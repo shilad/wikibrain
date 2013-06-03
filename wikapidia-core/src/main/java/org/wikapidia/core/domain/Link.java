@@ -13,4 +13,27 @@ public class Link {
         subsec = sub;
     }
 
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public int getPageID() {
+        return pageID;
+    }
+
+    public void setPageID(int pageID) {
+        this.pageID = pageID;
+    }
+
+    public boolean isSubsec() {
+        return subsec;
+    }
+
+    public void setSubsec(boolean subsec) {
+        this.subsec = subsec;
+    }
 }
