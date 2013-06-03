@@ -9,59 +9,49 @@ package org.wikapidia.core.domain;
  */
 public class Article {
 
-    private int myID;
-    private String myTitle;
-    private NameSpace myNS;
-    private boolean myDisamb;
-    private boolean myRedirect;
+    private int pageID;
+    private String title;
+    private NameSpace pageNS;
+    private PageType type;
 
-    public Article(int pageID, String title, NameSpace ns , boolean disamb, boolean redirect)
+    public Article(int id, String t, NameSpace ns , PageType p)
     {
-        myID = pageID;
-        myTitle = title;
-        myNS = ns;
-        myDisamb = disamb;
-        myRedirect = redirect;
+        pageID = id;
+        title = t;
+        pageNS = ns;
+        type = p;
     }
 
-    public int getMyID() {
-        return myID;
+    public int getPageID() {
+        return pageID;
     }
 
-    public void setMyID(int myID) {
-        this.myID = myID;
+    public void setPageID(int pageID) {
+        this.pageID = pageID;
     }
 
-    public String getMyTitle() {
-        return myTitle;
+    public String getTitle() {
+        return title;
     }
 
-    public void setMyTitle(String myTitle) {
-        this.myTitle = myTitle;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public NameSpace getMyNS() {
-        return myNS;
+    public NameSpace getPageNS() {
+        return pageNS;
     }
 
-    public void setMyNS(NameSpace myNS) {
-        this.myNS = myNS;
+    public void setPageNS(NameSpace pageNS) {
+        this.pageNS = pageNS;
     }
 
-    public boolean isMyDisamb() {
-        return myDisamb;
+    public PageType getType() {
+        return type;
     }
 
-    public void setMyDisamb(boolean myDisamb) {
-        this.myDisamb = myDisamb;
-    }
-
-    public boolean isMyRedirect() {
-        return myRedirect;
-    }
-
-    public void setMyRedirect(boolean myRedirect) {
-        this.myRedirect = myRedirect;
+    public void setType(PageType type) {
+        this.type = type;
     }
 
     private enum NameSpace {
@@ -78,6 +68,10 @@ public class Article {
         EDUCATION_PROGRAM, EDUCATION_PROGRAM_TALK,
         TIMED_TEXT, TIMED_TEXT_TALK,
         MODULE, MODULE_TALK
+    }
+
+    private enum PageType{
+        DISAMB, REDIRECT, NORMAL
     }
 
 }
