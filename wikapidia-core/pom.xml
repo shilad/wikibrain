@@ -9,13 +9,18 @@
   <version>0.1-SNAPSHOT</version>
 
   <dependencies>
-    <dependency>
+  <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.0</version>
       <type>jar</type>
       <scope>test</scope>
       <optional>true</optional>
+  </dependency>
+    <dependency>
+        <groupId>org.wikapidia</groupId>
+        <artifactId>wikapidia-utils</artifactId>
+        <version>0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
