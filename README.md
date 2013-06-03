@@ -1,2 +1,2 @@
-wikapidia readme
+wikapidia
 =========
