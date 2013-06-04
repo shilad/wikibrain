@@ -11,11 +11,11 @@ import java.sql.DriverManager;
 import org.wikapidia.core.jooq.Tables;
 
 public class ConceptDao {
-    public Concept get(int cID){
+    public Concept get(long cID){
         try{
             Connection conn = connect();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().from(Tables.CONCEPT).where(Tables.CONCEPT.ID.equals(cID)).fetchOne();
+            Record record = context.select().from(Tables.CONCEPT).where(Tables.CONCEPT.ID.equal(cID)).fetchOne();
             Concept c = new Concept(
                     record.getValue(Tables.CONCEPT.ID),
                     null
@@ -33,7 +33,7 @@ public class ConceptDao {
         try{
             Connection conn = connect();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            context.insertInto(Tables.CONCEPT, Tables.CONCEPT.ID).values(c.getId(), c.getArticleIds())
+            context.insertInto(Tables.CONCEPT, Tables.CONCEPT.ID).values(c.getId());
             conn.close();
         }
         catch(Exception e){
