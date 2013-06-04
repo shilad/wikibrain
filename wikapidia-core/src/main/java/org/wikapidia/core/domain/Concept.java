@@ -1,11 +1,31 @@
 package org.wikapidia.core.domain;
 
+import java.util.ArrayList;
+
 /**
- * Created with IntelliJ IDEA.
- * User: shilad
- * Date: 6/3/13
- * Time: 3:10 PM
- * To change this template use File | Settings | File Templates.
  */
 public class Concept {
+    private int pageID;
+    private Article[] articles;
+
+    public Concept(int pageID, Article[] articles) {
+        this.pageID = pageID;
+        this.articles = articles;
+    }
+
+    public int getPageID() {
+        return pageID;
+    }
+
+    public void setPageID(int pageID) {
+        this.pageID = pageID;
+    }
+
+    public Article[] getArticles() {
+        return articles;
+    }
+
+    public void setArticles(Article[] articles) {
+        this.articles = articles;
+    }
 }
