@@ -1,0 +1,172 @@
+package org.wikapidia.parser;
+
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.io.FilenameUtils;
+
+import javax.xml.stream.XMLStreamException;
+import java.io.*;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+
+/**
+ * Iterates over a file containing an XML dump of wikipedia.
+ * Each string is the contents of a single article.
+ * Iterators are independent, so multiple iterators can simultaneously open a dump file.
+ */
+public class XmlDumpIterator implements Iterable<String> {
+    public static final String ARTICLE_BEGIN = "<page>";
+    public static final String ARTICLE_END = "</page>";
+    private static final int MAX_ARTICLE_LENGTH = 10000000;     // Maximum length of article
+
+
+    private static final Logger LOG = Logger.getLogger(XmlDumpIterator.class.getName());
+    private File path;
+
+    /**
+     * Creates an iterator over the given file.
+     * The file can be gzipped or bzipped.
+     * @param path
+     */
+    public XmlDumpIterator(File path) {
+        this.path = path;
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        try {
+            return new ArticleIterator(path);
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, "article iterator construction failed", e);
+            throw new RuntimeException(e);
+        } catch (ArchiveException e) {
+            LOG.log(Level.SEVERE, "article iterator construction failed", e);
+            throw new RuntimeException(e);
+        } catch (XMLStreamException e) {
+            LOG.log(Level.SEVERE, "article iterator construction failed", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public class ArticleIterator implements Iterator<String> {
+
+        private BufferedReader reader;
+        private String buffer = null;
+        private int lineNum = 0;
+        private boolean closed = false;
+
+        public ArticleIterator(File path) throws IOException, ArchiveException, XMLStreamException {
+            InputStream input = new BufferedInputStream(new FileInputStream(path));
+            if (FilenameUtils.getExtension(path.toString()).toLowerCase().startsWith("bz")) {
+                input = new BZip2CompressorInputStream(input);
+            } else if (FilenameUtils.getExtension(path.toString()).equalsIgnoreCase("gz")) {
+                input = new GZIPInputStream(input);
+            }
+
+            reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+        }
+
+        private void fillBuffer() {
+            if (closed || buffer != null) {
+                return;
+            }
+            try {
+                String articleOpen = readToArticleBegin();
+                if (articleOpen == null) {
+                    return;
+                }
+                buffer = readToArticleClose(articleOpen);
+            } catch (IOException e) {
+                logParseError("parser failed", e);
+                e.printStackTrace();
+            }
+        }
+
+        /**
+         * Reads until it finds the beginning of an article.
+         * @return the line with the beginning tag.
+         * @throws IOException
+         */
+        private String readToArticleBegin() throws IOException {
+            while (true) {
+                String line = readLine();
+                if (line == null) {
+                    return null;
+                }
+                if (line.trim().equals(ARTICLE_BEGIN)) {
+                    return line;
+                }
+            }
+        }
+
+        /**
+         * Reads until the end of the article.
+         * If the article is too long, it truncates the article and adds a closing tag.
+         * @param articleOpen First line of the article.
+         * @return
+         */
+        private String readToArticleClose(String articleOpen) throws IOException {
+            StringBuffer buffer = new StringBuffer(articleOpen);
+            while (true) {
+                String line = readLine();
+                if (line == null) {
+                    logParseError("reached eof in middle of article");
+                    buffer.append(ARTICLE_END + "\n");
+                    break;
+                }
+                if (buffer.length() + line.length() > MAX_ARTICLE_LENGTH) {
+                    logParseError("truncating overly long article");
+                    buffer.append(ARTICLE_END + "\n");
+                    break;
+                }
+                buffer.append(line);
+                if (line.trim().equals(ARTICLE_END)) {
+                    break;
+                }
+            }
+            return buffer.toString();
+        }
+
+        private void logParseError(String message) {
+            LOG.log(Level.SEVERE, "parsing " + path + "  failed in line " + message);
+        }
+
+        private void logParseError(String message, Exception e) {
+            LOG.log(Level.SEVERE, "parsing " + path + "  failed in line " + message + ":", e);
+        }
+
+        private String readLine() throws IOException {
+            if (closed) {
+                return null;
+            }
+            String line = reader.readLine();
+            if (line == null) {
+                reader.close();
+                closed = true;
+                return null;
+            }
+            lineNum++;
+            return line;
+        }
+
+        @Override
+        public boolean hasNext() {
+            fillBuffer();
+            return (buffer != null);
+        }
+
+        public String next() {
+            fillBuffer();
+            String tmp = buffer;
+            buffer = null;
+            return tmp;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+}
