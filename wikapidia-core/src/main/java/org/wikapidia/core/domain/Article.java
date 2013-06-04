@@ -1,7 +1,7 @@
 package org.wikapidia.core.domain;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created with IntelliJ IdEA.
  * User: shilad
  * Date: 6/3/13
  * Time: 3:10 PM
@@ -9,25 +9,25 @@ package org.wikapidia.core.domain;
  */
 public class Article {
 
-    private int pageID;
+    private int articleId;
     private String title;
     private NameSpace pageNS;
     private PageType type;
 
-    public Article(int pageID, String title, NameSpace pageNS , PageType type)
+    public Article(int articleId, String title, NameSpace pageNS , PageType type)
     {
-        this.pageID = pageID;
+        this.articleId = articleId;
         this.title = title;
         this.pageNS = pageNS;
         this.type = type;
     }
 
-    public int getPageID() {
-        return pageID;
+    public int getPageId() {
+        return articleId;
     }
 
-    public void setPageID(int pageID) {
-        this.pageID = pageID;
+    public void setPageId(int articleId) {
+        this.articleId = articleId;
     }
 
     public String getTitle() {

@@ -5,27 +5,27 @@ import java.util.ArrayList;
 /**
  */
 public class Concept {
-    private int pageID;
-    private Article[] articles;
+    private int conceptId;
+    private int[] articleIds;
 
-    public Concept(int pageID, Article[] articles) {
-        this.pageID = pageID;
-        this.articles = articles;
+    public Concept(int conceptId, int[] articleIds) {
+        this.conceptId = conceptId;
+        this.articleIds = articleIds;
     }
 
-    public int getPageID() {
-        return pageID;
+    public int getConceptId() {
+        return conceptId;
     }
 
-    public void setPageID(int pageID) {
-        this.pageID = pageID;
+    public void setConceptId(int conceptId) {
+        this.conceptId = conceptId;
     }
 
-    public Article[] getArticles() {
-        return articles;
+    public int[] getArticleIds() {
+        return articleIds;
     }
 
-    public void setArticles(Article[] articles) {
-        this.articles = articles;
+    public void setArticles(int[] articleIds) {
+        this.articleIds = articleIds;
     }
 }
