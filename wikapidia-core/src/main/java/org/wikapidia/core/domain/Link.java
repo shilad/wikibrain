@@ -4,12 +4,12 @@ package org.wikapidia.core.domain;
  */
 public class Link {
     private String text;
-    private int pageID;
+    private int articleId;
     private boolean subsec;
 
-    public Link(String text, int pageID, boolean subsec) {
+    public Link(String text, int articleId, boolean subsec) {
         this.text = text;
-        this.pageID = pageID;
+        this.articleId = articleId;
         this.subsec = subsec;
     }
 
@@ -21,12 +21,12 @@ public class Link {
         this.text = text;
     }
 
-    public int getPageID() {
-        return pageID;
+    public int getPageId() {
+        return articleId;
     }
 
-    public void setPageID(int pageID) {
-        this.pageID = pageID;
+    public void setPageId(int articleId) {
+        this.articleId = articleId;
     }
 
     public boolean isSubsec() {
