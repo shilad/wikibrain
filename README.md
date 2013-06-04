@@ -1,4 +1,2 @@
-wikAPIdia
+wikapidia
 =========
-
-testing again

@@ -3,6 +3,7 @@ package org.wikapidia.core.model;
 /**
  */
 public class Concept {
+
     private int id;
     private int[] articleIds;
 

@@ -3,6 +3,7 @@ package org.wikapidia.core.model;
 /**
  */
 public class Link {
+
     private String text;
     private int id;
     private boolean subsec;
