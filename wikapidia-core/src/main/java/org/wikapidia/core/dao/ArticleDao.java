@@ -24,7 +24,8 @@ public class ArticleDao {
                 Article.NameSpace.intToNS(record.getValue(Tables.ARTICLE.NS)),
                 Article.PageType.values()[record.getValue(Tables.ARTICLE.PTYPE)]
             );
-            return null;
+            conn.close();
+            return a;
         }
         catch (Exception e){
             e.printStackTrace();
