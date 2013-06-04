@@ -8,9 +8,9 @@ public class Concept {
     private int pageID;
     private Article[] articles;
 
-    public Concept(int id, Article[] arts) {
-        pageID = id;
-        articles = arts;
+    public Concept(int pageID, Article[] articles) {
+        this.pageID = pageID;
+        this.articles = articles;
     }
 
     public int getPageID() {

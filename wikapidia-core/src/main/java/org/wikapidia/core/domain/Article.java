@@ -14,12 +14,12 @@ public class Article {
     private NameSpace pageNS;
     private PageType type;
 
-    public Article(int id, String t, NameSpace ns , PageType p)
+    public Article(int pageID, String title, NameSpace pageNS , PageType type)
     {
-        pageID = id;
-        title = t;
-        pageNS = ns;
-        type = p;
+        this.pageID = pageID;
+        this.title = title;
+        this.pageNS = pageNS;
+        this.type = type;
     }
 
     public int getPageID() {
@@ -71,7 +71,7 @@ public class Article {
     }
 
     private enum PageType{
-        DISAMB, REDIRECT, NORMAL
+        DISAMB, REDIRECT, STANDARD
     }
 
 }
