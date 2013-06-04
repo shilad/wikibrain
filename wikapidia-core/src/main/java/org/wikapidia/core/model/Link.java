@@ -1,4 +1,4 @@
-package org.wikapidia.core.domain;
+package org.wikapidia.core.model;
 
 /**
  */
