@@ -23,3 +23,4 @@ CREATE TABLE article_concept (
   article_id INT NOT NULL,
   concept_id INT NOT NULL
 );
+COMMIT;
