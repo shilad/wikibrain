@@ -7,7 +7,6 @@ import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.wikapidia.core.model.Article;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.DriverManager;
 import org.wikapidia.core.jooq.Tables;
 
@@ -22,8 +21,8 @@ public class ArticleDao {
             Article a = new Article(
                 record.getValue(Tables.ARTICLE.ID),
                 record.getValue(Tables.ARTICLE.TITLE),
-                record.getValue(Tables.ARTICLE.NS),
-                record.getValue(Tables.ARTICLE.PTYPE)
+                Article.NameSpace.intToNS(record.getValue(Tables.ARTICLE.NS)),
+                Article.PageType.values()[record.getValue(Tables.ARTICLE.PTYPE)]
             );
             return null;
         }
