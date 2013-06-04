@@ -11,7 +11,7 @@ package org.wikapidia.core.jooq;
 @java.lang.SuppressWarnings({ "all", "unchecked" })
 public class Public extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1586518270;
+	private static final long serialVersionUID = 492779601;
 
 	/**
 	 * The singleton instance of <code>PUBLIC</code>
@@ -34,8 +34,8 @@ public class Public extends org.jooq.impl.SchemaImpl {
 
 	private final java.util.List<org.jooq.Sequence<?>> getSequences0() {
 		return java.util.Arrays.<org.jooq.Sequence<?>>asList(
-			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_347E173A_8C2F_47AA_857F_41BC04923F7A,
-			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_9F36558D_BE91_4515_BEB4_CFA2D7E2C999);
+			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_8B7B182F_567B_4201_9512_825DC2704199,
+			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_91328F99_4D98_4FAC_8A5C_3F4BCDB89BC8);
 	}
 
 	@Override
