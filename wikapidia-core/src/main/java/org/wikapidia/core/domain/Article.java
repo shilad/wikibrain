@@ -1,33 +1,28 @@
 package org.wikapidia.core.domain;
 
 /**
- * Created with IntelliJ IdEA.
- * User: shilad
- * Date: 6/3/13
- * Time: 3:10 PM
- * To change this template use File | Settings | File Templates.
  */
 public class Article {
 
-    private int articleId;
+    private int id;
     private String title;
-    private NameSpace pageNS;
+    private NameSpace ns;
     private PageType type;
 
-    public Article(int articleId, String title, NameSpace pageNS , PageType type)
+    public Article(int id, String title, NameSpace ns , PageType type)
     {
-        this.articleId = articleId;
+        this.id = id;
         this.title = title;
-        this.pageNS = pageNS;
+        this.ns = ns;
         this.type = type;
     }
 
-    public int getPageId() {
-        return articleId;
+    public int getId() {
+        return id;
     }
 
-    public void setPageId(int articleId) {
-        this.articleId = articleId;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -38,12 +33,12 @@ public class Article {
         this.title = title;
     }
 
-    public NameSpace getPageNS() {
-        return pageNS;
+    public NameSpace getNs() {
+        return ns;
     }
 
-    public void setPageNS(NameSpace pageNS) {
-        this.pageNS = pageNS;
+    public void setNs(NameSpace ns) {
+        this.ns = ns;
     }
 
     public PageType getType() {
