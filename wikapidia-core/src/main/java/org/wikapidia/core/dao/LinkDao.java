@@ -16,55 +16,56 @@ import java.sql.SQLException;
 public class LinkDao {
 
     public Link get(int wpId) {
-        Connection conn = null;
         try{
-            conn = connect();
+            Connection conn = connect();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().from(Tables.LINK).where(Tables.LINK.ARTICLE_ID.equal(wpId)).fetchOne();
-            return new Link(
+            Link l = new Link(
                 record.getValue(Tables.LINK.TEXT),
                 record.getValue(Tables.LINK.ARTICLE_ID),
                 false
             );
+            conn.close();
+            return l;
         }
         catch (Exception e){
             e.printStackTrace();
-        }
-        finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                }
-                catch (SQLException ignore) {}
-            }
         }
         return null;
     }
 
     public Link query(String wpText) {
-        Connection conn = null;
         try{
-            conn = connect();
+            Connection conn = connect();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().from(Tables.LINK).where(Tables.LINK.TEXT.equal(wpText)).fetchOne();
-            return new Link(
+            Link l = new Link(
                     record.getValue(Tables.LINK.TEXT),
                     record.getValue(Tables.LINK.ARTICLE_ID),
                     false
             );
+            conn.close();
+            return l;
         }
         catch (Exception e){
             e.printStackTrace();
         }
-        finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                }
-                catch (SQLException ignore) {}
-            }
-        }
         return null;
+    }
+
+    public void save(Link link) {
+        try{
+            Connection conn = connect();
+            DSLContext context = DSL.using(conn, SQLDialect.H2);
+            context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
+                    link.getId(),
+                    link.getText()
+            );
+            conn.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private Connection connect()throws Exception{
