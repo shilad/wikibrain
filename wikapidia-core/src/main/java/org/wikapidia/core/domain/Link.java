@@ -7,10 +7,10 @@ public class Link {
     private int pageID;
     private boolean subsec;
 
-    public Link(String t, int id, boolean sub) {
-        text = t;
-        pageID = id;
-        subsec = sub;
+    public Link(String text, int pageID, boolean subsec) {
+        this.text = text;
+        this.pageID = pageID;
+        this.subsec = subsec;
     }
 
     public String getText() {
