@@ -1,4 +1,4 @@
-package org.wikapidia.core;
+package org.wikapidia.core.model;
 
 /**
  * Created with IntelliJ IDEA.
