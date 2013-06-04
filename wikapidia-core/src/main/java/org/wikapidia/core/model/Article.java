@@ -75,10 +75,18 @@ public class Article {
         public int getValue() {
             return value;
         }
+
+        static public NameSpace intToNS(int value){
+            if(value>=0 && value<16) return NameSpace.values()[value];
+            for (NameSpace v : NameSpace.values()){
+                if (value == v.getValue()) {return v;}
+            }
+            return null;
+        }
     }
 
     public static enum PageType{
-        DISAMB, REDIRECT, STANDARD
+        STANDARD, DISAMB, REDIRECT;
     }
 
 }
