@@ -140,7 +140,7 @@
                         </generate>
                         <target>
                             <packageName>org.wikapidia.core.jooq</packageName>
-                            <directory>target/generated-test-sources/jooq-h2</directory>
+                            <directory>src/generated/jooq-h2</directory>
                         </target>
                     </generator>
                 </configuration>
