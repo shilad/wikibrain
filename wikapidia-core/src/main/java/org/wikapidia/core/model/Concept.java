@@ -1,6 +1,4 @@
-package org.wikapidia.core.domain;
-
-import java.util.ArrayList;
+package org.wikapidia.core.model;
 
 /**
  */
