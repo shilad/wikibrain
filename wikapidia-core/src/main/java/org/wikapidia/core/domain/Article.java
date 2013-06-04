@@ -1,33 +1,28 @@
 package org.wikapidia.core.domain;
 
 /**
- * Created with IntelliJ IDEA.
- * User: shilad
- * Date: 6/3/13
- * Time: 3:10 PM
- * To change this template use File | Settings | File Templates.
  */
 public class Article {
 
-    private int pageID;
+    private int id;
     private String title;
-    private NameSpace pageNS;
+    private NameSpace ns;
     private PageType type;
 
-    public Article(int id, String t, NameSpace ns , PageType p)
+    public Article(int id, String title, NameSpace ns , PageType type)
     {
-        pageID = id;
-        title = t;
-        pageNS = ns;
-        type = p;
+        this.id = id;
+        this.title = title;
+        this.ns = ns;
+        this.type = type;
     }
 
-    public int getPageID() {
-        return pageID;
+    public int getId() {
+        return id;
     }
 
-    public void setPageID(int pageID) {
-        this.pageID = pageID;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -38,12 +33,12 @@ public class Article {
         this.title = title;
     }
 
-    public NameSpace getPageNS() {
-        return pageNS;
+    public NameSpace getNs() {
+        return ns;
     }
 
-    public void setPageNS(NameSpace pageNS) {
-        this.pageNS = pageNS;
+    public void setNs(NameSpace ns) {
+        this.ns = ns;
     }
 
     public PageType getType() {
@@ -71,7 +66,7 @@ public class Article {
     }
 
     private enum PageType{
-        DISAMB, REDIRECT, NORMAL
+        DISAMB, REDIRECT, STANDARD
     }
 
 }
