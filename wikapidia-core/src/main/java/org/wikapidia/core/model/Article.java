@@ -87,6 +87,13 @@ public class Article {
 
     public static enum PageType{
         STANDARD, DISAMB, REDIRECT;
+
+        public int getValue(){
+            for (int i=0; i<3; i++){
+                if (PageType.values()[i]==this){return i;}
+            }
+            return -1;
+        }
     }
 
 }
