@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao;
 
-import com.jolbox.bonecp.BoneCPDataSource;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -9,6 +8,7 @@ import org.jooq.impl.DSL;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.model.Link;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,17 +17,20 @@ import java.util.List;
  */
 public class LinkDao {
 
-    private BoneCPDataSource bds;
+    private DataSource ds;
 
-    public LinkDao(BoneCPDataSource bds) {
-        this.bds = bds;
+    public LinkDao(DataSource ds) {
+        this.ds = ds;
     }
 
     public Link get(int lId) {
         try{
-            Connection conn = bds.getConnection();
+            Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().from(Tables.LINK).where(Tables.LINK.ARTICLE_ID.equal(lId)).fetchOne();
+            if (record == null) {
+                return null;
+            }
             Link l = new Link(
                     record.getValue(Tables.LINK.TEXT),
                     record.getValue(Tables.LINK.ARTICLE_ID),
@@ -44,7 +47,7 @@ public class LinkDao {
 
     public List<Link> query(String lText) {
         try{
-            Connection conn = bds.getConnection();
+            Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Result<Record> result = context.select().from(Tables.LINK).where(Tables.LINK.TEXT.likeIgnoreCase(lText)).fetch();
             conn.close();
@@ -58,7 +61,7 @@ public class LinkDao {
 
     public void save(Link link) {
         try{
-            Connection conn = bds.getConnection();
+            Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
                     link.getId(),
@@ -72,6 +75,9 @@ public class LinkDao {
     }
 
     private ArrayList<Link> buildLinks(Result<Record> result){
+        if (result == null) {
+            return null;
+        }
         ArrayList<Link> links = null;
         for (Record record: result){
             Link a = new Link(
