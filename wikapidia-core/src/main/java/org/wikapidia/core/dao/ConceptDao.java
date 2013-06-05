@@ -15,7 +15,7 @@ public class ConceptDao {
 
     private BoneCPDataSource bds;
 
-    public ConceptDao(BoneCPDataSource dataSource)throws Exception{
+    public ConceptDao(BoneCPDataSource dataSource){
         bds = dataSource;
     }
 
