@@ -9,7 +9,6 @@ import org.wikapidia.core.model.Article;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -48,7 +47,7 @@ public class TestDao {
 
         List<Article> articles = ad.query("test");
         assert (articles != null);
-        assert (articles.size()==0);
+        assert (articles.size()==1);
         assert (articles.get(0).getId()==1);
         assert (articles.get(0).getTitle().equals(article.getTitle()));
         assert (articles.get(0).getNs().equals(article.getNs()));
@@ -69,7 +68,6 @@ public class TestDao {
         assert (articles.get(0).getType().equals(article.getType()));
 
         articles = ad.query("wrong");
-        assert (articles==null);
-
+        assert (articles.size()==0);
     }
 }
