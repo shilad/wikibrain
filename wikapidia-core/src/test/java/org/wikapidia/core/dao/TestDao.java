@@ -1,15 +1,11 @@
 package org.wikapidia.core.dao;
 
-import com.jolbox.bonecp.BoneCP;
-import com.jolbox.bonecp.BoneCPConfig;
 import com.jolbox.bonecp.BoneCPDataSource;
-import junit.framework.Test;
+import org.junit.Test;
 import org.wikapidia.core.model.Article;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
