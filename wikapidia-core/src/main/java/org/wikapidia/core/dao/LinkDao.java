@@ -27,7 +27,10 @@ public class LinkDao {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().from(Tables.LINK).where(Tables.LINK.ARTICLE_ID.equal(lId)).fetchOne();
+            Record record = context.select().
+                                    from(Tables.LINK).
+                                    where(Tables.LINK.ARTICLE_ID.equal(lId)).
+                                    fetchOne();
             if (record == null) {
                 return null;
             }
@@ -49,7 +52,10 @@ public class LinkDao {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Result<Record> result = context.select().from(Tables.LINK).where(Tables.LINK.TEXT.likeIgnoreCase(lText)).fetch();
+            Result<Record> result = context.select().
+                                            from(Tables.LINK).
+                                            where(Tables.LINK.TEXT.likeIgnoreCase(lText)).
+                                            fetch();
             conn.close();
             return buildLinks(result);
         }
@@ -59,26 +65,25 @@ public class LinkDao {
         return null;
     }
 
-    public void save(Link link) {
+    public boolean save(Link link) {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
                     link.getId(),
                     link.getText()
-            );
+            ).execute();
             conn.close();
+            return true;
         }
         catch (Exception e){
             e.printStackTrace();
+            return false;
         }
     }
 
     private ArrayList<Link> buildLinks(Result<Record> result){
-        if (result == null) {
-            return null;
-        }
-        ArrayList<Link> links = null;
+        ArrayList<Link> links = new ArrayList<Link>();
         for (Record record: result){
             Link a = new Link(
                     record.getValue(Tables.LINK.TEXT),
@@ -90,4 +95,19 @@ public class LinkDao {
         return links;
     }
 
+    public int getDatabaseSize() {
+        try{
+            Connection conn = ds.getConnection();
+            DSLContext context = DSL.using(conn,SQLDialect.H2);
+            Result<Record> result = context.select().
+                    from(Tables.ARTICLE).
+                    fetch();
+            conn.close();
+            return result.size();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return -1;
+        }
+    }
 }
