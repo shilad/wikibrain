@@ -48,7 +48,7 @@ public class ConceptDao {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            context.insertInto(Tables.CONCEPT, Tables.CONCEPT.ID).values(c.getId());
+            context.insertInto(Tables.CONCEPT, Tables.CONCEPT.ID).values(c.getId()).execute();
             conn.close();
             return true;
         }
