@@ -65,7 +65,7 @@ public class LinkDao {
         return null;
     }
 
-    public void save(Link link) {
+    public boolean save(Link link) {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
@@ -74,9 +74,11 @@ public class LinkDao {
                     link.getText()
             );
             conn.close();
+            return true;
         }
         catch (Exception e){
             e.printStackTrace();
+            return false;
         }
     }
 

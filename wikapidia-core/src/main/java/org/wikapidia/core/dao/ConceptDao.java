@@ -44,15 +44,17 @@ public class ConceptDao {
         }
     }
 
-    public void save(Concept c){
+    public boolean save(Concept c){
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             context.insertInto(Tables.CONCEPT, Tables.CONCEPT.ID).values(c.getId());
             conn.close();
+            return true;
         }
         catch(Exception e){
             e.printStackTrace();
+            return false;
         }
     }
 

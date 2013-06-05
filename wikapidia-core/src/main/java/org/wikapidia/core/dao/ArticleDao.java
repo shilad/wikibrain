@@ -50,7 +50,7 @@ public class ArticleDao {
         }
     }
 
-    public void save(Article article){
+    public boolean save(Article article){
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
@@ -59,11 +59,13 @@ public class ArticleDao {
                     article.getTitle(),
                     article.getNs().getValue(),
                     article.getType().getValue()
-            );
+            ).execute();
             conn.close();
+            return true;
         }
         catch (Exception e){
             e.printStackTrace();
+            return false;
         }
     }
 
