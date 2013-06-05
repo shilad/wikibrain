@@ -35,9 +35,9 @@ public class TestDao {
 
         ArticleDao ad = new ArticleDao(ds);
         Article article = new Article(1,"test", Article.NameSpace.MAIN,Article.PageType.STANDARD);
-        ad.save(article);
+        assert(ad.save(article));
 
-        assert (ad.getDatabaseSize() == 0);
+        //assert (ad.getDatabaseSize() == 0);
 
         Article saved = ad.get(1);
         assert (saved != null);
