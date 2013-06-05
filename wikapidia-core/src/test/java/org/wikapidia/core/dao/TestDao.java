@@ -32,64 +32,70 @@ public class TestDao {
         );
         conn.close();
 
+       try{
+            //Article
+                ArticleDao ad = new ArticleDao(ds);
+                Article article = new Article(1,"test", Article.NameSpace.MAIN,Article.PageType.STANDARD);
+                assert(ad.save(article));
 
-        //Article
-        ArticleDao ad = new ArticleDao(ds);
-        Article article = new Article(1,"test", Article.NameSpace.MAIN,Article.PageType.STANDARD);
-        assert(ad.save(article));
+                Article savedArticle = ad.get(1);
+                assert (savedArticle != null);
+                assert (article.getId()==savedArticle.getId());
+                assert (article.getTitle().equals(savedArticle.getTitle()));
+                assert (article.getNs().equals(savedArticle.getNs()));
+                assert (article.getType().equals(savedArticle.getType()));
 
-        Article savedArticle = ad.get(1);
-        assert (savedArticle != null);
-        assert (article.getId()==savedArticle.getId());
-        assert (article.getTitle().equals(savedArticle.getTitle()));
-        assert (article.getNs().equals(savedArticle.getNs()));
-        assert (article.getType().equals(savedArticle.getType()));
+                List<Article> articles = ad.query("test");
+                assert (articles != null);
+                assert (articles.size()==1);
+                assert (articles.get(0).getId()==1);
+                assert (articles.get(0).getTitle().equals(article.getTitle()));
+                assert (articles.get(0).getNs().equals(article.getNs()));
+                assert (articles.get(0).getType().equals(article.getType()));
 
-        List<Article> articles = ad.query("test");
-        assert (articles != null);
-        assert (articles.size()==1);
-        assert (articles.get(0).getId()==1);
-        assert (articles.get(0).getTitle().equals(article.getTitle()));
-        assert (articles.get(0).getNs().equals(article.getNs()));
-        assert (articles.get(0).getType().equals(article.getType()));
+                articles = ad.query(Article.NameSpace.MAIN);
+                assert (articles.size()==1);
+                assert (articles.get(0).getId()==1);
+                assert (articles.get(0).getTitle().equals(article.getTitle()));
+                assert (articles.get(0).getNs().equals(article.getNs()));
+                assert (articles.get(0).getType().equals(article.getType()));
 
-        articles = ad.query(Article.NameSpace.MAIN);
-        assert (articles.size()==1);
-        assert (articles.get(0).getId()==1);
-        assert (articles.get(0).getTitle().equals(article.getTitle()));
-        assert (articles.get(0).getNs().equals(article.getNs()));
-        assert (articles.get(0).getType().equals(article.getType()));
-
-        articles = ad.query("test",Article.NameSpace.MAIN);
-        assert (articles.size()==1);
-        assert (articles.get(0).getId()==1);
-        assert (articles.get(0).getTitle().equals(article.getTitle()));
-        assert (articles.get(0).getNs().equals(article.getNs()));
-        assert (articles.get(0).getType().equals(article.getType()));
-
-        articles = ad.query("wrong");
-        assert (articles.size()==0);
+                articles = ad.query("test",Article.NameSpace.MAIN);
+                assert (articles.size()==1);
+                assert (articles.get(0).getId()==1);
+                assert (articles.get(0).getTitle().equals(article.getTitle()));
+                assert (articles.get(0).getNs().equals(article.getNs()));
+                assert (articles.get(0).getType().equals(article.getType()));
 
 
-        //Link
-        LinkDao ld = new LinkDao(ds);
-        Link link = new Link("zelda.com", 1, false);
-        assert(ld.save(link));
+                articles = ad.query("wrong");
+                assert (articles.size()==0);
 
-        Link savedLink = ld.get(1);
-        assert (savedLink != null);
-        assert (link.getText().equals(savedLink.getText()));
-        assert (link.getId()==savedLink.getId());
-        assert (link.isSubsec()==savedLink.isSubsec());
 
-        List<Link> links = ld.query("zelda.com");
-        assert (links != null);
-        assert (links.size()==1);
-        assert (links.get(0).getText().equals(link.getText()));
-        assert (links.get(0).getId()==1);
-        assert (links.get(0).isSubsec()==false);
+            //Link
+                LinkDao ld = new LinkDao(ds);
+                Link link = new Link("zelda.com", 1, false);
+                assert(ld.save(link));
 
-        links = ld.query("ganondorf.com");
-        assert (links.size()==0);
+                Link savedLink = ld.get(1);
+                assert (savedLink != null);
+                assert (link.getText().equals(savedLink.getText()));
+                assert (link.getId()==savedLink.getId());
+                assert (link.isSubsec()==savedLink.isSubsec());
+
+                List<Link> links = ld.query("zelda.com");
+                assert (links != null);
+                assert (links.size()==1);
+                assert (links.get(0).getText().equals(link.getText()));
+                assert (links.get(0).getId()==1);
+                assert (links.get(0).isSubsec()==false);
+
+                links = ld.query("ganondorf.com");
+                assert (links.size()==0);
+       }
+       catch (SQLException e)
+       {
+
+       }
     }
 }
