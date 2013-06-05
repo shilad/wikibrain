@@ -1,29 +1,32 @@
 package org.wikapidia.core.dao;
 
-import com.jolbox.bonecp.BoneCPDataSource;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
-import org.wikapidia.core.model.Concept;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import org.wikapidia.core.jooq.Tables;
+import org.wikapidia.core.model.Concept;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
 
 public class ConceptDao {
 
-    private BoneCPDataSource bds;
+    private DataSource ds;
 
-    public ConceptDao(BoneCPDataSource dataSource)throws Exception{
-        bds = dataSource;
+    public ConceptDao(DataSource dataSource) {
+        ds = dataSource;
     }
 
-    public Concept get(long cID){
+    public Concept get(long cId){
         try{
-            Connection conn = bds.getConnection();
+            Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().from(Tables.CONCEPT).where(Tables.CONCEPT.ID.equal(cID)).fetchOne();
+            Record record = context.select().from(Tables.CONCEPT).where(Tables.CONCEPT.ID.equal(cId)).fetchOne();
+            if (record == null) {
+                return null;
+            }
             Concept c = new Concept(
                     record.getValue(Tables.CONCEPT.ID),
                     null
@@ -31,7 +34,7 @@ public class ConceptDao {
             conn.close();
             return c;
         }
-        catch(Exception e){
+        catch(Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -39,7 +42,7 @@ public class ConceptDao {
 
     public void save(Concept c){
         try{
-            Connection conn = bds.getConnection();
+            Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             context.insertInto(Tables.CONCEPT, Tables.CONCEPT.ID).values(c.getId());
             conn.close();
