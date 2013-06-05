@@ -11,6 +11,7 @@ import org.wikapidia.core.model.Article;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ArticleDao {
         ds = dataSource;
     }
 
-    public Article get(int wpId) throws Exception{
+    public Article get(int wpId) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn, SQLDialect.H2);
         Record record = context.select().
@@ -32,7 +33,7 @@ public class ArticleDao {
                                 where(Tables.ARTICLE.ID.equal(wpId)).
                                 fetchOne();
         if (record == null) {
-            return new Article(-1, "Oogalie Boogalie", Article.NameSpace.MAIN, Article.PageType.STANDARD);
+            return null;
         }
         Article a = new Article(
             record.getValue(Tables.ARTICLE.ID),
@@ -44,7 +45,7 @@ public class ArticleDao {
         return a;
     }
 
-    public void save(Article article) throws Exception {
+    public void save(Article article) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         context.insertInto(Tables.ARTICLE).values(
@@ -56,7 +57,7 @@ public class ArticleDao {
         conn.close();
     }
 
-    public List<Article> query(String title) throws Exception {
+    public List<Article> query(String title) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Result<Record> result = context.select().
@@ -67,7 +68,7 @@ public class ArticleDao {
         return buildArticles(result);
     }
 
-    public List<Article> query(Article.NameSpace ns) throws Exception{
+    public List<Article> query(Article.NameSpace ns) throws SQLException{
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Result<Record> result = context.select().
@@ -78,7 +79,7 @@ public class ArticleDao {
         return buildArticles(result);
     }
 
-    public List<Article> query(String title, Article.NameSpace ns) throws Exception {
+    public List<Article> query(String title, Article.NameSpace ns) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Result<Record> result = context.select().
@@ -90,7 +91,7 @@ public class ArticleDao {
         return buildArticles(result);
     }
 
-    public int getDatabaseSize() throws Exception {
+    public int getDatabaseSize() throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Result<Record> result = context.select().

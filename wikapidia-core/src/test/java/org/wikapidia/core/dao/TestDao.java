@@ -4,7 +4,7 @@ package org.wikapidia.core.dao;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.wikapidia.core.model.*;
+import org.wikapidia.core.model.Article;
 
 import java.io.File;
 import java.io.IOException;
