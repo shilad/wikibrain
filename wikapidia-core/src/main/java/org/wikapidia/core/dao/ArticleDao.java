@@ -29,7 +29,7 @@ public class ArticleDao {
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.ID.equal(wpId)).fetchOne();
-            if (record==null){return new Article(1,"a",Article.NameSpace.MAIN,Article.PageType.STANDARD);}
+            if (record==null){return null;}
             Article a = new Article(
                 record.getValue(Tables.ARTICLE.ID),
                 record.getValue(Tables.ARTICLE.TITLE),
