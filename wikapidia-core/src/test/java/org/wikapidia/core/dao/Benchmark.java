@@ -50,10 +50,15 @@ public class Benchmark {
 
         System.out.println("time to insert: "+(time/60000)+"m");
 
-        start=System.currentTimeMillis();
-        ad.get(13);
-        stop=System.currentTimeMillis();
-        System.out.println("time to get by id: "+(stop-start)+"ms");
+        Random r = new Random();
+        int j;
+        for (int i=0; i<50; i++){
+            j=r.nextInt(numArticles);
+            start=System.currentTimeMillis();
+            ad.get(j);
+            stop=System.currentTimeMillis();
+            System.out.println("time to get by id: "+(stop-start)+"ms");
+        }
 
         start=System.currentTimeMillis();
         ad.query("a%");
