@@ -72,7 +72,7 @@ public class LinkDao {
             context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
                     link.getId(),
                     link.getText()
-            );
+            ).execute();
             conn.close();
             return true;
         }
@@ -83,10 +83,7 @@ public class LinkDao {
     }
 
     private ArrayList<Link> buildLinks(Result<Record> result){
-        if (result == null) {
-            return null;
-        }
-        ArrayList<Link> links = null;
+        ArrayList<Link> links = new ArrayList<Link>();
         for (Record record: result){
             Link a = new Link(
                     record.getValue(Tables.LINK.TEXT),
