@@ -28,6 +28,9 @@ public class LinkDao {
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().from(Tables.LINK).where(Tables.LINK.ARTICLE_ID.equal(lId)).fetchOne();
+            if (record == null) {
+                return null;
+            }
             Link l = new Link(
                     record.getValue(Tables.LINK.TEXT),
                     record.getValue(Tables.LINK.ARTICLE_ID),
@@ -72,6 +75,9 @@ public class LinkDao {
     }
 
     private ArrayList<Link> buildLinks(Result<Record> result){
+        if (result == null) {
+            return null;
+        }
         ArrayList<Link> links = null;
         for (Record record: result){
             Link a = new Link(
