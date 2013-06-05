@@ -10,6 +10,7 @@ import org.wikapidia.core.model.Link;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class LinkDao {
         this.ds = ds;
     }
 
-    public Link get(int lId) throws Exception {
+    public Link get(int lId) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn, SQLDialect.H2);
         Record record = context.select().
@@ -42,7 +43,7 @@ public class LinkDao {
         return l;
     }
 
-    public List<Link> query(String lText) throws Exception {
+    public List<Link> query(String lText) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn, SQLDialect.H2);
         Result<Record> result = context.select().
@@ -53,7 +54,7 @@ public class LinkDao {
         return buildLinks(result);
     }
 
-    public void save(Link link) throws Exception {
+    public void save(Link link) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn, SQLDialect.H2);
         context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
@@ -63,7 +64,7 @@ public class LinkDao {
         conn.close();
     }
 
-    public int getDatabaseSize() throws Exception {
+    public int getDatabaseSize() throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Result<Record> result = context.select().
