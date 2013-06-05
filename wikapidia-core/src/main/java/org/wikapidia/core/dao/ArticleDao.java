@@ -138,10 +138,7 @@ public class ArticleDao {
     }
 
     private ArrayList<Article> buildArticles(Result<Record> result){
-        if (result == null) {
-            return null;
-        }
-        ArrayList<Article> articles = null;
+        ArrayList<Article> articles = new ArrayList<Article>();
         for (Record record: result){
             Article a = new Article(
                     record.getValue(Tables.ARTICLE.ID),
