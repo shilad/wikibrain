@@ -10,6 +10,7 @@ import org.wikapidia.core.model.Link;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,63 +24,54 @@ public class LinkDao {
         this.ds = ds;
     }
 
-    public Link get(int lId) {
-        try{
-            Connection conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().
-                                    from(Tables.LINK).
-                                    where(Tables.LINK.ARTICLE_ID.equal(lId)).
-                                    fetchOne();
-            if (record == null) {
-                return null;
-            }
-            Link l = new Link(
-                    record.getValue(Tables.LINK.TEXT),
-                    record.getValue(Tables.LINK.ARTICLE_ID),
-                    false
-            );
-            conn.close();
-            return l;
+    public Link get(int lId) throws SQLException {
+        Connection conn = ds.getConnection();
+        DSLContext context = DSL.using(conn, SQLDialect.H2);
+        Record record = context.select().
+                                from(Tables.LINK).
+                                where(Tables.LINK.ARTICLE_ID.equal(lId)).
+                                fetchOne();
+        if (record == null) {
+            return null;
         }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
+        Link l = new Link(
+                record.getValue(Tables.LINK.TEXT),
+                record.getValue(Tables.LINK.ARTICLE_ID),
+                false
+        );
+        conn.close();
+        return l;
     }
 
-    public List<Link> query(String lText) {
-        try{
-            Connection conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Result<Record> result = context.select().
-                                            from(Tables.LINK).
-                                            where(Tables.LINK.TEXT.likeIgnoreCase(lText)).
-                                            fetch();
-            conn.close();
-            return buildLinks(result);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
+    public List<Link> query(String lText) throws SQLException {
+        Connection conn = ds.getConnection();
+        DSLContext context = DSL.using(conn, SQLDialect.H2);
+        Result<Record> result = context.select().
+                                        from(Tables.LINK).
+                                        where(Tables.LINK.TEXT.likeIgnoreCase(lText)).
+                                        fetch();
+        conn.close();
+        return buildLinks(result);
     }
 
-    public boolean save(Link link) {
-        try{
-            Connection conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, SQLDialect.H2);
-            context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
-                    link.getId(),
-                    link.getText()
-            ).execute();
-            conn.close();
-            return true;
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
+    public void save(Link link) throws SQLException {
+        Connection conn = ds.getConnection();
+        DSLContext context = DSL.using(conn, SQLDialect.H2);
+        context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
+                link.getId(),
+                link.getText()
+        ).execute();
+        conn.close();
+    }
+
+    public int getDatabaseSize() throws SQLException {
+        Connection conn = ds.getConnection();
+        DSLContext context = DSL.using(conn,SQLDialect.H2);
+        Result<Record> result = context.select().
+                from(Tables.ARTICLE).
+                fetch();
+        conn.close();
+        return result.size();
     }
 
     private ArrayList<Link> buildLinks(Result<Record> result){
@@ -93,21 +85,5 @@ public class LinkDao {
             links.add(a);
         }
         return links;
-    }
-
-    public int getDatabaseSize() {
-        try{
-            Connection conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,SQLDialect.H2);
-            Result<Record> result = context.select().
-                    from(Tables.ARTICLE).
-                    fetch();
-            conn.close();
-            return result.size();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            return -1;
-        }
     }
 }
