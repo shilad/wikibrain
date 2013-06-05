@@ -28,9 +28,12 @@ public class ArticleDao {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.ID.equal(wpId)).fetchOne();
+            Record record = context.select().
+                                    from(Tables.ARTICLE).
+                                    where(Tables.ARTICLE.ID.equal(wpId)).
+                                    fetchOne();
             if (record == null) {
-                return null;
+                return new Article(-1, "Oogalie Boogalie", Article.NameSpace.MAIN, Article.PageType.STANDARD);
             }
             Article a = new Article(
                 record.getValue(Tables.ARTICLE.ID),
@@ -68,7 +71,10 @@ public class ArticleDao {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
-            Result<Record> result = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).fetch();
+            Result<Record> result = context.select().
+                                            from(Tables.ARTICLE).
+                                            where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).
+                                            fetch();
             conn.close();
             return buildArticles(result);
         }
@@ -82,7 +88,10 @@ public class ArticleDao {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
-            Result<Record> result = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.NS.equal(ns.getValue())).fetch();
+            Result<Record> result = context.select().
+                                            from(Tables.ARTICLE).
+                                            where(Tables.ARTICLE.NS.equal(ns.getValue())).
+                                            fetch();
             conn.close();
             return buildArticles(result);
         }
@@ -96,13 +105,33 @@ public class ArticleDao {
         try{
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
-            Result<Record> result = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).and(Tables.ARTICLE.NS.equal(ns.getValue())).fetch();
+            Result<Record> result = context.select().
+                                            from(Tables.ARTICLE).
+                                            where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).
+                                            and(Tables.ARTICLE.NS.equal(ns.getValue())).
+                                            fetch();
             conn.close();
             return buildArticles(result);
         }
         catch (Exception e){
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public int getDatabaseSize() {
+        try{
+            Connection conn = ds.getConnection();
+            DSLContext context = DSL.using(conn,SQLDialect.H2);
+            Result<Record> result = context.select().
+                    from(Tables.ARTICLE).
+                    fetch();
+            conn.close();
+            return result.size();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return -1;
         }
     }
 
@@ -122,5 +151,4 @@ public class ArticleDao {
         }
         return articles;
     }
-
 }
