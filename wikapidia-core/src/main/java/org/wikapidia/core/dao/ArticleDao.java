@@ -1,5 +1,6 @@
 package org.wikapidia.core.dao;
 
+import com.jolbox.bonecp.BoneCPDataSource;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -15,9 +16,16 @@ import org.wikapidia.core.jooq.Tables;
 /**
  */
 public class ArticleDao {
+
+    private BoneCPDataSource bds;
+
+    public ArticleDao(BoneCPDataSource dataSource)throws Exception{
+        bds = dataSource;
+    }
+
     public Article get(int wpId) {
         try{
-            Connection conn = connect();
+            Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.ID.equal(wpId)).fetchOne();
             Article a = new Article(
@@ -37,7 +45,7 @@ public class ArticleDao {
 
     public void save(Article article){
         try{
-            Connection conn = connect();
+            Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
             context.insertInto(Tables.ARTICLE).values(
                     article.getId(),
@@ -54,7 +62,7 @@ public class ArticleDao {
 
     public ArrayList<Article> query(String title){
         try{
-            Connection conn = connect();
+            Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
             Result<Record> result = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).fetch();
             return buildArticles(result);
@@ -67,7 +75,7 @@ public class ArticleDao {
 
     public ArrayList<Article> query(Article.NameSpace ns){
         try{
-            Connection conn = connect();
+            Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
             Result<Record> result = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.NS.equal(ns.getValue())).fetch();
             return buildArticles(result);
@@ -80,7 +88,7 @@ public class ArticleDao {
 
     public ArrayList<Article> query(String title, Article.NameSpace ns){
         try{
-            Connection conn = connect();
+            Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
             Result<Record> result = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).and(Tables.ARTICLE.NS.equal(ns.getValue())).fetch();
             return buildArticles(result);
@@ -89,12 +97,6 @@ public class ArticleDao {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private Connection connect()throws Exception{
-        Class.forName("org.h2.Driver");
-        Connection conn = DriverManager.getConnection("tmp/maven-test");
-        return conn;
     }
 
     private ArrayList<Article> buildArticles(Result<Record> result){
