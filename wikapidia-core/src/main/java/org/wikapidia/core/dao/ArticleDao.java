@@ -10,6 +10,7 @@ import org.wikapidia.core.model.Article;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.wikapidia.core.jooq.Tables;
 
@@ -19,7 +20,7 @@ public class ArticleDao {
 
     private BoneCPDataSource bds;
 
-    public ArticleDao(BoneCPDataSource dataSource)throws Exception{
+    public ArticleDao(BoneCPDataSource dataSource){
         bds = dataSource;
     }
 
@@ -60,7 +61,7 @@ public class ArticleDao {
         }
     }
 
-    public ArrayList<Article> query(String title){
+    public List<Article> query(String title){
         try{
             Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
@@ -73,7 +74,7 @@ public class ArticleDao {
         }
     }
 
-    public ArrayList<Article> query(Article.NameSpace ns){
+    public List<Article> query(Article.NameSpace ns){
         try{
             Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
@@ -86,7 +87,7 @@ public class ArticleDao {
         }
     }
 
-    public ArrayList<Article> query(String title, Article.NameSpace ns){
+    public List<Article> query(String title, Article.NameSpace ns){
         try{
             Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn,SQLDialect.H2);
