@@ -48,27 +48,27 @@ public class Benchmark {
             time += stop-start;
         }
 
-        System.out.println(time);
+        System.out.println("time to insert: "+(time/60000)+"m");
 
         start=System.currentTimeMillis();
         ad.get(13);
         stop=System.currentTimeMillis();
-        System.out.println(stop-start);
+        System.out.println("time to get by id: "+(stop-start)+"ms");
 
         start=System.currentTimeMillis();
         ad.query("a%");
         stop=System.currentTimeMillis();
-        System.out.println(stop-start);
+        System.out.println("time to query by title: "+((stop-start)/1000)+"s");
 
         start=System.currentTimeMillis();
         ad.query(Article.NameSpace.MAIN);
         stop=System.currentTimeMillis();
-        System.out.println(stop-start);
+        System.out.println("time to query by namespace: "+((stop-start)/1000)+"s");
 
         start=System.currentTimeMillis();
         ad.query("a%",Article.NameSpace.MAIN);
         stop=System.currentTimeMillis();
-        System.out.println(stop-start);
+        System.out.println("time to query by title and namespace: "+((stop-start)/1000)+"s");
 
     }
 }
