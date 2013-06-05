@@ -1,24 +1,33 @@
 package org.wikapidia.core.dao;
 
+import com.jolbox.bonecp.BoneCPDataSource;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.model.Link;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  */
 public class LinkDao {
 
-    public Link get(int wpId) {
+    private BoneCPDataSource bds;
+
+    public LinkDao(BoneCPDataSource bds) {
+        this.bds = bds;
+    }
+
+    public Link get(int lId) {
         try{
-            Connection conn = connect();
+            Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().from(Tables.LINK).where(Tables.LINK.ARTICLE_ID.equal(wpId)).fetchOne();
+            Record record = context.select().from(Tables.LINK).where(Tables.LINK.ARTICLE_ID.equal(lId)).fetchOne();
             Link l = new Link(
                     record.getValue(Tables.LINK.TEXT),
                     record.getValue(Tables.LINK.ARTICLE_ID),
@@ -33,18 +42,13 @@ public class LinkDao {
         return null;
     }
 
-    public Link query(String wpText) {
+    public List<Link> query(String lText) {
         try{
-            Connection conn = connect();
+            Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().from(Tables.LINK).where(Tables.LINK.TEXT.equal(wpText)).fetchOne();
-            Link l = new Link(
-                    record.getValue(Tables.LINK.TEXT),
-                    record.getValue(Tables.LINK.ARTICLE_ID),
-                    false
-            );
+            Result<Record> result = context.select().from(Tables.LINK).where(Tables.LINK.TEXT.likeIgnoreCase(lText)).fetch();
             conn.close();
-            return l;
+            return buildLinks(result);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -54,7 +58,7 @@ public class LinkDao {
 
     public void save(Link link) {
         try{
-            Connection conn = connect();
+            Connection conn = bds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
                     link.getId(),
@@ -67,8 +71,17 @@ public class LinkDao {
         }
     }
 
-    private Connection connect()throws Exception{
-        Class.forName("org.h2.Driver");
-        return DriverManager.getConnection("tmp/maven-test");
+    private ArrayList<Link> buildLinks(Result<Record> result){
+        ArrayList<Link> links = null;
+        for (Record record: result){
+            Link a = new Link(
+                    record.getValue(Tables.LINK.TEXT),
+                    record.getValue(Tables.LINK.ARTICLE_ID),
+                    false
+            );
+            links.add(a);
+        }
+        return links;
     }
+
 }
