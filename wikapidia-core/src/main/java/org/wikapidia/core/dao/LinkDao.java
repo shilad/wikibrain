@@ -72,7 +72,7 @@ public class LinkDao {
             context.insertInto(Tables.LINK, Tables.LINK.ARTICLE_ID, Tables.LINK.TEXT).values(
                     link.getId(),
                     link.getText()
-            );
+            ).execute();
             conn.close();
             return true;
         }
