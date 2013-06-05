@@ -83,10 +83,7 @@ public class LinkDao {
     }
 
     private ArrayList<Link> buildLinks(Result<Record> result){
-        if (result == null) {
-            return null;
-        }
-        ArrayList<Link> links = null;
+        ArrayList<Link> links = new ArrayList<Link>();
         for (Record record: result){
             Link a = new Link(
                     record.getValue(Tables.LINK.TEXT),
