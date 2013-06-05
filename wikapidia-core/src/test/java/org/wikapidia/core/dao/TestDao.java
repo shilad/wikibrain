@@ -2,11 +2,13 @@ package org.wikapidia.core.dao;
 
 
 import com.jolbox.bonecp.BoneCPDataSource;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.wikapidia.core.model.Article;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -22,10 +24,20 @@ public class TestDao {
         ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
         ds.setUsername("sa");
         ds.setPassword("");
+
+        //make the database
+        Connection conn = ds.getConnection();
+        conn.createStatement().execute(
+                FileUtils.readFileToString(new File("src/main/resources/schema.sql"))
+        );
+        conn.close();
+
+
         ArticleDao ad = new ArticleDao(ds);
         Article article = new Article(1,"test", Article.NameSpace.MAIN,Article.PageType.STANDARD);
         ad.save(article);
         Article saved = ad.get(1);
+        assert (saved!=null);
         assert (article.getId()==saved.getId());
         assert (article.getTitle().equals(saved.getTitle()));
         assert (article.getNs().equals(saved.getNs()));
@@ -50,6 +62,9 @@ public class TestDao {
         assert (articles.get(0).getType().equals(article.getType()));
         articles = ad.query("wrong");
         assert (articles==null);
+
+
+        FileUtils.deleteDirectory(tmpDir);
 
     }
 }
