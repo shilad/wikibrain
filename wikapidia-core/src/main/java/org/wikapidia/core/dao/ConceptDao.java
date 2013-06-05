@@ -24,6 +24,9 @@ public class ConceptDao {
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().from(Tables.CONCEPT).where(Tables.CONCEPT.ID.equal(cId)).fetchOne();
+            if (record == null) {
+                return null;
+            }
             Concept c = new Concept(
                     record.getValue(Tables.CONCEPT.ID),
                     null
@@ -31,7 +34,7 @@ public class ConceptDao {
             conn.close();
             return c;
         }
-        catch(Exception e){
+        catch(Exception e) {
             e.printStackTrace();
             return null;
         }

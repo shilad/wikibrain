@@ -29,7 +29,9 @@ public class ArticleDao {
             Connection conn = ds.getConnection();
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().from(Tables.ARTICLE).where(Tables.ARTICLE.ID.equal(wpId)).fetchOne();
-            if (record==null){return null;}
+            if (record == null) {
+                return null;
+            }
             Article a = new Article(
                 record.getValue(Tables.ARTICLE.ID),
                 record.getValue(Tables.ARTICLE.TITLE),
@@ -105,7 +107,10 @@ public class ArticleDao {
     }
 
     private ArrayList<Article> buildArticles(Result<Record> result){
-        ArrayList<Article> articles=null;
+        if (result == null) {
+            return null;
+        }
+        ArrayList<Article> articles = null;
         for (Record record: result){
             Article a = new Article(
                     record.getValue(Tables.ARTICLE.ID),
