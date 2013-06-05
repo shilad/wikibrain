@@ -3,19 +3,19 @@ package org.wikapidia.core.model;
 /**
  */
 public class Concept {
-    private int id;
+    private long id;
     private int[] articleIds;
 
-    public Concept(int id, int[] articleIds) {
+    public Concept(long id, int[] articleIds) {
         this.id = id;
         this.articleIds = articleIds;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
