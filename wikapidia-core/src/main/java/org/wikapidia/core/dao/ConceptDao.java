@@ -11,6 +11,7 @@ import org.wikapidia.core.model.Concept;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class ConceptDao {
 
@@ -20,7 +21,7 @@ public class ConceptDao {
         ds = dataSource;
     }
 
-    public Concept get(long cId) throws Exception {
+    public Concept get(long cId) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn, SQLDialect.H2);
         Record record = context.select().
@@ -38,14 +39,14 @@ public class ConceptDao {
         return c;
     }
 
-    public void save(Concept c) throws Exception {
+    public void save(Concept c) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn, SQLDialect.H2);
         context.insertInto(Tables.CONCEPT, Tables.CONCEPT.ID).values(c.getId()).execute();
         conn.close();
     }
 
-    public int getDatabaseSize() throws Exception {
+    public int getDatabaseSize() throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Result<Record> result = context.select().
