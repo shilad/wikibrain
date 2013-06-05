@@ -15,7 +15,7 @@ public class ConceptDao {
 
     private DataSource ds;
 
-    public ConceptDao(DataSource dataSource)throws Exception{
+    public ConceptDao(DataSource dataSource) {
         ds = dataSource;
     }
 

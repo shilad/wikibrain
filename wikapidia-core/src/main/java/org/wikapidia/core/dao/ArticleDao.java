@@ -20,7 +20,7 @@ public class ArticleDao {
 
     private DataSource ds;
 
-    public ArticleDao(DataSource dataSource) throws Exception{
+    public ArticleDao(DataSource dataSource) {
         ds = dataSource;
     }
 
