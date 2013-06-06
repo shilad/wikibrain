@@ -18,8 +18,8 @@ public class Benchmark {
     private int titleLength = 10;
     private int textMinLength = 30;
     private int textMaxLength = 2500;
-    boolean shouldBuildDb = false;
-    boolean shouldBuildArticleDb = false;
+    boolean shouldBuildDb = true;
+    boolean shouldBuildArticleDb = true;
 
     @Test
     public void articleBenchmark() throws IOException, SQLException {
@@ -70,6 +70,7 @@ public class Benchmark {
             ad.save(a);
             stop = System.currentTimeMillis();
             time += stop-start;
+            if(i%1000000 == 0) {System.out.println("" + i + " insertions completed");}
         }
 
         System.out.println("time to insert: "+(time/60000)+" m (" + ((time/1000)/(long)numArticles) + " record/s");
@@ -103,13 +104,14 @@ class RandomHelper{
     }
 
     public String string(int min, int max) {
-        String s = "";
+        char r = chars.charAt(random.nextInt(chars.length()));
+        StringBuffer s = new StringBuffer();
         int length = random.nextInt(max);
         length += min;
         for (int i = 0; i < length; i++) {
-            s += chars.charAt(random.nextInt(chars.length()));
+            s.append(r);
         }
-        return s;
+        return s.toString();
     }
 
     public Article.NameSpace ns(){
