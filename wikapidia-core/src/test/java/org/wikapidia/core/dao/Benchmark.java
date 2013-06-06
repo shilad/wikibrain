@@ -46,6 +46,7 @@ public class Benchmark {
             ad.save(a);
             stop = System.currentTimeMillis();
             time += stop-start;
+            if(i%100000 == 0) {System.out.println(i);}
         }
 
         System.out.println("time to insert: "+(time/60000)+"m");
