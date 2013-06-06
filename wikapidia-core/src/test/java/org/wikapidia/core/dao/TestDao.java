@@ -33,7 +33,7 @@ public class TestDao {
         conn.close();
 
         ArticleDao ad = new ArticleDao(ds);
-        Article article = new Article(1,"test", Article.NameSpace.MAIN,Article.PageType.STANDARD);
+        Article article = new Article(1,"test", Article.NameSpace.MAIN,Article.PageType.ST-ANDARD);
         ad.save(article);
 
         Article saved = ad.get(1);
