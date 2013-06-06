@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao;
 
-import com.jolbox.bonecp.BoneCPConfig;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -46,6 +45,7 @@ public class Benchmark {
             ad.save(a);
             stop = System.currentTimeMillis();
             time += stop-start;
+            if(i%100000==0) System.out.println(i);
         }
 
         System.out.println("time to insert: "+(time/60000)+"m");
