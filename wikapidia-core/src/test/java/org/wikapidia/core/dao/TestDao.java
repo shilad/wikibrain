@@ -35,7 +35,8 @@ public class TestDao {
 
         //Article
             ArticleDao ad = new ArticleDao(ds);
-            Article article = new Article(1,"test", Article.NameSpace.MAIN,Article.PageType.STANDARD);
+            Article article = new Article(1,"test", Article.NameSpace.MAIN,
+                    Article.PageType.STANDARD, "This is the text!");
             ad.save(article);
 
             Article savedArticle = ad.get(1);
@@ -44,6 +45,7 @@ public class TestDao {
             assert (article.getTitle().equals(savedArticle.getTitle()));
             assert (article.getNs().equals(savedArticle.getNs()));
             assert (article.getType().equals(savedArticle.getType()));
+            assert (article.getText().equals(savedArticle.getText()));
 
             List<Article> articles = ad.query("test");
             assert (articles != null);
@@ -52,6 +54,7 @@ public class TestDao {
             assert (articles.get(0).getTitle().equals(article.getTitle()));
             assert (articles.get(0).getNs().equals(article.getNs()));
             assert (articles.get(0).getType().equals(article.getType()));
+            assert (articles.get(0).getText().equals(article.getText()));
 
             articles = ad.query(Article.NameSpace.MAIN);
             assert (articles.size()==1);
@@ -59,6 +62,7 @@ public class TestDao {
             assert (articles.get(0).getTitle().equals(article.getTitle()));
             assert (articles.get(0).getNs().equals(article.getNs()));
             assert (articles.get(0).getType().equals(article.getType()));
+            assert (articles.get(0).getText().equals(savedArticle.getText()));
 
             articles = ad.query("test",Article.NameSpace.MAIN);
             assert (articles.size()==1);
@@ -66,7 +70,7 @@ public class TestDao {
             assert (articles.get(0).getTitle().equals(article.getTitle()));
             assert (articles.get(0).getNs().equals(article.getNs()));
             assert (articles.get(0).getType().equals(article.getType()));
-
+            assert (articles.get(0).getText().equals(savedArticle.getText()));
 
             articles = ad.query("wrong");
             assert (articles.size()==0);
