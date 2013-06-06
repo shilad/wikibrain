@@ -8,13 +8,15 @@ public class Article {
     private String title;
     private NameSpace ns;
     private PageType type;
+    private String text;
 
-    public Article(int id, String title, NameSpace ns , PageType type)
+    public Article(int id, String title, NameSpace ns , PageType type, String text)
     {
         this.id = id;
         this.title = title;
         this.ns = ns;
         this.type = type;
+        this.text = text;
     }
 
     public int getId() {
@@ -47,6 +49,14 @@ public class Article {
 
     public void setType(PageType type) {
         this.type = type;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 
     public static enum NameSpace {

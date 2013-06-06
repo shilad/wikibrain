@@ -1,5 +1,6 @@
 package org.wikapidia.core.dao;
 
+import com.jolbox.bonecp.BoneCPConfig;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -14,42 +15,21 @@ import java.util.Random;
 public class Benchmark {
     private int numArticles = 40000000;
     private int numLinks = 1000000;
+    boolean shouldBuildDb = false;
+    boolean shouldBuildArticleDb = false;
 
     @Test
-    public void articleBenchmark() throws ClassNotFoundException, IOException, SQLException {
-        Class.forName("org.h2.Driver");
-        File tmpDir = File.createTempFile("wikapidia-h2", null);
-        tmpDir.delete();
-        tmpDir.deleteOnExit();
-        tmpDir.mkdirs();
-
+    public void articleBenchmark() throws IOException, SQLException {
         BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
+        ds.setJdbcUrl("jdbc:h2:~/benchmark-db");
         ds.setUsername("sa");
         ds.setPassword("");
-
-        Connection conn = ds.getConnection();
-        conn.createStatement().execute(
-                FileUtils.readFileToString(new File("src/main/resources/schema.sql"))
-        );
-        conn.close();
-
         ArticleDao ad = new ArticleDao(ds);
 
-        //build
+        if (shouldBuildDb){buildDb(ds);}
+        if (shouldBuildArticleDb){buildArticleDb(ad);}
+
         long time = 0, start, stop;
-        RandomHelper rh = new RandomHelper();
-        for (int i=0; i<numArticles; i++){
-            Article a = new Article(i,rh.string(),rh.ns(),rh.type());
-            start = System.currentTimeMillis();
-            ad.save(a);
-            stop = System.currentTimeMillis();
-            time += stop-start;
-            if(i%100000==0) System.out.println(i);
-        }
-
-        System.out.println("time to insert: "+(time/60000)+"m");
-
         Random r = new Random();
         int j;
         for (int i=0; i<50; i++){
@@ -61,7 +41,7 @@ public class Benchmark {
         }
 
         start=System.currentTimeMillis();
-        ad.query("a%");
+        ad.query("aa%");
         stop=System.currentTimeMillis();
         System.out.println("time to query by title: "+((stop-start)/1000)+"s");
 
@@ -71,9 +51,33 @@ public class Benchmark {
         System.out.println("time to query by namespace: "+((stop-start)/1000)+"s");
 
         start=System.currentTimeMillis();
-        ad.query("a%",Article.NameSpace.MAIN);
+        ad.query("aa%",Article.NameSpace.MAIN);
         stop=System.currentTimeMillis();
         System.out.println("time to query by title and namespace: "+((stop-start)/1000)+"s");
+
+    }
+
+
+    public void buildArticleDb(ArticleDao ad) throws IOException, SQLException {
+        long time = 0, start, stop;
+        RandomHelper rh = new RandomHelper();
+        for (int i=0; i<numArticles; i++){
+            Article a = new Article(i,rh.string(),rh.ns(),rh.type());
+            start = System.currentTimeMillis();
+            ad.save(a);
+            stop = System.currentTimeMillis();
+            time += stop-start;
+        }
+
+        System.out.println("time to insert: "+(time/60000)+"m");
+    }
+
+    public void buildDb(BoneCPDataSource ds) throws SQLException, IOException {
+        Connection conn = ds.getConnection();
+        conn.createStatement().execute(
+                FileUtils.readFileToString(new File("src/main/resources/schema.sql"))
+        );
+        conn.close();
 
     }
 }
