@@ -39,7 +39,8 @@ public class ArticleDao {
             record.getValue(Tables.ARTICLE.ID),
             record.getValue(Tables.ARTICLE.TITLE),
             Article.NameSpace.intToNS(record.getValue(Tables.ARTICLE.NS)),
-            Article.PageType.values()[record.getValue(Tables.ARTICLE.PTYPE)]
+            Article.PageType.values()[record.getValue(Tables.ARTICLE.PTYPE)],
+            record.getValue(Tables.ARTICLE.TEXT)
         );
         conn.close();
         return a;
@@ -52,7 +53,8 @@ public class ArticleDao {
                 article.getId(),
                 article.getTitle(),
                 article.getNs().getValue(),
-                article.getType().getValue()
+                article.getType().getValue(),
+                article.getText()
         ).execute();
         conn.close();
     }
@@ -108,7 +110,8 @@ public class ArticleDao {
                     record.getValue(Tables.ARTICLE.ID),
                     record.getValue(Tables.ARTICLE.TITLE),
                     Article.NameSpace.intToNS(record.getValue(Tables.ARTICLE.NS)),
-                    Article.PageType.values()[record.getValue(Tables.ARTICLE.PTYPE)]
+                    Article.PageType.values()[record.getValue(Tables.ARTICLE.PTYPE)],
+                    record.getValue(Tables.ARTICLE.TEXT)
             );
             articles.add(a);
         }
