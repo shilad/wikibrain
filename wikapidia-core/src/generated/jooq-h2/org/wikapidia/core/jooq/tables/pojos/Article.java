@@ -11,12 +11,13 @@ package org.wikapidia.core.jooq.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked" })
 public class Article implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1589400991;
+	private static final long serialVersionUID = 286869421;
 
 	private java.lang.Integer id;
 	private java.lang.String  title;
 	private java.lang.Integer ns;
 	private java.lang.Integer ptype;
+	private java.lang.String  text;
 
 	public java.lang.Integer getId() {
 		return this.id;
@@ -48,5 +49,13 @@ public class Article implements java.io.Serializable {
 
 	public void setPtype(java.lang.Integer ptype) {
 		this.ptype = ptype;
+	}
+
+	public java.lang.String getText() {
+		return this.text;
+	}
+
+	public void setText(java.lang.String text) {
+		this.text = text;
 	}
 }

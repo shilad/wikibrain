@@ -67,4 +67,11 @@ public class ArticleDao extends org.jooq.impl.DAOImpl<org.wikapidia.core.jooq.ta
 	public java.util.List<org.wikapidia.core.jooq.tables.pojos.Article> fetchByPtype(java.lang.Integer... values) {
 		return fetch(org.wikapidia.core.jooq.tables.Article.ARTICLE.PTYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>TEXT IN (values)</code>
+	 */
+	public java.util.List<org.wikapidia.core.jooq.tables.pojos.Article> fetchByText(java.lang.String... values) {
+		return fetch(org.wikapidia.core.jooq.tables.Article.ARTICLE.TEXT, values);
+	}
 }
