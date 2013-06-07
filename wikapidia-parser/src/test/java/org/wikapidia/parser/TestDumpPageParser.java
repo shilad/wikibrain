@@ -1,8 +1,9 @@
 package org.wikapidia.parser;
 
 import org.junit.Test;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.parser.xml.DumpPageXmlParser;
+import org.wikapidia.parser.xml.PageXml;
 
 import java.io.File;
 import java.util.Date;
@@ -16,7 +17,7 @@ public class TestDumpPageParser {
 
     @Test
     public void testSimple() {
-        DumpPageParser dpp = new DumpPageParser(EN_DUMP, EN);
+        DumpPageXmlParser dpp = new DumpPageXmlParser(EN_DUMP, EN);
         int i = 0;
         for (PageXml xml : dpp) {
             i++;
@@ -27,7 +28,7 @@ public class TestDumpPageParser {
     @Test
     public void testText() {
         int i = 0;
-        DumpPageParser dpp = new DumpPageParser(EN_DUMP, EN);
+        DumpPageXmlParser dpp = new DumpPageXmlParser(EN_DUMP, EN);
         for (PageXml xml : dpp) {
             switch (i) {
             case 0:
