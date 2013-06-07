@@ -1,5 +1,6 @@
 package org.wikapidia.parser.wiki;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
@@ -7,6 +8,7 @@ import org.wikapidia.parser.xml.PageXml;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +27,13 @@ public class WikiTextDumpParser {
         this.language = language;
         this.dpxp = new DumpPageXmlParser(file, language);
         this.wtp = new WikiTextParser(language);
+    }
+
+    public WikiTextDumpParser(File file, LanguageInfo language, List<String> allowedIllLangs) {
+        this.file = file;
+        this.language = language;
+        this.dpxp = new DumpPageXmlParser(file, language);
+        this.wtp = new WikiTextParser(language, allowedIllLangs);
     }
 
     /**

@@ -10,6 +10,7 @@ import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.parser.xml.PageXml;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,10 +32,18 @@ public class WikiTextParser {
         MediaWikiParserFactory pf = new MediaWikiParserFactory();
         pf.setCalculateSrcSpans(true);
         pf.setCategoryIdentifers(lang.getCategoryNames());
-        // TODO: why was there more language originally passed below?
-        pf.setLanguageIdentifers(Arrays.asList(lang.getLanguage().getLangCode()));
         jwpl = pf.createParser();
+    }
 
+    public WikiTextParser(LanguageInfo lang, List<String> allowedIllLangs) {
+        this.lang = lang;
+        subarticleParser = new SubarticleParser(lang);
+
+        MediaWikiParserFactory pf = new MediaWikiParserFactory();
+        pf.setCalculateSrcSpans(true);
+        pf.setCategoryIdentifers(lang.getCategoryNames());
+        pf.setLanguageIdentifers(allowedIllLangs);
+        jwpl = pf.createParser();
     }
 
     /**
@@ -82,7 +91,7 @@ public class WikiTextParser {
                             continue;
                         }
                         Title destTitle = link2Title(curLink);
-                        if (destTitle.guessType() != PageType.ARTICLE){
+                        if (destTitle == null || destTitle.guessType() != PageType.ARTICLE){
                             continue;
                         }
                         try{
@@ -128,6 +137,7 @@ public class WikiTextParser {
                                 ParsedPage parsedTemplate = jwpl.parse(templateText);
                                 for (Link templateLink : parsedTemplate.getLinks()){
                                     Title destTitle = link2Title(templateLink);
+                                    if (destTitle == null) { continue; }
                                     PageType type = destTitle.guessType();
                                     if (type == PageType.ARTICLE){
                                         ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
@@ -214,9 +224,10 @@ public class WikiTextParser {
                     LOG.log(Level.WARNING, String.format("Error while parsing/storing ILL\t%s\t%s\t%s",xml,ill.toString().replaceAll("\n", ","), e.getMessage()));
                 }
             }
-        }else{
-            LOG.info("No ILLs found for\t" + xml);
         }
+//        else{
+//            LOG.info("No ILLs found for\t" + xml);
+//        }
 
     }
 
@@ -267,5 +278,11 @@ public class WikiTextParser {
         }
     }
 
-
+    static public List<String> getLangCodes(List<LanguageInfo> langs) {
+        List<String> langCodes = new ArrayList<String>();
+        for (LanguageInfo l : langs) {
+            langCodes.add(l.getLanguage().getLangCode());
+        }
+        return langCodes;
+    }
 }

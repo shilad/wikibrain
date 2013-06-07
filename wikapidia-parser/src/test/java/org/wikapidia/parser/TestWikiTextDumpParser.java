@@ -7,6 +7,7 @@ import org.wikapidia.parser.xml.PageXml;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
@@ -19,7 +20,15 @@ public class TestWikiTextDumpParser {
 
     @Test
     public void test1() {
+        List<String> allowedIllLangs = new ArrayList<String>();
+        allowedIllLangs.add("en");
+        allowedIllLangs.add("de");
+
+        // Scans for ILLs in all languages
         WikiTextDumpParser wtdp = new WikiTextDumpParser(EN_DUMP, EN);
+
+        // Scans for ILLs in languages specified above only
+        //WikiTextDumpParser wtdp = new WikiTextDumpParser(EN_DUMP, EN, allowedIllLangs);
 
         final AtomicInteger pageCounter = new AtomicInteger();
         final ArrayList<ParsedCategory> categories = new ArrayList<ParsedCategory>();
@@ -57,5 +66,9 @@ public class TestWikiTextDumpParser {
         wtdp.parse(visitor);
 
         assertEquals(pageCounter.get(), 44);
+        System.out.println("Categories: " + categories.size());
+        System.out.println("ILLs: " + ills.size());
+        System.out.println("Links: " + links.size());
+        System.out.println("Redirects: " + redirects.size());
     }
 }
