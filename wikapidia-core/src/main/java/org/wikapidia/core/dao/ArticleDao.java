@@ -20,23 +20,15 @@ public class ArticleDao {
         ds = dataSource;
     }
 
-    public Article get(int wpId) throws SQLException {
+    public Article get(int aId) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn, SQLDialect.H2);
         Record record = context.select().
-            from(Tables.ARTICLE).
-            where(Tables.ARTICLE.ID.equal(wpId)).
-            fetchOne();
-        if (record == null) {
-            return null;
-        }
-        Article a = new Article(
-            record.getValue(Tables.ARTICLE.ID),
-            record.getValue(Tables.ARTICLE.TITLE),
-            Article.NameSpace.intToNS(record.getValue(Tables.ARTICLE.NS)),
-            Article.PageType.values()[record.getValue(Tables.ARTICLE.PTYPE)],
-            record.getValue(Tables.ARTICLE.TEXT)
-        );
+                                from(Tables.ARTICLE).
+                                where(Tables.ARTICLE.ID.equal(aId)).
+                                fetchOne();
+        if (record == null) { return null; }
+        Article a = buildArticle(record);
         conn.close();
         return a;
     }
@@ -58,9 +50,9 @@ public class ArticleDao {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Cursor<Record> result = context.select().
-            from(Tables.ARTICLE).
-            where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).
-            fetchLazy();
+                                        from(Tables.ARTICLE).
+                                        where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).
+                                        fetchLazy();
         conn.close();
 
         return buildArticles(result);
@@ -70,9 +62,9 @@ public class ArticleDao {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Cursor<Record> result = context.select().
-            from(Tables.ARTICLE).
-            where(Tables.ARTICLE.NS.equal(ns.getValue())).
-            fetchLazy();
+                                        from(Tables.ARTICLE).
+                                        where(Tables.ARTICLE.NS.equal(ns.getValue())).
+                                        fetchLazy();
         conn.close();
         return buildArticles(result);
     }
@@ -81,10 +73,10 @@ public class ArticleDao {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Cursor<Record> result = context.select().
-            from(Tables.ARTICLE).
-            where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).
-            and(Tables.ARTICLE.NS.equal(ns.getValue())).
-           fetchLazy();
+                                        from(Tables.ARTICLE).
+                                        where(Tables.ARTICLE.TITLE.likeIgnoreCase(title)).
+                                        and(Tables.ARTICLE.NS.equal(ns.getValue())).
+                                        fetchLazy();
         conn.close();
         return buildArticles(result);
     }
@@ -93,8 +85,8 @@ public class ArticleDao {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn,SQLDialect.H2);
         Result<Record> result = context.select().
-            from(Tables.ARTICLE).
-            fetch();
+                                        from(Tables.ARTICLE).
+                                        fetch();
         conn.close();
         return result.size();
     }
@@ -111,12 +103,14 @@ public class ArticleDao {
     }
 
     private WikapidiaIterable<Article> buildArticles(Cursor<Record> result){
-        return new WikapidiaIterable<Article>(result, new DaoTransformer<Article>() {
-            @Override
-            public Article transform(Record r) {
-                return buildArticle(r);
-            }
-        });
+        return new WikapidiaIterable<Article>(result,
+                    new DaoTransformer<Article>() {
+                        @Override
+                        public Article transform(Record r) {
+                            return buildArticle(r);
+                        }
+                    }
+        );
     }
 
 /*    private ArrayList<Article> buildArticles(Result<Record> result){

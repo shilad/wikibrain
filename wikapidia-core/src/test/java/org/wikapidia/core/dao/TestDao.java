@@ -34,67 +34,67 @@ public class TestDao {
 
 
         //Article
-        ArticleDao ad = new ArticleDao(ds);
-        Article article = new Article(1,"test", Article.NameSpace.MAIN,
-                Article.PageType.STANDARD, "This is the text!");
-        ad.save(article);
+            ArticleDao ad = new ArticleDao(ds);
+            Article article = new Article(1,"test", Article.NameSpace.MAIN,
+                    Article.PageType.STANDARD, "This is the text!");
+            ad.save(article);
 
-        Article savedArticle = ad.get(1);
-        assert (savedArticle != null);
-        assert (article.getId()==savedArticle.getId());
-        assert (article.getTitle().equals(savedArticle.getTitle()));
-        assert (article.getNs().equals(savedArticle.getNs()));
-        assert (article.getType().equals(savedArticle.getType()));
-        assert (article.getText().equals(savedArticle.getText()));
+            Article savedArticle = ad.get(1);
+            assert (savedArticle != null);
+            assert (article.getId()==savedArticle.getId());
+            assert (article.getTitle().equals(savedArticle.getTitle()));
+            assert (article.getNs().equals(savedArticle.getNs()));
+            assert (article.getType().equals(savedArticle.getType()));
+            assert (article.getText().equals(savedArticle.getText()));
 
-        WikapidiaIterable<Article> articles = ad.query("test");
-        assert (articles != null);
-        savedArticle = articles.iterator().next();
-        assert (savedArticle.getId()==1);
-        assert (savedArticle.getTitle().equals(article.getTitle()));
-        assert (savedArticle.getNs().equals(article.getNs()));
-        assert (savedArticle.getType().equals(article.getType()));
-        assert (savedArticle.getText().equals(article.getText()));
+            List<Article> articles = ad.query("test");
+            assert (articles != null);
+            assert (articles.size()==1);
+            assert (articles.get(0).getId()==1);
+            assert (articles.get(0).getTitle().equals(article.getTitle()));
+            assert (articles.get(0).getNs().equals(article.getNs()));
+            assert (articles.get(0).getType().equals(article.getType()));
+            assert (articles.get(0).getText().equals(article.getText()));
 
-        articles = ad.query(Article.NameSpace.MAIN);
-        savedArticle = articles.iterator().next();
-        assert (savedArticle.getId()==1);
-        assert (savedArticle.getTitle().equals(article.getTitle()));
-        assert (savedArticle.getNs().equals(article.getNs()));
-        assert (savedArticle.getType().equals(article.getType()));
-        assert (savedArticle.getText().equals(savedArticle.getText()));
+            articles = ad.query(Article.NameSpace.MAIN);
+            assert (articles.size()==1);
+            assert (articles.get(0).getId()==1);
+            assert (articles.get(0).getTitle().equals(article.getTitle()));
+            assert (articles.get(0).getNs().equals(article.getNs()));
+            assert (articles.get(0).getType().equals(article.getType()));
+            assert (articles.get(0).getText().equals(savedArticle.getText()));
 
-        articles = ad.query("test",Article.NameSpace.MAIN);
-        savedArticle = articles.iterator().next();
-        assert (savedArticle.getId()==1);
-        assert (savedArticle.getTitle().equals(article.getTitle()));
-        assert (savedArticle.getNs().equals(article.getNs()));
-        assert (savedArticle.getType().equals(article.getType()));
-        assert (savedArticle.getText().equals(savedArticle.getText()));
+            articles = ad.query("test",Article.NameSpace.MAIN);
+            assert (articles.size()==1);
+            assert (articles.get(0).getId()==1);
+            assert (articles.get(0).getTitle().equals(article.getTitle()));
+            assert (articles.get(0).getNs().equals(article.getNs()));
+            assert (articles.get(0).getType().equals(article.getType()));
+            assert (articles.get(0).getText().equals(savedArticle.getText()));
 
-        articles = ad.query("wrong");
-        assert (articles.iterator().hasNext()==false);
+            articles = ad.query("wrong");
+            assert (articles.size()==0);
 
 
         //Link
-        LinkDao ld = new LinkDao(ds);
-        Link link = new Link("zelda.com", 1, false);
-        ld.save(link);
+            LinkDao ld = new LinkDao(ds);
+            Link link = new Link("zelda.com", 1, false);
+            ld.save(link);
 
-        Link savedLink = ld.get(1);
-        assert (savedLink != null);
-        assert (link.getText().equals(savedLink.getText()));
-        assert (link.getId()==savedLink.getId());
-        assert (link.isSubsec()==savedLink.isSubsec());
+            Link savedLink = ld.get(1);
+            assert (savedLink != null);
+            assert (link.getText().equals(savedLink.getText()));
+            assert (link.getId()==savedLink.getId());
+            assert (link.isSubsec()==savedLink.isSubsec());
 
-        List<Link> links = ld.query("zelda.com");
-        assert (links != null);
-        assert (links.size()==1);
-        assert (links.get(0).getText().equals(link.getText()));
-        assert (links.get(0).getId()==1);
-        assert (links.get(0).isSubsec()==false);
+            List<Link> links = ld.query("zelda.com");
+            assert (links != null);
+            assert (links.size()==1);
+            assert (links.get(0).getText().equals(link.getText()));
+            assert (links.get(0).getId()==1);
+            assert (links.get(0).isSubsec()==false);
 
-        links = ld.query("ganondorf.com");
-        assert (links.size()==0);
+            links = ld.query("ganondorf.com");
+            assert (links.size()==0);
     }
 }
