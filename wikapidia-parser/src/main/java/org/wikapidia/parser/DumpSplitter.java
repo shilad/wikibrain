@@ -16,13 +16,13 @@ import java.util.zip.GZIPInputStream;
  * Each string is the contents of a single article.
  * Iterators are independent, so multiple iterators can simultaneously open a dump file.
  */
-public class XmlDumpIterator implements Iterable<String> {
+public class DumpSplitter implements Iterable<String> {
     public static final String ARTICLE_BEGIN = "<page>";
     public static final String ARTICLE_END = "</page>";
     private static final int MAX_ARTICLE_LENGTH = 10000000;     // Maximum length of article
 
 
-    private static final Logger LOG = Logger.getLogger(XmlDumpIterator.class.getName());
+    private static final Logger LOG = Logger.getLogger(DumpSplitter.class.getName());
     private File path;
 
     /**
@@ -30,8 +30,12 @@ public class XmlDumpIterator implements Iterable<String> {
      * The file can be gzipped or bzipped.
      * @param path
      */
-    public XmlDumpIterator(File path) {
+    public DumpSplitter(File path) {
         this.path = path;
+    }
+
+    public File getPath() {
+        return path;
     }
 
     @Override
@@ -96,7 +100,7 @@ public class XmlDumpIterator implements Iterable<String> {
                     return null;
                 }
                 if (line.trim().equals(ARTICLE_BEGIN)) {
-                    return line;
+                    return line + "\n";
                 }
             }
         }
@@ -121,7 +125,7 @@ public class XmlDumpIterator implements Iterable<String> {
                     buffer.append(ARTICLE_END + "\n");
                     break;
                 }
-                buffer.append(line);
+                buffer.append(line + "\n");
                 if (line.trim().equals(ARTICLE_END)) {
                     break;
                 }
