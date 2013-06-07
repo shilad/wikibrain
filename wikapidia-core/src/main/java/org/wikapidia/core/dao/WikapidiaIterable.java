@@ -2,7 +2,6 @@ package org.wikapidia.core.dao;
 
 import org.jooq.Cursor;
 import org.jooq.Record;
-import org.jooq.Result;
 import java.lang.UnsupportedOperationException;
 import java.util.Iterator;
 
