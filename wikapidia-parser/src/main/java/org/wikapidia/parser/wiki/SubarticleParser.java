@@ -1,7 +1,8 @@
-package org.wikapidia.parser;
+package org.wikapidia.parser.wiki;
 
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.UnsupportedLanguageException;
+import org.wikapidia.parser.xml.PageXml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,23 +15,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class SubarticleParser {
     private final LanguageInfo lang;
 
-    public static enum EncodingType {
-        MAIN_TEMPLATE,
-        SEEALSO_TEMPLATE,
-        MAIN_INLINE,
-        SEEALSO_INLINE,
-        SEEALSO_HEADER
-    };
-
-
     public SubarticleParser(LanguageInfo lang) {
         this.lang = lang;
     }
 
-    public EncodingType isSeeAlsoHeader(LanguageInfo lang, String headerName){
+    public ParsedLink.SubarticleType isSeeAlsoHeader(LanguageInfo lang, String headerName){
 		if (lang.getSeeAlsoHeaderPattern() != null && headerName != null){
 			Matcher m = lang.getSeeAlsoHeaderPattern().matcher(headerName);
-			if (m.find()) return EncodingType.SEEALSO_HEADER;
+			if (m.find()) return ParsedLink.SubarticleType.SEEALSO_HEADER;
 		}
 		return null;
 	}
@@ -67,17 +59,17 @@ public class SubarticleParser {
 		return parts[0];
 	}
 	
-	public EncodingType isTemplateSubarticle(String templateName, String templateText) throws UnsupportedLanguageException {
-        EncodingType rVal = null;
+	public ParsedLink.SubarticleType isTemplateSubarticle(String templateName, String templateText) throws UnsupportedLanguageException {
+        ParsedLink.SubarticleType rVal = null;
 		if (lang.getMainTemplatePattern() != null){
 			Matcher m = lang.getMainTemplatePattern().matcher(templateName);
 			if (m.find())
-				rVal = EncodingType.MAIN_TEMPLATE;
+				rVal = ParsedLink.SubarticleType.MAIN_TEMPLATE;
 		}
 		if (rVal == null && lang.getSeeAlsoTemplatePattern() != null){
 			Matcher m = lang.getSeeAlsoTemplatePattern().matcher(templateName);
 			if (m.find())
-				rVal = EncodingType.SEEALSO_TEMPLATE;
+				rVal = ParsedLink.SubarticleType.SEEALSO_TEMPLATE;
 		}
 		if (rVal != null){
 			rVal = handleSpecialTemplateBasedSubarticleSpecialCases(templateName, templateText, rVal);
@@ -87,7 +79,7 @@ public class SubarticleParser {
 	}
 	
 	private static int LEFT_WINDOW = 150; // max distance to look for newline char; given that subarticle lines tend to be short, this should be more than enough
-	public EncodingType isInlineSubarticle(int location, PageXml pageXml){
+	public ParsedLink.SubarticleType isInlineSubarticle(int location, PageXml pageXml){
 		if ((lang.getMainInlinePattern() != null || lang.getSeeAlsoInlinePattern() != null) && location > 0){
 			
 			Boolean valid = false;
@@ -124,13 +116,13 @@ public class SubarticleParser {
 			if (lang.getMainInlinePattern() != null){
 				Matcher m = lang.getMainInlinePattern().matcher(textUntilNewLine);
 				if (m.find()){
-					return EncodingType.MAIN_INLINE;
+					return ParsedLink.SubarticleType.MAIN_INLINE;
 				}
 			}
 			
 			if (lang.getSeeAlsoInlinePattern() != null){
 				Matcher m = lang.getSeeAlsoInlinePattern().matcher(textUntilNewLine);
-				if (m.find()) return EncodingType.SEEALSO_INLINE;
+				if (m.find()) return ParsedLink.SubarticleType.SEEALSO_INLINE;
 			}
 		}
 		
@@ -138,16 +130,16 @@ public class SubarticleParser {
 	}
 
     private final static Pattern special_DanishSeOgs = Pattern.compile("Tekst\\s*=\\s*Se også", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-    public EncodingType handleSpecialTemplateBasedSubarticleSpecialCases(String templateName,
-                                                                         String templateText, EncodingType normalType) throws UnsupportedLanguageException{
-        EncodingType rVal = normalType;
+    public ParsedLink.SubarticleType handleSpecialTemplateBasedSubarticleSpecialCases(String templateName,
+                                                                         String templateText, ParsedLink.SubarticleType normalType) throws UnsupportedLanguageException{
+        ParsedLink.SubarticleType rVal = normalType;
 
         // danish
         if (lang.getLanguage().getLangCode().equals("de")){
-            if (normalType.equals(EncodingType.MAIN_TEMPLATE)){
+            if (normalType.equals(ParsedLink.SubarticleType.MAIN_TEMPLATE)){
                 Matcher m = special_DanishSeOgs.matcher(templateText);
                 if (m.find()){
-                    rVal = EncodingType.SEEALSO_TEMPLATE;
+                    rVal = ParsedLink.SubarticleType.SEEALSO_TEMPLATE;
                 }
             }
         }

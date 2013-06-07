@@ -1,14 +1,17 @@
-package org.wikapidia.parser;
+package org.wikapidia.parser.xml;
 
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.parser.DumpSplitter;
+import org.wikapidia.parser.WpParseException;
+import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.parser.xml.PageXmlParser;
 
 import java.io.File;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DumpPageParser implements Iterable<PageXml> {
+public class DumpPageXmlParser implements Iterable<PageXml> {
     public static final Logger LOG = Logger.getLogger(DumpSplitter.class.getName());
 
     private final PageXmlParser parser;
@@ -19,7 +22,7 @@ public class DumpPageParser implements Iterable<PageXml> {
      * @param file
      * @param language  TODO: read language from dump file!
      */
-    public DumpPageParser(File file, LanguageInfo language) {
+    public DumpPageXmlParser(File file, LanguageInfo language) {
         this.language = language;
         this.impl = new DumpSplitter(file);
         this.parser = new PageXmlParser(language);
