@@ -28,7 +28,7 @@ public class LinkDao {
                                 from(Tables.LINK).
                                 where(Tables.LINK.ARTICLE_ID.equal(lId)).
                                 fetchOne();
-        if (record == null) return null;
+        if (record == null) { return null; }
         Link l = buildLink(record);
         conn.close();
         return l;
