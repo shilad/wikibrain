@@ -1,6 +1,6 @@
 package org.wikapidia.core.dao;
 
-
+import com.jolbox.bonecp.BoneCPConfig;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -15,8 +15,11 @@ import java.util.Random;
 public class Benchmark {
     private int numArticles = 40000000;
     private int numLinks = 1000000;
-    boolean shouldBuildDb = true;
-    boolean shouldBuildArticleDb = true;
+    private int titleLength = 10;
+    private int textMinLength = 30;
+    private int textMaxLength = 2500;
+    boolean shouldBuildDb = false;
+    boolean shouldBuildArticleDb = false;
 
     @Test
     public void articleBenchmark() throws IOException, SQLException {
@@ -62,14 +65,14 @@ public class Benchmark {
         long time = 0, start, stop;
         RandomHelper rh = new RandomHelper();
         for (int i=0; i<numArticles; i++){
-            Article a = new Article(i,rh.string(),rh.ns(),rh.type(), "this much time");
+            Article a = new Article(i,rh.string(titleLength),rh.ns(),rh.type(), rh.string(textMinLength, textMaxLength));
             start = System.currentTimeMillis();
             ad.save(a);
             stop = System.currentTimeMillis();
             time += stop-start;
         }
 
-        System.out.println("time to insert: "+(time/60000)+"m");
+        System.out.println("time to insert: "+(time/60000)+" m (" + ((time/1000)/(long)numArticles) + " record/s");
     }
 
     public void buildDb(BoneCPDataSource ds) throws SQLException, IOException {
@@ -91,10 +94,20 @@ class RandomHelper{
         random = new Random();
     }
 
-    public String string(){
+    public String string(int textLength){
         String s="";
-        for (int i=0; i<10; i++){
+        for (int i=0; i<textLength; i++){
             s+=chars.charAt(random.nextInt(chars.length()));
+        }
+        return s;
+    }
+
+    public String string(int min, int max) {
+        String s = "";
+        int length = random.nextInt(max);
+        length += min;
+        for (int i = 0; i < length; i++) {
+            s += chars.charAt(random.nextInt(chars.length()));
         }
         return s;
     }
