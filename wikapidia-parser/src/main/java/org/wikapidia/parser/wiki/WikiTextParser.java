@@ -44,6 +44,7 @@ public class WikiTextParser {
      * @throws WikapidiaException
      */
     public void parse(PageXml xml, ParserVisitor visitor) throws WikapidiaException {
+        visitor.beginPage(xml);
         ParsedPage pp = jwpl.parse(xml.getBody());
 
         if (xml.getType() == PageType.REDIRECT) {
@@ -56,6 +57,7 @@ public class WikiTextParser {
         } else if (xml.getType() == PageType.ARTICLE) {
             parseArticle(xml, visitor, pp);
         }
+        visitor.endPage(xml);
     }
 
     private void parseRedirect(PageXml xml, ParserVisitor visitor, ParsedPage page) {

@@ -9,7 +9,10 @@ import org.wikapidia.parser.xml.PageXml;
  * extends methods they find interesting and passes the visitor to the parser.
  */
 public class ParserVisitor {
+    public void beginPage(PageXml xml) {}
+
     public void category(ParsedCategory category) throws WikapidiaException {}
+
     public void ill(ParsedIll ill) throws WikapidiaException {}
 
     /**
@@ -25,4 +28,6 @@ public class ParserVisitor {
      * @throws WikapidiaException
      */
     public void redirect(ParsedRedirect redirect) throws WikapidiaException {}
+
+    public void endPage(PageXml xml) {}
 }
