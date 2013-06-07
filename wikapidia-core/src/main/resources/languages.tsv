@@ -1,0 +1,286 @@
+id	langCode	enLangName	nativeName
+1	en	English	English
+2	de	German	Deutsch
+3	fr	French	Français
+4	nl	Dutch	Nederlands
+5	it	Italian	Italiano
+6	pl	Polish	Polski
+7	es	Spanish	Español
+8	ru	Russian	Русский
+9	ja	Japanese	日本語
+10	pt	Portuguese	Português
+11	zh	Chinese	中文
+12	sv	Swedish	Svenska
+13	vi	Vietnamese	Tiếng Việt
+14	uk	Ukrainian	Українська
+15	ca	Catalan	Català
+16	no	Norwegian (Bokmål)	Norsk (Bokmål)
+17	fi	Finnish	Suomi
+18	cs	Czech	Čeština
+19	hu	Hungarian	Magyar
+20	ko	Korean	한국어
+21	fa	Persian	فارسی
+22	id	Indonesian	Bahasa Indonesia
+23	tr	Turkish	Türkçe
+24	ar	Arabic	العربية
+25	ro	Romanian	Română
+26	sk	Slovak	Slovenčina
+27	eo	Esperanto	Esperanto
+28	da	Danish	Dansk
+29	sr	Serbian	Српски / Srpski
+30	lt	Lithuanian	Lietuvių
+31	ms	Malay	Bahasa Melayu
+32	he	Hebrew	עברית
+33	eu	Basque	Euskara
+34	sl	Slovenian	Slovenščina
+35	bg	Bulgarian	Български
+36	kk	Kazakh	Қазақша
+37	vo	Volapük	Volapük
+38	hr	Croatian	Hrvatski
+39	war	Waray-Waray	Winaray
+40	hi	Hindi	हिन्दी
+41	et	Estonian	Eesti
+42	gl	Galician	Galego
+43	az	Azerbaijani	Azərbaycanca
+44	nn	Norwegian (Nynorsk)	Nynorsk
+45	simple	Simple English	Simple English
+46	la	Latin	Latina
+47	el	Greek	Ελληνικά
+48	th	Thai	ไทย
+49	new	Newar / Nepal Bhasa	नेपाल भाषा
+50	roa-rup	Aromanian	Armãneashce
+51	oc	Occitan	Occitan
+52	sh	Serbo-Croatian	Srpskohrvatski / Српскохрватски
+53	ka	Georgian	ქართული
+54	mk	Macedonian	Македонски
+55	tl	Tagalog	Tagalog
+56	ht	Haitian	Krèyol ayisyen
+57	pms	Piedmontese	Piemontèis
+58	te	Telugu	తెలుగు
+59	ta	Tamil	தமிழ்
+60	be-x-old	Belarusian (Taraškievica)	Беларуская (тарашкевіца)
+61	be	Belarusian	Беларуская
+62	br	Breton	Brezhoneg
+63	ceb	Cebuano	Sinugboanong Binisaya
+64	lv	Latvian	Latviešu
+65	sq	Albanian	Shqip
+66	jv	Javanese	Basa Jawa
+67	mg	Malagasy	Malagasy
+68	cy	Welsh	Cymraeg
+69	lb	Luxembourgish	Lëtzebuergesch
+70	mr	Marathi	मराठी
+71	is	Icelandic	Íslenska
+72	bs	Bosnian	Bosanski
+73	yo	Yoruba	Yorùbá
+74	an	Aragonese	Aragonés
+75	lmo	Lombard	Lumbaart
+76	hy	Armenian	Հայերեն
+77	fy	West Frisian	Frysk
+78	bpy	Bishnupriya Manipuri	ইমার ঠার/বিষ্ণুপ্রিয়া মণিপুরী
+79	ml	Malayalam	മലയാളം
+80	pnb	Western Panjabi	شاہ مکھی پنجابی (Shāhmukhī Pañjābī)
+81	sw	Swahili	Kiswahili
+82	bn	Bengali	বাংলা
+83	io	Ido	Ido
+84	af	Afrikaans	Afrikaans
+85	gu	Gujarati	ગુજરાતી
+86	zh-yue	Cantonese	粵語
+87	ne	Nepali	नेपाली
+88	nds	Low Saxon	Plattdüütsch
+89	ur	Urdu	اردو
+90	ku	Kurdish	Kurdî / كوردی
+91	uz	Uzbek	O‘zbek
+92	ast	Asturian	Asturianu
+93	scn	Sicilian	Sicilianu
+94	su	Sundanese	Basa Sunda
+95	qu	Quechua	Runa Simi
+96	diq	Zazaki	Zazaki
+97	ba	Bashkir	Башҡорт
+98	tt	Tatar	Tatarça / Татарча
+99	my	Burmese	မ္ရန္ မာစာ
+100	ga	Irish	Gaeilge
+101	cv	Chuvash	Чăваш
+102	ia	Interlingua	Interlingua
+103	nap	Neapolitan	Nnapulitano
+104	bat-smg	Samogitian	Žemaitėška
+105	map-bms	Banyumasan	Basa Banyumasan
+106	wa	Walloon	Walon
+107	als	Alemannic	Alemannisch
+108	kn	Kannada	ಕನ್ನಡ
+109	am	Amharic	አማርኛ
+110	gd	Scottish Gaelic	Gàidhlig
+111	bug	Buginese	Basa Ugi
+112	tg	Tajik	Тоҷикӣ
+113	zh-min-nan	Min Nan	Bân-lâm-gú
+114	yi	Yiddish	ייִדיש
+115	vec	Venetian	Vèneto
+116	sco	Scots	Scots
+117	hif	Fiji Hindi	Fiji Hindi
+118	roa-tara	Tarantino	Tarandíne
+119	os	Ossetian	Иронау
+120	arz	Egyptian Arabic	مصرى (Maṣrī)
+121	nah	Nahuatl	Nāhuatl
+122	mzn	Mazandarani	مَزِروني
+123	sah	Sakha	Саха тыла (Saxa Tyla)
+124	ky	Kirghiz	Кыргызча
+125	mn	Mongolian	Монгол
+126	sa	Sanskrit	संस्कृतम्
+127	pam	Kapampangan	Kapampangan
+128	hsb	Upper Sorbian	Hornjoserbsce
+129	li	Limburgian	Limburgs
+130	mi	Maori	Māori
+131	si	Sinhalese	සිංහල
+132	co	Corsican	Corsu
+133	ckb	Sorani	Soranî / کوردی
+134	gan	Gan	贛語
+135	glk	Gilaki	گیلکی
+136	bo	Tibetan	བོད་སྐད
+137	fo	Faroese	Føroyskt
+138	bar	Bavarian	Boarisch
+139	bcl	Central_Bicolano	Bikol
+140	ilo	Ilokano	Ilokano
+141	mrj	Hill Mari	Кырык Мары (Kyryk Mary) 
+142	se	Northern Sami	Sámegiella
+143	fiu-vro	Võro	Võro
+144	nds-nl	Dutch Low Saxon	Nedersaksisch
+145	tk	Turkmen	تركمن / Туркмен
+146	vls	West Flemish	West-Vlams
+147	ps	Pashto	پښتو
+148	gv	Manx	Gaelg
+149	rue	Rusyn	русиньскый язык
+150	dv	Divehi	ދިވެހިބަސް
+151	nrm	Norman	Nouormand/Normaund
+152	pag	Pangasinan	Pangasinan
+153	pa	Punjabi	ਪੰਜਾਬੀ
+154	koi	Komi-Permyak	Перем Коми (Perem Komi)
+155	rm	Romansh	Rumantsch
+156	km	Khmer	ភាសាខ្មែរ
+157	kv	Komi	Коми
+158	udm	Udmurt	Удмурт кыл
+159	csb	Kashubian	Kaszëbsczi
+160	mhr	Meadow Mari	Олык Марий (Olyk Marij)
+161	fur	Friulian	Furlan
+162	mt	Maltese	Malti
+163	zea	Zeelandic	Zeêuws
+164	wuu	Wu	吴语
+165	lij	Ligurian	Líguru
+166	ug	Uyghur	Oyghurque
+167	lad	Ladino	Dzhudezmo
+168	pi	Pali	पाऴि
+169	xmf	Mingrelian	მარგალური (Margaluri)
+170	sc	Sardinian	Sardu
+171	bh	Bihari	भोजपुरी
+172	zh-classical	Classical Chinese	古文 / 文言文
+173	or	Oriya	ଓଡ଼ିଆ
+174	nov	Novial	Novial
+175	ksh	Ripuarian	Ripoarisch
+176	ang	Anglo-Saxon	Englisc
+177	so	Somali	Soomaaliga
+178	kw	Cornish	Kernewek/Karnuack
+179	stq	Saterland Frisian	Seeltersk
+180	nv	Navajo	Diné bizaad
+181	hak	Hakka	Hak-kâ-fa / 客家話
+182	frr	North Frisian	Nordfriisk
+183	ay	Aymara	Aymar
+184	frp	Franco-Provençal/Arpitan	Arpitan
+185	ext	Extremaduran	Estremeñu
+186	szl	Silesian	Ślůnski
+187	pcd	Picard	Picard
+188	ie	Interlingue	Interlingue
+189	gag	Gagauz	Gagauz
+190	haw	Hawaiian	Hawai`i
+191	xal	Kalmyk	Хальмг
+192	ln	Lingala	Lingala
+193	rw	Kinyarwanda	Ikinyarwanda
+194	pdc	Pennsylvania German	Deitsch
+195	pfl	Palatinate German	Pfälzisch
+196	vep	Vepsian	Vepsän
+197	krc	Karachay-Balkar	Къарачай-Малкъар (Qarachay-Malqar)
+198	crh	Crimean Tatar	Qırımtatarca
+199	eml	Emilian-Romagnol	Emiliàn e rumagnòl
+200	gn	Guarani	Avañe'ẽ
+201	ace	Acehnese	Bahsa Acèh
+202	to	Tongan	faka Tonga
+203	ce	Chechen	Нохчийн
+204	kl	Greenlandic	Kalaallisut
+205	arc	Assyrian Neo-Aramaic	ܐܪܡܝܐ
+206	myv	Erzya	Эрзянь (Erzjanj Kelj)
+207	dsb	Lower Sorbian	Dolnoserbski
+208	as	Assamese	অসমীয়া
+209	bjn	Banjar	Bahasa Banjar
+210	pap	Papiamentu	Papiamentu
+211	tpi	Tok Pisin	Tok Pisin
+212	lbe	Lak	Лакку
+213	mdf	Moksha	Мокшень (Mokshanj Kälj)
+214	wo	Wolof	Wolof
+215	jbo	Lojban	Lojban
+216	kab	Kabyle	Taqbaylit
+217	sn	Shona	chiShona
+218	av	Avar	Авар
+219	cbk-zam	Zamboanga Chavacano	Chavacano de Zamboanga
+220	ty	Tahitian	Reo Mā`ohi
+221	srn	Sranan	Sranantongo
+222	kbd	Kabardian Circassian	Адыгэбзэ (Adighabze)
+223	lo	Lao	ລາວ
+224	lez	Lezgian	Лезги чІал (Lezgi č’al)
+225	ab	Abkhazian	Аҧсуа
+226	mwl	Mirandese	Mirandés
+227	ltg	Latgalian	Latgaļu
+228	na	Nauruan	dorerin Naoero
+229	ig	Igbo	Igbo
+230	kg	Kongo	KiKongo
+231	tet	Tetum	Tetun
+232	za	Zhuang	Cuengh
+233	kaa	Karakalpak	Qaraqalpaqsha
+234	nso	Northern Sotho	Sesotho sa Leboa
+235	zu	Zulu	isiZulu
+236	rmy	Romani	romani - रोमानी
+237	cu	Old Church Slavonic	Словѣньскъ
+238	tn	Tswana	Setswana
+239	chr	Cherokee	ᏣᎳᎩ
+240	chy	Cheyenne	Tsetsêhestâhese
+241	got	Gothic	̲̹̺̿̈́̓
+242	sm	Samoan	Gagana Samoa
+243	bi	Bislama	Bislama
+244	mo	Moldovan	Молдовеняскэ
+245	bm	Bambara	Bamanankan
+246	iu	Inuktitut	ᐃᓄᒃᑎᑐᑦ
+247	pih	Norfolk	Norfuk
+248	ik	Inupiak	Iñupiak
+249	ss	Swati	SiSwati
+250	sd	Sindhi	سنڌي، سندھی ، सिन्ध
+251	pnt	Pontic	Ποντιακά
+252	cdo	Min Dong	Mìng-dĕ̤ng-ngṳ̄
+253	ee	Ewe	Eʋegbe
+254	ha	Hausa	هَوُسَ
+255	ti	Tigrinya	ትግርኛ
+256	bxr	Buryat (Russia)	Буряад
+257	ts	Tsonga	Xitsonga
+258	om	Oromo	Oromoo
+259	ks	Kashmiri	कश्मीरी / كشميري
+260	ki	Kikuyu	Gĩkũyũ
+261	ve	Venda	Tshivenda
+262	sg	Sango	Sängö
+263	rn	Kirundi	Kirundi
+264	cr	Cree	Nehiyaw
+265	dz	Dzongkha	ཇོང་ཁ
+266	lg	Luganda	Luganda
+267	ak	Akan	Akana
+268	ff	Fula	Fulfulde
+269	tum	Tumbuka	chiTumbuka
+270	fj	Fijian	Na Vosa Vakaviti
+271	st	Sesotho	Sesotho
+272	tw	Twi	Twi
+273	xh	Xhosa	isiXhosa
+274	ch	Chamorro	Chamoru
+275	ny	Chichewa	Chi-Chewa
+276	ng	Ndonga	Oshiwambo
+277	ii	Sichuan Yi	ꆇꉙ
+278	cho	Choctaw	Choctaw
+279	mh	Marshallese	Ebon
+280	aa	Afar	Afar
+281	kj	Kuanyama	Kuanyama
+282	ho	Hiri Motu	Hiri Motu
+283	mus	Muscogee	Muskogee
+284	kr	Kanuri	Kanuri
+285	hz	Herero	Otsiherero
