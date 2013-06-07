@@ -1,9 +1,6 @@
 package org.wikapidia.core.dao;
 
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.model.Link;
@@ -31,25 +28,19 @@ public class LinkDao {
                                 from(Tables.LINK).
                                 where(Tables.LINK.ARTICLE_ID.equal(lId)).
                                 fetchOne();
-        if (record == null) {
-            return null;
-        }
-        Link l = new Link(
-                record.getValue(Tables.LINK.TEXT),
-                record.getValue(Tables.LINK.ARTICLE_ID),
-                false
-        );
+        if (record == null) { return null; }
+        Link l = buildLink(record);
         conn.close();
         return l;
     }
 
-    public List<Link> query(String lText) throws SQLException {
+    public WikapidiaIterable<Link> query(String lText) throws SQLException {
         Connection conn = ds.getConnection();
         DSLContext context = DSL.using(conn, SQLDialect.H2);
-        Result<Record> result = context.select().
+        Cursor<Record> result = context.select().
                                         from(Tables.LINK).
                                         where(Tables.LINK.TEXT.likeIgnoreCase(lText)).
-                                        fetch();
+                                        fetchLazy();
         conn.close();
         return buildLinks(result);
     }
@@ -74,6 +65,26 @@ public class LinkDao {
         return result.size();
     }
 
+    private Link buildLink(Record record){
+        return new Link(
+                record.getValue(Tables.LINK.TEXT),
+                record.getValue(Tables.LINK.ARTICLE_ID),
+                false
+        );
+    }
+
+    private WikapidiaIterable<Link> buildLinks(Cursor<Record> result){
+        return new WikapidiaIterable<Link>(result,
+                new DaoTransformer<Link>() {
+                    @Override
+                    public Link transform(Record r) {
+                        return buildLink(r);
+                    }
+                }
+        );
+    }
+
+    /*
     private ArrayList<Link> buildLinks(Result<Record> result){
         ArrayList<Link> links = new ArrayList<Link>();
         for (Record record: result){
@@ -85,5 +96,5 @@ public class LinkDao {
             links.add(a);
         }
         return links;
-    }
+    } */
 }
