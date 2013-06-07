@@ -20,6 +20,7 @@ public class TestDao {
         tmpDir.delete();
         tmpDir.deleteOnExit();
         tmpDir.mkdirs();
+        
 
         BoneCPDataSource ds = new BoneCPDataSource();
         ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
