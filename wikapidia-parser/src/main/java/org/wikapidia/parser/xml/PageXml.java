@@ -1,4 +1,4 @@
-package org.wikapidia.parser;
+package org.wikapidia.parser.xml;
 
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.PageType;

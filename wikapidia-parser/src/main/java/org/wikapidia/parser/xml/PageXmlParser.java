@@ -1,10 +1,10 @@
-package org.wikapidia.parser;
+package org.wikapidia.parser.xml;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
+import org.wikapidia.parser.WpParseException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
