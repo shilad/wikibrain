@@ -18,8 +18,8 @@ public class Benchmark {
     private int titleLength = 10;
     private int textMinLength = 30;
     private int textMaxLength = 2500;
-    boolean shouldBuildDb = false;
-    boolean shouldBuildArticleDb = false;
+    boolean shouldBuildDb = true;
+    boolean shouldBuildArticleDb = true;
 
     @Test
     public void articleBenchmark() throws IOException, SQLException {
@@ -44,7 +44,7 @@ public class Benchmark {
         }
 
         start=System.currentTimeMillis();
-        ad.query("aa%");
+        ad.query("a%");
         stop=System.currentTimeMillis();
         System.out.println("time to query by title: "+((stop-start)/1000)+"s");
 
