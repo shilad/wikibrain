@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao;
 
-/**
- */
-public class DaoTransformer {
+import org.jooq.Record;
+
+public abstract interface DaoTransformer<E> {
+    public E transform(Record r);
 }
