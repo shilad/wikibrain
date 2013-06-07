@@ -27,7 +27,7 @@ public class ArticleDao {
                                 from(Tables.ARTICLE).
                                 where(Tables.ARTICLE.ID.equal(aId)).
                                 fetchOne();
-        if (record == null) { return null; }
+        if (record == null) return null;
         Article a = buildArticle(record);
         conn.close();
         return a;

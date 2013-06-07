@@ -29,8 +29,8 @@ public class Benchmark {
         ds.setPassword("");
         ArticleDao ad = new ArticleDao(ds);
 
-        if (shouldBuildDb){buildDb(ds);}
-        if (shouldBuildArticleDb){buildArticleDb(ad);}
+        if (shouldBuildDb) buildDb(ds);
+        if (shouldBuildArticleDb) buildArticleDb(ad);
 
         long time = 0, start, stop;
         Random r = new Random();
@@ -63,13 +63,19 @@ public class Benchmark {
 
     public void buildArticleDb(ArticleDao ad) throws IOException, SQLException {
         long time = 0, start, stop;
-        RandomHelper rh = new RandomHelper();
         for (int i=0; i<numArticles; i++){
-            Article a = new Article(i,rh.string(titleLength),rh.ns(),rh.type(), rh.string(textMinLength, textMaxLength));
+            Article a = new Article(
+                    i,
+                    RandomHelper.string(titleLength),
+                    RandomHelper.ns(),
+                    RandomHelper.type(),
+                    RandomHelper.string(textMinLength, textMaxLength)
+            );
             start = System.currentTimeMillis();
             ad.save(a);
             stop = System.currentTimeMillis();
             time += stop-start;
+            if (i%100000==0) System.out.println(i);
         }
 
         System.out.println("time to insert: "+(time/60000)+" m (" + ((time/1000)/(long)numArticles) + " record/s");
@@ -86,15 +92,10 @@ public class Benchmark {
 }
 
 class RandomHelper{
-    Random random;
-    String chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 ";
+    static Random random = new Random();
+    static final String chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 ";
 
-
-    RandomHelper(){
-        random = new Random();
-    }
-
-    public String string(int textLength){
+    public static String string(int textLength){
         String s="";
         for (int i=0; i<textLength; i++){
             s+=chars.charAt(random.nextInt(chars.length()));
@@ -102,7 +103,7 @@ class RandomHelper{
         return s;
     }
 
-    public String string(int min, int max) {
+    public static String string(int min, int max) {
         String s = "";
         int length = random.nextInt(max);
         length += min;
@@ -112,11 +113,11 @@ class RandomHelper{
         return s;
     }
 
-    public Article.NameSpace ns(){
+    public static Article.NameSpace ns(){
         return Article.NameSpace.values()[random.nextInt(Article.NameSpace.values().length)];
     }
 
-    public Article.PageType type(){
+    public static Article.PageType type(){
         return Article.PageType.values()[random.nextInt(Article.PageType.values().length)];
     }
 }
