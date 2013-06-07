@@ -10,11 +10,13 @@ public class LocalPage {
     protected Language language;
     protected int localId;
     protected Title title;
+    protected PageType pageType;
 
-    protected LocalPage(Language language, int localId, Title title){
+    protected LocalPage(Language language, int localId, Title title, PageType pageType){
         this.language = language;
         this.localId = localId;
         this.title = title;
+        this.pageType = pageType;
     }
 
     public int getLocalId() {
