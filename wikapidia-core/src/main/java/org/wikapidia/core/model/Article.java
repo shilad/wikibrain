@@ -1,22 +1,36 @@
 package org.wikapidia.core.model;
 
+import org.wikapidia.core.lang.LanguageInfo;
+
 /**
  */
 public class Article {
 
     private int id;
-    private String title;
+    private Title title;
     private NameSpace ns;
     private PageType type;
     private String text;
+    private LanguageInfo language;
 
-    public Article(int id, String title, NameSpace ns , PageType type, String text)
+    public Article(int id, String title, NameSpace ns , PageType type, String text, LanguageInfo language)
+    {
+        this.id = id;
+        this.title = new Title(title, language);
+        this.ns = ns;
+        this.type = type;
+        this.text = text;
+        this.language = language;
+    }
+
+    public Article(int id, Title title, NameSpace ns , PageType type, String text, LanguageInfo language)
     {
         this.id = id;
         this.title = title;
         this.ns = ns;
         this.type = type;
         this.text = text;
+        this.language = language;
     }
 
     public int getId() {
@@ -27,12 +41,16 @@ public class Article {
         this.id = id;
     }
 
-    public String getTitle() {
+    public Title getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(Title title) {
         this.title = title;
+    }
+
+    public void setTitle(String title) {
+        this.title = new Title(title, this.language);
     }
 
     public NameSpace getNs() {
@@ -57,6 +75,14 @@ public class Article {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public LanguageInfo getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(LanguageInfo language) {
+        this.language = language;
     }
 
     public static enum NameSpace {
