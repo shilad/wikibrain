@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.util.Random;
 
 public class Benchmark {
-    private int numArticles = 1000000;
+    private int numArticles = 500000;
     private int numLinks = 1000000;
     private int titleLength = 10;
     boolean shouldBuildDb = true;
@@ -67,7 +67,7 @@ public class Benchmark {
         String bigString = rh.generateBigString();
 
         for (int i=0; i<numArticles; i++){
-            Article a = new Article(i,rh.string(titleLength),rh.ns(),rh.type(), rh.getSmallString(bigString));
+            Article a = new Article(i,rh.string(titleLength), Article.NameSpace.MAIN,rh.type(), rh.getSmallString(bigString));
             start = System.currentTimeMillis();
             ad.save(a);
             stop = System.currentTimeMillis();
