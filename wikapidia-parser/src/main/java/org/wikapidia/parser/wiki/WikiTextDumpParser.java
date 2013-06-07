@@ -2,7 +2,6 @@ package org.wikapidia.parser.wiki;
 
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.parser.DumpSplitter;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.parser.xml.PageXml;
 
@@ -28,13 +27,17 @@ public class WikiTextDumpParser {
         this.wtp = new WikiTextParser(language);
     }
 
+    /**
+     * Parses the input file completely. First splits the file into individual PageXmls via
+     * DumpPageXmlParser, then parses each page via WikiTextParser
+     *
+     * @param visitor extracts data from side effects
+     */
     public void parse(ParserVisitor visitor) {
-        // use the dump page xml parser to iterate over the dump
-        Iterator<PageXml> dumpIterator = dpxp.iterator();
-        // call the wiki text parser for each article with the visitor
-        while (dumpIterator.hasNext()) {
+        Iterator<PageXml> pageIterator = dpxp.iterator();
+        while (pageIterator.hasNext()) {
             try {
-                wtp.parse(dumpIterator.next(), visitor);
+                wtp.parse(pageIterator.next(), visitor);
             }
             catch (WikapidiaException e) {
                 LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
