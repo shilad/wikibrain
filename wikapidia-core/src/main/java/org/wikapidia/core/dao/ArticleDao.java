@@ -43,7 +43,7 @@ public class ArticleDao {
             record.getValue(Tables.ARTICLE.TEXT)
         );
         conn.close();
-        return null;
+        return a;
     }
 
     public void save(Article article) throws SQLException {
