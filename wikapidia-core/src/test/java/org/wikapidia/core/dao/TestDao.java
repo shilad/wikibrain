@@ -88,14 +88,14 @@ public class TestDao {
         assert (link.getId()==savedLink.getId());
         assert (link.isSubsec()==savedLink.isSubsec());
 
-        List<Link> links = ld.query("zelda.com");
+        WikapidiaIterable<Link> links = ld.query("zelda.com");
         assert (links != null);
-        assert (links.size()==1);
-        assert (links.get(0).getText().equals(link.getText()));
-        assert (links.get(0).getId()==1);
-        assert (links.get(0).isSubsec()==false);
+        savedLink = links.iterator().next();
+        assert (savedLink.getText().equals(link.getText()));
+        assert (savedLink.getId()==1);
+        assert (savedLink.isSubsec()==false);
 
         links = ld.query("ganondorf.com");
-        assert (links.size()==0);
+        assert (articles.iterator().hasNext()==false);
     }
 }
