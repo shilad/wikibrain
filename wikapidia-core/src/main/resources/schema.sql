@@ -3,7 +3,8 @@ CREATE TABLE article (
   id INT PRIMARY KEY NOT NULL,
   title VARCHAR(256) NOT NULL,
   ns INT NOT NULL,
-  ptype INT NOT NULL
+  ptype INT NOT NULL,
+  text TEXT NOT NULL
 );
 
 DROP TABLE IF EXISTS link;

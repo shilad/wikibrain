@@ -11,7 +11,7 @@ package org.wikapidia.core.jooq.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked" })
 public class Article extends org.jooq.impl.TableImpl<org.wikapidia.core.jooq.tables.records.ArticleRecord> {
 
-	private static final long serialVersionUID = 1966793852;
+	private static final long serialVersionUID = 1344681775;
 
 	/**
 	 * The singleton instance of <code>PUBLIC.ARTICLE</code>
@@ -45,6 +45,11 @@ public class Article extends org.jooq.impl.TableImpl<org.wikapidia.core.jooq.tab
 	 * The column <code>PUBLIC.ARTICLE.PTYPE</code>. 
 	 */
 	public final org.jooq.TableField<org.wikapidia.core.jooq.tables.records.ArticleRecord, java.lang.Integer> PTYPE = createField("PTYPE", org.jooq.impl.SQLDataType.INTEGER, this);
+
+	/**
+	 * The column <code>PUBLIC.ARTICLE.TEXT</code>. 
+	 */
+	public final org.jooq.TableField<org.wikapidia.core.jooq.tables.records.ArticleRecord, java.lang.String> TEXT = createField("TEXT", org.jooq.impl.SQLDataType.CLOB.length(2147483647), this);
 
 	/**
 	 * Create a <code>PUBLIC.ARTICLE</code> table reference
