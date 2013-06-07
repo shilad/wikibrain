@@ -1,12 +1,11 @@
 package org.wikapidia.core.model;
 
-/**
- * Created with IntelliJ IDEA.
- * User: research
- * Date: 6/7/13
- * Time: 11:46 AM
- * To change this template use File | Settings | File Templates.
- */
-public class LocalCategory extends LocalConcept {
+import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.lang.Language;
 
+public class LocalCategory extends LocalPage {
+
+    public LocalCategory(Language language, int localId, Title title) {
+        super(language, localId, title);
+    }
 }

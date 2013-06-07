@@ -1,11 +1,10 @@
 package org.wikapidia.core.model;
 
-/**
- * Created with IntelliJ IDEA.
- * User: research
- * Date: 6/7/13
- * Time: 11:45 AM
- * To change this template use File | Settings | File Templates.
- */
-public class LocalArticle {
+import org.wikapidia.core.lang.Language;
+
+public class LocalArticle extends LocalPage {
+
+    public LocalArticle(Language language, int localId, Title title) {
+        super(language, localId, title);
+    }
 }

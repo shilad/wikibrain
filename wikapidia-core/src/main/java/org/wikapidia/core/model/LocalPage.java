@@ -29,16 +29,6 @@ public class LocalPage {
         return language;
     }
 
-    public LocalConceptType getLocalConceptType(){
-        if (this instanceof LocalArticle){
-            return LocalConceptType.ARTICLE;
-        }else if (this instanceof LocalCategory){
-            return LocalConceptType.CATEGORY;
-        }else{
-            return LocalConceptType.OTHER;
-        }
-    }
-
     public int hashCode(){
         return (language.getId() + "_" + localId).hashCode(); //non-optimal
     }
@@ -51,14 +41,5 @@ public class LocalPage {
         }else{
             return false;
         }
-    }
-
-    protected void unsupported() throws WikapidiaException {
-        throw new WikapidiaException("This local concept was generated using a query " +
-                "source that does not support this field in LocalPage");
-    }
-
-    public enum LocalConceptType{
-        ARTICLE, CATEGORY, OTHER
     }
 }
