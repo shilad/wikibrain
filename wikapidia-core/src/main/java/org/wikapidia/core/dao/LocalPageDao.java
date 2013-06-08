@@ -7,7 +7,6 @@ import org.jooq.impl.DSL;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.model.Article;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
@@ -19,16 +18,23 @@ import java.sql.SQLException;
 /**
  */
 public class LocalPageDao {
+    private final SQLDialect dialect;
     private DataSource ds;
 
-    public LocalPageDao(DataSource dataSource) {
+    public LocalPageDao(DataSource dataSource) throws SQLException {
         ds = dataSource;
+        Connection conn = ds.getConnection();
+        try {
+            this.dialect = JooqUtils.dialect(conn);
+        } finally {
+            conn.close();
+        }
     }
 
     public LocalPage get(Language lang, int localId) throws SQLException {
         Connection conn = ds.getConnection();
         try {
-            DSLContext context = DSL.using(conn, SQLDialect.H2);
+            DSLContext context = DSL.using(conn, dialect);
             Record record = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.PAGE_ID.equal(localId)).
@@ -53,7 +59,7 @@ public class LocalPageDao {
     public LocalPage get(Title title, int ns) throws SQLException {
         Connection conn = ds.getConnection();
         try {
-            DSLContext context = DSL.using(conn, SQLDialect.H2);
+            DSLContext context = DSL.using(conn, dialect);
             Record record = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.TITLE.equal(title.getCanonicalTitle())).
@@ -69,7 +75,7 @@ public class LocalPageDao {
     public void save(LocalPage page) throws SQLException {
         Connection conn = ds.getConnection();
         try {
-            DSLContext context = DSL.using(conn,SQLDialect.H2);
+            DSLContext context = DSL.using(conn, dialect);
             context.insertInto(Tables.LOCAL_PAGE).values(
                     null,
                     page.getLanguage().getId(),
@@ -91,7 +97,7 @@ public class LocalPageDao {
         Title title = new Title(
                 record.getValue(Tables.ARTICLE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        PageType ptype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PTYPE)];
+        PageType ptype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
         return new LocalPage(
                 lang,
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),

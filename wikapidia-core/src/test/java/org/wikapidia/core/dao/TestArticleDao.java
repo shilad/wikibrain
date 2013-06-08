@@ -13,7 +13,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-public class TestDao {
+public class TestArticleDao {
     @Test
     public void testArticle() throws ClassNotFoundException, IOException, SQLException {
         Class.forName("org.h2.Driver");
