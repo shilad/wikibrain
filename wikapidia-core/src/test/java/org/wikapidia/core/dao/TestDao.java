@@ -4,6 +4,7 @@ package org.wikapidia.core.dao;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
 
 import java.io.File;
@@ -37,7 +38,8 @@ public class TestDao {
         //Article
         ArticleDao ad = new ArticleDao(ds);
         Article article = new Article(1,"test", Article.NameSpace.MAIN,
-                Article.PageType.STANDARD, "This is the text!");
+                Article.PageType.STANDARD, "This is the text!",
+                LanguageInfo.getByLangCode("en"));
         ad.save(article);
 
         Article savedArticle = ad.get(1);

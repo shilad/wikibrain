@@ -4,6 +4,7 @@ import com.jolbox.bonecp.BoneCPConfig;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.Article;
 
 import java.io.File;
@@ -67,7 +68,7 @@ public class Benchmark {
         String bigString = rh.generateBigString();
 
         for (int i=0; i<numArticles; i++){
-            Article a = new Article(i,rh.string(titleLength), Article.NameSpace.MAIN,rh.type(), rh.getSmallString(bigString));
+            Article a = new Article(i,rh.string(titleLength), Article.NameSpace.MAIN,rh.type(), rh.getSmallString(bigString), LanguageInfo.getByLangCode("en"));
             start = System.currentTimeMillis();
             ad.save(a);
             stop = System.currentTimeMillis();
