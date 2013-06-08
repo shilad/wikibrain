@@ -1,11 +1,102 @@
 package org.wikapidia.core.dao;
 
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
+import org.wikapidia.core.jooq.Tables;
+import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.model.Article;
+import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.Title;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 /**
- * Created with IntelliJ IDEA.
- * User: research
- * Date: 6/7/13
- * Time: 4:30 PM
- * To change this template use File | Settings | File Templates.
  */
 public class LocalPageDao {
+    private DataSource ds;
+
+    public LocalPageDao(DataSource dataSource) {
+        ds = dataSource;
+    }
+
+    public LocalPage get(Language lang, int localId) throws SQLException {
+        Connection conn = ds.getConnection();
+        try {
+            DSLContext context = DSL.using(conn, SQLDialect.H2);
+            Record record = context.select().
+                    from(Tables.LOCAL_PAGE).
+                    where(Tables.LOCAL_PAGE.PAGE_ID.equal(localId)).
+                    and(Tables.LOCAL_PAGE.LANG_ID.equal((short) lang.getId())).
+                    fetchOne();
+            return buildPage(record);
+        } finally {
+            conn.close();
+        }
+    }
+
+    public LocalPage get(Title title, PageType pageType) throws SQLException {
+        return get(title, pageType.getNamespace());
+    }
+
+    /**
+     * TODO: make this take a NameSpace enum once Rebecca commits.
+     * @param title
+     * @param ns
+     * @return
+     */
+    public LocalPage get(Title title, int ns) throws SQLException {
+        Connection conn = ds.getConnection();
+        try {
+            DSLContext context = DSL.using(conn, SQLDialect.H2);
+            Record record = context.select().
+                    from(Tables.LOCAL_PAGE).
+                    where(Tables.LOCAL_PAGE.TITLE.equal(title.getCanonicalTitle())).
+                    and(Tables.LOCAL_PAGE.LANG_ID.equal((short) title.getLanguage().getId())).
+                    and(Tables.LOCAL_PAGE.NS.equal((short) ns)).
+                    fetchOne();
+            return buildPage(record);
+        } finally {
+            conn.close();
+        }
+    }
+
+    public void save(LocalPage page) throws SQLException {
+        Connection conn = ds.getConnection();
+        try {
+            DSLContext context = DSL.using(conn,SQLDialect.H2);
+            context.insertInto(Tables.LOCAL_PAGE).values(
+                    null,
+                    page.getLanguage().getId(),
+                    page.getLocalId(),
+                    page.getTitle().getCanonicalTitle(),
+                    page.getPageType().getNamespace(),
+                    page.getPageType().ordinal()
+            ).execute();
+        } finally {
+            conn.close();
+        }
+    }
+
+    private LocalPage buildPage(Record record) {
+        if (record == null) {
+            return null;
+        }
+        Language lang = Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID));
+        Title title = new Title(
+                record.getValue(Tables.ARTICLE.TITLE), true,
+                LanguageInfo.getByLanguage(lang));
+        PageType ptype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PTYPE)];
+        return new LocalPage(
+                lang,
+                record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
+                title,
+                ptype
+        );
+    }
 }

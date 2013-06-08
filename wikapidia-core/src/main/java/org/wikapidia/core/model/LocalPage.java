@@ -12,7 +12,7 @@ public class LocalPage {
     protected Title title;
     protected PageType pageType;
 
-    protected LocalPage(Language language, int localId, Title title, PageType pageType){
+    public LocalPage(Language language, int localId, Title title, PageType pageType){
         this.language = language;
         this.localId = localId;
         this.title = title;
@@ -29,6 +29,10 @@ public class LocalPage {
 
     public Language getLanguage() {
         return language;
+    }
+
+    public PageType getPageType() {
+        return pageType;
     }
 
     public int hashCode(){
