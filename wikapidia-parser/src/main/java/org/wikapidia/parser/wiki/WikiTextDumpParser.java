@@ -1,12 +1,12 @@
 package org.wikapidia.parser.wiki;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.parser.xml.PageXml;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -20,20 +20,17 @@ public class WikiTextDumpParser {
     private final File file;
     private final LanguageInfo language;
     private final DumpPageXmlParser dpxp;
-    private final WikiTextParser wtp;
+    private final List<String> allowedLanguages;
 
     public WikiTextDumpParser(File file, LanguageInfo language) {
-        this.file = file;
-        this.language = language;
-        this.dpxp = new DumpPageXmlParser(file, language);
-        this.wtp = new WikiTextParser(language);
+        this(file, language, null);
     }
 
     public WikiTextDumpParser(File file, LanguageInfo language, List<String> allowedIllLangs) {
         this.file = file;
         this.language = language;
         this.dpxp = new DumpPageXmlParser(file, language);
-        this.wtp = new WikiTextParser(language, allowedIllLangs);
+        this.allowedLanguages = allowedIllLangs;
     }
 
     /**
@@ -43,12 +40,17 @@ public class WikiTextDumpParser {
      * @param visitor extracts data from side effects
      */
     public void parse(ParserVisitor visitor) {
+        parse(Arrays.asList(visitor));
+    }
+
+    public void parse(List<ParserVisitor> visitors) {
+        WikiTextParser wtp = new WikiTextParser(language, allowedLanguages, visitors);
         Iterator<PageXml> pageIterator = dpxp.iterator();
         while (pageIterator.hasNext()) {
             try {
-                wtp.parse(pageIterator.next(), visitor);
+                wtp.parse(pageIterator.next());
             }
-            catch (WikapidiaException e) {
+            catch (Exception e) {
                 LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
             }
         }

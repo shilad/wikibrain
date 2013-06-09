@@ -97,6 +97,9 @@ public class PageXmlParser {
     }
 
     private static String extractSingleString(Pattern patternToMatch, String body, int matchNum){
+        if (patternToMatch == null || body == null) {
+            return null;
+        }
         Matcher matcher = patternToMatch.matcher(body);
         int counter = 0;
         String curGroup = null;
