@@ -36,12 +36,17 @@ public class LocalArticleSqlDao extends LocalArticleDao {
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.LOCAL_PAGE, Tables.LOCAL_PAGE.LANG_ID, Tables.LOCAL_PAGE.PAGE_ID, Tables.LOCAL_PAGE.TITLE, Tables.LOCAL_PAGE.PAGE_TYPE).values(
-                    page.getLanguage().getId(),
-                    page.getLocalId(),
-                    page.getTitle().toString(),
-                    (short) page.getPageType().ordinal()
-            ).execute();
+            context.insertInto(Tables.LOCAL_PAGE,
+                        Tables.LOCAL_PAGE.LANG_ID,
+                        Tables.LOCAL_PAGE.PAGE_ID,
+                        Tables.LOCAL_PAGE.TITLE,
+                        Tables.LOCAL_PAGE.PAGE_TYPE).
+                    values(
+                        page.getLanguage().getId(),
+                        page.getLocalId(),
+                        page.getTitle().toString(),
+                        page.getPageType().getPageTypeId()).
+                    execute();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -74,7 +79,7 @@ public class LocalArticleSqlDao extends LocalArticleDao {
     }
 
     @Override
-    public LocalArticle getByTitle(Language language, Title title, PageType ns) throws DaoException {
+    public LocalArticle getByTitle(Language language, Title title, PageType pt) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -83,7 +88,7 @@ public class LocalArticleSqlDao extends LocalArticleDao {
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.TITLE.eq(title.toString())).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
-                    and(Tables.LOCAL_PAGE.NS.eq(ns.getNamespace().getValue())).
+                    and(Tables.LOCAL_PAGE.PAGE_TYPE.eq(pt.getPageTypeId())).
                     fetchOne();
             if (record == null) { return null; }
             return buildLocalArticle(record);
