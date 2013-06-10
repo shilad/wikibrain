@@ -39,11 +39,11 @@ public abstract class LocalPageDao<T extends LocalPage> {
         }
     }
 
-    public abstract void beginLoad();
+    public abstract void beginLoad() throws DaoException;
 
-    public abstract void save(T page);
+    public abstract void save(T page) throws DaoException;
 
-    public abstract void endLoad();
+    public abstract void endLoad() throws DaoException;
 
     /**
      * Get a single page by its title

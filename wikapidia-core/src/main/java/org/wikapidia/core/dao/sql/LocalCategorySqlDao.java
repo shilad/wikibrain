@@ -1,5 +1,6 @@
 package org.wikapidia.core.dao.sql;
 
+import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -13,6 +14,7 @@ import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -22,6 +24,63 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
 
     public LocalCategorySqlDao(DataSource dataSource) throws DaoException {
         super(dataSource);
+    }
+
+    @Override
+    public void beginLoad() throws DaoException {
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalCategorySqlDao.class.getResource("/db/local-page-schema.sql")
+                    ));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+    @Override
+    public void save(LocalCategory page) throws DaoException {
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            context.insertInto(Tables.LOCAL_PAGE).values(
+                    null,
+                    page.getLanguage().getId(),
+                    page.getLocalId(),
+                    page.getTitle().getCanonicalTitle(),
+                    PageType.CATEGORY.getNamespace(),
+                    PageType.CATEGORY.ordinal()
+            ).execute();
+        } catch (SQLException e ){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public void endLoad() throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalCategorySqlDao.class.getResource("/db/local-page-indexes.sql")
+                    ));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+
     }
 
     @Override
