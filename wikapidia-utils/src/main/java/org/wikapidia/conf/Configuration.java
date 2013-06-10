@@ -22,13 +22,18 @@ public class Configuration {
     }
 
     /**
-     * Creates a configuration using
+     * Creates a configuration using a specific file that overrides the standard
+     * defaults listed at https://github.com/typesafehub/config. The file is loaded
+     * in ADDITION to the standard files, but it takes precedence.
+     *
      * @param file
      */
     public Configuration(File file) {
-        this.config = (file == null)
-                ? ConfigFactory.load()
-                : ConfigFactory.load(file.getAbsolutePath());
+        if (file == null) {
+            this.config = ConfigFactory.load();
+        } else {
+            this.config = ConfigFactory.load(ConfigFactory.parseFile(file));
+        }
     }
 
     /**
