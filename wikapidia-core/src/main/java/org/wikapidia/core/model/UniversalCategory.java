@@ -7,5 +7,5 @@ package org.wikapidia.core.model;
  * Time: 4:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UniversalCategory {
+public class UniversalCategory extends UniversalPage {
 }
