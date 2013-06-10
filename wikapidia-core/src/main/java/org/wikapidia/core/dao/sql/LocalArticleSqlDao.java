@@ -37,8 +37,10 @@ public class LocalArticleSqlDao extends LocalArticleDao {
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne();
             return buildLocalArticle(record);
-        } catch (SQLException e) { throw new DaoException(e);
-        } finally { quietlyCloseConn(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 
@@ -56,8 +58,10 @@ public class LocalArticleSqlDao extends LocalArticleDao {
                     fetchOne();
             if (record == null) { return null; }
             return buildLocalArticle(record);
-        } catch (SQLException e) { throw new DaoException(e);
-        } finally { quietlyCloseConn(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 

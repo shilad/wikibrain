@@ -36,8 +36,10 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
                     and(Tables.LOCAL_PAGE.LANG_ID.equal(language.getId())).
                     fetchOne();
             return buildLocalCategory(record);
-        } catch (SQLException e) { throw new DaoException(e);
-        } finally { quietlyCloseConn(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 
@@ -55,8 +57,10 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
                     and(Tables.LOCAL_PAGE.NS.equal(PageType.CATEGORY.getNamespace().getValue())).
                     fetchOne();
             return buildLocalCategory(record);
-        } catch (SQLException e) { throw new DaoException(e);
-        } finally { quietlyCloseConn(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 

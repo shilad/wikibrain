@@ -32,10 +32,18 @@ public abstract class LocalPageDao<T extends LocalPage> {
         try {
             conn = ds.getConnection();
             this.dialect = JooqUtils.dialect(conn);
-        } catch (SQLException e) { throw new DaoException(e);
-        } finally { quietlyCloseConn(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
+
+    public abstract void beginLoad();
+
+    public abstract void save(T page);
+
+    public abstract void endLoad();
 
     /**
      * Get a single page by its title
@@ -93,8 +101,9 @@ public abstract class LocalPageDao<T extends LocalPage> {
      */
     public static void quietlyCloseConn(Connection conn) {
         if (conn != null) {
-            try { conn.close(); }
-            catch (SQLException e) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
                 LOG.log(Level.WARNING, "Failed to close connection: ", e);
             }
         }
