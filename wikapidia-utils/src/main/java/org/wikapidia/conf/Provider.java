@@ -15,7 +15,7 @@ public abstract class Provider<T> {
      * @param configurator
      * @param config
      */
-    public Provider(Configurator configurator, Configuration config) {
+    public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
         this.configurator = configurator;
         this.config = config;
     }
@@ -32,5 +32,5 @@ public abstract class Provider<T> {
      * Should return a configured instance of the requested class,
      * or null if it cannot be created by this provider.
      */
-    public abstract T get(String name, Class klass, Config config);
+    public abstract T get(String name, Class klass, Config config) throws ConfigurationException;
 }

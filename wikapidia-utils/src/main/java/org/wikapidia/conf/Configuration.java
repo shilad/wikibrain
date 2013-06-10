@@ -26,7 +26,9 @@ public class Configuration {
      * @param file
      */
     public Configuration(File file) {
-        this.config = ConfigFactory.load(file.getAbsolutePath());
+        this.config = (file == null)
+                ? ConfigFactory.load()
+                : ConfigFactory.load(file.getAbsolutePath());
     }
 
     /**

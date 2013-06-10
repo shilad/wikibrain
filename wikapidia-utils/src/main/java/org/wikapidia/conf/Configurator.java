@@ -1,10 +1,14 @@
 package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigList;
+import com.typesafe.config.ConfigObject;
+import com.typesafe.config.ConfigValue;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Binds together providers for a collection of components. A component is uniquely
@@ -55,6 +59,8 @@ import java.util.*;
  * generated once, it is cached and reused for future requests.
  */
 public class Configurator {
+    private static final Logger LOG = Logger.getLogger(Configurator.class.getName());
+
     public static String PROVIDER_PATH = "providers";
 
     private final Configuration conf;
@@ -89,19 +95,29 @@ public class Configurator {
      */
     public Configurator(Configuration conf) throws ConfigurationException {
         this.conf = conf;
-        this.registerProviders();
+        searchForProviders(null);
     }
 
     /**
-     * Registers all the providers specified in config files.
+     * Performs a depth-first search for providers under a particular path.
+     * @param path
+     * @throws ConfigurationException
      */
-    private void registerProviders() throws ConfigurationException {
-        Config providerConf = conf.get().getConfig(PROVIDER_PATH);
-        for (String path : conf.get().getObject(PROVIDER_PATH).keySet()) {
-            ProviderSet pset = registerProvidersForComponent(path);
-            providers.put(pset.klass, pset);
-            components.put(pset.klass, new HashMap<String, Object>());
-        };
+    private void searchForProviders(String path) throws ConfigurationException {
+        String fullPath = (path == null)
+                ? (PROVIDER_PATH)
+                : (PROVIDER_PATH + "." + path);
+        ConfigValue value = conf.get().getValue(fullPath);
+
+        if (value instanceof ConfigList) {              // a list of providers
+            registerProvidersForComponent(path);
+        } else if (value instanceof ConfigObject) {     // a nested dictionary, so recurse
+            for (String key : ((ConfigObject)value).keySet()) {
+                searchForProviders(path == null ? key : (path + "." + key));
+            }
+        } else {
+            throw new ConfigurationException("Encountered unexpected type while walking providers at " + path + ": " + value);
+        }
     }
 
     /**
@@ -110,7 +126,7 @@ public class Configurator {
      * @return
      * @throws ConfigurationException
      */
-    private ProviderSet registerProvidersForComponent(String componentPath) throws ConfigurationException {
+    private void registerProvidersForComponent(String componentPath) throws ConfigurationException {
         ProviderSet pset = new ProviderSet(componentPath);
         for (String providerClass : conf.get().getStringList(PROVIDER_PATH + "." + componentPath)) {
             try {
@@ -137,7 +153,9 @@ public class Configurator {
                 throw new ConfigurationException("error when loading provider for " + componentPath, e);
             }
         }
-        return pset;
+        providers.put(pset.klass, pset);
+        components.put(pset.klass, new HashMap<String, Object>());
+        LOG.info("installed " + pset.providers.size() + " configurators for " + pset.klass);
     }
 
     /**
@@ -147,12 +165,12 @@ public class Configurator {
      * @return The requested component.
      */
     public Object get(Class klass, String name) throws ConfigurationException {
-        if (providers.containsKey(klass)) {
+        if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
         ProviderSet pset = providers.get(klass);
         String path = pset.path + "." + name;
-        if (conf.get().hasPath(path)) {
+        if (!conf.get().hasPath(path)) {
             throw new ConfigurationException("Configuration path " + path + " does not exist");
         }
         Config config = conf.get().getConfig(path);
