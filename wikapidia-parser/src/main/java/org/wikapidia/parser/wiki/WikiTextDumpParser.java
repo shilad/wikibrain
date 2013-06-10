@@ -1,6 +1,5 @@
 package org.wikapidia.parser.wiki;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
