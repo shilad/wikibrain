@@ -69,13 +69,6 @@ public class LocalPageDao extends org.jooq.impl.DAOImpl<org.wikapidia.core.jooq.
 	}
 
 	/**
-	 * Fetch records that have <code>NS IN (values)</code>
-	 */
-	public java.util.List<org.wikapidia.core.jooq.tables.pojos.LocalPage> fetchByNs(java.lang.Short... values) {
-		return fetch(org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE.NS, values);
-	}
-
-	/**
 	 * Fetch records that have <code>PAGE_TYPE IN (values)</code>
 	 */
 	public java.util.List<org.wikapidia.core.jooq.tables.pojos.LocalPage> fetchByPageType(java.lang.Short... values) {
