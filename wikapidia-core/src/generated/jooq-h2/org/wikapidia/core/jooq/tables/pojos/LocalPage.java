@@ -11,12 +11,13 @@ package org.wikapidia.core.jooq.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked" })
 public class LocalPage implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1759122632;
+	private static final long serialVersionUID = -1900843195;
 
 	private java.lang.Long    id;
 	private java.lang.Short   langId;
 	private java.lang.Integer pageId;
 	private java.lang.String  title;
+	private java.lang.Short   ns;
 	private java.lang.Short   pageType;
 
 	public java.lang.Long getId() {
@@ -49,6 +50,14 @@ public class LocalPage implements java.io.Serializable {
 
 	public void setTitle(java.lang.String title) {
 		this.title = title;
+	}
+
+	public java.lang.Short getNs() {
+		return this.ns;
+	}
+
+	public void setNs(java.lang.Short ns) {
+		this.ns = ns;
 	}
 
 	public java.lang.Short getPageType() {

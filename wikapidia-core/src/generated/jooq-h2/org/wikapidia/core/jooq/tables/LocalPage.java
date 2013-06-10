@@ -11,7 +11,7 @@ package org.wikapidia.core.jooq.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked" })
 public class LocalPage extends org.jooq.impl.TableImpl<org.wikapidia.core.jooq.tables.records.LocalPageRecord> {
 
-	private static final long serialVersionUID = 117763647;
+	private static final long serialVersionUID = 2014919617;
 
 	/**
 	 * The singleton instance of <code>PUBLIC.LOCAL_PAGE</code>
@@ -45,6 +45,11 @@ public class LocalPage extends org.jooq.impl.TableImpl<org.wikapidia.core.jooq.t
 	 * The column <code>PUBLIC.LOCAL_PAGE.TITLE</code>. 
 	 */
 	public final org.jooq.TableField<org.wikapidia.core.jooq.tables.records.LocalPageRecord, java.lang.String> TITLE = createField("TITLE", org.jooq.impl.SQLDataType.VARCHAR.length(256), this);
+
+	/**
+	 * The column <code>PUBLIC.LOCAL_PAGE.NS</code>. 
+	 */
+	public final org.jooq.TableField<org.wikapidia.core.jooq.tables.records.LocalPageRecord, java.lang.Short> NS = createField("NS", org.jooq.impl.SQLDataType.SMALLINT, this);
 
 	/**
 	 * The column <code>PUBLIC.LOCAL_PAGE.PAGE_TYPE</code>. 
