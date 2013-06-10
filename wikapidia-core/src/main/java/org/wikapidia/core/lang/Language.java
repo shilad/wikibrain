@@ -36,20 +36,20 @@ public class Language implements Comparable<Language>{
         }
     }
 
-    private final int id;
+    private final short id;
     private final String langCode;
     private final String enLangName;
     private final String nativeName;
     private Locale locale;
 
-    private Language(int id, String langCode, String enLangName, String nativeName) {
+    private Language(short id, String langCode, String enLangName, String nativeName) {
         this.id = id;
         this.langCode = langCode;
         this.enLangName = enLangName;
         this.nativeName = nativeName;
     }
 
-    public int getId() {
+    public short getId() {
         return id;
     }
 
@@ -115,7 +115,8 @@ public class Language implements Comparable<Language>{
             LANGUAGES = new Language[lines.size()];
             for (int i = 0; i < lines.size(); i++) {
                 String[] cols = StringUtils.splitPreserveAllTokens(lines.get(i), "\t");
-                int id = Integer.parseInt(cols[0]);
+                short id = Short.parseShort(cols[0]);
+                //int id = Integer.parseInt(cols[0]);
                 if (id != i+1) {
                     throw new IOException("expected language id " + (i+1) + ", but got " + id);
                 }
@@ -129,6 +130,6 @@ public class Language implements Comparable<Language>{
 
     @Override
     public int compareTo(Language language) {
-        return Integer.valueOf(this.id).compareTo(language.id);
+        return Short.valueOf(this.id).compareTo(language.id);
     }
 }

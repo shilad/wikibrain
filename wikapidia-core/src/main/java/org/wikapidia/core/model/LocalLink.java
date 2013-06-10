@@ -1,44 +1,62 @@
 package org.wikapidia.core.model;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import java.util.List;
+import org.wikapidia.core.lang.Language;
 
 /**
  */
 public class LocalLink {
 
-    private final Integer localId;
-    private final Integer location;
-    private final Boolean isParseable;
+    private final Language language;
+    private final String anchorText;
+    private final int localId;
+    private final int location;
+    private final boolean isParseable;
     private final LocationType locType;
 
     private static enum LocationType {FIRST_PARA, FIRST_SEC, NONE};
 
-    public boolean isRedId(int id){
+    public static boolean isRedId(int id){
         return (id < 0);
     }
 
-    public LocalLink(Integer localID, Integer location, Boolean parseable, LocationType locType) {
-        this.localId = localID;
+    public LocalLink(Language language, String anchorText, int localId, int location, boolean isParseable, LocationType locType) {
+        this.language = language;
+        this.anchorText = anchorText;
+        this.localId = localId;
         this.location = location;
-        isParseable = parseable;
+        this.isParseable = isParseable;
         this.locType = locType;
+    }
+
+    /**
+     * Returns the language of the link.
+     * @return
+     */
+    public Language getLanguage() {
+        return language;
+    }
+
+    /**
+     * Returns the anchor text of the link.
+     * @return
+     */
+    public String getAnchorText() {
+        return anchorText;
     }
 
     /**
      * Returns the outlink or inlink IDs of the pivot page.
      * @return
      */
-    public Integer getLocalId() {
+    public int getLocalId() {
         return localId;
     }
 
     /**
-     * Returns the byte location of the beginning of the lin
+     * Returns the byte location of the beginning of the link.
      * @return
      */
-    public Integer getLocation() {
+    public int getLocation() {
         return location;
     }
 
@@ -46,9 +64,7 @@ public class LocalLink {
      * Returns the parseability of the link.
      * @return
      */
-    public Boolean getIsParseable() {
+    public boolean isParseable() {
         return isParseable;
     }
-
-
 }

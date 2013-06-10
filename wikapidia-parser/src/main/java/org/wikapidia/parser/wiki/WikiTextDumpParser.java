@@ -1,6 +1,5 @@
 package org.wikapidia.parser.wiki;
 
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.parser.xml.PageXml;
