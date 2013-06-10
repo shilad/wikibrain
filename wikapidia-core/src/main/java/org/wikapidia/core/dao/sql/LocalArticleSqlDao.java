@@ -26,6 +26,35 @@ public class LocalArticleSqlDao extends LocalArticleDao {
     }
 
     @Override
+    public void beginLoad() throws DaoException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void save(LocalArticle page) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            context.insertInto(Tables.LOCAL_PAGE, Tables.LOCAL_PAGE.LANG_ID, Tables.LOCAL_PAGE.PAGE_ID, Tables.LOCAL_PAGE.TITLE, Tables.LOCAL_PAGE.PAGE_TYPE).values(
+                    page.getLanguage().getId(),
+                    page.getLocalId(),
+                    page.getTitle().toString(),
+                    (short) page.getPageType().ordinal()
+            ).execute();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public void endLoad() throws DaoException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     public LocalArticle getByPageId(Language language, int pageId) throws DaoException {
         Connection conn = null;
         try {
