@@ -93,21 +93,21 @@ public enum PageType {
 
         SPECIAL(-1), MEDIA(-2);
 
-        private int value;
+        private short value;
 
         /**
          * Constructor for NameSpace.
          * @param value The numeric value of the NameSpace as defined by Wikipedia.
          */
         private NameSpace(int value) {
-            this.value = value;
+            this.value = (short)value;
         }
 
         /**
          *
          * @return The numeric value of the NameSpace as defined by Wikipedia.
          */
-        public int getValue() {
+        public short getValue() {
             return value;
         }
 
