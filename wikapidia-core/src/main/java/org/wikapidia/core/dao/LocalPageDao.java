@@ -58,12 +58,11 @@ public class LocalPageDao {
     }
 
     /**
-     * TODO: make this take a NameSpace enum once Rebecca commits.
      * @param title
      * @param ns
      * @return
      */
-    public LocalPage get(Title title, int ns) throws SQLException {
+    public LocalPage get(Title title, PageType.NameSpace ns) throws SQLException {
         Connection conn = ds.getConnection();
         try {
             DSLContext context = DSL.using(conn, dialect);
@@ -71,7 +70,7 @@ public class LocalPageDao {
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.TITLE.equal(title.getCanonicalTitle())).
                     and(Tables.LOCAL_PAGE.LANG_ID.equal((short) title.getLanguage().getId())).
-                    and(Tables.LOCAL_PAGE.NS.equal((short) ns)).
+                    and(Tables.LOCAL_PAGE.NS.equal((short)ns.getValue())).
                     fetchOne();
             return buildPage(record);
         } finally {
