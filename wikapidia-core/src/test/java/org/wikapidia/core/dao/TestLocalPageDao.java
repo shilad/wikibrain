@@ -3,7 +3,9 @@ package org.wikapidia.core.dao;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
+import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
@@ -14,7 +16,7 @@ import java.sql.SQLException;
 
 public class TestLocalPageDao {
     @Test
-    public void testArticle() throws ClassNotFoundException, IOException, SQLException {
+    public void testArticle() throws ClassNotFoundException, IOException, SQLException, DaoException {
         Class.forName("org.h2.Driver");
         File tmpDir = File.createTempFile("wikapidia-h2", null);
         tmpDir.delete();
@@ -27,20 +29,20 @@ public class TestLocalPageDao {
         ds.setPassword("");
 
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        LocalPageDao dao = new LocalPageDao(ds);
+        LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
         dao.beginLoad();
-        LocalPage page = new LocalPage(lang.getLanguage(),
-                7, new Title("test", false, lang), PageType.ARTICLE
+        LocalArticle article = new LocalArticle(lang.getLanguage(),
+                7, new Title("test", lang)
         );
-        dao.save(page);
+        dao.save(article);
         dao.endLoad();
 
-        LocalPage savedPage = dao.get(lang.getLanguage(), 7);
+        LocalArticle savedPage = dao.getById(lang.getLanguage(), 7);
         assert (savedPage != null);
-        assert (page.getLocalId() == savedPage.getLocalId());
-        assert (page.getTitle().equals(savedPage.getTitle()));
-        assert (page.getPageType().equals(savedPage.getPageType()));
-//
+        assert (article.getLocalId() == savedPage.getLocalId());
+        assert (article.getTitle().equals(savedPage.getTitle()));
+        assert (article.getPageType().equals(savedPage.getPageType()));
+
 //        WikapidiaIterable<Article> articles = ad.query("test");
 //        assert (articles != null);
 //        savedArticle = articles.iterator().next();

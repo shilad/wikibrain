@@ -1,17 +1,20 @@
 package org.wikapidia.core.dao;
 
+
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategory;
+import org.wikapidia.core.model.Title;
 
-import javax.sql.DataSource;
+import java.util.Collection;
+import java.util.Map;
 
-public abstract class LocalCategoryDao extends LocalPageDao<LocalCategory> {
+public interface LocalCategoryDao extends LocalPageDao {
 
-    /**
-     *
-     * @param dataSource
-     * @throws DaoException
-     */
-    public LocalCategoryDao(DataSource dataSource) throws DaoException {
-        super(dataSource);
-    }
+    @Override
+    public abstract LocalCategory getById(Language language, int pageId) throws DaoException;
+
+    public abstract LocalCategory getByTitle(Language language, Title title) throws DaoException;
+
+    public abstract Map<Title, LocalCategory> getByTitles(Language language, Collection<Title> titles) throws DaoException;
+
 }

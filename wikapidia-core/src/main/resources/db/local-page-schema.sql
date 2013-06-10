@@ -4,6 +4,5 @@ CREATE TABLE local_page (
   lang_id SMALLINT NOT NULL,
   page_id INT NOT NULL,
   title VARCHAR(256) NOT NULL,
-  ns SMALLINT NOT NULL,
   page_type SMALLINT NOT NULL
 );
