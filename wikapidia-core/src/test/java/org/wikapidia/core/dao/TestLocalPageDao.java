@@ -42,7 +42,7 @@ public class TestLocalPageDao {
         assert (article.getLocalId() == savedPage.getLocalId());
         assert (article.getTitle().equals(savedPage.getTitle()));
         assert (article.getPageType().equals(savedPage.getPageType()));
-//
+
 //        WikapidiaIterable<Article> articles = ad.query("test");
 //        assert (articles != null);
 //        savedArticle = articles.iterator().next();
