@@ -1,4 +1,4 @@
 package org.wikapidia.core.dao;
 
-public class LocalCategoryDao<LocalCategory> extends LocalPageDao{
+public class LocalCategoryDao<LocalCategory> extends LocalPageSqlDao {
 }

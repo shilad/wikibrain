@@ -3,7 +3,6 @@ package org.wikapidia.core.dao;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
-import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.PageType;
