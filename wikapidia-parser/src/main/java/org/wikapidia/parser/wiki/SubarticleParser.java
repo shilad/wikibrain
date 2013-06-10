@@ -1,7 +1,6 @@
 package org.wikapidia.parser.wiki;
 
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.lang.UnsupportedLanguageException;
 import org.wikapidia.parser.xml.PageXml;
 
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ public class SubarticleParser {
 		return parts[0];
 	}
 	
-	public ParsedLink.SubarticleType isTemplateSubarticle(String templateName, String templateText) throws UnsupportedLanguageException {
+	public ParsedLink.SubarticleType isTemplateSubarticle(String templateName, String templateText) {
         ParsedLink.SubarticleType rVal = null;
 		if (lang.getMainTemplatePattern() != null){
 			Matcher m = lang.getMainTemplatePattern().matcher(templateName);
@@ -131,7 +130,7 @@ public class SubarticleParser {
 
     private final static Pattern special_DanishSeOgs = Pattern.compile("Tekst\\s*=\\s*Se også", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     public ParsedLink.SubarticleType handleSpecialTemplateBasedSubarticleSpecialCases(String templateName,
-                                                                         String templateText, ParsedLink.SubarticleType normalType) throws UnsupportedLanguageException{
+                                                                         String templateText, ParsedLink.SubarticleType normalType) {
         ParsedLink.SubarticleType rVal = normalType;
 
         // danish
