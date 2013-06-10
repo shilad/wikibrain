@@ -1,7 +1,9 @@
 package org.wikapidia.parser.xml;
 
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.Title;
 
 import java.util.Date;
 import java.util.logging.Logger;
@@ -12,7 +14,7 @@ import java.util.logging.Logger;
 public class PageXml {
     private static final Logger LOG = Logger.getLogger(PageXml.class.getName());
 
-    private String title;
+    private Title title;
     private String body;
     private Date lastEdit;
 
@@ -24,7 +26,7 @@ public class PageXml {
     private PageType type;
 
     public PageXml(int pageId, int revisionId, String title, String body, Date lastEdit, PageType type, Language lang, Long startByte, Long endByte) {
-        this.title = title;
+        this.title = new Title(title, false, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
         this.type = type;
@@ -35,7 +37,7 @@ public class PageXml {
         this.pageId = pageId;
     }
 
-    public String getTitle() {
+    public Title getTitle() {
         return title;
     }
 

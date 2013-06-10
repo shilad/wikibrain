@@ -3,6 +3,7 @@ package org.wikapidia.core.model;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 
 import java.io.*;
@@ -32,6 +33,16 @@ public class Title implements Externalizable {
         this.language = lang;
     }
 
+    public String getCanonicalTitle() {
+        return canonicalTitle;
+    }
+
+    public LanguageInfo getLanguageInfo() {
+        return language;
+    }
+    public Language getLanguage() {
+        return language.getLanguage();
+    }
 
     /**
 	 * Gets the "Category:" or equivalent

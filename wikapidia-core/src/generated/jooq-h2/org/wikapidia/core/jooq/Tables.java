@@ -32,4 +32,9 @@ public class Tables {
 	 * The table PUBLIC.ARTICLE_CONCEPT
 	 */
 	public static final org.wikapidia.core.jooq.tables.ArticleConcept ARTICLE_CONCEPT = org.wikapidia.core.jooq.tables.ArticleConcept.ARTICLE_CONCEPT;
+
+	/**
+	 * The table PUBLIC.LOCAL_PAGE
+	 */
+	public static final org.wikapidia.core.jooq.tables.LocalPage LOCAL_PAGE = org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE;
 }

@@ -98,7 +98,8 @@ public class ArticleDao {
             record.getValue(Tables.ARTICLE.TITLE),
             Article.NameSpace.intToNS(record.getValue(Tables.ARTICLE.NS)),
             Article.PageType.values()[record.getValue(Tables.ARTICLE.PTYPE)],
-            record.getValue(Tables.ARTICLE.TEXT)
+            record.getValue(Tables.ARTICLE.TEXT),
+            null
         );
     }
 
