@@ -24,56 +24,55 @@ public class WikiTextParser {
     private final MediaWikiParser jwpl;
     private final SubarticleParser subarticleParser;
     private final LanguageInfo lang;
+    private final List<ParserVisitor> visitors;
 
-    public WikiTextParser(LanguageInfo lang) {
-        this.lang = lang;
-        subarticleParser = new SubarticleParser(lang);
-
-        MediaWikiParserFactory pf = new MediaWikiParserFactory();
-        pf.setCalculateSrcSpans(true);
-        pf.setCategoryIdentifers(lang.getCategoryNames());
-        jwpl = pf.createParser();
+    public WikiTextParser(LanguageInfo lang, List<ParserVisitor> visitors) {
+        this(lang, null, visitors);
     }
 
-    public WikiTextParser(LanguageInfo lang, List<String> allowedIllLangs) {
+    public WikiTextParser(LanguageInfo lang, List<String> allowedIllLangs, List<ParserVisitor> visitors) {
         this.lang = lang;
         subarticleParser = new SubarticleParser(lang);
+        this.visitors = visitors;
 
         MediaWikiParserFactory pf = new MediaWikiParserFactory();
         pf.setCalculateSrcSpans(true);
         pf.setCategoryIdentifers(lang.getCategoryNames());
-        pf.setLanguageIdentifers(allowedIllLangs);
+        if (allowedIllLangs != null) {
+            pf.setLanguageIdentifers(allowedIllLangs);
+        }
         jwpl = pf.createParser();
     }
 
     /**
      * TODO: change exception to WpParseException
      * @param xml
-     * @param visitor
      * @throws WikapidiaException
      */
-    public void parse(PageXml xml, ParserVisitor visitor) throws WikapidiaException {
-        visitor.beginPage(xml);
+    public void parse(PageXml xml) throws WikapidiaException {
+        visitBeginPage(xml);
         ParsedPage pp = jwpl.parse(xml.getBody());
+        if (pp == null) {
+            LOG.warning("invalid page: " + xml.getBody());
+        }
 
         if (xml.getType() == PageType.REDIRECT) {
             ParsedRedirect pr = new ParsedRedirect();
             pr.location = new ParsedLocation(xml, -1, -1, -1);
             // TODO: calculate redirect text?
-            visitor.redirect(pr);
+            visitRedirect(pr);
         } else if (xml.getType() == PageType.CATEGORY) {
-            parseCategory(xml, pp, visitor);
+            parseCategory(xml, pp);
         } else if (xml.getType() == PageType.ARTICLE) {
-            parseArticle(xml, visitor, pp);
+            parseArticle(xml, pp);
         }
-        visitor.endPage(xml);
+        visitEndPage(xml);
     }
 
-    private void parseRedirect(PageXml xml, ParserVisitor visitor, ParsedPage page) {
+    private void parseRedirect(PageXml xml, ParsedPage page) {
     }
 
-    private void parseArticle(PageXml xml, ParserVisitor visitor, ParsedPage pp) {   		// *** LINKS, ANCHOR TEXTS, SECTIONS
-        Title title = new Title(xml.getTitle(), lang);
+    private void parseArticle(PageXml xml, ParsedPage pp) {   		// *** LINKS, ANCHOR TEXTS, SECTIONS
         int secNum = 0;
 
         // paragraph numbers before first paragraph are negative
@@ -102,7 +101,7 @@ public class WikiTextParser {
                                 linkSubType = secSubType; // captures see also
                             }
                             ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, curLink.getSrcSpan().getStart());
-                            visitLink(visitor, location, title, destTitle, curLink.getText(), linkSubType);
+                            visitLink(location, destTitle, curLink.getText(), linkSubType);
                         } catch (WikapidiaException e) {
                             LOG.log(Level.WARNING, String.format("Could not process link\t%s\t%s", xml, curLink.toString()),e);
                         }
@@ -141,7 +140,7 @@ public class WikiTextParser {
                                     PageType type = destTitle.guessType();
                                     if (type == PageType.ARTICLE){
                                         ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
-                                        visitLink(visitor, location, title, destTitle, templateLink.getText(), tempSubType);
+                                        visitLink(location, destTitle, templateLink.getText(), tempSubType);
                                     } else if (type == PageType.CATEGORY){
                                         throw new RuntimeException("Found a category link in a template");
                                     }
@@ -157,7 +156,7 @@ public class WikiTextParser {
                                 Title destTitle = new Title(dest, lang);
                                 try {
                                     ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
-                                    visitLink(visitor, location, title, destTitle, dest, tempSubType);
+                                    visitLink(location, destTitle, dest, tempSubType);
                                 } catch (WikapidiaException e) {
                                     LOG.log(Level.SEVERE,
                                             String.format("Could not process template-based subarticle link: \t%s\t%s", xml, t.toString()), e);
@@ -178,7 +177,7 @@ public class WikiTextParser {
 
 
         // *** ILLS
-        parseIlls(xml, pp, visitor);
+        parseIlls(xml, pp);
 
         // *** CATEGORY MEMBERSHIPS
         for (Link cat : pp.getCategories()){
@@ -188,19 +187,15 @@ public class WikiTextParser {
             }
             Title destTitle = new Title(cat.getTarget(), false, lang);
             // TODO: ensure destTitle is a category
-            try {
-                ParsedCategory pc = new ParsedCategory();
-                pc.location = new ParsedLocation(xml, -1, -1, cat.getSrcSpan().getStart());
-                pc.category = destTitle;
-                visitor.category(pc);
-            } catch (WikapidiaException e) {
-                LOG.log(Level.WARNING, String.format("Could not process category membership\t%s\t%s", xml, destTitle),e);
-            }
+            ParsedCategory pc = new ParsedCategory();
+            pc.location = new ParsedLocation(xml, -1, -1, cat.getSrcSpan().getStart());
+            pc.category = destTitle;
+            visitCategory(pc);
         }
     }
 
     private static Pattern illPattern = Pattern.compile("(.+?)\\:\\s*(.+)");
-    private void parseIlls(PageXml xml, ParsedPage pp, ParserVisitor visitor) {
+    private void parseIlls(PageXml xml, ParsedPage pp) {
         if (pp.getLanguagesElement() !=  null){
             for (Link ill : pp.getLanguages()){
                 try{
@@ -215,7 +210,7 @@ public class WikiTextParser {
                             ParsedIll pill = new ParsedIll();
                             pill.location = new ParsedLocation(xml, -1, -1, ill.getSrcSpan().getStart());;
                             pill.title = new Title(target, false, lang);
-                            visitor.ill(pill);
+                            visitIll(pill);
                         }
                     }else{
                         LOG.warning("Invalid ILL:\t" + xml + "\t" + ill.getTarget());
@@ -231,29 +226,73 @@ public class WikiTextParser {
 
     }
 
-    private void parseCategory(PageXml xml, ParsedPage pp, ParserVisitor visitor){
-        Title title = new Title(xml.getTitle(), lang);
-
+    private void parseCategory(PageXml xml, ParsedPage pp){
         // handle links
         for (Link catMem : pp.getCategories()){
             try {
                 Title destTitle = new Title(catMem.getTarget(), lang);
                 // TODO: ensure title is a category
                 ParsedLocation location = new ParsedLocation(xml, -1, -1, catMem.getSrcSpan().getStart());
-                visitLink(visitor, location, title, destTitle, catMem.getText(), null);
+                visitLink(location, destTitle, catMem.getText(), null);
             } catch (WikapidiaException e) {
                 LOG.log(Level.WARNING, String.format("Could not parse/store link\t%s\t%s", xml, catMem.toString()), e);
             }
         }
 
         // handle ILLs
-        parseIlls(xml, pp, visitor);
+        parseIlls(xml, pp);
     }
 
 
-    private void visitLink(ParserVisitor visitor, ParsedLocation location, Title src, Title dest, String linkText, ParsedLink.SubarticleType subType) throws WikapidiaException{
+    private void visitBeginPage(PageXml xml) {
+        for (ParserVisitor visitor : visitors) {
+            try {
+                visitor.beginPage(xml);
+            } catch (WikapidiaException e) {
+                LOG.log(Level.WARNING, "beginPage failed:", e);
+            }
+        }
+    }
+    private void visitEndPage(PageXml xml) {
+        for (ParserVisitor visitor : visitors) {
+            try {
+                visitor.endPage(xml);
+            } catch (WikapidiaException e) {
+                LOG.log(Level.WARNING, "beginPage failed:", e);
+            }
+        }
+    }
+    private void visitRedirect(ParsedRedirect redirect) {
+        for (ParserVisitor visitor : visitors) {
+            try {
+                visitor.redirect(redirect);
+            } catch (WikapidiaException e) {
+                LOG.log(Level.WARNING, "beginPage failed:", e);
+            }
+        }
+    }
+    private void visitIll(ParsedIll ill) {
+        for (ParserVisitor visitor : visitors) {
+            try {
+                visitor.ill(ill);
+            } catch (WikapidiaException e) {
+                LOG.log(Level.WARNING, "beginPage failed:", e);
+            }
+        }
+    }
+    private void visitCategory(ParsedCategory cat) {
+        for (ParserVisitor visitor : visitors) {
+            try {
+                visitor.category(cat);
+            } catch (WikapidiaException e) {
+                LOG.log(Level.WARNING, "beginPage failed:", e);
+            }
+        }
+    }
+    private void visitLink(ParsedLocation location, Title dest, String linkText, ParsedLink.SubarticleType subType) throws WikapidiaException{
 
         // don't want to consider within-page links
+        Title src = location.getXml().getTitle();
         if (src.toString().startsWith("#") || src.equals(dest)) {
             return;
         }
@@ -262,7 +301,13 @@ public class WikiTextParser {
         pl.target = dest;
         pl.text = linkText;
         pl.subarticleType = subType;
-        visitor.link(pl);
+        for (ParserVisitor visitor : visitors) {
+            try {
+                visitor.link(pl);
+            } catch (WikapidiaException e) {
+                LOG.log(Level.WARNING, "beginPage failed:", e);
+            }
+        }
     }
 
     private PageType getLinkType(Link link){

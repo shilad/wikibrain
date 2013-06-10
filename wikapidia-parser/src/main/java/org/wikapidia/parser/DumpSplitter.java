@@ -63,8 +63,8 @@ public class DumpSplitter implements Iterable<String> {
 
         public ArticleIterator(File path) throws IOException, ArchiveException, XMLStreamException {
             InputStream input = new BufferedInputStream(new FileInputStream(path));
-            if (FilenameUtils.getExtension(path.toString()).toLowerCase().startsWith("bz")) {
-                input = new BZip2CompressorInputStream(input);
+            if (FilenameUtils.getExtension(path.toString()).toLowerCase().startsWith("bz2")) {
+                input = new BZip2CompressorInputStream(input, true);
             } else if (FilenameUtils.getExtension(path.toString()).equalsIgnoreCase("gz")) {
                 input = new GZIPInputStream(input);
             }
