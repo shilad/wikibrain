@@ -11,13 +11,10 @@ import org.wikapidia.core.model.Title;
 import javax.sql.DataSource;
 
 public abstract class LocalCategoryDao extends LocalPageDao<LocalCategory> {
+
     public LocalCategoryDao(DataSource dataSource) throws DaoException {
         super(dataSource);
     }
-
-    public abstract LocalCategory getByPageId(Language language, int pageId) throws DaoException;
-
-    public abstract LocalCategory getByTitle(Language language, Title title, PageType ns) throws DaoException;
 
     /**
      * Build a LocalCategory from a database record representation
