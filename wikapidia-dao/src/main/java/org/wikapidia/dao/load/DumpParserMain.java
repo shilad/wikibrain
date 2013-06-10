@@ -1,8 +1,6 @@
 package org.wikapidia.dao.load;
 
-import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -16,7 +14,6 @@ import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
 import java.io.*;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
- * Load the contents of a
+ * Load the contents of a dump into the various daos.
  */
 public class DumpParserMain {
     private static final Logger LOG = Logger.getLogger(DumpParserMain.class.getName());
