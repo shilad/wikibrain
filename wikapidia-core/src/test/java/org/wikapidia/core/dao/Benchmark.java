@@ -36,13 +36,16 @@ public class Benchmark {
         long time = 0, start, stop;
         Random r = new Random();
         int j;
-        for (int i=0; i<50; i++){
+        int numQueries = 0;
+        while(time < 1000){
             j=r.nextInt(numArticles);
             start=System.currentTimeMillis();
             ad.get(j);
             stop=System.currentTimeMillis();
-            System.out.println("time to get by id: "+(stop-start)+"ms");
+            time += stop - start;
+            numQueries++;
         }
+        System.out.println("" + numQueries + " Get_Queries completed in 1 s");
 
         start=System.currentTimeMillis();
         ad.query("aa%");
