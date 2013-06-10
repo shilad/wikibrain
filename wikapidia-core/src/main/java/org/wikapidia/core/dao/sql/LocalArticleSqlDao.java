@@ -23,36 +23,42 @@ public class LocalArticleSqlDao extends LocalArticleDao {
     }
 
     @Override
-    public LocalArticle getByPageId(Language language, int pageId) throws SQLException {
-        Connection conn = ds.getConnection();
-        DSLContext context = DSL.using(conn, SQLDialect.H2);
-        Record record = context.select().
-                from(Tables.LOCAL_PAGE).
-                where(Tables.LOCAL_PAGE.PAGE_ID.equal(pageId)).
-                and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
-                fetchOne();
-        LocalArticle a = buildLocalArticle(record);
-        conn.close();
-        return a;
+    public LocalArticle getByPageId(Language language, int pageId) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, SQLDialect.H2);
+            Record record = context.select().
+                    from(Tables.LOCAL_PAGE).
+                    where(Tables.LOCAL_PAGE.PAGE_ID.equal(pageId)).
+                    and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
+                    fetchOne();
+            return buildLocalArticle(record);
+        } catch (SQLException e) { throw new DaoException(e);
+        } finally { quietlyCloseConn(conn);
+        }
     }
 
     @Override
-    public LocalArticle getByTitle(Language language, Title title, PageType ns) throws SQLException {
-        Connection conn = ds.getConnection();
-        DSLContext context = DSL.using(conn, SQLDialect.H2);
-        Record record = context.select().
-                from(Tables.LOCAL_PAGE).
-                where(Tables.LOCAL_PAGE.TITLE.eq(title.toString())).
-                and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
-                and(Tables.LOCAL_PAGE.NS.eq(ns.getNamespace().getValue())).
-                fetchOne();
-        if (record == null) { return null; }
-        LocalArticle a = buildLocalArticle(record);
-        conn.close();
-        return a;
+    public LocalArticle getByTitle(Language language, Title title, PageType ns) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, SQLDialect.H2);
+            Record record = context.select().
+                    from(Tables.LOCAL_PAGE).
+                    where(Tables.LOCAL_PAGE.TITLE.eq(title.toString())).
+                    and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
+                    and(Tables.LOCAL_PAGE.NS.eq(ns.getNamespace().getValue())).
+                    fetchOne();
+            if (record == null) { return null; }
+            return buildLocalArticle(record);
+        } catch (SQLException e) { throw new DaoException(e);
+        } finally { quietlyCloseConn(conn);
+        }
     }
 
-    public LocalArticle getByTitle(Language language, Title title) throws SQLException {
+    public LocalArticle getByTitle(Language language, Title title) throws DaoException {
         return getByTitle(language, title, PageType.ARTICLE);
     }
 }

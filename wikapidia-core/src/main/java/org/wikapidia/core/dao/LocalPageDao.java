@@ -6,6 +6,7 @@ import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,11 +20,11 @@ public abstract class LocalPageDao<T extends LocalPage> {
         this.ds = ds;
     }
 
-    public abstract T getByPageId(Language language, int pageId) throws SQLException;
+    public abstract T getByPageId(Language language, int pageId) throws DaoException;
 
-    public abstract T getByTitle(Language language, Title title, PageType ns) throws SQLException;
+    public abstract T getByTitle(Language language, Title title, PageType ns) throws DaoException;
 
-    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws SQLException {
+    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
         Map<Integer, T> map = new HashMap<Integer,T>();
         for (int id : pageIds){
             map.put(id, getByPageId(language,id));
@@ -31,11 +32,20 @@ public abstract class LocalPageDao<T extends LocalPage> {
         return map;
     }
 
-    public Map<Title, T> getbyTitles(Language language, Collection<Title> titles, PageType ns) throws SQLException {
+    public Map<Title, T> getbyTitles(Language language, Collection<Title> titles, PageType ns) throws DaoException {
         Map<Title, T> map = new HashMap<Title, T>();
         for (Title title : titles){
             map.put(title, getByTitle(language, title, ns));
         }
         return map;
+    }
+
+    public static void quietlyCloseConn(Connection conn) throws DaoException {
+        if (conn != null) {
+            try { conn.close(); }
+            catch (SQLException e) {
+                throw new DaoException(e);
+            }
+        }
     }
 }
