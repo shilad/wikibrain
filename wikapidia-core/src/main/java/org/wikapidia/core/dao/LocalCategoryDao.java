@@ -20,7 +20,7 @@ public abstract class LocalCategoryDao extends LocalPageDao<LocalCategory> {
      * Build a LocalCategory from a database record representation
      * @param record a database record
      * @return a LocalCategory representation of the given database record
-     * @throws org.wikapidia.core.WikapidiaException if the record is not a Category
+     * @throws org.wikapidia.core.dao.DaoException if the record is not a Category
      */
     protected LocalCategory buildLocalCategory(Record record) throws DaoException {
         if (record == null) {
