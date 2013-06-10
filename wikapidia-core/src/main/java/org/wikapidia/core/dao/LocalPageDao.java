@@ -1,9 +1,14 @@
 package org.wikapidia.core.dao;
 
+import com.typesafe.config.Config;
+import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -12,10 +17,13 @@ import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
+ * A data source for
  */
 public class LocalPageDao {
     private final SQLDialect dialect;
@@ -72,6 +80,20 @@ public class LocalPageDao {
         }
     }
 
+    public void beginLoad() throws SQLException {
+        Connection conn = ds.getConnection();
+        try {
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalPageDao.class.getResource("/db/local-page-schema.sql")
+                    ));
+        } catch (IOException e) {
+            throw new SQLException(e);
+        } finally {
+            conn.close();
+        }
+    }
+
     public void save(LocalPage page) throws SQLException {
         Connection conn = ds.getConnection();
         try {
@@ -89,6 +111,21 @@ public class LocalPageDao {
         }
     }
 
+    public void endLoad() throws SQLException {
+        Connection conn = ds.getConnection();
+        try {
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                        LocalPageDao.class.getResource("/db/local-page-indexes.sql")
+                    ));
+        } catch (IOException e) {
+            throw new SQLException(e);
+        } finally {
+            conn.close();
+        }
+
+    }
+
     private LocalPage buildPage(Record record) {
         if (record == null) {
             return null;
@@ -104,5 +141,39 @@ public class LocalPageDao {
                 title,
                 ptype
         );
+    }
+
+    /**
+     * Configures a local page provider. Example configuration:
+     *
+     * foo {
+     *      type : sql,
+     *      dataSource : bar
+     * }
+     *
+     */
+    public static class Provider extends org.wikapidia.conf.Provider<LocalPageDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LocalPageDao.class;
+        }
+
+        @Override
+        public LocalPageDao get(String name, Class klass, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("sql")) {
+                return null;
+            }
+            String dataSourceName = config.getString("dataSource");
+            DataSource dataSource = (DataSource) getConfigurator().get(DataSource.class, dataSourceName);
+            try {
+                return new LocalPageDao(dataSource);
+            } catch (SQLException e) {
+                throw new ConfigurationException(e);
+            }
+        }
     }
 }

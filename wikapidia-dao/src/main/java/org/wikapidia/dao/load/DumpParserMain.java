@@ -2,6 +2,9 @@ package org.wikapidia.dao.load;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.ParserVisitor;
@@ -50,28 +53,21 @@ public class DumpParserMain {
         parser.parse(visitors);
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException {
-        // TODO: this "setup" would come from a configuration file
-        Class.forName("org.h2.Driver");
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException {
 
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:db/local-page");
-        ds.setUsername("sa");
-        ds.setPassword("");
+        // TODO: figure out command line idioms and spice this up.
+        File pathConf = (args.length == 0) ? null : new File(args[0]);
+        Configurator conf = new Configurator(new Configuration(pathConf));
 
-        Connection conn = ds.getConnection();
-        conn.createStatement().execute(
-                FileUtils.readFileToString(new File("../wikapidia-core/src/main/resources/schema.sql"))
-        );
-        conn.close();
-
-        LocalPageDao dao = new LocalPageDao(ds);
+        LocalPageDao dao = (LocalPageDao) conf.get(LocalPageDao.class);
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
         visitors.add(new LocalPageLoader(dao));
 
-
         String path = "/tmp/simplewiki.xml";
         DumpParserMain loader = new DumpParserMain(visitors);
+
+        dao.beginLoad();
         loader.load(new File(path));
+        dao.endLoad();
     }
 }

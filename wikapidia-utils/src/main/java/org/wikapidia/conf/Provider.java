@@ -6,8 +6,8 @@ import com.typesafe.config.Config;
  * Generates some type of object using a configuration file
  */
 public abstract class Provider<T> {
-    protected final Configurator configurator;
-    protected final Configuration config;
+    private final Configurator configurator;
+    private final Configuration config;
 
     /**
      * Creates a new provider instance.
@@ -33,4 +33,12 @@ public abstract class Provider<T> {
      * or null if it cannot be created by this provider.
      */
     public abstract T get(String name, Class klass, Config config) throws ConfigurationException;
+
+    public Configurator getConfigurator() {
+        return configurator;
+    }
+
+    public Configuration getConfig() {
+        return config;
+    }
 }

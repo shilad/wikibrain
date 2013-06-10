@@ -2,17 +2,14 @@ package org.wikapidia.core.dao;
 
 
 import com.jolbox.bonecp.BoneCPDataSource;
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.model.Article;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public class TestLocalPageDao {
@@ -29,21 +26,16 @@ public class TestLocalPageDao {
         ds.setUsername("sa");
         ds.setPassword("");
 
-        Connection conn = ds.getConnection();
-        conn.createStatement().execute(
-                FileUtils.readFileToString(new File("src/main/resources/schema.sql"))
-        );
-        conn.close();
-
-
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        LocalPageDao ad = new LocalPageDao(ds);
+        LocalPageDao dao = new LocalPageDao(ds);
+        dao.beginLoad();
         LocalPage page = new LocalPage(lang.getLanguage(),
                 7, new Title("test", false, lang), PageType.ARTICLE
         );
-        ad.save(page);
+        dao.save(page);
+        dao.endLoad();
 
-        LocalPage savedPage = ad.get(lang.getLanguage(), 7);
+        LocalPage savedPage = dao.get(lang.getLanguage(), 7);
         assert (savedPage != null);
         assert (page.getLocalId() == savedPage.getLocalId());
         assert (page.getTitle().equals(savedPage.getTitle()));

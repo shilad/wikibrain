@@ -194,4 +194,41 @@ public class Configurator {
                 "' and configuration path '" + path + "'"
         );
     }
+
+    /**
+     * Get a specific named instance of the component with the specified class.
+     * This method can only be used when there is exactly one provider, and one
+     * instance of the component.
+     *
+     * @param klass The generic interface or superclass, not the specific implementation.
+     * @return The requested component.
+     */
+    public Object get(Class klass) throws ConfigurationException {
+        if (!providers.containsKey(klass)) {
+            throw new ConfigurationException("No registered providers for components with class " + klass);
+        }
+        ProviderSet pset = providers.get(klass);
+        if (!conf.get().hasPath(pset.path)) {
+            throw new ConfigurationException("Configuration path " + pset.path + " does not exist");
+        }
+        Config config = conf.get().getConfig(pset.path);
+        Map<String, Object> cache = components.get(klass);
+        synchronized (cache) {
+            if (cache.containsKey("")) {
+                return cache.get("");
+            }
+            for (Provider p : pset.providers) {
+                Object o = p.get("", klass, config);
+                if (o != null) {
+                    cache.put("", o);
+                    return o;
+                }
+            }
+        }
+        throw new ConfigurationException(
+                "None of the " + pset.providers.size() + " providers claimed ownership of component " +
+                        "with class " + klass + " no name, " +
+                        "' and configuration path '" + pset.path + "'"
+        );
+    }
 }

@@ -2,7 +2,6 @@ package org.wikapidia.dao.load;
 
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.parser.wiki.ParserVisitor;
 import org.wikapidia.parser.xml.PageXml;
