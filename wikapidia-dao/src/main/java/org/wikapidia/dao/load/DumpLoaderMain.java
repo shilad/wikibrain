@@ -23,12 +23,12 @@ import java.util.logging.Logger;
 /**
  * Load the contents of a dump into the various daos.
  */
-public class DumpParserMain {
-    private static final Logger LOG = Logger.getLogger(DumpParserMain.class.getName());
+public class DumpLoaderMain {
+    private static final Logger LOG = Logger.getLogger(DumpLoaderMain.class.getName());
     private final List<ParserVisitor> visitors;
     private final AtomicInteger counter = new AtomicInteger();
 
-    public DumpParserMain(List<ParserVisitor> visitors) {
+    public DumpLoaderMain(List<ParserVisitor> visitors) {
         this.visitors = new ArrayList<ParserVisitor>(visitors);
         this.visitors.add(0, new ParserVisitor() {
             @Override
@@ -81,7 +81,7 @@ public class DumpParserMain {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.err.println( "Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("DumpParserMain", options);
+            new HelpFormatter().printHelp("DumpLoaderMain", options);
             return;
         }
 
@@ -95,7 +95,7 @@ public class DumpParserMain {
         LocalPageDao dao = (LocalPageDao) conf.get(LocalPageDao.class);
         visitors.add(new LocalPageLoader(dao));
 
-        final DumpParserMain loader = new DumpParserMain(visitors);
+        final DumpLoaderMain loader = new DumpLoaderMain(visitors);
 
         // TODO: initialize other visitors
         if (cmd.hasOption("t")) {
