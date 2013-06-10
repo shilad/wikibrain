@@ -17,6 +17,11 @@ public abstract class LocalPageDao<T extends LocalPage> {
     protected final SQLDialect dialect;
     protected DataSource ds;
 
+    /**
+     *
+     * @param dataSource
+     * @throws DaoException
+     */
     public LocalPageDao(DataSource dataSource) throws DaoException {
         ds = dataSource;
         Connection conn = null;
@@ -28,10 +33,32 @@ public abstract class LocalPageDao<T extends LocalPage> {
         }
     }
 
+    /**
+     * Get a single page by its title
+     * @param language the page's language
+     * @param title the page's title
+     * @param ns the page's namespace
+     * @return the requested LocalPage
+     * @throws DaoException if there was an error retrieving the page
+     */
     public abstract T getByTitle(Language language, Title title, PageType ns) throws DaoException;
 
+    /**
+     * Get a single page by its title
+     * @param language the page's language
+     * @param pageId the page's id
+     * @return the requested LocalPage
+     * @throws DaoException if there was an error retrieving the page
+     */
     public abstract T getByPageId(Language language, int pageId) throws DaoException;
 
+    /**
+     * Get a set of pages by their ids
+     * @param language the language of the pages
+     * @param pageIds a Collection of page ids
+     * @return a map of ids to pages
+     * @throws DaoException if there was an error retrieving the pages
+     */
     public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
         Map<Integer, T> map = new HashMap<Integer,T>();
         for (int id : pageIds){
@@ -40,6 +67,14 @@ public abstract class LocalPageDao<T extends LocalPage> {
         return map;
     }
 
+    /**
+     * Get a set of pages by their titles
+     * @param language the language of the pages
+     * @param titles a Collection of page titles
+     * @param ns the namespace of the pages
+     * @return a map of titles to pages
+     * @throws DaoException if there was an error retrieving the pages
+     */
     public Map<Title, T> getByTitles(Language language, Collection<Title> titles, PageType ns) throws DaoException{
         Map<Title, T> map = new HashMap<Title, T>();
         for (Title title : titles){
@@ -48,11 +83,15 @@ public abstract class LocalPageDao<T extends LocalPage> {
         return map;
     }
 
-    public static void quietlyCloseConn(Connection conn) throws DaoException {
+    /**
+     * Close a connection without generating an exception if it fails.
+     * @param conn
+     */
+    public static void quietlyCloseConn(Connection conn) {
         if (conn != null) {
             try { conn.close(); }
             catch (SQLException e) {
-                throw new DaoException(e);
+
             }
         }
     }
