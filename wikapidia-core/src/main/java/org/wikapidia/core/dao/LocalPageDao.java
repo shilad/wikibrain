@@ -12,8 +12,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class LocalPageDao<T extends LocalPage> {
+    public static final Logger LOG = Logger.getLogger(LocalPageDao.class.getName());
+
     protected final SQLDialect dialect;
     protected DataSource ds;
 
@@ -48,11 +52,11 @@ public abstract class LocalPageDao<T extends LocalPage> {
         return map;
     }
 
-    public static void quietlyCloseConn(Connection conn) throws DaoException {
+    public static void quietlyCloseConn(Connection conn) {
         if (conn != null) {
             try { conn.close(); }
             catch (SQLException e) {
-                throw new DaoException(e);
+                LOG.log(Level.WARNING, "Failed to close connection: ", e);
             }
         }
     }

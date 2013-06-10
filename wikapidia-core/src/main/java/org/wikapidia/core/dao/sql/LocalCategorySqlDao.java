@@ -14,6 +14,8 @@ import org.wikapidia.core.model.Title;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Map;
 
 public class LocalCategorySqlDao extends LocalCategoryDao{
 
@@ -57,7 +59,27 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
         }
     }
 
+    /**
+     * Returns a LocalCategory based on language and title, with namespace assumed as CATEGORY.
+     *
+     * @param language the language of the category
+     * @param title the title of the category to be searched for
+     * @return a LocalCategory object
+     * @throws DaoException
+     */
     public LocalCategory getByTitle(Language language, Title title) throws DaoException {
         return getByTitle(language, title, PageType.CATEGORY);
+    }
+
+    /**
+     * Returns a Map of LocalCategories based on language and a collection of titles, with namespace assumed as CATEGORY.
+     *
+     * @param language the language of the categories
+     * @param titles the titles to be searched for
+     * @return a Map of LocalCategories mapped to their titles
+     * @throws DaoException
+     */
+    public Map<Title, LocalCategory> getByTitles(Language language, Collection<Title> titles) throws DaoException{
+        return getByTitles(language, titles, PageType.CATEGORY);
     }
 }

@@ -15,6 +15,9 @@ import org.wikapidia.core.model.Title;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LocalArticleSqlDao extends LocalArticleDao {
 
@@ -58,7 +61,27 @@ public class LocalArticleSqlDao extends LocalArticleDao {
         }
     }
 
+    /**
+     * Returns a LocalArticle based on language and title, with namespace assumed as ARTICLE.
+     *
+     * @param language the language of the article
+     * @param title the title of the article to be searched for
+     * @return a LocalArticle object
+     * @throws DaoException
+     */
     public LocalArticle getByTitle(Language language, Title title) throws DaoException {
         return getByTitle(language, title, PageType.ARTICLE);
+    }
+
+    /**
+     * Returns a Map of LocalArticles based on language and a collection of titles, with namespace assumed as ARTICLE.
+     *
+     * @param language the language of the articles
+     * @param titles the titles to be searched for
+     * @return a Map of LocalArticles mapped to their titles
+     * @throws DaoException
+     */
+    public Map<Title, LocalArticle> getByTitles(Language language, Collection<Title> titles) throws DaoException{
+        return getByTitles(language, titles, PageType.ARTICLE);
     }
 }

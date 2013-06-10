@@ -18,9 +18,10 @@ public abstract class LocalArticleDao extends LocalPageDao<LocalArticle> {
 
     /**
      * Build a LocalArticle from a database record representation
+     *
      * @param record a database record
      * @return a LocalArticle representation of the given database record
-     * @throws org.wikapidia.core.dao.DaoException if the record is not an Article
+     * @throws DaoException if the record is not an Article
      */
     protected LocalArticle buildLocalArticle(Record record) throws DaoException {
         if (record == null ) { return null; }
