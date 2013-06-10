@@ -54,7 +54,6 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
                     page.getLanguage().getId(),
                     page.getLocalId(),
                     page.getTitle().getCanonicalTitle(),
-                    PageType.CATEGORY.getNamespace(),
                     PageType.CATEGORY.ordinal()
             ).execute();
         } catch (SQLException e ){
@@ -113,7 +112,7 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.TITLE.equal(title.getCanonicalTitle())).
                     and(Tables.LOCAL_PAGE.LANG_ID.equal(title.getLanguage().getId())).
-                    and(Tables.LOCAL_PAGE.NS.equal(PageType.CATEGORY.getNamespace().getValue())).
+                    and(Tables.LOCAL_PAGE.PAGE_TYPE.equal((short)PageType.CATEGORY.ordinal())).
                     fetchOne();
             return buildLocalCategory(record);
         } catch (SQLException e) {
