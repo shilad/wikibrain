@@ -13,6 +13,7 @@ public interface LocalArticleDao extends LocalPageDao {
     @Override
     public abstract LocalArticle getById(Language language, int pageId) throws DaoException;
 
+
     public abstract LocalArticle getByTitle(Language language, Title title) throws DaoException;
 
     public abstract Map<Title, LocalArticle> getByTitles(Language language, Collection<Title> titles) throws DaoException;

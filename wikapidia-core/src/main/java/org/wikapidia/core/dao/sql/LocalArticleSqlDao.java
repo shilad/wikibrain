@@ -23,7 +23,11 @@ public class LocalArticleSqlDao extends LocalPageSqlDao implements LocalArticleD
     public LocalArticle getById(Language language, int pageId) throws DaoException{
         LocalPage page = super.getById(language, pageId);
         if(page.getPageType() == PageType.ARTICLE) {
-            return (LocalArticle) page;
+            return new LocalArticle(
+                    page.getLanguage(),
+                    page.getLocalId(),
+                    page.getTitle()
+            );
         }
         else {
             throw new DaoException("Tried to get ARTICLE, but found " + page.getPageType().name());
@@ -41,7 +45,11 @@ public class LocalArticleSqlDao extends LocalPageSqlDao implements LocalArticleD
     public LocalArticle getByTitle(Language language, Title title) throws DaoException {
         LocalPage page = super.getByTitle(language, title, PageType.ARTICLE);
         if(page.getPageType() == PageType.ARTICLE) {
-            return (LocalArticle) page;
+            return new LocalArticle(
+                    page.getLanguage(),
+                    page.getLocalId(),
+                    page.getTitle()
+            );
         }
         else {
             throw new DaoException("Tried to get ARTICLE, but found " + page.getPageType().name());
@@ -60,7 +68,12 @@ public class LocalArticleSqlDao extends LocalPageSqlDao implements LocalArticleD
         Map<Title, LocalPage> map = super.getByTitles(language, titles, PageType.ARTICLE);
         Map<Title, LocalArticle> newMap = new HashMap<Title, LocalArticle>();
         for (Title title : map.keySet()) {
-            newMap.put(title, (LocalArticle) map.get(title));
+            LocalArticle temp = new LocalArticle(
+                    map.get(title).getLanguage(),
+                    map.get(title).getLocalId(),
+                    map.get(title).getTitle()
+            );
+            newMap.put(title, temp);
         }
         return newMap;
     }
