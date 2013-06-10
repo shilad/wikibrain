@@ -1,4 +1,4 @@
-package org.wikapidia.parser;
+package org.wikapidia.parser.wiki;
 
 import de.tudarmstadt.ukp.wikipedia.parser.*;
 import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParser;
@@ -8,6 +8,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
+import org.wikapidia.parser.xml.PageXml;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,12 +43,14 @@ public class WikiTextParser {
      * @param visitor
      * @throws WikapidiaException
      */
-    public void parse(PageXml xml, Visitor visitor) throws WikapidiaException {
+    public void parse(PageXml xml, ParserVisitor visitor) throws WikapidiaException {
         ParsedPage pp = jwpl.parse(xml.getBody());
 
         if (xml.getType() == PageType.REDIRECT) {
+            ParsedRedirect pr = new ParsedRedirect();
+            pr.location = new ParsedLocation(xml, -1, -1, -1);
             // TODO: calculate redirect text?
-            visitor.redirect(xml, null);
+            visitor.redirect(pr);
         } else if (xml.getType() == PageType.CATEGORY) {
             parseCategory(xml, pp, visitor);
         } else if (xml.getType() == PageType.ARTICLE) {
@@ -55,28 +58,21 @@ public class WikiTextParser {
         }
     }
 
-    private void parseRedirect(PageXml xml, Visitor visitor, ParsedPage page) {
+    private void parseRedirect(PageXml xml, ParserVisitor visitor, ParsedPage page) {
     }
 
-    private void parseArticle(PageXml xml, Visitor visitor, ParsedPage pp) {   		// *** LINKS, ANCHOR TEXTS, SECTIONS
+    private void parseArticle(PageXml xml, ParserVisitor visitor, ParsedPage pp) {   		// *** LINKS, ANCHOR TEXTS, SECTIONS
         Title title = new Title(xml.getTitle(), lang);
         int secNum = 0;
-        int paraNum = 0;
 
-        Boolean foundFirstParagraph = false;
+        // paragraph numbers before first paragraph are negative
+        // paragraph 0 is the first paragraph
+        int paraNum = -pp.getFirstParagraphNr();
 
         for (Section curSection: pp.getSections()){
             try{
-                SubarticleParser.EncodingType secSubType = subarticleParser.isSeeAlsoHeader(lang, curSection.getTitle());
+                ParsedLink.SubarticleType secSubType = subarticleParser.isSeeAlsoHeader(lang, curSection.getTitle());
                 for (Content curContent : curSection.getContentList()){
-
-                    Boolean isFirstParagraph = false;
-                    if (!foundFirstParagraph && (curContent instanceof Paragraph)){
-                        isFirstParagraph = (paraNum == pp.getFirstParagraphNr());
-                        if (isFirstParagraph) foundFirstParagraph = true;
-                        paraNum++;
-                    }
-
                     // EASY LINKS
                     for (Link curLink : curContent.getLinks()){
                         if (curLink.getTarget().length() == 0){
@@ -88,16 +84,14 @@ public class WikiTextParser {
                             continue;
                         }
                         try{
-                            SubarticleParser.EncodingType linkSubType;
+                            ParsedLink.SubarticleType linkSubType;
                             if (secSubType == null){ // don't look for inlines in "see also"
                                 linkSubType = subarticleParser.isInlineSubarticle(curLink.getSrcSpan().getStart(), xml);
                             }else{
                                 linkSubType = secSubType; // captures see also
                             }
-                            parseLink(
-                                    xml, visitor, title, destTitle, curLink.getText(),
-                                    curLink.getSrcSpan().getStart(), isFirstParagraph,
-                                    (secNum == 0), linkSubType);
+                            ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, curLink.getSrcSpan().getStart());
+                            visitLink(visitor, location, title, destTitle, curLink.getText(), linkSubType);
                         } catch (WikapidiaException e) {
                             LOG.log(Level.WARNING, String.format("Could not process link\t%s\t%s", xml, curLink.toString()),e);
                         }
@@ -121,7 +115,7 @@ public class WikiTextParser {
                         }
                         String templateName = t.getName(); // SUBARTICLE INFO STUFF
                         templateName = new Title(templateName, false, lang).toString(); // this appears to be necessary due to JWPL's handling of template names
-                        SubarticleParser.EncodingType tempSubType;
+                        ParsedLink.SubarticleType tempSubType;
                         tempSubType = subarticleParser.isTemplateSubarticle(templateName, templateText);
                         if (tempSubType == null){
                             try{
@@ -134,9 +128,8 @@ public class WikiTextParser {
                                     Title destTitle = link2Title(templateLink);
                                     PageType type = destTitle.guessType();
                                     if (type == PageType.ARTICLE){
-                                            parseLink(xml, visitor, title, destTitle, templateLink.getText(),
-                                                    t.getSrcSpan().getStart(), isFirstParagraph, (secNum == 0),
-                                                    tempSubType);
+                                        ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
+                                        visitLink(visitor, location, title, destTitle, templateLink.getText(), tempSubType);
                                     } else if (type == PageType.CATEGORY){
                                         throw new RuntimeException("Found a category link in a template");
                                     }
@@ -151,9 +144,8 @@ public class WikiTextParser {
                                 dest = subarticleParser.removeTemplateAnchor(dest);
                                 Title destTitle = new Title(dest, lang);
                                 try {
-                                    parseLink(xml, visitor, title, destTitle, dest, t.getSrcSpan().getStart(),
-                                            isFirstParagraph, (secNum == 0), tempSubType);
-
+                                    ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
+                                    visitLink(visitor, location, title, destTitle, dest, tempSubType);
                                 } catch (WikapidiaException e) {
                                     LOG.log(Level.SEVERE,
                                             String.format("Could not process template-based subarticle link: \t%s\t%s", xml, t.toString()), e);
@@ -161,6 +153,9 @@ public class WikiTextParser {
                             }
                         }
 
+                    }
+                    if (curContent instanceof Paragraph) {
+                        paraNum++;
                     }
                 }
             } catch(WikapidiaException e){
@@ -182,8 +177,10 @@ public class WikiTextParser {
             Title destTitle = new Title(cat.getTarget(), false, lang);
             // TODO: ensure destTitle is a category
             try {
-                visitor.category(xml, destTitle);
-
+                ParsedCategory pc = new ParsedCategory();
+                pc.location = new ParsedLocation(xml, -1, -1, cat.getSrcSpan().getStart());
+                pc.category = destTitle;
+                visitor.category(pc);
             } catch (WikapidiaException e) {
                 LOG.log(Level.WARNING, String.format("Could not process category membership\t%s\t%s", xml, destTitle),e);
             }
@@ -191,7 +188,7 @@ public class WikiTextParser {
     }
 
     private static Pattern illPattern = Pattern.compile("(.+?)\\:\\s*(.+)");
-    private void parseIlls(PageXml xml, ParsedPage pp, Visitor visitor) {
+    private void parseIlls(PageXml xml, ParsedPage pp, ParserVisitor visitor) {
         if (pp.getLanguagesElement() !=  null){
             for (Link ill : pp.getLanguages()){
                 try{
@@ -203,7 +200,10 @@ public class WikiTextParser {
                         if (l == null) {
                             LOG.warning("unkonwn lang code:\t" + langCode);
                         } else if (l != lang.getLanguage()) {
-                            visitor.ill(xml, new Title(target, false, lang));
+                            ParsedIll pill = new ParsedIll();
+                            pill.location = new ParsedLocation(xml, -1, -1, ill.getSrcSpan().getStart());;
+                            pill.title = new Title(target, false, lang);
+                            visitor.ill(pill);
                         }
                     }else{
                         LOG.warning("Invalid ILL:\t" + xml + "\t" + ill.getTarget());
@@ -218,7 +218,7 @@ public class WikiTextParser {
 
     }
 
-    private void parseCategory(PageXml xml, ParsedPage pp, Visitor visitor){
+    private void parseCategory(PageXml xml, ParsedPage pp, ParserVisitor visitor){
         Title title = new Title(xml.getTitle(), lang);
 
         // handle links
@@ -226,8 +226,8 @@ public class WikiTextParser {
             try {
                 Title destTitle = new Title(catMem.getTarget(), lang);
                 // TODO: ensure title is a category
-                parseLink(xml, visitor, title, destTitle, catMem.getText(), null,
-                        null, null, null);
+                ParsedLocation location = new ParsedLocation(xml, -1, -1, catMem.getSrcSpan().getStart());
+                visitLink(visitor, location, title, destTitle, catMem.getText(), null);
             } catch (WikapidiaException e) {
                 LOG.log(Level.WARNING, String.format("Could not parse/store link\t%s\t%s", xml, catMem.toString()), e);
             }
@@ -238,29 +238,18 @@ public class WikiTextParser {
     }
 
 
-    private void parseLink(PageXml xml, Visitor visitor, Title src, Title dest, String linkText, Integer location,
-                                     Boolean isFirstParagraph, Boolean isFirstSection, SubarticleParser.EncodingType subType) throws WikapidiaException{
+    private void visitLink(ParserVisitor visitor, ParsedLocation location, Title src, Title dest, String linkText, ParsedLink.SubarticleType subType) throws WikapidiaException{
 
         // don't want to consider within-page links
         if (src.toString().startsWith("#") || src.equals(dest)) {
             return;
         }
-        visitor.link(xml, src, linkText, location, isFirstParagraph, isFirstSection, subType != null);
-
-        /**
-         * TODO: are there reasons to specially capture anchor texts independent of links?
-        // deal with anchor texts
-        if (type.equals(PageXMLType.ARTICLE)){
-            AnchorTextShell atShell = new AnchorTextShell(curPageXML, linkText);
-            handler.handleNewAnchorTextShell(atShell, destShell);
-        }
-         */
-
-        // deal with subarticle infos
-        if (subType != null && dest.guessType() == PageType.ARTICLE) {
-            visitor.subarticleLink(xml, dest, location, subType);
-        }
-
+        ParsedLink pl = new ParsedLink();
+        pl.location = location;
+        pl.target = dest;
+        pl.text = linkText;
+        pl.subarticleType = subType;
+        visitor.link(pl);
     }
 
     private PageType getLinkType(Link link){
@@ -277,19 +266,4 @@ public class WikiTextParser {
     }
 
 
-    public static interface Visitor {
-        public void category(PageXml xml, Title category) throws WikapidiaException;
-        public void ill(PageXml xml, Title title) throws WikapidiaException;
-//        public void section(SectionShell shell) throws WikapidiaException;
-//        public void paragraph(SectionShell shell) throws WikapidiaException;
-
-        // TODO: isFirstParagraph and isFirstSection should be able to be tracked by the consumer and not passed
-        public void link(PageXml xml, Title target, String text,
-                         int location, boolean isFirstParagraph, boolean isFirstSection,
-                         boolean isSubarticle) throws WikapidiaException;
-
-        public void subarticleLink(PageXml xml, Title subarticle, int location, SubarticleParser.EncodingType type);
-
-        public void redirect(PageXml xml, String redirect) throws WikapidiaException;
-    }
 }
