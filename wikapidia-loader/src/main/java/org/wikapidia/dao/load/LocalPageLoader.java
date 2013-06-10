@@ -1,6 +1,7 @@
 package org.wikapidia.dao.load;
 
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.parser.wiki.ParserVisitor;
 import org.wikapidia.parser.xml.PageXml;
@@ -10,9 +11,9 @@ import java.sql.SQLException;
 /**
  */
 public class LocalPageLoader extends ParserVisitor {
-    private final LocalPageSqlDao dao;
+    private final LocalPageDao dao;
 
-    public LocalPageLoader(LocalPageSqlDao dao) {
+    public LocalPageLoader(LocalPageDao dao) {
         this.dao = dao;
     }
 

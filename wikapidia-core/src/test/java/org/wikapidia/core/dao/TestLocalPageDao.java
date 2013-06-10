@@ -27,7 +27,7 @@ public class TestLocalPageDao {
         ds.setPassword("");
 
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        LocalPageSqlDao dao = new LocalPageSqlDao(ds);
+        LocalPageDao dao = new LocalPageDao(ds);
         dao.beginLoad();
         LocalPage page = new LocalPage(lang.getLanguage(),
                 7, new Title("test", false, lang), PageType.ARTICLE

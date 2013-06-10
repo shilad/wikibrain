@@ -14,8 +14,6 @@ public abstract class UniversalPageDao {
 
     /**
      * Returns a UniversalPage instance corresponding to the input universal id and type.
-     *
-     * Example: getUniversalPage(1, UniversalArticle.class);
      * @param univId
      * @param type The type of the UniversalPage (e.g. UniversalArticle.class or UniversalCategory.class)
      * @return
