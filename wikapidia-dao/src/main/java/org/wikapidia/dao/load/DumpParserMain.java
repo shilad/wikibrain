@@ -1,15 +1,19 @@
 package org.wikapidia.dao.load;
 
 import com.jolbox.bonecp.BoneCPDataSource;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.ParserVisitor;
 import org.wikapidia.parser.wiki.WikiTextDumpParser;
 import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
 
 import java.io.*;
 import java.sql.Connection;
@@ -20,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
+ * Load the contents of a
  */
 public class DumpParserMain {
     private static final Logger LOG = Logger.getLogger(DumpParserMain.class.getName());
@@ -54,20 +59,65 @@ public class DumpParserMain {
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException {
+        Options options = new Options();
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("conf")
+                        .withDescription("configuration file")
+                        .create("c"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("drop-tables")
+                        .withDescription("drop and recreate all tables")
+                        .create("t"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("create-indexes")
+                        .withDescription("create all indexes after loading")
+                        .create("i"));
 
-        // TODO: figure out command line idioms and spice this up.
-        File pathConf = (args.length == 0) ? null : new File(args[0]);
+
+        CommandLineParser parser = new PosixParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println( "Invalid option usage: " + e.getMessage());
+            new HelpFormatter().printHelp("DumpParserMain", options);
+            return;
+        }
+
+
+        File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        LocalPageDao dao = (LocalPageDao) conf.get(LocalPageDao.class);
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
+
+        // TODO: add other visitors
+        LocalPageDao dao = (LocalPageDao) conf.get(LocalPageDao.class);
         visitors.add(new LocalPageLoader(dao));
 
-        String path = "/tmp/simplewiki.xml";
-        DumpParserMain loader = new DumpParserMain(visitors);
+        final DumpParserMain loader = new DumpParserMain(visitors);
 
-        dao.beginLoad();
-        loader.load(new File(path));
-        dao.endLoad();
+        // TODO: initialize other visitors
+        if (cmd.hasOption("t")) {
+            dao.beginLoad();
+        }
+
+        // loads multiple dumps in parallel
+        ParallelForEach.loop(cmd.getArgList(),
+                Runtime.getRuntime().availableProcessors(),
+                new Procedure<String>() {
+                    @Override
+                    public void call(String path) throws Exception {
+                        loader.load(new File(path));
+                    }
+                });
+
+        // TODO: finalize other visitors
+        if (cmd.hasOption("i")) {
+            dao.endLoad();
+        }
     }
 }
