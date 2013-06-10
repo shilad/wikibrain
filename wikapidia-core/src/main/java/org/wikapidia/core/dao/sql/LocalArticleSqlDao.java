@@ -1,5 +1,6 @@
 package org.wikapidia.core.dao.sql;
 
+import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SQLDialect;
@@ -14,6 +15,7 @@ import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -27,7 +29,20 @@ public class LocalArticleSqlDao extends LocalArticleDao {
 
     @Override
     public void beginLoad() throws DaoException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalCategorySqlDao.class.getResource("/db/local-page-schema.sql")
+                    ));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     @Override
@@ -36,17 +51,13 @@ public class LocalArticleSqlDao extends LocalArticleDao {
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.LOCAL_PAGE,
-                        Tables.LOCAL_PAGE.LANG_ID,
-                        Tables.LOCAL_PAGE.PAGE_ID,
-                        Tables.LOCAL_PAGE.TITLE,
-                        Tables.LOCAL_PAGE.PAGE_TYPE).
-                    values(
-                        page.getLanguage().getId(),
-                        page.getLocalId(),
-                        page.getTitle().toString(),
-                        page.getPageType().getPageTypeId()).
-                    execute();
+            context.insertInto(Tables.LOCAL_PAGE).values(
+                    null,
+                    page.getLanguage().getId(),
+                    page.getLocalId(),
+                    page.getTitle().getCanonicalTitle(),
+                    PageType.ARTICLE.getPageTypeId()
+            ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -56,7 +67,20 @@ public class LocalArticleSqlDao extends LocalArticleDao {
 
     @Override
     public void endLoad() throws DaoException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalCategorySqlDao.class.getResource("/db/local-page-indexes.sql")
+                    ));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     @Override
@@ -86,7 +110,7 @@ public class LocalArticleSqlDao extends LocalArticleDao {
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().
                     from(Tables.LOCAL_PAGE).
-                    where(Tables.LOCAL_PAGE.TITLE.eq(title.toString())).
+                    where(Tables.LOCAL_PAGE.TITLE.eq(title.getCanonicalTitle())).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     and(Tables.LOCAL_PAGE.PAGE_TYPE.eq(pt.getPageTypeId())).
                     fetchOne();

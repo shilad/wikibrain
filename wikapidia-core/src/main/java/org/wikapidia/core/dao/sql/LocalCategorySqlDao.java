@@ -43,6 +43,7 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
             quietlyCloseConn(conn);
         }
     }
+
     @Override
     public void save(LocalCategory page) throws DaoException {
         Connection conn=null;
@@ -54,7 +55,7 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
                     page.getLanguage().getId(),
                     page.getLocalId(),
                     page.getTitle().getCanonicalTitle(),
-                    PageType.CATEGORY.ordinal()
+                    PageType.CATEGORY.getPageTypeId()
             ).execute();
         } catch (SQLException e ){
             throw new DaoException(e);
@@ -79,7 +80,6 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
         } finally {
             quietlyCloseConn(conn);
         }
-
     }
 
     @Override
