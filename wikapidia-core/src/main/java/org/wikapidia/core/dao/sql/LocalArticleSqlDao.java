@@ -91,7 +91,7 @@ public class LocalArticleSqlDao extends LocalArticleDao {
             DSLContext context = DSL.using(conn, SQLDialect.H2);
             Record record = context.select().
                     from(Tables.LOCAL_PAGE).
-                    where(Tables.LOCAL_PAGE.PAGE_ID.equal(pageId)).
+                    where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne();
             return buildLocalArticle(record);

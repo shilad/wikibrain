@@ -90,8 +90,8 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
             DSLContext context = DSL.using(conn, dialect);
             Record record = context.select().
                     from(Tables.LOCAL_PAGE).
-                    where(Tables.LOCAL_PAGE.PAGE_ID.equal(pageId)).
-                    and(Tables.LOCAL_PAGE.LANG_ID.equal(language.getId())).
+                    where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
+                    and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne();
             return buildLocalCategory(record);
         } catch (SQLException e) {
@@ -110,9 +110,9 @@ public class LocalCategorySqlDao extends LocalCategoryDao{
             DSLContext context = DSL.using(conn, dialect);
             Record record = context.select().
                     from(Tables.LOCAL_PAGE).
-                    where(Tables.LOCAL_PAGE.TITLE.equal(title.getCanonicalTitle())).
-                    and(Tables.LOCAL_PAGE.LANG_ID.equal(title.getLanguage().getId())).
-                    and(Tables.LOCAL_PAGE.PAGE_TYPE.equal((short)PageType.CATEGORY.ordinal())).
+                    where(Tables.LOCAL_PAGE.TITLE.eq(title.getCanonicalTitle())).
+                    and(Tables.LOCAL_PAGE.LANG_ID.eq(title.getLanguage().getId())).
+                    and(Tables.LOCAL_PAGE.PAGE_TYPE.eq(PageType.CATEGORY.getPageTypeId())).
                     fetchOne();
             return buildLocalCategory(record);
         } catch (SQLException e) {
