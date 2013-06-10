@@ -3,6 +3,7 @@ package org.wikapidia.core.dao;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
+import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.PageType;
@@ -27,7 +28,7 @@ public class TestLocalPageDao {
         ds.setPassword("");
 
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        LocalPageDao dao = new LocalPageDao(ds);
+        LocalPageSqlDao dao = new LocalPageSqlDao(ds);
         dao.beginLoad();
         LocalPage page = new LocalPage(lang.getLanguage(),
                 7, new Title("test", false, lang), PageType.ARTICLE

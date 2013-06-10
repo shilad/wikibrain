@@ -5,7 +5,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
-import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.ParserVisitor;
 import org.wikapidia.parser.wiki.WikiTextDumpParser;
@@ -92,7 +92,7 @@ public class DumpLoaderMain {
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
 
         // TODO: add other visitors
-        LocalPageDao dao = (LocalPageDao) conf.get(LocalPageDao.class);
+        LocalPageSqlDao dao = (LocalPageSqlDao) conf.get(LocalPageSqlDao.class);
         visitors.add(new LocalPageLoader(dao));
 
         final DumpLoaderMain loader = new DumpLoaderMain(visitors);

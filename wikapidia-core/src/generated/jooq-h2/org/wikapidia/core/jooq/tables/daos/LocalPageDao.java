@@ -12,14 +12,14 @@ package org.wikapidia.core.jooq.tables.daos;
 public class LocalPageDao extends org.jooq.impl.DAOImpl<org.wikapidia.core.jooq.tables.records.LocalPageRecord, org.wikapidia.core.jooq.tables.pojos.LocalPage, java.lang.Long> {
 
 	/**
-	 * Create a new LocalPageDao without any configuration
+	 * Create a new LocalPageSqlDao without any configuration
 	 */
 	public LocalPageDao() {
 		super(org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE, org.wikapidia.core.jooq.tables.pojos.LocalPage.class);
 	}
 
 	/**
-	 * Create a new LocalPageDao with an attached configuration
+	 * Create a new LocalPageSqlDao with an attached configuration
 	 */
 	public LocalPageDao(org.jooq.Configuration configuration) {
 		super(org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE, org.wikapidia.core.jooq.tables.pojos.LocalPage.class, configuration);
