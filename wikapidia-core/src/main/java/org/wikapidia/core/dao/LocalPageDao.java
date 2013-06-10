@@ -1,47 +1,18 @@
 package org.wikapidia.core.dao;
 
-import org.jooq.SQLDialect;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public abstract class LocalPageDao<T extends LocalPage> {
-    public static final Logger LOG = Logger.getLogger(LocalPageDao.class.getName());
-
-    protected final SQLDialect dialect;
-    protected DataSource ds;
-
-    /**
-     *
-     * @param dataSource
-     * @throws DaoException
-     */
-    public LocalPageDao(DataSource dataSource) throws DaoException {
-        ds = dataSource;
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            this.dialect = JooqUtils.dialect(conn);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
+public interface LocalPageDao {
 
     public abstract void beginLoad() throws DaoException;
 
-    public abstract void save(T page) throws DaoException;
+    public abstract void save(LocalPage page) throws DaoException;
 
     public abstract void endLoad() throws DaoException;
 
@@ -53,7 +24,7 @@ public abstract class LocalPageDao<T extends LocalPage> {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract T getByTitle(Language language, Title title, PageType ns) throws DaoException;
+    public abstract LocalPage getByTitle(Language language, Title title, PageType ns) throws DaoException;
 
     /**
      * Get a single page by its title
@@ -62,7 +33,7 @@ public abstract class LocalPageDao<T extends LocalPage> {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract T getByPageId(Language language, int pageId) throws DaoException;
+    public abstract LocalPage getById(Language language, int pageId) throws DaoException;
 
     /**
      * Get a set of pages by their ids
@@ -71,13 +42,7 @@ public abstract class LocalPageDao<T extends LocalPage> {
      * @return a map of ids to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
-        Map<Integer, T> map = new HashMap<Integer,T>();
-        for (int id : pageIds){
-            map.put(id, getByPageId(language,id));
-        }
-        return map;
-    }
+    public abstract Map<Integer, LocalPage> getByIds(Language language, Collection<Integer> pageIds) throws DaoException;
 
     /**
      * Get a set of pages by their titles
@@ -87,25 +52,5 @@ public abstract class LocalPageDao<T extends LocalPage> {
      * @return a map of titles to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, PageType ns) throws DaoException{
-        Map<Title, T> map = new HashMap<Title, T>();
-        for (Title title : titles){
-            map.put(title, getByTitle(language, title, ns));
-        }
-        return map;
-    }
-
-    /**
-     * Close a connection without generating an exception if it fails.
-     * @param conn
-     */
-    public static void quietlyCloseConn(Connection conn) {
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                LOG.log(Level.WARNING, "Failed to close connection: ", e);
-            }
-        }
-    }
+    public Map<Title, LocalPage> getByTitles(Language language, Collection<Title> titles, PageType ns) throws DaoException;
 }

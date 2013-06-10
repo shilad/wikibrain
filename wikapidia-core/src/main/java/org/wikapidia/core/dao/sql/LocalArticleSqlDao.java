@@ -1,125 +1,32 @@
 package org.wikapidia.core.dao.sql;
 
-import org.apache.commons.io.IOUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalArticleDao;
-import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
-public class LocalArticleSqlDao extends LocalArticleDao {
+public class LocalArticleSqlDao extends LocalPageSqlDao implements LocalArticleDao {
 
-    public LocalArticleSqlDao(DataSource ds) throws DaoException {
-        super(ds);
+    public LocalArticleSqlDao(DataSource dataSource) throws DaoException {
+        super(dataSource);
     }
 
     @Override
-    public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalCategorySqlDao.class.getResource("/db/local-page-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
+    public LocalArticle getById(Language language, int pageId) throws DaoException{
+        LocalPage page = super.getById(language, pageId);
+        if(page.getPageType() == PageType.ARTICLE) {
+            return (LocalArticle) page;
         }
-    }
-
-    @Override
-    public void save(LocalArticle page) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.LOCAL_PAGE).values(
-                    null,
-                    page.getLanguage().getId(),
-                    page.getLocalId(),
-                    page.getTitle().getCanonicalTitle(),
-                    PageType.ARTICLE.getPageTypeId()
-            ).execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalCategorySqlDao.class.getResource("/db/local-page-indexes.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public LocalArticle getByPageId(Language language, int pageId) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().
-                    from(Tables.LOCAL_PAGE).
-                    where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
-                    and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
-                    fetchOne();
-            return buildLocalArticle(record);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public LocalArticle getByTitle(Language language, Title title, PageType pt) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, SQLDialect.H2);
-            Record record = context.select().
-                    from(Tables.LOCAL_PAGE).
-                    where(Tables.LOCAL_PAGE.TITLE.eq(title.getCanonicalTitle())).
-                    and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
-                    and(Tables.LOCAL_PAGE.PAGE_TYPE.eq(pt.getPageTypeId())).
-                    fetchOne();
-            if (record == null) { return null; }
-            return buildLocalArticle(record);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
+        else {
+            throw new DaoException("Tried to get ARTICLE, but found " + page.getPageType().name());
         }
     }
 
@@ -132,42 +39,29 @@ public class LocalArticleSqlDao extends LocalArticleDao {
      * @throws DaoException
      */
     public LocalArticle getByTitle(Language language, Title title) throws DaoException {
-        return getByTitle(language, title, PageType.ARTICLE);
+        LocalPage page = super.getByTitle(language, title, PageType.ARTICLE);
+        if(page.getPageType() == PageType.ARTICLE) {
+            return (LocalArticle) page;
+        }
+        else {
+            throw new DaoException("Tried to get ARTICLE, but found " + page.getPageType().name());
+        }
     }
 
     /**
-     * Returns a Map of LocalArticles based on language and a collection of titles, with namespace assumed as ARTICLE.
+     * Returns a Map of LocalCategories based on language and a collection of titles, with namespace assumed as ARTICLE.
      *
-     * @param language the language of the articles
+     * @param language the language of the categories
      * @param titles the titles to be searched for
-     * @return a Map of LocalArticles mapped to their titles
+     * @return a Map of LocalCategories mapped to their titles
      * @throws DaoException
      */
     public Map<Title, LocalArticle> getByTitles(Language language, Collection<Title> titles) throws DaoException{
-        return getByTitles(language, titles, PageType.ARTICLE);
-    }
-
-    /**
-     * Build a LocalArticle from a database record representation
-     *
-     * @param record a database record
-     * @return a LocalArticle representation of the given database record
-     * @throws DaoException if the record is not an Article
-     */
-    private LocalArticle buildLocalArticle(Record record) throws DaoException {
-        if (record == null ) { return null; }
-
-        short langId = record.getValue(Tables.LOCAL_PAGE.LANG_ID);
-        Language language = Language.getById(langId);
-        int pageId = record.getValue(Tables.LOCAL_PAGE.PAGE_ID);
-        Title title = new Title(record.getValue(Tables.LOCAL_PAGE.TITLE), LanguageInfo.getById(langId));
-
-        PageType pagetype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
-        if (!pagetype.equals(PageType.ARTICLE)){
-            throw new DaoException("Tried to get ARTICLE, but found "+pagetype.name());
+        Map<Title, LocalPage> map = super.getByTitles(language, titles, PageType.ARTICLE);
+        Map<Title, LocalArticle> newMap = new HashMap<Title, LocalArticle>();
+        for (Title title : map.keySet()) {
+            newMap.put(title, (LocalArticle) map.get(title));
         }
-        else {
-            return new LocalArticle(language, pageId, title);
-        }
+        return newMap;
     }
 }
