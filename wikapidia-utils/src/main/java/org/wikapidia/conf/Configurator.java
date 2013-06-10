@@ -180,7 +180,7 @@ public class Configurator {
                 return cache.get(name);
             }
             for (Provider p : pset.providers) {
-                Object o = p.get(name, klass, config);
+                Object o = p.get(name, config);
                 if (o != null) {
                     cache.put(name, o);
                     return o;
@@ -197,8 +197,7 @@ public class Configurator {
 
     /**
      * Get a specific named instance of the component with the specified class.
-     * This method can only be used when there is exactly one provider, and one
-     * instance of the component.
+     * This method can only be used when there is exactly one instance of the component.
      *
      * @param klass The generic interface or superclass, not the specific implementation.
      * @return The requested component.
@@ -218,7 +217,7 @@ public class Configurator {
                 return cache.get("");
             }
             for (Provider p : pset.providers) {
-                Object o = p.get("", klass, config);
+                Object o = p.get("", config);
                 if (o != null) {
                     cache.put("", o);
                     return o;

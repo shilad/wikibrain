@@ -1,10 +1,6 @@
 package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
-import org.wikapidia.conf.Provider;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,11 +24,10 @@ public class ConsecutiveIntProvider extends Provider<Integer> {
     }
 
     @Override
-    public Integer get(String name, Class klass, Config config) throws ConfigurationException {
+    public Integer get(String name, Config config) throws ConfigurationException {
         if (!config.getString("type").equals("consecutive")) {
             return null;
         }
-        assertEquals(klass, Integer.class);
         return count++;
     }
 }

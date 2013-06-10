@@ -24,11 +24,10 @@ public class OddIntProvider extends Provider<Integer> {
     }
 
     @Override
-    public Integer get(String name, Class klass, Config config) throws ConfigurationException {
+    public Integer get(String name, Config config) throws ConfigurationException {
         if (!config.getString("type").equals("odd")) {
             return null;
         }
-        assertEquals(klass, Integer.class);
         int result = count;
         count += 2;
         return result;

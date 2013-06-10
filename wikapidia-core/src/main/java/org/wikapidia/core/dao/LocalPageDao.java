@@ -17,7 +17,6 @@ import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -163,7 +162,7 @@ public class LocalPageDao {
         }
 
         @Override
-        public LocalPageDao get(String name, Class klass, Config config) throws ConfigurationException {
+        public LocalPageDao get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

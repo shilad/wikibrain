@@ -32,7 +32,7 @@ public abstract class Provider<T> {
      * Should return a configured instance of the requested class,
      * or null if it cannot be created by this provider.
      */
-    public abstract T get(String name, Class klass, Config config) throws ConfigurationException;
+    public abstract T get(String name, Config config) throws ConfigurationException;
 
     public Configurator getConfigurator() {
         return configurator;

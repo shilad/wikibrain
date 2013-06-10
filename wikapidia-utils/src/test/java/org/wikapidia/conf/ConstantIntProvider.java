@@ -2,8 +2,6 @@ package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
 
-import static org.junit.Assert.*;
-
 public class ConstantIntProvider extends Provider<Integer> {
     /**
      * Creates a new provider instance.
@@ -22,11 +20,10 @@ public class ConstantIntProvider extends Provider<Integer> {
     }
 
     @Override
-    public Integer get(String name, Class klass, Config config) throws ConfigurationException {
+    public Integer get(String name, Config config) throws ConfigurationException {
         if (!config.getString("type").equals("constant")) {
             return null;
         }
-        assertEquals(klass, Integer.class);
         return config.getInt("value");
     }
 }

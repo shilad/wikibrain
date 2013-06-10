@@ -42,7 +42,7 @@ public class DataSourceProvider extends Provider<DataSource> {
     }
 
     @Override
-    public DataSource get(String name, Class klass, Config config) throws ConfigurationException {
+    public DataSource get(String name, Config config) throws ConfigurationException {
         try {
             Class.forName(config.getString("driver"));
             BoneCPDataSource ds = new BoneCPDataSource();
