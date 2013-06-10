@@ -37,7 +37,7 @@ public class TestLocalPageDao {
         dao.save(article);
         dao.endLoad();
 
-        LocalArticle savedPage = dao.getByPageId(lang.getLanguage(), 7);
+        LocalArticle savedPage = dao.getById(lang.getLanguage(), 7);
         assert (savedPage != null);
         assert (article.getLocalId() == savedPage.getLocalId());
         assert (article.getTitle().equals(savedPage.getTitle()));
