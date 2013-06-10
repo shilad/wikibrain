@@ -4,10 +4,10 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalArticleDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.Article;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
@@ -18,7 +18,7 @@ import java.sql.SQLException;
 
 public class LocalArticleSqlDao extends LocalArticleDao {
 
-    public LocalArticleSqlDao(DataSource ds) {
+    public LocalArticleSqlDao(DataSource ds) throws DaoException {
         super(ds);
     }
 

@@ -1,7 +1,6 @@
 package org.wikapidia.core.dao;
 
 import org.jooq.Record;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -10,10 +9,9 @@ import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 
 public abstract class LocalCategoryDao extends LocalPageDao<LocalCategory> {
-    public LocalCategoryDao(DataSource dataSource) throws SQLException {
+    public LocalCategoryDao(DataSource dataSource) throws DaoException {
         super(dataSource);
     }
 
@@ -37,7 +35,7 @@ public abstract class LocalCategoryDao extends LocalPageDao<LocalCategory> {
                 LanguageInfo.getByLanguage(lang));
         PageType ptype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
         if (!ptype.equals(PageType.CATEGORY)){
-            throw new DaoException("tried to get Category, but found "+ptype.name());
+            throw new DaoException("Tried to get CATEGORY, but found "+ptype.name());
         }
         else {
             return new LocalCategory(

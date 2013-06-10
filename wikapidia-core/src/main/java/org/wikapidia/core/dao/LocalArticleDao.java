@@ -12,21 +12,24 @@ import javax.sql.DataSource;
 
 public abstract class LocalArticleDao extends LocalPageDao<LocalArticle> {
 
-    public LocalArticleDao(DataSource ds) {
+    public LocalArticleDao(DataSource ds) throws DaoException {
         super(ds);
     }
 
     protected LocalArticle buildLocalArticle(Record record) throws DaoException {
         if (record == null ) { return null; }
-        if (record.getValue(Tables.LOCAL_PAGE.NS) != PageType.ARTICLE.getNamespace().getValue()) {
-            throw new DaoException("Page type mismatch"); // or some other text
-        }
 
         short langId = record.getValue(Tables.LOCAL_PAGE.LANG_ID);
         Language language = Language.getById(langId);
         int pageId = record.getValue(Tables.LOCAL_PAGE.PAGE_ID);
         Title title = new Title(record.getValue(Tables.LOCAL_PAGE.TITLE), LanguageInfo.getById(langId));
 
-        return new LocalArticle(language, pageId, title);
+        PageType pagetype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
+        if (!pagetype.equals(PageType.ARTICLE)){
+            throw new DaoException("Tried to get ARTICLE, but found "+pagetype.name());
+        }
+        else {
+            return new LocalArticle(language, pageId, title);
+        }
     }
 }

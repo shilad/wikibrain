@@ -17,13 +17,14 @@ public abstract class LocalPageDao<T extends LocalPage> {
     protected final SQLDialect dialect;
     protected DataSource ds;
 
-    public LocalPageDao(DataSource dataSource) throws SQLException {
+    public LocalPageDao(DataSource dataSource) throws DaoException {
         ds = dataSource;
-        Connection conn = ds.getConnection();
+        Connection conn = null;
         try {
+            conn = ds.getConnection();
             this.dialect = JooqUtils.dialect(conn);
-        } finally {
-            conn.close();
+        } catch (SQLException e) { throw new DaoException(e);
+        } finally { quietlyCloseConn(conn);
         }
     }
 
