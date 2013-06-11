@@ -85,4 +85,16 @@ public class LocalLink {
     public boolean isParseable() {
         return isParseable;
     }
+
+    public int getSourceId(){
+        return sourceId;
+    }
+
+    public int getDestId(){
+        return destId;
+    }
+
+    public LocationType getLocType(){
+        return locType;
+    }
 }

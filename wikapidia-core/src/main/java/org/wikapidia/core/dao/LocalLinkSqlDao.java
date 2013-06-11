@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao;
 
 import com.typesafe.config.Config;
+import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -13,6 +14,7 @@ import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.PageType;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -106,6 +108,61 @@ public class LocalLinkSqlDao implements LocalLinkDao {
                 i++;
             }
             return i;
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    public void save(LocalLink localLink) throws DaoException {
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            context.insertInto(Tables.LOCAL_LINK).values(
+                    localLink.getLanguage().getId(),
+                    localLink.getAnchorText(),
+                    localLink.getSourceId(),
+                    localLink.getDestId(),
+                    localLink.getLocation(),
+                    localLink.isParseable(),
+                    localLink.getLocType().ordinal()
+            ).execute();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    public void beginLoad() throws DaoException {
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalPageSqlDao.class.getResource("/db/local-link-schema.sql")
+                    ));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    public void endLoad() throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalPageSqlDao.class.getResource("/db/local-link-indexes.sql")
+                    ));
+        } catch (IOException e) {
+            throw new DaoException(e);
         } catch (SQLException e){
             throw new DaoException(e);
         } finally {
