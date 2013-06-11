@@ -11,7 +11,7 @@ package org.wikapidia.core.jooq.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked" })
 public class LocalPage extends org.jooq.impl.TableImpl<org.wikapidia.core.jooq.tables.records.LocalPageRecord> {
 
-	private static final long serialVersionUID = 117763647;
+	private static final long serialVersionUID = 587205233;
 
 	/**
 	 * The singleton instance of <code>PUBLIC.LOCAL_PAGE</code>
@@ -78,7 +78,7 @@ public class LocalPage extends org.jooq.impl.TableImpl<org.wikapidia.core.jooq.t
 	 */
 	@Override
 	public org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.LocalPageRecord> getPrimaryKey() {
-		return org.wikapidia.core.jooq.Keys.CONSTRAINT_6C;
+		return org.wikapidia.core.jooq.Keys.CONSTRAINT_6;
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class LocalPage extends org.jooq.impl.TableImpl<org.wikapidia.core.jooq.t
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.LocalPageRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.LocalPageRecord>>asList(org.wikapidia.core.jooq.Keys.CONSTRAINT_6C);
+		return java.util.Arrays.<org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.LocalPageRecord>>asList(org.wikapidia.core.jooq.Keys.CONSTRAINT_6);
 	}
 
 	/**
