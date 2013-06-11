@@ -7,7 +7,7 @@ import org.wikapidia.core.model.PageType;
 
 import java.util.List;
 
-public interface LocalLinkDao extends Loader {
+public interface LocalLinkDao extends Loader<LocalLink> {
     /**
      * get all the links on a page matching criteria
      * @param language
