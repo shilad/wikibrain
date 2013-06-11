@@ -4,6 +4,7 @@ package org.wikapidia.core.dao;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
+import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalPage;
@@ -13,6 +14,9 @@ import org.wikapidia.core.model.Title;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class TestLocalPageDao {
     @Test
@@ -31,17 +35,43 @@ public class TestLocalPageDao {
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
         LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
         dao.beginLoad();
-        LocalArticle article = new LocalArticle(lang.getLanguage(),
-                7, new Title("test", lang)
+        LocalPage page = new LocalPage(
+                lang.getLanguage(),
+                7,
+                new Title("test", lang),
+                PageType.ARTICLE
         );
-        dao.save(article);
+        dao.save(page);
         dao.endLoad();
 
-        LocalArticle savedPage = dao.getById(lang.getLanguage(), 7);
+        LocalArticle savedPage = dao.getByTitle(lang.getLanguage(), new Title("test", lang));
         assert (savedPage != null);
-        assert (article.getLocalId() == savedPage.getLocalId());
-        assert (article.getTitle().equals(savedPage.getTitle()));
-        assert (article.getPageType().equals(savedPage.getPageType()));
+        assert (page.getLocalId() == savedPage.getLocalId());
+        assert (page.getTitle().equals(savedPage.getTitle()));
+        assert (page.getPageType().equals(savedPage.getPageType()));
+
+        savedPage = dao.getById(lang.getLanguage(), 7);
+        assert (savedPage != null);
+        assert (page.getLocalId() == savedPage.getLocalId());
+        assert (page.getTitle().equals(savedPage.getTitle()));
+        assert (page.getPageType().equals(savedPage.getPageType()));
+
+        List<Integer> pageIds = new ArrayList<Integer>();
+        pageIds.add(7);
+        Map<Integer, LocalArticle> pages = dao.getByIds(lang.getLanguage(), pageIds);
+        assert (pages.size() == 1);
+        assert (pages.get(7).equals(page));
+        assert (pages.get(7).equals(savedPage));
+
+        List<Title> titles = new ArrayList<Title>();
+        titles.add(new Title("test", lang));
+        Map<Title, LocalArticle> morePages = dao.getByTitles(lang.getLanguage(), titles);
+        assert (morePages.size() == 1);
+        assert (morePages.get(new Title("test", lang)).equals(page));
+        assert (morePages.get(new Title("test", lang)).equals(savedPage));
+
+
+
 
 //        WikapidiaIterable<Article> articles = ad.query("test");
 //        assert (articles != null);

@@ -31,11 +31,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created with IntelliJ IDEA.
- * User: houde
- * Date: 6/10/13
- * Time: 4:32 PM
- * To change this template use File | Settings | File Templates.
  */
 public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
     public static final Logger LOG = Logger.getLogger(LocalPageSqlDao.class.getName());
@@ -153,7 +148,7 @@ public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
 
     @Override
     public Map getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
-        Map<Integer, LocalPage> map = new HashMap<Integer, LocalPage>();
+        Map<Integer, T> map = new HashMap<Integer, T>();
         for (Integer pageId : pageIds){
             map.put(pageId, getById(language, pageId));
         }
@@ -162,7 +157,7 @@ public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
 
     @Override
     public Map getByTitles(Language language, Collection<Title> titles, PageType pageType) throws DaoException {
-        Map<Title, LocalPage> map = new HashMap<Title, LocalPage>();
+        Map<Title, T> map = new HashMap<Title, T>();
         for (Title title : titles){
             map.put(title, getByTitle(language, title, pageType));
         }
@@ -185,12 +180,12 @@ public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        PageType ptype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
+        PageType pageType = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
         return new LocalPage(
                 lang,
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
                 title,
-                ptype
+                pageType
         );
     }
 

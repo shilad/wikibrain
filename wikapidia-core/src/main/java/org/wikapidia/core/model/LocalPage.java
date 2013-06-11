@@ -39,11 +39,12 @@ public class LocalPage {
     }
 
     public boolean equals(Object o){
-        if (this.getClass().equals(o.getClass())){
+        if (o instanceof LocalPage){
             LocalPage input = (LocalPage)o;
-            return (input.getLanguage().equals(this.getLanguage()) && input.getLocalId() ==
-                    this.getLocalId());
-        }else{
+            return (input.getLanguage().equals(this.getLanguage()) &&
+                    input.getLocalId() == this.getLocalId()
+            );
+        } else {
             return false;
         }
     }
