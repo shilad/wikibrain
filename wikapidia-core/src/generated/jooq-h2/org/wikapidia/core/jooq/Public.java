@@ -11,7 +11,7 @@ package org.wikapidia.core.jooq;
 @java.lang.SuppressWarnings({ "all", "unchecked" })
 public class Public extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 684669026;
+	private static final long serialVersionUID = 1548699597;
 
 	/**
 	 * The singleton instance of <code>PUBLIC</code>
@@ -47,7 +47,8 @@ public class Public extends org.jooq.impl.SchemaImpl {
 
 	private final java.util.List<org.jooq.Table<?>> getTables0() {
 		return java.util.Arrays.<org.jooq.Table<?>>asList(
-			org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE,
-			org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE);
+			org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE,
+			org.wikapidia.core.jooq.tables.LocalLink.LOCAL_LINK,
+			org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE);
 	}
 }
