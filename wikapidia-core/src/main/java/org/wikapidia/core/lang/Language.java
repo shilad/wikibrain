@@ -135,10 +135,10 @@ public class Language implements Comparable<Language>{
 
     @Override
     public boolean equals(Object o) {
-        if (this.getClass().equals(o.getClass())){
+        if (o instanceof Language) {
             Language input = (Language)o;
             return (this.getId()==input.getId());
-        }else{
+        } else {
             return false;
         }
     }
