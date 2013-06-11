@@ -61,10 +61,19 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.UNIVERSAL_PAGE).values(
-                    -1, // TODO: finish this insert call
-                    null
-            ).execute();
+            UniversalPage<LocalPage> temp = page;
+            PageType pageType = temp.getPageType();
+            for (Language language : temp.getLanguageSetOfExistsInLangs()) {
+                for (LocalPage localPage : temp.getLocalPages(language)) {
+                    context.insertInto(Tables.LOCAL_PAGE).values(
+                            null,
+                            language,
+                            localPage.getLocalId(),
+                            localPage.getTitle().getCanonicalTitle(),
+                            pageType
+                    ).execute();
+                }
+            }
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
