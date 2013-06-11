@@ -128,7 +128,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     /**
-     * Build a LocalPage from a database record representation.
+     * Build a UniversalPage from a database record representation.
      * Classes that extend class this should override this method.
      *
      * @param result a list of database records
