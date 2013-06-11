@@ -1,5 +1,6 @@
 package org.wikapidia.core.dao;
 
+import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.UniversalPage;
 
 import java.util.Collection;
@@ -15,7 +16,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends DaoParent<T> 
      * @return
      * @throws DaoException
      */
-    public abstract T getById(int univId) throws DaoException;
+    public abstract T getById(int univId, PageType pageType) throws DaoException;
 
     /**
      * Returns a map of UniversalPages by a collection of universal IDs
@@ -23,5 +24,5 @@ public interface UniversalPageDao<T extends UniversalPage> extends DaoParent<T> 
      * @return a map of universal IDs to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public abstract Map<Integer, T> getByIds(Collection<Integer> univIds) throws DaoException;
+    public abstract Map<Integer, T> getByIds(Collection<Integer> univIds, PageType pageType) throws DaoException;
 }
