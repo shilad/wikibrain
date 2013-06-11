@@ -174,7 +174,7 @@
                             <deprecated>false</deprecated>
                             <instanceFields>true</instanceFields>
                             <pojos>true</pojos>
-                            <daos>true</daos>
+                            <daos>false</daos>
                         </generate>
                         <target>
                             <packageName>org.wikapidia.core.jooq</packageName>
