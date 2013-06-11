@@ -8,13 +8,7 @@ import org.wikapidia.core.model.Title;
 import java.util.Collection;
 import java.util.Map;
 
-public interface LocalPageDao<T extends LocalPage> {
-
-    public abstract void beginLoad() throws DaoException;
-
-    public abstract void save(T page) throws DaoException;
-
-    public abstract void endLoad() throws DaoException;
+public interface LocalPageDao<T extends LocalPage> extends DaoParent<T> {
 
     /**
      * Get a single page by its title
@@ -45,7 +39,7 @@ public interface LocalPageDao<T extends LocalPage> {
     public abstract Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException;
 
     /**
-     * Get a set of pages by their titles
+     * Get a map of pages by their titles
      * @param language the language of the pages
      * @param titles a Collection of page titles
      * @param ns the namespace of the pages
