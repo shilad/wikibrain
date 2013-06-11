@@ -8,7 +8,7 @@ import org.wikapidia.core.model.Title;
 import java.util.Collection;
 import java.util.Map;
 
-public interface LocalPageDao<T extends LocalPage> extends DaoParent<T> {
+public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
 
     /**
      * Get a single page by its title
