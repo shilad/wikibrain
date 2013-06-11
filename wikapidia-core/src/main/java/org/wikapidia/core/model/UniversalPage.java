@@ -18,15 +18,21 @@ public abstract class UniversalPage<T extends LocalPage> {
      * The universal id for the universal page. Universal ids are defined within but not across namespaces.
      */
     private final int univId;
+    private final PageType pageType;
     private final Multimap<Language, T> localPages;
 
-    public UniversalPage(int univId, Multimap<Language, T> localPages){
+    protected UniversalPage(int univId, PageType pageType, Multimap<Language, T> localPages) {
         this.univId = univId;
+        this.pageType = pageType;
         this.localPages = localPages;
     }
 
     public int getUnivId(){
         return univId;
+    }
+
+    public PageType getPageType() {
+        return pageType;
     }
 
     /**

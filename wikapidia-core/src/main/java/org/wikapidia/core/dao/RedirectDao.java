@@ -1,4 +1,4 @@
-package org.wikapidia.core.dao2;
+package org.wikapidia.core.dao;
 
 import com.sun.istack.internal.Nullable;
 import org.wikapidia.core.WikapidiaException;
