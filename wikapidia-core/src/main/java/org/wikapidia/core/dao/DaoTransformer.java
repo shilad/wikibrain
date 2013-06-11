@@ -1,4 +1,4 @@
-package org.wikapidia.core.dao.unused;
+package org.wikapidia.core.dao;
 
 import org.jooq.Record;
 

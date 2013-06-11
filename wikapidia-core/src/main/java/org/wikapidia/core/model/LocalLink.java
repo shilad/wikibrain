@@ -15,7 +15,7 @@ public class LocalLink {
     private final boolean isParseable;
     private final LocationType locType;
 
-    private static enum LocationType {FIRST_PARA, FIRST_SEC, NONE};
+    public static enum LocationType {FIRST_PARA, FIRST_SEC, NONE};
 
     public static boolean isRedId(int id){
         return (id < 0);
@@ -84,5 +84,17 @@ public class LocalLink {
      */
     public boolean isParseable() {
         return isParseable;
+    }
+
+    public int getSourceId(){
+        return sourceId;
+    }
+
+    public int getDestId(){
+        return destId;
+    }
+
+    public LocationType getLocType(){
+        return locType;
     }
 }
