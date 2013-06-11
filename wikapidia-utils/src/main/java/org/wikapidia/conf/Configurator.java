@@ -1,11 +1,10 @@
 package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigList;
-import com.typesafe.config.ConfigObject;
-import com.typesafe.config.ConfigValue;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.clapper.util.classutil.*;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -14,46 +13,41 @@ import java.util.logging.Logger;
  * Binds together providers for a collection of components. A component is uniquely
  * identified by two elements:
  *
- * 1. A superclass or interface (e.g. LocalPageDao).
+ * 1. A superclass or interface (e.g. DataSource).
  * 2. A name (e.g. 'foo').
  *
- * So there can be multiple instances of the same component as long as it is uniquely named.
+ * So there can be multiple instances of the same component type as long as they are
+ * uniquely named.
  *
- * The configurator Requires a top-level configuration element called "providers" that is a
- * dictionary. The key of a dictionary will be a generic "path" for a component, and the value
- * will be a list of fully qualified class names for providers for components along that path.
- * This configurator will look for its configuration along the path that is the dictionary
- * key of the 'providers' element. Each provider must be a concrete implementation of the
- * abstract Provider class.
+ * The configurator scans the class path for all classes that extend
+ * org.wikapidia.conf.Provider. This configurator will instantiate the provider and ask it
+ * what class it provides (Provider.getType) and what path of the configuration it handles
+ * along (Provider.getPath()).
  *
- * For example, some section of the config file may look like:
+ * For example, let's say that there are two different providers for DataSource:
+ * MySqlDataSourceProvider and H2DataSourceProvider. Both their Provider.getType()
+ * methods must return javax.sql.DataSource and both their Provider.getPath() methods
+ * must return "dao.dataSource".
+ *
+ * Given the following config:
  *
  *      ... some top-level elements...
  *
- *      'providers' : {
- *          'dao.localPage' : [
- *              'org.wikapidia.dao.SqlLocalPageDao',
- *              'org.wikapidia.dao.MemoryLocalPageDao'
- *          ]
- *          ... other providers...
- *      }
- *
- * Note that all providers in a list must return the exact same class, which must be
- * the same class requested by clients.
- *
- * The actual configuration specification for the components follows at some point:
- *
- *      ... some more top-level elements...
- *
  *      'dao' :
- *          'localPage' : {
+ *          'dataSource' : {
  *              'foo' : { ... config params for foo impl ... },
  *              'bar' : { ... config params for bar impl ... },
  *          }
  *
  * If a client requests the local page dao named 'foo', the configurator iterates
- * through all dao.localPage providers pass '{ ... config params for foo .. }' until
- * a provider accepts and generates the requested dao.
+ * through the two providers passing '{ ... config params for foo .. }' until
+ * a provider accepts and generates the requested DataSource.
+ *
+ * A special optional key named 'default' has a value corresponding to the name of
+ * implementation that should be used for the version of get() that does not take
+ * a name. For example, if the dataSource hashtable above had entry 'default' : 'bar',
+ * the 'bar' entry would be used by default if no name was supplied to the get()
+ * method.
  *
  * All generated components are considered singletons. Once a named component is
  * generated once, it is cached and reused for future requests.
@@ -63,17 +57,20 @@ public class Configurator {
 
     public static String PROVIDER_PATH = "providers";
 
+    public static final int MAX_FILE_SIZE = 8 * 1024 * 1024;   // 8MB
+
     private final Configuration conf;
 
     /**
      * A collection of providers for a particular type of component (e.g. LocalPageDao).
      */
     private class ProviderSet {
-        Class klass = null;         // component's superclass or interface
+        Class type = null;          // component's superclass or interface
         String path;                // path for config elements of the components
         List<Provider> providers;   // list of providers for the component.
 
-        ProviderSet(String path) {
+        ProviderSet(Class klass, String path) {
+            this.type = klass;
             this.path = path;
             this.providers = new ArrayList<Provider>();
         }
@@ -95,67 +92,84 @@ public class Configurator {
      */
     public Configurator(Configuration conf) throws ConfigurationException {
         this.conf = conf;
-        searchForProviders(null);
+        registerProviders();
     }
 
     /**
-     * Performs a depth-first search for providers under a particular path.
-     * @param path
+     * Registers all class that extend Providers
      * @throws ConfigurationException
      */
-    private void searchForProviders(String path) throws ConfigurationException {
-        String fullPath = (path == null)
-                ? (PROVIDER_PATH)
-                : (PROVIDER_PATH + "." + path);
-        ConfigValue value = conf.get().getValue(fullPath);
+    private void registerProviders() throws ConfigurationException {
 
-        if (value instanceof ConfigList) {              // a list of providers
-            registerProvidersForComponent(path);
-        } else if (value instanceof ConfigObject) {     // a nested dictionary, so recurse
-            for (String key : ((ConfigObject)value).keySet()) {
-                searchForProviders(path == null ? key : (path + "." + key));
+        for (String entry : System.getProperty("java.class.path").split(":")) {
+            File file = new File(entry);
+            if (file.length() > MAX_FILE_SIZE) {
+                LOG.info("skipping looking for components in large file " + file);
+                continue;
             }
-        } else {
-            throw new ConfigurationException("Encountered unexpected type while walking providers at " + path + ": " + value);
+
+            ClassFinder finder = new ClassFinder();
+            finder.add(new File(entry));
+
+            ClassFilter filter = new ProviderFilter();
+            Collection<ClassInfo> foundClasses = new ArrayList<ClassInfo>();
+            finder.findClasses (foundClasses,filter);
+
+            for (ClassInfo classInfo : foundClasses) {
+                LOG.info("registering component " + classInfo);
+                registerProvider(classInfo.getClassName());
+            }
+        }
+
+        for (Class c : providers.keySet()) {
+            ProviderSet pset = providers.get(c);
+            LOG.info("installed " + pset.providers.size() + " configurators for " + pset.type);
         }
     }
+
+
 
     /**
      * Instantiates providers for the component.
-     * @param componentPath
+     * @param providerClass The name of the provider that should be instaniated
      * @return
      * @throws ConfigurationException
      */
-    private void registerProvidersForComponent(String componentPath) throws ConfigurationException {
-        ProviderSet pset = new ProviderSet(componentPath);
-        for (String providerClass : conf.get().getStringList(PROVIDER_PATH + "." + componentPath)) {
-            try {
-                Class<Provider> klass = (Class<Provider>) Class.forName(providerClass);
-                Provider provider = ConstructorUtils.invokeConstructor(klass, this, conf);
-                if (pset.klass == null) pset.klass = provider.getType();
-                if (!pset.klass.equals(provider.getType())) {
-                    throw new ConfigurationException(
-                            "inconsistent component types declared for " + componentPath +
-                                    " for provider " + klass +
-                                    " expected component type " + pset.klass +
-                                    ", found component type " + provider.getType());
-                }
-                pset.providers.add(provider);
-            } catch (ClassNotFoundException e) {
-                throw new ConfigurationException("error when loading provider for " + componentPath, e);
-            } catch (InvocationTargetException e) {
-                throw new ConfigurationException("error when loading provider for " + componentPath, e);
-            } catch (NoSuchMethodException e) {
-                throw new ConfigurationException("error when loading provider for " + componentPath, e);
-            } catch (InstantiationException e) {
-                throw new ConfigurationException("error when loading provider for " + componentPath, e);
-            } catch (IllegalAccessException e) {
-                throw new ConfigurationException("error when loading provider for " + componentPath, e);
+    private void registerProvider(String providerClass) throws ConfigurationException {
+        try {
+            Class<Provider> klass = (Class<Provider>) Class.forName(providerClass);
+            Provider provider = ConstructorUtils.invokeConstructor(klass, this, conf);
+
+            Class type = provider.getType();
+            String path = provider.getPath();
+            ProviderSet pset = providers.get(type);
+            if (pset == null) {
+                pset = new ProviderSet(type, path);
+                providers.put(type, pset);
+                components.put(type, new HashMap<String, Object>());
             }
+            if (pset.type != type) {
+                throw new IllegalStateException();
+            }
+            if (!pset.path.equals(path)) {
+                throw new ConfigurationException(
+                        "inconsistent component path declared for provider " + klass +
+                        " that provides type " + type +
+                        " expected path " + pset.path +
+                        ", found path " + path);
+            }
+            pset.providers.add(provider);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationException("error when loading provider " + providerClass, e);
+        } catch (InvocationTargetException e) {
+            throw new ConfigurationException("error when loading provider " + providerClass, e);
+        } catch (NoSuchMethodException e) {
+            throw new ConfigurationException("error when loading provider " + providerClass, e);
+        } catch (InstantiationException e) {
+            throw new ConfigurationException("error when loading provider " + providerClass, e);
+        } catch (IllegalAccessException e) {
+            throw new ConfigurationException("error when loading provider " + providerClass, e);
         }
-        providers.put(pset.klass, pset);
-        components.put(pset.klass, new HashMap<String, Object>());
-        LOG.info("installed " + pset.providers.size() + " configurators for " + pset.klass);
     }
 
     /**
@@ -211,23 +225,18 @@ public class Configurator {
             throw new ConfigurationException("Configuration path " + pset.path + " does not exist");
         }
         Config config = conf.get().getConfig(pset.path);
-        Map<String, Object> cache = components.get(klass);
-        synchronized (cache) {
-            if (cache.containsKey("")) {
-                return cache.get("");
-            }
-            for (Provider p : pset.providers) {
-                Object o = p.get("", config);
-                if (o != null) {
-                    cache.put("", o);
-                    return o;
-                }
-            }
+        if (config.hasPath("default")) {
+            return get(klass, config.getString("default"));
+        } else if (config.root().keySet().size() == 1) {
+            return get(klass, config.root().keySet().iterator().next());
+        } else {
+            throw new IllegalArgumentException(
+                    "Ambiguous request for nameless component with type " + klass +
+                    " the configuration dictionary at path " + pset.path +
+                    " must either have a 'default' key specifying the name " +
+                    " of the default implementation or exactly one element. " +
+                    "Available provider implementations are: " + Arrays.toString(pset.providers.toArray())
+            );
         }
-        throw new ConfigurationException(
-                "None of the " + pset.providers.size() + " providers claimed ownership of component " +
-                        "with class " + klass + " no name, " +
-                        "' and configuration path '" + pset.path + "'"
-        );
     }
 }

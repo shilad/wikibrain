@@ -9,6 +9,8 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 public class TestConfigurator {
+    public static final String INTMAKER_PATH =  "some.path.intMaker";
+
     @Test
     public void testSimple() throws ConfigurationException {
         // Should pick up configuration in reference.conf

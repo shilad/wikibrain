@@ -20,6 +20,11 @@ public class ConstantIntProvider extends Provider<Integer> {
     }
 
     @Override
+    public String getPath() {
+        return TestConfigurator.INTMAKER_PATH;
+    }
+
+    @Override
     public Integer get(String name, Config config) throws ConfigurationException {
         if (!config.getString("type").equals("constant")) {
             return null;

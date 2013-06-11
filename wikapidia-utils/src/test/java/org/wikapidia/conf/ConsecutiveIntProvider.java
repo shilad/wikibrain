@@ -24,6 +24,11 @@ public class ConsecutiveIntProvider extends Provider<Integer> {
     }
 
     @Override
+    public String getPath() {
+        return TestConfigurator.INTMAKER_PATH;
+    }
+
+    @Override
     public Integer get(String name, Config config) throws ConfigurationException {
         if (!config.getString("type").equals("consecutive")) {
             return null;

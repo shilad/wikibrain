@@ -5,6 +5,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.ParserVisitor;
@@ -55,7 +56,7 @@ public class DumpLoaderMain {
         parser.parse(visitors);
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException {
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -74,7 +75,6 @@ public class DumpLoaderMain {
                         .withDescription("create all indexes after loading")
                         .create("i"));
 
-
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
         try {
@@ -84,8 +84,6 @@ public class DumpLoaderMain {
             new HelpFormatter().printHelp("DumpLoaderMain", options);
             return;
         }
-
-
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 

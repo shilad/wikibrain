@@ -1,6 +1,7 @@
 package org.wikapidia.dao.load;
 
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.parser.wiki.ParserVisitor;
@@ -21,7 +22,7 @@ public class LocalPageLoader extends ParserVisitor {
     public void beginPage(PageXml xml) throws WikapidiaException {
         try {
             dao.save(new LocalPage(xml.getLang(), xml.getPageId(), xml.getTitle(), xml.getType()));
-        } catch (SQLException e) {
+        } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
     }

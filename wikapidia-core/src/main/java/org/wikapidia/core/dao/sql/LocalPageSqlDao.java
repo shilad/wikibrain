@@ -1,10 +1,15 @@
 package org.wikapidia.core.dao.sql;
 
+import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.JooqUtils;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -198,6 +203,38 @@ public class LocalPageSqlDao implements LocalPageDao {
                 conn.close();
             } catch (SQLException e) {
                 LOG.log(Level.WARNING, "Failed to close connection: ", e);
+            }
+        }
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LocalPageDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LocalPageDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.localPage";
+        }
+
+        @Override
+        public LocalPageDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("sql")) {
+                return null;
+            }
+            try {
+                return new LocalPageSqlDao(
+                        (DataSource) getConfigurator().get(
+                                DataSource.class,
+                                config.getString("dataSource"))
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
             }
         }
     }

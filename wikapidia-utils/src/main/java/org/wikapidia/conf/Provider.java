@@ -29,6 +29,20 @@ public abstract class Provider<T> {
     public abstract Class getType();
 
     /**
+     * Returns the path in the configuration file for the components.
+     * For example: 'dao.dataSource'.
+     *
+     * The configuration at this location is actually a dictionary whose
+     * keys are different names for the options for this component and
+     * values are the configuration for that option.
+     *
+     * For example, in the previous example, dao.dataSource could
+     * have configuration { h2 : {..}, mysql: {..} }, and it would thus
+     * have two different named options.
+     */
+    public abstract String getPath();
+
+    /**
      * Should return a configured instance of the requested class,
      * or null if it cannot be created by this provider.
      */
