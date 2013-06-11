@@ -37,4 +37,9 @@ public class Tables {
 	 * The table PUBLIC.LOCAL_PAGE
 	 */
 	public static final org.wikapidia.core.jooq.tables.LocalPage LOCAL_PAGE = org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE;
+
+	/**
+	 * The table PUBLIC.UNIVERSAL_PAGE
+	 */
+	public static final org.wikapidia.core.jooq.tables.UniversalPage UNIVERSAL_PAGE = org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE;
 }

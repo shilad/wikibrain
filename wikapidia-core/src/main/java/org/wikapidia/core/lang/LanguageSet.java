@@ -5,10 +5,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.WikapidiaException;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,7 +14,7 @@ import java.util.Set;
  * Time: 1:12 AM
  * To change this template use File | Settings | File Templates.
  */
-public class LanguageSet {
+public class LanguageSet implements Iterable<Language>{
 
     private Set<Language> langs;
     private Language defaultLanguage;
@@ -126,4 +123,8 @@ public class LanguageSet {
     }
 
 
+    @Override
+    public Iterator<Language> iterator() {
+        return langs.iterator();
+    }
 }

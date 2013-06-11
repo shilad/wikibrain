@@ -21,6 +21,7 @@ public class Keys {
 	public static final org.jooq.Identity<org.wikapidia.core.jooq.tables.records.LinkRecord, java.lang.Long> IDENTITY_LINK = Identities0.IDENTITY_LINK;
 	public static final org.jooq.Identity<org.wikapidia.core.jooq.tables.records.ConceptRecord, java.lang.Long> IDENTITY_CONCEPT = Identities0.IDENTITY_CONCEPT;
 	public static final org.jooq.Identity<org.wikapidia.core.jooq.tables.records.LocalPageRecord, java.lang.Long> IDENTITY_LOCAL_PAGE = Identities0.IDENTITY_LOCAL_PAGE;
+	public static final org.jooq.Identity<org.wikapidia.core.jooq.tables.records.UniversalPageRecord, java.lang.Long> IDENTITY_UNIVERSAL_PAGE = Identities0.IDENTITY_UNIVERSAL_PAGE;
 
 	// -------------------------------------------------------------------------
 	// UNIQUE and PRIMARY KEY definitions
@@ -30,6 +31,7 @@ public class Keys {
 	public static final org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.LinkRecord> CONSTRAINT_2 = UniqueKeys0.CONSTRAINT_2;
 	public static final org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.ConceptRecord> CONSTRAINT_6 = UniqueKeys0.CONSTRAINT_6;
 	public static final org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.LocalPageRecord> CONSTRAINT_6C = UniqueKeys0.CONSTRAINT_6C;
+	public static final org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.UniversalPageRecord> CONSTRAINT_D = UniqueKeys0.CONSTRAINT_D;
 
 	// -------------------------------------------------------------------------
 	// FOREIGN KEY definitions
@@ -44,6 +46,7 @@ public class Keys {
 		public static org.jooq.Identity<org.wikapidia.core.jooq.tables.records.LinkRecord, java.lang.Long> IDENTITY_LINK = createIdentity(org.wikapidia.core.jooq.tables.Link.LINK, org.wikapidia.core.jooq.tables.Link.LINK.ID);
 		public static org.jooq.Identity<org.wikapidia.core.jooq.tables.records.ConceptRecord, java.lang.Long> IDENTITY_CONCEPT = createIdentity(org.wikapidia.core.jooq.tables.Concept.CONCEPT, org.wikapidia.core.jooq.tables.Concept.CONCEPT.ID);
 		public static org.jooq.Identity<org.wikapidia.core.jooq.tables.records.LocalPageRecord, java.lang.Long> IDENTITY_LOCAL_PAGE = createIdentity(org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE, org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE.ID);
+		public static org.jooq.Identity<org.wikapidia.core.jooq.tables.records.UniversalPageRecord, java.lang.Long> IDENTITY_UNIVERSAL_PAGE = createIdentity(org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE, org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE.ID);
 	}
 
 	private static class UniqueKeys0 extends org.jooq.impl.AbstractKeys {
@@ -51,5 +54,6 @@ public class Keys {
 		public static final org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.LinkRecord> CONSTRAINT_2 = createUniqueKey(org.wikapidia.core.jooq.tables.Link.LINK, org.wikapidia.core.jooq.tables.Link.LINK.ID);
 		public static final org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.ConceptRecord> CONSTRAINT_6 = createUniqueKey(org.wikapidia.core.jooq.tables.Concept.CONCEPT, org.wikapidia.core.jooq.tables.Concept.CONCEPT.ID);
 		public static final org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.LocalPageRecord> CONSTRAINT_6C = createUniqueKey(org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE, org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE.ID);
+		public static final org.jooq.UniqueKey<org.wikapidia.core.jooq.tables.records.UniversalPageRecord> CONSTRAINT_D = createUniqueKey(org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE, org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE.ID);
 	}
 }

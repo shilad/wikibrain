@@ -4,14 +4,11 @@ import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.JooqUtils;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
@@ -27,28 +24,13 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  */
-public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
-    public static final Logger LOG = Logger.getLogger(LocalPageSqlDao.class.getName());
-
-    protected final SQLDialect dialect;
-    protected DataSource ds;
+public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao implements LocalPageDao<T> {
 
     public LocalPageSqlDao(DataSource dataSource) throws DaoException {
-        ds = dataSource;
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            this.dialect = JooqUtils.dialect(conn);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        super(dataSource);
     }
 
     @Override
@@ -108,6 +90,25 @@ public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
     }
 
     @Override
+    public T getById(Language language, int pageId) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Record record = context.select().
+                    from(Tables.LOCAL_PAGE).
+                    where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
+                    and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
+                    fetchOne();
+            return (T)buildLocalPage(record);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
     public T getByTitle(Language language, Title title, PageType pageType) throws DaoException {
         Connection conn = null;
         try {
@@ -128,26 +129,7 @@ public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
     }
 
     @Override
-    public T getById(Language language, int pageId) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Record record = context.select().
-                    from(Tables.LOCAL_PAGE).
-                    where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
-                    and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
-                    fetchOne();
-            return (T)buildLocalPage(record);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public Map getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
+    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
         Map<Integer, T> map = new HashMap<Integer, T>();
         for (Integer pageId : pageIds){
             map.put(pageId, getById(language, pageId));
@@ -156,7 +138,7 @@ public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
     }
 
     @Override
-    public Map getByTitles(Language language, Collection<Title> titles, PageType pageType) throws DaoException {
+    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, PageType pageType) throws DaoException {
         Map<Title, T> map = new HashMap<Title, T>();
         for (Title title : titles){
             map.put(title, getByTitle(language, title, pageType));
@@ -187,20 +169,6 @@ public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
                 title,
                 pageType
         );
-    }
-
-    /**
-     * Close a connection without generating an exception if it fails.
-     * @param conn
-     */
-    public static void quietlyCloseConn(Connection conn) {
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                LOG.log(Level.WARNING, "Failed to close connection: ", e);
-            }
-        }
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalPageDao> {
