@@ -18,30 +18,13 @@ CREATE TABLE local_link (
   location_type SMALLINT NOT NULL
 );
 
-DROP TABLE IF EXISTS article;
-CREATE TABLE article (
-  id INT PRIMARY KEY NOT NULL,
-  title VARCHAR(256) NOT NULL,
-  ns INT NOT NULL,
-  ptype INT NOT NULL,
-  text TEXT NOT NULL
-);
-
-DROP TABLE IF EXISTS link;
-CREATE TABLE link (
+DROP TABLE IF EXISTS universal_page;
+CREATE TABLE universal_page (
   id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-  article_id INT NOT NULL,
-  text TEXT NOT NULL
-);
-
-DROP TABLE IF EXISTS concept;
-CREATE TABLE concept (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL
-);
-
-DROP TABLE IF EXISTS article_concept;
-CREATE TABLE article_concept (
-  article_id INT NOT NULL,
-  concept_id INT NOT NULL
+  lang_id SMALLINT NOT NULL,
+  page_id INT NOT NULL,
+  title VARCHAR(256) NOT NULL,
+  page_type SMALLINT NOT NULL,
+  univ_id INT NOT NULL
 );
 COMMIT;
