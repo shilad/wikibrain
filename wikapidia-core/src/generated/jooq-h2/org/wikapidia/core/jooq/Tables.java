@@ -27,9 +27,4 @@ public class Tables {
 	 * The table PUBLIC.LOCAL_LINK
 	 */
 	public static final org.wikapidia.core.jooq.tables.LocalLink LOCAL_LINK = org.wikapidia.core.jooq.tables.LocalLink.LOCAL_LINK;
-
-	/**
-	 * The table PUBLIC.UNIVERSAL_PAGE
-	 */
-	public static final org.wikapidia.core.jooq.tables.UniversalPage UNIVERSAL_PAGE = org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE;
 }
