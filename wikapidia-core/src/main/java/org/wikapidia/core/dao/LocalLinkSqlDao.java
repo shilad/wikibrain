@@ -7,37 +7,22 @@ import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.dao.sql.AbstractSqlDao;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
-import org.wikapidia.core.model.PageType;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
-public class LocalLinkSqlDao implements LocalLinkDao {
-    public static final Logger LOG = Logger.getLogger(LocalPageSqlDao.class.getName());
-
-    private final SQLDialect dialect;
-    private final DataSource ds;
+public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
 
     public LocalLinkSqlDao (DataSource dataSource) throws DaoException{
-        ds = dataSource;
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            this.dialect = JooqUtils.dialect(conn);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        super(dataSource);
     }
 
 
@@ -167,20 +152,6 @@ public class LocalLinkSqlDao implements LocalLinkDao {
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
-        }
-    }
-
-    /**
-     * Close a connection without generating an exception if it fails.
-     * @param conn
-     */
-    public static void quietlyCloseConn(Connection conn) {
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                LOG.log(Level.WARNING, "Failed to close connection: ", e);
-            }
         }
     }
 
