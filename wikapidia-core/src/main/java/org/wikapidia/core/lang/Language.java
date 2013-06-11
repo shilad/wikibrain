@@ -132,4 +132,14 @@ public class Language implements Comparable<Language>{
     public int compareTo(Language language) {
         return Short.valueOf(this.id).compareTo(language.id);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this.getClass().equals(o.getClass())){
+            Language input = (Language)o;
+            return (this.getId()==input.getId());
+        }else{
+            return false;
+        }
+    }
 }

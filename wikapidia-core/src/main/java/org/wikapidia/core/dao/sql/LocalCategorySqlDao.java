@@ -19,21 +19,6 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
         super(dataSource);
     }
 
-    @Override
-    public LocalCategory getById(Language language, int pageId) throws DaoException{
-        LocalPage page = super.getById(language, pageId);
-        if(page.getPageType() == PageType.CATEGORY) {
-            return new LocalCategory(
-                    page.getLanguage(),
-                    page.getLocalId(),
-                    page.getTitle()
-            );
-        }
-        else {
-            throw new DaoException("Tried to get CATEGORY, but found " + page.getPageType().name());
-        }
-    }
-
     /**
      * Returns a LocalCategory based on language and title, with namespace assumed as CATEGORY.
      *
@@ -44,17 +29,7 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
      */
     @Override
     public LocalCategory getByTitle(Language language, Title title) throws DaoException {
-        LocalPage page = super.getByTitle(language, title, PageType.CATEGORY);
-        if(page.getPageType() == PageType.CATEGORY) {
-            return new LocalCategory(
-                    page.getLanguage(),
-                    page.getLocalId(),
-                    page.getTitle()
-            );
-        }
-        else {
-            throw new DaoException("Tried to get CATEGORY, but found " + page.getPageType().name());
-        }
+        return super.getByTitle(language, title, PageType.CATEGORY);
     }
 
     /**
@@ -67,22 +42,12 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
      */
     @Override
     public Map<Title, LocalCategory> getByTitles(Language language, Collection<Title> titles) throws DaoException{
-        Map<Title, LocalPage> map = super.getByTitles(language, titles, PageType.CATEGORY);
-        Map<Title, LocalCategory> newMap = new HashMap<Title, LocalCategory>();
-        for (Title title : map.keySet()) {
-            LocalCategory temp = new LocalCategory(
-                    map.get(title).getLanguage(),
-                    map.get(title).getLocalId(),
-                    map.get(title).getTitle()
-            );
-            newMap.put(title, temp);
-        }
-        return newMap;
+        return super.getByTitles(language, titles, PageType.CATEGORY);
     }
 
 
     @Override
-    protected LocalPage buildLocalPage(Record record) throws DaoException {
+    protected LocalCategory buildLocalPage(Record record) throws DaoException {
         if (record == null) {
             return null;
         }
@@ -90,9 +55,9 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        PageType ptype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
-        if (ptype != PageType.CATEGORY) {
-            throw new DaoException("expected a category, but found " + ptype);
+        PageType pageType = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
+        if (pageType != PageType.CATEGORY) {
+            throw new DaoException("Tried to get CATEGORY, but found " + pageType);
         }
         return new LocalCategory(
                 lang,

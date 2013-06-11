@@ -22,21 +22,6 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
         super(dataSource);
     }
 
-    @Override
-    public LocalArticle getById(Language language, int pageId) throws DaoException{
-        LocalPage page = super.getById(language, pageId);
-        if(page.getPageType() == PageType.ARTICLE) {
-            return new LocalArticle(
-                    page.getLanguage(),
-                    page.getLocalId(),
-                    page.getTitle()
-            );
-        }
-        else {
-            throw new DaoException("Tried to get ARTICLE, but found " + page.getPageType().name());
-        }
-    }
-
     /**
      * Returns a LocalArticle based on language and title, with namespace assumed as ARTICLE.
      *
@@ -46,17 +31,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
      * @throws DaoException
      */
     public LocalArticle getByTitle(Language language, Title title) throws DaoException {
-        LocalPage page = super.getByTitle(language, title, PageType.ARTICLE);
-        if(page.getPageType() == PageType.ARTICLE) {
-            return new LocalArticle(
-                    page.getLanguage(),
-                    page.getLocalId(),
-                    page.getTitle()
-            );
-        }
-        else {
-            throw new DaoException("Tried to get ARTICLE, but found " + page.getPageType().name());
-        }
+        return super.getByTitle(language, title, PageType.ARTICLE);
     }
 
     /**
@@ -68,21 +43,11 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
      * @throws DaoException
      */
     public Map<Title, LocalArticle> getByTitles(Language language, Collection<Title> titles) throws DaoException{
-        Map<Title, LocalPage> map = super.getByTitles(language, titles, PageType.ARTICLE);
-        Map<Title, LocalArticle> newMap = new HashMap<Title, LocalArticle>();
-        for (Title title : map.keySet()) {
-            LocalArticle temp = new LocalArticle(
-                    map.get(title).getLanguage(),
-                    map.get(title).getLocalId(),
-                    map.get(title).getTitle()
-            );
-            newMap.put(title, temp);
-        }
-        return newMap;
+        return super.getByTitles(language, titles, PageType.ARTICLE);
     }
 
     @Override
-    protected LocalPage buildLocalPage(Record record) throws DaoException {
+    protected LocalArticle buildLocalPage(Record record) throws DaoException {
         if (record == null) {
             return null;
         }
@@ -90,9 +55,9 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        PageType ptype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
-        if (ptype != PageType.ARTICLE) {
-            throw new DaoException("expected an article, but found " + ptype);
+        PageType pageType = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
+        if (pageType != PageType.ARTICLE) {
+            throw new DaoException("Tried to get ARTICLE, but found " + pageType);
         }
         return new LocalArticle(
                 lang,
