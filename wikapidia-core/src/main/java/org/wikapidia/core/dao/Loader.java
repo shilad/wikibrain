@@ -2,7 +2,7 @@ package org.wikapidia.core.dao;
 
 /**
  */
-public interface DaoParent<T> {
+public interface Loader<T> {
 
     public abstract void beginLoad() throws DaoException;
 
