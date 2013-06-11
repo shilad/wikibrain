@@ -42,6 +42,11 @@ public class DataSourceProvider extends Provider<DataSource> {
     }
 
     @Override
+    public String getPath() {
+        return "dao.dataSource";
+    }
+
+    @Override
     public DataSource get(String name, Config config) throws ConfigurationException {
         try {
             Class.forName(config.getString("driver"));

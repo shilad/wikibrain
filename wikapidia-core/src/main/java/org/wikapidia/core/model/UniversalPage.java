@@ -102,13 +102,7 @@ public abstract class UniversalPage<T extends LocalPage> {
         return localPages.values().size();
     }
 
-
-
-
-
-
-
-
-
-
+    public static interface LocalPageChooser<T extends LocalPage> {
+        public T choose(Collection<T> localPages);
+    }
 }

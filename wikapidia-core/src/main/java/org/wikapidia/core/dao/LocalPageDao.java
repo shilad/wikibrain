@@ -161,6 +161,11 @@ public class LocalPageDao {
         }
 
         @Override
+        public String getPath() {
+            return "dao.localPage";
+        }
+
+        @Override
         public LocalPageDao get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
