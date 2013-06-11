@@ -10,7 +10,7 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.ParserVisitor;
 import org.wikapidia.parser.wiki.WikiTextDumpParser;
-import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.core.model.RawPage;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -33,7 +33,7 @@ public class DumpLoaderMain {
         this.visitors = new ArrayList<ParserVisitor>(visitors);
         this.visitors.add(0, new ParserVisitor() {
             @Override
-            public void beginPage(PageXml page) {
+            public void beginPage(RawPage page) {
                 if (counter.incrementAndGet() % 100 == 0) {
                     LOG.info("processing article " + counter.get());
                 }
