@@ -8,7 +8,7 @@ import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.Map;
 
-public interface LocalArticleDao extends LocalPageDao {
+public interface LocalArticleDao extends LocalPageDao<LocalArticle>  {
 
     @Override
     public abstract LocalArticle getById(Language language, int pageId) throws DaoException;

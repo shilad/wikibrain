@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * Time: 4:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class LocalPageSqlDao implements LocalPageDao {
+public class LocalPageSqlDao<T extends LocalPage> implements LocalPageDao<T> {
     public static final Logger LOG = Logger.getLogger(LocalPageSqlDao.class.getName());
 
     protected final SQLDialect dialect;
@@ -113,7 +113,7 @@ public class LocalPageSqlDao implements LocalPageDao {
     }
 
     @Override
-    public LocalPage getByTitle(Language language, Title title, PageType pageType) throws DaoException {
+    public T getByTitle(Language language, Title title, PageType pageType) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -124,7 +124,7 @@ public class LocalPageSqlDao implements LocalPageDao {
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(title.getLanguage().getId())).
                     and(Tables.LOCAL_PAGE.PAGE_TYPE.eq(pageType.getPageTypeId())).
                     fetchOne();
-            return buildLocalPage(record);
+            return (T)buildLocalPage(record);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -133,7 +133,7 @@ public class LocalPageSqlDao implements LocalPageDao {
     }
 
     @Override
-    public LocalPage getById(Language language, int pageId) throws DaoException {
+    public T getById(Language language, int pageId) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -143,7 +143,7 @@ public class LocalPageSqlDao implements LocalPageDao {
                     where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne();
-            return buildLocalPage(record);
+            return (T)buildLocalPage(record);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -170,13 +170,14 @@ public class LocalPageSqlDao implements LocalPageDao {
     }
 
     /**
-     * Build a LocalPage from a database record representation
+     * Build a LocalPage from a database record representation.
+     * Classes that extend class this should override this method.
      *
      * @param record a database record
      * @return a LocalPage representation of the given database record
      * @throws DaoException if the record is not a Page
      */
-    private LocalPage buildLocalPage(Record record) throws DaoException {
+    protected LocalPage buildLocalPage(Record record) throws DaoException {
         if (record == null) {
             return null;
         }

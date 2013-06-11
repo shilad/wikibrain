@@ -8,11 +8,11 @@ import org.wikapidia.core.model.Title;
 import java.util.Collection;
 import java.util.Map;
 
-public interface LocalPageDao {
+public interface LocalPageDao<T extends LocalPage> {
 
     public abstract void beginLoad() throws DaoException;
 
-    public abstract void save(LocalPage page) throws DaoException;
+    public abstract void save(T page) throws DaoException;
 
     public abstract void endLoad() throws DaoException;
 
@@ -24,7 +24,7 @@ public interface LocalPageDao {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract LocalPage getByTitle(Language language, Title title, PageType ns) throws DaoException;
+    public abstract T getByTitle(Language language, Title title, PageType ns) throws DaoException;
 
     /**
      * Get a single page by its title
@@ -33,7 +33,7 @@ public interface LocalPageDao {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract LocalPage getById(Language language, int pageId) throws DaoException;
+    public abstract T getById(Language language, int pageId) throws DaoException;
 
     /**
      * Get a set of pages by their ids
@@ -42,7 +42,7 @@ public interface LocalPageDao {
      * @return a map of ids to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public abstract Map<Integer, LocalPage> getByIds(Language language, Collection<Integer> pageIds) throws DaoException;
+    public abstract Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException;
 
     /**
      * Get a set of pages by their titles
@@ -52,5 +52,5 @@ public interface LocalPageDao {
      * @return a map of titles to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Title, LocalPage> getByTitles(Language language, Collection<Title> titles, PageType ns) throws DaoException;
+    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, PageType ns) throws DaoException;
 }

@@ -8,7 +8,7 @@ import org.wikapidia.core.model.Title;
 import java.util.Collection;
 import java.util.Map;
 
-public interface LocalCategoryDao extends LocalPageDao {
+public interface LocalCategoryDao extends LocalPageDao<LocalCategory> {
 
     @Override
     public abstract LocalCategory getById(Language language, int pageId) throws DaoException;

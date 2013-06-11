@@ -1,8 +1,11 @@
 package org.wikapidia.core.dao.sql;
 
+import org.jooq.Record;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalArticleDao;
+import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.PageType;
@@ -13,7 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LocalArticleSqlDao extends LocalPageSqlDao implements LocalArticleDao {
+public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements LocalArticleDao{
 
     public LocalArticleSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource);
@@ -76,5 +79,25 @@ public class LocalArticleSqlDao extends LocalPageSqlDao implements LocalArticleD
             newMap.put(title, temp);
         }
         return newMap;
+    }
+
+    @Override
+    protected LocalPage buildLocalPage(Record record) throws DaoException {
+        if (record == null) {
+            return null;
+        }
+        Language lang = Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID));
+        Title title = new Title(
+                record.getValue(Tables.LOCAL_PAGE.TITLE), true,
+                LanguageInfo.getByLanguage(lang));
+        PageType ptype = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
+        if (ptype != PageType.ARTICLE) {
+            throw new DaoException("expected an article, but found " + ptype);
+        }
+        return new LocalArticle(
+                lang,
+                record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
+                title
+        );
     }
 }
