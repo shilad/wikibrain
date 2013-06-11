@@ -59,7 +59,7 @@ public enum PageType {
      * @return This method will let you know if a given PageType is a Talk-type page.
      */
     public boolean isTalk() {
-        return (!(namespace==NameSpace.SPECIAL) && namespace.getValue()%2 == 1);
+        return (namespace.getValue() >= 0 && namespace.getValue()%2 == 1);
     }
 
     /**
@@ -68,6 +68,16 @@ public enum PageType {
      */
     public boolean isMainNs() {
         return namespace == NameSpace.MAIN;
+    }
+
+    /**
+     * Returns a short ID for the PageType.
+     * The ID is determined arbitrarily by this Enum, and should not be referenced to
+     * anything else. It is unrelated to NameSpace.getValue().
+     * @return
+     */
+    public short getPageTypeId() {
+        return (short) ordinal();
     }
 
     /**
