@@ -1,6 +1,10 @@
 package org.wikapidia.core.dao.sql;
 
+import com.typesafe.config.Config;
 import org.jooq.Record;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryDao;
 import org.wikapidia.core.jooq.Tables;
@@ -64,5 +68,37 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
                 title
         );
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LocalCategoryDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LocalCategoryDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.localCategory";
+        }
+
+        @Override
+        public LocalCategoryDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("sql")) {
+                return null;
+            }
+            try {
+                return new LocalCategorySqlDao(
+                        (DataSource) getConfigurator().get(
+                                DataSource.class,
+                                config.getString("dataSource"))
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
     }
 }

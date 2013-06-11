@@ -1,6 +1,10 @@
 package org.wikapidia.core.dao.sql;
 
+import com.typesafe.config.Config;
 import org.jooq.Record;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalArticleDao;
 import org.wikapidia.core.jooq.Tables;
@@ -64,5 +68,37 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
                 title
         );
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LocalArticleDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LocalArticleDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.localArticle";
+        }
+
+        @Override
+        public LocalArticleDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("sql")) {
+                return null;
+            }
+            try {
+                return new LocalArticleSqlDao(
+                        (DataSource) getConfigurator().get(
+                                DataSource.class,
+                                config.getString("dataSource"))
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
     }
 }
