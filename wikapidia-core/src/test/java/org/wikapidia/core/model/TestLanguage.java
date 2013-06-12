@@ -10,13 +10,13 @@ public class TestLanguage {
     @Test
     public void testByLangCode() {
         Language en = Language.getByLangCode("en");
-        assertEquals(en.getId(), 1);
+        assert (en.getId() == 1);
         assertEquals(en.getLangCode(), "en");
         assertEquals(en.getEnLangName(), "English");
         assertEquals(en.getNativeName(), "English");
 
         Language tr = Language.getByLangCode("tr");
-        assertEquals(tr.getId(), 23);
+        assert (tr.getId() == 23);
         assertEquals(tr.getLangCode(), "tr");
         assertEquals(tr.getEnLangName(), "Turkish");
         assertEquals(tr.getNativeName(), "Türkçe");
@@ -35,13 +35,13 @@ public class TestLanguage {
     @Test
     public void testById() {
         Language en = Language.getById(1);
-        assertEquals(en.getId(), 1);
+        assert (en.getId() == 1);
         assertEquals(en.getLangCode(), "en");
         assertEquals(en.getEnLangName(), "English");
         assertEquals(en.getNativeName(), "English");
 
         Language tr = Language.getById(23);
-        assertEquals(tr.getId(), 23);
+        assert (tr.getId() == 23);
         assertEquals(tr.getLangCode(), "tr");
         assertEquals(tr.getEnLangName(), "Turkish");
         assertEquals(tr.getNativeName(), "Türkçe");
