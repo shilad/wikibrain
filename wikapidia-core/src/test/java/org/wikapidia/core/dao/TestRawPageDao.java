@@ -11,6 +11,7 @@ import org.wikapidia.core.model.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Date;
 
 public class TestRawPageDao {
     @Test
@@ -41,7 +42,7 @@ public class TestRawPageDao {
         lpDao.save(page);
         String body = "foo bar \000baz\n\n\324";
         RawPage rawPage = new RawPage(
-                7, 3242, "test", body, null, PageType.ARTICLE, lang.getLanguage()
+                7, 3242, "test", body, new Date(), PageType.ARTICLE, lang.getLanguage()
         );
         rpDao.save(rawPage);
 
@@ -60,5 +61,15 @@ public class TestRawPageDao {
         assert (page.getTitle().equals(rawSaved.getTitle()));
         assert (page.getPageType().equals(rawSaved.getType()));
         assert (body.equals(rawSaved.getBody()));
+
+        WikapidiaIterable<RawPage> savedRaws = rpDao.allRawPages();
+        assert (savedRaws!=null);
+        RawPage savedRaw = savedRaws.iterator().next();
+        assert (savedRaw.getType().getNamespace().getValue() == rawPage.getType().getNamespace().getValue());
+        assert (savedRaw.getLastEdit().equals(rawPage.getLastEdit()));
+        assert (savedRaw.getRevisionId() == rawPage.getRevisionId());
+        assert (savedRaw.getBody().equals(body));
+        assert (savedRaw.getLang().equals(rawPage.getLang()));
+        assert (savedRaw.getTitle().equals(rawPage.getTitle()));
     }
 }

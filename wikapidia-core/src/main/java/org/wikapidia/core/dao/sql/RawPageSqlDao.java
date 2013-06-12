@@ -2,23 +2,28 @@ package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
+import org.jooq.Cursor;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.RawPageDao;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.RawPage;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Retrieves and stores page text.
@@ -59,7 +64,11 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             context.insertInto(Tables.RAW_PAGE).values(
                     page.getLang().getId(),
                     page.getPageId(),
-                    page.getBody()
+                    page.getRevisionId(),
+                    page.getBody(),
+                    page.getTitle(),
+                    page.getLastEdit(),
+                    page.getType().getNamespace().getValue()
             ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -100,6 +109,18 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                 lp.getLanguage());
     }
 
+    private RawPage databaseToRaw(Record record){
+        Timestamp timestamp = record.getValue(Tables.RAW_PAGE.LASTEDIT);
+        return new RawPage(record.getValue(Tables.RAW_PAGE.PAGE_ID),
+                record.getValue(Tables.RAW_PAGE.REVISION_ID),
+                record.getValue(Tables.RAW_PAGE.TITLE),
+                record.getValue(Tables.RAW_PAGE.BODY),
+                new Date(timestamp.getTime()),
+                PageType.values()[record.getValue(Tables.RAW_PAGE.PAGE_TYPE)],
+                Language.getById(record.getValue(Tables.RAW_PAGE.LANG_ID))
+        );
+    }
+
     @Override
     public String getBody(Language language, int localPageId) throws DaoException {
         Connection conn = null;
@@ -112,11 +133,33 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                 where(Tables.RAW_PAGE.PAGE_ID.eq(localPageId)).
                 and(Tables.RAW_PAGE.LANG_ID.eq(language.getId())).
                 fetchOne().
-                getValue(Tables.RAW_PAGE.TEXT);
+                getValue(Tables.RAW_PAGE.BODY);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
+        }
+    }
+
+    public WikapidiaIterable<RawPage> allRawPages() throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context =  DSL.using(conn, dialect);
+            TableField idField;
+            Cursor<Record> result = context.select()
+                    .from(Tables.RAW_PAGE)
+                    .fetchLazy();
+            return  new WikapidiaIterable<RawPage>(result,
+                    new DaoTransformer<RawPage>() {
+                        @Override
+                        public RawPage transform(Record r) {
+                             return databaseToRaw(r);
+                        }
+                    }
+            );
+        } catch (SQLException e) {
+            throw new DaoException(e);
         }
     }
 

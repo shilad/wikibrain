@@ -1,15 +1,20 @@
 package org.wikapidia.core.dao;
 
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.core.model.Title;
+
+import java.util.Date;
 
 public interface RawPageDao extends Loader<RawPage> {
 
     /**
-     * Returns the RawPage associated with the page given local page.
+     *
      * @param language
      * @param localPageId
      * @return
+     * @throws DaoException
      */
     public RawPage get(Language language, int localPageId) throws DaoException;
 
