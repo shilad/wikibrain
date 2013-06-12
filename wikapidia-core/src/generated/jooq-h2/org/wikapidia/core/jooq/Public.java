@@ -11,7 +11,7 @@ package org.wikapidia.core.jooq;
 @java.lang.SuppressWarnings({ "all", "unchecked" })
 public class Public extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1548699597;
+	private static final long serialVersionUID = 927908757;
 
 	/**
 	 * The singleton instance of <code>PUBLIC</code>
@@ -34,10 +34,10 @@ public class Public extends org.jooq.impl.SchemaImpl {
 
 	private final java.util.List<org.jooq.Sequence<?>> getSequences0() {
 		return java.util.Arrays.<org.jooq.Sequence<?>>asList(
-			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_1804A599_FE28_48FC_BCCC_FF4C0C8F334D,
-			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_3D042512_79A5_4506_A697_EA8E37E69725,
-			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_93A5AD82_3118_4CA8_91FA_48491DE1CAA7,
-			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_9EC65A10_9713_4B11_A9CE_011F3A35E8FA);
+			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_14EC7BF2_8590_4CD3_9B9E_6B0D64C9E7CB,
+			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_2B18ADE6_76DF_4A59_A9C1_33A42840DEB1,
+			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_77282367_0A2D_437D_B739_256CE5798996,
+			org.wikapidia.core.jooq.Sequences.SYSTEM_SEQUENCE_D5A50224_A2BB_4D01_AC93_3262866A0D82);
 	}
 
 	@Override
@@ -54,6 +54,7 @@ public class Public extends org.jooq.impl.SchemaImpl {
 			org.wikapidia.core.jooq.tables.Concept.CONCEPT,
 			org.wikapidia.core.jooq.tables.ArticleConcept.ARTICLE_CONCEPT,
 			org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE,
+			org.wikapidia.core.jooq.tables.LocalLink.LOCAL_LINK,
 			org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE);
 	}
 }
