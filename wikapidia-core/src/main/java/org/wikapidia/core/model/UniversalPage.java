@@ -111,4 +111,17 @@ public abstract class UniversalPage<T extends LocalPage> {
     public static interface LocalPageChooser<T extends LocalPage> {
         public T choose(Collection<T> localPages);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof UniversalPage) {
+            UniversalPage other = (UniversalPage) o;
+            return (this.getUnivId() == other.getUnivId() &&
+                    this.getPageType() == other.getPageType()
+            );
+        }
+        else {
+            return false;
+        }
+    }
 }

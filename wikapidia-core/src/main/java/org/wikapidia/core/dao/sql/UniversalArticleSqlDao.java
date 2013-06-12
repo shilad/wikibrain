@@ -42,7 +42,7 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
 
     @Override
     protected UniversalArticle buildUniversalPage(Result<Record> result) throws DaoException {
-        if (result == null) {
+        if (result.isEmpty()) {
             return null;
         }
         Multimap<Language, LocalArticle> localPages = HashMultimap.create(result.size(), result.size());

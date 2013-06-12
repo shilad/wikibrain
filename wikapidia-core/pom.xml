@@ -68,11 +68,6 @@
           <version>3.1</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-lang3</artifactId>
-          <version>3.1</version>
-      </dependency>
-      <dependency>
           <groupId>commons-beanutils</groupId>
           <artifactId>commons-beanutils</artifactId>
           <version>1.8.3</version>
@@ -147,7 +142,7 @@
                 <executions>
                     <execution>
                         <id>exec1</id>
-                        <phase>generate-test-sources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -174,7 +169,6 @@
                             <deprecated>false</deprecated>
                             <instanceFields>true</instanceFields>
                             <pojos>true</pojos>
-                            <daos>true</daos>
                         </generate>
                         <target>
                             <packageName>org.wikapidia.core.jooq</packageName>
