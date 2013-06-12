@@ -32,14 +32,14 @@ public class TestDumpPageParser {
         for (RawPage xml : dpp) {
             switch (i) {
             case 0:
-                assertEquals(xml.getTitle(), "Potential difference");
+                assertEquals(xml.getTitle().getCanonicalTitle(), "Potential difference");
                 assertEquals(xml.getPageId(), 25001);
                 assertEquals(xml.getRevisionId(), 301899471);
                 assertEquals(xml.getLastEdit(), new Date(109, 6, 13, 18, 8, 34));
                 assertEquals(xml.getBody(), "#REDIRECT [[voltage]]");
                 break;
             case 43:
-                assertEquals(xml.getTitle(), "Product of rings");
+                assertEquals(xml.getTitle().getCanonicalTitle(), "Product of rings");
                 assertEquals(xml.getPageId(), 25063);
                 assertEquals(xml.getRevisionId(), 540215174);
                 assertTrue(xml.getBody().contains("''R''<sub>''i''")); // check escaping

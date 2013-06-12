@@ -65,12 +65,13 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             PageType pageType = temp.getPageType();
             for (Language language : temp.getLanguageSetOfExistsInLangs()) {
                 for (LocalPage localPage : temp.getLocalPages(language)) {
-                    context.insertInto(Tables.LOCAL_PAGE).values(
+                    context.insertInto(Tables.UNIVERSAL_PAGE).values(
                             null,
-                            language,
+                            language.getId(),
                             localPage.getLocalId(),
                             localPage.getTitle().getCanonicalTitle(),
-                            pageType
+                            pageType.getPageTypeId(),
+                            page.getUnivId()
                     ).execute();
                 }
             }
