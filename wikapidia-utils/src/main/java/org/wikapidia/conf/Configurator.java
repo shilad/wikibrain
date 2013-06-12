@@ -178,7 +178,7 @@ public class Configurator {
      * @param name The name of the class as it appears in the config file.
      * @return The requested component.
      */
-    public Object get(Class klass, String name) throws ConfigurationException {
+    public <T> T get(Class<T> klass, String name) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
@@ -191,13 +191,13 @@ public class Configurator {
         Map<String, Object> cache = components.get(klass);
         synchronized (cache) {
             if (cache.containsKey(name)) {
-                return cache.get(name);
+                return (T) cache.get(name);
             }
             for (Provider p : pset.providers) {
                 Object o = p.get(name, config);
                 if (o != null) {
                     cache.put(name, o);
-                    return o;
+                    return (T) o;
                 }
             }
         }
@@ -216,7 +216,7 @@ public class Configurator {
      * @param klass The generic interface or superclass, not the specific implementation.
      * @return The requested component.
      */
-    public Object get(Class klass) throws ConfigurationException {
+    public <T> T get(Class<T> klass) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
