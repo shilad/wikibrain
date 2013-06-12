@@ -26,7 +26,7 @@ public abstract class Provider<T> {
      * There may be other providers that provide the same interface.
      * @return class
      */
-    public abstract Class getType();
+    public abstract Class<T> getType();
 
     /**
      * Returns the path in the configuration file for the components.

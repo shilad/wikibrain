@@ -1,17 +1,16 @@
 package org.wikapidia.parser.xml;
 
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.model.RawPage;
 import org.wikapidia.parser.DumpSplitter;
 import org.wikapidia.parser.WpParseException;
-import org.wikapidia.parser.xml.PageXml;
-import org.wikapidia.parser.xml.PageXmlParser;
 
 import java.io.File;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DumpPageXmlParser implements Iterable<PageXml> {
+public class DumpPageXmlParser implements Iterable<RawPage> {
     public static final Logger LOG = Logger.getLogger(DumpSplitter.class.getName());
 
     private final PageXmlParser parser;
@@ -29,13 +28,13 @@ public class DumpPageXmlParser implements Iterable<PageXml> {
     }
 
     @Override
-    public Iterator<PageXml> iterator() {
+    public Iterator<RawPage> iterator() {
         return new IteratorImpl();
     }
 
-    public class IteratorImpl implements Iterator<PageXml> {
+    public class IteratorImpl implements Iterator<RawPage> {
         private final Iterator<String> iterImpl;
-        private PageXml buff;
+        private RawPage buff;
 
         public IteratorImpl() {
             this.iterImpl = impl.iterator();
@@ -64,9 +63,9 @@ public class DumpPageXmlParser implements Iterable<PageXml> {
         }
 
         @Override
-        public PageXml next() {
+        public RawPage next() {
             fillBuff();
-            PageXml next = buff;
+            RawPage next = buff;
             buff = null;
             return next;
         }

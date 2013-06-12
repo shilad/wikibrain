@@ -17,10 +17,6 @@ public class LocalLink {
 
     public static enum LocationType {FIRST_PARA, FIRST_SEC, NONE};
 
-    public static boolean isRedId(int id){
-        return (id < 0);
-    }
-
     public LocalLink(Language language, String anchorText, int sourceId, int destId, boolean outlink, int location, boolean parseable, LocationType locType) {
         this.language = language;
         this.anchorText = anchorText;
