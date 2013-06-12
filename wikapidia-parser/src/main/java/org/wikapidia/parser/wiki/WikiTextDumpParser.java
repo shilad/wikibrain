@@ -2,7 +2,7 @@ package org.wikapidia.parser.wiki;
 
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
-import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.core.model.RawPage;
 
 import java.io.File;
 import java.util.Arrays;
@@ -44,7 +44,7 @@ public class WikiTextDumpParser {
 
     public void parse(List<ParserVisitor> visitors) {
         WikiTextParser wtp = new WikiTextParser(language, allowedLanguages, visitors);
-        Iterator<PageXml> pageIterator = dpxp.iterator();
+        Iterator<RawPage> pageIterator = dpxp.iterator();
         while (pageIterator.hasNext()) {
             try {
                 wtp.parse(pageIterator.next());

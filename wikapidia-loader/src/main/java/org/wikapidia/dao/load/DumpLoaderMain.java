@@ -7,10 +7,11 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.ParserVisitor;
 import org.wikapidia.parser.wiki.WikiTextDumpParser;
-import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.core.model.RawPage;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -33,7 +34,7 @@ public class DumpLoaderMain {
         this.visitors = new ArrayList<ParserVisitor>(visitors);
         this.visitors.add(0, new ParserVisitor() {
             @Override
-            public void beginPage(PageXml page) {
+            public void beginPage(RawPage page) {
                 if (counter.incrementAndGet() % 100 == 0) {
                     LOG.info("processing article " + counter.get());
                 }
@@ -90,14 +91,17 @@ public class DumpLoaderMain {
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
 
         // TODO: add other visitors
-        LocalPageDao dao = (LocalPageDao) conf.get(LocalPageDao.class);
-        visitors.add(new LocalPageLoader(dao));
+        LocalPageDao lpDao = conf.get(LocalPageDao.class);
+        RawPageDao rpDao = conf.get(RawPageDao.class);
+        visitors.add(new LocalPageLoader(lpDao));
+        visitors.add(new RawPageLoader(rpDao));
 
         final DumpLoaderMain loader = new DumpLoaderMain(visitors);
 
         // TODO: initialize other visitors
         if (cmd.hasOption("t")) {
-            dao.beginLoad();
+            lpDao.beginLoad();
+            rpDao.beginLoad();
         }
 
         // loads multiple dumps in parallel
@@ -112,7 +116,8 @@ public class DumpLoaderMain {
 
         // TODO: finalize other visitors
         if (cmd.hasOption("i")) {
-            dao.endLoad();
+            lpDao.endLoad();
+            rpDao.endLoad();
         }
     }
 }

@@ -1,7 +1,7 @@
 package org.wikapidia.parser.wiki;
 
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.core.model.RawPage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class SubarticleParser {
 	}
 	
 	private static int LEFT_WINDOW = 150; // max distance to look for newline char; given that subarticle lines tend to be short, this should be more than enough
-	public ParsedLink.SubarticleType isInlineSubarticle(int location, PageXml pageXml){
+	public ParsedLink.SubarticleType isInlineSubarticle(int location, RawPage pageXml){
 		if ((lang.getMainInlinePattern() != null || lang.getSeeAlsoInlinePattern() != null) && location > 0){
 			
 			Boolean valid = false;

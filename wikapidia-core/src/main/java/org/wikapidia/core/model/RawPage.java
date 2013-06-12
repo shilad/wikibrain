@@ -1,38 +1,34 @@
-package org.wikapidia.parser.xml;
+package org.wikapidia.core.model;
 
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.model.PageType;
-import org.wikapidia.core.model.Title;
 
 import java.util.Date;
 import java.util.logging.Logger;
 
 /**
  * Contains a single page's data from Wikipedia's Xml Dump with no processing.
+ * You probably don't want to use this class unless you are parsing or need full text.
  */
-public class PageXml {
-    private static final Logger LOG = Logger.getLogger(PageXml.class.getName());
+public class RawPage {
+    private static final Logger LOG = Logger.getLogger(RawPage.class.getName());
 
     private Title title;
     private String body;
     private Date lastEdit;
 
     private Language lang;
-    private Long startByte, endByte;    // TODO: Are these necessary?
     private int revisionId;
     private int pageId;
 
     private PageType type;
 
-    public PageXml(int pageId, int revisionId, String title, String body, Date lastEdit, PageType type, Language lang, Long startByte, Long endByte) {
+    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, PageType type, Language lang) {
         this.title = new Title(title, false, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
         this.type = type;
         this.lang = lang;
-        this.startByte = startByte;
-        this.endByte = endByte;
         this.revisionId = revisionId;
         this.pageId = pageId;
     }
@@ -57,14 +53,6 @@ public class PageXml {
         return lang;
     }
 
-    public Long getStartByte() {
-        return startByte;
-    }
-
-    public Long getEndByte() {
-        return endByte;
-    }
-
     public int getRevisionId() {
         return revisionId;
     }
@@ -76,5 +64,4 @@ public class PageXml {
     public String toString(){
         return String.format("%s / %s (%s)", this.getTitle(), this.pageId, lang.getLangCode());
     }
-
 }

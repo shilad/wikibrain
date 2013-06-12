@@ -3,7 +3,7 @@ package org.wikapidia.parser;
 import org.junit.Test;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.*;
-import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.core.model.RawPage;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class TestWikiTextDumpParser {
 
         ParserVisitor visitor = new ParserVisitor() {
             @Override
-            public void beginPage(PageXml xml) {
+            public void beginPage(RawPage xml) {
                 pageCounter.incrementAndGet();
             }
 

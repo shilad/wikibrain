@@ -193,7 +193,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             }
             try {
                 return new LocalPageSqlDao(
-                        (DataSource) getConfigurator().get(
+                            getConfigurator().get(
                                 DataSource.class,
                                 config.getString("dataSource"))
                 );

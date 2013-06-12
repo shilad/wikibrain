@@ -8,10 +8,9 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.core.model.RawPage;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +48,7 @@ public class WikiTextParser {
      * @param xml
      * @throws WikapidiaException
      */
-    public void parse(PageXml xml) throws WikapidiaException {
+    public void parse(RawPage xml) throws WikapidiaException {
         visitBeginPage(xml);
         ParsedPage pp = jwpl.parse(xml.getBody());
         if (pp == null) {
@@ -69,10 +68,10 @@ public class WikiTextParser {
         visitEndPage(xml);
     }
 
-    private void parseRedirect(PageXml xml, ParsedPage page) {
+    private void parseRedirect(RawPage xml, ParsedPage page) {
     }
 
-    private void parseArticle(PageXml xml, ParsedPage pp) {   		// *** LINKS, ANCHOR TEXTS, SECTIONS
+    private void parseArticle(RawPage xml, ParsedPage pp) {   		// *** LINKS, ANCHOR TEXTS, SECTIONS
         int secNum = 0;
 
         // paragraph numbers before first paragraph are negative
@@ -195,7 +194,7 @@ public class WikiTextParser {
     }
 
     private static Pattern illPattern = Pattern.compile("(.+?)\\:\\s*(.+)");
-    private void parseIlls(PageXml xml, ParsedPage pp) {
+    private void parseIlls(RawPage xml, ParsedPage pp) {
         if (pp.getLanguagesElement() !=  null){
             for (Link ill : pp.getLanguages()){
                 try{
@@ -226,7 +225,7 @@ public class WikiTextParser {
 
     }
 
-    private void parseCategory(PageXml xml, ParsedPage pp){
+    private void parseCategory(RawPage xml, ParsedPage pp){
         // handle links
         for (Link catMem : pp.getCategories()){
             try {
@@ -244,7 +243,7 @@ public class WikiTextParser {
     }
 
 
-    private void visitBeginPage(PageXml xml) {
+    private void visitBeginPage(RawPage xml) {
         for (ParserVisitor visitor : visitors) {
             try {
                 visitor.beginPage(xml);
@@ -253,7 +252,7 @@ public class WikiTextParser {
             }
         }
     }
-    private void visitEndPage(PageXml xml) {
+    private void visitEndPage(RawPage xml) {
         for (ParserVisitor visitor : visitors) {
             try {
                 visitor.endPage(xml);

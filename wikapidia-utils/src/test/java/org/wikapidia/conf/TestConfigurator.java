@@ -15,13 +15,13 @@ public class TestConfigurator {
     public void testSimple() throws ConfigurationException {
         // Should pick up configuration in reference.conf
         Configurator conf = new Configurator(new Configuration());
-        Integer i = (Integer) conf.get(Integer.class, "foo");
+        Integer i = conf.get(Integer.class, "foo");
         assertEquals(i, 42);
-        Integer j = (Integer) conf.get(Integer.class, "bar");
+        Integer j = conf.get(Integer.class, "bar");
         assertEquals(j, 23);
-        Integer k = (Integer) conf.get(Integer.class, "baz");
+        Integer k = conf.get(Integer.class, "baz");
         assertEquals(k, 0);
-        Integer l = (Integer) conf.get(Integer.class, "biff");
+        Integer l = conf.get(Integer.class, "biff");
         assertEquals(l, 1);
     }
 
@@ -36,18 +36,18 @@ public class TestConfigurator {
             );
         Configurator conf = new Configurator(new Configuration(tmp));
 
-        Integer i = (Integer) conf.get(Integer.class, "foo");
+        Integer i = conf.get(Integer.class, "foo");
         assertEquals(i, 42);
-        Integer j = (Integer) conf.get(Integer.class, "bar");
+        Integer j = conf.get(Integer.class, "bar");
         assertEquals(j, 23);
-        Integer k = (Integer) conf.get(Integer.class, "baz");
+        Integer k = conf.get(Integer.class, "baz");
         assertEquals(k, 0);
-        Integer l = (Integer) conf.get(Integer.class, "biff");
+        Integer l = conf.get(Integer.class, "biff");
         assertEquals(l, 1);
 
-        Integer m = (Integer) conf.get(Integer.class, "aaa");
+        Integer m = conf.get(Integer.class, "aaa");
         assertEquals(m, 1);
-        Integer n = (Integer) conf.get(Integer.class, "bbb");
+        Integer n = conf.get(Integer.class, "bbb");
         assertEquals(n, 3);
 
         tmp.delete();

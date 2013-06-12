@@ -1,12 +1,12 @@
 package org.wikapidia.parser.wiki;
 
-import org.wikapidia.parser.xml.PageXml;
+import org.wikapidia.core.model.RawPage;
 
 public class ParsedLocation {
     /**
      * Enclosing page.
      */
-    private PageXml xml;
+    private RawPage xml;
 
     /**
      * Section 0 is the first section
@@ -25,14 +25,14 @@ public class ParsedLocation {
      */
     private int location;
 
-    public ParsedLocation(PageXml xml, int section, int paragraph, int location) {
+    public ParsedLocation(RawPage xml, int section, int paragraph, int location) {
         this.xml = xml;
         this.section = section;
         this.paragraph = paragraph;
         this.location = location;
     }
 
-    public PageXml getXml() {
+    public RawPage getXml() {
         return xml;
     }
 
