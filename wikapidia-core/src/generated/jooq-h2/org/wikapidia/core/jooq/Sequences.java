@@ -14,22 +14,22 @@ package org.wikapidia.core.jooq;
 public class Sequences {
 
 	/**
-	 * The sequence <code>PUBLIC.SYSTEM_SEQUENCE_1804A599_FE28_48FC_BCCC_FF4C0C8F334D</code>
+	 * The sequence <code>PUBLIC.SYSTEM_SEQUENCE_0BD0F9C2_D6AD_433D_833E_B78D26089141</code>
 	 */
-	public static final org.jooq.Sequence<java.lang.Long> SYSTEM_SEQUENCE_1804A599_FE28_48FC_BCCC_FF4C0C8F334D = new org.jooq.impl.SequenceImpl<java.lang.Long>("SYSTEM_SEQUENCE_1804A599_FE28_48FC_BCCC_FF4C0C8F334D", org.wikapidia.core.jooq.Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT);
+	public static final org.jooq.Sequence<java.lang.Long> SYSTEM_SEQUENCE_0BD0F9C2_D6AD_433D_833E_B78D26089141 = new org.jooq.impl.SequenceImpl<java.lang.Long>("SYSTEM_SEQUENCE_0BD0F9C2_D6AD_433D_833E_B78D26089141", org.wikapidia.core.jooq.Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT);
 
 	/**
-	 * The sequence <code>PUBLIC.SYSTEM_SEQUENCE_3D042512_79A5_4506_A697_EA8E37E69725</code>
+	 * The sequence <code>PUBLIC.SYSTEM_SEQUENCE_6694D2CA_20A1_4CA7_AB69_09EDE7CB8844</code>
 	 */
-	public static final org.jooq.Sequence<java.lang.Long> SYSTEM_SEQUENCE_3D042512_79A5_4506_A697_EA8E37E69725 = new org.jooq.impl.SequenceImpl<java.lang.Long>("SYSTEM_SEQUENCE_3D042512_79A5_4506_A697_EA8E37E69725", org.wikapidia.core.jooq.Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT);
+	public static final org.jooq.Sequence<java.lang.Long> SYSTEM_SEQUENCE_6694D2CA_20A1_4CA7_AB69_09EDE7CB8844 = new org.jooq.impl.SequenceImpl<java.lang.Long>("SYSTEM_SEQUENCE_6694D2CA_20A1_4CA7_AB69_09EDE7CB8844", org.wikapidia.core.jooq.Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT);
 
 	/**
-	 * The sequence <code>PUBLIC.SYSTEM_SEQUENCE_93A5AD82_3118_4CA8_91FA_48491DE1CAA7</code>
+	 * The sequence <code>PUBLIC.SYSTEM_SEQUENCE_8A26E531_90A6_4B1C_894B_DACADA32B378</code>
 	 */
-	public static final org.jooq.Sequence<java.lang.Long> SYSTEM_SEQUENCE_93A5AD82_3118_4CA8_91FA_48491DE1CAA7 = new org.jooq.impl.SequenceImpl<java.lang.Long>("SYSTEM_SEQUENCE_93A5AD82_3118_4CA8_91FA_48491DE1CAA7", org.wikapidia.core.jooq.Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT);
+	public static final org.jooq.Sequence<java.lang.Long> SYSTEM_SEQUENCE_8A26E531_90A6_4B1C_894B_DACADA32B378 = new org.jooq.impl.SequenceImpl<java.lang.Long>("SYSTEM_SEQUENCE_8A26E531_90A6_4B1C_894B_DACADA32B378", org.wikapidia.core.jooq.Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT);
 
 	/**
-	 * The sequence <code>PUBLIC.SYSTEM_SEQUENCE_9EC65A10_9713_4B11_A9CE_011F3A35E8FA</code>
+	 * The sequence <code>PUBLIC.SYSTEM_SEQUENCE_F1951D28_089D_4F81_89FD_ED4260505D4F</code>
 	 */
-	public static final org.jooq.Sequence<java.lang.Long> SYSTEM_SEQUENCE_9EC65A10_9713_4B11_A9CE_011F3A35E8FA = new org.jooq.impl.SequenceImpl<java.lang.Long>("SYSTEM_SEQUENCE_9EC65A10_9713_4B11_A9CE_011F3A35E8FA", org.wikapidia.core.jooq.Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT);
+	public static final org.jooq.Sequence<java.lang.Long> SYSTEM_SEQUENCE_F1951D28_089D_4F81_89FD_ED4260505D4F = new org.jooq.impl.SequenceImpl<java.lang.Long>("SYSTEM_SEQUENCE_F1951D28_089D_4F81_89FD_ED4260505D4F", org.wikapidia.core.jooq.Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT);
 }

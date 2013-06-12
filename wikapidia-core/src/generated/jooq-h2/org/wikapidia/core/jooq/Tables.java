@@ -42,4 +42,9 @@ public class Tables {
 	 * The table PUBLIC.UNIVERSAL_PAGE
 	 */
 	public static final org.wikapidia.core.jooq.tables.UniversalPage UNIVERSAL_PAGE = org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE;
+
+	/**
+	 * The table PUBLIC.RAW_PAGE
+	 */
+	public static final org.wikapidia.core.jooq.tables.RawPage RAW_PAGE = org.wikapidia.core.jooq.tables.RawPage.RAW_PAGE;
 }
