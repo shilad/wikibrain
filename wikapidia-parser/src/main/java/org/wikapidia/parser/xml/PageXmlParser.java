@@ -3,6 +3,7 @@ package org.wikapidia.parser.xml;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.RawPage;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.parser.WpParseException;
 
@@ -30,7 +31,7 @@ public class PageXmlParser {
         this.language = language;
     }
 
-    public PageXml parse(String rawXml) throws WpParseException {
+    public RawPage parse(String rawXml) throws WpParseException {
         return parse(rawXml, -1, -1);
     }
 
@@ -42,7 +43,7 @@ public class PageXmlParser {
      * @return
      * @throws WpParseException
      */
-    public PageXml parse(String rawXml, long startByte, long stopByte) throws WpParseException {
+    public RawPage parse(String rawXml, long startByte, long stopByte) throws WpParseException {
         rawXml = StringEscapeUtils.unescapeHtml4(rawXml);
         String title = extractSingleString(titlePattern, rawXml, 1);
         String idString = extractSingleString(idPattern, rawXml, 1);
@@ -68,17 +69,14 @@ public class PageXmlParser {
         }
         title = title.trim();
 
-        return new PageXml(
+        return new RawPage(
                 Integer.valueOf(idString),
                 Integer.valueOf(revisionIdString),
                 title,
                 body,
                 lastEdit,
                 getPageType(title, body),
-                language.getLanguage(),
-                startByte,
-                stopByte
-        );
+                language.getLanguage());
     }
 
     private PageType getPageType(String title, String body) {
