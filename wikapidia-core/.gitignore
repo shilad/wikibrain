@@ -8,6 +8,7 @@
 .idea/
 *.iml
 *.iws
+src/generated/
 
 # Mac
 .DS_Store
