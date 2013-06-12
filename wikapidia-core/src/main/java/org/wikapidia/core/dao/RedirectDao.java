@@ -1,6 +1,8 @@
 package org.wikapidia.core.dao;
 
 import com.sun.istack.internal.Nullable;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.set.TIntSet;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
@@ -66,7 +68,7 @@ public abstract class RedirectDao {
      * @return
      * @throws WikapidiaException
      */
-    public abstract Set<Integer> getAllRedirectIds(Language lang) throws WikapidiaException;
+    public abstract TIntSet getAllRedirectIds(Language lang) throws WikapidiaException;
 
     /**
      * Gets the redirect local id -> dest local id mappings for lang = langId
@@ -74,7 +76,7 @@ public abstract class RedirectDao {
      * @return
      * @throws WikapidiaException
      */
-    public abstract Map<Integer, Integer> getAllRedirectIdsToDestIds(Language lang) throws WikapidiaException;
+    public abstract TIntIntMap getAllRedirectIdsToDestIds(Language lang) throws WikapidiaException;
 
 
 
