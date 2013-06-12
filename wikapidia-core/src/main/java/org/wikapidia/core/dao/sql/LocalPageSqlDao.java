@@ -22,8 +22,7 @@ import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
