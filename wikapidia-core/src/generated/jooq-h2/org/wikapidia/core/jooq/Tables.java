@@ -39,11 +39,6 @@ public class Tables {
 	public static final org.wikapidia.core.jooq.tables.LocalPage LOCAL_PAGE = org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE;
 
 	/**
-	 * The table PUBLIC.LOCAL_LINK
-	 */
-	public static final org.wikapidia.core.jooq.tables.LocalLink LOCAL_LINK = org.wikapidia.core.jooq.tables.LocalLink.LOCAL_LINK;
-
-	/**
 	 * The table PUBLIC.UNIVERSAL_PAGE
 	 */
 	public static final org.wikapidia.core.jooq.tables.UniversalPage UNIVERSAL_PAGE = org.wikapidia.core.jooq.tables.UniversalPage.UNIVERSAL_PAGE;
@@ -52,4 +47,9 @@ public class Tables {
 	 * The table PUBLIC.RAW_PAGE
 	 */
 	public static final org.wikapidia.core.jooq.tables.RawPage RAW_PAGE = org.wikapidia.core.jooq.tables.RawPage.RAW_PAGE;
+
+	/**
+	 * The table PUBLIC.LOCAL_LINK
+	 */
+	public static final org.wikapidia.core.jooq.tables.LocalLink LOCAL_LINK = org.wikapidia.core.jooq.tables.LocalLink.LOCAL_LINK;
 }
