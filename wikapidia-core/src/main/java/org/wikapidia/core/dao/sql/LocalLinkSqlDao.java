@@ -1,4 +1,4 @@
-package org.wikapidia.core.dao;
+package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
@@ -7,8 +7,7 @@ import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.sql.AbstractSqlDao;
-import org.wikapidia.core.dao.sql.LocalPageSqlDao;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
@@ -21,7 +20,7 @@ import java.sql.SQLException;
 
 public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
 
-    public LocalLinkSqlDao (DataSource dataSource) throws DaoException{
+    public LocalLinkSqlDao (DataSource dataSource) throws DaoException {
         super(dataSource);
     }
 

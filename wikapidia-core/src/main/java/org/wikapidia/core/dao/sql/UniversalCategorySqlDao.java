@@ -42,13 +42,13 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
 
     @Override
     protected UniversalCategory buildUniversalPage(Result<Record> result) throws DaoException {
-        if (result == null) {
+        if (result.isEmpty()) {
             return null;
         }
         Multimap<Language, LocalCategory> localPages = HashMultimap.create(result.size(), result.size());
         for(Record record : result) {
             PageType pageType = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
-            if (pageType != PageType.ARTICLE) {
+            if (pageType != PageType.CATEGORY) {
                 throw new DaoException("Tried to get CATEGORY, but found " + pageType);
             }
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
