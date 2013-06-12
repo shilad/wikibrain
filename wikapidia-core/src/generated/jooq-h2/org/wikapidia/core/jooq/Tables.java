@@ -14,29 +14,14 @@ package org.wikapidia.core.jooq;
 public class Tables {
 
 	/**
-	 * The table PUBLIC.ARTICLE
-	 */
-	public static final org.wikapidia.core.jooq.tables.Article ARTICLE = org.wikapidia.core.jooq.tables.Article.ARTICLE;
-
-	/**
-	 * The table PUBLIC.LINK
-	 */
-	public static final org.wikapidia.core.jooq.tables.Link LINK = org.wikapidia.core.jooq.tables.Link.LINK;
-
-	/**
-	 * The table PUBLIC.CONCEPT
-	 */
-	public static final org.wikapidia.core.jooq.tables.Concept CONCEPT = org.wikapidia.core.jooq.tables.Concept.CONCEPT;
-
-	/**
-	 * The table PUBLIC.ARTICLE_CONCEPT
-	 */
-	public static final org.wikapidia.core.jooq.tables.ArticleConcept ARTICLE_CONCEPT = org.wikapidia.core.jooq.tables.ArticleConcept.ARTICLE_CONCEPT;
-
-	/**
 	 * The table PUBLIC.LOCAL_PAGE
 	 */
 	public static final org.wikapidia.core.jooq.tables.LocalPage LOCAL_PAGE = org.wikapidia.core.jooq.tables.LocalPage.LOCAL_PAGE;
+
+	/**
+	 * The table PUBLIC.LOCAL_LINK
+	 */
+	public static final org.wikapidia.core.jooq.tables.LocalLink LOCAL_LINK = org.wikapidia.core.jooq.tables.LocalLink.LOCAL_LINK;
 
 	/**
 	 * The table PUBLIC.UNIVERSAL_PAGE
@@ -47,9 +32,4 @@ public class Tables {
 	 * The table PUBLIC.RAW_PAGE
 	 */
 	public static final org.wikapidia.core.jooq.tables.RawPage RAW_PAGE = org.wikapidia.core.jooq.tables.RawPage.RAW_PAGE;
-
-	/**
-	 * The table PUBLIC.LOCAL_LINK
-	 */
-	public static final org.wikapidia.core.jooq.tables.LocalLink LOCAL_LINK = org.wikapidia.core.jooq.tables.LocalLink.LOCAL_LINK;
 }

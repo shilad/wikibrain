@@ -13,16 +13,10 @@ public interface RawPageDao extends Loader<RawPage> {
      *
      * @param language
      * @param localPageId
-     * @param revisionId
-     * @param body
-     * @param title
-     * @param lastEdit
-     * @param pageType
      * @return
      * @throws DaoException
      */
-    public RawPage get(Language language, int localPageId, int revisionId, String body, Title title,
-                       Date lastEdit, PageType pageType) throws DaoException;
+    public RawPage get(Language language, int localPageId) throws DaoException;
 
     /**
      * Returns the body (i.e. wikitext) of a particular local page.
