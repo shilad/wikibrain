@@ -190,13 +190,13 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
         }
 
         @Override
-        public Class getType() {
-            return LocalPageDao.class;
+        public Class<LocalLinkDao> getType() {
+            return LocalLinkDao.class;
         }
 
         @Override
         public String getPath() {
-            return "dao.localPage";
+            return "dao.localLink";
         }
 
         @Override

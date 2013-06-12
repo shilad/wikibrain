@@ -76,10 +76,7 @@ public class PageXmlParser {
                 body,
                 lastEdit,
                 getPageType(title, body),
-                language.getLanguage(),
-                startByte,
-                stopByte
-        );
+                language.getLanguage());
     }
 
     private PageType getPageType(String title, String body) {

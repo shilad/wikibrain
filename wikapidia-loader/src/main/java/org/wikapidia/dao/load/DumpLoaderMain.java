@@ -6,6 +6,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -93,8 +94,10 @@ public class DumpLoaderMain {
         // TODO: add other visitors
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
+        LocalLinkDao llDao = conf.get(LocalLinkDao.class);
         visitors.add(new LocalPageLoader(lpDao));
         visitors.add(new RawPageLoader(rpDao));
+        visitors.add(new LocalLinkLoader(llDao));
 
         final DumpLoaderMain loader = new DumpLoaderMain(visitors);
 
@@ -102,6 +105,7 @@ public class DumpLoaderMain {
         if (cmd.hasOption("t")) {
             lpDao.beginLoad();
             rpDao.beginLoad();
+            llDao.beginLoad();
         }
 
         // loads multiple dumps in parallel
@@ -118,6 +122,7 @@ public class DumpLoaderMain {
         if (cmd.hasOption("i")) {
             lpDao.endLoad();
             rpDao.endLoad();
+            llDao.endLoad();
         }
     }
 }

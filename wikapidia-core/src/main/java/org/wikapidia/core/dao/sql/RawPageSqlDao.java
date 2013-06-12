@@ -127,8 +127,8 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
         }
 
         @Override
-        public Class getType() {
-            return LocalPageDao.class;
+        public Class<RawPageDao> getType() {
+            return RawPageDao.class;
         }
 
         @Override
