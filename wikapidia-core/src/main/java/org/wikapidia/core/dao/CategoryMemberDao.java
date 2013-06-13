@@ -95,6 +95,4 @@ public interface CategoryMemberDao extends Loader<CategoryMember> {
      */
     public Map<Integer, LocalCategory> getCategories(LocalArticle localArticle) throws DaoException;
 
-
-
 }
