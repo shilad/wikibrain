@@ -5,12 +5,12 @@ import org.wikapidia.core.lang.Language;
 
 /**
  */
-public class CategoryMember {
+public class LocalCategoryMember {
     private final int categoryId;
     private final int articleId;
     private final Language language;
 
-    public CategoryMember(LocalCategory localCategory, LocalArticle localArticle) throws WikapidiaException {
+    public LocalCategoryMember(LocalCategory localCategory, LocalArticle localArticle) throws WikapidiaException {
         if (!localArticle.getLanguage().equals(localCategory.getLanguage())) {
             throw new WikapidiaException("Language Mismatch");
         }
@@ -19,7 +19,7 @@ public class CategoryMember {
         this.language = localCategory.getLanguage();
     }
 
-    public CategoryMember(int categoryId, int articleId, Language language) {
+    public LocalCategoryMember(int categoryId, int articleId, Language language) {
         this.categoryId = categoryId;
         this.articleId = articleId;
         this.language = language;

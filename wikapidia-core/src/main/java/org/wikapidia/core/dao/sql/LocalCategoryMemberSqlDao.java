@@ -6,11 +6,11 @@ import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.wikapidia.core.WikapidiaException;
-import org.wikapidia.core.dao.CategoryMemberDao;
+import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.CategoryMember;
+import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalCategory;
 
@@ -24,8 +24,8 @@ import java.util.Map;
 
 /**
  */
-public class CategoryMemberSqlDao extends AbstractSqlDao implements CategoryMemberDao {
-    public CategoryMemberSqlDao(DataSource dataSource) throws DaoException {
+public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCategoryMemberDao {
+    public LocalCategoryMemberSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource);
     }
 
@@ -36,7 +36,7 @@ public class CategoryMemberSqlDao extends AbstractSqlDao implements CategoryMemb
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            CategoryMemberSqlDao.class.getResource("/db/category-members-schema.sql")
+                            LocalCategoryMemberSqlDao.class.getResource("/db/category-members-schema.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -48,7 +48,7 @@ public class CategoryMemberSqlDao extends AbstractSqlDao implements CategoryMemb
     }
 
     @Override
-    public void save(CategoryMember member) throws DaoException {
+    public void save(LocalCategoryMember member) throws DaoException {
         Connection conn=null;
         try {
             conn = ds.getConnection();
@@ -67,7 +67,7 @@ public class CategoryMemberSqlDao extends AbstractSqlDao implements CategoryMemb
 
     @Override
     public void save(LocalCategory category, LocalArticle article) throws DaoException, WikapidiaException {
-        save(new CategoryMember(category, article));
+        save(new LocalCategoryMember(category, article));
     }
 
     @Override
@@ -77,7 +77,7 @@ public class CategoryMemberSqlDao extends AbstractSqlDao implements CategoryMemb
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            CategoryMemberSqlDao.class.getResource("/db/category-members-indexes.sql")
+                            LocalCategoryMemberSqlDao.class.getResource("/db/category-members-indexes.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);

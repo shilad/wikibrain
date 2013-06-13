@@ -2,7 +2,7 @@ package org.wikapidia.core.dao;
 
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.CategoryMember;
+import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalCategory;
 
@@ -10,8 +10,9 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
+ * CategoryMembers should be parsed in the same step as LocalLinks
  */
-public interface CategoryMemberDao extends Loader<CategoryMember> {
+public interface LocalCategoryMemberDao extends Loader<LocalCategoryMember> {
 
     /**
      * Supplemental method that saves a membership relationship based on
