@@ -7,5 +7,6 @@ CREATE TABLE raw_page (
   title VARCHAR(256) NOT NULL,
   lastEdit TIMESTAMP,
   name_space SMALLINT NOT NULL,
-  is_redirect BOOLEAN NOT NULL
+  is_redirect BOOLEAN NOT NULL,
+  is_disambig BOOLEAN NOT NULL
 );

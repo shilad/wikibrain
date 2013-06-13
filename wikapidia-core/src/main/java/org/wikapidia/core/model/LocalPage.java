@@ -11,6 +11,7 @@ public class LocalPage {
     protected final Title title;
     protected final NameSpace nameSpace;
     protected final boolean isRedirect;
+    protected final boolean isDisambig;
 
     /**
      * Default for NON-redirect pages.
@@ -24,7 +25,8 @@ public class LocalPage {
         this.localId = localId;
         this.title = title;
         this.nameSpace = nameSpace;
-        this.isRedirect = false;
+        isRedirect = false;
+        isDisambig = false;
     }
 
     /**
@@ -35,12 +37,13 @@ public class LocalPage {
      * @param nameSpace
      * @param redirect
      */
-    public LocalPage(Language language, int localId, Title title, NameSpace nameSpace, boolean redirect) {
+    public LocalPage(Language language, int localId, Title title, NameSpace nameSpace, boolean redirect, boolean disambig) {
         this.language = language;
         this.localId = localId;
         this.title = title;
         this.nameSpace = nameSpace;
         isRedirect = redirect;
+        isDisambig = disambig;
     }
 
     public int getLocalId() {
@@ -57,6 +60,10 @@ public class LocalPage {
 
     public NameSpace getNameSpace() {
         return nameSpace;
+    }
+
+    public boolean isDisambig() {
+        return isDisambig;
     }
 
     public boolean isRedirect() {

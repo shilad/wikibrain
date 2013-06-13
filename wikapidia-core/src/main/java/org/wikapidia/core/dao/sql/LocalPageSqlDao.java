@@ -65,7 +65,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     page.getLocalId(),
                     page.getTitle().getCanonicalTitle(),
                     page.getNameSpace().getArbitraryId(),
-                    page.isRedirect()
+                    page.isRedirect(),
+                    page.isDisambig()
             ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -186,7 +187,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                 lang,
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
                 title,
-                nameSpace
+                nameSpace,
+                record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT),
+                record.getValue(Tables.LOCAL_PAGE.IS_DISAMBIG)
         );
     }
 

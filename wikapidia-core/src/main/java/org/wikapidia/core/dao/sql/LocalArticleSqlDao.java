@@ -64,7 +64,9 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
         return new LocalArticle(
                 lang,
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
-                title
+                title,
+                record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT),
+                record.getValue(Tables.LOCAL_PAGE.IS_DISAMBIG)
         );
     }
 

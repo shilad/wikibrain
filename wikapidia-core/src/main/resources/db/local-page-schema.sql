@@ -5,5 +5,6 @@ CREATE TABLE local_page (
   page_id INT NOT NULL,
   title VARCHAR(256) NOT NULL,
   name_space SMALLINT NOT NULL,
-  is_redirect BOOLEAN NOT NULL
+  is_redirect BOOLEAN NOT NULL,
+  is_disambig BOOLEAN NOT NULL
 );

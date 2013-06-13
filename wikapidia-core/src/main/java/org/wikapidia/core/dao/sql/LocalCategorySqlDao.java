@@ -65,7 +65,8 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
         return new LocalCategory(
                 lang,
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
-                title
+                title,
+                record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)
         );
     }
 
