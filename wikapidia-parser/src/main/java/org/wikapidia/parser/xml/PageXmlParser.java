@@ -25,6 +25,7 @@ public class PageXmlParser {
     private static final Pattern timestampPattern = Pattern.compile("<timestamp>(.*?)</timestamp>");
     private static final SimpleDateFormat xmlDumpDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final Pattern contentPattern = Pattern.compile("<text xml:space=\"preserve\">(.*?)</text>", Pattern.DOTALL);
+    private static final Pattern redirectPattern = Pattern.compile("<redirect title=\"(.*?)\" />");
     private final LanguageInfo language;
 
     public PageXmlParser(LanguageInfo language) {
@@ -48,7 +49,9 @@ public class PageXmlParser {
         String title = extractSingleString(titlePattern, rawXml, 1);
         String idString = extractSingleString(idPattern, rawXml, 1);
         String timestampString = extractSingleString(timestampPattern, rawXml, 1);
+        boolean isRedirect =(extractSingleString(redirectPattern,rawXml,1)!=null);
         String revisionIdString = extractSingleString(idPattern, rawXml, 2);
+
 
         if (title == null) {
             throw new WpParseException("no title for article");
