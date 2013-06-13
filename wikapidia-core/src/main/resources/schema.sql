@@ -50,4 +50,13 @@ CREATE TABLE category_members (
   category_id INT NOT NULL
 );
 
+DROP TABLE if exists redirect;
+CREATE TABLE redirect (
+  resolved BOOLEAN NOT NULL,
+  lang_id SMALLINT NOT NULL,
+  redirected_title VARCHAR(256) NOT NULL,
+  title VARCHAR(256) NOT NULL,
+  name_space SMALLINT NOT NULL
+);
+
 COMMIT;
