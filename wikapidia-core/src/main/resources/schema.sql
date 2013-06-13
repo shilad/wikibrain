@@ -6,7 +6,8 @@ CREATE TABLE local_page (
   page_id INT NOT NULL,
   title VARCHAR(256) NOT NULL,
   name_space SMALLINT NOT NULL,
-  is_redirect BOOLEAN NOT NULL
+  is_redirect BOOLEAN NOT NULL,
+  is_disambig BOOLEAN NOT NULL
 );
 
 DROP TABLE IF EXISTS local_link;
@@ -39,7 +40,8 @@ CREATE TABLE raw_page (
   title VARCHAR(256) NOT NULL,
   lastEdit TIMESTAMP,
   name_space SMALLINT NOT NULL,
-  is_redirect BOOLEAN NOT NULL
+  is_redirect BOOLEAN NOT NULL,
+  is_disambig BOOLEAN NOT NULL
 );
 
 DROP TABLE IF EXISTS category_members;
