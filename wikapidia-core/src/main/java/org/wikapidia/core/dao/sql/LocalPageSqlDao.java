@@ -151,11 +151,11 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         return map;
     }
 
-    public int getIdByTitle(String title, Language language, PageType pageType) throws DaoException {
+    public int getIdByTitle(String title, Language language, NameSpace namespace) throws DaoException {
         if (titlesToIds==null){
             titlesToIds=buildTitlesToIds();
         }
-        return titlesToIds.get(hashTitle(title,language.getId(),pageType.ordinal()));
+        return titlesToIds.get(hashTitle(title,language.getId(),namespace.ordinal()));
     }
 
     /**
@@ -200,8 +200,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         return h;
     }
 
-    protected long hashTitle(Title title, Language language, PageType pageType){
-        return hashTitle(title.getCanonicalTitle(),language.getId(),pageType.ordinal());
+    protected long hashTitle(Title title, Language language, NameSpace nameSpace){
+        return hashTitle(title.getCanonicalTitle(),language.getId(),nameSpace.ordinal());
     }
 
     protected TLongIntHashMap buildTitlesToIds() throws DaoException {
@@ -222,7 +222,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             for (Record record : cursor){
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
-                        record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE));
+                        record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
                 map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
             }
             if (cache!=null){
