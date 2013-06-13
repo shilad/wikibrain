@@ -67,6 +67,8 @@ public class TestLocalPageDao {
         assert (morePages.get(new Title("test", lang)).equals(page));
         assert (morePages.get(new Title("test", lang)).equals(savedPage));
 
+        int savedId = dao.getIdByTitle("Test", lang.getLanguage(), NameSpace.ARTICLE);
+        assert (savedId==7);
     }
 
     @Test
@@ -119,5 +121,8 @@ public class TestLocalPageDao {
         assert (morePages.size() == 1);
         assert (morePages.get(new Title("test", lang)).equals(page));
         assert (morePages.get(new Title("test", lang)).equals(savedPage));
+
+        int savedId = dao.getIdByTitle("Test", lang.getLanguage(), NameSpace.CATEGORY);
+        assert (savedId==7);
     }
 }
