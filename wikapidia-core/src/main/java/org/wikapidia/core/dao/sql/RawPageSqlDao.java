@@ -23,7 +23,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Retrieves and stores page text.
@@ -44,7 +43,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/raw-page-schema.sql")
+                            RawPageSqlDao.class.getResource("/db/raw-page-schema.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -84,7 +83,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/raw-page-indexes.sql")
+                            RawPageSqlDao.class.getResource("/db/raw-page-indexes.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);

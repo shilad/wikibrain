@@ -44,7 +44,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/universal-page-schema.sql")
+                            UniversalPageSqlDao.class.getResource("/db/universal-page-schema.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -89,7 +89,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/universal-page-indexes.sql")
+                            UniversalPageSqlDao.class.getResource("/db/universal-page-indexes.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
