@@ -12,6 +12,13 @@ public class LocalPage {
     protected final NameSpace nameSpace;
     protected final boolean isRedirect;
 
+    /**
+     * Default for NON-redirect pages.
+     * @param language
+     * @param localId
+     * @param title
+     * @param nameSpace
+     */
     public LocalPage(Language language, int localId, Title title, NameSpace nameSpace){
         this.language = language;
         this.localId = localId;
@@ -20,6 +27,14 @@ public class LocalPage {
         this.isRedirect = false;
     }
 
+    /**
+     * Ability to set redirect pages.
+     * @param language
+     * @param localId
+     * @param title
+     * @param nameSpace
+     * @param redirect
+     */
     public LocalPage(Language language, int localId, Title title, NameSpace nameSpace, boolean redirect) {
         this.language = language;
         this.localId = localId;
