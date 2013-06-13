@@ -37,12 +37,12 @@ public class TestRawPageDao {
                 lang.getLanguage(),
                 7,
                 new Title("test", lang),
-                PageType.ARTICLE
+                NameSpace.ARTICLE
         );
         lpDao.save(page);
         String body = "foo bar \000baz\n\n\324";
         RawPage rawPage = new RawPage(
-                7, 3242, "test", body, new Date(), PageType.ARTICLE, lang.getLanguage()
+                7, 3242, "test", body, new Date(), lang.getLanguage(), NameSpace.ARTICLE
         );
         rpDao.save(rawPage);
 
@@ -53,19 +53,19 @@ public class TestRawPageDao {
         assert (savedPage != null);
         assert (page.getLocalId() == savedPage.getLocalId());
         assert (page.getTitle().equals(savedPage.getTitle()));
-        assert (page.getPageType().equals(savedPage.getPageType()));
+        assert (page.getNameSpace().equals(savedPage.getNameSpace()));
 
         RawPage rawSaved = rpDao.get(lang.getLanguage(), 7);
         assert (rawSaved != null);
         assert (page.getLocalId() == rawSaved.getPageId());
         assert (page.getTitle().equals(rawSaved.getTitle()));
-        assert (page.getPageType().equals(rawSaved.getType()));
+        assert (page.getNameSpace().equals(rawSaved.getType()));
         assert (body.equals(rawSaved.getBody()));
 
         WikapidiaIterable<RawPage> savedRaws = rpDao.allRawPages();
         assert (savedRaws!=null);
         RawPage savedRaw = savedRaws.iterator().next();
-        assert (savedRaw.getType().getNamespace().getValue() == rawPage.getType().getNamespace().getValue());
+        assert (savedRaw.getType().getValue() == rawPage.getType().getValue());
         assert (savedRaw.getLastEdit().equals(rawPage.getLastEdit()));
         assert (savedRaw.getRevisionId() == rawPage.getRevisionId());
         assert (savedRaw.getBody().equals(body));

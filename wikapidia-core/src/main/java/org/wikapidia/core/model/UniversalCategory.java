@@ -7,6 +7,6 @@ import org.wikapidia.core.lang.Language;
  */
 public class UniversalCategory extends UniversalPage<LocalCategory>{
     public UniversalCategory(int univId, Multimap<Language, LocalCategory> localPages) {
-        super(univId, PageType.CATEGORY, localPages);
+        super(univId, NameSpace.CATEGORY, localPages);
     }
 }

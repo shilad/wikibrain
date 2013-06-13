@@ -6,7 +6,6 @@ import org.wikapidia.core.lang.LanguageSet;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,12 +17,12 @@ public abstract class UniversalPage<T extends LocalPage> {
      * The universal id for the universal page. Universal ids are defined within but not across namespaces.
      */
     private final int univId;
-    private final PageType pageType;
+    private final NameSpace nameSpace;
     private final Multimap<Language, T> localPages;
 
-    protected UniversalPage(int univId, PageType pageType, Multimap<Language, T> localPages) {
+    protected UniversalPage(int univId, NameSpace nameSpace, Multimap<Language, T> localPages) {
         this.univId = univId;
-        this.pageType = pageType;
+        this.nameSpace = nameSpace;
         this.localPages = localPages;
     }
 
@@ -31,8 +30,8 @@ public abstract class UniversalPage<T extends LocalPage> {
         return univId;
     }
 
-    public PageType getPageType() {
-        return pageType;
+    public NameSpace getNameSpace() {
+        return nameSpace;
     }
 
     /**
@@ -117,7 +116,7 @@ public abstract class UniversalPage<T extends LocalPage> {
         if (o instanceof UniversalPage) {
             UniversalPage other = (UniversalPage) o;
             return (this.getUnivId() == other.getUnivId() &&
-                    this.getPageType() == other.getPageType()
+                    this.getNameSpace() == other.getNameSpace()
             );
         }
         else {

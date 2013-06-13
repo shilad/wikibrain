@@ -16,7 +16,7 @@ import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
@@ -64,7 +64,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     page.getLanguage().getId(),
                     page.getLocalId(),
                     page.getTitle().getCanonicalTitle(),
-                    page.getPageType().getPageTypeId()
+                    page.getNameSpace().getArbitraryId()
             ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -114,7 +114,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     @Override
-    public T getByTitle(Language language, Title title, PageType pageType) throws DaoException {
+    public T getByTitle(Language language, Title title, NameSpace nameSpace) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -123,7 +123,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.TITLE.eq(title.getCanonicalTitle())).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(title.getLanguage().getId())).
-                    and(Tables.LOCAL_PAGE.PAGE_TYPE.eq(pageType.getPageTypeId())).
+                    and(Tables.LOCAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
                     fetchOne();
             return (T)buildLocalPage(record);
         } catch (SQLException e) {
@@ -143,10 +143,10 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     @Override
-    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, PageType pageType) throws DaoException {
+    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace nameSpace) throws DaoException {
         Map<Title, T> map = new HashMap<Title, T>();
         for (Title title : titles){
-            map.put(title, getByTitle(language, title, pageType));
+            map.put(title, getByTitle(language, title, nameSpace));
         }
         return map;
     }
@@ -174,12 +174,12 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        PageType pageType = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
+        NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         return new LocalPage(
                 lang,
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
                 title,
-                pageType
+                nameSpace
         );
     }
 

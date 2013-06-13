@@ -2,7 +2,7 @@ package org.wikapidia.parser.xml;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.parser.WpParseException;
@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 /**
  * Parses the Xml associated with a single Wikipedia page.
- * TODO: figure out pageType
+ * TODO: figure out nameSpace
  */
 public class PageXmlParser {
     private static final Logger LOG =Logger.getLogger(PageXmlParser.class.getName());
@@ -75,23 +75,26 @@ public class PageXmlParser {
                 title,
                 body,
                 lastEdit,
-                getPageType(title, body),
-                language.getLanguage());
+                language.getLanguage(),
+                getNameSpace(title),
+                isRedirect(body)
+        );
     }
 
-    private PageType getPageType(String title, String body) {
-        PageType type = new Title(title, language).guessType();
-        if (type == PageType.ARTICLE) {
-            if (extractSingleString(language.getRedirectPattern(), body, 1) != null) {
-                return PageType.REDIRECT;
-            } else {
-                return PageType.ARTICLE;
-            }
-        } else if (type == PageType.CATEGORY) {
-            return PageType.CATEGORY;
+    // TODO: does this method need to be like this, or can it just return "type"
+    private NameSpace getNameSpace(String title) {
+        NameSpace ns = new Title(title, language).guessType();
+        if (ns == NameSpace.ARTICLE) {
+            return NameSpace.ARTICLE;
+        } else if (ns == NameSpace.CATEGORY) {
+            return NameSpace.CATEGORY;
         } else {
-            return PageType.SPECIAL;
+            return NameSpace.SPECIAL;
         }
+    }
+
+    private boolean isRedirect(String body) {
+        return extractSingleString(language.getRedirectPattern(), body, 1) != null;
     }
 
     private static String extractSingleString(Pattern patternToMatch, String body, int matchNum){

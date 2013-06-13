@@ -6,7 +6,7 @@ import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParserFactory;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.RawPage;
 
@@ -55,14 +55,14 @@ public class WikiTextParser {
             LOG.warning("invalid page: " + xml.getBody());
         }
 
-        if (xml.getType() == PageType.REDIRECT) {
+        if (xml.isRedirect()) {
             ParsedRedirect pr = new ParsedRedirect();
             pr.location = new ParsedLocation(xml, -1, -1, -1);
             // TODO: calculate redirect text?
             visitRedirect(pr);
-        } else if (xml.getType() == PageType.CATEGORY) {
+        } else if (xml.getType() == NameSpace.CATEGORY) {
             parseCategory(xml, pp);
-        } else if (xml.getType() == PageType.ARTICLE) {
+        } else if (xml.getType() == NameSpace.ARTICLE) {
             parseArticle(xml, pp);
         }
         visitEndPage(xml);
@@ -89,7 +89,7 @@ public class WikiTextParser {
                             continue;
                         }
                         Title destTitle = link2Title(curLink);
-                        if (destTitle == null || destTitle.guessType() != PageType.ARTICLE){
+                        if (destTitle == null || destTitle.guessType() != NameSpace.ARTICLE){
                             continue;
                         }
                         try{
@@ -136,11 +136,11 @@ public class WikiTextParser {
                                 for (Link templateLink : parsedTemplate.getLinks()){
                                     Title destTitle = link2Title(templateLink);
                                     if (destTitle == null) { continue; }
-                                    PageType type = destTitle.guessType();
-                                    if (type == PageType.ARTICLE){
+                                    NameSpace type = destTitle.guessType();
+                                    if (type == NameSpace.ARTICLE){
                                         ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
                                         visitLink(location, destTitle, templateLink.getText(), tempSubType);
-                                    } else if (type == PageType.CATEGORY){
+                                    } else if (type == NameSpace.CATEGORY){
                                         throw new RuntimeException("Found a category link in a template");
                                     }
                                 }
@@ -309,7 +309,7 @@ public class WikiTextParser {
         }
     }
 
-    private PageType getLinkType(Link link){
+    private NameSpace getLinkType(Link link){
         Title t = link2Title(link);
         return t == null ? null : t.guessType();
     }

@@ -11,13 +11,11 @@ import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements LocalArticleDao{
@@ -35,7 +33,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
      * @throws DaoException
      */
     public LocalArticle getByTitle(Language language, Title title) throws DaoException {
-        return super.getByTitle(language, title, PageType.ARTICLE);
+        return super.getByTitle(language, title, NameSpace.ARTICLE);
     }
 
     /**
@@ -47,7 +45,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
      * @throws DaoException
      */
     public Map<Title, LocalArticle> getByTitles(Language language, Collection<Title> titles) throws DaoException{
-        return super.getByTitles(language, titles, PageType.ARTICLE);
+        return super.getByTitles(language, titles, NameSpace.ARTICLE);
     }
 
     @Override
@@ -59,9 +57,9 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        PageType pageType = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
-        if (pageType != PageType.ARTICLE) {
-            throw new DaoException("Tried to get ARTICLE, but found " + pageType);
+        NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        if (nameSpace != NameSpace.ARTICLE) {
+            throw new DaoException("Tried to get ARTICLE, but found " + nameSpace);
         }
         return new LocalArticle(
                 lang,

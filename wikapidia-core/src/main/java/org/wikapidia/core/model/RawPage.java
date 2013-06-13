@@ -13,24 +13,37 @@ import java.util.logging.Logger;
 public class RawPage {
     private static final Logger LOG = Logger.getLogger(RawPage.class.getName());
 
-    private Title title;
-    private String body;
-    private Date lastEdit;
+    private final Title title;
+    private final String body;
+    private final Date lastEdit;
 
-    private Language lang;
-    private int revisionId;
-    private int pageId;
+    private final Language lang;
+    private final int revisionId;
+    private final int pageId;
 
-    private PageType type;
+    private final NameSpace type;
+    private final boolean isRedirect;
 
-    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, PageType type, Language lang) {
-        this.title = new Title(title, false, LanguageInfo.getByLanguage(lang));
+    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace type) {
+        this.title = new Title(title, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
         this.type = type;
         this.lang = lang;
         this.revisionId = revisionId;
         this.pageId = pageId;
+        isRedirect = false;
+    }
+
+    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace type, boolean redirect) {
+        this.title = new Title(title, LanguageInfo.getByLanguage(lang));
+        this.body = body;
+        this.lastEdit = lastEdit;
+        this.lang = lang;
+        this.revisionId = revisionId;
+        this.pageId = pageId;
+        this.type = type;
+        isRedirect = redirect;
     }
 
     public Title getTitle() {
@@ -45,10 +58,6 @@ public class RawPage {
         return lastEdit;
     }
 
-    public PageType getType() {
-        return type;
-    }
-
     public Language getLang() {
         return lang;
     }
@@ -59,6 +68,14 @@ public class RawPage {
 
     public int getPageId() {
         return pageId;
+    }
+
+    public NameSpace getType() {
+        return type;
+    }
+
+    public boolean isRedirect() {
+        return isRedirect;
     }
 
     public String toString(){
