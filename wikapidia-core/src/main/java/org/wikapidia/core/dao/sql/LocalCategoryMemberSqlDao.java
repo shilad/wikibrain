@@ -55,6 +55,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
             DSLContext context = DSL.using(conn, dialect);
             context.insertInto(Tables.CATEGORY_MEMBERS).values(
                     null,
+                    member.getLanguage().getId(),
                     member.getCategoryId(),
                     member.getArticleId()
             ).execute();

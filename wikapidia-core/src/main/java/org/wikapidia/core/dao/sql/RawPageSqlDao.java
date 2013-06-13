@@ -96,10 +96,10 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
 
     @Override
     public RawPage get(Language language, int localPageId) throws DaoException {
-        return localToRaw(localPageDao.getById(language, localPageId));
+        return buildRawPage(localPageDao.getById(language, localPageId));
     }
 
-    private RawPage localToRaw(LocalPage lp) throws DaoException {
+    private RawPage buildRawPage(LocalPage lp) throws DaoException {
         return new RawPage(lp.getLocalId(), -1,
                 lp.getTitle().getCanonicalTitle(),
                 getBody(lp.getLanguage(), lp.getLocalId()),

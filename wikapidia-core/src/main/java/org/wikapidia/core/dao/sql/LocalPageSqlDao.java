@@ -62,7 +62,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     page.getLanguage().getId(),
                     page.getLocalId(),
                     page.getTitle().getCanonicalTitle(),
-                    page.getNameSpace().getArbitraryId()
+                    page.getNameSpace().getArbitraryId(),
+                    page.isRedirect()
             ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -130,6 +131,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
 
     @Override
     public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
+        if (pageIds == null || pageIds.isEmpty()) {
+            return null;
+        }
         Map<Integer, T> map = new HashMap<Integer, T>();
         for (Integer pageId : pageIds){
             map.put(pageId, getById(language, pageId));
@@ -139,6 +143,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
 
     @Override
     public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace nameSpace) throws DaoException {
+        if (titles == null || titles.isEmpty()) {
+            return null;
+        }
         Map<Title, T> map = new HashMap<Title, T>();
         for (Title title : titles){
             map.put(title, getByTitle(language, title, nameSpace));

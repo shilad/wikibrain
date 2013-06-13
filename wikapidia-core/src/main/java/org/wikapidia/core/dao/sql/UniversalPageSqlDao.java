@@ -121,6 +121,9 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
 
     @Override
     public Map<Integer, T> getByIds(Collection<Integer> univIds, NameSpace nameSpace) throws DaoException {
+        if (univIds == null || univIds.isEmpty()) {
+            return null;
+        }
         Map<Integer, T> map = new HashMap<Integer, T>();
         for (Integer univId : univIds){
             map.put(univId, getById(univId, nameSpace));
@@ -160,7 +163,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
                 nameSpace,
                 localPages
-        ) {};
+        ){};
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<UniversalPageDao> {
