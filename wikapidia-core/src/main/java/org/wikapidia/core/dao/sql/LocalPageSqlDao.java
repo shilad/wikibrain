@@ -151,11 +151,11 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         return map;
     }
 
-    public int getIdByTitle(String title, Language language, NameSpace namespace) throws DaoException {
+    public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException {
         if (titlesToIds==null){
             titlesToIds=buildTitlesToIds();
         }
-        return titlesToIds.get(hashTitle(title,language.getId(),namespace.ordinal()));
+        return titlesToIds.get(hashTitle(title,language.getId(),nameSpace.ordinal()));
     }
 
     /**

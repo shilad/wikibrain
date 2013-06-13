@@ -8,7 +8,6 @@ import org.wikapidia.core.dao.sql.SqlCache;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.Title;
 
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class Benchmark {
 
                 id = ad.getIdByTitle(article.getTitle().getCanonicalTitle(),
                                      article.getLanguage(),
-                                     article.getNameSpace();
+                                     article.getNameSpace());
                 assert(id == article.getLocalId());
             }
             stop = System.currentTimeMillis();
@@ -155,7 +154,7 @@ class RandomHelper{
         return smallString;
     }
 
-    public NameSpace ns(){
+    public NameSpace getRandomNS(){
         return NameSpace.values()[random.nextInt(NameSpace.values().length)];
     }
 
