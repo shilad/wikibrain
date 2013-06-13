@@ -137,24 +137,24 @@ public class Title implements Externalizable {
 	}
 
     /**
-     * Returns the PageType associated with the page.
+     * Returns the NameSpace associated with the page.
      * A return value of ARTICLE may actually be a redirect or disambiguation
      * because those depend on the wikitext of the article - not just the title.
      * TODO: figure out how to look for special pages...
      * @return
      */
-    public PageType guessType() {
+    public NameSpace guessType() {
         // test for category
         Matcher m = language.getCategoryPattern().matcher(canonicalTitle);
         if (m.find())
-            return PageType.CATEGORY;
+            return NameSpace.CATEGORY;
 
-        return PageType.ARTICLE;
+        return NameSpace.ARTICLE;
     }
 
     /**
      * Deconstructs a title such as "Mash_(film)" into "Mash" and "film"
-     * TODO: remove this, and have getNameAndDisambiuator return an array of 2 strings.
+     * TODO: remove this, and have getNameAndDisambiguator return an array of 2 strings.
      */
 	public static class NameAndDisambiguator{
 		

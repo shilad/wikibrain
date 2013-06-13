@@ -5,7 +5,8 @@ CREATE TABLE local_page (
   lang_id SMALLINT NOT NULL,
   page_id INT NOT NULL,
   title VARCHAR(256) NOT NULL,
-  page_type SMALLINT NOT NULL
+  name_space SMALLINT NOT NULL,
+  is_redirect BOOLEAN NOT NULL
 );
 
 DROP TABLE IF EXISTS local_link;
@@ -25,7 +26,7 @@ CREATE TABLE universal_page (
   lang_id SMALLINT NOT NULL,
   page_id INT NOT NULL,
   title VARCHAR(256) NOT NULL,
-  page_type SMALLINT NOT NULL,
+  name_space SMALLINT NOT NULL,
   univ_id INT NOT NULL
 );
 
@@ -37,7 +38,8 @@ CREATE TABLE raw_page (
   body CLOB NOT NULL,
   title VARCHAR(256) NOT NULL,
   lastEdit TIMESTAMP,
-  page_type SMALLINT NOT NULL
+  name_space SMALLINT NOT NULL,
+  is_redirect BOOLEAN NOT NULL
 );
 
 DROP TABLE IF EXISTS category_members;

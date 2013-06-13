@@ -14,7 +14,7 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 
 import javax.sql.DataSource;
@@ -67,7 +67,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                     page.getBody(),
                     page.getTitle(),
                     page.getLastEdit(),
-                    page.getType().getNamespace().getValue()
+                    page.getType().getArbitraryId()
             ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -104,19 +104,22 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                 lp.getTitle().getCanonicalTitle(),
                 getBody(lp.getLanguage(), lp.getLocalId()),
                 null,
-                lp.getPageType(),
-                lp.getLanguage());
+                lp.getLanguage(),
+                lp.getNameSpace(),
+                lp.isRedirect()
+        );
     }
 
-    private RawPage databaseToRaw(Record record){
+    private RawPage buildRawPage(Record record){
         Timestamp timestamp = record.getValue(Tables.RAW_PAGE.LASTEDIT);
         return new RawPage(record.getValue(Tables.RAW_PAGE.PAGE_ID),
                 record.getValue(Tables.RAW_PAGE.REVISION_ID),
                 record.getValue(Tables.RAW_PAGE.TITLE),
                 record.getValue(Tables.RAW_PAGE.BODY),
                 new Date(timestamp.getTime()),
-                PageType.values()[record.getValue(Tables.RAW_PAGE.PAGE_TYPE)],
-                Language.getById(record.getValue(Tables.RAW_PAGE.LANG_ID))
+                Language.getById(record.getValue(Tables.RAW_PAGE.LANG_ID)),
+                NameSpace.getNameSpaceById(record.getValue(Tables.RAW_PAGE.NAME_SPACE)),
+                record.getValue(Tables.RAW_PAGE.IS_REDIRECT)
         );
     }
 
@@ -153,7 +156,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                     new DaoTransformer<RawPage>() {
                         @Override
                         public RawPage transform(Record r) {
-                             return databaseToRaw(r);
+                             return buildRawPage(r);
                         }
                     }
             );

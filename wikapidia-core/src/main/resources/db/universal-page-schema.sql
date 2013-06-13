@@ -4,6 +4,6 @@ CREATE TABLE universal_page (
   lang_id SMALLINT NOT NULL,
   page_id INT NOT NULL,
   title VARCHAR(256) NOT NULL,
-  page_type SMALLINT NOT NULL,
+  name_space SMALLINT NOT NULL,
   univ_id INT NOT NULL
 );

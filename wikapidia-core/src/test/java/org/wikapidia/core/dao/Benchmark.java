@@ -130,7 +130,7 @@
 //        return Article.NameSpace.values()[random.nextInt(Article.NameSpace.values().length)];
 //    }
 //
-//    public Article.PageType type(){
-//        return Article.PageType.values()[random.nextInt(Article.PageType.values().length)];
+//    public Article.NameSpace type(){
+//        return Article.NameSpace.values()[random.nextInt(Article.NameSpace.values().length)];
 //    }
 //}

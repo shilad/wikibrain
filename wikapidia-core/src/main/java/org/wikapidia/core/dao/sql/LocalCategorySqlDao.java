@@ -14,7 +14,6 @@ import org.wikapidia.core.model.*;
 
 import javax.sql.DataSource;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implements LocalCategoryDao {
@@ -33,7 +32,7 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
      */
     @Override
     public LocalCategory getByTitle(Language language, Title title) throws DaoException {
-        return super.getByTitle(language, title, PageType.CATEGORY);
+        return super.getByTitle(language, title, NameSpace.CATEGORY);
     }
 
     /**
@@ -46,7 +45,7 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
      */
     @Override
     public Map<Title, LocalCategory> getByTitles(Language language, Collection<Title> titles) throws DaoException{
-        return super.getByTitles(language, titles, PageType.CATEGORY);
+        return super.getByTitles(language, titles, NameSpace.CATEGORY);
     }
 
 
@@ -59,9 +58,9 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        PageType pageType = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
-        if (pageType != PageType.CATEGORY) {
-            throw new DaoException("Tried to get CATEGORY, but found " + pageType);
+        NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        if (nameSpace != NameSpace.CATEGORY) {
+            throw new DaoException("Tried to get CATEGORY, but found " + nameSpace);
         }
         return new LocalCategory(
                 lang,
