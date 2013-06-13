@@ -4,6 +4,7 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
+import org.wikapidia.core.dao.sql.SqlCache;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.PageType;
@@ -18,6 +19,7 @@ public class Benchmark {
     private int numLinks = 1000000;
     private int titleLength = 10;
     boolean shouldBuildDb = true;
+    boolean shouldBuildLastModified = true;
     LanguageInfo lang;
 
     @Test
@@ -28,9 +30,18 @@ public class Benchmark {
         ds.setJdbcUrl("jdbc:h2:~/benchmark-small-db");
         ds.setUsername("sa");
         ds.setPassword("");
+
+        if (shouldBuildLastModified){
+            (new SqlCache(ds)).makeLastModifiedDb();
+        }
         LocalArticleSqlDao ad = new LocalArticleSqlDao(ds);
+        ad.useCache("./");
         System.out.println("Data source established.");
         List<LocalArticle> list = null;
+
+
+
+
         if (shouldBuildDb){list = buildDb(ad);}
 
         long time = 0, start, stop;
@@ -104,7 +115,6 @@ public class Benchmark {
         start=System.currentTimeMillis();
         dao.endLoad();
         stop= System.currentTimeMillis();
-        System.out.println("endLoad took "+(stop-start)+" ms");
         return list;
 
     }

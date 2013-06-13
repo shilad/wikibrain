@@ -1,8 +1,7 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TLongIntHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import org.apache.commons.io.IOUtils;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
@@ -30,7 +29,7 @@ import java.util.Map;
 /**
  */
 public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao implements LocalPageDao<T> {
-    private TLongIntHashMap titlesToIds;
+    private TLongIntHashMap titlesToIds = null;
 
     public LocalPageSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource);
@@ -83,7 +82,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     IOUtils.toString(
                             LocalPageSqlDao.class.getResource("/db/local-page-indexes.sql")
                     ));
-            titlesToIds = buildTitlesToIds();
+            if (cache!=null){
+                cache.updateTableLastModified("page_table");
+            }
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (SQLException e){
@@ -150,7 +151,10 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         return map;
     }
 
-    public int getIdByTitle(String title, Language language, PageType pageType){
+    public int getIdByTitle(String title, Language language, PageType pageType) throws DaoException {
+        if (titlesToIds==null){
+            titlesToIds=buildTitlesToIds();
+        }
         return titlesToIds.get(hashTitle(title,language.getId(),pageType.ordinal()));
     }
 
@@ -203,6 +207,12 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     protected TLongIntHashMap buildTitlesToIds() throws DaoException {
         Connection conn = null;
         try {
+            if (cache!=null){
+                TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds","local_page");
+                if (map!=null){
+                    return map;
+                }
+            }
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> cursor = context.select().
@@ -214,6 +224,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
                         record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE));
                 map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
+            }
+            if (cache!=null){
+                cache.saveToCache("titlesToIds",map,"page_table");
             }
             return map;
         } catch (SQLException e) {
