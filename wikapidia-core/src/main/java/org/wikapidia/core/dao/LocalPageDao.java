@@ -2,7 +2,7 @@ package org.wikapidia.core.dao;
 
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
 import java.util.Collection;
@@ -18,7 +18,7 @@ public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract T getByTitle(Language language, Title title, PageType ns) throws DaoException;
+    public abstract T getByTitle(Language language, Title title, NameSpace ns) throws DaoException;
 
     /**
      * Get a single page by its title
@@ -46,5 +46,5 @@ public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
      * @return a map of titles to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, PageType ns) throws DaoException;
+    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException;
 }

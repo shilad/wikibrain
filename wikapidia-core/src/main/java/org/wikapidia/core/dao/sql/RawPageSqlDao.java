@@ -14,7 +14,7 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 
 import javax.sql.DataSource;
@@ -23,7 +23,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Retrieves and stores page text.
@@ -44,7 +43,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/raw-page-schema.sql")
+                            RawPageSqlDao.class.getResource("/db/raw-page-schema.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -68,7 +67,9 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                     page.getBody(),
                     page.getTitle(),
                     page.getLastEdit(),
-                    page.getType().getNamespace().getValue()
+                    page.getNamespace().getArbitraryId(),
+                    page.isRedirect(),
+                    page.isDisambig()
             ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -84,7 +85,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/raw-page-indexes.sql")
+                            RawPageSqlDao.class.getResource("/db/raw-page-indexes.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -97,27 +98,32 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
 
     @Override
     public RawPage get(Language language, int localPageId) throws DaoException {
-        return localToRaw(localPageDao.getById(language, localPageId));
+        return buildRawPage(localPageDao.getById(language, localPageId));
     }
 
-    private RawPage localToRaw(LocalPage lp) throws DaoException {
+    private RawPage buildRawPage(LocalPage lp) throws DaoException {
         return new RawPage(lp.getLocalId(), -1,
                 lp.getTitle().getCanonicalTitle(),
                 getBody(lp.getLanguage(), lp.getLocalId()),
                 null,
-                lp.getPageType(),
-                lp.getLanguage());
+                lp.getLanguage(),
+                lp.getNameSpace(),
+                lp.isRedirect(),
+                lp.isDisambig()
+        );
     }
 
-    private RawPage databaseToRaw(Record record){
+    private RawPage buildRawPage(Record record){
         Timestamp timestamp = record.getValue(Tables.RAW_PAGE.LASTEDIT);
         return new RawPage(record.getValue(Tables.RAW_PAGE.PAGE_ID),
                 record.getValue(Tables.RAW_PAGE.REVISION_ID),
                 record.getValue(Tables.RAW_PAGE.TITLE),
                 record.getValue(Tables.RAW_PAGE.BODY),
                 new Date(timestamp.getTime()),
-                PageType.values()[record.getValue(Tables.RAW_PAGE.PAGE_TYPE)],
-                Language.getById(record.getValue(Tables.RAW_PAGE.LANG_ID))
+                Language.getById(record.getValue(Tables.RAW_PAGE.LANG_ID)),
+                NameSpace.getNameSpaceById(record.getValue(Tables.RAW_PAGE.NAME_SPACE)),
+                record.getValue(Tables.RAW_PAGE.IS_REDIRECT),
+                record.getValue(Tables.RAW_PAGE.IS_DISAMBIG)
         );
     }
 
@@ -154,7 +160,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                     new DaoTransformer<RawPage>() {
                         @Override
                         public RawPage transform(Record r) {
-                             return databaseToRaw(r);
+                             return buildRawPage(r);
                         }
                     }
             );

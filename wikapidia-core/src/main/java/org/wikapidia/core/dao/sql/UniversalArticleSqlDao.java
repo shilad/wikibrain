@@ -14,7 +14,7 @@ import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalArticle;
 
@@ -32,12 +32,12 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
 
     @Override
     public UniversalArticle getById(int univId) throws DaoException {
-        return super.getById(univId, PageType.ARTICLE);
+        return super.getById(univId, NameSpace.ARTICLE);
     }
 
     @Override
     public Map<Integer, UniversalArticle> getByIds(Collection<Integer> univIds) throws DaoException {
-        return super.getByIds(univIds, PageType.ARTICLE);
+        return super.getByIds(univIds, NameSpace.ARTICLE);
     }
 
     @Override
@@ -47,9 +47,9 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
         }
         Multimap<Language, LocalArticle> localPages = HashMultimap.create(result.size(), result.size());
         for(Record record : result) {
-            PageType pageType = PageType.values()[record.getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
-            if (pageType != PageType.ARTICLE) {
-                throw new DaoException("Tried to get ARTICLE, but found " + pageType);
+            NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+            if (nameSpace != NameSpace.ARTICLE) {
+                throw new DaoException("Tried to get ARTICLE, but found " + nameSpace);
             }
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             Title title = new Title(

@@ -6,16 +6,44 @@ import org.wikapidia.core.lang.Language;
  */
 public class LocalPage {
 
-    protected Language language;
-    protected int localId;
-    protected Title title;
-    protected PageType pageType;
+    protected final Language language;
+    protected final int localId;
+    protected final Title title;
+    protected final NameSpace nameSpace;
+    protected final boolean isRedirect;
+    protected final boolean isDisambig;
 
-    public LocalPage(Language language, int localId, Title title, PageType pageType){
+    /**
+     * Default for NON-redirect pages.
+     * @param language
+     * @param localId
+     * @param title
+     * @param nameSpace
+     */
+    public LocalPage(Language language, int localId, Title title, NameSpace nameSpace){
         this.language = language;
         this.localId = localId;
         this.title = title;
-        this.pageType = pageType;
+        this.nameSpace = nameSpace;
+        isRedirect = false;
+        isDisambig = false;
+    }
+
+    /**
+     * Ability to set redirect pages.
+     * @param language
+     * @param localId
+     * @param title
+     * @param nameSpace
+     * @param redirect
+     */
+    public LocalPage(Language language, int localId, Title title, NameSpace nameSpace, boolean redirect, boolean disambig) {
+        this.language = language;
+        this.localId = localId;
+        this.title = title;
+        this.nameSpace = nameSpace;
+        isRedirect = redirect;
+        isDisambig = disambig;
     }
 
     public int getLocalId() {
@@ -30,8 +58,16 @@ public class LocalPage {
         return language;
     }
 
-    public PageType getPageType() {
-        return pageType;
+    public NameSpace getNameSpace() {
+        return nameSpace;
+    }
+
+    public boolean isDisambig() {
+        return isDisambig;
+    }
+
+    public boolean isRedirect() {
+        return isRedirect;
     }
 
     public int hashCode(){

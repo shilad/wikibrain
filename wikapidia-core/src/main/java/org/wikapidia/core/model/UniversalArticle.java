@@ -10,7 +10,7 @@ import org.wikapidia.core.lang.Language;
 public class UniversalArticle extends UniversalPage<LocalArticle>{
 
     public UniversalArticle(int univId, Multimap<Language, LocalArticle> localPages) {
-        super(univId, PageType.ARTICLE, localPages);
+        super(univId, NameSpace.ARTICLE, localPages);
     }
 
 }

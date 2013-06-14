@@ -19,7 +19,7 @@ public class LocalPageLoader extends ParserVisitor {
     @Override
     public void beginPage(RawPage xml) throws WikapidiaException {
         try {
-            dao.save(new LocalPage(xml.getLang(), xml.getPageId(), xml.getTitle(), xml.getType()));
+            dao.save(new LocalPage(xml.getLang(), xml.getPageId(), xml.getTitle(), xml.getNamespace()));
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }

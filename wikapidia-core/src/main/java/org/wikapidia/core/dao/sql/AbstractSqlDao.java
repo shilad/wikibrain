@@ -1,10 +1,13 @@
 package org.wikapidia.core.dao.sql;
 
+import org.apache.commons.io.IOUtils;
 import org.jooq.SQLDialect;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.JooqUtils;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -17,6 +20,7 @@ public abstract class AbstractSqlDao {
 
     protected final SQLDialect dialect;
     protected DataSource ds;
+    protected SqlCache cache;
 
     public AbstractSqlDao(DataSource dataSource) throws DaoException {
         ds = dataSource;
@@ -29,6 +33,28 @@ public abstract class AbstractSqlDao {
         } finally {
             quietlyCloseConn(conn);
         }
+        cache = null;
+    }
+
+    public void beginLoad() throws DaoException {
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalPageSqlDao.class.getResource("/db/local-page-schema.sql")
+                    ));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    public void useCache(File dir) throws DaoException{
+        cache = new SqlCache(ds, dir);
     }
 
     /**
