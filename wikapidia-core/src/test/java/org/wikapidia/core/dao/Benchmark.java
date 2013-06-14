@@ -1,14 +1,16 @@
 package org.wikapidia.core.dao;
 
 import com.jolbox.bonecp.BoneCPDataSource;
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
+import org.wikapidia.core.dao.sql.SqlCache;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,6 +20,7 @@ public class Benchmark {
     private int numLinks = 1000000;
     private int titleLength = 10;
     boolean shouldBuildDb = true;
+    boolean shouldBuildLastModified = true;
     LanguageInfo lang;
 
     @Test
@@ -28,24 +31,38 @@ public class Benchmark {
         ds.setJdbcUrl("jdbc:h2:~/benchmark-small-db");
         ds.setUsername("sa");
         ds.setPassword("");
+
+        if (shouldBuildLastModified){
+            (new SqlCache(ds, new File("."))).makeLastModifiedDb();
+        }
         LocalArticleSqlDao ad = new LocalArticleSqlDao(ds);
+        ad.useCache(new File("."));
         System.out.println("Data source established.");
         List<LocalArticle> list = null;
-        if (shouldBuildDb){list = buildDb(ad);}
 
-        long time = 0, start, stop;
+
+        long time, start, stop;
+        if (shouldBuildDb) {
+            list = buildDb(ad);
+        } else {
+            start=System.currentTimeMillis();
+            ad.getIdByTitle("FOO", Language.getByLangCode("en"), NameSpace.ARTICLE);
+            stop=System.currentTimeMillis();
+            time = stop - start;
+            System.out.println("loading titles took " + time + " millis");
+        }
+
         Random r = new Random();
         int j;
-        int numQueries = 0;
-        while(time < 1000){
+        int numQueries = 100000;
+        start=System.currentTimeMillis();
+        for (int i = 0; i < numQueries; i++) {
             j=r.nextInt(numArticles);
-            start=System.currentTimeMillis();
             ad.getById(lang.getLanguage(), j);
-            stop=System.currentTimeMillis();
-            time += stop - start;
-            numQueries++;
         }
-        System.out.println("" + numQueries + " Get_Queries completed in 1 s");
+        stop=System.currentTimeMillis();
+        time = stop - start;
+        System.out.println("Get_Queries: completed " + (numQueries / (time / 1000.0)) + " per second");
 
 
         if (list!=null){
@@ -56,7 +73,7 @@ public class Benchmark {
 
                 id = ad.getIdByTitle(article.getTitle().getCanonicalTitle(),
                                      article.getLanguage(),
-                                     article.getPageType());
+                                     article.getNameSpace());
                 assert(id == article.getLocalId());
             }
             stop = System.currentTimeMillis();
@@ -104,7 +121,6 @@ public class Benchmark {
         start=System.currentTimeMillis();
         dao.endLoad();
         stop= System.currentTimeMillis();
-        System.out.println("endLoad took "+(stop-start)+" ms");
         return list;
 
     }
@@ -144,8 +160,8 @@ class RandomHelper{
         return smallString;
     }
 
-    public PageType ns(){
-        return PageType.values()[random.nextInt(PageType.values().length)];
+    public NameSpace getRandomNS(){
+        return NameSpace.values()[random.nextInt(NameSpace.values().length)];
     }
 
 }

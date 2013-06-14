@@ -126,7 +126,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/local-link-schema.sql")
+                            LocalLinkSqlDao.class.getResource("/db/local-link-schema.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);

@@ -5,7 +5,6 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.LocalCategorySqlDao;
-import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
 
@@ -37,7 +36,7 @@ public class TestLocalPageDao {
                 lang.getLanguage(),
                 7,
                 new Title("test", lang),
-                PageType.ARTICLE
+                NameSpace.ARTICLE
         );
         dao.save(page);
         dao.endLoad();
@@ -46,13 +45,13 @@ public class TestLocalPageDao {
         assert (savedPage != null);
         assert (page.getLocalId() == savedPage.getLocalId());
         assert (page.getTitle().equals(savedPage.getTitle()));
-        assert (page.getPageType().equals(savedPage.getPageType()));
+        assert (page.getNameSpace().equals(savedPage.getNameSpace()));
 
         savedPage = dao.getById(lang.getLanguage(), 7);
         assert (savedPage != null);
         assert (page.getLocalId() == savedPage.getLocalId());
         assert (page.getTitle().equals(savedPage.getTitle()));
-        assert (page.getPageType().equals(savedPage.getPageType()));
+        assert (page.getNameSpace().equals(savedPage.getNameSpace()));
 
         List<Integer> pageIds = new ArrayList<Integer>();
         pageIds.add(7);
@@ -68,7 +67,7 @@ public class TestLocalPageDao {
         assert (morePages.get(new Title("test", lang)).equals(page));
         assert (morePages.get(new Title("test", lang)).equals(savedPage));
 
-        int savedId = dao.getIdByTitle("Test", lang.getLanguage(), PageType.ARTICLE);
+        int savedId = dao.getIdByTitle("Test", lang.getLanguage(), NameSpace.ARTICLE);
         assert (savedId==7);
     }
 
@@ -92,7 +91,7 @@ public class TestLocalPageDao {
                 lang.getLanguage(),
                 7,
                 new Title("test", lang),
-                PageType.CATEGORY
+                NameSpace.CATEGORY
         );
         dao.save(page);
         dao.endLoad();
@@ -101,13 +100,13 @@ public class TestLocalPageDao {
         assert (savedPage != null);
         assert (page.getLocalId() == savedPage.getLocalId());
         assert (page.getTitle().equals(savedPage.getTitle()));
-        assert (page.getPageType().equals(savedPage.getPageType()));
+        assert (page.getNameSpace().equals(savedPage.getNameSpace()));
 
         savedPage = dao.getById(lang.getLanguage(), 7);
         assert (savedPage != null);
         assert (page.getLocalId() == savedPage.getLocalId());
         assert (page.getTitle().equals(savedPage.getTitle()));
-        assert (page.getPageType().equals(savedPage.getPageType()));
+        assert (page.getNameSpace().equals(savedPage.getNameSpace()));
 
         List<Integer> pageIds = new ArrayList<Integer>();
         pageIds.add(7);
@@ -123,7 +122,7 @@ public class TestLocalPageDao {
         assert (morePages.get(new Title("test", lang)).equals(page));
         assert (morePages.get(new Title("test", lang)).equals(savedPage));
 
-        int savedId = dao.getIdByTitle("Test", lang.getLanguage(), PageType.CATEGORY);
+        int savedId = dao.getIdByTitle("Test", lang.getLanguage(), NameSpace.CATEGORY);
         assert (savedId==7);
     }
 }

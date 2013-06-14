@@ -120,7 +120,7 @@
                 <executions>
                     <execution>
                         <id>create-database</id>
-                        <phase>generate-test-sources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>execute</goal>
                         </goals>
