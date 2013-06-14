@@ -60,9 +60,9 @@ public class WikiTextParser {
             pr.location = new ParsedLocation(xml, -1, -1, -1);
             // TODO: calculate redirect text?
             visitRedirect(pr);
-        } else if (xml.getType() == NameSpace.CATEGORY) {
+        } else if (xml.getNamespace() == NameSpace.CATEGORY) {
             parseCategory(xml, pp);
-        } else if (xml.getType() == NameSpace.ARTICLE) {
+        } else if (xml.getNamespace() == NameSpace.ARTICLE) {
             parseArticle(xml, pp);
         }
         visitEndPage(xml);

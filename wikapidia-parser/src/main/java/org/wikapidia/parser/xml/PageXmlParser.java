@@ -77,7 +77,8 @@ public class PageXmlParser {
                 lastEdit,
                 language.getLanguage(),
                 getNameSpace(title),
-                isRedirect(body)
+                isRedirect(body),
+                false   // TODO: FIXME by properly parsing disambigs!
         );
     }
 

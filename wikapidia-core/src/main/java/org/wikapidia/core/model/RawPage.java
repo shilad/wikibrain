@@ -21,15 +21,15 @@ public class RawPage {
     private final int revisionId;
     private final int pageId;
 
-    private final NameSpace type;
+    private final NameSpace namespace;
     private final boolean isRedirect;
     private final boolean isDisambig;
 
-    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace type) {
+    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace) {
         this.title = new Title(title, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
-        this.type = type;
+        this.namespace = namespace;
         this.lang = lang;
         this.revisionId = revisionId;
         this.pageId = pageId;
@@ -37,14 +37,14 @@ public class RawPage {
         isDisambig = false;
     }
 
-    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace type, boolean redirect, boolean disambig) {
+    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace, boolean redirect, boolean disambig) {
         this.title = new Title(title, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
         this.lang = lang;
         this.revisionId = revisionId;
         this.pageId = pageId;
-        this.type = type;
+        this.namespace = namespace;
         isRedirect = redirect;
         isDisambig = disambig;
     }
@@ -73,8 +73,8 @@ public class RawPage {
         return pageId;
     }
 
-    public NameSpace getType() {
-        return type;
+    public NameSpace getNamespace() {
+        return namespace;
     }
 
     public boolean isRedirect() {
