@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Random;
 
 public class Benchmark {
-    private int numArticles = 5000000;
+    private int numArticles = 1000000;
     private int numLinks = 1000000;
     private int titleLength = 10;
-    boolean shouldBuildDb = false;
-    boolean shouldBuildLastModified = false;
+    boolean shouldBuildDb = true;
+    boolean shouldBuildLastModified = true;
     LanguageInfo lang;
 
     @Test
