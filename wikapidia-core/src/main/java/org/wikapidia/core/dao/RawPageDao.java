@@ -1,11 +1,7 @@
 package org.wikapidia.core.dao;
 
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.PageType;
 import org.wikapidia.core.model.RawPage;
-import org.wikapidia.core.model.Title;
-
-import java.util.Date;
 
 public interface RawPageDao extends Loader<RawPage> {
 

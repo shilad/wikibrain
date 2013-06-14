@@ -17,7 +17,7 @@ import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.PageType;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
 
@@ -44,7 +44,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/universal-page-schema.sql")
+                            UniversalPageSqlDao.class.getResource("/db/universal-page-schema.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -62,7 +62,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
             UniversalPage<LocalPage> temp = page;
-            PageType pageType = temp.getPageType();
+            NameSpace nameSpace = temp.getNameSpace();
             for (Language language : temp.getLanguageSetOfExistsInLangs()) {
                 for (LocalPage localPage : temp.getLocalPages(language)) {
                     context.insertInto(Tables.UNIVERSAL_PAGE).values(
@@ -70,7 +70,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                             language.getId(),
                             localPage.getLocalId(),
                             localPage.getTitle().getCanonicalTitle(),
-                            pageType.getPageTypeId(),
+                            nameSpace.getArbitraryId(),
                             page.getUnivId()
                     ).execute();
                 }
@@ -89,7 +89,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/universal-page-indexes.sql")
+                            UniversalPageSqlDao.class.getResource("/db/universal-page-indexes.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -101,7 +101,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public T getById(int univId, PageType pageType) throws DaoException {
+    public T getById(int univId, NameSpace nameSpace) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -109,7 +109,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Result<Record> result = context.select().
                     from(Tables.UNIVERSAL_PAGE).
                     where(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(univId)).
-                    and(Tables.UNIVERSAL_PAGE.PAGE_TYPE.eq(pageType.getPageTypeId())).
+                    and(Tables.UNIVERSAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
                     fetch();
             return (T)buildUniversalPage(result);
         } catch (SQLException e) {
@@ -120,10 +120,13 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public Map<Integer, T> getByIds(Collection<Integer> univIds, PageType pageType) throws DaoException {
+    public Map<Integer, T> getByIds(Collection<Integer> univIds, NameSpace nameSpace) throws DaoException {
+        if (univIds == null || univIds.isEmpty()) {
+            return null;
+        }
         Map<Integer, T> map = new HashMap<Integer, T>();
         for (Integer univId : univIds){
-            map.put(univId, getById(univId, pageType));
+            map.put(univId, getById(univId, nameSpace));
         }
         return map;
     }
@@ -141,7 +144,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             return null;
         }
         Multimap<Language, LocalPage> localPages = HashMultimap.create(result.size(), result.size());
-        PageType pageType = PageType.values()[result.get(0).getValue(Tables.LOCAL_PAGE.PAGE_TYPE)];
+        NameSpace nameSpace = NameSpace.getNameSpaceById(result.get(0).getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         for(Record record : result) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             Title title = new Title(
@@ -152,15 +155,15 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                             language,
                             record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID),
                             title,
-                            pageType
+                            nameSpace
                     )
             );
         }
         return new UniversalPage<LocalPage>(
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
-                pageType,
+                nameSpace,
                 localPages
-        ) {};
+        ){};
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<UniversalPageDao> {

@@ -4,9 +4,10 @@ import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,12 +19,12 @@ public abstract class UniversalPage<T extends LocalPage> {
      * The universal id for the universal page. Universal ids are defined within but not across namespaces.
      */
     private final int univId;
-    private final PageType pageType;
+    private final NameSpace nameSpace;
     private final Multimap<Language, T> localPages;
 
-    protected UniversalPage(int univId, PageType pageType, Multimap<Language, T> localPages) {
+    protected UniversalPage(int univId, NameSpace nameSpace, Multimap<Language, T> localPages) {
         this.univId = univId;
-        this.pageType = pageType;
+        this.nameSpace = nameSpace;
         this.localPages = localPages;
     }
 
@@ -31,8 +32,8 @@ public abstract class UniversalPage<T extends LocalPage> {
         return univId;
     }
 
-    public PageType getPageType() {
-        return pageType;
+    public NameSpace getNameSpace() {
+        return nameSpace;
     }
 
     /**
@@ -87,10 +88,18 @@ public abstract class UniversalPage<T extends LocalPage> {
     /**
      * Returns a language set of languages in which this UniversalPage has pages.
      * The default language of the language set is undefined.
+     * TODO: choose an appropriate default language based on the config file.
      * @return
      */
     public LanguageSet getLanguageSetOfExistsInLangs() {
-        return new LanguageSet(localPages.keys());
+        Language en = Language.getByLangCode("en");
+        if (localPages.containsKey(en)) {
+            return new LanguageSet(en, localPages.keys());
+        } else {
+            List<Language> langs = new ArrayList<Language>(localPages.keySet());
+            Collections.sort(langs);
+            return new LanguageSet(langs);
+        }
     }
 
     /**
@@ -117,7 +126,7 @@ public abstract class UniversalPage<T extends LocalPage> {
         if (o instanceof UniversalPage) {
             UniversalPage other = (UniversalPage) o;
             return (this.getUnivId() == other.getUnivId() &&
-                    this.getPageType() == other.getPageType()
+                    this.getNameSpace() == other.getNameSpace()
             );
         }
         else {

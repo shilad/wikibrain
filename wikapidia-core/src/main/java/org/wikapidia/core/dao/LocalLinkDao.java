@@ -3,9 +3,6 @@ package org.wikapidia.core.dao;
 
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
-import org.wikapidia.core.model.PageType;
-
-import java.util.List;
 
 public interface LocalLinkDao extends Loader<LocalLink> {
     /**

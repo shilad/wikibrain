@@ -13,24 +13,40 @@ import java.util.logging.Logger;
 public class RawPage {
     private static final Logger LOG = Logger.getLogger(RawPage.class.getName());
 
-    private Title title;
-    private String body;
-    private Date lastEdit;
+    private final Title title;
+    private final String body;
+    private final Date lastEdit;
 
-    private Language lang;
-    private int revisionId;
-    private int pageId;
+    private final Language lang;
+    private final int revisionId;
+    private final int pageId;
 
-    private PageType type;
+    private final NameSpace namespace;
+    private final boolean isRedirect;
+    private final boolean isDisambig;
 
-    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, PageType type, Language lang) {
-        this.title = new Title(title, false, LanguageInfo.getByLanguage(lang));
+    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace) {
+        this.title = new Title(title, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
-        this.type = type;
+        this.namespace = namespace;
         this.lang = lang;
         this.revisionId = revisionId;
         this.pageId = pageId;
+        isRedirect = false;
+        isDisambig = false;
+    }
+
+    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace, boolean redirect, boolean disambig) {
+        this.title = new Title(title, LanguageInfo.getByLanguage(lang));
+        this.body = body;
+        this.lastEdit = lastEdit;
+        this.lang = lang;
+        this.revisionId = revisionId;
+        this.pageId = pageId;
+        this.namespace = namespace;
+        isRedirect = redirect;
+        isDisambig = disambig;
     }
 
     public Title getTitle() {
@@ -45,10 +61,6 @@ public class RawPage {
         return lastEdit;
     }
 
-    public PageType getType() {
-        return type;
-    }
-
     public Language getLang() {
         return lang;
     }
@@ -59,6 +71,18 @@ public class RawPage {
 
     public int getPageId() {
         return pageId;
+    }
+
+    public NameSpace getNamespace() {
+        return namespace;
+    }
+
+    public boolean isRedirect() {
+        return isRedirect;
+    }
+
+    public boolean isDisambig() {
+        return isDisambig;
     }
 
     public String toString(){
