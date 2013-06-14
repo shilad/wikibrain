@@ -99,7 +99,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     @Override
-    public WikapidiaIterable<T> get(PageFilter pageFilter) throws DaoException {
+    public DaoIterable<T> get(PageFilter pageFilter) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -124,7 +124,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
                     fetchLazy();
-            return new WikapidiaIterable<T>(result, new DaoTransformer<T>() {
+            return new DaoIterable<T>(result, new DaoTransformer<T>() {
                 @Override
                 public T transform(Record r) {
                     try {

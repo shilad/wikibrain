@@ -147,7 +147,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
         }
     }
 
-    public WikapidiaIterable<RawPage> allRawPages() throws DaoException {
+    public DaoIterable<RawPage> allRawPages() throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -156,7 +156,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             Cursor<Record> result = context.select()
                     .from(Tables.RAW_PAGE)
                     .fetchLazy();
-            return  new WikapidiaIterable<RawPage>(result,
+            return  new DaoIterable<RawPage>(result,
                     new DaoTransformer<RawPage>() {
                         @Override
                         public RawPage transform(Record r) {

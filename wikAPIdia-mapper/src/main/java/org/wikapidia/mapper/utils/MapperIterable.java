@@ -1,15 +1,39 @@
 package org.wikapidia.mapper.utils;
 
-import org.wikapidia.core.model.UniversalPage;
-
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
  */
-public class MapperIterable<T> implements Iterable<T> {
+public abstract class MapperIterable<E> implements Iterable<E> {
+
+    private final Iterable input;
+
+    public MapperIterable(Iterable input) {
+        this.input = input;
+    }
+
+    public abstract E transform(Iterator iterator);
 
     @Override
-    public Iterator<T> iterator() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Iterator<E> iterator() {
+        return new Iterator<E>() {
+            Iterator iterator = input.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public E next() {
+                return transform(iterator);
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 }

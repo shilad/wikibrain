@@ -5,11 +5,11 @@ import org.jooq.Record;
 import java.lang.UnsupportedOperationException;
 import java.util.Iterator;
 
-public class WikapidiaIterable<E> implements Iterable<E> {
-    Cursor<Record> result;
+public class DaoIterable<E> implements Iterable<E> {
+    Cursor result;
     DaoTransformer<E> func;
 
-    public WikapidiaIterable(Cursor<Record> result, DaoTransformer<E> func){
+    public DaoIterable(Cursor result, DaoTransformer<E> func){
         this.result=result;
         this.func=func;
     }

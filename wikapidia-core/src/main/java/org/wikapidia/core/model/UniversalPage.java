@@ -22,7 +22,7 @@ public class UniversalPage<T extends LocalPage> {
     private final NameSpace nameSpace;
     private final Multimap<Language, T> localPages;
 
-    protected UniversalPage(int univId, NameSpace nameSpace, Multimap<Language, T> localPages) {
+    public UniversalPage(int univId, NameSpace nameSpace, Multimap<Language, T> localPages) {
         this.univId = univId;
         this.nameSpace = nameSpace;
         this.localPages = localPages;
