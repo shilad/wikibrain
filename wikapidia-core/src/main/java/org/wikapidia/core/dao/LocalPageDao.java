@@ -11,6 +11,12 @@ import java.util.Map;
 public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
 
     /**
+     * Sets if we should try to follow the redirects or not. Default is true (to following them).
+     * @param followRedirects
+     */
+    public abstract void setFollowRedirects(boolean followRedirects);
+
+    /**
      * Get a single page by its title
      * @param language the page's language
      * @param title the page's title

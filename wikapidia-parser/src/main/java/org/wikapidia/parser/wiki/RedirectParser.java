@@ -16,11 +16,11 @@ public class RedirectParser {
         this.language = LanguageInfo.getByLanguage(language);
     }
 
-    private boolean isRedirect(String body) {
+    public boolean isRedirect(String body) {
         return extractSingleString(language.getRedirectPattern(), body, 1) != null;
     }
 
-    private Title getRedirect(String body) {
+    public Title getRedirect(String body) {
         String title =  extractSingleString(language.getRedirectPattern(), body, 1);
         return new Title(title, language);
     }

@@ -11,7 +11,9 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoTransformer;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.WikapidiaIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -30,9 +32,20 @@ import java.util.Map;
  */
 public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao implements LocalPageDao<T> {
     private TLongIntHashMap titlesToIds = null;
+    private boolean followRedirects = true;
+    private RedirectSqlDao redirectSqlDao;
 
     public LocalPageSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource);
+        redirectSqlDao = new RedirectSqlDao(ds);
+    }
+
+    public LocalPageSqlDao(DataSource dataSource, boolean followRedirects) throws DaoException{
+        super(dataSource);
+        this.followRedirects = followRedirects;
+        if (followRedirects){
+            redirectSqlDao = new RedirectSqlDao(ds);
+        }
     }
 
     @Override
@@ -107,12 +120,26 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne();
-            return (T)buildLocalPage(record);
+            LocalPage page = buildLocalPage(record);
+            if (followRedirects && page.isRedirect()){
+                return getById(language,
+                        redirectSqlDao.resolveRedirect(
+                                page.getLanguage(),
+                                page.getLocalId()
+                        )
+                );
+            }
+            return (T)page;
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
         }
+    }
+
+    @Override
+    public void setFollowRedirects(boolean followRedirects) {
+        this.followRedirects = followRedirects;
     }
 
     @Override
@@ -127,7 +154,16 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(title.getLanguage().getId())).
                     and(Tables.LOCAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
                     fetchOne();
-            return (T)buildLocalPage(record);
+            LocalPage page = buildLocalPage(record);
+            if (followRedirects && page.isRedirect()){
+                return getById(language,
+                        redirectSqlDao.resolveRedirect(
+                                page.getLanguage(),
+                                page.getLocalId()
+                        )
+                );
+            }
+            return (T)page;
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -174,7 +210,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
      * @return a LocalPage representation of the given database record
      * @throws DaoException if the record is not a Page
      */
-    protected LocalPage buildLocalPage(Record record) throws DaoException {
+    protected LocalPage buildLocalPage(Record record) {
         if (record == null) {
             return null;
         }
@@ -228,12 +264,21 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             Cursor<Record> cursor = context.select().
                     from(Tables.LOCAL_PAGE).
                     fetchLazy();
-            TLongIntHashMap map = new TLongIntHashMap();
+
+            TLongIntHashMap map = new TLongIntHashMap(10, 0.5f, -1, -1);
             for (Record record : cursor){
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
                         record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
-                map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
+                if (followRedirects && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)){
+                    map.put(hash, redirectSqlDao.resolveRedirect(
+                            Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID)),
+                            record.getValue(Tables.LOCAL_PAGE.PAGE_ID)
+                    ));
+                }
+                else{
+                    map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
+                }
             }
             if (cache!=null){
                 cache.saveToCache("titlesToIds", map);
