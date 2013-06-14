@@ -6,23 +6,19 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalLinkDao;
-import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.RawPageDao;
+
+import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.model.RawPage;
-import org.wikapidia.parser.wiki.ParserVisitor;
-import org.wikapidia.utils.ParallelForEach;
-import org.wikapidia.utils.Procedure;
+import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.mapper.algorithms.MonolingualConceptMapper;
+import org.wikapidia.mapper.utils.MapperIterable;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -30,14 +26,24 @@ import java.util.logging.Logger;
 public class ConceptLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
     private final LanguageSet languageSet;
-//    private final List<ParserVisitor> visitors;
+    private final Configurator configurator;
 //    private final AtomicInteger counter = new AtomicInteger();
 
     public ConceptLoader(LanguageSet languageSet, Configurator configurator) {
         this.languageSet = languageSet;
+        this.configurator = configurator;
     }
 
-    public void load(String algorithm) {
+    public void load(String algorithm) throws ConfigurationException, DaoException {
+        if (algorithm.equalsIgnoreCase("monolingual")) {
+            UniversalPageDao dao = configurator.get(UniversalPageDao.class);
+            MapperIterable<UniversalPage> pages = new MonolingualConceptMapper(configurator).getConceptMap(languageSet);
+            dao.beginLoad();
+            for (UniversalPage page : pages) {
+                dao.save(page);
+            }
+            dao.endLoad();
+        }
 
     }
 
@@ -73,28 +79,6 @@ public class ConceptLoader {
         Configurator conf = new Configurator(new Configuration(pathConf));
 
 //        List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
-//
-//        // TODO: add other visitors
-//        LocalPageDao lpDao = conf.get(LocalPageDao.class);
-//        RawPageDao rpDao = conf.get(RawPageDao.class);
-//        LocalLinkDao llDao = conf.get(LocalLinkDao.class);
-//        visitors.add(new LocalPageLoader(lpDao));
-//        visitors.add(new RawPageLoader(rpDao));
-//        visitors.add(new LocalLinkLoader(llDao));
-//
-//        // TODO: initialize other visitors
-//        if (cmd.hasOption("t")) {
-//            lpDao.beginLoad();
-//            rpDao.beginLoad();
-//            llDao.beginLoad();
-//        }
-//
-//        // TODO: finalize other visitors
-//        if (cmd.hasOption("i")) {
-//            lpDao.endLoad();
-//            rpDao.endLoad();
-//            llDao.endLoad();
-//        }
 
         LanguageSet languages = LanguageSet.getSetOfAllLanguages();
         if (cmd.hasOption("l")) {
@@ -111,6 +95,18 @@ public class ConceptLoader {
             algorithm = cmd.getOptionValue("n");
         }
 
-        final ConceptLoader loader = new ConceptLoader(languages);
+        final ConceptLoader loader = new ConceptLoader(languages, conf);
+
+        UniversalPageDao dao = conf.get(UniversalPageDao.class);
+
+//        if (cmd.hasOption("t")) {
+//            dao.beginLoad();
+//        }
+
+        loader.load(algorithm);
+
+//        if (cmd.hasOption("i")) {
+//            dao.endLoad();
+//        }
     }
 }

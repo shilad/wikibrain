@@ -21,7 +21,7 @@ import java.util.Iterator;
  */
 public class MonolingualConceptMapper extends ConceptMapper {
 
-    protected MonolingualConceptMapper(Configurator configurator) {
+    public MonolingualConceptMapper(Configurator configurator) {
         super(configurator);
     }
 
