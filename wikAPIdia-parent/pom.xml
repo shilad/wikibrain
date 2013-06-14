@@ -10,10 +10,11 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>../wikapidia-utils</module>
         <module>../wikapidia-core</module>
         <module>../wikapidia-loader</module>
         <module>../wikapidia-parser</module>
-        <module>../wikapidia-utils</module>
+        <module>../wikapidia-download</module>
     </modules>
 
 </project>
