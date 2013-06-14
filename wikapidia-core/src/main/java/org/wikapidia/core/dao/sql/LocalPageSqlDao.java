@@ -85,7 +85,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                             LocalPageSqlDao.class.getResource("/db/local-page-indexes.sql")
                     ));
             if (cache!=null){
-                cache.updateTableLastModified("page_table");
+                cache.updateTableLastModified(Tables.LOCAL_PAGE.getName());
             }
         } catch (IOException e) {
             throw new DaoException(e);
@@ -218,7 +218,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         Connection conn = null;
         try {
             if (cache!=null){
-                TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds","local_page");
+                TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", Tables.LOCAL_PAGE.getName());
                 if (map!=null){
                     return map;
                 }
@@ -236,7 +236,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                 map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
             }
             if (cache!=null){
-                cache.saveToCache("titlesToIds",map,"page_table");
+                cache.saveToCache("titlesToIds", map);
             }
             return map;
         } catch (SQLException e) {

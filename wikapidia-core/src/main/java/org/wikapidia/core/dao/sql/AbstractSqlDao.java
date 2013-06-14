@@ -6,6 +6,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.JooqUtils;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -52,11 +53,7 @@ public abstract class AbstractSqlDao {
         }
     }
 
-    public  void useCache() throws DaoException {
-        cache = new SqlCache(ds);
-    }
-
-    public void useCache(String dir) throws DaoException{
+    public void useCache(File dir) throws DaoException{
         cache = new SqlCache(ds, dir);
     }
 

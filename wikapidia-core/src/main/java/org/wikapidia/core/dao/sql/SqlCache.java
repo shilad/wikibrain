@@ -14,16 +14,14 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public class SqlCache extends AbstractSqlDao{
-    String directory;
+    File directory;
 
-    public SqlCache(DataSource dataSource) throws DaoException {
-        super(dataSource);
-        this.directory="./";
-    }
-
-    public SqlCache(DataSource dataSource, String directory) throws DaoException {
+    public SqlCache(DataSource dataSource, File directory) throws DaoException {
         super(dataSource);
         this.directory=directory;
+        if (!this.directory.isDirectory()) {
+            throw new IllegalArgumentException("" + directory + " is not a valid directory");
+        }
     }
 
     public void makeLastModifiedDb () throws DaoException {
@@ -43,42 +41,43 @@ public class SqlCache extends AbstractSqlDao{
         }
     }
 
-
-    // Updates the timestamp in table "table_modified" to the current time
+    /**
+     * Updates the timestamp in table "table_modified" to the current time
+     */
     void updateTableLastModified(String tableName) throws DaoException {
         Connection conn = null;
         try{
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            context.update(Tables.TABLE_MODIFIED)
-                   .set(Tables.TABLE_MODIFIED.LAST_MODIFIED,
-                           new Timestamp(System.currentTimeMillis()));
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+
+            int n = context.update(Tables.TABLE_MODIFIED)
+                    .set(Tables.TABLE_MODIFIED.LAST_MODIFIED, now)
+                    .where(Tables.TABLE_MODIFIED.TABLE_NAME.eq(tableName))
+                    .execute();
+
+            if (n == 0) {
+                n = context.insertInto(Tables.TABLE_MODIFIED, Tables.TABLE_MODIFIED.TABLE_NAME, Tables.TABLE_MODIFIED.LAST_MODIFIED)
+                    .values(tableName, now)
+                    .execute();
+            }
         }catch (SQLException e){
             throw new DaoException(e);
         }
 
     }
 
-    // Updates the timestamp in table "table_modified" to the current time
-    void updateTableLastUpdated(String tableName) throws DaoException {
-        Connection conn = null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.update(Tables.TABLE_MODIFIED)
-                    .set(Tables.TABLE_MODIFIED.LAST_UPDATED,
-                            new Timestamp(System.currentTimeMillis()));
-        }catch (SQLException e){
-            throw new DaoException(e);
-        }
 
-    }
-
-    // Save a named object to the cache. Name is a unique identifier for the object
-    // The object is saved in some/standard/directory/passed/to/AbstractSqlConstructor
+    /**
+     * Save a named object to the cache. Name is a unique identifier for the object
+     * The object is saved in some/standard/directory/passed/to/AbstractSqlConstructor
+     * @param name
+     * @param object
+     * @throws DaoException
+     */
     void saveToCache(String name, Object object) throws DaoException {
         try {
-            FileOutputStream fos = new FileOutputStream(directory+name);
+            FileOutputStream fos = new FileOutputStream(getCacheFile(name));
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(object);
             oos.close();
@@ -88,13 +87,17 @@ public class SqlCache extends AbstractSqlDao{
         }
     }
 
-    //A convenience method to save and update
-    void saveToCache(String name, Object object, String tableName) throws DaoException{
-        saveToCache(name,object);
-        updateTableLastModified(tableName);
+    private File getCacheFile(String name) {
+        return new File(directory, name);
     }
 
-    // Returns the object if it exists and is up to date, otherwise returns null
+    /**
+     * Returns the object if it exists and is up to date, otherwise returns null
+     * @param objectName
+     * @param tableName
+     * @return
+     * @throws DaoException
+     */
     Object get(String objectName, String tableName) throws DaoException {
         Connection conn=null;
         try {
@@ -102,13 +105,14 @@ public class SqlCache extends AbstractSqlDao{
             DSLContext context = DSL.using(conn, dialect);
             Record record = context.select()
                    .from(Tables.TABLE_MODIFIED)
-                   .where(Tables.TABLE_MODIFIED.TITLE.equal(tableName))
+                   .where(Tables.TABLE_MODIFIED.TABLE_NAME.equal(tableName))
                    .fetchOne();
-            if (record==null || record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED)
-                    .after(record.getValue(Tables.TABLE_MODIFIED.LAST_UPDATED))){
+
+            Timestamp cacheTstamp = new Timestamp(getCacheFile(objectName).lastModified());
+            if (record==null || record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED).after(cacheTstamp)){
                 return null;
             }
-            FileInputStream fis = new FileInputStream(directory+objectName);
+            FileInputStream fis = new FileInputStream(getCacheFile(objectName));
             ObjectInputStream ois = new ObjectInputStream(fis);
             Object object = ois.readObject();
             ois.close();
@@ -125,6 +129,4 @@ public class SqlCache extends AbstractSqlDao{
             quietlyCloseConn(conn);
         }
     }
-
-
 }
