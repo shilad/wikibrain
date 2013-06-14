@@ -3,6 +3,7 @@ package org.wikapidia.core.dao.sql;
 import com.typesafe.config.Config;
 import gnu.trove.map.hash.TLongIntHashMap;
 import org.apache.commons.io.IOUtils;
+import org.jooq.Condition;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -10,8 +11,7 @@ import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -22,9 +22,11 @@ import org.wikapidia.core.model.Title;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  */
@@ -90,6 +92,50 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public WikapidiaIterable<T> get(PageFilter pageFilter) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (pageFilter.getLanguages() != null) {
+                conditions.add(Tables.LOCAL_PAGE.LANG_ID.in(pageFilter.getLanguages()));
+            }
+            if (pageFilter.getNameSpaces() != null) {
+                conditions.add(Tables.LOCAL_PAGE.NAME_SPACE.in(pageFilter.getNameSpaces()));
+            }
+            if (pageFilter.isRedirect() != null) {
+                conditions.add(Tables.LOCAL_PAGE.IS_REDIRECT.in(pageFilter.isRedirect()));
+            }
+            if (pageFilter.isDisambig() != null) {
+                conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(pageFilter.isDisambig()));
+            }
+            if (conditions.isEmpty()) {
+                return null;
+            }
+            Cursor<Record> result = context.select().
+                    from(Tables.LOCAL_PAGE).
+                    where(conditions).
+                    fetchLazy();
+            return new WikapidiaIterable<T>(result, new DaoTransformer<T>() {
+                @Override
+                public T transform(Record r) {
+                    try {
+                        return (T)buildLocalPage(r);
+                    } catch (DaoException e) {
+                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        return null;
+                    }
+                }
+            });
+        } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);

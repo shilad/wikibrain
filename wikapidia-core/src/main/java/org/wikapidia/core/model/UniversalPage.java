@@ -13,7 +13,7 @@ import java.util.List;
  * Created with IntelliJ IDEA.
  * User: Brent Hecht
  */
-public abstract class UniversalPage<T extends LocalPage> {
+public class UniversalPage<T extends LocalPage> {
 
     /**
      * The universal id for the universal page. Universal ids are defined within but not across namespaces.

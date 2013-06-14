@@ -10,6 +10,8 @@ import java.util.Map;
 
 public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
 
+    public abstract WikapidiaIterable<T> get(PageFilter pageFilter) throws DaoException;
+
     /**
      * Get a single page by its title
      * @param language the page's language
