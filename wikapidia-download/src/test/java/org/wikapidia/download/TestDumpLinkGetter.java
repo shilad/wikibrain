@@ -27,7 +27,7 @@ public class TestDumpLinkGetter {
         Pattern testPattern = testGetter.getLanguageSpecificPatterns(Language.getByLangCode("en")).get(0);
 
         for(String testLink : testLinks){
-            assert(Pattern.matches(testPattern.toString(), testLink));
+//            assert(Pattern.matches(testPattern.toString(), testLink));
             System.out.println(Pattern.matches(testPattern.toString(), testLink));
         }
 
@@ -36,5 +36,12 @@ public class TestDumpLinkGetter {
 //        DumpLinkGetter getter = new DumpLinkGetter(articlePatterns);
 
 //        List<URL> links = getter.getDumpFiles(Language.getByLangCode("en"));
+    }
+
+    @Test
+    public void testIndex() {
+        DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(DumpLinkGetter.PATTERN_INDEXLINK));
+        String testString = testGetter.getDumpIndex(Language.getByLangCode("de"));
+        System.out.println(testString);
     }
 }

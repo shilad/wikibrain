@@ -1,5 +1,10 @@
 package org.wikapidia.download;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.util.Arrays;
 import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
@@ -9,11 +14,12 @@ import java.util.regex.Pattern;
 
 /**
  * WHAT DOES THIS DO?
+ * There will be different getters for users requesting different type of pages
  */
 public class DumpLinkGetter {
     public static final String PATTERN_ARTICLES = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pages-articles[0-9]+.xml-.+.bz2";
-    public static final String PATTERN_LINKS = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__simplewiki-latest-pagelinks.sql.gz";
-
+    public static final String PATTERN_PAGELINKS = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__simplewiki-latest-pagelinks.sql.gz";
+    public static final String PATTERN_INDEXLINK = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
 
     private final List<String> patterns;
 
@@ -28,6 +34,7 @@ public class DumpLinkGetter {
     public DumpLinkGetter(List<String> patterns) {
         this.patterns = patterns;
     }
+
 
     /**
      * Given a particular language, construct a set of language-specific regular expressions.
@@ -67,7 +74,24 @@ public class DumpLinkGetter {
      * @return
      */
     protected String getDumpIndex(Language lang) {
-        return null;
+        try {
+            Pattern indexPattern = this.getLanguageSpecificPatterns(lang).get(0);
+            URL indexURL = new URL(indexPattern.toString());
+            BufferedReader pageReader = new BufferedReader(new InputStreamReader(indexURL.openStream()));
+            StringBuffer stringBuffer = new StringBuffer();
+            String inputLine;
+            while((inputLine = pageReader.readLine()) != null) {
+                stringBuffer.append(inputLine);
+            }
+            return stringBuffer.toString();
+//            return Integer.toString(stringBuffer.toString().length());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();  //How to handle this?
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();  //How to handle this?
+            return null;
+        }
     }
 
     /**
