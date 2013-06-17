@@ -73,42 +73,24 @@ public enum NameSpace {
      * @return null if the string does not match a namespace
      */
     public static NameSpace getNameSpaceByName(String s){
-        s = s.toLowerCase();
+        s=s.toUpperCase();
+        for (NameSpace ns : NameSpace.values()){
+            if (ns.toString().replace("_"," ").equals(s)){
+                return ns;
+            }
+        }
         if (s.equals("")) return NameSpace.ARTICLE;
-        else if(s.equals("talk")) return NameSpace.TALK;
-        else if(s.equals("user")) return NameSpace.USER;
-        else if(s.equals("user talk"))return NameSpace.USER_TALK;
-        else if(s.equals("wikiapedia")) return NameSpace.WIKIPEDIA;
-        else if(s.equals("wp")) return NameSpace.WIKIPEDIA;
-        else if(s.equals("project")) return NameSpace.WIKIPEDIA;
-        else if(s.equals("wikipedia talk")) return NameSpace.WIKIPEDIA_TALK;
-        else if(s.equals("wt")) return NameSpace.WIKIPEDIA_TALK;
-        else if(s.equals("project talk")) return NameSpace.WIKIPEDIA_TALK;
-        else if(s.equals("file"))return NameSpace.FILE;
-        else if(s.equals("image"))return NameSpace.FILE;
-        else if(s.equals("file talk"))return NameSpace.FILE_TALK;
-        else if(s.equals("image talk"))return NameSpace.FILE_TALK;
-        else if(s.equals("mediawiki"))return NameSpace.MEDIA_WIKI;
-        else if(s.equals("mediawiki talk"))return NameSpace.MEDIA_WIKI_TALK;
-        else if(s.equals("template"))return NameSpace.TEMPLATE;
-        else if(s.equals("template talk"))return NameSpace.TEMPLATE_TALK;
-        else if(s.equals("help"))return NameSpace.HELP;
-        else if(s.equals("help talk"))return NameSpace.HELP_TALK;
-        else if(s.equals("category"))return NameSpace.CATEGORY;
-        else if(s.equals("category talk"))return NameSpace.CATEGORY_TALK;
-        else if(s.equals("portal"))return NameSpace.PORTAL;
-        else if(s.equals("portal talk"))return NameSpace.PORTAL_TALK;
-        else if(s.equals("book"))return NameSpace.BOOK;
-        else if(s.equals("book talk"))return NameSpace.BOOK_TALK;
-        else if(s.equals("education program"))return NameSpace.EDUCATION_PROGRAM;
-        else if(s.equals("education program talk"))return NameSpace.EDUCATION_PROGRAM_TALK;
-        else if(s.equals("timedtext"))return NameSpace.TIMED_TEXT;
-        else if(s.equals("timedtext talk"))return NameSpace.TIMED_TEXT_TALK;
-        else if(s.equals("module"))return NameSpace.MODULE;
-        else if(s.equals("module talk"))return NameSpace.MODULE_TALK;
-        else if(s.equals("special"))return NameSpace.SPECIAL;
-        else if(s.equals("media"))return NameSpace.MEDIA;
+        else if (s.equals("WP")) return NameSpace.WIKIPEDIA;
+        else if (s.equals("WT")) return NameSpace.WIKIPEDIA_TALK;
+        else if (s.equals("IMAGE")) return NameSpace.FILE;
+        else if (s.equals("IMAGE TALK")) return NameSpace.FILE_TALK;
+        else if (s.equals("PROJECT")) return NameSpace.WIKIPEDIA;
+        else if (s.equals("PROJECT TALK")) return NameSpace.WIKIPEDIA_TALK;
         else return null;
+    }
+
+    public static boolean isNamespaceString(String s){
+        return !(getNameSpaceByName(s)==null);
     }
 
     /**
