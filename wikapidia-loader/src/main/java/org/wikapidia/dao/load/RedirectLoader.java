@@ -31,13 +31,28 @@ import java.io.File;
  */
 public class RedirectLoader {
 
-    private static Language language;
-    private static TIntIntHashMap redirectIdsToPageIds;
-    private static RawPageSqlDao rawPages;
-    private static LocalPageSqlDao localPages;
-    private static RedirectSqlDao redirects;
+    private final Language language;
+    private TIntIntHashMap redirectIdsToPageIds;
+    private final RawPageSqlDao rawPages;
+    private final LocalPageSqlDao localPages;
+    private final RedirectSqlDao redirects;
 
-    private static void loadRedirectIdsIntoMemory() throws DaoException{
+    public RedirectLoader(Language language, DataSource ds) throws DaoException{
+        this.language = language;
+        this.rawPages = new RawPageSqlDao(ds);
+        this.localPages = new LocalPageSqlDao(ds,false);
+        this.redirects = new RedirectSqlDao(ds);
+    }
+
+    private void beginLoad() throws DaoException {
+        redirects.beginLoad();
+    }
+
+    private void endLoad() throws DaoException {
+        redirects.endLoad();
+    }
+
+    private void loadRedirectIdsIntoMemory() throws DaoException{
         RedirectParser redirectParser = new RedirectParser(language);
         redirectIdsToPageIds = new TIntIntHashMap(10, 0.5f, -1, -1);
         WikapidiaIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
@@ -48,7 +63,7 @@ public class RedirectLoader {
         }
     }
 
-    private static int resolveRedirect(int src){
+    private int resolveRedirect(int src){
         int dest = redirectIdsToPageIds.get(src);
         for(int i = 0; i<4; i++){
             if (redirectIdsToPageIds.get(dest) == -1)
@@ -58,13 +73,13 @@ public class RedirectLoader {
         return -1;
     }
 
-    private static void resolveRedirectsInMemory(){
+    private void resolveRedirectsInMemory(){
         for (int src : redirectIdsToPageIds.keys()) {
             redirectIdsToPageIds.put(src, resolveRedirect(src));
         }
     }
 
-    private static void loadRedirectsIntoDatabase() throws DaoException{
+    private void loadRedirectsIntoDatabase() throws DaoException{
         for(int src : redirectIdsToPageIds.keys()){
             redirects.save(language, src, redirectIdsToPageIds.get(src));
         }
@@ -88,6 +103,12 @@ public class RedirectLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                    .hasArg()
+                    .withLongOpt("language")
+                    .withDescription("language")
+                    .create("l"));
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
         try {
@@ -100,21 +121,22 @@ public class RedirectLoader {
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        redirects = conf.get(RedirectSqlDao.class);
-        localPages = conf.get(LocalPageSqlDao.class);
-        rawPages = conf.get(RawPageSqlDao.class);
-        language = conf.get(Language.class);
+        Language lang = cmd.hasOption("l") ? Language.getByLangCode(cmd.getOptionValue('l')) : Language.getByLangCode("en");
 
+        DataSource dataSource = conf.get(DataSource.class);
+
+        RedirectLoader redirectLoader = new RedirectLoader(lang,dataSource);
 
         if (cmd.hasOption("t")){
-            redirects.beginLoad();
-            loadRedirectIdsIntoMemory();
-            resolveRedirectsInMemory();
-            loadRedirectsIntoDatabase();
+            redirectLoader.beginLoad();
         }
 
+        redirectLoader.loadRedirectIdsIntoMemory();
+        redirectLoader.resolveRedirectsInMemory();
+        redirectLoader.loadRedirectsIntoDatabase();
+
         if (cmd.hasOption("i")){
-            redirects.endLoad();
+            redirectLoader.endLoad();
         }
     }
 
