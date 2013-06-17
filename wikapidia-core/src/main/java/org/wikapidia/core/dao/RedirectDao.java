@@ -46,14 +46,6 @@ public interface RedirectDao {
     public abstract TIntSet getRedirects(LocalPage localPage) throws DaoException;
 
     /**
-     * Gets all redirects for a given language;
-     * @param lang
-     * @return
-     * @throws WikapidiaException
-     */
-    public abstract TIntSet getAllRedirectIds(Language lang) throws DaoException;
-
-    /**
      * Gets the redirect local id -> dest local id mappings for lang = langId
      * @param lang
      * @return

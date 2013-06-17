@@ -89,27 +89,6 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao{
     }
 
     @Override
-    public TIntSet getAllRedirectIds(Language lang) throws DaoException {
-        Connection conn=null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,dialect);
-            Cursor<Record> cursor = context.select().from(Tables.REDIRECT)
-                    .where(Tables.REDIRECT.LANG_ID.equal(lang.getId()))
-                    .fetchLazy();
-            TIntSet ids = new TIntHashSet();
-            for (Record record : cursor){
-                ids.add(record.getValue(Tables.REDIRECT.SRC_PAGE_ID));
-            }
-            return ids;
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
     public TIntIntMap getAllRedirectIdsToDestIds(Language lang) throws DaoException {
         Connection conn=null;
         try{
