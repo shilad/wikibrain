@@ -13,8 +13,6 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.mapper.ConceptMapper;
-import org.wikapidia.mapper.algorithms.MonolingualConceptMapper;
-import org.wikapidia.mapper.utils.MapperIterable;
 
 import java.io.File;
 import java.io.IOException;

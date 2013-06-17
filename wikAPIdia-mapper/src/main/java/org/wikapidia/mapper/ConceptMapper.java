@@ -6,8 +6,6 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.UniversalPage;
 
-import java.util.Iterator;
-
 /**
  */
 public abstract class ConceptMapper {
