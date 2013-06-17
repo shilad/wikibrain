@@ -62,7 +62,7 @@ public class TestRawPageDao {
         assert (page.getNameSpace().equals(rawSaved.getNamespace()));
         assert (body.equals(rawSaved.getBody()));
 
-        WikapidiaIterable<RawPage> savedRaws = rpDao.allRawPages();
+        DaoIterable<RawPage> savedRaws = rpDao.allRawPages();
         assert (savedRaws!=null);
         RawPage savedRaw = savedRaws.iterator().next();
         assert (savedRaw.getNamespace().getValue() == rawPage.getNamespace().getValue());

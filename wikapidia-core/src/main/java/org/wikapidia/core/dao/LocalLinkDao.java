@@ -15,7 +15,7 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public WikapidiaIterable<LocalLink> getLinks(Language language, int localId, boolean
+    public DaoIterable<LocalLink> getLinks(Language language, int localId, boolean
             outlinks, boolean isParseable, LocalLink.LocationType locationType)
             throws DaoException;
 
@@ -27,7 +27,7 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public WikapidiaIterable<LocalLink> getLinks(Language language, int localId, boolean
+    public DaoIterable<LocalLink> getLinks(Language language, int localId, boolean
             outlinks) throws DaoException;
 
 
