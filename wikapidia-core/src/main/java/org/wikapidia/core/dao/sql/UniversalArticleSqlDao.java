@@ -26,16 +26,6 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
         super(dataSource);
     }
 
-//    @Override
-//    public UniversalArticle getById(int univId, int algorithmId) throws DaoException {
-//        return super.getById(univId, algorithmId, NameSpace.ARTICLE);
-//    }
-//
-//    @Override
-//    public Map<Integer, UniversalArticle> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException {
-//        return super.getByIds(univIds, algorithmId, NameSpace.ARTICLE);
-//    }
-
     @Override
     protected UniversalArticle buildUniversalPage(Result<Record> result) throws DaoException {
         if (result.isEmpty()) {
