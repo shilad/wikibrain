@@ -44,4 +44,11 @@ public class TestDumpLinkGetter {
         String testString = testGetter.getDumpIndex(Language.getByLangCode("de"));
         System.out.println(testString);
     }
+
+    @Test
+    public void testParseLinks() {
+        DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(DumpLinkGetter.PATTERN_INDEXLINK));
+        String testString = testGetter.getDumpIndex(Language.getByLangCode("en"));
+        testGetter.getMatchingPatterns(testString, Pattern.compile("enwiki-latest-pages-articles[0-9]+.xml-.+.bz2"));
+    }
 }

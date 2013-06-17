@@ -10,6 +10,7 @@ import org.wikapidia.core.lang.Language;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -61,10 +62,23 @@ public class DumpLinkGetter {
      */
     protected List<URL> getMatchingPatterns(String html, Pattern pattern) {
         List<URL> matches = new ArrayList<URL>();
+        Pattern linkPattern = Pattern.compile("\\b(?<=(href=\"))[^\"]*?(?=\")");
+        Matcher m = linkPattern.matcher(html);
+        String linkString;
+        while(m.find()) {
+//            linkString = "http://dumps.wikimedia.org/enwiki/latest/" + m.group();
+            if(Pattern.matches(pattern.toString(), m.group())) {
+                try {
+                    URL linkURL = new URL("http://dumps.wikimedia.org/enwiki/latest/" + m.group());
+                    matches.add(linkURL);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
+        }
         // Use jSoup to find all the anchor hrefs
         // For each href, see if the pattern applies.
         // If it does, create a URL for it and add it to the result list.
-
         return matches;
     }
 
