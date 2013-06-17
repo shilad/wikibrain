@@ -86,6 +86,11 @@ public enum NameSpace {
         else if (s.equals("IMAGE TALK")) return NameSpace.FILE_TALK;
         else if (s.equals("PROJECT")) return NameSpace.WIKIPEDIA;
         else if (s.equals("PROJECT TALK")) return NameSpace.WIKIPEDIA_TALK;
+        else if (s.equals("CAT")) return NameSpace.CATEGORY;
+        else if (s.equals("MOS")) return NameSpace.WIKIPEDIA;
+        else if (s.equals("H")) return NameSpace.HELP;
+        else if (s.equals("P")) return NameSpace.PORTAL;
+        else if (s.equals("T")) return NameSpace.TALK;
         else return null;
     }
 
