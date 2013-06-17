@@ -15,9 +15,8 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.mapper.ConceptMapper;
-import org.wikapidia.mapper.utils.MapperIterable;
+import org.wikapidia.mapper.utils.MapperIterator;
 
-import javax.sql.DataSource;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -31,10 +30,10 @@ public class MonolingualConceptMapper extends ConceptMapper {
     }
 
     @Override
-    public MapperIterable<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException, ConfigurationException {
+    public MapperIterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException, ConfigurationException {
         LocalPageDao<LocalPage> dao = configurator.get(LocalPageDao.class);
         SqlDaoIterable<LocalPage> localPages = dao.get(new PageFilter().setLanguages(ls));
-        return new MapperIterable<UniversalPage>(localPages) {
+        return new MapperIterator<UniversalPage>(localPages) {
 
             @Override
             public UniversalPage transform(Object obj) {

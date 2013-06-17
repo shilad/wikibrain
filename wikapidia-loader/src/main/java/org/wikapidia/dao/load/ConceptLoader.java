@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 /**
@@ -36,10 +37,10 @@ public class ConceptLoader {
     public void load(ConceptMapper mapper) throws ConfigurationException, WikapidiaException {
         UniversalPageDao dao = configurator.get(UniversalPageDao.class);
         try {
-            Iterable<UniversalPage> pages = mapper.getConceptMap(languageSet);
+            Iterator<UniversalPage> pages = mapper.getConceptMap(languageSet);
             dao.beginLoad();
-            for (UniversalPage page : pages) {
-                dao.save(page);
+            while (pages.hasNext()) {
+                dao.save(pages.next());
             }
             dao.endLoad();
         } catch (DaoException e) {
@@ -72,7 +73,7 @@ public class ConceptLoader {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.err.println( "Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("DumpLoader", options);
+            new HelpFormatter().printHelp("ConceptLoader", options);
             return;
         }
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;

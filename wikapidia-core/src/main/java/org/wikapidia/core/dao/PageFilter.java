@@ -18,10 +18,10 @@ import java.util.Collection;
  *          setDisambig(false);
  */
 public class PageFilter {
-    private final Collection<Short> langIds;
-    private final Collection<Short> nsIds;
-    private final Boolean isRedirect;
-    private final Boolean isDisambig;
+    private Collection<Short> langIds;
+    private Collection<Short> nsIds;
+    private Boolean isRedirect;
+    private Boolean isDisambig;
 
     public PageFilter() {
         langIds = null;
@@ -54,21 +54,7 @@ public class PageFilter {
     }
 
     public PageFilter setLanguages(LanguageSet languages) {
-        Collection<Short> temp = new ArrayList<Short>();
-        if (languages.getNumberOfLanguages()==0 || languages==null) {
-            temp = null;
-        }
-        else {
-            for (Language l : languages) {
-                temp.add(l.getId());
-            }
-        }
-        return new PageFilter(
-                temp,
-                getNameSpaces(),
-                isRedirect(),
-                isDisambig()
-        );
+        return setLanguages(languages.getLanguages());
     }
 
     public PageFilter setLanguages(Collection<Language> languages) {
@@ -81,12 +67,8 @@ public class PageFilter {
                 temp.add(l.getId());
             }
         }
-        return new PageFilter(
-                temp,
-                getNameSpaces(),
-                isRedirect(),
-                isDisambig()
-        );
+        this.langIds = temp;
+        return this;
     }
 
     public PageFilter setNameSpaces(Collection<NameSpace> nameSpaces) {
@@ -99,29 +81,17 @@ public class PageFilter {
                 temp.add(ns.getArbitraryId());
             }
         }
-        return new PageFilter(
-                getLanguages(),
-                temp,
-                isRedirect(),
-                isDisambig()
-        );
+        this.nsIds = temp;
+        return this;
     }
 
     public PageFilter setRedirect(Boolean redirect) {
-        return new PageFilter(
-                getLanguages(),
-                getNameSpaces(),
-                redirect,
-                isDisambig()
-        );
+        this.isRedirect = redirect;
+        return this;
     }
 
     public PageFilter setDisambig(Boolean disambig) {
-        return new PageFilter(
-                getLanguages(),
-                getNameSpaces(),
-                isRedirect(),
-                disambig
-        );
+        this.isDisambig = disambig;
+        return this;
     }
 }
