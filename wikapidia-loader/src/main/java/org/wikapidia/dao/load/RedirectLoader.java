@@ -2,6 +2,8 @@ package org.wikapidia.dao.load;
 
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import org.apache.commons.cli.Options;
+import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.WikapidiaIterable;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
@@ -64,12 +66,36 @@ public class RedirectLoader {
         return -1;
     }
 
-    private void resolveRedirectsInMemory(Language language) throws  DaoException{
+    private void resolveRedirectsInMemory(Language language){
         for (int src : redirectIdsToPageIds.keys()) {
             redirectIdsToPageIds.put(src, resolveRedirect(src));
         }
     }
 
+    private void loadRedirectsIntoDatabase(Language language) throws DaoException{
+        for(int src : redirectIdsToPageIds.keys()){
+            redirects.save(language, src, redirectIdsToPageIds.get(src));
+        }
+    }
 
+    public static void main(String args[]) {
+        Options options = new Options();
+        options.addOption(
+                new DefaultOptionBuilder()
+                    .hasArg()
+                    .withLongOpt("conf")
+                    .withDescription("configuration file")
+                    .create("c"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("drop-tables")
+                        .withDescription("drop and recreate all tables")
+                        .create("t"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("create-indexes")
+                        .withDescription("create all indexes after loading")
+                        .create("i"));
+    }
 
 }
