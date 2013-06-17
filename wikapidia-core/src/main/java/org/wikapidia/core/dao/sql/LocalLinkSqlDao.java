@@ -25,7 +25,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
 
-    public DaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
+    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -52,7 +52,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
     @Override
-    public DaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
+    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -155,9 +155,9 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
 
-    private DaoIterable<LocalLink> buildLocalLinks(Cursor<Record> result, boolean outlink){
+    private SqlDaoIterable<LocalLink> buildLocalLinks(Cursor<Record> result, boolean outlink){
         final boolean o = outlink;
-        return new DaoIterable<LocalLink>(result) {
+        return new SqlDaoIterable<LocalLink>(result) {
             @Override
             public LocalLink transform(Record r) {
                 return buildLocalLink(r, o);

@@ -5,10 +5,10 @@ import org.jooq.Record;
 import java.lang.UnsupportedOperationException;
 import java.util.Iterator;
 
-public abstract class DaoIterable<E> implements Iterable<E> {
+public abstract class SqlDaoIterable<E> implements Iterable<E> {
     Cursor<Record> result;
 
-    public DaoIterable(Cursor<Record> result){
+    public SqlDaoIterable(Cursor<Record> result){
         this.result=result;
     }
 
