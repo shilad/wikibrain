@@ -78,7 +78,7 @@ public enum NameSpace {
         else if(s.equals("talk")) return NameSpace.TALK;
         else if(s.equals("user")) return NameSpace.USER;
         else if(s.equals("user talk"))return NameSpace.USER_TALK;
-        else if(s.equals("wikiapedia")) return NameSpace.WIKIPEDIA;
+        else if(s.equals("wikipedia")) return NameSpace.WIKIPEDIA;
         else if(s.equals("wp")) return NameSpace.WIKIPEDIA;
         else if(s.equals("project")) return NameSpace.WIKIPEDIA;
         else if(s.equals("wikipedia talk")) return NameSpace.WIKIPEDIA_TALK;
