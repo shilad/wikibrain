@@ -106,7 +106,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Result<Record> result = context.select().
                     from(Tables.UNIVERSAL_PAGE).
                     where(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(univId)).
-                    and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq((short) algorithmId)).
+                    and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
                     fetch();
             return (T)buildUniversalPage(result);
         } catch (SQLException e) {

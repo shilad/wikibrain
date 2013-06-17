@@ -88,7 +88,7 @@ public class ConceptLoader {
             languages = new LanguageSet(langs);
         }
 
-        String algorithm = "monolingual";
+        String algorithm = null;
         if (cmd.hasOption("n")) {
             algorithm = cmd.getOptionValue("n");
         }

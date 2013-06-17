@@ -10,7 +10,7 @@ import org.wikapidia.core.model.UniversalPage;
  */
 public abstract class ConceptMapper {
 
-    public static final short ID = -1;
+    public static final int MONOLINGUAL_ALGORITHM_ID = 0;
 
     protected final Configurator configurator;
 
