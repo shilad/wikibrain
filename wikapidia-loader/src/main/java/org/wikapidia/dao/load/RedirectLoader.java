@@ -1,13 +1,16 @@
 package org.wikapidia.dao.load;
 
 import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.WikapidiaIterable;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.core.model.Title;
 import org.wikapidia.parser.wiki.RedirectParser;
 
 import javax.sql.DataSource;
@@ -24,6 +27,7 @@ public class RedirectLoader {
 
     private final Language language;
     private final TLongIntMap titlesToIds;
+    private TIntIntHashMap redirectIdsToPageIds;
     private final DataSource ds;
     private final RedirectParser redirectParser;
     private final RawPageSqlDao rawPages;
@@ -40,40 +44,32 @@ public class RedirectLoader {
         this.redirects = new RedirectSqlDao(ds);
     }
 
-    public void loadAllRedirects() throws DaoException{
+    private void loadRedirectIdsIntoMemory(Language language) throws DaoException{
+        redirectIdsToPageIds = new TIntIntHashMap(10, 0.5f, -1, -1);
         WikapidiaIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
-        for(RawPage p : redirectPages)
-        {
-            redirects.save(language,
-                    p.getPageId(),
-                    localPages.getIdByTitle(redirectParser.getRedirect(p.getBody()).getCanonicalTitle(),
-                            language,
-                            p.getNamespace()) //this can be wrong sometimes CROSS NAMESPACE REDIRECTS SUCK
-            );
+        for(RawPage p : redirectPages){
+           Title pTitle = new Title(redirectParser.getRedirect(p.getBody()).getCanonicalTitle(), LanguageInfo.getByLanguage(language));
+           redirectIdsToPageIds.put(p.getPageId(),
+                    localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));
         }
     }
 
-    public void resolveAllRedirects() throws DaoException{
-        WikapidiaIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
-        for(RawPage p : redirectPages)
-        {
-            int currPage = p.getPageId();
-            boolean found = false;
-            for (int i=0; i<4; i++){
-                currPage = redirects.resolveRedirect(language, currPage);
-                if (!redirects.isRedirect(language, currPage)){
-                    found = true;
-                    break;
-                }
-            }
-            if (found){
-               redirects.update(language,p.getPageId(),currPage);
-            }
-            else {
-               redirects.update(language,p.getPageId(),currPage);
-            }
+    private int resolveRedirect(int src){
+        int dest = redirectIdsToPageIds.get(src);
+        for(int i = 0; i<4; i++){
+            if (redirectIdsToPageIds.get(dest) == -1)
+                return dest;
+            dest = redirectIdsToPageIds.get(dest);
+        }
+        return -1;
+    }
 
+    private void resolveRedirectsInMemory(Language language) throws  DaoException{
+        for (int src : redirectIdsToPageIds.keys()) {
+            redirectIdsToPageIds.put(src, resolveRedirect(src));
         }
     }
+
+
 
 }

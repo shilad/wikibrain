@@ -92,7 +92,7 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao{
     public boolean isRedirect(Language lang, int id) throws DaoException {
         Connection conn=null;
         try{
-            conn = ds.getConnection();
+        conn = ds.getConnection();
             DSLContext context = DSL.using(conn,dialect);
             Record record = context.select().from(Tables.REDIRECT)
                     .where(Tables.REDIRECT.SRC_PAGE_ID.equal(id))
