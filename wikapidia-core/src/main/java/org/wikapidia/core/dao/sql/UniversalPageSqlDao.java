@@ -12,6 +12,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
@@ -31,8 +32,11 @@ import java.util.Map;
  */
 public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao implements UniversalPageDao<T> {
 
-    public UniversalPageSqlDao(DataSource dataSource) throws DaoException {
+    private final LocalPageDao localPageDao;
+
+    public UniversalPageSqlDao(DataSource dataSource, LocalPageDao localPageDao) throws DaoException {
         super(dataSource);
+        this.localPageDao = localPageDao;
     }
 
     @Override
@@ -142,11 +146,10 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         }
         Multimap<Language, LocalPage> localPages = HashMultimap.create(result.size(), result.size());
         NameSpace nameSpace = NameSpace.getNameSpaceById(result.get(0).getValue(Tables.LOCAL_PAGE.NAME_SPACE));
-        LocalPageSqlDao localDao = new LocalPageSqlDao(ds);
         for(Record record : result) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
-            localPages.put(language, localDao.getById(language, pageId));
+            localPages.put(language, localPageDao.getById(language, pageId));
         }
         return new UniversalPage<LocalPage>(
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
@@ -178,9 +181,12 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             }
             try {
                 return new UniversalPageSqlDao(
-                        (DataSource) getConfigurator().get(
+                        getConfigurator().get(
                                 DataSource.class,
-                                config.getString("dataSource"))
+                                config.getString("dataSource")),
+                        getConfigurator().get(
+                                LocalPageDao.class,
+                                config.getString("localPageDao"))
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);

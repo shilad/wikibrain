@@ -11,6 +11,7 @@ import org.wikapidia.core.model.UniversalPage;
 public abstract class ConceptMapper {
 
     public static final int MONOLINGUAL_ALGORITHM_ID = 0;
+    public static final int CONCEPTUALIGN_ALGORITHM_ID = 1;
 
     protected final Configurator configurator;
 

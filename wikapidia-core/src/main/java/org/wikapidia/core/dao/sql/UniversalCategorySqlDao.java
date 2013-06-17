@@ -9,6 +9,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalCategoryDao;
 import org.wikapidia.core.dao.UniversalCategoryDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
@@ -22,8 +23,8 @@ import javax.sql.DataSource;
  */
 public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCategory> implements UniversalCategoryDao {
 
-    public UniversalCategorySqlDao(DataSource dataSource) throws DaoException {
-        super(dataSource);
+    public UniversalCategorySqlDao(DataSource dataSource, LocalCategoryDao localCategoryDao) throws DaoException {
+        super(dataSource, localCategoryDao);
     }
 
     @Override
@@ -71,9 +72,12 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
             }
             try {
                 return new UniversalCategorySqlDao(
-                        (DataSource) getConfigurator().get(
+                        getConfigurator().get(
                                 DataSource.class,
-                                config.getString("dataSource"))
+                                config.getString("dataSource")),
+                        getConfigurator().get(
+                                LocalCategoryDao.class,
+                                config.getString("localCategoryDao"))
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
