@@ -1,6 +1,5 @@
 package org.wikapidia.mapper.utils;
 
-import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -13,7 +12,7 @@ public abstract class MapperIterable<E> implements Iterable<E> {
         this.input = input;
     }
 
-    public abstract E transform(Iterator iterator);
+    public abstract E transform(Object obj);
 
     @Override
     public Iterator<E> iterator() {

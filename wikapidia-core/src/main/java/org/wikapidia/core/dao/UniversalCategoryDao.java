@@ -15,7 +15,7 @@ public interface UniversalCategoryDao extends UniversalPageDao<UniversalCategory
      * @return a UniversalCategory
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract UniversalCategory getById(int univId) throws DaoException;
+    public abstract UniversalCategory getById(int univId, int algorithmId) throws DaoException;
 
     /**
      * Returns a map of UniversalCategories based on a collection of of universal IDs
@@ -23,6 +23,6 @@ public interface UniversalCategoryDao extends UniversalPageDao<UniversalCategory
      * @return a map of universal IDs to UniversalCategories
      * @throws DaoException if there was an error retrieving the pages
      */
-    public abstract Map<Integer, UniversalCategory> getByIds(Collection<Integer> univIds) throws DaoException;
+    public abstract Map<Integer, UniversalCategory> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException;
 
 }

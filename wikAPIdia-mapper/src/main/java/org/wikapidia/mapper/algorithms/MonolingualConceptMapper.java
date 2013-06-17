@@ -15,11 +15,14 @@ import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.mapper.ConceptMapper;
 import org.wikapidia.mapper.utils.MapperIterable;
 
-import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
 public class MonolingualConceptMapper extends ConceptMapper {
+
+    private static final AtomicInteger nextUnivId = new AtomicInteger(0);
+    public static final short ID = 0;
 
     public MonolingualConceptMapper(Configurator configurator) {
         super(configurator);
@@ -30,14 +33,15 @@ public class MonolingualConceptMapper extends ConceptMapper {
         LocalPageDao<LocalPage> dao = configurator.get(LocalPageDao.class);
         DaoIterable<LocalPage> localPages = dao.get(new PageFilter().setLanguages(ls));
         return new MapperIterable<UniversalPage>(localPages) {
+
             @Override
-            public UniversalPage transform(Iterator iterator) {
-                Object temp = iterator.next();
-                LocalPage page = (LocalPage) temp;
+            public UniversalPage transform(Object obj) {
+                LocalPage page = (LocalPage) obj;
                 Multimap<Language, LocalPage> map = HashMultimap.create();
                 map.put(page.getLanguage(), page);
                 return new UniversalPage<LocalPage>(
                         nextUnivId.getAndIncrement(),
+                        ID,
                         page.getNameSpace(),
                         map
                 );

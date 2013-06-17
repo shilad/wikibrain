@@ -23,7 +23,7 @@ public class PageFilter {
     private final Boolean isRedirect;
     private final Boolean isDisambig;
 
-    private PageFilter() {
+    public PageFilter() {
         langIds = null;
         nsIds = null;
         isRedirect = null;
@@ -51,10 +51,6 @@ public class PageFilter {
 
     public Boolean isDisambig() {
         return isDisambig;
-    }
-
-    public static PageFilter get() {
-        return new PageFilter();
     }
 
     public PageFilter setLanguages(LanguageSet languages) {

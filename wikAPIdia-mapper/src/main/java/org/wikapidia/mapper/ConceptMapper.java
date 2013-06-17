@@ -5,14 +5,14 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.mapper.utils.MapperIterable;
 
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
 public abstract class ConceptMapper {
+
+    public static final short ID = -1;
 
     protected final Configurator configurator;
 
@@ -20,6 +20,6 @@ public abstract class ConceptMapper {
         this.configurator = configurator;
     }
 
-    public abstract Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException, ConfigurationException;
+    public abstract Iterable<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException, ConfigurationException;
 
 }

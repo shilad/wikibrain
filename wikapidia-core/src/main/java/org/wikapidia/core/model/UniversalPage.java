@@ -19,17 +19,23 @@ public class UniversalPage<T extends LocalPage> {
      * The universal id for the universal page. Universal ids are defined within but not across namespaces.
      */
     private final int univId;
+    private final short algorithmId;
     private final NameSpace nameSpace;
     private final Multimap<Language, T> localPages;
 
-    public UniversalPage(int univId, NameSpace nameSpace, Multimap<Language, T> localPages) {
+    public UniversalPage(int univId, int algorithmId, NameSpace nameSpace, Multimap<Language, T> localPages) {
         this.univId = univId;
+        this.algorithmId = (short)algorithmId;
         this.nameSpace = nameSpace;
         this.localPages = localPages;
     }
 
     public int getUnivId(){
         return univId;
+    }
+
+    public int getAlgorithmId() {
+        return algorithmId;
     }
 
     public NameSpace getNameSpace() {

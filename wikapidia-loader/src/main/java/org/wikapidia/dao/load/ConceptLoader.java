@@ -5,6 +5,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 
 import org.wikapidia.core.dao.UniversalPageDao;
@@ -28,27 +29,27 @@ public class ConceptLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
     private final LanguageSet languageSet;
     private final Configurator configurator;
-//    private final AtomicInteger counter = new AtomicInteger();
 
     public ConceptLoader(LanguageSet languageSet, Configurator configurator) {
         this.languageSet = languageSet;
         this.configurator = configurator;
     }
 
-    public void load(String algorithm) throws ConfigurationException, DaoException {
-        if (algorithm.equalsIgnoreCase("monolingual")) {
-            UniversalPageDao dao = configurator.get(UniversalPageDao.class);
-            MapperIterable<UniversalPage> pages = new MonolingualConceptMapper(configurator).getConceptMap(languageSet);
+    public void load(ConceptMapper mapper) throws ConfigurationException, WikapidiaException {
+        UniversalPageDao dao = configurator.get(UniversalPageDao.class);
+        try {
+            Iterable<UniversalPage> pages = mapper.getConceptMap(languageSet);
             dao.beginLoad();
             for (UniversalPage page : pages) {
                 dao.save(page);
             }
             dao.endLoad();
+        } catch (DaoException e) {
+            throw new WikapidiaException(e);
         }
-
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException {
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -79,8 +80,6 @@ public class ConceptLoader {
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-//        List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
-
         LanguageSet languages = LanguageSet.getSetOfAllLanguages();
         if (cmd.hasOption("l")) {
             String[] langCodes = cmd.getOptionValues("l");
@@ -97,18 +96,7 @@ public class ConceptLoader {
         }
 
         final ConceptLoader loader = new ConceptLoader(languages, conf);
-
-        UniversalPageDao dao = conf.get(UniversalPageDao.class);
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
-
-//        if (cmd.hasOption("t")) {
-//            dao.beginLoad();
-//        }
-
-        loader.load(algorithm);
-
-//        if (cmd.hasOption("i")) {
-//            dao.endLoad();
-//        }
+        loader.load(mapper);
     }
 }

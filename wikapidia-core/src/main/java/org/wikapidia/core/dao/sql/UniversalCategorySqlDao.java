@@ -31,13 +31,13 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
     }
 
     @Override
-    public UniversalCategory getById(int univId) throws DaoException {
-        return super.getById(univId, NameSpace.CATEGORY);
+    public UniversalCategory getById(int univId, int algorithmId) throws DaoException {
+        return super.getById(univId, algorithmId, NameSpace.CATEGORY);
     }
 
     @Override
-    public Map<Integer, UniversalCategory> getByIds(Collection<Integer> univIds) throws DaoException {
-        return super.getByIds(univIds, NameSpace.CATEGORY);
+    public Map<Integer, UniversalCategory> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException {
+        return super.getByIds(univIds, algorithmId, NameSpace.CATEGORY);
     }
 
     @Override
@@ -52,19 +52,13 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
                 throw new DaoException("Tried to get CATEGORY, but found " + nameSpace);
             }
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
-            Title title = new Title(
-                    record.getValue(Tables.UNIVERSAL_PAGE.TITLE), true,
-                    LanguageInfo.getByLanguage(language));
-            localPages.put(language,
-                    new LocalCategory(
-                            language,
-                            record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID),
-                            title
-                    )
-            );
+            int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
+            LocalCategorySqlDao localDao = new LocalCategorySqlDao(ds);
+            localPages.put(language, localDao.getById(language, pageId));
         }
         return new UniversalCategory(
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
+                result.get(0).getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID),
                 localPages
         );
     }

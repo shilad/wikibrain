@@ -66,12 +66,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             for (Language language : temp.getLanguageSetOfExistsInLangs()) {
                 for (LocalPage localPage : temp.getLocalPages(language)) {
                     context.insertInto(Tables.UNIVERSAL_PAGE).values(
-                            null,
                             language.getId(),
                             localPage.getLocalId(),
-                            localPage.getTitle().getCanonicalTitle(),
                             nameSpace.getArbitraryId(),
-                            page.getUnivId()
+                            page.getUnivId(),
+                            page.getAlgorithmId()
                     ).execute();
                 }
             }
@@ -101,7 +100,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public T getById(int univId, NameSpace nameSpace) throws DaoException {
+    public T getById(int univId, int algorithmId, NameSpace nameSpace) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -109,6 +108,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Result<Record> result = context.select().
                     from(Tables.UNIVERSAL_PAGE).
                     where(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(univId)).
+                    and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq((short) algorithmId)).
                     and(Tables.UNIVERSAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
                     fetch();
             return (T)buildUniversalPage(result);
@@ -120,13 +120,13 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public Map<Integer, T> getByIds(Collection<Integer> univIds, NameSpace nameSpace) throws DaoException {
+    public Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId, NameSpace nameSpace) throws DaoException {
         if (univIds == null || univIds.isEmpty()) {
             return null;
         }
         Map<Integer, T> map = new HashMap<Integer, T>();
         for (Integer univId : univIds){
-            map.put(univId, getById(univId, nameSpace));
+            map.put(univId, getById(univId, algorithmId, nameSpace));
         }
         return map;
     }
@@ -145,22 +145,15 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         }
         Multimap<Language, LocalPage> localPages = HashMultimap.create(result.size(), result.size());
         NameSpace nameSpace = NameSpace.getNameSpaceById(result.get(0).getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        LocalPageSqlDao localDao = new LocalPageSqlDao(ds);
         for(Record record : result) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
-            Title title = new Title(
-                    record.getValue(Tables.UNIVERSAL_PAGE.TITLE), true,
-                    LanguageInfo.getByLanguage(language));
-            localPages.put(language,
-                    new LocalPage(
-                            language,
-                            record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID),
-                            title,
-                            nameSpace
-                    )
-            );
+            int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
+            localPages.put(language, localDao.getById(language, pageId));
         }
         return new UniversalPage<LocalPage>(
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
+                result.get(0).getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID),
                 nameSpace,
                 localPages
         ){};

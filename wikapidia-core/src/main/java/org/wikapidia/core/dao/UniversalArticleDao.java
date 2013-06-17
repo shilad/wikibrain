@@ -15,7 +15,7 @@ public interface UniversalArticleDao extends UniversalPageDao<UniversalArticle> 
      * @return a UniversalArticle
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract UniversalArticle getById(int univId) throws DaoException;
+    public abstract UniversalArticle getById(int univId, int algorithmId) throws DaoException;
 
     /**
      * Returns a map of UniversalArticles based on a collection of of universal IDs
@@ -23,6 +23,6 @@ public interface UniversalArticleDao extends UniversalPageDao<UniversalArticle> 
      * @return a map of universal IDs to UniversalArticles
      * @throws DaoException if there was an error retrieving the pages
      */
-    public abstract Map<Integer, UniversalArticle> getByIds(Collection<Integer> univIds) throws DaoException;
+    public abstract Map<Integer, UniversalArticle> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException;
 
 }
