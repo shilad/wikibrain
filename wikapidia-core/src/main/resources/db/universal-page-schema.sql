@@ -1,9 +1,8 @@
 DROP TABLE IF EXISTS universal_page;
 CREATE TABLE universal_page (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   lang_id SMALLINT NOT NULL,
   page_id INT NOT NULL,
-  title VARCHAR(256) NOT NULL,
   name_space SMALLINT NOT NULL,
-  univ_id INT NOT NULL
+  univ_id INT NOT NULL,
+  algorithm_id INT NOT NULL
 );

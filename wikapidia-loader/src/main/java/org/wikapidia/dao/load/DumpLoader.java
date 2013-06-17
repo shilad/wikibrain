@@ -26,12 +26,12 @@ import java.util.logging.Logger;
 /**
  * Load the contents of a dump into the various daos.
  */
-public class DumpLoaderMain {
-    private static final Logger LOG = Logger.getLogger(DumpLoaderMain.class.getName());
+public class DumpLoader {
+    private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
     private final List<ParserVisitor> visitors;
     private final AtomicInteger counter = new AtomicInteger();
 
-    public DumpLoaderMain(List<ParserVisitor> visitors) {
+    public DumpLoader(List<ParserVisitor> visitors) {
         this.visitors = new ArrayList<ParserVisitor>(visitors);
         this.visitors.add(0, new ParserVisitor() {
             @Override
@@ -83,7 +83,7 @@ public class DumpLoaderMain {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.err.println( "Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("DumpLoaderMain", options);
+            new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
@@ -99,7 +99,7 @@ public class DumpLoaderMain {
         visitors.add(new RawPageLoader(rpDao));
         visitors.add(new LocalLinkLoader(llDao));
 
-        final DumpLoaderMain loader = new DumpLoaderMain(visitors);
+        final DumpLoader loader = new DumpLoader(visitors);
 
         // TODO: initialize other visitors
         if (cmd.hasOption("t")) {

@@ -9,35 +9,22 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalArticleDao;
 import org.wikapidia.core.dao.UniversalArticleDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalArticle;
 
 import javax.sql.DataSource;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  */
 public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle> implements UniversalArticleDao {
 
-    public UniversalArticleSqlDao(DataSource dataSource) throws DaoException {
-        super(dataSource);
-    }
-
-    @Override
-    public UniversalArticle getById(int univId) throws DaoException {
-        return super.getById(univId, NameSpace.ARTICLE);
-    }
-
-    @Override
-    public Map<Integer, UniversalArticle> getByIds(Collection<Integer> univIds) throws DaoException {
-        return super.getByIds(univIds, NameSpace.ARTICLE);
+    public UniversalArticleSqlDao(DataSource dataSource, LocalArticleDao localArticleDao) throws DaoException {
+        super(dataSource, localArticleDao);
     }
 
     @Override
@@ -52,19 +39,13 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
                 throw new DaoException("Tried to get ARTICLE, but found " + nameSpace);
             }
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
-            Title title = new Title(
-                    record.getValue(Tables.UNIVERSAL_PAGE.TITLE), true,
-                    LanguageInfo.getByLanguage(language));
-            localPages.put(language,
-                    new LocalArticle(
-                            language,
-                            record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID),
-                            title
-                    )
-            );
+            int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
+            LocalArticleSqlDao localDao = new LocalArticleSqlDao(ds);
+            localPages.put(language, localDao.getById(language, pageId));
         }
         return new UniversalArticle(
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
+                result.get(0).getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID),
                 localPages
         );
     }
@@ -91,9 +72,12 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
             }
             try {
                 return new UniversalArticleSqlDao(
-                        (DataSource) getConfigurator().get(
+                        getConfigurator().get(
                                 DataSource.class,
-                                config.getString("dataSource"))
+                                config.getString("dataSource")),
+                        getConfigurator().get(
+                                LocalArticleDao.class,
+                                config.getString("localArticleDao"))
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
