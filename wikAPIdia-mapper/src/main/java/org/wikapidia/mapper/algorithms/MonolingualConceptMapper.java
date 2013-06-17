@@ -28,7 +28,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
     @Override
     public MapperIterable<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException, ConfigurationException {
         LocalPageDao<LocalPage> dao = configurator.get(LocalPageDao.class);
-        DaoIterable<LocalPage> localPages = dao.get(PageFilter.get().setLanguages(ls));
+        DaoIterable<LocalPage> localPages = dao.get(new PageFilter().setLanguages(ls));
         return new MapperIterable<UniversalPage>(localPages) {
             @Override
             public UniversalPage transform(Iterator iterator) {
@@ -37,7 +37,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
                 Multimap<Language, LocalPage> map = HashMultimap.create();
                 map.put(page.getLanguage(), page);
                 return new UniversalPage<LocalPage>(
-                        nextUnivId.getAndDecrement(),
+                        nextUnivId.getAndIncrement(),
                         page.getNameSpace(),
                         map
                 );

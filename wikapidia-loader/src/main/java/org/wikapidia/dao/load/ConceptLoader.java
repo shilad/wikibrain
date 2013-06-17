@@ -11,6 +11,7 @@ import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.mapper.ConceptMapper;
 import org.wikapidia.mapper.algorithms.MonolingualConceptMapper;
 import org.wikapidia.mapper.utils.MapperIterable;
 
@@ -98,6 +99,7 @@ public class ConceptLoader {
         final ConceptLoader loader = new ConceptLoader(languages, conf);
 
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
+        ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
 
 //        if (cmd.hasOption("t")) {
 //            dao.beginLoad();
