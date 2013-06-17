@@ -18,23 +18,29 @@ import java.util.Collection;
  *          setDisambig(false);
  */
 public class PageFilter {
-    private Collection<Short> langIds;
+    /**
+     * Ubiquitous filters
+     */
     private Collection<Short> nsIds;
+
+    /**
+     * LocalPage filters
+     */
+    private Collection<Short> langIds;
     private Boolean isRedirect;
     private Boolean isDisambig;
+
+    /**
+     * UniversalPage filters
+     */
+    private Collection<Integer> algorithmIds;
 
     public PageFilter() {
         langIds = null;
         nsIds = null;
         isRedirect = null;
         isDisambig = null;
-    }
-
-    private PageFilter(Collection<Short> langIds, Collection<Short> nsIds, Boolean redirect, Boolean disambig) {
-        this.langIds = langIds;
-        this.nsIds = nsIds;
-        isRedirect = redirect;
-        isDisambig = disambig;
+        algorithmIds = null;
     }
 
     public Collection<Short> getLanguages() {
@@ -51,6 +57,10 @@ public class PageFilter {
 
     public Boolean isDisambig() {
         return isDisambig;
+    }
+
+    public Collection<Integer> getAlgorithms() {
+        return algorithmIds;
     }
 
     public PageFilter setLanguages(LanguageSet languages) {
@@ -92,6 +102,11 @@ public class PageFilter {
 
     public PageFilter setDisambig(Boolean disambig) {
         this.isDisambig = disambig;
+        return this;
+    }
+
+    public PageFilter setAlgorithmIds(Collection<Integer> algorithmIds) {
+        this.algorithmIds = algorithmIds;
         return this;
     }
 }
