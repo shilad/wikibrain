@@ -1,5 +1,7 @@
 package org.wikapidia.core.model;
 
+import java.util.HashMap;
+
 /**
  * A NameSpace defines the kind Wikipidia page a given page is.
  * The NameSpace contains the NameSpace enum that specifies what namespace a given NameSpace is in.
@@ -24,6 +26,7 @@ public enum NameSpace {
     SPECIAL(-1), MEDIA(-2);
 
     private short value;
+
 
     private NameSpace(int value) {
         this.value = (short)value;
@@ -62,6 +65,50 @@ public enum NameSpace {
      */
     public static NameSpace getNameSpaceById(int id) {
         return NameSpace.values()[id];
+    }
+
+    /**
+     * Takes in a string and returns the correspond
+     * @param s
+     * @return null if the string does not match a namespace
+     */
+    public static NameSpace getNameSpaceByName(String s){
+        s = s.toLowerCase();
+        if (s.equals("")) return NameSpace.ARTICLE;
+        else if(s.equals("talk")) return NameSpace.TALK;
+        else if(s.equals("user")) return NameSpace.USER;
+        else if(s.equals("user talk"))return NameSpace.USER_TALK;
+        else if(s.equals("wikiapedia")) return NameSpace.WIKIPEDIA;
+        else if(s.equals("wp")) return NameSpace.WIKIPEDIA;
+        else if(s.equals("project")) return NameSpace.WIKIPEDIA;
+        else if(s.equals("wikipedia talk")) return NameSpace.WIKIPEDIA_TALK;
+        else if(s.equals("wt")) return NameSpace.WIKIPEDIA_TALK;
+        else if(s.equals("project talk")) return NameSpace.WIKIPEDIA_TALK;
+        else if(s.equals("file"))return NameSpace.FILE;
+        else if(s.equals("image"))return NameSpace.FILE;
+        else if(s.equals("file talk"))return NameSpace.FILE_TALK;
+        else if(s.equals("image talk"))return NameSpace.FILE_TALK;
+        else if(s.equals("mediawiki"))return NameSpace.MEDIA_WIKI;
+        else if(s.equals("mediawiki talk"))return NameSpace.MEDIA_WIKI_TALK;
+        else if(s.equals("template"))return NameSpace.TEMPLATE;
+        else if(s.equals("template talk"))return NameSpace.TEMPLATE_TALK;
+        else if(s.equals("help"))return NameSpace.HELP;
+        else if(s.equals("help talk"))return NameSpace.HELP_TALK;
+        else if(s.equals("category"))return NameSpace.CATEGORY;
+        else if(s.equals("category talk"))return NameSpace.CATEGORY_TALK;
+        else if(s.equals("portal"))return NameSpace.PORTAL;
+        else if(s.equals("portal talk"))return NameSpace.PORTAL_TALK;
+        else if(s.equals("book"))return NameSpace.BOOK;
+        else if(s.equals("book talk"))return NameSpace.BOOK_TALK;
+        else if(s.equals("education program"))return NameSpace.EDUCATION_PROGRAM;
+        else if(s.equals("education program talk"))return NameSpace.EDUCATION_PROGRAM_TALK;
+        else if(s.equals("timedtext"))return NameSpace.TIMED_TEXT;
+        else if(s.equals("timedtext talk"))return NameSpace.TIMED_TEXT_TALK;
+        else if(s.equals("module"))return NameSpace.MODULE;
+        else if(s.equals("module talk"))return NameSpace.MODULE_TALK;
+        else if(s.equals("special"))return NameSpace.SPECIAL;
+        else if(s.equals("media"))return NameSpace.MEDIA;
+        else return null;
     }
 
     /**
