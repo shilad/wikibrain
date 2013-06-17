@@ -4,6 +4,7 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.io.IOUtils;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -16,6 +17,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -25,6 +27,44 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao{
 
     public RedirectSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource);
+    }
+
+    public void beginLoad() throws DaoException{
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            RedirectSqlDao.class.getResource("/db/redirect-schema.sql")
+                    )
+            );
+        } catch (IOException e){
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    public void endLoad() throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            conn.createStatement().execute(
+                    IOUtils.toString(
+                            LocalPageSqlDao.class.getResource("/db/redirect-indexes.sql")
+                    ));
+            if (cache!=null){
+                cache.updateTableLastModified(Tables.REDIRECT.getName());
+            }
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     @Override

@@ -16,9 +16,6 @@ import java.util.regex.Pattern;
  * Represents a canonically capitalized Wikipedia title.
  * Contains utility methods for querying aspects of the title.
  *
- * TODO:
- * - Add getNamespace, be careful about titles without a namespace.
- * - Write some tests to make sure we understand how this class works.
  */
 public class Title implements Externalizable {
 

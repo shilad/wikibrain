@@ -210,7 +210,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
      * @return a LocalPage representation of the given database record
      * @throws DaoException if the record is not a Page
      */
-    protected LocalPage buildLocalPage(Record record) {
+    protected LocalPage buildLocalPage(Record record) throws DaoException {
         if (record == null) {
             return null;
         }
