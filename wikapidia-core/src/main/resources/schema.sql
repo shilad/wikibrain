@@ -53,11 +53,9 @@ CREATE TABLE category_members (
 
 DROP TABLE if exists redirect;
 CREATE TABLE redirect (
-  resolved BOOLEAN NOT NULL,
   lang_id SMALLINT NOT NULL,
-  redirected_title VARCHAR(256) NOT NULL,
-  title VARCHAR(256) NOT NULL,
-  name_space SMALLINT NOT NULL
+  src_page_id INT NOT NULL,
+  dest_page_id INT NOT NULL
 );
 
 DROP TABLE IF EXISTS table_modified;

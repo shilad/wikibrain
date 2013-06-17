@@ -12,15 +12,11 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.UniversalCategoryDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalCategory;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalCategory;
 
 import javax.sql.DataSource;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  */
@@ -30,15 +26,15 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
         super(dataSource);
     }
 
-    @Override
-    public UniversalCategory getById(int univId, int algorithmId) throws DaoException {
-        return super.getById(univId, algorithmId, NameSpace.CATEGORY);
-    }
-
-    @Override
-    public Map<Integer, UniversalCategory> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException {
-        return super.getByIds(univIds, algorithmId, NameSpace.CATEGORY);
-    }
+//    @Override
+//    public UniversalCategory getById(int univId, int algorithmId) throws DaoException {
+//        return super.getById(univId, algorithmId, NameSpace.CATEGORY);
+//    }
+//
+//    @Override
+//    public Map<Integer, UniversalCategory> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException {
+//        return super.getByIds(univIds, algorithmId, NameSpace.CATEGORY);
+//    }
 
     @Override
     protected UniversalCategory buildUniversalPage(Result<Record> result) throws DaoException {

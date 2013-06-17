@@ -99,7 +99,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     @Override
-    public DaoIterable<T> get(PageFilter pageFilter) throws DaoException {
+    public SqlDaoIterable<T> get(PageFilter pageFilter) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -124,7 +124,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
                     fetchLazy();
-            return new DaoIterable<T>(result, new DaoTransformer<T>() {
+            return new SqlDaoIterable<T>(result) {
                 @Override
                 public T transform(Record r) {
                     try {
@@ -134,7 +134,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                         return null;
                     }
                 }
-            });
+            };
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -273,7 +273,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> cursor = context.select().
                     from(Tables.LOCAL_PAGE).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             TLongIntHashMap map = new TLongIntHashMap();
             for (Record record : cursor){
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),

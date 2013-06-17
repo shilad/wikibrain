@@ -15,10 +15,8 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
 
 import javax.sql.DataSource;
@@ -100,7 +98,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public T getById(int univId, int algorithmId, NameSpace nameSpace) throws DaoException {
+    public T getById(int univId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -109,7 +107,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     from(Tables.UNIVERSAL_PAGE).
                     where(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(univId)).
                     and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq((short) algorithmId)).
-                    and(Tables.UNIVERSAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
                     fetch();
             return (T)buildUniversalPage(result);
         } catch (SQLException e) {
@@ -120,13 +117,13 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId, NameSpace nameSpace) throws DaoException {
+    public Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException {
         if (univIds == null || univIds.isEmpty()) {
             return null;
         }
         Map<Integer, T> map = new HashMap<Integer, T>();
         for (Integer univId : univIds){
-            map.put(univId, getById(univId, algorithmId, nameSpace));
+            map.put(univId, getById(univId, algorithmId));
         }
         return map;
     }

@@ -5,14 +5,14 @@ import org.jooq.Record;
 import java.lang.UnsupportedOperationException;
 import java.util.Iterator;
 
-public class DaoIterable<E> implements Iterable<E> {
-    Cursor result;
-    DaoTransformer<E> func;
+public abstract class SqlDaoIterable<E> implements Iterable<E> {
+    Cursor<Record> result;
 
-    public DaoIterable(Cursor result, DaoTransformer<E> func){
+    public SqlDaoIterable(Cursor<Record> result){
         this.result=result;
-        this.func=func;
     }
+
+    public abstract E transform(Record record);
 
     @Override
     public Iterator<E> iterator() {
@@ -26,7 +26,7 @@ public class DaoIterable<E> implements Iterable<E> {
 
             @Override
             public E next() {
-                return func.transform(recordIterator.next());
+                return transform(recordIterator.next());
             }
 
             @Override
