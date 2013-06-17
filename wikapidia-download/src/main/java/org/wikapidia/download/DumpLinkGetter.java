@@ -26,6 +26,7 @@ public class DumpLinkGetter {
     public static final String PATTERN_ARTICLES = ".*wiki-latest-pages-articles[0-9]+.xml-.+.bz2";
     public static final String PATTERN_PAGELINKS = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pagelinks.sql.gz";
     public static final String PATTERN_PAGELINKSQL = ".*wiki-latest-pagelinks.sql.gz";
+    public static final String PATTERN_TITLE = "Index of (.*)";
 
     private List<String> patterns;
 
@@ -67,17 +68,26 @@ public class DumpLinkGetter {
      * @param pattern
      * @return
      */
-    protected List<URL> getMatchingPatterns(String html, Pattern pattern) {
+    protected List<URL> getMatchingPatterns(/*URL baseUrl, */String html, Pattern pattern) {
         List<URL> matches = new ArrayList<URL>();
         Document doc = Jsoup.parse(html);
         Elements linkElements = doc.select("a[href]");
+
+        //Get language information from html.
+        String htmlTitle = doc.title();
+        String titleLang = "";
+        Pattern titlePattern = Pattern.compile(PATTERN_TITLE);
+        Matcher matcher = titlePattern.matcher(htmlTitle);
+        if (matcher.find()) {
+            titleLang = matcher.group(1);
+        }
+
         for (Element linkElement : linkElements) {
             String link = linkElement.attr("href");
             if(link.matches(pattern.toString())){
                 try {
-                    URL linkURL = new URL("http://dumps.wikimedia.org/enwiki/latest/" + link);
+                    URL linkURL = new URL("http://dumps.wikimedia.org" + titleLang + link);
                     matches.add(linkURL);
-                    System.out.println(link);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();  //How to handle this?
                     return null;
