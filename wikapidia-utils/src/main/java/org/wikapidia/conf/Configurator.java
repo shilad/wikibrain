@@ -174,8 +174,13 @@ public class Configurator {
 
     /**
      * Get a specific named instance of the component with the specified class.
+     *
      * @param klass The generic interface or superclass, not the specific implementation.
-     * @param name The name of the class as it appears in the config file.
+     * @param name The name of the class as it appears in the config file. If name is null,
+     *             the configurator tries to guess by looking for a "default" entry in
+     *             the config that provides the name for a default implementation or, if
+     *             there is exactly one implementation returning it. Otherwise, if name is
+     *             null it throws an error.
      * @return The requested component.
      */
     public <T> T get(Class<T> klass, String name) throws ConfigurationException {
@@ -189,6 +194,23 @@ public class Configurator {
         }
         Config config = conf.get().getConfig(path);
         Map<String, Object> cache = components.get(klass);
+
+        // If name is null, check to see if there is a default entry or only one option.
+        if (name == null) {
+            if (config.hasPath("default")) {
+                name = config.getString("default");
+            } else if (config.root().keySet().size() == 1) {
+                name = config.root().keySet().iterator().next();
+            } else {
+                throw new IllegalArgumentException(
+                        "Ambiguous request for nameless component with type " + klass +
+                                " the configuration dictionary at path " + pset.path +
+                                " must either have a 'default' key specifying the name " +
+                                " of the default implementation or exactly one element. " +
+                                "Available provider implementations are: " + Arrays.toString(pset.providers.toArray())
+                );
+            }
+        }
         synchronized (cache) {
             if (cache.containsKey(name)) {
                 return (T) cache.get(name);
@@ -217,26 +239,6 @@ public class Configurator {
      * @return The requested component.
      */
     public <T> T get(Class<T> klass) throws ConfigurationException {
-        if (!providers.containsKey(klass)) {
-            throw new ConfigurationException("No registered providers for components with class " + klass);
-        }
-        ProviderSet pset = providers.get(klass);
-        if (!conf.get().hasPath(pset.path)) {
-            throw new ConfigurationException("Configuration path " + pset.path + " does not exist");
-        }
-        Config config = conf.get().getConfig(pset.path);
-        if (config.hasPath("default")) {
-            return get(klass, config.getString("default"));
-        } else if (config.root().keySet().size() == 1) {
-            return get(klass, config.root().keySet().iterator().next());
-        } else {
-            throw new IllegalArgumentException(
-                    "Ambiguous request for nameless component with type " + klass +
-                    " the configuration dictionary at path " + pset.path +
-                    " must either have a 'default' key specifying the name " +
-                    " of the default implementation or exactly one element. " +
-                    "Available provider implementations are: " + Arrays.toString(pset.providers.toArray())
-            );
-        }
+        return get(klass, null);
     }
 }
