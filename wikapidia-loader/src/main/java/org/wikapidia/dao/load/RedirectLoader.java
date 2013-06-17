@@ -2,7 +2,10 @@ package org.wikapidia.dao.load;
 
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.apache.commons.cli.Options;
+import org.apache.commons.cli.*;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.WikapidiaIterable;
@@ -16,6 +19,7 @@ import org.wikapidia.core.model.Title;
 import org.wikapidia.parser.wiki.RedirectParser;
 
 import javax.sql.DataSource;
+import java.io.File;
 
 /**
  *
@@ -27,26 +31,14 @@ import javax.sql.DataSource;
  */
 public class RedirectLoader {
 
-    private final Language language;
-    private final TLongIntMap titlesToIds;
-    private TIntIntHashMap redirectIdsToPageIds;
-    private final DataSource ds;
-    private final RedirectParser redirectParser;
-    private final RawPageSqlDao rawPages;
-    private final LocalPageSqlDao localPages;
-    private final RedirectSqlDao redirects;
+    private static Language language;
+    private static TIntIntHashMap redirectIdsToPageIds;
+    private static RawPageSqlDao rawPages;
+    private static LocalPageSqlDao localPages;
+    private static RedirectSqlDao redirects;
 
-    public RedirectLoader(Language language, TLongIntMap titlesToIds, DataSource ds) throws DaoException{
-        this.language = language;
-        this.titlesToIds = titlesToIds;
-        this.ds = ds;
-        this.redirectParser = new RedirectParser(language);
-        this.rawPages = new RawPageSqlDao(ds);
-        this.localPages = new LocalPageSqlDao(ds,false);
-        this.redirects = new RedirectSqlDao(ds);
-    }
-
-    private void loadRedirectIdsIntoMemory(Language language) throws DaoException{
+    private static void loadRedirectIdsIntoMemory() throws DaoException{
+        RedirectParser redirectParser = new RedirectParser(language);
         redirectIdsToPageIds = new TIntIntHashMap(10, 0.5f, -1, -1);
         WikapidiaIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
         for(RawPage p : redirectPages){
@@ -56,7 +48,7 @@ public class RedirectLoader {
         }
     }
 
-    private int resolveRedirect(int src){
+    private static int resolveRedirect(int src){
         int dest = redirectIdsToPageIds.get(src);
         for(int i = 0; i<4; i++){
             if (redirectIdsToPageIds.get(dest) == -1)
@@ -66,19 +58,19 @@ public class RedirectLoader {
         return -1;
     }
 
-    private void resolveRedirectsInMemory(Language language){
+    private static void resolveRedirectsInMemory(){
         for (int src : redirectIdsToPageIds.keys()) {
             redirectIdsToPageIds.put(src, resolveRedirect(src));
         }
     }
 
-    private void loadRedirectsIntoDatabase(Language language) throws DaoException{
+    private static void loadRedirectsIntoDatabase() throws DaoException{
         for(int src : redirectIdsToPageIds.keys()){
             redirects.save(language, src, redirectIdsToPageIds.get(src));
         }
     }
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws ConfigurationException, DaoException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -96,6 +88,34 @@ public class RedirectLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
+        CommandLineParser parser = new PosixParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println( "Invalid option usage: " + e.getMessage());
+            new HelpFormatter().printHelp("DumpLoaderMain", options);
+            return;
+        }
+        File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
+        Configurator conf = new Configurator(new Configuration(pathConf));
+
+        redirects = conf.get(RedirectSqlDao.class);
+        localPages = conf.get(LocalPageSqlDao.class);
+        rawPages = conf.get(RawPageSqlDao.class);
+        language = conf.get(Language.class);
+
+
+        if (cmd.hasOption("t")){
+            redirects.beginLoad();
+            loadRedirectIdsIntoMemory();
+            resolveRedirectsInMemory();
+            loadRedirectsIntoDatabase();
+        }
+
+        if (cmd.hasOption("i")){
+            redirects.endLoad();
+        }
     }
 
 }
