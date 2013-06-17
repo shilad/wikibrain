@@ -17,8 +17,8 @@ public class TestDumpLinkGetter {
     public void testArticles() {
 
         List<String> testLinks = Arrays.asList(
-                "http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2",
-                "http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract11.xml"
+            "http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2",
+            "http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract11.xml"
         );
 
 
@@ -27,9 +27,7 @@ public class TestDumpLinkGetter {
         Pattern testPattern = testGetter.getLanguageSpecificPatterns(Language.getByLangCode("en")).get(0);
 
         for(String testLink : testLinks){
-//            assert(Pattern.matches(/*testPattern.toString()*/"aaa", /*testLink*/"bbb"));
-            System.out.println(testLink);
-            System.out.println(testPattern.toString());
+            assert(Pattern.matches(testPattern.toString(), testLink));
             System.out.println(Pattern.matches(testPattern.toString(), testLink));
         }
 

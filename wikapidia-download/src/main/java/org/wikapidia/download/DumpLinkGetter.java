@@ -10,9 +10,8 @@ import java.util.regex.Pattern;
 /**
  */
 public class DumpLinkGetter {
-    public static final String PATTERN_ARTICLES = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pages-articles[0-9]+.xml-[a-z0-9]+.bz2";
-                                                 //http://dumps.wikimedia.org/  en    wiki/latest/  en    wiki-latest-pages-articles1     .xml-p000000010p000010000.bz2
-                                                 //http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pages-articles[0-9]+.xml-*                   .bz2
+    public static final String PATTERN_ARTICLES = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pages-articles[0-9]+.xml-.+.bz2";
+
     private final List<String> patterns;
 
     /**
