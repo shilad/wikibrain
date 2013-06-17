@@ -1,5 +1,6 @@
 package org.wikapidia.core.dao.sql;
 
+import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
@@ -10,6 +11,9 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.RedirectDao;
 import org.wikapidia.core.jooq.Tables;
@@ -189,4 +193,35 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao{
         }
     }
 
+    public static class Provider extends org.wikapidia.conf.Provider<RedirectSqlDao>  {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return RedirectDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.redirect";
+        }
+
+        @Override
+        public RedirectSqlDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("sql")){
+                return null;
+            }
+            try {
+                return new RedirectSqlDao(
+                        getConfigurator().get(
+                                DataSource.class,
+                                config.getString("dataSource"))
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+    }
 }
