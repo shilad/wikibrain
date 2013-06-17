@@ -29,7 +29,7 @@ public class TestRawPageDao {
 
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
         LocalArticleSqlDao lpDao = new LocalArticleSqlDao(ds);
-        RawPageSqlDao rpDao = new RawPageSqlDao(ds, lpDao);
+        RawPageSqlDao rpDao = new RawPageSqlDao(ds);
         lpDao.beginLoad();
         rpDao.beginLoad();
 
