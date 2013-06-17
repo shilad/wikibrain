@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
@@ -14,15 +19,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * WHAT DOES THIS DO?
- * There will be different getters for users requesting different type of pages
+ * This c
  */
 public class DumpLinkGetter {
-    public static final String PATTERN_ARTICLES = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pages-articles[0-9]+.xml-.+.bz2";
-    public static final String PATTERN_PAGELINKS = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__simplewiki-latest-pagelinks.sql.gz";
-    public static final String PATTERN_INDEXLINK = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
+    public static final String PATTERN_PREFIX = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
+    public static final String PATTERN_ARTICLES = ".*wiki-latest-pages-articles[0-9]+.xml-.+.bz2";
+    public static final String PATTERN_PAGELINKS = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pagelinks.sql.gz";
+    public static final String PATTERN_PAGELINKSQL = ".*wiki-latest-pagelinks.sql.gz";
 
-    private final List<String> patterns;
+    private List<String> patterns;
+
+    public DumpLinkGetter(){}
 
     /**
      * Example pattern to match enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2 and friends
@@ -62,23 +69,21 @@ public class DumpLinkGetter {
      */
     protected List<URL> getMatchingPatterns(String html, Pattern pattern) {
         List<URL> matches = new ArrayList<URL>();
-        Pattern linkPattern = Pattern.compile("\\b(?<=(href=\"))[^\"]*?(?=\")");
-        Matcher m = linkPattern.matcher(html);
-        String linkString;
-        while(m.find()) {
-//            linkString = "http://dumps.wikimedia.org/enwiki/latest/" + m.group();
-            if(Pattern.matches(pattern.toString(), m.group())) {
+        Document doc = Jsoup.parse(html);
+        Elements linkElements = doc.select("a[href]");
+        for (Element linkElement : linkElements) {
+            String link = linkElement.attr("href");
+            if(link.matches(pattern.toString())){
                 try {
-                    URL linkURL = new URL("http://dumps.wikimedia.org/enwiki/latest/" + m.group());
+                    URL linkURL = new URL("http://dumps.wikimedia.org/enwiki/latest/" + link);
                     matches.add(linkURL);
+                    System.out.println(link);
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    e.printStackTrace();  //How to handle this?
+                    return null;
                 }
             }
         }
-        // Use jSoup to find all the anchor hrefs
-        // For each href, see if the pattern applies.
-        // If it does, create a URL for it and add it to the result list.
         return matches;
     }
 
@@ -89,6 +94,7 @@ public class DumpLinkGetter {
      */
     protected String getDumpIndex(Language lang) {
         try {
+            this.patterns = Arrays.asList(PATTERN_PREFIX);
             Pattern indexPattern = this.getLanguageSpecificPatterns(lang).get(0);
             URL indexURL = new URL(indexPattern.toString());
             BufferedReader pageReader = new BufferedReader(new InputStreamReader(indexURL.openStream()));

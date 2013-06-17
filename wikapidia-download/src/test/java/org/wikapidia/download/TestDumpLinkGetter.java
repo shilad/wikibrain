@@ -28,27 +28,29 @@ public class TestDumpLinkGetter {
 
         for(String testLink : testLinks){
 //            assert(Pattern.matches(testPattern.toString(), testLink));
-            System.out.println(Pattern.matches(testPattern.toString(), testLink));
+            System.out.println(testLink.matches(testPattern.toString()));
         }
 
 //        List<String> articlePatterns = Arrays.asList(DumpLinkGetter.PATTERN_ARTICLES);
-
 //        DumpLinkGetter getter = new DumpLinkGetter(articlePatterns);
-
 //        List<URL> links = getter.getDumpFiles(Language.getByLangCode("en"));
     }
 
     @Test
     public void testIndex() {
-        DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(DumpLinkGetter.PATTERN_INDEXLINK));
-        String testString = testGetter.getDumpIndex(Language.getByLangCode("de"));
-        System.out.println(testString);
+        DumpLinkGetter testGetter = new DumpLinkGetter();
+        for(Language lang : Language.LANGUAGES) {
+            String testString = testGetter.getDumpIndex(lang);
+//            System.out.println(lang.getId());
+//            System.out.println(testString.substring(206, 240));
+        }
     }
 
     @Test
     public void testParseLinks() {
-        DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(DumpLinkGetter.PATTERN_INDEXLINK));
+        DumpLinkGetter testGetter = new DumpLinkGetter();
         String testString = testGetter.getDumpIndex(Language.getByLangCode("en"));
-        testGetter.getMatchingPatterns(testString, Pattern.compile("enwiki-latest-pages-articles[0-9]+.xml-.+.bz2"));
+        testGetter.getMatchingPatterns(testString, Pattern.compile(DumpLinkGetter.PATTERN_ARTICLES));
+//        System.out.println(Language.LANGUAGES.length);
     }
 }
