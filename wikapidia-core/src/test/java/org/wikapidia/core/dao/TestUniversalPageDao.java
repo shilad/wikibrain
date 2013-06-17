@@ -48,7 +48,7 @@ public class TestUniversalPageDao {
         localDao.endLoad();
         UniversalPage page = new UniversalArticle(23, 0, map);
 
-        UniversalArticleSqlDao dao = new UniversalArticleSqlDao(ds);
+        UniversalArticleSqlDao dao = new UniversalArticleSqlDao(ds, new LocalArticleSqlDao(ds));
         dao.beginLoad();
         dao.save(page);
         dao.endLoad();
@@ -97,7 +97,7 @@ public class TestUniversalPageDao {
         localDao.endLoad();
         UniversalPage page = new UniversalCategory(23, 0, map);
 
-        UniversalCategorySqlDao dao = new UniversalCategorySqlDao(ds);
+        UniversalCategorySqlDao dao = new UniversalCategorySqlDao(ds, new LocalCategorySqlDao(ds));
         dao.beginLoad();
         dao.save(page);
         dao.endLoad();
