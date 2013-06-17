@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
+ * WHAT DOES THIS DO?
  */
 public class DumpLinkGetter {
     public static final String PATTERN_ARTICLES = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pages-articles[0-9]+.xml-.+.bz2";
+    public static final String PATTERN_LINKS = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__simplewiki-latest-pagelinks.sql.gz";
+
 
     private final List<String> patterns;
 
@@ -32,7 +35,7 @@ public class DumpLinkGetter {
      * @param language
      * @return
      */
-    public List<Pattern> getLanguageSpecificPatterns(Language language) {
+    protected List<Pattern> getLanguageSpecificPatterns(Language language) {
         String langCode = language.getLangCode();
         // langCode with dashes like "roa-tara" should be 'roa_tara' in dump links
         String validLangCode = langCode.replace("-", "_");
@@ -41,6 +44,30 @@ public class DumpLinkGetter {
             linkREs.add(Pattern.compile(linkPattern.replace("__LANG__", validLangCode)));
         }
         return linkREs;
+    }
+
+    /**
+     *
+     * @param html
+     * @param pattern
+     * @return
+     */
+    protected List<URL> getMatchingPatterns(String html, Pattern pattern) {
+        List<URL> matches = new ArrayList<URL>();
+        // Use jSoup to find all the anchor hrefs
+        // For each href, see if the pattern applies.
+        // If it does, create a URL for it and add it to the result list.
+
+        return matches;
+    }
+
+    /**
+     * Given a language, return the html of the database dump index page.
+     * @param lang
+     * @return
+     */
+    protected String getDumpIndex(Language lang) {
+        return null;
     }
 
     /**
