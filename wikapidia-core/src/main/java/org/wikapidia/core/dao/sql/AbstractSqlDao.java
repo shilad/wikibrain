@@ -17,10 +17,12 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractSqlDao {
     public static final Logger LOG = Logger.getLogger(LocalPageSqlDao.class.getName());
+    public static final int DEFAULT_FETCH_SIZE = 1000;
 
     protected final SQLDialect dialect;
     protected DataSource ds;
     protected SqlCache cache;
+    private int fetchSize = DEFAULT_FETCH_SIZE;
 
     public AbstractSqlDao(DataSource dataSource) throws DaoException {
         ds = dataSource;
@@ -69,5 +71,13 @@ public abstract class AbstractSqlDao {
                 LOG.log(Level.WARNING, "Failed to close connection: ", e);
             }
         }
+    }
+
+    public int getFetchSize() {
+        return fetchSize;
+    }
+
+    public void setFetchSize(int fetchSize) {
+        this.fetchSize = fetchSize;
     }
 }

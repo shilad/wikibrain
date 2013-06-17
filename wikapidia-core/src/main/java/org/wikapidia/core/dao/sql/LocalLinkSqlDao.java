@@ -42,7 +42,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .and(idField.equal(localId))
                     .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
                     .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
-                    .fetchLazy();
+                    .fetchLazy(getFetchSize());
             return buildLocalLinks(result, outlinks);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -67,7 +67,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .from(Tables.LOCAL_LINK)
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(idField.equal(localId))
-                    .fetchLazy();
+                    .fetchLazy(getFetchSize());
             return buildLocalLinks(result, outlinks);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -86,7 +86,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
                     .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
-                    .fetchLazy();
+                    .fetchLazy(getFetchSize());
             int i = 0;
             for (Record r : result){
                 i++;

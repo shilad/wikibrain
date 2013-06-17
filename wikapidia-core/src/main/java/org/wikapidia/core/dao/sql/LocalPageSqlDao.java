@@ -227,7 +227,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> cursor = context.select().
                     from(Tables.LOCAL_PAGE).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             TLongIntHashMap map = new TLongIntHashMap();
             for (Record record : cursor){
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),

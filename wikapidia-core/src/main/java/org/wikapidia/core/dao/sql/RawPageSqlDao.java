@@ -155,7 +155,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             TableField idField;
             Cursor<Record> result = context.select()
                     .from(Tables.RAW_PAGE)
-                    .fetchLazy();
+                    .fetchLazy(getFetchSize());
             return new SqlDaoIterable<RawPage>(result) {
                 @Override
                 public RawPage transform(Record r) {
