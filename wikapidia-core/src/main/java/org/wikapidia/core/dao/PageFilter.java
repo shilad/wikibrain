@@ -11,7 +11,7 @@ import java.util.Collection;
  * A helper class for specifying complex queries.  To use, call the static get() method to create an instance,
  * than call the various set methods in a chain to set the constraints. For example, a call might look like:
  *
- * PageFilter pf = PageFilter.get().
+ * PageFilter pf = new PageFilter.
  *          setLanguages(languageSet).
  *          setNameSpace(nameSpaces).
  *          setRedirect(true).
