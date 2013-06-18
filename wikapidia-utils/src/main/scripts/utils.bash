@@ -8,7 +8,8 @@ function die() {
 }
 
 function compile() {
+    echo compiling
     (cd ../wikAPIdia-parent &&
     mvn compile || die "compilation failed")
-    echo compiling
+    echo compiled
 }
