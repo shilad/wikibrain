@@ -17,4 +17,4 @@ log/
 target/
 
 # Dumps!
-simplewiki.xml.bz2
+*.bz2
