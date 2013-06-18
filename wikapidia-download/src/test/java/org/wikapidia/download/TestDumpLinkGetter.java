@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.download.DumpLinkGetter;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,45 +14,32 @@ import java.util.regex.Pattern;
 /**
  */
 public class TestDumpLinkGetter {
-    @Test
-    public void testArticles() {
-
-        List<String> testLinks = Arrays.asList(
-            "http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2",
-            "http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract11.xml"
-        );
-
-        DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(DumpLinkGetter.PATTERN_ARTICLES));
-
-        Pattern testPattern = testGetter.getLanguageSpecificPatterns(Language.getByLangCode("en")).get(0);
-
-        for(String testLink : testLinks){
-            System.out.println(testLink.matches(testPattern.toString()));
-        }
-
-//        List<String> articlePatterns = Arrays.asList(DumpLinkGetter.PATTERN_ARTICLES);
-//        DumpLinkGetter getter = new DumpLinkGetter(articlePatterns);
-//        List<URL> links = getter.getDumpFiles(Language.getByLangCode("en"));
-    }
 
     @Test
-    public void testIndex() {
-        DumpLinkGetter testGetter = new DumpLinkGetter();
+    public void testIndex() throws IOException {
         for(Language lang : Language.LANGUAGES) {
-            String testString = testGetter.getDumpIndex(lang);
-            System.out.println(lang.getId());
-            System.out.println(testString.substring(206, 240));
+            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.values()), lang);
+            String testString = testGetter.getDumpIndex();
+            System.out.println(lang.getId() + " " + testString.substring(214, 240));
         }
     }
 
     @Test
-    public void testParseLinks() {
-        DumpLinkGetter testGetter = new DumpLinkGetter();
+    public void testParseLinks() throws IOException {
         for(Language lang : Language.LANGUAGES) {
-            String testString = testGetter.getDumpIndex(lang);
-            List<URL> links = testGetter.getMatchingPatterns(testString, Pattern.compile(DumpLinkGetter.PATTERN_PAGELINKSQL));
+            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.values()), lang);
+            List<URL> links = testGetter.getMatchingPatterns(testGetter.getDumpIndex(), Pattern.compile(DumpLinkGetter.PATTERN_ABSTRACT));
             System.out.println(links);
         }
-//        System.out.println(Language.LANGUAGES.length);
+    }
+
+    @Test
+    public void testGetDumpFiles() throws IOException {
+        List<String> patterns = Arrays.asList(LinkMatcher.values().toString());
+        for(Language lang : Language.LANGUAGES){
+            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.values()), lang);
+            List<URL> urlList= testGetter.getDumpFiles();
+            System.out.println(lang.getId() + " " + urlList);
+        }
     }
 }

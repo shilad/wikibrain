@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 
+import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,116 +20,96 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This c
+ *
  */
 public class DumpLinkGetter {
-    public static final String PATTERN_PREFIX = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
-    public static final String PATTERN_ARTICLES = ".*wiki-latest-pages-articles[0-9]+.xml-.+.bz2";
-    public static final String PATTERN_PAGELINKS = "http://dumps.wikimedia.org/__LANG__wiki/latest/__LANG__wiki-latest-pagelinks.sql.gz";
-    public static final String PATTERN_PAGELINKSQL = ".*wiki-latest-pagelinks.sql.gz";
-    public static final String PATTERN_TITLE = "Index of (.*)";
 
-    private List<String> patterns;
-
-    public DumpLinkGetter(){}
+    private List<LinkMatcher> matchers;
+    private Language lang;
 
     /**
-     * Example pattern to match enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2 and friends
      *
-     * "LANGwiki-latest-pages-articles[0-9]+.xml.*.bz2"
-     *
-     *
-     * @param patterns
+     * @param matchers
+     * @param lang
      */
-    public DumpLinkGetter(List<String> patterns) {
-        this.patterns = patterns;
+    public DumpLinkGetter(List<LinkMatcher> matchers, Language lang) {
+        this.matchers = matchers;
+        this.lang = lang;
     }
 
-
     /**
-     * Given a particular language, construct a set of language-specific regular expressions.
+     * Given a particulat language, return the base url string of the dump of the language.
      *
-     * @param language
+     * @param lang
      * @return
      */
-    protected List<Pattern> getLanguageSpecificPatterns(Language language) {
-        String langCode = language.getLangCode();
+    private String validBaseURLString(Language lang) {
+        String langCode = lang.getLangCode();
         // langCode with dashes like "roa-tara" should be 'roa_tara' in dump links
         String validLangCode = langCode.replace("-", "_");
-        List<Pattern> linkREs = new ArrayList<Pattern>();
-        for(String linkPattern : patterns){
-            linkREs.add(Pattern.compile(linkPattern.replace("__LANG__", validLangCode)));
-        }
-        return linkREs;
+        return BASEURL_STRING.replace("__LANG__", validLangCode);
     }
 
     /**
+     * Return the html of the database dump index page.
      *
-     * @param html
-     * @param pattern
      * @return
      */
-    protected List<URL> getMatchingPatterns(/*URL baseUrl, */String html, Pattern pattern) {
-        List<URL> matches = new ArrayList<URL>();
+    protected String getDumpIndex() throws IOException {
+        String indexPageAddress = validBaseURLString(lang);
+        URL indexURL = new URL(indexPageAddress);
+        return IOUtils.toString(indexURL.openStream());
+    }
+
+    /**
+     * Given the html of an index page and a particular pattern, return all links in html that fits the pattern.
+     *
+     * @param html
+     * @return
+     */
+    protected List<String> getMatchingPatterns(String html) {
+        List<String> matches = new ArrayList<String>();
         Document doc = Jsoup.parse(html);
         Elements linkElements = doc.select("a[href]");
-
-        //Get language information from html.
-        String htmlTitle = doc.title();
-        String titleLang = "";
-        Pattern titlePattern = Pattern.compile(PATTERN_TITLE);
-        Matcher matcher = titlePattern.matcher(htmlTitle);
-        if (matcher.find()) {
-            titleLang = matcher.group(1);
+        for (Element linkElement: linkElements) {
+            matches.add(linkElement.toString());
         }
-
-        for (Element linkElement : linkElements) {
-            String link = linkElement.attr("href");
-            if(link.matches(pattern.toString())){
-                try {
-                    URL linkURL = new URL("http://dumps.wikimedia.org" + titleLang + link);
-                    matches.add(linkURL);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();  //How to handle this?
-                    return null;
-                }
-            }
-        }
+//        for (Element linkElement : linkElements) {
+//            String link = linkElement.attr("href");
+//            if(link.matches(pattern.toString())){
+//                try {
+//                    URL linkURL = new URL(validBaseURLString(lang) + link);
+//                    matches.add(linkURL);
+//                } catch (MalformedURLException e) {
+//                    e.printStackTrace();  //How to handle this?
+//                    return null;
+//                }
+//            }
+//        }
         return matches;
     }
 
     /**
-     * Given a language, return the html of the database dump index page.
-     * @param lang
+     * Return all links of a particular language the fits one of the patterns.
      * @return
      */
-    protected String getDumpIndex(Language lang) {
-        try {
-            this.patterns = Arrays.asList(PATTERN_PREFIX);
-            Pattern indexPattern = this.getLanguageSpecificPatterns(lang).get(0);
-            URL indexURL = new URL(indexPattern.toString());
-            BufferedReader pageReader = new BufferedReader(new InputStreamReader(indexURL.openStream()));
-            StringBuffer stringBuffer = new StringBuffer();
-            String inputLine;
-            while((inputLine = pageReader.readLine()) != null) {
-                stringBuffer.append(inputLine);
-            }
-            return stringBuffer.toString();
-//            return Integer.toString(stringBuffer.toString().length());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();  //How to handle this?
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();  //How to handle this?
-            return null;
+    public List<URL> getDumpFiles() throws IOException {
+        List<URL> allLinks = new ArrayList<URL>();
+        for(String linkPattern : ){
+            allLinks.addAll(
+                    getMatchingPatterns(getDumpIndex(), Pattern.compile(linkPattern)));
         }
+        return allLinks;
     }
 
     /**
-     * @param lang
-     * @return
+     *
+     *
      */
-    public List<URL> getDumpFiles(Language lang) {
-        return null;
+    public void main() {
+
     }
+
+    public static final String BASEURL_STRING = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
+
 }
