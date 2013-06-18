@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Invoke this using ./src/main/processdump.sh
 #
 # Import environment parameters from conf.sh
