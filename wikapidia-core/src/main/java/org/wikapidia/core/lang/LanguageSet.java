@@ -102,8 +102,8 @@ public class LanguageSet implements Iterable<Language>{
      * @return
      */
     public static LanguageSet getSetOfAllLanguages() {
-        List<String> langCodes = new MediaWikiParserFactory().getLanguageIdentifers();
-        return new LanguageSet(getLangsFromCodes(langCodes));
+        Language[] languages = Language.LANGUAGES;
+        return new LanguageSet(Arrays.asList(languages));
     }
 
     public boolean equals(Object o){
