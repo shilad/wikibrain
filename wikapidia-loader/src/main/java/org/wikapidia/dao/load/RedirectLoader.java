@@ -46,21 +46,29 @@ public class RedirectLoader {
 
     private void beginLoad() throws DaoException {
         redirects.beginLoad();
+        System.out.println("Begin Load: ");
     }
 
     private void endLoad() throws DaoException {
         redirects.endLoad();
+        System.out.println("End Load.");
     }
 
     private void loadRedirectIdsIntoMemory() throws DaoException{
         RedirectParser redirectParser = new RedirectParser(language);
         redirectIdsToPageIds = new TIntIntHashMap(10, 0.5f, -1, -1);
         WikapidiaIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
+        int i = 0;
+        System.out.println("Begin loading redirects into memory: ");
         for(RawPage p : redirectPages){
-           Title pTitle = new Title(redirectParser.getRedirect(p.getBody()).getCanonicalTitle(), LanguageInfo.getByLanguage(language));
+           Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
            redirectIdsToPageIds.put(p.getPageId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));
+           if(i%100==0)
+               System.out.println("loading redirect # " + i);
+            i++;
         }
+        System.out.println("End loading redirects into memory.");
     }
 
     private int resolveRedirect(int src){
@@ -74,15 +82,25 @@ public class RedirectLoader {
     }
 
     private void resolveRedirectsInMemory(){
+        int i = 0;
         for (int src : redirectIdsToPageIds.keys()) {
             redirectIdsToPageIds.put(src, resolveRedirect(src));
+            if(i%100==0)
+                System.out.println("resolving redirect # " + i);
+            i++;
         }
     }
 
     private void loadRedirectsIntoDatabase() throws DaoException{
+        int i = 0;
+        System.out.println("Begin loading redirects into database: ");
         for(int src : redirectIdsToPageIds.keys()){
+            if(i%100==0)
+                System.out.println("loaded " + i + " into database.");
             redirects.save(language, src, redirectIdsToPageIds.get(src));
+            i++;
         }
+        System.out.println("End loading redirects into database.");
     }
 
     public static void main(String args[]) throws ConfigurationException, DaoException {
@@ -121,7 +139,7 @@ public class RedirectLoader {
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        Language lang = cmd.hasOption("l") ? Language.getByLangCode(cmd.getOptionValue('l')) : Language.getByLangCode("en");
+        Language lang = cmd.hasOption("l") ? Language.getByLangCode(cmd.getOptionValue('l')) : Language.getByLangCode("simple");
 
         DataSource dataSource = conf.get(DataSource.class);
 

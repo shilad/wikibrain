@@ -67,7 +67,8 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                     page.getLastEdit(),
                     page.getNamespace().getArbitraryId(),
                     page.isRedirect(),
-                    page.isDisambig()
+                    page.isDisambig(),
+                    page.getRedirectTitle()
             ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -104,7 +105,8 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                 Language.getById(record.getValue(Tables.RAW_PAGE.LANG_ID)),
                 NameSpace.getNameSpaceById(record.getValue(Tables.RAW_PAGE.NAME_SPACE)),
                 record.getValue(Tables.RAW_PAGE.IS_REDIRECT),
-                record.getValue(Tables.RAW_PAGE.IS_DISAMBIG)
+                record.getValue(Tables.RAW_PAGE.IS_DISAMBIG),
+                record.getValue(Tables.RAW_PAGE.REDIRECT_TITLE)
         );
     }
 

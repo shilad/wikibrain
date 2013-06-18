@@ -42,7 +42,7 @@ public class TestRawPageDao {
         lpDao.save(page);
         String body = "foo bar \000baz\n\n\324";
         RawPage rawPage = new RawPage(
-                7, 3242, "test", body, new Date(), lang.getLanguage(), NameSpace.ARTICLE
+                7, 3242, "test", body, new Date(), lang.getLanguage(), NameSpace.ARTICLE, true, false, "POOP"
         );
         rpDao.save(rawPage);
 
@@ -61,6 +61,7 @@ public class TestRawPageDao {
         assert (page.getTitle().equals(rawSaved.getTitle()));
         assert (page.getNameSpace().equals(rawSaved.getNamespace()));
         assert (body.equals(rawSaved.getBody()));
+        assert (rawSaved.isRedirect());
 
         WikapidiaIterable<RawPage> savedRaws = rpDao.allRawPages();
         assert (savedRaws!=null);
@@ -71,5 +72,6 @@ public class TestRawPageDao {
         assert (savedRaw.getBody().equals(body));
         assert (savedRaw.getLang().equals(rawPage.getLang()));
         assert (savedRaw.getTitle().equals(rawPage.getTitle()));
+        assert (savedRaw.isRedirect());
     }
 }

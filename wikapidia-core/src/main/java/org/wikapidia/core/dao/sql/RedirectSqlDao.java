@@ -163,7 +163,8 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao{
                     lang.getId(),
                     src,
                     dest
-            );
+            ).execute();
+
         } catch (SQLException e){
             throw new DaoException(e);
         } finally {

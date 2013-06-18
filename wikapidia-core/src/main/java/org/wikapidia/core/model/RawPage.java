@@ -24,6 +24,7 @@ public class RawPage {
     private final NameSpace namespace;
     private final boolean isRedirect;
     private final boolean isDisambig;
+    private String redirectTitle = null;
 
     public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace) {
         this.title = new Title(title, LanguageInfo.getByLanguage(lang));
@@ -37,7 +38,16 @@ public class RawPage {
         isDisambig = false;
     }
 
-    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace, boolean redirect, boolean disambig) {
+    public String getRedirectTitle() {
+        return redirectTitle;
+    }
+
+    public void setRedirectTitle(String redirectTitle) {
+        this.redirectTitle = redirectTitle;
+    }
+
+    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace,
+                   boolean redirect, boolean disambig, String redirectTitle) {
         this.title = new Title(title, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
@@ -47,6 +57,7 @@ public class RawPage {
         this.namespace = namespace;
         isRedirect = redirect;
         isDisambig = disambig;
+        this.redirectTitle = redirectTitle;
     }
 
     public Title getTitle() {
