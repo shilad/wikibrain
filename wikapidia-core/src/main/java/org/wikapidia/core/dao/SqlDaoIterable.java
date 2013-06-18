@@ -8,6 +8,8 @@ import java.util.Iterator;
 public abstract class SqlDaoIterable<E> implements Iterable<E> {
     Cursor<Record> result;
 
+    private boolean usedUp = false;
+
     public SqlDaoIterable(Cursor<Record> result){
         this.result=result;
     }
@@ -16,6 +18,13 @@ public abstract class SqlDaoIterable<E> implements Iterable<E> {
 
     @Override
     public Iterator<E> iterator() {
+        if (usedUp) {
+            throw new IllegalStateException(
+                    "SqlDaoIterable can only be iterated over once. " +
+                    "We should change this to an iterator but for-each loops are nice."
+            );
+        }
+        usedUp = true;
         return new Iterator<E>() {
             Iterator<Record> recordIterator = result.iterator();
 
