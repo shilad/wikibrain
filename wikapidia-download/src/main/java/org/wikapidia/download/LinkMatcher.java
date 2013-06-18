@@ -10,15 +10,17 @@ import java.util.regex.Pattern;
  */
 public enum LinkMatcher {
 
-    ARTICLES ("articles",
+    ARTICLES     ("articles",
             Pattern.compile(".*wiki-latest-pages-articles[0-9]+.xml-.*.bz2"),
             Pattern.compile(".*wiki-latest-pages-articles.xml.*.bz2")),
-    LINK_SQL ("links", Pattern.compile(".*wiki-latest-pagelinks.sql.gz")),
-    ABSTRACT ("abstract",
+    LINK_SQL     ("links", Pattern.compile(".*wiki-latest-pagelinks.sql.gz")),
+    ABSTRACT     ("abstract",
             Pattern.compile(".*wiki-latest-abstract[0-9]+.xml"),
             Pattern.compile(".*wiki-latest-abstract.xml")),
-    TITLES   ("titles", Pattern.compile(".*wiki-latest-all-titles-in-ns0.gz")),
-    CATEGORY ("category", Pattern.compile(".*wiki-latest-category.sql.gz"));
+    TITLES       ("titles", Pattern.compile(".*wiki-latest-all-titles-in-ns0.gz")),
+    CATEGORY     ("category", Pattern.compile(".*wiki-latest-category.sql.gz")),
+    META_CURRENT ("current_meta", Pattern.compile(".*wiki-latest-pages-meta-current.xml.bz2")),
+    META_HISTORY ("history_meta", Pattern.compile(".*wiki-latest-pages-meta-history.xml.7z"));
 
     private String name;
     private Pattern[] patterns;

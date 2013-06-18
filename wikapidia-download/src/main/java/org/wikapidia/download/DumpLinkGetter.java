@@ -16,6 +16,8 @@ import org.wikapidia.core.lang.Language;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +28,8 @@ public class DumpLinkGetter {
 
     private List<LinkMatcher> matchers;
     private Language lang;
+
+    private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
 
     /**
      *
@@ -91,8 +95,12 @@ public class DumpLinkGetter {
                     linkMatcher.match(links));
         }
         for (String url : result) {
-            URL linkURL = new URL(validBaseURLString(lang) +url);
-            urlLinks.add(linkURL);
+            try {
+                URL linkURL = new URL(/*validBaseURLString(lang) + */url);
+                urlLinks.add(linkURL);
+            } catch (MalformedURLException e) {
+                LOG.log(Level.WARNING, "article iterator construction failed", e); // TODO: WARNING OR SEVERE
+            }
         }
         return urlLinks;
     }
