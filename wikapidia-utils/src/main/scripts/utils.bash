@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # This bash script contains common shell functions and is included by all bash scripts
 #
 
@@ -8,8 +8,13 @@ function die() {
 }
 
 function compile() {
-    echo compiling
+    echo compiling...
     (cd ../wikAPIdia-parent &&
     mvn compile || die "compilation failed")
     echo compiled
 }
+
+# source all util scripts here, so that other scripts only
+# need to source this script to source everything
+source ../wikapidia-utils/src/main/scripts/conf.bash
+
