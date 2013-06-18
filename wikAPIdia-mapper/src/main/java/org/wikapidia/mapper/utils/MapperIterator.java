@@ -26,7 +26,7 @@ public abstract class MapperIterator<E> implements Iterator<E> {
 
     @Override
     public E next() {
-        return transform(input);
+        return transform(input.next());
     }
 
     @Override

@@ -27,20 +27,22 @@ import java.util.logging.Logger;
 public class ConceptLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
     private final LanguageSet languageSet;
-    private final Configurator configurator;
+    private final UniversalPageDao dao;
 
-    public ConceptLoader(LanguageSet languageSet, Configurator configurator) {
+    public ConceptLoader(LanguageSet languageSet, UniversalPageDao dao) {
         this.languageSet = languageSet;
-        this.configurator = configurator;
+        this.dao = dao;
     }
 
     public void load(ConceptMapper mapper) throws ConfigurationException, WikapidiaException {
-        UniversalPageDao dao = configurator.get(UniversalPageDao.class);
         try {
             Iterator<UniversalPage> pages = mapper.getConceptMap(languageSet);
             dao.beginLoad();
+            int i = 0;
             while (pages.hasNext()) {
                 dao.save(pages.next());
+                i++;
+                if (i%1000 == 0) System.out.println(i);
             }
             dao.endLoad();
         } catch (DaoException e) {
@@ -94,8 +96,9 @@ public class ConceptLoader {
             algorithm = cmd.getOptionValue("n");
         }
 
-        final ConceptLoader loader = new ConceptLoader(languages, conf);
+        UniversalPageDao dao = conf.get(UniversalPageDao.class);
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
+        final ConceptLoader loader = new ConceptLoader(languages, dao);
         loader.load(mapper);
     }
 }

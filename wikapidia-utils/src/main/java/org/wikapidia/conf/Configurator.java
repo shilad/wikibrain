@@ -188,15 +188,14 @@ public class Configurator {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
         ProviderSet pset = providers.get(klass);
-        String path = pset.path + "." + name;
-        if (!conf.get().hasPath(path)) {
-            throw new ConfigurationException("Configuration path " + path + " does not exist");
-        }
-        Config config = conf.get().getConfig(path);
-        Map<String, Object> cache = components.get(klass);
+
 
         // If name is null, check to see if there is a default entry or only one option.
         if (name == null) {
+            if (!conf.get().hasPath(pset.path)) {
+                throw new ConfigurationException("Configuration path " + pset.path + " does not exist");
+            }
+            Config config = conf.get().getConfig(pset.path);
             if (config.hasPath("default")) {
                 name = config.getString("default");
             } else if (config.root().keySet().size() == 1) {
@@ -211,6 +210,14 @@ public class Configurator {
                 );
             }
         }
+
+        String path = pset.path + "." + name;
+        if (!conf.get().hasPath(path)) {
+            throw new ConfigurationException("Configuration path " + path + " does not exist");
+        }
+        Config config = conf.get().getConfig(path);
+        Map<String, Object> cache = components.get(klass);
+
         synchronized (cache) {
             if (cache.containsKey(name)) {
                 return (T) cache.get(name);

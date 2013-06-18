@@ -62,7 +62,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
 
         @Override
         public String getPath() {
-            return "mapper.monolingual";
+            return "mapper";
         }
 
         @Override
