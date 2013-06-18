@@ -28,8 +28,9 @@ public class TestDumpLinkGetter {
     public void testParseLinks() throws IOException {
         for(Language lang : Language.LANGUAGES) {
             DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.values()), lang);
-            List<URL> links = testGetter.getMatchingPatterns(testGetter.getDumpIndex(), Pattern.compile(DumpLinkGetter.PATTERN_ABSTRACT));
-            System.out.println(links);
+            String html = testGetter.getDumpIndex();
+            List<String> links = testGetter.getLinks(html);
+            System.out.println(lang.getId() + " sample link: " + links.get(2));
         }
     }
 
@@ -37,7 +38,7 @@ public class TestDumpLinkGetter {
     public void testGetDumpFiles() throws IOException {
         List<String> patterns = Arrays.asList(LinkMatcher.values().toString());
         for(Language lang : Language.LANGUAGES){
-            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.values()), lang);
+            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.ABSTRACT, LinkMatcher.ARTICLES), lang);
             List<URL> urlList= testGetter.getDumpFiles();
             System.out.println(lang.getId() + " " + urlList);
         }

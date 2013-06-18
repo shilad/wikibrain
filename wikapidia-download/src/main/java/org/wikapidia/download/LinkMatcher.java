@@ -6,15 +6,17 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Given an Html Page, finds a certain type of links
+ * Given a list of urls, finds a certain type of links
  */
 public enum LinkMatcher {
 
     ARTICLES ("articles",
-               Pattern.compile(".*wiki-latest-pages-articles[0-9]+.xml-.*.bz2"),
-               Pattern.compile(".*wiki-latest-pages-articles.xml.*.bz2")),
+            Pattern.compile(".*wiki-latest-pages-articles[0-9]+.xml-.*.bz2"),
+            Pattern.compile(".*wiki-latest-pages-articles.xml.*.bz2")),
     LINK_SQL ("links", Pattern.compile(".*wiki-latest-pagelinks.sql.gz")),
-    ABSTRACT ("abstract", Pattern.compile(".*wiki-latest-abstract[0-9]*.xml")),
+    ABSTRACT ("abstract",
+            Pattern.compile(".*wiki-latest-abstract[0-9]+.xml"),
+            Pattern.compile(".*wiki-latest-abstract.xml")),
     TITLES   ("titles", Pattern.compile(".*wiki-latest-all-titles-in-ns0.gz")),
     CATEGORY ("category", Pattern.compile(".*wiki-latest-category.sql.gz"));
 

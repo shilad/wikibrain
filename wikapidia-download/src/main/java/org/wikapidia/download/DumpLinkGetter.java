@@ -62,30 +62,19 @@ public class DumpLinkGetter {
     }
 
     /**
-     * Given the html of an index page and a particular pattern, return all links in html that fits the pattern.
+     * Given the html of an index page and a particular pattern, return all links.
      *
      * @param html
      * @return
      */
-    protected List<String> getMatchingPatterns(String html) {
+    protected List<String> getLinks(String html) {
         List<String> matches = new ArrayList<String>();
         Document doc = Jsoup.parse(html);
         Elements linkElements = doc.select("a[href]");
         for (Element linkElement: linkElements) {
-            matches.add(linkElement.toString());
+            String link = linkElement.attr("href");
+            matches.add(link);
         }
-//        for (Element linkElement : linkElements) {
-//            String link = linkElement.attr("href");
-//            if(link.matches(pattern.toString())){
-//                try {
-//                    URL linkURL = new URL(validBaseURLString(lang) + link);
-//                    matches.add(linkURL);
-//                } catch (MalformedURLException e) {
-//                    e.printStackTrace();  //How to handle this?
-//                    return null;
-//                }
-//            }
-//        }
         return matches;
     }
 
@@ -94,12 +83,18 @@ public class DumpLinkGetter {
      * @return
      */
     public List<URL> getDumpFiles() throws IOException {
-        List<URL> allLinks = new ArrayList<URL>();
-        for(String linkPattern : ){
-            allLinks.addAll(
-                    getMatchingPatterns(getDumpIndex(), Pattern.compile(linkPattern)));
+        List<String> links = getLinks(getDumpIndex());
+        List<String> result = new ArrayList<String>();
+        List<URL> urlLinks = new ArrayList<URL>();
+        for (LinkMatcher linkMatcher : matchers){
+            result.addAll(
+                    linkMatcher.match(links));
         }
-        return allLinks;
+        for (String url : result) {
+            URL linkURL = new URL(validBaseURLString(lang) +url);
+            urlLinks.add(linkURL);
+        }
+        return urlLinks;
     }
 
     /**
