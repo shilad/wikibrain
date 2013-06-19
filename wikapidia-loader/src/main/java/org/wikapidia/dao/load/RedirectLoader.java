@@ -1,6 +1,5 @@
 package org.wikapidia.dao.load;
 
-import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.Configuration;
@@ -8,7 +7,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.WikapidiaIterable;
+import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
@@ -57,7 +56,7 @@ public class RedirectLoader {
     private void loadRedirectIdsIntoMemory() throws DaoException{
         RedirectParser redirectParser = new RedirectParser(language);
         redirectIdsToPageIds = new TIntIntHashMap(10, 0.5f, -1, -1);
-        WikapidiaIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
+        SqlDaoIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
         int i = 0;
         System.out.println("Begin loading redirects into memory: ");
         for(RawPage p : redirectPages){
