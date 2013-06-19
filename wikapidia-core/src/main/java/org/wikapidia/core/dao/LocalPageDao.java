@@ -64,4 +64,13 @@ public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
      * @throws DaoException if there was an error retrieving the pages
      */
     public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException;
+
+    /**
+     * Get an id from a title
+     * @param title
+     * @param language
+     * @param nameSpace
+     * @return
+     */
+    public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException;
 }
