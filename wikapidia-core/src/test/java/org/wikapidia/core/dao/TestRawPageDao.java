@@ -63,7 +63,7 @@ public class TestRawPageDao {
         assert (body.equals(rawSaved.getBody()));
         assert (rawSaved.isRedirect());
 
-        WikapidiaIterable<RawPage> savedRaws = rpDao.allRawPages();
+        SqlDaoIterable<RawPage> savedRaws = rpDao.allRawPages();
         assert (savedRaws!=null);
         RawPage savedRaw = savedRaws.iterator().next();
         assert (savedRaw.getNamespace().getValue() == rawPage.getNamespace().getValue());

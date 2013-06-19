@@ -39,7 +39,7 @@ public class TestLocalLinkDao {
         dao.save(link);
         dao.endLoad();
 
-        WikapidiaIterable<LocalLink> savedLinks = dao.getLinks(lang.getLanguage(), 1, true);
+        SqlDaoIterable<LocalLink> savedLinks = dao.getLinks(lang.getLanguage(), 1, true);
         assert (savedLinks!=null);
         LocalLink savedLink = savedLinks.iterator().next();
         assert (savedLink.isOutlink());
