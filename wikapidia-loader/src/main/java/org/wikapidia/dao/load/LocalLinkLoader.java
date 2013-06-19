@@ -15,13 +15,9 @@ import org.wikapidia.parser.wiki.ParserVisitor;
  */
 public class LocalLinkLoader extends ParserVisitor {
     private final LocalLinkDao linkDao;
-    private final LocalPageDao pageDao;
-    private final LocalCategoryMemberDao catMemDao;
 
-    public LocalLinkLoader(LocalLinkDao linkDao, LocalPageDao pageDao, LocalCategoryMemberDao catMemDao) {
+    public LocalLinkLoader(LocalLinkDao linkDao) {
         this.linkDao = linkDao;
-        this.pageDao = pageDao;
-        this.catMemDao = catMemDao;
     }
 
     @Override
@@ -34,35 +30,25 @@ public class LocalLinkLoader extends ParserVisitor {
                 loc = LocalLink.LocationType.FIRST_SEC;
             }
             Language lang = link.target.getLanguage();
-            LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
-            if(isCategory(link.text, langInfo)){
-                catMemDao.save(
-                        new LocalCategoryMember(pageDao.getIdByTitle(Title.canonicalize(link.text, langInfo),
-                                lang, NameSpace.CATEGORY),
-                                link.location.getXml().getPageId(),
-                                lang)
-                );
-            }
-            else{
-                if(isLinkToCategory(link.text, langInfo))
-                    link.text = link.text.substring(1,link.text.length());
-                Title linkTitle = new Title(link.text, langInfo);
-                linkDao.save(
-                        new LocalLink(
-                                lang,
-                                link.text,
-                                link.location.getXml().getPageId(),
-                                pageDao.getIdByTitle(linkTitle.getCanonicalTitle(), lang, linkTitle.getNamespace()),
-                                true,
-                                link.location.getLocation(),
-                                true,
-                                loc
-                        ));
-            }
+            linkDao.save(
+                    new LocalLink(
+                            lang,
+                            link.text,
+                            link.location.getXml().getPageId(),
+                            -1,
+                            true,
+                            link.location.getLocation(),
+                            true,
+                            loc
+                    ));
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
     }
+
+
+
+    //TODO: Move these to some new class or something.
 
     public boolean isCategory(String link, LanguageInfo languageInfo){
         for(String categoryName : languageInfo.getCategoryNames()){
@@ -75,7 +61,7 @@ public class LocalLinkLoader extends ParserVisitor {
 
     public boolean isLinkToCategory(String link, LanguageInfo languageInfo){
         for(String categoryName : languageInfo.getCategoryNames()){
-            if(link.substring(categoryName.length()+2).toLowerCase().equals(":" + categoryName+":")){
+            if(link.substring(categoryName.length()+2).toLowerCase().equals(":" + categoryName + ":")){
                 return true;
             }
         }
