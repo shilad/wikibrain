@@ -69,7 +69,7 @@
                             <goal>build-classpath</goal>
                         </goals>
                         <configuration>
-                            <attach>true</attach>
+                            <outputFile>target/localclasspath.txt</outputFile>
                         </configuration>
                     </execution>
                 </executions>

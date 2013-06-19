@@ -15,9 +15,9 @@ echo sourced
 
 compile
 
-read < ./target/classpath REMOTE_CLASS_PATH
+getRemoteClasspath
 
-CLASS_PATH="${REMOTE_CLASS_PATH}:$LOCAL_CLASS_PATH"
+CLASS_PATH="${REMOTE_CLASS_PATH}:${LOCAL_CLASS_PATH}"
 
 echo "$CLASS_PATH"
 
