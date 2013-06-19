@@ -1,10 +1,14 @@
 package org.wikapidia.core.dao.sql;
 
+import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.DaoException;
@@ -177,5 +181,37 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
             );
         }
         return pageIds;
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LocalCategoryMemberDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LocalCategoryMemberDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.localCategoryMember";
+        }
+
+        @Override
+        public LocalCategoryMemberDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("sql")) {
+                return null;
+            }
+            try {
+                return new LocalCategoryMemberSqlDao(
+                        getConfigurator().get(
+                                DataSource.class,
+                                config.getString("dataSource"))
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
     }
 }

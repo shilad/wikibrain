@@ -25,7 +25,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
 
-    public WikapidiaIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
+    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -42,7 +42,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .and(idField.equal(localId))
                     .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
                     .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
-                    .fetchLazy();
+                    .fetchLazy(getFetchSize());
             return buildLocalLinks(result, outlinks);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -52,7 +52,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
     @Override
-    public WikapidiaIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
+    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -67,7 +67,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .from(Tables.LOCAL_LINK)
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(idField.equal(localId))
-                    .fetchLazy();
+                    .fetchLazy(getFetchSize());
             return buildLocalLinks(result, outlinks);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -86,7 +86,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
                     .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
-                    .fetchLazy();
+                    .fetchLazy(getFetchSize());
             int i = 0;
             for (Record r : result){
                 i++;
@@ -155,16 +155,14 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
 
-    private WikapidiaIterable<LocalLink> buildLocalLinks(Cursor<Record> result, boolean outlink){
+    private SqlDaoIterable<LocalLink> buildLocalLinks(Cursor<Record> result, boolean outlink){
         final boolean o = outlink;
-        return new WikapidiaIterable<LocalLink>(result,
-                new DaoTransformer<LocalLink>() {
-                    @Override
-                    public LocalLink transform(Record r) {
-                        return buildLocalLink(r, o);
-                    }
-                }
-        );
+        return new SqlDaoIterable<LocalLink>(result) {
+            @Override
+            public LocalLink transform(Record r) {
+                return buildLocalLink(r, o);
+            }
+        };
     }
 
     private LocalLink buildLocalLink(Record record, boolean outlink){

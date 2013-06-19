@@ -14,6 +14,7 @@
         <module>../wikapidia-loader</module>
         <module>../wikapidia-parser</module>
         <module>../wikapidia-utils</module>
+        <module>../wikAPIdia-mapper</module>
     </modules>
 
 </project>

@@ -15,6 +15,3 @@
 # Maven
 log/
 target/
-
-# Dumps!
-*.bz2

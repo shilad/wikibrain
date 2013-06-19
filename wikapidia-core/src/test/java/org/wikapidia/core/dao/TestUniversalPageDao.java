@@ -4,8 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
-import org.wikapidia.core.dao.sql.UniversalArticleSqlDao;
-import org.wikapidia.core.dao.sql.UniversalCategorySqlDao;
+import org.wikapidia.core.dao.sql.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
@@ -35,6 +34,8 @@ public class TestUniversalPageDao {
         ds.setPassword("");
 
         Multimap<Language, LocalArticle> map = HashMultimap.create();
+        LocalArticleSqlDao localDao = new LocalArticleSqlDao(ds);
+        localDao.beginLoad();
         for (Language language : Language.LANGUAGES) {
             LocalArticle temp = new LocalArticle(
                     language,
@@ -42,15 +43,17 @@ public class TestUniversalPageDao {
                     new Title(language.getEnLangName(), LanguageInfo.getByLanguage(language))
             );
             map.put(language, temp);
+            localDao.save(temp);
         }
-        UniversalPage page = new UniversalArticle(23, map);
+        localDao.endLoad();
+        UniversalPage page = new UniversalArticle(23, 0, map);
 
-        UniversalArticleSqlDao dao = new UniversalArticleSqlDao(ds);
+        UniversalArticleSqlDao dao = new UniversalArticleSqlDao(ds, new LocalArticleSqlDao(ds));
         dao.beginLoad();
         dao.save(page);
         dao.endLoad();
 
-        UniversalPage savedPage = dao.getById(23);
+        UniversalPage savedPage = dao.getById(23, 0);
         assert (savedPage != null);
         assert (page.equals(savedPage));
         assert (page.getNumberOfPages() == savedPage.getNumberOfPages());
@@ -59,7 +62,7 @@ public class TestUniversalPageDao {
 
         List<Integer> pageIds = new ArrayList<Integer>();
         pageIds.add(23);
-        Map<Integer, UniversalArticle> pages = dao.getByIds(pageIds);
+        Map<Integer, UniversalArticle> pages = dao.getByIds(pageIds, 0);
         assert (pages.size() == 1);
         assert (pages.get(23).equals(page));
         assert (pages.get(23).equals(savedPage));
@@ -80,6 +83,8 @@ public class TestUniversalPageDao {
         ds.setPassword("");
 
         Multimap<Language, LocalCategory> map = HashMultimap.create();
+        LocalCategorySqlDao localDao = new LocalCategorySqlDao(ds);
+        localDao.beginLoad();
         for (Language language : Language.LANGUAGES) {
             LocalCategory temp = new LocalCategory(
                     language,
@@ -87,15 +92,17 @@ public class TestUniversalPageDao {
                     new Title(language.getEnLangName(), LanguageInfo.getByLanguage(language))
             );
             map.put(language, temp);
+            localDao.save(temp);
         }
-        UniversalPage page = new UniversalCategory(23, map);
+        localDao.endLoad();
+        UniversalPage page = new UniversalCategory(23, 0, map);
 
-        UniversalCategorySqlDao dao = new UniversalCategorySqlDao(ds);
+        UniversalCategorySqlDao dao = new UniversalCategorySqlDao(ds, new LocalCategorySqlDao(ds));
         dao.beginLoad();
         dao.save(page);
         dao.endLoad();
 
-        UniversalPage savedPage = dao.getById(23);
+        UniversalPage savedPage = dao.getById(23, 0);
         assert (savedPage != null);
         assert (page.equals(savedPage));
         assert (page.getNumberOfPages() == savedPage.getNumberOfPages());
@@ -104,7 +111,7 @@ public class TestUniversalPageDao {
 
         List<Integer> pageIds = new ArrayList<Integer>();
         pageIds.add(23);
-        Map<Integer, UniversalCategory> pages = dao.getByIds(pageIds);
+        Map<Integer, UniversalCategory> pages = dao.getByIds(pageIds, 0);
         assert (pages.size() == 1);
         assert (pages.get(23).equals(page));
         assert (pages.get(23).equals(savedPage));

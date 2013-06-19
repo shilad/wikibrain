@@ -2,6 +2,7 @@ package org.wikapidia.core.lang;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParserFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.WikapidiaException;
 
@@ -67,8 +68,6 @@ public class LanguageSet implements Iterable<Language>{
         this(inputLangs.iterator().next(), inputLangs);
     }
 
-
-
     /**
      * Sets the default language.
      * @param newDefaultLanguage
@@ -97,6 +96,16 @@ public class LanguageSet implements Iterable<Language>{
         return langs.size();
     }
 
+    /**
+     * Returns a language set that contains all the languages in it,
+     * with English as the default
+     * @return
+     */
+    public static LanguageSet getSetOfAllLanguages() {
+        Language[] languages = Language.LANGUAGES;
+        return new LanguageSet(Arrays.asList(languages));
+    }
+
     public boolean equals(Object o){
         if (o instanceof LanguageSet){
             String myString = this.toString();
@@ -122,9 +131,16 @@ public class LanguageSet implements Iterable<Language>{
 
     }
 
-
     @Override
     public Iterator<Language> iterator() {
         return langs.iterator();
+    }
+
+    private static Collection<Language> getLangsFromCodes(Collection<String> langCodes) {
+        Collection<Language> languages = new ArrayList<Language>();
+        for (String langCode : langCodes) {
+            languages.add(Language.getByLangCode(langCode));
+        }
+        return languages;
     }
 }
