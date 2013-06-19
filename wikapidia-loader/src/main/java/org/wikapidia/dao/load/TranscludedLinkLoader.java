@@ -11,7 +11,9 @@ import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.parser.sql.TranscludedLinkParser;
+import org.wikapidia.parser.sql.MySqlDumpParser;
+
+import java.io.File;
 
 /**
  */
@@ -37,16 +39,18 @@ public class TranscludedLinkLoader {
         }
     }
 
-    public void addNewLinks(Iterable<TranscludedLinkParser.RawLink> links) throws DaoException {
-        for (TranscludedLinkParser.RawLink link : links) {
-            Title title = new Title(link.destTitle, LanguageInfo.getByLanguage(language));
-            NameSpace ns = NameSpace.getNameSpaceById(link.destNamespace);
+    public void addNewLinks(File sqlDump) throws DaoException {
+        for (Object[] row : new MySqlDumpParser().parse(sqlDump)) {
+            Integer srcPageId = (Integer) row[0];
+            Integer destNamespace = (Integer) row[1];
+            String destTitle = (String) row[2];
+            Title title = new Title(destTitle, LanguageInfo.getByLanguage(language));
+            NameSpace ns = NameSpace.getNameSpaceById(destNamespace);
             LocalPage lp = pageDao.getByTitle(language, title, ns);
             if (lp == null) {
                 // Handle red link
             } else {
-                LocalLink ll = new LocalLink(language, null,
-                        link.srcPageId, lp.getLocalId(),
+                LocalLink ll = new LocalLink(language, null, srcPageId, lp.getLocalId(),
                         true, -1, false, LocalLink.LocationType.NONE);
                 if (!existing.contains(ll.longHashCode())) {
                     dao.save(ll);
