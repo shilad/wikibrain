@@ -169,7 +169,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
         }
     }
 
-    public WikapidiaIterable<RawPage> getAllRedirects(Language language) throws DaoException{
+    public SqlDaoIterable<RawPage> getAllRedirects(Language language) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -179,13 +179,12 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                     where(Tables.RAW_PAGE.LANG_ID.eq(language.getId())).
                     and(Tables.RAW_PAGE.IS_REDIRECT.equal(true)).
                     fetchLazy();
-            return  new WikapidiaIterable<RawPage>(result,
-                    new DaoTransformer<RawPage>() {
-                        @Override
-                        public RawPage transform(Record r) {
-                            return buildRawPage(r);
-                        }
-                    } );
+            return new SqlDaoIterable<RawPage>(result) {
+                @Override
+                public RawPage transform(Record r) {
+                    return buildRawPage(r);
+                }
+            };
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
