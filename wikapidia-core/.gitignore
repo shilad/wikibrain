@@ -17,6 +17,6 @@ src/generated/
 log/
 target/
 
-# Generated stuff
+# jOOQ generated
 src/generated
-tmp/
+
