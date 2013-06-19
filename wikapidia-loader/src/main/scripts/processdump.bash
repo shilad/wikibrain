@@ -15,5 +15,9 @@ echo sourced
 
 compile
 
-java -cp $CLASS_PATH $JVM_OPTS org.wikapidia.dao.load.DumpLoader "$@"
-java -cp $CLASS_PATH $JVM_OPTS org.wikapidia.dao.load.ConceptLoader "$@"
+read < ./target/classpath CLASS_PATH
+
+echo $CLASS_PATH
+
+java -cp "$CLASS_PATH" $JVM_OPTS org.wikapidia.dao.load.DumpLoader "$@"
+java -cp "$CLASS_PATH" $JVM_OPTS org.wikapidia.dao.load.ConceptLoader "$@"
