@@ -99,6 +99,30 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
         }
     }
 
+    /**
+     * Returns all the outlinks in the database.
+     * @param language
+     * @return
+     * @throws DaoException
+     */
+    @Override
+    public Iterable<LocalLink> getLinks(Language language) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Cursor<Record> result = context.select()
+                    .from(Tables.LOCAL_LINK)
+                    .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
+                    .fetchLazy(getFetchSize());
+            return buildLocalLinks(result, true);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
     public void save(LocalLink localLink) throws DaoException {
         Connection conn=null;
         try {

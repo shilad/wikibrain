@@ -15,7 +15,7 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean
+    public Iterable<LocalLink> getLinks(Language language, int localId, boolean
             outlinks, boolean isParseable, LocalLink.LocationType locationType)
             throws DaoException;
 
@@ -27,7 +27,7 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean
+    public Iterable<LocalLink> getLinks(Language language, int localId, boolean
             outlinks) throws DaoException;
 
 
@@ -41,4 +41,6 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      */
     public int getNumLinks (Language language, boolean isParseable,
             LocalLink.LocationType locationType) throws DaoException;
+
+    public Iterable<LocalLink> getLinks(Language language) throws DaoException;
 }
