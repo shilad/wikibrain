@@ -2,7 +2,6 @@ package org.wikapidia.parser.sql;
 
 import com.akiban.sql.StandardException;
 import com.akiban.sql.parser.*;
-import org.apache.commons.io.FileUtils;
 import org.wikapidia.utils.CompressedFile;
 
 import java.io.BufferedReader;
@@ -15,8 +14,8 @@ import java.util.logging.Logger;
 /**
  * Parses a MySQL dump file containing insert statements.
  */
-public class MySqlInsertParser {
-    private static final Logger LOG = Logger.getLogger(MySqlInsertParser.class.getName());
+public class MySqlDumpParser {
+    private static final Logger LOG = Logger.getLogger(MySqlDumpParser.class.getName());
 
     private SQLParser sqlParser = new SQLParser();
 
