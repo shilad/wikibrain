@@ -1,11 +1,7 @@
 package org.wikapidia.download;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.util.Arrays;
-
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -96,7 +90,7 @@ public class DumpLinkGetter {
         }
         for (String url : result) {
             try {
-                URL linkURL = new URL(/*validBaseURLString(lang) + */url);
+                URL linkURL = new URL(validBaseURLString(lang) + url);
                 urlLinks.add(linkURL);
             } catch (MalformedURLException e) {
                 LOG.log(Level.WARNING, "article iterator construction failed", e); // TODO: WARNING OR SEVERE

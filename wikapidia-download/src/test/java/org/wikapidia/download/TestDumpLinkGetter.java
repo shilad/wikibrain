@@ -38,7 +38,7 @@ public class TestDumpLinkGetter {
     public void testGetDumpFiles() throws IOException {
         List<String> patterns = Arrays.asList(LinkMatcher.values().toString());
         for(Language lang : Language.LANGUAGES){
-            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.ABSTRACT, LinkMatcher.ARTICLES), lang);
+            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.META_CURRENT), lang);
             List<URL> urlList= testGetter.getDumpFiles();
             System.out.println(lang.getId() + " " + urlList);
         }

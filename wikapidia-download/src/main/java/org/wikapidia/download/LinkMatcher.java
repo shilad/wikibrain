@@ -10,17 +10,45 @@ import java.util.regex.Pattern;
  */
 public enum LinkMatcher {
 
-    ARTICLES     ("articles",
-            Pattern.compile(".*wiki-latest-pages-articles[0-9]+.xml-.*.bz2"),
-            Pattern.compile(".*wiki-latest-pages-articles.xml.*.bz2")),
-    LINK_SQL     ("links", Pattern.compile(".*wiki-latest-pagelinks.sql.gz")),
-    ABSTRACT     ("abstract",
-            Pattern.compile(".*wiki-latest-abstract[0-9]+.xml"),
-            Pattern.compile(".*wiki-latest-abstract.xml")),
-    TITLES       ("titles", Pattern.compile(".*wiki-latest-all-titles-in-ns0.gz")),
-    CATEGORY     ("category", Pattern.compile(".*wiki-latest-category.sql.gz")),
-    META_CURRENT ("current_meta", Pattern.compile(".*wiki-latest-pages-meta-current.xml.bz2")),
-    META_HISTORY ("history_meta", Pattern.compile(".*wiki-latest-pages-meta-history.xml.7z"));
+    MULTISTREAM       ("multistream", Pattern.compile(".+wiki-latest-pages-articles-multistream.xml.bz2")),
+    MULTISTREAM_INDEX ("multistream_index", Pattern.compile(".+wiki-latest-pages-articles-multistream-index\\.txt\\.bz2")),
+    EDIT_HISTORY_7z      ("edit_history_7z",
+            Pattern.compile(".+wiki-latest-pages-meta-history\\d+.xml-.+\\.7z"),  // TODO: 7z vs bz2
+            Pattern.compile(".+wiki-latest-pages-meta-history.xml.7z")),
+    EDIT_HISTORY_bz2      ("edit_history_bz2",
+            Pattern.compile(".+wiki-latest-pages-meta-history\\d+.xml-.+\\.bz2"),
+            Pattern.compile(".+wiki-latest-pages-meta-history.xml.bz2")),
+    LOG               ("log_events", Pattern.compile(".+wiki-latest-pages-logging.xml.gz")),
+    META_CURRENT      ("current_meta", Pattern.compile(".+wiki-latest-pages-meta-current.xml.bz2")),
+    ARTICLES          ("articles",
+            Pattern.compile(".+wiki-latest-pages-articles\\d+\\.xml-.+\\.bz2"),
+            Pattern.compile(".+wiki-latest-pages-articles.xml.bz2")),
+//    First-pass, stub-meta
+    ABSTRACT          ("abstract",
+            Pattern.compile(".+wiki-latest-abstract\\d+.xml"),
+            Pattern.compile(".+wiki-latest-abstract.xml")),
+    TITLES            ("titles", Pattern.compile(".+wiki-latest-all-titles-in-ns0.gz")),
+    INTERLINK         ("interwiki_link", Pattern.compile(".+wiki-latest-iwlinks.sql.gz")),
+    REDIRECT_LIST     ("redirect_list", Pattern.compile(".+wiki-latest-redirect.sql.gz")),
+    PROTECTED_TITLES  ("protected_titles", Pattern.compile(".+wiki-latest-protected_titles.sql.gz")),
+    NAME_PAIRS        ("name-pairs", Pattern.compile(".+wiki-latest-page_props.sql.gz")),
+    PAGE_RESTRICTIONS ("page_restrictinos", Pattern.compile(".+wiki-latest-page_restrictions.sql.gz")),
+    PAGE_BASE         ("base_page_data", Pattern.compile(".+wiki-latest-page.sql.gz")),
+    CATEGORY          ("category", Pattern.compile(".+wiki-latest-category.sql.gz")),
+    USER_GROUP        ("user_group", Pattern.compile(".+wiki-latest-user_groups.sql.gz")),
+    INTERWIKI         ("interwiki_prefixes", Pattern.compile(".+wiki-latest-interwiki.sql.gz")),
+    INTERLANG_LINKS   ("interlang_links", Pattern.compile(".+wiki-latest-langlinks.sql.gz ")),
+    EXTERNAL_LINKS    ("external_links", Pattern.compile(".+wiki-latest-externallinks.sql.gz")),
+    TEMPLATE_LINKS    ("template_links", Pattern.compile(".+wiki-latest-templatelinks.sql.gz")),
+    IMAGE_LINKS       ("image_links", Pattern.compile(".+wiki-latest-imagelinks.sql.gz")),
+    CATEGORY_LINKS    ("category_links", Pattern.compile(".+wiki-latest-categorylinks.sql.gz")),
+    LINK_SQL          ("links", Pattern.compile(".+wiki-latest-pagelinks.sql.gz")),
+    OLD_MEDIA_META    ("old_media_meta", Pattern.compile(".+wiki-latest-oldimage.sql.gz")),
+    CURRENT_MEDIA_META("current_media_meta", Pattern.compile(".+wiki-latest-image.sql.gz")),
+    SITE_STATS        ("site_stats", Pattern.compile(".+wiki-latest-site_stats.sql.gz")),
+    FLAGGED_REVISION  ("flagged_revision", Pattern.compile(".+wiki-latest-flaggedrevs.sql.gz")),
+    FLAGGED_PAGES     ("flagged_pages", Pattern.compile(".+wiki-latest-flaggedpages.sql.gz"));
+
 
     private String name;
     private Pattern[] patterns;
