@@ -36,11 +36,34 @@ public class TestDumpLinkGetter {
 
     @Test
     public void testGetDumpFiles() throws IOException {
-        List<String> patterns = Arrays.asList(LinkMatcher.values().toString());
-        for(Language lang : Language.LANGUAGES){
-            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.META_CURRENT), lang);
+        List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.ABSTRACT);
+        for(Language lang : Arrays.asList(Language.getByLangCode("zh")/*LANGUAGES*/)) {
+            DumpLinkGetter testGetter = new DumpLinkGetter(linkMatchers, lang);
             List<URL> urlList= testGetter.getDumpFiles();
             System.out.println(lang.getId() + " " + urlList);
         }
     }
+
+    @Test
+    public void testLinks() throws IOException {
+        List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.values());
+        for(Language lang : Language.LANGUAGES){
+            DumpLinkGetter testGetter = new DumpLinkGetter(linkMatchers, lang);
+            List<String> allLinks = testGetter.getLinks(testGetter.getDumpIndex());
+            List<URL> patternedURLs = testGetter.getDumpFiles();
+            List<String> patternedStrings = new ArrayList<String>();
+            for (int i = 0; i < allLinks.size(); i++) {
+                allLinks.set(i, DumpLinkGetter.BASEURL_STRING.replace("__LANG__", lang.getLangCode().replace("-", "_")) + allLinks.get(i));
+            }
+            for (URL url : patternedURLs) {
+                patternedStrings.add(url.toString());
+            }
+            for (String link : allLinks) {
+                if (!patternedStrings.contains(link) && !(link.endsWith("rss.xml") || link.endsWith("../"))) {
+                    System.out.println(link);
+                }
+            }
+        }
+    }
+
 }

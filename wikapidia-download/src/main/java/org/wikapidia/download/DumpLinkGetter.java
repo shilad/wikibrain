@@ -42,10 +42,8 @@ public class DumpLinkGetter {
      * @return
      */
     private String validBaseURLString(Language lang) {
-        String langCode = lang.getLangCode();
         // langCode with dashes like "roa-tara" should be 'roa_tara' in dump links
-        String validLangCode = langCode.replace("-", "_");
-        return BASEURL_STRING.replace("__LANG__", validLangCode);
+        return BASEURL_STRING.replace("__LANG__", lang.getLangCode().replace("-", "_"));
     }
 
     /**
@@ -54,8 +52,7 @@ public class DumpLinkGetter {
      * @return
      */
     protected String getDumpIndex() throws IOException {
-        String indexPageAddress = validBaseURLString(lang);
-        URL indexURL = new URL(indexPageAddress);
+        URL indexURL = new URL(validBaseURLString(lang));
         return IOUtils.toString(indexURL.openStream());
     }
 
@@ -82,19 +79,17 @@ public class DumpLinkGetter {
      */
     public List<URL> getDumpFiles() throws IOException {
         List<String> links = getLinks(getDumpIndex());
-        List<String> result = new ArrayList<String>();
         List<URL> urlLinks = new ArrayList<URL>();
-        for (LinkMatcher linkMatcher : matchers){
-            result.addAll(
-                    linkMatcher.match(links));
-        }
-        for (String url : result) {
-            try {
-                URL linkURL = new URL(validBaseURLString(lang) + url);
-                urlLinks.add(linkURL);
-            } catch (MalformedURLException e) {
-                LOG.log(Level.WARNING, "article iterator construction failed", e); // TODO: WARNING OR SEVERE
+        try{
+            for(LinkMatcher linkMatcher : matchers){
+                List<String> results = linkMatcher.match(links);
+                for (String url: results){
+                    URL linkURL = new URL(validBaseURLString(lang) + url);
+                    urlLinks.add(linkURL);
+                }
             }
+        } catch(MalformedURLException e){
+            LOG.log(Level.WARNING, "string cannot form URL", e); // TODO: WARNING OR SEVERE
         }
         return urlLinks;
     }

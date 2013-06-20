@@ -1,5 +1,7 @@
 package org.wikapidia.download;
 
+import sun.security.provider.MD5;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,20 +15,26 @@ public enum LinkMatcher {
     MULTISTREAM       ("multistream", Pattern.compile(".+wiki-latest-pages-articles-multistream.xml.bz2")),
     MULTISTREAM_INDEX ("multistream_index", Pattern.compile(".+wiki-latest-pages-articles-multistream-index\\.txt\\.bz2")),
     EDIT_HISTORY_7z      ("edit_history_7z",
-            Pattern.compile(".+wiki-latest-pages-meta-history\\d+.xml-.+\\.7z"),  // TODO: 7z vs bz2
+            Pattern.compile(".+wiki-latest-pages-meta-history\\d+.xml-.+\\.7z"),
             Pattern.compile(".+wiki-latest-pages-meta-history.xml.7z")),
     EDIT_HISTORY_bz2      ("edit_history_bz2",
             Pattern.compile(".+wiki-latest-pages-meta-history\\d+.xml-.+\\.bz2"),
             Pattern.compile(".+wiki-latest-pages-meta-history.xml.bz2")),
     LOG               ("log_events", Pattern.compile(".+wiki-latest-pages-logging.xml.gz")),
-    META_CURRENT      ("current_meta", Pattern.compile(".+wiki-latest-pages-meta-current.xml.bz2")),
+    META_CURRENT      ("current_meta",
+            Pattern.compile(".+wiki-latest-pages-meta-current\\d+.xml-.+\\.bz2"),
+            Pattern.compile(".+wiki-latest-pages-meta-current.xml.bz2")),
     ARTICLES          ("articles",
             Pattern.compile(".+wiki-latest-pages-articles\\d+\\.xml-.+\\.bz2"),
             Pattern.compile(".+wiki-latest-pages-articles.xml.bz2")),
-//    First-pass, stub-meta
+    STUB_ARTICLES     ("stub_articles", Pattern.compile(".+wiki-latest-stub-articles\\d*.xml.gz")),
+    STUB_META_CURRENT ("stub_meta_current", Pattern.compile(".+wiki-latest-stub-meta-current\\d*.xml.gz")),
+    STUB_META_HISTORY ("stub_meta_history", Pattern.compile(".+wiki-latest-stub-meta-history\\d*.xml.gz")),
     ABSTRACT          ("abstract",
-            Pattern.compile(".+wiki-latest-abstract\\d+.xml"),
-            Pattern.compile(".+wiki-latest-abstract.xml")),
+            Pattern.compile(".+wiki-latest-abstract\\d+\\.xml"), // TODO: zhwiki has multiple?
+            Pattern.compile(".+wiki-latest-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
+//                           zhwiki-latest-abstract-zh-cn.xml
+//                             wiki-latest-abstract.xml-rss.xml
     TITLES            ("titles", Pattern.compile(".+wiki-latest-all-titles-in-ns0.gz")),
     INTERLINK         ("interwiki_link", Pattern.compile(".+wiki-latest-iwlinks.sql.gz")),
     REDIRECT_LIST     ("redirect_list", Pattern.compile(".+wiki-latest-redirect.sql.gz")),
@@ -37,7 +45,7 @@ public enum LinkMatcher {
     CATEGORY          ("category", Pattern.compile(".+wiki-latest-category.sql.gz")),
     USER_GROUP        ("user_group", Pattern.compile(".+wiki-latest-user_groups.sql.gz")),
     INTERWIKI         ("interwiki_prefixes", Pattern.compile(".+wiki-latest-interwiki.sql.gz")),
-    INTERLANG_LINKS   ("interlang_links", Pattern.compile(".+wiki-latest-langlinks.sql.gz ")),
+    INTERLANG_LINKS   ("interlang_links", Pattern.compile(".+wiki-latest-langlinks.sql.gz")),
     EXTERNAL_LINKS    ("external_links", Pattern.compile(".+wiki-latest-externallinks.sql.gz")),
     TEMPLATE_LINKS    ("template_links", Pattern.compile(".+wiki-latest-templatelinks.sql.gz")),
     IMAGE_LINKS       ("image_links", Pattern.compile(".+wiki-latest-imagelinks.sql.gz")),
@@ -47,7 +55,8 @@ public enum LinkMatcher {
     CURRENT_MEDIA_META("current_media_meta", Pattern.compile(".+wiki-latest-image.sql.gz")),
     SITE_STATS        ("site_stats", Pattern.compile(".+wiki-latest-site_stats.sql.gz")),
     FLAGGED_REVISION  ("flagged_revision", Pattern.compile(".+wiki-latest-flaggedrevs.sql.gz")),
-    FLAGGED_PAGES     ("flagged_pages", Pattern.compile(".+wiki-latest-flaggedpages.sql.gz"));
+    FLAGGED_PAGES     ("flagged_pages", Pattern.compile(".+wiki-latest-flaggedpages.sql.gz")),
+    MD5               ("md5_checksume", Pattern.compile(".+wiki-latest-md5sums.txt"));
 
 
     private String name;
