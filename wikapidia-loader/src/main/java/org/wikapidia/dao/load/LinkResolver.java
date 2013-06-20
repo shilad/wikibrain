@@ -61,20 +61,19 @@ public class LinkResolver {
 
          LocalLinkDao llDao = conf.get(LocalLinkDao.class);
          LocalPageDao lpDao = conf.get(LocalPageDao.class);
-         LocalCategoryMemberDao lcmDao = conf.get(LocalCategoryMemberDao.class);
+         LocalCategoryMemberDao catMemDao = conf.get(LocalCategoryMemberDao.class);
 
-         final LinkResolver resolver = new LinkResolver(llDao, lpDao,lcmDao);
+         final LinkResolver resolver = new LinkResolver(llDao, lpDao,catMemDao);
 
          if (cmd.hasOption("t")){
-             llDao.beginLoad();
-             lcmDao.beginLoad();
+             catMemDao.beginLoad();
          }
 
          //Stuff happens
 
          if (cmd.hasOption("i")){
              llDao.endLoad();
-             lcmDao.endLoad();
+             catMemDao.endLoad();
          }
 
 

@@ -181,6 +181,32 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
         );
     }
 
+    /**
+     *
+     * @param link
+     * @param id a Table ID
+     */
+    public void update(LocalLink link, int id){
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            context.update(Tables.LOCAL_LINK)
+                    .set(Tables.LOCAL_LINK.ANCHOR_TEXT, link.getAnchorText())
+                    .set(Tables.LOCAL_LINK.DEST_ID, link.getDestId())
+                    .set(Tables.LOCAL_LINK.LANG_ID, link.getLanguage().getId())
+                    .set(Tables.LOCAL_LINK.LOCATION, link.getLocation())
+                    .set(Tables.LOCAL_LINK.LOCATION_TYPE, (short)link.getLocType().ordinal())
+                    .set(Tables.LOCAL_LINK.SOURCE_ID, link.getSourceId())
+                    .where(Tables.LOCAL_LINK.)
+                    .execute();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
     public static class Provider extends org.wikapidia.conf.Provider<LocalLinkDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
