@@ -44,12 +44,12 @@ public class SqlCache extends AbstractSqlDao{
     /**
      * Updates the timestamp in table "table_modified" to the current time
      */
-    void updateTableLastModified(String tableName) throws DaoException {
+    public void updateTableLastModified(String tableName) throws DaoException {
         Connection conn = null;
         try{
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            Timestamp now = new Timestamp(System.currentTimeMillis());
+            Timestamp now = new Timestamp(System.currentTimeMillis()/1000*1000);
 
             int n = context.update(Tables.TABLE_MODIFIED)
                     .set(Tables.TABLE_MODIFIED.LAST_MODIFIED, now)
@@ -75,7 +75,7 @@ public class SqlCache extends AbstractSqlDao{
      * @param object
      * @throws DaoException
      */
-    void saveToCache(String name, Object object) throws DaoException {
+    public void saveToCache(String name, Object object) throws DaoException {
         try {
             FileOutputStream fos = new FileOutputStream(getCacheFile(name));
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -94,39 +94,58 @@ public class SqlCache extends AbstractSqlDao{
     /**
      * Returns the object if it exists and is up to date, otherwise returns null
      * @param objectName
-     * @param tableName
+     * @param tableNames List of table names whose data the cache depends on
      * @return
      * @throws DaoException
      */
-    Object get(String objectName, String tableName) throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Record record = context.select()
-                   .from(Tables.TABLE_MODIFIED)
-                   .where(Tables.TABLE_MODIFIED.TABLE_NAME.equal(tableName))
-                   .fetchOne();
-
-            Timestamp cacheTstamp = new Timestamp(getCacheFile(objectName).lastModified());
-            if (record==null || record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED).after(cacheTstamp)){
+    public Object get(String objectName, String ... tableNames) throws DaoException {
+        if (!getCacheFile(objectName).isFile()) {
+            return null;
+        }
+        Timestamp cacheTstamp = new Timestamp(getCacheFile(objectName).lastModified());
+        for (String name : tableNames) {
+            Timestamp tableTstamp = getLastModified(name);
+            if (tableTstamp == null || tableTstamp.after(cacheTstamp)) {
+                if(tableTstamp!=null)
+                {
+                    System.out.println(cacheTstamp.getTime());
+                    System.out.println(tableTstamp.getTime());
+                    //TODO: Talk to Shilad about this problem.
+                }
                 return null;
             }
+        }
+        try {
             FileInputStream fis = new FileInputStream(getCacheFile(objectName));
             ObjectInputStream ois = new ObjectInputStream(fis);
             Object object = ois.readObject();
             ois.close();
             return object;
-        }catch (FileNotFoundException f){
-            return null;
-        } catch (SQLException e){
-            throw new DaoException(e);
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (ClassNotFoundException e) {
             throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
+
+     public Timestamp getLastModified(String tableName) throws DaoException {
+         Connection conn=null;
+         try {
+             conn = ds.getConnection();
+             DSLContext context = DSL.using(conn, dialect);
+             Record record = context.select()
+                     .from(Tables.TABLE_MODIFIED)
+                     .where(Tables.TABLE_MODIFIED.TABLE_NAME.equal(tableName))
+                     .fetchOne();
+             if (record == null) {
+                 return null;
+             } else {
+                return record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED);
+             }
+         } catch (SQLException e) {
+             throw new DaoException(e);
+         } finally {
+             quietlyCloseConn(conn);
+         }
+     }
 }
