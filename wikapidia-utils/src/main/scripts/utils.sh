@@ -1,16 +1,20 @@
 #!/bin/bash
 # This bash script contains common shell functions and is included by all bash scripts
 #
+# source all util scripts here, so that other scripts only
+# need to source this script to source everything
+source ${WP_UTILS}/src/main/scripts/conf.sh
+
 
 function die() {
     echo $1 >&2
     exit 1
 }
 
-export WP_BASE=../
+export WP_BASE=..
 export WP_CORE=$WP_BASE/wikapidia-core
 export WP_LOADER=$WP_BASE/wikapidia-loader
-export WP_MAPPER=$WP_BASE/wikapidia-mapper
+export WP_MAPPER=$WP_BASE/wikAPIdia-mapper
 export WP_PARENT=$WP_BASE/wikAPIdia-parent
 export WP_PARSER=$WP_BASE/wikapidia-parser
 export WP_UTILS=$WP_BASE/wikapidia-utils
@@ -23,7 +27,7 @@ done
 
 
 function compileJooq() {
-    schema_dir=${WP_CORE}/src/main/resources/db/
+    schema_dir=${WP_CORE}/src/main/resources/db
     [ -d "$schema_dir" ] || die "missing sql schema directory $schema_dir"
     cat ${schema_dir}/*-schema.sql > ${schema_dir}/full_schema.sql
     cat ${schema_dir}/*-indexes.sql >> ${schema_dir}/full_schema.sql
@@ -63,8 +67,5 @@ function execClass() {
     die "executing '$CMD' failed"
 }
 
-# source all util scripts here, so that other scripts only
-# need to source this script to source everything
-source ${WP_UTILS}/src/main/scripts/conf.sh
 
 
