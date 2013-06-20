@@ -15,23 +15,34 @@ export WP_PARENT=$WP_BASE/wikAPIdia-parent
 export WP_PARSER=$WP_BASE/wikapidia-parser
 export WP_UTILS=$WP_BASE/wikapidia-utils
 
-if ! [ -d ${WP_BASE} ]; then
-    die "missing base directory ${WP_BASE}"
-fi
+[ -d ${WP_BASE} ] || die "missing base directory ${WP_BASE}"
 
 for d in "${WP_CORE}" "${WP_LOADER}" "${WP_MAPPER}" "${WP_PARENT}" "${WP_PARSER}" "${WP_UTILS}"; do
-    if ! [ -d "$d" ]; then
-        die "missing module directory $d"
-    fi
+    [ -d "$d" ] || die "missing module directory $d"
 done
 
 
 function compileJooq() {
-    cat ../wikapidia-core/src/main/resources/db/*-schema.sql >
+    schema_dir=${WP_CORE}/src/main/resources/db/
+    [ -d "$schema_dir" ] || die "missing sql schema directory $schema_dir"
+    cat ${schema_dir}/*-schema.sql > ${schema_dir}/full_schema.sql
+    cat ${schema_dir}/*-indexes.sql >> ${schema_dir}/full_schema.sql
+    oldhash=$(cat ${schema_dir}/full_schema.hash | tr -d ' \n' )
+    newhash=$(md5 -q ${schema_dir}/full_schema.sql)
+
+    if [ "$oldhash" == "$newhash" ]; then
+        echo "jooq schema is already up to date." >&2
+        return
+    fi
+
+    (cd ${WP_CORE} && mvn sql:execute jooq-codegen:generate) ||
+        die "jooq compilation failed"
+    echo $newhash > ${schema_dir}/full_schema.hash
 }
 
 function compile() {
     echo compiling... &&
+    compileJooq &&
     (cd ${WP_PARENT} && mvn compile ) ||
     die "compilation failed"
 
