@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 /**
  * Represents a canonically capitalized Wikipedia title.
  * Contains utility methods for querying aspects of the title.
+ *
  */
 public class Title implements Externalizable {
 
@@ -44,6 +45,16 @@ public class Title implements Externalizable {
         return language.getLanguage();
     }
 
+    public NameSpace getNamespace(){
+        String nameSpaceString = this.getNamespaceString();
+        if (nameSpaceString==null){
+            return NameSpace.ARTICLE;
+        }
+        else{
+            return NameSpace.getNameSpaceByName(nameSpaceString);
+        }
+    }
+
     /**
 	 * Gets the "Category:" or equivalent
 	 * @return
@@ -54,35 +65,10 @@ public class Title implements Externalizable {
 	
 	private static String getNamespaceString(String text){
 		String[] parts = text.split(":");
-		if (parts.length > 1){
+		if (parts.length > 1 && NameSpace.isNamespaceString(parts[0])){
 			return parts[0];
 		}else{
 			return null;
-		}
-	}
-	
-	/**
-	 * [0] is the namespace string (if it exists)
-	 * [1] is the non-namespace string
-	 * @return
-	 */
-	private static String[] getNamespaceAndNonnamespaceString(String text){
-		String[] rVal = new String[2];
-		rVal[0] = null;
-		rVal[1] = null;
-		String[] parts = text.split(":");
-
-		if (parts.length == 1) {
-			rVal[1] = parts[0];
-			return rVal;
-		} else {
-			rVal[0] = parts[0].trim();
-			StringBuilder sb = new StringBuilder();
-			for (int i = 1; i < parts.length; i++){
-				sb.append(parts[i]);
-			}
-			rVal[1] = StringUtils.join(Arrays.copyOfRange(parts, 1, parts.length), ":").trim();
-			return rVal;
 		}
 	}
 	
@@ -91,10 +77,19 @@ public class Title implements Externalizable {
 	 * colon, returns the whole title.
 	 * @return
 	 */
-	public String getNonnamespaceString(){
-		return getNamespaceAndNonnamespaceString(canonicalTitle)[1];
+	public String getTitleStringWithoutNamespace(){
+		return getTitleStringWithoutNamespace(canonicalTitle);
 	}
-	
+
+    private static String getTitleStringWithoutNamespace(String text){
+        String[] parts = text.split(":",2);
+
+        if (parts.length == 1 || !NameSpace.isNamespaceString(parts[0])) {
+            return text;
+        } else {
+            return parts[1].trim();
+        }
+    }
 	
 	@Override
 	public String toString(){
@@ -243,9 +238,8 @@ public class Title implements Externalizable {
 
         // ensure reasonable capitalization with namespaces
         if (getNamespaceString(title) != null){
-            String[] splitText = getNamespaceAndNonnamespaceString(title);
-            String nonNsString = StringUtils.capitalize(splitText[1]); // make sure that titles following colons conform to first-letter-caps policy
-            title = splitText[0] + ":" + nonNsString;
+            // make sure that titles following colons conform to first-letter-caps policy
+            title = getNamespaceString(title) + ":" + StringUtils.capitalize(getTitleStringWithoutNamespace(title));
         }
 
         // this is a weird f-ing bug that needed to be fixed!

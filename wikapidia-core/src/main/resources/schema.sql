@@ -40,7 +40,8 @@ CREATE TABLE raw_page (
   lastEdit TIMESTAMP,
   name_space SMALLINT NOT NULL,
   is_redirect BOOLEAN NOT NULL,
-  is_disambig BOOLEAN NOT NULL
+  is_disambig BOOLEAN NOT NULL,
+  redirect_title VARCHAR(256)
 );
 
 DROP TABLE IF EXISTS category_members;
