@@ -32,17 +32,14 @@ import java.util.logging.Level;
  */
 public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao implements LocalPageDao<T> {
     private TLongIntHashMap titlesToIds = null;
-    private boolean followRedirects = true;
     private RedirectSqlDao redirectSqlDao;
 
     public LocalPageSqlDao(DataSource dataSource) throws DaoException {
-        super(dataSource);
-        redirectSqlDao = new RedirectSqlDao(ds);
+        this(dataSource, true);
     }
 
     public LocalPageSqlDao(DataSource dataSource, boolean followRedirects) throws DaoException{
         super(dataSource);
-        this.followRedirects = followRedirects;
         if (followRedirects){
             redirectSqlDao = new RedirectSqlDao(ds);
         }
@@ -165,7 +162,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne();
             LocalPage page = buildLocalPage(record);
-            if (followRedirects && page.isRedirect()){
+            if (redirectSqlDao != null && page.isRedirect()){
                 return getById(language,
                         redirectSqlDao.resolveRedirect(
                                 page.getLanguage(),
@@ -182,8 +179,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     @Override
-    public void setFollowRedirects(boolean followRedirects) {
-        this.followRedirects = followRedirects;
+    public void setFollowRedirects(boolean followRedirects) throws DaoException {
+        redirectSqlDao = new RedirectSqlDao(ds);
     }
 
     @Override
@@ -199,7 +196,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     and(Tables.LOCAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
                     fetchOne();
             LocalPage page = buildLocalPage(record);
-            if (followRedirects && page.isRedirect()){
+            if (redirectSqlDao != null && page.isRedirect()){
                 return getById(language,
                         redirectSqlDao.resolveRedirect(
                                 page.getLanguage(),
@@ -297,8 +294,11 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     protected TLongIntHashMap buildTitlesToIds() throws DaoException {
         Connection conn = null;
         try {
-            if (cache!=null){
-                TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", Tables.LOCAL_PAGE.getName());
+            if (cache!=null) {
+                String [] dependsOn = (redirectSqlDao == null)
+                        ? new String[] { Tables.LOCAL_PAGE.getName() }
+                        : new String[] { Tables.LOCAL_PAGE.getName(), Tables.REDIRECT.getName() };
+                TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", dependsOn);
                 if (map!=null){
                     return map;
                 }
@@ -313,7 +313,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
                         record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
-                if (followRedirects && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)){
+                if (redirectSqlDao != null && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)){
                     map.put(hash, redirectSqlDao.resolveRedirect(
                             Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID)),
                             record.getValue(Tables.LOCAL_PAGE.PAGE_ID)
