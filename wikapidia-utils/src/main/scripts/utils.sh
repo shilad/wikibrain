@@ -1,16 +1,20 @@
 #!/bin/bash
 # This bash script contains common shell functions and is included by all bash scripts
 #
+# source all util scripts here, so that other scripts only
+# need to source this script to source everything
+source ${WP_UTILS}/src/main/scripts/conf.sh
+
 
 function die() {
     echo $1 >&2
     exit 1
 }
 
-export WP_BASE=../
+export WP_BASE=..
 export WP_CORE=$WP_BASE/wikapidia-core
 export WP_LOADER=$WP_BASE/wikapidia-loader
-export WP_MAPPER=$WP_BASE/wikapidia-mapper
+export WP_MAPPER=$WP_BASE/wikAPIdia-mapper
 export WP_PARENT=$WP_BASE/wikAPIdia-parent
 export WP_PARSER=$WP_BASE/wikapidia-parser
 export WP_UTILS=$WP_BASE/wikapidia-utils
@@ -63,8 +67,5 @@ function execClass() {
     die "executing '$CMD' failed"
 }
 
-# source all util scripts here, so that other scripts only
-# need to source this script to source everything
-source ${WP_UTILS}/src/main/scripts/conf.sh
 
 
