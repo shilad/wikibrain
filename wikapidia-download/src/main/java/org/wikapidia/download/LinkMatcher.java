@@ -33,8 +33,6 @@ public enum LinkMatcher {
     ABSTRACT          ("abstract",
             Pattern.compile(".+wiki-latest-abstract\\d+\\.xml"), // TODO: zhwiki has multiple?
             Pattern.compile(".+wiki-latest-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
-//                           zhwiki-latest-abstract-zh-cn.xml
-//                             wiki-latest-abstract.xml-rss.xml
     TITLES            ("titles", Pattern.compile(".+wiki-latest-all-titles-in-ns0.gz")),
     INTERLINK         ("interwiki_link", Pattern.compile(".+wiki-latest-iwlinks.sql.gz")),
     REDIRECT_LIST     ("redirect_list", Pattern.compile(".+wiki-latest-redirect.sql.gz")),
