@@ -8,6 +8,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
+import org.wikapidia.core.dao.filter.LinkFilter;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
@@ -16,6 +17,8 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 
 public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
@@ -83,7 +86,49 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
     @Override
-    public LocalLink getLink(Language language, int sourceId, int destId, int location) throws DaoException {
+    public SqlDaoIterable<LocalLink> get(LinkFilter linkFilter) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (linkFilter.getLangIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.LANG_ID.in(linkFilter.getLangIds()));
+            }
+            if (linkFilter.getLocTypes() != null) {
+                conditions.add(Tables.LOCAL_LINK.LOCATION_TYPE.in(linkFilter.getLocTypes()));
+            }
+            if (linkFilter.getSourceIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.SOURCE_ID.in(linkFilter.getSourceIds()));
+            }
+            if (linkFilter.getDestIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.DEST_ID.in(linkFilter.getDestIds()));
+            }
+            if (linkFilter.isParseable() != null) {
+                conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(linkFilter.isParseable()));
+            }
+            if (conditions.isEmpty()) {
+                return null;
+            }
+            Cursor<Record> result = context.select().
+                    from(Tables.LOCAL_PAGE).
+                    where(conditions).
+                    fetchLazy();
+            return new SqlDaoIterable<LocalLink>(result) {
+                @Override
+                public LocalLink transform(Record r) {
+                    return buildLocalLink(r, true);
+                }
+            };
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -93,7 +138,6 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     where(Tables.LOCAL_LINK.LANG_ID.eq(language.getId())).
                     and(Tables.LOCAL_LINK.SOURCE_ID.eq(sourceId)).
                     and(Tables.LOCAL_LINK.DEST_ID.eq(destId)).
-                    and(Tables.LOCAL_LINK.LOCATION.eq(location)).
                     fetchOne();
             return buildLocalLink(record, true);
         } catch (SQLException e) {

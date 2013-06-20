@@ -26,7 +26,7 @@ public abstract class AbstractUniversalEntity<T> {
     }
 
     /**
-     * Gets the set of pages in the input language.
+     * Gets the set of entities in the input language.
      * @param language
      * @return A collection of local pages or null if no pages in the input language exist in this concept.
      */

@@ -6,10 +6,8 @@ import com.typesafe.config.Config;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.PageFilter;
-import org.wikapidia.core.dao.SqlDaoIterable;
+import org.wikapidia.core.dao.*;
+import org.wikapidia.core.dao.filter.LocalPageFilter;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
@@ -25,14 +23,13 @@ public class MonolingualConceptMapper extends ConceptMapper {
 
     private static final AtomicInteger nextUnivId = new AtomicInteger(0);
 
-    public MonolingualConceptMapper(Configurator configurator) {
-        super(configurator);
+    public MonolingualConceptMapper(LocalPageDao<LocalPage> localPageDao) {
+        super(localPageDao);
     }
 
     @Override
-    public MapperIterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException, ConfigurationException {
-        LocalPageDao<LocalPage> dao = configurator.get(LocalPageDao.class);
-        SqlDaoIterable<LocalPage> localPages = dao.get(new PageFilter().setLanguages(ls));
+    public MapperIterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException {
+        SqlDaoIterable<LocalPage> localPages = localPageDao.get(new LocalPageFilter().setLanguages(ls));
         return new MapperIterator<UniversalPage>(localPages) {
 
             @Override
@@ -62,7 +59,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
 
         @Override
         public String getPath() {
-            return "mapper";
+            return "mapper.concept";
         }
 
         @Override
@@ -70,7 +67,11 @@ public class MonolingualConceptMapper extends ConceptMapper {
             if (!config.getString("type").equals("monolingual")) {
                 return null;
             }
-            return new MonolingualConceptMapper(getConfigurator());
+            return new MonolingualConceptMapper(
+                    getConfigurator().get(
+                            LocalPageDao.class,
+                            config.getString("localPageDao"))
+            );
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.wikapidia.core.dao;
+package org.wikapidia.core.dao.filter;
 
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -11,20 +11,20 @@ import java.util.Collection;
  * A helper class for specifying complex queries.  To use, call the static get() method to create an instance,
  * than call the various set methods in a chain to set the constraints. For example, a call might look like:
  *
- * PageFilter pf = new PageFilter.
+ * LocalPageFilter pf = new LocalPageFilter.
  *          setLanguages(languageSet).
  *          setNameSpace(nameSpaces).
  *          setRedirect(true).
  *          setDisambig(false);
  */
-public class PageFilter {
+public class LocalPageFilter {
 
     private Collection<Short> langIds;
     private Collection<Short> nsIds;
     private Boolean isRedirect;
     private Boolean isDisambig;
 
-    public PageFilter() {
+    public LocalPageFilter() {
         langIds = null;
         nsIds = null;
         isRedirect = null;
@@ -47,11 +47,11 @@ public class PageFilter {
         return isDisambig;
     }
 
-    public PageFilter setLanguages(LanguageSet languages) {
+    public LocalPageFilter setLanguages(LanguageSet languages) {
         return setLanguages(languages.getLanguages());
     }
 
-    public PageFilter setLanguages(Collection<Language> languages) {
+    public LocalPageFilter setLanguages(Collection<Language> languages) {
         Collection<Short> temp = new ArrayList<Short>();
         if (languages.isEmpty() || languages==null) {
             temp = null;
@@ -65,7 +65,7 @@ public class PageFilter {
         return this;
     }
 
-    public PageFilter setNameSpaces(Collection<NameSpace> nameSpaces) {
+    public LocalPageFilter setNameSpaces(Collection<NameSpace> nameSpaces) {
         Collection<Short> temp = new ArrayList<Short>();
         if (nameSpaces.isEmpty() || nameSpaces==null) {
             temp = null;
@@ -79,12 +79,12 @@ public class PageFilter {
         return this;
     }
 
-    public PageFilter setRedirect(Boolean redirect) {
+    public LocalPageFilter setRedirect(Boolean redirect) {
         this.isRedirect = redirect;
         return this;
     }
 
-    public PageFilter setDisambig(Boolean disambig) {
+    public LocalPageFilter setDisambig(Boolean disambig) {
         this.isDisambig = disambig;
         return this;
     }

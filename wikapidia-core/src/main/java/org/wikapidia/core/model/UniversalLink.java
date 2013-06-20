@@ -3,6 +3,9 @@ package org.wikapidia.core.model;
 import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  */
 public class UniversalLink extends AbstractUniversalEntity<LocalLink> {
@@ -22,5 +25,9 @@ public class UniversalLink extends AbstractUniversalEntity<LocalLink> {
 
     public int getDestUnivId() {
         return destUnivId;
+    }
+
+    public Collection<LocalLink> getLocalLinks(Language language) {
+        return new ArrayList<LocalLink>(getLocalEntities(language));
     }
 }

@@ -3,6 +3,7 @@ package org.wikapidia.core.model;
 import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -29,6 +30,10 @@ public class UniversalPage<T extends LocalPage> extends AbstractUniversalEntity<
 
     public NameSpace getNameSpace() {
         return nameSpace;
+    }
+
+    public Collection<T> getLocalPages(Language language) {
+        return new ArrayList<T>(getLocalEntities(language));
     }
 
     public static interface LocalPageChooser<T extends LocalPage> {

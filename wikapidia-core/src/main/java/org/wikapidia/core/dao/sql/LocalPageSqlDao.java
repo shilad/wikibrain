@@ -12,6 +12,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
+import org.wikapidia.core.dao.filter.LocalPageFilter;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -107,23 +108,23 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     @Override
-    public SqlDaoIterable<T> get(PageFilter pageFilter) throws DaoException {
+    public SqlDaoIterable<T> get(LocalPageFilter localPageFilter) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
-            if (pageFilter.getLanguages() != null) {
-                conditions.add(Tables.LOCAL_PAGE.LANG_ID.in(pageFilter.getLanguages()));
+            if (localPageFilter.getLanguages() != null) {
+                conditions.add(Tables.LOCAL_PAGE.LANG_ID.in(localPageFilter.getLanguages()));
             }
-            if (pageFilter.getNameSpaces() != null) {
-                conditions.add(Tables.LOCAL_PAGE.NAME_SPACE.in(pageFilter.getNameSpaces()));
+            if (localPageFilter.getNameSpaces() != null) {
+                conditions.add(Tables.LOCAL_PAGE.NAME_SPACE.in(localPageFilter.getNameSpaces()));
             }
-            if (pageFilter.isRedirect() != null) {
-                conditions.add(Tables.LOCAL_PAGE.IS_REDIRECT.in(pageFilter.isRedirect()));
+            if (localPageFilter.isRedirect() != null) {
+                conditions.add(Tables.LOCAL_PAGE.IS_REDIRECT.in(localPageFilter.isRedirect()));
             }
-            if (pageFilter.isDisambig() != null) {
-                conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(pageFilter.isDisambig()));
+            if (localPageFilter.isDisambig() != null) {
+                conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(localPageFilter.isDisambig()));
             }
             if (conditions.isEmpty()) {
                 return null;

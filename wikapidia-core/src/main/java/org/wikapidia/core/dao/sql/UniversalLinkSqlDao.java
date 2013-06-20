@@ -57,7 +57,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
             for (Language language : link.getLanguageSetOfExistsInLangs()) {
-                for (LocalLink localLink : link.getLocalEntities(language)) {
+                for (LocalLink localLink : link.getLocalLinks(language)) {
                     context.insertInto(Tables.UNIVERSAL_LINK).values(
                             localLink.getLanguage().getId(),
                             localLink.getSourceId(),
@@ -69,6 +69,28 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                     ).execute();
                 }
             }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public void save(LocalLink localLink, int sourceUnivId, int destUnivId, int algorithmId) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            context.insertInto(Tables.UNIVERSAL_LINK).values(
+                    localLink.getLanguage().getId(),
+                    localLink.getSourceId(),
+                    localLink.getDestId(),
+                    localLink.getLocation(),
+                    sourceUnivId,
+                    destUnivId,
+                    algorithmId
+            ).execute();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -230,8 +252,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
             LocalLink temp = localLinkDao.getLink(
                     language,
                     record.getValue(Tables.UNIVERSAL_LINK.SOURCE_ID),
-                    record.getValue(Tables.UNIVERSAL_LINK.DEST_ID),
-                    record.getValue(Tables.UNIVERSAL_LINK.LOCATION)
+                    record.getValue(Tables.UNIVERSAL_LINK.DEST_ID)
             );
             map.put(language, temp);
         }

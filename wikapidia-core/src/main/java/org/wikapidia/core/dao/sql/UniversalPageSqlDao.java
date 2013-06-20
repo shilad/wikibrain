@@ -66,7 +66,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             UniversalPage<LocalPage> temp = page;
             NameSpace nameSpace = temp.getNameSpace();
             for (Language language : temp.getLanguageSetOfExistsInLangs()) {
-                for (LocalPage localPage : temp.getLocalEntities(language)) {
+                for (LocalPage localPage : temp.getLocalPages(language)) {
                     context.insertInto(Tables.UNIVERSAL_PAGE).values(
                             language.getId(),
                             localPage.getLocalId(),
@@ -130,6 +130,31 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             map.put(univId, getById(univId, algorithmId));
         }
         return map;
+    }
+
+    @Override
+    public int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Record record = context.select().
+                    from(Tables.UNIVERSAL_PAGE).
+                    where(Tables.UNIVERSAL_PAGE.LANG_ID.eq(language.getId())).
+                    and(Tables.UNIVERSAL_PAGE.PAGE_ID.eq(localPageId)).
+                    and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
+                    fetchOne();
+            return record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException {
+        return getUnivPageId(localPage.getLanguage(), localPage.getLocalId(), algorithmId);
     }
 
     /**
