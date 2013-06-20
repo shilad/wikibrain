@@ -66,7 +66,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             UniversalPage<LocalPage> temp = page;
             NameSpace nameSpace = temp.getNameSpace();
             for (Language language : temp.getLanguageSetOfExistsInLangs()) {
-                for (LocalPage localPage : temp.getLocalPages(language)) {
+                for (LocalPage localPage : temp.getLocalEntities(language)) {
                     context.insertInto(Tables.UNIVERSAL_PAGE).values(
                             language.getId(),
                             localPage.getLocalId(),
