@@ -184,9 +184,10 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     /**
      *
      * @param link
-     * @param id a Table ID
+     * @param id id a Table ID
+     * @throws DaoException
      */
-    public void update(LocalLink link, int id){
+    public void update(LocalLink link, long id) throws DaoException {
         Connection conn=null;
         try {
             conn = ds.getConnection();
@@ -198,8 +199,28 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .set(Tables.LOCAL_LINK.LOCATION, link.getLocation())
                     .set(Tables.LOCAL_LINK.LOCATION_TYPE, (short)link.getLocType().ordinal())
                     .set(Tables.LOCAL_LINK.SOURCE_ID, link.getSourceId())
-                    .where(Tables.LOCAL_LINK.)
-                    .execute();
+                    .where(Tables.LOCAL_LINK.ID.eq(id))
+                .execute();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    /**
+     *
+     * @param id id a Table ID
+     * @throws DaoException
+     */
+    public void remove(long id) throws DaoException{
+        Connection conn=null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            context.delete(Tables.LOCAL_LINK)
+                    .where(Tables.LOCAL_LINK.ID.eq(id))
+                .execute();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
