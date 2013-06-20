@@ -16,15 +16,17 @@ import java.util.regex.Pattern;
 
 /**
  * Parses the Xml associated with a single Wikipedia page.
- * TODO: figure out nameSpace
  */
 public class PageXmlParser {
     private static final Logger LOG =Logger.getLogger(PageXmlParser.class.getName());
     private static final Pattern titlePattern = Pattern.compile("<title>(.*?)</title>");
     private static final Pattern idPattern = Pattern.compile("<id>(.*?)</id>");
     private static final Pattern timestampPattern = Pattern.compile("<timestamp>(.*?)</timestamp>");
-    private static final SimpleDateFormat xmlDumpDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final Pattern contentPattern = Pattern.compile("<text xml:space=\"preserve\">(.*?)</text>", Pattern.DOTALL);
+    private static final Pattern redirectPattern = Pattern.compile("<redirect title=\"(.*?)\" />");
+
+    // xmlDumpDateFormat is not static because it isn't threadsafe. BOOO!!
+    private final SimpleDateFormat xmlDumpDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private final LanguageInfo language;
 
     public PageXmlParser(LanguageInfo language) {
@@ -68,7 +70,7 @@ public class PageXmlParser {
             LOG.warning("Could not parse last edited date: " + timestampString);
         }
         title = title.trim();
-
+        String redirectTitle = getRedirect(rawXml);
         return new RawPage(
                 Integer.valueOf(idString),
                 Integer.valueOf(revisionIdString),
@@ -77,8 +79,9 @@ public class PageXmlParser {
                 lastEdit,
                 language.getLanguage(),
                 getNameSpace(title),
-                isRedirect(body),
-                false   // TODO: FIXME by properly parsing disambigs!
+                redirectTitle!=null,
+                false,   // TODO: FIXME by properly parsing disambigs!
+                redirectTitle
         );
     }
 
@@ -94,8 +97,8 @@ public class PageXmlParser {
         }
     }
 
-    private boolean isRedirect(String body) {
-        return extractSingleString(language.getRedirectPattern(), body, 1) != null;
+    private String getRedirect(String rawXml) {
+        return extractSingleString(redirectPattern, rawXml, 1);
     }
 
     private static String extractSingleString(Pattern patternToMatch, String body, int matchNum){

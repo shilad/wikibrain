@@ -1,5 +1,7 @@
 package org.wikapidia.core.model;
 
+import java.util.HashMap;
+
 /**
  * A NameSpace defines the kind Wikipidia page a given page is.
  * The NameSpace contains the NameSpace enum that specifies what namespace a given NameSpace is in.
@@ -24,6 +26,7 @@ public enum NameSpace {
     SPECIAL(-1), MEDIA(-2);
 
     private short value;
+
 
     private NameSpace(int value) {
         this.value = (short)value;
@@ -62,6 +65,37 @@ public enum NameSpace {
      */
     public static NameSpace getNameSpaceById(int id) {
         return NameSpace.values()[id];
+    }
+
+    /**
+     * Takes in a string and returns the correspond
+     * @param s
+     * @return null if the string does not match a namespace
+     */
+    public static NameSpace getNameSpaceByName(String s){
+        s=s.toUpperCase();
+        for (NameSpace ns : NameSpace.values()){
+            if (ns.toString().replace("_"," ").equals(s)){
+                return ns;
+            }
+        }
+        if (s.equals("")) return NameSpace.ARTICLE;
+        else if (s.equals("WP")) return NameSpace.WIKIPEDIA;
+        else if (s.equals("WT")) return NameSpace.WIKIPEDIA_TALK;
+        else if (s.equals("IMAGE")) return NameSpace.FILE;
+        else if (s.equals("IMAGE TALK")) return NameSpace.FILE_TALK;
+        else if (s.equals("PROJECT")) return NameSpace.WIKIPEDIA;
+        else if (s.equals("PROJECT TALK")) return NameSpace.WIKIPEDIA_TALK;
+        else if (s.equals("CAT")) return NameSpace.CATEGORY;
+        else if (s.equals("MOS")) return NameSpace.WIKIPEDIA;
+        else if (s.equals("H")) return NameSpace.HELP;
+        else if (s.equals("P")) return NameSpace.PORTAL;
+        else if (s.equals("T")) return NameSpace.TALK;
+        else return null;
+    }
+
+    public static boolean isNamespaceString(String s){
+        return !(getNameSpaceByName(s)==null);
     }
 
     /**
