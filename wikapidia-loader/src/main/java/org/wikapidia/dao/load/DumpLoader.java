@@ -10,9 +10,11 @@ import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.parser.wiki.ParserVisitor;
 import org.wikapidia.parser.wiki.WikiTextDumpParser;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -21,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -28,19 +31,14 @@ import java.util.logging.Logger;
  */
 public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
-    private final List<ParserVisitor> visitors;
-    private final AtomicInteger counter = new AtomicInteger();
 
-    public DumpLoader(List<ParserVisitor> visitors) {
-        this.visitors = new ArrayList<ParserVisitor>(visitors);
-        this.visitors.add(0, new ParserVisitor() {
-            @Override
-            public void beginPage(RawPage page) {
-                if (counter.incrementAndGet() % 100 == 0) {
-                    LOG.info("processing article " + counter.get());
-                }
-            }
-        });
+    private final AtomicInteger counter = new AtomicInteger();
+    private final LocalPageDao localPageDao;
+    private final RawPageDao rawPageDao;
+
+    public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao) {
+        this.localPageDao = localPageDao;
+        this.rawPageDao = rawPageDao;
     }
 
     /**
@@ -54,8 +52,33 @@ public class DumpLoader {
         }
         String langCode = file.getName().substring(0, i);
         LanguageInfo lang = LanguageInfo.getByLangCode(langCode);
-        WikiTextDumpParser parser = new WikiTextDumpParser(file, lang);
-        parser.parse(visitors);
+        DumpPageXmlParser parser = new DumpPageXmlParser(file, lang);
+        for (RawPage rp : parser) {
+            if (counter.incrementAndGet() % 1000 == 0) {
+                LOG.info("processing article " + counter.get());
+            }
+            save(file, rp);
+        }
+    }
+
+    private void save(File file, RawPage rp) {
+        try {
+            rawPageDao.save(rp);
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
+
+        }
+        try {
+            LocalPage lp = new LocalPage(
+                                rp.getLang(), rp.getPageId(),
+                                rp.getTitle(), rp.getNamespace(),
+                                rp.isRedirect(), rp.isDisambig()
+                            );
+            localPageDao.save(lp);
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
+        }
+
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException {
@@ -94,18 +117,13 @@ public class DumpLoader {
         // TODO: add other visitors
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
-        LocalLinkDao llDao = conf.get(LocalLinkDao.class);
-        visitors.add(new LocalPageLoader(lpDao));
-        visitors.add(new RawPageLoader(rpDao));
-        visitors.add(new LocalLinkLoader(llDao));
 
-        final DumpLoader loader = new DumpLoader(visitors);
+        final DumpLoader loader = new DumpLoader(lpDao, rpDao);
 
         // TODO: initialize other visitors
         if (cmd.hasOption("t")) {
             lpDao.beginLoad();
             rpDao.beginLoad();
-            llDao.beginLoad();
         }
 
         // loads multiple dumps in parallel
@@ -122,7 +140,6 @@ public class DumpLoader {
         if (cmd.hasOption("i")) {
             lpDao.endLoad();
             rpDao.endLoad();
-            llDao.endLoad();
         }
     }
 }
