@@ -177,7 +177,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
     once, which increases the time constraint by at least a factor of n.
     TODO: decide which of these methods to use
      */
-    private Iterable<UniversalLink> buildUniversalLinksTest(final Cursor<Record> result, boolean source) throws DaoException {
+    private Iterable<UniversalLink> buildUniversalLinksIterable(final Cursor<Record> result, boolean source) throws DaoException {
         final Set<Integer> univIds = new HashSet<Integer>();
         final TableField<UniversalLinkRecord, Integer> univId = source ?
                 Tables.UNIVERSAL_LINK.DEST_UNIV_ID :
