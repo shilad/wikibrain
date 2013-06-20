@@ -141,7 +141,7 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao{
             Cursor<Record> cursor = context.select().from(Tables.REDIRECT)
                     .where(Tables.REDIRECT.LANG_ID.equal(lang.getId()))
                     .fetchLazy();
-            TIntIntMap ids = new TIntIntHashMap();
+            TIntIntMap ids = new TIntIntHashMap(10, .5f, -1, -1);
             for (Record record : cursor){
                 ids.put(record.getValue(Tables.REDIRECT.SRC_PAGE_ID),
                         record.getValue(Tables.REDIRECT.DEST_PAGE_ID));
@@ -169,28 +169,6 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao{
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void update(Language lang, int src, int newDest) throws DaoException {
-        Connection conn = null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            int n = context.update(Tables.REDIRECT)
-                    .set(Tables.REDIRECT.DEST_PAGE_ID, newDest)
-                    .where(Tables.REDIRECT.SRC_PAGE_ID.equal(src))
-                    .and(Tables.REDIRECT.LANG_ID.equal(lang.getId()))
-                    .execute();
-            if (n == 0) {
-                n = context.insertInto(Tables.REDIRECT, Tables.REDIRECT.LANG_ID, Tables.REDIRECT.SRC_PAGE_ID,
-                        Tables.REDIRECT.DEST_PAGE_ID)
-                        .values(lang.getId(), src, newDest)
-                        .execute();
-            }
-        }catch (SQLException e){
-            throw new DaoException(e);
         }
     }
 

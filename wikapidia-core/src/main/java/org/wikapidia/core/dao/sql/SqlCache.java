@@ -44,7 +44,7 @@ public class SqlCache extends AbstractSqlDao{
     /**
      * Updates the timestamp in table "table_modified" to the current time
      */
-    void updateTableLastModified(String tableName) throws DaoException {
+    public void updateTableLastModified(String tableName) throws DaoException {
         Connection conn = null;
         try{
             conn = ds.getConnection();
@@ -75,7 +75,7 @@ public class SqlCache extends AbstractSqlDao{
      * @param object
      * @throws DaoException
      */
-    void saveToCache(String name, Object object) throws DaoException {
+    public void saveToCache(String name, Object object) throws DaoException {
         try {
             FileOutputStream fos = new FileOutputStream(getCacheFile(name));
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -98,7 +98,7 @@ public class SqlCache extends AbstractSqlDao{
      * @return
      * @throws DaoException
      */
-    Object get(String objectName, String tableName) throws DaoException {
+    public Object get(String objectName, String tableName) throws DaoException {
         Connection conn=null;
         try {
             conn = ds.getConnection();
@@ -108,8 +108,13 @@ public class SqlCache extends AbstractSqlDao{
                    .where(Tables.TABLE_MODIFIED.TABLE_NAME.equal(tableName))
                    .fetchOne();
 
-            Timestamp cacheTstamp = new Timestamp(getCacheFile(objectName).lastModified());
-            if (record==null || record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED).after(cacheTstamp)){
+            Long cacheTstamp = getCacheFile(objectName).lastModified();
+            if (record==null || record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED).getTime() > cacheTstamp){
+                System.out.println("I'm returning null, guys!");
+                if(record!=null){
+                System.out.println(record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED).getTime());
+                System.out.println(cacheTstamp);
+                }
                 return null;
             }
             FileInputStream fis = new FileInputStream(getCacheFile(objectName));
