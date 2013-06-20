@@ -44,7 +44,6 @@ public class TestSqlCache {
         assert (cache.get("A string", "table")==null);
 
         cache.saveToCache("A string", string);
-        System.out.print(cache.get("A string", "table"));
         assert (cache.get("A string", "table").equals(string));
 
 
