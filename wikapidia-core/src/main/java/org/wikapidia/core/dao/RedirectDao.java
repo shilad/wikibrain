@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao;
 
-import com.sun.istack.internal.Nullable;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.WikapidiaException;
@@ -26,7 +25,7 @@ public interface RedirectDao {
      * If id is not a redirect, returns null
      * @throws WikapidiaException
      */
-    public abstract @Nullable Integer resolveRedirect(Language lang, int id) throws DaoException;
+    public abstract Integer resolveRedirect(Language lang, int id) throws DaoException;
 
     /**
      * Returns true iff id is a redirect in lang
