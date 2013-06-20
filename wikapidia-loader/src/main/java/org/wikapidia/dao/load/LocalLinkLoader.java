@@ -45,26 +45,4 @@ public class LocalLinkLoader extends ParserVisitor {
             throw new WikapidiaException(e);
         }
     }
-
-
-
-    //TODO: Move these to some new class or something.
-
-    public boolean isCategory(String link, LanguageInfo languageInfo){
-        for(String categoryName : languageInfo.getCategoryNames()){
-            if(link.substring(categoryName.length()+1).toLowerCase().equals(categoryName+":")){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isLinkToCategory(String link, LanguageInfo languageInfo){
-        for(String categoryName : languageInfo.getCategoryNames()){
-            if(link.substring(categoryName.length()+2).toLowerCase().equals(":" + categoryName + ":")){
-                return true;
-            }
-        }
-        return false;
-    }
 }

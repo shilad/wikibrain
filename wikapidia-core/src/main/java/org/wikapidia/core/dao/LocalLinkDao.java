@@ -30,6 +30,15 @@ public interface LocalLinkDao extends Loader<LocalLink> {
     public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean
             outlinks) throws DaoException;
 
+    /**
+     * Get all links in a language
+     * @param language
+     * @param outlinks resolve as inlinks or as outlinks
+     * @return
+     * @throws DaoException
+     */
+    public SqlDaoIterable<LocalLink> getLinks(Language language, boolean outlinks) throws DaoException;
+
 
     /**
      * Retrieve the number of links in a language meeting given criteria

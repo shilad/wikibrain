@@ -76,6 +76,24 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
         }
     }
 
+    @Override
+    public SqlDaoIterable<LocalLink> getLinks(Language language, boolean outlinks) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Cursor<Record> result = context.select()
+                    .from(Tables.LOCAL_LINK)
+                    .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
+                    .fetchLazy(getFetchSize());
+            return buildLocalLinks(result, outlinks);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
     public int getNumLinks(Language language, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
         Connection conn = null;
         try {
@@ -182,12 +200,11 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
     /**
-     *
+     *  Updates based on Source ID, Lang ID and Location.
      * @param link
-     * @param id id a Table ID
      * @throws DaoException
      */
-    public void update(LocalLink link, long id) throws DaoException {
+    public void update(LocalLink link) throws DaoException {
         Connection conn=null;
         try {
             conn = ds.getConnection();
@@ -195,11 +212,11 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
             context.update(Tables.LOCAL_LINK)
                     .set(Tables.LOCAL_LINK.ANCHOR_TEXT, link.getAnchorText())
                     .set(Tables.LOCAL_LINK.DEST_ID, link.getDestId())
-                    .set(Tables.LOCAL_LINK.LANG_ID, link.getLanguage().getId())
-                    .set(Tables.LOCAL_LINK.LOCATION, link.getLocation())
                     .set(Tables.LOCAL_LINK.LOCATION_TYPE, (short)link.getLocType().ordinal())
-                    .set(Tables.LOCAL_LINK.SOURCE_ID, link.getSourceId())
-                    .where(Tables.LOCAL_LINK.ID.eq(id))
+                    .set(Tables.LOCAL_LINK.IS_PARSEABLE, link.isParseable())
+                    .where(Tables.LOCAL_LINK.SOURCE_ID.eq(link.getSourceId()))
+                    .and(Tables.LOCAL_LINK.LANG_ID.eq(link.getLanguage().getId()))
+                    .and(Tables.LOCAL_LINK.LOCATION.eq(link.getLocation()))
                 .execute();
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -209,17 +226,19 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
     /**
-     *
-     * @param id id a Table ID
+     * Removes based on Source ID, Lang ID and Location.
+     * @param link
      * @throws DaoException
      */
-    public void remove(long id) throws DaoException{
+    public void remove(LocalLink link) throws DaoException{
         Connection conn=null;
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
             context.delete(Tables.LOCAL_LINK)
-                    .where(Tables.LOCAL_LINK.ID.eq(id))
+                    .where(Tables.LOCAL_LINK.SOURCE_ID.eq(link.getSourceId()))
+                    .and(Tables.LOCAL_LINK.LANG_ID.eq(link.getLanguage().getId()))
+                    .and(Tables.LOCAL_LINK.LOCATION.eq(link.getLocation()))
                 .execute();
         } catch (SQLException e) {
             throw new DaoException(e);
