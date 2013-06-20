@@ -106,6 +106,10 @@ public class SqlCache extends AbstractSqlDao{
         for (String name : tableNames) {
             Timestamp tableTstamp = getLastModified(name);
             if (tableTstamp == null || tableTstamp.after(cacheTstamp)) {
+                if (tableTstamp!=null){
+                    System.out.println(tableTstamp);
+                    System.out.println(cacheTstamp);
+                }
                 return null;
             }
         }
