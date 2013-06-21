@@ -7,7 +7,6 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
@@ -24,7 +23,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
     private static final AtomicInteger nextUnivId = new AtomicInteger(0);
 
     public MonolingualConceptMapper(LocalPageDao<LocalPage> localPageDao) {
-        super(0, localPageDao);
+        super(MONOLINGUAL_ALGORITHM_ID, localPageDao);
 
     }
 
@@ -40,7 +39,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
                 map.put(page.getLanguage(), page);
                 return new UniversalPage<LocalPage>(
                         nextUnivId.getAndIncrement(),
-                        MONOLINGUAL_ALGORITHM_ID,
+                        getId(),
                         page.getNameSpace(),
                         map
                 );
@@ -60,7 +59,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
 
         @Override
         public String getPath() {
-            return "mapper.concept";
+            return "mapper";
         }
 
         @Override

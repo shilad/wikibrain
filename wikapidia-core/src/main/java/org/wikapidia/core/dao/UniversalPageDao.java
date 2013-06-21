@@ -30,13 +30,22 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
     public abstract Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException;
 
     /**
-     * Returns the universal ID of a local page specified by a language and an ID
+     * Returns the universal ID of a local page specified by a language and
+     * an ID, within the scope of the specified algorithm
      * @param language
      * @param localPageId
+     * @param algorithmId
      * @return
      * @throws DaoException
      */
     public abstract int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException;
 
+    /**
+     * Returns the universal ID of a local page, within the scope of the specified algorithm
+     * @param localPage
+     * @param algorithmId
+     * @return
+     * @throws DaoException
+     */
     public abstract int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException;
 }

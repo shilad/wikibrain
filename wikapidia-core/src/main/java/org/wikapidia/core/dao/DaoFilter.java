@@ -92,7 +92,7 @@ public class DaoFilter {
 
     /**
      * Sets the language filter to the specified collection of languages.
-     * Used by LocalPage, RawPage, LocalLink, and Redirect.
+     * Used by LocalPage, RawPage, LocalLink, Redirect, and LocalCategoryMember.
      * @param languages
      * @return
      */

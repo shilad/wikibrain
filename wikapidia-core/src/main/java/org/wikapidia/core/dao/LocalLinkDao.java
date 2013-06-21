@@ -48,9 +48,5 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public abstract int getNumLinks (
-            Language language,
-            boolean isParseable,
-            LocalLink.LocationType locationType)
-            throws DaoException;
+    public abstract int getNumLinks (Language language, boolean isParseable, LocalLink.LocationType locationType) throws DaoException;
 }
