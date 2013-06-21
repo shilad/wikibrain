@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 /**
- */
+*/
 public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao implements UniversalPageDao<T> {
 
     private final LocalPageDao localPageDao;

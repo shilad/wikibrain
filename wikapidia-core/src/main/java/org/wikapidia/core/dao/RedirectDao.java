@@ -47,6 +47,4 @@ public interface RedirectDao extends Loader<Redirect> {
 
     public abstract void save(Language lang, int src, int dest) throws DaoException;
 
-    public abstract void update(Language lang, int src, int newDest) throws DaoException;
-
 }
