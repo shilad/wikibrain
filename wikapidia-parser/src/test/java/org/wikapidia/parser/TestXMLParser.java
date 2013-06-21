@@ -2,6 +2,7 @@ package org.wikapidia.parser;
 
 import org.junit.Test;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.parser.xml.PageXmlParser;
 
@@ -38,6 +39,7 @@ public class TestXMLParser {
 
         assert (rawwwPage.getTitle().getCanonicalTitle().equals("Wikipedia:Featured article candidates"));
         assert (rawwwPage.isRedirect());
+        assert (rawwwPage.getNamespace().equals(NameSpace.WIKIPEDIA));  //TODO: Test this one out.
     }
 
 }

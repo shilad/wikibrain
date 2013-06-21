@@ -2,21 +2,22 @@ package org.wikapidia.dao.load;
 
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.model.LocalLink;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.RawPage;
+import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.model.*;
 import org.wikapidia.parser.wiki.ParsedLink;
 import org.wikapidia.parser.wiki.ParserVisitor;
 
 /**
  */
 public class LocalLinkLoader extends ParserVisitor {
-    private final LocalLinkDao dao;
+    private final LocalLinkDao linkDao;
 
-    public LocalLinkLoader(LocalLinkDao dao) {
-        this.dao = dao;
+    public LocalLinkLoader(LocalLinkDao linkDao) {
+        this.linkDao = linkDao;
     }
 
     @Override
@@ -28,19 +29,42 @@ public class LocalLinkLoader extends ParserVisitor {
             } else if (link.location.getSection() == 0) {
                 loc = LocalLink.LocationType.FIRST_SEC;
             }
-            dao.save(
+            Language lang = link.target.getLanguage();
+            linkDao.save(
                     new LocalLink(
-                            link.target.getLanguage(),
+                            lang,
                             link.text,
                             link.location.getXml().getPageId(),
-                            link.target.hashCode(), // FIXME.. YUCK!
+                            -1,
                             true,
                             link.location.getLocation(),
                             true,
                             loc
-                        ));
+                    ));
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
+    }
+
+
+
+    //TODO: Move these to some new class or something.
+
+    public boolean isCategory(String link, LanguageInfo languageInfo){
+        for(String categoryName : languageInfo.getCategoryNames()){
+            if(link.substring(categoryName.length()+1).toLowerCase().equals(categoryName+":")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isLinkToCategory(String link, LanguageInfo languageInfo){
+        for(String categoryName : languageInfo.getCategoryNames()){
+            if(link.substring(categoryName.length()+2).toLowerCase().equals(":" + categoryName + ":")){
+                return true;
+            }
+        }
+        return false;
     }
 }
