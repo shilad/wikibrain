@@ -1,6 +1,5 @@
 DROP TABLE IF EXISTS local_link;
 CREATE TABLE local_link (
-  id BIGINT AUTO_INCREMENT NOT NULL,
   lang_id SMALLINT NOT NULL,
   anchor_text TEXT NOT NULL,
   source_id INT NOT NULL,

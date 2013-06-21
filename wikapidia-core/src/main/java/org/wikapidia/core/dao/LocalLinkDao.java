@@ -50,4 +50,18 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      */
     public int getNumLinks (Language language, boolean isParseable,
             LocalLink.LocationType locationType) throws DaoException;
+
+    /**
+     *  Updates based on Source ID, Lang ID and Location.
+     * @param link
+     * @throws DaoException
+     */
+    public void update(LocalLink link) throws DaoException;
+
+    /**
+     * Removes based on Source ID, Lang ID and Location.
+     * @param link
+     * @throws DaoException
+     */
+    public void remove(LocalLink link) throws DaoException;
 }

@@ -13,11 +13,15 @@ import org.wikapidia.parser.wiki.ParserVisitor;
 
 /**
  */
-public class LocalLinkLoader extends ParserVisitor {
+public class LocalLinkVisitor extends ParserVisitor {
     private final LocalLinkDao linkDao;
+    private final LocalPageDao pageDao;
+    private final LocalCategoryMemberDao catMemDao;
 
-    public LocalLinkLoader(LocalLinkDao linkDao) {
+    public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao, LocalCategoryMemberDao catMemDao) {
         this.linkDao = linkDao;
+        this.pageDao = pageDao;
+        this.catMemDao = catMemDao;
     }
 
     @Override
@@ -30,12 +34,22 @@ public class LocalLinkLoader extends ParserVisitor {
                 loc = LocalLink.LocationType.FIRST_SEC;
             }
             Language lang = link.target.getLanguage();
+            LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
+
+            String linkText = link.text.split("|")[0]; //piped link
+            linkText = linkText.split("#")[0]; //subsection
+
+            if (isLinkToCategory(linkText, langInfo)){
+                linkText = linkText.substring(1,linkText.length());
+            }
+            Title linkTitle = new Title(linkText, langInfo);
+            int destId = pageDao.getIdByTitle(linkTitle.getCanonicalTitle(), lang, linkTitle.getNamespace());
             linkDao.save(
                     new LocalLink(
                             lang,
                             link.text,
                             link.location.getXml().getPageId(),
-                            -1,
+                            destId,
                             true,
                             link.location.getLocation(),
                             true,
@@ -45,4 +59,16 @@ public class LocalLinkLoader extends ParserVisitor {
             throw new WikapidiaException(e);
         }
     }
+
+    private boolean isLinkToCategory(String link, LanguageInfo lang){
+        for(String categoryName : lang.getCategoryNames()){
+            if(link.substring(categoryName.length() + 2).toLowerCase().equals(":" + categoryName + ":")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
 }

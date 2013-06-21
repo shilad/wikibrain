@@ -21,11 +21,11 @@ import java.io.File;
  */
 public class LinkResolver {
     private final Language language;
-    private final LocalLinkSqlDao linkDao;
+    private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;
     private final LocalCategoryMemberDao catMemDao;
 
-    public LinkResolver(Language language, LocalLinkSqlDao linkDao, LocalPageDao pageDao, LocalCategoryMemberDao catMemDao){
+    public LinkResolver(Language language, LocalLinkDao linkDao, LocalPageDao pageDao, LocalCategoryMemberDao catMemDao){
         this.language = language;
         this.linkDao = linkDao;
         this.pageDao = pageDao;
@@ -34,8 +34,12 @@ public class LinkResolver {
 
 
     private void resolveAllLinks() throws DaoException {
+        System.out.println("Begin resolve links:");
         SqlDaoIterable<LocalLink> localLinks = linkDao.getLinks(language, true);
+        int i = 0;
         for (LocalLink link : localLinks){
+            if(i%1000==0)
+                System.out.println("Resolved link #" + i++);
             if (isCategory(link)) {
                 resolveCategoryMember(link);
             }
@@ -43,7 +47,7 @@ public class LinkResolver {
                 resolveLink(link);
             }
         }
-
+        System.out.println("End resolve links.");
     }
 
     private void resolveLink(LocalLink link) throws DaoException {
@@ -105,13 +109,11 @@ public class LinkResolver {
                         .create("c"));
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create('t'));
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
@@ -151,9 +153,6 @@ public class LinkResolver {
             llDao.endLoad();
             catMemDao.endLoad();
         }
-
-
-
     }
 
 
