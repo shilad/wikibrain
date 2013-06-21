@@ -7,7 +7,6 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalCategoryMember;
-import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.parser.wiki.ParsedCategory;
