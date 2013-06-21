@@ -1,8 +1,5 @@
 package org.wikapidia.download;
 
-import sun.security.provider.MD5;
-
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -95,4 +92,14 @@ public enum LinkMatcher {
     public String getName() {
         return name;
     }
+
+    public static LinkMatcher getByName(String name) {
+        for (LinkMatcher linkMatcher : LinkMatcher.values()) {
+            if (linkMatcher.getName().equalsIgnoreCase(name)) {
+                return linkMatcher;
+            }
+        }
+        return null;
+    }
+
 }

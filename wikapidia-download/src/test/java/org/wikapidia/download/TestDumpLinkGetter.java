@@ -69,9 +69,10 @@ public class TestDumpLinkGetter {
         }
     }
 
-    @Test
-    public void testMain() {
-
-    }
+//    @Test
+//    public void testMain() throws IOException {
+//        List<Language> langArray = Arrays.asList(Language.getByLangCode("en"), Language.getByLangCode("zh"));
+//        DumpLinkGetter.main(langArray, Arrays.asList("abstract", "stub_meta_current"), "try.tsv");
+//    }
 
 }

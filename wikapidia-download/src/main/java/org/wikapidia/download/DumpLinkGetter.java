@@ -1,18 +1,17 @@
 package org.wikapidia.download;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
@@ -107,42 +106,50 @@ public class DumpLinkGetter {
      *
      *
      */
-    public static void main(List<Language> languages, List<String> names, String filePath) throws IOException {
+    public static void main(String[] args) throws IOException {
 
-//        Options options = new Options();
-//
-//        options.addOption("l", true, "language");
-//        options.addOption("n", true, "dump name");
-//        options.addOption("o", true, "save to file path");
-//
-//        CommandLineParser parser = new PosixParser();
-//        CommandLine cmd;
-//        try {
-//            cmd = parser.parse(options, args);
-//        } catch (ParseException e) {
-//            System.err.println( "Invalid option usage: " + e.getMessage());
-//            new HelpFormatter().printHelp("DumpLinkGetter", options);
-//            return;
-//        }
-//        List<String> names = cmd.hasOption("n") ? Arrays.asList(cmd.getOptionValues("n")) : Arrays.asList(new String[]{"articles"});
-//        List<Language> languages = cmd.hasOption("l") ? Arrays.asList(cmd.getOptionValues("l")) : Arrays.asList(new Language[]{Language.getById(1)});
-//        String filePath = cmd.hasOption("o") ? cmd.getOptionValue('o') : "~/";
+        Options options = new Options();
 
-        FileWriter writer = new FileWriter(filePath);
+        options.addOption("l", true, "language");
+        options.addOption("n", true, "dump name");
+        options.addOption("o", true, "save to file path");
 
+        CommandLineParser parser = new PosixParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println( "Invalid option usage: " + e.getMessage());
+            new HelpFormatter().printHelp("DumpLinkGetter", options);
+            return;
+        }
+
+        List<String> names = cmd.hasOption("n") ? Arrays.asList(cmd.getOptionValue("n").split(",")) : Arrays.asList(new String[]{"articles"});
+        List<Language> languages = new ArrayList<Language>();
+        if (cmd.hasOption("l")) {
+            for (String langName : cmd.getOptionValue("l").split(",")){
+                languages.add(Language.getByLangCode(langName));
+            }
+        }
+
+        String filePath = cmd.hasOption("o") ? cmd.getOptionValue('o') : "false.tsv";
+        File file = new File(filePath);
+
+        List<String> result = new ArrayList<String>();
         for (Language language : languages) {
             List<LinkMatcher> linkMatchers = new ArrayList<LinkMatcher>();
             for (String name : names) {
-                linkMatchers.add(LinkMatcher.valueOf(name));
+                linkMatchers.add(LinkMatcher.getByName(name));
             }
             DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(linkMatchers, language);
             HashMap<String, List<URL>> urls = dumpLinkGetter.getDumpFiles();
             for (String linkName : urls.keySet()) {
                 for (URL url : urls.get(linkName)) {
-                    writer.append(language.getLangCode() + "\t" + linkName + "\t" + url + "\n");
+                    result.add(language.getLangCode() + "\t" + linkName + "\t" + url);
                 }
             }
         }
+        FileUtils.writeLines(file, result, "\n");
     }
 
     protected static final String BASEURL_STRING = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
