@@ -1,21 +1,10 @@
 package org.wikapidia.core.dao;
 
 
-import org.wikapidia.core.dao.filter.LinkFilter;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
 
 public interface LocalLinkDao extends Loader<LocalLink> {
-
-    /**
-     * Returns an Iterable of LocalLinks that fit the filters specified by the LinkFilter.
-     * Possible filters are what languages and what LocationTypes to search over, as well as
-     * whether or not to search for parseable links. Filters set to null will not limit the search.
-     * @param linkFilter a set of filters to limit the search
-     * @return an Iterable of local pages that fit the specified filters
-     * @throws DaoException if there was an error retrieving the pages
-     */
-    public abstract SqlDaoIterable<LocalLink> get(LinkFilter linkFilter) throws DaoException;
 
     /**
      * Returns a single LocalLink based on language and source and destination within

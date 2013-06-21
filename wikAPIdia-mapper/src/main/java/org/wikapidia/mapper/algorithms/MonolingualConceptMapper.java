@@ -7,7 +7,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.dao.filter.LocalPageFilter;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
@@ -29,7 +29,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
 
     @Override
     public MapperIterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException {
-        SqlDaoIterable<LocalPage> localPages = localPageDao.get(new LocalPageFilter().setLanguages(ls));
+        Iterable<LocalPage> localPages = localPageDao.get(new DaoFilter().setLanguages(ls));
         return new MapperIterator<UniversalPage>(localPages) {
 
             @Override

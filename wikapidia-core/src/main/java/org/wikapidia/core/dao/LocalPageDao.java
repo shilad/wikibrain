@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao;
 
-import org.wikapidia.core.dao.filter.LocalPageFilter;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
@@ -10,17 +9,6 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
-
-    /**
-     * Returns an Iterable of LocalPages that fit the filters specified by the LocalPageFilter.
-     * Possible filters are what languages and what namespaces to search over, as well as
-     * whether or not to search for redirect or disambiguation pages. Filters set to null
-     * will not limit the search.
-     * @param localPageFilter a set of filters to limit the search
-     * @return an Iterable of local pages that fit the specified filters
-     * @throws DaoException if there was an error retrieving the pages
-     */
-    public abstract SqlDaoIterable<T> get(LocalPageFilter localPageFilter) throws DaoException;
 
     /**
      * Sets if we should try to follow the redirects or not. Default is true (to following them).

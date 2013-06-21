@@ -2,16 +2,16 @@ package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategoryMember;
@@ -25,10 +25,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  */
 public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCategoryMemberDao {
+
     public LocalCategoryMemberSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource);
     }
@@ -91,6 +93,11 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
         } finally {
             quietlyCloseConn(conn);
         }
+    }
+
+    @Override
+    public SqlDaoIterable<LocalCategoryMember> get(DaoFilter daoFilter) throws DaoException {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -8,7 +8,6 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.dao.filter.LinkFilter;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
@@ -86,32 +85,32 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
     @Override
-    public SqlDaoIterable<LocalLink> get(LinkFilter linkFilter) throws DaoException {
+    public SqlDaoIterable<LocalLink> get(DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
-            if (linkFilter.getLangIds() != null) {
-                conditions.add(Tables.LOCAL_LINK.LANG_ID.in(linkFilter.getLangIds()));
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.LANG_ID.in(daoFilter.getLangIds()));
             }
-            if (linkFilter.getLocTypes() != null) {
-                conditions.add(Tables.LOCAL_LINK.LOCATION_TYPE.in(linkFilter.getLocTypes()));
+            if (daoFilter.getLocTypes() != null) {
+                conditions.add(Tables.LOCAL_LINK.LOCATION_TYPE.in(daoFilter.getLocTypes()));
             }
-            if (linkFilter.getSourceIds() != null) {
-                conditions.add(Tables.LOCAL_LINK.SOURCE_ID.in(linkFilter.getSourceIds()));
+            if (daoFilter.getSourceIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.SOURCE_ID.in(daoFilter.getSourceIds()));
             }
-            if (linkFilter.getDestIds() != null) {
-                conditions.add(Tables.LOCAL_LINK.DEST_ID.in(linkFilter.getDestIds()));
+            if (daoFilter.getDestIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.DEST_ID.in(daoFilter.getDestIds()));
             }
-            if (linkFilter.isParseable() != null) {
-                conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(linkFilter.isParseable()));
+            if (daoFilter.isParseable() != null) {
+                conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(daoFilter.isParseable()));
             }
             if (conditions.isEmpty()) {
                 return null;
             }
             Cursor<Record> result = context.select().
-                    from(Tables.LOCAL_PAGE).
+                    from(Tables.LOCAL_LINK).
                     where(conditions).
                     fetchLazy();
             return new SqlDaoIterable<LocalLink>(result) {

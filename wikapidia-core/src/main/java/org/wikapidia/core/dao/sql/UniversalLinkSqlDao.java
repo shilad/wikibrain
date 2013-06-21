@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.UniversalLinkDao;
 import org.wikapidia.core.jooq.Tables;
@@ -118,6 +119,37 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
     }
 
     @Override
+    public Iterable<UniversalLink> get(DaoFilter daoFilter) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID.in(daoFilter.getSourceIds()));
+            }
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_LINK.DEST_UNIV_ID.in(daoFilter.getDestIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+            }
+            if (conditions.isEmpty()) {
+                return null;
+            }
+            Cursor<Record> result = context.select().
+                    from(Tables.UNIVERSAL_LINK).
+                    where(conditions).
+                    fetchLazy();
+            return buildUniversalLinksIterable(result);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
     public List<UniversalLink> getBySourceId(int sourceId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
@@ -199,13 +231,12 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
     once, which increases the time constraint by at least a factor of n.
     TODO: decide which of these methods to use
      */
-    private Iterable<UniversalLink> buildUniversalLinksIterable(final Cursor<Record> result, boolean source) throws DaoException {
-        final Set<Integer> univIds = new HashSet<Integer>();
-        final TableField<UniversalLinkRecord, Integer> univId = source ?
-                Tables.UNIVERSAL_LINK.DEST_UNIV_ID :
-                Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID;
+    private Iterable<UniversalLink> buildUniversalLinksIterable(final Cursor<Record> result) throws DaoException {
+        final Multimap<Integer, Integer> univIds = HashMultimap.create();
         for (Record record : result) {
-            univIds.add(record.getValue(univId));
+            univIds.put(
+                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),
+                    record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID));
         }
         return new Iterable<UniversalLink>() {
             @Override
@@ -213,15 +244,17 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                 return new Iterator<UniversalLink>() {
                     @Override
                     public boolean hasNext() {
-                        return univIds.iterator().hasNext();
+                        return univIds.entries().iterator().hasNext();
                     }
 
                     @Override
                     public UniversalLink next() {
-                        Integer id = univIds.iterator().next();
+                        Map.Entry entry = univIds.entries().iterator().next();
                         List<Record> records = new ArrayList<Record>();
                         for (Record record : result) {
-                            if (record.getValue(univId) == id) {
+                            if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getKey() &&
+                                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getValue())
+                            {
                                 records.add(record);
                             }
                         }

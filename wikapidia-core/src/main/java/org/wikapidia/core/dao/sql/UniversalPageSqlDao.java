@@ -4,16 +4,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.UniversalPageDao;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
@@ -24,9 +20,8 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Level;
 
 /**
  */
@@ -102,6 +97,70 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
+    public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+            }
+            if (conditions.isEmpty()) {
+                return null;
+            }
+            final Cursor<Record> result = context.select().
+                    from(Tables.UNIVERSAL_PAGE).
+                    where(conditions).
+                    fetchLazy();
+            final Set<Integer> univIds = new HashSet<Integer>();
+            for (Record record : result) {
+                univIds.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
+            }
+            return new Iterable<T>() {
+                @Override
+                public Iterator<T> iterator() {
+                    return new Iterator<T>() {
+                        @Override
+                        public boolean hasNext() {
+                            return univIds.iterator().hasNext();
+                        }
+
+                        @Override
+                        public T next() {
+                            Integer id = univIds.iterator().next();
+                            List<Record> records = new ArrayList<Record>();
+                            for (Record record : result) {
+                                if (record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID) == id) {
+                                    records.add(record);
+                                }
+                            }
+                            try {
+                                return (T)buildUniversalPage(records);
+                            } catch (DaoException e) {
+                                LOG.log(Level.WARNING, "Failed to build links: ", e);
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException();
+                        }
+                    };
+                }
+            };
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
     public T getById(int univId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
@@ -165,7 +224,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
      * @return a UniversalPage representation of the given database record
      * @throws DaoException if the record is not a Page
      */
-    protected UniversalPage buildUniversalPage(Result<Record> result) throws DaoException {
+    protected UniversalPage buildUniversalPage(List<Record> result) throws DaoException {
         if (result == null) {
             return null;
         }

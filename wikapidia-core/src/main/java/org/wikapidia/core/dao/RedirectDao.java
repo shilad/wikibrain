@@ -7,7 +7,7 @@ import org.wikapidia.core.model.LocalPage;
 
 /**
  */
-public interface RedirectDao {
+public interface RedirectDao extends Loader {
 
     /**
      * If the input id corresponds to a redirect, returns the local id of the destination of the redirect.

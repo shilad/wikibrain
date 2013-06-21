@@ -15,7 +15,9 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RedirectDao;
+import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
@@ -33,6 +35,7 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
         super(dataSource);
     }
 
+    @Override
     public void beginLoad() throws DaoException{
         Connection conn=null;
         try {
@@ -51,6 +54,31 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
         }
     }
 
+    @Override
+    public void save(Object item) throws DaoException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void save(Language lang, int src, int dest) throws DaoException {
+        Connection conn = null;
+        try{
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn,dialect);
+            context.insertInto(Tables.REDIRECT).values(
+                    lang.getId(),
+                    src,
+                    dest
+            ).execute();
+
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
     public void endLoad() throws DaoException{
         Connection conn = null;
         try {
@@ -69,6 +97,12 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
         } finally {
             quietlyCloseConn(conn);
         }
+    }
+
+    // TODO: add support for this method?
+    @Override
+    public SqlDaoIterable get(DaoFilter daoFilter) throws DaoException {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -148,25 +182,6 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
                         record.getValue(Tables.REDIRECT.DEST_PAGE_ID));
             }
             return ids;
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void save(Language lang, int src, int dest) throws DaoException {
-        Connection conn = null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,dialect);
-            context.insertInto(Tables.REDIRECT).values(
-                    lang.getId(),
-                    src,
-                    dest
-            ).execute();
-
         } catch (SQLException e){
             throw new DaoException(e);
         } finally {
