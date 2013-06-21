@@ -13,6 +13,7 @@
         <module>../wikapidia-core</module>
         <module>../wikapidia-loader</module>
         <module>../wikapidia-parser</module>
+        <module>../wikAPIdia-phrases</module>
         <module>../wikapidia-utils</module>
         <module>../wikAPIdia-mapper</module>
         <module>../wikAPIdia-matrix</module>
