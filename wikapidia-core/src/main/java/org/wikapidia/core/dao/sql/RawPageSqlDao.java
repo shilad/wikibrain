@@ -149,6 +149,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
         }
     }
 
+    @Override
     public SqlDaoIterable<RawPage> allRawPages() throws DaoException {
         Connection conn = null;
         try {
