@@ -117,14 +117,14 @@
 
                     <autocommit>true</autocommit>
                     <srcFiles>
-                        <srcFile>src/main/resources/schema.sql</srcFile>
+                        <srcFile>src/main/resources/db/full_schema.sql</srcFile>
                     </srcFiles>
                 </configuration>
 
                 <executions>
                     <execution>
                         <id>create-database</id>
-                        <phase>generate-sources</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>execute</goal>
                         </goals>
@@ -151,7 +151,7 @@
                 <executions>
                     <execution>
                         <id>exec1</id>
-                        <phase>generate-sources</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -201,6 +201,27 @@
                         </goals>
                         <configuration>
                             <outputFile>target/localclasspath.txt</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- add generated files to source path -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>test</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/generated/jooq-h2</source>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>
