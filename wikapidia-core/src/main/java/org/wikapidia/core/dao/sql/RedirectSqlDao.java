@@ -142,11 +142,7 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao{
             Cursor<Record> cursor = context.select().from(Tables.REDIRECT)
                     .where(Tables.REDIRECT.LANG_ID.equal(lang.getId()))
                     .fetchLazy();
-            TIntIntMap ids = new TIntIntHashMap(
-                    Constants.DEFAULT_CAPACITY,
-                    Constants.DEFAULT_LOAD_FACTOR,
-                    -1,
-                    -1);
+            TIntIntMap ids = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
             for (Record record : cursor){
                 ids.put(record.getValue(Tables.REDIRECT.SRC_PAGE_ID),
                         record.getValue(Tables.REDIRECT.DEST_PAGE_ID));

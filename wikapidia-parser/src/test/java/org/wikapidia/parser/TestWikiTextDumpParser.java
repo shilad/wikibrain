@@ -1,6 +1,14 @@
 package org.wikapidia.parser;
 
+import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalCategoryMemberDao;
+import org.wikapidia.core.dao.LocalLinkDao;
+import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.sql.LocalCategoryMemberSqlDao;
+import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
+import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.*;
 import org.wikapidia.core.model.RawPage;
@@ -19,7 +27,7 @@ public class TestWikiTextDumpParser {
     public static final LanguageInfo EN = LanguageInfo.getByLangCode("en");
 
     @Test
-    public void test1() {
+    public void test1() throws DaoException {
         List<String> allowedIllLangs = new ArrayList<String>();
         allowedIllLangs.add("en");
         allowedIllLangs.add("de");
@@ -35,6 +43,8 @@ public class TestWikiTextDumpParser {
         final ArrayList<ParsedIll> ills = new ArrayList<ParsedIll>();
         final ArrayList<ParsedLink> links = new ArrayList<ParsedLink>();
         final ArrayList<ParsedRedirect> redirects = new ArrayList<ParsedRedirect>();
+
+        List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
 
         ParserVisitor visitor = new ParserVisitor() {
             @Override
@@ -63,7 +73,22 @@ public class TestWikiTextDumpParser {
             }
         };
 
-        wtdp.parse(visitor);
+        BoneCPDataSource ds = new BoneCPDataSource();
+        ds.setJdbcUrl("jdbc:h2:"+"db/h2");
+        ds.setUsername("sa");
+        ds.setPassword("");
+        LocalLinkDao linkDao = new LocalLinkSqlDao(ds);
+        LocalPageDao pageDao = new LocalPageSqlDao(ds);
+        LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(ds);
+
+        ParserVisitor linkVisitor = new LocalLinkVisitor(linkDao, pageDao);
+        ParserVisitor catVisitor = new LocalCategoryVisitor(pageDao, catMemDao);
+
+        visitors.add(visitor);
+        visitors.add(linkVisitor);
+        visitors.add(catVisitor);
+
+        wtdp.parse(visitors);
 
         assertEquals(pageCounter.get(), 44);
         System.out.println("Categories: " + categories.size());

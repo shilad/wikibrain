@@ -1,4 +1,4 @@
-package org.wikapidia.dao.load;
+package org.wikapidia.parser.wiki;
 
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;

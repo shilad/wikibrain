@@ -1,27 +1,22 @@
-package org.wikapidia.dao.load;
+package org.wikapidia.parser.wiki;
 
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
-import org.wikapidia.parser.wiki.ParsedLink;
-import org.wikapidia.parser.wiki.ParserVisitor;
 
 /**
  */
 public class LocalLinkVisitor extends ParserVisitor {
     private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;
-    private final LocalCategoryMemberDao catMemDao;
 
-    public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao, LocalCategoryMemberDao catMemDao) {
+    public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao) {
         this.linkDao = linkDao;
         this.pageDao = pageDao;
-        this.catMemDao = catMemDao;
     }
 
     @Override
