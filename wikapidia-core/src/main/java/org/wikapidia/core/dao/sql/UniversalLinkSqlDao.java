@@ -62,7 +62,6 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                             localLink.getLanguage().getId(),
                             localLink.getSourceId(),
                             localLink.getDestId(),
-                            localLink.getLocation(),
                             link.getSourceUnivId(),
                             link.getDestUnivId(),
                             link.getAlgorithmId()
