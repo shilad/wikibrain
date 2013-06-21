@@ -1,16 +1,23 @@
 package org.wikapidia.download;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,19 +84,21 @@ public class DumpLinkGetter {
      * Return all links of a particular language the fits one of the patterns.
      * @return
      */
-    public List<URL> getDumpFiles() throws IOException {
+    public HashMap<String, List<URL>> getDumpFiles() throws IOException {
         List<String> links = getLinks(getDumpIndex());
-        List<URL> urlLinks = new ArrayList<URL>();
+        HashMap<String, List<URL>> urlLinks = new HashMap<String, List<URL>>();
         try{
             for(LinkMatcher linkMatcher : matchers){
                 List<String> results = linkMatcher.match(links);
+                List<URL> urls = new ArrayList<URL>();
                 for (String url: results){
                     URL linkURL = new URL(validBaseURLString(lang) + url);
-                    urlLinks.add(linkURL);
+                    urls.add(linkURL);
                 }
+                urlLinks.put(linkMatcher.getName(), urls);
             }
         } catch(MalformedURLException e){
-            LOG.log(Level.WARNING, "string cannot form URL", e); // TODO: WARNING OR SEVERE
+            LOG.log(Level.WARNING, "string cannot form URL", e);
         }
         return urlLinks;
     }
@@ -98,10 +107,44 @@ public class DumpLinkGetter {
      *
      *
      */
-    public void main() {
+    public static void main(List<Language> languages, List<String> names, String filePath) throws IOException {
 
+//        Options options = new Options();
+//
+//        options.addOption("l", true, "language");
+//        options.addOption("n", true, "dump name");
+//        options.addOption("o", true, "save to file path");
+//
+//        CommandLineParser parser = new PosixParser();
+//        CommandLine cmd;
+//        try {
+//            cmd = parser.parse(options, args);
+//        } catch (ParseException e) {
+//            System.err.println( "Invalid option usage: " + e.getMessage());
+//            new HelpFormatter().printHelp("DumpLinkGetter", options);
+//            return;
+//        }
+//        List<String> names = cmd.hasOption("n") ? Arrays.asList(cmd.getOptionValues("n")) : Arrays.asList(new String[]{"articles"});
+//        List<Language> languages = cmd.hasOption("l") ? Arrays.asList(cmd.getOptionValues("l")) : Arrays.asList(new Language[]{Language.getById(1)});
+//        String filePath = cmd.hasOption("o") ? cmd.getOptionValue('o') : "~/";
+
+        FileWriter writer = new FileWriter(filePath);
+
+        for (Language language : languages) {
+            List<LinkMatcher> linkMatchers = new ArrayList<LinkMatcher>();
+            for (String name : names) {
+                linkMatchers.add(LinkMatcher.valueOf(name));
+            }
+            DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(linkMatchers, language);
+            HashMap<String, List<URL>> urls = dumpLinkGetter.getDumpFiles();
+            for (String linkName : urls.keySet()) {
+                for (URL url : urls.get(linkName)) {
+                    writer.append(language.getLangCode() + "\t" + linkName + "\t" + url + "\n");
+                }
+            }
+        }
     }
 
-    public static final String BASEURL_STRING = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
+    protected static final String BASEURL_STRING = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
 
 }

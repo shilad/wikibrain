@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -37,9 +38,9 @@ public class TestDumpLinkGetter {
     @Test
     public void testGetDumpFiles() throws IOException {
         List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.ABSTRACT);
-        for(Language lang : Arrays.asList(Language.getByLangCode("zh")/*LANGUAGES*/)) {
+        for(Language lang : Arrays.asList(Language.LANGUAGES)) {
             DumpLinkGetter testGetter = new DumpLinkGetter(linkMatchers, lang);
-            List<URL> urlList= testGetter.getDumpFiles();
+            HashMap<String, List<URL>> urlList= testGetter.getDumpFiles();
             System.out.println(lang.getId() + " " + urlList);
         }
     }
@@ -50,13 +51,15 @@ public class TestDumpLinkGetter {
         for(Language lang : Language.LANGUAGES){
             DumpLinkGetter testGetter = new DumpLinkGetter(linkMatchers, lang);
             List<String> allLinks = testGetter.getLinks(testGetter.getDumpIndex());
-            List<URL> patternedURLs = testGetter.getDumpFiles();
+            HashMap<String, List<URL>> patternedURLs = testGetter.getDumpFiles();
             List<String> patternedStrings = new ArrayList<String>();
             for (int i = 0; i < allLinks.size(); i++) {
                 allLinks.set(i, DumpLinkGetter.BASEURL_STRING.replace("__LANG__", lang.getLangCode().replace("-", "_")) + allLinks.get(i));
             }
-            for (URL url : patternedURLs) {
-                patternedStrings.add(url.toString());
+            for (List<URL> urls : patternedURLs.values()) {
+                for (URL url : urls) {
+                    patternedStrings.add(url.toString());
+                }
             }
             for (String link : allLinks) {
                 if (!patternedStrings.contains(link) && !(link.endsWith("rss.xml") || link.endsWith("../"))) {
@@ -64,6 +67,11 @@ public class TestDumpLinkGetter {
                 }
             }
         }
+    }
+
+    @Test
+    public void testMain() {
+
     }
 
 }

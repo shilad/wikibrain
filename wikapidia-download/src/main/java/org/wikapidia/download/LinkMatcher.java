@@ -31,7 +31,7 @@ public enum LinkMatcher {
     STUB_META_CURRENT ("stub_meta_current", Pattern.compile(".+wiki-latest-stub-meta-current\\d*.xml.gz")),
     STUB_META_HISTORY ("stub_meta_history", Pattern.compile(".+wiki-latest-stub-meta-history\\d*.xml.gz")),
     ABSTRACT          ("abstract",
-            Pattern.compile(".+wiki-latest-abstract\\d+\\.xml"), // TODO: zhwiki has multiple?
+            Pattern.compile(".+wiki-latest-abstract\\d+\\.xml"),
             Pattern.compile(".+wiki-latest-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
     TITLES            ("titles", Pattern.compile(".+wiki-latest-all-titles-in-ns0.gz")),
     INTERLINK         ("interwiki_link", Pattern.compile(".+wiki-latest-iwlinks.sql.gz")),
