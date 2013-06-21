@@ -10,7 +10,6 @@ import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.UniversalLinkDao;
 import org.wikapidia.core.jooq.Tables;
-import org.wikapidia.core.jooq.tables.records.UniversalLinkRecord;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;

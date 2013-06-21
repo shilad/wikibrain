@@ -17,7 +17,6 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RedirectDao;
-import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;

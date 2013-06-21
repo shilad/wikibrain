@@ -10,7 +10,6 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 
@@ -22,7 +21,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.logging.Level;
 
 /**
  * Retrieves and stores page text.

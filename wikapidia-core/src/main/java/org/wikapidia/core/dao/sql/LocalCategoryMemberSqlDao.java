@@ -11,7 +11,6 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategoryMember;
@@ -25,7 +24,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  */
@@ -96,7 +94,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
     }
 
     @Override
-    public SqlDaoIterable<LocalCategoryMember> get(DaoFilter daoFilter) throws DaoException {
+    public Iterable<LocalCategoryMember> get(DaoFilter daoFilter) throws DaoException {
         throw new UnsupportedOperationException();
     }
 
