@@ -21,10 +21,30 @@ public abstract class ConceptMapper {
     public static final int MONOLINGUAL_ALGORITHM_ID = 0;
     public static final int CONCEPTUALIGN_ALGORITHM_ID = 1;
 
+    private static int id;
+
     protected final LocalPageDao<LocalPage> localPageDao;
 
-    protected ConceptMapper(LocalPageDao<LocalPage> localPageDao) {
+    /**
+     * General purpose constructor for use by providers
+     * @param localPageDao
+     */
+    public ConceptMapper(LocalPageDao<LocalPage> localPageDao) {
         this.localPageDao = localPageDao;
+    }
+
+    /**
+     * Constructor for use by child algorithms to properly set the algorithm ID.
+     * @param id
+     * @param localPageDao
+     */
+    protected ConceptMapper(int id, LocalPageDao<LocalPage> localPageDao) {
+        this(localPageDao);
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     /**
