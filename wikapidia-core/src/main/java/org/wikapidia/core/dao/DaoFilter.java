@@ -10,9 +10,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * A helper class for specifying complex queries.  To use, call the static get() method to create an instance,
- * than call the various set methods in a chain to set the constraints. For example, a call might look like:
+ * A helper class for specifying complex queries.  To use, instantiate a new instance,
+ * than call the various set methods in a chain to set the filters.
+ * Possible filters are, with the objects that use them:
  *
+ * - Language collection     (LocalPage, RawPage, LocalLink, Redirect, LocalCategoryMember)
+ * - NameSpace collection    (LocalPage, RawPage, UniversalPage)
+ * - Redirect flag           (LocalPage, RawPage)
+ * - Disambiguation flag     (LocalPage, RawPage)
+ * - LocationType collection (LocalLink)
+ * - Source ID collection    (LocalLink, Redirect, UniversalLink)
+ * - Dest ID collection      (LocalLink, Redirect, UniversalLink)
+ * - Parseable flag          (LocalLink, Redirect)
+ * - Algorithm ID collection (UniversalPage, UniversalLink)
+ *
+ * Not all filters are apply to all objects. Collections are specified as a collection
+ * of acceptable entries, while flags are booleans set to true, false, or null. Flags
+ * and collections set to null will be ignored when the search is executed.
+ *
+ * A call might look something like:
  * DaoFilter df = new DaoFilter.
  *          setLanguages(languageSet).
  *          setNameSpace(nameSpaces).
