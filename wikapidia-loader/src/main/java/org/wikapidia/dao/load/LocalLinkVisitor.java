@@ -39,7 +39,9 @@ public class LocalLinkVisitor extends ParserVisitor {
             String linkText = link.text.split("|")[0]; //piped link
             linkText = linkText.split("#")[0]; //subsection
 
-            if (isLinkToCategory(linkText, langInfo)){
+            //Wikipedia ignores colons at the beginning of links
+            // and uses them to overcome technical restrictions
+            if (linkText.length()>0&&linkText.charAt(0)==':'){
                 linkText = linkText.substring(1,linkText.length());
             }
             Title linkTitle = new Title(linkText, langInfo);
@@ -59,16 +61,5 @@ public class LocalLinkVisitor extends ParserVisitor {
             throw new WikapidiaException(e);
         }
     }
-
-    private boolean isLinkToCategory(String link, LanguageInfo lang){
-        for(String categoryName : lang.getCategoryNames()){
-            if(link.substring(categoryName.length() + 2).toLowerCase().equals(":" + categoryName + ":")){
-                return true;
-            }
-        }
-        return false;
-    }
-
-
 
 }
