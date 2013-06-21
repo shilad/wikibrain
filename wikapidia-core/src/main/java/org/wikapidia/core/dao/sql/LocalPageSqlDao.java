@@ -108,7 +108,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     @Override
-    public SqlDaoIterable<T> get(DaoFilter daoFilter) throws DaoException {
+    public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();

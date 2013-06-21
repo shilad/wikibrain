@@ -101,7 +101,7 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
 
     // TODO: add support for this method?
     @Override
-    public SqlDaoIterable get(DaoFilter daoFilter) throws DaoException {
+    public Iterable get(DaoFilter daoFilter) throws DaoException {
         throw new UnsupportedOperationException();
     }
 

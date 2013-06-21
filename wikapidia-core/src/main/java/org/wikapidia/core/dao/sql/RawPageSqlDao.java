@@ -96,7 +96,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
     }
 
     @Override
-    public SqlDaoIterable<RawPage> get(DaoFilter daoFilter) throws DaoException {
+    public Iterable<RawPage> get(DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();

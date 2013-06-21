@@ -85,7 +85,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
     @Override
-    public SqlDaoIterable<LocalLink> get(DaoFilter daoFilter) throws DaoException {
+    public Iterable<LocalLink> get(DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
