@@ -103,7 +103,7 @@ public class DumpLinkGetter {
     }
 
     /**
-     *
+     * Parse command line and generate .tsv file containing language code, name of file type and link.
      *
      */
     public static void main(String[] args) throws IOException {
