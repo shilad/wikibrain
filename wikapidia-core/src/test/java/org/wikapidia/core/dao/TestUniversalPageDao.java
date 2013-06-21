@@ -56,7 +56,7 @@ public class TestUniversalPageDao {
         UniversalPage savedPage = dao.getById(23, 0);
         assert (savedPage != null);
         assert (page.equals(savedPage));
-        assert (page.getNumberOfPages() == savedPage.getNumberOfPages());
+        assert (page.getNumberOfEntities() == savedPage.getNumberOfEntities());
         assert (page.getLanguageSetOfExistsInLangs().equals(savedPage.getLanguageSetOfExistsInLangs()));
         assert (page.getClarity() == savedPage.getClarity());
 
@@ -105,7 +105,7 @@ public class TestUniversalPageDao {
         UniversalPage savedPage = dao.getById(23, 0);
         assert (savedPage != null);
         assert (page.equals(savedPage));
-        assert (page.getNumberOfPages() == savedPage.getNumberOfPages());
+        assert (page.getNumberOfEntities() == savedPage.getNumberOfEntities());
         assert (page.getLanguageSetOfExistsInLangs().equals(savedPage.getLanguageSetOfExistsInLangs()));
         assert (page.getClarity() == savedPage.getClarity());
 

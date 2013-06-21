@@ -10,3 +10,11 @@ compile  &&
 java -cp "$CLASSPATH" $JAVA_OPTS org.wikapidia.dao.load.DumpLoader "$@"  &&
 java -cp "$CLASSPATH" $JAVA_OPTS org.wikapidia.dao.load.ConceptLoader "$@" ||
 die "$0 failed"
+
+# Order of existing classes:
+# DumpLoader
+# RedirectLoader
+# LocalLinkLoader
+# CategoryLoader
+# ConceptLoader
+# UniversalLinkLoader

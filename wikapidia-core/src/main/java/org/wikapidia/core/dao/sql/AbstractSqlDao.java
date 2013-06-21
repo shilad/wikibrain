@@ -38,23 +38,6 @@ public abstract class AbstractSqlDao {
         cache = null;
     }
 
-    public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/local-page-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
     public void useCache(File dir) throws DaoException{
         cache = new SqlCache(ds, dir);
     }
