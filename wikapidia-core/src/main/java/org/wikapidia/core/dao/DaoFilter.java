@@ -13,7 +13,7 @@ import java.util.Collection;
  * A helper class for specifying complex queries.  To use, call the static get() method to create an instance,
  * than call the various set methods in a chain to set the constraints. For example, a call might look like:
  *
- * DaoFilter pf = new DaoFilter.
+ * DaoFilter df = new DaoFilter.
  *          setLanguages(languageSet).
  *          setNameSpace(nameSpaces).
  *          setRedirect(true).
@@ -82,7 +82,7 @@ public class DaoFilter {
 
     /**
      * Sets the language filter to the specified LanguageSet.
-     * Used by LocalPage, RawPage, LocalLink, and Redirect.
+     * Used by LocalPage, RawPage, LocalLink, Redirect, and LocalCategoryMember.
      * @param languages
      * @return
      */

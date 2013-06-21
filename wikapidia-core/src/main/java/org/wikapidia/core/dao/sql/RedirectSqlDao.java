@@ -6,10 +6,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.IOUtils;
-import org.jooq.Cursor;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -17,14 +14,18 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RedirectDao;
+import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.Redirect;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  */
@@ -54,8 +55,8 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
     }
 
     @Override
-    public void save(Object item) throws DaoException {
-        throw new UnsupportedOperationException();
+    public void save(Redirect redirect) throws DaoException {
+        save(redirect.getLanguage(), redirect.getSourceId(), redirect.getDestId());
     }
 
     @Override
@@ -98,10 +99,39 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
         }
     }
 
-    // TODO: add support for this method?
+    /**
+     * Generally this method should not be used.
+     * @param daoFilter a set of filters to limit the search
+     * @return
+     * @throws DaoException
+     */
     @Override
-    public Iterable get(DaoFilter daoFilter) throws DaoException {
-        throw new UnsupportedOperationException();
+    public Iterable<Redirect> get(DaoFilter daoFilter) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.REDIRECT.LANG_ID.in(daoFilter.getLangIds()));
+            } else {
+                return null;
+            }
+            Cursor<Record> result = context.select().
+                    from(Tables.LOCAL_LINK).
+                    where(conditions).
+                    fetchLazy();
+            return new SqlDaoIterable<Redirect>(result) {
+                @Override
+                public Redirect transform(Record r) {
+                    return buildRedirect(r);
+                }
+            };
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     @Override
@@ -211,6 +241,17 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
         } finally {
             quietlyCloseConn(conn);
         }
+    }
+
+    private Redirect buildRedirect(Record r) {
+        if (r == null){
+            return null;
+        }
+        return new Redirect(
+                Language.getById(r.getValue(Tables.REDIRECT.LANG_ID)),
+                r.getValue(Tables.REDIRECT.SRC_PAGE_ID),
+                r.getValue(Tables.REDIRECT.DEST_PAGE_ID)
+        );
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<RedirectSqlDao>  {
