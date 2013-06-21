@@ -19,7 +19,7 @@ public class TestDumpLinkGetter {
     @Test
     public void testIndex() throws IOException {
         for(Language lang : Language.LANGUAGES) {
-            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.values()), lang);
+            DumpLinkGetter testGetter = new DumpLinkGetter(DumpLinkGetter.BASEURL_STRING, Arrays.asList(LinkMatcher.values()), lang);
             String testString = testGetter.getDumpIndex();
             System.out.println(lang.getId() + " " + testString.substring(214, 240));
         }
@@ -28,7 +28,7 @@ public class TestDumpLinkGetter {
     @Test
     public void testParseLinks() throws IOException {
         for(Language lang : Language.LANGUAGES) {
-            DumpLinkGetter testGetter = new DumpLinkGetter(Arrays.asList(LinkMatcher.values()), lang);
+            DumpLinkGetter testGetter = new DumpLinkGetter(DumpLinkGetter.BASEURL_STRING, Arrays.asList(LinkMatcher.values()), lang);
             String html = testGetter.getDumpIndex();
             List<String> links = testGetter.getLinks(html);
             System.out.println(lang.getId() + " sample link: " + links.get(2));
@@ -39,7 +39,7 @@ public class TestDumpLinkGetter {
     public void testGetDumpFiles() throws IOException {
         List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.ABSTRACT);
         for(Language lang : Arrays.asList(Language.LANGUAGES)) {
-            DumpLinkGetter testGetter = new DumpLinkGetter(linkMatchers, lang);
+            DumpLinkGetter testGetter = new DumpLinkGetter(DumpLinkGetter.BASEURL_STRING, linkMatchers, lang);
             HashMap<String, List<URL>> urlList= testGetter.getDumpFiles();
             System.out.println(lang.getId() + " " + urlList);
         }
@@ -49,7 +49,7 @@ public class TestDumpLinkGetter {
     public void testLinks() throws IOException {
         List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.values());
         for(Language lang : Language.LANGUAGES){
-            DumpLinkGetter testGetter = new DumpLinkGetter(linkMatchers, lang);
+            DumpLinkGetter testGetter = new DumpLinkGetter(DumpLinkGetter.BASEURL_STRING, linkMatchers, lang);
             List<String> allLinks = testGetter.getLinks(testGetter.getDumpIndex());
             HashMap<String, List<URL>> patternedURLs = testGetter.getDumpFiles();
             List<String> patternedStrings = new ArrayList<String>();

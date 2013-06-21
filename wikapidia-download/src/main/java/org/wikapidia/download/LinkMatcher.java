@@ -26,19 +26,19 @@ public enum LinkMatcher {
             Pattern.compile(".+wiki-latest-pages-articles.xml.bz2")),
     STUB_ARTICLES     ("stub_articles", Pattern.compile(".+wiki-latest-stub-articles\\d*.xml.gz")),
     STUB_META_CURRENT ("stub_meta_current", Pattern.compile(".+wiki-latest-stub-meta-current\\d*.xml.gz")),
-    STUB_META_HISTORY ("stub_meta_history", Pattern.compile(".+wiki-latest-stub-meta-history\\d*.xml.gz")),
-    ABSTRACT          ("abstract",
+    STUB_META_HISTORY ("stub_meta_histories", Pattern.compile(".+wiki-latest-stub-meta-history\\d*.xml.gz")),
+    ABSTRACT          ("abstracts",
             Pattern.compile(".+wiki-latest-abstract\\d+\\.xml"),
             Pattern.compile(".+wiki-latest-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
     TITLES            ("titles", Pattern.compile(".+wiki-latest-all-titles-in-ns0.gz")),
-    INTERLINK         ("interwiki_link", Pattern.compile(".+wiki-latest-iwlinks.sql.gz")),
-    REDIRECT_LIST     ("redirect_list", Pattern.compile(".+wiki-latest-redirect.sql.gz")),
+    INTERLINK         ("interwiki_links", Pattern.compile(".+wiki-latest-iwlinks.sql.gz")),
+    REDIRECT_LIST     ("redirect_lists", Pattern.compile(".+wiki-latest-redirect.sql.gz")),
     PROTECTED_TITLES  ("protected_titles", Pattern.compile(".+wiki-latest-protected_titles.sql.gz")),
     NAME_PAIRS        ("name-pairs", Pattern.compile(".+wiki-latest-page_props.sql.gz")),
-    PAGE_RESTRICTIONS ("page_restrictinos", Pattern.compile(".+wiki-latest-page_restrictions.sql.gz")),
-    PAGE_BASE         ("base_page_data", Pattern.compile(".+wiki-latest-page.sql.gz")),
-    CATEGORY          ("category", Pattern.compile(".+wiki-latest-category.sql.gz")),
-    USER_GROUP        ("user_group", Pattern.compile(".+wiki-latest-user_groups.sql.gz")),
+    PAGE_RESTRICTIONS ("page_restrictions", Pattern.compile(".+wiki-latest-page_restrictions.sql.gz")),
+    PAGE_BASE         ("base_page_datas", Pattern.compile(".+wiki-latest-page.sql.gz")),
+    CATEGORY          ("categories", Pattern.compile(".+wiki-latest-category.sql.gz")),
+    USER_GROUP        ("user_groups", Pattern.compile(".+wiki-latest-user_groups.sql.gz")),
     INTERWIKI         ("interwiki_prefixes", Pattern.compile(".+wiki-latest-interwiki.sql.gz")),
     INTERLANG_LINKS   ("interlang_links", Pattern.compile(".+wiki-latest-langlinks.sql.gz")),
     EXTERNAL_LINKS    ("external_links", Pattern.compile(".+wiki-latest-externallinks.sql.gz")),
@@ -46,12 +46,12 @@ public enum LinkMatcher {
     IMAGE_LINKS       ("image_links", Pattern.compile(".+wiki-latest-imagelinks.sql.gz")),
     CATEGORY_LINKS    ("category_links", Pattern.compile(".+wiki-latest-categorylinks.sql.gz")),
     LINK_SQL          ("links", Pattern.compile(".+wiki-latest-pagelinks.sql.gz")),
-    OLD_MEDIA_META    ("old_media_meta", Pattern.compile(".+wiki-latest-oldimage.sql.gz")),
-    CURRENT_MEDIA_META("current_media_meta", Pattern.compile(".+wiki-latest-image.sql.gz")),
+    OLD_MEDIA_META    ("old_media_metas", Pattern.compile(".+wiki-latest-oldimage.sql.gz")),
+    CURRENT_MEDIA_META("current_media_metas", Pattern.compile(".+wiki-latest-image.sql.gz")),
     SITE_STATS        ("site_stats", Pattern.compile(".+wiki-latest-site_stats.sql.gz")),
-    FLAGGED_REVISION  ("flagged_revision", Pattern.compile(".+wiki-latest-flaggedrevs.sql.gz")),
+    FLAGGED_REVISION  ("flagged_revisions", Pattern.compile(".+wiki-latest-flaggedrevs.sql.gz")),
     FLAGGED_PAGES     ("flagged_pages", Pattern.compile(".+wiki-latest-flaggedpages.sql.gz")),
-    MD5               ("md5_checksume", Pattern.compile(".+wiki-latest-md5sums.txt"));
+    MD5               ("md5_checksums", Pattern.compile(".+wiki-latest-md5sums.txt"));
 
 
     private String name;
@@ -100,6 +100,14 @@ public enum LinkMatcher {
             }
         }
         return null;
+    }
+
+    static public List<String> getAllNames() {
+        List<String> result = new ArrayList<String>();
+        for (LinkMatcher matcher : LinkMatcher.values()) {
+            result.add(matcher.getName());
+        }
+        return result;
     }
 
 }

@@ -12,20 +12,23 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * //TODO: javadocs
  */
 public class DumpLinkGetter {
 
+    private final String baseUrl;
     private List<LinkMatcher> matchers;
     private Language lang;
 
@@ -36,7 +39,8 @@ public class DumpLinkGetter {
      * @param matchers
      * @param lang
      */
-    public DumpLinkGetter(List<LinkMatcher> matchers, Language lang) {
+    public DumpLinkGetter(String baseUrl, List<LinkMatcher> matchers, Language lang) {
+        this.baseUrl = baseUrl;
         this.matchers = matchers;
         this.lang = lang;
     }
@@ -47,7 +51,7 @@ public class DumpLinkGetter {
      * @param lang
      * @return
      */
-    private String validBaseURLString(Language lang) {
+    private String getLanguageBaseUrl(Language lang) {
         // langCode with dashes like "roa-tara" should be 'roa_tara' in dump links
         return BASEURL_STRING.replace("__LANG__", lang.getLangCode().replace("-", "_"));
     }
@@ -58,7 +62,7 @@ public class DumpLinkGetter {
      * @return
      */
     protected String getDumpIndex() throws IOException {
-        URL indexURL = new URL(validBaseURLString(lang));
+        URL indexURL = new URL(getLanguageBaseUrl(lang));
         return IOUtils.toString(indexURL.openStream());
     }
 
@@ -91,7 +95,7 @@ public class DumpLinkGetter {
                 List<String> results = linkMatcher.match(links);
                 List<URL> urls = new ArrayList<URL>();
                 for (String url: results){
-                    URL linkURL = new URL(validBaseURLString(lang) + url);
+                    URL linkURL = new URL(getLanguageBaseUrl(lang) + url);
                     urls.add(linkURL);
                 }
                 urlLinks.put(linkMatcher.getName(), urls);
@@ -110,12 +114,37 @@ public class DumpLinkGetter {
 
         Options options = new Options();
 
-        options.addOption("l", true, "language");
-        options.addOption("n", true, "dump name");
-        options.addOption("o", true, "save to file path");
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("languages")
+                        .withValueSeparator(',')
+                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). Default is all languages.")
+                        .create("l"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withValueSeparator(',')
+                        .withLongOpt("names")
+                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). Default is everything.")
+                        .create("n"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .isRequired()
+                        .withLongOpt("output")
+                        .withDescription("Path to output file.")
+                        .create("o"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("baseurl")
+                        .withDescription("Base url for dumps. Defaults to " + BASEURL_STRING)
+                        .create("u"));
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
+
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
@@ -124,24 +153,42 @@ public class DumpLinkGetter {
             return;
         }
 
-        List<String> names = cmd.hasOption("n") ? Arrays.asList(cmd.getOptionValue("n").split(",")) : Arrays.asList(new String[]{"articles"});
-        List<Language> languages = new ArrayList<Language>();
-        if (cmd.hasOption("l")) {
-            for (String langName : cmd.getOptionValue("l").split(",")){
-                languages.add(Language.getByLangCode(langName));
+        System.out.println(cmd.getOptionValues("n").toString());
+
+        List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.values());
+        if (cmd.hasOption("n")) {
+            linkMatchers = new ArrayList<LinkMatcher>();
+            for (String name : cmd.getOptionValues("n")) {
+                LinkMatcher matcher = LinkMatcher.getByName(name);
+                if (matcher == null) {
+                    System.err.println("Invalid matcher name: " + name);
+                    System.exit(1);
+                }
+                linkMatchers.add(matcher);
             }
         }
 
+        List<Language> languages = Arrays.asList(Language.LANGUAGES);
+        if (cmd.hasOption("l")) {
+            languages = new ArrayList<Language>();
+            for (String langCode : cmd.getOptionValues("l")) {
+                Language lang = Language.getByLangCode(langCode);
+                if (lang == null) {
+                    System.err.println("Invalid language code: " + langCode);
+                    System.exit(1);
+                }
+                languages.add(lang);
+            }
+        }
+
+
+        String baseUrl = cmd.hasOption("u") ? cmd.getOptionValue('u') : BASEURL_STRING;
         String filePath = cmd.hasOption("o") ? cmd.getOptionValue('o') : "false.tsv";
         File file = new File(filePath);
 
         List<String> result = new ArrayList<String>();
         for (Language language : languages) {
-            List<LinkMatcher> linkMatchers = new ArrayList<LinkMatcher>();
-            for (String name : names) {
-                linkMatchers.add(LinkMatcher.getByName(name));
-            }
-            DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(linkMatchers, language);
+            DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(baseUrl, linkMatchers, language);
             HashMap<String, List<URL>> urls = dumpLinkGetter.getDumpFiles();
             for (String linkName : urls.keySet()) {
                 for (URL url : urls.get(linkName)) {
