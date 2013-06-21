@@ -23,17 +23,16 @@ import static org.junit.Assert.*;
 /**
  */
 public class TestWikiTextDumpParser {
-    public static final File EN_DUMP = new File("src/test/resources/org/wikapidia/parser/en_test.xml");
-    public static final LanguageInfo EN = LanguageInfo.getByLangCode("en");
+    public static final File SIMPLE_DUMP = new File("../wikapidia/wikapidia-loader/simplewiki-20130608-pages-articles.xml");
+    public static final LanguageInfo SIMPLE = LanguageInfo.getByLangCode("simple");
 
     @Test
     public void test1() throws DaoException {
         List<String> allowedIllLangs = new ArrayList<String>();
-        allowedIllLangs.add("en");
-        allowedIllLangs.add("de");
+        allowedIllLangs.add("simple");
 
         // Scans for ILLs in all languages
-        WikiTextDumpParser wtdp = new WikiTextDumpParser(EN_DUMP, EN);
+        WikiTextDumpParser wtdp = new WikiTextDumpParser(SIMPLE_DUMP, SIMPLE);
 
         // Scans for ILLs in languages specified above only
         //WikiTextDumpParser wtdp = new WikiTextDumpParser(EN_DUMP, EN, allowedIllLangs);
@@ -81,6 +80,9 @@ public class TestWikiTextDumpParser {
         LocalPageDao pageDao = new LocalPageSqlDao(ds);
         LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(ds);
 
+        linkDao.beginLoad();
+        catMemDao.beginLoad();
+
         ParserVisitor linkVisitor = new LocalLinkVisitor(linkDao, pageDao);
         ParserVisitor catVisitor = new LocalCategoryVisitor(pageDao, catMemDao);
 
@@ -90,10 +92,12 @@ public class TestWikiTextDumpParser {
 
         wtdp.parse(visitors);
 
-        assertEquals(pageCounter.get(), 44);
         System.out.println("Categories: " + categories.size());
         System.out.println("ILLs: " + ills.size());
         System.out.println("Links: " + links.size());
         System.out.println("Redirects: " + redirects.size());
+
+        linkDao.endLoad();
+        catMemDao.endLoad();
     }
 }

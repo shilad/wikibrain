@@ -13,14 +13,19 @@ import org.wikapidia.core.model.*;
 public class LocalLinkVisitor extends ParserVisitor {
     private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;
+    private int counter;
 
     public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao) {
         this.linkDao = linkDao;
         this.pageDao = pageDao;
+        this.counter = 0;
     }
 
     @Override
     public void link(ParsedLink link) throws WikapidiaException {
+        if(counter%1000==0)
+            System.out.println("Visited link #" + counter);
+        counter++;
         try {
             LocalLink.LocationType loc = LocalLink.LocationType.NONE;
             if (link.location.getParagraph() == 0) {

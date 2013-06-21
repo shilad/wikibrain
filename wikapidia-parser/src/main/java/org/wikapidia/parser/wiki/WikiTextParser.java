@@ -284,7 +284,7 @@ public class WikiTextParser {
             try {
                 visitor.category(cat);
             } catch (WikapidiaException e) {
-                LOG.log(Level.WARNING, "beginPage failed:", e);
+               // LOG.log(Level.WARNING, "beginPage failed:", e);
             }
         }
     }

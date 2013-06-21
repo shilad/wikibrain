@@ -17,10 +17,12 @@ import org.wikapidia.parser.wiki.ParserVisitor;
 public class LocalCategoryVisitor extends ParserVisitor {
     private final LocalPageDao pageDao;
     private final LocalCategoryMemberDao catMemDao;
+    private int cats;
 
     public LocalCategoryVisitor(LocalPageDao pageDao, LocalCategoryMemberDao catMemDao) {
         this.pageDao = pageDao;
         this.catMemDao = catMemDao;
+        cats = 0;
     }
 
     @Override
@@ -29,11 +31,16 @@ public class LocalCategoryVisitor extends ParserVisitor {
             Language lang = cat.category.getLanguage();
             LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
 
-            String catText = cat.category.getCanonicalTitle().split("|")[0]; //piped cat link
+            if(++cats%1000==0){
+                System.out.println("Cat # " + cats + " says meow!");
+            }
+
+            String catText = cat.category.getCanonicalTitle().split("\\|")[0]; //piped cat link
             catText = catText.split("#")[0]; //cat subsection
 
-            if(!isCategory(catText, langInfo))
+            if(!isCategory(catText, langInfo))  {
                 throw new WikapidiaException("Thought it was a category, was not a category.");
+            }
             Title catTitle = new Title(catText, langInfo);
             assert (catTitle.getNamespace().equals(NameSpace.CATEGORY));
             int catId = pageDao.getIdByTitle(catTitle.getCanonicalTitle(), lang, NameSpace.CATEGORY);
@@ -46,10 +53,12 @@ public class LocalCategoryVisitor extends ParserVisitor {
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
+
     }
     private boolean isCategory(String link, LanguageInfo lang){
         for(String categoryName : lang.getCategoryNames()){
-            if(link.substring(categoryName.length() + 1).toLowerCase().equals(categoryName + ":")){
+            if(link.length()>categoryName.length()&&
+                    link.substring(0, categoryName.length() + 1).toLowerCase().equals(categoryName.toLowerCase() + ":")){
                 return true;
             }
         }
