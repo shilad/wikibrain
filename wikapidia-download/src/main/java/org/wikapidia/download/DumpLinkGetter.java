@@ -17,14 +17,16 @@ import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * //TODO: javadocs
+ *
+ * Parses a command line script and generates a .tsv file with the links to the dumps
+ * of specified file type and languages.
+ *
  */
 public class DumpLinkGetter {
 
@@ -116,14 +118,14 @@ public class DumpLinkGetter {
 
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
+                        .hasArgs()
                         .withLongOpt("languages")
                         .withValueSeparator(',')
                         .withDescription("List of languages, separated by a comma (e.g. 'en,de'). Default is all languages.")
                         .create("l"));
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
+                        .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("names")
                         .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). Default is everything.")
@@ -153,15 +155,14 @@ public class DumpLinkGetter {
             return;
         }
 
-        System.out.println(cmd.getOptionValues("n").toString());
-
         List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.values());
         if (cmd.hasOption("n")) {
             linkMatchers = new ArrayList<LinkMatcher>();
             for (String name : cmd.getOptionValues("n")) {
                 LinkMatcher matcher = LinkMatcher.getByName(name);
                 if (matcher == null) {
-                    System.err.println("Invalid matcher name: " + name);
+                    System.err.println("Invalid matcher name: " + name
+                            + "\nValid matcher names: \n" + LinkMatcher.getAllNames().toString());
                     System.exit(1);
                 }
                 linkMatchers.add(matcher);
@@ -172,18 +173,22 @@ public class DumpLinkGetter {
         if (cmd.hasOption("l")) {
             languages = new ArrayList<Language>();
             for (String langCode : cmd.getOptionValues("l")) {
-                Language lang = Language.getByLangCode(langCode);
-                if (lang == null) {
-                    System.err.println("Invalid language code: " + langCode);
+                try {
+                    languages.add(Language.getByLangCode(langCode));
+                } catch (IllegalArgumentException e) {
+                    String langs = "";
+                    for (Language language : Language.LANGUAGES) {
+                        langs += language.getLangCode() + ",";
+                    }
+                    System.err.println("Invalid language code: " + langCode
+                            + "\nValid language codes: \n" + langs);
                     System.exit(1);
                 }
-                languages.add(lang);
             }
         }
 
-
         String baseUrl = cmd.hasOption("u") ? cmd.getOptionValue('u') : BASEURL_STRING;
-        String filePath = cmd.hasOption("o") ? cmd.getOptionValue('o') : "false.tsv";
+        String filePath = cmd.getOptionValue('o');
         File file = new File(filePath);
 
         List<String> result = new ArrayList<String>();
