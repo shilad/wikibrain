@@ -3,7 +3,6 @@
 #
 # source all util scripts here, so that other scripts only
 # need to source this script to source everything
-source ${WP_UTILS}/src/main/scripts/conf.sh
 
 
 function die() {
@@ -18,6 +17,8 @@ export WP_MAPPER=$WP_BASE/wikAPIdia-mapper
 export WP_PARENT=$WP_BASE/wikAPIdia-parent
 export WP_PARSER=$WP_BASE/wikapidia-parser
 export WP_UTILS=$WP_BASE/wikapidia-utils
+
+source ${WP_UTILS}/src/main/scripts/conf.sh
 
 [ -d ${WP_BASE} ] || die "missing base directory ${WP_BASE}"
 

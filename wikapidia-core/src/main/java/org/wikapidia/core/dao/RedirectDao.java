@@ -4,10 +4,11 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.Redirect;
 
 /**
  */
-public interface RedirectDao {
+public interface RedirectDao extends Loader<Redirect> {
 
     /**
      * If the input id corresponds to a redirect, returns the local id of the destination of the redirect.
@@ -45,7 +46,5 @@ public interface RedirectDao {
 
 
     public abstract void save(Language lang, int src, int dest) throws DaoException;
-
-    public abstract void update(Language lang, int src, int newDest) throws DaoException;
 
 }
