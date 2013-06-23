@@ -20,6 +20,11 @@
             <artifactId>wikapidia-utils</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>berkeleydb</groupId>
+            <artifactId>je</artifactId>
+            <version>3.2.76</version>
+        </dependency>
     </dependencies>
 
 </project>

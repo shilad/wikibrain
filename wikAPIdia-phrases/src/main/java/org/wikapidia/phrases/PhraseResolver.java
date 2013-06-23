@@ -7,10 +7,7 @@ import org.wikapidia.core.model.LocalPage;
 import java.util.LinkedHashMap;
 
 /**
- * A phrase resolver supports two features:
- *
  * For a given phrase, returns the most common pages.
- * For a given page, returns the most common phrases.
  *
  * If you want smarter, contex aware disambiguation, look at disambig in the sr module.
  */
@@ -34,24 +31,4 @@ public interface PhraseResolver {
      * The scores can be considered probabilities that sum to 1.0 across all possibilities.
      */
     public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages);
-
-    /**
-     * Returns the most descriptive phrases for a wikipedia page.
-     * @param language The language for the phrase and the returned LocalPages.
-     * @param page The page to be described.
-     * @param maxPhrases The maximum number of phrases to be returned.
-     * @return An map from phrase to score, ordered by decreasing probability.
-     * The scores can be considered probabilities that sum to 1.0 across all possibilities.
-     */
-    public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases);
-
-    /**
-     * Returns the most descriptive phrases for a universal page.
-     * @param language The language for the returned phrases.
-     * @param page The page to be described.
-     * @param maxPhrases The maximum number of phrases to be returned.
-     * @return An map from phrase to score, ordered by decreasing probability.
-     * The scores can be considered probabilities that sum to 1.0 across all possibilities.
-     */
-    public LinkedHashMap<String, Float> describeUniversal(Language language, UniversalPage page, int maxPhrases);
 }
