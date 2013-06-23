@@ -15,6 +15,7 @@
         <module>../wikapidia-parser</module>
         <module>../wikapidia-utils</module>
         <module>../wikAPIdia-mapper</module>
+        <module>../wikAPIdia-download</module>
     </modules>
 
     <build>
