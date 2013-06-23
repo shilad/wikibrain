@@ -1,5 +1,6 @@
 package org.wikapidia.phrases;
 
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.jooq.tables.UniversalPage;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
@@ -18,7 +19,7 @@ public interface PageDescriber {
      * @return An map from phrase to score, ordered by decreasing probability.
      * The scores can be considered probabilities that sum to 1.0 across all possibilities.
      */
-    public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases);
+    public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException;
 
     /**
      * Returns the most descriptive phrases for a universal page.

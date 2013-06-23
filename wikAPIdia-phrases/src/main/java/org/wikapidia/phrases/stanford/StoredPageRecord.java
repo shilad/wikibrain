@@ -56,6 +56,14 @@ public class StoredPageRecord implements Serializable {
         }
     }
 
+    public void prune(int numPhrases) {
+        if (numPhrases >= phrases.length) {
+            return;
+        }
+        counts = Arrays.copyOfRange(counts, 0, numPhrases);
+        phrases = Arrays.copyOfRange(phrases, 0, numPhrases);
+    }
+
     public int getWpId() {
         return wpId;
     }
@@ -66,5 +74,25 @@ public class StoredPageRecord implements Serializable {
 
     public int[] getCounts() {
         return counts;
+    }
+
+    public String getPhrase(int i) {
+        return phrases[i];
+    }
+
+    public int getCount(int i) {
+        return counts[i];
+    }
+
+    public int numPhrases() {
+        return phrases.length;
+    }
+
+    public int sumCounts() {
+        int n = 0;
+        for (int c : counts) {
+            n += c;
+        }
+        return n;
     }
 }
