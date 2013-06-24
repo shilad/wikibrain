@@ -15,12 +15,14 @@ import com.github.axet.wget.WGet;
 
 public class FileDownloader {
 
+
     public static void main(String[] args) {
         try {
             // choise internet url (ftp, http)
-            URL url = new URL("http://www.dd-wrt.com/routerdb/de/download/D-Link/DIR-300/A1/ap61.ram/2049");
+            URL url = new URL("http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-site_stats.sql.gz");
             // choise target folder or filename "/Users/axet/Downloads/ap61.ram"
-            File target = new File("/Users/axet/Downloads/");
+            File target = new File(/*"/Users/axet/Downloads/"*/"Downloads/");
+            if (!target.exists()) target.mkdir();
             // initialize wget object
             WGet w = new WGet(url, target);
             // single thread download. will return here only when file download

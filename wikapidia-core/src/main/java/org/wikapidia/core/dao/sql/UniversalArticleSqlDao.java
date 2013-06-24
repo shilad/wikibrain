@@ -18,6 +18,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalArticle;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 /**
  */
@@ -28,7 +29,7 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
     }
 
     @Override
-    protected UniversalArticle buildUniversalPage(Result<Record> result) throws DaoException {
+    protected UniversalArticle buildUniversalPage(List<Record> result) throws DaoException {
         if (result.isEmpty()) {
             return null;
         }
