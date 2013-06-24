@@ -56,6 +56,8 @@ public class ResolutionRecord implements Serializable, PrunableCounter {
             newCounts[i] = counts[j];
             sum += counts[j];
         }
+        wpIds = newWpIds;
+        counts = newCounts;
     }
 
     public String getText() {

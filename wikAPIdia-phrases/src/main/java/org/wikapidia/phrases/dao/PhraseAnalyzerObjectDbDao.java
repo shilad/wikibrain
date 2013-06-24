@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.utils.ObjectDb;
+import org.wikapidia.utils.WpStringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +73,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
     }
 
     private void addStoredPhrase(Language lang, String phrase, int wpId, int count) throws DaoException {
+        phrase = WpStringUtils.normalize(phrase);
         String key = lang.getLangCode() + phrase;
         ResolutionRecord value = null;
         try {
@@ -117,6 +119,9 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
     public PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase) throws DaoException {
         try {
             ResolutionRecord record = resolveDb.get(lang.getLangCode() + phrase);
+            if (record == null) {
+                return null;
+            }
             PrunedCounts<Integer> counts = new PrunedCounts<Integer>(record.getSum());
             for (int i = 0; i < record.size(); i++) {
                 counts.put(record.getWpId(i), record.getCount(i));
@@ -143,6 +148,9 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
     public PrunedCounts<String> getPageCounts(Language lang, int wpId) throws DaoException {
         try {
             DescriptionRecord record = describeDb.get(lang.getLangCode() + wpId);
+            if (record == null) {
+                return null;
+            }
             PrunedCounts<String> counts = new PrunedCounts<String>(record.getSum());
             for (int i = 0; i < record.size(); i++) {
                 counts.put(record.getPhrase(i), record.getCount(i));

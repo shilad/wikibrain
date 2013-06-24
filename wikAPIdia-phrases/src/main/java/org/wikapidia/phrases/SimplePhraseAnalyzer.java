@@ -13,13 +13,13 @@ import java.util.LinkedHashMap;
  * Simple implementation of a phrase analyzer.
  */
 public class SimplePhraseAnalyzer implements PhraseAnalyzer {
-    private PhraseAnalyzerDao phraseDao;
-    private LocalPageDao pageDao;
+        private PhraseAnalyzerDao phraseDao;
+        private LocalPageDao pageDao;
 
-    public SimplePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao) {
-        this.phraseDao = phraseDao;
-        this.pageDao = pageDao;
-    }
+        public SimplePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao) {
+            this.phraseDao = phraseDao;
+            this.pageDao = pageDao;
+        }
 
     @Override
     public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {

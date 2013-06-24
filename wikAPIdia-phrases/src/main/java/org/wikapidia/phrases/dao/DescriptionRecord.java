@@ -13,8 +13,8 @@ import java.util.*;
  */
 public class DescriptionRecord implements Serializable, PrunableCounter {
     private int wpId;
-    private String phrases[];
-    private int counts[];
+    private String phrases[] = {};
+    private int counts[] = {};
     private int sum = -1;        // useful after pruning.
 
     public DescriptionRecord(int wpId) {
