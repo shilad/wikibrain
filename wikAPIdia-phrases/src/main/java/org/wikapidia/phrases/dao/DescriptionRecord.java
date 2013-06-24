@@ -1,4 +1,4 @@
-package org.wikapidia.phrases.stanford;
+package org.wikapidia.phrases.dao;
 
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
@@ -11,12 +11,13 @@ import java.util.*;
 /**
  * The stored record associated with a page id -> phrases and counts.
  */
-public class StoredPageRecord implements Serializable {
+public class DescriptionRecord implements Serializable, PrunableCounter {
     private int wpId;
     private String phrases[];
     private int counts[];
+    private int sum = -1;        // useful after pruning.
 
-    public StoredPageRecord(int wpId) {
+    public DescriptionRecord(int wpId) {
         this.wpId = wpId;
     }
 
@@ -38,6 +39,7 @@ public class StoredPageRecord implements Serializable {
      * Sorts the phrases by counts.
      * TODO: Keep the most popular version of a phrase instead of the normalized version.
      */
+    @Override
     public void freeze() {
         final TObjectIntMap<String> normalizedCounts = new TObjectIntHashMap<String>();
         for (int i = 0; i < phrases.length; i++) {
@@ -50,12 +52,15 @@ public class StoredPageRecord implements Serializable {
                 return normalizedCounts.get(p2) - normalizedCounts.get(p1);
             }
         });
+        sum = 0;
         counts = new int[phrases.length];
         for (int i = 0; i < phrases.length; i++) {
             counts[i] = normalizedCounts.get(phrases[i]);
+            sum += counts[i];
         }
     }
 
+    @Override
     public void prune(int numPhrases) {
         if (numPhrases >= phrases.length) {
             return;
@@ -72,6 +77,7 @@ public class StoredPageRecord implements Serializable {
         return phrases;
     }
 
+    @Override
     public int[] getCounts() {
         return counts;
     }
@@ -88,11 +94,11 @@ public class StoredPageRecord implements Serializable {
         return phrases.length;
     }
 
-    public int sumCounts() {
-        int n = 0;
-        for (int c : counts) {
-            n += c;
-        }
-        return n;
+    public int size() {
+        return phrases.length;
+    }
+
+    public int getSum() {
+        return sum;
     }
 }

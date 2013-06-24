@@ -1,4 +1,4 @@
-package org.wikapidia.phrases.stanford;
+package org.wikapidia.phrases.dao;
 
 import org.wikapidia.utils.WpArrayUtils;
 
@@ -9,12 +9,13 @@ import java.util.Comparator;
 /**
  * The record associated with stored phrase -> pages and counts.
  */
-public class StoredPhraseRecord implements Serializable {
+public class ResolutionRecord implements Serializable, PrunableCounter {
     private String text;    // normalized version of the text
     private int wpIds[] = new int[0];
     private int counts[] = new int[0];
+    private int sum = -1;
 
-    public StoredPhraseRecord(String text) {
+    public ResolutionRecord(String text) {
         this.text = text;
     }
 
@@ -37,6 +38,7 @@ public class StoredPhraseRecord implements Serializable {
      * Sorts the ids by counts.
      */
     public void freeze() {
+        sum = 0;
         Integer [] indexes = new Integer[counts.length];
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = i;
@@ -52,6 +54,7 @@ public class StoredPhraseRecord implements Serializable {
             int j = indexes[i];
             newWpIds[i] = wpIds[j];
             newCounts[i] = counts[j];
+            sum += counts[j];
         }
     }
 
@@ -65,5 +68,31 @@ public class StoredPhraseRecord implements Serializable {
 
     public int[] getCounts() {
         return counts;
+    }
+
+    public int getWpId(int i) {
+        return wpIds[i];
+    }
+
+    public int getCount(int i) {
+        return counts[i];
+    }
+
+    public int size() {
+        return counts.length;
+    }
+
+
+    @Override
+    public void prune(int size) {
+        if (size >= wpIds.length) {
+            return;
+        }
+        counts = Arrays.copyOfRange(counts, 0, size);
+        wpIds = Arrays.copyOfRange(wpIds, 0, size);
+    }
+
+    public int getSum() {
+        return sum;
     }
 }
