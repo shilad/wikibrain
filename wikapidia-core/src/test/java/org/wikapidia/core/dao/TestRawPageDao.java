@@ -55,7 +55,7 @@ public class TestRawPageDao {
         assert (page.getTitle().equals(savedPage.getTitle()));
         assert (page.getNameSpace().equals(savedPage.getNameSpace()));
 
-        RawPage rawSaved = rpDao.get(lang.getLanguage(), 7);
+        RawPage rawSaved = rpDao.getById(lang.getLanguage(), 7);
         assert (rawSaved != null);
         assert (page.getLocalId() == rawSaved.getPageId());
         assert (page.getTitle().equals(rawSaved.getTitle()));
