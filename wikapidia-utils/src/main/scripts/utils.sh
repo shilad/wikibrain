@@ -63,8 +63,7 @@ function execClass() {
         die "missing local classpath file $localclasspathfile"
     fi
     read < $localclasspathfile REMOTE_CLASSPATH
-    CMD="java -cp \"${REMOTE_CLASSPATH}:${LOCAL_CLASSPATH}\" $JAVA_OPTS $class $@"
-    $CMD ||
+    java -cp "${REMOTE_CLASSPATH}:${LOCAL_CLASSPATH}" $JAVA_OPTS $class $@ ||
     die "executing '$CMD' failed"
 }
 
