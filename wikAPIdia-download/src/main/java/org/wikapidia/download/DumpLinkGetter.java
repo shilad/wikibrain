@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 
 /**
  *
+ * @author Yulun Li
+ *
  * Parses a command line script and generates a .tsv file with the links to the dumps
  * of specified file type and languages.
  *

@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
+ *
+ * @author Yulun Li
+ *
  * Given a list of urls, finds a certain type of links
  */
 public enum LinkMatcher {
