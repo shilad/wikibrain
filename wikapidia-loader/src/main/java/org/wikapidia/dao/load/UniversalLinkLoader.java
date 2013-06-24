@@ -43,8 +43,9 @@ public class UniversalLinkLoader {
     public void loadLinkMap(int algorithmId) throws WikapidiaException {
         try {
             Iterable<LocalLink> localLinks = localLinkDao.get(new DaoFilter().setLanguages(languageSet));
-            universalLinkDao.beginLoad();
+            int i=0;
             for (LocalLink localLink : localLinks) {
+                i++;
                 universalLinkDao.save(
                         localLink,
                         universalPageDao.getUnivPageId(
@@ -57,14 +58,17 @@ public class UniversalLinkLoader {
                                 algorithmId),
                         algorithmId
                 );
+                if (i%1000 == 0) {
+                    System.out.println("UniversalLinks loaded: " + i);
+                }
             }
-            universalLinkDao.endLoad();
+            System.out.println("All UniversalLinks loaded: " + i);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException {
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -82,6 +86,18 @@ public class UniversalLinkLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("languages")
+                        .withDescription("the set of languages to process")
+                        .create("l"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("algorithm")
+                        .withDescription("the name of the algorithm to execute")
+                        .create("n"));
+
+
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -119,6 +135,21 @@ public class UniversalLinkLoader {
                 localLinkDao,
                 universalPageDao,
                 universalLinkDao);
+
+        if (cmd.hasOption("t")) {
+            localLinkDao.beginLoad();
+            universalPageDao.beginLoad();
+            universalLinkDao.beginLoad();
+            System.out.println("Begin Load");
+        }
+
         loader.loadLinkMap(mapper.getId());
+
+        if (cmd.hasOption("i")) {
+            localLinkDao.endLoad();
+            universalPageDao.endLoad();
+            universalLinkDao.endLoad();
+            System.out.println("End Load");
+        }
     }
 }

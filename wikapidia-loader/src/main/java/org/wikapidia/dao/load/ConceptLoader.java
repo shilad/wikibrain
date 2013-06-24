@@ -37,20 +37,19 @@ public class ConceptLoader {
     public void load(ConceptMapper mapper) throws ConfigurationException, WikapidiaException {
         try {
             Iterator<UniversalPage> pages = mapper.getConceptMap(languageSet);
-            dao.beginLoad();
             int i = 0;
             while (pages.hasNext()) {
                 dao.save(pages.next());
                 i++;
-                if (i%1000 == 0) System.out.println(i);
+                if (i%1000 == 0) System.out.println("UniversalPages mapped: " + i);
             }
-            dao.endLoad();
+            System.out.println("All UniversalPages mapped: " + i);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException {
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -68,6 +67,12 @@ public class ConceptLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("languages")
+                        .withDescription("the set of languages to process")
+                        .create("l"));
+
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -99,6 +104,17 @@ public class ConceptLoader {
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
         final ConceptLoader loader = new ConceptLoader(languages, dao);
+
+        if (cmd.hasOption("t")) {
+            dao.beginLoad();
+            System.out.println("Begin Load");
+        }
+
         loader.load(mapper);
+
+        if (cmd.hasOption("i")) {
+            dao.endLoad();
+            System.out.println("End Load");
+        }
     }
 }

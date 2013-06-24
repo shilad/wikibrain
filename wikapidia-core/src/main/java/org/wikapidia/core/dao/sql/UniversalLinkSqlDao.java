@@ -2,9 +2,11 @@ package org.wikapidia.core.dao.sql;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.wikapidia.conf.*;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
@@ -294,4 +296,40 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                 map
         );
     }
+
+    public static class Provider extends org.wikapidia.conf.Provider<UniversalLinkDao> {
+        public Provider(Configurator configurator, org.wikapidia.conf.Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return UniversalLinkDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.universalLink";
+        }
+
+        @Override
+        public UniversalLinkDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("sql")) {
+                return null;
+            }
+            try {
+                return new UniversalLinkSqlDao(
+                        getConfigurator().get(
+                                DataSource.class,
+                                config.getString("dataSource")),
+                        getConfigurator().get(
+                                LocalLinkDao.class,
+                                config.getString("localLinkDao"))
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+    }
+
 }
