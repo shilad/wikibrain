@@ -18,6 +18,8 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalCategory;
 
 import javax.sql.DataSource;
+import java.util.List;
+
 
 /**
  */
@@ -28,7 +30,7 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
     }
 
     @Override
-    protected UniversalCategory buildUniversalPage(Result<Record> result) throws DaoException {
+    protected UniversalCategory buildUniversalPage(List<Record> result) throws DaoException {
         if (result.isEmpty()) {
             return null;
         }

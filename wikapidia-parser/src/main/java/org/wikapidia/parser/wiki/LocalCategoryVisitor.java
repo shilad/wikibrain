@@ -9,8 +9,6 @@ import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.parser.wiki.ParsedCategory;
-import org.wikapidia.parser.wiki.ParserVisitor;
 
 /**
  */

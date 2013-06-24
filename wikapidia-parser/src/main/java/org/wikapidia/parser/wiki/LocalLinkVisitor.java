@@ -36,8 +36,24 @@ public class LocalLinkVisitor extends ParserVisitor {
             Language lang = link.target.getLanguage();
             LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
 
-            String linkText = link.text.split("|")[0]; //piped link
+            String linkText = link.text.split("\\|")[0]; //piped link
             linkText = linkText.split("#")[0]; //subsection
+
+            /**
+             * This is really dummmmbbbbbbb.
+             */
+            if(lang.equals(Language.getByLangCode("cy")) && linkText.toLowerCase().contains("bawd|")) {
+                return;
+            }
+            if(lang.equals(Language.getByLangCode("he")) && linkText.toLowerCase().contains("ממוזער|")) {
+                return;
+            }
+            if(lang.equals(Language.getByLangCode("de")) && linkText.toLowerCase().contains("miniatur|")) {
+                return;
+            }
+            if(linkText.toLowerCase().startsWith("thumb|")){
+                return;
+            }
 
             //Wikipedia ignores colons at the beginning of links
             // and uses them to overcome technical restrictions
