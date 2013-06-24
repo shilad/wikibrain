@@ -26,6 +26,17 @@ for d in "${WP_CORE}" "${WP_LOADER}" "${WP_MAPPER}" "${WP_PARENT}" "${WP_PARSER}
     [ -d "$d" ] || die "missing module directory $d"
 done
 
+function checksum() {
+    if [ $(type -P md5) ]; then
+        md5 -q $@
+    elif [ $(type -P md5sum) ]; then
+        md5sum $@
+    elif [ $(type -P sum) ]; then
+        sum $@
+    else
+        die "no checksum binary found. please install md5 or md5sum."
+    fi
+}
 
 function compileJooq() {
     schema_dir=${WP_CORE}/src/main/resources/db
