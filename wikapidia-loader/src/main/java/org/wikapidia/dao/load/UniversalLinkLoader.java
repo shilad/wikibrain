@@ -137,8 +137,6 @@ public class UniversalLinkLoader {
                 universalLinkDao);
 
         if (cmd.hasOption("t")) {
-            localLinkDao.beginLoad();
-            universalPageDao.beginLoad();
             universalLinkDao.beginLoad();
             System.out.println("Begin Load");
         }
@@ -146,8 +144,6 @@ public class UniversalLinkLoader {
         loader.loadLinkMap(mapper.getId());
 
         if (cmd.hasOption("i")) {
-            localLinkDao.endLoad();
-            universalPageDao.endLoad();
             universalLinkDao.endLoad();
             System.out.println("End Load");
         }
