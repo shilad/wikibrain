@@ -23,12 +23,29 @@ public class SimplePhraseAnalyzer implements PhraseAnalyzer {
 
     @Override
     public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {
-        return null;
+        LinkedHashMap<String, Float> result = new LinkedHashMap<String, Float>();
+        PhraseAnalyzerDao.PrunedCounts<String> counts = phraseDao.getPageCounts(language, page.getLocalId());
+        for (String phrase : counts.keySet()) {
+            result.put(phrase, (float)1.0 * counts.get(phrase) / counts.getTotal());
+            if (counts.size() >= maxPhrases) {
+                break;
+            }
+        }
+        return result;
     }
 
     @Override
-    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
+        LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
+        PhraseAnalyzerDao.PrunedCounts<Integer> counts = phraseDao.getPhraseCounts(language, phrase);
+        for (Integer wpId : counts.keySet()) {
+            result.put(pageDao.getById(language, wpId),
+                    (float)1.0 * counts.get(wpId) / counts.getTotal());
+            if (counts.size() >= maxPages) {
+                break;
+            }
+        }
+        return result;
     }
 
     @Override

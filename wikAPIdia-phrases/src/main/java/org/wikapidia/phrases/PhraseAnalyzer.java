@@ -39,7 +39,7 @@ public interface PhraseAnalyzer {
      * @return An map from page to score, ordered by decreasing probability.
      * The scores can be considered probabilities that sum to 1.0 across all possibilities.
      */
-    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages);
+    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException;
 
     /**
      * Returns the most likely universal pages for a phrase.
