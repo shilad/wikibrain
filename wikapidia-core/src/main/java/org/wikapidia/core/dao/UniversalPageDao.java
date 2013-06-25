@@ -18,7 +18,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      * @return a UniversalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract T getById(int univId, int algorithmId) throws DaoException;
+    public T getById(int univId, int algorithmId) throws DaoException;
 
     /**
      * Returns a map of UniversalPages of the specified page type by a collection of universal IDs
@@ -27,7 +27,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      * @return a map of universal IDs to UniversalPages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public abstract Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException;
+    public Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException;
 
     /**
      * Returns the universal ID of a local page specified by a language and
@@ -38,7 +38,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      * @return
      * @throws DaoException
      */
-    public abstract int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException;
+    public int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException;
 
     /**
      * Returns the universal ID of a local page, within the scope of the specified algorithm
@@ -47,5 +47,5 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      * @return
      * @throws DaoException
      */
-    public abstract int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException;
+    public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException;
 }
