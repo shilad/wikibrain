@@ -1,5 +1,6 @@
 package org.wikapidia.download;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.download.DumpLinkGetter;
@@ -16,6 +17,7 @@ import java.util.regex.Pattern;
  */
 public class TestDumpLinkGetter {
 
+    @Ignore
     @Test
     public void testIndex() throws IOException {
         for(Language lang : Language.LANGUAGES) {
@@ -25,6 +27,7 @@ public class TestDumpLinkGetter {
         }
     }
 
+    @Ignore
     @Test
     public void testParseLinks() throws IOException {
         for(Language lang : Language.LANGUAGES) {
@@ -35,6 +38,7 @@ public class TestDumpLinkGetter {
         }
     }
 
+    @Ignore
     @Test
     public void testGetDumpFiles() throws IOException {
         List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.ABSTRACT);
@@ -45,6 +49,7 @@ public class TestDumpLinkGetter {
         }
     }
 
+    @Ignore
     @Test
     public void testLinks() throws IOException {
         List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.values());

@@ -3,6 +3,7 @@ package org.wikapidia.dao.load;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
@@ -34,7 +35,7 @@ public class TranscludedLinkLoader {
 
     public void loadExisting() throws DaoException {
         existing.clear();
-        for (LocalLink ll : dao.getLinks(language)) {
+        for (LocalLink ll : dao.get(new DaoFilter().setLanguages(language))) {
             existing.add(ll.longHashCode());
         }
     }
