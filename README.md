@@ -28,5 +28,37 @@ Here is the basic outline of how this program runs:
 <br />
 Here is what you, the user, need to do:
 <ol>
- 	<li>Script-y stuff</li>
+	<li>Run the download script.</li>
+ 	<li>Run the dumploader.sh
+		<ul>
+			<li><b>Parameter Format:</b> [-c .conf] [-it] [file ...]</li>
+			<br />
+			<li>-c &nbsp;&nbsp;&nbsp; Sets configuration file. Include that file .conf</li>
+			<li>-i &nbsp;&nbsp;&nbsp; Creates all indexes after loading</li>
+			<li>-t &nbsp;&nbsp;&nbsp; Drops and recreates all tables</li>
+		</ul>
+	</li>
+	
+ 	<li>Run the redirectloader.sh
+ 		<ul>
+ 			<li><b>Parameter Format:</b> [-c .conf] [-it] [-l lang ...]</li>
+ 			<br />
+ 			<li>-c &nbsp;&nbsp;&nbsp; Sets configuration file. Include that file .conf</li>
+			<li>-i &nbsp;&nbsp;&nbsp; Creates all indexes after loading</li>
+			<li>-l &nbsp;&nbsp;&nbsp; Set language for redirects to be resolved in. Enter as lang codes with spaces between them.</li>
+			<li>-t &nbsp;&nbsp;&nbsp; Drops and recreates all tables</li>
+		</ul>
+ 	</li>
+ 	
+ 	<li>Run the wikitextdumploader.sh
+ 		<ul>
+ 			<li><b>Parameter Format:</b> [-c .conf] [-it] [-l lang ...]</li>
+ 			<br />
+ 			<li>-c &nbsp;&nbsp;&nbsp; Sets configuration file. Include that file .conf</li>
+			<li>-i &nbsp;&nbsp;&nbsp; Creates all indexes after loading</li>
+			<li>-l &nbsp;&nbsp;&nbsp; Set languages to be processed. Also sets ills (Inter Language Links). Enter as lang codes with spaces between them.</li>
+			<li>-t &nbsp;&nbsp;&nbsp; Drops and recreates all tables</li>
+		</ul>
+	</li>
+	<li>Run concept mapper scripts.</li>
  </ol>
