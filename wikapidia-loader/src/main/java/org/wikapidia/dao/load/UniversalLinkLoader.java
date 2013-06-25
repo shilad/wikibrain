@@ -115,7 +115,7 @@ public class UniversalLinkLoader {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.err.println( "Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("ConceptLoader", options);
+            new HelpFormatter().printHelp("UniversalLinkLoader", options);
             return;
         }
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
