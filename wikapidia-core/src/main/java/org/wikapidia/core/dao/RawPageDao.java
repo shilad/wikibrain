@@ -22,10 +22,4 @@ public interface RawPageDao extends Loader<RawPage> {
      */
     public String getBody(Language language, int rawLocalPageId) throws DaoException;
 
-    /**
-     * TODO: change to match format of get() in LocalPageDao
-     * @return
-     * @throws DaoException
-     */
-    SqlDaoIterable<RawPage> allRawPages() throws DaoException;
 }

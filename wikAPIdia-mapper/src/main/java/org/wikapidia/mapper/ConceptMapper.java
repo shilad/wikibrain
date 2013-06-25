@@ -1,6 +1,7 @@
 package org.wikapidia.mapper;
 
 import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -55,6 +56,6 @@ public abstract class ConceptMapper {
      * @throws DaoException
      * @throws ConfigurationException
      */
-    public abstract Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException;
+    public abstract Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikapidiaException;
 
 }

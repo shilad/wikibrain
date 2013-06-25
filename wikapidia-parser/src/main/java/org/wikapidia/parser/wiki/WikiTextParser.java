@@ -89,7 +89,7 @@ public class WikiTextParser {
                             continue;
                         }
                         Title destTitle = link2Title(curLink);
-                        if (destTitle == null || destTitle.guessType() != NameSpace.ARTICLE){
+                        if (destTitle == null || destTitle.getNamespace() != NameSpace.ARTICLE){
                             continue;
                         }
                         try{
@@ -136,7 +136,7 @@ public class WikiTextParser {
                                 for (Link templateLink : parsedTemplate.getLinks()){
                                     Title destTitle = link2Title(templateLink);
                                     if (destTitle == null) { continue; }
-                                    NameSpace type = destTitle.guessType();
+                                    NameSpace type = destTitle.getNamespace();
                                     if (type == NameSpace.ARTICLE){
                                         ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
                                         visitLink(location, destTitle, templateLink.getText(), tempSubType);
@@ -284,7 +284,7 @@ public class WikiTextParser {
             try {
                 visitor.category(cat);
             } catch (WikapidiaException e) {
-                LOG.log(Level.WARNING, "beginPage failed:", e);
+               // LOG.log(Level.WARNING, "beginPage failed:", e);
             }
         }
     }
@@ -311,7 +311,7 @@ public class WikiTextParser {
 
     private NameSpace getLinkType(Link link){
         Title t = link2Title(link);
-        return t == null ? null : t.guessType();
+        return t == null ? null : t.getNamespace();
     }
 
     private Title link2Title(Link link) {

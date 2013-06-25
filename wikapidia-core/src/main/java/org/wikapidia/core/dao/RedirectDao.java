@@ -11,13 +11,22 @@ import org.wikapidia.core.model.Redirect;
 public interface RedirectDao extends Loader<Redirect> {
 
     /**
+     * Alternate method for saving a redirect to the database
+     * @param lang
+     * @param src
+     * @param dest
+     * @throws DaoException
+     */
+    public void save(Language lang, int src, int dest) throws DaoException;
+
+    /**
      * If the input id corresponds to a redirect, returns the local id of the destination of the redirect.
      * @param lang The language to be considered
      * @param id The id of the potential redirect
      * @return the local id of the destination of the redirect if it exists, else null
      * @throws DaoException
      */
-    public abstract Integer resolveRedirect(Language lang, int id) throws DaoException;
+    public Integer resolveRedirect(Language lang, int id) throws DaoException;
 
     /**
      * Returns true iff id is a redirect in lang
@@ -34,7 +43,7 @@ public interface RedirectDao extends Loader<Redirect> {
      * @return
      * @throws DaoException
      */
-    public abstract TIntSet getRedirects(LocalPage localPage) throws DaoException;
+    public TIntSet getRedirects(LocalPage localPage) throws DaoException;
 
     /**
      * Gets the redirect local id -> dest local id mappings for lang = langId
@@ -42,9 +51,6 @@ public interface RedirectDao extends Loader<Redirect> {
      * @return
      * @throws DaoException
      */
-    public abstract TIntIntMap getAllRedirectIdsToDestIds(Language lang) throws DaoException;
-
-
-    public abstract void save(Language lang, int src, int dest) throws DaoException;
+    public TIntIntMap getAllRedirectIdsToDestIds(Language lang) throws DaoException;
 
 }
