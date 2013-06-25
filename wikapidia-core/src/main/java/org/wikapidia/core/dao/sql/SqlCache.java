@@ -49,7 +49,7 @@ public class SqlCache extends AbstractSqlDao{
         try{
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            Timestamp now = new Timestamp(System.currentTimeMillis());
+            Timestamp now = new Timestamp(System.currentTimeMillis()/1000*1000);
 
             int n = context.update(Tables.TABLE_MODIFIED)
                     .set(Tables.TABLE_MODIFIED.LAST_MODIFIED, now)
@@ -106,6 +106,12 @@ public class SqlCache extends AbstractSqlDao{
         for (String name : tableNames) {
             Timestamp tableTstamp = getLastModified(name);
             if (tableTstamp == null || tableTstamp.after(cacheTstamp)) {
+                if(tableTstamp!=null)
+                {
+                    System.out.println(cacheTstamp.getTime());
+                    System.out.println(tableTstamp.getTime());
+                    //TODO: Talk to Shilad about this problem.
+                }
                 return null;
             }
         }

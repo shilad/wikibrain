@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import org.jooq.Record;
-import org.jooq.Result;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -18,6 +17,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalArticle;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 /**
  */
@@ -28,7 +28,7 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
     }
 
     @Override
-    protected UniversalArticle buildUniversalPage(Result<Record> result) throws DaoException {
+    protected UniversalArticle buildUniversalPage(List<Record> result) throws DaoException {
         if (result.isEmpty()) {
             return null;
         }

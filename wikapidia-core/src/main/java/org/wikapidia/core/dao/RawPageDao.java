@@ -12,7 +12,7 @@ public interface RawPageDao extends Loader<RawPage> {
      * @return
      * @throws DaoException
      */
-    public RawPage get(Language language, int rawLocalPageId) throws DaoException;
+    public RawPage getById(Language language, int rawLocalPageId) throws DaoException;
 
     /**
      * Returns the body (i.e. wikitext) of a particular local page.
@@ -21,4 +21,11 @@ public interface RawPageDao extends Loader<RawPage> {
      * @return
      */
     public String getBody(Language language, int rawLocalPageId) throws DaoException;
+
+    /**
+     * TODO: change to match format of get() in LocalPageDao
+     * @return
+     * @throws DaoException
+     */
+    SqlDaoIterable<RawPage> allRawPages() throws DaoException;
 }

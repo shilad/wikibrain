@@ -17,6 +17,7 @@
         <module>../wikapidia-utils</module>
         <module>../wikAPIdia-mapper</module>
         <module>../wikAPIdia-matrix</module>
+        <module>../wikAPIdia-download</module>
     </modules>
 
     <build>

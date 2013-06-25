@@ -2,16 +2,16 @@ package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategoryMember;
@@ -29,6 +29,7 @@ import java.util.Map;
 /**
  */
 public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCategoryMemberDao {
+
     public LocalCategoryMemberSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource);
     }
@@ -87,6 +88,41 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    /**
+     * This method should generally not be used.
+     * @param daoFilter a set of filters to limit the search
+     * @return
+     * @throws DaoException
+     */
+    @Override
+    public Iterable<LocalCategoryMember> get(DaoFilter daoFilter) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.CATEGORY_MEMBERS.LANG_ID.in(daoFilter.getLangIds()));
+            } else {
+                return null;
+            }
+            Cursor<Record> result = context.select().
+                    from(Tables.CATEGORY_MEMBERS).
+                    where(conditions).
+                    fetchLazy();
+            return new SqlDaoIterable<LocalCategoryMember>(result) {
+                @Override
+                public LocalCategoryMember transform(Record r) {
+                    return buildLocalCategoryMember(r);
+                }
+            };
+        } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
@@ -169,7 +205,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
         return dao.getByIds(localArticle.getLanguage(), categoryIds);
     }
 
-    protected Collection<Integer> extractIds(Result<Record> result, boolean categoryIds) {
+    private Collection<Integer> extractIds(Result<Record> result, boolean categoryIds) {
         if (result.isEmpty()) {
             return null;
         }
@@ -181,6 +217,14 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
             );
         }
         return pageIds;
+    }
+
+    private LocalCategoryMember buildLocalCategoryMember(Record r) {
+        return new LocalCategoryMember(
+                r.getValue(Tables.CATEGORY_MEMBERS.CATEGORY_ID),
+                r.getValue(Tables.CATEGORY_MEMBERS.ARTICLE_ID),
+                Language.getById(r.getValue(Tables.CATEGORY_MEMBERS.LANG_ID))
+        );
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalCategoryMemberDao> {
