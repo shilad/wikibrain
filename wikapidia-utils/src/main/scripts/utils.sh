@@ -1,9 +1,6 @@
 #!/bin/bash
 # This bash script contains common shell functions and is included by all bash scripts
 #
-# source all util scripts here, so that other scripts only
-# need to source this script to source everything
-
 
 function die() {
     echo $1 >&2
@@ -13,19 +10,34 @@ function die() {
 export WP_BASE=..
 export WP_CORE=$WP_BASE/wikapidia-core
 export WP_LOADER=$WP_BASE/wikapidia-loader
+export WP_MATRIX=$WP_BASE/wikapidia-matrix
 export WP_MAPPER=$WP_BASE/wikAPIdia-mapper
 export WP_PARENT=$WP_BASE/wikAPIdia-parent
 export WP_PARSER=$WP_BASE/wikapidia-parser
 export WP_UTILS=$WP_BASE/wikapidia-utils
 
-source ${WP_UTILS}/src/main/scripts/conf.sh
 
 [ -d ${WP_BASE} ] || die "missing base directory ${WP_BASE}"
 
-for d in "${WP_CORE}" "${WP_LOADER}" "${WP_MAPPER}" "${WP_PARENT}" "${WP_PARSER}" "${WP_UTILS}"; do
+for d in "${WP_CORE}" "${WP_LOADER}" "${WP_MAPPER}" "${WP_PARENT}" "${WP_PARSER}" "${WP_UTILS}" "${WP_MATRIX}"; do
     [ -d "$d" ] || die "missing module directory $d"
 done
+                                                     
+# source all util scripts here, so that other scripts only
+# need to source this script to source everything
+source ${WP_UTILS}/src/main/scripts/conf.sh
 
+function checksum() {
+    if [ $(type -P md5) ]; then
+        md5 -q $@
+    elif [ $(type -P md5sum) ]; then
+        md5sum $@
+    elif [ $(type -P sum) ]; then
+        sum $@
+    else
+        die "no checksum binary found. please install md5 or md5sum."
+    fi
+}
 
 function compileJooq() {
     schema_dir=${WP_CORE}/src/main/resources/db
@@ -63,9 +75,8 @@ function execClass() {
         die "missing local classpath file $localclasspathfile"
     fi
     read < $localclasspathfile REMOTE_CLASSPATH
-    CMD="java -cp \"${REMOTE_CLASSPATH}:${LOCAL_CLASSPATH}\" $JAVA_OPTS $class $@"
-    $CMD ||
-    die "executing '$CMD' failed"
+    java -cp "${REMOTE_CLASSPATH}:${LOCAL_CLASSPATH}" $JAVA_OPTS $class $@ ||
+    die "executing java -cp ${REMOTE_CLASSPATH}:${LOCAL_CLASSPATH} $JAVA_OPTS $class $@ failed"
 }
 
 

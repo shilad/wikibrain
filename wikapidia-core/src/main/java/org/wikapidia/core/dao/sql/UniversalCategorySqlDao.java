@@ -20,7 +20,6 @@ import org.wikapidia.core.model.UniversalCategory;
 import javax.sql.DataSource;
 import java.util.List;
 
-
 /**
  */
 public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCategory> implements UniversalCategoryDao {

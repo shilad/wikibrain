@@ -2,17 +2,21 @@ package org.wikapidia.core.dao.sql;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.wikapidia.conf.*;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.UniversalLinkDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;
+import org.wikapidia.core.model.UniversalLinkGroup;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -137,7 +141,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             return buildUniversalLinksIterable(result);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -147,7 +151,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
     }
 
     @Override
-    public List<UniversalLink> getBySourceId(int sourceId, int algorithmId) throws DaoException {
+    public UniversalLinkGroup getOutlinks(int sourceId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -157,7 +161,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                     where(Tables.UNIVERSAL_LINK.SOURCE_ID.eq(sourceId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetchLazy(getFetchSize());
-            return buildUniversalLinks(result, true);
+            return buildUniversalLinkGroup(result, true);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -166,7 +170,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
     }
 
     @Override
-    public List<UniversalLink> getByDestId(int destId, int algorithmId) throws DaoException {
+    public UniversalLinkGroup getInlinks(int destId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -176,7 +180,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                     where(Tables.UNIVERSAL_LINK.DEST_ID.eq(destId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetchLazy(getFetchSize());
-            return buildUniversalLinks(result, false);
+            return buildUniversalLinkGroup(result, false);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -204,20 +208,36 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
         }
     }
 
-    private List<UniversalLink> buildUniversalLinks(Cursor<Record> result, boolean source) throws DaoException {
+    private UniversalLinkGroup buildUniversalLinkGroup(Cursor<Record> result, boolean outlinks) throws DaoException {
+        if (!result.hasNext()) {
+            return null;
+        }
         Multimap<Integer, Record> allRecords = HashMultimap.create();
+        Set<Language> languages = new HashSet<Language>();
+        Record temp = null;
         for (Record record : result) {
             allRecords.put(
-                    record.getValue(source ?
-                            Tables.UNIVERSAL_LINK.DEST_UNIV_ID :
-                            Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),
+                    record.getValue(outlinks ?                      // Gets the unique ID of the links
+                            Tables.UNIVERSAL_LINK.DEST_UNIV_ID :    // If links are outlinks, dest ID is unique
+                            Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),  // If links are inlinks, source ID is unique
                     record);
+            languages.add(Language.getById(record.getValue(Tables.UNIVERSAL_LINK.LANG_ID)));
+            temp = record;
         }
         List<UniversalLink> links = new ArrayList<UniversalLink>();
+        Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>(links.size());
         for (Integer integer : allRecords.keySet()) {
-            links.add(buildUniversalLink(allRecords.get(integer)));
+            map.put(integer, buildUniversalLink(allRecords.get(integer)));
         }
-        return links;
+        return new UniversalLinkGroup(
+                map,
+                outlinks,
+                temp.getValue(outlinks ?           // Gets the common ID of the links
+                        Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID :  // If links are outlinks, source ID is common
+                        Tables.UNIVERSAL_LINK.DEST_UNIV_ID),    // If links are inlinks, dest ID is common
+                temp.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID),
+                new LanguageSet(languages)
+        );
     }
 
     /*
@@ -294,4 +314,40 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                 map
         );
     }
+
+    public static class Provider extends org.wikapidia.conf.Provider<UniversalLinkDao> {
+        public Provider(Configurator configurator, org.wikapidia.conf.Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return UniversalLinkDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.universalLink";
+        }
+
+        @Override
+        public UniversalLinkDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("sql")) {
+                return null;
+            }
+            try {
+                return new UniversalLinkSqlDao(
+                        getConfigurator().get(
+                                DataSource.class,
+                                config.getString("dataSource")),
+                        getConfigurator().get(
+                                LocalLinkDao.class,
+                                config.getString("localLinkDao"))
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+    }
+
 }

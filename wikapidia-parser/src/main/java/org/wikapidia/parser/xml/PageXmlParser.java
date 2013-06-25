@@ -95,14 +95,7 @@ public class PageXmlParser {
 
     // TODO: does this method need to be like this, or can it just return "type"
     private NameSpace getNameSpace(String title) {
-        NameSpace ns = new Title(title, language).guessType();
-        if (ns == NameSpace.ARTICLE) {
-            return NameSpace.ARTICLE;
-        } else if (ns == NameSpace.CATEGORY) {
-            return NameSpace.CATEGORY;
-        } else {
-            return NameSpace.SPECIAL;
-        }
+        return new Title(title, language).getNamespace();
     }
 
     private String getRedirect(String rawXml) {

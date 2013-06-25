@@ -93,4 +93,8 @@ public class LocalLink {
     public LocationType getLocType(){
         return locType;
     }
+
+    public long longHashCode() {
+        return ((long)sourceId << 32) | destId + 232421 * language.getId();
+    }
 }

@@ -108,6 +108,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         }
     }
 
+    // This iterable can contain null entries, which originate from the cursor.
+    // TODO: Investigate this issue
     @Override
     public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
@@ -133,7 +135,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             return new SqlDaoIterable<T>(result) {
                 @Override
                 public T transform(Record r) {

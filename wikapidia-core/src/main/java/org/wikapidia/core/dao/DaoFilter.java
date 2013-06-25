@@ -126,6 +126,10 @@ public class DaoFilter {
         return this;
     }
 
+    public DaoFilter setLanguages(Language language) {
+        return setLanguages(Arrays.asList(new Language[]{language}));
+    }
+
     /**
      * Sets the namespace filter to the specified collection of namespace constants.
      * Used by LocalPage, RawPage, and UniversalPage.

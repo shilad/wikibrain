@@ -10,8 +10,8 @@ import java.util.Map;
 
 public interface LocalCategoryDao extends LocalPageDao<LocalCategory> {
 
-    public abstract LocalCategory getByTitle(Language language, Title title) throws DaoException;
+    public LocalCategory getByTitle(Language language, Title title) throws DaoException;
 
-    public abstract Map<Title, LocalCategory> getByTitles(Language language, Collection<Title> titles) throws DaoException;
+    public Map<Title, LocalCategory> getByTitles(Language language, Collection<Title> titles) throws DaoException;
 
 }
