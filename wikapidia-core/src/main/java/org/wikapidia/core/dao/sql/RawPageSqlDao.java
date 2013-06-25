@@ -118,7 +118,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             Cursor<Record> result = context.select().
                     from(Tables.RAW_PAGE).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             return new SqlDaoIterable<RawPage>(result) {
                 @Override
                 public RawPage transform(Record r) {
@@ -168,27 +168,6 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public SqlDaoIterable<RawPage> allRawPages() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context =  DSL.using(conn, dialect);
-            TableField idField;
-            Cursor<Record> result = context.select()
-                    .from(Tables.RAW_PAGE)
-                    .fetchLazy(getFetchSize());
-            return new SqlDaoIterable<RawPage>(result) {
-                @Override
-                public RawPage transform(Record r) {
-                     return buildRawPage(r);
-                }
-            };
-        } catch (SQLException e) {
-            throw new DaoException(e);
         }
     }
 

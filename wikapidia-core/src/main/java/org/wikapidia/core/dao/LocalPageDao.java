@@ -14,7 +14,7 @@ public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
      * Sets if we should try to follow the redirects or not. Default is true (to following them).
      * @param followRedirects
      */
-    public abstract void setFollowRedirects(boolean followRedirects) throws DaoException;
+    public void setFollowRedirects(boolean followRedirects) throws DaoException;
 
     /**
      * Get a single page by its title
@@ -24,7 +24,7 @@ public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract T getByTitle(Language language, Title title, NameSpace ns) throws DaoException;
+    public T getByTitle(Language language, Title title, NameSpace ns) throws DaoException;
 
     /**
      * Get a single page by its title
@@ -33,7 +33,7 @@ public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract T getById(Language language, int pageId) throws DaoException;
+    public T getById(Language language, int pageId) throws DaoException;
 
     /**
      * Get a set of pages by their ids
@@ -42,7 +42,7 @@ public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
      * @return a map of ids to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public abstract Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException;
+    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException;
 
     /**
      * Get a map of pages by their titles

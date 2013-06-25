@@ -1,12 +1,17 @@
-package org.wikapidia.mapper.utils;
+package org.wikapidia.mapper;
 
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  */
 public abstract class MapperIterator<E> implements Iterator<E> {
 
+    public static final Logger LOG = Logger.getLogger(MapperIterator.class.getName());
+
     private final Iterator input;
+    private int nullCounter = 0;
 
     public MapperIterator(Iterable input) {
         this.input = input.iterator();
@@ -21,12 +26,21 @@ public abstract class MapperIterator<E> implements Iterator<E> {
 
     @Override
     public boolean hasNext() {
-        return input.hasNext();
+        boolean temp = input.hasNext();
+        if (!temp) {
+            LOG.log(Level.INFO, "Null records: " + nullCounter);
+        }
+        return temp;
     }
 
     @Override
     public E next() {
-        return transform(input.next());
+        Object temp = input.next();
+        while (temp == null) {
+            temp = input.next();
+            nullCounter++;
+        }
+        return transform(temp);
     }
 
     @Override

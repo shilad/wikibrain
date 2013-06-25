@@ -6,13 +6,14 @@ import com.typesafe.config.Config;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.mapper.ConceptMapper;
-import org.wikapidia.mapper.utils.MapperIterator;
+import org.wikapidia.mapper.MapperIterator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,8 +29,19 @@ public class MonolingualConceptMapper extends ConceptMapper {
     }
 
     @Override
-    public MapperIterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException {
-        Iterable<LocalPage> localPages = localPageDao.get(new DaoFilter().setLanguages(ls));
+    public MapperIterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikapidiaException {
+        Iterable<LocalPage> localPages = null;
+        try {
+            localPages = localPageDao.get(new DaoFilter().setLanguages(ls).setRedirect(false));
+        } catch (DaoException e) {
+            throw new WikapidiaException(e);
+        }
+
+        if (localPages == null) {
+            System.out.println("No pages found!");
+            return null;
+        }
+
         return new MapperIterator<UniversalPage>(localPages) {
 
             @Override

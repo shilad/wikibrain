@@ -16,7 +16,7 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return a single unique LocalLink
      * @throws DaoException
      */
-    public abstract LocalLink getLink(Language language, int sourceId, int destId) throws DaoException;
+    public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException;
 
     /**
      * get all the links on a page matching criteria
@@ -28,7 +28,7 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public abstract SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException;
+    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException;
 
     /**
      * get all inlinks or outlinks for a page
@@ -38,7 +38,7 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public abstract SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException;
+    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException;
 
     /**
      * Retrieve the number of links in a language meeting given criteria
@@ -48,5 +48,5 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public abstract int getNumLinks (Language language, boolean isParseable, LocalLink.LocationType locationType) throws DaoException;
+    public int getNumLinks (Language language, boolean isParseable, LocalLink.LocationType locationType) throws DaoException;
 }

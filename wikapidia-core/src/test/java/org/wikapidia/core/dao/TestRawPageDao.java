@@ -63,7 +63,7 @@ public class TestRawPageDao {
         assert (body.equals(rawSaved.getBody()));
         assert (rawSaved.isRedirect());
 
-        SqlDaoIterable<RawPage> savedRaws = rpDao.allRawPages();
+        Iterable<RawPage> savedRaws = rpDao.get(new DaoFilter().setLanguages(lang.getLanguage()));
         assert (savedRaws!=null);
         RawPage savedRaw = savedRaws.iterator().next();
         assert (savedRaw.getNamespace().getValue() == rawPage.getNamespace().getValue());
