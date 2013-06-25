@@ -7,6 +7,7 @@ import java.util.Iterator;
 public abstract class MapperIterator<E> implements Iterator<E> {
 
     private final Iterator input;
+    private int nullCounter = 0;
 
     public MapperIterator(Iterable input) {
         this.input = input.iterator();
@@ -21,12 +22,21 @@ public abstract class MapperIterator<E> implements Iterator<E> {
 
     @Override
     public boolean hasNext() {
-        return input.hasNext();
+        boolean temp = input.hasNext();
+        if (!temp) {
+            System.out.println("Null records: " + nullCounter);
+        }
+        return temp;
     }
 
     @Override
     public E next() {
-        return transform(input.next());
+        Object temp = input.next();
+        while (temp == null) {
+            temp = input.next();
+            nullCounter++;
+        }
+        return transform(temp);
     }
 
     @Override

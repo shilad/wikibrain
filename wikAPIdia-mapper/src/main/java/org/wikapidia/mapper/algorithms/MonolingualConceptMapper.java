@@ -29,7 +29,13 @@ public class MonolingualConceptMapper extends ConceptMapper {
 
     @Override
     public MapperIterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException {
-        Iterable<LocalPage> localPages = localPageDao.get(new DaoFilter().setLanguages(ls));
+        Iterable<LocalPage> localPages = localPageDao.get(new DaoFilter().setLanguages(ls).setRedirect(false));
+
+        if (localPages == null) {
+            System.out.println("No pages found!");
+            return null;
+        }
+
         return new MapperIterator<UniversalPage>(localPages) {
 
             @Override

@@ -1,6 +1,8 @@
 package org.wikapidia.core.dao;
 
+import gnu.trove.map.TIntIntMap;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
 
@@ -48,4 +50,6 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      * @throws DaoException
      */
     public abstract int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException;
+
+    Map<Language, TIntIntMap> getAllLocalIdsToUnivIds(int algorithmId, LanguageSet ls) throws DaoException;
 }

@@ -39,8 +39,11 @@ public class ConceptLoader {
             Iterator<UniversalPage> pages = mapper.getConceptMap(languageSet);
             int i = 0;
             while (pages.hasNext()) {
-                dao.save(pages.next());
-                i++;
+                UniversalPage temp = pages.next();
+                if (temp != null) {
+                    dao.save(temp);
+                    i++;
+                }
                 if (i%1000 == 0) System.out.println("UniversalPages mapped: " + i);
             }
             System.out.println("All UniversalPages mapped: " + i);
@@ -69,10 +72,16 @@ public class ConceptLoader {
                         .create("i"));
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArgs()
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process")
                         .create("l"));
-
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("algorithm")
+                        .withDescription("the name of the algorithm to execute")
+                        .create("n"));
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;

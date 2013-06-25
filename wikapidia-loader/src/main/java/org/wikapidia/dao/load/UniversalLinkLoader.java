@@ -1,5 +1,6 @@
 package org.wikapidia.dao.load;
 
+import gnu.trove.map.TIntIntMap;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -43,24 +45,31 @@ public class UniversalLinkLoader {
     public void loadLinkMap(int algorithmId) throws WikapidiaException {
         try {
             Iterable<LocalLink> localLinks = localLinkDao.get(new DaoFilter().setLanguages(languageSet));
+            System.out.println("Fetching ID map");
+            Map<Language, TIntIntMap> map = universalPageDao.getAllLocalIdsToUnivIds(algorithmId, languageSet);
+            System.out.println("Loading links");
             int i=0;
             for (LocalLink localLink : localLinks) {
                 i++;
+                if (i%1000 == 0)
+                    System.out.println("UniversalLinks loaded: " + i);
+                int sourceUnivId, destUnivId;
+                if (localLink.getSourceId() < 0) {
+                    sourceUnivId = -1;
+                } else {
+                    sourceUnivId = map.get(localLink.getLanguage()).get(localLink.getSourceId());
+                }
+                if (localLink.getDestId() < 0) {
+                    destUnivId = -1;
+                } else {
+                    destUnivId = map.get(localLink.getLanguage()).get(localLink.getDestId());
+                }
                 universalLinkDao.save(
                         localLink,
-                        universalPageDao.getUnivPageId(
-                                localLink.getLanguage(),
-                                localLink.getSourceId(),
-                                algorithmId),
-                        universalPageDao.getUnivPageId(
-                                localLink.getLanguage(),
-                                localLink.getDestId(),
-                                algorithmId),
+                        sourceUnivId,
+                        destUnivId,
                         algorithmId
                 );
-                if (i%1000 == 0) {
-                    System.out.println("UniversalLinks loaded: " + i);
-                }
             }
             System.out.println("All UniversalLinks loaded: " + i);
         } catch (DaoException e) {
@@ -88,16 +97,16 @@ public class UniversalLinkLoader {
                         .create("i"));
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArgs()
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process")
                         .create("l"));
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArg()
                         .withLongOpt("algorithm")
                         .withDescription("the name of the algorithm to execute")
                         .create("n"));
-
-
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;

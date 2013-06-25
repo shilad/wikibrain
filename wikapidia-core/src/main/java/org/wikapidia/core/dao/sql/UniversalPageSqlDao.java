@@ -3,6 +3,8 @@ package org.wikapidia.core.dao.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -12,6 +14,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
@@ -191,7 +194,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         return map;
     }
 
-    // TODO: implement this using TIntIntMap?
     @Override
     public int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException {
         Connection conn = null;
@@ -204,7 +206,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     and(Tables.UNIVERSAL_PAGE.PAGE_ID.eq(localPageId)).
                     and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
                     fetchOne();
-            return record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID);
+            if (record == null) {
+                return -1;
+            } else {
+                return record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID);
+            }
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -215,6 +221,37 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     @Override
     public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException {
         return getUnivPageId(localPage.getLanguage(), localPage.getLocalId(), algorithmId);
+    }
+
+    @Override
+    public Map<Language, TIntIntMap> getAllLocalIdsToUnivIds(int algorithmId, LanguageSet ls) throws DaoException {
+        Connection conn = null;
+        try{
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn,dialect);
+            Map<Language, TIntIntMap> map = new HashMap<Language, TIntIntMap>();
+            for (Language l : ls) {
+                Cursor<Record> cursor = context.select().
+                        from(Tables.UNIVERSAL_PAGE).
+                        where(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
+                        and(Tables.UNIVERSAL_PAGE.LANG_ID.eq(l.getId())).
+                        fetchLazy();
+                TIntIntMap ids = new TIntIntHashMap(
+                        gnu.trove.impl.Constants.DEFAULT_CAPACITY,
+                        gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
+                        -1, -1);
+                for (Record record : cursor){
+                    ids.put(record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID),
+                            record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
+                }
+                map.put(l, ids);
+            }
+            return map;
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     /**
