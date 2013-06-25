@@ -18,11 +18,20 @@ import java.util.regex.Pattern;
 public class TestDumpLinkGetter {
 
     @Test
-    public void testNew() throws IOException {
+    public void testDumpLinkGetter() throws IOException {
         for (Language lang : Arrays.asList(Language.getByLangCode("en"))) {
             DumpLinkGetter testGetter = new DumpLinkGetter(lang, Arrays.asList(LinkMatcher.values()), "20130604");
 //            System.out.println("" /*+ testGetter.getFileLinks().size()*/ + "\n" + testGetter.getFileLinks() );
             System.out.println(testGetter.getDumpFiles());
+        }
+    }
+
+    @Test
+    public void testNew() throws IOException {
+        for (Language lang : Arrays.asList(Language.getByLangCode("en"))) {
+            RequestedLinkGetter testGetter = new RequestedLinkGetter(lang, Arrays.asList(LinkMatcher.values()), "20130604");
+//            System.out.println("" /*+ testGetter.getFileLinks().size()*/ + "\n" + testGetter.getFileLinks() );
+            System.out.println(testGetter.getAvailableDates());
         }
     }
 
