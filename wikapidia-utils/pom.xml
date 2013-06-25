@@ -61,6 +61,11 @@
             <artifactId>je</artifactId>
             <version>5.0.73</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.5</version>
+        </dependency>
     </dependencies>
 
     <build>
