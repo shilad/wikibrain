@@ -65,7 +65,7 @@ public class Title implements Externalizable {
 	
 	private static String getNamespaceString(String text){
 		String[] parts = text.split(":");
-		if (parts.length > 1 && NameSpace.isNamespaceString(parts[0])){
+		if (text.contains(":")&& NameSpace.isNamespaceString(parts[0])){
 			return parts[0];
 		}else{
 			return null;
