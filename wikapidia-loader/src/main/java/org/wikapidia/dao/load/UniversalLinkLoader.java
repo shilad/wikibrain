@@ -146,8 +146,8 @@ public class UniversalLinkLoader {
                 universalLinkDao);
 
         if (cmd.hasOption("t")) {
-            universalLinkDao.beginLoad();
             System.out.println("Begin Load");
+            universalLinkDao.beginLoad();
         }
 
         loader.loadLinkMap(mapper.getId());
