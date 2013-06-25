@@ -21,3 +21,6 @@ target/
 
 # tmp
 */tmp/
+
+# Databases
+*.db
