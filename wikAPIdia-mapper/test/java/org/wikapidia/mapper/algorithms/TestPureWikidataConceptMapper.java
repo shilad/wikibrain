@@ -5,12 +5,12 @@
 //import org.wikapidia.mapper.algorithms.PureWikidataConceptMapper;
 //
 ///**
-// * Created with IntelliJ IDEA.
-// * User: bjhecht
-// * Date: 6/25/13
-// * Time: 2:33 PM
-// * To change this template use File | Settings | File Templates.
-// */
+//* Created with IntelliJ IDEA.
+//* User: bjhecht
+//* Date: 6/25/13
+//* Time: 2:33 PM
+//* To change this template use File | Settings | File Templates.
+//*/
 //public class TestPureWikidataConceptMapper {
 //
 //    @Test
@@ -18,7 +18,7 @@
 //
 //        try {
 //
-//            String path = "/Users/bjhecht/Downloads/wikidatawiki-20130527-wb_items_per_site.sql";
+////            PureWikidataConceptMapper mapper = new PureWikidataConceptMapper();
 //
 //        } catch (WikapidiaException e) {
 //            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
