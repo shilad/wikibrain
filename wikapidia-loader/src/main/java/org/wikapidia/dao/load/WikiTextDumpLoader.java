@@ -73,11 +73,7 @@ public class WikiTextDumpLoader {
             new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
-        if (cmd.getArgList().isEmpty()) {
-            System.err.println("No input files specified.");
-            new HelpFormatter().printHelp("WikiTextDumpLoader", options);
-            return;
-        }
+        
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
@@ -85,7 +81,7 @@ public class WikiTextDumpLoader {
         if (cmd.hasOption("l")){
             allowedIlls = Arrays.asList(cmd.getOptionValues('l'));
         } else {
-            allowedIlls = null;
+            allowedIlls = (List<String>)conf.getConf().get().getAnyRef("Languages");
         }
 
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();

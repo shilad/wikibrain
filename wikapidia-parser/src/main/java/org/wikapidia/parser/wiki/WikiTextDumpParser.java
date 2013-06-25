@@ -46,11 +46,11 @@ public class WikiTextDumpParser {
 
     public void parse(List<ParserVisitor> visitors) throws DaoException {
         WikiTextParser wtp = new WikiTextParser(language, allowedLanguages, visitors);
-        DaoFilter daoFilter = new DaoFilter();
-        Iterator<RawPage> pageIterator = rawPageDao.get(daoFilter).iterator();
-        while (pageIterator.hasNext()) {
+        DaoFilter daoFilter = new DaoFilter().setLanguages(language.getLanguage());
+        Iterable<RawPage> pageIterator = rawPageDao.get(daoFilter);
+        for(RawPage page : pageIterator) {
             try {
-                wtp.parse(pageIterator.next());
+                wtp.parse(page);
             }
             catch (Exception e) {
                 LOG.log(Level.WARNING, "parsing failed:", e);
