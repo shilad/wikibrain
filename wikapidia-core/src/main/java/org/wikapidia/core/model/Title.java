@@ -46,11 +46,14 @@ public class Title implements Externalizable {
     }
 
     public NameSpace getNamespace(){
+        Matcher m = language.getCategoryPattern().matcher(canonicalTitle);
+        if (m.find()) {
+            return NameSpace.CATEGORY;
+        }
         String nameSpaceString = this.getNamespaceString();
         if (nameSpaceString==null){
             return NameSpace.ARTICLE;
-        }
-        else{
+        } else {
             return NameSpace.getNameSpaceByName(nameSpaceString);
         }
     }
@@ -130,22 +133,6 @@ public class Title implements Externalizable {
 			throw new WikapidiaException(e);
 		}
 	}
-
-    /**
-     * Returns the NameSpace associated with the page.
-     * A return value of ARTICLE may actually be a redirect or disambiguation
-     * because those depend on the wikitext of the article - not just the title.
-     * TODO: figure out how to look for special pages...
-     * @return
-     */
-    public NameSpace guessType() {
-        // test for category
-        Matcher m = language.getCategoryPattern().matcher(canonicalTitle);
-        if (m.find())
-            return NameSpace.CATEGORY;
-
-        return NameSpace.ARTICLE;
-    }
 
     /**
      * Deconstructs a title such as "Mash_(film)" into "Mash" and "film"

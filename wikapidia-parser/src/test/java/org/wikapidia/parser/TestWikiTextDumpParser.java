@@ -1,6 +1,7 @@
 package org.wikapidia.parser;
 
 import com.jolbox.bonecp.BoneCPDataSource;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
@@ -26,6 +27,7 @@ public class TestWikiTextDumpParser {
     public static final File SIMPLE_DUMP = new File("../wikapidia/wikapidia-loader/simplewiki-20130608-pages-articles.xml");
     public static final LanguageInfo SIMPLE = LanguageInfo.getByLangCode("simple");
 
+    @Ignore
     @Test
     public void test1() throws DaoException {
         List<String> allowedIllLangs = new ArrayList<String>();
