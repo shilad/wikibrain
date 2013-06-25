@@ -51,6 +51,7 @@ public class WikiTextDumpLoader {
             throw new IllegalArgumentException("invalid filename. Expected prefix, for example 'enwiki-...'");
         }
         String langCode = file.getName().substring(0, i);
+        langCode = langCode.replace('_', '-');
         LanguageInfo lang = LanguageInfo.getByLangCode(langCode);
         WikiTextDumpParser dumpParser = new WikiTextDumpParser(file, lang, allowedIlls);
         dumpParser.parse(visitors);
