@@ -23,7 +23,7 @@ public class LocalLinkVisitor extends ParserVisitor {
 
     @Override
     public void link(ParsedLink link) throws WikapidiaException {
-        if(counter%1000==0)
+        if(counter%10000==0)
             System.out.println("Visited link #" + counter);
         counter++;
         try {
@@ -36,32 +36,15 @@ public class LocalLinkVisitor extends ParserVisitor {
             Language lang = link.target.getLanguage();
             LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
 
-            String linkText = link.text.split("\\|")[0]; //piped link
-            linkText = linkText.split("#")[0]; //subsection
-
-            /**
-             * This is really dummmmbbbbbbb.
-             */
-            if(lang.equals(Language.getByLangCode("cy")) && linkText.toLowerCase().contains("bawd|")) {
-                return;
-            }
-            if(lang.equals(Language.getByLangCode("he")) && linkText.toLowerCase().contains("ממוזער|")) {
-                return;
-            }
-            if(lang.equals(Language.getByLangCode("de")) && linkText.toLowerCase().contains("miniatur|")) {
-                return;
-            }
-            if(linkText.toLowerCase().startsWith("thumb|")){
-                return;
-            }
+            String targetText = link.target.getCanonicalTitle();
 
             //Wikipedia ignores colons at the beginning of links
             // and uses them to overcome technical restrictions
-            if (linkText.length()>0&&linkText.charAt(0)==':'){
-                linkText = linkText.substring(1,linkText.length());
+            if (targetText.length()>0&&targetText.charAt(0)==':'){
+                targetText = targetText.substring(1,targetText.length());
+                link.target = new Title(targetText, langInfo);
             }
-            Title linkTitle = new Title(linkText, langInfo);
-            int destId = pageDao.getIdByTitle(linkTitle.getCanonicalTitle(), lang, linkTitle.getNamespace());
+            int destId = pageDao.getIdByTitle(targetText, lang, link.target.getNamespace());
             linkDao.save(
                     new LocalLink(
                             lang,

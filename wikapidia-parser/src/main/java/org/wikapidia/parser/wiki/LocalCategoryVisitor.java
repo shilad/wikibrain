@@ -30,17 +30,17 @@ public class LocalCategoryVisitor extends ParserVisitor {
             LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
 
             if(++cats%1000==0){
-                System.out.println("Cat # " + cats + " says meow!");
+                System.out.println("Visited cat #" + cats);
             }
 
             String catText = cat.category.getCanonicalTitle().split("\\|")[0]; //piped cat link
             catText = catText.split("#")[0]; //cat subsection
 
-            if(!isCategory(catText, langInfo))  {
+            Title catTitle = new Title(catText, langInfo);
+            if(!isCategory(catText, langInfo) && !catTitle.getNamespace().equals(NameSpace.CATEGORY))  {
                 throw new WikapidiaException("Thought it was a category, was not a category.");
             }
-            Title catTitle = new Title(catText, langInfo);
-            assert (catTitle.getNamespace().equals(NameSpace.CATEGORY));
+
             int catId = pageDao.getIdByTitle(catTitle.getCanonicalTitle(), lang, NameSpace.CATEGORY);
             catMemDao.save(
                     new LocalCategoryMember(

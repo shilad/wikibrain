@@ -64,7 +64,7 @@ public class RedirectLoader {
            Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
            redirectIdsToPageIds.put(p.getPageId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));
-           if(i%100==0)
+           if(i%1000==0)
                System.out.println("loading redirect # " + i);
             i++;
         }
