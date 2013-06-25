@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.cli.*;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
@@ -16,7 +17,9 @@ import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
+import java.text.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,6 +38,7 @@ public class DumpLinkGetter {
     private final String baseUrl;
     private List<LinkMatcher> matchers;
     private Language lang;
+    private String date;    // This is the date when the dump snapshot is taken.
 
     private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
 
@@ -49,8 +53,15 @@ public class DumpLinkGetter {
         this.lang = lang;
     }
 
+    public DumpLinkGetter(String baseUrl, List<LinkMatcher> matchers, Language lang, String date) {
+        this.baseUrl = baseUrl;
+        this.matchers = matchers;
+        this.lang = lang;
+        this.date = date;
+    }
+
     /**
-     * Given a particulat language, return the base url string of the dump of the language.
+     * Given a particular language, return the base url string of the dump of the language.
      *
      * @param lang
      * @return
@@ -58,6 +69,72 @@ public class DumpLinkGetter {
     private String getLanguageBaseUrl(Language lang) {
         // langCode with dashes like "roa-tara" should be 'roa_tara' in dump links
         return BASEURL_STRING.replace("__LANG__", lang.getLangCode().replace("-", "_"));
+    }
+
+    /**
+     * Convert a string formatted in 'yyyyMMdd' to java.util.Date.
+     * @param dateString
+     * @return
+     * @throws java.text.ParseException
+     */
+    protected Date stringToDate(String dateString) throws java.text.ParseException {
+        Date date = new SimpleDateFormat("yyyyMMdd").parse(dateString);
+        return date;
+    }
+
+    /**
+     * Given a particular language, return the list of dates available on the dump index page.
+     *
+     * @param lang
+     * @return
+     */
+    protected List<Date> getAvailableDates(Language lang) throws IOException, java.text.ParseException {
+        List<Date> availableDate = new ArrayList<Date>();
+        // langCode with dashes like "roa-tara" should be 'roa_tara' in dump links
+        URL dumpIndexURL = new URL(BASEURL_STRING.replace("__LANG__", lang.getLangCode().replace("-", "_")));
+        String dumpIndexPage = IOUtils.toString(dumpIndexURL.openStream());
+        List<String> availableLinks = getLinks(dumpIndexPage);
+        for (String availableLink :availableLinks) {
+            if (availableLink.matches("\\d{8}/")) {
+                availableDate.add(stringToDate(availableLink.substring(0,8)));
+            }
+        }
+        return availableDate;
+    }
+
+    /**
+     * Select the last date in a date list before the target date.
+     * @param targetDate
+     * @return
+     */
+    protected String dateSelecter(List<Date> dateList, Date targetDate) throws java.text.ParseException {
+        Date selectDate = dateList.get(0);
+        for (Date date : dateList) {
+            if (date.before(targetDate) && (date.after(selectDate) || selectDate.after(targetDate))) {
+                selectDate = date;
+            }
+        }
+        if (selectDate.before(targetDate)) {
+            return new SimpleDateFormat("yyyyMMdd").format(selectDate);
+        }
+        return null;
+    }
+
+    protected String getDumpIndexDate(String date) throws IOException {
+        URL tryIndexURL = new URL(BASEURL_STRING.replace("__LANG__", lang.getLangCode().replace("-", "_")) + date + "/");
+        Document doc = Jsoup.parse(IOUtils.toString(tryIndexURL.openStream()));
+        String status = doc.select("p.status").select("span").text();
+        return status.equals("Dump complete") ? date : "latest";
+    }
+
+    /**
+     * Return the html of the database dump index page.
+     *
+     * @return
+     */
+    protected String getDumpIndex(String date) throws IOException {
+        URL indexURL = new URL(getLanguageBaseUrl(lang) + date + "/");
+        return IOUtils.toString(indexURL.openStream());
     }
 
     /**
@@ -71,7 +148,7 @@ public class DumpLinkGetter {
     }
 
     /**
-     * Given the html of an index page and a particular pattern, return all links.
+     * Given the html of an index page, return all links.
      *
      * @param html
      * @return
@@ -93,6 +170,29 @@ public class DumpLinkGetter {
      */
     public HashMap<String, List<URL>> getDumpFiles() throws IOException {
         List<String> links = getLinks(getDumpIndex());
+        HashMap<String, List<URL>> urlLinks = new HashMap<String, List<URL>>();
+        try{
+            for(LinkMatcher linkMatcher : matchers){
+                List<String> results = linkMatcher.match(links);
+                List<URL> urls = new ArrayList<URL>();
+                for (String url: results){
+                    URL linkURL = new URL(getLanguageBaseUrl(lang) + url);
+                    urls.add(linkURL);
+                }
+                urlLinks.put(linkMatcher.getName(), urls);
+            }
+        } catch(MalformedURLException e){
+            LOG.log(Level.WARNING, "string cannot form URL", e);
+        }
+        return urlLinks;
+    }
+
+    /**
+     * Return all links of a particular language the fits one of the patterns.
+     * @return
+     */
+    public HashMap<String, List<URL>> getDumpFiles(String date) throws IOException {
+        List<String> links = getLinks(getDumpIndex(date));
         HashMap<String, List<URL>> urlLinks = new HashMap<String, List<URL>>();
         try{
             for(LinkMatcher linkMatcher : matchers){
@@ -206,6 +306,7 @@ public class DumpLinkGetter {
         FileUtils.writeLines(file, result, "\n");
     }
 
-    protected static final String BASEURL_STRING = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
+//    protected static final String BASEURL_STRING = "http://dumps.wikimedia.org/__LANG__wiki/latest/";
+    protected static final String BASEURL_STRING = "http://dumps.wikimedia.org/__LANG__wiki/";
 
 }

@@ -6,6 +6,7 @@ import org.wikapidia.download.DumpLinkGetter;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,6 +16,21 @@ import java.util.regex.Pattern;
 /**
  */
 public class TestDumpLinkGetter {
+
+    @Test
+    public void testGetLanguageIndex() throws ParseException {
+        for(Language lang : Language.LANGUAGES) {
+            DumpLinkGetter testGetter = new DumpLinkGetter(DumpLinkGetter.BASEURL_STRING, Arrays.asList(LinkMatcher.values()), lang);
+            try {
+                String date = testGetter.dateSelecter(testGetter.getAvailableDates(lang), testGetter.stringToDate("20131106"));
+                HashMap<String, List<URL>> whoa= testGetter.getDumpFiles(testGetter.getDumpIndexDate(date));
+                System.out.println(testGetter.getDumpIndexDate(date));
+                System.out.println(whoa);
+            } catch (IOException e) {
+                System.err.println("IO");
+            }
+        }
+    }
 
     @Test
     public void testIndex() throws IOException {
