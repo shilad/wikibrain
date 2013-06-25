@@ -3,12 +3,17 @@ package org.wikapidia.download;
 import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.lang.Language;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,19 +27,22 @@ public class DumpLinkInfo {
     private final String date;
     private final LinkMatcher linkMatcher;
     private final URL url;
+    private final int counter;
 
-    public DumpLinkInfo(Language language, String date, LinkMatcher linkMatcher, URL url) {
+    public DumpLinkInfo(Language language, String date, LinkMatcher linkMatcher, URL url, int counter) {
         this.language = language;
         this.date = date;
         this.linkMatcher = linkMatcher;
         this.url = url;
+        this.counter = counter;
     }
 
-    public DumpLinkInfo(String langCode, String date, String linkMatcher, String url) throws MalformedURLException {
+    public DumpLinkInfo(String langCode, String date, String linkMatcher, String url, int counter) throws MalformedURLException {
         this.language = Language.getByLangCode(langCode);
         this.date = date;
         this.linkMatcher = LinkMatcher.getByName(linkMatcher);
         this.url = new URL(url);
+        this.counter = counter;
     }
 
     public Language getLanguage() {
@@ -53,6 +61,45 @@ public class DumpLinkInfo {
         return url;
     }
 
+    public int getCounter() {
+        return counter;
+    }
+
+    /**
+     * Returns a string for the local path to save this dump file
+     * @return
+     */
+    public String getLocalPath() {
+        return language.getLangCode() + "/" + date;
+    }
+
+    /**
+     * Returns a string for the file name to save this dump file
+     * @return
+     */
+    public String getFileName() {
+        return linkMatcher.getName() + "." +
+                counter + "." +
+                language.getLangCode() + "." +
+                date +
+                getExtension();
+    }
+
+    /**
+     * Returns a string for the extension to save this dump file
+     * @return
+     */
+    public String getExtension() {
+        String terminal = url.toString().substring(url.toString().lastIndexOf("wiki"));
+        int first = terminal.indexOf(".");
+        int last = terminal.lastIndexOf(".");
+        if (first == last) {
+            return terminal.substring(last); // Only 1 extension
+        } else {
+            return terminal.substring(first, first+4) + terminal.substring(last); // 2 extensions
+        }
+    }
+
     /**
      * Parses a file of info pertaining to dump links into a list of DumpLinkInfo.
      * Info must be listed in order: lang code, date, LinkMatcher, URL
@@ -60,17 +107,30 @@ public class DumpLinkInfo {
      * @param file
      * @return
      */
-    public static List<DumpLinkInfo> parseFile(String file) {
+    public static List<DumpLinkInfo> parseFile(File file) {
         InputStream stream = null;
+        Map<String, AtomicInteger> counters = new HashMap<String, AtomicInteger>();
         try {
-            stream = DumpLinkInfo.class.getClassLoader()
-                    .getResourceAsStream(file);
+            stream = new FileInputStream(file);
             List<String> lines = IOUtils.readLines(stream, "UTF-8");
             List<DumpLinkInfo> dumpLinks = new ArrayList<DumpLinkInfo>();
             for (String line : lines) {
-                DumpLinkInfo temp = parseInfo(line);
-                if (temp != null) {
+                String[] parsedInfo = line.split("\t");
+                try {
+                    String lm = parsedInfo[1];
+                    if (!counters.containsKey(lm)) {
+                        counters.put(lm, new AtomicInteger(0));
+                    }
+                    DumpLinkInfo temp = new DumpLinkInfo(
+                            parsedInfo[0],
+                            "date",         // TODO: implement date
+                            lm,
+                            parsedInfo[2],
+                            counters.get(lm).getAndIncrement()
+                    );
                     dumpLinks.add(temp);
+                } catch (MalformedURLException e) {
+                    LOG.log(Level.WARNING, "Malformed URL \"" + parsedInfo[3] + "\" : ", e);
                 }
             }
             return dumpLinks;
@@ -79,54 +139,5 @@ public class DumpLinkInfo {
         } finally {
             if (stream != null) IOUtils.closeQuietly(stream);
         }
-    }
-
-    /**
-     * Parses a tab-separated string of info into a DumpLink.
-     * Info must be listed in order: lang code, date, LinkMatcher, URL
-     * @param info
-     * @return
-     * @throws MalformedURLException
-     */
-    public static DumpLinkInfo parseInfo(String info) {
-        String[] parsedInfo = info.split("\t");
-
-        try {
-            return new DumpLinkInfo(
-                    parsedInfo[0],
-                    parsedInfo[1],
-                    parsedInfo[2],
-                    parsedInfo[3]
-            );
-        } catch (MalformedURLException e) {
-            LOG.log(Level.WARNING, "Malformed URL \"" + parsedInfo[3] + "\" : ", e);
-        }
-        return null;
-
-//        Language language = null;
-//        int date = -1;
-//        LinkMatcher linkMatcher = null;
-//        URL url = null;
-//        for (String infoPiece : parsedInfo) {
-//            LinkMatcher temp = LinkMatcher.getByName(infoPiece);
-//            if (temp != null) {
-//                linkMatcher = temp;
-//            }
-//            try {
-//                language = Language.getByLangCode(infoPiece);
-//            } catch (IllegalArgumentException e) {}
-//            try {
-//                date = Integer.parseInt(infoPiece);
-//            } catch (NumberFormatException e) {}
-//            try {
-//                url = new URL(infoPiece);
-//            } catch (MalformedURLException e) {}
-//        }
-//        return new DumpLinkInfo(
-//                language,
-//                date,
-//                linkMatcher,
-//                url
-//        );
     }
 }
