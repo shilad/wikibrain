@@ -1,10 +1,14 @@
-package org.wikapidia.mapper.utils;
+package org.wikapidia.mapper;
 
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  */
 public abstract class MapperIterator<E> implements Iterator<E> {
+
+    public static final Logger LOG = Logger.getLogger(MapperIterator.class.getName());
 
     private final Iterator input;
     private int nullCounter = 0;
@@ -24,7 +28,7 @@ public abstract class MapperIterator<E> implements Iterator<E> {
     public boolean hasNext() {
         boolean temp = input.hasNext();
         if (!temp) {
-            System.out.println("Null records: " + nullCounter);
+            LOG.log(Level.INFO, "Null records: " + nullCounter);
         }
         return temp;
     }

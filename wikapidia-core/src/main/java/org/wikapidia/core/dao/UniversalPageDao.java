@@ -43,7 +43,9 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
     public int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException;
 
     /**
-     * Returns the universal ID of a local page, within the scope of the specified algorithm
+     * Returns the universal ID of a local page, within the scope of the specified algorithm.
+     * This method is SLOW and should not be used extensively. For mass usage,
+     * use the getAllLocalToUnivIdsMap() method.
      * @param localPage
      * @param algorithmId
      * @return
@@ -51,5 +53,14 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      */
     public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException;
 
-    public Map<Language, TIntIntMap> getAllLocalIdsToUnivIds(int algorithmId, LanguageSet ls) throws DaoException;
+    /**
+     * Returns a group of maps between local IDs and universal IDs.
+     * The maps are distributed by language.  This allows fast and easy retrieval
+     * of the universal ID to which a specified algorithm mapped a page.
+     * @param algorithmId the algorithm to map
+     * @param ls the set of languages to map
+     * @return
+     * @throws DaoException
+     */
+    public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(int algorithmId, LanguageSet ls) throws DaoException;
 }

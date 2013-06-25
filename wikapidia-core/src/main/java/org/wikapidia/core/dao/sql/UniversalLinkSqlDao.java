@@ -141,7 +141,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             return buildUniversalLinksIterable(result);
         } catch (SQLException e) {
             throw new DaoException(e);

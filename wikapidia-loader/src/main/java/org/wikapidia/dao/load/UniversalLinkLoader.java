@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -45,14 +46,14 @@ public class UniversalLinkLoader {
     public void loadLinkMap(int algorithmId) throws WikapidiaException {
         try {
             Iterable<LocalLink> localLinks = localLinkDao.get(new DaoFilter().setLanguages(languageSet));
-            System.out.println("Fetching ID map");
-            Map<Language, TIntIntMap> map = universalPageDao.getAllLocalIdsToUnivIds(algorithmId, languageSet);
-            System.out.println("Loading links");
+            LOG.log(Level.INFO, "Fetching ID map");
+            Map<Language, TIntIntMap> map = universalPageDao.getAllLocalToUnivIdsMap(algorithmId, languageSet);
+            LOG.log(Level.INFO, "Loading links");
             int i=0;
             for (LocalLink localLink : localLinks) {
                 i++;
                 if (i%1000 == 0)
-                    System.out.println("UniversalLinks loaded: " + i);
+                    LOG.log(Level.INFO, "UniversalLinks loaded: " + i);
                 int sourceUnivId, destUnivId;
                 if (localLink.getSourceId() < 0) {
                     sourceUnivId = -1;
@@ -71,7 +72,7 @@ public class UniversalLinkLoader {
                         algorithmId
                 );
             }
-            System.out.println("All UniversalLinks loaded: " + i);
+            LOG.log(Level.INFO, "All UniversalLinks loaded: " + i);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
@@ -146,15 +147,16 @@ public class UniversalLinkLoader {
                 universalLinkDao);
 
         if (cmd.hasOption("t")) {
-            System.out.println("Begin Load");
+            LOG.log(Level.INFO, "Begin Load");
             universalLinkDao.beginLoad();
         }
 
         loader.loadLinkMap(mapper.getId());
 
         if (cmd.hasOption("i")) {
+            LOG.log(Level.INFO, "End Load");
             universalLinkDao.endLoad();
-            System.out.println("End Load");
         }
+        LOG.log(Level.INFO, "DONE");
     }
 }

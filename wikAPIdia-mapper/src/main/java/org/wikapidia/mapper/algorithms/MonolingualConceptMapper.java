@@ -12,7 +12,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.mapper.ConceptMapper;
-import org.wikapidia.mapper.utils.MapperIterator;
+import org.wikapidia.mapper.MapperIterator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

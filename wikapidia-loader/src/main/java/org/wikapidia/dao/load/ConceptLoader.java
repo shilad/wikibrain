@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -36,17 +37,15 @@ public class ConceptLoader {
 
     public void load(ConceptMapper mapper) throws ConfigurationException, WikapidiaException {
         try {
+            LOG.log(Level.INFO, "Loading Concepts");
             Iterator<UniversalPage> pages = mapper.getConceptMap(languageSet);
             int i = 0;
             while (pages.hasNext()) {
-                UniversalPage temp = pages.next();
-                if (temp != null) {
-                    dao.save(temp);
-                    i++;
-                }
-                if (i%1000 == 0) System.out.println("UniversalPages mapped: " + i);
+                dao.save(pages.next());
+                i++;
+                if (i%1000 == 0) LOG.log(Level.INFO, "UniversalPages loaded: " + i);
             }
-            System.out.println("All UniversalPages mapped: " + i);
+            LOG.log(Level.INFO, "All UniversalPages loaded: " + i);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
@@ -115,15 +114,16 @@ public class ConceptLoader {
         final ConceptLoader loader = new ConceptLoader(languages, dao);
 
         if (cmd.hasOption("t")) {
+            LOG.log(Level.INFO, "Begin Load");
             dao.beginLoad();
-            System.out.println("Begin Load");
         }
 
         loader.load(mapper);
 
         if (cmd.hasOption("i")) {
+            LOG.log(Level.INFO, "End Load");
             dao.endLoad();
-            System.out.println("End Load");
         }
+        LOG.log(Level.INFO, "DONE");
     }
 }

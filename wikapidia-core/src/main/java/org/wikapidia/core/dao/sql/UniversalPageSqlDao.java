@@ -118,7 +118,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             final Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_PAGE).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             final Set<Integer> univIds = new HashSet<Integer>();
             for (Record record : result) {
                 univIds.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
@@ -224,7 +224,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public Map<Language, TIntIntMap> getAllLocalIdsToUnivIds(int algorithmId, LanguageSet ls) throws DaoException {
+    public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(int algorithmId, LanguageSet ls) throws DaoException {
         Connection conn = null;
         try{
             conn = ds.getConnection();
@@ -240,7 +240,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                         gnu.trove.impl.Constants.DEFAULT_CAPACITY,
                         gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
                         -1, -1);
-                for (Record record : cursor){
+                for (Record record : cursor) {
                     ids.put(record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID),
                             record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
                 }
