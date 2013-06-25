@@ -121,7 +121,7 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
             Cursor<Record> result = context.select().
                     from(Tables.REDIRECT).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             return new SqlDaoIterable<Redirect>(result) {
                 @Override
                 public Redirect transform(Record r) {
