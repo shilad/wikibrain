@@ -31,14 +31,12 @@ import java.io.File;
  */
 public class RedirectLoader {
 
-    private final Language language;
     private TIntIntHashMap redirectIdsToPageIds;
     private final RawPageSqlDao rawPages;
     private final LocalPageSqlDao localPages;
     private final RedirectSqlDao redirects;
 
-    public RedirectLoader(Language language, DataSource ds) throws DaoException{
-        this.language = language;
+    public RedirectLoader(DataSource ds) throws DaoException{
         this.rawPages = new RawPageSqlDao(ds);
         this.localPages = new LocalPageSqlDao(ds,false);
         this.redirects = new RedirectSqlDao(ds);
@@ -54,7 +52,7 @@ public class RedirectLoader {
         System.out.println("End Load.");
     }
 
-    private void loadRedirectIdsIntoMemory() throws DaoException{
+    private void loadRedirectIdsIntoMemory(Language language) throws DaoException{
         RedirectParser redirectParser = new RedirectParser(language);
         redirectIdsToPageIds = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
         SqlDaoIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
@@ -91,7 +89,7 @@ public class RedirectLoader {
         }
     }
 
-    private void loadRedirectsIntoDatabase() throws DaoException{
+    private void loadRedirectsIntoDatabase(Language language) throws DaoException{
         int i = 0;
         System.out.println("Begin loading redirects into database: ");
         for(int src : redirectIdsToPageIds.keys()){
@@ -123,7 +121,7 @@ public class RedirectLoader {
                         .create("i"));
         options.addOption(
                 new DefaultOptionBuilder()
-                    .hasArg()
+                    .hasArgs()
                     .withLongOpt("language")
                     .withDescription("language")
                     .create("l"));
@@ -139,19 +137,25 @@ public class RedirectLoader {
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        Language lang = cmd.hasOption("l") ? Language.getByLangCode(cmd.getOptionValue('l')) : Language.getByLangCode("simple");
-
         DataSource dataSource = conf.get(DataSource.class);
-
-        RedirectLoader redirectLoader = new RedirectLoader(lang,dataSource);
-
+        RedirectLoader redirectLoader = new RedirectLoader(dataSource);
         if (cmd.hasOption("t")){
             redirectLoader.beginLoad();
         }
 
-        redirectLoader.loadRedirectIdsIntoMemory();
-        redirectLoader.resolveRedirectsInMemory();
-        redirectLoader.loadRedirectsIntoDatabase();
+        String[] languages = null;
+        if (cmd.hasOption('l')) {
+            languages = cmd.getOptionValues('l');
+        } else {
+            languages = (String[])conf.getConf().get().getAnyRef("Languages");
+        }
+            for(String l : languages){
+                Language lang = Language.getByLangCode(l);
+                redirectLoader.loadRedirectIdsIntoMemory(lang);
+                redirectLoader.resolveRedirectsInMemory();
+                redirectLoader.loadRedirectsIntoDatabase(lang);
+
+            }
 
         if (cmd.hasOption("i")){
             redirectLoader.endLoad();
