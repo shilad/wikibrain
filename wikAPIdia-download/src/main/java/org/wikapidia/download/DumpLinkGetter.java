@@ -40,9 +40,6 @@ public class DumpLinkGetter {
     private EnumSet<LinkMatcher> hasMatchers;
     private String dumpDate;    // This is the date of the dump.
 
-    private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
-
-
     public DumpLinkGetter(Language lang, List<LinkMatcher> matchers, String dumpDate) {
         this.lang = lang;
         this.matchers = matchers;
@@ -72,20 +69,14 @@ public class DumpLinkGetter {
     }
 
     public List<String> getFileLinks() throws IOException {
-        try {
-            List<String> links = new ArrayList<String>();
-            URL dumpPageUrl = new URL(getLanguageWikiUrl() + dumpDate + "/");
-            Document doc = Jsoup.parse(IOUtils.toString(dumpPageUrl.openStream()));
-            Elements linkElements = doc.select("ul").select("li.done").select("li.file").select("a[href]");
-            for (Element linkElement : linkElements) {
-                links.add(linkElement.attr("href"));
-            }
-            return links;
-        } catch (MalformedURLException e) {
-            // TODO
-            e.printStackTrace();
+        List<String> links = new ArrayList<String>();
+        URL dumpPageUrl = new URL(getLanguageWikiUrl() + dumpDate + "/");
+        Document doc = Jsoup.parse(IOUtils.toString(dumpPageUrl.openStream()));
+        Elements linkElements = doc.select("ul").select("li.done").select("li.file").select("a[href]");
+        for (Element linkElement : linkElements) {
+            links.add(linkElement.attr("href"));
         }
-        return null;
+        return links;
     }
 
     /**
@@ -108,10 +99,4 @@ public class DumpLinkGetter {
         }
         return urlLinks;
     }
-
-    public List<LinkMatcher> getMissingMatchers() {
-
-        return null;
-    }
-
 }
