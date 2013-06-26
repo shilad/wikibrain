@@ -60,8 +60,8 @@ public class WikiTextDumpLoader {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
-                        .withLongOpt("ills")
-                        .withDescription("ills allowed")
+                        .withLongOpt("languages")
+                        .withDescription("the set of languages to process")
                         .create("l"));
 
         CommandLineParser parser = new PosixParser();
@@ -77,11 +77,11 @@ public class WikiTextDumpLoader {
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        List<String> allowedIlls;
+        List<String> languages;
         if (cmd.hasOption("l")){
-            allowedIlls = Arrays.asList(cmd.getOptionValues('l'));
+            languages = Arrays.asList(cmd.getOptionValues('l'));
         } else {
-            allowedIlls = (List)conf.getConf().get().getAnyRef("Languages");
+            languages = (List<String>)conf.getConf().get().getAnyRef("Languages");
         }
 
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
@@ -98,14 +98,14 @@ public class WikiTextDumpLoader {
         visitors.add(linkVisitor);
         visitors.add(catVisitor);
 
-        final WikiTextDumpLoader loader = new WikiTextDumpLoader(visitors, allowedIlls, rpDao);
+        final WikiTextDumpLoader loader = new WikiTextDumpLoader(visitors, languages, rpDao);
 
         if(cmd.hasOption("t")) {
             llDao.beginLoad();
             lcmDao.beginLoad();
         }
 
-        ParallelForEach.loop(allowedIlls,
+        ParallelForEach.loop(languages,
                 Runtime.getRuntime().availableProcessors(),
                 new Procedure<String>() {
                     @Override
