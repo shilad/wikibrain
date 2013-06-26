@@ -1,13 +1,13 @@
 wikAPIdia
 =====
-An API for acessing and organizing wikipedia's language dumps. Specifically we:
+An API for accessing and organizing Wikipedia's language dumps. Specifically we:
 * Support multiple languages in parallel.
 * Resolve all redirected links to the page they point to.
-* Document all links out from a given wikipedia page.
-* Document all of the members of a specific wikipedia category.
+* Document all links out from a given Wikipedia page.
+* Document all of the members of a specific Wikipedia category.
 * Overlay concepts that are cross-lingual and links between concepts.
 
-This API is meant to be used for anyone wishing to utalize wikipedia's vast information. 
+This API is meant to be used for anyone wishing to manipulate Wikipedia's vast information.
 
 Software and Hardware Recommendations
 -----------
