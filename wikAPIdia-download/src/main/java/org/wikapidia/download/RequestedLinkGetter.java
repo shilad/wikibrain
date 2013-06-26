@@ -201,7 +201,7 @@ public class RequestedLinkGetter {
             for (String dumpDate : urls.keySet()) {
                 for (String linkName : urls.get(dumpDate).keySet()) {
                     for (URL url : urls.get(dumpDate).get(linkName)) {
-                        result.add(language.getLangCode() + " " + dumpDate + "\t" + linkName + "\t" + url);
+                        result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + url);
                     }
                 }
             }
