@@ -95,7 +95,7 @@ public class ConceptLoader {
             new HelpFormatter().printHelp("ConceptLoader", options);
             return;
         }
-        File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
+        File pathConf = new File(cmd.getOptionValue('c', null));
         Configurator conf = new Configurator(new Configuration(pathConf));
 
         LanguageSet languages = LanguageSet.getSetOfAllLanguages();

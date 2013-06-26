@@ -136,10 +136,10 @@ public class RedirectLoader {
             new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
-        File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
+        File pathConf = new File(cmd.getOptionValue('c', null));
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        Language lang = cmd.hasOption("l") ? Language.getByLangCode(cmd.getOptionValue('l')) : Language.getByLangCode("simple");
+        Language lang = Language.getByLangCode(cmd.getOptionValue('l', "simple"));
 
         DataSource dataSource = conf.get(DataSource.class);
 
