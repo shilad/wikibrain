@@ -17,7 +17,6 @@ public class FileDownloader {
 
     private static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
 
-
     private final File tmp;
     private final File output;
 
@@ -48,7 +47,6 @@ public class FileDownloader {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .isRequired()
                         .withLongOpt("output")
                         .withDescription("Path to output file.")
                         .create("o"));
@@ -64,8 +62,12 @@ public class FileDownloader {
             return;
         }
 
-        String filePath = cmd.getOptionValue('o');
-        File file = new File(filePath);
+        String filePath;
+        if (cmd.hasOption("o")) {
+            filePath = cmd.getOptionValue('o');
+        } else {
+            filePath = "download";
+        }
         if (cmd.getArgList().isEmpty()) {
             System.err.println("No input files specified.");
             new HelpFormatter().printHelp("FileDownloader", options);
