@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import org.jooq.Record;
-import org.jooq.Result;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;

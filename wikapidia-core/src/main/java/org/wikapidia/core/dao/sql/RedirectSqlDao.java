@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
+import gnu.trove.impl.*;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
@@ -120,7 +121,7 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
             Cursor<Record> result = context.select().
                     from(Tables.REDIRECT).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             return new SqlDaoIterable<Redirect>(result) {
                 @Override
                 public Redirect transform(Record r) {
@@ -206,7 +207,10 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
                     from(Tables.REDIRECT).
                     where(Tables.REDIRECT.LANG_ID.equal(lang.getId())).
                     fetchLazy();
-            TIntIntMap ids = new TIntIntHashMap(10, .5f, -1, -1);
+            TIntIntMap ids = new TIntIntHashMap(
+                    gnu.trove.impl.Constants.DEFAULT_CAPACITY,
+                    gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
+                    -1, -1);
             for (Record record : cursor){
                 ids.put(record.getValue(Tables.REDIRECT.SRC_PAGE_ID),
                         record.getValue(Tables.REDIRECT.DEST_PAGE_ID));

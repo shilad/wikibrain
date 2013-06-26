@@ -3,6 +3,7 @@ package org.wikapidia.parser;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FilenameUtils;
+import org.wikapidia.utils.CompressedFile;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
@@ -62,14 +63,7 @@ public class DumpSplitter implements Iterable<String> {
         private boolean closed = false;
 
         public ArticleIterator(File path) throws IOException, ArchiveException, XMLStreamException {
-            InputStream input = new BufferedInputStream(new FileInputStream(path));
-            if (FilenameUtils.getExtension(path.toString()).toLowerCase().startsWith("bz2")) {
-                input = new BZip2CompressorInputStream(input, true);
-            } else if (FilenameUtils.getExtension(path.toString()).equalsIgnoreCase("gz")) {
-                input = new GZIPInputStream(input);
-            }
-
-            reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+            reader = CompressedFile.open(path);
         }
 
         private void fillBuffer() {

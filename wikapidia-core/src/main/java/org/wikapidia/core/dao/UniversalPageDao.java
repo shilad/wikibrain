@@ -1,6 +1,8 @@
 package org.wikapidia.core.dao;
 
+import gnu.trove.map.TIntIntMap;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
 
@@ -18,7 +20,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      * @return a UniversalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public abstract T getById(int univId, int algorithmId) throws DaoException;
+    public T getById(int univId, int algorithmId) throws DaoException;
 
     /**
      * Returns a map of UniversalPages of the specified page type by a collection of universal IDs
@@ -27,7 +29,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      * @return a map of universal IDs to UniversalPages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public abstract Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException;
+    public Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException;
 
     /**
      * Returns the universal ID of a local page specified by a language and
@@ -38,14 +40,27 @@ public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
      * @return
      * @throws DaoException
      */
-    public abstract int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException;
+    public int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException;
 
     /**
-     * Returns the universal ID of a local page, within the scope of the specified algorithm
+     * Returns the universal ID of a local page, within the scope of the specified algorithm.
+     * This method is SLOW and should not be used extensively. For mass usage,
+     * use the getAllLocalToUnivIdsMap() method.
      * @param localPage
      * @param algorithmId
      * @return
      * @throws DaoException
      */
-    public abstract int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException;
+    public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException;
+
+    /**
+     * Returns a group of maps between local IDs and universal IDs.
+     * The maps are distributed by language.  This allows fast and easy retrieval
+     * of the universal ID to which a specified algorithm mapped a page.
+     * @param algorithmId the algorithm to map
+     * @param ls the set of languages to map
+     * @return
+     * @throws DaoException
+     */
+    public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(int algorithmId, LanguageSet ls) throws DaoException;
 }

@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
+import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TLongIntHashMap;
 import org.apache.commons.io.IOUtils;
 import org.jooq.Condition;
@@ -107,6 +108,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         }
     }
 
+    // This iterable can contain null entries, which originate from the cursor.
+    // TODO: Investigate this issue
     @Override
     public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
@@ -132,7 +135,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             return new SqlDaoIterable<T>(result) {
                 @Override
                 public T transform(Record r) {
@@ -163,14 +166,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne();
             LocalPage page = buildLocalPage(record);
-            if (redirectSqlDao != null && page.isRedirect()){
-                return getById(language,
-                        redirectSqlDao.resolveRedirect(
-                                page.getLanguage(),
-                                page.getLocalId()
-                        )
-                );
-            }
             return (T)page;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -197,14 +192,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     and(Tables.LOCAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
                     fetchOne();
             LocalPage page = buildLocalPage(record);
-            if (redirectSqlDao != null && page.isRedirect()){
-                return getById(language,
-                        redirectSqlDao.resolveRedirect(
-                                page.getLanguage(),
-                                page.getLocalId()
-                        )
-                );
-            }
             return (T)page;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -257,6 +244,10 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             return null;
         }
         Language lang = Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID));
+        if (record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)&&redirectSqlDao!=null){
+            return getById(lang,
+                    redirectSqlDao.resolveRedirect(lang,record.getValue(Tables.LOCAL_PAGE.PAGE_ID)));
+        }
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
@@ -309,7 +300,10 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             Cursor<Record> cursor = context.select().
                     from(Tables.LOCAL_PAGE).
                     fetchLazy();
-            TLongIntHashMap map = new TLongIntHashMap(10, 0.5f, -1, -1);
+            TLongIntHashMap map = new TLongIntHashMap(
+                    Constants.DEFAULT_CAPACITY,
+                    Constants.DEFAULT_LOAD_FACTOR,
+                    -1, -1);
             for (Record record : cursor){
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),

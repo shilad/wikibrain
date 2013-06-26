@@ -23,6 +23,7 @@ public class PageXmlParser {
     private static final Pattern idPattern = Pattern.compile("<id>(.*?)</id>");
     private static final Pattern timestampPattern = Pattern.compile("<timestamp>(.*?)</timestamp>");
     private static final Pattern contentPattern = Pattern.compile("<text xml:space=\"preserve\">(.*?)</text>", Pattern.DOTALL);
+    private static final Pattern selfClosingContentPattern = Pattern.compile("<text xml:space=\"preserve\"\\s*/>", Pattern.DOTALL);
     private static final Pattern redirectPattern = Pattern.compile("<redirect title=\"(.*?)\" />");
 
     // xmlDumpDateFormat is not static because it isn't threadsafe. BOOO!!
@@ -63,6 +64,13 @@ public class PageXmlParser {
         }
 
         String body = extractSingleString(contentPattern, rawXml, 1);
+        if (body == null && selfClosingContentPattern.matcher(rawXml).find()) {
+            body = "";
+        }
+        if (body == null) {
+            System.err.println("invalid body: " + rawXml);
+            body = "";
+        }
         Date lastEdit = null;
         try {
             lastEdit = xmlDumpDateFormat.parse(timestampString);
@@ -87,14 +95,7 @@ public class PageXmlParser {
 
     // TODO: does this method need to be like this, or can it just return "type"
     private NameSpace getNameSpace(String title) {
-        NameSpace ns = new Title(title, language).guessType();
-        if (ns == NameSpace.ARTICLE) {
-            return NameSpace.ARTICLE;
-        } else if (ns == NameSpace.CATEGORY) {
-            return NameSpace.CATEGORY;
-        } else {
-            return NameSpace.SPECIAL;
-        }
+        return new Title(title, language).getNamespace();
     }
 
     private String getRedirect(String rawXml) {

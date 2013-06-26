@@ -22,7 +22,7 @@ public interface LocalCategoryMemberDao extends Loader<LocalCategoryMember> {
      * @throws DaoException if there was an error saving the item
      * @throws org.wikapidia.core.WikapidiaException if the category and article are in different languages
      */
-    public abstract void save(LocalCategory category, LocalArticle article) throws DaoException, WikapidiaException;
+    public void save(LocalCategory category, LocalArticle article) throws DaoException, WikapidiaException;
 
     /**
      * Gets a collection of page IDs of articles that are members of the category

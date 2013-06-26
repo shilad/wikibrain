@@ -1,6 +1,15 @@
 package org.wikapidia.parser;
 
+import com.jolbox.bonecp.BoneCPDataSource;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalCategoryMemberDao;
+import org.wikapidia.core.dao.LocalLinkDao;
+import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.sql.LocalCategoryMemberSqlDao;
+import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
+import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.*;
 import org.wikapidia.core.model.RawPage;
@@ -15,17 +24,17 @@ import static org.junit.Assert.*;
 /**
  */
 public class TestWikiTextDumpParser {
-    public static final File EN_DUMP = new File("src/test/resources/org/wikapidia/parser/en_test.xml");
-    public static final LanguageInfo EN = LanguageInfo.getByLangCode("en");
+    public static final File SIMPLE_DUMP = new File("../wikapidia/wikapidia-loader/simplewiki-20130608-pages-articles.xml");
+    public static final LanguageInfo SIMPLE = LanguageInfo.getByLangCode("simple");
 
+    @Ignore
     @Test
-    public void test1() {
+    public void test1() throws DaoException {
         List<String> allowedIllLangs = new ArrayList<String>();
-        allowedIllLangs.add("en");
-        allowedIllLangs.add("de");
+        allowedIllLangs.add("simple");
 
         // Scans for ILLs in all languages
-        WikiTextDumpParser wtdp = new WikiTextDumpParser(EN_DUMP, EN);
+        WikiTextDumpParser wtdp = new WikiTextDumpParser(SIMPLE_DUMP, SIMPLE);
 
         // Scans for ILLs in languages specified above only
         //WikiTextDumpParser wtdp = new WikiTextDumpParser(EN_DUMP, EN, allowedIllLangs);
@@ -35,6 +44,8 @@ public class TestWikiTextDumpParser {
         final ArrayList<ParsedIll> ills = new ArrayList<ParsedIll>();
         final ArrayList<ParsedLink> links = new ArrayList<ParsedLink>();
         final ArrayList<ParsedRedirect> redirects = new ArrayList<ParsedRedirect>();
+
+        List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
 
         ParserVisitor visitor = new ParserVisitor() {
             @Override
@@ -63,12 +74,32 @@ public class TestWikiTextDumpParser {
             }
         };
 
-        wtdp.parse(visitor);
+        BoneCPDataSource ds = new BoneCPDataSource();
+        ds.setJdbcUrl("jdbc:h2:"+"db/h2");
+        ds.setUsername("sa");
+        ds.setPassword("");
+        LocalLinkDao linkDao = new LocalLinkSqlDao(ds);
+        LocalPageDao pageDao = new LocalPageSqlDao(ds);
+        LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(ds);
 
-        assertEquals(pageCounter.get(), 44);
+        linkDao.beginLoad();
+        catMemDao.beginLoad();
+
+        ParserVisitor linkVisitor = new LocalLinkVisitor(linkDao, pageDao);
+        ParserVisitor catVisitor = new LocalCategoryVisitor(pageDao, catMemDao);
+
+        visitors.add(visitor);
+        visitors.add(linkVisitor);
+        visitors.add(catVisitor);
+
+        wtdp.parse(visitors);
+
         System.out.println("Categories: " + categories.size());
         System.out.println("ILLs: " + ills.size());
         System.out.println("Links: " + links.size());
         System.out.println("Redirects: " + redirects.size());
+
+        linkDao.endLoad();
+        catMemDao.endLoad();
     }
 }
