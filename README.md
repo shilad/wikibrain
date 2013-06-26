@@ -59,11 +59,11 @@ User Instructions
 [-c .conf] [-it] [-l lang ...] [-n algorithm]
 ```
 ```bash
--c	Sets configuration file. Include that file .conf</li>
--i	reates all indexes after loading</li>
--l	Set languages to be processed. Enter as lang codes with spaces between them</li>
--t	Drops and recreates all tables</li>
--n	Selects the algorithm to use to map concepts</li>
+-c	Sets configuration file. Include that file .conf
+-i	reates all indexes after loading
+-l	Set languages to be processed. Enter as lang codes with spaces between them
+-t	Drops and recreates all tables
+-n	Selects the algorithm to use to map concepts
 ```
 
 * Run universallinkloader.sh. The parameters should be formatted to match the following:
@@ -72,11 +72,11 @@ User Instructions
 [-c .conf] [-it] [-l lang ...] [-n algorithm]
 ```
 ```bash
--c	Sets configuration file. Include that file .conf</li>
--i	reates all indexes after loading</li>
--l	Set languages to be processed. Enter as lang codes with spaces between them</li>
--t	Drops and recreates all tables</li>
--n	Selects the algorithm to use to map concepts</li>
+-c	Sets configuration file. Include that file .conf
+-i	reates all indexes after loading
+-l	Set languages to be processed. Enter as lang codes with spaces between them
+-t	Drops and recreates all tables
+-n	Selects the algorithm to use to map concepts
 ```
  
 A Basic Outline of the Process 
