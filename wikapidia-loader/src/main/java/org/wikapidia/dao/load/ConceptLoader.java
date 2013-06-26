@@ -24,6 +24,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * Loads an Iterable of mapped concepts (Universal Pages) into a database.
  */
 public class ConceptLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());

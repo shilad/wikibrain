@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
+ *
+ * @author Ari Weiland
+ *
  * A helper class for specifying complex queries.  To use, instantiate a new instance,
  * than call the various set methods in a chain to set the filters.
  * Possible filters are, with the objects that use them:
