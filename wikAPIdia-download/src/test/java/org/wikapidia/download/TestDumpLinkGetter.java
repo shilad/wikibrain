@@ -24,24 +24,6 @@ public class TestDumpLinkGetter {
         }
     }
 
-    @Test
-    public void testNew() throws IOException, ParseException {
-        for (Language lang : Arrays.asList(Language.getByLangCode("en"))) {
-            RequestedLinkGetter testGetter = new RequestedLinkGetter(lang, Arrays.asList(LinkMatcher.values()), "20130604");
-//            System.out.println("" /*+ testGetter.getFileLinks().size()*/ + "\n" + testGetter.getFileLinks() );
-            System.out.println(testGetter.getAllDates());
-        }
-    }
-
-    @Test
-    public void testComparator() throws IOException, ParseException, WikapidiaException {
-        for (Language lang : Arrays.asList(Language.getByLangCode("id"))) {
-            RequestedLinkGetter testGetter = new RequestedLinkGetter(lang, Arrays.asList(LinkMatcher.values()), "20130701");
-            System.out.println(testGetter.getDumps());
-            System.out.println(testGetter.getDumps().size());
-        }
-
-    }
 
 //    @Test
 //    public void testGetLanguageIndex() throws ParseException {
