@@ -4,13 +4,21 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.jooq.tables.UniversalPage;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.phrases.dao.PhraseAnalyzerDao;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 
 /**
  * Given a page, returns the most common phrases
  */
 public interface PhraseAnalyzer {
+    /**
+     * Loads a single phrase corpus into the database.
+     * @throws java.io.IOException, DaoException
+     */
+    void loadCorpus() throws DaoException, IOException;
+
     /**
      * Returns the most descriptive phrases for a wikipedia page.
      * @param language The language for the phrase and the returned LocalPages.

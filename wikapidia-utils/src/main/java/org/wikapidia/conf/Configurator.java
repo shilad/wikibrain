@@ -189,6 +189,10 @@ public class Configurator {
         }
         ProviderSet pset = providers.get(klass);
 
+        // If name is "default", treat it as null for default option
+        if (name != null && name.equalsIgnoreCase("default")) {
+            name = null;
+        }
 
         // If name is null, check to see if there is a default entry or only one option.
         if (name == null) {

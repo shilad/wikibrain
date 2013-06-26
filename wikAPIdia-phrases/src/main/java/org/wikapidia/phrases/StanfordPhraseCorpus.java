@@ -1,6 +1,10 @@
 package org.wikapidia.phrases;
 
+import com.typesafe.config.Config;
 import org.apache.commons.lang3.math.Fraction;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
@@ -29,25 +33,25 @@ import java.util.logging.Logger;
  * These files capture anchor text associated with web pages that link to Wikipedia.
  * Note that the pages with anchor text are not (usually) Wikipedia pages themselves.
  */
-public class StanfordPhraseLoader {
-    private static final Logger LOG = Logger.getLogger(StanfordPhraseLoader.class.getName());
+public class StanfordPhraseCorpus implements PhraseCorpus {
+    private static final Logger LOG = Logger.getLogger(StanfordPhraseCorpus.class.getName());
     private static final LanguageInfo EN = LanguageInfo.getByLangCode("en");
 
-    private PhraseAnalyzerDao phraseDao;
     private LocalPageDao pageDao;
+    private final File path;
 
-    public StanfordPhraseLoader(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao) {
-        this.phraseDao = phraseDao;
+    public StanfordPhraseCorpus(LocalPageDao pageDao, File path) {
         this.pageDao = pageDao;
+        this.path = path;
     }
 
     /**
      * Loads a single Stanford phrase file into the database.
      * This can safely be called for multiple files if it is chunked.
-     * @param path
      * @throws IOException
      */
-    public void load(File path) throws IOException {
+    @Override
+    public void loadCorpus(PhraseAnalyzerDao dao) throws IOException {
         BufferedReader reader = CompressedFile.open(path);
         long numLines = 0;
         long numLinesRetained = 0;
@@ -69,7 +73,7 @@ public class StanfordPhraseLoader {
                         new Title(e.article, EN),
                         NameSpace.ARTICLE);
                 if (lp != null) {
-                    phraseDao.add(EN.getLanguage(), lp.getLocalId(), e.text, e.getNumEnglishLinks());
+                    dao.add(EN.getLanguage(), lp.getLocalId(), e.text, e.getNumEnglishLinks());
                     numLinesRetained++;
                 }
             } catch (Exception e) {
@@ -113,6 +117,32 @@ public class StanfordPhraseLoader {
                 }
             }
             return 0;
+        }
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<PhraseCorpus> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return PhraseCorpus.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "phrases.corpus";
+        }
+
+        @Override
+        public PhraseCorpus get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("stanford")) {
+                return null;
+            }
+            LocalPageDao dao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
+            File path = new File(config.getString("path"));
+            return new StanfordPhraseCorpus(dao, path);
         }
     }
 }

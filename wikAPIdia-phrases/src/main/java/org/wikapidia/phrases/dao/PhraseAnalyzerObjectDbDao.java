@@ -1,10 +1,16 @@
 package org.wikapidia.phrases.dao;
 
 import com.sleepycat.je.DatabaseException;
+import com.typesafe.config.Config;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.phrases.PhraseCorpus;
 import org.wikapidia.utils.ObjectDb;
 import org.wikapidia.utils.WpStringUtils;
 
@@ -209,4 +215,36 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
             }
         }
     }
+
+    public static class Provider extends org.wikapidia.conf.Provider<PhraseAnalyzerDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return PhraseAnalyzerDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "phrases.dao";
+        }
+
+        @Override
+        public PhraseAnalyzerDao get(String name, Config config) throws ConfigurationException {
+            System.err.println("type is " + config.getString("type"));
+            if (!config.getString("type").equals("objectdb")) {
+                return null;
+            }
+            boolean isNew = config.getBoolean("isNew");
+            File path = new File(config.getString("path"));
+            try {
+                return new PhraseAnalyzerObjectDbDao(path, isNew);
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+    }
+
 }

@@ -13,7 +13,7 @@ public interface PhraseAnalyzerDao {
 
     /**
      * Captures the top-k entries, by count, but also remembers the total count.
-     * @param <K>
+     * @param <K> The class of the objects being counted.
      */
     public static class PrunedCounts<K> extends LinkedHashMap<K, Integer> {
         private int total;
