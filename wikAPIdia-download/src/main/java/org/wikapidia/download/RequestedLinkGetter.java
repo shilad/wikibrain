@@ -210,7 +210,6 @@ public class RequestedLinkGetter {
             }
         }
 
-        String getDumpByDate = cmd.getOptionValue('d', new SimpleDateFormat(DATE_FORMAT).format(new Date()));
         Date getDumpByDate = new Date();
         if (cmd.hasOption("d")) {
             try {
