@@ -15,7 +15,7 @@ import java.sql.SQLException;
  */
 public class TestSqlCache {
     @Test
-    public void test() throws ClassNotFoundException, IOException, SQLException, DaoException{
+    public void test() throws ClassNotFoundException, IOException, SQLException, DaoException, InterruptedException {
         Class.forName("org.h2.Driver");
         File tmpDir = File.createTempFile("wikapidia-h2", null);
         tmpDir.delete();
@@ -35,16 +35,18 @@ public class TestSqlCache {
         map.put(2, 4);
         map.put(3, 4);
         String string = "string";
-        cache.saveToCache("A string", string);
+        cache.saveToCache("a string", string);
         cache.saveToCache("A map", map);
 
-        assert (cache.get("A string", "nothing!")==null);
+        Thread.currentThread().sleep(1000);
+
+        assert (cache.get("a string", "nothing!")==null);
 
         cache.updateTableLastModified("table");
-        assert (cache.get("A string", "table")==null);
+        assert (cache.get("a string", "table")==null);
 
-        cache.saveToCache("A string", string);
-        assert (cache.get("A string", "table").equals(string));
+        cache.saveToCache("a string", string);
+        assert (cache.get("a string", "table").equals(string));
 
 
         cache.updateTableLastModified("table");

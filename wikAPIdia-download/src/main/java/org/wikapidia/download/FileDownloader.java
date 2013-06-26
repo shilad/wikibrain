@@ -11,6 +11,11 @@ import org.apache.commons.cli.*;
 import org.wikapidia.conf.DefaultOptionBuilder;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * Downloads dumps from a specified tsv file containing lines of dump links.
+ *
  */
 
 public class FileDownloader {

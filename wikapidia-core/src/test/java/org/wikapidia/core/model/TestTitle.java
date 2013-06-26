@@ -20,6 +20,9 @@ public class TestTitle {
         assert (pokemonTalk.getNamespaceString().equals("Talk"));
         assert (pokemonTalk.getNamespace()==NameSpace.TALK);
         assert (pokemonTalk.getTitleStringWithoutNamespace().equals("Pokemon: The Movie"));
-
+        Title badCategory = new Title("Category: ",lang);
+        assert (badCategory.getNamespaceString().equals("Category"));
+        assert (badCategory.getNamespace()==NameSpace.CATEGORY);
+        assert (badCategory.getTitleStringWithoutNamespace().equals(""));
     }
 }

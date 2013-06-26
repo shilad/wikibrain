@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -36,21 +37,21 @@ public class ConceptLoader {
 
     public void load(ConceptMapper mapper) throws ConfigurationException, WikapidiaException {
         try {
+            LOG.log(Level.INFO, "Loading Concepts");
             Iterator<UniversalPage> pages = mapper.getConceptMap(languageSet);
-            dao.beginLoad();
             int i = 0;
             while (pages.hasNext()) {
                 dao.save(pages.next());
                 i++;
-                if (i%1000 == 0) System.out.println(i);
+                if (i%1000 == 0) LOG.log(Level.INFO, "UniversalPages loaded: " + i);
             }
-            dao.endLoad();
+            LOG.log(Level.INFO, "All UniversalPages loaded: " + i);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException {
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -68,6 +69,18 @@ public class ConceptLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArgs()
+                        .withLongOpt("languages")
+                        .withDescription("the set of languages to process")
+                        .create("l"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("algorithm")
+                        .withDescription("the name of the algorithm to execute")
+                        .create("n"));
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -99,6 +112,18 @@ public class ConceptLoader {
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
         final ConceptLoader loader = new ConceptLoader(languages, dao);
+
+        if (cmd.hasOption("t")) {
+            LOG.log(Level.INFO, "Begin Load");
+            dao.beginLoad();
+        }
+
         loader.load(mapper);
+
+        if (cmd.hasOption("i")) {
+            LOG.log(Level.INFO, "End Load");
+            dao.endLoad();
+        }
+        LOG.log(Level.INFO, "DONE");
     }
 }

@@ -115,7 +115,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
             Cursor<Record> result = context.select().
                     from(Tables.CATEGORY_MEMBERS).
                     where(conditions).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             return new SqlDaoIterable<LocalCategoryMember>(result) {
                 @Override
                 public LocalCategoryMember transform(Record r) {

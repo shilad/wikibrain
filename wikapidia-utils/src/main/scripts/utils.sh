@@ -1,9 +1,6 @@
 #!/bin/bash
 # This bash script contains common shell functions and is included by all bash scripts
 #
-# source all util scripts here, so that other scripts only
-# need to source this script to source everything
-
 
 function die() {
     echo $1 >&2
@@ -13,18 +10,22 @@ function die() {
 export WP_BASE=..
 export WP_CORE=$WP_BASE/wikapidia-core
 export WP_LOADER=$WP_BASE/wikapidia-loader
+export WP_MATRIX=$WP_BASE/wikapidia-matrix
 export WP_MAPPER=$WP_BASE/wikAPIdia-mapper
 export WP_PARENT=$WP_BASE/wikAPIdia-parent
 export WP_PARSER=$WP_BASE/wikapidia-parser
 export WP_UTILS=$WP_BASE/wikapidia-utils
 
-source ${WP_UTILS}/src/main/scripts/conf.sh
 
 [ -d ${WP_BASE} ] || die "missing base directory ${WP_BASE}"
 
-for d in "${WP_CORE}" "${WP_LOADER}" "${WP_MAPPER}" "${WP_PARENT}" "${WP_PARSER}" "${WP_UTILS}"; do
+for d in "${WP_CORE}" "${WP_LOADER}" "${WP_MAPPER}" "${WP_PARENT}" "${WP_PARSER}" "${WP_UTILS}" "${WP_MATRIX}"; do
     [ -d "$d" ] || die "missing module directory $d"
 done
+                                                     
+# source all util scripts here, so that other scripts only
+# need to source this script to source everything
+source ${WP_UTILS}/src/main/scripts/conf.sh
 
 function checksum() {
     if [ $(type -P md5) ]; then
@@ -44,7 +45,7 @@ function compileJooq() {
     cat ${schema_dir}/*-schema.sql > ${schema_dir}/full_schema.sql
     cat ${schema_dir}/*-indexes.sql >> ${schema_dir}/full_schema.sql
     oldhash=$(cat ${schema_dir}/full_schema.hash | tr -d ' \n' )
-    newhash=$(checksum ${schema_dir}/full_schema.sql)
+    newhash=$(md5 -q ${schema_dir}/full_schema.sql)
 
     if [ "$oldhash" == "$newhash" ]; then
         echo "jooq schema is already up to date." >&2
@@ -74,9 +75,8 @@ function execClass() {
         die "missing local classpath file $localclasspathfile"
     fi
     read < $localclasspathfile REMOTE_CLASSPATH
-    CMD="java -cp \"${REMOTE_CLASSPATH}:${LOCAL_CLASSPATH}\" $JAVA_OPTS $class $@"
-    $CMD ||
-    die "executing '$CMD' failed"
+    java -cp "${REMOTE_CLASSPATH}:${LOCAL_CLASSPATH}" $JAVA_OPTS $class $@ ||
+    die "executing java -cp ${REMOTE_CLASSPATH}:${LOCAL_CLASSPATH} $JAVA_OPTS $class $@ failed"
 }
 
 

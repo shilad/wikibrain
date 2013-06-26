@@ -1,5 +1,6 @@
 package org.wikapidia.dao.load;
 
+import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.Configuration;
@@ -55,7 +56,7 @@ public class RedirectLoader {
 
     private void loadRedirectIdsIntoMemory() throws DaoException{
         RedirectParser redirectParser = new RedirectParser(language);
-        redirectIdsToPageIds = new TIntIntHashMap(10, 0.5f, -1, -1);
+        redirectIdsToPageIds = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
         SqlDaoIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
         int i = 0;
         System.out.println("Begin loading redirects into memory: ");
@@ -63,7 +64,7 @@ public class RedirectLoader {
            Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
            redirectIdsToPageIds.put(p.getPageId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));
-           if(i%100==0)
+           if(i%1000==0)
                System.out.println("loading redirect # " + i);
             i++;
         }
@@ -132,7 +133,7 @@ public class RedirectLoader {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.err.println( "Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("DumpLoaderMain", options);
+            new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;

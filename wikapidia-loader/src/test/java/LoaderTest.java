@@ -1,6 +1,7 @@
 import com.jolbox.bonecp.BoneCPDataSource;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
@@ -14,6 +15,7 @@ import java.io.File;
  */
 public class LoaderTest {
 
+    @Ignore
     @Test
     public void test() throws DaoException{
         BoneCPDataSource ds = new BoneCPDataSource();
@@ -23,7 +25,6 @@ public class LoaderTest {
         RedirectSqlDao redirectSqlDao = new RedirectSqlDao(ds);
         LocalPageSqlDao localPageSqlDao = new LocalPageSqlDao(ds, false);
 
-        System.out.println("I got here.");
         Language language = Language.getByLangCode("la");
         TIntIntMap map = redirectSqlDao.getAllRedirectIdsToDestIds(language);
         for(int src : map.keys()){

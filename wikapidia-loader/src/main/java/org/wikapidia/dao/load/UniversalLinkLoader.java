@@ -1,5 +1,6 @@
 package org.wikapidia.dao.load;
 
+import gnu.trove.map.TIntIntMap;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -43,28 +46,39 @@ public class UniversalLinkLoader {
     public void loadLinkMap(int algorithmId) throws WikapidiaException {
         try {
             Iterable<LocalLink> localLinks = localLinkDao.get(new DaoFilter().setLanguages(languageSet));
-            universalLinkDao.beginLoad();
+            LOG.log(Level.INFO, "Fetching ID map");
+            Map<Language, TIntIntMap> map = universalPageDao.getAllLocalToUnivIdsMap(algorithmId, languageSet);
+            LOG.log(Level.INFO, "Loading links");
+            int i=0;
             for (LocalLink localLink : localLinks) {
+                i++;
+                if (i%1000 == 0)
+                    LOG.log(Level.INFO, "UniversalLinks loaded: " + i);
+                int sourceUnivId, destUnivId;
+                if (localLink.getSourceId() < 0) {
+                    sourceUnivId = -1;
+                } else {
+                    sourceUnivId = map.get(localLink.getLanguage()).get(localLink.getSourceId());
+                }
+                if (localLink.getDestId() < 0) {
+                    destUnivId = -1;
+                } else {
+                    destUnivId = map.get(localLink.getLanguage()).get(localLink.getDestId());
+                }
                 universalLinkDao.save(
                         localLink,
-                        universalPageDao.getUnivPageId(
-                                localLink.getLanguage(),
-                                localLink.getSourceId(),
-                                algorithmId),
-                        universalPageDao.getUnivPageId(
-                                localLink.getLanguage(),
-                                localLink.getDestId(),
-                                algorithmId),
+                        sourceUnivId,
+                        destUnivId,
                         algorithmId
                 );
             }
-            universalLinkDao.endLoad();
+            LOG.log(Level.INFO, "All UniversalLinks loaded: " + i);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException {
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -82,6 +96,18 @@ public class UniversalLinkLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArgs()
+                        .withLongOpt("languages")
+                        .withDescription("the set of languages to process")
+                        .create("l"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("algorithm")
+                        .withDescription("the name of the algorithm to execute")
+                        .create("n"));
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -89,7 +115,7 @@ public class UniversalLinkLoader {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.err.println( "Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("ConceptLoader", options);
+            new HelpFormatter().printHelp("UniversalLinkLoader", options);
             return;
         }
         File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
@@ -119,6 +145,18 @@ public class UniversalLinkLoader {
                 localLinkDao,
                 universalPageDao,
                 universalLinkDao);
+
+        if (cmd.hasOption("t")) {
+            LOG.log(Level.INFO, "Begin Load");
+            universalLinkDao.beginLoad();
+        }
+
         loader.loadLinkMap(mapper.getId());
+
+        if (cmd.hasOption("i")) {
+            LOG.log(Level.INFO, "End Load");
+            universalLinkDao.endLoad();
+        }
+        LOG.log(Level.INFO, "DONE");
     }
 }
