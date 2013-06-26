@@ -56,6 +56,6 @@ public abstract class ConceptMapper {
      * @throws DaoException
      * @throws ConfigurationException
      */
-    public abstract Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikapidiaException;
+    public abstract Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikapidiaException, DaoException;
 
 }
