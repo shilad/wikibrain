@@ -51,38 +51,15 @@ public class DumpLinkGetter {
         return BASEURL_STRING + "/" + lang.getLangCode().replace("-", "_") + "wiki/";
     }
 
-    /**
-     * Given the html of a page, return all links.
-     *
-     * @param html
-     * @return
-     */
-    private List<String> getLinks(String html) {
-        List<String> matches = new ArrayList<String>();
-        Document doc = Jsoup.parse(html);
-        Elements linkElements = doc.select("a[href]");
-        for (Element linkElement: linkElements) {
-            String link = linkElement.attr("href");
-            matches.add(link);
-        }
-        return matches;
-    }
-
     public List<String> getFileLinks() throws IOException {
-        try {
-            List<String> links = new ArrayList<String>();
-            URL dumpPageUrl = new URL(getLanguageWikiUrl() + dumpDate + "/");
-            Document doc = Jsoup.parse(IOUtils.toString(dumpPageUrl.openStream()));
-            Elements linkElements = doc.select("ul").select("li.done").select("li.file").select("a[href]");
-            for (Element linkElement : linkElements) {
-                links.add(linkElement.attr("href"));
-            }
-            return links;
-        } catch (MalformedURLException e) {
-            // TODO
-            e.printStackTrace();
+        List<String> links = new ArrayList<String>();
+        URL dumpPageUrl = new URL(getLanguageWikiUrl() + dumpDate + "/");
+        Document doc = Jsoup.parse(IOUtils.toString(dumpPageUrl.openStream()));
+        Elements linkElements = doc.select("ul").select("li.done").select("li.file").select("a[href]");
+        for (Element linkElement : linkElements) {
+            links.add(linkElement.attr("href"));
         }
-        return null;
+        return links;
     }
 
     /**
