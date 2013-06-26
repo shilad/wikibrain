@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
@@ -17,9 +16,7 @@ import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
-import java.text.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -80,7 +77,7 @@ public class DumpLinkGetter {
             Elements linkElements = doc.select("ul").select("li.done").select("li.file").select("a[href]");
             for (Element linkElement : linkElements) {
                 links.add(linkElement.attr("href"));
-            };
+            }
             return links;
         } catch (MalformedURLException e) {
             // TODO

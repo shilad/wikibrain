@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -33,21 +35,14 @@ public class RequestedLinkGetter {
 
     protected List<Date> getAvailableDates() {
         List<Date> availableDate = new ArrayList<Date>();
-        List<String> availableDatess = new ArrayList<String>();
         try {
             URL langWikiPageUrl = new URL(DumpLinkGetter.BASEURL_STRING+ "/" + lang.getLangCode().replace("-", "_") + "wiki/");
-            String langWikiPage = IOUtils.toString(langWikiPageUrl.openStream());
-            Document doc = Jsoup.parse(langWikiPage);
+            Document doc = Jsoup.parse(IOUtils.toString(langWikiPageUrl.openStream()));
             Elements availableDates = doc.select("tbody").select("td.n").select("a[href]");
             for (Element element : availableDates) {
-                availableDatess.add(element.attr("href"));
-            }
-            System.out.println(availableDatess);
-//            String status = doc.select("p.status").select("span").text();
-            for (String thisDate : availableDatess) {
-                System.out.println(thisDate);
-                if (thisDate.matches("\\d{8}/")) {
-                    availableDate.add(stringToDate(thisDate.substring(0,8)));
+                Matcher dateMatcher = Pattern.compile("(\\d{8})/").matcher(element.attr("href"));
+                while (dateMatcher.find()) {
+                    availableDate.add(stringToDate(dateMatcher.group(1)));
                 }
             }
             return availableDate;
@@ -65,31 +60,30 @@ public class RequestedLinkGetter {
     }
 
 
+    private String getFirstDumpDate(List<Date> dateList) throws java.text.ParseException {
+        Date selectDate = dateList.get(0);
+        for (Date date : dateList) {
+            if (date.before(stringToDate(requestDate)) && (date.after(selectDate) || selectDate.after(stringToDate(requestDate)))) {
+                selectDate = date;
+            }
+        }
+        if (selectDate.before(stringToDate(requestDate))) {
+            return new SimpleDateFormat("yyyyMMdd").format(selectDate);
+        }
+        return null;
+    }
 
-    //    private String dateSelecter(List<Date> dateList) throws java.text.ParseException {
-//        Date selectDate = dateList.get(0);
-//        for (Date date : dateList) {
-//            if (date.before(stringToDate(requestDate)) && (date.after(selectDate) || selectDate.after(stringToDate(requestDate)))) {
-//                selectDate = date;
-//            }
-//        }
-//        if (selectDate.before(stringToDate(requestDate))) {
-//            return new SimpleDateFormat("yyyyMMdd").format(selectDate);
-//        }
+//            String status = doc.select("p.status").select("span").text();
 
     /**
-     * Convert a string formatted in 'yyyyMMdd' to java.util.Date.
-     * @param dateString
-     * @return
+     * Convert a String to a Date object.
+     * @param dateString Date formatted in 'yyyyMMdd' as a string.
+     * @return Date as java.util.Date object.
      * @throws java.text.ParseException
      */
     private Date stringToDate(String dateString) throws java.text.ParseException {
-        Date date = new SimpleDateFormat("yyyyMMdd").parse(dateString);
-        return date;
+        return new SimpleDateFormat("yyyyMMdd").parse(dateString);
     }
-
-
-//        return null;
 
     protected String getDumpIndexDate(String date) throws IOException {
         URL tryIndexURL = new URL(DumpLinkGetter.BASEURL_STRING.replace("__LANG__", lang.getLangCode().replace("-", "_")) + date + "/");
@@ -98,35 +92,6 @@ public class RequestedLinkGetter {
         return status.equals("Dump complete") ? date : "latest";
     }
 
-
-
-
-
-
-
-
-//    }
-//
-//    /**
-//     * Return the html of the database dump index page.
-//     *
-//     * @return
-//     */
-//    protected String getDumpIndex(String date) throws IOException {
-//        URL indexURL = new URL(getLanguageBaseUrl(lang) + date + "/");
-//        return IOUtils.toString(indexURL.openStream());
-//    }
-//
-//    /**
-//     * Return the html of the database dump index page.
-//     *
-//     * @return
-//     */
-//    protected String getDumpIndex() throws IOException {
-//        URL indexURL = new URL(getLanguageBaseUrl(lang));
-//        return IOUtils.toString(indexURL.openStream());
-//    }
-//
 //    /**
 //     * Given the html of an index page, return all links.
 //     *
