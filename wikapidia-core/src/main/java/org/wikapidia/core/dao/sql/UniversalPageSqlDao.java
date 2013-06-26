@@ -27,7 +27,12 @@ import java.util.*;
 import java.util.logging.Level;
 
 /**
-*/
+ *
+ * @author Ari Weiland
+ *
+ * A SQL database implementation of the UniversalPageDao.
+ *
+ */
 public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao implements UniversalPageDao<T> {
 
     private final LocalPageDao localPageDao;

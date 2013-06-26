@@ -21,6 +21,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * Generates and loads the Universal Link map into a database.
+ *
  */
 public class UniversalLinkLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());

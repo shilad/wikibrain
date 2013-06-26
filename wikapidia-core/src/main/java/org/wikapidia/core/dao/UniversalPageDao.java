@@ -10,6 +10,11 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * An interface that describes a Dao to retrieve Universal Pages.
+ *
  */
 public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
 

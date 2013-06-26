@@ -13,6 +13,11 @@ import org.wikapidia.core.model.UniversalPage;
 import java.util.Iterator;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * An abstract superclass that lays the framework for a concept mapping algorithm.
+ *
  */
 public abstract class ConceptMapper {
 

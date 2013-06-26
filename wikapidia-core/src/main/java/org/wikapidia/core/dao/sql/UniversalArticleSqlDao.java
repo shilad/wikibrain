@@ -20,6 +20,9 @@ import javax.sql.DataSource;
 import java.util.List;
 
 /**
+ *
+ * @author Ari Weiland
+ *
  */
 public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle> implements UniversalArticleDao {
 

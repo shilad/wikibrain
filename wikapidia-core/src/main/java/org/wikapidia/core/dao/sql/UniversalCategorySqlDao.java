@@ -21,6 +21,9 @@ import javax.sql.DataSource;
 import java.util.List;
 
 /**
+ *
+ * @author Ari Weiland
+ *
  */
 public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCategory> implements UniversalCategoryDao {
 
