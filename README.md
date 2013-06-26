@@ -45,7 +45,7 @@ Here is what you, the user, need to do:
  			<br />
  			<li>-c &nbsp;&nbsp;&nbsp; Sets configuration file. Include that file .conf</li>
 			<li>-i &nbsp;&nbsp;&nbsp; Creates all indexes after loading</li>
-			<li>-l &nbsp;&nbsp;&nbsp; Set language for redirects to be resolved in. Enter as lang codes with spaces between them.</li>
+			<li>-l &nbsp;&nbsp;&nbsp; Set language for redirects to be resolved in. Enter as lang codes with spaces between them</li>
 			<li>-t &nbsp;&nbsp;&nbsp; Drops and recreates all tables</li>
 		</ul>
  	</li>
@@ -56,9 +56,30 @@ Here is what you, the user, need to do:
  			<br />
  			<li>-c &nbsp;&nbsp;&nbsp; Sets configuration file. Include that file .conf</li>
 			<li>-i &nbsp;&nbsp;&nbsp; Creates all indexes after loading</li>
-			<li>-l &nbsp;&nbsp;&nbsp; Set languages to be processed. Also sets ills (Inter Language Links). Enter as lang codes with spaces between them.</li>
+			<li>-l &nbsp;&nbsp;&nbsp; Set languages to be processed. Also sets ILLs (Inter Language Links). Enter as lang codes with spaces between them</li>
 			<li>-t &nbsp;&nbsp;&nbsp; Drops and recreates all tables</li>
 		</ul>
 	</li>
-	<li>Run concept mapper scripts.</li>
+	<li>Run conceptmapper.sh
+	    <ul>
+            <li><b>Parameter Format:</b> [-c .conf] [-it] [-l lang ...] [-n algorithm]</li>
+            <br />
+            <li>-c &nbsp;&nbsp;&nbsp; Sets configuration file. Include that file .conf</li>
+            <li>-i &nbsp;&nbsp;&nbsp; Creates all indexes after loading</li>
+            <li>-l &nbsp;&nbsp;&nbsp; Set languages to be processed. Enter as lang codes with spaces between them</li>
+            <li>-t &nbsp;&nbsp;&nbsp; Drops and recreates all tables</li>
+            <li>-n &nbsp;&nbsp;&nbsp; Selects the algorithm to use to map concepts</li>
+        </ul>
+    </li>
+	<li>Run universallinkloader.sh
+        <ul>
+            <li><b>Parameter Format:</b> [-c .conf] [-it] [-l lang ...] [-n algorithm]</li>
+            <br />
+            <li>-c &nbsp;&nbsp;&nbsp; Sets configuration file. Include that file .conf</li>
+            <li>-i &nbsp;&nbsp;&nbsp; Creates all indexes after loading</li>
+            <li>-l &nbsp;&nbsp;&nbsp; Set languages to be processed. Enter as lang codes with spaces between them</li>
+            <li>-t &nbsp;&nbsp;&nbsp; Drops and recreates all tables</li>
+            <li>-n &nbsp;&nbsp;&nbsp; Selects the algorithm universe in which to generate the universal link map</li>
+        </ul>
+    </li>
  </ol>
