@@ -20,6 +20,8 @@ import org.wikapidia.parser.wiki.RedirectParser;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -122,8 +124,8 @@ public class RedirectLoader {
         options.addOption(
                 new DefaultOptionBuilder()
                     .hasArgs()
-                    .withLongOpt("language")
-                    .withDescription("language")
+                        .withLongOpt("languages")
+                        .withDescription("the set of languages to process")
                     .create("l"));
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -143,19 +145,18 @@ public class RedirectLoader {
             redirectLoader.beginLoad();
         }
 
-        String[] languages = null;
-        if (cmd.hasOption('l')) {
-            languages = cmd.getOptionValues('l');
+        List<String> languages;
+        if (cmd.hasOption("l")) {
+            languages = Arrays.asList(cmd.getOptionValues("l"));
         } else {
-            languages = (String[])conf.getConf().get().getAnyRef("Languages");
+            languages = (List<String>)conf.getConf().get().getAnyRef("Languages");
         }
-            for(String l : languages){
-                Language lang = Language.getByLangCode(l);
-                redirectLoader.loadRedirectIdsIntoMemory(lang);
-                redirectLoader.resolveRedirectsInMemory();
-                redirectLoader.loadRedirectsIntoDatabase(lang);
-
-            }
+        for(String l : languages){
+            Language lang = Language.getByLangCode(l);
+            redirectLoader.loadRedirectIdsIntoMemory(lang);
+            redirectLoader.resolveRedirectsInMemory();
+            redirectLoader.loadRedirectsIntoDatabase(lang);
+        }
 
         if (cmd.hasOption("i")){
             redirectLoader.endLoad();
