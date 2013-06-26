@@ -24,7 +24,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ * @author Ari Weiland
+ * @author Yulun Li
  *
  */
 public class RequestedLinkGetter {
