@@ -182,8 +182,9 @@ public class RequestedLinkGetter {
                 } catch (IllegalArgumentException e) {
                     String langs = "";
                     for (Language language : Language.LANGUAGES) {
-                        langs += language.getLangCode() + ",";
+                        langs += "," + language.getLangCode();
                     }
+                    langs = langs.substring(1);
                     System.err.println("Invalid language code: " + langCode
                             + "\nValid language codes: \n" + langs);
                     System.exit(1);
@@ -191,7 +192,7 @@ public class RequestedLinkGetter {
             }
         }
 
-        String getDumpByDate = cmd.hasOption("d") ? cmd.getOptionValue('d') : new SimpleDateFormat(DATE_FORMAT).format(new Date());
+        String getDumpByDate = cmd.getOptionValue('d', new SimpleDateFormat(DATE_FORMAT).format(new Date()));
         String filePath = cmd.getOptionValue('o');
         File file = new File(filePath);
 
