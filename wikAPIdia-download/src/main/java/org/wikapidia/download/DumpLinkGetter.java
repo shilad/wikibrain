@@ -82,10 +82,4 @@ public class DumpLinkGetter {
         }
         return urlLinks;
     }
-
-    public List<LinkMatcher> getMissingMatchers() {
-
-        return null;
-    }
-
 }
