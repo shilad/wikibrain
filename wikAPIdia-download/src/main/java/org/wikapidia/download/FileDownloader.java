@@ -3,6 +3,8 @@ package org.wikapidia.download;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.github.axet.wget.WGet;
 import org.apache.commons.cli.*;
@@ -12,6 +14,9 @@ import org.wikapidia.conf.DefaultOptionBuilder;
  */
 
 public class FileDownloader {
+
+    private static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
+
 
     private final File tmp;
     private final File output;
@@ -24,13 +29,13 @@ public class FileDownloader {
     public void downloadFrom(File file) throws IOException {
         if (!tmp.exists()) tmp.mkdir();
         List<DumpLinkInfo> links = DumpLinkInfo.parseFile(file);
-        System.out.println("Downloading Files");
+        LOG.log(Level.INFO, "Downloading Files");
         for (int i=0; i<links.size(); i++) {
             DumpLinkInfo link = links.get(i);
             File target = new File(output, link.getLocalPath());
             if (!target.exists()) target.mkdirs();
             new WGet(link.getUrl(), tmp).download();
-            System.out.println("Files downloaded: " + (i+1));
+            LOG.log(Level.INFO, "Files downloaded: " + (i+1));
             File download = tmp.listFiles()[0];
             download.renameTo(new File(target, link.getFileName()));
         }
