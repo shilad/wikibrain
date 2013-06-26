@@ -95,20 +95,16 @@ public class DumpLinkGetter {
     public HashMap<String, List<URL>> getDumpFiles() throws IOException {
         List<String> links = getFileLinks();
         HashMap<String, List<URL>> urlLinks = new HashMap<String, List<URL>>();
-        try{
-            for(LinkMatcher linkMatcher : matchers){
-                List<String> results = linkMatcher.match(links);
-                if (!results.isEmpty()) {
-                    List<URL> urls = new ArrayList<URL>();
-                    for (String url: results){
-                        URL linkURL = new URL(BASEURL_STRING + url);
-                        urls.add(linkURL);
-                    }
-                    urlLinks.put(linkMatcher.getName(), urls);
+        for(LinkMatcher linkMatcher : matchers){
+            List<String> results = linkMatcher.match(links);
+            if (!results.isEmpty()) {
+                List<URL> urls = new ArrayList<URL>();
+                for (String url: results){
+                    URL linkURL = new URL(BASEURL_STRING + url);
+                    urls.add(linkURL);
                 }
+                urlLinks.put(linkMatcher.getName(), urls);
             }
-        } catch(MalformedURLException e){
-            LOG.log(Level.WARNING, "string cannot form URL", e);
         }
         return urlLinks;
     }
