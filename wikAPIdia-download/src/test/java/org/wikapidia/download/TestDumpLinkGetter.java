@@ -1,16 +1,14 @@
 package org.wikapidia.download;
 
 import org.junit.Test;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.download.DumpLinkGetter;
 
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -27,12 +25,22 @@ public class TestDumpLinkGetter {
     }
 
     @Test
-    public void testNew() throws IOException {
+    public void testNew() throws IOException, ParseException {
         for (Language lang : Arrays.asList(Language.getByLangCode("en"))) {
             RequestedLinkGetter testGetter = new RequestedLinkGetter(lang, Arrays.asList(LinkMatcher.values()), "20130604");
 //            System.out.println("" /*+ testGetter.getFileLinks().size()*/ + "\n" + testGetter.getFileLinks() );
-            System.out.println(testGetter.getAvailableDates());
+            System.out.println(testGetter.getAllDates());
         }
+    }
+
+    @Test
+    public void testComparator() throws IOException, ParseException, WikapidiaException {
+        for (Language lang : Arrays.asList(Language.getByLangCode("id"))) {
+            RequestedLinkGetter testGetter = new RequestedLinkGetter(lang, Arrays.asList(LinkMatcher.values()), "20130701");
+            System.out.println(testGetter.getDumps());
+            System.out.println(testGetter.getDumps().size());
+        }
+
     }
 
 //    @Test

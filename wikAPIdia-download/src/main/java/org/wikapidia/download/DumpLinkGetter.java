@@ -17,6 +17,7 @@ import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -36,6 +37,7 @@ public class DumpLinkGetter {
 
     private Language lang;
     private List<LinkMatcher> matchers;
+    private EnumSet<LinkMatcher> hasMatchers;
     private String dumpDate;    // This is the date of the dump.
 
     private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
@@ -96,17 +98,24 @@ public class DumpLinkGetter {
         try{
             for(LinkMatcher linkMatcher : matchers){
                 List<String> results = linkMatcher.match(links);
-                List<URL> urls = new ArrayList<URL>();
-                for (String url: results){
-                    URL linkURL = new URL(BASEURL_STRING + url);
-                    urls.add(linkURL);
+                if (!results.isEmpty()) {
+                    List<URL> urls = new ArrayList<URL>();
+                    for (String url: results){
+                        URL linkURL = new URL(BASEURL_STRING + url);
+                        urls.add(linkURL);
+                    }
+                    urlLinks.put(linkMatcher.getName(), urls);
                 }
-                urlLinks.put(linkMatcher.getName(), urls);
             }
         } catch(MalformedURLException e){
             LOG.log(Level.WARNING, "string cannot form URL", e);
         }
         return urlLinks;
+    }
+
+    public List<LinkMatcher> getMissingMatchers() {
+
+        return null;
     }
 
 }
