@@ -53,8 +53,31 @@ User Instructions
 -l     Set languages to be processed. Also sets ills (Inter Language Links). Enter as lang codes with spaces between them.
 -t     Drops and recreates all tables
 ```
-* Run concept mapper scripts.
- 
+* Run conceptmapper.sh file. The parameters should be formatted to match the following:
+
+```bash
+[-c .conf] [-it] [-l lang ...] [-n algorithm]
+```
+```bash
+-c	Sets configuration file. Include that file .conf</li>
+-i	reates all indexes after loading</li>
+-l	Set languages to be processed. Enter as lang codes with spaces between them</li>
+-t	Drops and recreates all tables</li>
+-n	Selects the algorithm to use to map concepts</li>
+```
+
+* Run universallinkloader.sh. The parameters should be formatted to match the following:
+
+```bash
+[-c .conf] [-it] [-l lang ...] [-n algorithm]
+```
+```bash
+-c	Sets configuration file. Include that file .conf</li>
+-i	reates all indexes after loading</li>
+-l	Set languages to be processed. Enter as lang codes with spaces between them</li>
+-t	Drops and recreates all tables</li>
+-n	Selects the algorithm to use to map concepts</li>
+```
  
 A Basic Outline of the Process 
 -----------
