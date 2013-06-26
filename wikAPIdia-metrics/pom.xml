@@ -8,5 +8,18 @@
     <artifactId>wikAPIdia-metrics</artifactId>
     <version>0.1-SNAPSHOT</version>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.wikapidia</groupId>
+            <artifactId>wikapidia-core</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikapidia</groupId>
+            <artifactId>wikapidia-utils</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     
 </project>
