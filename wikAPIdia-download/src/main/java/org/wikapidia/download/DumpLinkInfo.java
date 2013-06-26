@@ -117,15 +117,15 @@ public class DumpLinkInfo {
             for (String line : lines) {
                 String[] parsedInfo = line.split("\t");
                 try {
-                    String lm = parsedInfo[1];
+                    String lm = parsedInfo[2];
                     if (!counters.containsKey(lm)) {
                         counters.put(lm, new AtomicInteger(0));
                     }
                     DumpLinkInfo temp = new DumpLinkInfo(
                             parsedInfo[0],
-                            "date",         // TODO: implement date
+                            parsedInfo[1],
                             lm,
-                            parsedInfo[2],
+                            parsedInfo[3],
                             counters.get(lm).getAndIncrement()
                     );
                     dumpLinks.add(temp);
