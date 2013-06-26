@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 
 /**
  * @author Yulun Li
- * @author Ari Weiland
  *
  * Get URLs of the dump file links with specified language, type of dump file and the date before which the dumps
  * are pulled.
@@ -71,9 +70,8 @@ public class RequestedLinkGetter {
      * Return a sorted list of dump dates before the date requested.
      * @param dateList list of Date object
      * @return list of dates as String.
-     * @throws java.text.ParseException
      */
-    protected List<String> availableDumpDatesSorted(List<Date> dateList) throws java.text.ParseException {
+    protected List<String> availableDumpDatesSorted(List<Date> dateList) throws WikapidiaException {
         List<String> dateListSorted = new ArrayList<String>();
         Collections.sort(dateList, new Comparator<Date>() {
             public int compare(Date date1, Date date2) {
@@ -84,6 +82,9 @@ public class RequestedLinkGetter {
             if (!date.after(requestDate)) {
                 dateListSorted.add(new SimpleDateFormat(DATE_FORMAT).format(date));
             }
+        }
+        if (dateListSorted.isEmpty()) {
+            throw new WikapidiaException("No dumps for " + lang.getLangCode() + " found before " + new SimpleDateFormat(DATE_FORMAT).format(requestDate));
         }
         return dateListSorted;
     }
@@ -219,20 +220,27 @@ public class RequestedLinkGetter {
         }
 
         String filePath = cmd.getOptionValue('o');
-        File file = new File(filePath);
 
         List<String> result = new ArrayList<String>();
         for (Language language : languages) {
             RequestedLinkGetter requestedLinkGetter = new RequestedLinkGetter(language, linkMatchers, getDumpByDate);
-            HashMap<String, HashMap<String, List<URL>>> urls = requestedLinkGetter.getDumps();
-            for (String dumpDate : urls.keySet()) {
-                for (String linkName : urls.get(dumpDate).keySet()) {
-                    for (URL url : urls.get(dumpDate).get(linkName)) {
-                        result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + url);
+            try {
+                HashMap<String, HashMap<String, List<URL>>> urls = requestedLinkGetter.getDumps();
+                for (String dumpDate : urls.keySet()) {
+                    for (String linkName : urls.get(dumpDate).keySet()) {
+                        for (URL url : urls.get(dumpDate).get(linkName)) {
+                            result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + url);
+                        }
                     }
                 }
+            } catch (WikapidiaException e) {
+                System.err.println(e);
             }
         }
-        FileUtils.writeLines(file, result, "\n");
+
+        if (!result.isEmpty()) {
+            File file = new File(filePath);
+            FileUtils.writeLines(file, result, "\n");
+        }
     }
 }
