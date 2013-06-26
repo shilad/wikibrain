@@ -10,7 +10,11 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * CategoryMembers should be parsed in the same step as LocalLinks
+ *
+ * @author Ari Weiland
+ *
+ * An interface that describes a Dao to determine local category membership.
+ *
  */
 public interface LocalCategoryMemberDao extends Loader<LocalCategoryMember> {
 

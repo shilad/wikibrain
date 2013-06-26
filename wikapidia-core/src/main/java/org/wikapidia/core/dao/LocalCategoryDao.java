@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao;
 
-
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategory;
 import org.wikapidia.core.model.Title;

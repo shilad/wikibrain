@@ -1,19 +1,22 @@
 package org.wikapidia.core.dao.sql;
 
-import org.apache.commons.io.IOUtils;
 import org.jooq.SQLDialect;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.JooqUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * A SQL Dao superclass that contains a few important parameters and utility methods
+ * ubiquitous to all SQL Daos.
  */
 public abstract class AbstractSqlDao {
     public static final Logger LOG = Logger.getLogger(LocalPageSqlDao.class.getName());

@@ -7,6 +7,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * A class to represent a Universal Link.
+ *
  */
 public class UniversalLink extends AbstractUniversalEntity<LocalLink> {
 

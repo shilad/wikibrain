@@ -1,5 +1,9 @@
 package org.wikapidia.parser.wiki;
 
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
+import org.wikapidia.core.dao.RawPageDao;
+import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.core.model.RawPage;
@@ -16,20 +20,18 @@ import java.util.logging.Logger;
 public class WikiTextDumpParser {
     public static final Logger LOG = Logger.getLogger(WikiTextDumpParser.class.getName());
 
-    private final File file;
     private final LanguageInfo language;
-    private final DumpPageXmlParser dpxp;
+    private final RawPageDao rawPageDao;
     private final List<String> allowedLanguages;
 
-    public WikiTextDumpParser(File file, LanguageInfo language) {
-        this(file, language, null);
+    public WikiTextDumpParser(RawPageDao rawPageDao, LanguageInfo language) {
+        this(rawPageDao, language, null);
     }
 
-    public WikiTextDumpParser(File file, LanguageInfo language, List<String> allowedIllLangs) {
-        this.file = file;
+    public WikiTextDumpParser(RawPageDao rawPageDao, LanguageInfo language, List<String> allowedIllLangs) {
         this.language = language;
-        this.dpxp = new DumpPageXmlParser(file, language);
         this.allowedLanguages = allowedIllLangs;
+        this.rawPageDao = rawPageDao;
     }
 
     /**
@@ -38,19 +40,20 @@ public class WikiTextDumpParser {
      *
      * @param visitor extracts data from side effects
      */
-    public void parse(ParserVisitor visitor) {
+    public void parse(ParserVisitor visitor) throws DaoException {
         parse(Arrays.asList(visitor));
     }
 
-    public void parse(List<ParserVisitor> visitors) {
+    public void parse(List<ParserVisitor> visitors) throws DaoException {
         WikiTextParser wtp = new WikiTextParser(language, allowedLanguages, visitors);
-        Iterator<RawPage> pageIterator = dpxp.iterator();
-        while (pageIterator.hasNext()) {
+        DaoFilter daoFilter = new DaoFilter().setLanguages(language.getLanguage());
+        Iterable<RawPage> pageIterator = rawPageDao.get(daoFilter);
+        for(RawPage page : pageIterator) {
             try {
-                wtp.parse(pageIterator.next());
+                wtp.parse(page);
             }
             catch (Exception e) {
-                LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
+                LOG.log(Level.WARNING, "parsing failed:", e);
             }
         }
     }
