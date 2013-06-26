@@ -81,7 +81,7 @@ public class WikiTextDumpLoader {
         if (cmd.hasOption("l")){
             allowedIlls = Arrays.asList(cmd.getOptionValues('l'));
         } else {
-            allowedIlls = (List<String>)conf.getConf().get().getAnyRef("Languages");
+            allowedIlls = (List)conf.getConf().get().getAnyRef("Languages");
         }
 
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();

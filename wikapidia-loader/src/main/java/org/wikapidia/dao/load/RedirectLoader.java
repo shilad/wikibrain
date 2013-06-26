@@ -20,6 +20,8 @@ import org.wikapidia.parser.wiki.RedirectParser;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -143,11 +145,11 @@ public class RedirectLoader {
             redirectLoader.beginLoad();
         }
 
-        String[] languages = null;
+        List<String> languages = null;
         if (cmd.hasOption('l')) {
-            languages = cmd.getOptionValues('l');
+            languages = Arrays.asList(cmd.getOptionValues('l'));
         } else {
-            languages = (String[])conf.getConf().get().getAnyRef("Languages");
+            languages = (List)conf.getConf().get().getAnyRef("Languages");
         }
             for(String l : languages){
                 Language lang = Language.getByLangCode(l);
