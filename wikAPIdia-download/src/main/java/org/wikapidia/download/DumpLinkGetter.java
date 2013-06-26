@@ -40,9 +40,6 @@ public class DumpLinkGetter {
     private EnumSet<LinkMatcher> hasMatchers;
     private String dumpDate;    // This is the date of the dump.
 
-    private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
-
-
     public DumpLinkGetter(Language lang, List<LinkMatcher> matchers, String dumpDate) {
         this.lang = lang;
         this.matchers = matchers;
