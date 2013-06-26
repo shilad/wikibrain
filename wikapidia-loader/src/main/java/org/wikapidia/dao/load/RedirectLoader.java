@@ -107,10 +107,10 @@ public class RedirectLoader {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
-                    .hasArg()
-                    .withLongOpt("conf")
-                    .withDescription("configuration file")
-                    .create("c"));
+                        .hasArg()
+                        .withLongOpt("conf")
+                        .withDescription("configuration file")
+                        .create("c"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
@@ -123,10 +123,10 @@ public class RedirectLoader {
                         .create("i"));
         options.addOption(
                 new DefaultOptionBuilder()
-                    .hasArgs()
+                        .hasArgs()
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process")
-                    .create("l"));
+                        .create("l"));
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
         try {
@@ -136,7 +136,7 @@ public class RedirectLoader {
             new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
-        File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
+        File pathConf = new File(cmd.getOptionValue('c', null));
         Configurator conf = new Configurator(new Configuration(pathConf));
 
         DataSource dataSource = conf.get(DataSource.class);
