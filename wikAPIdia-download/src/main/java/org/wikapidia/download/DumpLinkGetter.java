@@ -1,27 +1,18 @@
 package org.wikapidia.download;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
-import org.apache.commons.cli.*;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.lang.Language;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -37,7 +28,6 @@ public class DumpLinkGetter {
 
     private Language lang;
     private List<LinkMatcher> matchers;
-    private EnumSet<LinkMatcher> hasMatchers;
     private String dumpDate;    // This is the date of the dump.
 
     public DumpLinkGetter(Language lang, List<LinkMatcher> matchers, String dumpDate) {
@@ -63,8 +53,8 @@ public class DumpLinkGetter {
     }
 
     /**
-     * Return all links of a particular language the fits one of the patterns.
-     * @return
+     * Return all links of a particular language the fits one of the patterns
+     * @return  hashmap with dump urls and names of dump type
      */
     public HashMap<String, List<URL>> getDumpFiles() throws IOException {
         List<String> links = getFileLinks();
