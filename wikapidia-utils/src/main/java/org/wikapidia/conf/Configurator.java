@@ -76,6 +76,10 @@ public class Configurator {
         }
     }
 
+    public Configuration getConf() {
+        return conf;
+    }
+
     /**
      * Providers for each component.
      */

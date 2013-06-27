@@ -10,7 +10,7 @@ function die() {
 export WP_BASE=..
 export WP_CORE=$WP_BASE/wikapidia-core
 export WP_LOADER=$WP_BASE/wikapidia-loader
-export WP_MATRIX=$WP_BASE/wikapidia-matrix
+export WP_MATRIX=$WP_BASE/wikAPIdia-matrix
 export WP_MAPPER=$WP_BASE/wikAPIdia-mapper
 export WP_PARENT=$WP_BASE/wikAPIdia-parent
 export WP_PARSER=$WP_BASE/wikapidia-parser
