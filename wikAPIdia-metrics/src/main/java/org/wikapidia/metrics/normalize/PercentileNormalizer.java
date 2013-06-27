@@ -1,9 +1,9 @@
 package org.wikapidia.metrics.normalize;
 
-import edu.macalester.wpsemsim.utils.MathUtils;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.wikapidia.utils.MathUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

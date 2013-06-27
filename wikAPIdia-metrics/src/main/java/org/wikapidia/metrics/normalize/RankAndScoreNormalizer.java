@@ -1,9 +1,9 @@
 package org.wikapidia.metrics.normalize;
 
-import edu.macalester.wpsemsim.utils.DocScoreList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.wikapidia.metrics.SRResultList;
 
 import java.text.DecimalFormat;
 import java.util.logging.Logger;
@@ -22,7 +22,7 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
     private transient TDoubleArrayList ys = new TDoubleArrayList();
 
     @Override
-    public void observe(DocScoreList list, int index, double y) {
+    public void observe(SRResultList list, int index, double y) {
         if (index >= 0) {
             double score = list.getScore(index);
             if (!Double.isNaN(score) && !Double.isInfinite(score)) {
@@ -59,8 +59,8 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
     }
 
     @Override
-    public DocScoreList normalize(DocScoreList list) {
-        DocScoreList normalized = new DocScoreList(list.numDocs());
+    public SRResultList normalize(SRResultList list) {
+        SRResultList normalized = new SRResultList(list.numDocs());
         normalized.setMissingScore(missingMean);
         for (int i = 0; i < list.numDocs(); i++) {
             double s = logIfNecessary(list.getScore(i));

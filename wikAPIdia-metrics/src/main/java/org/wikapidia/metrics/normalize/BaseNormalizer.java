@@ -1,8 +1,8 @@
 package org.wikapidia.metrics.normalize;
 
-import edu.macalester.wpsemsim.utils.DocScoreList;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.wikapidia.metrics.SRResultList;
 
 import java.io.Serializable;
 import java.util.Random;
@@ -14,7 +14,7 @@ import java.util.Random;
  * 2. Call observe with each observation.
  * 3. Call finalize.
  * 4. Call normalize() on a new datapoint.
- * Make sure to set the missingScore value for the DocScoreList version.
+ * Make sure to set the missingScore value for the SRResultList version.
  */
 public abstract class BaseNormalizer implements Serializable, Normalizer {
     public static final long serialVersionUID = 4305858822325261880L;
@@ -44,9 +44,9 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
     protected BaseNormalizer() {}
 
     @Override
-    public void observe(DocScoreList sims, int rank, double y) {
+    public void observe(SRResultList sims, int rank, double y) {
         if (rank >= 0) {
-            observe(sims.get(rank).getScore(), y);
+            observe(sims.get(rank).getValue(), y);
         } else {
             observe(Double.NaN, y);
         }
@@ -97,8 +97,8 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
      * @param list
      */
     @Override
-    public DocScoreList normalize(DocScoreList list) {
-        DocScoreList dsl = new DocScoreList(list.numDocs());
+    public SRResultList normalize(SRResultList list) {
+        SRResultList dsl = new SRResultList(list.numDocs());
         list.setMissingScore(missingMean);
         for (int i = 0; i < list.numDocs(); i++) {
             dsl.set(i, list.getId(i), normalize(list.getScore(i)));
