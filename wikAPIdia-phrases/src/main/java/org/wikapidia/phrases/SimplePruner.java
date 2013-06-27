@@ -8,7 +8,7 @@ import java.util.*;
  *
  * @author Shilad Sen
  */
-class SimplePruner<K> implements PrunedCounts.Pruner<K> {
+public class SimplePruner<K> implements PrunedCounts.Pruner<K> {
     private final int minCount;
     private final int maxRank;
     private final double minFrac;

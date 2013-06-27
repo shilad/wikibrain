@@ -1,4 +1,4 @@
-package org.wikapidia.phrases.dao;
+package org.wikapidia.phrases;
 
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
@@ -33,7 +33,7 @@ public interface PhraseAnalyzerDao {
     void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException;
 
     /**
-     * Gets pages related to a phrase.
+     * Gets pages related to a phrase. Phrases are normalized before looking them up.
      * @param lang
      * @param phrase
      * @return Map from page ids (in the local language) to the number of occurrences

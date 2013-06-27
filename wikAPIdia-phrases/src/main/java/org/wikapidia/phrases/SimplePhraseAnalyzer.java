@@ -12,7 +12,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.phrases.dao.PhraseAnalyzerDao;
+import org.wikapidia.phrases.PhraseAnalyzerDao;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpStringUtils;
 
@@ -226,33 +226,5 @@ public abstract class SimplePhraseAnalyzer implements PhraseAnalyzer {
     @Override
     public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
         throw new UnsupportedOperationException();
-    }
-
-
-    public static class Provider extends org.wikapidia.conf.Provider<PhraseAnalyzer> {
-        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
-            super(configurator, config);
-        }
-
-        @Override
-        public Class getType() {
-            return PhraseAnalyzer.class;
-        }
-
-        @Override
-        public String getPath() {
-            return "phrases.analyzer";
-        }
-
-        @Override
-        public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("simple")) {
-                return null;
-            }
-            LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
-            PhraseAnalyzerDao paDao = getConfigurator().get(PhraseAnalyzerDao.class, config.getString("phraseDao"));
-            PhraseCorpus corpus = getConfigurator().get(PhraseCorpus.class, config.getString("corpus"));
-            return new SimplePhraseAnalyzer(paDao, lpDao, corpus);
-        }
     }
 }

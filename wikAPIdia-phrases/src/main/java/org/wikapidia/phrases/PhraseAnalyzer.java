@@ -4,7 +4,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.jooq.tables.UniversalPage;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.phrases.dao.PhraseAnalyzerDao;
+import org.wikapidia.phrases.PhraseAnalyzerDao;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;

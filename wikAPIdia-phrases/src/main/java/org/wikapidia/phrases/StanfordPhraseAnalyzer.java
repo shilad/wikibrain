@@ -11,7 +11,7 @@ import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.phrases.dao.PhraseAnalyzerDao;
+import org.wikapidia.phrases.PhraseAnalyzerDao;
 import org.wikapidia.utils.WpIOUtils;
 
 
@@ -34,13 +34,13 @@ import java.util.logging.Logger;
  * These files capture anchor text associated with web pages that link to Wikipedia.
  * Note that the pages with anchor text are not (usually) Wikipedia pages themselves.
  */
-public class StanfordPhraseCorpus extends SimplePhraseAnalyzer {
-    private static final Logger LOG = Logger.getLogger(StanfordPhraseCorpus.class.getName());
+public class StanfordPhraseAnalyzer extends SimplePhraseAnalyzer {
+    private static final Logger LOG = Logger.getLogger(StanfordPhraseAnalyzer.class.getName());
     private static final LanguageInfo EN = LanguageInfo.getByLangCode("simple");
 
     private final File path;
 
-    public StanfordPhraseCorpus(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, File path) {
+    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, File path) {
         super(phraseDao, pageDao);
         this.path = path;
     }
@@ -50,7 +50,7 @@ public class StanfordPhraseCorpus extends SimplePhraseAnalyzer {
      * This can safely be called for multiple files if it is chunked.
      * @throws IOException
      */
-    @Override
+//    @Override
     public void loadCorpus(PhraseAnalyzerDao dao) throws IOException {
         BufferedReader reader = WpIOUtils.openReader(path);
         long numLines = 0;
@@ -73,7 +73,7 @@ public class StanfordPhraseCorpus extends SimplePhraseAnalyzer {
                         new Title(e.article, EN),
                         NameSpace.ARTICLE);
                 if (lp != null) {
-                    dao.add(EN.getLanguage(), lp.getLocalId(), e.text, e.getNumEnglishLinks());
+//                    dao.add(EN.getLanguage(), lp.getLocalId(), e.text, e.getNumEnglishLinks());
                     numLinesRetained++;
                 }
             } catch (Exception e) {
@@ -126,29 +126,30 @@ public class StanfordPhraseCorpus extends SimplePhraseAnalyzer {
         }
     }
 
-    public static class Provider extends org.wikapidia.conf.Provider<PhraseCorpus> {
+    public static class Provider extends org.wikapidia.conf.Provider<PhraseAnalyzer> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return PhraseCorpus.class;
+            return PhraseAnalyzer.class;
         }
 
         @Override
         public String getPath() {
-            return "phrases.corpus";
+            return "phrases.analyzer";
         }
 
         @Override
-        public PhraseCorpus get(String name, Config config) throws ConfigurationException {
+        public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("stanford")) {
                 return null;
             }
-            LocalPageDao dao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
+            PhraseAnalyzerDao paDao = getConfigurator().get(PhraseAnalyzerDao.class, config.getString("phraseDao"));
+            LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             File path = new File(config.getString("path"));
-            return new StanfordPhraseCorpus(dao, path);
+            return new StanfordPhraseAnalyzer(paDao, lpDao, path);
         }
     }
 }

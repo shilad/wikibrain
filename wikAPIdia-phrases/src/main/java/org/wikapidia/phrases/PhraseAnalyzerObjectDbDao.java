@@ -1,4 +1,4 @@
-package org.wikapidia.phrases.dao;
+package org.wikapidia.phrases;
 
 import com.sleepycat.je.DatabaseException;
 import com.typesafe.config.Config;
@@ -9,8 +9,10 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.phrases.PhraseAnalyzerDao;
 import org.wikapidia.phrases.PrunedCounts;
 import org.wikapidia.utils.ObjectDb;
+import org.wikapidia.utils.WpStringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +54,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
 
     @Override
     public void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException {
+        phrase = normalize(phrase);
         try {
             resolveDb.put(lang.getLangCode() + ":" + phrase, counts);
         } catch (IOException e) {
@@ -72,6 +75,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      */
     @Override
     public PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase, int maxPages) throws DaoException {
+        phrase = normalize(phrase);
         try {
             PrunedCounts<Integer> counts = resolveDb.get(lang.getLangCode() + ":" + phrase);
             if (counts == null || counts.size() <= maxPages) {
@@ -92,6 +96,15 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
         }
     }
 
+    /**
+     * Normalizes a phrase by folding case and removing non alphanumeric characters.
+     * This is scary for non-English languages!
+     * @param phrase
+     * @return
+     */
+    public String normalize(String phrase) {
+        return WpStringUtils.normalize(phrase);
+    }
 
 
     /**
@@ -122,53 +135,6 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
             throw new DaoException(e);
         } catch (ClassNotFoundException e) {
             throw new DaoException(e);
-        }
-    }
-
-    /**
-     *
-     * @param db
-     * @param minCount
-     * @param maxRank
-     * @param minFrac
-     * @param <T>
-     * @throws DaoException
-     */
-
-    private <T extends PrunableCounter> void freezeAndPrune(ObjectDb<T> db, int minCount, int maxRank, double minFrac) throws DaoException {
-        Iterator<Pair<String, T>> iter = db.iterator();
-        while (iter.hasNext()) {
-            Pair<String, T> entry = iter.next();
-            T record = entry.getValue();
-            record.freeze();
-
-            int counts[] = record.getCounts();
-            int sum = 0;
-            for (int i = 0; i < counts.length; i++) {
-                sum += counts[i];
-            }
-            // find rank for this entry
-            int i = 0;
-            for (; i < counts.length  && i < maxRank; i++) {
-                int c = counts[i];
-                if (c < minCount || 1.0 * c / sum < minFrac) {
-                    break;
-                }
-            }
-            if (i == 0) {
-                iter.remove();
-            } else {
-                if (i < counts.length) {
-                    record.prune(i);
-                }
-                try {
-                    db.put(entry.getKey(), record);
-                } catch (DatabaseException e) {
-                    throw new DaoException(e);
-                } catch (IOException e) {
-                    throw new DaoException(e);
-                }
-            }
         }
     }
 

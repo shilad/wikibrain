@@ -25,7 +25,7 @@ class NormalizedStringPruner extends SimplePruner<String> {
         Map<String, String> best = new HashMap<String, String>();   // normalized string to most popular unnormalized version
         for (String key : allCounts.keySet()) {
             String nkey = WpStringUtils.normalize(key);
-            int c = allCounts.get(nkey);
+            int c = allCounts.get(key);
             sums.put(nkey, c + (sums.containsKey(nkey) ? sums.get(nkey) : 0));
             if (!best.containsKey(nkey) || allCounts.get(best.get(nkey)) < c) {
                 best.put(nkey, key);

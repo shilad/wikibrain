@@ -1,7 +1,7 @@
 package org.wikapidia.phrases;
 
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.phrases.dao.PhraseAnalyzerDao;
+import org.wikapidia.phrases.PhraseAnalyzerDao;
 
 import java.io.IOException;
 
