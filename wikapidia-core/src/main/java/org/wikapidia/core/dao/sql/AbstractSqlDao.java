@@ -19,7 +19,8 @@ import java.util.logging.Logger;
  * ubiquitous to all SQL Daos.
  */
 public abstract class AbstractSqlDao {
-    public static final Logger LOG = Logger.getLogger(LocalPageSqlDao.class.getName());
+
+    public static final Logger LOG = Logger.getLogger(AbstractSqlDao.class.getName());
     public static final int DEFAULT_FETCH_SIZE = 1000;
 
     protected final SQLDialect dialect;
