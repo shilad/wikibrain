@@ -67,12 +67,7 @@ public class FileDownloader {
             return;
         }
 
-        String filePath;
-        if (cmd.hasOption("o")) {
-            filePath = cmd.getOptionValue('o');
-        } else {
-            filePath = "download";
-        }
+        String filePath = cmd.getOptionValue('o', "download");
         if (cmd.getArgList().isEmpty()) {
             System.err.println("No input files specified.");
             new HelpFormatter().printHelp("FileDownloader", options);

@@ -27,6 +27,9 @@ import java.util.regex.Pattern;
  * @author Ari Weiland
  * @author Yulun Li
  *
+ * Get URLs of the dump file links with specified language, type of dump file and the date before which the dumps
+ * are pulled.
+ *
  */
 public class RequestedLinkGetter {
 
@@ -34,17 +37,22 @@ public class RequestedLinkGetter {
 
     private Language lang;
     private List<LinkMatcher> matchers;
-    private String requestDate;    // This is the date requested by the user.
+    private Date requestDate;    // This is the date requested by the user.
 
     private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
 
-
-    public RequestedLinkGetter(Language lang, List<LinkMatcher> matchers, String requestDate) {
+    public RequestedLinkGetter(Language lang, List<LinkMatcher> matchers, Date requestDate) {
         this.lang = lang;
         this.matchers = matchers;
         this.requestDate = requestDate;
     }
 
+    /**
+     * Return all dates on the dump index page of a particular language.
+     * @return list of Date objects.
+     * @throws IOException
+     * @throws ParseException
+     */
     protected List<Date> getAllDates() throws IOException, ParseException {
         List<Date> availableDate = new ArrayList<Date>();
         URL langWikiPageUrl = new URL(DumpLinkGetter.BASEURL_STRING+ "/" + lang.getLangCode().replace("-", "_") + "wiki/");
@@ -59,10 +67,12 @@ public class RequestedLinkGetter {
         return availableDate;
     }
 
-
-
-
-    protected List<String> availableDumpDatesSorted(List<Date> dateList) throws java.text.ParseException {
+    /**
+     * Return a sorted list of dump dates before the date requested.
+     * @param dateList list of Date object
+     * @return list of dates as String.
+     */
+    protected List<String> availableDumpDatesSorted(List<Date> dateList) throws WikapidiaException {
         List<String> dateListSorted = new ArrayList<String>();
         Collections.sort(dateList, new Comparator<Date>() {
             public int compare(Date date1, Date date2) {
@@ -70,9 +80,12 @@ public class RequestedLinkGetter {
             }
         });
         for (Date date : dateList) {
-            if (!date.after(stringToDate(requestDate))) {
+            if (!date.after(requestDate)) {
                 dateListSorted.add(new SimpleDateFormat(DATE_FORMAT).format(date));
             }
+        }
+        if (dateListSorted.isEmpty()) {
+            throw new WikapidiaException("No dumps for " + lang.getLangCode() + " found before " + new SimpleDateFormat(DATE_FORMAT).format(requestDate));
         }
         return dateListSorted;
     }
@@ -83,8 +96,10 @@ public class RequestedLinkGetter {
      * @return Date as java.util.Date object.
      * @throws java.text.ParseException
      */
-    private Date stringToDate(String dateString) throws java.text.ParseException {
-        return new SimpleDateFormat(DATE_FORMAT).parse(dateString);
+    private static Date stringToDate(String dateString) throws java.text.ParseException {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMAT);
+        dateFormatter.setLenient(false);
+        return dateFormatter.parse(dateString);
     }
 
     protected HashMap<String, HashMap<String, List<URL>>> getDumps() throws ParseException, IOException, WikapidiaException {
@@ -113,8 +128,11 @@ public class RequestedLinkGetter {
     }
 
     /**
-     * Parse command line and generate .tsv file containing language code, name of file type and link.
-     *
+     * Parse command line and generate .tsv file containing language code, date of dump, name of file type and link url.
+     * @param args command line prompt
+     * @throws IOException
+     * @throws WikapidiaException
+     * @throws ParseException
      */
     public static void main(String[] args) throws IOException, WikapidiaException, ParseException {
 
@@ -182,8 +200,9 @@ public class RequestedLinkGetter {
                 } catch (IllegalArgumentException e) {
                     String langs = "";
                     for (Language language : Language.LANGUAGES) {
-                        langs += language.getLangCode() + ",";
+                        langs += "," + language.getLangCode();
                     }
+                    langs = langs.substring(1);
                     System.err.println("Invalid language code: " + langCode
                             + "\nValid language codes: \n" + langs);
                     System.exit(1);
@@ -191,22 +210,39 @@ public class RequestedLinkGetter {
             }
         }
 
-        String getDumpByDate = cmd.hasOption("d") ? cmd.getOptionValue('d') : new SimpleDateFormat(DATE_FORMAT).format(new Date());
+        Date getDumpByDate = new Date();
+        if (cmd.hasOption("d")) {
+            try {
+                getDumpByDate = stringToDate(cmd.getOptionValue("d"));
+            } catch (java.text.ParseException e) {
+                System.err.println("Invalid date: " + cmd.getOptionValue("d")
+                        + "\nValid date format: \n" + "yyyyMMdd");
+                System.exit(1);
+            }
+        }
+
         String filePath = cmd.getOptionValue('o');
-        File file = new File(filePath);
 
         List<String> result = new ArrayList<String>();
         for (Language language : languages) {
             RequestedLinkGetter requestedLinkGetter = new RequestedLinkGetter(language, linkMatchers, getDumpByDate);
-            HashMap<String, HashMap<String, List<URL>>> urls = requestedLinkGetter.getDumps();
-            for (String dumpDate : urls.keySet()) {
-                for (String linkName : urls.get(dumpDate).keySet()) {
-                    for (URL url : urls.get(dumpDate).get(linkName)) {
-                        result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + url);
+            try {
+                HashMap<String, HashMap<String, List<URL>>> urls = requestedLinkGetter.getDumps();
+                for (String dumpDate : urls.keySet()) {
+                    for (String linkName : urls.get(dumpDate).keySet()) {
+                        for (URL url : urls.get(dumpDate).get(linkName)) {
+                            result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + url);
+                        }
                     }
                 }
+            } catch (WikapidiaException e) {
+                System.err.println(e);
             }
         }
-        FileUtils.writeLines(file, result, "\n");
+
+        if (!result.isEmpty()) {
+            File file = new File(filePath);
+            FileUtils.writeLines(file, result, "\n");
+        }
     }
 }
