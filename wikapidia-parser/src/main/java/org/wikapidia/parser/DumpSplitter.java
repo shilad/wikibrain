@@ -1,16 +1,13 @@
 package org.wikapidia.parser;
 
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.apache.commons.io.FilenameUtils;
-import org.wikapidia.utils.CompressedFile;
+import org.wikapidia.utils.WpIOUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 
 /**
  * Iterates over a file containing an XML dump of wikipedia.
@@ -63,7 +60,7 @@ public class DumpSplitter implements Iterable<String> {
         private boolean closed = false;
 
         public ArticleIterator(File path) throws IOException, ArchiveException, XMLStreamException {
-            reader = CompressedFile.open(path);
+            reader = WpIOUtils.openReader(path);
         }
 
         private void fillBuffer() {

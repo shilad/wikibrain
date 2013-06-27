@@ -5,13 +5,14 @@ import org.apache.commons.lang3.math.Fraction;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.phrases.dao.PhraseAnalyzerDao;
-import org.wikapidia.utils.CompressedFile;
+import org.wikapidia.utils.WpIOUtils;
 
 
 import java.util.logging.Level;
@@ -33,15 +34,14 @@ import java.util.logging.Logger;
  * These files capture anchor text associated with web pages that link to Wikipedia.
  * Note that the pages with anchor text are not (usually) Wikipedia pages themselves.
  */
-public class StanfordPhraseCorpus implements PhraseCorpus {
+public class StanfordPhraseCorpus extends SimplePhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(StanfordPhraseCorpus.class.getName());
-    private static final LanguageInfo EN = LanguageInfo.getByLangCode("en");
+    private static final LanguageInfo EN = LanguageInfo.getByLangCode("simple");
 
-    private LocalPageDao pageDao;
     private final File path;
 
-    public StanfordPhraseCorpus(LocalPageDao pageDao, File path) {
-        this.pageDao = pageDao;
+    public StanfordPhraseCorpus(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, File path) {
+        super(phraseDao, pageDao);
         this.path = path;
     }
 
@@ -52,7 +52,7 @@ public class StanfordPhraseCorpus implements PhraseCorpus {
      */
     @Override
     public void loadCorpus(PhraseAnalyzerDao dao) throws IOException {
-        BufferedReader reader = CompressedFile.open(path);
+        BufferedReader reader = WpIOUtils.openReader(path);
         long numLines = 0;
         long numLinesRetained = 0;
         while (true) {
@@ -93,6 +93,12 @@ public class StanfordPhraseCorpus implements PhraseCorpus {
      * - A variety of flags
      */
     private static final Pattern MATCH_ENTRY = Pattern.compile("([^\t]*)\t([0-9.e-]+) ([^ ]*)(| (.*))$");
+
+    @Override
+    protected Iterable<SimplePhraseAnalyzer.Entry> getCorpus() throws IOException, DaoException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     class Entry {
         String text;
         float fraction;

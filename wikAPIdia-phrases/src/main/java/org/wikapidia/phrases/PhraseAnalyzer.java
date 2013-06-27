@@ -13,11 +13,14 @@ import java.util.LinkedHashMap;
  * Given a page, returns the most common phrases
  */
 public interface PhraseAnalyzer {
+
     /**
-     * Loads a single phrase corpus into the database.
-     * @throws java.io.IOException, DaoException
+     * Loads a specific corpus into the dao.
+     *
+     * @throws DaoException
+     * @throws IOException
      */
-    void loadCorpus() throws DaoException, IOException;
+    void loadCorpus(PrunedCounts.Pruner<String> pagePruner, PrunedCounts.Pruner<Integer> phrasePruner) throws DaoException, IOException;
 
     /**
      * Returns the most descriptive phrases for a wikipedia page.
@@ -58,4 +61,5 @@ public interface PhraseAnalyzer {
      * The scores can be considered probabilities that sum to 1.0 across all possibilities.
      */
     public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages);
+
 }

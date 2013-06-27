@@ -2,8 +2,7 @@ package org.wikapidia.phrases.dao;
 
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-
-import java.util.LinkedHashMap;
+import org.wikapidia.phrases.PrunedCounts;
 
 /**
  * Stores and retrieves information related to phrase to page relationships.
@@ -12,35 +11,26 @@ import java.util.LinkedHashMap;
 public interface PhraseAnalyzerDao {
 
     /**
-     * Captures the top-k entries, by count, but also remembers the total count.
-     * @param <K> The class of the objects being counted.
-     */
-    public static class PrunedCounts<K> extends LinkedHashMap<K, Integer> {
-        private int total;
-        public PrunedCounts(int total) { this.total = total; }
-        public int getTotal() { return total; }
-    }
-
-    /**
-     * Adds information mapping a page to a phrase a certain number of times.
-     * Multiple invocations of the method with the same page and phrase should sum the counts.
+     * Adds information mapping a page to phrases.
+     * Multiple invocations of the method with the same page override counts.
      * @param lang
      * @param wpId
-     * @param phrase
-     * @param count
+     * @param counts
      * @throws org.wikapidia.core.dao.DaoException
      */
-    void add(Language lang, int wpId, String phrase, int count) throws DaoException;
+    void savePageCounts(Language lang, int wpId, PrunedCounts<String> counts) throws DaoException;
 
     /**
-     * Freeze records after all phrase to page relationships have been added.
-     * Prune down records to meet a certain criteria
-     * @param minCount
-     * @param maxRank
-     * @param minFrac
+     * Adds information mapping a phrase to pages.
+     * Phrases are normalized, and phrases that normalize to the same string are
+     * treated as identical. Multiple invocations of the method with the same phrase
+     * override counts.
+     * @param lang
+     * @param phrase
+     * @param counts
      * @throws org.wikapidia.core.dao.DaoException
      */
-    void freezeAndPrune(int minCount, int maxRank, double minFrac) throws DaoException;
+    void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException;
 
     /**
      * Gets pages related to a phrase.
@@ -50,7 +40,7 @@ public interface PhraseAnalyzerDao {
      * ordered by decreasing count.
      * @throws DaoException
      */
-    PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase) throws DaoException;
+    PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase, int maxPages) throws DaoException;
 
     /**
      * Gets phrases related to a page.
@@ -60,5 +50,5 @@ public interface PhraseAnalyzerDao {
      * ordered by decreasing count.
      * @throws DaoException
      */
-    PrunedCounts<String> getPageCounts(Language lang, int wpId) throws DaoException;
+    PrunedCounts<String> getPageCounts(Language lang, int wpId, int maxPhrases) throws DaoException;
 }

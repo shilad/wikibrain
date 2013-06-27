@@ -8,11 +8,9 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.phrases.PhraseCorpus;
+import org.wikapidia.phrases.PrunedCounts;
 import org.wikapidia.utils.ObjectDb;
-import org.wikapidia.utils.WpStringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +20,8 @@ import java.util.Iterator;
  * Persists information about phrases to page relationships using an object database.
  */
 public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
-    private ObjectDb<DescriptionRecord> describeDb;
-    private ObjectDb<ResolutionRecord> resolveDb;
+    private ObjectDb<PrunedCounts<String>> describeDb;
+    private ObjectDb<PrunedCounts<Integer>> resolveDb;
 
     /**
      * Creates a new dao using the given directory.
@@ -37,102 +35,56 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
             path.mkdirs();
         }
         try {
-            describeDb = new ObjectDb<DescriptionRecord>(new File(path, "describe"), isNew);
-            resolveDb = new ObjectDb<ResolutionRecord>(new File(path, "resolve"), isNew);
+            describeDb = new ObjectDb<PrunedCounts<String>>(new File(path, "describe"), isNew);
+            resolveDb = new ObjectDb<PrunedCounts<Integer>>(new File(path, "resolve"), isNew);
         } catch (IOException e) {
             throw new DaoException(e);
         }
     }
-
-    /**
-     * Adds information mapping a page to a phrase a certain number of times.
-     * Multiple invocations of the method with the same page and phrase should sum the counts.
-     * @param lang
-     * @param wpId
-     * @param phrase
-     * @param count
-     * @throws DaoException
-     */
     @Override
-    public void add(Language lang, int wpId, String phrase, int count) throws DaoException {
-        addStoredPage(lang, wpId, phrase, count);
-        addStoredPhrase(lang, phrase, wpId, count);
-    }
-
-    private void addStoredPage(Language lang, int wpId, String phrase, int count) throws DaoException {
-        String key = lang.getLangCode() + wpId;
-        DescriptionRecord value = null;
+    public void savePageCounts(Language lang, int wpId, PrunedCounts<String> counts) throws DaoException {
         try {
-            value = describeDb.get(key);
-            if (value == null) {
-                value = new DescriptionRecord(wpId);
-            }
-            value.add(phrase, count);
-            describeDb.put(key, value);
-        } catch (DatabaseException e) {
-            throw new DaoException(e);
+            describeDb.put(lang.getLangCode() + ":" + wpId, counts);
         } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (ClassNotFoundException e) {
             throw new DaoException(e);
         }
     }
 
-    private void addStoredPhrase(Language lang, String phrase, int wpId, int count) throws DaoException {
-        phrase = WpStringUtils.normalize(phrase);
-        String key = lang.getLangCode() + phrase;
-        ResolutionRecord value = null;
-        try {
-            value = resolveDb.get(key);
-            if (value == null) {
-                value = new ResolutionRecord(phrase);
-            }
-            value.add(wpId, count);
-            resolveDb.put(key, value);
-        } catch (DatabaseException e) {
-            throw new DaoException(e);
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (ClassNotFoundException e) {
-            throw new DaoException(e);
-        }
-    }
-
-    /**
-     * Freeze records after all phrase to page relationships have been added.
-     * Prune down records to meet a certain criteria
-     * @param minCount
-     * @param maxRank
-     * @param minFrac
-     * @throws DaoException
-     */
     @Override
-    public void freezeAndPrune(int minCount, int maxRank, double minFrac) throws DaoException {
-        freezeAndPrune(resolveDb, minCount, maxRank, minFrac);
-        freezeAndPrune(describeDb, minCount, maxRank, minFrac);
+    public void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException {
+        try {
+            resolveDb.put(lang.getLangCode() + ":" + phrase, counts);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
     }
+
 
     /**
      * Gets pages related to a phrase.
      *
      * @param lang
      * @param phrase
+     * @param maxPages
      * @return Map from page ids (in the local language) to the number of occurrences
      * ordered by decreasing count.
      * @throws DaoException
      */
     @Override
-    public PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase) throws DaoException {
+    public PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase, int maxPages) throws DaoException {
         try {
-            ResolutionRecord record = resolveDb.get(lang.getLangCode() + phrase);
-            if (record == null) {
-                return null;
+            PrunedCounts<Integer> counts = resolveDb.get(lang.getLangCode() + ":" + phrase);
+            if (counts == null || counts.size() <= maxPages) {
+                return counts;
             }
-            PrunedCounts<Integer> counts = new PrunedCounts<Integer>(record.getSum());
-            for (int i = 0; i < record.size(); i++) {
-                counts.put(record.getWpId(i), record.getCount(i));
+            PrunedCounts<Integer> result = new PrunedCounts<Integer>(counts.getTotal());
+            for (int id : counts.keySet()) {
+                if (result.size() >= maxPages) {
+                    break;
+                }
+                result.put(id, counts.get(id));
             }
-            return counts;
+            return result;
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (ClassNotFoundException e) {
@@ -146,22 +98,26 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      * Gets phrases related to a page.
      * @param lang
      * @param wpId Local page id
+     * @param maxPhrases
      * @return Map from phrasese (in the local language) to the number of occurrences
      * ordered by decreasing count.
      * @throws DaoException
      */
     @Override
-    public PrunedCounts<String> getPageCounts(Language lang, int wpId) throws DaoException {
+    public PrunedCounts<String> getPageCounts(Language lang, int wpId, int maxPhrases) throws DaoException {
         try {
-            DescriptionRecord record = describeDb.get(lang.getLangCode() + wpId);
-            if (record == null) {
-                return null;
+            PrunedCounts<String> counts = describeDb.get(lang.getLangCode() + ":" + wpId);
+            if (counts == null || counts.size() <= maxPhrases) {
+                return counts;
             }
-            PrunedCounts<String> counts = new PrunedCounts<String>(record.getSum());
-            for (int i = 0; i < record.size(); i++) {
-                counts.put(record.getPhrase(i), record.getCount(i));
+            PrunedCounts<String> result = new PrunedCounts<String>(counts.getTotal());
+            for (String phrase : counts.keySet()) {
+                if (result.size() >= maxPhrases) {
+                    break;
+                }
+                result.put(phrase, counts.get(phrase));
             }
-            return counts;
+            return result;
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (ClassNotFoundException e) {

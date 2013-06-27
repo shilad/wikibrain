@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.utils.ObjectDb;
+import org.wikapidia.phrases.PrunedCounts;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,7 +82,7 @@ public class TestPhraseAnalyzerDao {
         dao.add(en, 36, "fOo", 8);
         dao.freezeAndPrune(2, 2, 0.0);
 
-        PhraseAnalyzerDao.PrunedCounts<String> r1 = dao.getPageCounts(en, 319);
+        PrunedCounts<String> r1 = dao.getPageCounts(en, 319);
         assertNotNull(r1);
         assertEquals(r1.size(), 2);
         assertEquals(r1.getTotal(), 111);
@@ -94,7 +94,7 @@ public class TestPhraseAnalyzerDao {
         assertNull(dao.getPhraseCounts(en, "BAz!"));
 
 
-        PhraseAnalyzerDao.PrunedCounts<Integer> r2 = dao.getPhraseCounts(en, "foo");
+        PrunedCounts<Integer> r2 = dao.getPhraseCounts(en, "foo");
         assertNotNull(r2);
         assertEquals(r2.size(), 2);
         assertEquals(r2.getTotal(), 125);
