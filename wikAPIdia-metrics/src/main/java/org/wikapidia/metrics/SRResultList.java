@@ -5,6 +5,7 @@ import org.apache.commons.collections.iterators.ArrayIterator;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 public class SRResultList implements  Iterable<SRResult>{
     private SRResult[] results;
@@ -15,7 +16,7 @@ public class SRResultList implements  Iterable<SRResult>{
     public SRResultList(int maxNumDocs) {
         this.results = new SRResult[maxNumDocs];
         for (int i = 0; i < this.results.length; i++) {
-            results[i] = new SRResult(missingScore);
+            results[i] = new SRResult();
         }
         numDocs = maxNumDocs;
     }
@@ -60,6 +61,13 @@ public class SRResultList implements  Iterable<SRResult>{
         assert(i < numDocs);
         results[i].id = id;
         results[i].value = score;
+    }
+
+    public void set (int i, int id, double score, List<Explanation> explanationList){
+        assert (i<numDocs);
+        results[i].id = id;
+        results[i].value = score;
+        results[i].explanations = explanationList;
     }
 
     public int[] getIds() {
