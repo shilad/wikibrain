@@ -1,6 +1,5 @@
 package org.wikapidia.metrics.normalize;
 
-import edu.macalester.wpsemsim.utils.MathUtils;
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -8,6 +7,7 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
 import org.apache.commons.math3.stat.ranking.NaturalRanking;
 import org.apache.commons.math3.stat.ranking.TiesStrategy;
+import org.wikapidia.utils.MathUtils;
 
 import java.text.DecimalFormat;
 import java.util.logging.Logger;
