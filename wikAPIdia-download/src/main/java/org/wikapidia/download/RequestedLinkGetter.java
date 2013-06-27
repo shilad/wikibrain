@@ -33,6 +33,9 @@ import java.util.regex.Pattern;
  */
     public class RequestedLinkGetter {
 
+    // TODO: use configuration file
+//    TODO: user default, specify languages and get articles for default
+
     private static final String DATE_FORMAT = "yyyyMMdd";
 
     private Language lang;

@@ -102,7 +102,6 @@ public class UniversalLinkLoader {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
-                        .withValueSeparator(',')
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process")
                         .create("l"));
@@ -122,7 +121,7 @@ public class UniversalLinkLoader {
             new HelpFormatter().printHelp("UniversalLinkLoader", options);
             return;
         }
-        File pathConf = new File(cmd.getOptionValue('c', null));
+        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
         List<String> langCodes;

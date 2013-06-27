@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,6 @@ public class DumpLinkInfo {
         return language.getLangCode() + "wiki." +
                 linkMatcher.getName() + "." +
                 counter + "." +
-                language.getLangCode() + "." +
                 date +
                 getExtension();
     }
@@ -109,6 +107,10 @@ public class DumpLinkInfo {
         }
     }
 
+    public String getDownloadName() {
+        return url.toString().substring(url.toString().lastIndexOf("/") + 1);
+    }
+
     /**
      * Parses a file of info pertaining to dump links into a list of DumpLinkInfo.
      * Info must be listed in order: lang code, date, LinkMatcher, URL
@@ -116,30 +118,33 @@ public class DumpLinkInfo {
      * @param file
      * @return
      */
-    public static List<DumpLinkInfo> parseFile(File file) {
+    public static DumpLinkCluster parseFile(File file) {
         InputStream stream = null;
         Map<String, AtomicInteger> counters = new HashMap<String, AtomicInteger>();
         try {
             stream = new FileInputStream(file);
             List<String> lines = IOUtils.readLines(stream, "UTF-8");
-            List<DumpLinkInfo> dumpLinks = new ArrayList<DumpLinkInfo>();
+            DumpLinkCluster dumpLinks = new DumpLinkCluster();
             for (String line : lines) {
                 String[] parsedInfo = line.split("\t");
+                String langCode = parsedInfo[0];
+                String date = parsedInfo[1];
+                String linkMatcher = parsedInfo[2];
+                String url = parsedInfo[3];
                 try {
-                    String lm = parsedInfo[2];
-                    if (!counters.containsKey(lm)) {
-                        counters.put(lm, new AtomicInteger(0));
+                    if (!counters.containsKey(linkMatcher)) {
+                        counters.put(linkMatcher, new AtomicInteger(0));
                     }
                     DumpLinkInfo temp = new DumpLinkInfo(
-                            parsedInfo[0],
-                            parsedInfo[1],
-                            lm,
-                            parsedInfo[3],
-                            counters.get(lm).getAndIncrement()
+                            langCode,
+                            date,
+                            linkMatcher,
+                            url,
+                            counters.get(linkMatcher).getAndIncrement()
                     );
                     dumpLinks.add(temp);
                 } catch (MalformedURLException e) {
-                    LOG.log(Level.WARNING, "Malformed URL \"" + parsedInfo[3] + "\" : ", e);
+                    LOG.log(Level.WARNING, "Malformed URL \"" + url + "\" : ", e);
                 }
             }
             return dumpLinks;
