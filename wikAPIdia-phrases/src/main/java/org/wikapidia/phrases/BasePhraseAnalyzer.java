@@ -1,28 +1,27 @@
 package org.wikapidia.phrases;
 
 import com.google.code.externalsorting.ExternalSort;
-import com.typesafe.config.Config;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.jooq.tables.UniversalPage;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.phrases.PhraseAnalyzerDao;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpStringUtils;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Simple implementation of a phrase analyzer.
  */
 public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
+    private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
 
     /**
      * An entry in the corpus.
@@ -67,7 +66,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
      * @throws IOException
      */
     @Override
-    public void loadCorpus(PrunedCounts.Pruner<String> pagePruner, PrunedCounts.Pruner<Integer> phrasePruner) throws DaoException, IOException {
+    public void loadCorpus(LanguageSet languages, PrunedCounts.Pruner<String> pagePruner, PrunedCounts.Pruner<Integer> phrasePruner) throws DaoException, IOException {
         File byWpIdFile = File.createTempFile("wp_phrases_by_id", "txt");
         byWpIdFile.deleteOnExit();
         BufferedWriter byWpId = WpIOUtils.openWriter(byWpIdFile);
@@ -75,7 +74,18 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         byPhraseFile.deleteOnExit();
         BufferedWriter byPhrase = WpIOUtils.openWriter(byPhraseFile);
 
+        long numEntries = 0;
+        long numEntriesRetained = 0;
         for (Entry e : getCorpus()) {
+            if (++numEntries % 100000 == 0) {
+                double p = 100.0 * numEntriesRetained / numEntries;
+                LOG.info("processing entry: " + numEntries +
+                        ", retained " + numEntriesRetained +
+                        "(" + new DecimalFormat("#.#").format(p) + "%)");
+            }
+            if (!languages.containsLanguage(e.language)) {
+                continue;
+            }
             if (e.localId < 0) {
                 LocalPage lp = pageDao.getByTitle(e.language,
                         new Title(e.title, e.language),
@@ -85,7 +95,8 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
                 }
                 e.localId = lp.getLocalId();
             }
-            e.phrase.replace("\n", "");
+            numEntriesRetained++;
+            e.phrase.replace("\n", " ");
             // phrase is last because it may contain tabs.
             String line = e.language.getLangCode() + "\t" + e.localId + "\t" + e.count + "\t" + e.phrase + "\n";
             byPhrase.write(e.language.getLangCode() + ":" + WpStringUtils.normalize(e.phrase) + "\t" + line);

@@ -16,7 +16,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -62,9 +64,7 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
 
     protected class Iter implements Iterator<BasePhraseAnalyzer.Entry> {
         BufferedReader reader;
-        long numLines = 0;
-        long numLinesRetained = 0;
-        BasePhraseAnalyzer.Entry buffer;
+        List<Entry> buffer = new ArrayList<Entry>();
         boolean eof = false;
 
         public Iter() throws IOException {
@@ -74,15 +74,17 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
         @Override
         public boolean hasNext() {
             fillBuffer();
-            return (buffer != null);
+            return !buffer.isEmpty();
         }
 
         @Override
         public BasePhraseAnalyzer.Entry next() {
             fillBuffer();
-            BasePhraseAnalyzer.Entry tmp = buffer;
-            buffer = null;
-            return tmp;
+            if (buffer.isEmpty()) {
+                return null;
+            } else {
+                return buffer.remove(0);
+            }
         }
 
         @Override
@@ -91,10 +93,10 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
         }
 
         private void fillBuffer() {
-            if (buffer != null || eof) {
+            if (!buffer.isEmpty() || eof) {
                 return;
             }
-            while (!eof && buffer == null) {
+            while (!eof && buffer.isEmpty()) {
                 try {
                     parseNextLine();
                 } catch (IOException e) {
@@ -106,24 +108,20 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
         }
 
         private void parseNextLine() throws IOException {
-            if (buffer != null) throw new IllegalStateException();
+            if (!buffer.isEmpty()) throw new IllegalStateException();
             String line = reader.readLine();
             if (line == null) {
                 IOUtils.closeQuietly(reader);
                 eof = true;
                 return;
             }
-            if (++numLines % 100000 == 0) {
-                double p = 100.0 * numLinesRetained / numLines;
-                LOG.info("processing line: " + numLines +
-                        ", retained " + numLinesRetained +
-                        "(" + new DecimalFormat("#.#").format(p) + "%)");
-            }
             Record r = new Record(line);
-            buffer = new BasePhraseAnalyzer.Entry(
-                    Language.getByLangCode("en"),
-                    r.article, r.phrase,
-                    r.getNumEnglishLinks());
+            buffer.add(
+                    new BasePhraseAnalyzer.Entry(Language.getByLangCode("en"),
+                    r.article, r.phrase, r.getNumEnglishLinks()));
+            buffer.add(
+                    new BasePhraseAnalyzer.Entry(Language.getByLangCode("simple"),
+                            r.article, r.phrase, r.getNumEnglishLinks()));
         }
     }
 
