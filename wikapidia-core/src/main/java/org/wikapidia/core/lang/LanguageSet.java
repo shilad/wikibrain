@@ -96,6 +96,10 @@ public class LanguageSet implements Iterable<Language>{
         return langs.size();
     }
 
+    public boolean containsLanguage(Language language){
+        return langs.contains(language);
+    }
+
     /**
      * Returns a language set that contains all the languages in it,
      * with English as the default
@@ -105,6 +109,8 @@ public class LanguageSet implements Iterable<Language>{
         Language[] languages = Language.LANGUAGES;
         return new LanguageSet(Arrays.asList(languages));
     }
+
+
 
     public boolean equals(Object o){
         if (o instanceof LanguageSet){

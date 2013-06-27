@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestDumpPageParser {
+
     public static final File EN_DUMP = new File("src/test/resources/org/wikapidia/parser/en_test.xml");
     public static final LanguageInfo EN = LanguageInfo.getByLangCode("en");
 
