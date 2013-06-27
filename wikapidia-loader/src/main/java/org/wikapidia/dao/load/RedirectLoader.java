@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  *
@@ -32,6 +33,7 @@ import java.util.List;
  * - RedirectSqlDao.update goes away.
  */
 public class RedirectLoader {
+    private static final Logger LOG = Logger.getLogger(RedirectLoader.class.getName());
 
     private TIntIntHashMap redirectIdsToPageIds;
     private final RawPageSqlDao rawPages;
@@ -46,29 +48,28 @@ public class RedirectLoader {
 
     private void beginLoad() throws DaoException {
         redirects.beginLoad();
-        System.out.println("Begin Load: ");
+        LOG.info("Begin Load: ");
     }
 
     private void endLoad() throws DaoException {
         redirects.endLoad();
-        System.out.println("End Load.");
+        LOG.info("End Load.");
     }
 
     private void loadRedirectIdsIntoMemory(Language language) throws DaoException{
-        RedirectParser redirectParser = new RedirectParser(language);
         redirectIdsToPageIds = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
         SqlDaoIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
         int i = 0;
-        System.out.println("Begin loading redirects into memory: ");
+        LOG.info("Begin loading redirects into memory: ");
         for(RawPage p : redirectPages){
            Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
            redirectIdsToPageIds.put(p.getPageId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));
-           if(i%1000==0)
-               System.out.println("loading redirect # " + i);
+           if(i%10000==0)
+               LOG.info("loading redirect # " + i);
             i++;
         }
-        System.out.println("End loading redirects into memory.");
+        LOG.info("End loading redirects into memory.");
     }
 
     private int resolveRedirect(int src){
@@ -85,22 +86,22 @@ public class RedirectLoader {
         int i = 0;
         for (int src : redirectIdsToPageIds.keys()) {
             redirectIdsToPageIds.put(src, resolveRedirect(src));
-            if(i%100==0)
-                System.out.println("resolving redirect # " + i);
+            if(i%10000==0)
+                LOG.info("resolving redirect # " + i);
             i++;
         }
     }
 
     private void loadRedirectsIntoDatabase(Language language) throws DaoException{
         int i = 0;
-        System.out.println("Begin loading redirects into database: ");
+        LOG.info("Begin loading redirects into database: ");
         for(int src : redirectIdsToPageIds.keys()){
-            if(i%100==0)
-                System.out.println("loaded " + i + " into database.");
+            if(i%10000==0)
+                LOG.info("loaded " + i + " into database.");
             redirects.save(language, src, redirectIdsToPageIds.get(src));
             i++;
         }
-        System.out.println("End loading redirects into database.");
+        LOG.info("End loading redirects into database.");
     }
 
     public static void main(String args[]) throws ConfigurationException, DaoException {
@@ -154,6 +155,7 @@ public class RedirectLoader {
             languages = (List<String>)conf.getConf().get().getAnyRef("Languages");
         }
         for(String l : languages){
+            LOG.info("LOADING REDIRECTS FOR " + l);
             Language lang = Language.getByLangCode(l);
             redirectLoader.loadRedirectIdsIntoMemory(lang);
             redirectLoader.resolveRedirectsInMemory();
