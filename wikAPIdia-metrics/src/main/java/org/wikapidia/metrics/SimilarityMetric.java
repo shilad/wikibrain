@@ -28,6 +28,16 @@ public interface SimilarityMetric {
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations);
 
     /**
+     * Determine similarity between two local pages using page ids.
+     * @param pageId1 The first page's id.
+     * @param pageId2 The second page's id.
+     * @param language The language of the pages.
+     * @param explanations Whether explanations should be created
+     * @return
+     */
+    public SRResult localSimilarity(int pageId1, int pageId2, Language language, boolean explanations);
+
+    /**
      * Determine the similarity between two universal pages
      * @param page1 The first page.
      * @param page2 The second page.
@@ -35,6 +45,15 @@ public interface SimilarityMetric {
      * @return
      */
     public SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations);
+
+    /**
+     * Determine the similarity between two universal pages using page ids
+     * @param pageId1 The first page's id.
+     * @param pageId2 The second page's id.
+     * @param explanations Whether explanations should be created.
+     * @return
+     */
+    public SRResult universalSimilarity(int pageId1, int pageId2, boolean explanations);
 
     /**
      * Determine the similarity between two strings in a given language by mapping through local pages
