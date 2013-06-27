@@ -5,6 +5,11 @@ import org.wikapidia.core.lang.LanguageSet;
 import java.util.Map;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * A convienent wrapper for a group of Universal Inlinks or Outlinks.
+ *
  */
 public class UniversalLinkGroup {
 

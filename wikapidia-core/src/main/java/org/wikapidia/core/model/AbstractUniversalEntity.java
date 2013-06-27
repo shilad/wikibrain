@@ -10,6 +10,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * This Universal Superclass contains methods and fields useful to both
+ * Universal Pages and Universal Links.
+ *
  */
 public abstract class AbstractUniversalEntity<T> {
 

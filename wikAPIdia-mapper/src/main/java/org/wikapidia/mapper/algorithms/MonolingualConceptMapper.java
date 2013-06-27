@@ -18,6 +18,12 @@ import org.wikapidia.mapper.MapperIterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * A basic ConceptMapper implementation with a very simple algorithm
+ * that maps each Local Page across languages to a unique Universal Page.
+ *
  */
 public class MonolingualConceptMapper extends ConceptMapper {
 

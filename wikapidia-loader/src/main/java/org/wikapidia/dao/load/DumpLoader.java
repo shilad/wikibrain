@@ -110,23 +110,16 @@ public class DumpLoader {
             new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
-        if (cmd.getArgList().isEmpty()) {
-            System.err.println("No input files specified.");
-            new HelpFormatter().printHelp("DumpLoader", options);
-            return;
-        }
-        File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
+        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
 
-        // TODO: add other visitors
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
 
         final DumpLoader loader = new DumpLoader(lpDao, rpDao);
 
-        // TODO: initialize other visitors
         if (cmd.hasOption("t")) {
             lpDao.beginLoad();
             rpDao.beginLoad();
@@ -142,7 +135,6 @@ public class DumpLoader {
                     }
                 });
 
-        // TODO: finalize other visitors
         if (cmd.hasOption("i")) {
             lpDao.endLoad();
             rpDao.endLoad();

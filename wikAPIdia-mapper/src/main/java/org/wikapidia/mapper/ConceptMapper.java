@@ -13,6 +13,11 @@ import org.wikapidia.core.model.UniversalPage;
 import java.util.Iterator;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * An abstract superclass that lays the framework for a concept mapping algorithm.
+ *
  */
 public abstract class ConceptMapper {
 
@@ -56,6 +61,6 @@ public abstract class ConceptMapper {
      * @throws DaoException
      * @throws ConfigurationException
      */
-    public abstract Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikapidiaException;
+    public abstract Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikapidiaException, DaoException;
 
 }

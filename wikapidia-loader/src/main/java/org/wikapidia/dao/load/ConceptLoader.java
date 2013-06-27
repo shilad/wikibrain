@@ -17,13 +17,15 @@ import org.wikapidia.mapper.ConceptMapper;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * Loads an Iterable of mapped concepts (Universal Pages) into a database.
  */
 public class ConceptLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
@@ -72,6 +74,7 @@ public class ConceptLoader {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
+                        .withValueSeparator(',')
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process")
                         .create("l"));
@@ -91,18 +94,21 @@ public class ConceptLoader {
             new HelpFormatter().printHelp("ConceptLoader", options);
             return;
         }
-        File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
+
+        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        LanguageSet languages = LanguageSet.getSetOfAllLanguages();
+        List<String> langCodes;
         if (cmd.hasOption("l")) {
-            String[] langCodes = cmd.getOptionValues("l");
-            Collection<Language> langs = new ArrayList<Language>();
-            for (String langCode : langCodes) {
-                langs.add(Language.getByLangCode(langCode));
-            }
-            languages = new LanguageSet(langs);
+            langCodes = Arrays.asList(cmd.getOptionValues("l"));
+        } else {
+            langCodes = (List<String>)conf.getConf().get().getAnyRef("Languages");
         }
+        Collection<Language> langs = new ArrayList<Language>();
+        for (String langCode : langCodes) {
+            langs.add(Language.getByLangCode(langCode));
+        }
+        LanguageSet languages = new LanguageSet(langs);
 
         String algorithm = null;
         if (cmd.hasOption("n")) {

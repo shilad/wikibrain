@@ -5,6 +5,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *
+ * @author Ari Weiland
+ *
+ * An iterator for use by ConceptMapper children.
+ *
  */
 public abstract class MapperIterator<E> implements Iterator<E> {
 
