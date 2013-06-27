@@ -18,17 +18,19 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * Simple implementation of a phrase analyzer.
+ * Base implementation of a phrase analyzer.
+ * Concrete implementations extending this class need only implement a getCorpus() method.
  */
 public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
 
     /**
-     * An entry in the corpus.
+     * An entry in the phrase corpus.
+     * Some implementations may have a local id.
+     * Others will only have a title.
      */
     public static class Entry {
         Language language;
-        // EITHER localId or title can identify to the article.
         int localId = -1;
         String title = null;
         String phrase;
@@ -57,7 +59,15 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         this.pageDao = pageDao;
     }
 
-    protected abstract Iterable<Entry> getCorpus() throws IOException, DaoException;
+    /**
+     * Concrete implementations must override this method to determine what phrases
+     * are stored.
+     *
+     * @return
+     * @throws IOException
+     * @throws DaoException
+     */
+    protected abstract Iterable<Entry> getCorpus(LanguageSet langs) throws IOException, DaoException;
 
     /**
      * Loads a specific corpus into the dao.
@@ -66,7 +76,9 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
      * @throws IOException
      */
     @Override
-    public void loadCorpus(LanguageSet languages, PrunedCounts.Pruner<String> pagePruner, PrunedCounts.Pruner<Integer> phrasePruner) throws DaoException, IOException {
+    public void loadCorpus(LanguageSet langs, PrunedCounts.Pruner<String> pagePruner, PrunedCounts.Pruner<Integer> phrasePruner) throws DaoException, IOException {
+        // create temp files for storing corpus entries by phrase and local id.
+        // these will ultimately be sorted to group together records with the same phrase / id.
         File byWpIdFile = File.createTempFile("wp_phrases_by_id", "txt");
         byWpIdFile.deleteOnExit();
         BufferedWriter byWpId = WpIOUtils.openWriter(byWpIdFile);
@@ -74,16 +86,20 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         byPhraseFile.deleteOnExit();
         BufferedWriter byPhrase = WpIOUtils.openWriter(byPhraseFile);
 
+        // Iterate over each entry in the corpus.
+        // Throws away entries in languages we don't care about.
+        // Resolve titles to ids if necessary.
+        // Write entries to the by phrase / id files.
         long numEntries = 0;
         long numEntriesRetained = 0;
-        for (Entry e : getCorpus()) {
+        for (Entry e : getCorpus(langs)) {
             if (++numEntries % 100000 == 0) {
                 double p = 100.0 * numEntriesRetained / numEntries;
                 LOG.info("processing entry: " + numEntries +
                         ", retained " + numEntriesRetained +
                         "(" + new DecimalFormat("#.#").format(p) + "%)");
             }
-            if (!languages.containsLanguage(e.language)) {
+            if (!langs.containsLanguage(e.language)) {
                 continue;
             }
             if (e.localId < 0) {
@@ -102,13 +118,13 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             byPhrase.write(e.language.getLangCode() + ":" + WpStringUtils.normalize(e.phrase) + "\t" + line);
             byWpId.write(e.language.getLangCode() + ":" + e.localId + "\t" + line);
         }
-
         byWpId.close();
         byPhrase.close();
 
+        // sort phrases by phrase / id and load them
         sortInPlace(byWpIdFile);
-        sortInPlace(byPhraseFile);
         loadFromFile(RecordType.PAGES, byWpIdFile, pagePruner);
+        sortInPlace(byPhraseFile);
         loadFromFile(RecordType.PHRASES, byPhraseFile, phrasePruner);
     }
 
