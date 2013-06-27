@@ -5,10 +5,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
-import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalCategoryMemberDao;
-import org.wikapidia.core.dao.LocalLinkDao;
-import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.LocalCategoryVisitor;
 import org.wikapidia.parser.wiki.LocalLinkVisitor;
@@ -29,31 +26,16 @@ public class WikiTextDumpLoader {
 
     private final List<ParserVisitor> visitors;
     private final List<String> allowedIlls;
+    private final RawPageDao rawPageDao;
 
-    public WikiTextDumpLoader(List<ParserVisitor> visitors, List<String> allowedIlls) {
+    public WikiTextDumpLoader(List<ParserVisitor> visitors, List<String> allowedIlls, RawPageDao rawPageDao) {
         this.visitors = visitors;
         this.allowedIlls = allowedIlls;
+        this.rawPageDao = rawPageDao;
     }
 
-
-    public static LanguageInfo getLanguageInfo(File file) {
-        int i = file.getName().indexOf("wiki");
-        if (i < 0) {
-            throw new IllegalArgumentException("invalid filename. Expected prefix, for example 'enwiki-...'");
-        }
-        String langCode = file.getName().substring(0, i);
-        return LanguageInfo.getByLangCode(langCode);
-    }
-
-    private void load(File file) {
-        int i = file.getName().indexOf("wiki");
-        if (i < 0) {
-            throw new IllegalArgumentException("invalid filename. Expected prefix, for example 'enwiki-...'");
-        }
-        String langCode = file.getName().substring(0, i);
-        langCode = langCode.replace('_', '-');
-        LanguageInfo lang = LanguageInfo.getByLangCode(langCode);
-        WikiTextDumpParser dumpParser = new WikiTextDumpParser(file, lang, allowedIlls);
+    private void load(LanguageInfo lang) throws DaoException {
+        WikiTextDumpParser dumpParser = new WikiTextDumpParser(rawPageDao, lang, allowedIlls);
         dumpParser.parse(visitors);
     }
 
@@ -77,8 +59,9 @@ public class WikiTextDumpLoader {
                         .create("i"));
         options.addOption(
                 new DefaultOptionBuilder()
-                        .withLongOpt("ills")
-                        .withDescription("ills allowed")
+                        .hasArgs()
+                        .withLongOpt("languages")
+                        .withDescription("the set of languages to process")
                         .create("l"));
 
         CommandLineParser parser = new PosixParser();
@@ -90,21 +73,20 @@ public class WikiTextDumpLoader {
             new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
-        if (cmd.getArgList().isEmpty()) {
-            System.err.println("No input files specified.");
-            new HelpFormatter().printHelp("WikiTextDumpLoader", options);
-            return;
-        }
+
         File pathConf = new File(cmd.getOptionValue('c', null));
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        List<String> allowedIlls = null;
+        List<String> languages;
         if (cmd.hasOption("l")){
-            allowedIlls = Arrays.asList(cmd.getOptionValue('l').split(","));
+            languages = Arrays.asList(cmd.getOptionValues('l'));
+        } else {
+            languages = (List<String>)conf.getConf().get().getAnyRef("Languages");
         }
 
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
 
+        RawPageDao rpDao = conf.get(RawPageDao.class);
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         LocalLinkDao llDao = conf.get(LocalLinkDao.class);
         LocalCategoryMemberDao lcmDao = conf.get(LocalCategoryMemberDao.class);
@@ -116,19 +98,19 @@ public class WikiTextDumpLoader {
         visitors.add(linkVisitor);
         visitors.add(catVisitor);
 
-        final WikiTextDumpLoader loader = new WikiTextDumpLoader(visitors, allowedIlls);
+        final WikiTextDumpLoader loader = new WikiTextDumpLoader(visitors, languages, rpDao);
 
         if(cmd.hasOption("t")) {
             llDao.beginLoad();
             lcmDao.beginLoad();
         }
 
-        ParallelForEach.loop(cmd.getArgList(),
+        ParallelForEach.loop(languages,
                 Runtime.getRuntime().availableProcessors(),
                 new Procedure<String>() {
                     @Override
-                    public void call(String path) throws Exception {
-                        loader.load(new File(path));
+                    public void call(String lang) throws Exception {
+                        loader.load(LanguageInfo.getByLangCode(lang));
                     }
                 });
 
