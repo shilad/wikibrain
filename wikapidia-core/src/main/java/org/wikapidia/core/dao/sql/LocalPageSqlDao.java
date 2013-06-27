@@ -304,20 +304,30 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                     Constants.DEFAULT_CAPACITY,
                     Constants.DEFAULT_LOAD_FACTOR,
                     -1, -1);
+            int numRedirects = 0;
+            int numResolved = 0;
             for (Record record : cursor){
+                if (record == null) {
+                    continue;
+                }
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
                         record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
                 if (redirectSqlDao != null && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)){
-                    map.put(hash, redirectSqlDao.resolveRedirect(
+                    numRedirects++;
+                    Integer dest = redirectSqlDao.resolveRedirect(
                             Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID)),
-                            record.getValue(Tables.LOCAL_PAGE.PAGE_ID)
-                    ));
+                            record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
+                    if (dest != null) {
+                        numResolved++;
+                        map.put(hash, dest);
+                    }
                 }
                 else{
                     map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
                 }
             }
+            LOG.info("resolved " + numResolved + " of " + numRedirects + " redirects.");
             if (cache!=null){
                 cache.saveToCache("titlesToIds", map);
             }

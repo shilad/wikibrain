@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * are pulled.
  *
  */
-public class RequestedLinkGetter {
+    public class RequestedLinkGetter {
 
     private static final String DATE_FORMAT = "yyyyMMdd";
 

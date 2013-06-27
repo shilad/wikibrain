@@ -86,7 +86,8 @@ public class DumpLinkInfo {
      * @return
      */
     public String getFileName() {
-        return linkMatcher.getName() + "." +
+        return language.getLangCode() + "wiki." +
+                linkMatcher.getName() + "." +
                 counter + "." +
                 language.getLangCode() + "." +
                 date +
