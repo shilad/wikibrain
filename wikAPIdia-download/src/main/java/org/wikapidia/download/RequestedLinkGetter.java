@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * @author Ari Weiland
  * @author Yulun Li
  *
  * Get URLs of the dump file links with specified language, type of dump file and the date before which the dumps
@@ -202,8 +203,9 @@ public class RequestedLinkGetter {
                 } catch (IllegalArgumentException e) {
                     String langs = "";
                     for (Language language : Language.LANGUAGES) {
-                        langs += language.getLangCode() + ",";
+                        langs += "," + language.getLangCode();
                     }
+                    langs = langs.substring(1);
                     System.err.println("Invalid language code: " + langCode
                             + "\nValid language codes: \n" + langs);
                     System.exit(1);
