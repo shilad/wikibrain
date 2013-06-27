@@ -10,7 +10,7 @@ import java.util.*;
  *
  * @author Ari Weiland
  *
- * This class stores a list of DumpLinkInfo, and provides iteration by language
+ * This class wraps a complex map of DumpLinkInfo, and provides iteration by language
  * so that during the download process, downloads proceed one language at a time.
  * The Iterator returns Multimaps of LinkMatchers mapped to DumpLinkInfo so that
  * the downloads can be additionally clustered by LinkMatcher.
@@ -18,31 +18,28 @@ import java.util.*;
  */
 public class DumpLinkCluster implements Iterable<Multimap<LinkMatcher, DumpLinkInfo>> {
 
-    private final Set<Language> languages = new HashSet<Language>();
-    private final List<DumpLinkInfo> links = new ArrayList<DumpLinkInfo>();
+    private final Map<Language, Multimap<LinkMatcher, DumpLinkInfo>> links = new HashMap<Language, Multimap<LinkMatcher, DumpLinkInfo>>();
 
     public DumpLinkCluster() {}
 
     public void add(DumpLinkInfo link) {
-        languages.add(link.getLanguage());
-        links.add(link);
+        Language language = link.getLanguage();
+        if (!links.containsKey(language)) {
+            Multimap<LinkMatcher, DumpLinkInfo> temp = HashMultimap.create();
+            links.put(language, temp);
+        }
+        links.get(language).put(link.getLinkMatcher(), link);
     }
 
     public Multimap<LinkMatcher, DumpLinkInfo> get(Language language) {
-        Multimap<LinkMatcher, DumpLinkInfo> map = HashMultimap.create();
-        for (DumpLinkInfo link : links) {
-            if (link.getLanguage().equals(language)) {
-                map.put(link.getLinkMatcher(), link);
-            }
-        }
-        return map;
+        return links.get(language);
     }
 
     @Override
     public Iterator<Multimap<LinkMatcher, DumpLinkInfo>> iterator() {
         return new Iterator<Multimap<LinkMatcher, DumpLinkInfo>>() {
 
-            Iterator<Language> local = languages.iterator();
+            Iterator<Language> local = links.keySet().iterator();
 
             @Override
             public boolean hasNext() {
