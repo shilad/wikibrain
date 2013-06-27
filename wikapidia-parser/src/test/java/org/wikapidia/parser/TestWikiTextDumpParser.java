@@ -34,7 +34,7 @@ public class TestWikiTextDumpParser {
         allowedIllLangs.add("simple");
 
         // Scans for ILLs in all languages
-        WikiTextDumpParser wtdp = new WikiTextDumpParser(SIMPLE_DUMP, SIMPLE);
+        WikiTextDumpParser wtdp = new WikiTextDumpParser(null, null);
 
         // Scans for ILLs in languages specified above only
         //WikiTextDumpParser wtdp = new WikiTextDumpParser(EN_DUMP, EN, allowedIllLangs);
