@@ -1,12 +1,14 @@
 package org.wikapidia.metrics;
 
 import gnu.trove.set.TIntSet;
-import org.wikapidia.core.jooq.tables.UniversalPage;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.metrics.utils.KnownSim;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public interface SimilarityMetric {
 
@@ -18,129 +20,129 @@ public interface SimilarityMetric {
 
     /**
      * Determine the similarity between two local pages
-     * @param page1
-     * @param page2
-     * @param explanations should create explanations
+     * @param page1 The first page.
+     * @param page2 The second page.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations);
 
     /**
      * Determine the similarity between two universal pages
-     * @param page1
-     * @param page2
-     * @param explanations should create explanations
+     * @param page1 The first page.
+     * @param page2 The second page.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations);
 
     /**
      * Determine the similarity between two strings in a given language by mapping through local pages
-     * @param phrase1 a word or phrase in language
-     * @param phrase2 a word or phrase in language
-     * @param language
-     * @param explanations should create explanations
+     * @param phrase1 The first phrase.
+     * @param phrase2 The second phrase.
+     * @param language The language of the phrases.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResult localSimilarity(String phrase1, String phrase2, Language language, boolean explanations);
 
     /**
      * Determine the similarity between two strings in a given language using Universal pages
-     * @param phrase1
-     * @param phrase2
-     * @param language
-     * @param explanations should create explanations
+     * @param phrase1 The first phrase.
+     * @param phrase2 The second phrase.
+     * @param language The language of the phrases.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResult universalSimilarity(String phrase1, String phrase2, Language language, boolean explanations);
 
     /**
      * Determine the similarity between two strings, which may be in different languages, using Universal pages
-     * @param phrase1
-     * @param language1 the language of phrase1
-     * @param phrase2
-     * @param language2 the language of phrase2
-     * @param explanations should create explanations
+     * @param phrase1 The first phrase.
+     * @param language1 The language of the first phrase.
+     * @param phrase2 The second phrase.
+     * @param language2 The language of the second phrase.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResult universalSimilarity(String phrase1, Language language1, String phrase2, Language language2, boolean explanations);
 
     /**
      * Find the most similar local pages to a local page within the same language
-     * @param page
-     * @param maxResults
-     * @param explanations should create explanations
+     * @param page The local page whose similarity we are examining.
+     * @param maxResults The maximum number of results to return.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations);
 
     /**
-     * Find the most similar local pages to a local page from a set of local pages within the same language
-     * @param page
-     * @param maxResults
-     * @param explanations should create explanations
-     * @param validIds a set of LocalPage ids to find mostSimilar from
+     * Find the most similar local pages to a local page.
+     * @param page The local page whose similarity we are examining.
+     * @param maxResults The maximum number of results to return.
+     * @param explanations Whether explanations should be created.
+     * @param validIds The local page ids to be considered.  Null means all ids in the language.
      * @return
      */
     public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds);
 
     /**
-     * Find the most similar universal pages to a universal page
-     * @param page
-     * @param maxResults
-     * @param explanations should create explanations
+     * Find the most similar universal pages to a universal page.
+     * @param page The universal page whose similarity we are examining.
+     * @param maxResults The maximum number of results to return.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations);
 
     /**
-     * Find the most similar universal pages to a universal page from a set of universal pages
-     * @param page
-     * @param maxResults
-     * @param explanations should create explanations
-     * @param validIds a set of UniversalPage ids to find mostSimilar from
+     * Find the most similar universal pages to a universal page.
+     * @param page The universal page whose similarity we are examining.
+     * @param maxResults The maximum number of results to return.
+     * @param explanations Whether explanations should be created.
+     * @param validIds The universal page ids to be considered.  Null means all ids.
      * @return
      */
     public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds);
 
     /**
-     * Find the most similar local pages to a string in a given language
-     * @param phrase a word or phrase in language
-     * @param language
-     * @param maxResults
-     * @param explanations should create explanations
+     * Find the most similar local pages to a phrase
+     * @param phrase The phrase whose similarity we are examining.
+     * @param language The language of the phrase.
+     * @param maxResults The maximum number of results to return.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResultList localMostSimilar(String phrase, Language language, int maxResults, boolean explanations);
 
     /**
-     * Find the most similar local pages to a string in a given language from a given set of local pages
-     * @param phrase a word or phrase in language
-     * @param language
-     * @param maxResults
-     * @param explanations should create explanations
-     * @param validIds a set of LocalPage ids to find mostSimilar from in the same language as language
+     * Find the most similar local pages to a phrase
+     * @param phrase The phrase whose similarity we are examining.
+     * @param language The language of the phrase and the local pages.
+     * @param maxResults The maximum number of results to return.
+     * @param explanations Whether explanations should be created.
+     * @param validIds The local page ids to be considered.  Null means all ids in the language
      * @return
      */
     public SRResultList localMostSimilar(String phrase, Language language, int maxResults, boolean explanations, TIntSet validIds);
 
     /**
-     * Find the most similar universal concepts to a string in a given language
-     * @param phrase a word or phrase in language
-     * @param language
-     * @param maxResults
-     * @param explanations should create explanations
+     * Find the most similar universal concepts to a phrase
+     * @param phrase The phrase whose similarity we are examining.
+     * @param language The language of the phrase.
+     * @param maxResults The maximum number of results to return.
+     * @param explanations Whether explanations should be created.
      * @return
      */
     public SRResultList universalMostSimilar(String phrase, Language language, int maxResults, boolean explanations);
 
     /**
      * Find the most similar universal pages to a string in a given language from a set of universal pages
-     * @param phrase a word or phrase in language
-     * @param language
-     * @param maxResults
-     * @param explanations should create explanations
-     * @param validIds  a set of UniversalPage ids to find mostSimilar from
+     * @param phrase The phrase whose similarity we are examining.
+     * @param language The language of the phrase.
+     * @param maxResults The maximum number of results to return.
+     * @param explanations Whether explanations should be created.s
+     * @param validIds  The UniversalPage ids to be considered.  Null means all ids.
      * @return
      */
     public SRResultList universalMostSimilar(String phrase, Language language, int maxResults, boolean explanations, TIntSet validIds);
@@ -161,26 +163,43 @@ public interface SimilarityMetric {
      */
     public void read(File directory) throws IOException;
 
+    /**
+     * Train the similarity() function.
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     * @param labeled The labeled gold standard dataset.
+     */
+    public void trainSimilarity(List<KnownSim> labeled);
+
+    /**
+     * Train the mostSimilar() function
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2)
+     * @param labeled The labeled gold standard dataset.
+     * @param numResults The maximum number of similar articles computed per phrase.
+     * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
+     */
+    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds);
+
 
     /**
      * Construct a cosimilarity matrix of Wikipedia ids in a given language
      * @param wpRowIds
      * @param wpColIds
+     * @param language The language of the pages.
      * @return
      * @throws IOException
      */
     public double[][] localCosimilarity(int wpRowIds[], int wpColIds[], Language language) throws IOException;
 
 
-    //TODO: HOW TO INCORPORATE LANGUAGE?
     /**
      * Construct a cosimilarity matrix of phrases.
      * @param rowPhrases
      * @param colPhrases
+     * @param language The language of the phrases.
      * @return
      * @throws IOException
      */
-    public double[][] localCosimilarity(String rowPhrases[], String colPhrases[]) throws IOException;
+    public double[][] localCosimilarity(String rowPhrases[], String colPhrases[], Language language) throws IOException;
 
     /**
      * Construct symmetric comsimilarity matrix of Wikipedia ids in a given language
@@ -190,14 +209,14 @@ public interface SimilarityMetric {
      */
     public double[][] localCosimilarity(int ids[], Language language) throws IOException;
 
-    //TODO: HOW TO INCORPORATE LANGUAGE?
     /**
-     * Construct symmetric cosimilarity matrix of phrases
+     * Construct symmetric cosimilarity matrix of phrases by mapping through local pages
      * @param phrases
+     * @param language The language of the phrases.
      * @return
      * @throws IOException
      */
-    public double[][] localCosimilarity(String phrases[]) throws IOException;
+    public double[][] localCosimilarity(String phrases[], Language language) throws IOException;
 
     /**
      * Construct a cosimilarity matrix of Universal Page ids.
@@ -208,15 +227,16 @@ public interface SimilarityMetric {
      */
     public double[][] universalCosimilarity(int wpRowIds[], int wpColIds[]) throws IOException;
 
-    //TODO: HOW TO INCORPORATE LANGUAGE?
     /**
      * Construct a cosimilarity matrix of phrases.
      * @param rowPhrases
+     * @param rowLanguages The respective languages of the phrases in the rows.
      * @param colPhrases
+     * @param colLanguages The respective languages of the phrases in the columns.
      * @return
      * @throws IOException
      */
-    public double[][] universalCosimilarity(String rowPhrases[], String colPhrases[]) throws IOException;
+    public double[][] universalCosimilarity(String rowPhrases[], Language rowLanguages[], String colPhrases[], Language colLanguages[]) throws IOException;
 
     /**
      * Construct symmetric comsimilarity matrix of Universal Page ids
@@ -226,12 +246,12 @@ public interface SimilarityMetric {
      */
     public double[][] universalCosimilarity(int ids[]) throws IOException;
 
-    //TODO: HOW TO INCORPORATE LANGUAGE?
     /**
-     * Construct symmetric cosimilarity matrix of phrases
+     *
      * @param phrases
+     * @param languages The respective languages of the phrases.
      * @return
      * @throws IOException
      */
-    public double[][] universalCosimilarity(String phrases[]) throws IOException;
+    public double[][] universalCosimilarity(String phrases[], Language languages[]) throws IOException;
 }
