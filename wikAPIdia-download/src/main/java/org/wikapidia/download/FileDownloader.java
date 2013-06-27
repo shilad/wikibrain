@@ -29,7 +29,7 @@ public class FileDownloader {
 
     public FileDownloader(File output) {
         this.output = output;
-        tmp = new File("tmp");
+        tmp = new File(".tmp");
     }
 
     public void downloadFrom(File file) throws IOException {
