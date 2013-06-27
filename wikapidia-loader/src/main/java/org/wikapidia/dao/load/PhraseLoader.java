@@ -7,7 +7,9 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.phrases.NormalizedStringPruner;
 import org.wikapidia.phrases.PhraseAnalyzer;
+import org.wikapidia.phrases.SimplePruner;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,8 +60,15 @@ public class PhraseLoader {
 
         PhraseAnalyzer analyzer = conf.get(PhraseAnalyzer.class, name);
 
-        LOG.log(Level.INFO, "LOADING CORPUS FOR " + name);
-        analyzer.loadCorpus();
+        LOG.log(Level.INFO, "LOADING PHRASE CORPUS FOR " + name);
+        int minCount = c.get().getInt("phrases.pruning.minCount");
+        int maxRank = c.get().getInt("phrases.pruning.maxRank");
+        double minFraction = c.get().getDouble("phrases.pruning.minFraction");
+
+        analyzer.loadCorpus(
+                new NormalizedStringPruner(minCount, maxRank, minFraction),
+                new SimplePruner<Integer>(minCount, maxRank, minFraction)
+        );
         LOG.log(Level.INFO, "DONE");
     }
 }

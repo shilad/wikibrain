@@ -22,7 +22,7 @@ import java.util.*;
 /**
  * Simple implementation of a phrase analyzer.
  */
-public abstract class SimplePhraseAnalyzer implements PhraseAnalyzer {
+public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
 
     /**
      * An entry in the corpus.
@@ -35,14 +35,14 @@ public abstract class SimplePhraseAnalyzer implements PhraseAnalyzer {
         String phrase;
         int count;
 
-        private Entry(Language language, int localId, String phrase, int count) {
+        public Entry(Language language, int localId, String phrase, int count) {
             this.language = language;
             this.localId = localId;
             this.phrase = phrase;
             this.count = count;
         }
 
-        private Entry(Language language, String title, String phrase, int count) {
+        public Entry(Language language, String title, String phrase, int count) {
             this.language = language;
             this.title = title;
             this.phrase = phrase;
@@ -53,7 +53,7 @@ public abstract class SimplePhraseAnalyzer implements PhraseAnalyzer {
     protected PhraseAnalyzerDao phraseDao;
     protected LocalPageDao pageDao;
 
-    public SimplePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao) {
+    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao) {
         this.phraseDao = phraseDao;
         this.pageDao = pageDao;
     }

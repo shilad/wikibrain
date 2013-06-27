@@ -14,7 +14,7 @@ import java.util.Map;
  *
  * @author Shilad Sen
  */
-class NormalizedStringPruner extends SimplePruner<String> {
+public class NormalizedStringPruner extends SimplePruner<String> {
     public NormalizedStringPruner(int minCount, int maxRank, double minFrac) {
         super(minCount, maxRank, minFrac);
     }

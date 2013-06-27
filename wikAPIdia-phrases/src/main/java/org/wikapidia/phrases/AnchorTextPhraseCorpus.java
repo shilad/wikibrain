@@ -9,12 +9,12 @@
 //import org.wikapidia.phrases.PhraseAnalyzerDao;
 //
 //import java.io.IOException;
-//import java.text.DecimalFormat;
+//import java.phrase.DecimalFormat;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
 //
 ///**
-// * Loads phrase to page mapping using anchor text in wiki links.
+// * Loads phrase to page mapping using anchor phrase in wiki links.
 // */
 //public class AnchorTextPhraseCorpus implements PhraseCorpus {
 //    private static final Logger LOG = Logger.getLogger(AnchorTextPhraseCorpus.class.getName());

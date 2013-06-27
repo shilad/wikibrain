@@ -1,40 +1,36 @@
 package org.wikapidia.phrases;
 
 import com.typesafe.config.Config;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
-import org.wikapidia.phrases.PhraseAnalyzerDao;
 import org.wikapidia.utils.WpIOUtils;
-
-
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Loads phrase to page files from Indexes files from
  * http://www-nlp.stanford.edu/pubs/crosswikis-data.tar.bz2/
  * into a PhraseAnalyzer
  *
- * These files capture anchor text associated with web pages that link to Wikipedia.
- * Note that the pages with anchor text are not (usually) Wikipedia pages themselves.
+ * These files capture anchor phrase associated with web pages that link to Wikipedia.
+ * Note that the pages with anchor phrase are not (usually) Wikipedia pages themselves.
  */
-public class StanfordPhraseAnalyzer extends SimplePhraseAnalyzer {
+public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(StanfordPhraseAnalyzer.class.getName());
     private static final LanguageInfo EN = LanguageInfo.getByLangCode("simple");
 
@@ -50,15 +46,72 @@ public class StanfordPhraseAnalyzer extends SimplePhraseAnalyzer {
      * This can safely be called for multiple files if it is chunked.
      * @throws IOException
      */
-//    @Override
-    public void loadCorpus(PhraseAnalyzerDao dao) throws IOException {
-        BufferedReader reader = WpIOUtils.openReader(path);
+    @Override
+    protected Iterable<BasePhraseAnalyzer.Entry> getCorpus() throws IOException, DaoException {
+        return new Iterable<Entry>() {
+            @Override
+            public Iterator<Entry> iterator() {
+                try {
+                    return new Iter();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
+    protected class Iter implements Iterator<BasePhraseAnalyzer.Entry> {
+        BufferedReader reader;
         long numLines = 0;
         long numLinesRetained = 0;
-        while (true) {
+        BasePhraseAnalyzer.Entry buffer;
+        boolean eof = false;
+
+        public Iter() throws IOException {
+            reader = WpIOUtils.openReader(path);
+        }
+
+        @Override
+        public boolean hasNext() {
+            fillBuffer();
+            return (buffer != null);
+        }
+
+        @Override
+        public BasePhraseAnalyzer.Entry next() {
+            fillBuffer();
+            BasePhraseAnalyzer.Entry tmp = buffer;
+            buffer = null;
+            return tmp;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        private void fillBuffer() {
+            if (buffer != null || eof) {
+                return;
+            }
+            while (!eof && buffer == null) {
+                try {
+                    parseNextLine();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    LOG.log(Level.FINEST, "Error parsing line:", e);
+                }
+            }
+        }
+
+        private void parseNextLine() throws IOException {
+            if (buffer != null) throw new IllegalStateException();
             String line = reader.readLine();
             if (line == null) {
-                break;
+                IOUtils.closeQuietly(reader);
+                eof = true;
+                return;
             }
             if (++numLines % 100000 == 0) {
                 double p = 100.0 * numLinesRetained / numLines;
@@ -66,19 +119,11 @@ public class StanfordPhraseAnalyzer extends SimplePhraseAnalyzer {
                         ", retained " + numLinesRetained +
                         "(" + new DecimalFormat("#.#").format(p) + "%)");
             }
-            try {
-                Entry e = new Entry(line);
-                LocalPage lp = pageDao.getByTitle(
-                        EN.getLanguage(),
-                        new Title(e.article, EN),
-                        NameSpace.ARTICLE);
-                if (lp != null) {
-//                    dao.add(EN.getLanguage(), lp.getLocalId(), e.text, e.getNumEnglishLinks());
-                    numLinesRetained++;
-                }
-            } catch (Exception e) {
-                LOG.log(Level.FINEST, "Error parsing line " + line + ":", e);
-            }
+            Record r = new Record(line);
+            buffer = new BasePhraseAnalyzer.Entry(
+                    Language.getByLangCode("en"),
+                    r.article, r.phrase,
+                    r.getNumEnglishLinks());
         }
     }
 
@@ -94,23 +139,18 @@ public class StanfordPhraseAnalyzer extends SimplePhraseAnalyzer {
      */
     private static final Pattern MATCH_ENTRY = Pattern.compile("([^\t]*)\t([0-9.e-]+) ([^ ]*)(| (.*))$");
 
-    @Override
-    protected Iterable<SimplePhraseAnalyzer.Entry> getCorpus() throws IOException, DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    class Entry {
-        String text;
+    class Record {
+        String phrase;
         float fraction;
         String article;
         String flags[];
 
-        Entry(String line) {
+        Record(String line) {
             Matcher m = MATCH_ENTRY.matcher(line);
             if (!m.matches()) {
                 throw new IllegalArgumentException("invalid concepts entry: '" + line + "'");
             }
-            this.text = m.group(1);
+            this.phrase = m.group(1);
             this.fraction = Float.valueOf(m.group(2));
             this.article = m.group(3);
             this.flags = m.group(4).trim().split(" ");
