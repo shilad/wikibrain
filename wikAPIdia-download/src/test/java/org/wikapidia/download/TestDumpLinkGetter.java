@@ -20,7 +20,6 @@ public class TestDumpLinkGetter {
         for (Language lang : Arrays.asList(Language.getByLangCode("en"))) {
             DumpLinkGetter testGetter = new DumpLinkGetter(lang, Arrays.asList(LinkMatcher.values()), "20130604");
 //            System.out.println("" /*+ testGetter.getFileLinks().size()*/ + "\n" + testGetter.getFileLinks() );
-            System.out.println(testGetter.getDumpFiles());
         }
     }
 
