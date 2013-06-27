@@ -1,5 +1,7 @@
 package org.wikapidia.download;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.lang.Language;
 
