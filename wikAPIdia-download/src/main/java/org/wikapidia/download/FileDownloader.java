@@ -2,9 +2,6 @@ package org.wikapidia.download;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,41 +30,6 @@ public class FileDownloader {
         this.output = output;
         tmp = new File(".tmp");
     }
-
-//    public void downloadFrom(File file) throws IOException, InterruptedException {
-//        if (!tmp.exists()) tmp.mkdir();
-//        DumpLinkCluster linkCluster = DumpLinkInfo.parseFile(file);
-//        int numTotalFiles = linkCluster.size();
-//        LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
-//        int i = 0;
-//        for (Multimap<LinkMatcher, DumpLinkInfo> map : linkCluster) {
-//            for (LinkMatcher linkMatcher : map.keySet()) {
-//                for (DumpLinkInfo link : map.get(linkMatcher)) {
-//                    URL tryURL = link.getUrl();
-//                    try {
-//                        WGet w = new WGet(link.getUrl(), tmp);
-//                        w.download();
-//                        File download = new File(tmp, link.getDownloadName());
-//                        download.renameTo(new File(tmp, link.getFileName()));
-//                        i++;
-//                        LOG.log(Level.INFO, "Download complete: " + download.getName() +
-//                                " " + i + "/" + numTotalFiles + " files");
-//                        w = null;
-//                        Thread.sleep(000);
-//                    } catch (DownloadIOCodeError e) {
-//                        LOG.log(Level.WARNING, "HTTP " + e.getCode() + "-Error at " + link.getUrl());
-//                    }
-//                }
-//                for (DumpLinkInfo link : map.get(linkMatcher)) {
-//                    File download = new File(tmp, link.getFileName());
-//                    File target = new File(output, link.getLocalPath());
-//                    if (!target.exists()) target.mkdirs();
-//                    download.renameTo(new File(target, download.getName()));
-//                }
-//            }
-//        }
-//        tmp.delete();
-//    }
 
     public void getDump(DumpLinkInfo link, int failedTimes) throws InterruptedException, IOException {
         try {
@@ -112,8 +74,6 @@ public class FileDownloader {
         }
         tmp.delete();
     }
-
-
 
     public static void main(String[] args) throws IOException, InterruptedException {
 

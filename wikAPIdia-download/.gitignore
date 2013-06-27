@@ -18,6 +18,6 @@ log/
 target/
 
 # Downloads
-download/
-tmp/
+./download/
+.tmp/
 *.tsv
