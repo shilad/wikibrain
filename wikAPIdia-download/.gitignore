@@ -19,5 +19,5 @@ target/
 
 # Downloads
 ./download/
-tmp/
+.tmp/
 *.tsv
