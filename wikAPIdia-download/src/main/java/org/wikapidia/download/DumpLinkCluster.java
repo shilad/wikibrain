@@ -35,6 +35,14 @@ public class DumpLinkCluster implements Iterable<Multimap<LinkMatcher, DumpLinkI
         return links.get(language);
     }
 
+    public int size() {
+        int counter = 0;
+        for (Multimap map : this) {
+            counter += map.size();
+        }
+        return counter;
+    }
+
     @Override
     public Iterator<Multimap<LinkMatcher, DumpLinkInfo>> iterator() {
         return new Iterator<Multimap<LinkMatcher, DumpLinkInfo>>() {
