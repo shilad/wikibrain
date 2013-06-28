@@ -102,14 +102,16 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             if (!langs.containsLanguage(e.language)) {
                 continue;
             }
-            if (e.localId < 0) {
+            if (e.title != null && e.localId < 0) {
                 LocalPage lp = pageDao.getByTitle(e.language,
                         new Title(e.title, e.language),
                         NameSpace.ARTICLE);
-                if (lp == null) {
-                    continue;
+                if (lp != null) {
+                    e.localId = lp.getLocalId();
                 }
-                e.localId = lp.getLocalId();
+            }
+            if (e.localId < 0) {
+                continue;
             }
             numEntriesRetained++;
             e.phrase.replace("\n", " ");
@@ -167,17 +169,15 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         }
         Language lang = pageCounts.get(0).language;
         int wpId = pageCounts.get(0).localId;
-        Collections.sort(pageCounts, new Comparator<Entry>() {
-            @Override
-            public int compare(Entry e1, Entry e2) {
-                return -1 * (e1.count - e2.count);
-            }
-        });
-        LinkedHashMap<String, Integer> counts = new LinkedHashMap<String, Integer>();
+        Map<String, Integer> counts = new HashMap<String, Integer>();
         for (Entry e : pageCounts) {
             if (e.localId != wpId) throw new IllegalStateException();
             if (e.language != lang) throw new IllegalStateException();
-            counts.put(e.phrase, e.count);
+            if (counts.containsKey(e.phrase)) {
+                counts.put(e.phrase, counts.get(e.phrase) + e.count);
+            } else {
+                counts.put(e.phrase, e.count);
+            }
         }
         PrunedCounts<String> pruned = pruner.prune(counts);
         if (pruned != null) {
@@ -191,17 +191,15 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         }
         Language lang = pageCounts.get(0).language;
         String phrase = WpStringUtils.normalize(pageCounts.get(0).phrase);
-        Collections.sort(pageCounts, new Comparator<Entry>() {
-            @Override
-            public int compare(Entry e1, Entry e2) {
-                return -1 * (e1.count - e2.count);
-            }
-        });
-        LinkedHashMap<Integer, Integer> counts = new LinkedHashMap<Integer, Integer>();
+        Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
         for (Entry e : pageCounts) {
             if (!WpStringUtils.normalize(e.phrase).equals(phrase)) throw new IllegalStateException();
             if (e.language != lang) throw new IllegalStateException();
-            counts.put(e.localId, e.count);
+            if (counts.containsKey(e.localId)) {
+                counts.put(e.localId, counts.get(e.localId) + e.count);
+            } else {
+                counts.put(e.localId, e.count);
+            }
         }
         PrunedCounts<Integer> pruned = pruner.prune(counts);
         if (pruned != null) {
@@ -222,6 +220,9 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {
         LinkedHashMap<String, Float> result = new LinkedHashMap<String, Float>();
         PrunedCounts<String> counts = phraseDao.getPageCounts(language, page.getLocalId(), maxPhrases);
+        if (counts == null) {
+            return null;
+        }
         for (String phrase : counts.keySet()) {
             result.put(phrase, (float)1.0 * counts.get(phrase) / counts.getTotal());
             if (counts.size() >= maxPhrases) {
@@ -235,6 +236,9 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
         PrunedCounts<Integer> counts = phraseDao.getPhraseCounts(language, phrase, maxPages);
+        if (counts == null) {
+            return null;
+        }
         for (Integer wpId : counts.keySet()) {
             result.put(pageDao.getById(language, wpId),
                     (float)1.0 * counts.get(wpId) / counts.getTotal());

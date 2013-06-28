@@ -30,7 +30,6 @@ mvn clean
 
 compile &&
 execClass org.wikapidia.dao.load.DumpLoader -t -i $DAT/dump/*/*/*.articles.*.xml.bz2 &&
-execClass org.wikapidia.dao.load.RedirectLoader -t -i -l $LANGS
-execClass org.wikapidia.dao.load.RedirectLoader -t -i -l simple -l simple -l la
+execClass org.wikapidia.dao.load.RedirectLoader -t -i -l $LANGS &&
 execClass org.wikapidia.dao.load.ConceptLoader -t -i -l $LANGS -n monolingual &&
 execClass org.wikapidia.dao.load.WikiTextDumpLoader -t -i -l $LANGS || exit 1
