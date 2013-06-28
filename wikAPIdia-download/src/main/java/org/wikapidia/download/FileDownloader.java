@@ -47,7 +47,7 @@ public class FileDownloader {
         }
     }
 
-        public void downloadFrom(File file) throws IOException, InterruptedException {
+    public void downloadFrom(File file) throws IOException, InterruptedException {
         if (!tmp.exists()) tmp.mkdir();
         DumpLinkCluster linkCluster = DumpLinkInfo.parseFile(file);
         int numTotalFiles = linkCluster.size();
