@@ -5,6 +5,7 @@ import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.core.model.RawPage;
 
@@ -22,13 +23,13 @@ public class WikiTextDumpParser {
 
     private final LanguageInfo language;
     private final RawPageDao rawPageDao;
-    private final List<String> allowedLanguages;
+    private final LanguageSet allowedLanguages;
 
     public WikiTextDumpParser(RawPageDao rawPageDao, LanguageInfo language) {
         this(rawPageDao, language, null);
     }
 
-    public WikiTextDumpParser(RawPageDao rawPageDao, LanguageInfo language, List<String> allowedIllLangs) {
+    public WikiTextDumpParser(RawPageDao rawPageDao, LanguageInfo language, LanguageSet allowedIllLangs) {
         this.language = language;
         this.allowedLanguages = allowedIllLangs;
         this.rawPageDao = rawPageDao;

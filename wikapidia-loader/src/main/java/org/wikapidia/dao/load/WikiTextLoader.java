@@ -5,8 +5,11 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.*;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.parser.wiki.LocalCategoryVisitor;
 import org.wikapidia.parser.wiki.LocalLinkVisitor;
 import org.wikapidia.parser.wiki.ParserVisitor;
@@ -22,13 +25,13 @@ import java.util.List;
 /**
  */
 
-public class WikiTextDumpLoader {
+public class WikiTextLoader {
 
     private final List<ParserVisitor> visitors;
-    private final List<String> allowedIlls;
+    private final LanguageSet allowedIlls;
     private final RawPageDao rawPageDao;
 
-    public WikiTextDumpLoader(List<ParserVisitor> visitors, List<String> allowedIlls, RawPageDao rawPageDao) {
+    public WikiTextLoader(List<ParserVisitor> visitors, LanguageSet allowedIlls, RawPageDao rawPageDao) {
         this.visitors = visitors;
         this.allowedIlls = allowedIlls;
         this.rawPageDao = rawPageDao;
@@ -43,12 +46,6 @@ public class WikiTextDumpLoader {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"));
-        options.addOption(
-                new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("t"));
@@ -57,13 +54,7 @@ public class WikiTextDumpLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArgs()
-                        .withValueSeparator(',')
-                        .withLongOpt("languages")
-                        .withDescription("the set of languages to process")
-                        .create("l"));
+        Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -75,15 +66,9 @@ public class WikiTextDumpLoader {
             return;
         }
 
-        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        Configurator conf = new Configurator(new Configuration(pathConf));
+        Env env = new Env(cmd);
+        Configurator conf = env.getConfigurator();
 
-        List<String> languages;
-        if (cmd.hasOption("l")){
-            languages = Arrays.asList(cmd.getOptionValues('l'));
-        } else {
-            languages = (List<String>)conf.getConf().get().getAnyRef("Languages");
-        }
 
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
 
@@ -99,19 +84,19 @@ public class WikiTextDumpLoader {
         visitors.add(linkVisitor);
         visitors.add(catVisitor);
 
-        final WikiTextDumpLoader loader = new WikiTextDumpLoader(visitors, languages, rpDao);
+        final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao);
 
         if(cmd.hasOption("t")) {
             llDao.beginLoad();
             lcmDao.beginLoad();
         }
 
-        ParallelForEach.loop(languages,
+        ParallelForEach.loop(env.getLanguages().getLanguages(),
                 Runtime.getRuntime().availableProcessors(),
-                new Procedure<String>() {
+                new Procedure<Language>() {
                     @Override
-                    public void call(String lang) throws Exception {
-                        loader.load(LanguageInfo.getByLangCode(lang));
+                    public void call(Language lang) throws Exception {
+                        loader.load(LanguageInfo.getByLanguage(lang));
                     }
                 });
 

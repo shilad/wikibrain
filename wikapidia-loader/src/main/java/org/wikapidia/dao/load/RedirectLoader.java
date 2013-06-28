@@ -7,6 +7,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
@@ -107,12 +108,6 @@ public class RedirectLoader {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"));
-        options.addOption(
-                new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("t"));
@@ -121,13 +116,8 @@ public class RedirectLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArgs()
-                        .withValueSeparator(',')
-                        .withLongOpt("languages")
-                        .withDescription("the set of languages to process")
-                        .create("l"));
+        Env.addStandardOptions(options);
+
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
         try {
@@ -138,8 +128,8 @@ public class RedirectLoader {
             return;
         }
 
-        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        Configurator conf = new Configurator(new Configuration(pathConf));
+        Env env = new Env(cmd);
+        Configurator conf = env.getConfigurator();
 
         DataSource dataSource = conf.get(DataSource.class);
         RedirectLoader redirectLoader = new RedirectLoader(dataSource);
@@ -147,18 +137,11 @@ public class RedirectLoader {
             redirectLoader.beginLoad();
         }
 
-        List<String> languages;
-        if (cmd.hasOption("l")) {
-            languages = Arrays.asList(cmd.getOptionValues("l"));
-        } else {
-            languages = (List<String>)conf.getConf().get().getAnyRef("Languages");
-        }
-        for(String l : languages){
+        for(Language l : env.getLanguages()){
             LOG.info("LOADING REDIRECTS FOR " + l);
-            Language lang = Language.getByLangCode(l);
-            redirectLoader.loadRedirectIdsIntoMemory(lang);
+            redirectLoader.loadRedirectIdsIntoMemory(l);
             redirectLoader.resolveRedirectsInMemory();
-            redirectLoader.loadRedirectsIntoDatabase(lang);
+            redirectLoader.loadRedirectsIntoDatabase(l);
         }
 
         if (cmd.hasOption("i")){

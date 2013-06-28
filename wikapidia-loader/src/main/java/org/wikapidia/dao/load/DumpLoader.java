@@ -5,6 +5,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -86,12 +87,6 @@ public class DumpLoader {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"));
-        options.addOption(
-                new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("t"));
@@ -100,6 +95,7 @@ public class DumpLoader {
                         .withLongOpt("create-indexes")
                         .withDescription("create all indexes after loading")
                         .create("i"));
+        Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -110,8 +106,9 @@ public class DumpLoader {
             new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
-        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        Configurator conf = new Configurator(new Configuration(pathConf));
+
+        Env env = new Env(cmd);
+        Configurator conf = env.getConfigurator();
 
         File downloadPath = new File((String) conf.getConf().get().getAnyRef("downloadPath"));
         List<String> dumps = new ArrayList<String>();
@@ -149,7 +146,7 @@ public class DumpLoader {
 
         // loads multiple dumps in parallel
         ParallelForEach.loop(dumps,
-                Runtime.getRuntime().availableProcessors(),
+                env.getMaxThreads(),
                 new Procedure<String>() {
                     @Override
                     public void call(String path) throws Exception {

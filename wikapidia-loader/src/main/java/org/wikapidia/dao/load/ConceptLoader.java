@@ -6,6 +6,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 
 import org.wikapidia.core.dao.UniversalPageDao;
@@ -57,12 +58,6 @@ public class ConceptLoader {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"));
-        options.addOption(
-                new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("t"));
@@ -73,17 +68,11 @@ public class ConceptLoader {
                         .create("i"));
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArgs()
-                        .withValueSeparator(',')
-                        .withLongOpt("languages")
-                        .withDescription("the set of languages to process")
-                        .create("l"));
-        options.addOption(
-                new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("algorithm")
                         .withDescription("the name of the algorithm to execute")
                         .create("n"));
+        Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -95,26 +84,13 @@ public class ConceptLoader {
             return;
         }
 
-        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        Configurator conf = new Configurator(new Configuration(pathConf));
-
-        List<String> langCodes;
-        if (cmd.hasOption("l")) {
-            langCodes = Arrays.asList(cmd.getOptionValues("l"));
-        } else {
-            langCodes = (List<String>)conf.getConf().get().getAnyRef("Languages");
-        }
-        Collection<Language> langs = new ArrayList<Language>();
-        for (String langCode : langCodes) {
-            langs.add(Language.getByLangCode(langCode));
-        }
-        LanguageSet languages = new LanguageSet(langs);
-
+        Env env = new Env(cmd);
+        Configurator conf = env.getConfigurator();
         String algorithm = cmd.getOptionValue("n", (String) conf.getConf().get().getAnyRef("defaultMappingAlgorithm"));
 
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
-        final ConceptLoader loader = new ConceptLoader(languages, dao);
+        final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao);
 
         if (cmd.hasOption("t")) {
             LOG.log(Level.INFO, "Begin Load");
