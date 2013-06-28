@@ -3,14 +3,26 @@ package org.wikapidia.phrases;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.jooq.tables.UniversalPage;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.phrases.PhraseAnalyzerDao;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 
 /**
  * Given a page, returns the most common phrases
  */
 public interface PhraseAnalyzer {
+
+    /**
+     * Loads a specific corpus into the dao.
+     *
+     * @throws DaoException
+     * @throws IOException
+     */
+    void loadCorpus(LanguageSet langs, PrunedCounts.Pruner<String> pagePruner, PrunedCounts.Pruner<Integer> phrasePruner) throws DaoException, IOException;
+
     /**
      * Returns the most descriptive phrases for a wikipedia page.
      * @param language The language for the phrase and the returned LocalPages.
@@ -50,4 +62,5 @@ public interface PhraseAnalyzer {
      * The scores can be considered probabilities that sum to 1.0 across all possibilities.
      */
     public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages);
+
 }

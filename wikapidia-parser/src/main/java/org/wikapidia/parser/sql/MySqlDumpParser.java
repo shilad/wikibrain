@@ -2,7 +2,7 @@ package org.wikapidia.parser.sql;
 
 import com.akiban.sql.StandardException;
 import com.akiban.sql.parser.*;
-import org.wikapidia.utils.CompressedFile;
+import org.wikapidia.utils.WpIOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -138,7 +138,7 @@ public class MySqlDumpParser {
 
         public MyIterator(File path) throws IOException {
             this.path = path;
-            reader = CompressedFile.open(path);
+            reader = WpIOUtils.openReader(path);
         }
 
         private void fillBuffer() {

@@ -2,20 +2,16 @@ package org.wikapidia.core.lang;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParserFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.WikapidiaException;
 
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
  * User: bjhecht
- * Date: 6/10/13
- * Time: 1:12 AM
- * To change this template use File | Settings | File Templates.
  */
-public class LanguageSet implements Iterable<Language>{
+public class LanguageSet implements Iterable<Language> {
+    public static final LanguageSet ALL = new LanguageSet(Arrays.asList(Language.LANGUAGES));
 
     private Set<Language> langs;
     private Language defaultLanguage;
@@ -27,10 +23,13 @@ public class LanguageSet implements Iterable<Language>{
      * @param csv A list of language codes separated by commas. The first language
      *            is automatically assumed to be the default language.
      */
-    public LanguageSet(String csv){
+    public LanguageSet(String csv) {
+        this(Arrays.asList(csv.split(",")));
+    }
+
+    public LanguageSet(List<String> langCodes) {
         langs = Sets.newHashSet();
         defaultLanguage = null;
-        String[] langCodes = csv.split(",");
         for (String langCode : langCodes) {
             langCode = langCode.trim(); // handle whitespace issues just in case
             Language lang = Language.getByLangCode(langCode);
@@ -38,8 +37,7 @@ public class LanguageSet implements Iterable<Language>{
             if (defaultLanguage == null){
                 defaultLanguage = lang;
             }
-
-         }
+        }
     }
 
     /**
