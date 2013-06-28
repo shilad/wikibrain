@@ -88,8 +88,8 @@ public class Env {
         }
 
         // Load numThreads
-        if (cmd.hasOption("t")) {
-            maxThreads = new Integer(cmd.getOptionValue("t"));
+        if (cmd.hasOption("h")) {
+            maxThreads = new Integer(cmd.getOptionValue("h"));
         }
 
         LOG.info("using languages " + languages);
