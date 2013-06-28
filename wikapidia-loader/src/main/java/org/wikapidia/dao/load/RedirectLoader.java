@@ -58,10 +58,9 @@ public class RedirectLoader {
 
     private void loadRedirectIdsIntoMemory(Language language) throws DaoException{
         redirectIdsToPageIds = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
-        SqlDaoIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
         int i = 0;
         LOG.info("Begin loading redirects into memory: ");
-        for(RawPage p : redirectPages){
+        for (RawPage p : rawPages.getAllRedirects(language)) {
            Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
            redirectIdsToPageIds.put(p.getPageId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));

@@ -34,6 +34,10 @@ public class Title implements Externalizable {
         this.language = lang;
     }
 
+    public Title(String title, Language language) {
+        this(title, LanguageInfo.getByLanguage(language));
+    }
+
     public String getCanonicalTitle() {
         return canonicalTitle;
     }
@@ -245,7 +249,4 @@ public class Title implements Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(canonicalTitle);
     }
-	
-
-
 }
