@@ -41,7 +41,7 @@ public class FileDownloader {
      * @throws InterruptedException
      */
     public boolean getDump(DumpLinkInfo link) throws InterruptedException {
-        for (int i=0; i<MAX_ATTEMPT; i++) {
+        for (int i=0; i < MAX_ATTEMPT; i++) {
             try {
                 new WGet(link.getUrl(), tmp).download();
                 File download = new File(tmp, link.getDownloadName());
@@ -52,10 +52,12 @@ public class FileDownloader {
             } catch (DownloadIOCodeError e) {
                 if (i+1 < MAX_ATTEMPT) {
                     LOG.log(Level.INFO, "Failed to download " + link.getFileName() +
-                            ". Reconnecting in " + ((i+1) * (SLEEP_TIME/1000)) + " seconds (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
+                            ". Reconnecting in " + ((i+1) * (SLEEP_TIME/1000)) +
+                            " seconds (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
                     Thread.sleep(SLEEP_TIME * (i+1));
                 } else {
-                    LOG.log(Level.WARNING, "Failed to download " + link.getFileName() + " (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
+                    LOG.log(Level.WARNING, "Failed to download " + link.getFileName() +
+                            " (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
                 }
             }
         }

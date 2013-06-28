@@ -5,12 +5,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 
 import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
+import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,9 +36,6 @@ import java.util.regex.Pattern;
  *
  */
     public class RequestedLinkGetter {
-
-    // TODO: use configuration file
-//    TODO: user default, specify languages and get articles for default
 
     private static final String DATE_FORMAT = "yyyyMMdd";
 
@@ -137,7 +138,7 @@ import java.util.regex.Pattern;
      * @throws WikapidiaException
      * @throws ParseException
      */
-    public static void main(String[] args) throws IOException, WikapidiaException, ParseException {
+    public static void main(String[] args) throws IOException, WikapidiaException, ParseException, ConfigurationException {
 
         Options options = new Options();
 
@@ -180,7 +181,10 @@ import java.util.regex.Pattern;
             return;
         }
 
-        List<LinkMatcher> linkMatchers = Arrays.asList(LinkMatcher.values());
+        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
+        Configurator conf = new Configurator(new Configuration(pathConf));
+
+        List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames((List<String>)conf.getConf().get().getAnyRef("defaultDownloadType"));
         if (cmd.hasOption("n")) {
             linkMatchers = new ArrayList<LinkMatcher>();
             for (String name : cmd.getOptionValues("n")) {
@@ -194,22 +198,19 @@ import java.util.regex.Pattern;
             }
         }
 
-        List<Language> languages = Arrays.asList(Language.LANGUAGES);
+        LanguageSet languages = new LanguageSet((List<String>)conf.getConf().get().getAnyRef("Languages"));
         if (cmd.hasOption("l")) {
-            languages = new ArrayList<Language>();
-            for (String langCode : cmd.getOptionValues("l")) {
-                try {
-                    languages.add(Language.getByLangCode(langCode));
-                } catch (IllegalArgumentException e) {
-                    String langs = "";
-                    for (Language language : Language.LANGUAGES) {
-                        langs += "," + language.getLangCode();
-                    }
-                    langs = langs.substring(1);
-                    System.err.println("Invalid language code: " + langCode
-                            + "\nValid language codes: \n" + langs);
-                    System.exit(1);
+            try{
+                languages = new LanguageSet(Arrays.asList(cmd.getOptionValues("l")));
+            } catch (IllegalArgumentException e) {
+                String langs = "";
+                for (Language language : Language.LANGUAGES) {
+                    langs += "," + language.getLangCode();
                 }
+                langs = langs.substring(1);
+                System.err.println(e.toString()
+                        + "\nValid language codes: \n" + langs);
+                System.exit(1);
             }
         }
 
