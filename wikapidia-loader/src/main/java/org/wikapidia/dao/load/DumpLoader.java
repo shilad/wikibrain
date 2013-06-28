@@ -127,10 +127,8 @@ public class DumpLoader {
                     if (langDir.isDirectory()) {                                    // the directory structure of the
                         for (File dateDir : langDir.listFiles()) {                  // download process:
                             if (dateDir.isDirectory()) {                            // ${PARENT}/langcode/date/dumpfile.xml.bz2
-                                for (File dump : dateDir.listFiles()) {
-                                    if (dump.isFile()) {
-                                        dumps.add(dump.getPath());
-                                    }
+                                for (String dump : dateDir.list()) {
+                                    dumps.add(dump);
                                 }
                             }
                         }
