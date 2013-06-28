@@ -24,7 +24,7 @@ public class FileDownloader {
 
     private static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
     private static final int SLEEP_TIME = 10000; // getDump takes a break from downloading
-    private static final int MAX_ATTEMP = 30; // number of attemps before getDump gives up downloading the dump
+    private static final int MAX_ATTEMPT = 30; // number of attempts before getDump gives up downloading the dump
 
     private final File tmp;
     private final File output;
@@ -34,42 +34,57 @@ public class FileDownloader {
         tmp = new File(".tmp");
     }
 
-    public void getDump(DumpLinkInfo link, int failedTimes) throws InterruptedException, IOException, WikapidiaException {
-        if (failedTimes < MAX_ATTEMP) {
+    /**
+     * Attempts to download the specified file. Returns the success of the download.
+     * @param link
+     * @return true if successful, else false
+     * @throws InterruptedException
+     */
+    public boolean getDump(DumpLinkInfo link) throws InterruptedException {
+        for (int i=0; i<MAX_ATTEMPT; i++) {
             try {
                 new WGet(link.getUrl(), tmp).download();
                 File download = new File(tmp, link.getDownloadName());
                 download.renameTo(new File(tmp, link.getFileName()));
                 LOG.log(Level.INFO, "Download complete: " + download.getName());
                 Thread.sleep(SLEEP_TIME);
+                return true;
             } catch (DownloadIOCodeError e) {
-                failedTimes++;
-                LOG.log(Level.INFO, "Fail to download : " + link.getFileName() +
-                        ", reconect in " + (failedTimes * (SLEEP_TIME /1000)) + " seconds (HTTP "+ e.getCode() + "-Error " + link.getUrl() + ")");
-                Thread.sleep(SLEEP_TIME * failedTimes);
-                getDump(link, failedTimes);
+                if (i+1 < MAX_ATTEMPT) {
+                    LOG.log(Level.INFO, "Failed to download " + link.getFileName() +
+                            ". Reconnecting in " + ((i+1) * (SLEEP_TIME/1000)) + " seconds (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
+                    Thread.sleep(SLEEP_TIME * (i+1));
+                } else {
+                    LOG.log(Level.WARNING, "Failed to download " + link.getFileName() + " (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
+                }
             }
         }
-        else {
-            throw new WikapidiaException("Dump forbidden " + link.getUrl());
-        }
+        return false;
     }
 
-    public void downloadFrom(File file) throws IOException, InterruptedException {
+    /**
+     * Processes a tsv file containing dump link info and initiates the download process
+     * on that info. Files are downloaded one language at a time, then one type at a time.
+     * Within each language, all of one type is downloaded before moving the files
+     * to the destination directory.
+     * @param file the tsv file containing the dump link info
+     * @throws InterruptedException
+     */
+    public void downloadFrom(File file) throws InterruptedException {
         if (!tmp.exists()) tmp.mkdir();
         DumpLinkCluster linkCluster = DumpLinkInfo.parseFile(file);
         int numTotalFiles = linkCluster.size();
         LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
-        int i = 0;
+        int success = 0;
+        int fail = 0;
         for (Multimap<LinkMatcher, DumpLinkInfo> map : linkCluster) {
             for (LinkMatcher linkMatcher : map.keySet()) {
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
-                    try {
-                        getDump(link, 0);
-                        i++;
-                        LOG.log(Level.INFO, i + "/" + numTotalFiles + " file(s) downloaded");
-                    } catch (WikapidiaException e) {
-                        LOG.log(Level.WARNING, "HTTP " + e + "-Error at " + link.getUrl());
+                    if (getDump(link)) {
+                        success++;
+                        LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
+                    } else {
+                        fail++;
                     }
                 }
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
@@ -80,10 +95,12 @@ public class FileDownloader {
                 }
             }
         }
+        LOG.log(Level.INFO, success + " files downloaded and " +
+                fail + " files failed out of " + numTotalFiles + " files.");
         tmp.delete();
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
 
         Options options = new Options();
         options.addOption(
