@@ -1,9 +1,9 @@
-package org.wikapidia.metrics.normalize;
+package org.wikapidia.sr.normalize;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
-import org.wikapidia.metrics.SRResultList;
+import org.wikapidia.sr.SRResultList;
 
 import java.text.DecimalFormat;
 import java.util.logging.Logger;

@@ -1,6 +1,6 @@
-package org.wikapidia.metrics.normalize;
+package org.wikapidia.sr.normalize;
 
-import org.wikapidia.metrics.SRResultList;
+import org.wikapidia.sr.SRResultList;
 
 import java.io.Serializable;
 

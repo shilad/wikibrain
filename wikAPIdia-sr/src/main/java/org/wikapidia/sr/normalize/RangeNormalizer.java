@@ -1,4 +1,4 @@
-package org.wikapidia.metrics.normalize;
+package org.wikapidia.sr.normalize;
 
 /**
  * Normalizes values to fall within a particular range.

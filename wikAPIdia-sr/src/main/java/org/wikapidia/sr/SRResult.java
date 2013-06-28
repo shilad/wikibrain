@@ -1,4 +1,4 @@
-package org.wikapidia.metrics;
+package org.wikapidia.sr;
 
 import java.util.ArrayList;
 import java.util.List;

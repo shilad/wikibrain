@@ -1,7 +1,6 @@
-package org.wikapidia.metrics;
+package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
 

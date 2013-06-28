@@ -1,8 +1,8 @@
-package org.wikapidia.metrics;
+package org.wikapidia.sr;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
-import org.wikapidia.metrics.normalize.PercentileNormalizer;
+import org.wikapidia.sr.normalize.PercentileNormalizer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

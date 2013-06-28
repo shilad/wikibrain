@@ -1,11 +1,10 @@
-package org.wikapidia.metrics;
+package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.metrics.utils.KnownSim;
+import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.wikapidia.metrics.normalize;
+package org.wikapidia.sr.normalize;
 
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;

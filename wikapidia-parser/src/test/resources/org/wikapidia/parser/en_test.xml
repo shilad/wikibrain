@@ -6373,8 +6373,8 @@ This is a listing of Pierre de Coubertin's books. In addition to these, he wrote
       <contributor>
         <ip>194.145.60.36</ip>
       </contributor>
-      <text xml:space="preserve">{{Operator notation|logo=[[File:Prefix-dia.svg|125px]]}}
-'''Polish notation''', also known as '''Polish prefix notation''' or simply '''prefix notation''', is a form of notation for [[logic]], [[arithmetic]], and [[algebra]]. Its distinguishing feature is that it places [[Operator (mathematics)|operator]]s to the left of their [[operand]]s. If the [[arity]] of the operators is fixed, the result is a syntax lacking parentheses or other brackets that can still be parsed without ambiguity. The [[Poland|Polish]] logician [[Jan Łukasiewicz]] invented this notation in 1924 in order to simplify [[Propositional calculus|sentential logic]]. 
+      <text xml:space="preserve"><![CDATA[{{Operator notation|logo=[[File:Prefix-dia.svg|125px]]}}
+'''Polish notation''', also known as '''Polish prefix notation''' or simply '''prefix notation''', is a form of notation for [[logic]], [[arithmetic]], and [[algebra]]. Its distinguishing feature is that it places [[Operator (mathematics)|operator]]s to the left of their [[operand]]s. If the [[arity]] of the operators is fixed, the result is a syntax lacking parentheses or other brackets that can still be parsed without ambiguity. The [[Poland|Polish]] logician [[Jan Łukasiewicz]] invented this notation in 1924 in order to simplify [[Propositional calculus|sentential logic]].
 
 The term ''Polish notation'' is sometimes taken (as the opposite of ''[[infix notation]]'') to also include Polish ''postfix'' notation, or [[Reverse Polish notation]], in which the operator is placed ''after'' the operands.&lt;ref&gt;
 {{cite book
@@ -6397,7 +6397,7 @@ The reference cited by Jan Łukasiewicz above is apparently a lithographed repor
 
 [[Alonzo Church]] mentions this notation in his classic book on [[mathematical logic]] as worthy of remark in notational systems even contrasted to [[Alfred North Whitehead|Whitehead]] and [[Bertrand Russell|Russell]]'s logical notational exposition and work in [[Principia Mathematica]].&lt;ref&gt;{{Cite book|first=Alonzo|last=Church|title=Introduction to Mathematical Logic|location=Princeton, New Jersey|publisher=Princeton University Press|year=1944}} – p. 38: &quot;Worthy of remark is the parenthesis-free notation of Jan Łukasiewicz. In this the letters N, A, C, E, K are used in the roles of negation, disjunction, implication, equivalence, conjunction respectively. ...&quot;&lt;/ref&gt;
 
-In Łukasiewicz 1951 book, ''Aristotle’s Syllogistic from the Standpoint of Modern Formal Logic'', he mentions that the principle of his notation was to write the [[function symbol|functors]] before the [[argument of a function|arguments]] to avoid brackets and that he had employed his notation in his logical papers since 1929.&lt;ref&gt;Cf. Łukasiewicz, (1951) ''Aristotle’s Syllogistic from the Standpoint of Modern Formal Logic'', Chapter IV &quot;Aristotle's System in Symbolic Form&quot; (section on &quot;org.wikapidia.metrics.Explanation of the Symbolism&quot;), p. 78 and on.&lt;/ref&gt; He then goes on to cite, as an example, a 1930 paper he wrote with [[Alfred Tarski]] on the [[Propositional calculus|sentential calculus]].&lt;ref&gt;Łukasiewicz, Jan; Tarski, Alfred, &quot;Untersuchungen über den Aussagenkalkül&quot; [&quot;Investigations into
+In Łukasiewicz 1951 book, ''Aristotle’s Syllogistic from the Standpoint of Modern Formal Logic'', he mentions that the principle of his notation was to write the [[function symbol|functors]] before the [[argument of a function|arguments]] to avoid brackets and that he had employed his notation in his logical papers since 1929.&lt;ref&gt;Cf. Łukasiewicz, (1951) ''Aristotle’s Syllogistic from the Standpoint of Modern Formal Logic'', Chapter IV &quot;Aristotle's System in Symbolic Form&quot; (section on &quot;org.wikapidia.sr.Explanation of the Symbolism&quot;), p. 78 and on.&lt;/ref&gt; He then goes on to cite, as an example, a 1930 paper he wrote with [[Alfred Tarski]] on the [[Propositional calculus|sentential calculus]].&lt;ref&gt;Łukasiewicz, Jan; Tarski, Alfred, &quot;Untersuchungen über den Aussagenkalkül&quot; [&quot;Investigations into
 the sentential calculus&quot;], ''Comptes Rendus des séances de la Société des Sciences et des Lettres de Varsovie'', Vol, 23 (1930) Cl. III, pp. 31–32&lt;/ref&gt;
 
 While no longer used much in logic,{{citation_needed|date=August 2012}} Polish notation has since found a place in [[computer science]].
@@ -6560,7 +6560,7 @@ Note that the quantifiers ranged over propositional values in Łukasiewicz's wor
 [[Category:Polish inventions]]
 [[Category:Science and technology in Poland]]
 [[Category:Operators (programming)]]
-[[Category:Logical expressions]]</text>
+[[Category:Logical expressions]]]]></text>
       <sha1>cr8a98p4627793t1con89qhplzsm8ak</sha1>
       <model>wikitext</model>
       <format>text/x-wiki</format>

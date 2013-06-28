@@ -1,4 +1,4 @@
-package org.wikapidia.metrics;
+package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.lang.Language;
@@ -6,9 +6,9 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
-import org.wikapidia.metrics.normalize.IdentityNormalizer;
-import org.wikapidia.metrics.normalize.Normalizer;
-import org.wikapidia.metrics.utils.KnownSim;
+import org.wikapidia.sr.normalize.IdentityNormalizer;
+import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.utils.KnownSim;
 
 
 import java.io.File;

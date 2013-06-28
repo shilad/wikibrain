@@ -1,7 +1,7 @@
-package org.wikapidia.metrics.normalize;
+package org.wikapidia.sr.normalize;
 
-import org.wikapidia.metrics.SRResult;
-import org.wikapidia.metrics.SRResultList;
+import org.wikapidia.sr.SRResult;
+import org.wikapidia.sr.SRResultList;
 
 /**
  * A simple normalizer that returns log(1 + min-value).

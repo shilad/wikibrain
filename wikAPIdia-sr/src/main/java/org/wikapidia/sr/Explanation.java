@@ -1,4 +1,4 @@
-package org.wikapidia.metrics;
+package org.wikapidia.sr;
 
 import org.wikapidia.core.model.LocalPage;
 

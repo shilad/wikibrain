@@ -1,4 +1,4 @@
-package org.wikapidia.metrics;
+package org.wikapidia.sr;
 
 import gnu.trove.map.hash.TIntFloatHashMap;
 import org.apache.commons.collections.iterators.ArrayIterator;

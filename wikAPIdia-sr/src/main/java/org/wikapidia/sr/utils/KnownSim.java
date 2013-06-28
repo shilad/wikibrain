@@ -1,4 +1,4 @@
-package org.wikapidia.metrics.utils;
+package org.wikapidia.sr.utils;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.wikapidia.core.lang.Language;

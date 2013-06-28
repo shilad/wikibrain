@@ -1,8 +1,8 @@
-package org.wikapidia.metrics.normalize;
+package org.wikapidia.sr.normalize;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.wikapidia.metrics.SRResultList;
+import org.wikapidia.sr.SRResultList;
 
 import java.io.Serializable;
 import java.util.Random;

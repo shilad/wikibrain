@@ -1,4 +1,4 @@
-package org.wikapidia.metrics.normalize;
+package org.wikapidia.sr.normalize;
 
 public class IdentityNormalizer extends BaseNormalizer{
     @Override

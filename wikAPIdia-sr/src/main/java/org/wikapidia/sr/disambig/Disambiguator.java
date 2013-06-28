@@ -1,5 +1,6 @@
-package org.wikapidia.metrics.disambig;
+package org.wikapidia.sr.disambig;
 
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 
@@ -30,7 +31,7 @@ public interface Disambiguator {
      *                 aid disambiguation.
      * @return
      */
-    public LocalId disambiguate(LocalString phrase, Set<LocalString> context);
+    public LocalId disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException;
 
     /**
      * Disambiguates multiple strings in some language to local pages in that language.
@@ -41,7 +42,7 @@ public interface Disambiguator {
      *                 aid disambiguation.
      * @return          The disambiguated pages. The order matches phrases.
      */
-    public List<LocalId> disambiguate(List<LocalString> phrases, Set<LocalString> context);
+    public List<LocalId> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException;
 
 
 }
