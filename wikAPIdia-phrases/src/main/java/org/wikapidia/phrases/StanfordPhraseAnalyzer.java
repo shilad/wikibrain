@@ -10,12 +10,12 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +34,8 @@ import java.util.regex.Pattern;
  */
 public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(StanfordPhraseAnalyzer.class.getName());
-    private static final LanguageInfo EN = LanguageInfo.getByLangCode("simple");
+    private static final Language LANG_EN = Language.getByLangCode("en");
+    private static final Language LANG_SIMPLE = Language.getByLangCode("simple");
 
     private final File path;
 
@@ -49,7 +50,12 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
      * @throws IOException
      */
     @Override
-    protected Iterable<BasePhraseAnalyzer.Entry> getCorpus() throws IOException, DaoException {
+    protected Iterable<BasePhraseAnalyzer.Entry> getCorpus(LanguageSet langs) throws IOException, DaoException {
+        for (Language l : langs) {
+            if (l != LANG_EN && l != LANG_SIMPLE) {
+                LOG.warning("Stanford only supports English and Simple English (not " + l + ")");
+            }
+        }
         return new Iterable<Entry>() {
             @Override
             public Iterator<Entry> iterator() {
