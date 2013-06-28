@@ -2,6 +2,7 @@ package org.wikapidia.download;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,6 +10,9 @@ import com.github.axet.wget.WGet;
 import com.github.axet.wget.info.ex.DownloadIOCodeError;
 import com.google.common.collect.Multimap;
 import org.apache.commons.cli.*;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 
@@ -100,9 +104,15 @@ public class FileDownloader {
         tmp.delete();
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ConfigurationException {
 
         Options options = new Options();
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("conf")
+                        .withDescription("configuration file")
+                        .create("c"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
@@ -121,15 +131,18 @@ public class FileDownloader {
             return;
         }
 
-        String filePath = cmd.getOptionValue('o', "download");
-        if (cmd.getArgList().isEmpty()) {
-            System.err.println("No input files specified.");
-            new HelpFormatter().printHelp("FileDownloader", options);
-            return;
+        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
+        Configurator conf = new Configurator(new Configuration(pathConf));
+
+
+        String filePath = cmd.getOptionValue('o', (String)conf.getConf().get().getAnyRef("defaultListFile"));
+        List argList = (List) conf.getConf().get().getAnyRef("defaultDownloadPath");
+        if (!cmd.getArgList().isEmpty()) {
+            argList = cmd.getArgList();
         }
 
         final FileDownloader downloader = new FileDownloader(new File(filePath));
-        for (Object path : cmd.getArgList()) {
+        for (Object path : argList) {
             downloader.downloadFrom(new File((String) path));
         }
     }
