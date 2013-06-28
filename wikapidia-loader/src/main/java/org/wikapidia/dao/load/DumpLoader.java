@@ -113,7 +113,31 @@ public class DumpLoader {
         File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
+        File downloadPath = new File((String) conf.getConf().get().getAnyRef("downloadPath"));
+        List<String> dumps = new ArrayList<String>();
+        if (!cmd.getArgList().isEmpty()) {                                          // There are files specified
+            dumps = cmd.getArgList();
+        } else {                                                                    // No specified files
+            if ((!downloadPath.isDirectory() || downloadPath.list().length == 0)) { // Default path is missing or empty
+                System.err.println( "There is no download path. Please specify one or configure a default.");
+                new HelpFormatter().printHelp("DumpLoader", options);
+                return;
+            } else {                                                                // Default path is functional
+                for (File langDir : downloadPath.listFiles()) {                     // Layered for-loops sift through
+                    if (langDir.isDirectory()) {                                    // the directory structure of the
+                        for (File dateDir : langDir.listFiles()) {                  // download process:
+                            if (dateDir.isDirectory()) {                            // ${PARENT}/langcode/date/dumpfile.xml.bz2
+                                for (File dump : dateDir.listFiles()) {
+                                    if (dump.isFile()) {
+                                        dumps.add(dump.getPath());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
@@ -126,7 +150,7 @@ public class DumpLoader {
         }
 
         // loads multiple dumps in parallel
-        ParallelForEach.loop(cmd.getArgList(),
+        ParallelForEach.loop(dumps,
                 Runtime.getRuntime().availableProcessors(),
                 new Procedure<String>() {
                     @Override
