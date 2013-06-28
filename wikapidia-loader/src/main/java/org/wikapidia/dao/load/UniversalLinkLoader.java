@@ -102,6 +102,7 @@ public class UniversalLinkLoader {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
+                        .withValueSeparator(',')
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process")
                         .create("l"));
