@@ -13,7 +13,7 @@ import java.util.Set;
  * - A TopResult disambiguator that always returns the most popular
  * meaning from a PhraseAnalyzer and ignores context.
  * - A BaseDisambiguator that is abstract and uses a PhraseAnalyzer combined with a
- * way of computing scores between terms (i.e. an SRMetric).
+ * way of computing scores between terms (i.e. an LocalSRMetric).
  * - Two child classes of BaseDisambiguator: SimilarityDisambiguator and MostSimilarDisambiguator
  *
  * UniversalDisambiguator will be a wrapper class around some concrete
