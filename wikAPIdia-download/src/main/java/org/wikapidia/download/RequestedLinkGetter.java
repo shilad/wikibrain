@@ -147,19 +147,18 @@ import java.util.regex.Pattern;
                         .hasArgs()
                         .withLongOpt("languages")
                         .withValueSeparator(',')
-                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). Default is all languages.")
+                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getAnyRef("Languages"))
                         .create("l"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("names")
-                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). Default is everything.")
+                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getAnyRef("downloadMatcher"))
                         .create("n"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .isRequired()
                         .withLongOpt("output")
                         .withDescription("Path to output file.")
                         .create("o"));
@@ -169,6 +168,12 @@ import java.util.regex.Pattern;
                         .withLongOpt("date")
                         .withDescription("Dumps are pulled from on or before this date. Default is today")
                         .create("d"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("conf")
+                        .withDescription("configuration file")
+                        .create("c"));
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -184,7 +189,7 @@ import java.util.regex.Pattern;
         File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames((List<String>)conf.getConf().get().getAnyRef("defaultDownloadType"));
+        List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames((List<String>)conf.getConf().get().getAnyRef("downloadMatcher"));
         if (cmd.hasOption("n")) {
             linkMatchers = new ArrayList<LinkMatcher>();
             for (String name : cmd.getOptionValues("n")) {
@@ -225,7 +230,10 @@ import java.util.regex.Pattern;
             }
         }
 
-        String filePath = cmd.getOptionValue('o');
+        String filePath = (String)conf.getConf().get().getAnyRef("downloadListFile");
+        if (cmd.hasOption('o')) {
+            filePath = cmd.getOptionValue('o');
+        }
 
         List<String> result = new ArrayList<String>();
         for (Language language : languages) {
