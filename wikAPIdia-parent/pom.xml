@@ -18,6 +18,7 @@
         <module>../wikAPIdia-mapper</module>
         <module>../wikAPIdia-matrix</module>
         <module>../wikAPIdia-download</module>
+        <module>../wikAPIdia-metrics</module>
     </modules>
 
     <build>
