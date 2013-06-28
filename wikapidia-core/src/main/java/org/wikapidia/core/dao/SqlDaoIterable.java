@@ -32,10 +32,10 @@ public abstract class SqlDaoIterable<E> implements Iterable<E> {
             @Override
             public boolean hasNext() {
                 if (!finished) {
-                    finished = recordIterator.hasNext();
-                    if (!finished) { result.close(); }
+                    finished = !recordIterator.hasNext();
+                    if (finished) { result.close(); }
                 }
-                return finished;
+                return !finished;
             }
 
             @Override
