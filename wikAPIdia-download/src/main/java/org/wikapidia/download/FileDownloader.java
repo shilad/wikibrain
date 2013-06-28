@@ -10,6 +10,7 @@ import com.github.axet.wget.info.ex.DownloadIOCodeError;
 import com.google.common.collect.Multimap;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.WikapidiaException;
 
 /**
  *
@@ -22,6 +23,8 @@ import org.wikapidia.conf.DefaultOptionBuilder;
 public class FileDownloader {
 
     private static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
+    private static final int SLEEP_TIME = 10000; // getDump takes a break from downloading
+    private static final int MAX_ATTEMP = 30; // number of attemps before getDump gives up downloading the dump
 
     private final File tmp;
     private final File output;
@@ -31,19 +34,24 @@ public class FileDownloader {
         tmp = new File(".tmp");
     }
 
-    public void getDump(DumpLinkInfo link, int failedTimes) throws InterruptedException, IOException {
-        try {
-            new WGet(link.getUrl(), tmp).download();
-            File download = new File(tmp, link.getDownloadName());
-            download.renameTo(new File(tmp, link.getFileName()));
-            LOG.log(Level.INFO, "Download complete: " + download.getName());
-            Thread.sleep(5000);
-        } catch (DownloadIOCodeError e) {
-            failedTimes++;
-            LOG.log(Level.INFO, "Fail to download : " + link.getFileName() +
-                    ", reconect in " + (failedTimes * 10) + " seconds (HTTP "+ e.getCode() + "-Error " + link.getUrl() + ")");
-            Thread.sleep(10000 * failedTimes);
-            getDump(link, failedTimes);
+    public void getDump(DumpLinkInfo link, int failedTimes) throws InterruptedException, IOException, WikapidiaException {
+        if (failedTimes < MAX_ATTEMP) {
+            try {
+                new WGet(link.getUrl(), tmp).download();
+                File download = new File(tmp, link.getDownloadName());
+                download.renameTo(new File(tmp, link.getFileName()));
+                LOG.log(Level.INFO, "Download complete: " + download.getName());
+                Thread.sleep(SLEEP_TIME);
+            } catch (DownloadIOCodeError e) {
+                failedTimes++;
+                LOG.log(Level.INFO, "Fail to download : " + link.getFileName() +
+                        ", reconect in " + (failedTimes * (SLEEP_TIME /1000)) + " seconds (HTTP "+ e.getCode() + "-Error " + link.getUrl() + ")");
+                Thread.sleep(SLEEP_TIME * failedTimes);
+                getDump(link, failedTimes);
+            }
+        }
+        else {
+            throw new WikapidiaException("Dump forbidden " + link.getUrl());
         }
     }
 
@@ -59,9 +67,9 @@ public class FileDownloader {
                     try {
                         getDump(link, 0);
                         i++;
-                        LOG.log(Level.INFO, i + "/" + numTotalFiles + " files downloaded");
-                    } catch (DownloadIOCodeError e) {
-                        LOG.log(Level.WARNING, "HTTP " + e.getCode() + "-Error at " + link.getUrl());
+                        LOG.log(Level.INFO, i + "/" + numTotalFiles + " file(s) downloaded");
+                    } catch (WikapidiaException e) {
+                        LOG.log(Level.WARNING, "HTTP " + e + "-Error at " + link.getUrl());
                     }
                 }
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
