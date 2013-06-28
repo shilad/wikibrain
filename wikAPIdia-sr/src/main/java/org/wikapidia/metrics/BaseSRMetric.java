@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public abstract class BaseSimilarityMetric implements SimilarityMetric{
-    private static Logger LOG = Logger.getLogger(BaseSimilarityMetric.class.getName());
+public abstract class BaseSRMetric implements SRMetric {
+    private static Logger LOG = Logger.getLogger(BaseSRMetric.class.getName());
     protected int numThreads = Runtime.getRuntime().availableProcessors();
 
     private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
@@ -28,7 +28,7 @@ public abstract class BaseSimilarityMetric implements SimilarityMetric{
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
 
 
-    public BaseSimilarityMetric(){
+    public BaseSRMetric(){
 
     }
 
