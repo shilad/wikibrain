@@ -40,6 +40,19 @@ public class LanguageSet implements Iterable<Language> {
         }
     }
 
+    public LanguageSet(List<String> langCodes){
+        langs = Sets.newHashSet();
+        defaultLanguage = null;
+        for (String langCode : langCodes) {
+            langCode = langCode.trim(); // handle whitespace issues just in case
+            Language lang = Language.getByLangCode(langCode);
+            langs.add(lang);
+            if (defaultLanguage == null){
+                defaultLanguage = lang;
+            }
+        }
+    }
+
     /**
      * Creates an instance of a language set with defaultLang as the default language and
      * inputLangs as the set of languages.

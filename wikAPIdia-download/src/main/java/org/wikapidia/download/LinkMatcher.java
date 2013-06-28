@@ -1,6 +1,7 @@
 package org.wikapidia.download;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -103,6 +104,14 @@ public enum LinkMatcher {
             }
         }
         return null;
+    }
+
+    public static List<LinkMatcher> getListByNames(List<String> listNames) {
+        List<LinkMatcher> listMatchers = new ArrayList<LinkMatcher>();
+        for (String name : listNames) {
+            listMatchers.add(getByName(name));
+        }
+        return listMatchers;
     }
 
     static public List<String> getAllNames() {
