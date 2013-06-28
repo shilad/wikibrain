@@ -40,7 +40,7 @@ public class Env {
                         .hasArg()
                         .withLongOpt("threads")
                         .withDescription("the maximum number of threads that should be used")
-                        .create("t"),
+                        .create("h"),
                 new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("languages")
