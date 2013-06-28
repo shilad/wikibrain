@@ -27,15 +27,29 @@ public abstract class SqlDaoIterable<E> implements Iterable<E> {
         usedUp = true;
         return new Iterator<E>() {
             Iterator<Record> recordIterator = result.iterator();
+            boolean finished = false;
 
             @Override
             public boolean hasNext() {
-                return recordIterator.hasNext();
+                if (!finished) {
+                    finished = !recordIterator.hasNext();
+                    if (finished) { result.close(); }
+                }
+                return !finished;
             }
 
             @Override
             public E next() {
-                return transform(recordIterator.next());
+                if (finished) {
+                    return null;
+                }
+                Record r = recordIterator.next();
+                if (r == null) {
+                    finished = true;
+                    result.close();
+                    return null;
+                }
+                return transform(r);
             }
 
             @Override
