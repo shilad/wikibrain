@@ -16,6 +16,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
 
 /**
  *
@@ -113,16 +114,11 @@ public class FileDownloader {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
                         .withLongOpt("output")
                         .withDescription("Path to output file.")
                         .create("o"));
 
+        Env.addStandardOptions(options);
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
 
@@ -134,8 +130,8 @@ public class FileDownloader {
             return;
         }
 
-        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        Configurator conf = new Configurator(new Configuration(pathConf));
+        Env env = new Env(cmd);
+        Configurator conf = env.getConfigurator();
 
         List argList = Arrays.asList(conf.getConf().get().getAnyRef("downloadListFile"));
         String filePath = cmd.getOptionValue('o', (String)conf.getConf().get().getAnyRef("downloadPath"));
