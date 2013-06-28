@@ -110,10 +110,7 @@ public class ConceptLoader {
         }
         LanguageSet languages = new LanguageSet(langs);
 
-        String algorithm = null;
-        if (cmd.hasOption("n")) {
-            algorithm = cmd.getOptionValue("n");
-        }
+        String algorithm = cmd.getOptionValue("n", (String) conf.getConf().get().getAnyRef("defaultMappingAlgorithm"));
 
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);

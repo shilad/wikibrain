@@ -137,10 +137,7 @@ public class UniversalLinkLoader {
         }
         LanguageSet languages = new LanguageSet(langs);
 
-        String algorithm = null;
-        if (cmd.hasOption("n")) {
-            algorithm = cmd.getOptionValue("n");
-        }
+        String algorithm = cmd.getOptionValue("n", (String) conf.getConf().get().getAnyRef("defaultMappingAlgorithm"));
 
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
