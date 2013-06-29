@@ -120,15 +120,19 @@ public class Configurator {
             finder.findClasses (foundClasses,filter);
 
             for (ClassInfo classInfo : foundClasses) {
-                LOG.info("registering component " + classInfo);
+                LOG.fine("registering component " + classInfo);
                 registerProvider(classInfo.getClassName());
             }
         }
 
+        int total = 0;
         for (Class c : providers.keySet()) {
             ProviderSet pset = providers.get(c);
-            LOG.info("installed " + pset.providers.size() + " configurators for " + pset.type);
+            total += pset.providers.size();
+            LOG.fine("installed " + pset.providers.size() + " configurators for " + pset.type);
         }
+        LOG.info("configurator installed " + total + " providers for " +
+                providers.size() + " classes");
     }
 
 
