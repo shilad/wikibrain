@@ -146,11 +146,11 @@ public class UniversalLinkLoader {
             return;
         }
 
-        int algorithmId = conf.getConf().get().getInt("mapper.default.algorithmId");
+        String algorithm = conf.getConf().get().getString("mapper.default");
         if (cmd.hasOption("n")) {
-            String algorithm = cmd.getOptionValue("n");
-            algorithmId = conf.getConf().get().getInt("mapper." + algorithm + ".algorithmId");
+            algorithm = cmd.getOptionValue("n");
         }
+        int algorithmId = conf.getConf().get().getInt("mapper." + algorithm + ".algorithmId");
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
         UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class);
