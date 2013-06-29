@@ -91,12 +91,12 @@ public class WikiTextLoader {
             lcmDao.beginLoad();
         }
 
-        ParallelForEach.loop(languages,
+        ParallelForEach.loop(env.getLanguages().getLanguages(),
                 Runtime.getRuntime().availableProcessors(),
-                new Procedure<String>() {
+                new Procedure<Language>() {
                     @Override
-                    public void call(String lang) throws Exception {
-                        loader.load(LanguageInfo.getByLangCode(lang));
+                    public void call(Language lang) throws Exception {
+                        loader.load(LanguageInfo.getByLanguage(lang));
                     }
                 });
 
