@@ -2,20 +2,18 @@ package org.wikapidia.core.lang;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParserFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.WikapidiaException;
 
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
  * User: bjhecht
- * Date: 6/10/13
- * Time: 1:12 AM
- * To change this template use File | Settings | File Templates.
  */
-public class LanguageSet implements Iterable<Language>{
+public class LanguageSet implements Iterable<Language> {
+    public static final LanguageSet ALL = new LanguageSet(
+            Language.getByLangCode("en"),
+            Arrays.asList(Language.LANGUAGES));
 
     private Set<Language> langs;
     private Language defaultLanguage;
@@ -27,22 +25,11 @@ public class LanguageSet implements Iterable<Language>{
      * @param csv A list of language codes separated by commas. The first language
      *            is automatically assumed to be the default language.
      */
-    public LanguageSet(String csv){
-        langs = Sets.newHashSet();
-        defaultLanguage = null;
-        String[] langCodes = csv.split(",");
-        for (String langCode : langCodes) {
-            langCode = langCode.trim(); // handle whitespace issues just in case
-            Language lang = Language.getByLangCode(langCode);
-            langs.add(lang);
-            if (defaultLanguage == null){
-                defaultLanguage = lang;
-            }
-
-         }
+    public LanguageSet(String csv) {
+        this(Arrays.asList(csv.split(",")));
     }
 
-    public LanguageSet(List<String> langCodes){
+    public LanguageSet(List<String> langCodes) {
         langs = Sets.newHashSet();
         defaultLanguage = null;
         for (String langCode : langCodes) {
@@ -113,17 +100,6 @@ public class LanguageSet implements Iterable<Language>{
         return langs.contains(language);
     }
 
-    /**
-     * Returns a language set that contains all the languages in it,
-     * with English as the default
-     * @return
-     */
-    public static LanguageSet getSetOfAllLanguages() {
-        Language[] languages = Language.LANGUAGES;
-        return new LanguageSet(Arrays.asList(languages));
-    }
-
-
 
     public boolean equals(Object o){
         if (o instanceof LanguageSet){
@@ -134,9 +110,7 @@ public class LanguageSet implements Iterable<Language>{
         return false;
     }
 
-    @Override
-    public String toString(){
-
+    public String getLangCodeString() {
         List<String> output = Lists.newArrayList();
         for (Language lang : langs) {
             if (lang.equals(defaultLanguage)) {
@@ -146,7 +120,20 @@ public class LanguageSet implements Iterable<Language>{
             }
         }
         Collections.sort(output);
-        return "(" + StringUtils.join(output,",") + ")";
+        return StringUtils.join(output, ",");
+    }
+
+    public List<String> getLangCodes() {
+        List<String> output = Lists.newArrayList();
+        for (Language lang : langs) {
+            output.add(lang.getLangCode());
+        }
+        return output;
+    }
+
+    @Override
+    public String toString(){
+        return "(" + getLangCodeString() + ")";
 
     }
 

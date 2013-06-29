@@ -34,7 +34,7 @@ public class TestPureWikidataConceptMapper {
             LocalPageDao lpDao = new LocalPageSqlDao(ds);
 
             PureWikidataConceptMapper mapper = new PureWikidataConceptMapper(lpDao);
-            mapper.getConceptMap(LanguageSet.getSetOfAllLanguages());
+            mapper.getConceptMap(LanguageSet.ALL);
 
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

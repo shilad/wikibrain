@@ -55,7 +55,7 @@ public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
     public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException;
 
     /**
-     * Get an id from a title
+     * Get an id from a title. Returns -1 if it doesn't exist.
      * @param title
      * @param language
      * @param nameSpace

@@ -12,6 +12,7 @@ fi
 
 source ../wikapidia-utils/src/main/scripts/utils.sh || exit 1
 
+
 mvn clean
 
 (

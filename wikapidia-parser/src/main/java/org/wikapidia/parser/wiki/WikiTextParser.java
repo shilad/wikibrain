@@ -6,6 +6,7 @@ import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParserFactory;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.RawPage;
@@ -29,7 +30,7 @@ public class WikiTextParser {
         this(lang, null, visitors);
     }
 
-    public WikiTextParser(LanguageInfo lang, List<String> allowedIllLangs, List<ParserVisitor> visitors) {
+    public WikiTextParser(LanguageInfo lang, LanguageSet allowedIllLangs, List<ParserVisitor> visitors) {
         this.lang = lang;
         subarticleParser = new SubarticleParser(lang);
         this.visitors = visitors;
@@ -38,7 +39,7 @@ public class WikiTextParser {
         pf.setCalculateSrcSpans(true);
         pf.setCategoryIdentifers(lang.getCategoryNames());
         if (allowedIllLangs != null) {
-            pf.setLanguageIdentifers(allowedIllLangs);
+            pf.setLanguageIdentifers(allowedIllLangs.getLangCodes());
         }
         jwpl = pf.createParser();
     }

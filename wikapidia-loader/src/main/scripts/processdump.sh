@@ -17,7 +17,7 @@ die "$0 failed"
 # Order of existing classes:
 # DumpLoader
 # RedirectLoader
-# WikiTextDumpLoader
+# WikiTextLoader
 # ConceptLoader
 # UniversalLinkLoader
 #

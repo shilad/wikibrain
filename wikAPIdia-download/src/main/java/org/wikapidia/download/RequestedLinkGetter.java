@@ -10,6 +10,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.lang.Language;
 
 import org.jsoup.select.Elements;
@@ -141,20 +142,12 @@ import java.util.regex.Pattern;
     public static void main(String[] args) throws IOException, WikapidiaException, ParseException, ConfigurationException {
 
         Options options = new Options();
-
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArgs()
-                        .withLongOpt("languages")
-                        .withValueSeparator(',')
-                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getStringList("languages"))
-                        .create("l"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("names")
-                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getStringList("download.matcher"))
+                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getAnyRef("downloadMatcher"))
                         .create("n"));
         options.addOption(
                 new DefaultOptionBuilder()
@@ -168,13 +161,8 @@ import java.util.regex.Pattern;
                         .withLongOpt("date")
                         .withDescription("Dumps are pulled from on or before this date. Default is today")
                         .create("d"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"));
 
+        Env.addStandardOptions(options);
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
 
@@ -186,8 +174,8 @@ import java.util.regex.Pattern;
             return;
         }
 
-        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        Configurator conf = new Configurator(new Configuration(pathConf));
+        Env env = new Env(cmd);
+        Configurator conf = env.getConfigurator();
 
         List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames(conf.getConf().get().getStringList("download.matcher"));
         if (cmd.hasOption("n")) {
@@ -203,26 +191,7 @@ import java.util.regex.Pattern;
             }
         }
 
-        List<String> langCodes;
-        if (cmd.hasOption("l")) {
-            langCodes = Arrays.asList(cmd.getOptionValues("l"));
-        } else {
-            langCodes = conf.getConf().get().getStringList("languages");
-        }
-        LanguageSet languages;
-        try{
-            languages = new LanguageSet(langCodes);
-        } catch (IllegalArgumentException e) {
-            String langs = "";
-            for (Language language : Language.LANGUAGES) {
-                langs += "," + language.getLangCode();
-            }
-            langs = langs.substring(1);
-            System.err.println(e.toString()
-                    + "\nValid language codes: \n" + langs);
-            System.exit(1);
-            return;
-        }
+        LanguageSet languages = env.getLanguages();
 
         Date getDumpByDate = new Date();
         if (cmd.hasOption("d")) {
