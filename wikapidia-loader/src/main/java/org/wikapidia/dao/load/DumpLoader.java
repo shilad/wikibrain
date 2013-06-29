@@ -102,7 +102,7 @@ public class DumpLoader {
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
-            System.err.println( "Invalid option usage: " + e.getMessage());
+            System.err.println("Invalid option usage: " + e.getMessage());
             new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
@@ -110,7 +110,7 @@ public class DumpLoader {
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
 
-        File downloadPath = new File((String) conf.getConf().get().getAnyRef("downloadPath"));
+        File downloadPath = new File(conf.getConf().get().getString("download.path"));
         List<String> dumps = new ArrayList<String>();
         if (!cmd.getArgList().isEmpty()) {                                          // There are files specified
             dumps = cmd.getArgList();
@@ -124,8 +124,8 @@ public class DumpLoader {
                     if (langDir.isDirectory()) {                                    // the directory structure of the
                         for (File dateDir : langDir.listFiles()) {                  // download process:
                             if (dateDir.isDirectory()) {                            // ${PARENT}/langcode/date/dumpfile.xml.bz2
-                                for (String dump : dateDir.list()) {
-                                    dumps.add(dump);
+                                for (File dump : dateDir.listFiles()) {
+                                    dumps.add(dump.getPath());
                                 }
                             }
                         }

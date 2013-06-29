@@ -15,6 +15,7 @@ import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.parser.wiki.RedirectParser;

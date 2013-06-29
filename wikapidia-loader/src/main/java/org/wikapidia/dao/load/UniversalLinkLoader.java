@@ -55,7 +55,7 @@ public class UniversalLinkLoader {
             int i=0;
             for (LocalLink localLink : localLinks) {
                 i++;
-                if (i%1000 == 0)
+                if (i%100000 == 0)
                     LOG.log(Level.INFO, "UniversalLinks loaded: " + i);
                 int sourceUnivId, destUnivId;
                 if (localLink.getSourceId() < 0) {
@@ -104,7 +104,7 @@ public class UniversalLinkLoader {
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("languages")
-                        .withDescription("the set of languages to process")
+                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getStringList("languages"))
                         .create("l"));
         options.addOption(
                 new DefaultOptionBuilder()
@@ -129,32 +129,44 @@ public class UniversalLinkLoader {
         if (cmd.hasOption("l")) {
             langCodes = Arrays.asList(cmd.getOptionValues("l"));
         } else {
-            langCodes = (List<String>)conf.getConf().get().getAnyRef("Languages");
+            langCodes = conf.getConf().get().getStringList("languages");
         }
-        Collection<Language> langs = new ArrayList<Language>();
-        for (String langCode : langCodes) {
-            langs.add(Language.getByLangCode(langCode));
+        LanguageSet languages;
+        try{
+            languages = new LanguageSet(langCodes);
+        } catch (IllegalArgumentException e) {
+            String langs = "";
+            for (Language language : Language.LANGUAGES) {
+                langs += "," + language.getLangCode();
+            }
+            langs = langs.substring(1);
+            System.err.println(e.toString()
+                    + "\nValid language codes: \n" + langs);
+            System.exit(1);
+            return;
         }
-        LanguageSet languages = new LanguageSet(langs);
 
-        String algorithm = cmd.getOptionValue("n", (String) conf.getConf().get().getAnyRef("defaultMappingAlgorithm"));
-
+        String algorithm = conf.getConf().get().getString("mapper.default");
+        if (cmd.hasOption("n")) {
+            algorithm = cmd.getOptionValue("n");
+        }
+        int algorithmId = conf.getConf().get().getInt("mapper." + algorithm + ".algorithmId");
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
         UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class);
-        ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
-        final UniversalLinkLoader loader = new UniversalLinkLoader(
+        UniversalLinkLoader loader = new UniversalLinkLoader(
                 languages,
                 localLinkDao,
                 universalPageDao,
-                universalLinkDao);
+                universalLinkDao
+        );
 
         if (cmd.hasOption("t")) {
             LOG.log(Level.INFO, "Begin Load");
             universalLinkDao.beginLoad();
         }
 
-        loader.loadLinkMap(mapper.getId());
+        loader.loadLinkMap(algorithmId);
 
         if (cmd.hasOption("i")) {
             LOG.log(Level.INFO, "End Load");

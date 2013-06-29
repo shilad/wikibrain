@@ -133,8 +133,8 @@ public class FileDownloader {
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
 
-        List argList = Arrays.asList(conf.getConf().get().getAnyRef("downloadListFile"));
-        String filePath = cmd.getOptionValue('o', (String)conf.getConf().get().getAnyRef("downloadPath"));
+        List argList = Arrays.asList(conf.getConf().get().getString("download.listFile"));
+        String filePath = cmd.getOptionValue('o', conf.getConf().get().getString("download.path"));
         if (!cmd.getArgList().isEmpty()) {
             argList = cmd.getArgList();
         }

@@ -40,10 +40,6 @@ public class PureWikidataConceptMapper extends ConceptMapper {
 
     private static final String WIKIDATA_MAPPING_FILE_PATH = "/Users/bjhecht/Downloads/wikidatawiki-20130527-wb_items_per_site.sql";
 
-    public PureWikidataConceptMapper(LocalPageDao<LocalPage> localPageDao) {
-        super(localPageDao);
-    }
-
     protected PureWikidataConceptMapper(int id, LocalPageDao<LocalPage> localPageDao) {
         super(id, localPageDao);    //To change body of overridden methods use File | Settings | File Templates.
     }
@@ -112,6 +108,7 @@ public class PureWikidataConceptMapper extends ConceptMapper {
                 return null;
             }
             return new PureWikidataConceptMapper(
+                    config.getInt("algorithmId"),
                     getConfigurator().get(
                             LocalPageDao.class,
                             config.getString("localPageDao"))

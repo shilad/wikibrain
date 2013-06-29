@@ -46,7 +46,7 @@ public class ConceptLoader {
             while (pages.hasNext()) {
                 dao.save(pages.next());
                 i++;
-                if (i%1000 == 0) LOG.log(Level.INFO, "UniversalPages loaded: " + i);
+                if (i%10000 == 0) LOG.log(Level.INFO, "UniversalPages loaded: " + i);
             }
             LOG.log(Level.INFO, "All UniversalPages loaded: " + i);
         } catch (DaoException e) {
@@ -86,7 +86,7 @@ public class ConceptLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        String algorithm = cmd.getOptionValue("n", (String) conf.getConf().get().getAnyRef("defaultMappingAlgorithm"));
+        String algorithm = cmd.getOptionValue("n", null);
 
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);

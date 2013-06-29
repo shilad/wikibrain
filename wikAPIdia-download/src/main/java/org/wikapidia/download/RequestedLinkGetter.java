@@ -147,7 +147,7 @@ import java.util.regex.Pattern;
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("names")
-                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getAnyRef("downloadMatcher"))
+                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getStringList("download.matcher"))
                         .create("n"));
         options.addOption(
                 new DefaultOptionBuilder()
@@ -177,7 +177,7 @@ import java.util.regex.Pattern;
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
 
-        List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames((List<String>)conf.getConf().get().getAnyRef("downloadMatcher"));
+        List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames(conf.getConf().get().getStringList("download.matcher"));
         if (cmd.hasOption("n")) {
             linkMatchers = new ArrayList<LinkMatcher>();
             for (String name : cmd.getOptionValues("n")) {
@@ -204,7 +204,7 @@ import java.util.regex.Pattern;
             }
         }
 
-        String filePath = (String)conf.getConf().get().getAnyRef("downloadListFile");
+        String filePath = conf.getConf().get().getString("download.listFile");
         if (cmd.hasOption('o')) {
             filePath = cmd.getOptionValue('o');
         }
