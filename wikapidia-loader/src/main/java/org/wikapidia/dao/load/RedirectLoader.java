@@ -14,6 +14,7 @@ import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.parser.wiki.RedirectParser;
@@ -22,6 +23,8 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -32,6 +35,8 @@ import java.util.List;
  * - RedirectSqlDao.update goes away.
  */
 public class RedirectLoader {
+
+    private static final Logger LOG = Logger.getLogger(RedirectLoader.class.getName());
 
     private TIntIntHashMap redirectIdsToPageIds;
     private final RawPageSqlDao rawPages;
@@ -46,29 +51,28 @@ public class RedirectLoader {
 
     private void beginLoad() throws DaoException {
         redirects.beginLoad();
-        System.out.println("Begin Load: ");
+        LOG.log(Level.INFO, "Begin Load");
     }
 
     private void endLoad() throws DaoException {
         redirects.endLoad();
-        System.out.println("End Load.");
+        LOG.log(Level.INFO, "End Load");
     }
 
     private void loadRedirectIdsIntoMemory(Language language) throws DaoException{
-        RedirectParser redirectParser = new RedirectParser(language);
         redirectIdsToPageIds = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
         SqlDaoIterable<RawPage> redirectPages = rawPages.getAllRedirects(language);
         int i = 0;
-        System.out.println("Begin loading redirects into memory: ");
+        LOG.log(Level.INFO, "Loading redirects into memory");
         for(RawPage p : redirectPages){
-           Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
-           redirectIdsToPageIds.put(p.getPageId(),
+            Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
+            redirectIdsToPageIds.put(p.getPageId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));
-           if(i%1000==0)
-               System.out.println("loading redirect # " + i);
             i++;
+            if(i%1000==0)
+                LOG.log(Level.INFO, "Redirects loaded: " + i);
         }
-        System.out.println("End loading redirects into memory.");
+        LOG.log(Level.INFO, "All redirects loaded into memory: " + i);
     }
 
     private int resolveRedirect(int src){
@@ -85,22 +89,22 @@ public class RedirectLoader {
         int i = 0;
         for (int src : redirectIdsToPageIds.keys()) {
             redirectIdsToPageIds.put(src, resolveRedirect(src));
-            if(i%100==0)
-                System.out.println("resolving redirect # " + i);
             i++;
+            if(i%1000==0)
+                LOG.log(Level.INFO, "Redirects resolved: " + i);
         }
     }
 
-    private void loadRedirectsIntoDatabase(Language language) throws DaoException{
+    private void loadRedirectsIntoDatabase(Language language) throws DaoException {
         int i = 0;
-        System.out.println("Begin loading redirects into database: ");
+        LOG.log(Level.INFO, "Loading redirects into database");
         for(int src : redirectIdsToPageIds.keys()){
-            if(i%100==0)
-                System.out.println("loaded " + i + " into database.");
             redirects.save(language, src, redirectIdsToPageIds.get(src));
+            if(i%1000==0)
+                LOG.log(Level.INFO, "loaded " + i + " into database.");
             i++;
         }
-        System.out.println("End loading redirects into database.");
+        LOG.log(Level.INFO, "All redirects loaded into database: " + i);
     }
 
     public static void main(String args[]) throws ConfigurationException, DaoException {
@@ -126,7 +130,7 @@ public class RedirectLoader {
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("languages")
-                        .withDescription("the set of languages to process")
+                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getStringList("languages"))
                         .create("l"));
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -147,14 +151,27 @@ public class RedirectLoader {
             redirectLoader.beginLoad();
         }
 
-        List<String> languages;
+        List<String> langCodes;
         if (cmd.hasOption("l")) {
-            languages = Arrays.asList(cmd.getOptionValues("l"));
+            langCodes = Arrays.asList(cmd.getOptionValues("l"));
         } else {
-            languages = (List<String>)conf.getConf().get().getAnyRef("Languages");
+            langCodes = conf.getConf().get().getStringList("languages");
         }
-        for(String l : languages){
-            Language lang = Language.getByLangCode(l);
+        LanguageSet languages;
+        try{
+            languages = new LanguageSet(langCodes);
+        } catch (IllegalArgumentException e) {
+            String langs = "";
+            for (Language language : Language.LANGUAGES) {
+                langs += "," + language.getLangCode();
+            }
+            langs = langs.substring(1);
+            System.err.println(e.toString()
+                    + "\nValid language codes: \n" + langs);
+            System.exit(1);
+            return;
+        }
+        for(Language lang : languages) {
             redirectLoader.loadRedirectIdsIntoMemory(lang);
             redirectLoader.resolveRedirectsInMemory();
             redirectLoader.loadRedirectsIntoDatabase(lang);

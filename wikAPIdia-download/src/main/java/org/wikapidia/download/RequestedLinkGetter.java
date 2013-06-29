@@ -147,14 +147,14 @@ import java.util.regex.Pattern;
                         .hasArgs()
                         .withLongOpt("languages")
                         .withValueSeparator(',')
-                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getAnyRef("Languages"))
+                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getStringList("languages"))
                         .create("l"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("names")
-                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getAnyRef("downloadMatcher"))
+                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getStringList("download.matcher"))
                         .create("n"));
         options.addOption(
                 new DefaultOptionBuilder()
@@ -189,7 +189,7 @@ import java.util.regex.Pattern;
         File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames((List<String>)conf.getConf().get().getAnyRef("downloadMatcher"));
+        List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames(conf.getConf().get().getStringList("download.matcher"));
         if (cmd.hasOption("n")) {
             linkMatchers = new ArrayList<LinkMatcher>();
             for (String name : cmd.getOptionValues("n")) {
@@ -203,20 +203,25 @@ import java.util.regex.Pattern;
             }
         }
 
-        LanguageSet languages = new LanguageSet((List<String>)conf.getConf().get().getAnyRef("Languages"));
+        List<String> langCodes;
         if (cmd.hasOption("l")) {
-            try{
-                languages = new LanguageSet(Arrays.asList(cmd.getOptionValues("l")));
-            } catch (IllegalArgumentException e) {
-                String langs = "";
-                for (Language language : Language.LANGUAGES) {
-                    langs += "," + language.getLangCode();
-                }
-                langs = langs.substring(1);
-                System.err.println(e.toString()
-                        + "\nValid language codes: \n" + langs);
-                System.exit(1);
+            langCodes = Arrays.asList(cmd.getOptionValues("l"));
+        } else {
+            langCodes = conf.getConf().get().getStringList("languages");
+        }
+        LanguageSet languages;
+        try{
+            languages = new LanguageSet(langCodes);
+        } catch (IllegalArgumentException e) {
+            String langs = "";
+            for (Language language : Language.LANGUAGES) {
+                langs += "," + language.getLangCode();
             }
+            langs = langs.substring(1);
+            System.err.println(e.toString()
+                    + "\nValid language codes: \n" + langs);
+            System.exit(1);
+            return;
         }
 
         Date getDumpByDate = new Date();
@@ -230,7 +235,7 @@ import java.util.regex.Pattern;
             }
         }
 
-        String filePath = (String)conf.getConf().get().getAnyRef("downloadListFile");
+        String filePath = conf.getConf().get().getString("download.listFile");
         if (cmd.hasOption('o')) {
             filePath = cmd.getOptionValue('o');
         }

@@ -21,31 +21,17 @@ import java.util.Iterator;
  */
 public abstract class ConceptMapper {
 
-    /**
-     * Algorithm IDs for the various concept parsing algorithms
-     */
-    public static final int MONOLINGUAL_ALGORITHM_ID = 0;
-    public static final int CONCEPTUALIGN_ALGORITHM_ID = 1;
-
-    private static int id;
+    private final int id;
 
     protected final LocalPageDao<LocalPage> localPageDao;
 
     /**
-     * General purpose constructor for use by providers
-     * @param localPageDao
-     */
-    public ConceptMapper(LocalPageDao<LocalPage> localPageDao) {
-        this.localPageDao = localPageDao;
-    }
-
-    /**
-     * Constructor for use by child algorithms to properly set the algorithm ID.
+     * All purpose constructor
      * @param id
      * @param localPageDao
      */
-    protected ConceptMapper(int id, LocalPageDao<LocalPage> localPageDao) {
-        this(localPageDao);
+    public ConceptMapper(int id, LocalPageDao<LocalPage> localPageDao) {
+        this.localPageDao = localPageDao;
         this.id = id;
     }
 

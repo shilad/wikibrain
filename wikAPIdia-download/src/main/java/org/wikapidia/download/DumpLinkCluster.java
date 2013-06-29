@@ -45,24 +45,6 @@ public class DumpLinkCluster implements Iterable<Multimap<LinkMatcher, DumpLinkI
 
     @Override
     public Iterator<Multimap<LinkMatcher, DumpLinkInfo>> iterator() {
-        return new Iterator<Multimap<LinkMatcher, DumpLinkInfo>>() {
-
-            Iterator<Language> local = links.keySet().iterator();
-
-            @Override
-            public boolean hasNext() {
-                return local.hasNext();
-            }
-
-            @Override
-            public Multimap<LinkMatcher, DumpLinkInfo> next() {
-                return get(local.next());
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+        return links.values().iterator();
     }
 }

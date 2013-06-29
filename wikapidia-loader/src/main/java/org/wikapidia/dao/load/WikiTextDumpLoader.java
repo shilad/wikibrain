@@ -62,7 +62,7 @@ public class WikiTextDumpLoader {
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("languages")
-                        .withDescription("the set of languages to process")
+                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getStringList("languages"))
                         .create("l"));
 
         CommandLineParser parser = new PosixParser();
@@ -82,7 +82,7 @@ public class WikiTextDumpLoader {
         if (cmd.hasOption("l")){
             languages = Arrays.asList(cmd.getOptionValues('l'));
         } else {
-            languages = (List<String>)conf.getConf().get().getAnyRef("Languages");
+            languages = conf.getConf().get().getStringList("languages");
         }
 
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();

@@ -76,7 +76,7 @@ public class ConceptLoader {
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("languages")
-                        .withDescription("the set of languages to process")
+                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getStringList("languages"))
                         .create("l"));
         options.addOption(
                 new DefaultOptionBuilder()
@@ -102,7 +102,7 @@ public class ConceptLoader {
         if (cmd.hasOption("l")) {
             langCodes = Arrays.asList(cmd.getOptionValues("l"));
         } else {
-            langCodes = (List<String>)conf.getConf().get().getAnyRef("Languages");
+            langCodes = conf.getConf().get().getStringList("languages");
         }
         Collection<Language> langs = new ArrayList<Language>();
         for (String langCode : langCodes) {
@@ -110,11 +110,12 @@ public class ConceptLoader {
         }
         LanguageSet languages = new LanguageSet(langs);
 
-        String algorithm = cmd.getOptionValue("n", (String) conf.getConf().get().getAnyRef("defaultMappingAlgorithm"));
-
+        ConceptMapper mapper = conf.get(ConceptMapper.class);
+        if (cmd.hasOption("n")) {
+            mapper = conf.get(ConceptMapper.class, cmd.getOptionValue("n"));
+        }
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
-        ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
-        final ConceptLoader loader = new ConceptLoader(languages, dao);
+        ConceptLoader loader = new ConceptLoader(languages, dao);
 
         if (cmd.hasOption("t")) {
             LOG.log(Level.INFO, "Begin Load");

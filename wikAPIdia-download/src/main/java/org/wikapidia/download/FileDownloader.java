@@ -1,7 +1,6 @@
 package org.wikapidia.download;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -15,7 +14,6 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
-import org.wikapidia.core.WikapidiaException;
 
 /**
  *
@@ -137,8 +135,8 @@ public class FileDownloader {
         File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
         Configurator conf = new Configurator(new Configuration(pathConf));
 
-        List argList = Arrays.asList(conf.getConf().get().getAnyRef("downloadListFile"));
-        String filePath = cmd.getOptionValue('o', (String)conf.getConf().get().getAnyRef("downloadPath"));
+        List argList = Arrays.asList(conf.getConf().get().getString("download.listFile"));
+        String filePath = cmd.getOptionValue('o', conf.getConf().get().getString("download.path"));
         if (!cmd.getArgList().isEmpty()) {
             argList = cmd.getArgList();
         }

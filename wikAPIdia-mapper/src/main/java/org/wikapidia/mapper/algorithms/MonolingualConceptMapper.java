@@ -29,14 +29,13 @@ public class MonolingualConceptMapper extends ConceptMapper {
 
     private static final AtomicInteger nextUnivId = new AtomicInteger(0);
 
-    public MonolingualConceptMapper(LocalPageDao<LocalPage> localPageDao) {
-        super(MONOLINGUAL_ALGORITHM_ID, localPageDao);
-
+    public MonolingualConceptMapper(int id, LocalPageDao<LocalPage> localPageDao) {
+        super(id, localPageDao);
     }
 
     @Override
     public MapperIterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikapidiaException {
-        Iterable<LocalPage> localPages = null;
+        Iterable<LocalPage> localPages;
         try {
             localPages = localPageDao.get(new DaoFilter().setLanguages(ls).setRedirect(false));
         } catch (DaoException e) {
@@ -86,6 +85,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
                 return null;
             }
             return new MonolingualConceptMapper(
+                    config.getInt("algorithmId"),
                     getConfigurator().get(
                             LocalPageDao.class,
                             config.getString("localPageDao"))
