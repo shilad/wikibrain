@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ../wikapidia-utils/src/main/scripts/utils.sh &&
+mvn clean &&
 compile  &&
 (cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.RequestedLinkGetter $@) &&
 (cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.FileDownloader $@) &&

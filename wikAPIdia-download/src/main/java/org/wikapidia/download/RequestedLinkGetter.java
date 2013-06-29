@@ -147,7 +147,7 @@ import java.util.regex.Pattern;
                         .hasArgs()
                         .withValueSeparator(',')
                         .withLongOpt("names")
-                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getAnyRef("downloadMatcher"))
+                        .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getStringList("download.matcher"))
                         .create("n"));
         options.addOption(
                 new DefaultOptionBuilder()
