@@ -1,6 +1,7 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
@@ -96,7 +97,7 @@ public interface LocalSRMetric {
      * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
      * @param labeled The labeled gold standard dataset.
      */
-    public void trainSimilarity(List<KnownSim> labeled);
+    public void trainSimilarity(List<KnownSim> labeled) throws DaoException;
 
     /**
      * Train the mostSimilar() function
@@ -105,7 +106,7 @@ public interface LocalSRMetric {
      * @param numResults The maximum number of similar articles computed per phrase.
      * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
      */
-    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds);
+    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) throws DaoException;
 
 
     /**
@@ -116,7 +117,7 @@ public interface LocalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(int wpRowIds[], int wpColIds[], Language language) throws IOException;
+    public double[][] cosimilarity(int wpRowIds[], int wpColIds[], Language language) throws DaoException;
 
 
     /**
@@ -127,7 +128,7 @@ public interface LocalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(String rowPhrases[], String colPhrases[], Language language) throws IOException;
+    public double[][] cosimilarity(String rowPhrases[], String colPhrases[], Language language) throws DaoException;
 
     /**
      * Construct symmetric comsimilarity matrix of Wikipedia ids in a given language
@@ -135,7 +136,7 @@ public interface LocalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(int ids[], Language language) throws IOException;
+    public double[][] cosimilarity(int ids[], Language language) throws DaoException;
 
     /**
      * Construct symmetric cosimilarity matrix of phrases by mapping through local pages
@@ -144,5 +145,5 @@ public interface LocalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(String phrases[], Language language) throws IOException;
+    public double[][] cosimilarity(String phrases[], Language language) throws DaoException;
 }

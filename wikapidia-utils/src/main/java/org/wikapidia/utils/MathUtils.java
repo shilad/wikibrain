@@ -14,6 +14,15 @@ import java.util.Arrays;
 public class MathUtils {
 
     /**
+     * Returns true if the number is not NaN or infinite.
+     * @param d
+     * @return
+     */
+    public static boolean isReal(double d) {
+        return !Double.isNaN(d) && !Double.isInfinite(d);
+    }
+
+    /**
      * Returns a value that approaches yInf from y0 as xDelta increases.
      * The values for the function range from (0, y0) to (inf, yInf).
      * For each xHalfLife, the function moves 50% closer to yInf.
