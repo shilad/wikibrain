@@ -11,6 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Resolves disambiguations by naively choosing the most common
+ * meaning of a phrase without regards to its context.
+ */
 public class TopResultDisambiguator implements Disambiguator{
     private final PhraseAnalyzer phraseAnalyzer;
 

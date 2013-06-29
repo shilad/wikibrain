@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.wikapidia</groupId>
-    <artifactId>wikAPIdia-metrics</artifactId>
+    <artifactId>wikAPIdia-sr</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <dependencies>
