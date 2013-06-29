@@ -55,7 +55,7 @@ public class UniversalLinkLoader {
             int i=0;
             for (LocalLink localLink : localLinks) {
                 i++;
-                if (i%1000 == 0)
+                if (i%100000 == 0)
                     LOG.log(Level.INFO, "UniversalLinks loaded: " + i);
                 int sourceUnivId, destUnivId;
                 if (localLink.getSourceId() < 0) {
