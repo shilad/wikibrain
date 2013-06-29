@@ -4,18 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.github.axet.wget.WGet;
+import com.github.axet.wget.info.DownloadInfo;
 import com.github.axet.wget.info.ex.DownloadIOCodeError;
 import com.google.common.collect.Multimap;
 import org.apache.commons.cli.*;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 
 /**
@@ -29,15 +29,17 @@ import org.wikapidia.core.cmd.Env;
 public class FileDownloader {
 
     private static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
-    private static final int SLEEP_TIME = 10000; // getDump takes a break from downloading
-    private static final int MAX_ATTEMPT = 30; // number of attempts before getDump gives up downloading the dump
+    private static final int SLEEP_TIME = 10000;    // getDump takes a break from downloading
+    private static final int MAX_ATTEMPT = 30;      // number of attempts before getDump gives up downloading the dump
+    private static final int DISPLAY_INFO = 10000;  // amount of time between displaying download progress
 
-    private final File tmp;
+    private final File tmp = new File(".tmp").getAbsoluteFile();
     private final File output;
 
-    public FileDownloader(File output) {
+    private DownloadInfo info;
+
+    public FileDownloader(File output) throws IOException {
         this.output = output;
-        tmp = new File(".tmp");
     }
 
     /**
@@ -49,9 +51,11 @@ public class FileDownloader {
     public boolean getDump(DumpLinkInfo link) throws InterruptedException {
         for (int i=0; i < MAX_ATTEMPT; i++) {
             try {
-                new WGet(link.getUrl(), tmp).download();
-                File download = new File(tmp, link.getDownloadName());
-                download.renameTo(new File(tmp, link.getFileName()));
+                AtomicBoolean stop = new AtomicBoolean(false);
+                File download = new File(tmp, link.getFileName());
+                info = new DownloadInfo(link.getUrl());
+                info.extract(stop, notify);
+                new WGet(info, download).download(stop, notify);
                 LOG.log(Level.INFO, "Download complete: " + download.getName());
                 Thread.sleep(SLEEP_TIME);
                 return true;
@@ -79,7 +83,15 @@ public class FileDownloader {
      * @throws InterruptedException
      */
     public void downloadFrom(File file) throws InterruptedException {
-        if (!tmp.exists()) tmp.mkdir();
+        if (tmp.isDirectory()) {
+            if (tmp.listFiles().length != 0) {
+                for (File f : tmp.listFiles()) {
+                    f.delete();
+                }
+            }
+        } else {
+            tmp.mkdirs();
+        }
         DumpLinkCluster linkCluster = DumpLinkInfo.parseFile(file);
         int numTotalFiles = linkCluster.size();
         LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
@@ -88,11 +100,15 @@ public class FileDownloader {
         for (Multimap<LinkMatcher, DumpLinkInfo> map : linkCluster) {
             for (LinkMatcher linkMatcher : map.keySet()) {
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
-                    if (getDump(link)) {
-                        success++;
-                        LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
+                    if (new File(output, link.getLocalPath()+"/"+link.getFileName()).exists()) {
+                        LOG.log(Level.INFO, "File already downloaded: " + link.getFileName());
                     } else {
-                        fail++;
+                        if (getDump(link)) {
+                            success++;
+                            LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
+                        } else {
+                            fail++;
+                        }
                     }
                 }
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
@@ -108,7 +124,7 @@ public class FileDownloader {
         tmp.delete();
     }
 
-    public static void main(String[] args) throws InterruptedException, ConfigurationException {
+    public static void main(String[] args) throws InterruptedException, ConfigurationException, IOException {
 
         Options options = new Options();
         options.addOption(
@@ -139,9 +155,36 @@ public class FileDownloader {
             argList = cmd.getArgList();
         }
 
-        final FileDownloader downloader = new FileDownloader(new File(filePath));
+        FileDownloader downloader = new FileDownloader(new File(filePath));
         for (Object path : argList) {
             downloader.downloadFrom(new File((String) path));
         }
     }
+
+    private Runnable notify = new Runnable() {
+        long last;
+
+        @Override
+        public void run() {
+            switch (info.getState()) {
+                case EXTRACTING:
+                case EXTRACTING_DONE:
+                case DONE:
+                    LOG.log(Level.INFO, "" + info.getState());
+                    break;
+                case RETRYING:
+                    LOG.log(Level.INFO, info.getState() + " " + info.getDelay());
+                    break;
+                case DOWNLOADING:
+                    long now = System.currentTimeMillis();
+                    if (now > last + DISPLAY_INFO) {
+                        last = now;
+                        LOG.log(Level.INFO, String.format("%s %d %%", info.getSource(), info.getCount() * 100 / info.getLength()));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 }

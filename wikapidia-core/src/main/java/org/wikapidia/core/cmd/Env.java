@@ -84,7 +84,7 @@ public class Env {
         if (cmd.hasOption("l")) {
             languages = new LanguageSet(cmd.getOptionValue("l"));
         } else {
-            languages = new LanguageSet(configuration.get().getStringList("Languages"));
+            languages = new LanguageSet(configuration.get().getStringList("languages"));
         }
 
         // Load numThreads
