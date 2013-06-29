@@ -11,7 +11,9 @@ import java.util.*;
  * User: bjhecht
  */
 public class LanguageSet implements Iterable<Language> {
-    public static final LanguageSet ALL = new LanguageSet(Arrays.asList(Language.LANGUAGES));
+    public static final LanguageSet ALL = new LanguageSet(
+            Language.getByLangCode("en"),
+            Arrays.asList(Language.LANGUAGES));
 
     private Set<Language> langs;
     private Language defaultLanguage;
@@ -98,17 +100,6 @@ public class LanguageSet implements Iterable<Language> {
         return langs.contains(language);
     }
 
-    /**
-     * Returns a language set that contains all the languages in it,
-     * with English as the default
-     * @return
-     */
-    public static LanguageSet getSetOfAllLanguages() {
-        Language[] languages = Language.LANGUAGES;
-        return new LanguageSet(Arrays.asList(languages));
-    }
-
-
 
     public boolean equals(Object o){
         if (o instanceof LanguageSet){
@@ -119,9 +110,7 @@ public class LanguageSet implements Iterable<Language> {
         return false;
     }
 
-    @Override
-    public String toString(){
-
+    public String getLangCodeString() {
         List<String> output = Lists.newArrayList();
         for (Language lang : langs) {
             if (lang.equals(defaultLanguage)) {
@@ -131,7 +120,20 @@ public class LanguageSet implements Iterable<Language> {
             }
         }
         Collections.sort(output);
-        return "(" + StringUtils.join(output,",") + ")";
+        return StringUtils.join(output, ",");
+    }
+
+    public List<String> getLangCodes() {
+        List<String> output = Lists.newArrayList();
+        for (Language lang : langs) {
+            output.add(lang.getLangCode());
+        }
+        return output;
+    }
+
+    @Override
+    public String toString(){
+        return "(" + getLangCodeString() + ")";
 
     }
 

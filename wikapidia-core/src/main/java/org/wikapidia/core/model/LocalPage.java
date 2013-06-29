@@ -84,4 +84,14 @@ public class LocalPage {
             return false;
         }
     }
+
+    @Override
+    public String toString() {
+        return "LocalPage{" +
+                "nameSpace=" + nameSpace +
+                ", title=" + title +
+                ", localId=" + localId +
+                ", language=" + language +
+                '}';
+    }
 }

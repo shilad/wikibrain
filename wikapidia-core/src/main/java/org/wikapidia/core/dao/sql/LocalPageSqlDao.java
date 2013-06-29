@@ -307,9 +307,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             int numRedirects = 0;
             int numResolved = 0;
             for (Record record : cursor){
-                if (record == null) {
-                    continue;
-                }
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
                         record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));

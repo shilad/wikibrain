@@ -2,13 +2,21 @@ package org.wikapidia.download;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.github.axet.wget.WGet;
+import com.github.axet.wget.info.ex.DownloadIOCodeError;
+import com.google.common.collect.Multimap;
 import org.apache.commons.cli.*;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
 
 /**
  *
@@ -21,32 +29,86 @@ import org.wikapidia.conf.DefaultOptionBuilder;
 public class FileDownloader {
 
     private static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
+    private static final int SLEEP_TIME = 10000; // getDump takes a break from downloading
+    private static final int MAX_ATTEMPT = 30; // number of attempts before getDump gives up downloading the dump
 
     private final File tmp;
     private final File output;
 
     public FileDownloader(File output) {
         this.output = output;
-        tmp = new File("tmp");
+        tmp = new File(".tmp");
     }
 
-    public void downloadFrom(File file) throws IOException {
-        if (!tmp.exists()) tmp.mkdir();
-        List<DumpLinkInfo> links = DumpLinkInfo.parseFile(file);
-        LOG.log(Level.INFO, "Downloading Files");
-        for (int i=0; i<links.size(); i++) {
-            DumpLinkInfo link = links.get(i);
-            File target = new File(output, link.getLocalPath());
-            if (!target.exists()) target.mkdirs();
-            new WGet(link.getUrl(), tmp).download();
-            LOG.log(Level.INFO, "Files downloaded: " + (i+1));
-            File download = tmp.listFiles()[0];
-            download.renameTo(new File(target, link.getFileName()));
+    /**
+     * Attempts to download the specified file. Returns the success of the download.
+     * @param link
+     * @return true if successful, else false
+     * @throws InterruptedException
+     */
+    public boolean getDump(DumpLinkInfo link) throws InterruptedException {
+        for (int i=0; i < MAX_ATTEMPT; i++) {
+            try {
+                new WGet(link.getUrl(), tmp).download();
+                File download = new File(tmp, link.getDownloadName());
+                download.renameTo(new File(tmp, link.getFileName()));
+                LOG.log(Level.INFO, "Download complete: " + download.getName());
+                Thread.sleep(SLEEP_TIME);
+                return true;
+            } catch (DownloadIOCodeError e) {
+                if (i+1 < MAX_ATTEMPT) {
+                    LOG.log(Level.INFO, "Failed to download " + link.getFileName() +
+                            ". Reconnecting in " + ((i+1) * (SLEEP_TIME/1000)) +
+                            " seconds (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
+                    Thread.sleep(SLEEP_TIME * (i+1));
+                } else {
+                    LOG.log(Level.WARNING, "Failed to download " + link.getFileName() +
+                            " (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
+                }
+            }
         }
+        return false;
+    }
+
+    /**
+     * Processes a tsv file containing dump link info and initiates the download process
+     * on that info. Files are downloaded one language at a time, then one type at a time.
+     * Within each language, all of one type is downloaded before moving the files
+     * to the destination directory.
+     * @param file the tsv file containing the dump link info
+     * @throws InterruptedException
+     */
+    public void downloadFrom(File file) throws InterruptedException {
+        if (!tmp.exists()) tmp.mkdir();
+        DumpLinkCluster linkCluster = DumpLinkInfo.parseFile(file);
+        int numTotalFiles = linkCluster.size();
+        LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
+        int success = 0;
+        int fail = 0;
+        for (Multimap<LinkMatcher, DumpLinkInfo> map : linkCluster) {
+            for (LinkMatcher linkMatcher : map.keySet()) {
+                for (DumpLinkInfo link : map.get(linkMatcher)) {
+                    if (getDump(link)) {
+                        success++;
+                        LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
+                    } else {
+                        fail++;
+                    }
+                }
+                for (DumpLinkInfo link : map.get(linkMatcher)) {
+                    File download = new File(tmp, link.getFileName());
+                    File target = new File(output, link.getLocalPath());
+                    if (!target.exists()) target.mkdirs();
+                    download.renameTo(new File(target, download.getName()));
+                }
+            }
+        }
+        LOG.log(Level.INFO, success + " files downloaded and " +
+                fail + " files failed out of " + numTotalFiles + " files.");
         tmp.delete();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws InterruptedException, ConfigurationException {
 
         Options options = new Options();
         options.addOption(
@@ -56,6 +118,7 @@ public class FileDownloader {
                         .withDescription("Path to output file.")
                         .create("o"));
 
+        Env.addStandardOptions(options);
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
 
@@ -67,15 +130,17 @@ public class FileDownloader {
             return;
         }
 
-        String filePath = cmd.getOptionValue('o', "download");
-        if (cmd.getArgList().isEmpty()) {
-            System.err.println("No input files specified.");
-            new HelpFormatter().printHelp("FileDownloader", options);
-            return;
+        Env env = new Env(cmd);
+        Configurator conf = env.getConfigurator();
+
+        List argList = Arrays.asList(conf.getConf().get().getAnyRef("downloadListFile"));
+        String filePath = cmd.getOptionValue('o', (String)conf.getConf().get().getAnyRef("downloadPath"));
+        if (!cmd.getArgList().isEmpty()) {
+            argList = cmd.getArgList();
         }
 
         final FileDownloader downloader = new FileDownloader(new File(filePath));
-        for (Object path : cmd.getArgList()) {
+        for (Object path : argList) {
             downloader.downloadFrom(new File((String) path));
         }
     }

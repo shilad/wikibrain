@@ -36,4 +36,9 @@ public class PrunedCounts<K> extends LinkedHashMap<K, Integer> implements Serial
         public PrunedCounts<K> prune(final Map<K, Integer> allCounts);
 
     }
+
+    @Override
+    public String toString() {
+        return "total="+total + ", " + super.toString();
+    }
 }

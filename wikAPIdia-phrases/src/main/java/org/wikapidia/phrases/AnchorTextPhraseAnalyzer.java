@@ -1,5 +1,9 @@
 package org.wikapidia.phrases;
 
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
@@ -7,6 +11,7 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -14,12 +19,12 @@ import java.util.logging.Logger;
 /**
 * Loads phrase to page mapping using anchor phrase in wiki links.
 */
-public class AnchorTextPhraseCorpus extends BasePhraseAnalyzer {
-    private static final Logger LOG = Logger.getLogger(AnchorTextPhraseCorpus.class.getName());
+public class AnchorTextPhraseAnalyzer extends BasePhraseAnalyzer {
+    private static final Logger LOG = Logger.getLogger(AnchorTextPhraseAnalyzer.class.getName());
 
     private LocalLinkDao linkDao;
 
-    public AnchorTextPhraseCorpus(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, LocalLinkDao linkDao) {
+    public AnchorTextPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, LocalLinkDao linkDao) {
         super(phraseDao, pageDao);
         this.linkDao = linkDao;
     }
@@ -91,6 +96,34 @@ public class AnchorTextPhraseCorpus extends BasePhraseAnalyzer {
             buffer = new BasePhraseAnalyzer.Entry(
                     ll.getLanguage(), ll.getDestId(), ll.getAnchorText(), 1
                 );
+        }
+    }
+
+
+    public static class Provider extends org.wikapidia.conf.Provider<PhraseAnalyzer> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return PhraseAnalyzer.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "phrases.analyzer";
+        }
+
+        @Override
+        public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("anchortext")) {
+                return null;
+            }
+            PhraseAnalyzerDao paDao = getConfigurator().get(PhraseAnalyzerDao.class, config.getString("phraseDao"));
+            LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
+            LocalLinkDao llDao = getConfigurator().get(LocalLinkDao.class, config.getString("localLinkDao"));
+            return new AnchorTextPhraseAnalyzer(paDao, lpDao, llDao);
         }
     }
 }

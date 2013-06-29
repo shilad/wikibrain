@@ -1,23 +1,20 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.phrases.NormalizedStringPruner;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.phrases.SimplePruner;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,23 +28,11 @@ public class PhraseLoader {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
                         .isRequired()
                         .withLongOpt("analyzer")
                         .withDescription("the name of the phrase analyzer to use")
                         .create("n"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArgs()
-                        .withValueSeparator(',')
-                        .withLongOpt("languages")
-                        .withDescription("the set of languages to process")
-                        .create("l"));
+        Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -58,32 +43,24 @@ public class PhraseLoader {
             new HelpFormatter().printHelp("ConceptLoader", options);
             return;
         }
-        File pathConf = cmd.hasOption("c") ? new File(cmd.getOptionValue('c')) : null;
 
-        System.setProperty("phrases.loading", "true");
-        Configuration c = new Configuration(pathConf);
-        Configurator conf = new Configurator(c);
+        Map<String, String> confOverrides = new HashMap<String, String>();
+        confOverrides.put("phrases.loading", "true");
 
-        String name = null;
-        if (cmd.hasOption("n")) {
-            name = cmd.getOptionValue("n");
-        }
-        LanguageSet langs;
-        if (cmd.hasOption("l")) {
-            langs = new LanguageSet(Arrays.asList(cmd.getOptionValues("l")));
-        } else {
-            langs = new LanguageSet((List<String>)conf.getConf().get().getAnyRef("Languages"));
-        }
+        Env env = new Env(cmd, confOverrides);
 
-        PhraseAnalyzer analyzer = conf.get(PhraseAnalyzer.class, name);
+        String name = cmd.getOptionValue("n");
+
+        PhraseAnalyzer analyzer = env.getConfigurator().get(PhraseAnalyzer.class, name);
 
         LOG.log(Level.INFO, "LOADING PHRASE CORPUS FOR " + name);
+        Configuration c = env.getConfiguration();
         int minCount = c.get().getInt("phrases.pruning.minCount");
         int maxRank = c.get().getInt("phrases.pruning.maxRank");
         double minFraction = c.get().getDouble("phrases.pruning.minFraction");
 
         analyzer.loadCorpus(
-                langs,
+                env.getLanguages(),
                 new NormalizedStringPruner(minCount, maxRank, minFraction),
                 new SimplePruner<Integer>(minCount, maxRank, minFraction)
         );

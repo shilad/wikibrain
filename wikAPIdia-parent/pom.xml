@@ -19,6 +19,7 @@
         <module>../wikAPIdia-matrix</module>
         <module>../wikAPIdia-download</module>
         <module>../wikAPIdia-sr</module>
+        <module>../wikAPIdia-cookbook</module>
     </modules>
 
     <build>
