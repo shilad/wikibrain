@@ -18,5 +18,5 @@ log/
 target/
 
 # download stuff
-.tmp/*
+.tmp/
 *.tsv
