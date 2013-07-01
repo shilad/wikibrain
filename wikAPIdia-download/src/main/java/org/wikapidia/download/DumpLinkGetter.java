@@ -67,15 +67,18 @@ public class DumpLinkGetter {
      */
     public HashMap<String, List<DumpLinkInfo>> getDumpFiles(List<String> links) throws IOException {
         HashMap<String, List<DumpLinkInfo>> urlLinks = new HashMap<String, List<DumpLinkInfo>>();
+        HashMap<String, String> md5s = getMd5Sums(links);
         for(LinkMatcher linkMatcher : matchers){
             List<String> results = linkMatcher.match(links);
             if (!results.isEmpty()) {
-                List<DumpLinkInfo> urls = new ArrayList<DumpLinkInfo>();
+                List<DumpLinkInfo> dumpLinks = new ArrayList<DumpLinkInfo>();
                 for (String url: results){
                     URL linkURL = new URL(BASEURL_STRING + url);
-                    urls.add(new DumpLinkInfo(lang, dumpDate, linkMatcher, linkURL, -1));
+                    DumpLinkInfo linkInfo = new DumpLinkInfo(lang, dumpDate, linkMatcher, linkURL);
+                    linkInfo.setMd5(md5s.get(linkInfo.getDownloadName()));
+                    dumpLinks.add(linkInfo);
                 }
-                urlLinks.put(linkMatcher.getName(), urls);
+                urlLinks.put(linkMatcher.getName(), dumpLinks);
             }
         }
         return urlLinks;

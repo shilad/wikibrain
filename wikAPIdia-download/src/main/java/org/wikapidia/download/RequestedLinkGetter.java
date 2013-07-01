@@ -116,13 +116,13 @@ import java.util.regex.Pattern;
      * @throws IOException
      * @throws WikapidiaException
      */
-    protected HashMap<String, HashMap<String, List<URL>>> getDumps() throws ParseException, IOException, WikapidiaException {
+    protected HashMap<String, HashMap<String, List<DumpLinkInfo>>> getDumps() throws ParseException, IOException, WikapidiaException {
         List<String> availableDates = availableDumpDatesSorted(getAllDates());
-        HashMap<String, HashMap<String, List<URL>>> map = new HashMap<String, HashMap<String, List<URL>>>();
+        HashMap<String, HashMap<String, List<DumpLinkInfo>>> map = new HashMap<String, HashMap<String, List<DumpLinkInfo>>>();
         List<LinkMatcher> unfoundMatchers = new ArrayList<LinkMatcher>(matchers);
         for (int i = availableDates.size() -1; i > -1; i--) {
             DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(lang, unfoundMatchers, availableDates.get(i));
-            HashMap<String, List<URL>> batchDumps = dumpLinkGetter.getDumpFiles(dumpLinkGetter.getFileLinks());
+            HashMap<String, List<DumpLinkInfo>> batchDumps = dumpLinkGetter.getDumpFiles(dumpLinkGetter.getFileLinks());
             map.put(availableDates.get(i), batchDumps);
             for (int j = 0; j < unfoundMatchers.size(); j++) {
                 LinkMatcher linkMatcher = unfoundMatchers.get(j);
@@ -222,14 +222,14 @@ import java.util.regex.Pattern;
         for (Language language : languages) {
             RequestedLinkGetter requestedLinkGetter = new RequestedLinkGetter(language, linkMatchers, getDumpByDate);
             try {
-                HashMap<String, HashMap<String, List<URL>>> urls = requestedLinkGetter.getDumps();
-                for (String dumpDate : urls.keySet()) {
+                HashMap<String, HashMap<String, List<DumpLinkInfo>>> dumpLinks = requestedLinkGetter.getDumps();
+                for (String dumpDate : dumpLinks.keySet()) {
                     DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(language, linkMatchers, dumpDate);
                     HashMap<String, String> md5s = dumpLinkGetter.getMd5Sums(dumpLinkGetter.getFileLinks());
-                    for (String linkName : urls.get(dumpDate).keySet()) {
-                        for (URL url : urls.get(dumpDate).get(linkName)) {
-                            String fileName = url.toString();
-                            result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + url);
+                    for (String linkName : dumpLinks.get(dumpDate).keySet()) {
+                        for (DumpLinkInfo linkInfo : dumpLinks.get(dumpDate).get(linkName)) {
+                            String fileName = linkInfo.toString();
+                            result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + linkInfo.getUrl() + "\t" + linkInfo.getMd5());
                         }
                     }
                 }
