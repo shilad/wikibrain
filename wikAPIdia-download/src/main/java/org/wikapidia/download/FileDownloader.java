@@ -13,10 +13,14 @@ import com.github.axet.wget.info.DownloadInfo;
 import com.github.axet.wget.info.ex.DownloadIOCodeError;
 import com.google.common.collect.Multimap;
 import org.apache.commons.cli.*;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.lang.Language;
 
 /**
  *
@@ -38,7 +42,7 @@ public class FileDownloader {
 
     private DownloadInfo info;
 
-    public FileDownloader(File output) throws IOException {
+    public FileDownloader(File output) {
         this.output = output;
     }
 
@@ -48,7 +52,7 @@ public class FileDownloader {
      * @return true if successful, else false
      * @throws InterruptedException
      */
-    public boolean getDump(DumpLinkInfo link) throws InterruptedException {
+    public String getDump(DumpLinkInfo link) throws InterruptedException, IOException {
         for (int i=0; i < MAX_ATTEMPT; i++) {
             try {
                 AtomicBoolean stop = new AtomicBoolean(false);
@@ -57,8 +61,9 @@ public class FileDownloader {
                 info.extract(stop, notify);
                 new WGet(info, download).download(stop, notify);
                 LOG.log(Level.INFO, "Download complete: " + download.getName());
+                String md5 = DigestUtils.md5Hex(FileUtils.openInputStream(download));
                 Thread.sleep(SLEEP_TIME);
-                return true;
+                return md5;
             } catch (DownloadIOCodeError e) {
                 if (i+1 < MAX_ATTEMPT) {
                     LOG.log(Level.INFO, "Failed to download " + link.getFileName() +
@@ -71,7 +76,7 @@ public class FileDownloader {
                 }
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -82,7 +87,7 @@ public class FileDownloader {
      * @param file the tsv file containing the dump link info
      * @throws InterruptedException
      */
-    public void downloadFrom(File file) throws InterruptedException {
+    public void downloadFrom(File file) throws InterruptedException, WikapidiaException, IOException {
         if (tmp.isDirectory()) {
             if (tmp.listFiles().length != 0) {
                 for (File f : tmp.listFiles()) {
@@ -97,15 +102,21 @@ public class FileDownloader {
         LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
         int success = 0;
         int fail = 0;
-        for (Multimap<LinkMatcher, DumpLinkInfo> map : linkCluster) {
+        for (Language language : linkCluster) {
+            Multimap<LinkMatcher, DumpLinkInfo> map = linkCluster.get(language);
             for (LinkMatcher linkMatcher : map.keySet()) {
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
                     if (new File(output, link.getLocalPath()+"/"+link.getFileName()).exists()) {
                         LOG.log(Level.INFO, "File already downloaded: " + link.getFileName());
                     } else {
-                        if (getDump(link)) {
-                            success++;
-                            LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
+                        String md5 = getDump(link);
+                        if (md5 != null) {
+                            if (link.getMd5() == null || link.getMd5().equalsIgnoreCase(md5)) {
+                                success++;
+                                LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
+                            } else {
+                                throw new WikapidiaException("Download malfunction! MD5 strings do not match!");
+                            }
                         } else {
                             fail++;
                         }
@@ -124,7 +135,7 @@ public class FileDownloader {
         tmp.delete();
     }
 
-    public static void main(String[] args) throws InterruptedException, ConfigurationException, IOException {
+    public static void main(String[] args) throws ConfigurationException, WikapidiaException, IOException, InterruptedException {
 
         Options options = new Options();
         options.addOption(

@@ -5,13 +5,13 @@
 
 
 source ../wikapidia-utils/src/main/scripts/utils.sh &&
-die "SCRIPT NOT YET IMPLEMENTED" &&
+mvn clean &&
 compile  &&
-execClass org.wikapidia.dao.load.DumpLoader $@ &&
-execClass org.wikapidia.dao.load.RedirectLoader $@ &&
-execClass org.wikapidia.dao.load.WikiTextDumpLoader $@ &&
-execClass org.wikapidia.dao.load.ConceptLoader $@ &&
-execClass org.wikapidia.dao.load.UniversalLinkLoader $@ ||
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.DumpLoader -ti $@) &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.RedirectLoader -ti $@) &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.WikiTextLoader -ti $@) &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.ConceptLoader -ti $@) &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.UniversalLinkLoader -ti $@) ||
 die "$0 failed"
 
 # Order of existing classes:
