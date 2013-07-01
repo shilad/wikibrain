@@ -30,8 +30,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
 
 
-    public BaseLocalSRMetric(){
-
+    public BaseLocalSRMetric(Disambiguator disambiguator){
+        this.disambiguator=disambiguator;
     }
 
 
@@ -123,7 +123,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
 
     @Override
-    public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations);
+    public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
 
 
 
@@ -169,7 +169,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     public abstract void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds);
 
     @Override
-    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language){
+    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws DaoException {
         double[][] cos = new double[wpRowIds.length][wpColIds.length];
         for (int i=0; i<wpRowIds.length; i++){
             for (int j=0; j<wpColIds.length; j++){
@@ -204,7 +204,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public double[][] cosimilarity(int[] ids, Language language){
+    public double[][] cosimilarity(int[] ids, Language language) throws DaoException {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
             cos[i][i]=1;

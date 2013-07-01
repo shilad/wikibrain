@@ -10,6 +10,7 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.mapper.ConceptMapper;
+import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -21,6 +22,12 @@ import java.util.List;
 public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
     LocalPageDao pageHelper;
+
+    public MilneWittenInLinkSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
+        super(disambiguator);
+        this.linkHelper = linkHelper;
+        this.pageHelper = pageHelper;
+    }
 
     public String getName() {
         return "Milne Witten";
@@ -115,10 +122,7 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public MilneWittenInLinkSimilarity(ConceptMapper mapper, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
-        this.linkHelper = linkHelper;
-        this.pageHelper = pageHelper;
-    }
+
 
     private TIntSet getInLinks(LocalId wpId) throws DaoException {
         SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), false);
