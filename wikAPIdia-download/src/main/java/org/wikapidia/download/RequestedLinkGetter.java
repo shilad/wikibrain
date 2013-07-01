@@ -120,13 +120,13 @@ public class RequestedLinkGetter {
         List<String> availableDates = availableDumpDatesSorted(getAllDates());
         Map<String, Multimap<LinkMatcher, DumpLinkInfo>> map = new HashMap<String, Multimap<LinkMatcher, DumpLinkInfo>>();
         List<LinkMatcher> unfoundMatchers = new ArrayList<LinkMatcher>(matchers);
-        for (int i = availableDates.size() -1; i > -1; i--) {
+        for (int i = availableDates.size() - 1; i > -1; i--) {
             DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(lang, unfoundMatchers, availableDates.get(i));
             Multimap<LinkMatcher, DumpLinkInfo> batchDumps = dumpLinkGetter.getDumpFiles(dumpLinkGetter.getFileLinks());
             map.put(availableDates.get(i), batchDumps);
             for (int j = 0; j < unfoundMatchers.size(); j++) {
                 LinkMatcher linkMatcher = unfoundMatchers.get(j);
-                if (batchDumps.keySet().contains(linkMatcher.getName())) {
+                if (batchDumps.keySet().contains(linkMatcher)) {
                     unfoundMatchers.remove(linkMatcher);
                     j--;
                 }
