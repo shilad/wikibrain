@@ -152,7 +152,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     public abstract void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds);
 
     @Override
-    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws IOException{
+    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) {
         double[][] cos = new double[wpRowIds.length][wpColIds.length];
         for (int i=0; i<wpRowIds.length; i++){
             for (int j=0; j<wpColIds.length; j++){
@@ -171,7 +171,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public double[][] cosimilarity(String[] rowPhrases, String[] colPhrases, Language language) throws IOException{
+    public double[][] cosimilarity(String[] rowPhrases, String[] colPhrases, Language language) {
         double[][] cos = new double[rowPhrases.length][colPhrases.length];
         for (int i=0; i<rowPhrases.length; i++){
             for (int j=0; j<colPhrases.length; j++){
@@ -187,7 +187,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public double[][] cosimilarity(int[] ids, Language language) throws IOException{
+    public double[][] cosimilarity(int[] ids, Language language) {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
             cos[i][i]=1;
@@ -209,7 +209,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public abstract double[][] cosimilarity(String[] phrases, Language language) throws IOException;
+    public abstract double[][] cosimilarity(String[] phrases, Language language);
 
 
 }
