@@ -1,5 +1,6 @@
 package org.wikapidia.sr;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.core.dao.*;
@@ -14,6 +15,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
@@ -72,9 +74,24 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
             return new SRResult(0.0);
         }
 
-        return new SRResult(1.0 - (
+        SRResult result = new SRResult(1.0 - (
             (Math.log(Math.max(A.size(), B.size())) - Math.log(I.size()))
             /   (Math.log(numArticles) - Math.log(Math.min(A.size(), B.size())))));
+
+        if (explanations) {
+            for (int id : I.toArray()) {
+                String format = "? links to both ? and ?";
+                LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(), id);
+                List<LocalPage> formatPages =new ArrayList<LocalPage>();
+                formatPages.add(intersectionPage);
+                formatPages.add(page1);
+                formatPages.add(page2);
+                Explanation explanation = new Explanation(format, formatPages);
+                result.addExplanation(explanation);
+            }
+        }
+
+        return result;
     }
 
     @Override
