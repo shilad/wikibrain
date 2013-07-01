@@ -15,9 +15,6 @@ import java.util.List;
  * @author Shilad Sen
  */
 public class ESAMetric extends BaseLocalSRMetric {
-    public ESAMetric(Disambiguator disambiguator) {
-        super(disambiguator);
-    }
 
     @Override
     public String getName() {
