@@ -160,7 +160,8 @@ public class DumpLinkInfo {
                 String date         = parsedInfo[1];
                 String linkMatcher  = parsedInfo[2];
                 String url          = parsedInfo[3];
-                String md5          = parsedInfo[4];
+                String md5 = null;
+                if (parsedInfo.length == 5) md5 = parsedInfo[4];
                 try {
                     if (!counters.containsKey(linkMatcher)) {
                         counters.put(linkMatcher, new AtomicInteger(0));

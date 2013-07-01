@@ -111,7 +111,7 @@ public class FileDownloader {
                     } else {
                         String md5 = getDump(link);
                         if (md5 != null) {
-                            if (link.getMd5().equalsIgnoreCase(md5)) {
+                            if (link.getMd5() == null || link.getMd5().equalsIgnoreCase(md5)) {
                                 success++;
                                 LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
                             } else {
