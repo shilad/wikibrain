@@ -16,9 +16,11 @@ import org.wikapidia.core.lang.Language;
 import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
 import org.wikapidia.core.lang.LanguageSet;
+import sun.security.provider.MD5;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,7 +62,7 @@ import java.util.regex.Pattern;
      */
     protected List<Date> getAllDates() throws IOException, ParseException {
         List<Date> availableDate = new ArrayList<Date>();
-        URL langWikiPageUrl = new URL(DumpLinkGetter.BASEURL_STRING+ "/" + lang.getLangCode().replace("-", "_") + "wiki/");
+        URL langWikiPageUrl = new URL(DumpLinkGetter.BASEURL_STRING + "/" + lang.getLangCode().replace("-", "_") + "wiki/");
         Document doc = Jsoup.parse(IOUtils.toString(langWikiPageUrl.openStream()));
         Elements availableDates = doc.select("tbody").select("td.n").select("a[href]");
         for (Element element : availableDates) {
@@ -107,13 +109,20 @@ import java.util.regex.Pattern;
         return dateFormatter.parse(dateString);
     }
 
+    /**
+     * Get dump file links of the most recent available before the requestDate.
+     * @return
+     * @throws ParseException
+     * @throws IOException
+     * @throws WikapidiaException
+     */
     protected HashMap<String, HashMap<String, List<URL>>> getDumps() throws ParseException, IOException, WikapidiaException {
         List<String> availableDates = availableDumpDatesSorted(getAllDates());
         HashMap<String, HashMap<String, List<URL>>> map = new HashMap<String, HashMap<String, List<URL>>>();
         List<LinkMatcher> unfoundMatchers = new ArrayList<LinkMatcher>(matchers);
         for (int i = availableDates.size() -1; i > -1; i--) {
             DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(lang, unfoundMatchers, availableDates.get(i));
-            HashMap<String, List<URL>> batchDumps = dumpLinkGetter.getDumpFiles();
+            HashMap<String, List<URL>> batchDumps = dumpLinkGetter.getDumpFiles(dumpLinkGetter.getFileLinks());
             map.put(availableDates.get(i), batchDumps);
             for (int j = 0; j < unfoundMatchers.size(); j++) {
                 LinkMatcher linkMatcher = unfoundMatchers.get(j);
@@ -215,8 +224,11 @@ import java.util.regex.Pattern;
             try {
                 HashMap<String, HashMap<String, List<URL>>> urls = requestedLinkGetter.getDumps();
                 for (String dumpDate : urls.keySet()) {
+                    DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(language, linkMatchers, dumpDate);
+                    HashMap<String, String> md5s = dumpLinkGetter.getMd5Sums(dumpLinkGetter.getFileLinks());
                     for (String linkName : urls.get(dumpDate).keySet()) {
                         for (URL url : urls.get(dumpDate).get(linkName)) {
+                            String fileName = url.toString();
                             result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + url);
                         }
                     }
