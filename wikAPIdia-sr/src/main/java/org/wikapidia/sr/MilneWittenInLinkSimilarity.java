@@ -51,7 +51,9 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
     }
 
     @Override
-    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) {
+    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
+        TIntSet A = getInLinks(new LocalId(page1.getLanguage(), page1.getLocalId()));
+        TIntSet
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

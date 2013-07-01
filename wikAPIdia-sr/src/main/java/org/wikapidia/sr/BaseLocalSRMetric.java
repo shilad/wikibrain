@@ -1,6 +1,7 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
@@ -120,7 +121,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
 
     @Override
-    public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations);
+    public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
 
 
 
