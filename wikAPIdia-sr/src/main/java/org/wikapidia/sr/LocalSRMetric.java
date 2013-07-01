@@ -36,7 +36,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations);
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException;
 
     /**
      * Find the most similar local pages to a local page within the same language
@@ -64,7 +64,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException;
 
     /**
      * Find the most similar local pages to a phrase
@@ -74,7 +74,7 @@ public interface LocalSRMetric {
      * @param validIds The local page ids to be considered.  Null means all ids in the language
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
     /**
      * Writes the metric to a directory.
