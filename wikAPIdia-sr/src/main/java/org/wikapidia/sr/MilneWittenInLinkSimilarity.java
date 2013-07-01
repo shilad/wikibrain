@@ -49,6 +49,7 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    //TODO: Add a normalizer
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
         if (page1.getLanguage()!=page2.getLanguage()){
@@ -118,27 +119,6 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
         this.linkHelper = linkHelper;
         this.pageHelper = pageHelper;
     }
-
-    //TODO: Unimplemented for now
-//    @Override
-//    public double similarity(int wpId1, int wpId2) throws IOException {
-//        TIntSet A = getInLinks(wpId1);
-//        TIntSet B = getInLinks(wpId2);
-//        if (A == null || B == null) {
-//            return Double.NaN;
-//        }
-//        TIntSet I = new TIntHashSet(A); I.retainAll(B); // intersection
-////        int numArticles = pageHelper.;
-//
-////        System.out.println("sizes are A=" + A.size() + ", B=" + B.size() + " I=" + I.size());
-//        if (I.size() == 0) {
-//            return 0;
-//        }
-//
-//        return 1.0 - (
-//            (Math.log(Math.max(A.size(), B.size())) - Math.log(I.size()))
-//        /   (Math.log(numArticles) - Math.log(Math.min(A.size(), B.size()))));
-//    }
 
     private TIntSet getInLinks(LocalId wpId) throws DaoException {
         SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), false);
