@@ -30,10 +30,10 @@ public class DumpLinkInfo {
 
     private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
 
-    private final Language language;
-    private final String date;
-    private final LinkMatcher linkMatcher;
-    private final URL url;
+    private Language language;
+    private String date;
+    private LinkMatcher linkMatcher;
+    private URL url;
     private String md5;
     private int counter;
 
@@ -57,20 +57,32 @@ public class DumpLinkInfo {
         return language;
     }
 
+    public void setLanguage(Language language) {
+        this.language = language;
+    }
+
     public String getDate() {
         return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public LinkMatcher getLinkMatcher() {
         return linkMatcher;
     }
 
+    public void setLinkMatcher(LinkMatcher linkMatcher) {
+        this.linkMatcher = linkMatcher;
+    }
+
     public URL getUrl() {
         return url;
     }
 
-    public int getCounter() {
-        return counter;
+    public void setUrl(URL url) {
+        this.url = url;
     }
 
     public String getMd5() {
@@ -81,12 +93,16 @@ public class DumpLinkInfo {
         this.md5 = md5;
     }
 
+    public int getCounter() {
+        return counter;
+    }
+
     public void setCounter(int counter) {
         this.counter = counter;
     }
 
     /**
-     * Returns a string for the local path to save this dump file
+     * Returns a string for the local path in which to save this dump file
      * @return
      */
     public String getLocalPath() {
@@ -94,7 +110,7 @@ public class DumpLinkInfo {
     }
 
     /**
-     * Returns a string for the file name to save this dump file
+     * Returns a string for the file name with which to save this dump file
      * @return
      */
     public String getFileName() {
@@ -106,7 +122,7 @@ public class DumpLinkInfo {
     }
 
     /**
-     * Returns a string for the extension to save this dump file
+     * Returns a string for the extension with which to save this dump file
      * @return
      */
     public String getExtension() {
@@ -125,8 +141,8 @@ public class DumpLinkInfo {
     }
 
     /**
-     * Parses a file of info pertaining to dump links into a list of DumpLinkInfo.
-     * Info must be listed in order: lang code, date, LinkMatcher, URL
+     * Parses a file of info pertaining to dump links into a cluster of DumpLinkInfo.
+     * Info must be listed in order: lang code, date, LinkMatcher, URL, MD5 checksum
      * with each DumpLink reference on a new line.
      * @param file
      * @return
@@ -164,7 +180,7 @@ public class DumpLinkInfo {
             }
             return dumpLinks;
         } catch (IOException e) {
-            throw new RuntimeException(e);  // What else can we do?
+            throw new RuntimeException(e);  // Something went horribly wrong!
         } finally {
             if (stream != null) IOUtils.closeQuietly(stream);
         }
