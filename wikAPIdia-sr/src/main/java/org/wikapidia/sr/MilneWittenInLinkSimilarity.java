@@ -3,14 +3,21 @@ package org.wikapidia.sr;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.core.dao.LocalLinkDao;
+import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LocalString;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.mapper.ConceptMapper;
+import org.wikapidia.sr.utils.KnownSim;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
+    LocalPageDao pageHelper;
 
     public String getName() {
         return "Milne Witten";
@@ -24,9 +31,54 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
         throw new NotImplementedException();
     }
 
-    public MilneWittenInLinkSimilarity(ConceptMapper mapper, IndexHelper linkHelper, IndexHelper mainHelper) {
-        super(mapper, mainHelper);
+    @Override
+    public void trainSimilarity(List<KnownSim> labeled) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public double[][] cosimilarity(String[] phrases, Language language) {
+        return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public MilneWittenInLinkSimilarity(ConceptMapper mapper, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
         this.linkHelper = linkHelper;
+        this.pageHelper = pageHelper;
     }
 
     //TODO: normalize!
