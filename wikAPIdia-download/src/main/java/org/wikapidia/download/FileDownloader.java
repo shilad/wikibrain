@@ -106,6 +106,7 @@ public class FileDownloader {
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
                     File download = new File(output, link.getLocalPath()+"/"+link.getFileName());
                     if (download.exists()) {
+                        success++;
                         LOG.log(Level.INFO, "File already downloaded: " + link.getFileName());
                     } else {
                         download = getDump(link);
