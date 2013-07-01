@@ -4,6 +4,7 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.File;
@@ -14,6 +15,10 @@ import java.util.List;
  * @author Shilad Sen
  */
 public class ESAMetric extends BaseLocalSRMetric {
+    public ESAMetric(Disambiguator disambiguator) {
+        super(disambiguator);
+    }
+
     @Override
     public String getName() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
