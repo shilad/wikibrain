@@ -2,6 +2,7 @@ package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
@@ -23,16 +24,12 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     private static Logger LOG = Logger.getLogger(BaseLocalSRMetric.class.getName());
     protected int numThreads = Runtime.getRuntime().availableProcessors();
     protected Disambiguator disambiguator;
+    protected LocalPageDao pageHelper;
 
     private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer similarityNormalizer = new IdentityNormalizer();
 
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
-
-
-    public BaseLocalSRMetric(Disambiguator disambiguator){
-        this.disambiguator=disambiguator;
-    }
 
 
 
@@ -135,7 +132,9 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         context.clear();
         context.add(new LocalString(language,phrase1));
         LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
-        return similarity(similar1.asLocalPage(),similar2.asLocalPage(),explanations);
+        return similarity(pageHelper.getById(language,similar1.getId()),
+                pageHelper.getById(language,similar2.getId()),
+                explanations);
     }
 
     @Override

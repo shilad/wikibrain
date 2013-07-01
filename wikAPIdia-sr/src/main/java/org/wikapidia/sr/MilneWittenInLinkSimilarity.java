@@ -21,12 +21,11 @@ import java.util.List;
 
 public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
-    LocalPageDao pageHelper;
 
     public MilneWittenInLinkSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
-        super(disambiguator);
+        this.disambiguator = disambiguator;
+        this.pageHelper=pageHelper;
         this.linkHelper = linkHelper;
-        this.pageHelper = pageHelper;
     }
 
     public String getName() {
@@ -100,11 +99,6 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
         }
 
         return result;
-    }
-
-    @Override
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
