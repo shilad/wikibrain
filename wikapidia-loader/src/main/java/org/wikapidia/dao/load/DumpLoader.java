@@ -22,6 +22,7 @@ import org.wikapidia.utils.Procedure;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -110,6 +111,13 @@ public class DumpLoader {
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
 
+        List<String> langCodes;
+        if (cmd.hasOption("l")) {
+            langCodes = Arrays.asList(cmd.getOptionValues("l"));
+        } else {
+            langCodes = conf.getConf().get().getStringList("languages");
+        }
+
         File downloadPath = new File(conf.getConf().get().getString("download.path"));
         List<String> dumps = new ArrayList<String>();
         if (!cmd.getArgList().isEmpty()) {                                          // There are files specified
@@ -119,11 +127,11 @@ public class DumpLoader {
                 System.err.println( "There is no download path. Please specify one or configure a default.");
                 new HelpFormatter().printHelp("DumpLoader", options);
                 return;
-            } else {                                                                // Default path is functional
-                for (File langDir : downloadPath.listFiles()) {                     // Layered for-loops sift through
-                    if (langDir.isDirectory()) {                                    // the directory structure of the
-                        for (File dateDir : langDir.listFiles()) {                  // download process:
-                            if (dateDir.isDirectory()) {                            // ${PARENT}/langcode/date/dumpfile.xml.bz2
+            } else {                                                                        // Default path is functional
+                for (File langDir : downloadPath.listFiles()) {                             // Layered for-loops sift through
+                    if (langDir.isDirectory() && langCodes.contains(langDir.getName())) {   // the directory structure of the
+                        for (File dateDir : langDir.listFiles()) {                          // download process:
+                            if (dateDir.isDirectory()) {                                    // ${PARENT}/langcode/date/dumpfile.xml.bz2
                                 for (File dump : dateDir.listFiles()) {
                                     dumps.add(dump.getPath());
                                 }
