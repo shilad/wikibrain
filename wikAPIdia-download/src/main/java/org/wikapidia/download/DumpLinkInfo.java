@@ -1,12 +1,10 @@
 package org.wikapidia.download;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.lang.Language;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -124,7 +122,7 @@ public class DumpLinkInfo {
         InputStream stream = null;
         Map<String, AtomicInteger> counters = new HashMap<String, AtomicInteger>();
         try {
-            stream = new FileInputStream(file);
+            stream = FileUtils.openInputStream(file);
             List<String> lines = IOUtils.readLines(stream, "UTF-8");
             DumpLinkCluster dumpLinks = new DumpLinkCluster();
             for (String line : lines) {
