@@ -79,14 +79,6 @@ public class FileDownloader {
         return null;
     }
 
-    public Md5Info processMd5File(DumpLinkInfo md5Link) {
-        File download = new File(tmp, md5Link.getFileName());
-        File target = new File(output, md5Link.getLocalPath());
-        if (!target.exists()) target.mkdirs();
-        download.renameTo(new File(target, download.getName()));
-        return new Md5Info(download);
-    }
-
     /**
      * Processes a tsv file containing dump link info and initiates the download process
      * on that info. Files are downloaded one language at a time, then one type at a time.
@@ -112,14 +104,6 @@ public class FileDownloader {
         int fail = 0;
         for (Language language : linkCluster) {
             Multimap<LinkMatcher, DumpLinkInfo> map = linkCluster.get(language);
-            DumpLinkInfo md5Link = linkCluster.getMd5Link(language);
-            if (getDump(md5Link) != null) {
-                success++;
-                LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
-            } else {
-                fail++;
-            }
-            Md5Info md5Info = processMd5File(md5Link);
             for (LinkMatcher linkMatcher : map.keySet()) {
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
                     if (new File(output, link.getLocalPath()+"/"+link.getFileName()).exists()) {
@@ -127,7 +111,7 @@ public class FileDownloader {
                     } else {
                         String md5 = getDump(link);
                         if (md5 != null) {
-                            if (md5Info.getMd5String(link).equalsIgnoreCase(md5)) {
+                            if (link.getMd5().equalsIgnoreCase(md5)) {
                                 success++;
                                 LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
                             } else {

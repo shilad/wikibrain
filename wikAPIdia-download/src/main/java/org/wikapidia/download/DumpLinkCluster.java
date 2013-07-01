@@ -21,29 +21,20 @@ import java.util.logging.Logger;
 public class DumpLinkCluster implements Iterable<Language> {
 
     private final Map<Language, Multimap<LinkMatcher, DumpLinkInfo>> links = new HashMap<Language, Multimap<LinkMatcher, DumpLinkInfo>>();
-    private final Map<Language, DumpLinkInfo> md5Links = new HashMap<Language, DumpLinkInfo>();
 
     public DumpLinkCluster() {}
 
     public void add(DumpLinkInfo link) {
         Language language = link.getLanguage();
-        if (link.getLinkMatcher() == LinkMatcher.MD5) {
-            md5Links.put(language, link);
-        } else {
-            if (!links.containsKey(language)) {
-                Multimap<LinkMatcher, DumpLinkInfo> temp = HashMultimap.create();
-                links.put(language, temp);
-            }
-            links.get(language).put(link.getLinkMatcher(), link);
+        if (!links.containsKey(language)) {
+            Multimap<LinkMatcher, DumpLinkInfo> temp = HashMultimap.create();
+            links.put(language, temp);
         }
+        links.get(language).put(link.getLinkMatcher(), link);
     }
 
     public Multimap<LinkMatcher, DumpLinkInfo> get(Language language) {
         return links.get(language);
-    }
-
-    public DumpLinkInfo getMd5Link(Language language) {
-        return md5Links.get(language);
     }
 
     public int size() {
