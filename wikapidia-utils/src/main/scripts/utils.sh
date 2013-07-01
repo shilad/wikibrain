@@ -46,7 +46,7 @@ function compileJooq() {
     cat ${schema_dir}/*-schema.sql > ${schema_dir}/full_schema.sql
     cat ${schema_dir}/*-indexes.sql >> ${schema_dir}/full_schema.sql
     oldhash=$(cat ${schema_dir}/full_schema.hash | tr -d ' \n' )
-    newhash=$(md5 -q ${schema_dir}/full_schema.sql)
+    newhash=$(checksum ${schema_dir}/full_schema.sql)
 
     if [ "$oldhash" == "$newhash" ]; then
         echo "jooq schema is already up to date." >&2
