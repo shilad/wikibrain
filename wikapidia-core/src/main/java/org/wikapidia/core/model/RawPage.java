@@ -1,5 +1,6 @@
 package org.wikapidia.core.model;
 
+import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParserFactory;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 
@@ -94,6 +95,14 @@ public class RawPage {
 
     public boolean isDisambig() {
         return isDisambig;
+    }
+
+    /**
+     * Returns a plain text output of the body of this RawPage
+     * @return
+     */
+    public String getPlainText() {
+        return new MediaWikiParserFactory().createParser().parse(body).getText();
     }
 
     public String toString(){
