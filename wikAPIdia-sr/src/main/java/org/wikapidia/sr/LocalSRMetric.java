@@ -26,7 +26,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations);
+    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
 
     /**
      * Determine the similarity between two strings in a given language by mapping through local pages
