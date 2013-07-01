@@ -1,6 +1,7 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -33,6 +34,7 @@ import java.util.logging.Logger;
  */
 public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
+    private static final String[] DUMP_SUFFIXES = { "xml", "xml.bz2", "xml.gz", "xml.7z" };
 
     private final AtomicInteger counter = new AtomicInteger();
     private final LocalPageDao localPageDao;
@@ -130,14 +132,8 @@ public class DumpLoader {
             } else {                                                                        // Default path is functional
                 for (File langDir : downloadPath.listFiles()) {                             // Layered for-loops sift through
                     if (langDir.isDirectory() && langCodes.contains(langDir.getName())) {   // the directory structure of the
-                        for (File dateDir : langDir.listFiles()) {                          // download process:
-                            if (dateDir.isDirectory()) {                                    // ${PARENT}/langcode/date/dumpfile.xml.bz2
-                                for (File dump : dateDir.listFiles()) {
-                                    if (dump.getName().indexOf("wiki") > 0) {               // Only selects files that are actually dumps
-                                        dumps.add(dump.getPath());
-                                    }
-                                }
-                            }
+                        for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {  // download process:
+                            dumps.add(f.getPath());                                         // ${PARENT}/langcode/date/dumpfile.xml.bz2
                         }
                     }
                 }
