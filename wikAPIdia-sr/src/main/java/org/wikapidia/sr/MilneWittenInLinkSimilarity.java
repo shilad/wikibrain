@@ -2,19 +2,27 @@ package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.mapper.ConceptMapper;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.File;
 import java.io.IOException;
 
 public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
-    IndexHelper linkHelper;
+    LocalLinkDao linkHelper;
 
     public String getName() {
         return "Milne Witten";
     }
 
+    public void read(File directory) throws IOException {
+        throw new NotImplementedException();
+    }
 
+    public void write(File directory) throws IOException {
+        throw new NotImplementedException();
+    }
 
     public MilneWittenInLinkSimilarity(ConceptMapper mapper, IndexHelper linkHelper, IndexHelper mainHelper) {
         super(mapper, mainHelper);
