@@ -1,5 +1,6 @@
 package org.wikapidia.download;
 
+import com.google.common.collect.Multimap;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -38,15 +39,14 @@ import java.util.regex.Pattern;
  * are pulled.
  *
  */
-    public class RequestedLinkGetter {
+public class RequestedLinkGetter {
 
+    private static final Logger LOG = Logger.getLogger(RequestedLinkGetter.class.getName());
     private static final String DATE_FORMAT = "yyyyMMdd";
 
-    private Language lang;
-    private List<LinkMatcher> matchers;
-    private Date requestDate;    // This is the date requested by the user.
-
-    private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
+    private final Language lang;
+    private final List<LinkMatcher> matchers;
+    private final Date requestDate;    // This is the date requested by the user.
 
     public RequestedLinkGetter(Language lang, List<LinkMatcher> matchers, Date requestDate) {
         this.lang = lang;
@@ -116,13 +116,13 @@ import java.util.regex.Pattern;
      * @throws IOException
      * @throws WikapidiaException
      */
-    protected HashMap<String, HashMap<String, List<DumpLinkInfo>>> getDumps() throws ParseException, IOException, WikapidiaException {
+    protected Map<String, Multimap<LinkMatcher, DumpLinkInfo>> getDumps() throws ParseException, IOException, WikapidiaException {
         List<String> availableDates = availableDumpDatesSorted(getAllDates());
-        HashMap<String, HashMap<String, List<DumpLinkInfo>>> map = new HashMap<String, HashMap<String, List<DumpLinkInfo>>>();
+        Map<String, Multimap<LinkMatcher, DumpLinkInfo>> map = new HashMap<String, Multimap<LinkMatcher, DumpLinkInfo>>();
         List<LinkMatcher> unfoundMatchers = new ArrayList<LinkMatcher>(matchers);
         for (int i = availableDates.size() -1; i > -1; i--) {
             DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(lang, unfoundMatchers, availableDates.get(i));
-            HashMap<String, List<DumpLinkInfo>> batchDumps = dumpLinkGetter.getDumpFiles(dumpLinkGetter.getFileLinks());
+            Multimap<LinkMatcher, DumpLinkInfo> batchDumps = dumpLinkGetter.getDumpFiles(dumpLinkGetter.getFileLinks());
             map.put(availableDates.get(i), batchDumps);
             for (int j = 0; j < unfoundMatchers.size(); j++) {
                 LinkMatcher linkMatcher = unfoundMatchers.get(j);
@@ -222,14 +222,15 @@ import java.util.regex.Pattern;
         for (Language language : languages) {
             RequestedLinkGetter requestedLinkGetter = new RequestedLinkGetter(language, linkMatchers, getDumpByDate);
             try {
-                HashMap<String, HashMap<String, List<DumpLinkInfo>>> dumpLinks = requestedLinkGetter.getDumps();
+                Map<String, Multimap<LinkMatcher, DumpLinkInfo>> dumpLinks = requestedLinkGetter.getDumps();
                 for (String dumpDate : dumpLinks.keySet()) {
-                    DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(language, linkMatchers, dumpDate);
-                    HashMap<String, String> md5s = dumpLinkGetter.getMd5Sums(dumpLinkGetter.getFileLinks());
-                    for (String linkName : dumpLinks.get(dumpDate).keySet()) {
-                        for (DumpLinkInfo linkInfo : dumpLinks.get(dumpDate).get(linkName)) {
-                            String fileName = linkInfo.toString();
-                            result.add(language.getLangCode() + "\t" + dumpDate + "\t" + linkName + "\t" + linkInfo.getUrl() + "\t" + linkInfo.getMd5());
+                    for (LinkMatcher linkMatcher : dumpLinks.get(dumpDate).keySet()) {
+                        for (DumpLinkInfo linkInfo : dumpLinks.get(dumpDate).get(linkMatcher)) {
+                            result.add(linkInfo.getLanguage().getLangCode() + "\t" +
+                                    linkInfo.getDate() + "\t" +
+                                    linkInfo.getLinkMatcher().getName() + "\t" +
+                                    linkInfo.getUrl() + "\t" +
+                                    linkInfo.getMd5());
                         }
                     }
                 }

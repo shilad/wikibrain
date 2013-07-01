@@ -2,6 +2,8 @@ package org.wikapidia.download;
 
 import java.io.IOException;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -65,32 +67,31 @@ public class DumpLinkGetter {
      * Return all links of a particular language the fits one of the patterns
      * @return  hashmap with dump urls and names of dump type
      */
-    public HashMap<String, List<DumpLinkInfo>> getDumpFiles(List<String> links) throws IOException {
-        HashMap<String, List<DumpLinkInfo>> urlLinks = new HashMap<String, List<DumpLinkInfo>>();
-        HashMap<String, String> md5s = getMd5Sums(links);
+    public Multimap<LinkMatcher, DumpLinkInfo> getDumpFiles(List<String> links) throws IOException {
+        Multimap<LinkMatcher, DumpLinkInfo> dumpLinks = HashMultimap.create();
+        Map<String, String> md5s = getMd5Sums(links);
         for(LinkMatcher linkMatcher : matchers){
             List<String> results = linkMatcher.match(links);
             if (!results.isEmpty()) {
-                List<DumpLinkInfo> dumpLinks = new ArrayList<DumpLinkInfo>();
-                for (String url: results){
+                for (String url : results){
                     URL linkURL = new URL(BASEURL_STRING + url);
                     DumpLinkInfo linkInfo = new DumpLinkInfo(lang, dumpDate, linkMatcher, linkURL);
                     linkInfo.setMd5(md5s.get(linkInfo.getDownloadName()));
-                    dumpLinks.add(linkInfo);
+                    dumpLinks.put(linkMatcher, linkInfo);
                 }
-                urlLinks.put(linkMatcher.getName(), dumpLinks);
             }
         }
-        return urlLinks;
+        return dumpLinks;
     }
 
     /**
      * Get MD5 of the dump of the specified language and dumpDate.
+     * Maps download name to MD5 sum.
      * @param links
      * @return
      * @throws IOException
      */
-    protected HashMap<String, String> getMd5Sums(List<String> links) throws IOException {
+    protected Map<String, String> getMd5Sums(List<String> links) throws IOException {
         LinkMatcher md5Matcher = LinkMatcher.MD5;
         URL md5Url = new URL(BASEURL_STRING + md5Matcher.match(links).get(0));
         List<String> lines = IOUtils.readLines(md5Url.openStream(), "UTF-8");
