@@ -1,12 +1,10 @@
 package org.wikapidia.download;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.lang.Language;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -37,20 +35,23 @@ public class DumpLinkInfo {
     private final LinkMatcher linkMatcher;
     private final URL url;
     private final int counter;
+    private final String md5;
 
-    public DumpLinkInfo(Language language, String date, LinkMatcher linkMatcher, URL url, int counter) {
+    public DumpLinkInfo(Language language, String date, LinkMatcher linkMatcher, URL url, int counter, String md5) {
         this.language = language;
         this.date = date;
         this.linkMatcher = linkMatcher;
         this.url = url;
         this.counter = counter;
+        this.md5 = md5;
     }
 
-    public DumpLinkInfo(String langCode, String date, String linkMatcher, String url, int counter) throws MalformedURLException {
+    public DumpLinkInfo(String langCode, String date, String linkMatcher, String url, String md5, int counter) throws MalformedURLException {
         this.language = Language.getByLangCode(langCode);
         this.date = date;
         this.linkMatcher = LinkMatcher.getByName(linkMatcher);
         this.url = new URL(url);
+        this.md5 = md5;
         this.counter = counter;
     }
 
@@ -72,6 +73,10 @@ public class DumpLinkInfo {
 
     public int getCounter() {
         return counter;
+    }
+
+    public String getMd5() {
+        return md5;
     }
 
     /**
@@ -124,15 +129,16 @@ public class DumpLinkInfo {
         InputStream stream = null;
         Map<String, AtomicInteger> counters = new HashMap<String, AtomicInteger>();
         try {
-            stream = new FileInputStream(file);
+            stream = FileUtils.openInputStream(file);
             List<String> lines = IOUtils.readLines(stream, "UTF-8");
             DumpLinkCluster dumpLinks = new DumpLinkCluster();
             for (String line : lines) {
                 String[] parsedInfo = line.split("\t");
-                String langCode = parsedInfo[0];
-                String date = parsedInfo[1];
-                String linkMatcher = parsedInfo[2];
-                String url = parsedInfo[3];
+                String langCode     = parsedInfo[0];
+                String date         = parsedInfo[1];
+                String linkMatcher  = parsedInfo[2];
+                String url          = parsedInfo[3];
+                String md5          = parsedInfo[4];
                 try {
                     if (!counters.containsKey(linkMatcher)) {
                         counters.put(linkMatcher, new AtomicInteger(0));
@@ -142,6 +148,7 @@ public class DumpLinkInfo {
                             date,
                             linkMatcher,
                             url,
+                            md5,
                             counters.get(linkMatcher).getAndIncrement()
                     );
                     dumpLinks.add(temp);
