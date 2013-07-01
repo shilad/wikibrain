@@ -52,7 +52,7 @@ public class FileDownloader {
      * @return true if successful, else false
      * @throws InterruptedException
      */
-    public String getDump(DumpLinkInfo link) throws InterruptedException, IOException {
+    public File getDump(DumpLinkInfo link) throws InterruptedException, IOException {
         for (int i=0; i < MAX_ATTEMPT; i++) {
             try {
                 AtomicBoolean stop = new AtomicBoolean(false);
@@ -61,9 +61,8 @@ public class FileDownloader {
                 info.extract(stop, notify);
                 new WGet(info, download).download(stop, notify);
                 LOG.log(Level.INFO, "Download complete: " + download.getName());
-                String md5 = DigestUtils.md5Hex(FileUtils.openInputStream(download));
                 Thread.sleep(SLEEP_TIME);
-                return md5;
+                return download;
             } catch (DownloadIOCodeError e) {
                 if (i+1 < MAX_ATTEMPT) {
                     LOG.log(Level.INFO, "Failed to download " + link.getFileName() +
@@ -101,25 +100,24 @@ public class FileDownloader {
         int numTotalFiles = linkCluster.size();
         LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
         int success = 0;
-        int fail = 0;
         for (Language language : linkCluster) {
             Multimap<LinkMatcher, DumpLinkInfo> map = linkCluster.get(language);
             for (LinkMatcher linkMatcher : map.keySet()) {
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
-                    if (new File(output, link.getLocalPath()+"/"+link.getFileName()).exists()) {
+                    File download = new File(output, link.getLocalPath()+"/"+link.getFileName());
+                    if (download.exists()) {
                         LOG.log(Level.INFO, "File already downloaded: " + link.getFileName());
                     } else {
-                        String md5 = getDump(link);
-                        if (md5 != null) {
-                            if (link.getMd5() == null || link.getMd5().equalsIgnoreCase(md5)) {
-                                success++;
-                                LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
-                            } else {
-                                throw new WikapidiaException("Download malfunction! MD5 strings do not match!");
-                            }
-                        } else {
-                            fail++;
+                        download = getDump(link);
+                        if (download == null) {
+                            throw new WikapidiaException("Download malfunction! Download timed out!");
                         }
+                        success++;
+                        LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
+                    }
+                    String md5 = DigestUtils.md5Hex(FileUtils.openInputStream(download));
+                    if (!link.getMd5().equalsIgnoreCase(md5)) {
+                        throw new WikapidiaException("Download malfunction! MD5 strings do not match!");
                     }
                 }
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
@@ -130,8 +128,7 @@ public class FileDownloader {
                 }
             }
         }
-        LOG.log(Level.INFO, success + " files downloaded and " +
-                fail + " files failed out of " + numTotalFiles + " files.");
+        LOG.log(Level.INFO, success + " files downloaded out of " + numTotalFiles + " files.");
         tmp.delete();
     }
 

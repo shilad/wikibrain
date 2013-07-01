@@ -133,7 +133,9 @@ public class DumpLoader {
                         for (File dateDir : langDir.listFiles()) {                          // download process:
                             if (dateDir.isDirectory()) {                                    // ${PARENT}/langcode/date/dumpfile.xml.bz2
                                 for (File dump : dateDir.listFiles()) {
-                                    dumps.add(dump.getPath());
+                                    if (dump.getName().indexOf("wiki") > 0) {               // Only selects files that are actually dumps
+                                        dumps.add(dump.getPath());
+                                    }
                                 }
                             }
                         }
