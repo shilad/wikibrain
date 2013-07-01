@@ -2,10 +2,14 @@ package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
+import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.mapper.ConceptMapper;
 import org.wikapidia.sr.utils.KnownSim;
@@ -62,11 +66,6 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -81,47 +80,38 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
         this.pageHelper = pageHelper;
     }
 
-    //TODO: normalize!
-    @Override
-    public double similarity(int wpId1, int wpId2) throws IOException {
-        TIntSet A = getInLinks(wpId1);
-        TIntSet B = getInLinks(wpId2);
-        if (A == null || B == null) {
-            return Double.NaN;
-        }
-        TIntSet I = new TIntHashSet(A); I.retainAll(B); // intersection
-        int numArticles = linkHelper.getReader().numDocs();
+    //TODO: Unimplemented for now
+//    @Override
+//    public double similarity(int wpId1, int wpId2) throws IOException {
+//        TIntSet A = getInLinks(wpId1);
+//        TIntSet B = getInLinks(wpId2);
+//        if (A == null || B == null) {
+//            return Double.NaN;
+//        }
+//        TIntSet I = new TIntHashSet(A); I.retainAll(B); // intersection
+////        int numArticles = pageHelper.;
+//
+////        System.out.println("sizes are A=" + A.size() + ", B=" + B.size() + " I=" + I.size());
+//        if (I.size() == 0) {
+//            return 0;
+//        }
+//
+//        return 1.0 - (
+//            (Math.log(Math.max(A.size(), B.size())) - Math.log(I.size()))
+//        /   (Math.log(numArticles) - Math.log(Math.min(A.size(), B.size()))));
+//    }
 
-//        System.out.println("sizes are A=" + A.size() + ", B=" + B.size() + " I=" + I.size());
-        if (I.size() == 0) {
-            return 0;
+    private TIntSet getInLinks(LocalId wpId) throws DaoException {
+        SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), false);
+        TIntSet linkIds = new TIntHashSet();
+        for (LocalLink link : links){
+            linkIds.add(link.getSourceId());
         }
-
-        return 1.0 - (
-            (Math.log(Math.max(A.size(), B.size())) - Math.log(I.size()))
-        /   (Math.log(numArticles) - Math.log(Math.min(A.size(), B.size()))));
-    }
-
-    private TIntSet getInLinks(int wpId) throws IOException {
-        Document d = linkHelper.wpIdToLuceneDoc(wpId);
-        if (d == null) {
-//            Document d2 = getHelper().wpIdToLuceneDoc(wpId);
-//            if (d2 != null) {
-//                System.err.println("missing article " + wpId + " with title + " + d2.get("title") + " and type " + d2.get("type"));
-//            }
-            return null;
-        }
-        TIntSet links = new TIntHashSet();
-        for (IndexableField f : d.getFields(Page.FIELD_INLINKS)) {
-            if (linkHelper.getDocFreq(Page.FIELD_INLINKS, f.stringValue()) >= 3) {
-                links.add(Integer.valueOf(f.stringValue()));
-            }
-        }
-        return links;
+        return linkIds;
     }
 
     @Override
-    public DocScoreList mostSimilar(int wpId1, int maxResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) {
         throw new NotImplementedException();
     }
 }
