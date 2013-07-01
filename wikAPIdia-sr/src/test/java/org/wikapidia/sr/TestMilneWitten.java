@@ -2,6 +2,7 @@ package org.wikapidia.sr;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
+import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
@@ -10,6 +11,8 @@ import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
+import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.disambig.TopResultDisambiguator;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +27,25 @@ import java.sql.SQLException;
  */
 public class TestMilneWitten {
 
+    private static void printResult(SRResult result){
+        if (result == null){
+            System.out.println("Result was null");
+        }
+        else {
+            System.out.println("Similarity value: "+result.getValue());
+            int explanationsSeen = 0;
+            for (Explanation explanation : result.getExplanations()){
+                System.out.println(explanation.getPlaintext());
+                if (++explanationsSeen>5){
+                    break;
+                }
+            }
+        }
+
+    }
+
     @Test
-    public void testArticle() throws ClassNotFoundException, IOException, SQLException, DaoException {
+    public void testArticle() throws ClassNotFoundException, IOException, SQLException, DaoException, ConfigurationException {
         Class.forName("org.h2.Driver");
         File tmpDir = File.createTempFile("wikapidia-h2", null);
         tmpDir.delete();
@@ -97,10 +117,21 @@ public class TestMilneWitten {
         linkDao.save(link4);
         LocalLink link5 = new LocalLink(lang.getLanguage(), "", 6, 2, false, 0, false, LocalLink.LocationType.NONE);
         linkDao.save(link5);
+        LocalLink link6 = new LocalLink(lang.getLanguage(), "", 5, 1, false, 0, false, LocalLink.LocationType.NONE);
+        linkDao.save(link6);
+        LocalLink link7 = new LocalLink(lang.getLanguage(), "", 6, 1, false, 0, false, LocalLink.LocationType.NONE);
+        linkDao.save(link7);
         linkDao.endLoad();
 
+        Disambiguator disambiguator = new TopResultDisambiguator(null);
 
+        BaseLocalSRMetric sr = new MilneWittenInLinkSimilarity(disambiguator,linkDao,dao);
 
+        System.out.println("1 and 2");
+        double r = sr.similarity(page1, page2, true).getValue();
+        System.out.println(r);
+        assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==r);
+        assert(sr.similarity(page1,page1,true).getValue()==1);
     }
 
 

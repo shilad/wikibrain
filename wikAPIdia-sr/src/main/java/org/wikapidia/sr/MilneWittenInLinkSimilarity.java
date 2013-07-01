@@ -86,6 +86,10 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
             (Math.log(Math.max(A.size(), B.size())) - Math.log(I.size()))
             /   (Math.log(numArticles) - Math.log(Math.min(A.size(), B.size())))));
 
+//        SRResult result = new SRResult(1.0 - (
+//            (Math.max(A.size(), B.size()) - I.size()*1.0)
+//            /   (numArticles - Math.min(A.size(), B.size()))));
+
         if (explanations) {
             for (int id : I.toArray()) {
                 String format = "? links to both ? and ?";
