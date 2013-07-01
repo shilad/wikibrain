@@ -2,10 +2,7 @@ package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalLinkDao;
-import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.SqlDaoIterable;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
@@ -52,9 +49,32 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
 
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
+        if (page1.getLanguage()!=page2.getLanguage()){
+            return new SRResult(Double.NaN);
+        }
         TIntSet A = getInLinks(new LocalId(page1.getLanguage(), page1.getLocalId()));
-        TIntSet
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        TIntSet B = getInLinks(new LocalId(page2.getLanguage(), page2.getLocalId()));
+
+        //Error handling for null pages
+        if (A == null || B == null) {
+            return new SRResult(Double.NaN);
+        }
+
+        TIntSet I = new TIntHashSet(A); I.retainAll(B); // intersection
+        DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
+        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
+        int numArticles = 0;
+        for (LocalPage page : allPages){
+            numArticles++;
+        }
+
+        if (I.size() == 0) {
+            return new SRResult(0.0);
+        }
+
+        return new SRResult(1.0 - (
+            (Math.log(Math.max(A.size(), B.size())) - Math.log(I.size()))
+            /   (Math.log(numArticles) - Math.log(Math.min(A.size(), B.size())))));
     }
 
     @Override
