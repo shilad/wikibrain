@@ -37,6 +37,15 @@ public class DumpLinkInfo {
     private final int counter;
     private final String md5;
 
+    public DumpLinkInfo(Language language, String date, LinkMatcher linkMatcher, URL url, int counter, String md5) {
+        this.language = language;
+        this.date = date;
+        this.linkMatcher = linkMatcher;
+        this.url = url;
+        this.counter = counter;
+        this.md5 = md5;
+    }
+
     public DumpLinkInfo(String langCode, String date, String linkMatcher, String url, String md5, int counter) throws MalformedURLException {
         this.language = Language.getByLangCode(langCode);
         this.date = date;
