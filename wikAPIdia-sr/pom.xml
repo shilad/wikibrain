@@ -49,6 +49,11 @@
             <artifactId>lucene-analyzers-common</artifactId>
             <version>4.3.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <version>4.3.1</version>
+        </dependency>
 
     </dependencies>
 
