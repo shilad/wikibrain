@@ -7,20 +7,17 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LocalId;
-import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.BaseLocalSRMetric;
 import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.MilneWittenInLinkSimilarity;
+import org.wikapidia.sr.MilneWittenSimilarity;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
 
-import java.util.HashSet;
 
 /**
  * @author Matt Lesicko
@@ -52,18 +49,19 @@ public class SimilarityExample {
         Disambiguator disambiguator = new TopResultDisambiguator(pa);
         LocalLinkDao localLinkDao = c.get(LocalLinkDao.class);
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-        BaseLocalSRMetric sr = new MilneWittenInLinkSimilarity(disambiguator,localLinkDao,localPageDao);
+        BaseLocalSRMetric sr = new MilneWittenSimilarity(disambiguator,localLinkDao,localPageDao, true);
         //Similarity between strings
         String string1 = "Barack Obama";
         String string2 = "US";
         String string3 = "Canada";
         String string4 = "vim";
+        System.out.println("Barack Obama and US:");
         printResult(sr.similarity(string1,string2,lang,true));
-        System.out.println("Obama and Canada:");
+        System.out.println("Barack Obama and Canada:");
         printResult(sr.similarity(string1,string3,lang,true));
-        System.out.println("Obama and vim:");
+        System.out.println("Barack Obama and vim:");
         printResult(sr.similarity(string1,string4,lang,true));
-        System.out.println("Obama and Obama");
+        System.out.println("Barack Obama and Barack Obama");
         printResult(sr.similarity(string1,string1,lang,true));
 
 
@@ -76,13 +74,13 @@ public class SimilarityExample {
         System.out.println(page3.getTitle());
         LocalPage page4 = localPageDao.getByTitle(lang, new Title(string4, lang),NameSpace.ARTICLE);
         System.out.println(page4.getTitle());
-        System.out.println("Obama and US:");
+        System.out.println("Barack Obama and US:");
         printResult(sr.similarity(page1,page2,true));
-        System.out.println("Obama and Canada:");
+        System.out.println("Barack Obama and Canada:");
         printResult(sr.similarity(page1,page3,true));
-        System.out.println("Obama and vim:");
+        System.out.println("Barack Obama and vim:");
         printResult(sr.similarity(page1,page4,true));
-        System.out.println("Obama and Obama");
+        System.out.println("Barack Obama and Barack Obama");
         printResult(sr.similarity(page1,page1,true));
 
 

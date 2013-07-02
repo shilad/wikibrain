@@ -125,13 +125,16 @@ public class TestMilneWitten {
 
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
-        BaseLocalSRMetric sr = new MilneWittenInLinkSimilarity(disambiguator,linkDao,dao);
+        BaseLocalSRMetric srIn = new MilneWittenSimilarity(disambiguator,linkDao,dao);
+        BaseLocalSRMetric srOut =  new MilneWittenSimilarity(disambiguator,linkDao,dao,true);
 
-        System.out.println("1 and 2");
-        double r = sr.similarity(page1, page2, true).getValue();
-        System.out.println(r);
-        assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==r);
-        assert(sr.similarity(page1,page1,true).getValue()==1);
+        double rIn = srIn.similarity(page1, page2, true).getValue();
+        assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==rIn);
+        assert(srIn.similarity(page1,page1,true).getValue()==1);
+
+        double rOut = srOut.similarity(page3,page4,true).getValue();
+        assert((1-((Math.log(2)-Math.log(1)) / (Math.log(6) - Math.log(1))))==rOut);
+        assert(srOut.similarity(page3,page3,true).getValue()==1);
     }
 
 
