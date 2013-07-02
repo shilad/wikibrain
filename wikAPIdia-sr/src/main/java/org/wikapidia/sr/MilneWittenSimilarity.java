@@ -19,7 +19,6 @@ import java.util.List;
 
 public class MilneWittenSimilarity extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
-    LocalPageDao pageHelper;
     //False is standard Milne Witten with in links, true is with out links
     private boolean outLinks = false;
 
@@ -106,24 +105,40 @@ public class MilneWittenSimilarity extends BaseLocalSRMetric{
 //            /   (numArticles - Math.min(A.size(), B.size()))));
 
         if (explanations) {
-            for (int id : I.toArray()) {
-                String format = "? links to both ? and ?";
-                LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(), id);
-                List<LocalPage> formatPages =new ArrayList<LocalPage>();
-                formatPages.add(intersectionPage);
-                formatPages.add(page1);
-                formatPages.add(page2);
-                Explanation explanation = new Explanation(format, formatPages);
-                result.addExplanation(explanation);
+            if (outLinks){
+                for(int id: I.toArray()){
+                    String format = "Both ? and ? link to ?";
+                    LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(),id);
+                    if (intersectionPage==null){
+                        continue;
+                    }
+                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
+                    formatPages.add(page1);
+                    formatPages.add(page2);
+                    formatPages.add(intersectionPage);
+                    Explanation explanation = new Explanation(format, formatPages);
+                    result.addExplanation(explanation);
+                }
+            }
+            else{
+
+                for (int id : I.toArray()) {
+                    String format = "? links to both ? and ?";
+                    LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(), id);
+                    if (intersectionPage==null){
+                        continue;
+                    }
+                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
+                    formatPages.add(intersectionPage);
+                    formatPages.add(page1);
+                    formatPages.add(page2);
+                    Explanation explanation = new Explanation(format, formatPages);
+                    result.addExplanation(explanation);
+                }
             }
         }
 
         return result;
-    }
-
-    @Override
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
