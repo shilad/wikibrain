@@ -23,6 +23,8 @@ import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -228,7 +230,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         if (titlesToIds==null){
             buildTitlesToIds();
         }
-        return titlesToIds.get(hashTitle(title,language.getId(),nameSpace.ordinal()));
+        long i = hashTitle(title,language.getId(),nameSpace.getArbitraryId());
+        return titlesToIds.get(hashTitle(title,language.getId(),nameSpace.getArbitraryId()));
     }
 
     /**
@@ -271,10 +274,17 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
      */
     protected long hashTitle(String s, int lang_id, int page_type_id){
         s = s+lang_id+page_type_id;
+        MessageDigest messageDigest = null;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace(); //There is no reason this should ever get thrown.
+        }
+        messageDigest.update(s.getBytes());
+        byte[] bytes = messageDigest.digest();
         long h = 1125899906842597L; //prime
-        int len = s.length();
-        for (int i = 0; i < len; i++) {
-            h = 31*h + s.charAt(i);
+        for (byte b: bytes) {
+            h = 31*h + b;
         }
         return h;
     }
@@ -311,6 +321,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             int numRedirects = 0;
             int numResolved = 0;
             for (Record record : cursor){
+                String title = record.getValue(Tables.LOCAL_PAGE.TITLE);
+                int lang_id = record.getValue(Tables.LOCAL_PAGE.LANG_ID);
+                int ns_id = record.getValue(Tables.LOCAL_PAGE.NAME_SPACE);
                 long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
                         record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
