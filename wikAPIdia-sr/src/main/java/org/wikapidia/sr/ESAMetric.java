@@ -4,6 +4,7 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.File;

@@ -2,6 +2,7 @@ package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
@@ -23,16 +24,12 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     private static Logger LOG = Logger.getLogger(BaseLocalSRMetric.class.getName());
     protected int numThreads = Runtime.getRuntime().availableProcessors();
     protected Disambiguator disambiguator;
+    protected LocalPageDao pageHelper;
 
     private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer similarityNormalizer = new IdentityNormalizer();
 
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
-
-
-    public BaseLocalSRMetric(){
-
-    }
 
 
 
@@ -123,7 +120,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
 
     @Override
-    public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations);
+    public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
 
 
 
@@ -135,7 +132,9 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         context.clear();
         context.add(new LocalString(language,phrase1));
         LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
-        return similarity(similar1.asLocalPage(),similar2.asLocalPage(),explanations);
+        return similarity(pageHelper.getById(language,similar1.getId()),
+                pageHelper.getById(language,similar2.getId()),
+                explanations);
     }
 
     @Override
@@ -169,7 +168,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     public abstract void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds);
 
     @Override
-    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language){
+    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws DaoException {
         double[][] cos = new double[wpRowIds.length][wpColIds.length];
         for (int i=0; i<wpRowIds.length; i++){
             for (int j=0; j<wpColIds.length; j++){
@@ -204,7 +203,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public double[][] cosimilarity(int[] ids, Language language){
+    public double[][] cosimilarity(int[] ids, Language language) throws DaoException {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
             cos[i][i]=1;

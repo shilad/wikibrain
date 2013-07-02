@@ -10,6 +10,7 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.mapper.ConceptMapper;
+import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -20,7 +21,12 @@ import java.util.List;
 
 public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
-    LocalPageDao pageHelper;
+
+    public MilneWittenInLinkSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
+        this.disambiguator = disambiguator;
+        this.pageHelper=pageHelper;
+        this.linkHelper = linkHelper;
+    }
 
     public String getName() {
         return "Milne Witten";
@@ -79,6 +85,10 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
             (Math.log(Math.max(A.size(), B.size())) - Math.log(I.size()))
             /   (Math.log(numArticles) - Math.log(Math.min(A.size(), B.size())))));
 
+//        SRResult result = new SRResult(1.0 - (
+//            (Math.max(A.size(), B.size()) - I.size()*1.0)
+//            /   (numArticles - Math.min(A.size(), B.size()))));
+
         if (explanations) {
             for (int id : I.toArray()) {
                 String format = "? links to both ? and ?";
@@ -96,11 +106,6 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
     }
 
     @Override
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -115,10 +120,7 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public MilneWittenInLinkSimilarity(ConceptMapper mapper, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
-        this.linkHelper = linkHelper;
-        this.pageHelper = pageHelper;
-    }
+
 
     private TIntSet getInLinks(LocalId wpId) throws DaoException {
         SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), false);
