@@ -62,7 +62,7 @@ import java.util.List;
  * This class is almost explicitly copied from Brent Hecht, WikAPIdia.
  *
  */
-public class LanguageSpecificTokenizers {
+public class LanguageSpecificTokenizers {       // TODO: test me!!!
 
     private static final String STOP_WORDS = "/src/main/resources/stopwords/";
     private static final String CONF_PATH = "sr.lucene.";
@@ -83,7 +83,6 @@ public class LanguageSpecificTokenizers {
         } catch(Exception e) {
             throw new WikapidiaException(e);
         }
-
     }
 
     public static abstract class WLanguageTokenizer {
