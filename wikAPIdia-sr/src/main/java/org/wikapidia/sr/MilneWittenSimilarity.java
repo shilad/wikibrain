@@ -146,8 +146,14 @@ public class MilneWittenSimilarity extends BaseLocalSRMetric{
     private TIntSet getLinks(LocalId wpId) throws DaoException {
         SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
         TIntSet linkIds = new TIntHashSet();
-        for (LocalLink link : links){
+        if(!outLinks) {
+            for (LocalLink link : links){
             linkIds.add(link.getSourceId());
+            }
+        } else {
+            for (LocalLink link : links){
+                linkIds.add(link.getDestId());
+            }
         }
         return linkIds;
     }

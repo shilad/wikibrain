@@ -13,7 +13,7 @@ import org.wikapidia.core.model.Title;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.BaseLocalSRMetric;
 import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.MilneWittenInLinkSimilarity;
+import org.wikapidia.sr.MilneWittenSimilarity;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
@@ -44,7 +44,7 @@ public class SimilarityExample {
         Disambiguator disambiguator = new TopResultDisambiguator(pa);
         LocalLinkDao localLinkDao = c.get(LocalLinkDao.class);
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-        BaseLocalSRMetric sr = new MilneWittenInLinkSimilarity(disambiguator,localLinkDao,localPageDao);
+        BaseLocalSRMetric sr = new MilneWittenSimilarity(disambiguator,localLinkDao,localPageDao);
         LocalPage page1 = localPageDao.getByTitle(lang, new Title("Obama", lang), NameSpace.ARTICLE);
         System.out.println(page1.getTitle());
         LocalPage page2 = localPageDao.getByTitle(lang, new Title("US", lang), NameSpace.ARTICLE);
