@@ -74,12 +74,10 @@ public class WikiTextLoader {
 
         ParserVisitor linkVisitor = new LocalLinkVisitor(llDao, lpDao);
         ParserVisitor catVisitor = new LocalCategoryVisitor(lpDao, lcmDao);
-        ParserVisitor luceneVisitor = new LuceneVisitor();
         //TODO: ill visitor
 
         visitors.add(linkVisitor);
         visitors.add(catVisitor);
-        visitors.add(luceneVisitor);
 
         final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao);
 

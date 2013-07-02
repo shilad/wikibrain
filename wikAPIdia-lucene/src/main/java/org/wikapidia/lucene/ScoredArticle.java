@@ -1,4 +1,4 @@
-package org.wikapidia.sr.lucene;
+package org.wikapidia.lucene;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.ScoreDoc;

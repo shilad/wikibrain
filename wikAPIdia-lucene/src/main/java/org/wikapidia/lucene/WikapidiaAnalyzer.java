@@ -1,4 +1,4 @@
-package org.wikapidia.sr.lucene;
+package org.wikapidia.lucene;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -75,7 +75,7 @@ public class WikapidiaAnalyzer extends Analyzer {
 
         try{
             LanguageSpecificTokenizers.WLanguageTokenizer langTokenizer = LanguageSpecificTokenizers.getWLanguageTokenizer(language);
-            TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET, MATCH_VERSION);
+            TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
             return new Analyzer.TokenStreamComponents(tokenizer, result);
         } catch(WikapidiaException e) {
             throw new RuntimeException(e);

@@ -1,4 +1,4 @@
-package org.wikapidia.sr.lucene;
+package org.wikapidia.lucene;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
