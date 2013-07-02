@@ -7,6 +7,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
@@ -85,12 +86,6 @@ public class UniversalLinkLoader {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"));
-        options.addOption(
-                new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("t"));
@@ -101,17 +96,11 @@ public class UniversalLinkLoader {
                         .create("i"));
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArgs()
-                        .withValueSeparator(',')
-                        .withLongOpt("languages")
-                        .withDescription("List of languages, separated by a comma (e.g. 'en,de'). \nDefault is " + new Configuration().get().getStringList("languages"))
-                        .create("l"));
-        options.addOption(
-                new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("algorithm")
                         .withDescription("the name of the algorithm to execute")
                         .create("n"));
+        Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -122,40 +111,18 @@ public class UniversalLinkLoader {
             new HelpFormatter().printHelp("UniversalLinkLoader", options);
             return;
         }
-        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        Configurator conf = new Configurator(new Configuration(pathConf));
 
-        List<String> langCodes;
-        if (cmd.hasOption("l")) {
-            langCodes = Arrays.asList(cmd.getOptionValues("l"));
-        } else {
-            langCodes = conf.getConf().get().getStringList("languages");
-        }
-        LanguageSet languages;
-        try{
-            languages = new LanguageSet(langCodes);
-        } catch (IllegalArgumentException e) {
-            String langs = "";
-            for (Language language : Language.LANGUAGES) {
-                langs += "," + language.getLangCode();
-            }
-            langs = langs.substring(1);
-            System.err.println(e.toString()
-                    + "\nValid language codes: \n" + langs);
-            System.exit(1);
-            return;
-        }
+        Env env = new Env(cmd);
+        Configurator conf = env.getConfigurator();
+        String algorithm = cmd.getOptionValue("n", null);
 
-        String algorithm = conf.getConf().get().getString("mapper.default");
-        if (cmd.hasOption("n")) {
-            algorithm = cmd.getOptionValue("n");
-        }
-        int algorithmId = conf.getConf().get().getInt("mapper." + algorithm + ".algorithmId");
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
         UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class);
+        ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
+
         UniversalLinkLoader loader = new UniversalLinkLoader(
-                languages,
+                env.getLanguages(),
                 localLinkDao,
                 universalPageDao,
                 universalLinkDao
@@ -166,7 +133,7 @@ public class UniversalLinkLoader {
             universalLinkDao.beginLoad();
         }
 
-        loader.loadLinkMap(algorithmId);
+        loader.loadLinkMap(mapper.getId());
 
         if (cmd.hasOption("i")) {
             LOG.log(Level.INFO, "End Load");
