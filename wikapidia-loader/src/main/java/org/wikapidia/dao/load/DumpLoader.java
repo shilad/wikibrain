@@ -33,7 +33,6 @@ import java.util.logging.Logger;
  */
 public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
-    private static String[] DUMP_SUFFIXES = { "xml", "xml.bz2", "xml.gz", "xml.7z" };
 
     private final AtomicInteger counter = new AtomicInteger();
     private final LocalPageDao localPageDao;
@@ -121,9 +120,13 @@ public class DumpLoader {
                 System.err.println( "There is no download path. Please specify one or configure a default.");
                 new HelpFormatter().printHelp("DumpLoader", options);
                 return;
-            } else {                                                                // Default path is functional
-                for (File f : FileUtils.listFiles(downloadPath, DUMP_SUFFIXES, true)) {
-                    dumps.add(f.getPath());
+            } else {                                                                        // Default path is functional
+                for (File langDir : downloadPath.listFiles()) {                             // Layered for-loops sift through
+                    if (langDir.isDirectory() && langCodes.contains(langDir.getName())) {   // the directory structure of the
+                        for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {  // download process:
+                            dumps.add(f.getPath());                                         // ${PARENT}/langcode/date/dumpfile.xml.bz2
+                        }
+                    }
                 }
             }
         }
