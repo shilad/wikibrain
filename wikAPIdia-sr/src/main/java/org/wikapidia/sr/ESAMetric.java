@@ -14,12 +14,19 @@ import java.util.List;
  * @author Shilad Sen
  */
 public class ESAMetric extends BaseLocalSRMetric {
+
     @Override
     public String getName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return "ESA";
     }
+
     @Override
     public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
+
+        if (phrase1 == null || phrase2 == null) {
+            return new SRResult(Double.NaN);
+        }
+
         // Get result vector for phrase 1
 
         // Get result vector for phrase 2
