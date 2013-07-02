@@ -24,13 +24,13 @@ public class MilneWittenSimilarity extends BaseLocalSRMetric{
     private boolean outLinks = false;
 
     public MilneWittenSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
-        super(disambiguator);
+        this.disambiguator = disambiguator;
         this.linkHelper = linkHelper;
         this.pageHelper = pageHelper;
     }
 
     public MilneWittenSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper, boolean outLinks) {
-        super(disambiguator);
+        this.disambiguator = disambiguator;
         this.linkHelper = linkHelper;
         this.pageHelper = pageHelper;
         this.outLinks = outLinks;
