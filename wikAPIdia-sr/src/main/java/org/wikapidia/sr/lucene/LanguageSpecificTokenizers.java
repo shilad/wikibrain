@@ -1,5 +1,6 @@
 package org.wikapidia.sr.lucene;
 
+import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
@@ -52,16 +53,28 @@ import org.apache.lucene.analysis.util.CharArrayMap;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ElisionFilter;
 import org.apache.lucene.analysis.util.WordlistLoader;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.*;
 import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -70,8 +83,8 @@ import java.util.List;
  */
 public class LanguageSpecificTokenizers {
 
-    public static final String STOP_WORDS = "/src/main/resources/stopwords/";
-    public static final String CONF_PATH = "parser.lucene.";
+    private static final String STOP_WORDS = "/src/main/resources/stopwords/";
+    private static final String CONF_PATH = "sr.lucene.";
     private static Configuration conf = new Configuration(null);
 
     public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
@@ -561,7 +574,7 @@ public class LanguageSpecificTokenizers {
                                                  CharArraySet stemExclusionSet, Version version)
                 throws WikapidiaException {
 
-            //			final Tokenizer source = new StandardTokenizer(matchVersion, reader);
+            //			final Tokenizer source = new StandardTokenizer(MATCH_VERSION, reader);
             TokenStream result = new StandardFilter(version, input);
             result = new LowerCaseFilter(version, result);
             result = new StopFilter(version, result, FinnishAnalyzer.getDefaultStopSet());
