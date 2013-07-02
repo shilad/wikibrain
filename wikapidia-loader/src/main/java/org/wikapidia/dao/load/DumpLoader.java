@@ -112,20 +112,14 @@ public class DumpLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-
-        List<String> langCodes;
-        if (cmd.hasOption("l")) {
-            langCodes = Arrays.asList(cmd.getOptionValues("l"));
-        } else {
-            langCodes = conf.getConf().get().getStringList("languages");
-        }
+        List<String> langCodes = env.getLanguages().getLangCodes();
 
         File downloadPath = new File(conf.getConf().get().getString("download.path"));
         List<String> dumps = new ArrayList<String>();
-        if (!cmd.getArgList().isEmpty()) {                                          // There are files specified
-            dumps = cmd.getArgList();
-        } else {                                                                    // No specified files
-            if ((!downloadPath.isDirectory() || downloadPath.list().length == 0)) { // Default path is missing or empty
+        if (!cmd.getArgList().isEmpty()) {                                                  // There are files specified
+            dumps = cmd.getArgList();                                                       // Else no specified files
+        } else {                                                                            // Default path is missing or empty
+            if ((!downloadPath.isDirectory() || FileUtils.listFiles(downloadPath, DUMP_SUFFIXES, true).isEmpty())) {
                 System.err.println( "There is no download path. Please specify one or configure a default.");
                 new HelpFormatter().printHelp("DumpLoader", options);
                 return;
