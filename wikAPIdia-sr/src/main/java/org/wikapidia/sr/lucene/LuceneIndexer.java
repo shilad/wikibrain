@@ -27,12 +27,12 @@ import java.io.IOException;
 public class LuceneIndexer {
 
     public static final String CONF_PATH = "parser.lucene.";
-    private Configuration conf = new Configuration(null);
+    private static Configuration conf = new Configuration(null);
 
-    public final Version matchVersion = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
-    public final String localIdFieldName = conf.get().getString(CONF_PATH + "localId");
-    public final String wikitextFieldName = conf.get().getString(CONF_PATH + "wikitext");
-    public final String plaintextFieldName = conf.get().getString(CONF_PATH + "plaintext");
+    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
+    public static final String LOCAL_ID_FIELD_NAME = conf.get().getString(CONF_PATH + "localId");
+    public static final String WIKITEXT_FIELD_NAME = conf.get().getString(CONF_PATH + "wikitext");
+    public static final String PLAINTEXT_FIELD_NAME = conf.get().getString(CONF_PATH + "plaintext");
 
     private Analyzer analyzer;
     private Directory directory;
@@ -40,19 +40,19 @@ public class LuceneIndexer {
     private IndexWriter writer;
 
     public LuceneIndexer() throws IOException {
-        analyzer = new StandardAnalyzer(matchVersion); // TODO: Find/write a more specific analyzer?
+        analyzer = new StandardAnalyzer(MATCH_VERSION); // TODO: Find/write a more specific analyzer?
         directory = FSDirectory.open(new File(
                 conf.get().getString(CONF_PATH + "directory")));
-        config = new IndexWriterConfig(matchVersion, analyzer);
+        config = new IndexWriterConfig(MATCH_VERSION, analyzer);
         writer = new IndexWriter(directory, config);
     }
 
     public void indexPage(RawPage page) throws WikapidiaException {
         if (page.getNamespace() == NameSpace.ARTICLE) { // TODO: Is this actually necessary?
             Document document = new Document();
-            Field localIdField = new IntField(localIdFieldName, page.getPageId(), Field.Store.YES);
-            Field wikiTextField = new TextField(wikitextFieldName, page.getBody(), Field.Store.YES);
-            Field plainTextField = new TextField(plaintextFieldName, page.getPlainText(), Field.Store.YES); // should be parsed in WikapidiaAnalyzer
+            Field localIdField = new IntField(LOCAL_ID_FIELD_NAME, page.getPageId(), Field.Store.YES);
+            Field wikiTextField = new TextField(WIKITEXT_FIELD_NAME, page.getBody(), Field.Store.YES);
+            Field plainTextField = new TextField(PLAINTEXT_FIELD_NAME, page.getPlainText(), Field.Store.YES); // should be parsed in WikapidiaAnalyzer
             document.add(localIdField);
             document.add(wikiTextField);
             document.add(plainTextField);

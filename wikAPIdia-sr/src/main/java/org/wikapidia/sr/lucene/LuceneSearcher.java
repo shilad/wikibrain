@@ -17,33 +17,34 @@ import java.io.IOException;
 
 /**
  *
- * @author
+ * @author Ari Weiland
+ *
  */
 public class LuceneSearcher {
 
     public static final int HIT_COUNT = 1000;
 
     public static final String CONF_PATH = "parser.lucene.";
-    private Configuration conf = new Configuration(null);
+    private static Configuration conf = new Configuration(null);
 
-    public final Version matchVersion = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
-    public final String localIdFieldName = conf.get().getString(CONF_PATH + "localId");
-    public final String wikitextFieldName = conf.get().getString(CONF_PATH + "wikitext");
-    public final String plaintextFieldName = conf.get().getString(CONF_PATH + "plaintext");
+    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
+    public static final String LOCAL_ID_FIELD_NAME = conf.get().getString(CONF_PATH + "localId");
+    public static final String WIKITEXT_FIELD_NAME = conf.get().getString(CONF_PATH + "wikitext");
+    public static final String PLAINTEXT_FIELD_NAME = conf.get().getString(CONF_PATH + "plaintext");
 
     private Analyzer analyzer;
     private DirectoryReader reader;
     private IndexSearcher searcher;
 
     public LuceneSearcher() throws IOException {
-        analyzer = new StandardAnalyzer(matchVersion);
+        analyzer = new StandardAnalyzer(MATCH_VERSION);
         reader = DirectoryReader.open(FSDirectory.open(new File(
                 conf.get().getString(CONF_PATH + "directory"))));
         searcher = new IndexSearcher(reader);
     }
 
     public ScoreDoc[] search(String fieldName, String search) throws ParseException, IOException {
-        QueryParser parser = new QueryParser(matchVersion, fieldName, analyzer);
+        QueryParser parser = new QueryParser(MATCH_VERSION, fieldName, analyzer);
         Query query = parser.parse(search);
         return searcher.search(query, HIT_COUNT).scoreDocs;
     }
