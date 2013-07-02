@@ -14,6 +14,8 @@ import org.wikapidia.conf.Configuration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -43,9 +45,17 @@ public class LuceneSearcher {
         searcher = new IndexSearcher(reader);
     }
 
-    public ScoreDoc[] search(String fieldName, String search) throws ParseException, IOException {
+    public List<ScoredArticle> search(String fieldName, String search) throws ParseException, IOException {
         QueryParser parser = new QueryParser(MATCH_VERSION, fieldName, analyzer);
         Query query = parser.parse(search);
-        return searcher.search(query, HIT_COUNT).scoreDocs;
+        ScoreDoc[] scoreDocs = searcher.search(query, HIT_COUNT).scoreDocs;
+        List<ScoredArticle> scoredArticles = new ArrayList<ScoredArticle>();
+        for (ScoreDoc scoreDoc : scoreDocs) {
+            scoredArticles.add(new ScoredArticle(
+                    searcher.doc(scoreDoc.doc),
+                    scoreDoc
+            ));
+        }
+        return scoredArticles;
     }
 }
