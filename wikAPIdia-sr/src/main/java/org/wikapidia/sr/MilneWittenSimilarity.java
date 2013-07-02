@@ -1,6 +1,5 @@
 package org.wikapidia.sr;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.core.dao.*;
@@ -9,7 +8,6 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.mapper.ConceptMapper;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -19,14 +17,31 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
+public class MilneWittenSimilarity extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
     LocalPageDao pageHelper;
+    //False is standard Milne Witten with in links, true is with out links
+    private boolean outLinks = false;
 
-    public MilneWittenInLinkSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
+    public MilneWittenSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
         super(disambiguator);
         this.linkHelper = linkHelper;
         this.pageHelper = pageHelper;
+    }
+
+    public MilneWittenSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper, boolean outLinks) {
+        super(disambiguator);
+        this.linkHelper = linkHelper;
+        this.pageHelper = pageHelper;
+        this.outLinks = outLinks;
+    }
+
+    public boolean isOutLinks() {
+        return outLinks;
+    }
+
+    public void setOutLinks(boolean outLinks) {
+        this.outLinks = outLinks;
     }
 
     public String getName() {
@@ -62,8 +77,8 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
         if (page1.getLanguage()!=page2.getLanguage()){
             return new SRResult(Double.NaN);
         }
-        TIntSet A = getInLinks(new LocalId(page1.getLanguage(), page1.getLocalId()));
-        TIntSet B = getInLinks(new LocalId(page2.getLanguage(), page2.getLocalId()));
+        TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()));
+        TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()));
 
         //Error handling for null pages
         if (A == null || B == null) {
@@ -128,8 +143,8 @@ public class MilneWittenInLinkSimilarity extends BaseLocalSRMetric{
 
 
 
-    private TIntSet getInLinks(LocalId wpId) throws DaoException {
-        SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), false);
+    private TIntSet getLinks(LocalId wpId) throws DaoException {
+        SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
         TIntSet linkIds = new TIntHashSet();
         for (LocalLink link : links){
             linkIds.add(link.getSourceId());
