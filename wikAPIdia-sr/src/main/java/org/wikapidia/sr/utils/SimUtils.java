@@ -20,11 +20,13 @@ public class SimUtils {
                 xDotY += x * Y.get(id);
             }
         }
-
         for (double y : Y.values()) {
             yDotY += y * y;
         }
-
         return xDotX * yDotY != 0 ? xDotY / Math.sqrt(xDotX * yDotY): Double.NaN;
+    }
+
+    public static double normalizeVector(TIntDoubleHashMap X) {
+        return Double.NaN;
     }
 }

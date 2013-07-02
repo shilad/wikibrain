@@ -28,7 +28,6 @@ import java.util.logging.Logger;
  */
 public class ESAMetric extends BaseLocalSRMetric {
 
-    @Override
     public String getName() {
         return "ESA";
     }
@@ -37,7 +36,15 @@ public class ESAMetric extends BaseLocalSRMetric {
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
     private Analyzer analyzer = new ESAAnalyzer();
 
-    @Override
+    /**
+     * Get cosine similarity between two phrases.
+     * @param phrase1
+     * @param phrase2
+     * @param language
+     * @param explanations
+     * @return
+     * @throws DaoException
+     */
     public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
         if (phrase1 == null || phrase2 == null) {
             return new SRResult(Double.NaN);
@@ -48,7 +55,12 @@ public class ESAMetric extends BaseLocalSRMetric {
         return new SRResult(sim); // TODO: normalize
     }
 
-    public TIntDoubleHashMap getConceptVector(String phrase) {
+    /**
+     * Get concept vector of a specified phrase.
+     * @param phrase
+     * @return
+     */
+    public TIntDoubleHashMap getConceptVector(String phrase) { // TODO: validIDs
         QueryParser parser = new QueryParser(Version.LUCENE_43, "text", analyzer);
         TopDocs docs = null;
         try {
