@@ -12,6 +12,7 @@ import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.parser.wiki.ParserVisitor;
 import org.wikapidia.parser.wiki.WikiTextDumpParser;
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
  */
 public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
-    private static String[] DUMP_SUFFIXES = { "xml", "xml.bz2", "xml.gz", "xml.7z" };
+    private static final String[] DUMP_SUFFIXES = { "xml", "xml.bz2", "xml.gz", "xml.7z" };
 
     private final AtomicInteger counter = new AtomicInteger();
     private final LocalPageDao localPageDao;
@@ -111,6 +112,7 @@ public class DumpLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
+        LanguageSet languages = env.getLanguages();
 
         File downloadPath = new File(conf.getConf().get().getString("download.path"));
         List<String> dumps = new ArrayList<String>();
@@ -121,9 +123,13 @@ public class DumpLoader {
                 System.err.println( "There is no download path. Please specify one or configure a default.");
                 new HelpFormatter().printHelp("DumpLoader", options);
                 return;
-            } else {                                                                // Default path is functional
-                for (File f : FileUtils.listFiles(downloadPath, DUMP_SUFFIXES, true)) {
-                    dumps.add(f.getPath());
+            } else {                                                                                        // Default path is functional
+                for (File langDir : downloadPath.listFiles()) {                                             // Layered for-loops sift through
+                    if (langDir.isDirectory() && languages.getLangCodes().contains(langDir.getName())) {    // the directory structure of the
+                        for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {                  // download process:
+                            dumps.add(f.getPath());                                                         // ${PARENT}/langcode/date/dumpfile.xml.bz2
+                        }
+                    }
                 }
             }
         }

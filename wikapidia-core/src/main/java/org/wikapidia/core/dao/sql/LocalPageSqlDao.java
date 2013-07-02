@@ -35,7 +35,7 @@ import java.util.logging.Level;
 /**
  */
 public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao implements LocalPageDao<T> {
-    private TLongIntHashMap titlesToIds = null;
+    private volatile TLongIntHashMap titlesToIds = null;
     private RedirectSqlDao redirectSqlDao;
 
     public LocalPageSqlDao(DataSource dataSource) throws DaoException {
@@ -228,7 +228,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
 
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException {
         if (titlesToIds==null){
-            titlesToIds=buildTitlesToIds();
+            buildTitlesToIds();
         }
         long i = hashTitle(title,language.getId(),nameSpace.getArbitraryId());
         return titlesToIds.get(hashTitle(title,language.getId(),nameSpace.getArbitraryId()));
@@ -293,7 +293,10 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         return hashTitle(title.getCanonicalTitle(),language.getId(),nameSpace.ordinal());
     }
 
-    protected TLongIntHashMap buildTitlesToIds() throws DaoException {
+    protected synchronized void buildTitlesToIds() throws DaoException {
+        if (titlesToIds != null) {
+            return;
+        }
         Connection conn = null;
         try {
             if (cache!=null) {
@@ -302,7 +305,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                         : new String[] { Tables.LOCAL_PAGE.getName(), Tables.REDIRECT.getName() };
                 TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", dependsOn);
                 if (map!=null){
-                    return map;
+                    titlesToIds = map;
+                    return;
                 }
             }
             conn = ds.getConnection();
@@ -341,7 +345,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             if (cache!=null){
                 cache.saveToCache("titlesToIds", map);
             }
-            return map;
+            titlesToIds = map;
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {

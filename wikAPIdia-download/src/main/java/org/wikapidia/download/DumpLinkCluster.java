@@ -5,6 +5,8 @@ import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,7 +18,7 @@ import java.util.*;
  * the downloads can be additionally clustered by LinkMatcher.
  *
  */
-public class DumpLinkCluster implements Iterable<Multimap<LinkMatcher, DumpLinkInfo>> {
+public class DumpLinkCluster implements Iterable<Language> {
 
     private final Map<Language, Multimap<LinkMatcher, DumpLinkInfo>> links = new HashMap<Language, Multimap<LinkMatcher, DumpLinkInfo>>();
 
@@ -37,14 +39,14 @@ public class DumpLinkCluster implements Iterable<Multimap<LinkMatcher, DumpLinkI
 
     public int size() {
         int counter = 0;
-        for (Multimap map : this) {
-            counter += map.size();
+        for (Language language : this) {
+            counter += this.get(language).size();
         }
         return counter;
     }
 
     @Override
-    public Iterator<Multimap<LinkMatcher, DumpLinkInfo>> iterator() {
-        return links.values().iterator();
+    public Iterator<Language> iterator() {
+        return links.keySet().iterator();
     }
 }
