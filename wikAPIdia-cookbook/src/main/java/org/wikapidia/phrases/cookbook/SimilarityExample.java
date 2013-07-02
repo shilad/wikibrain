@@ -13,7 +13,7 @@ import org.wikapidia.core.model.Title;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.BaseLocalSRMetric;
 import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.MilneWittenInLinkSimilarity;
+import org.wikapidia.sr.MilneWittenSimilarity;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
@@ -49,7 +49,7 @@ public class SimilarityExample {
         Disambiguator disambiguator = new TopResultDisambiguator(pa);
         LocalLinkDao localLinkDao = c.get(LocalLinkDao.class);
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-        BaseLocalSRMetric sr = new MilneWittenInLinkSimilarity(disambiguator,localLinkDao,localPageDao);
+        BaseLocalSRMetric sr = new MilneWittenSimilarity(disambiguator,localLinkDao,localPageDao,true);
         //Similarity between strings
         String string1 = "Barack Obama";
         String string2 = "US";
@@ -82,7 +82,6 @@ public class SimilarityExample {
         printResult(sr.similarity(page1,page4,true));
         System.out.println("Barack Obama and Barack Obama");
         printResult(sr.similarity(page1,page1,true));
-
 
     }
 }
