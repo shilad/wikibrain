@@ -47,6 +47,4 @@ public class ScoredArticle {
     public int getPageId() {
         return pageId;
     }
-
-
 }
