@@ -171,6 +171,12 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
         }
     }
 
+    /**
+     * @deprecated Use get(new DaoFilter().setLanguages(language).setRedirect(true)) instead
+     * @param language
+     * @return
+     * @throws DaoException
+     */
     public SqlDaoIterable<RawPage> getAllRedirects(Language language) throws DaoException{
         Connection conn = null;
         try {

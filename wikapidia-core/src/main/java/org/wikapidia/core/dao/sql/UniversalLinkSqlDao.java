@@ -140,9 +140,9 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
+//            if (conditions.isEmpty()) {
+//                return null;
+//            }
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
                     where(conditions).

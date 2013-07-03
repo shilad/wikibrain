@@ -9,6 +9,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.dao.sql.RawPageSqlDao;
@@ -62,7 +63,7 @@ public class RedirectLoader {
         redirectIdsToPageIds = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
         int i = 0;
         LOG.info("Begin loading redirects into memory: ");
-        for (RawPage p : rawPages.getAllRedirects(language)) {
+        for (RawPage p : rawPages.get(new DaoFilter().setLanguages(language).setRedirect(true))) {
            Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
            redirectIdsToPageIds.put(p.getPageId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));

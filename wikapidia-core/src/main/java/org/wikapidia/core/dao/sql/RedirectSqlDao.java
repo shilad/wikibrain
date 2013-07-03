@@ -115,8 +115,8 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.REDIRECT.LANG_ID.in(daoFilter.getLangIds()));
-            } else {
-                return null;
+//            } else {
+//                return null;
             }
             Cursor<Record> result = context.select().
                     from(Tables.REDIRECT).
