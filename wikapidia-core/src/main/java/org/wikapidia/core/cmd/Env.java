@@ -42,7 +42,8 @@ public class Env {
                         .withDescription("the maximum number of threads that should be used")
                         .create("h"),
                 new DefaultOptionBuilder()
-                        .hasArg()
+                        .hasArgs()
+                        .withValueSeparator(',')
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process, separated by commas")
                         .create("l")
