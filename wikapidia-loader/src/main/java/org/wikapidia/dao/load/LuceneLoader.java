@@ -9,13 +9,10 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RawPageDao;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.lucene.LuceneIndexer;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,9 +40,11 @@ public class LuceneLoader {
 
     public void load() throws WikapidiaException {
         try {
+            int i = 0;
             Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter());
             for (RawPage rawPage : rawPages) {
                 luceneIndexer.indexPage(rawPage);
+                System.out.println(++i);
             }
         } catch (DaoException e) {
             throw new WikapidiaException(e);
@@ -89,7 +88,7 @@ public class LuceneLoader {
             }
         }
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
-        LuceneIndexer luceneIndexer = new LuceneIndexer(env.getLanguages(), nameSpaces);;
+        LuceneIndexer luceneIndexer = new LuceneIndexer(env.getLanguages(), nameSpaces);
 
         LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer);
         loader.load();

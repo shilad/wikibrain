@@ -5,19 +5,18 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.wikapidia.lucene.LuceneUtils.*;
 
 /**
  *
@@ -26,48 +25,68 @@ import java.util.Map;
  */
 public class LuceneSearcher {
 
-    public static final int HIT_COUNT = 1000;
+    private static final Logger LOG = Logger.getLogger(LuceneSearcher.class.getName());
+    public static final int HIT_COUNT = 1000; // TODO: do something more user-friendly with this value?
 
-    private static Configuration conf = new Configuration(null);
+    private final File file;
+    private final Map<Language, WikapidiaAnalyzer> analyzers;
+    private final Map<Language, IndexSearcher> searchers;
 
-    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString("lucene.version"));
-    public static final String LOCAL_ID_FIELD_NAME = conf.get().getString("lucene.localId");
-    public static final String LANG_ID_FIELD_NAME = conf.get().getString("lucene.langId");
-    public static final String WIKITEXT_FIELD_NAME = conf.get().getString("lucene.wikitext");
-    public static final String PLAINTEXT_FIELD_NAME = conf.get().getString("lucene.plaintext");
-
-    private Directory directory;
-    private Map<Language, WikapidiaAnalyzer> analyzers;
-    private Map<Language, IndexSearcher> searchers;
-
+    /**
+     * Constructs a LuceneSearcher that will run lucene queries on
+     * sets of articles in any language in the LanguageSet.
+     * @param languages
+     * @throws WikapidiaException
+     */
     public LuceneSearcher(LanguageSet languages) throws WikapidiaException {
         try {
-            directory = FSDirectory.open(new File(
-                    conf.get().getString("lucene.directory")));
+            file = LUCENE_ROOT;
+            analyzers = new HashMap<Language, WikapidiaAnalyzer>();
+            searchers = new HashMap<Language, IndexSearcher>();
             for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, new File(file, language.getLangCode()));
                 analyzers.put(language, analyzer);
-                searchers.put(language, analyzer.getIndexSearcher(directory));
+                searchers.put(language, analyzer.getIndexSearcher());
             }
         } catch (IOException e) {
             throw new WikapidiaException(e);
         }
     }
 
-    public ScoreDoc[] search(String fieldName, String searchString, Language language) throws ParseException, IOException {
-        QueryParser parser = new QueryParser(MATCH_VERSION, fieldName, analyzers.get(language));
-        Query query = parser.parse(searchString);
-        return searchers.get(language).search(query, HIT_COUNT).scoreDocs;
+    /**
+     * Runs a lucene query on the plaintext field for the specified
+     * search string in the specified language.
+     * @param searchString
+     * @param language
+     * @return
+     * @throws WikapidiaException
+     */
+    public ScoreDoc[] search(String searchString, Language language) throws WikapidiaException {
+        return search(PLAINTEXT_FIELD_NAME, searchString, language);
     }
 
-    public List<ScoredArticle> convert(ScoreDoc[] scoreDocs, Language language) throws IOException {
-        List<ScoredArticle> scoredArticles = new ArrayList<ScoredArticle>();
-        for (ScoreDoc scoreDoc : scoreDocs) {
-            scoredArticles.add(new ScoredArticle(
-                    searchers.get(language).doc(scoreDoc.doc),
-                    scoreDoc
-            ));
+    /**
+     * Runs a lucene query on the specified field for the specified
+     * search string in the specified language.
+     * @param fieldName
+     * @param searchString
+     * @param language
+     * @return
+     * @throws WikapidiaException
+     */
+    public ScoreDoc[] search(String fieldName, String searchString, Language language) throws WikapidiaException {
+        if (!analyzers.containsKey(language)) {
+            throw new WikapidiaException("This Analyzer does not support " + language.getEnLangName());
         }
-        return scoredArticles;
+        try {
+            QueryParser parser = new QueryParser(MATCH_VERSION, fieldName, analyzers.get(language));
+            Query query = parser.parse(searchString);
+            return searchers.get(language).search(query, HIT_COUNT).scoreDocs;
+        } catch (ParseException e) {
+            LOG.log(Level.WARNING, "Unable to parse " + searchString + " in " + language.getEnLangName());
+            return null;
+        } catch (IOException e) {
+            throw new WikapidiaException(e);
+        }
     }
 }

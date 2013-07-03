@@ -13,49 +13,54 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.Version;
-import org.wikapidia.conf.Configuration;
+import org.apache.lucene.store.FSDirectory;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 
+import static org.wikapidia.lucene.LuceneUtils.*;
+
 /**
  *
- * This class is almost explicitly copied from Brent Hecht, WikAPIdia.
+ * @author Ari Weiland
  *
- */
-public class WikapidiaAnalyzer extends Analyzer {
-
-    private static Configuration conf = new Configuration(null);
-
-    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString("lucene.version"));
+ * This class is based on a class of the same name from Brent Hecht, WikAPIdia.
+ * I have updated everything to properly function consistently with lucene 4.3,
+ * as well as adding functionality such as the FilterSelects and the getIndexWriter
+ * and getIndexSearcher methods.
+ *
+ */public class WikapidiaAnalyzer extends Analyzer {
 
     private final Language language;
+    private final Directory dir;
     private FilterSelect select;
 
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with specified filters.
+     * The WikapidiaAnalyzer stores its lucene files in the specified directory
      * @param language
+     * @param file
      * @param select
+     * @throws IOException
      */
-    public WikapidiaAnalyzer(Language language, FilterSelect select) {
-        // make sure we're using the correct English version
-        if (language.equals(Language.getByLangCode("simple"))) {
-            this.language = Language.getByLangCode("en");
-        } else {
-            this.language = language;
-        }
+    public WikapidiaAnalyzer(Language language, File file, FilterSelect select) throws IOException {
+        this.language = language;
+        this.dir = FSDirectory.open(file);
         this.select = select;
     }
 
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with all filters.
+     * The WikapidiaAnalyzer stores its lucene files in the specified directory
      * @param language
+     * @param file
+     * @throws IOException
      */
-    public WikapidiaAnalyzer(Language language) {
-        this(language, new FilterSelect().useStem().useStopWords().caseInsensitive());
+    public WikapidiaAnalyzer(Language language, File file) throws IOException {
+        this(language, file, new FilterSelect().useStem().useStopWords().caseInsensitive());
     }
 
     public FilterSelect getSelect() {
@@ -66,12 +71,12 @@ public class WikapidiaAnalyzer extends Analyzer {
         this.select = select;
     }
 
-    public IndexWriter getIndexWriter(Directory dir) throws IOException {
+    public IndexWriter getIndexWriter() throws IOException {
         IndexWriterConfig iwc = new IndexWriterConfig(MATCH_VERSION, this);
         return new IndexWriter(dir, iwc);
     }
 
-    public IndexSearcher getIndexSearcher(Directory dir) throws IOException {
+    public IndexSearcher getIndexSearcher() throws IOException {
         DirectoryReader reader = DirectoryReader.open(dir);
         return new IndexSearcher(reader);
     }
@@ -80,6 +85,10 @@ public class WikapidiaAnalyzer extends Analyzer {
     protected Analyzer.TokenStreamComponents createComponents(String s, Reader r) {
         Tokenizer tokenizer;
         String langCode = language.getLangCode();
+        // make sure we're using the correct English version
+        if (langCode == "simple") {
+            langCode = "en";
+        }
         if (langCode.equals("ja")) {
             tokenizer = new JapaneseTokenizer(r, null, false, JapaneseTokenizer.DEFAULT_MODE);
         } else if (langCode.equals("zh")) {

@@ -47,22 +47,15 @@ import org.apache.lucene.analysis.stempel.StempelFilter;
 import org.apache.lucene.analysis.stempel.StempelStemmer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ElisionFilter;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.*;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.wikapidia.lucene.LuceneUtils.*;
 
 /**
  *
@@ -77,9 +70,6 @@ import java.util.List;
 public class LanguageSpecificTokenizers {
 
     private static final String STOP_WORDS = "src/main/resources/stopwords/";
-    private static Configuration conf = new Configuration(null);
-
-    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString("lucene.version"));
 
 //    // Just a test to make sure tokenizers are working
 //    public static void main(String[] args){
