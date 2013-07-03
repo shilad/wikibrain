@@ -100,7 +100,7 @@ public class LanguageSpecificTokenizers {
 //                writer.addDocument(d);
 //                writer.close();
 //            }
-//        }catch(Exception e){
+//        }catch (Exception e){
 //            e.printStackTrace();
 //        }
 //    }
@@ -116,7 +116,7 @@ public class LanguageSpecificTokenizers {
                     (Class<WLanguageTokenizer>) Class.forName(LanguageSpecificTokenizers.class.getCanonicalName() + "$" + englishName + "Tokenizer");
             WLanguageTokenizer rVal = wltClass.newInstance();
             return rVal;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new WikapidiaException(e);
         }
     }
@@ -133,10 +133,18 @@ public class LanguageSpecificTokenizers {
             return new StandardTokenizer(MATCH_VERSION, r);
         }
 
-        public void setFilters(boolean caseInsensitive, boolean useStopWords, boolean useStem) {
-            this.caseInsensitive = caseInsensitive;
-            this.useStopWords = useStopWords;
-            this.useStem = useStem;
+        public void setFilters(FilterSelect select) {
+            this.caseInsensitive = select.isCaseInsensitive();
+            this.useStopWords = select.doesUseStopWords();
+            this.useStem = select.doesUseStem();
+        }
+
+        public FilterSelect getFilters() {
+            FilterSelect filterSelect = new FilterSelect();
+            if (caseInsensitive) filterSelect.caseInsensitive();
+            if (useStopWords) filterSelect.useStopWords();
+            if (useStem) filterSelect.useStem();
+            return filterSelect;
         }
     }
 
@@ -197,7 +205,7 @@ public class LanguageSpecificTokenizers {
                     stream = new StempelFilter(stream, stemmer);
                 }
                 return stream;
-            } catch(IOException e) {
+            } catch (IOException e) {
                 throw new WikapidiaException(e);
             }
         }
@@ -637,7 +645,7 @@ public class LanguageSpecificTokenizers {
 //
 //            br.close();
 //            return rVal;
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new WikapidiaException(e);
         }
     }

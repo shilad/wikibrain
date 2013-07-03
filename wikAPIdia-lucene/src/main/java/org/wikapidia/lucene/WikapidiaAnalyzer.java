@@ -33,34 +33,37 @@ public class WikapidiaAnalyzer extends Analyzer {
     public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString("lucene.version"));
 
     private final Language language;
-    private final boolean caseInsensitive;
-    private final boolean useStopWords;
-    private final boolean useStem;
+    private FilterSelect select;
 
     /**
-     * Constructs a WikapidiaAnalyzer for the specified language with specified boolean filters.
+     * Constructs a WikapidiaAnalyzer for the specified language with specified filters.
      * @param language
-     * @param caseInsensitive
-     * @param useStopWords
-     * @param useStem
+     * @param select
      */
-    public WikapidiaAnalyzer(Language language, boolean caseInsensitive, boolean useStopWords, boolean useStem) {
+    public WikapidiaAnalyzer(Language language, FilterSelect select) {
         // make sure we're using the correct English version
         if (language.equals(Language.getByLangCode("simple"))) {
             this.language = Language.getByLangCode("en");
         } else {
             this.language = language;
         }
-        this.caseInsensitive = caseInsensitive;
-        this.useStopWords = useStopWords;
-        this.useStem = useStem;
+        this.select = select;
     }
 
     /**
+     * Constructs a WikapidiaAnalyzer for the specified language with all filters.
      * @param language
      */
     public WikapidiaAnalyzer(Language language) {
-        this(language, true, true, true);
+        this(language, new FilterSelect().useStem().useStopWords().caseInsensitive());
+    }
+
+    public FilterSelect getSelect() {
+        return select;
+    }
+
+    public void setSelect(FilterSelect select) {
+        this.select = select;
     }
 
     public IndexWriter getIndexWriter(Directory dir) throws IOException {
@@ -89,10 +92,10 @@ public class WikapidiaAnalyzer extends Analyzer {
 
         try{
             LanguageSpecificTokenizers.WLanguageTokenizer langTokenizer = LanguageSpecificTokenizers.getWLanguageTokenizer(language);
-            langTokenizer.setFilters(caseInsensitive, useStopWords, useStem);
+            langTokenizer.setFilters(select);
             TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
             return new Analyzer.TokenStreamComponents(tokenizer, result);
-        } catch(WikapidiaException e) {
+        } catch (WikapidiaException e) {
             throw new RuntimeException(e);
         }
     }
