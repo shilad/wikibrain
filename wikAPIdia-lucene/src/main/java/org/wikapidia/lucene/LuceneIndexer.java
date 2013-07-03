@@ -1,5 +1,6 @@
 package org.wikapidia.lucene;
 
+import com.typesafe.config.Config;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
@@ -9,6 +10,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -17,7 +20,7 @@ import org.wikapidia.core.model.RawPage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -34,19 +37,23 @@ public class LuceneIndexer {
     public static final String WIKITEXT_FIELD_NAME = conf.get().getString("lucene.wikitext");
     public static final String PLAINTEXT_FIELD_NAME = conf.get().getString("lucene.plaintext");
 
-    private Directory directory;
-    private Map<Language, WikapidiaAnalyzer> analyzers;
-    private Map<Language, IndexWriter> writers;
+    private final Directory directory;
+    private final Map<Language, WikapidiaAnalyzer> analyzers;
+    private final Map<Language, IndexWriter> writers;
+    private final Collection<NameSpace> nameSpaces;
 
-    public LuceneIndexer(LanguageSet languages) throws WikapidiaException {
+    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces) throws WikapidiaException {
         try {
             directory = FSDirectory.open(new File(
                     conf.get().getString("lucene.directory")));
+            analyzers = new HashMap<Language, WikapidiaAnalyzer>();
+            writers = new HashMap<Language, IndexWriter>();
             for (Language language : languages) {
                 WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
                 analyzers.put(language, analyzer);
                 writers.put(language, analyzer.getIndexWriter(directory));
             }
+            this.nameSpaces = nameSpaces;
         } catch (IOException e) {
             throw new WikapidiaException(e);
         }
@@ -54,8 +61,7 @@ public class LuceneIndexer {
 
     public void indexPage(RawPage page) throws WikapidiaException {
         Language language = page.getLang();
-        // TODO: Is it really necessary to only index articles?
-        if (page.getNamespace() == NameSpace.ARTICLE && analyzers.containsKey(language)) {
+        if (nameSpaces.contains(page.getNamespace()) && analyzers.containsKey(language)) {
             try {
                 IndexWriter writer = writers.get(language);
                 Document document = new Document();
@@ -73,4 +79,38 @@ public class LuceneIndexer {
             }
         }
     }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LuceneIndexer> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LuceneIndexer.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "lucene";
+        }
+
+        @Override
+        public LuceneIndexer get(String name, Config config) throws ConfigurationException {
+            List<String> nsStrings = config.getStringList("namespaces");
+            Collection<NameSpace> nameSpaces = new ArrayList<NameSpace>();
+            for (String s : nsStrings) {
+                nameSpaces.add(NameSpace.getNameSpaceByName(s));
+            }
+            try {
+                return new LuceneIndexer(
+                        new LanguageSet(config.getStringList("languages")),
+                        nameSpaces
+                );
+            } catch (WikapidiaException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+    }
+
 }

@@ -112,9 +112,9 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
             if (daoFilter.isDisambig() != null) {
                 conditions.add(Tables.RAW_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
+//            if (conditions.isEmpty()) {
+//                return null;
+//            }
             Cursor<Record> result = context.select().
                     from(Tables.RAW_PAGE).
                     where(conditions).
