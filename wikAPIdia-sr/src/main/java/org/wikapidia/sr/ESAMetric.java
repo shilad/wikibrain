@@ -2,39 +2,34 @@ package org.wikapidia.sr;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.queryparser.classic.QueryParser;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.utils.ESAAnalyzer;
+import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.sr.utils.KnownSim;
-import org.apache.lucene.util.Version;
 import org.wikapidia.sr.utils.SimUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author Shilad Sen
+ * @author Yulun Li
  */
 public class ESAMetric extends BaseLocalSRMetric {
+
+    // TODO: test ESA independently
+    // TODO: finish article similarity
 
     public String getName() {
         return "ESA";
     }
 
-    private IndexSearcher searcher;
+    private LuceneSearcher searcher;
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
-    private Analyzer analyzer = new ESAAnalyzer();
 
     /**
      * Get cosine similarity between two phrases.
@@ -47,12 +42,16 @@ public class ESAMetric extends BaseLocalSRMetric {
      */
     public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
         if (phrase1 == null || phrase2 == null) {
-            return new SRResult(Double.NaN);
+            throw new NullPointerException("Null phrase passed to similarity");
         }
-        TIntDoubleHashMap scores1 = getConceptVector(phrase1);
-        TIntDoubleHashMap scores2 = getConceptVector(phrase2);
-        double sim = SimUtils.cosineSimilarity(scores1, scores2);
-        return new SRResult(sim); // TODO: normalize
+        try {
+            TIntDoubleHashMap scores1 = getConceptVector(phrase1, language);
+            TIntDoubleHashMap scores2 = getConceptVector(phrase2, language);
+            double sim = SimUtils.cosineSimilarity(scores1, scores2);
+            return new SRResult(sim); // TODO: normalize
+        } catch (WikapidiaException e) {
+            throw new DaoException(e);
+        }
     }
 
     /**
@@ -60,19 +59,11 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @param phrase
      * @return
      */
-    public TIntDoubleHashMap getConceptVector(String phrase) { // TODO: validIDs
-        QueryParser parser = new QueryParser(Version.LUCENE_43, "text", analyzer);
-        TopDocs docs = null;
-        try {
-            docs = searcher.search(parser.parse(phrase), 5000);
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (ParseException e) {
-            LOG.log(Level.WARNING, "parsing of phrase " + phrase + " failed", e);
-            return null;
-        }
+    public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws WikapidiaException { // TODO: validIDs
+        ScoreDoc[] scoreDocs = searcher.search(phrase, language);
         // TODO: prune
-        TIntDoubleHashMap result = expandScores(docs.scoreDocs);
+        // normalize vector to unit length
+        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));
         return result;
     }
 
@@ -84,12 +75,12 @@ public class ESAMetric extends BaseLocalSRMetric {
     private TIntDoubleHashMap expandScores(ScoreDoc scores[]) {
         TIntDoubleHashMap expanded = new TIntDoubleHashMap();
         for (ScoreDoc sd : scores) {
-            expanded.adjustOrPutValue(sd.doc, sd.score, sd.score);
+            expanded.put(sd.doc, sd.score);
         }
         return expanded;
     }
 
-        @Override
+    @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
