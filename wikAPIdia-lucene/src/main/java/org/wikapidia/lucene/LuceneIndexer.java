@@ -79,38 +79,4 @@ public class LuceneIndexer {
             }
         }
     }
-
-    public static class Provider extends org.wikapidia.conf.Provider<LuceneIndexer> {
-        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
-            super(configurator, config);
-        }
-
-        @Override
-        public Class getType() {
-            return LuceneIndexer.class;
-        }
-
-        @Override
-        public String getPath() {
-            return "lucene";
-        }
-
-        @Override
-        public LuceneIndexer get(String name, Config config) throws ConfigurationException {
-            List<String> nsStrings = config.getStringList("namespaces");
-            Collection<NameSpace> nameSpaces = new ArrayList<NameSpace>();
-            for (String s : nsStrings) {
-                nameSpaces.add(NameSpace.getNameSpaceByName(s));
-            }
-            try {
-                return new LuceneIndexer(
-                        new LanguageSet(config.getStringList("languages")),
-                        nameSpaces
-                );
-            } catch (WikapidiaException e) {
-                throw new ConfigurationException(e);
-            }
-        }
-    }
-
 }
