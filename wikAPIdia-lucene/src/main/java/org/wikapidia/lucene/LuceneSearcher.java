@@ -28,14 +28,13 @@ public class LuceneSearcher {
 
     public static final int HIT_COUNT = 1000;
 
-    private static final String CONF_PATH = "sr.lucene.";
     private static Configuration conf = new Configuration(null);
 
-    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
-    public static final String LOCAL_ID_FIELD_NAME = conf.get().getString(CONF_PATH + "localId");
-    public static final String LANG_ID_FIELD_NAME = conf.get().getString(CONF_PATH + "langId");
-    public static final String WIKITEXT_FIELD_NAME = conf.get().getString(CONF_PATH + "wikitext");
-    public static final String PLAINTEXT_FIELD_NAME = conf.get().getString(CONF_PATH + "plaintext");
+    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString("lucene.version"));
+    public static final String LOCAL_ID_FIELD_NAME = conf.get().getString("lucene.localId");
+    public static final String LANG_ID_FIELD_NAME = conf.get().getString("lucene.langId");
+    public static final String WIKITEXT_FIELD_NAME = conf.get().getString("lucene.wikitext");
+    public static final String PLAINTEXT_FIELD_NAME = conf.get().getString("lucene.plaintext");
 
     private Directory directory;
     private Map<Language, WikapidiaAnalyzer> analyzers;
@@ -44,7 +43,7 @@ public class LuceneSearcher {
     public LuceneSearcher(LanguageSet languages) throws WikapidiaException {
         try {
             directory = FSDirectory.open(new File(
-                    conf.get().getString(CONF_PATH + "directory")));
+                    conf.get().getString("lucene.directory")));
             for (Language language : languages) {
                 WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
                 analyzers.put(language, analyzer);

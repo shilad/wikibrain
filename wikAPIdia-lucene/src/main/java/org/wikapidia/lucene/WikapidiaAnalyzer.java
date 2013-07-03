@@ -28,25 +28,39 @@ import java.io.Reader;
  */
 public class WikapidiaAnalyzer extends Analyzer {
 
-    private static final String CONF_PATH = "sr.lucene.";
     private static Configuration conf = new Configuration(null);
 
-    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
+    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString("lucene.version"));
 
     private final Language language;
+    private final boolean caseInsensitive;
+    private final boolean useStopWords;
+    private final boolean useStem;
 
     /**
-     * If you are going to be processing wikiscript, useWikipediaTokenizer should be true
+     * Constructs a WikapidiaAnalyzer for the specified language with specified boolean filters.
      * @param language
-     * @throws WikapidiaException
+     * @param caseInsensitive
+     * @param useStopWords
+     * @param useStem
      */
-    public WikapidiaAnalyzer(Language language) throws WikapidiaException {
+    public WikapidiaAnalyzer(Language language, boolean caseInsensitive, boolean useStopWords, boolean useStem) {
         // make sure we're using the correct English version
         if (language.equals(Language.getByLangCode("simple"))) {
             this.language = Language.getByLangCode("en");
         } else {
             this.language = language;
         }
+        this.caseInsensitive = caseInsensitive;
+        this.useStopWords = useStopWords;
+        this.useStem = useStem;
+    }
+
+    /**
+     * @param language
+     */
+    public WikapidiaAnalyzer(Language language) {
+        this(language, true, true, true);
     }
 
     public IndexWriter getIndexWriter(Directory dir) throws IOException {
@@ -61,20 +75,21 @@ public class WikapidiaAnalyzer extends Analyzer {
 
     @Override
     protected Analyzer.TokenStreamComponents createComponents(String s, Reader r) {
-        Tokenizer tokenizer = null;
+        Tokenizer tokenizer;
         String langCode = language.getLangCode();
-        if (langCode.equals("ja")){
+        if (langCode.equals("ja")) {
             tokenizer = new JapaneseTokenizer(r, null, false, JapaneseTokenizer.DEFAULT_MODE);
-        } else if (langCode.equals("zh")){
+        } else if (langCode.equals("zh")) {
             tokenizer = new SentenceTokenizer(r);
-        } else if (langCode.equals("he") || langCode.equals("sk")){
+        } else if (langCode.equals("he") || langCode.equals("sk")) {
             tokenizer = new ICUTokenizer(r);
-        } else{
+        } else {
             tokenizer = new StandardTokenizer(MATCH_VERSION,r);
         }
 
         try{
             LanguageSpecificTokenizers.WLanguageTokenizer langTokenizer = LanguageSpecificTokenizers.getWLanguageTokenizer(language);
+            langTokenizer.setFilters(caseInsensitive, useStopWords, useStem);
             TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
             return new Analyzer.TokenStreamComponents(tokenizer, result);
         } catch(WikapidiaException e) {

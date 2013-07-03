@@ -12,14 +12,14 @@ import org.wikapidia.conf.Configuration;
  */
 public class ScoredArticle {
 
-    public static final String CONF_PATH = "sr.lucene.";
+    public static final String CONF_PATH = "lucene.";
     private static Configuration conf = new Configuration(null);
 
-    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
-    public static final String LOCAL_ID_FIELD_NAME = conf.get().getString(CONF_PATH + "localId");
-    public static final String LANG_ID_FIELD_NAME = conf.get().getString(CONF_PATH + "langId");
-    public static final String WIKITEXT_FIELD_NAME = conf.get().getString(CONF_PATH + "wikitext");
-    public static final String PLAINTEXT_FIELD_NAME = conf.get().getString(CONF_PATH + "plaintext");
+    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString("lucene.version"));
+    public static final String LOCAL_ID_FIELD_NAME = conf.get().getString("lucene.localId");
+    public static final String LANG_ID_FIELD_NAME = conf.get().getString("lucene.langId");
+    public static final String WIKITEXT_FIELD_NAME = conf.get().getString("lucene.wikitext");
+    public static final String PLAINTEXT_FIELD_NAME = conf.get().getString("lucene.plaintext");
 
     private final Document doc;
     private final double score;

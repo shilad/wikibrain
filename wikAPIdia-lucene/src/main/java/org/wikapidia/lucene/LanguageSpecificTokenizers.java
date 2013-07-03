@@ -47,11 +47,18 @@ import org.apache.lucene.analysis.stempel.StempelFilter;
 import org.apache.lucene.analysis.stempel.StempelStemmer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ElisionFilter;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.*;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.*;
 import java.util.Arrays;
@@ -59,16 +66,45 @@ import java.util.List;
 
 /**
  *
- * This class is almost explicitly copied from Brent Hecht, WikAPIdia.
+ * @author Ari Weiland
+ *
+ * This class is based on a class of the same name from Brent Hecht, WikAPIdia.
+ * I have updated everything to properly function consistently with lucene 4.3,
+ * as well as adding functionality such as the booleans to determine which filters
+ * should be applied.
  *
  */
-public class LanguageSpecificTokenizers {       // TODO: test me!!!
+public class LanguageSpecificTokenizers {
 
-    private static final String STOP_WORDS = "/src/main/resources/stopwords/";
-    private static final String CONF_PATH = "sr.lucene.";
+    private static final String STOP_WORDS = "src/main/resources/stopwords/";
     private static Configuration conf = new Configuration(null);
 
-    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString(CONF_PATH + "version"));
+    public static final Version MATCH_VERSION = Version.parseLeniently(conf.get().getString("lucene.version"));
+
+//    // Just a test to make sure tokenizers are working
+//    public static void main(String[] args){
+//        try{
+//            Field textField = new TextField("test", "wrap around the world", Field.Store.YES);
+//            List<String> langCodes = conf.get().getStringList("languages");
+//            langCodes.add("he");
+//            langCodes.add("sk");
+//            LanguageSet langSet = new LanguageSet(langCodes);
+//            for(Language language : langSet){
+//                WikapidiaAnalyzer wa = new WikapidiaAnalyzer(language);
+//                IndexWriterConfig iwc = new IndexWriterConfig(MATCH_VERSION, wa);
+//                iwc.setRAMBufferSizeMB(1024.0);
+//                iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+//                IndexWriter writer = new IndexWriter(new RAMDirectory(), iwc);
+//                Document d = new Document();
+//                d.add(textField);
+//                writer.addDocument(d);
+//                writer.close();
+//            }
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }
+//    }
+
 
     public static WLanguageTokenizer getWLanguageTokenizer(Language language) throws WikapidiaException {
         try{
@@ -87,14 +123,20 @@ public class LanguageSpecificTokenizers {       // TODO: test me!!!
 
     public static abstract class WLanguageTokenizer {
 
-        protected boolean caseInsensitive;
-        protected boolean useStopWords;
-        protected boolean useStem;
+        protected boolean caseInsensitive = true;
+        protected boolean useStopWords = true;
+        protected boolean useStem = true;
 
         protected abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException;
 
         public Tokenizer getTokenizer(Reader r) {
             return new StandardTokenizer(MATCH_VERSION, r);
+        }
+
+        public void setFilters(boolean caseInsensitive, boolean useStopWords, boolean useStem) {
+            this.caseInsensitive = caseInsensitive;
+            this.useStopWords = useStopWords;
+            this.useStem = useStem;
         }
     }
 
@@ -200,7 +242,7 @@ public class LanguageSpecificTokenizers {       // TODO: test me!!!
         @Override
         protected TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException {
             TokenStream stream = new CJKWidthFilter(input);
-            stream = new CJKBigramFilter(stream); // TODO: I don't know what the fuck to do with this! Harrison help me!
+            stream = new CJKBigramFilter(stream); // TODO: This seems to be a default, but we should look into it
             if (caseInsensitive)
                 stream = new LowerCaseFilter(MATCH_VERSION, stream);
             if (useStopWords)
