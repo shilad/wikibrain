@@ -14,14 +14,14 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.lucene.tokenizers.LanguageTokenizer;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-
-import static org.wikapidia.lucene.LuceneUtils.*;
 
 /**
  *
@@ -32,53 +32,40 @@ import static org.wikapidia.lucene.LuceneUtils.*;
  * as well as adding functionality such as the FilterSelects and the getIndexWriter
  * and getIndexSearcher methods.
  *
- */public class WikapidiaAnalyzer extends Analyzer {
+ */
+public class WikapidiaAnalyzer extends Analyzer {
+
+    protected final LuceneOptions O = new LuceneOptions(new Configuration());
 
     private final Language language;
-    private final Directory dir;
-    private FilterSelect select;
+    private TokenizerOptions options;
 
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with specified filters.
-     * The WikapidiaAnalyzer stores its lucene files in the specified directory
      * @param language
-     * @param file
-     * @param select
+     * @param options
      * @throws IOException
      */
-    public WikapidiaAnalyzer(Language language, File file, FilterSelect select) throws IOException {
+    public WikapidiaAnalyzer(Language language, TokenizerOptions options) throws IOException {
         this.language = language;
-        this.dir = FSDirectory.open(file);
-        this.select = select;
+        this.options = options;
     }
 
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with all filters.
-     * The WikapidiaAnalyzer stores its lucene files in the specified directory
      * @param language
-     * @param file
      * @throws IOException
      */
-    public WikapidiaAnalyzer(Language language, File file) throws IOException {
-        this(language, file, new FilterSelect().useStem().useStopWords().caseInsensitive());
+    public WikapidiaAnalyzer(Language language) throws IOException {
+        this(language, new TokenizerOptions().useStem().useStopWords().caseInsensitive());
     }
 
-    public FilterSelect getSelect() {
-        return select;
+    public TokenizerOptions getSelect() {
+        return options;
     }
 
-    public void setSelect(FilterSelect select) {
-        this.select = select;
-    }
-
-    public IndexWriter getIndexWriter() throws IOException {
-        IndexWriterConfig iwc = new IndexWriterConfig(MATCH_VERSION, this);
-        return new IndexWriter(dir, iwc);
-    }
-
-    public IndexSearcher getIndexSearcher() throws IOException {
-        DirectoryReader reader = DirectoryReader.open(dir);
-        return new IndexSearcher(reader);
+    public void setSelect(TokenizerOptions options) {
+        this.options = options;
     }
 
     @Override
@@ -96,12 +83,11 @@ import static org.wikapidia.lucene.LuceneUtils.*;
         } else if (langCode.equals("he") || langCode.equals("sk")) {
             tokenizer = new ICUTokenizer(r);
         } else {
-            tokenizer = new StandardTokenizer(MATCH_VERSION,r);
+            tokenizer = new StandardTokenizer(O.MATCH_VERSION,r);
         }
 
         try{
-            LanguageSpecificTokenizers.WLanguageTokenizer langTokenizer = LanguageSpecificTokenizers.getWLanguageTokenizer(language);
-            langTokenizer.setFilters(select);
+            LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
             TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
             return new Analyzer.TokenStreamComponents(tokenizer, result);
         } catch (WikapidiaException e) {

@@ -7,28 +7,28 @@ package org.wikapidia.lucene;
  * A wrapper class that uses a simple builder pattern to select filters to use by the Analyzer.
  *
  */
-public class FilterSelect {
+public class TokenizerOptions {
     private boolean caseInsensitive;
     private boolean useStopWords;
     private boolean useStem;
 
-    public FilterSelect() {
+    public TokenizerOptions() {
         caseInsensitive = false;
         useStopWords = false;
         useStem = false;
     }
 
-    public FilterSelect caseInsensitive() {
+    public TokenizerOptions caseInsensitive() {
         caseInsensitive = true;
         return this;
     }
 
-    public FilterSelect useStopWords() {
+    public TokenizerOptions useStopWords() {
         useStopWords = true;
         return this;
     }
 
-    public FilterSelect useStem() {
+    public TokenizerOptions useStem() {
         useStem = true;
         return this;
     }

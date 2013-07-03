@@ -5,6 +5,9 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.Directory;
+import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -15,14 +18,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static org.wikapidia.lucene.LuceneUtils.*;
-
 /**
- *
- * @author Ari Weiland
- *
- */
+*
+* @author Ari Weiland
+*
+*/
 public class LuceneIndexer {
+
+    protected final LuceneOptions O = new LuceneOptions(new Configuration());
 
     private final File file;
     private final Map<Language, WikapidiaAnalyzer> analyzers;
@@ -38,13 +41,15 @@ public class LuceneIndexer {
      */
     public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces) throws WikapidiaException {
         try {
-            file = LUCENE_ROOT;
+            file = O.LUCENE_ROOT;
+            Directory directory = new
             analyzers = new HashMap<Language, WikapidiaAnalyzer>();
             writers = new HashMap<Language, IndexWriter>();
             for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, new File(file, language.getLangCode()));
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
                 analyzers.put(language, analyzer);
-                writers.put(language, analyzer.getIndexWriter());
+                IndexWriterConfig iwc = new IndexWriterConfig(O.MATCH_VERSION, analyzer);
+                writers.put(language, new IndexWriter(directory, iwc));
             }
             this.nameSpaces = nameSpaces;
         } catch (IOException e) {
@@ -63,10 +68,10 @@ public class LuceneIndexer {
             try {
                 IndexWriter writer = writers.get(language);
                 Document document = new Document();
-                Field localIdField = new IntField(LOCAL_ID_FIELD_NAME, page.getPageId(), Field.Store.YES);
-                Field langIdField = new IntField(LANG_ID_FIELD_NAME, page.getLang().getId(), Field.Store.YES);
-                Field wikiTextField = new TextField(WIKITEXT_FIELD_NAME, page.getBody(), Field.Store.YES);
-                Field plainTextField = new TextField(PLAINTEXT_FIELD_NAME, page.getPlainText(), Field.Store.YES);
+                Field localIdField = new IntField(O.LOCAL_ID_FIELD_NAME, page.getPageId(), Field.Store.YES);
+                Field langIdField = new IntField(O.LANG_ID_FIELD_NAME, page.getLang().getId(), Field.Store.YES);
+                Field wikiTextField = new TextField(O.WIKITEXT_FIELD_NAME, page.getBody(), Field.Store.YES);
+                Field plainTextField = new TextField(O.PLAINTEXT_FIELD_NAME, page.getPlainText(), Field.Store.YES);
                 document.add(localIdField);
                 document.add(langIdField);
                 document.add(wikiTextField);

@@ -1,0 +1,46 @@
+package org.wikapidia.lucene.tokenizers;
+
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.da.DanishAnalyzer;
+import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
+import org.apache.lucene.analysis.snowball.SnowballFilter;
+import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.analysis.util.ElisionFilter;
+import org.tartarus.snowball.ext.CatalanStemmer;
+import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.lucene.TokenizerOptions;
+
+import java.util.Arrays;
+
+/**
+ * @author Ari Weiland
+ */
+public class CatalanTokenizer extends LanguageTokenizer {
+
+    private static final CharArraySet DEFAULT_ARTICLES = CharArraySet.unmodifiableSet(
+            new CharArraySet(MATCH_VERSION, Arrays.asList("d", "l", "m", "n", "s", "t"), true));
+
+    public CatalanTokenizer(TokenizerOptions select) {
+        super(select);
+    }
+
+    @Override
+    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException {
+        TokenStream stream = new StandardFilter(MATCH_VERSION, input);
+        if (caseInsensitive)
+            stream = new LowerCaseFilter(MATCH_VERSION, stream);
+        if (useStopWords) {
+            stream = new ElisionFilter(stream, DEFAULT_ARTICLES);
+            stream = new StopFilter(MATCH_VERSION, stream, DanishAnalyzer.getDefaultStopSet());
+        }
+        if (useStem) {
+            if (!stemExclusionSet.isEmpty())
+                stream = new SetKeywordMarkerFilter(stream, stemExclusionSet);
+            stream = new SnowballFilter(stream, new CatalanStemmer());
+        }
+        return stream;
+    }
+}

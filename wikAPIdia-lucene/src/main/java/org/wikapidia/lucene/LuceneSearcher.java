@@ -5,6 +5,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -16,17 +17,17 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.wikapidia.lucene.LuceneUtils.*;
-
 /**
- *
- * @author Ari Weiland
- *
- */
+*
+* @author Ari Weiland
+*
+*/
 public class LuceneSearcher {
 
     private static final Logger LOG = Logger.getLogger(LuceneSearcher.class.getName());
     public static final int HIT_COUNT = 1000; // TODO: do something more user-friendly with this value?
+
+    protected final LuceneOptions O = new LuceneOptions(new Configuration());
 
     private final File file;
     private final Map<Language, WikapidiaAnalyzer> analyzers;
@@ -40,7 +41,7 @@ public class LuceneSearcher {
      */
     public LuceneSearcher(LanguageSet languages) throws WikapidiaException {
         try {
-            file = LUCENE_ROOT;
+            file = O.LUCENE_ROOT;
             analyzers = new HashMap<Language, WikapidiaAnalyzer>();
             searchers = new HashMap<Language, IndexSearcher>();
             for (Language language : languages) {
@@ -62,7 +63,7 @@ public class LuceneSearcher {
      * @throws WikapidiaException
      */
     public ScoreDoc[] search(String searchString, Language language) throws WikapidiaException {
-        return search(PLAINTEXT_FIELD_NAME, searchString, language);
+        return search(O.PLAINTEXT_FIELD_NAME, searchString, language);
     }
 
     /**
@@ -79,7 +80,7 @@ public class LuceneSearcher {
             throw new WikapidiaException("This Analyzer does not support " + language.getEnLangName());
         }
         try {
-            QueryParser parser = new QueryParser(MATCH_VERSION, fieldName, analyzers.get(language));
+            QueryParser parser = new QueryParser(O.MATCH_VERSION, fieldName, analyzers.get(language));
             Query query = parser.parse(searchString);
             return searchers.get(language).search(query, HIT_COUNT).scoreDocs;
         } catch (ParseException e) {
