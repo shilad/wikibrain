@@ -129,9 +129,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             if (daoFilter.isDisambig() != null) {
                 conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
+//            if (conditions.isEmpty()) {
+//                return null;
+//            }
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(conditions).

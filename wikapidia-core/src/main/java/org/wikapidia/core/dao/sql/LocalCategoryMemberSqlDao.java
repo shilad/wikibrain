@@ -114,8 +114,8 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.CATEGORY_MEMBERS.LANG_ID.in(daoFilter.getLangIds()));
-            } else {
-                return null;
+//            } else {
+//                return null;
             }
             Cursor<Record> result = context.select().
                     from(Tables.CATEGORY_MEMBERS).
