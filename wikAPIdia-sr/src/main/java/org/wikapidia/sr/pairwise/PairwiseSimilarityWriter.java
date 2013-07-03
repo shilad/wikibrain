@@ -1,14 +1,13 @@
 package org.wikapidia.sr.pairwise;
 
-import edu.macalester.wpsemsim.matrix.SparseMatrixRow;
-import edu.macalester.wpsemsim.matrix.SparseMatrixWriter;
-import edu.macalester.wpsemsim.matrix.ValueConf;
-import edu.macalester.wpsemsim.sim.SimilarityMetric;
-import edu.macalester.wpsemsim.utils.DocScoreList;
-import edu.macalester.wpsemsim.utils.Procedure;
-import edu.macalester.wpsemsim.utils.ParallelForEach;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.matrix.SparseMatrixWriter;
+import org.wikapidia.matrix.ValueConf;
+import org.wikapidia.sr.SRResultList;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +19,7 @@ import java.util.logging.Logger;
 
 public class PairwiseSimilarityWriter {
     private static final Logger LOG = Logger.getLogger(PairwiseSimilarityWriter.class.getName());
-
-    private SimilarityMetric metric;
+    //TODO: add the constructor for language and metric
     private SparseMatrixWriter writer;
     private AtomicInteger idCounter = new AtomicInteger();
     private long numCells;
@@ -29,8 +27,7 @@ public class PairwiseSimilarityWriter {
     private TIntSet validIds;
     private TIntSet usedIds = new TIntHashSet();
 
-    public PairwiseSimilarityWriter(SimilarityMetric metric, File outputFile) throws IOException {
-        this.metric = metric;
+    public PairwiseSimilarityWriter(File outputFile) throws IOException {
         this.vconf = new ValueConf();
         this.writer = new SparseMatrixWriter(outputFile, vconf);
     }
@@ -62,7 +59,8 @@ public class PairwiseSimilarityWriter {
                     ": finding matches for doc " + idCounter.get() +
                     ", used " + usedIds.size() + " of " + nValidStr);
         }
-        DocScoreList scores = metric.mostSimilar(wpId, maxSimsPerDoc, validIds);
+        //TODO: Create a new method in the Milne Witten/specific metric to generate the unknown vector
+        SRResultList scores = metric.mostSimilar(wpId, maxSimsPerDoc, validIds);
         if (scores != null) {
             int ids[] = scores.getIds();
             synchronized (this) {

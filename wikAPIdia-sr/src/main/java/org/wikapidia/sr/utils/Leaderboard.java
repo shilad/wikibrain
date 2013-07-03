@@ -1,5 +1,7 @@
 package org.wikapidia.sr.utils;
 
+import org.wikapidia.sr.SRResultList;
+
 public class Leaderboard {
     private double[] values;
     private int[] keys;
@@ -99,8 +101,8 @@ public class Leaderboard {
         }
     }
 
-    public DocScoreList getTop() {
-        DocScoreList scores = new DocScoreList(size);
+    public SRResultList getTop() {
+        SRResultList scores = new SRResultList(size);
         for (int i = 1; i <= size; i++) {
             scores.set(i - 1, keys[i], values[i]);
         }

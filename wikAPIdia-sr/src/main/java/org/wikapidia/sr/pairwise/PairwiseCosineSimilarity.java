@@ -1,51 +1,33 @@
 package org.wikapidia.sr.pairwise;
 
-import edu.macalester.wpsemsim.concepts.ConceptMapper;
-import edu.macalester.wpsemsim.lucene.IndexHelper;
-import edu.macalester.wpsemsim.matrix.Matrix;
-import edu.macalester.wpsemsim.matrix.MatrixRow;
-import edu.macalester.wpsemsim.matrix.SparseMatrix;
-import edu.macalester.wpsemsim.matrix.SparseMatrixRow;
-import edu.macalester.wpsemsim.sim.BaseSimilarityMetric;
-import edu.macalester.wpsemsim.sim.SimilarityMetric;
-import edu.macalester.wpsemsim.utils.DocScoreList;
-import edu.macalester.wpsemsim.utils.Leaderboard;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.apache.lucene.queryparser.surround.parser.ParseException;
+import org.wikapidia.matrix.MatrixRow;
+import org.wikapidia.matrix.SparseMatrix;
+import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.utils.Leaderboard;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class PairwiseCosineSimilarity extends BaseSimilarityMetric implements SimilarityMetric {
+public class PairwiseCosineSimilarity {
     private static final Logger LOG = Logger.getLogger(PairwiseCosineSimilarity.class.getName());
 
     private SparseMatrix matrix;
     private SparseMatrix transpose;
+    private String name;
     private TIntFloatHashMap lengths = null;   // lengths of each row
     private int maxResults = -1;
-    private SimilarityMetric basedOn;   // underlying similarity metric that generated these similarities
-    private boolean buildPhraseVectors; // if true, build phrase vectors using the underlying similarity metric.
     private TIntSet idsInResults = new TIntHashSet();
 
     public PairwiseCosineSimilarity(SparseMatrix matrix, SparseMatrix transpose) throws IOException {
-        this(null, null, matrix, transpose);
-
-    }
-    public PairwiseCosineSimilarity(ConceptMapper mapper, IndexHelper helper, SparseMatrix matrix, SparseMatrix transpose) throws IOException {
-        super(mapper, helper);
         this.matrix = matrix;
         this.transpose = transpose;
-        setName("pairwise-cosine-similarity (matrix=" +
-                matrix.getPath() + ", transpose=" +
-                transpose.getPath() + ")");
-    }
-
-    public void setBasedOn(SimilarityMetric metric) {
-        this.basedOn = metric;
+        this.name = "pairwise-cosine-similarity (matrix=" + matrix.getPath() + ", transpose=" + transpose.getPath() + ")";
     }
 
     public synchronized void initIfNeeded() {
@@ -60,7 +42,6 @@ public class PairwiseCosineSimilarity extends BaseSimilarityMetric implements Si
         }
     }
 
-    @Override
     public double similarity(int wpId1, int wpId2) throws IOException {
         double sim = 0;
         MatrixRow row1 = matrix.getRow(wpId1);
@@ -70,56 +51,21 @@ public class PairwiseCosineSimilarity extends BaseSimilarityMetric implements Si
                     sim = cosineSimilarity(row1.asTroveMap(), row2.asTroveMap());
             }
         }
-        return normalize(sim);
+        return sim;
 
     }
 
-    @Override
-    public double similarity(String phrase1, String phrase2) throws IOException {
-        if (!buildPhraseVectors) {
-            return super.similarity(phrase1, phrase2);
-        }
-        if (basedOn == null) {
-            throw new IllegalArgumentException("basedOn must be non-null if buildPhraseVectors is true");
-        }
-        initIfNeeded();
-        DocScoreList list1 = basedOn.mostSimilar(phrase1, maxResults, idsInResults);
-        DocScoreList list2 = basedOn.mostSimilar(phrase2, maxResults, idsInResults);
-        list1.makeUnitLength();
-        list2.makeUnitLength();
-        return normalize(cosineSimilarity(list1.asTroveMap(), list2.asTroveMap()));
-    }
-
-    @Override
-    public DocScoreList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException {
         MatrixRow row = matrix.getRow(wpId);
         if (row == null) {
             LOG.info("unknown wpId: " + wpId);
-            return new DocScoreList(0);
+            return new SRResultList(0);
         }
         TIntFloatHashMap vector = row.asTroveMap();
         return mostSimilar(maxResults, validIds, vector);
     }
 
-    @Override
-    public DocScoreList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws IOException {
-        if (!buildPhraseVectors) {
-            return super.mostSimilar(phrase, maxResults, validIds);
-        }
-        if (basedOn == null) {
-            throw new IllegalArgumentException("basedOn must be non-null if buildPhraseVectors is true");
-        }
-        initIfNeeded();
-        DocScoreList list = basedOn.mostSimilar(phrase, maxResults, idsInResults);
-        if (list == null) {
-            return null;
-        } else {
-            return mostSimilar(maxResults, validIds, list.asTroveMap());
-        }
-
-    }
-
-    private DocScoreList mostSimilar(int maxResults, TIntSet validIds, TIntFloatHashMap vector) throws IOException {
+    private SRResultList mostSimilar(int maxResults, TIntSet validIds, TIntFloatHashMap vector) throws IOException {
         initIfNeeded();
         TIntDoubleHashMap dots = new TIntDoubleHashMap();
 
@@ -147,9 +93,8 @@ public class PairwiseCosineSimilarity extends BaseSimilarityMetric implements Si
             leaderboard.tallyScore(id, sim);
         }
 
-        return normalize(leaderboard.getTop());
+        return leaderboard.getTop();
     }
-
 
     private double cosineSimilarity(TIntFloatHashMap map1, TIntFloatHashMap map2) {
         double xDotX = 0.0;
@@ -174,10 +119,6 @@ public class PairwiseCosineSimilarity extends BaseSimilarityMetric implements Si
         return Math.sqrt(length);
     }
 
-    public void setBuildPhraseVectors(boolean buildPhraseVectors) {
-        this.buildPhraseVectors = buildPhraseVectors;
-    }
-
     public static int PAGE_SIZE = 1024*1024*500;    // 500MB
     public static void main(String args[]) throws IOException, InterruptedException {
         if (args.length != 4 && args.length != 5) {
@@ -192,7 +133,7 @@ public class PairwiseCosineSimilarity extends BaseSimilarityMetric implements Si
                 ? Integer.valueOf(args[4])
                 : Runtime.getRuntime().availableProcessors();
 
-        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(sim, new File(args[2]));
+        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(new File(args[2]));
         writer.writeSims(matrix.getRowIds(), cores, Integer.valueOf(args[3]));
     }
 }
