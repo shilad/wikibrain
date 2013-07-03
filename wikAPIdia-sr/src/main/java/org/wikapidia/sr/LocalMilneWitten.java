@@ -17,22 +17,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MilneWittenSimilarity extends BaseLocalSRMetric{
+public class LocalMilneWitten extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
     //False is standard Milne Witten with in links, true is with out links
-    private boolean outLinks = false;
+    private boolean outLinks;
+    private MilneWittenCore core;
 
-    public MilneWittenSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
-        this.disambiguator = disambiguator;
-        this.linkHelper = linkHelper;
-        this.pageHelper = pageHelper;
+    public LocalMilneWitten(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
+        this(disambiguator,linkHelper,pageHelper,false);
     }
 
-    public MilneWittenSimilarity(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper, boolean outLinks) {
+    public LocalMilneWitten(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper, boolean outLinks) {
         this.disambiguator = disambiguator;
         this.linkHelper = linkHelper;
         this.pageHelper = pageHelper;
         this.outLinks = outLinks;
+        this.core = new MilneWittenCore();
     }
 
     public boolean isOutLinks() {
@@ -76,15 +76,10 @@ public class MilneWittenSimilarity extends BaseLocalSRMetric{
         if (page1.getLanguage()!=page2.getLanguage()){
             return new SRResult(Double.NaN);
         }
+
         TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()));
         TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()));
 
-        //Error handling for null pages
-        if (A == null || B == null) {
-            return new SRResult(Double.NaN);
-        }
-
-        TIntSet I = new TIntHashSet(A); I.retainAll(B); // intersection
         DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
         Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
         int numArticles = 0;
@@ -92,49 +87,43 @@ public class MilneWittenSimilarity extends BaseLocalSRMetric{
             numArticles++;
         }
 
-        if (I.size() == 0) {
-            return new SRResult(0.0);
-        }
+        SRResult result = core.similarity(A,B,numArticles,explanations);
 
-        SRResult result = new SRResult(1.0 - (
-            (Math.log(Math.max(A.size(), B.size())) - Math.log(I.size()))
-            /   (Math.log(numArticles) - Math.log(Math.min(A.size(), B.size())))));
-
-//        SRResult result = new SRResult(1.0 - (
-//            (Math.max(A.size(), B.size()) - I.size()*1.0)
-//            /   (numArticles - Math.min(A.size(), B.size()))));
-
+        //Reformat explanations to fit our metric.
         if (explanations) {
             if (outLinks){
-                for(int id: I.toArray()){
+                List<Explanation> explanationList = new ArrayList<Explanation>();
+                for (Explanation explanation : result.getExplanations()){
                     String format = "Both ? and ? link to ?";
+                    int id = (Integer)explanation.getInformation().get(0);
                     LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(),id);
                     if (intersectionPage==null){
                         continue;
                     }
-                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
+                    List<LocalPage> formatPages = new ArrayList<LocalPage>();
                     formatPages.add(page1);
                     formatPages.add(page2);
                     formatPages.add(intersectionPage);
-                    Explanation explanation = new Explanation(format, formatPages);
-                    result.addExplanation(explanation);
+                    explanationList.add(new Explanation(format, formatPages));
                 }
+                result.setExplanations(explanationList);
             }
             else{
-
-                for (int id : I.toArray()) {
+                List<Explanation> explanationList = new ArrayList<Explanation>();
+                for (Explanation explanation : result.getExplanations()){
                     String format = "? links to both ? and ?";
-                    LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(), id);
+                    int id = (Integer)explanation.getInformation().get(0);
+                    LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(),id);
                     if (intersectionPage==null){
                         continue;
                     }
-                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
+                    List<LocalPage> formatPages = new ArrayList<LocalPage>();
                     formatPages.add(intersectionPage);
                     formatPages.add(page1);
                     formatPages.add(page2);
-                    Explanation explanation = new Explanation(format, formatPages);
-                    result.addExplanation(explanation);
+                    explanationList.add(new Explanation(format, formatPages));
                 }
+                result.setExplanations(explanationList);
             }
         }
 

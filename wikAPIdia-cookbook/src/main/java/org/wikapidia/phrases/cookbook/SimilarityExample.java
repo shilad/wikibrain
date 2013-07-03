@@ -13,7 +13,7 @@ import org.wikapidia.core.model.Title;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.BaseLocalSRMetric;
 import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.MilneWittenSimilarity;
+import org.wikapidia.sr.LocalMilneWitten;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
@@ -49,7 +49,7 @@ public class SimilarityExample {
         Disambiguator disambiguator = new TopResultDisambiguator(pa);
         LocalLinkDao localLinkDao = c.get(LocalLinkDao.class);
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-        BaseLocalSRMetric sr = new MilneWittenSimilarity(disambiguator,localLinkDao,localPageDao, true);
+        BaseLocalSRMetric sr = new LocalMilneWitten(disambiguator,localLinkDao,localPageDao, true);
         //Similarity between strings
         String string1 = "Barack Obama";
         String string2 = "US";
