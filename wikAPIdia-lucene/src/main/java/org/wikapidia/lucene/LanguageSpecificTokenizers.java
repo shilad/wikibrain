@@ -66,6 +66,8 @@ import static org.wikapidia.lucene.LuceneUtils.*;
  * as well as adding functionality such as the booleans to determine which filters
  * should be applied.
  *
+ * Currently contains 26 Tokenizers
+ *
  */
 public class LanguageSpecificTokenizers {
 
