@@ -1,5 +1,7 @@
 package org.wikapidia.sr;
 
+import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.core.model.LocalPage;
 
 import java.util.List;
@@ -35,7 +37,10 @@ public class Explanation {
             //Add additional handlers as appropriate
             if (object instanceof LocalPage){
                 plaintext+=((LocalPage) object).getTitle().getCanonicalTitle();
-            } else {
+            } else if (object instanceof UniversalPage){
+                Language language = ((UniversalPage) object).getLanguageSetOfExistsInLangs().getDefaultLanguage();
+                plaintext+=((LocalPage)((UniversalPage) object).getLocalPages(language).toArray()[0]).getTitle().getCanonicalTitle();
+            }else {
                 plaintext+=object.toString();
             }
 

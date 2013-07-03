@@ -1,6 +1,8 @@
 package org.wikapidia.sr;
 
+import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
 
@@ -21,7 +23,7 @@ public interface UniversalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations);
+    public SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations) throws DaoException;
 
 
     /**
@@ -96,7 +98,7 @@ public interface UniversalSRMetric {
      * @param ids
      * @return
      */
-    public double[][] cosimilarity(int ids[]) throws IOException;
+    public double[][] cosimilarity(int ids[]) throws IOException, DaoException;
 
     /**
      * Construct a symmetric cosimilarity matrix of phrases
@@ -104,5 +106,14 @@ public interface UniversalSRMetric {
      * @return
      */
     public double[][] cosimilarity(LocalString phrases[]) throws IOException;
+
+    /**
+     * Return a vector for a UniversalPage
+     * @param id the UniversalPage's id
+     * @param algorithmId the UniversalPage's algorithm id
+     * @return a vector relating it to other pages.
+     * @throws DaoException
+     */
+    public TIntDoubleMap getVector(int id, int algorithmId) throws DaoException;
 
 }
