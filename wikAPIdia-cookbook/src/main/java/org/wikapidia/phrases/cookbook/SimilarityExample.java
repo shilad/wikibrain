@@ -49,7 +49,7 @@ public class SimilarityExample {
         Disambiguator disambiguator = new TopResultDisambiguator(pa);
         LocalLinkDao localLinkDao = c.get(LocalLinkDao.class);
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-        BaseLocalSRMetric sr = new MilneWittenSimilarity(disambiguator,localLinkDao,localPageDao,true);
+        BaseLocalSRMetric sr = new MilneWittenSimilarity(disambiguator,localLinkDao,localPageDao, true);
         //Similarity between strings
         String string1 = "Barack Obama";
         String string2 = "US";
@@ -82,6 +82,7 @@ public class SimilarityExample {
         printResult(sr.similarity(page1,page4,true));
         System.out.println("Barack Obama and Barack Obama");
         printResult(sr.similarity(page1,page1,true));
+
 
     }
 }
