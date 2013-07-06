@@ -1,7 +1,6 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import gnu.trove.impl.*;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
@@ -15,7 +14,6 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RedirectDao;
-import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
@@ -37,22 +35,14 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
     }
 
     @Override
+    public void clear() throws DaoException{
+        executeSqlResource("/db/redirect-drop.sql");
+        executeSqlResource("/db/redirect-schema.sql");
+    }
+
+    @Override
     public void beginLoad() throws DaoException{
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            RedirectSqlDao.class.getResource("/db/redirect-schema.sql")
-                    )
-            );
-        } catch (IOException e){
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/redirect-schema.sql");
     }
 
     @Override
@@ -81,23 +71,7 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
 
     @Override
     public void endLoad() throws DaoException{
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/redirect-indexes.sql")
-                    ));
-            if (cache!=null){
-                cache.updateTableLastModified(Tables.REDIRECT.getName());
-            }
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/redirect-indexes.sql");
     }
 
     /**

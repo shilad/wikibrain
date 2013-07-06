@@ -33,21 +33,14 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
     }
 
     @Override
+    public void clear() throws DaoException {
+        executeSqlResource("/db/raw-page-drop.sql");
+        executeSqlResource("/db/raw-page-schema.sql");
+    }
+
+    @Override
     public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            RawPageSqlDao.class.getResource("/db/raw-page-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+       executeSqlResource("/db/raw-page-schema.sql");
     }
 
     @Override
@@ -77,20 +70,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
 
     @Override
     public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            RawPageSqlDao.class.getResource("/db/raw-page-indexes.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/raw-page-indexes.sql");
     }
 
     @Override

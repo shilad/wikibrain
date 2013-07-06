@@ -3,28 +3,21 @@ package org.wikapidia.dao.load;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.cli.*;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.parser.wiki.RedirectParser;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -49,14 +42,8 @@ public class RedirectLoader {
         this.redirects = new RedirectSqlDao(ds);
     }
 
-    private void beginLoad() throws DaoException {
-        redirects.beginLoad();
-        LOG.info("Begin Load: ");
-    }
-
-    private void endLoad() throws DaoException {
-        redirects.endLoad();
-        LOG.info("End Load.");
+    public RedirectSqlDao getDao() {
+        return redirects;
     }
 
     private void loadRedirectIdsIntoMemory(Language language) throws DaoException{
@@ -112,12 +99,7 @@ public class RedirectLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
-                        .create("t"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("create-indexes")
-                        .withDescription("create all indexes after loading")
-                        .create("i"));
+                        .create("d"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -135,9 +117,13 @@ public class RedirectLoader {
 
         DataSource dataSource = conf.get(DataSource.class);
         RedirectLoader redirectLoader = new RedirectLoader(dataSource);
-        if (cmd.hasOption("t")){
-            redirectLoader.beginLoad();
+        if (cmd.hasOption("d")){
+            LOG.info("Clearing data provider: ");
+            redirectLoader.getDao().clear();
         }
+
+        LOG.info("Begin Load: ");
+        redirectLoader.getDao().beginLoad();
 
         for(Language l : env.getLanguages()){
             LOG.info("LOADING REDIRECTS FOR " + l);
@@ -146,9 +132,7 @@ public class RedirectLoader {
             redirectLoader.loadRedirectsIntoDatabase(l);
         }
 
-        if (cmd.hasOption("i")){
-            redirectLoader.endLoad();
-        }
+        redirectLoader.getDao().endLoad();
     }
 
 }

@@ -8,7 +8,7 @@ import org.wikapidia.core.model.Title;
 import java.util.Collection;
 import java.util.Map;
 
-public interface LocalPageDao<T extends LocalPage> extends Loader<T> {
+public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
 
     /**
      * Sets if we should try to follow the redirects or not. Default is true (to following them).

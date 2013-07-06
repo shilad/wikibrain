@@ -1,10 +1,11 @@
 package org.wikapidia.core.dao;
 
 
+import org.wikapidia.core.dao.sql.SqlDaoIterable;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
 
-public interface LocalLinkDao extends Loader<LocalLink> {
+public interface LocalLinkDao extends Dao<LocalLink> {
 
     /**
      * Returns a single LocalLink based on language and source and destination within

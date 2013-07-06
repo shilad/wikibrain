@@ -92,12 +92,7 @@ public class DumpLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
-                        .create("t"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("create-indexes")
-                        .withDescription("create all indexes after loading")
-                        .create("i"));
+                        .create("d"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -139,10 +134,12 @@ public class DumpLoader {
 
         final DumpLoader loader = new DumpLoader(lpDao, rpDao);
 
-        if (cmd.hasOption("t")) {
-            lpDao.beginLoad();
-            rpDao.beginLoad();
+        if (cmd.hasOption("d")) {
+            lpDao.clear();
+            rpDao.clear();
         }
+        lpDao.beginLoad();
+        rpDao.beginLoad();
 
         // loads multiple dumps in parallel
         ParallelForEach.loop(dumps,
@@ -154,9 +151,7 @@ public class DumpLoader {
                     }
                 });
 
-        if (cmd.hasOption("i")) {
-            lpDao.endLoad();
-            rpDao.endLoad();
-        }
+        lpDao.endLoad();
+        rpDao.endLoad();
     }
 }

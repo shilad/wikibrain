@@ -43,21 +43,14 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
+    public void clear() throws DaoException {
+        executeSqlResource("/db/universal-page-drop.sql");
+        executeSqlResource("/db/universal-page-schema.sql");
+    }
+
+    @Override
     public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalPageSqlDao.class.getResource("/db/universal-page-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/universal-page-schema.sql");
     }
 
     @Override
@@ -88,20 +81,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
 
     @Override
     public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalPageSqlDao.class.getResource("/db/universal-page-indexes.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/universal-page-indexes.sql");
     }
 
     @Override

@@ -48,21 +48,14 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     @Override
+    public void clear() throws DaoException {
+        executeSqlResource("/db/local-page-drop.sql");
+        executeSqlResource("/db/local-page-schema.sql");
+    }
+
+    @Override
     public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/local-page-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/local-page-schema.sql");
     }
 
     @Override
@@ -89,23 +82,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
 
     @Override
     public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/local-page-indexes.sql")
-                    ));
-            if (cache!=null){
-                cache.updateTableLastModified(Tables.LOCAL_PAGE.getName());
-            }
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/local-page-indexes.sql");
     }
 
     // This iterable can contain null entries, which originate from the cursor.

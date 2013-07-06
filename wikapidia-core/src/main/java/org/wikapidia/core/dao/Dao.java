@@ -10,7 +10,15 @@ package org.wikapidia.core.dao;
  * retrieve an Iterable of items.
  *
  */
-public interface Loader<T> {
+public interface Dao<T> {
+
+    /**
+     * Removes all entities from the data store.
+     * For a sql table, this will be a "drop."
+     *
+     * @throws DaoException
+     */
+    public void clear() throws DaoException;
 
     /**
      * Runs front-end processes on the database

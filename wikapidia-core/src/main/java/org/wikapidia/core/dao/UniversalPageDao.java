@@ -16,7 +16,7 @@ import java.util.Map;
  * An interface that describes a Dao to retrieve Universal Pages.
  *
  */
-public interface UniversalPageDao<T extends UniversalPage> extends Loader<T> {
+public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {
 
     /**
      * Returns a UniversalPage instance of the specified page type corresponding to the input universal ID

@@ -1,4 +1,4 @@
-package org.wikapidia.core.dao;
+package org.wikapidia.core.dao.sql;
 
 import org.jooq.SQLDialect;
 

@@ -43,6 +43,10 @@ public class UniversalLinkLoader {
         this.universalLinkDao = universalLinkDao;
     }
 
+    public UniversalLinkDao getDao() {
+        return universalLinkDao;
+    }
+
     /**
      * Loads the database of UniversalLinks. Requires a database of UniversalPages and LocalLinks
      * @throws DaoException
@@ -88,12 +92,7 @@ public class UniversalLinkLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
-                        .create("t"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("create-indexes")
-                        .withDescription("create all indexes after loading")
-                        .create("i"));
+                        .create("d"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
@@ -128,17 +127,17 @@ public class UniversalLinkLoader {
                 universalLinkDao
         );
 
-        if (cmd.hasOption("t")) {
-            LOG.log(Level.INFO, "Begin Load");
-            universalLinkDao.beginLoad();
+        if (cmd.hasOption("d")) {
+            LOG.log(Level.INFO, "Clearing data");
+            universalLinkDao.clear();
         }
+        LOG.log(Level.INFO, "Begin Load");
+        universalLinkDao.beginLoad();
 
         loader.loadLinkMap(mapper.getId());
 
-        if (cmd.hasOption("i")) {
-            LOG.log(Level.INFO, "End Load");
-            universalLinkDao.endLoad();
-        }
+        LOG.log(Level.INFO, "End Load");
+        universalLinkDao.endLoad();
         LOG.log(Level.INFO, "DONE");
     }
 }

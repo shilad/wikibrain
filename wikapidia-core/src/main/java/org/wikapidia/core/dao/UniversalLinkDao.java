@@ -11,7 +11,7 @@ import org.wikapidia.core.model.UniversalLinkGroup;
  * An interface that describes a Dao to retrieve Universal Links.
  *
  */
-public interface UniversalLinkDao extends Loader<UniversalLink>{
+public interface UniversalLinkDao extends Dao<UniversalLink> {
 
     /**
      * Alternate method for saving a UniversalLink to the database

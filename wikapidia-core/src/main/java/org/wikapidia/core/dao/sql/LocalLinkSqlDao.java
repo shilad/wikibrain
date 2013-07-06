@@ -27,21 +27,14 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
     }
 
     @Override
+    public void clear() throws DaoException {
+        executeSqlResource("/db/local-link-drop.sql");
+        executeSqlResource("/db/local-link-schema.sql");
+    }
+
+    @Override
     public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalLinkSqlDao.class.getResource("/db/local-link-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/local-link-schema.sql");
     }
 
     @Override
@@ -68,20 +61,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
 
     @Override
     public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/local-link-indexes.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/local-link-indexes.sql");
     }
 
     @Override

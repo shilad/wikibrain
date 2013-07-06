@@ -37,6 +37,10 @@ public class WikiTextLoader {
         this.rawPageDao = rawPageDao;
     }
 
+    public RawPageDao getDao() {
+        return rawPageDao;
+    }
+
     private void load(LanguageInfo lang) throws DaoException {
         WikiTextDumpParser dumpParser = new WikiTextDumpParser(rawPageDao, lang, allowedIlls);
         dumpParser.parse(visitors);
@@ -48,12 +52,7 @@ public class WikiTextLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
-                        .create("t"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("create-indexes")
-                        .withDescription("create all indexes after loading")
-                        .create("i"));
+                        .create("d"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -86,10 +85,12 @@ public class WikiTextLoader {
 
         final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao);
 
-        if(cmd.hasOption("t")) {
-            llDao.beginLoad();
-            lcmDao.beginLoad();
+        if(cmd.hasOption("d")) {
+            llDao.clear();
+            lcmDao.clear();
         }
+        llDao.beginLoad();
+        lcmDao.beginLoad();
 
         ParallelForEach.loop(env.getLanguages().getLanguages(),
                 Runtime.getRuntime().availableProcessors(),
@@ -100,10 +101,8 @@ public class WikiTextLoader {
                     }
                 });
 
-        if (cmd.hasOption("i")) {
-            llDao.endLoad();
-            lcmDao.endLoad();
-        }
+        llDao.endLoad();
+        lcmDao.endLoad();
     }
 
 
