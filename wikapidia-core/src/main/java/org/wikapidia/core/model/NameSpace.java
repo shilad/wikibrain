@@ -63,7 +63,7 @@ public enum NameSpace {
      * @param id the arbitrary ID of the namespace
      * @return the namespace
      */
-    public static NameSpace getNameSpaceById(int id) {
+    public static NameSpace getNameSpaceByArbitraryId(int id) {
         return NameSpace.values()[id];
     }
 

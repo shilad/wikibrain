@@ -3,7 +3,6 @@ package org.wikapidia.core.dao.sql;
 import com.typesafe.config.Config;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TLongIntHashMap;
-import org.apache.commons.io.IOUtils;
 import org.jooq.Condition;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
@@ -22,7 +21,6 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -205,7 +203,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         if (titlesToIds==null){
             buildTitlesToIds();
         }
-        return titlesToIds.get(hashTitle(title,language.getId(),nameSpace.ordinal()));
+        return titlesToIds.get(Title.longHashCode(language, title, nameSpace));
     }
 
     /**
@@ -228,7 +226,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         return new LocalPage(
                 lang,
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
@@ -237,27 +235,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                 record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT),
                 record.getValue(Tables.LOCAL_PAGE.IS_DISAMBIG)
         );
-    }
-
-    /**
-     *
-     * @param s The canonical title of the page.
-     * @param lang_id
-     * @param page_type_id
-     * @return
-     */
-    protected long hashTitle(String s, int lang_id, int page_type_id){
-        s = s+lang_id+page_type_id;
-        long h = 1125899906842597L; //prime
-        int len = s.length();
-        for (int i = 0; i < len; i++) {
-            h = 31*h + s.charAt(i);
-        }
-        return h;
-    }
-
-    protected long hashTitle(Title title, Language language, NameSpace nameSpace){
-        return hashTitle(title.getCanonicalTitle(),language.getId(),nameSpace.ordinal());
     }
 
     protected synchronized void buildTitlesToIds() throws DaoException {
@@ -288,8 +265,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             int numRedirects = 0;
             int numResolved = 0;
             for (Record record : cursor){
-                long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
+                long hash = Title.longHashCode(
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
+                        record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
                 if (redirectSqlDao != null && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)){
                     numRedirects++;

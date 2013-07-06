@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import org.jooq.Record;
-import org.jooq.Result;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -38,7 +37,7 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
         }
         Multimap<Language, LocalCategory> localPages = HashMultimap.create(result.size(), result.size());
         for(Record record : result) {
-            NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+            NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
             if (nameSpace != NameSpace.CATEGORY) {
                 throw new DaoException("Tried to get CATEGORY, but found " + nameSpace);
             }

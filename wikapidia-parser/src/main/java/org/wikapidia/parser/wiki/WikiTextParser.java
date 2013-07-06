@@ -69,9 +69,6 @@ public class WikiTextParser {
         visitEndPage(xml);
     }
 
-    private void parseRedirect(RawPage xml, ParsedPage page) {
-    }
-
     private void parseArticle(RawPage xml, ParsedPage pp) {   		// *** LINKS, ANCHOR TEXTS, SECTIONS
         int secNum = 0;
 

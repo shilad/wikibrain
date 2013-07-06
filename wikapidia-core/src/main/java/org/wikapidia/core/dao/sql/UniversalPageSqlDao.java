@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -20,7 +19,6 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -252,7 +250,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             return null;
         }
         Multimap<Language, LocalPage> localPages = HashMultimap.create(result.size(), result.size());
-        NameSpace nameSpace = NameSpace.getNameSpaceById(result.get(0).getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(result.get(0).getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         for(Record record : result) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);

@@ -37,7 +37,7 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
         }
         Multimap<Language, LocalArticle> localPages = HashMultimap.create(result.size(), result.size());
         for(Record record : result) {
-            NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+            NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
             if (nameSpace != NameSpace.ARTICLE) {
                 throw new DaoException("Tried to get ARTICLE, but found " + nameSpace);
             }

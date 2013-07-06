@@ -21,20 +21,30 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * Parses the wiki text associated with articles
+ * and populates data stores for links, ills, and categories.
  */
-
 public class WikiTextLoader {
+
+    /**
+     * The maximum number of threads to use for a single language edition.
+     */
+    public static int maxThreadsPerLang = 8;
+
 
     private final List<ParserVisitor> visitors;
     private final LanguageSet allowedIlls;
     private final RawPageDao rawPageDao;
+    private final AtomicInteger availableThreads;
 
-    public WikiTextLoader(List<ParserVisitor> visitors, LanguageSet allowedIlls, RawPageDao rawPageDao) {
+    public WikiTextLoader(List<ParserVisitor> visitors, LanguageSet allowedIlls, RawPageDao rawPageDao, int maxThreads) {
         this.visitors = visitors;
         this.allowedIlls = allowedIlls;
         this.rawPageDao = rawPageDao;
+        this.availableThreads = new AtomicInteger(maxThreads);
     }
 
     public RawPageDao getDao() {
@@ -42,8 +52,20 @@ public class WikiTextLoader {
     }
 
     private void load(LanguageInfo lang) throws DaoException {
-        WikiTextDumpParser dumpParser = new WikiTextDumpParser(rawPageDao, lang, allowedIlls);
-        dumpParser.parse(visitors);
+        int numLanguageThreads = 0;
+        synchronized (availableThreads) {
+            numLanguageThreads = Math.min(availableThreads.get(), maxThreadsPerLang);
+            availableThreads.getAndAdd(-numLanguageThreads);
+        }
+        try {
+            WikiTextDumpParser dumpParser = new WikiTextDumpParser(rawPageDao, lang, allowedIlls);
+            dumpParser.setMaxThreads(numLanguageThreads);
+            dumpParser.parse(visitors);
+        } finally {
+            synchronized (availableThreads) {
+                availableThreads.getAndAdd(numLanguageThreads);
+            }
+        }
     }
 
     public static void main(String args[]) throws ConfigurationException, DaoException {
@@ -83,7 +105,7 @@ public class WikiTextLoader {
         visitors.add(linkVisitor);
         visitors.add(catVisitor);
 
-        final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao);
+        final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao, env.getMaxThreads());
 
         if(cmd.hasOption("d")) {
             llDao.clear();
@@ -93,7 +115,7 @@ public class WikiTextLoader {
         lcmDao.beginLoad();
 
         ParallelForEach.loop(env.getLanguages().getLanguages(),
-                Runtime.getRuntime().availableProcessors(),
+                Math.max(1, env.getLanguages().size() / maxThreadsPerLang),
                 new Procedure<Language>() {
                     @Override
                     public void call(Language lang) throws Exception {

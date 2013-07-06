@@ -1,7 +1,6 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -14,7 +13,6 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -188,7 +186,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                 record.getValue(Tables.RAW_PAGE.BODY),
                 new Date(timestamp.getTime()),
                 Language.getById(record.getValue(Tables.RAW_PAGE.LANG_ID)),
-                NameSpace.getNameSpaceById(record.getValue(Tables.RAW_PAGE.NAME_SPACE)),
+                NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.RAW_PAGE.NAME_SPACE)),
                 record.getValue(Tables.RAW_PAGE.IS_REDIRECT),
                 record.getValue(Tables.RAW_PAGE.IS_DISAMBIG),
                 record.getValue(Tables.RAW_PAGE.REDIRECT_TITLE)
