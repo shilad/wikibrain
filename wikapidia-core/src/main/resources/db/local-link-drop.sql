@@ -1,2 +1,1 @@
 DROP TABLE local_link IF EXISTS;
-DROP TABLE local_link IF EXISTS;
