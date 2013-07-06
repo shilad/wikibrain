@@ -38,6 +38,10 @@ public class ConceptLoader {
         this.dao = dao;
     }
 
+    public UniversalPageDao getDao() {
+        return dao;
+    }
+
     public void load(ConceptMapper mapper) throws ConfigurationException, WikapidiaException {
         try {
             LOG.log(Level.INFO, "Loading Concepts");
@@ -60,12 +64,7 @@ public class ConceptLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
-                        .create("t"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("create-indexes")
-                        .withDescription("create all indexes after loading")
-                        .create("i"));
+                        .create("d"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
@@ -92,17 +91,17 @@ public class ConceptLoader {
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
         final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao);
 
-        if (cmd.hasOption("t")) {
-            LOG.log(Level.INFO, "Begin Load");
-            dao.beginLoad();
+        if (cmd.hasOption("d")) {
+            LOG.log(Level.INFO, "Clearing data");
+            dao.clear();
         }
+        LOG.log(Level.INFO, "Begin Load");
+        dao.beginLoad();
 
         loader.load(mapper);
 
-        if (cmd.hasOption("i")) {
-            LOG.log(Level.INFO, "End Load");
-            dao.endLoad();
-        }
+        LOG.log(Level.INFO, "End Load");
+        dao.endLoad();
         LOG.log(Level.INFO, "DONE");
     }
 }

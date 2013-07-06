@@ -42,14 +42,8 @@ public class RedirectLoader {
         this.redirects = new RedirectSqlDao(ds);
     }
 
-    private void beginLoad() throws DaoException {
-        redirects.beginLoad();
-        LOG.info("Begin Load: ");
-    }
-
-    private void endLoad() throws DaoException {
-        redirects.endLoad();
-        LOG.info("End Load.");
+    public RedirectSqlDao getDao() {
+        return redirects;
     }
 
     private void loadRedirectIdsIntoMemory(Language language) throws DaoException{
@@ -105,12 +99,7 @@ public class RedirectLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
-                        .create("t"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("create-indexes")
-                        .withDescription("create all indexes after loading")
-                        .create("i"));
+                        .create("d"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -128,9 +117,13 @@ public class RedirectLoader {
 
         DataSource dataSource = conf.get(DataSource.class);
         RedirectLoader redirectLoader = new RedirectLoader(dataSource);
-        if (cmd.hasOption("t")){
-            redirectLoader.beginLoad();
+        if (cmd.hasOption("d")){
+            LOG.info("Clearing data provider: ");
+            redirectLoader.getDao().clear();
         }
+
+        LOG.info("Begin Load: ");
+        redirectLoader.getDao().beginLoad();
 
         for(Language l : env.getLanguages()){
             LOG.info("LOADING REDIRECTS FOR " + l);
@@ -139,9 +132,7 @@ public class RedirectLoader {
             redirectLoader.loadRedirectsIntoDatabase(l);
         }
 
-        if (cmd.hasOption("i")){
-            redirectLoader.endLoad();
-        }
+        redirectLoader.getDao().endLoad();
     }
 
 }
