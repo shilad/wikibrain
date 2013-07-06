@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS local_page;
-CREATE TABLE local_page (
+CREATE TABLE IF NOT EXISTS local_page (
   id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
   lang_id SMALLINT NOT NULL,
   page_id INT NOT NULL,
@@ -8,3 +7,6 @@ CREATE TABLE local_page (
   is_redirect BOOLEAN NOT NULL,
   is_disambig BOOLEAN NOT NULL
 );
+
+DROP INDEX IF EXISTS local_page_idx_page_id;
+DROP INDEX IF EXISTS local_page_idx_page_title;

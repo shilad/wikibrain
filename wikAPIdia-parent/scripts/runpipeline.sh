@@ -6,9 +6,9 @@ mvn clean &&
 compile  &&
 (cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.RequestedLinkGetter $@) &&
 (cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.FileDownloader $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.DumpLoader -ti $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.RedirectLoader -ti $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.WikiTextLoader -ti $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.ConceptLoader -ti $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.UniversalLinkLoader -ti $@) ||
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.DumpLoader -d $@) &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.RedirectLoader -d $@) &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.WikiTextLoader -d $@) &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.ConceptLoader -d $@) &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.UniversalLinkLoader -d $@) ||
 die "$0 failed"
