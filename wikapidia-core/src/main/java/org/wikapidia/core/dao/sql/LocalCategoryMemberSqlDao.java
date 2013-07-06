@@ -39,21 +39,14 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
     }
 
     @Override
+    public void clear() throws DaoException {
+        executeSqlResource("/db/category-members-drop.sql");
+        executeSqlResource("/db/category-members-schema.sql");
+    }
+
+    @Override
     public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalCategoryMemberSqlDao.class.getResource("/db/category-members-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/category-members-schema.sql");
     }
 
     @Override
@@ -82,20 +75,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao implements LocalCa
 
     @Override
     public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalCategoryMemberSqlDao.class.getResource("/db/category-members-indexes.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/category-members-indexes.sql");
     }
 
     /**
