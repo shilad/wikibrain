@@ -70,7 +70,6 @@ public class TestDenseMatrix {
     private void verifyIsSourceMatrix(Matrix m) throws IOException {
         int j = 0;
         for (DenseMatrixRow srcRow : srcRows) {
-            System.err.println("checking row " + (j++));
             MatrixRow destRow = m.getRow(srcRow.getRowIndex());
             assertEquals(destRow.getRowIndex(), srcRow.getRowIndex());
             assertEquals(destRow.getNumCols(), srcRow.getNumCols());
