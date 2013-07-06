@@ -3,28 +3,21 @@ package org.wikapidia.dao.load;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.cli.*;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.parser.wiki.RedirectParser;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**

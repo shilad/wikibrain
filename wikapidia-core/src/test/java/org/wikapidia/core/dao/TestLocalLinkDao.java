@@ -3,6 +3,7 @@ package org.wikapidia.core.dao;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
+import org.wikapidia.core.dao.sql.SqlDaoIterable;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalLink;
 

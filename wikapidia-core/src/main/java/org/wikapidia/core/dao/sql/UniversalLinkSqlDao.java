@@ -42,21 +42,14 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
     }
 
     @Override
+    public void clear() throws DaoException {
+        executeSqlResource("/db/universal-link-drop.sql");
+        executeSqlResource("/db/universal-link-schema.sql");
+    }
+
+    @Override
     public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalLinkSqlDao.class.getResource("/db/universal-link-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/universal-link-schema.sql");
     }
 
     @Override
@@ -107,21 +100,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
 
     @Override
     public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalLinkSqlDao.class.getResource("/db/universal-link-indexes.sql")
-                    )
-            );
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        executeSqlResource("/db/universal-link-indexes.sql");
     }
 
     @Override

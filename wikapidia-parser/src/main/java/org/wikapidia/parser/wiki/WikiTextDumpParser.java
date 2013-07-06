@@ -3,15 +3,11 @@ package org.wikapidia.parser.wiki;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RawPageDao;
-import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.core.model.RawPage;
 
-import java.io.File;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
