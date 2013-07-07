@@ -113,7 +113,9 @@ public class WikiTextDumpParser {
             while (!finished.get()) {
                 try {
                     rp = queue.poll(100, TimeUnit.MILLISECONDS);
-                    parser.parse(rp);
+                    if (rp != null) {
+                        parser.parse(rp);
+                    }
                 } catch (InterruptedException e) {
                     LOG.log(Level.WARNING, "WikiTextDumpParser.Worker received interrupt.");
                     return;
