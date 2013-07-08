@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.util.*;
 
 /**
-*
-* @author Ari Weiland
-*
-*/
+ *
+ * @author Ari Weiland
+ *
+ * This class is used to index raw pages during the load process
+ *
+ */
 public class LuceneIndexer {
 
     protected LuceneOptions opts;

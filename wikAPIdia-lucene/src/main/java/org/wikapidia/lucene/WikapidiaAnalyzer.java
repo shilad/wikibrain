@@ -28,12 +28,13 @@ import java.io.Reader;
  */
 public class WikapidiaAnalyzer extends Analyzer {
 
-    protected final LuceneOptions opts;
     private final Language language;
     private final TokenizerOptions options;
+    private final LuceneOptions opts;
 
     /**
-     * Constructs a WikapidiaAnalyzer for the specified language with all filters.
+     * Constructs a WikapidiaAnalyzer for the specified language with all filters
+     * and default opts.
      * @param language
      * @throws IOException
      */
@@ -45,7 +46,8 @@ public class WikapidiaAnalyzer extends Analyzer {
     }
 
     /**
-     * Constructs a WikapidiaAnalyzer for the specified language with specified filters.
+     * Constructs a WikapidiaAnalyzer for the specified language with specified filters
+     * and default opts.
      * @param language
      * @param options
      * @throws IOException
@@ -58,7 +60,8 @@ public class WikapidiaAnalyzer extends Analyzer {
     }
 
     /**
-     * Constructs a WikapidiaAnalyzer for the specified language with specified opts.
+     * Constructs a WikapidiaAnalyzer for the specified language with all filters
+     * and specified opts.
      * @param language
      * @param opts a LuceneOptions object containing specific options for lucene
      * @throws IOException
@@ -71,7 +74,8 @@ public class WikapidiaAnalyzer extends Analyzer {
     }
 
     /**
-     * Constructs a WikapidiaAnalyzer for the specified language with specified filters.
+     * Constructs a WikapidiaAnalyzer for the specified language with specified filters
+     * and specified opts.
      * @param language
      * @param options
      * @param opts a LuceneOptions object containing specific options for lucene
@@ -91,10 +95,7 @@ public class WikapidiaAnalyzer extends Analyzer {
     protected Analyzer.TokenStreamComponents createComponents(String s, Reader r) {
         Tokenizer tokenizer;
         String langCode = language.getLangCode();
-        // make sure we're using the correct English version
-        if (langCode == "simple") {
-            langCode = "en";
-        }
+        if (langCode.equals("simple")) langCode = "en"; // simple english is just english
         if (langCode.equals("ja")) {
             tokenizer = new JapaneseTokenizer(r, null, false, JapaneseTokenizer.DEFAULT_MODE);
         } else if (langCode.equals("zh")) {
@@ -105,8 +106,8 @@ public class WikapidiaAnalyzer extends Analyzer {
             tokenizer = new StandardTokenizer(opts.matchVersion,r);
         }
 
-        try{
-            LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
+        try {
+            LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options, opts);
             TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
             return new Analyzer.TokenStreamComponents(tokenizer, result);
         } catch (WikapidiaException e) {

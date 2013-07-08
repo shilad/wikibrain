@@ -16,11 +16,11 @@ import java.util.List;
  *
  * @author Ari Weiland
  *
- * I had a lot of common static final parameters floating around,
- * so I am conglomerating them here.
+ * This class can be instantiated through a configurator or with default configuration.
+ * It provides access to all configurable options relevant to Lucene, such as version,
+ * directory, and namespaces to index.  It also contains static final variables for
+ * different field names. It should be passed to all classes in the lucene package.
  *
- * The easiest way to use is to just construct it as a protected
- * parameter in whatever class.
  */
 public class LuceneOptions {
 
@@ -48,10 +48,6 @@ public class LuceneOptions {
 
     /**
      * Used by provider only
-     * @param conf
-     * @param matchVersion
-     * @param luceneRoot
-     * @param nameSpaces
      */
     private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> nameSpaces) {
         this.conf = conf;
