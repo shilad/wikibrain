@@ -15,8 +15,8 @@ public class SlovakTokenizer extends LanguageTokenizer {
 
     private static CharArraySet stopWords = null;
 
-    public SlovakTokenizer(Version version, TokenizerOptions options) {
-        super(version, options);
+    protected SlovakTokenizer(Version version, TokenizerOptions options, Language language) {
+        super(version, options, language);
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.DutchStemmer;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
 /**
@@ -18,8 +19,8 @@ import org.wikapidia.lucene.TokenizerOptions;
  */
 public class DutchTokenizer extends LanguageTokenizer {
 
-    public DutchTokenizer(Version version, TokenizerOptions options) {
-        super(version, options);
+    protected DutchTokenizer(Version version, TokenizerOptions options, Language language) {
+        super(version, options, language);
     }
 
 //    static final CharArrayMap<String> DEFAULT_STEM_DICT;

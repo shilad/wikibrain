@@ -11,6 +11,7 @@ import org.apache.lucene.analysis.stempel.StempelStemmer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
 import java.io.IOException;
@@ -22,8 +23,8 @@ public class PolishTokenizer extends LanguageTokenizer {
 
     private static StempelStemmer stemmer;
 
-    public PolishTokenizer(Version version, TokenizerOptions options) {
-        super(version, options);
+    protected PolishTokenizer(Version version, TokenizerOptions options, Language language) {
+        super(version, options, language);
     }
 
     @Override

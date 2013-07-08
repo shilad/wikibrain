@@ -38,10 +38,37 @@ public abstract class LanguageTokenizer {
 
     protected static LuceneOptions opts;
 
-    protected Version matchVersion;
-    protected boolean caseInsensitive = true;
-    protected boolean useStopWords = true;
-    protected boolean useStem = true;
+    protected final Version matchVersion;
+    protected final boolean caseInsensitive;
+    protected final boolean useStopWords;
+    protected final boolean useStem;
+    protected final Language language;
+
+    protected LanguageTokenizer(Version version, TokenizerOptions options, Language language) {
+        this.matchVersion = version;
+        this.caseInsensitive = options.isCaseInsensitive();
+        this.useStopWords = options.doesUseStopWords();
+        this.useStem = options.doesUseStem();
+        this.language = language;
+    }
+
+    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException;
+
+    public Tokenizer getTokenizer(Reader r) {
+        return new StandardTokenizer(matchVersion, r);
+    }
+
+    public TokenizerOptions getOptions() {
+        TokenizerOptions options = new TokenizerOptions();
+        if (caseInsensitive) options.caseInsensitive();
+        if (useStopWords) options.useStopWords();
+        if (useStem) options.useStem();
+        return options;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
 
     /**
      * Returns an instance of a LanguageTokenizer for the specified language
@@ -69,13 +96,20 @@ public abstract class LanguageTokenizer {
             LanguageTokenizer.opts = opts;
             mapTokenizers();
             return (LanguageTokenizer) tokenizerClasses.get(language)
-                    .getConstructor(Version.class, TokenizerOptions.class).newInstance(opts.matchVersion, options);
+                    .getDeclaredConstructor(
+                            Version.class,
+                            TokenizerOptions.class,
+                            Language.class)
+                    .newInstance(
+                            opts.matchVersion,
+                            options,
+                            language);
         } catch (Exception e) {
             throw new WikapidiaException(e);
         }
     }
 
-    private static void mapTokenizers() throws NoSuchMethodException {
+    private static void mapTokenizers() {
         tokenizerClasses = new HashMap<Language, Class>();
         tokenizerClasses.put(Language.getByLangCode("en"), EnglishTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("de"), GermanTokenizer.class);
@@ -103,27 +137,6 @@ public abstract class LanguageTokenizer {
         tokenizerClasses.put(Language.getByLangCode("da"), DanishTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("he"), HebrewTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("lad"), LadinoTokenizer.class);
-    }
-
-    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException;
-
-    public Tokenizer getTokenizer(Reader r) {
-        return new StandardTokenizer(matchVersion, r);
-    }
-
-    protected LanguageTokenizer(Version version, TokenizerOptions options) {
-        this.matchVersion = version;
-        this.caseInsensitive = options.isCaseInsensitive();
-        this.useStopWords = options.doesUseStopWords();
-        this.useStem = options.doesUseStem();
-    }
-
-    public TokenizerOptions getOptions() {
-        TokenizerOptions options = new TokenizerOptions();
-        if (caseInsensitive) options.caseInsensitive();
-        if (useStopWords) options.useStopWords();
-        if (useStem) options.useStem();
-        return options;
     }
 
     protected static CharArraySet getStopWordsForNonLuceneLangFromFile(Language language) throws WikapidiaException{

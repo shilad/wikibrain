@@ -12,6 +12,7 @@ import org.apache.lucene.analysis.util.ElisionFilter;
 import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.CatalanStemmer;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
 import java.util.Arrays;
@@ -24,8 +25,8 @@ public class CatalanTokenizer extends LanguageTokenizer {
     private final CharArraySet DEFAULT_ARTICLES = CharArraySet.unmodifiableSet(
             new CharArraySet(matchVersion, Arrays.asList("d", "l", "m", "n", "s", "t"), true));
 
-    public CatalanTokenizer(Version version, TokenizerOptions options) {
-        super(version, options);
+    protected CatalanTokenizer(Version version, TokenizerOptions options, Language language) {
+        super(version, options, language);
     }
 
     @Override
