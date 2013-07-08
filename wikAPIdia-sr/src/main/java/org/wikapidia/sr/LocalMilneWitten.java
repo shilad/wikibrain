@@ -67,8 +67,10 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     @Override
-    public SparseMatrixRow getVector(int id, Language language) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public SparseMatrixRow getVector(int id) {
+
+
+        return null;
     }
 
     @Override

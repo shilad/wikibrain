@@ -15,7 +15,6 @@ import java.util.List;
 public interface LocalSRMetric {
 
     /**
-     *
      * @return the name of the similarity metric in a human readable format
      */
     public String getName();

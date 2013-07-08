@@ -6,7 +6,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.SRMetric;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -25,12 +25,15 @@ public class PairwiseSimilarityWriter {
     private ValueConf vconf;
     private TIntSet validIds;
     private TIntSet usedIds = new TIntHashSet();
-    private LocalSRMetric metric;
+    private SRMetric metric;
     private Language language;
 
-    public PairwiseSimilarityWriter(File outputFile) throws IOException {
+
+    public PairwiseSimilarityWriter(File outputFile, SRMetric metric) throws IOException {
         this.vconf = new ValueConf();
         this.writer = new SparseMatrixWriter(outputFile, vconf);
+//        this.language = Language.getByLangCode("simple");
+        this.metric = metric;
     }
 
     public void setValidIds(TIntSet validIds) {
@@ -62,4 +65,6 @@ public class PairwiseSimilarityWriter {
         SparseMatrixRow scores = metric.getVector(wpId, language);
         writer.writeRow(scores);
     }
+
 }
+

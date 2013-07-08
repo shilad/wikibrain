@@ -10,7 +10,6 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.Leaderboard;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -52,7 +51,6 @@ public class PairwiseCosineSimilarity {
             }
         }
         return sim;
-
     }
 
     public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException {
@@ -68,7 +66,6 @@ public class PairwiseCosineSimilarity {
     private SRResultList mostSimilar(int maxResults, TIntSet validIds, TIntFloatHashMap vector) throws IOException {
         initIfNeeded();
         TIntDoubleHashMap dots = new TIntDoubleHashMap();
-
         for (int id : vector.keys()) {
             float val1 = vector.get(id);
             MatrixRow row2 = transpose.getRow(id);
@@ -82,7 +79,6 @@ public class PairwiseCosineSimilarity {
                 }
             }
         }
-
         final Leaderboard leaderboard = new Leaderboard(maxResults);
         double rowNorm = norm(vector);
         for (int id : dots.keys()) {
@@ -92,7 +88,6 @@ public class PairwiseCosineSimilarity {
             double sim = dot / (l1 * l2);
             leaderboard.tallyScore(id, sim);
         }
-
         return leaderboard.getTop();
     }
 
@@ -117,23 +112,5 @@ public class PairwiseCosineSimilarity {
             length += x * x;
         }
         return Math.sqrt(length);
-    }
-
-    public static int PAGE_SIZE = 1024*1024*500;    // 500MB
-    public static void main(String args[]) throws IOException, InterruptedException {
-        if (args.length != 4 && args.length != 5) {
-            System.err.println("usage: " + PairwiseCosineSimilarity.class.getName()
-                    + " path_matrix path_matrix_transpose path_output maxResultsPerDoc [num-cores]");
-            System.exit(1);
-        }
-        SparseMatrix matrix = new SparseMatrix(new File(args[0]), 1, PAGE_SIZE);
-        SparseMatrix transpose = new SparseMatrix(new File(args[1]));
-        PairwiseCosineSimilarity sim = new PairwiseCosineSimilarity(matrix, transpose);
-        int cores = (args.length == 5)
-                ? Integer.valueOf(args[4])
-                : Runtime.getRuntime().availableProcessors();
-
-        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(new File(args[2]));
-        writer.writeSims(matrix.getRowIds(), cores, Integer.valueOf(args[3]));
     }
 }

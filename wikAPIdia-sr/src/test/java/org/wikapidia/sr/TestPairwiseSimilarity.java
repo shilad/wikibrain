@@ -39,6 +39,7 @@ public class TestPairwiseSimilarity {
     public void testSimilarity() throws IOException, InterruptedException {
         File simPath = File.createTempFile("matrix", null);
         simPath.deleteOnExit();
+
         PairwiseCosineSimilarity cosine = new PairwiseCosineSimilarity(matrix, transpose);
         PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(simPath);
         writer.writeSims(matrix.getRowIds(), 1, NUM_ROWS);
