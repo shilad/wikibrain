@@ -4,15 +4,17 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
+import org.h2.util.New;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.RawPage;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
-import org.wikapidia.lucene.WikapidiaAnalyzer;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.SimUtils;
 
@@ -75,6 +77,14 @@ public class ESAMetric extends BaseLocalSRMetric {
         return result;
     }
 
+    public TIntDoubleHashMap getConceptVector(RawPage rawPage, Language language) throws WikapidiaException, ParseException { // TODO: validIDs
+        QueryBuilder queryBuilder = new QueryBuilder(searcher.getOpts(), searcher.getAnalyzer(language));
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPageTextQuery(rawPage), language);
+        // TODO: prune
+        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
+        return result;
+    }
+
     /**
      * Put data in a scoreDoc into a TIntDoubleHashMap
      * @param scores
@@ -88,10 +98,20 @@ public class ESAMetric extends BaseLocalSRMetric {
         return expanded;
     }
 
-    @Override
-    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) {
+    public SRResult similarity(RawPage page1, RawPage page2, Language language) throws DaoException, ParseException {
+        try {
+            TIntDoubleHashMap scores1 = getConceptVector(page1, language);
+            TIntDoubleHashMap scores2 = getConceptVector(page2, language);
+            double sim = SimUtils.cosineSimilarity(scores1, scores2);
+            return new SRResult(sim); // TODO: normalize
+        } catch (WikapidiaException e) {
+            throw new DaoException(e);
+        }
+    }
 
-        return null;
+    @Override
+    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
