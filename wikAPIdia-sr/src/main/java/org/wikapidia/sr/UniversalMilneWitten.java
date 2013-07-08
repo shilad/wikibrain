@@ -55,7 +55,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     @Override
     public SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations) throws DaoException {
         if (page1.getAlgorithmId() != page2.getAlgorithmId()){
-            return new SRResult(Double.NaN);
+            throw new IllegalArgumentException();
         }
         int algorithmId = page1.getAlgorithmId();
 

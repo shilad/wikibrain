@@ -74,7 +74,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
         if (page1.getLanguage()!=page2.getLanguage()){
-            return new SRResult(Double.NaN);
+            throw new IllegalArgumentException();
         }
 
         TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()));
