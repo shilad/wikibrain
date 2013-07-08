@@ -4,9 +4,9 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
-import org.apache.lucene.analysis.ro.RomanianAnalyzer;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.tr.TurkishAnalyzer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.TurkishStemmer;
@@ -29,7 +29,7 @@ public class TurkishTokenizer extends LanguageTokenizer {
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);
         if (useStopWords)
-            stream = new StopFilter(matchVersion, stream, RomanianAnalyzer.getDefaultStopSet());
+            stream = new StopFilter(matchVersion, stream, TurkishAnalyzer.getDefaultStopSet());
         if (useStem) {
             if (!stemExclusionSet.isEmpty())
                 stream = new SetKeywordMarkerFilter(stream, stemExclusionSet);
