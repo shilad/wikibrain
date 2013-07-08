@@ -42,7 +42,7 @@ public class LuceneSearcher {
      * @throws WikapidiaException
      */
     public LuceneSearcher(LanguageSet languages, File root) throws WikapidiaException {
-        this(languages, root, LuceneOptions.getDefaultOpts());
+        this(languages, root, LuceneOptions.getDefaultOptions());
     }
 
     /**
@@ -69,6 +69,10 @@ public class LuceneSearcher {
         } catch (IOException e) {
             throw new WikapidiaException(e);
         }
+    }
+
+    public LanguageSet getLanguageSet() {
+        return new LanguageSet(searchers.keySet());
     }
 
     public LuceneOptions getOptions() {

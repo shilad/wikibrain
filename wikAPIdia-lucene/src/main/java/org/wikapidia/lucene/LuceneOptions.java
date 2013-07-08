@@ -5,7 +5,6 @@ import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.model.NameSpace;
 
 import java.io.File;
@@ -36,6 +35,9 @@ public class LuceneOptions {
     public final Collection<NameSpace> nameSpaces;
     public final TokenizerOptions options;
 
+    /**
+     * @deprecated Use getDefaultOptions() instead
+     */
     public LuceneOptions() {
         this.conf = new Configuration(null);
         Config config = conf.get();
@@ -53,11 +55,11 @@ public class LuceneOptions {
         );
     }
 
-    public static LuceneOptions getDefaultOpts() throws WikapidiaException {
+    public static LuceneOptions getDefaultOptions() {
         try {
             return new Configurator(new Configuration(null)).get(LuceneOptions.class, "options");
         } catch (ConfigurationException e) {
-            throw new WikapidiaException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -113,5 +115,4 @@ public class LuceneOptions {
             );
         }
     }
-
 }

@@ -6,12 +6,10 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.lucene.LuceneOptions;
-import org.wikapidia.lucene.TokenizerOptions;
 import org.wikapidia.lucene.WikapidiaAnalyzer;
 
 import java.io.IOException;
@@ -25,7 +23,7 @@ public class TestLanguageTokenizer {
 
     @Test
     public void shortTest() throws IOException, WikapidiaException {
-        LuceneOptions opts = LuceneOptions.getDefaultOpts();
+        LuceneOptions opts = LuceneOptions.getDefaultOptions();
         WikapidiaAnalyzer wa = new WikapidiaAnalyzer(Language.getByLangCode("en"));
         IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, wa);
         iwc.setRAMBufferSizeMB(1024.0);
@@ -38,8 +36,8 @@ public class TestLanguageTokenizer {
     }
 
     @Test
-    public void test() throws IOException, WikapidiaException {
-        LuceneOptions opts = LuceneOptions.getDefaultOpts();
+    public void test() throws IOException {
+        LuceneOptions opts = LuceneOptions.getDefaultOptions();
         List<String> langCodes = new Configuration().get().getStringList("languages");
         langCodes.add("he");
         langCodes.add("sk");
