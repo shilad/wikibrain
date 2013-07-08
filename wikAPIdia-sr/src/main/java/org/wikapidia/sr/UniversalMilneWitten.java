@@ -27,14 +27,13 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     private boolean outLinks;
     private MilneWittenCore core;
 
-    public UniversalMilneWitten(Disambiguator disambiguator, UniversalLinkDao universalLinkDao, UniversalPageDao universalPageDao){
-        this(disambiguator, universalLinkDao, universalPageDao,false);
+    public UniversalMilneWitten(Disambiguator disambiguator, UniversalPageDao universalPageDao, int algorithmId, UniversalLinkDao universalLinkDao){
+        this(disambiguator, universalPageDao, algorithmId, universalLinkDao,false);
     }
 
-    public UniversalMilneWitten(Disambiguator disambiguator, UniversalLinkDao universalLinkDao, UniversalPageDao universalPageDao, boolean outLinks){
-        this.disambiguator = disambiguator;
+    public UniversalMilneWitten(Disambiguator disambiguator, UniversalPageDao universalPageDao, int algorithmId, UniversalLinkDao universalLinkDao,  boolean outLinks){
+        super (disambiguator,universalPageDao,algorithmId);
         this.universalLinkDao = universalLinkDao;
-        this.universalPageDao = universalPageDao;
         this.outLinks = outLinks;
         this.core = new MilneWittenCore();
     }
