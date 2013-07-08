@@ -7,17 +7,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Matt Lesicko
- * Date: 7/3/13
- * Time: 10:39 AM
- * To change this template use File | Settings | File Templates.
+ * @author  Matt Lesicko
+ * This class handles the core Milne-Witten functionality.
+ * Specific Milne-Witten implementations should use an instance of this class.
  */
 public class MilneWittenCore {
     public MilneWittenCore(){
 
     }
 
+    /**
+     * Calculate the similarity between two pages based on shared links.
+     * Links can be either inlinks or outlinks, but should be consistent
+     * between the two pages.
+     * Explanations will be returned as page numbers with no special formatting.
+     * @param links1 The links for the first page.
+     * @param links2 The links for the second page.
+     * @param numPages The number of pages in the corpus.
+     * @param explanations Whether or not to generate explanations.
+     * @return
+     */
     public SRResult similarity(TIntSet links1, TIntSet links2, int numPages, boolean explanations){
         TIntSet I = new TIntHashSet(links1);
         I.retainAll(links2);

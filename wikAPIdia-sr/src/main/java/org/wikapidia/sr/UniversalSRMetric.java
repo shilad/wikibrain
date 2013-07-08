@@ -33,7 +33,7 @@ public interface UniversalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations);
+    public SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations) throws DaoException;
 
     /**
      * Find the most similar universal pages to a universal page.

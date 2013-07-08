@@ -3,6 +3,7 @@ package org.wikapidia.sr;
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.UniversalPageDao;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.matrix.SparseMatrix;
@@ -10,6 +11,7 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.logging.Logger;
 
 public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
@@ -17,8 +19,16 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     protected int numThreads = Runtime.getRuntime().availableProcessors();
     protected UniversalPageDao universalPageDao;
     protected Disambiguator disambiguator;
+    protected int algorithmId;
+
 
     protected SparseMatrix mostSimilarUniversalMatrix;
+
+    public BaseUniversalSRMetric(Disambiguator disambiguator, UniversalPageDao universalPageDao, int algorithmId){
+        this.universalPageDao = universalPageDao;
+        this.disambiguator = disambiguator;
+        this.algorithmId = algorithmId;
+    }
 
     public void setMostSimilarUniversalMatrix(SparseMatrix matrix) {
         this.mostSimilarUniversalMatrix = matrix;
@@ -49,7 +59,20 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     public abstract SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations) throws DaoException;
 
     @Override
-    public abstract SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations);
+    public SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations) throws DaoException {
+        HashSet<LocalString> context = new HashSet<LocalString>();
+        context.add(phrase2);
+        LocalId similar1 = disambiguator.disambiguate(phrase1, context);
+        int uId1 = universalPageDao.getUnivPageId(similar1.asLocalPage(),algorithmId);
+        UniversalPage up1 = universalPageDao.getById(uId1,algorithmId);
+        context.clear();
+        context.add(phrase1);
+        LocalId similar2 = disambiguator.disambiguate(phrase2, context);
+        int uId2 = universalPageDao.getUnivPageId(similar2.asLocalPage(),algorithmId);
+        UniversalPage up2 = universalPageDao.getById(uId1,algorithmId);
+        return similarity(up1,up2,explanations);
+
+    }
 
 
     @Override
