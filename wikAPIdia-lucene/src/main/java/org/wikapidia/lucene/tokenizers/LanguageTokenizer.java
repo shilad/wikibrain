@@ -36,7 +36,7 @@ public abstract class LanguageTokenizer {
     private static final String STOP_WORDS = "src/main/resources/stopwords/";
     private static Map<Language, Class> tokenizerClasses;
 
-    protected static LuceneOptions opts;
+    protected static LuceneOptions options;
 
     protected final Version matchVersion;
     protected final boolean caseInsensitive;
@@ -44,11 +44,11 @@ public abstract class LanguageTokenizer {
     protected final boolean useStem;
     protected final Language language;
 
-    protected LanguageTokenizer(Version version, TokenizerOptions options, Language language) {
+    protected LanguageTokenizer(Version version, TokenizerOptions tokenizerOptions, Language language) {
         this.matchVersion = version;
-        this.caseInsensitive = options.isCaseInsensitive();
-        this.useStopWords = options.doesUseStopWords();
-        this.useStem = options.doesUseStem();
+        this.caseInsensitive = tokenizerOptions.isCaseInsensitive();
+        this.useStopWords = tokenizerOptions.doesUseStopWords();
+        this.useStem = tokenizerOptions.doesUseStem();
         this.language = language;
     }
 
@@ -78,22 +78,9 @@ public abstract class LanguageTokenizer {
      * @return
      * @throws WikapidiaException
      */
-    public static LanguageTokenizer getLanguageTokenizer(Language language, TokenizerOptions options) throws WikapidiaException {
-        return getLanguageTokenizer(language, options, new LuceneOptions());
-    }
-
-    /**
-     * Returns an instance of a LanguageTokenizer for the specified language
-     * with the filters specified by options.
-     * @param language
-     * @param options
-     * @param opts
-     * @return
-     * @throws WikapidiaException
-     */
-    public static LanguageTokenizer getLanguageTokenizer(Language language, TokenizerOptions options, LuceneOptions opts) throws WikapidiaException {
+    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions options) throws WikapidiaException {
         try {
-            LanguageTokenizer.opts = opts;
+            LanguageTokenizer.options = options;
             mapTokenizers();
             return (LanguageTokenizer) tokenizerClasses.get(language)
                     .getDeclaredConstructor(
@@ -101,8 +88,8 @@ public abstract class LanguageTokenizer {
                             TokenizerOptions.class,
                             Language.class)
                     .newInstance(
-                            opts.matchVersion,
-                            options,
+                            options.matchVersion,
+                            options.options,
                             language);
         } catch (Exception e) {
             throw new WikapidiaException(e);
@@ -145,7 +132,7 @@ public abstract class LanguageTokenizer {
             String fileName = STOP_WORDS + langCode + ".txt";
             InputStream stream = FileUtils.openInputStream(new File(fileName));
             List<String> stopWords = org.apache.commons.io.IOUtils.readLines(stream);
-            CharArraySet charArraySet = new CharArraySet(opts.matchVersion, 0, false);
+            CharArraySet charArraySet = new CharArraySet(options.matchVersion, 0, false);
             for (String stopWord : stopWords) {
                 charArraySet.add(stopWord);
             }

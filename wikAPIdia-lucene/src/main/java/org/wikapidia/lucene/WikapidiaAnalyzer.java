@@ -8,12 +8,10 @@ import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
 import org.apache.lucene.analysis.ja.JapaneseTokenizer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.tokenizers.LanguageTokenizer;
 
-import java.io.IOException;
 import java.io.Reader;
 
 /**
@@ -29,78 +27,40 @@ import java.io.Reader;
 public class WikapidiaAnalyzer extends Analyzer {
 
     private final Language language;
-    private final TokenizerOptions options;
-    private final LuceneOptions opts;
+    private final LuceneOptions options;
 
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with all filters
-     * and default opts.
+     * and default options.
      * @param language
      */
-    public WikapidiaAnalyzer(Language language) {
+    public WikapidiaAnalyzer(Language language) throws WikapidiaException {
         this(
                 language,
-                new TokenizerOptions().useStem().useStopWords().caseInsensitive(),
-                new LuceneOptions());
+                LuceneOptions.getDefaultOpts());
     }
 
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with specified filters
-     * and default opts.
+     * and specified options.
      * @param language
-     * @param options
+     * @param options a LuceneOptions object containing specific options for lucene
      */
-    public WikapidiaAnalyzer(Language language, TokenizerOptions options) {
-        this(
-                language,
-                options,
-                new LuceneOptions());
-    }
-
-    /**
-     * Constructs a WikapidiaAnalyzer for the specified language with all filters
-     * and specified opts.
-     * @param language
-     * @param opts a LuceneOptions object containing specific options for lucene
-     */
-    public WikapidiaAnalyzer(Language language, LuceneOptions opts) {
-        this(
-                language,
-                new TokenizerOptions().useStem().useStopWords().caseInsensitive(),
-                opts);
-    }
-
-    /**
-     * Constructs a WikapidiaAnalyzer for the specified language with specified filters
-     * and specified opts.
-     * @param language
-     * @param options
-     * @param opts a LuceneOptions object containing specific options for lucene
-     */
-    public WikapidiaAnalyzer(Language language, TokenizerOptions options, LuceneOptions opts) {
+    public WikapidiaAnalyzer(Language language, LuceneOptions options) {
         this.language = language;
         this.options = options;
-        this.opts = opts;
     }
 
     /**
      * Returns the Lucene Options
      * @return
      */
-    public LuceneOptions getOpts() {
-        return opts;
+    public LuceneOptions getOptions() {
+        return options;
     }
 
     public Language getLanguage() {
         return language;
-    }
-
-    /**
-     * Returns the Tokenizer Options
-     * @return
-     */
-    public TokenizerOptions getOptions() {
-        return options;
     }
 
     @Override
@@ -115,11 +75,11 @@ public class WikapidiaAnalyzer extends Analyzer {
         } else if (langCode.equals("he") || langCode.equals("sk")) {
             tokenizer = new ICUTokenizer(r);
         } else {
-            tokenizer = new StandardTokenizer(opts.matchVersion,r);
+            tokenizer = new StandardTokenizer(options.matchVersion,r);
         }
 
         try {
-            LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options, opts);
+            LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
             TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
             return new Analyzer.TokenStreamComponents(tokenizer, result);
         } catch (WikapidiaException e) {

@@ -12,7 +12,6 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
-import org.wikapidia.lucene.WikapidiaAnalyzer;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.SimUtils;
 
@@ -30,9 +29,10 @@ public class ESAMetric extends BaseLocalSRMetric {
     // TODO: finish article similarity
 
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
+
     private LanguageSet languages;
     private LuceneSearcher searcher;
-    protected LuceneOptions opts;
+    private LuceneOptions options;
 
     public ESAMetric(LanguageSet languages) throws WikapidiaException {
         this.languages = languages;
@@ -68,7 +68,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      */
     public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws WikapidiaException, ParseException { // TODO: validIDs
-        QueryBuilder queryBuilder = new QueryBuilder(searcher.getOpts(), searcher.getAnalyzer(language));
+        QueryBuilder queryBuilder = new QueryBuilder(language, options);
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
         // TODO: prune
         TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length

@@ -1,8 +1,6 @@
 package org.wikapidia.lucene;
 
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -16,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -29,10 +26,9 @@ public class LuceneSearcher {
     private static final Logger LOG = Logger.getLogger(LuceneSearcher.class.getName());
     public static final int HIT_COUNT = 1000;
 
-    private final LuceneOptions opts;
+    private final LuceneOptions options;
     private final File root;
-    private final WikapidiaAnalyzer analyzer;
-    private final IndexSearcher searcher;
+    private final Map<Language, IndexSearcher> searchers;
 
     private int hitCount = HIT_COUNT;
 
@@ -41,48 +37,42 @@ public class LuceneSearcher {
      * in any language in the LanguageSet. Note that root is the parent directory
      * of the directory where lucene indexes are stored, though it is the same
      * directory as was passed to the LuceneIndexer.
-     * @param language
+     * @param languages
      * @param root the root directory in which each language contains its own lucene directory
      * @throws WikapidiaException
      */
-    public LuceneSearcher(Language language, File root) throws WikapidiaException {
-        this(language, root, new LuceneOptions());
+    public LuceneSearcher(LanguageSet languages, File root) throws WikapidiaException {
+        this(languages, root, LuceneOptions.getDefaultOpts());
     }
 
     /**
      * Constructs a LuceneSearcher that will run lucene queries on sets of articles
-     * in any language in the LanguageSet. The directory is specified within opts.
-     * @param language
-     * @param opts a LuceneOptions object containing specific options for lucene
+     * in any language in the LanguageSet. The directory is specified within options.
+     * @param languages
+     * @param options a LuceneOptions object containing specific options for lucene
      * @throws WikapidiaException
      */
-    public LuceneSearcher(Language language, LuceneOptions opts) throws WikapidiaException {
-        this(language, opts.luceneRoot, opts);
+    public LuceneSearcher(LanguageSet languages, LuceneOptions options) throws WikapidiaException {
+        this(languages, options.luceneRoot, options);
     }
 
-    private LuceneSearcher(Language language, File root, LuceneOptions opts) throws WikapidiaException {
+    private LuceneSearcher(LanguageSet languages, File root, LuceneOptions options) throws WikapidiaException {
         try {
             this.root = root;
-            this.analyzer = new WikapidiaAnalyzer(language, opts); // TODO: TokenizerOptions are always set to default. Should we add more user control?
-            Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
-            DirectoryReader reader = DirectoryReader.open(directory);
-            this.searcher = new IndexSearcher(reader);
-            this.opts = opts;
+            this.searchers = new HashMap<Language, IndexSearcher>();
+            for (Language language : languages) {
+                Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
+                DirectoryReader reader = DirectoryReader.open(directory);
+                searchers.put(language, new IndexSearcher(reader));
+            }
+            this.options = options;
         } catch (IOException e) {
             throw new WikapidiaException(e);
         }
     }
 
-    public LuceneOptions getOpts() {
-        return opts;
-    }
-
-    public WikapidiaAnalyzer getAnalyzer() {
-        return analyzer;
-    }
-
-    public Language getLanguage() {
-        return analyzer.getLanguage();
+    public LuceneOptions getOptions() {
+        return options;
     }
 
     public int getHitCount() {
@@ -94,44 +84,14 @@ public class LuceneSearcher {
     }
 
     /**
-     * Runs a lucene query on the plaintext field for the specified
-     * search string in the specified language.
-     * @param searchString
-     * @param language
-     * @return
-     * @throws WikapidiaException
-     */
-    public ScoreDoc[] search(String searchString, Language language) throws WikapidiaException {
-        return search(LuceneOptions.PLAINTEXT_FIELD_NAME, searchString);
-    }
-
-    /**
-     * Runs a lucene query on the specified field for the specified search string.
-     * @param fieldName
-     * @param searchString
-     * @return
-     * @throws WikapidiaException
-     */
-    public ScoreDoc[] search(String fieldName, String searchString) throws WikapidiaException {
-        try {
-            QueryParser parser = new QueryParser(opts.matchVersion, fieldName, analyzer);
-            Query query = parser.parse(searchString);
-            return search(query);
-        } catch (ParseException e) {
-            LOG.log(Level.WARNING, "Unable to parse " + searchString);
-            return null;
-        }
-    }
-
-    /**
-     * Runs a specified lucene query
+     * Runs a specified lucene query in the specified language
      * @param query
      * @return
      * @throws WikapidiaException
      */
-    public ScoreDoc[] search(Query query) throws WikapidiaException {
+    public ScoreDoc[] search(Query query, Language language) throws WikapidiaException {
         try {
-            return searcher.search(query, hitCount).scoreDocs;
+            return searchers.get(language).search(query, hitCount).scoreDocs;
         } catch (IOException e) {
             throw new WikapidiaException(e);
         }

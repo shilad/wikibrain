@@ -27,12 +27,11 @@ import java.util.*;
  */
 public class LuceneIndexer {
 
-    protected LuceneOptions opts;
-
     private final File root;
     private final Map<Language, WikapidiaAnalyzer> analyzers;
     private final Map<Language, IndexWriter> writers;
     private final Collection<NameSpace> nameSpaces;
+    private final LuceneOptions options;
 
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
@@ -44,28 +43,38 @@ public class LuceneIndexer {
      * @throws WikapidiaException
      */
     public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root) throws WikapidiaException {
-        this(languages, nameSpaces, root, new LuceneOptions());
+        this(languages, nameSpaces, root, LuceneOptions.getDefaultOpts());
     }
 
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
      * specified LanguageSet. Indexes are then placed in language-specific
-     * subdirectories specified by opts.
+     * subdirectories specified by options.
      * @param languages
-     * @param opts a LuceneOptions object containing specific options for lucene
+     * @param options a LuceneOptions object containing specific options for lucene
      * @throws WikapidiaException
      */
-    public LuceneIndexer(LanguageSet languages, LuceneOptions opts) throws WikapidiaException {
-        this(languages, opts.nameSpaces, opts.luceneRoot, opts);
+    public LuceneIndexer(LanguageSet languages, LuceneOptions options) throws WikapidiaException {
+        this(languages, options.nameSpaces, options.luceneRoot, options);
     }
 
-    private LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root, LuceneOptions opts) throws WikapidiaException {
-        this.root = root;
-        analyzers = new HashMap<Language, WikapidiaAnalyzer>();
-        writers = new HashMap<Language, IndexWriter>();
-        this.nameSpaces = nameSpaces;
-        this.opts = opts;
-        setup(languages);
+    private LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root, LuceneOptions options) throws WikapidiaException {
+        try {
+            this.root = root;
+            analyzers = new HashMap<Language, WikapidiaAnalyzer>();
+            writers = new HashMap<Language, IndexWriter>();
+            for (Language language : languages) {
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, options);
+                analyzers.put(language, analyzer);
+                Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
+                IndexWriterConfig iwc = new IndexWriterConfig(options.matchVersion, analyzer);
+                writers.put(language, new IndexWriter(directory, iwc));
+            }
+            this.nameSpaces = nameSpaces;
+            this.options = options;
+        } catch (IOException e) {
+            throw new WikapidiaException(e);
+        }
     }
 
     /**
@@ -97,10 +106,10 @@ public class LuceneIndexer {
     private void setup(LanguageSet languages) throws WikapidiaException {
         try {
             for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, opts);
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, options);
                 analyzers.put(language, analyzer);
                 Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
-                IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, analyzer);
+                IndexWriterConfig iwc = new IndexWriterConfig(options.matchVersion, analyzer);
                 writers.put(language, new IndexWriter(directory, iwc));
             }
         } catch (IOException e) {

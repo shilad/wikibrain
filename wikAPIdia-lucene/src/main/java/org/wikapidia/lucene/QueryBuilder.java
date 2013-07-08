@@ -3,6 +3,7 @@ package org.wikapidia.lucene;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.RawPage;
 
 /**
@@ -10,13 +11,12 @@ import org.wikapidia.core.model.RawPage;
  */
 public class QueryBuilder {
 
-    protected LuceneOptions opts;
+    private final Language language;
+    private final LuceneOptions options;
 
-    private final WikapidiaAnalyzer analyzer;
-
-    public QueryBuilder(LuceneOptions opts, WikapidiaAnalyzer analyzer) {
-        this.opts = opts;
-        this.analyzer = analyzer;
+    public QueryBuilder(Language language, LuceneOptions options) {
+        this.language = language;
+        this.options = options;
     }
 
     public Query getPhraseQuery(String searchString) throws ParseException {
@@ -24,12 +24,11 @@ public class QueryBuilder {
     }
 
     public Query getPhraseQuery(String fieldName, String searchString) throws ParseException {
-        QueryParser parser = new QueryParser(opts.matchVersion, fieldName, analyzer);
+        QueryParser parser = new QueryParser(options.matchVersion, fieldName, new WikapidiaAnalyzer(language, options));
         return parser.parse(searchString);
     }
 
     public Query getPageTextQuery(RawPage rawPage) throws ParseException {
-        String rawPageText = rawPage.getPlainText();
-        return getPhraseQuery(LuceneOptions.PLAINTEXT_FIELD_NAME, rawPageText);
+        return getPhraseQuery(LuceneOptions.PLAINTEXT_FIELD_NAME, rawPage.getPlainText());
     }
 }

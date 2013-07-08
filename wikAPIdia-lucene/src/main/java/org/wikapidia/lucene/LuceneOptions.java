@@ -5,6 +5,7 @@ import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.model.NameSpace;
 
 import java.io.File;
@@ -33,6 +34,7 @@ public class LuceneOptions {
     public final Version matchVersion;
     public final File luceneRoot;
     public final Collection<NameSpace> nameSpaces;
+    public final TokenizerOptions options;
 
     public LuceneOptions() {
         this.conf = new Configuration(null);
@@ -44,12 +46,25 @@ public class LuceneOptions {
         for (String s : nsStrings) {
             nameSpaces.add(NameSpace.getNameSpaceByName(s));
         }
+        options = buildOptions(
+                config.getBoolean("lucene.options.caseInsensitive"),
+                config.getBoolean("lucene.options.useStopWords"),
+                config.getBoolean("lucene.options.useStem")
+        );
+    }
+
+    public static LuceneOptions getDefaultOpts() throws WikapidiaException {
+        try {
+            return new Configurator(new Configuration(null)).get(LuceneOptions.class, "options");
+        } catch (ConfigurationException e) {
+            throw new WikapidiaException(e);
+        }
     }
 
     /**
      * Used by provider only
      */
-    private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> nameSpaces) {
+    private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> nameSpaces, TokenizerOptions options) {
         this.conf = conf;
         this.matchVersion = Version.parseLeniently(matchVersion);
         this.luceneRoot = new File(luceneRoot);
@@ -57,6 +72,15 @@ public class LuceneOptions {
         for (String s : nameSpaces) {
             this.nameSpaces.add(NameSpace.getNameSpaceByName(s));
         }
+        this.options = options;
+    }
+
+    private static TokenizerOptions buildOptions(boolean caseInsensitive, boolean useStopWords, boolean useStem) {
+        TokenizerOptions options = new TokenizerOptions();
+        if (caseInsensitive) options.caseInsensitive();
+        if (useStopWords) options.useStopWords();
+        if (useStem) options.useStem();
+        return options;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LuceneOptions> {
@@ -80,7 +104,12 @@ public class LuceneOptions {
                     getConfig(),
                     config.getString("version"),
                     config.getString("directory"),
-                    config.getStringList("namespaces")
+                    config.getStringList("namespaces"),
+                    buildOptions(
+                            config.getBoolean("caseInsensitive"),
+                            config.getBoolean("useStopWords"),
+                            config.getBoolean("useStem")
+                    )
             );
         }
     }
