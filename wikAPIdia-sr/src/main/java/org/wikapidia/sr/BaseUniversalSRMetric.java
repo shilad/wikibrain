@@ -34,15 +34,26 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         this.mostSimilarUniversalMatrix = matrix;
     }
 
-    public boolean hasCachedMostSimilarUniversal(int wpId) throws IOException {
-        return mostSimilarUniversalMatrix != null && mostSimilarUniversalMatrix.getRow(wpId) != null;
+    public boolean hasCachedMostSimilarUniversal(int wpId){
+        boolean hasCached;
+        try {
+            hasCached = mostSimilarUniversalMatrix != null && mostSimilarUniversalMatrix.getRow(wpId) != null;
+        } catch (IOException e) {
+            hasCached = false;
+        }
+        return hasCached;
     }
 
-    public SRResultList getCachedMostSimilarUniversal(int wpId, int numResults, TIntSet validIds) throws IOException {
+    public SRResultList getCachedMostSimilarUniversal(int wpId, int numResults, TIntSet validIds){
         if (!hasCachedMostSimilarUniversal(wpId)){
-//            return null;
+            return null;
         }
-        SparseMatrixRow row = mostSimilarUniversalMatrix.getRow(wpId);
+        SparseMatrixRow row;
+        try {
+            row = mostSimilarUniversalMatrix.getRow(wpId);
+        } catch (IOException e) {
+            return null;
+        }
         int n = 0;
         SRResultList srl = new SRResultList(row.getNumCols());
         for (int i = 0;i < row.getNumCols() &&  n < numResults; i++) {

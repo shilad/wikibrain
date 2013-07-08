@@ -113,13 +113,14 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     }
 
     @Override
-    public SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations) throws DaoException {
+        return super.similarity(phrase1,phrase2,explanations);
     }
 
     @Override
     public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        SRResultList mostSimilar = getCachedMostSimilarUniversal(page.getUnivId(), maxResults, null);
+        return null;
     }
 
     @Override
@@ -153,7 +154,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     }
 
     @Override
-    public TIntDoubleMap getVector(int id, int algorithmId) throws DaoException {
+    public TIntDoubleMap getVector(int id) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();
         Map<Integer, UniversalLink> links;
         if (outLinks){

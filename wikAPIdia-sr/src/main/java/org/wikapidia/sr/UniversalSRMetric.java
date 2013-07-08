@@ -110,10 +110,9 @@ public interface UniversalSRMetric {
     /**
      * Return a vector for a UniversalPage
      * @param id the UniversalPage's id
-     * @param algorithmId the UniversalPage's algorithm id
      * @return a vector relating it to other pages.
      * @throws DaoException
      */
-    public TIntDoubleMap getVector(int id, int algorithmId) throws DaoException;
+    public TIntDoubleMap getVector(int id) throws DaoException;
 
 }
