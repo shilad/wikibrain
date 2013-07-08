@@ -12,34 +12,45 @@ import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.TokenizerOptions;
 import org.wikapidia.lucene.WikapidiaAnalyzer;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
  */
 public class TestLanguageTokenizer {
 
+    private Field textField = new TextField("test", "wrap around the world", Field.Store.YES);
+    private LuceneOptions opts = new LuceneOptions();
+
     @Test
-    public void test() {
-        try{
-            Field textField = new TextField("test", "wrap around the world", Field.Store.YES);
-            List<String> langCodes = new Configuration().get().getStringList("languages");
-            langCodes.add("he");
-            langCodes.add("sk");
-            LanguageSet langSet = new LanguageSet(langCodes);
-            LuceneOptions opts = new LuceneOptions();
-            for(Language language : langSet){
-                WikapidiaAnalyzer wa = new WikapidiaAnalyzer(language, opts);
-                IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, wa);
-                iwc.setRAMBufferSizeMB(1024.0);
-                iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-                IndexWriter writer = new IndexWriter(new RAMDirectory(), iwc);
-                Document d = new Document();
-                d.add(textField);
-                writer.addDocument(d);
-                writer.close();
-            }
-        }catch (Exception e){
-            e.printStackTrace();
+    public void shortTest() throws IOException {
+        WikapidiaAnalyzer wa = new WikapidiaAnalyzer(Language.getByLangCode("en"));
+        IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, wa);
+        iwc.setRAMBufferSizeMB(1024.0);
+        iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+        IndexWriter writer = new IndexWriter(new RAMDirectory(), iwc);
+        Document d = new Document();
+        d.add(textField);
+        writer.addDocument(d);
+        writer.close();
+    }
+
+    @Test
+    public void test() throws IOException {
+        List<String> langCodes = new Configuration().get().getStringList("languages");
+        langCodes.add("he");
+        langCodes.add("sk");
+        LanguageSet langSet = new LanguageSet(langCodes);
+        for(Language language : langSet){
+            WikapidiaAnalyzer wa = new WikapidiaAnalyzer(language, opts);
+            IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, wa);
+            iwc.setRAMBufferSizeMB(1024.0);
+            iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+            IndexWriter writer = new IndexWriter(new RAMDirectory(), iwc);
+            Document d = new Document();
+            d.add(textField);
+            writer.addDocument(d);
+            writer.close();
         }
     }
 }

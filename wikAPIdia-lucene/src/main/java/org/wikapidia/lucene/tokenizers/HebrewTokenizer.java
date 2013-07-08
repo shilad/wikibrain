@@ -15,8 +15,8 @@ public class HebrewTokenizer extends LanguageTokenizer {
 
     private static CharArraySet stopWords = null;
 
-    public HebrewTokenizer(Version version, TokenizerOptions options) {
-        super(version, options);
+    protected HebrewTokenizer(Version version, TokenizerOptions options, Language language) {
+        super(version, options, language);
     }
 
     @Override
