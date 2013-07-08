@@ -81,7 +81,9 @@ public class LuceneLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
+        LuceneOptions opts = conf.get(LuceneOptions.class);
 
+        LanguageSet languages = env.getLanguages();
         Collection<NameSpace> nameSpaces = new ArrayList<NameSpace>();
         if (cmd.hasOption("p")) {
             String[] nsStrings = cmd.getOptionValues("p");
@@ -89,16 +91,12 @@ public class LuceneLoader {
                 nameSpaces.add(NameSpace.getNameSpaceByName(s));
             }
         } else {
-            List<String> nsStrings = conf.getConf().get().getStringList("namespaces");
-            for (String s : nsStrings) {
-                nameSpaces.add(NameSpace.getNameSpaceByName(s));
-            }
+            nameSpaces = opts.nameSpaces;
         }
-        LanguageSet languages = env.getLanguages();
+        File luceneRoot = opts.luceneRoot;
 
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
-        LuceneOptions opts = conf.get(LuceneOptions.class);
-        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, nameSpaces, opts);
+        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, nameSpaces, luceneRoot);
 
         final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer);
 

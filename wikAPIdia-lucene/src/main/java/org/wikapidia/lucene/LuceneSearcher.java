@@ -8,7 +8,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -53,15 +52,16 @@ public class LuceneSearcher {
 
     /**
      * Constructs a LuceneSearcher that will run lucene queries on sets of articles
-     * in any language in the LanguageSet. Note that root is the parent directory
-     * of the directory where lucene indexes are stored, though it is the same
-     * directory as was passed to the LuceneIndexer.
+     * in any language in the LanguageSet. The directory is specified within opts.
      * @param languages
-     * @param root the root directory in which each language contains its own lucene directory
      * @param opts a LuceneOptions object containing specific options for lucene
      * @throws WikapidiaException
      */
-    public LuceneSearcher(LanguageSet languages, File root, LuceneOptions opts) throws WikapidiaException {
+    public LuceneSearcher(LanguageSet languages, LuceneOptions opts) throws WikapidiaException {
+        this(languages, opts.luceneRoot, opts);
+    }
+
+    private LuceneSearcher(LanguageSet languages, File root, LuceneOptions opts) throws WikapidiaException {
         this.root = root;
         analyzers = new HashMap<Language, WikapidiaAnalyzer>();
         searchers = new HashMap<Language, IndexSearcher>();
@@ -86,7 +86,7 @@ public class LuceneSearcher {
      * @throws WikapidiaException
      */
     public ScoreDoc[] search(String searchString, Language language) throws WikapidiaException {
-        return search(opts.plaintextFieldName, searchString, language);
+        return search(opts.PLAINTEXT_FIELD_NAME, searchString, language);
     }
 
     /**

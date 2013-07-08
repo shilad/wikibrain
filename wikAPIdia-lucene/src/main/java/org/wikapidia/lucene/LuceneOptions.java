@@ -5,8 +5,12 @@ import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.model.NameSpace;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -19,33 +23,44 @@ import java.io.File;
  * parameter in whatever class.
  */
 public class LuceneOptions {
+
+    public static final String LOCAL_ID_FIELD_NAME = "local_id";
+    public static final String LANG_ID_FIELD_NAME = "lang_id";
+    public static final String WIKITEXT_FIELD_NAME = "wikitext";
+    public static final String PLAINTEXT_FIELD_NAME = "plaintext";
+
     public final Configuration conf;
     public final Version matchVersion;
-    public final String localIdFieldName;
-    public final String langIdFieldName;
-    public final String wikitextFieldName;
-    public final String plaintextFieldName;
     public final File luceneRoot;
+    public final Collection<NameSpace> nameSpaces;
 
     public LuceneOptions() {
         this.conf = new Configuration();
         Config config = conf.get();
         matchVersion = Version.parseLeniently(config.getString("lucene.version"));
-        localIdFieldName = config.getString("lucene.fieldName.localId");
-        langIdFieldName = config.getString("lucene.fieldName.langId");
-        wikitextFieldName = config.getString("lucene.fieldName.wikitext");
-        plaintextFieldName = config.getString("lucene.fieldName.plaintext");
         luceneRoot = new File(config.getString("lucene.directory"));
+        nameSpaces = new ArrayList<NameSpace>();
+        List<String> nsStrings = config.getStringList("namespaces");
+        for (String s : nsStrings) {
+            nameSpaces.add(NameSpace.getNameSpaceByName(s));
+        }
     }
 
-    private LuceneOptions(Configuration conf, String matchVersion, String localIdFieldName, String langIdFieldName, String wikitextFieldName, String plaintextFieldName, String luceneRoot) {
+    /**
+     * Used by provider only
+     * @param conf
+     * @param matchVersion
+     * @param luceneRoot
+     * @param nameSpaces
+     */
+    private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> nameSpaces) {
         this.conf = conf;
         this.matchVersion = Version.parseLeniently(matchVersion);
-        this.localIdFieldName = localIdFieldName;
-        this.langIdFieldName = langIdFieldName;
-        this.wikitextFieldName = wikitextFieldName;
-        this.plaintextFieldName = plaintextFieldName;
         this.luceneRoot = new File(luceneRoot);
+        this.nameSpaces = new ArrayList<NameSpace>();
+        for (String s : nameSpaces) {
+            this.nameSpaces.add(NameSpace.getNameSpaceByName(s));
+        }
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LuceneOptions> {
@@ -68,11 +83,8 @@ public class LuceneOptions {
             return new LuceneOptions(
                     getConfig(),
                     config.getString("version"),
-                    config.getString("fieldName.localId"),
-                    config.getString("fieldName.langId"),
-                    config.getString("fieldName.wikitext"),
-                    config.getString("fieldName.plaintext"),
-                    config.getString("directory")
+                    config.getString("directory"),
+                    config.getStringList("namespace")
             );
         }
     }
