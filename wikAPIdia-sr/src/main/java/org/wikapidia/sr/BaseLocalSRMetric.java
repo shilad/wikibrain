@@ -1,6 +1,7 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
@@ -125,7 +126,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
 
     @Override
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException, ParseException {
         HashSet<LocalString> context = new HashSet<LocalString>();
         context.add(new LocalString(language,phrase2));
         LocalId similar1 = disambiguator.disambiguate(new LocalString(language, phrase1), context);

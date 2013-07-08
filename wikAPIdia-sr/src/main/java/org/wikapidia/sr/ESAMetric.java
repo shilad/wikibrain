@@ -2,12 +2,17 @@ package org.wikapidia.sr;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
+import org.wikapidia.lucene.QueryBuilder;
+import org.wikapidia.lucene.WikapidiaAnalyzer;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.SimUtils;
 
@@ -24,12 +29,15 @@ public class ESAMetric extends BaseLocalSRMetric {
     // TODO: test ESA independently
     // TODO: finish article similarity
 
-    public String getName() {
-        return "ESA";
-    }
-
-    private LuceneSearcher searcher;
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
+    private LanguageSet languages;
+    private LuceneSearcher searcher;
+    protected LuceneOptions opts;
+
+    public ESAMetric(LanguageSet languages) throws WikapidiaException {
+        this.languages = languages;
+        searcher = new LuceneSearcher(languages, new LuceneOptions());
+    }
 
     /**
      * Get cosine similarity between two phrases.
@@ -40,7 +48,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      * @throws DaoException
      */
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException, ParseException {
         if (phrase1 == null || phrase2 == null) {
             throw new NullPointerException("Null phrase passed to similarity");
         }
@@ -59,11 +67,11 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @param phrase
      * @return
      */
-    public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws WikapidiaException { // TODO: validIDs
-        ScoreDoc[] scoreDocs = searcher.search(phrase, language);
+    public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws WikapidiaException, ParseException { // TODO: validIDs
+        QueryBuilder queryBuilder = new QueryBuilder(searcher.getOpts(), searcher.getAnalyzer(language));
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
         // TODO: prune
-        // normalize vector to unit length
-        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));
+        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
         return result;
     }
 
@@ -82,7 +90,8 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+
+        return null;
     }
 
     @Override
@@ -118,5 +127,9 @@ public class ESAMetric extends BaseLocalSRMetric {
     @Override
     public double[][] cosimilarity(String[] phrases, Language language) {
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public String getName() {
+        return "ESA";
     }
 }

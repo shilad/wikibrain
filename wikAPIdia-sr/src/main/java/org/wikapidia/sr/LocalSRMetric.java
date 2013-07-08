@@ -1,6 +1,7 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
@@ -36,7 +37,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException;
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException, ParseException;
 
     /**
      * Find the most similar local pages to a local page within the same language

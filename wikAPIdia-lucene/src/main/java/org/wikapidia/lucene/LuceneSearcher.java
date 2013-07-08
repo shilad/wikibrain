@@ -61,6 +61,14 @@ public class LuceneSearcher {
         this(languages, opts.luceneRoot, opts);
     }
 
+    public WikapidiaAnalyzer getAnalyzer(Language language) {
+        return analyzers.get(language);
+    }
+
+    public LuceneOptions getOpts() {
+        return opts;
+    }
+
     private LuceneSearcher(LanguageSet languages, File root, LuceneOptions opts) throws WikapidiaException {
         this.root = root;
         analyzers = new HashMap<Language, WikapidiaAnalyzer>();
