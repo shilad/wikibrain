@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 public class ESAMetric extends BaseLocalSRMetric {
 
     // TODO: test ESA independently
-    // TODO: finish article similarity
 
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
     private LanguageSet languages;
@@ -111,17 +110,21 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
+
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) {
+        QueryBuilder queryBuilder = new QueryBuilder(searcher.getOpts(), searcher.getAnalyzer(language));
+        searcher.setHitCount(maxResults);
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPageTextQuery(rawPage), language);
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     @Override
