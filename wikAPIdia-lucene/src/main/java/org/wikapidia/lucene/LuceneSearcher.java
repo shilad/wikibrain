@@ -99,16 +99,29 @@ public class LuceneSearcher {
      * @throws WikapidiaException
      */
     public ScoreDoc[] search(String fieldName, String searchString, Language language) throws WikapidiaException {
+        try {
+            QueryParser parser = new QueryParser(opts.matchVersion, fieldName, analyzers.get(language));
+            Query query = parser.parse(searchString);
+            return search(query, language);
+        } catch (ParseException e) {
+            LOG.log(Level.WARNING, "Unable to parse " + searchString + " in " + language.getEnLangName());
+            return null;
+        }
+    }
+
+    /**
+     * Runs a specified lucene query in the specified language
+     * @param query
+     * @param language
+     * @return
+     * @throws WikapidiaException
+     */
+    public ScoreDoc[] search(Query query, Language language) throws WikapidiaException {
         if (!analyzers.containsKey(language)) {
             throw new WikapidiaException("This Analyzer does not support " + language.getEnLangName());
         }
         try {
-            QueryParser parser = new QueryParser(opts.matchVersion, fieldName, analyzers.get(language));
-            Query query = parser.parse(searchString);
             return searchers.get(language).search(query, hitCount).scoreDocs;
-        } catch (ParseException e) {
-            LOG.log(Level.WARNING, "Unable to parse " + searchString + " in " + language.getEnLangName());
-            return null;
         } catch (IOException e) {
             throw new WikapidiaException(e);
         }

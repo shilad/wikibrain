@@ -6,7 +6,6 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
@@ -44,10 +43,27 @@ public abstract class LanguageTokenizer {
     protected boolean useStopWords = true;
     protected boolean useStem = true;
 
+    /**
+     * Returns an instance of a LanguageTokenizer for the specified language
+     * with the filters specified by options.
+     * @param language
+     * @param options
+     * @return
+     * @throws WikapidiaException
+     */
     public static LanguageTokenizer getLanguageTokenizer(Language language, TokenizerOptions options) throws WikapidiaException {
         return getLanguageTokenizer(language, options, new LuceneOptions());
     }
 
+    /**
+     * Returns an instance of a LanguageTokenizer for the specified language
+     * with the filters specified by options.
+     * @param language
+     * @param options
+     * @param opts
+     * @return
+     * @throws WikapidiaException
+     */
     public static LanguageTokenizer getLanguageTokenizer(Language language, TokenizerOptions options, LuceneOptions opts) throws WikapidiaException {
         try {
             LanguageTokenizer.opts = opts;
@@ -59,7 +75,7 @@ public abstract class LanguageTokenizer {
         }
     }
 
-    public static void mapTokenizers() throws NoSuchMethodException {
+    private static void mapTokenizers() throws NoSuchMethodException {
         tokenizerClasses = new HashMap<Language, Class>();
         tokenizerClasses.put(Language.getByLangCode("en"), EnglishTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("de"), GermanTokenizer.class);
