@@ -44,11 +44,6 @@
             <artifactId>lucene-analyzers-common</artifactId>
             <version>4.3.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-mapper</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
 
     </dependencies>
 

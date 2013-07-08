@@ -2,10 +2,11 @@ package org.wikapidia.sr.pairwise;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
-import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -19,13 +20,13 @@ import java.util.logging.Logger;
 
 public class PairwiseSimilarityWriter {
     private static final Logger LOG = Logger.getLogger(PairwiseSimilarityWriter.class.getName());
-    //TODO: add the constructor for language and metric
     private SparseMatrixWriter writer;
     private AtomicInteger idCounter = new AtomicInteger();
-    private long numCells;
     private ValueConf vconf;
     private TIntSet validIds;
     private TIntSet usedIds = new TIntHashSet();
+    private LocalSRMetric metric;
+    private Language language;
 
     public PairwiseSimilarityWriter(File outputFile) throws IOException {
         this.vconf = new ValueConf();
@@ -48,7 +49,6 @@ public class PairwiseSimilarityWriter {
                 writeSim(wpId, maxSimsPerDoc);
             }
         }, Integer.MAX_VALUE);
-        LOG.info("wrote " + numCells + " non-zero similarity cells");
         this.writer.finish();
     }
 
@@ -59,15 +59,7 @@ public class PairwiseSimilarityWriter {
                     ": finding matches for doc " + idCounter.get() +
                     ", used " + usedIds.size() + " of " + nValidStr);
         }
-        //TODO: Create a new method in the Milne Witten/specific metric to generate the unknown vector
-        SRResultList scores = metric.mostSimilar(wpId, maxSimsPerDoc, validIds);
-        if (scores != null) {
-            int ids[] = scores.getIds();
-            synchronized (this) {
-                numCells += scores.getIds().length;
-                usedIds.addAll(ids);
-            }
-            writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
-        }
+        SparseMatrixRow scores = metric.getVector(wpId, language);
+        writer.writeRow(scores);
     }
 }
