@@ -1,10 +1,13 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -12,14 +15,10 @@ import java.util.logging.Logger;
 public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     private static Logger LOG = Logger.getLogger(BaseUniversalSRMetric.class.getName());
     protected int numThreads = Runtime.getRuntime().availableProcessors();
-
-    protected LocalSRMetric localSRMetric;
+    protected UniversalPageDao universalPageDao;
+    protected Disambiguator disambiguator;
 
     protected SparseMatrix mostSimilarUniversalMatrix;
-
-    BaseUniversalSRMetric(LocalSRMetric localSRMetric){
-        this.localSRMetric=localSRMetric;
-    }
 
     public void setMostSimilarUniversalMatrix(SparseMatrix matrix) {
         this.mostSimilarUniversalMatrix = matrix;
@@ -47,7 +46,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     }
 
     @Override
-    public abstract SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations);
+    public abstract SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations) throws DaoException;
 
     @Override
     public abstract SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations);
@@ -72,7 +71,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     public abstract double[][] cosimilarity(LocalString[] rowPhrases, LocalString[] colPhrases) throws IOException;
 
     @Override
-    public double[][] cosimilarity(int[] ids) throws IOException {
+    public double[][] cosimilarity(int[] ids) throws IOException, DaoException {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
             cos[i][i]=1;
