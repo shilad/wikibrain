@@ -1,10 +1,10 @@
 package org.wikapidia.sr.pairwise;
 
+import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.sr.LocalSRMetric;
@@ -71,7 +71,7 @@ public class PairwiseSimilarityWriter {
                     ": finding matches for doc " + idCounter.get() +
                     ", used " + usedIds.size() + " of " + nValidStr);
         }
-        SparseMatrixRow scores;
+        TIntDoubleMap scores;
         if (localSRMetric!=null){
             scores = localSRMetric.getVector(id, language);
         } else if (universalSRMetric!=null){

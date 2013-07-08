@@ -1,11 +1,9 @@
 package org.wikapidia.sr;
 
 import gnu.trove.map.TIntDoubleMap;
-import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
 import org.wikapidia.matrix.SparseMatrixRow;
@@ -157,7 +155,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     }
 
     @Override
-    public SparseMatrixRow getVector(int id) throws DaoException {
+    public TIntDoubleMap getVector(int id) throws DaoException {
         LinkedHashMap<Integer,Float> vector = new LinkedHashMap<Integer, Float>();
         Map<Integer, UniversalLink> links;
         if (outLinks){

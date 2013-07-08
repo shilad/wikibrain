@@ -2,6 +2,7 @@ package org.wikapidia.matrix;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TShortArrayList;
+import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -122,7 +123,7 @@ public class SparseMatrixTransposer {
         RowAccumulator(int id) {
             this.id = id;
         }
-        SparseMatrixRow toRow(ValueConf vconf) {
+        TIntDoubleMap toRow(ValueConf vconf) {
             return new SparseMatrixRow(vconf, id, colIds.toArray(), colVals.toArray());
         }
         void addCol(int id, short val) {

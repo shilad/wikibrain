@@ -72,15 +72,15 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     @Override
-    public SparseMatrixRow getVector(int id, Language language) throws DaoException {
-        LinkedHashMap<Integer, Float> vector = new LinkedHashMap<Integer, Float>();
+    public TIntDoubleMap getVector(int id, Language language) throws DaoException {
+        TIntDoubleMap vector = new TIntDoubleHashMap();
         TIntSet links = getLinks(new LocalId(language, id));
-        DaoFilter pageFilter = new DaoFilter();
+        DaoFilter pageFilter = new DaoFilter().setLanguages(language);
         Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
         for (LocalPage page: allPages) {
-            vector.put(id, links.contains(page.getLocalId()) ? 1F:0F);
+            vector.put(id, links.contains(page.getLocalId()) ? 1:0);
         }
-        return new SparseMatrixRow(new ValueConf(), id, vector);
+        return vector;
     }
 
     @Override
