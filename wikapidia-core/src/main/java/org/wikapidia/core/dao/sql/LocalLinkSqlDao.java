@@ -1,26 +1,33 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.supercsv.io.CsvListWriter;
+import org.supercsv.prefs.CsvPreference;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.*;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
+import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
 
 import javax.sql.DataSource;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
 
 public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
+    private File tmpFile = null;
+    private CsvListWriter writer = null;
+
 
     public LocalLinkSqlDao (DataSource dataSource) throws DaoException {
         super(dataSource);
@@ -34,33 +41,73 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
 
     @Override
     public void beginLoad() throws DaoException {
+        if (!dialect.equals(SQLDialect.H2)) {
+            throw new IllegalArgumentException("invalid dialect: " + dialect);
+        }
         executeSqlResource("/db/local-link-schema.sql");
+        try {
+            tmpFile = File.createTempFile("locallink", "db");
+            tmpFile.deleteOnExit();
+            writer = new CsvListWriter(
+                    new BufferedWriter(
+                            new OutputStreamWriter(
+                                    new FileOutputStream(tmpFile), "UTF-8")),
+                    CsvPreference.STANDARD_PREFERENCE);
+            writer.writeHeader(
+                    Tables.LOCAL_LINK.LANG_ID.getName(),
+                    Tables.LOCAL_LINK.ANCHOR_TEXT.getName(),
+                    Tables.LOCAL_LINK.SOURCE_ID.getName(),
+                    Tables.LOCAL_LINK.DEST_ID.getName(),
+                    Tables.LOCAL_LINK.LOCATION.getName(),
+                    Tables.LOCAL_LINK.IS_PARSEABLE.getName(),
+                    Tables.LOCAL_LINK.LOCATION_TYPE.getName()
+            );
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
     }
 
     @Override
     public void save(LocalLink localLink) throws DaoException {
-        Connection conn=null;
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.LOCAL_LINK).values(
-                    localLink.getLanguage().getId(),
-                    localLink.getAnchorText(),
-                    localLink.getSourceId(),
-                    localLink.getDestId(),
-                    localLink.getLocation(),
-                    localLink.isParseable(),
-                    localLink.getLocType().ordinal()
-            ).execute();
-        } catch (SQLException e) {
+            synchronized (writer) {
+                writer.write(
+                        localLink.getLanguage().getId(),
+                        localLink.getAnchorText(),
+                        localLink.getSourceId(),
+                        localLink.getDestId(),
+                        localLink.getLocation(),
+                        localLink.isParseable(),
+                        localLink.getLocType().ordinal()
+                );
+            }
+        } catch (IOException e) {
             throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
     @Override
     public void endLoad() throws DaoException {
+        if (!dialect.equals(SQLDialect.H2)) {
+            throw new IllegalArgumentException("invalid dialect: " + dialect);
+        }
+        Connection conn = null;
+        try {
+            writer.close();
+            conn = ds.getConnection();
+            String quotedPath = tmpFile.getAbsolutePath().replace("'", "''");
+            Statement s = conn.createStatement();
+            s.execute("INSERT INTO " + Tables.LOCAL_LINK.getName() +
+                    " SELECT * " +
+                    " FROM CSVREAD('" + quotedPath + "', null, 'charset=UTF-8')");
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+
         executeSqlResource("/db/local-link-indexes.sql");
     }
 
@@ -143,7 +190,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(idField.equal(localId))
                     .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
-                    .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
+                    .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short) locationType.ordinal()))
                     .fetchLazy(getFetchSize());
             return buildLocalLinks(result, outlinks);
         } catch (SQLException e) {
@@ -250,7 +297,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
             }
             try {
                 return new LocalLinkSqlDao(
-                        (DataSource) getConfigurator().get(
+                        getConfigurator().get(
                                 DataSource.class,
                                 config.getString("dataSource"))
                 );
