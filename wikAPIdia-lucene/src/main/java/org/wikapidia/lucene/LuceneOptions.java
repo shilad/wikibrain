@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Ari Weiland
  *
- * This class can be instantiated through a configurator or with default configuration.
+ * This class can be instantiated through a configurator or by default configuration.
  * It provides access to all configurable options relevant to Lucene, such as version,
  * directory, and namespaces to index.  It also contains static final variables for
  * different field names. It should be passed to all classes in the lucene package.

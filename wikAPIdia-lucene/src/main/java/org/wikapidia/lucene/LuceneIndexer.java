@@ -21,7 +21,7 @@ import java.util.*;
  *
  * @author Ari Weiland
  *
- * This class is used to index raw pages during the load process
+ * This class is used to index raw pages during the load process.
  *
  */
 public class LuceneIndexer {

@@ -13,16 +13,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
-*
-* @author Ari Weiland
-*
+ *
+ * @author Ari Weiland
+ *
+ * This class wraps the lucene search into a class that can handle any specified language
+ *
 */
 public class LuceneSearcher {
 
-    private static final Logger LOG = Logger.getLogger(LuceneSearcher.class.getName());
     public static final int HIT_COUNT = 1000;
 
     private final LuceneOptions options;

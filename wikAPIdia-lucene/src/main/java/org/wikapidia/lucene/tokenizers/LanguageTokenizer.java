@@ -24,11 +24,13 @@ import java.util.Map;
  * @author Ari Weiland
  *
  * This class is based on a class of the same name from Brent Hecht, WikAPIdia.
- * I have updated everything to properly function consistently with lucene 4.3,
+ * I have updated everything to properly function consistently with Lucene 4.3,
  * as well as adding functionality such as the booleans to determine which filters
- * should be applied.
+ * should be applied. Lastly, I have broken up the language specific
+ * subclasses into their own separate class files.
  *
- * Currently encompasses 26 Tokenizers
+ * There are currently 26 language-specific tokenizer subclasses.
+ * Note that simple English is treated as standard English
  *
  */
 public abstract class LanguageTokenizer {
@@ -82,7 +84,8 @@ public abstract class LanguageTokenizer {
         try {
             LanguageTokenizer.options = options;
             mapTokenizers();
-            return (LanguageTokenizer) tokenizerClasses.get(language)
+            if (language.equals(Language.getByLangCode("simple"))) language = Language.getByLangCode("en"); // simple english
+            return (LanguageTokenizer) tokenizerClasses.get(language)                                       // is just english
                     .getDeclaredConstructor(
                             Version.class,
                             TokenizerOptions.class,

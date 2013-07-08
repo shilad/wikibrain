@@ -64,7 +64,6 @@ public class WikapidiaAnalyzer extends Analyzer {
     protected Analyzer.TokenStreamComponents createComponents(String s, Reader r) {
         Tokenizer tokenizer;
         String langCode = language.getLangCode();
-        if (langCode.equals("simple")) langCode = "en"; // simple english is just english
         if (langCode.equals("ja")) {
             tokenizer = new JapaneseTokenizer(r, null, false, JapaneseTokenizer.DEFAULT_MODE);
         } else if (langCode.equals("zh")) {
