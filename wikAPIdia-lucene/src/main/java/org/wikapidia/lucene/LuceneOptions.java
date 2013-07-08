@@ -35,12 +35,12 @@ public class LuceneOptions {
     public final Collection<NameSpace> nameSpaces;
 
     public LuceneOptions() {
-        this.conf = new Configuration();
+        this.conf = new Configuration(null);
         Config config = conf.get();
-        matchVersion = Version.parseLeniently(config.getString("lucene.version"));
-        luceneRoot = new File(config.getString("lucene.directory"));
+        matchVersion = Version.parseLeniently(config.getString("lucene.options.version"));
+        luceneRoot = new File(config.getString("lucene.options.directory"));
         nameSpaces = new ArrayList<NameSpace>();
-        List<String> nsStrings = config.getStringList("namespaces");
+        List<String> nsStrings = config.getStringList("lucene.options.namespaces");
         for (String s : nsStrings) {
             nameSpaces.add(NameSpace.getNameSpaceByName(s));
         }
@@ -84,7 +84,7 @@ public class LuceneOptions {
                     getConfig(),
                     config.getString("version"),
                     config.getString("directory"),
-                    config.getStringList("namespace")
+                    config.getStringList("namespaces")
             );
         }
     }

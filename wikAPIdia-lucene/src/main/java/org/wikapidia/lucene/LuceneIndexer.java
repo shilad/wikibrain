@@ -61,9 +61,9 @@ public class LuceneIndexer {
         this.root = root;
         analyzers = new HashMap<Language, WikapidiaAnalyzer>();
         writers = new HashMap<Language, IndexWriter>();
-        setup(languages);
         this.nameSpaces = nameSpaces;
         this.opts = opts;
+        setup(languages);
     }
 
     /**
@@ -95,7 +95,7 @@ public class LuceneIndexer {
     private void setup(LanguageSet languages) throws WikapidiaException {
         try {
             for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, opts);
                 analyzers.put(language, analyzer);
                 Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
                 IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, analyzer);

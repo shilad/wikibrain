@@ -65,8 +65,8 @@ public class LuceneSearcher {
         this.root = root;
         analyzers = new HashMap<Language, WikapidiaAnalyzer>();
         searchers = new HashMap<Language, IndexSearcher>();
-        setup(languages);
         this.opts = opts;
+        setup(languages);
     }
 
     public int getHitCount() {
@@ -117,7 +117,7 @@ public class LuceneSearcher {
     private void setup(LanguageSet languages) throws WikapidiaException {
         try {
             for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, opts);
                 analyzers.put(language, analyzer);
                 Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
                 DirectoryReader reader = DirectoryReader.open(directory);

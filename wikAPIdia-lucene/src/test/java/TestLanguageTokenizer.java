@@ -28,11 +28,7 @@ public class TestLanguageTokenizer {
             LanguageSet langSet = new LanguageSet(langCodes);
             LuceneOptions opts = new LuceneOptions();
             for(Language language : langSet){
-                WikapidiaAnalyzer wa = new WikapidiaAnalyzer(
-                        language,
-                        new TokenizerOptions().caseInsensitive().useStopWords().useStem(),
-                        opts
-                );
+                WikapidiaAnalyzer wa = new WikapidiaAnalyzer(language, opts);
                 IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, wa);
                 iwc.setRAMBufferSizeMB(1024.0);
                 iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);

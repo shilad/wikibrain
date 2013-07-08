@@ -33,13 +33,41 @@ public class WikapidiaAnalyzer extends Analyzer {
     private final TokenizerOptions options;
 
     /**
+     * Constructs a WikapidiaAnalyzer for the specified language with all filters.
+     * @param language
+     * @throws IOException
+     */
+    public WikapidiaAnalyzer(Language language) throws IOException {
+        this(
+                language,
+                new TokenizerOptions().useStem().useStopWords().caseInsensitive(),
+                new LuceneOptions());
+    }
+
+    /**
      * Constructs a WikapidiaAnalyzer for the specified language with specified filters.
      * @param language
      * @param options
      * @throws IOException
      */
     public WikapidiaAnalyzer(Language language, TokenizerOptions options) throws IOException {
-        this(language, options, new LuceneOptions());
+        this(
+                language,
+                options,
+                new LuceneOptions());
+    }
+
+    /**
+     * Constructs a WikapidiaAnalyzer for the specified language with specified opts.
+     * @param language
+     * @param opts a LuceneOptions object containing specific options for lucene
+     * @throws IOException
+     */
+    public WikapidiaAnalyzer(Language language, LuceneOptions opts) throws IOException {
+        this(
+                language,
+                new TokenizerOptions().useStem().useStopWords().caseInsensitive(),
+                opts);
     }
 
     /**
@@ -53,15 +81,6 @@ public class WikapidiaAnalyzer extends Analyzer {
         this.language = language;
         this.options = options;
         this.opts = opts;
-    }
-
-    /**
-     * Constructs a WikapidiaAnalyzer for the specified language with all filters.
-     * @param language
-     * @throws IOException
-     */
-    public WikapidiaAnalyzer(Language language) throws IOException {
-        this(language, new TokenizerOptions().useStem().useStopWords().caseInsensitive());
     }
 
     public TokenizerOptions getOptions() {
