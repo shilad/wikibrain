@@ -1,6 +1,5 @@
 package org.wikapidia.matrix;
 
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.io.File;
@@ -21,7 +20,7 @@ public class TestUtils {
      * @param sameIds
      * @return
      */
-    public static List<TIntDoubleMap> createSparseTestMatrixRows(int nRows, int maxRowLen, boolean sameIds) throws IOException {
+    public static List<SparseMatrixRow> createSparseTestMatrixRows(int nRows, int maxRowLen, boolean sameIds) throws IOException {
         return createSparseTestMatrixRowsInternal(nRows, maxRowLen, sameIds, null);
     }
     public static List<DenseMatrixRow> createDenseTestMatrixRows(int nRows, int numCols) throws IOException {
@@ -73,11 +72,11 @@ public class TestUtils {
      * @param writer
      * @return if writer == null the list of rows, else null
      */
-    private static List<TIntDoubleMap> createSparseTestMatrixRowsInternal(
+    private static List<SparseMatrixRow> createSparseTestMatrixRowsInternal(
             int nRows, int maxRowLen, boolean sameIds, SparseMatrixWriter writer)
             throws IOException {
         Random random = new Random();
-        List<TIntDoubleMap> rows = new ArrayList<TIntDoubleMap>();
+        List<SparseMatrixRow> rows = new ArrayList<SparseMatrixRow>();
         int rowIds[] = pickIds(nRows, nRows * 2);
         for (int id1 : rowIds) {
             LinkedHashMap<Integer, Float> data = new LinkedHashMap<Integer, Float>();
@@ -86,7 +85,7 @@ public class TestUtils {
             for (int id2 : colIds) {
                 data.put(id2, random.nextFloat());
             }
-            TIntDoubleMap row = new SparseMatrixRow(new ValueConf(), id1, data);
+            SparseMatrixRow row = new SparseMatrixRow(new ValueConf(), id1, data);
             if (writer == null) {
                 rows.add(row);
             } else {

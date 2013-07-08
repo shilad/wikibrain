@@ -1,11 +1,11 @@
 package org.wikapidia.sr;
 
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.File;
@@ -114,7 +114,7 @@ public interface LocalSRMetric {
      * @param language
      * @return A vector of a page's scores versus all other pages
      */
-    public TIntDoubleMap getVector(int id, Language language) throws DaoException;
+    public SparseMatrixRow getVector(int id, Language language) throws DaoException;
 
 
     /**

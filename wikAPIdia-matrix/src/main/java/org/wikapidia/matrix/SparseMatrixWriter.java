@@ -1,7 +1,6 @@
 package org.wikapidia.matrix;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -39,7 +38,7 @@ public class SparseMatrixWriter {
         info("writing body to tmp file at " + bodyPath);
     }
 
-    public synchronized void writeRow(TIntDoubleMap row) throws IOException {
+    public synchronized void writeRow(SparseMatrixRow row) throws IOException {
         if (!row.getValueConf().almostEquals(vconf)) {
             throw new IllegalArgumentException("Value conf for row does not match the writer's value conf");
         }
@@ -94,10 +93,10 @@ public class SparseMatrixWriter {
         LOG.log(Level.INFO, "sparse matrix writer " + path + ": " + message);
     }
 
-    public static void write(File file, Iterator<TIntDoubleMap> rows) throws IOException {
+    public static void write(File file, Iterator<SparseMatrixRow> rows) throws IOException {
         write(file, rows, new ValueConf());
     }
-    public static void write(File file, Iterator<TIntDoubleMap> rows, ValueConf vconf) throws IOException {
+    public static void write(File file, Iterator<SparseMatrixRow> rows, ValueConf vconf) throws IOException {
         SparseMatrixWriter w = new SparseMatrixWriter(file, vconf);
         while (rows.hasNext()) {
             w.writeRow(rows.next());

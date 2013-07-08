@@ -1,6 +1,5 @@
 package org.wikapidia.matrix;
 
-import gnu.trove.map.TIntDoubleMap;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestSparseMatrix {
-    private List<TIntDoubleMap> srcRows;
+    private List<SparseMatrixRow> srcRows;
 
     private int NUM_ROWS = 1000;
     private int MAX_COLS = NUM_ROWS * 2;
@@ -68,7 +67,7 @@ public class TestSparseMatrix {
 
 
     private void verifyIsSourceMatrix(Matrix m) throws IOException {
-        for (TIntDoubleMap srcRow : srcRows) {
+        for (SparseMatrixRow srcRow : srcRows) {
             MatrixRow destRow = m.getRow(srcRow.getRowIndex());
             assertEquals(destRow.getRowIndex(), srcRow.getRowIndex());
             assertEquals(destRow.getNumCols(), srcRow.getNumCols());
@@ -80,7 +79,7 @@ public class TestSparseMatrix {
     }
 
     private void verifyIsSourceMatrixUnordered(Matrix m, double delta) throws IOException {
-        for (TIntDoubleMap srcRow : srcRows) {
+        for (SparseMatrixRow srcRow : srcRows) {
             MatrixRow destRow = m.getRow(srcRow.getRowIndex());
             LinkedHashMap<Integer, Float> destRowMap = destRow.asMap();
             assertEquals(destRow.getRowIndex(), srcRow.getRowIndex());
