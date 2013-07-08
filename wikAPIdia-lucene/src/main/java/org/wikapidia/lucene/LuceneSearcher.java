@@ -29,11 +29,10 @@ public class LuceneSearcher {
     private static final Logger LOG = Logger.getLogger(LuceneSearcher.class.getName());
     public static final int HIT_COUNT = 1000;
 
-    protected LuceneOptions opts;
-
+    private final LuceneOptions opts;
     private final File root;
-    private final Map<Language, WikapidiaAnalyzer> analyzers;
-    private final Map<Language, IndexSearcher> searchers;
+    private final WikapidiaAnalyzer analyzer;
+    private final IndexSearcher searcher;
 
     private int hitCount = HIT_COUNT;
 
@@ -42,39 +41,48 @@ public class LuceneSearcher {
      * in any language in the LanguageSet. Note that root is the parent directory
      * of the directory where lucene indexes are stored, though it is the same
      * directory as was passed to the LuceneIndexer.
-     * @param languages
+     * @param language
      * @param root the root directory in which each language contains its own lucene directory
      * @throws WikapidiaException
      */
-    public LuceneSearcher(LanguageSet languages, File root) throws WikapidiaException {
-        this(languages, root, new LuceneOptions());
+    public LuceneSearcher(Language language, File root) throws WikapidiaException {
+        this(language, root, new LuceneOptions());
     }
 
     /**
      * Constructs a LuceneSearcher that will run lucene queries on sets of articles
      * in any language in the LanguageSet. The directory is specified within opts.
-     * @param languages
+     * @param language
      * @param opts a LuceneOptions object containing specific options for lucene
      * @throws WikapidiaException
      */
-    public LuceneSearcher(LanguageSet languages, LuceneOptions opts) throws WikapidiaException {
-        this(languages, opts.luceneRoot, opts);
+    public LuceneSearcher(Language language, LuceneOptions opts) throws WikapidiaException {
+        this(language, opts.luceneRoot, opts);
     }
 
-    public WikapidiaAnalyzer getAnalyzer(Language language) {
-        return analyzers.get(language);
+    private LuceneSearcher(Language language, File root, LuceneOptions opts) throws WikapidiaException {
+        try {
+            this.root = root;
+            this.analyzer = new WikapidiaAnalyzer(language, opts); // TODO: TokenizerOptions are always set to default. Should we add more user control?
+            Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
+            DirectoryReader reader = DirectoryReader.open(directory);
+            this.searcher = new IndexSearcher(reader);
+            this.opts = opts;
+        } catch (IOException e) {
+            throw new WikapidiaException(e);
+        }
     }
 
     public LuceneOptions getOpts() {
         return opts;
     }
 
-    private LuceneSearcher(LanguageSet languages, File root, LuceneOptions opts) throws WikapidiaException {
-        this.root = root;
-        analyzers = new HashMap<Language, WikapidiaAnalyzer>();
-        searchers = new HashMap<Language, IndexSearcher>();
-        this.opts = opts;
-        setup(languages);
+    public WikapidiaAnalyzer getAnalyzer() {
+        return analyzer;
+    }
+
+    public Language getLanguage() {
+        return analyzer.getLanguage();
     }
 
     public int getHitCount() {
@@ -94,56 +102,36 @@ public class LuceneSearcher {
      * @throws WikapidiaException
      */
     public ScoreDoc[] search(String searchString, Language language) throws WikapidiaException {
-        return search(opts.PLAINTEXT_FIELD_NAME, searchString, language);
+        return search(LuceneOptions.PLAINTEXT_FIELD_NAME, searchString);
     }
 
     /**
-     * Runs a lucene query on the specified field for the specified
-     * search string in the specified language.
+     * Runs a lucene query on the specified field for the specified search string.
      * @param fieldName
      * @param searchString
-     * @param language
      * @return
      * @throws WikapidiaException
      */
-    public ScoreDoc[] search(String fieldName, String searchString, Language language) throws WikapidiaException {
+    public ScoreDoc[] search(String fieldName, String searchString) throws WikapidiaException {
         try {
-            QueryParser parser = new QueryParser(opts.matchVersion, fieldName, analyzers.get(language));
+            QueryParser parser = new QueryParser(opts.matchVersion, fieldName, analyzer);
             Query query = parser.parse(searchString);
-            return search(query, language);
+            return search(query);
         } catch (ParseException e) {
-            LOG.log(Level.WARNING, "Unable to parse " + searchString + " in " + language.getEnLangName());
+            LOG.log(Level.WARNING, "Unable to parse " + searchString);
             return null;
         }
     }
 
     /**
-     * Runs a specified lucene query in the specified language
+     * Runs a specified lucene query
      * @param query
-     * @param language
      * @return
      * @throws WikapidiaException
      */
-    public ScoreDoc[] search(Query query, Language language) throws WikapidiaException {
-        if (!analyzers.containsKey(language)) {
-            throw new WikapidiaException("This Analyzer does not support " + language.getEnLangName());
-        }
+    public ScoreDoc[] search(Query query) throws WikapidiaException {
         try {
-            return searchers.get(language).search(query, hitCount).scoreDocs;
-        } catch (IOException e) {
-            throw new WikapidiaException(e);
-        }
-    }
-
-    private void setup(LanguageSet languages) throws WikapidiaException {
-        try {
-            for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, opts);
-                analyzers.put(language, analyzer);
-                Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
-                DirectoryReader reader = DirectoryReader.open(directory);
-                searchers.put(language, new IndexSearcher(reader));
-            }
+            return searcher.search(query, hitCount).scoreDocs;
         } catch (IOException e) {
             throw new WikapidiaException(e);
         }
