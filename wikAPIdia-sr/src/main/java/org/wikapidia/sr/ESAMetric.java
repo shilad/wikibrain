@@ -32,13 +32,12 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
 
-    private LanguageSet languages;
+    private Language language;
     private LuceneSearcher searcher;
-    private LuceneOptions options;
 
-    public ESAMetric(LanguageSet languages) throws WikapidiaException {
-        this.languages = languages;
-        searcher = new LuceneSearcher(languages, new LuceneOptions());
+    public ESAMetric(Language language) throws WikapidiaException {
+        this.language = language;
+        searcher = new LuceneSearcher(new LanguageSet(language.getLangCode()), new LuceneOptions());
     }
 
     /**
@@ -70,7 +69,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      */
     public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws WikapidiaException, ParseException { // TODO: validIDs
-        QueryBuilder queryBuilder = new QueryBuilder(language, options);
+        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
         // TODO: prune
         TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
@@ -78,7 +77,7 @@ public class ESAMetric extends BaseLocalSRMetric {
     }
 
     public TIntDoubleHashMap getConceptVector(RawPage rawPage, Language language) throws WikapidiaException, ParseException { // TODO: validIDs
-        QueryBuilder queryBuilder = new QueryBuilder(searcher.getOpts(), searcher.getAnalyzer(language));
+        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPageTextQuery(rawPage), language);
         // TODO: prune
         TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
@@ -115,9 +114,8 @@ public class ESAMetric extends BaseLocalSRMetric {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) {
-        QueryBuilder queryBuilder = new QueryBuilder(searcher.getOpts(), searcher.getAnalyzer(language));
+    public SRResultList mostSimilar(RawPage rawPage, int maxResults, boolean explanations) throws ParseException, WikapidiaException {
+        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPageTextQuery(rawPage), language);
         return null;  //To change body of implemented methods use File | Settings | File Templates.
@@ -126,6 +124,11 @@ public class ESAMetric extends BaseLocalSRMetric {
     @Override
     public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) {
         return null;
+    }
+
+    @Override
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
