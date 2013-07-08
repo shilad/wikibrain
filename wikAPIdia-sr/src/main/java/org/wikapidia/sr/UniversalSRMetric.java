@@ -5,6 +5,7 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.matrix.SparseMatrixRow;
 
 import java.io.IOException;
 
@@ -110,10 +111,9 @@ public interface UniversalSRMetric {
     /**
      * Return a vector for a UniversalPage
      * @param id the UniversalPage's id
-     * @param algorithmId the UniversalPage's algorithm id
      * @return a vector relating it to other pages.
      * @throws DaoException
      */
-    public TIntDoubleMap getVector(int id, int algorithmId) throws DaoException;
+    public SparseMatrixRow getVector(int id) throws DaoException;
 
 }

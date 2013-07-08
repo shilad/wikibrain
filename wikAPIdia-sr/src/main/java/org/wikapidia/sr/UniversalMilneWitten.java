@@ -8,10 +8,13 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
+import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +58,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     @Override
     public SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations) throws DaoException {
         if (page1.getAlgorithmId() != page2.getAlgorithmId()){
-            return new SRResult(Double.NaN);
+            throw new IllegalArgumentException();
         }
         int algorithmId = page1.getAlgorithmId();
 
@@ -113,13 +116,14 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     }
 
     @Override
-    public SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations) throws DaoException {
+        return super.similarity(phrase1,phrase2,explanations);
     }
 
     @Override
     public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        SRResultList mostSimilar = getCachedMostSimilarUniversal(page.getUnivId(), maxResults, null);
+        return null;
     }
 
     @Override
@@ -153,8 +157,8 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     }
 
     @Override
-    public TIntDoubleMap getVector(int id, int algorithmId) throws DaoException {
-        TIntDoubleMap vector = new TIntDoubleHashMap();
+    public SparseMatrixRow getVector(int id) throws DaoException {
+        LinkedHashMap<Integer,Float> vector = new LinkedHashMap<Integer, Float>();
         Map<Integer, UniversalLink> links;
         if (outLinks){
             links = universalLinkDao.getOutlinks(id,algorithmId).getLinks();
@@ -164,9 +168,9 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         DaoFilter pageFilter = new DaoFilter();
         Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
         for (UniversalPage page : allPages){
-            vector.put(page.getUnivId(),links.containsKey(page.getUnivId())? 1: 0);
+            vector.put(page.getUnivId(),links.containsKey(page.getUnivId())? 1F: 0F);
         }
-        return vector;
+        return new SparseMatrixRow(new ValueConf(), id, vector);
     }
 
     private TIntSet getLinks(int universeId, int algorithmId) throws DaoException {
