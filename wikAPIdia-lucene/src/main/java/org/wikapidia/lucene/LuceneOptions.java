@@ -35,33 +35,22 @@ public class LuceneOptions {
     public final Collection<NameSpace> nameSpaces;
     public final TokenizerOptions options;
 
-    /**
-     * @deprecated Use getDefaultOptions() instead
-     */
-    public LuceneOptions() {
-        this.conf = new Configuration(null);
-        Config config = conf.get();
-        matchVersion = Version.parseLeniently(config.getString("lucene.options.version"));
-        luceneRoot = new File(config.getString("lucene.options.directory"));
-        nameSpaces = new ArrayList<NameSpace>();
-        List<String> nsStrings = config.getStringList("lucene.options.namespaces");
-        for (String s : nsStrings) {
-            nameSpaces.add(NameSpace.getNameSpaceByName(s));
-        }
-        options = buildOptions(
-                config.getBoolean("lucene.options.caseInsensitive"),
-                config.getBoolean("lucene.options.useStopWords"),
-                config.getBoolean("lucene.options.useStem")
-        );
-    }
-
-    public static LuceneOptions getDefaultOptions() {
-        try {
-            return new Configurator(new Configuration(null)).get(LuceneOptions.class, "options");
-        } catch (ConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public LuceneOptions() {
+//        this.conf = new Configuration(null);
+//        Config config = conf.get();
+//        matchVersion = Version.parseLeniently(config.getString("lucene.options.version"));
+//        luceneRoot = new File(config.getString("lucene.options.directory"));
+//        nameSpaces = new ArrayList<NameSpace>();
+//        List<String> nsStrings = config.getStringList("lucene.options.namespaces");
+//        for (String s : nsStrings) {
+//            nameSpaces.add(NameSpace.getNameSpaceByName(s));
+//        }
+//        options = buildOptions(
+//                config.getBoolean("lucene.options.caseInsensitive"),
+//                config.getBoolean("lucene.options.useStopWords"),
+//                config.getBoolean("lucene.options.useStem")
+//        );
+//    }
 
     /**
      * Used by provider only
@@ -75,6 +64,14 @@ public class LuceneOptions {
             this.nameSpaces.add(NameSpace.getNameSpaceByName(s));
         }
         this.options = options;
+    }
+
+    public static LuceneOptions getDefaultOptions() {
+        try {
+            return new Configurator(new Configuration(null)).get(LuceneOptions.class, "options");
+        } catch (ConfigurationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static TokenizerOptions buildOptions(boolean caseInsensitive, boolean useStopWords, boolean useStem) {

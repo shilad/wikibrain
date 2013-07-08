@@ -6,8 +6,8 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.lucene.LuceneException;
 import org.wikapidia.lucene.TokenizerOptions;
 import org.wikapidia.lucene.LuceneOptions;
 
@@ -52,13 +52,13 @@ public abstract class LanguageTokenizer {
         this.language = language;
     }
 
-    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException;
+    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws LuceneException;
 
     public Tokenizer getTokenizer(Reader r) {
         return new StandardTokenizer(matchVersion, r);
     }
 
-    public TokenizerOptions getOptions() {
+    public TokenizerOptions getTokenizerOptions() {
         TokenizerOptions options = new TokenizerOptions();
         if (caseInsensitive) options.caseInsensitive();
         if (useStopWords) options.useStopWords();
@@ -73,12 +73,12 @@ public abstract class LanguageTokenizer {
     /**
      * Returns an instance of a LanguageTokenizer for the specified language
      * with the filters specified by options.
+     *
      * @param language
      * @param options
      * @return
-     * @throws WikapidiaException
      */
-    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions options) throws WikapidiaException {
+    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions options) throws LuceneException {
         try {
             LanguageTokenizer.options = options;
             mapTokenizers();
@@ -92,7 +92,7 @@ public abstract class LanguageTokenizer {
                             options.options,
                             language);
         } catch (Exception e) {
-            throw new WikapidiaException(e);
+            throw new LuceneException(e);
         }
     }
 
@@ -126,7 +126,7 @@ public abstract class LanguageTokenizer {
         tokenizerClasses.put(Language.getByLangCode("lad"), LadinoTokenizer.class);
     }
 
-    protected static CharArraySet getStopWordsForNonLuceneLangFromFile(Language language) throws WikapidiaException{
+    protected static CharArraySet getStopWordsForNonLuceneLangFromFile(Language language) {
         try{
             String langCode = language.getLangCode();
             String fileName = STOP_WORDS + langCode + ".txt";
@@ -138,7 +138,7 @@ public abstract class LanguageTokenizer {
             }
             return charArraySet;
         } catch (IOException e) {
-            throw new WikapidiaException(e);
+            throw new RuntimeException(e);
         }
     }
 }

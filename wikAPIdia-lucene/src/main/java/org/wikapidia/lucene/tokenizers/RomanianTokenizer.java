@@ -10,8 +10,8 @@ import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.RomanianStemmer;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.lucene.LuceneException;
 import org.wikapidia.lucene.TokenizerOptions;
 
 /**
@@ -24,8 +24,7 @@ public class RomanianTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet)
-            throws WikapidiaException {
+    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws LuceneException {
 
         TokenStream stream = new StandardFilter(matchVersion, input);
         if (caseInsensitive)

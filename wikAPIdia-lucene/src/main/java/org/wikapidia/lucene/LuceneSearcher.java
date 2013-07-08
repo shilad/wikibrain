@@ -6,7 +6,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
@@ -39,9 +38,8 @@ public class LuceneSearcher {
      * directory as was passed to the LuceneIndexer.
      * @param languages
      * @param root the root directory in which each language contains its own lucene directory
-     * @throws WikapidiaException
      */
-    public LuceneSearcher(LanguageSet languages, File root) throws WikapidiaException {
+    public LuceneSearcher(LanguageSet languages, File root) {
         this(languages, root, LuceneOptions.getDefaultOptions());
     }
 
@@ -50,13 +48,12 @@ public class LuceneSearcher {
      * in any language in the LanguageSet. The directory is specified within options.
      * @param languages
      * @param options a LuceneOptions object containing specific options for lucene
-     * @throws WikapidiaException
      */
-    public LuceneSearcher(LanguageSet languages, LuceneOptions options) throws WikapidiaException {
+    public LuceneSearcher(LanguageSet languages, LuceneOptions options) {
         this(languages, options.luceneRoot, options);
     }
 
-    private LuceneSearcher(LanguageSet languages, File root, LuceneOptions options) throws WikapidiaException {
+    private LuceneSearcher(LanguageSet languages, File root, LuceneOptions options) {
         try {
             this.root = root;
             this.searchers = new HashMap<Language, IndexSearcher>();
@@ -67,7 +64,7 @@ public class LuceneSearcher {
             }
             this.options = options;
         } catch (IOException e) {
-            throw new WikapidiaException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -91,13 +88,12 @@ public class LuceneSearcher {
      * Runs a specified lucene query in the specified language
      * @param query
      * @return
-     * @throws WikapidiaException
      */
-    public ScoreDoc[] search(Query query, Language language) throws WikapidiaException {
+    public ScoreDoc[] search(Query query, Language language) {
         try {
             return searchers.get(language).search(query, hitCount).scoreDocs;
         } catch (IOException e) {
-            throw new WikapidiaException(e);
+            throw new RuntimeException(e);
         }
     }
 }

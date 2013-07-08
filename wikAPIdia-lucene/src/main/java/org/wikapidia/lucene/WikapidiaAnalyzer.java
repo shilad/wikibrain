@@ -8,7 +8,6 @@ import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
 import org.apache.lucene.analysis.ja.JapaneseTokenizer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.tokenizers.LanguageTokenizer;
 
@@ -79,9 +78,9 @@ public class WikapidiaAnalyzer extends Analyzer {
         try {
             LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
             TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
-            return new Analyzer.TokenStreamComponents(tokenizer, result);
-        } catch (WikapidiaException e) {
-            throw new RuntimeException(e);
-        }
+            return new TokenStreamComponents(tokenizer, result);
+        } catch (LuceneException e) {
+            throw new RuntimeException(e); // In reality, these exceptions are based on hard code,
+        }                                  // and shouldn't every even be thrown anyways
     }
 }
