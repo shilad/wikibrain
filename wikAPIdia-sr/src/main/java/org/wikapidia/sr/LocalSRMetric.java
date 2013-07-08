@@ -5,6 +5,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.File;
@@ -14,7 +15,6 @@ import java.util.List;
 public interface LocalSRMetric {
 
     /**
-     *
      * @return the name of the similarity metric in a human readable format
      */
     public String getName();
@@ -107,6 +107,14 @@ public interface LocalSRMetric {
      * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
      */
     public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) throws DaoException;
+
+    /**
+     * Return a vector representation of a LocalPage
+     * @param id
+     * @param language
+     * @return A vector of a page's scores versus all other pages
+     */
+    public SparseMatrixRow getVector(int id, Language language);
 
 
     /**

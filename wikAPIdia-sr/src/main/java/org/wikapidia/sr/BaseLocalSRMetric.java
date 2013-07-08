@@ -26,12 +26,12 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     protected Disambiguator disambiguator;
     protected LocalPageDao pageHelper;
 
-    private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
-    private Normalizer similarityNormalizer = new IdentityNormalizer();
+
+    private Normalizer defaultMostSimilarNormalizer = new IdentityNormalizer();
+    private Normalizer defaultSimilarityNormalizer = new IdentityNormalizer();
+    private Map<Language, Normalizer> mostSimilarNormalizers;
 
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
-
-
 
     public void setMostSimilarLocalMatrices(Map<Language,SparseMatrix> mostSimilarLocalMatrices){
         this.mostSimilarLocalMatrices=mostSimilarLocalMatrices;
@@ -67,20 +67,20 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * Normalizers translate similarity scores to more meaningful values.
      * @param n
      */
-    public void setMostSimilarNormalizer(Normalizer n){
-        mostSimilarNormalizer = n;
+    public void setDefaultMostSimilarNormalizer(Normalizer n){
+        defaultMostSimilarNormalizer = n;
     }
 
 
-    public void setSimilarityNormalizer(Normalizer similarityNormalizer) {
-        this.similarityNormalizer = similarityNormalizer;
+    public void setDefaultSimilarityNormalizer(Normalizer defaultSimilarityNormalizer) {
+        this.defaultSimilarityNormalizer = defaultSimilarityNormalizer;
     }
 
     /**
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
     protected void ensureSimilarityTrained() {
-        if (!similarityNormalizer.isTrained()) {
+        if (!defaultSimilarityNormalizer.isTrained()) {
             throw new IllegalStateException("Model similarity has not been trained.");
         }
     }
@@ -88,29 +88,31 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
     protected void ensureMostSimilarTrained() {
-        if (!mostSimilarNormalizer.isTrained()) {
+        if (!defaultMostSimilarNormalizer.isTrained()) {
             throw new IllegalStateException("Model mostSimilar has not been trained.");
         }
     }
 
+    //TODO:Use Language specific normalizers
     /**
-     * Use the similarityNormalizer to normalize a similarity if it's available.
+     * Use the defaultSimilarityNormalizer to normalize a similarity if it's available.
      * @param sim
      * @return
      */
     protected double normalize(double sim) {
         ensureSimilarityTrained();
-        return similarityNormalizer.normalize(sim);
+        return defaultSimilarityNormalizer.normalize(sim);
     }
 
+    //TODO:Use Language specific normalizers
     /**
-     * Use the mostSimilarNormalizer to normalize a list of score if possible.
+     * Use the defaultMostSimilarNormalizer to normalize a list of score if possible.
      * @param srl
      * @return
      */
     protected SRResultList normalize(SRResultList srl) {
         ensureMostSimilarTrained();
-        return mostSimilarNormalizer.normalize(srl);
+        return defaultMostSimilarNormalizer.normalize(srl);
     }
 
     public void setNumThreads(int n) {

@@ -8,6 +8,7 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -63,6 +64,13 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     @Override
     public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SparseMatrixRow getVector(int id) {
+
+
+        return null;
     }
 
     @Override
@@ -144,8 +152,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
-
-
 
     private TIntSet getLinks(LocalId wpId) throws DaoException {
         SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
