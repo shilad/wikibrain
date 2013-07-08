@@ -9,6 +9,7 @@ import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ElisionFilter;
+import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.CatalanStemmer;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.lucene.TokenizerOptions;
@@ -20,21 +21,21 @@ import java.util.Arrays;
  */
 public class CatalanTokenizer extends LanguageTokenizer {
 
-    private static final CharArraySet DEFAULT_ARTICLES = CharArraySet.unmodifiableSet(
-            new CharArraySet(MATCH_VERSION, Arrays.asList("d", "l", "m", "n", "s", "t"), true));
+    private final CharArraySet DEFAULT_ARTICLES = CharArraySet.unmodifiableSet(
+            new CharArraySet(matchVersion, Arrays.asList("d", "l", "m", "n", "s", "t"), true));
 
-    public CatalanTokenizer(TokenizerOptions select) {
-        super(select);
+    public CatalanTokenizer(Version version, TokenizerOptions options) {
+        super(version, options);
     }
 
     @Override
     public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException {
-        TokenStream stream = new StandardFilter(MATCH_VERSION, input);
+        TokenStream stream = new StandardFilter(matchVersion, input);
         if (caseInsensitive)
-            stream = new LowerCaseFilter(MATCH_VERSION, stream);
+            stream = new LowerCaseFilter(matchVersion, stream);
         if (useStopWords) {
             stream = new ElisionFilter(stream, DEFAULT_ARTICLES);
-            stream = new StopFilter(MATCH_VERSION, stream, DanishAnalyzer.getDefaultStopSet());
+            stream = new StopFilter(matchVersion, stream, DanishAnalyzer.getDefaultStopSet());
         }
         if (useStem) {
             if (!stemExclusionSet.isEmpty())

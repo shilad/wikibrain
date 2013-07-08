@@ -9,6 +9,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.lucene.LuceneOptions;
+import org.wikapidia.lucene.TokenizerOptions;
 import org.wikapidia.lucene.WikapidiaAnalyzer;
 
 import java.util.List;
@@ -16,8 +17,6 @@ import java.util.List;
 /**
  */
 public class TestLanguageTokenizer {
-
-    protected final LuceneOptions O = new LuceneOptions(new Configuration());
 
     @Test
     public void test() {
@@ -27,9 +26,14 @@ public class TestLanguageTokenizer {
             langCodes.add("he");
             langCodes.add("sk");
             LanguageSet langSet = new LanguageSet(langCodes);
+            LuceneOptions opts = new LuceneOptions();
             for(Language language : langSet){
-                WikapidiaAnalyzer wa = new WikapidiaAnalyzer(language);
-                IndexWriterConfig iwc = new IndexWriterConfig(O.MATCH_VERSION, wa);
+                WikapidiaAnalyzer wa = new WikapidiaAnalyzer(
+                        language,
+                        new TokenizerOptions().caseInsensitive().useStopWords().useStem(),
+                        opts
+                );
+                IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, wa);
                 iwc.setRAMBufferSizeMB(1024.0);
                 iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
                 IndexWriter writer = new IndexWriter(new RAMDirectory(), iwc);

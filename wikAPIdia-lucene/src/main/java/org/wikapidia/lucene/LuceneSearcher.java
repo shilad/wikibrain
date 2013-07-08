@@ -1,10 +1,13 @@
 package org.wikapidia.lucene;
 
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
@@ -27,31 +30,51 @@ public class LuceneSearcher {
     private static final Logger LOG = Logger.getLogger(LuceneSearcher.class.getName());
     public static final int HIT_COUNT = 1000; // TODO: do something more user-friendly with this value?
 
-    protected final LuceneOptions O = new LuceneOptions(new Configuration());
+    protected LuceneOptions opts;
 
-    private final File file;
+    private final File root;
     private final Map<Language, WikapidiaAnalyzer> analyzers;
     private final Map<Language, IndexSearcher> searchers;
 
+    private int hitCount = HIT_COUNT;
+
     /**
-     * Constructs a LuceneSearcher that will run lucene queries on
-     * sets of articles in any language in the LanguageSet.
+     * Constructs a LuceneSearcher that will run lucene queries on sets of articles
+     * in any language in the LanguageSet. Note that root is the parent directory
+     * of the directory where lucene indexes are stored, though it is the same
+     * directory as was passed to the LuceneIndexer.
      * @param languages
+     * @param root the root directory in which each language contains its own lucene directory
      * @throws WikapidiaException
      */
-    public LuceneSearcher(LanguageSet languages) throws WikapidiaException {
-        try {
-            file = O.LUCENE_ROOT;
-            analyzers = new HashMap<Language, WikapidiaAnalyzer>();
-            searchers = new HashMap<Language, IndexSearcher>();
-            for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, new File(file, language.getLangCode()));
-                analyzers.put(language, analyzer);
-                searchers.put(language, analyzer.getIndexSearcher());
-            }
-        } catch (IOException e) {
-            throw new WikapidiaException(e);
-        }
+    public LuceneSearcher(LanguageSet languages, File root) throws WikapidiaException {
+        this(languages, root, new LuceneOptions());
+    }
+
+    /**
+     * Constructs a LuceneSearcher that will run lucene queries on sets of articles
+     * in any language in the LanguageSet. Note that root is the parent directory
+     * of the directory where lucene indexes are stored, though it is the same
+     * directory as was passed to the LuceneIndexer.
+     * @param languages
+     * @param root the root directory in which each language contains its own lucene directory
+     * @param opts a LuceneOptions object containing specific options for lucene
+     * @throws WikapidiaException
+     */
+    public LuceneSearcher(LanguageSet languages, File root, LuceneOptions opts) throws WikapidiaException {
+        this.root = root;
+        analyzers = new HashMap<Language, WikapidiaAnalyzer>();
+        searchers = new HashMap<Language, IndexSearcher>();
+        setup(languages);
+        this.opts = opts;
+    }
+
+    public int getHitCount() {
+        return hitCount;
+    }
+
+    public void setHitCount(int hitCount) {
+        this.hitCount = hitCount;
     }
 
     /**
@@ -63,7 +86,7 @@ public class LuceneSearcher {
      * @throws WikapidiaException
      */
     public ScoreDoc[] search(String searchString, Language language) throws WikapidiaException {
-        return search(O.PLAINTEXT_FIELD_NAME, searchString, language);
+        return search(opts.plaintextFieldName, searchString, language);
     }
 
     /**
@@ -80,12 +103,26 @@ public class LuceneSearcher {
             throw new WikapidiaException("This Analyzer does not support " + language.getEnLangName());
         }
         try {
-            QueryParser parser = new QueryParser(O.MATCH_VERSION, fieldName, analyzers.get(language));
+            QueryParser parser = new QueryParser(opts.matchVersion, fieldName, analyzers.get(language));
             Query query = parser.parse(searchString);
-            return searchers.get(language).search(query, HIT_COUNT).scoreDocs;
+            return searchers.get(language).search(query, hitCount).scoreDocs;
         } catch (ParseException e) {
             LOG.log(Level.WARNING, "Unable to parse " + searchString + " in " + language.getEnLangName());
             return null;
+        } catch (IOException e) {
+            throw new WikapidiaException(e);
+        }
+    }
+
+    private void setup(LanguageSet languages) throws WikapidiaException {
+        try {
+            for (Language language : languages) {
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
+                analyzers.put(language, analyzer);
+                Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
+                DirectoryReader reader = DirectoryReader.open(directory);
+                searchers.put(language, new IndexSearcher(reader));
+            }
         } catch (IOException e) {
             throw new WikapidiaException(e);
         }

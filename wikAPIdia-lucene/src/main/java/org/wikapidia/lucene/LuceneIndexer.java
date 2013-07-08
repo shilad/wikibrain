@@ -7,6 +7,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
@@ -25,36 +26,46 @@ import java.util.*;
 */
 public class LuceneIndexer {
 
-    protected final LuceneOptions O = new LuceneOptions(new Configuration());
+    protected LuceneOptions opts;
 
-    private final File file;
+    private final File root;
     private final Map<Language, WikapidiaAnalyzer> analyzers;
     private final Map<Language, IndexWriter> writers;
     private final Collection<NameSpace> nameSpaces;
 
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
-     * specified LanguageSet and a Collection of NameSpaces.
+     * specified LanguageSet and a Collection of NameSpaces. Indexes are
+     * then placed in language-specific subdirectories in the specified file.
      * @param languages
      * @param nameSpaces
+     * @param root
      * @throws WikapidiaException
      */
-    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces) throws WikapidiaException {
-        try {
-            file = O.LUCENE_ROOT;
-            Directory directory = new
-            analyzers = new HashMap<Language, WikapidiaAnalyzer>();
-            writers = new HashMap<Language, IndexWriter>();
-            for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
-                analyzers.put(language, analyzer);
-                IndexWriterConfig iwc = new IndexWriterConfig(O.MATCH_VERSION, analyzer);
-                writers.put(language, new IndexWriter(directory, iwc));
-            }
-            this.nameSpaces = nameSpaces;
-        } catch (IOException e) {
-            throw new WikapidiaException(e);
-        }
+    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root) throws WikapidiaException {
+        this(languages, nameSpaces, root, new LuceneOptions());
+    }
+
+    /**
+     * Constructs a LuceneIndexer that will index any RawPage within a
+     * specified LanguageSet and a Collection of NameSpaces. Indexes are
+     * then placed in language-specific subdirectories specified by opts.
+     * @param languages
+     * @param nameSpaces
+     * @param opts a LuceneOptions object containing specific options for lucene
+     * @throws WikapidiaException
+     */
+    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, LuceneOptions opts) throws WikapidiaException {
+        this(languages, nameSpaces, opts.luceneRoot, opts);
+    }
+
+    private LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root, LuceneOptions opts) throws WikapidiaException {
+        this.root = root;
+        analyzers = new HashMap<Language, WikapidiaAnalyzer>();
+        writers = new HashMap<Language, IndexWriter>();
+        setup(languages);
+        this.nameSpaces = nameSpaces;
+        this.opts = opts;
     }
 
     /**
@@ -68,10 +79,10 @@ public class LuceneIndexer {
             try {
                 IndexWriter writer = writers.get(language);
                 Document document = new Document();
-                Field localIdField = new IntField(O.LOCAL_ID_FIELD_NAME, page.getPageId(), Field.Store.YES);
-                Field langIdField = new IntField(O.LANG_ID_FIELD_NAME, page.getLang().getId(), Field.Store.YES);
-                Field wikiTextField = new TextField(O.WIKITEXT_FIELD_NAME, page.getBody(), Field.Store.YES);
-                Field plainTextField = new TextField(O.PLAINTEXT_FIELD_NAME, page.getPlainText(), Field.Store.YES);
+                Field localIdField = new IntField(opts.localIdFieldName, page.getPageId(), Field.Store.YES);
+                Field langIdField = new IntField(opts.langIdFieldName, page.getLang().getId(), Field.Store.YES);
+                Field wikiTextField = new TextField(opts.wikitextFieldName, page.getBody(), Field.Store.YES);
+                Field plainTextField = new TextField(opts.plaintextFieldName, page.getPlainText(), Field.Store.YES);
                 document.add(localIdField);
                 document.add(langIdField);
                 document.add(wikiTextField);
@@ -82,4 +93,19 @@ public class LuceneIndexer {
             }
         }
     }
+
+    private void setup(LanguageSet languages) throws WikapidiaException {
+        try {
+            for (Language language : languages) {
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language);
+                analyzers.put(language, analyzer);
+                Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
+                IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, analyzer);
+                writers.put(language, new IndexWriter(directory, iwc));
+            }
+        } catch (IOException e) {
+            throw new WikapidiaException(e);
+        }
+    }
+
 }

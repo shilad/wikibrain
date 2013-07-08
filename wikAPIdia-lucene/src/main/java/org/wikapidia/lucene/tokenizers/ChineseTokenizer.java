@@ -6,6 +6,7 @@ import org.apache.lucene.analysis.cn.smart.WordTokenFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.util.Version;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.lucene.TokenizerOptions;
 
@@ -14,8 +15,8 @@ import org.wikapidia.lucene.TokenizerOptions;
  */
 public class ChineseTokenizer extends LanguageTokenizer{
 
-    public ChineseTokenizer(TokenizerOptions select) {
-        super(select);
+    public ChineseTokenizer(Version version, TokenizerOptions options) {
+        super(version, options);
     }
 
     @Override
@@ -25,7 +26,7 @@ public class ChineseTokenizer extends LanguageTokenizer{
         // LowerCaseFilter is not needed, as SegTokenFilter lowercases Basic Latin text.
         // The porter stemming is too strict, this is not a bug, this is a feature:)
         if (useStopWords)
-            stream = new StopFilter(MATCH_VERSION, stream, SmartChineseAnalyzer.getDefaultStopSet());
+            stream = new StopFilter(matchVersion, stream, SmartChineseAnalyzer.getDefaultStopSet());
         if (useStem)
             stream = new PorterStemFilter(stream);
         return stream;

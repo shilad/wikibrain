@@ -9,6 +9,7 @@ import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.stempel.StempelFilter;
 import org.apache.lucene.analysis.stempel.StempelStemmer;
 import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.util.Version;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.lucene.TokenizerOptions;
 
@@ -21,8 +22,8 @@ public class PolishTokenizer extends LanguageTokenizer {
 
     private static StempelStemmer stemmer;
 
-    public PolishTokenizer(TokenizerOptions select) {
-        super(select);
+    public PolishTokenizer(Version version, TokenizerOptions options) {
+        super(version, options);
     }
 
     @Override
@@ -31,11 +32,11 @@ public class PolishTokenizer extends LanguageTokenizer {
             if (stemmer == null) {
                 stemmer = new StempelStemmer(StempelStemmer.load(PolishAnalyzer.class.getResourceAsStream("stemmer_20000.tbl")));
             }
-            TokenStream stream = new StandardFilter(MATCH_VERSION, input);
+            TokenStream stream = new StandardFilter(matchVersion, input);
             if (caseInsensitive)
-                stream = new LowerCaseFilter(MATCH_VERSION, stream);
+                stream = new LowerCaseFilter(matchVersion, stream);
             if (useStopWords)
-                stream = new StopFilter(MATCH_VERSION, stream, PolishAnalyzer.getDefaultStopSet());
+                stream = new StopFilter(matchVersion, stream, PolishAnalyzer.getDefaultStopSet());
             if (useStem) {
                 if (!stemExclusionSet.isEmpty())
                     stream = new SetKeywordMarkerFilter(stream, stemExclusionSet);

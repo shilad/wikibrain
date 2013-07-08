@@ -230,8 +230,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         if (titlesToIds==null){
             buildTitlesToIds();
         }
-        long i = hashTitle(title,language.getId(),nameSpace.getArbitraryId());
-        return titlesToIds.get(hashTitle(title,language.getId(),nameSpace.getArbitraryId()));
+        return titlesToIds.get(hashTitle(title, language.getId(), nameSpace.getArbitraryId()));
     }
 
     /**

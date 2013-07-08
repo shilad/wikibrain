@@ -8,6 +8,7 @@ import org.apache.lucene.analysis.nl.DutchAnalyzer;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.DutchStemmer;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.lucene.TokenizerOptions;
@@ -17,13 +18,13 @@ import org.wikapidia.lucene.TokenizerOptions;
  */
 public class DutchTokenizer extends LanguageTokenizer {
 
-    public DutchTokenizer(TokenizerOptions select) {
-        super(select);
+    public DutchTokenizer(Version version, TokenizerOptions options) {
+        super(version, options);
     }
 
 //    static final CharArrayMap<String> DEFAULT_STEM_DICT;
 //    static {
-//        DEFAULT_STEM_DICT = new CharArrayMap<String>(MATCH_VERSION, 4, false);
+//        DEFAULT_STEM_DICT = new CharArrayMap<String>(matchVersion, 4, false);
 //        DEFAULT_STEM_DICT.put("fiets", "fiets"); //otherwise fiet
 //        DEFAULT_STEM_DICT.put("bromfiets", "bromfiets"); //otherwise bromfiet
 //        DEFAULT_STEM_DICT.put("ei", "eier");
@@ -32,11 +33,11 @@ public class DutchTokenizer extends LanguageTokenizer {
 
     @Override
     public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException {
-        TokenStream stream = new StandardFilter(MATCH_VERSION, input);
+        TokenStream stream = new StandardFilter(matchVersion, input);
         if (caseInsensitive)
-            stream = new LowerCaseFilter(MATCH_VERSION, stream);
+            stream = new LowerCaseFilter(matchVersion, stream);
         if (useStopWords)
-            stream = new StopFilter(MATCH_VERSION, stream, DutchAnalyzer.getDefaultStopSet());
+            stream = new StopFilter(matchVersion, stream, DutchAnalyzer.getDefaultStopSet());
         if (useStem) {
             if (!stemExclusionSet.isEmpty())
                 stream = new SetKeywordMarkerFilter(stream, stemExclusionSet);

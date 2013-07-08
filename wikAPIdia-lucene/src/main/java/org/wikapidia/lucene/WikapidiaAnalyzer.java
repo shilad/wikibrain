@@ -8,18 +8,11 @@ import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
 import org.apache.lucene.analysis.ja.JapaneseTokenizer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.tokenizers.LanguageTokenizer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -35,10 +28,9 @@ import java.io.Reader;
  */
 public class WikapidiaAnalyzer extends Analyzer {
 
-    protected final LuceneOptions O = new LuceneOptions(new Configuration());
-
+    protected final LuceneOptions opts;
     private final Language language;
-    private TokenizerOptions options;
+    private final TokenizerOptions options;
 
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with specified filters.
@@ -47,8 +39,20 @@ public class WikapidiaAnalyzer extends Analyzer {
      * @throws IOException
      */
     public WikapidiaAnalyzer(Language language, TokenizerOptions options) throws IOException {
+        this(language, options, new LuceneOptions());
+    }
+
+    /**
+     * Constructs a WikapidiaAnalyzer for the specified language with specified filters.
+     * @param language
+     * @param options
+     * @param opts a LuceneOptions object containing specific options for lucene
+     * @throws IOException
+     */
+    public WikapidiaAnalyzer(Language language, TokenizerOptions options, LuceneOptions opts) throws IOException {
         this.language = language;
         this.options = options;
+        this.opts = opts;
     }
 
     /**
@@ -60,12 +64,8 @@ public class WikapidiaAnalyzer extends Analyzer {
         this(language, new TokenizerOptions().useStem().useStopWords().caseInsensitive());
     }
 
-    public TokenizerOptions getSelect() {
+    public TokenizerOptions getOptions() {
         return options;
-    }
-
-    public void setSelect(TokenizerOptions options) {
-        this.options = options;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class WikapidiaAnalyzer extends Analyzer {
         } else if (langCode.equals("he") || langCode.equals("sk")) {
             tokenizer = new ICUTokenizer(r);
         } else {
-            tokenizer = new StandardTokenizer(O.MATCH_VERSION,r);
+            tokenizer = new StandardTokenizer(opts.matchVersion,r);
         }
 
         try{

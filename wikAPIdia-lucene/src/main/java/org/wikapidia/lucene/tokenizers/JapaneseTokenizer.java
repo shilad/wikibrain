@@ -9,6 +9,7 @@ import org.apache.lucene.analysis.ja.JapaneseBaseFormFilter;
 import org.apache.lucene.analysis.ja.JapaneseKatakanaStemFilter;
 import org.apache.lucene.analysis.ja.JapanesePartOfSpeechStopFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.util.Version;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.lucene.TokenizerOptions;
 
@@ -17,8 +18,8 @@ import org.wikapidia.lucene.TokenizerOptions;
  */
 public class JapaneseTokenizer extends LanguageTokenizer {
 
-    public JapaneseTokenizer(TokenizerOptions select) {
-        super(select);
+    public JapaneseTokenizer(Version version, TokenizerOptions options) {
+        super(version, options);
     }
 
     @Override
@@ -26,10 +27,10 @@ public class JapaneseTokenizer extends LanguageTokenizer {
         TokenStream stream = new JapaneseBaseFormFilter(input);
         stream = new CJKWidthFilter(stream);
         if (caseInsensitive)
-            stream = new LowerCaseFilter(MATCH_VERSION, stream);
+            stream = new LowerCaseFilter(matchVersion, stream);
         if (useStopWords) {
             stream = new JapanesePartOfSpeechStopFilter(true, stream, JapaneseAnalyzer.getDefaultStopTags());
-            stream = new StopFilter(MATCH_VERSION, stream, JapaneseAnalyzer.getDefaultStopSet());
+            stream = new StopFilter(matchVersion, stream, JapaneseAnalyzer.getDefaultStopSet());
         }
         if (useStem)
             stream = new JapaneseKatakanaStemFilter(stream);
