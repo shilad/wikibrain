@@ -36,9 +36,8 @@ public class WikapidiaAnalyzer extends Analyzer {
      * Constructs a WikapidiaAnalyzer for the specified language with all filters
      * and default opts.
      * @param language
-     * @throws IOException
      */
-    public WikapidiaAnalyzer(Language language) throws IOException {
+    public WikapidiaAnalyzer(Language language) {
         this(
                 language,
                 new TokenizerOptions().useStem().useStopWords().caseInsensitive(),
@@ -50,9 +49,8 @@ public class WikapidiaAnalyzer extends Analyzer {
      * and default opts.
      * @param language
      * @param options
-     * @throws IOException
      */
-    public WikapidiaAnalyzer(Language language, TokenizerOptions options) throws IOException {
+    public WikapidiaAnalyzer(Language language, TokenizerOptions options) {
         this(
                 language,
                 options,
@@ -64,9 +62,8 @@ public class WikapidiaAnalyzer extends Analyzer {
      * and specified opts.
      * @param language
      * @param opts a LuceneOptions object containing specific options for lucene
-     * @throws IOException
      */
-    public WikapidiaAnalyzer(Language language, LuceneOptions opts) throws IOException {
+    public WikapidiaAnalyzer(Language language, LuceneOptions opts) {
         this(
                 language,
                 new TokenizerOptions().useStem().useStopWords().caseInsensitive(),
@@ -79,14 +76,29 @@ public class WikapidiaAnalyzer extends Analyzer {
      * @param language
      * @param options
      * @param opts a LuceneOptions object containing specific options for lucene
-     * @throws IOException
      */
-    public WikapidiaAnalyzer(Language language, TokenizerOptions options, LuceneOptions opts) throws IOException {
+    public WikapidiaAnalyzer(Language language, TokenizerOptions options, LuceneOptions opts) {
         this.language = language;
         this.options = options;
         this.opts = opts;
     }
 
+    /**
+     * Returns the Lucene Options
+     * @return
+     */
+    public LuceneOptions getOpts() {
+        return opts;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    /**
+     * Returns the Tokenizer Options
+     * @return
+     */
     public TokenizerOptions getOptions() {
         return options;
     }
