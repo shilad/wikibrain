@@ -36,6 +36,9 @@ public class LuceneOptions {
     public final Collection<NameSpace> nameSpaces;
     public final TokenizerOptions options;
 
+    /**
+     * @deprecated Use getDefaultOptions() instead
+     */
     public LuceneOptions() {
         this.conf = new Configuration(null);
         Config config = conf.get();
@@ -53,11 +56,11 @@ public class LuceneOptions {
         );
     }
 
-    public static LuceneOptions getDefaultOpts() throws WikapidiaException {
+    public static LuceneOptions getDefaultOptions() {
         try {
             return new Configurator(new Configuration(null)).get(LuceneOptions.class, "options");
         } catch (ConfigurationException e) {
-            throw new WikapidiaException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -113,5 +116,4 @@ public class LuceneOptions {
             );
         }
     }
-
 }

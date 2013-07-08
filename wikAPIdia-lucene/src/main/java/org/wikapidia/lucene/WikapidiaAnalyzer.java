@@ -34,10 +34,8 @@ public class WikapidiaAnalyzer extends Analyzer {
      * and default options.
      * @param language
      */
-    public WikapidiaAnalyzer(Language language) throws WikapidiaException {
-        this(
-                language,
-                LuceneOptions.getDefaultOpts());
+    public WikapidiaAnalyzer(Language language) {
+        this(language, LuceneOptions.getDefaultOptions());
     }
 
     /**

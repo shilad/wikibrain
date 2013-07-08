@@ -1,5 +1,6 @@
 package org.wikapidia.lucene;
 
+import com.typesafe.config.Config;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
@@ -8,6 +9,9 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -43,7 +47,7 @@ public class LuceneIndexer {
      * @throws WikapidiaException
      */
     public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root) throws WikapidiaException {
-        this(languages, nameSpaces, root, LuceneOptions.getDefaultOpts());
+        this(languages, nameSpaces, root, LuceneOptions.getDefaultOptions());
     }
 
     /**
@@ -77,6 +81,14 @@ public class LuceneIndexer {
         }
     }
 
+    public LanguageSet getLanguageSet() {
+        return new LanguageSet(analyzers.keySet());
+    }
+
+    public LuceneOptions getOptions() {
+        return options;
+    }
+
     /**
      * Indexes a specific RawPage
      * @param page
@@ -100,20 +112,6 @@ public class LuceneIndexer {
             } catch (IOException e) {
                 throw new WikapidiaException(e);
             }
-        }
-    }
-
-    private void setup(LanguageSet languages) throws WikapidiaException {
-        try {
-            for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, options);
-                analyzers.put(language, analyzer);
-                Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
-                IndexWriterConfig iwc = new IndexWriterConfig(options.matchVersion, analyzer);
-                writers.put(language, new IndexWriter(directory, iwc));
-            }
-        } catch (IOException e) {
-            throw new WikapidiaException(e);
         }
     }
 }
