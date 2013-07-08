@@ -114,7 +114,7 @@ public interface LocalSRMetric {
      * @param language
      * @return A vector of a page's scores versus all other pages
      */
-    public SparseMatrixRow getVector(int id, Language language);
+    public SparseMatrixRow getVector(int id, Language language) throws DaoException;
 
 
     /**

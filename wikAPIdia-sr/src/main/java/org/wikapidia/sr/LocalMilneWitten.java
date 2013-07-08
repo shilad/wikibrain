@@ -1,5 +1,7 @@
 package org.wikapidia.sr;
 
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.core.dao.*;
@@ -9,6 +11,7 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -16,6 +19,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class LocalMilneWitten extends BaseLocalSRMetric{
@@ -48,7 +52,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         return "Milne Witten";
     }
 
-    public void read(File directory) throws IOException {
+    public void r1ead(File directory) throws IOException {
         throw new NotImplementedException();
     }
 
@@ -67,10 +71,15 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     @Override
-    public SparseMatrixRow getVector(int id) {
-
-
-        return null;
+    public SparseMatrixRow getVector(int id, Language language) throws DaoException {
+        LinkedHashMap<Integer, Float> vector = new LinkedHashMap<Integer, Float>();
+        TIntSet links = getLinks(new LocalId(language, id));
+        DaoFilter pageFilter = new DaoFilter();
+        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
+        for (LocalPage page: allPages) {
+            vector.put(id, links.contains(page.getLocalId()) ? 1F:0F);
+        }
+        return new SparseMatrixRow(new ValueConf(), id, vector);
     }
 
     @Override
