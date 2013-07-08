@@ -52,7 +52,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         return "Milne Witten";
     }
 
-    public void r1ead(File directory) throws IOException {
+    public void read(File directory) throws IOException {
         throw new NotImplementedException();
     }
 

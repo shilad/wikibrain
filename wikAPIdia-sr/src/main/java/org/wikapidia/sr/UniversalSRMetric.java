@@ -114,6 +114,6 @@ public interface UniversalSRMetric {
      * @return a vector relating it to other pages.
      * @throws DaoException
      */
-    public SparseMatrixRow getVector(int id) throws DaoException;
+    public TIntDoubleMap getVector(int id) throws DaoException;
 
 }

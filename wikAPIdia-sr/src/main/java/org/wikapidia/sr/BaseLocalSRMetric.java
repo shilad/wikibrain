@@ -29,6 +29,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
     private Normalizer defaultMostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer defaultSimilarityNormalizer = new IdentityNormalizer();
+    private Map<Language, Normalizer> similarityNormalizers;
     private Map<Language, Normalizer> mostSimilarNormalizers;
 
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
@@ -71,9 +72,16 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         defaultMostSimilarNormalizer = n;
     }
 
-
     public void setDefaultSimilarityNormalizer(Normalizer defaultSimilarityNormalizer) {
         this.defaultSimilarityNormalizer = defaultSimilarityNormalizer;
+    }
+
+    public void setMostSimilarNormalizer(Normalizer n, Language l){
+        mostSimilarNormalizers.put(l,n);
+    }
+
+    public void setSimilarityNormalizer(Normalizer n, Language l){
+        similarityNormalizers.put(l,n);
     }
 
     /**
@@ -81,7 +89,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      */
     protected void ensureSimilarityTrained() {
         if (!defaultSimilarityNormalizer.isTrained()) {
-            throw new IllegalStateException("Model similarity has not been trained.");
+            throw new IllegalStateException("Model default similarity has not been trained.");
         }
     }
     /**
@@ -89,28 +97,36 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      */
     protected void ensureMostSimilarTrained() {
         if (!defaultMostSimilarNormalizer.isTrained()) {
-            throw new IllegalStateException("Model mostSimilar has not been trained.");
+            throw new IllegalStateException("Model default mostSimilar has not been trained.");
         }
     }
 
-    //TODO:Use Language specific normalizers
     /**
-     * Use the defaultSimilarityNormalizer to normalize a similarity if it's available.
+     * Use the language-specific similarity normalizer to normalize a similarity if it exists.
+     * Otherwise use the default similarity normalizer if it's available.
      * @param sim
+     * @param language
      * @return
      */
-    protected double normalize(double sim) {
+    protected double normalize(double sim, Language language) {
+        if (similarityNormalizers.containsKey(language)){
+            return similarityNormalizers.get(language).normalize(sim);
+        }
         ensureSimilarityTrained();
         return defaultSimilarityNormalizer.normalize(sim);
     }
 
-    //TODO:Use Language specific normalizers
     /**
-     * Use the defaultMostSimilarNormalizer to normalize a list of score if possible.
+     * Use the language-specific most similar normalizer to normalize a similarity if it exists.
+     * Otherwise use the default most similar normalizer if it's available.
      * @param srl
+     * @param language
      * @return
      */
-    protected SRResultList normalize(SRResultList srl) {
+    protected SRResultList normalize(SRResultList srl, Language language) {
+        if (similarityNormalizers.containsKey(language)){
+            return similarityNormalizers.get(language).normalize(srl);
+        }
         ensureMostSimilarTrained();
         return defaultMostSimilarNormalizer.normalize(srl);
     }
