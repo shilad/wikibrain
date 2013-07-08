@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 public class LuceneSearcher {
 
     private static final Logger LOG = Logger.getLogger(LuceneSearcher.class.getName());
-    public static final int HIT_COUNT = 1000; // TODO: do something more user-friendly with this value?
+    public static final int HIT_COUNT = 1000;
 
     protected LuceneOptions opts;
 
