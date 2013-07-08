@@ -15,14 +15,12 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.lucene.LuceneIndexer;
 import org.wikapidia.lucene.LuceneOptions;
-import org.wikapidia.lucene.TokenizerOptions;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**

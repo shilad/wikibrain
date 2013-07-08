@@ -5,7 +5,6 @@ import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.model.NameSpace;
 
 import java.io.File;

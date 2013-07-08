@@ -1,6 +1,5 @@
 package org.wikapidia.lucene;
 
-import com.typesafe.config.Config;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
@@ -9,9 +8,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
