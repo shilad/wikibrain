@@ -52,12 +52,13 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         return "Milne Witten";
     }
 
-    public void r1ead(File directory) throws IOException {
+    public void write(File directory) throws IOException {
         throw new NotImplementedException();
     }
 
-    public void write(File directory) throws IOException {
-        throw new NotImplementedException();
+    @Override
+    public void read(File directory) throws IOException {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
