@@ -5,15 +5,12 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,42 +68,8 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
 
-        //Reformat explanations to fit our metric.
         if (explanations) {
-            if (outLinks){
-                List<Explanation> explanationList = new ArrayList<Explanation>();
-                for (Explanation explanation : result.getExplanations()){
-                    String format = "Both ? and ? link to ?";
-                    int id = (Integer)explanation.getInformation().get(0);
-                    UniversalPage intersectionPage = universalPageDao.getById(id,algorithmId);
-                    if (intersectionPage==null){
-                        continue;
-                    }
-                    List<UniversalPage> formatPages = new ArrayList<UniversalPage>();
-                    formatPages.add(page1);
-                    formatPages.add(page2);
-                    formatPages.add(intersectionPage);
-                    explanationList.add(new Explanation(format, formatPages));
-                }
-                result.setExplanations(explanationList);
-            }
-            else{
-                List<Explanation> explanationList = new ArrayList<Explanation>();
-                for (Explanation explanation : result.getExplanations()){
-                    String format = "? links to both ? and ?";
-                    int id = (Integer)explanation.getInformation().get(0);
-                    UniversalPage intersectionPage = universalPageDao.getById(id,algorithmId);
-                    if (intersectionPage==null){
-                        continue;
-                    }
-                    List<UniversalPage> formatPages = new ArrayList<UniversalPage>();
-                    formatPages.add(intersectionPage);
-                    formatPages.add(page1);
-                    formatPages.add(page2);
-                    explanationList.add(new Explanation(format, formatPages));
-                }
-                result.setExplanations(explanationList);
-            }
+            result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
         }
 
         return result;
@@ -117,40 +80,88 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         return super.similarity(phrase1,phrase2,explanations);
     }
 
+
     @Override
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) {
-        SRResultList mostSimilar = getCachedMostSimilarUniversal(page.getUnivId(), maxResults, null);
-        return null;
+    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException {
+        SRResultList mostSimilar;
+        if (hasCachedMostSimilarUniversal(page.getUnivId())&&!explanations){
+            mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, null);
+            if (mostSimilar.numDocs()>maxResults){
+                mostSimilar.truncate(maxResults);
+            }
+            return mostSimilar;
+        } else {
+            TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
+
+            DaoFilter pageFilter = new DaoFilter();
+            Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
+            int numArticles = 0;
+            for (UniversalPage up : allPages){
+                numArticles++;
+            }
+
+            allPages = universalPageDao.get(pageFilter); //The iterable shouldn't be re-used
+            List<SRResult> results = new ArrayList<SRResult>();
+            for (UniversalPage up : allPages){
+                TIntSet comparisonLinks = getLinks(up.getUnivId(), algorithmId);
+                SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
+                if (explanations){
+                    result.setExplanations(reformatExplanations(result.getExplanations(),page,up));
+                }
+                results.add(result);
+            }
+            Collections.sort(results);
+
+            SRResultList  resultList = new SRResultList(maxResults);
+            for (int i=0; i<maxResults&&i<results.size(); i++){
+                resultList.set(i,results.get(i));
+            }
+
+            return resultList;
+        }
     }
 
     @Override
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
+        if (validIds==null){
+            return mostSimilar(page,maxResults,explanations);
+        }
+        SRResultList mostSimilar;
+        if (hasCachedMostSimilarUniversal(page.getUnivId())&&!explanations){
+            mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, validIds);
+            if (mostSimilar.numDocs()>maxResults){
+                mostSimilar.truncate(maxResults);
+            }
+            return mostSimilar;
+        } else {
+            TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
 
-    @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+            DaoFilter pageFilter = new DaoFilter();
+            Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
+            int numArticles = 0;
+            for (UniversalPage up : allPages){
+                numArticles++;
+            }
 
-    @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+            List<SRResult> results = new ArrayList<SRResult>();
+            for (int id : validIds.toArray()){
+                TIntSet comparisonLinks = getLinks(id, algorithmId);
+                SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
+                if (explanations){
+                    UniversalPage up = universalPageDao.getById(id,algorithmId);
+                    result.setExplanations(reformatExplanations(result.getExplanations(),page,up));
+                }
+                results.add(result);
+            }
+            Collections.sort(results);
 
-    @Override
-    public double[][] cosimilarity(int[] rowIds, int[] colIds) throws IOException {
-        return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
-    }
+            SRResultList  resultList = new SRResultList(maxResults);
+            for (int i=0; i<maxResults&&i<results.size(); i++){
+                resultList.set(i,results.get(i));
+            }
 
-    @Override
-    public double[][] cosimilarity(LocalString[] rowPhrases, LocalString[] colPhrases) throws IOException {
-        return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public double[][] cosimilarity(LocalString[] phrases) throws IOException {
-        return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
+            return resultList;
+        }
     }
 
     @Override
@@ -170,6 +181,50 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             }
         }
         return vector;
+    }
+
+    /**
+     * Reformat the explanations returned by MilneWittenCore to fit UniversalPages
+     * @param explanations
+     * @param page1
+     * @param page2
+     * @return
+     * @throws DaoException
+     */
+    private List<Explanation> reformatExplanations(List<Explanation> explanations, UniversalPage page1, UniversalPage page2) throws DaoException {
+        if (outLinks){
+            List<Explanation> explanationList = new ArrayList<Explanation>();
+            for (Explanation explanation : explanations){
+                String format = "Both ? and ? link to ?";
+                int id = (Integer)explanation.getInformation().get(0);
+                UniversalPage intersectionPage = universalPageDao.getById(id,algorithmId);
+                if (intersectionPage==null){
+                    continue;
+                }
+                List<UniversalPage> formatPages = new ArrayList<UniversalPage>();
+                formatPages.add(page1);
+                formatPages.add(page2);
+                formatPages.add(intersectionPage);
+                explanationList.add(new Explanation(format, formatPages));
+            }
+        }
+        else{
+            List<Explanation> explanationList = new ArrayList<Explanation>();
+            for (Explanation explanation : explanations){
+                String format = "? links to both ? and ?";
+                int id = (Integer)explanation.getInformation().get(0);
+                UniversalPage intersectionPage = universalPageDao.getById(id,algorithmId);
+                if (intersectionPage==null){
+                    continue;
+                }
+                List<UniversalPage> formatPages = new ArrayList<UniversalPage>();
+                formatPages.add(intersectionPage);
+                formatPages.add(page1);
+                formatPages.add(page2);
+                explanationList.add(new Explanation(format, formatPages));
+            }
+        }
+        return explanations;
     }
 
     private TIntSet getLinks(int universeId, int algorithmId) throws DaoException {

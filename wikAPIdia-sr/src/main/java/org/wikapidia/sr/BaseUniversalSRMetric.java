@@ -1,5 +1,6 @@
 package org.wikapidia.sr;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.UniversalPageDao;
@@ -11,7 +12,9 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
@@ -87,22 +90,52 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
 
     @Override
-    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations);
+    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds);
+    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
+        return mostSimilar(phrase, maxResults, explanations, null);
+    }
 
     @Override
-    public abstract SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
+        LocalId localId = disambiguator.disambiguate(phrase,null);
+        int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
+        UniversalPage up = universalPageDao.getById(uId,algorithmId);
+        return mostSimilar(up,maxResults,explanations,validIds);
+    }
 
     @Override
-    public abstract double[][] cosimilarity(int[] rowIds, int[] colIds) throws IOException;
+    public double[][] cosimilarity(int[] rowIds, int[] colIds) throws IOException, DaoException {
+        double[][] cos = new double[rowIds.length][colIds.length];
+        for (int i=0; i<rowIds.length; i++){
+            for (int j=0; j<colIds.length; j++){
+                cos[i][j]=similarity(
+                        new UniversalPage(rowIds[i], algorithmId, null, null),
+                        new UniversalPage(colIds[j], algorithmId, null, null),
+                        false).getValue();
+            }
+        }
+        return cos;
+    }
 
     @Override
-    public abstract double[][] cosimilarity(LocalString[] rowPhrases, LocalString[] colPhrases) throws IOException;
+    public double[][] cosimilarity(LocalString[] rowPhrases, LocalString[] colPhrases) throws IOException, DaoException {
+        int rowIds[] = new int[rowPhrases.length];
+        int colIds[] = new int[colPhrases.length];
+        List<LocalId> rowLocalIds = disambiguator.disambiguate(Arrays.asList(rowPhrases),new HashSet<LocalString>(Arrays.asList(colPhrases)));
+        List<LocalId> colLocalIds = disambiguator.disambiguate(Arrays.asList(colPhrases),new HashSet<LocalString>(Arrays.asList(rowPhrases)));
+        for (int i=0; i<rowIds.length; i++){
+            rowIds[i] = universalPageDao.getUnivPageId(rowLocalIds.get(i).asLocalPage(),algorithmId);
+        }
+        for (int i=0; i<colIds.length; i++){
+            colIds[i] = universalPageDao.getUnivPageId(colLocalIds.get(i).asLocalPage(),algorithmId);
+        }
+        return cosimilarity(rowIds, colIds);
+    }
 
     @Override
     public double[][] cosimilarity(int[] ids) throws IOException, DaoException {
@@ -127,5 +160,12 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     }
 
     @Override
-    public abstract double[][] cosimilarity(LocalString[] phrases) throws IOException;
+    public double[][] cosimilarity(LocalString[] phrases) throws IOException, DaoException {
+        int ids[] = new int[phrases.length];
+        List<LocalId> localIds = disambiguator.disambiguate(Arrays.asList(phrases), null);
+        for (int i=0; i<phrases.length; i++){
+            ids[i] = universalPageDao.getUnivPageId(localIds.get(i).asLocalPage(),algorithmId);
+        }
+        return cosimilarity(ids);
+    }
 }
