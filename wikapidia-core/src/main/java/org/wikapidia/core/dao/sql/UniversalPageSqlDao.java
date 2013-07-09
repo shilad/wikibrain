@@ -26,60 +26,43 @@ import java.util.logging.Level;
 
 /**
  *
- * @author Ari Weiland
+ * @author Ari Weiland, Shilad Sen
  *
  * A SQL database implementation of the UniversalPageDao.
  *
  */
-public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao implements UniversalPageDao<T> {
+public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao<T> implements UniversalPageDao<T> {
 
     private final LocalPageDao localPageDao;
 
     public UniversalPageSqlDao(DataSource dataSource, LocalPageDao localPageDao) throws DaoException {
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/universal-page");
         this.localPageDao = localPageDao;
     }
 
-    @Override
-    public void clear() throws DaoException {
-        executeSqlResource("/db/universal-page-drop.sql");
-        executeSqlResource("/db/universal-page-schema.sql");
-    }
-
-    @Override
-    public void beginLoad() throws DaoException {
-        executeSqlResource("/db/universal-page-schema.sql");
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.UNIVERSAL_PAGE.LANG_ID,
+            Tables.UNIVERSAL_PAGE.PAGE_ID,
+            Tables.UNIVERSAL_PAGE.NAME_SPACE,
+            Tables.UNIVERSAL_PAGE.UNIV_ID,
+            Tables.UNIVERSAL_PAGE.ALGORITHM_ID,
+    };
 
     @Override
     public void save(UniversalPage page) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            UniversalPage<LocalPage> temp = page;
-            NameSpace nameSpace = temp.getNameSpace();
-            for (Language language : temp.getLanguageSetOfExistsInLangs()) {
-                for (LocalPage localPage : temp.getLocalPages(language)) {
-                    context.insertInto(Tables.UNIVERSAL_PAGE).values(
-                            language.getId(),
-                            localPage.getLocalId(),
-                            nameSpace.getArbitraryId(),
-                            page.getUnivId(),
-                            page.getAlgorithmId()
-                    ).execute();
-                }
+        UniversalPage<LocalPage> temp = page;
+        NameSpace nameSpace = page.getNameSpace();
+        for (Language language : temp.getLanguageSetOfExistsInLangs()) {
+            for (LocalPage localPage : temp.getLocalPages(language)) {
+                insert(
+                    language.getId(),
+                    localPage.getLocalId(),
+                    nameSpace.getArbitraryId(),
+                    page.getUnivId(),
+                    page.getAlgorithmId()
+                );
             }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        executeSqlResource("/db/universal-page-indexes.sql");
     }
 
     @Override

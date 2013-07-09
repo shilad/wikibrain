@@ -41,14 +41,25 @@ public class WpIOUtils {
      * @return
      * @throws java.io.IOException
      */
-    public static BufferedReader openReader(File path) throws IOException {
+    public static BufferedReader openBufferedReader(File path) throws IOException {
+        return new BufferedReader(openReader(path));
+    }
+
+    /**
+     * Open a possibly compressed file and return a reader for it.
+     * UTF-8 encoding is used.
+     * @param path
+     * @return
+     * @throws java.io.IOException
+     */
+    public static Reader openReader(File path) throws IOException {
         InputStream input = new BufferedInputStream(new FileInputStream(path));
         if (FilenameUtils.getExtension(path.toString()).toLowerCase().startsWith("bz2")) {
             input = new BZip2CompressorInputStream(input, true);
         } else if (FilenameUtils.getExtension(path.toString()).equalsIgnoreCase("gz")) {
             input = new GZIPInputStream(input);
         }
-        return new BufferedReader(new InputStreamReader(input, "UTF-8"));
+        return new InputStreamReader(input, "UTF-8");
     }
 
     /**

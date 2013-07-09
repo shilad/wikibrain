@@ -60,7 +60,7 @@ public class DumpSplitter implements Iterable<String> {
         private boolean closed = false;
 
         public ArticleIterator(File path) throws IOException, ArchiveException, XMLStreamException {
-            reader = WpIOUtils.openReader(path);
+            reader = WpIOUtils.openBufferedReader(path);
         }
 
         private void fillBuffer() {

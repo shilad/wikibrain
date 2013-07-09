@@ -5,7 +5,6 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -20,7 +19,6 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.Redirect;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,50 +26,30 @@ import java.util.Collection;
 
 /**
  */
-public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
+public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements RedirectDao {
+
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.REDIRECT.LANG_ID,
+            Tables.REDIRECT.SRC_PAGE_ID,
+            Tables.REDIRECT.DEST_PAGE_ID,
+    };
 
     public RedirectSqlDao(DataSource dataSource) throws DaoException {
-        super(dataSource);
-    }
-
-    @Override
-    public void clear() throws DaoException{
-        executeSqlResource("/db/redirect-drop.sql");
-        executeSqlResource("/db/redirect-schema.sql");
-    }
-
-    @Override
-    public void beginLoad() throws DaoException{
-        executeSqlResource("/db/redirect-schema.sql");
+        super(dataSource, INSERT_FIELDS, "/db/redirect");
     }
 
     @Override
     public void save(Redirect redirect) throws DaoException {
-        save(redirect.getLanguage(), redirect.getSourceId(), redirect.getDestId());
+        insert(
+                redirect.getLanguage().getId(),
+                redirect.getSourceId(),
+                redirect.getDestId()
+        );
     }
 
     @Override
     public void save(Language lang, int src, int dest) throws DaoException {
-        Connection conn = null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,dialect);
-            context.insertInto(Tables.REDIRECT).values(
-                    lang.getId(),
-                    src,
-                    dest
-            ).execute();
-
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException{
-        executeSqlResource("/db/redirect-indexes.sql");
+        save(new Redirect(lang, src, dest));
     }
 
     /**

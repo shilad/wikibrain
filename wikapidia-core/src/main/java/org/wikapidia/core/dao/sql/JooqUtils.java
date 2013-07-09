@@ -1,10 +1,17 @@
 package org.wikapidia.core.dao.sql;
 
 import org.jooq.SQLDialect;
+import org.jooq.Table;
+import org.wikapidia.core.jooq.Tables;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.jooq.SQLDialect.*;
 
@@ -101,5 +108,4 @@ public class JooqUtils {
 
         return SQLDialect.SQL99;
     }
-
 }

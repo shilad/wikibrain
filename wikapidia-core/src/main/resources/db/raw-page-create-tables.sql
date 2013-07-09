@@ -11,4 +11,3 @@ CREATE TABLE IF NOT EXISTS raw_page (
   redirect_title VARCHAR (256)
 );
 
-DROP INDEX IF EXISTS raw_page_idx_page_id;

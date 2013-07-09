@@ -3,10 +3,7 @@ package org.wikapidia.core.dao.sql;
 import com.typesafe.config.Config;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TLongIntHashMap;
-import org.jooq.Condition;
-import org.jooq.Cursor;
-import org.jooq.DSLContext;
-import org.jooq.Record;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -30,7 +27,7 @@ import java.util.logging.Level;
 
 /**
  */
-public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao implements LocalPageDao<T> {
+public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> implements LocalPageDao<T> {
     private volatile TLongIntHashMap titlesToIds = null;
     private RedirectSqlDao redirectSqlDao;
 
@@ -39,48 +36,33 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     public LocalPageSqlDao(DataSource dataSource, boolean followRedirects) throws DaoException{
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/local-page");
         if (followRedirects){
             redirectSqlDao = new RedirectSqlDao(ds);
         }
     }
 
-    @Override
-    public void clear() throws DaoException {
-        executeSqlResource("/db/local-page-drop.sql");
-        executeSqlResource("/db/local-page-schema.sql");
-    }
-
-    @Override
-    public void beginLoad() throws DaoException {
-        executeSqlResource("/db/local-page-schema.sql");
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.LOCAL_PAGE.ID,
+            Tables.LOCAL_PAGE.LANG_ID,
+            Tables.LOCAL_PAGE.PAGE_ID,
+            Tables.LOCAL_PAGE.TITLE,
+            Tables.LOCAL_PAGE.NAME_SPACE,
+            Tables.LOCAL_PAGE.IS_REDIRECT,
+            Tables.LOCAL_PAGE.IS_DISAMBIG
+    };
 
     @Override
     public void save(LocalPage page) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.LOCAL_PAGE).values(
-                    null,
-                    page.getLanguage().getId(),
-                    page.getLocalId(),
-                    page.getTitle().getCanonicalTitle(),
-                    page.getNameSpace().getArbitraryId(),
-                    page.isRedirect(),
-                    page.isDisambig()
-            ).execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        executeSqlResource("/db/local-page-indexes.sql");
+        insert(
+                null,
+                page.getLanguage().getId(),
+                page.getLocalId(),
+                page.getTitle().getCanonicalTitle(),
+                page.getNameSpace().getArbitraryId(),
+                page.isRedirect(),
+                page.isDisambig()
+        );
     }
 
     // This iterable can contain null entries, which originate from the cursor.

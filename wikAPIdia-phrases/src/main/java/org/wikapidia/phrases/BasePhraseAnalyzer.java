@@ -135,7 +135,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     }
 
     protected void loadFromFile(RecordType ltype, File input, PrunedCounts.Pruner pruner) throws IOException, DaoException {
-        BufferedReader reader = WpIOUtils.openReader(input);
+        BufferedReader reader = WpIOUtils.openBufferedReader(input);
         String lastKey = null;
         List<Entry> buffer = new ArrayList<Entry>();
 

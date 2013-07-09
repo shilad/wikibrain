@@ -8,5 +8,3 @@ CREATE TABLE IF NOT EXISTS local_page (
   is_disambig BOOLEAN NOT NULL
 );
 
-DROP INDEX IF EXISTS local_page_idx_page_id;
-DROP INDEX IF EXISTS local_page_idx_page_title;

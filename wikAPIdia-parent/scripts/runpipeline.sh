@@ -2,6 +2,12 @@
 
 
 source ../wikapidia-utils/src/main/scripts/utils.sh &&
+compile  &&
+(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.WikiTextLoader -d $@)
+
+exit 0
+
+source ../wikapidia-utils/src/main/scripts/utils.sh &&
 mvn clean &&
 compile  &&
 (cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.RequestedLinkGetter $@) &&

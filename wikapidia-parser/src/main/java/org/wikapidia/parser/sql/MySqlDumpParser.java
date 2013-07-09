@@ -138,7 +138,7 @@ public class MySqlDumpParser {
 
         public MyIterator(File path) throws IOException {
             this.path = path;
-            reader = WpIOUtils.openReader(path);
+            reader = WpIOUtils.openBufferedReader(path);
         }
 
         private void fillBuffer() {
