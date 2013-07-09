@@ -213,8 +213,15 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                     record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID));
         }
         return new Iterable<UniversalLink>() {
+
+            private boolean closed = false;
+
             @Override
             public Iterator<UniversalLink> iterator() {
+                if (closed) {
+                    throw new IllegalStateException("Iterable can only be iterated over once.");
+                }
+                closed = true;
                 return new Iterator<UniversalLink>() {
                     @Override
                     public boolean hasNext() {
