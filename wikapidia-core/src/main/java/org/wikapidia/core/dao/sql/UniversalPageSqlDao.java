@@ -90,8 +90,15 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 univIds.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
             }
             return new Iterable<T>() {
+
+                private boolean closed = false;
+
                 @Override
                 public Iterator<T> iterator() {
+                    if (closed) {
+                        throw new IllegalStateException("Iterable can only be iterated over once.");
+                    }
+                    closed = true;
                     return new Iterator<T>() {
                         @Override
                         public boolean hasNext() {

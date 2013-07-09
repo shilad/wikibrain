@@ -65,8 +65,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         );
     }
 
-    // This iterable can contain null entries, which originate from the cursor.
-    // TODO: Investigate this issue
     @Override
     public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
