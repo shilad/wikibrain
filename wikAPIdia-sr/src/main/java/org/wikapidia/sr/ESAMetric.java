@@ -62,16 +62,12 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      */
     public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws DaoException { // TODO: validIDs
-        try {
-            QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-            ScoreDoc[] scoreDocs = new ScoreDoc[0];
-            scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
-            TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
-            return result;
-            // TODO: prune
-        } catch (ParseException e) {
-            throw new DaoException(e);
-        }
+        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
+        ScoreDoc[] scoreDocs = new ScoreDoc[0];
+        scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
+        // TODO: prune
+        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
+        return result;
     }
 
     /**
@@ -86,7 +82,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         // TODO: prune
         TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
-            return result;
+        return result;
     }
 
     /**

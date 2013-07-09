@@ -36,6 +36,13 @@ public class QueryBuilder {
         return getPhraseQuery(LuceneOptions.PLAINTEXT_FIELD_NAME, searchString);
     }
 
+    /**
+     * Build a phrase query
+     *
+     * @param fieldName
+     * @param searchString
+     * @return
+     */
     public Query getPhraseQuery(String fieldName, String searchString) {
         try {
             QueryParser parser = new QueryParser(options.matchVersion, fieldName, new WikapidiaAnalyzer(language, options));
@@ -46,10 +53,18 @@ public class QueryBuilder {
         }
     }
 
+
     public Query getPageTextQuery(RawPage rawPage) {
         return getPhraseQuery(LuceneOptions.PLAINTEXT_FIELD_NAME, rawPage.getPlainText());
     }
 
+    /**
+     * Build a localpage query
+     *
+     * @param localPage
+     * @return
+     * @throws DaoException
+     */
     public Query getLocalPageConceptQuery(LocalPage localPage) throws DaoException {
         LinkedHashMap<String, Float> description = basePhraseAnalyzer.describeLocal(language, localPage, 20);
         MultiPhraseQuery multiPhraseQuery = new MultiPhraseQuery();
