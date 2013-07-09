@@ -35,6 +35,9 @@ import java.util.logging.Logger;
 public class FastLoader {
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
 
+    // these files could get huge, so be careful not to put them in /tmp which might be small.
+    static final File DEFAULT_TMP_DIR = new File(".tmp");
+
     private final SQLDialect dialect;
     private String schema;
 
@@ -44,14 +47,12 @@ public class FastLoader {
     private File csvFile = null;
     private CsvListWriter writer = null;
 
-    /**
-     * Constructs a fast loader
-     *
-     * @param ds
-     * @param fields
-     * @throws DaoException
-     */
+
     public FastLoader(DataSource ds, TableField[] fields) throws DaoException {
+        this(ds, fields, DEFAULT_TMP_DIR);
+    }
+
+    public FastLoader(DataSource ds, TableField[] fields, File tmpDir) throws DaoException {
         this.ds = ds;
         this.table = fields[0].getTable();
         this.fields = fields;
@@ -59,7 +60,13 @@ public class FastLoader {
         try {
             cnx = ds.getConnection();
             this.dialect = JooqUtils.dialect(cnx);
-            csvFile = File.createTempFile("table", ".csv");
+            if (tmpDir.exists() && !tmpDir.isDirectory()) {
+                FileUtils.forceDelete(tmpDir);
+            }
+            if (!tmpDir.exists()) {
+                tmpDir.mkdirs();
+            }
+            csvFile = File.createTempFile("table", ".csv", tmpDir);
             csvFile.deleteOnExit();
             LOG.info("creating tmp csv for " + table.getName() + " at " + csvFile.getAbsolutePath());
             writer = new CsvListWriter(WpIOUtils.openWriter(csvFile), CsvPreference.STANDARD_PREFERENCE);
