@@ -10,9 +10,7 @@ import org.apache.lucene.analysis.stempel.StempelFilter;
 import org.apache.lucene.analysis.stempel.StempelStemmer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.lucene.LuceneException;
 import org.wikapidia.lucene.TokenizerOptions;
 
 import java.io.IOException;
@@ -29,7 +27,7 @@ public class PolishTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws LuceneException {
+    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) {
         try{
             if (stemmer == null) {
                 stemmer = new StempelStemmer(StempelStemmer.load(PolishAnalyzer.class.getResourceAsStream("stemmer_20000.tbl")));

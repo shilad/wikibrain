@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,7 @@ public abstract class LanguageTokenizer {
         this.language = language;
     }
 
-    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws LuceneException;
+    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet);
 
     public Tokenizer getTokenizer(Reader r) {
         return new StandardTokenizer(matchVersion, r);
@@ -80,7 +81,7 @@ public abstract class LanguageTokenizer {
      * @param opts
      * @return
      */
-    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions opts) throws LuceneException {
+    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions opts) {
         try {
             LanguageTokenizer.opts = opts;
             mapTokenizers();
@@ -95,7 +96,7 @@ public abstract class LanguageTokenizer {
                             opts.options,
                             language);
         } catch (Exception e) {
-            throw new LuceneException(e);
+            throw new RuntimeException(e); // These exceptions are based on hard code and should never get thrown
         }
     }
 

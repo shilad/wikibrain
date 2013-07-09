@@ -23,13 +23,13 @@ import java.util.Map;
 */
 public class LuceneSearcher {
 
-    public static final int HIT_COUNT = 1000;
+    public static final int DEFAULT_HIT_COUNT = 1000;
 
     private final LuceneOptions options;
     private final File root;
     private final Map<Language, IndexSearcher> searchers;
 
-    private int hitCount = HIT_COUNT;
+    private int hitCount = DEFAULT_HIT_COUNT;
 
     /**
      * Constructs a LuceneSearcher that will run lucene queries on sets of articles

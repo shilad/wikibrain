@@ -74,12 +74,8 @@ public class WikapidiaAnalyzer extends Analyzer {
             tokenizer = new StandardTokenizer(options.matchVersion,r);
         }
 
-        try {
-            LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
-            TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
-            return new TokenStreamComponents(tokenizer, result);
-        } catch (LuceneException e) {
-            throw new RuntimeException(e); // In reality, these exceptions are based on hard code,
-        }                                  // and shouldn't every even be thrown anyways
+        LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
+        TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
+        return new TokenStreamComponents(tokenizer, result);
     }
 }

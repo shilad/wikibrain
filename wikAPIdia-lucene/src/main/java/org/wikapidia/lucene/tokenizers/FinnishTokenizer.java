@@ -11,7 +11,6 @@ import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.tartarus.snowball.ext.FinnishStemmer;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.lucene.LuceneException;
 import org.wikapidia.lucene.TokenizerOptions;
 
 /**
@@ -24,7 +23,7 @@ public class FinnishTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws LuceneException {
+    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) {
         TokenStream stream = new StandardFilter(matchVersion, input);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);
