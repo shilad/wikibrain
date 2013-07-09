@@ -32,7 +32,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     public ESAMetric(Language language) throws WikapidiaException {
         this.language = language;
-        searcher = new LuceneSearcher(new LanguageSet(language.getLangCode()), new LuceneOptions());
+        searcher = new LuceneSearcher(new LanguageSet(language.getLangCode()), LuceneOptions.getDefaultOptions());
     }
 
     /**
@@ -71,8 +71,6 @@ public class ESAMetric extends BaseLocalSRMetric {
             // TODO: prune
         } catch (ParseException e) {
             throw new DaoException(e);
-        } catch (WikapidiaException e) {
-            throw new DaoException(e);
         }
     }
 
@@ -84,15 +82,11 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @throws DaoException
      */
     public TIntDoubleHashMap getConceptVector(LocalPage localPage, Language language) throws DaoException { // TODO: validIDs
-        try {
-            QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-            ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
-            // TODO: prune
-            TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
+        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+        // TODO: prune
+        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
             return result;
-        } catch (WikapidiaException e) {
-            throw new DaoException(e);
-        }
     }
 
     /**
