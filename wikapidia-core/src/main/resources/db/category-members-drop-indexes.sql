@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS local_category_member_idx_article_id;
+DROP INDEX IF EXISTS local_category_member_idx_category_id;

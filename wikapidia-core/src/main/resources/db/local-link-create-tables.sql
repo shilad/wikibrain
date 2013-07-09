@@ -8,5 +8,3 @@ CREATE TABLE IF NOT EXISTS local_link (
   location_type SMALLINT NOT NULL
 );
 
-DROP INDEX IF EXISTS local_link_idx_source_id;
-DROP INDEX IF EXISTS local_link_idx_dest_id;

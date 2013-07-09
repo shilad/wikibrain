@@ -9,7 +9,6 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.utils.WpIOUtils;
 
@@ -74,7 +73,7 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
         boolean eof = false;
 
         public Iter() throws IOException {
-            reader = WpIOUtils.openReader(path);
+            reader = WpIOUtils.openBufferedReader(path);
         }
 
         @Override

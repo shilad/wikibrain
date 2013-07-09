@@ -3,7 +3,6 @@ package org.wikapidia.core.dao.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.*;
@@ -19,7 +18,6 @@ import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -32,75 +30,50 @@ import java.util.logging.Level;
  * A SQL database implementation of the UniversalLinkDao.
  *
  */
-public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLinkDao {
+public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
 
     private final LocalLinkDao localLinkDao;
     
     public UniversalLinkSqlDao(DataSource dataSource, LocalLinkDao localLinkDao) throws DaoException {
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/universal-link");
         this.localLinkDao = localLinkDao;
     }
 
-    @Override
-    public void clear() throws DaoException {
-        executeSqlResource("/db/universal-link-drop.sql");
-        executeSqlResource("/db/universal-link-schema.sql");
-    }
-
-    @Override
-    public void beginLoad() throws DaoException {
-        executeSqlResource("/db/universal-link-schema.sql");
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.UNIVERSAL_LINK.LANG_ID,
+            Tables.UNIVERSAL_LINK.SOURCE_ID,
+            Tables.UNIVERSAL_LINK.DEST_ID,
+            Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID,
+            Tables.UNIVERSAL_LINK.DEST_UNIV_ID,
+            Tables.UNIVERSAL_LINK.ALGORITHM_ID,
+    };
 
     @Override
     public void save(UniversalLink link) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            for (Language language : link.getLanguageSetOfExistsInLangs()) {
-                for (LocalLink localLink : link.getLocalLinks(language)) {
-                    context.insertInto(Tables.UNIVERSAL_LINK).values(
-                            localLink.getLanguage().getId(),
-                            localLink.getSourceId(),
-                            localLink.getDestId(),
-                            link.getSourceUnivId(),
-                            link.getDestUnivId(),
-                            link.getAlgorithmId()
-                    ).execute();
-                }
+        for (Language language : link.getLanguageSetOfExistsInLangs()) {
+            for (LocalLink localLink : link.getLocalLinks(language)) {
+                insert(
+                    localLink.getLanguage().getId(),
+                    localLink.getSourceId(),
+                    localLink.getDestId(),
+                    link.getSourceUnivId(),
+                    link.getDestUnivId(),
+                    link.getAlgorithmId()
+                );
             }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
     @Override
     public void save(LocalLink localLink, int sourceUnivId, int destUnivId, int algorithmId) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.UNIVERSAL_LINK).values(
-                    localLink.getLanguage().getId(),
-                    localLink.getSourceId(),
-                    localLink.getDestId(),
-                    sourceUnivId,
-                    destUnivId,
-                    algorithmId
-            ).execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        executeSqlResource("/db/universal-link-indexes.sql");
+        insert(
+                localLink.getLanguage().getId(),
+                localLink.getSourceId(),
+                localLink.getDestId(),
+                sourceUnivId,
+                destUnivId,
+                algorithmId
+        );
     }
 
     @Override

@@ -6,5 +6,3 @@ CREATE TABLE IF NOT EXISTS universal_page (
   algorithm_id INT NOT NULL
 );
 
-DROP INDEX IF EXISTS universal_page_idx_page_id;
-DROP INDEX IF EXISTS universal_page_idx_page_type;
