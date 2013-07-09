@@ -2,6 +2,7 @@ package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
@@ -46,7 +47,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException, WikapidiaException;
 
     /**
      * Find the most similar local pages to a local page.
@@ -56,7 +57,7 @@ public interface LocalSRMetric {
      * @param validIds The local page ids to be considered.  Null means all ids in the language.
      * @return
      */
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException, WikapidiaException;
 
     /**
      * Find the most similar local pages to a phrase,
