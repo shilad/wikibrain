@@ -10,7 +10,6 @@ import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
@@ -24,7 +23,7 @@ public class GermanTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException {
+    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) {
         TokenStream stream = new StandardFilter(matchVersion, input);
         stream = new GermanNormalizationFilter(stream);
         if (caseInsensitive)

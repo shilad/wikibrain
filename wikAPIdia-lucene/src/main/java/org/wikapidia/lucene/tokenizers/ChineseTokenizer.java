@@ -7,7 +7,6 @@ import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
@@ -21,7 +20,7 @@ public class ChineseTokenizer extends LanguageTokenizer{
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException {
+    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) {
         TokenStream stream = new WordTokenFilter(input); // breaks Sentences into words
         // stream = new LowerCaseFilter(stream);
         // LowerCaseFilter is not needed, as SegTokenFilter lowercases Basic Latin text.

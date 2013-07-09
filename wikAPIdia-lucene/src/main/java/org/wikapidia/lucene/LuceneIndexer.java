@@ -8,7 +8,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.NameSpace;
@@ -22,7 +21,7 @@ import java.util.*;
  *
  * @author Ari Weiland
  *
- * This class is used to index raw pages during the load process
+ * This class is used to index raw pages during the load process.
  *
  */
 public class LuceneIndexer {
@@ -40,9 +39,8 @@ public class LuceneIndexer {
      * @param languages
      * @param nameSpaces
      * @param root
-     * @throws WikapidiaException
      */
-    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root) throws WikapidiaException {
+    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root) {
         this(languages, nameSpaces, root, LuceneOptions.getDefaultOptions());
     }
 
@@ -52,13 +50,12 @@ public class LuceneIndexer {
      * subdirectories specified by options.
      * @param languages
      * @param options a LuceneOptions object containing specific options for lucene
-     * @throws WikapidiaException
      */
-    public LuceneIndexer(LanguageSet languages, LuceneOptions options) throws WikapidiaException {
+    public LuceneIndexer(LanguageSet languages, LuceneOptions options) {
         this(languages, options.nameSpaces, options.luceneRoot, options);
     }
 
-    private LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root, LuceneOptions options) throws WikapidiaException {
+    private LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root, LuceneOptions options) {
         try {
             this.root = root;
             analyzers = new HashMap<Language, WikapidiaAnalyzer>();
@@ -73,7 +70,7 @@ public class LuceneIndexer {
             this.nameSpaces = nameSpaces;
             this.options = options;
         } catch (IOException e) {
-            throw new WikapidiaException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -88,9 +85,8 @@ public class LuceneIndexer {
     /**
      * Indexes a specific RawPage
      * @param page
-     * @throws WikapidiaException
      */
-    public void indexPage(RawPage page) throws WikapidiaException {
+    public void indexPage(RawPage page) {
         Language language = page.getLang();
         if (nameSpaces.contains(page.getNamespace()) && analyzers.containsKey(language)) {
             try {
@@ -106,7 +102,7 @@ public class LuceneIndexer {
                 document.add(plainTextField);
                 writer.addDocument(document);
             } catch (IOException e) {
-                throw new WikapidiaException(e);
+                throw new RuntimeException(e);
             }
         }
     }

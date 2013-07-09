@@ -8,7 +8,6 @@ import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
 import org.apache.lucene.analysis.ja.JapaneseTokenizer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.tokenizers.LanguageTokenizer;
 
@@ -65,7 +64,6 @@ public class WikapidiaAnalyzer extends Analyzer {
     protected Analyzer.TokenStreamComponents createComponents(String s, Reader r) {
         Tokenizer tokenizer;
         String langCode = language.getLangCode();
-        if (langCode.equals("simple")) langCode = "en"; // simple english is just english
         if (langCode.equals("ja")) {
             tokenizer = new JapaneseTokenizer(r, null, false, JapaneseTokenizer.DEFAULT_MODE);
         } else if (langCode.equals("zh")) {
@@ -76,12 +74,8 @@ public class WikapidiaAnalyzer extends Analyzer {
             tokenizer = new StandardTokenizer(options.matchVersion,r);
         }
 
-        try {
-            LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
-            TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
-            return new Analyzer.TokenStreamComponents(tokenizer, result);
-        } catch (WikapidiaException e) {
-            throw new RuntimeException(e);
-        }
+        LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
+        TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
+        return new TokenStreamComponents(tokenizer, result);
     }
 }

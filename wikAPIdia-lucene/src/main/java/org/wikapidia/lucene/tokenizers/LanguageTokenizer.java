@@ -6,8 +6,8 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.lucene.LuceneException;
 import org.wikapidia.lucene.TokenizerOptions;
 import org.wikapidia.lucene.LuceneOptions;
 
@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +25,13 @@ import java.util.Map;
  * @author Ari Weiland
  *
  * This class is based on a class of the same name from Brent Hecht, WikAPIdia.
- * I have updated everything to properly function consistently with lucene 4.3,
+ * I have updated everything to properly function consistently with Lucene 4.3,
  * as well as adding functionality such as the booleans to determine which filters
- * should be applied.
+ * should be applied. Lastly, I have broken up the language specific
+ * subclasses into their own separate class files.
  *
- * Currently encompasses 26 Tokenizers
+ * There are currently 26 language-specific tokenizer subclasses.
+ * Note that simple English is treated as standard English
  *
  */
 public abstract class LanguageTokenizer {
@@ -36,7 +39,7 @@ public abstract class LanguageTokenizer {
     private static final String STOP_WORDS = "src/main/resources/stopwords/";
     private static Map<Language, Class> tokenizerClasses;
 
-    protected static LuceneOptions options;
+    protected static LuceneOptions opts;
 
     protected final Version matchVersion;
     protected final boolean caseInsensitive;
@@ -52,13 +55,13 @@ public abstract class LanguageTokenizer {
         this.language = language;
     }
 
-    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) throws WikapidiaException;
+    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet);
 
     public Tokenizer getTokenizer(Reader r) {
         return new StandardTokenizer(matchVersion, r);
     }
 
-    public TokenizerOptions getOptions() {
+    public TokenizerOptions getTokenizerOptions() {
         TokenizerOptions options = new TokenizerOptions();
         if (caseInsensitive) options.caseInsensitive();
         if (useStopWords) options.useStopWords();
@@ -72,27 +75,28 @@ public abstract class LanguageTokenizer {
 
     /**
      * Returns an instance of a LanguageTokenizer for the specified language
-     * with the filters specified by options.
+     * with the filters specified by opts.
+     *
      * @param language
-     * @param options
+     * @param opts
      * @return
-     * @throws WikapidiaException
      */
-    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions options) throws WikapidiaException {
+    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions opts) {
         try {
-            LanguageTokenizer.options = options;
+            LanguageTokenizer.opts = opts;
             mapTokenizers();
-            return (LanguageTokenizer) tokenizerClasses.get(language)
+            if (language.equals(Language.getByLangCode("simple"))) language = Language.getByLangCode("en"); // simple english
+            return (LanguageTokenizer) tokenizerClasses.get(language)                                       // is just english
                     .getDeclaredConstructor(
                             Version.class,
                             TokenizerOptions.class,
                             Language.class)
                     .newInstance(
-                            options.matchVersion,
-                            options.options,
+                            opts.matchVersion,
+                            opts.options,
                             language);
         } catch (Exception e) {
-            throw new WikapidiaException(e);
+            throw new RuntimeException(e); // These exceptions are based on hard code and should never get thrown
         }
     }
 
@@ -126,19 +130,19 @@ public abstract class LanguageTokenizer {
         tokenizerClasses.put(Language.getByLangCode("lad"), LadinoTokenizer.class);
     }
 
-    protected static CharArraySet getStopWordsForNonLuceneLangFromFile(Language language) throws WikapidiaException{
+    protected static CharArraySet getStopWordsForNonLuceneLangFromFile(Language language) {
         try{
             String langCode = language.getLangCode();
             String fileName = STOP_WORDS + langCode + ".txt";
             InputStream stream = FileUtils.openInputStream(new File(fileName));
             List<String> stopWords = org.apache.commons.io.IOUtils.readLines(stream);
-            CharArraySet charArraySet = new CharArraySet(options.matchVersion, 0, false);
+            CharArraySet charArraySet = new CharArraySet(opts.matchVersion, 0, false);
             for (String stopWord : stopWords) {
                 charArraySet.add(stopWord);
             }
             return charArraySet;
         } catch (IOException e) {
-            throw new WikapidiaException(e);
+            throw new RuntimeException(e);
         }
     }
 }
