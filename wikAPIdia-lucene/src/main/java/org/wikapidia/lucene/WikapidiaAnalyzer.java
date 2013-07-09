@@ -31,7 +31,7 @@ public class WikapidiaAnalyzer extends Analyzer {
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with all filters
      * and default options.
-     * @param language
+     * @param language the language this analyzer analyzes
      */
     public WikapidiaAnalyzer(Language language) {
         this(language, LuceneOptions.getDefaultOptions());
@@ -40,7 +40,7 @@ public class WikapidiaAnalyzer extends Analyzer {
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with specified filters
      * and specified options.
-     * @param language
+     * @param language the language this analyzer analyzes
      * @param options a LuceneOptions object containing specific options for lucene
      */
     public WikapidiaAnalyzer(Language language, LuceneOptions options) {
@@ -48,10 +48,6 @@ public class WikapidiaAnalyzer extends Analyzer {
         this.options = options;
     }
 
-    /**
-     * Returns the Lucene Options
-     * @return
-     */
     public LuceneOptions getOptions() {
         return options;
     }
