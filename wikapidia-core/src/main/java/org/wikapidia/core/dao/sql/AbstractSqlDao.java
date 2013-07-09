@@ -65,7 +65,6 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         cache = null;
         this.fields = fields;
         this.sqlScriptPrefix = sqlScriptPrefix;
-        loader = new FastLoader(ds, fields);
     }
 
     /**
@@ -100,6 +99,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     public void beginLoad() throws  DaoException {
         executeSqlScriptWithSuffix("-drop-indexes.sql");
         executeSqlScriptWithSuffix("-create-tables.sql");
+        loader = new FastLoader(ds, fields);
     }
 
     /**
