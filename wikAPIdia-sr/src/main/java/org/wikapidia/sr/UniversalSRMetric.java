@@ -43,7 +43,7 @@ public interface UniversalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException;
 
     /**
      * Find the most similar universal pages to a universal page.
@@ -53,7 +53,7 @@ public interface UniversalSRMetric {
      * @param validIds The universal page ids to be considered.  Null means all ids.
      * @return
      */
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
 
     /**
@@ -63,7 +63,7 @@ public interface UniversalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException;
 
     /**
      * Find the most similar universal pages to a string in a given language from a set of universal pages
@@ -73,7 +73,7 @@ public interface UniversalSRMetric {
      * @param validIds  The UniversalPage ids to be considered.  Null means all ids.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
 
     /**
@@ -83,7 +83,7 @@ public interface UniversalSRMetric {
      * @return
      * @throws java.io.IOException
      */
-    public double[][] cosimilarity(int rowIds[], int colIds[]) throws IOException;
+    public double[][] cosimilarity(int rowIds[], int colIds[]) throws IOException, DaoException;
 
     /**
      * Construct a cosimilarity matrix of phrases.
@@ -92,7 +92,7 @@ public interface UniversalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(LocalString rowPhrases[], LocalString colPhrases[]) throws IOException;
+    public double[][] cosimilarity(LocalString rowPhrases[], LocalString colPhrases[]) throws IOException, DaoException;
 
     /**
      * Construct a symmetric cosimilarity matrix of Universal Page ids.
@@ -106,7 +106,7 @@ public interface UniversalSRMetric {
      * @param phrases
      * @return
      */
-    public double[][] cosimilarity(LocalString phrases[]) throws IOException;
+    public double[][] cosimilarity(LocalString phrases[]) throws IOException, DaoException;
 
     /**
      * Return a vector for a UniversalPage

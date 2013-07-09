@@ -63,6 +63,13 @@ public class SRResultList implements  Iterable<SRResult>{
         results[i].value = score;
     }
 
+    public void set (int i, SRResult result){
+        assert(i<numDocs());
+        results[i].id=result.getId();
+        results[i].value=result.getValue();
+        results[i].explanations = result.getExplanations();
+    }
+
     public void set (int i, int id, double score, List<Explanation> explanationList){
         assert (i<numDocs);
         results[i].id = id;
