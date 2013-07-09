@@ -16,6 +16,8 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -49,7 +51,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
                 page.getLang().getId(),
                 page.getPageId(),
                 page.getRevisionId(),
-                page.getBody(),
+                page.getBody() == null ? "" : page.getBody(),
                 page.getTitle(),
                 page.getLastEdit(),
                 page.getNamespace().getArbitraryId(),

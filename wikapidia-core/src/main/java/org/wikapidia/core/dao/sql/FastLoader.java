@@ -9,6 +9,8 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.prefs.CsvPreference;
+import org.supercsv.quote.AlwaysQuoteMode;
+import org.supercsv.quote.QuoteMode;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.utils.WpIOUtils;
 
@@ -17,6 +19,9 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Logger;
 
 /**
@@ -69,7 +74,10 @@ public class FastLoader {
             csvFile = File.createTempFile("table", ".csv", tmpDir);
             csvFile.deleteOnExit();
             LOG.info("creating tmp csv for " + table.getName() + " at " + csvFile.getAbsolutePath());
-            writer = new CsvListWriter(WpIOUtils.openWriter(csvFile), CsvPreference.STANDARD_PREFERENCE);
+            CsvPreference pref = new CsvPreference.Builder(CsvPreference.STANDARD_PREFERENCE)
+                    .useQuoteMode(new AlwaysQuoteMode())
+                    .build();
+            writer = new CsvListWriter(WpIOUtils.openWriter(csvFile), pref);
             String [] names = new String[fields.length];
             for (int i = 0; i < fields.length; i++) {
                 names[i] = fields[i].getName();
@@ -111,12 +119,18 @@ public class FastLoader {
      * @param values
      * @throws DaoException
      */
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     public void load(Object [] values) throws DaoException {
         if (values.length != fields.length) {
             throw new IllegalArgumentException();
         }
         try {
             synchronized (writer) {
+                for (int i = 0; i < values.length; i++) {
+                    if (values[i] != null && values[i] instanceof Date) {
+                        values[i] = DATE_FORMAT.format((Date)values[i]);
+                    }
+                }
                 writer.write(values);
             }
         } catch (IOException e) {
