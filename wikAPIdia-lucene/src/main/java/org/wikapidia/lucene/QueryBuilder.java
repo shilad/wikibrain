@@ -42,7 +42,7 @@ public class QueryBuilder {
             return parser.parse(searchString);
         } catch (ParseException e) {
             LOG.log(Level.WARNING, "Unable to parse " + searchString);
-            return null;
+            return null; // TODO: this is actually not ideal, we should probably pass an exception upwards
         }
     }
 
