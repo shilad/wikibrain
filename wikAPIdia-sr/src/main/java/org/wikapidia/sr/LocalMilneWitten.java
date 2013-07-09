@@ -52,12 +52,13 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         return "Milne Witten";
     }
 
-    public void read(File directory) throws IOException {
+    public void write(File directory) throws IOException {
         throw new NotImplementedException();
     }
 
-    public void write(File directory) throws IOException {
-        throw new NotImplementedException();
+    @Override
+    public void read(File directory) throws IOException {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -74,7 +75,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     public SparseMatrixRow getVector(int id, Language language) throws DaoException {
         LinkedHashMap<Integer, Float> vector = new LinkedHashMap<Integer, Float>();
         TIntSet links = getLinks(new LocalId(language, id));
-        DaoFilter pageFilter = new DaoFilter();
+        DaoFilter pageFilter = new DaoFilter().setLanguages(language);
         Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
         for (LocalPage page: allPages) {
             vector.put(id, links.contains(page.getLocalId()) ? 1F:0F);

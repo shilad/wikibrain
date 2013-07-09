@@ -67,7 +67,7 @@ public class ESAMetric extends BaseLocalSRMetric {
     }
 
     @Override
-    public SparseMatrixRow getVector(int id) {
+    public SparseMatrixRow getVector(int id, Language language) throws DaoException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

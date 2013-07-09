@@ -57,7 +57,7 @@ public class TestMilneWitten {
         ds.setUsername("sa");
         ds.setPassword("");
 
-        LanguageInfo lang = LanguageInfo.getByLangCode("en");
+        LanguageInfo lang = LanguageInfo.getByLangCode("simple");
         LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
         LocalLinkSqlDao linkDao = new LocalLinkSqlDao(ds);
 
