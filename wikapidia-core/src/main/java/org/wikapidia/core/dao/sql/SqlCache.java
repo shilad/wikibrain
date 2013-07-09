@@ -38,7 +38,7 @@ public class SqlCache {
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/table-modified-schema.sql")
+                            LocalPageSqlDao.class.getResource("/db/table-modified-create-tables.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
