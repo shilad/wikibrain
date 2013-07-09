@@ -38,7 +38,7 @@ public abstract class LanguageTokenizer {
     private static final String STOP_WORDS = "src/main/resources/stopwords/";
     private static Map<Language, Class> tokenizerClasses;
 
-    protected static LuceneOptions options;
+    protected static LuceneOptions opts;
 
     protected final Version matchVersion;
     protected final boolean caseInsensitive;
@@ -74,15 +74,15 @@ public abstract class LanguageTokenizer {
 
     /**
      * Returns an instance of a LanguageTokenizer for the specified language
-     * with the filters specified by options.
+     * with the filters specified by opts.
      *
      * @param language
-     * @param options
+     * @param opts
      * @return
      */
-    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions options) throws LuceneException {
+    public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions opts) throws LuceneException {
         try {
-            LanguageTokenizer.options = options;
+            LanguageTokenizer.opts = opts;
             mapTokenizers();
             if (language.equals(Language.getByLangCode("simple"))) language = Language.getByLangCode("en"); // simple english
             return (LanguageTokenizer) tokenizerClasses.get(language)                                       // is just english
@@ -91,8 +91,8 @@ public abstract class LanguageTokenizer {
                             TokenizerOptions.class,
                             Language.class)
                     .newInstance(
-                            options.matchVersion,
-                            options.options,
+                            opts.matchVersion,
+                            opts.options,
                             language);
         } catch (Exception e) {
             throw new LuceneException(e);
@@ -135,7 +135,7 @@ public abstract class LanguageTokenizer {
             String fileName = STOP_WORDS + langCode + ".txt";
             InputStream stream = FileUtils.openInputStream(new File(fileName));
             List<String> stopWords = org.apache.commons.io.IOUtils.readLines(stream);
-            CharArraySet charArraySet = new CharArraySet(options.matchVersion, 0, false);
+            CharArraySet charArraySet = new CharArraySet(opts.matchVersion, 0, false);
             for (String stopWord : stopWords) {
                 charArraySet.add(stopWord);
             }
