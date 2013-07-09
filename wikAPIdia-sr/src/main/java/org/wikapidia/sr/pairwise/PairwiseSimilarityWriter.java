@@ -92,8 +92,12 @@ public class PairwiseSimilarityWriter {
         } catch (DaoException e){
             throw new WikapidiaException(e);
         }
+        LinkedHashMap<Integer,Float> linkedHashMap = new LinkedHashMap<Integer, Float>();
+        for (int i : scores.keys()){
+            linkedHashMap.put(i,(float)scores.get(i));
+        }
         try {
-            writer.writeRow(new SparseMatrixRow(new ValueConf(), id, scores));
+            writer.writeRow(new SparseMatrixRow(new ValueConf(), id, linkedHashMap));
         } catch (IOException e){
             throw new WikapidiaException(e);
         }
