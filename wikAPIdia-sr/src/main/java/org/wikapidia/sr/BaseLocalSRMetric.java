@@ -2,6 +2,7 @@ package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
@@ -126,7 +127,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
 
     @Override
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException, ParseException {
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
         HashSet<LocalString> context = new HashSet<LocalString>();
         context.add(new LocalString(language,phrase2));
         LocalId similar1 = disambiguator.disambiguate(new LocalString(language, phrase1), context);
@@ -139,10 +140,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations);
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException, WikapidiaException;
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds);
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException, WikapidiaException;
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {

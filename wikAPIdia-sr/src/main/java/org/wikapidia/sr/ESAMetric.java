@@ -4,14 +4,11 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
-import org.h2.util.New;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.RawPage;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
@@ -28,8 +25,6 @@ import java.util.logging.Logger;
  */
 public class ESAMetric extends BaseLocalSRMetric {
 
-    // TODO: test ESA independently
-
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
 
     private Language language;
@@ -37,11 +32,12 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     public ESAMetric(Language language) throws WikapidiaException {
         this.language = language;
-        searcher = new LuceneSearcher(new LanguageSet(language.getLangCode()), new LuceneOptions());
+        searcher = new LuceneSearcher(new LanguageSet(language.getLangCode()), LuceneOptions.getDefaultOptions());
     }
 
     /**
      * Get cosine similarity between two phrases.
+     *
      * @param phrase1
      * @param phrase2
      * @param language
@@ -49,43 +45,53 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      * @throws DaoException
      */
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException, ParseException {
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
         if (phrase1 == null || phrase2 == null) {
             throw new NullPointerException("Null phrase passed to similarity");
         }
+        TIntDoubleHashMap scores1 = getConceptVector(phrase1, language);
+        TIntDoubleHashMap scores2 = getConceptVector(phrase2, language);
+        double sim = SimUtils.cosineSimilarity(scores1, scores2);
+        return new SRResult(sim); // TODO: normalize
+    }
+
+    /**
+     * Get concept vector of a specified phrase.
+     *
+     * @param phrase
+     * @return
+     */
+    public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws DaoException { // TODO: validIDs
         try {
-            TIntDoubleHashMap scores1 = getConceptVector(phrase1, language);
-            TIntDoubleHashMap scores2 = getConceptVector(phrase2, language);
-            double sim = SimUtils.cosineSimilarity(scores1, scores2);
-            return new SRResult(sim); // TODO: normalize
-        } catch (WikapidiaException e) {
+            QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
+            ScoreDoc[] scoreDocs = new ScoreDoc[0];
+            scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
+            TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
+            return result;
+            // TODO: prune
+        } catch (ParseException e) {
             throw new DaoException(e);
         }
     }
 
     /**
-     * Get concept vector of a specified phrase.
-     * @param phrase
+     * Get concept vector of a local page with a specified language.
+     * @param localPage
+     * @param language
      * @return
+     * @throws DaoException
      */
-    public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws WikapidiaException, ParseException { // TODO: validIDs
+    public TIntDoubleHashMap getConceptVector(LocalPage localPage, Language language) throws DaoException { // TODO: validIDs
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         // TODO: prune
         TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
-        return result;
-    }
-
-    public TIntDoubleHashMap getConceptVector(RawPage rawPage, Language language) throws WikapidiaException, ParseException { // TODO: validIDs
-        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPageTextQuery(rawPage), language);
-        // TODO: prune
-        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
-        return result;
+            return result;
     }
 
     /**
      * Put data in a scoreDoc into a TIntDoubleHashMap
+     *
      * @param scores
      * @return
      */
@@ -97,38 +103,49 @@ public class ESAMetric extends BaseLocalSRMetric {
         return expanded;
     }
 
-    public SRResult similarity(RawPage page1, RawPage page2, Language language) throws DaoException, ParseException {
-        try {
-            TIntDoubleHashMap scores1 = getConceptVector(page1, language);
-            TIntDoubleHashMap scores2 = getConceptVector(page2, language);
-            double sim = SimUtils.cosineSimilarity(scores1, scores2);
-            return new SRResult(sim); // TODO: normalize
-        } catch (WikapidiaException e) {
-            throw new DaoException(e);
-        }
-    }
-
-    @Override
+    /**
+     * Get similarity between two local pages.
+     *
+     * @param page1
+     * @param page2
+     * @param explanations
+     * @return
+     * @throws DaoException
+     */
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
-
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        TIntDoubleHashMap scores1 = getConceptVector(page1, language);
+        TIntDoubleHashMap scores2 = getConceptVector(page2, language);
+        double sim = SimUtils.cosineSimilarity(scores1, scores2);
+        return new SRResult(sim); // TODO: normalize
     }
 
-    public SRResultList mostSimilar(RawPage rawPage, int maxResults, boolean explanations) throws ParseException, WikapidiaException {
+    /**
+     * Get wiki pages that are the most similar to the specified local page.
+     * @param localPage
+     * @param maxResults
+     * @param explanations
+     * @return
+     * @throws DaoException
+     * @throws WikapidiaException
+     */
+    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations) throws DaoException, WikapidiaException {
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPageTextQuery(rawPage), language);
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+        SRResultList srResults = new SRResultList(maxResults);
+        int i = 0;
+        for (ScoreDoc scoreDoc : scoreDocs) {
+            if (i < srResults.numDocs()) {
+                srResults.set(i, scoreDoc.doc, scoreDoc.score);
+                i++;
+            }
+        }
+        return srResults;
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) {
+    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations, TIntSet validIds) throws DaoException, WikapidiaException {
         return null;
-    }
-
-    @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
