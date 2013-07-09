@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 public abstract class AbstractSqlDao<T> implements Dao<T> {
     public static final Logger LOG = Logger.getLogger(AbstractSqlDao.class.getName());
 
-
     public static final int DEFAULT_FETCH_SIZE = 1000;
 
     protected final SQLDialect dialect;
