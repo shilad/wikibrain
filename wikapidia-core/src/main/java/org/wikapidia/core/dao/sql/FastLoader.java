@@ -38,7 +38,6 @@ public class FastLoader {
     private final SQLDialect dialect;
     private String schema;
 
-
     private TableField[] fields;
     private DataSource ds;
     private Table table;
@@ -60,7 +59,7 @@ public class FastLoader {
         try {
             cnx = ds.getConnection();
             this.dialect = JooqUtils.dialect(cnx);
-            csvFile = File.createTempFile("table", "csv");
+            csvFile = File.createTempFile("table", ".csv");
             csvFile.deleteOnExit();
             LOG.info("creating tmp csv for " + table.getName() + " at " + csvFile.getAbsolutePath());
             writer = new CsvListWriter(WpIOUtils.openWriter(csvFile), CsvPreference.STANDARD_PREFERENCE);
@@ -119,6 +118,11 @@ public class FastLoader {
     }
 
     public void endLoad() throws DaoException {
+        try {
+            writer.close();
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
         if (dialect == SQLDialect.H2) {
             loadH2();
         } else {
