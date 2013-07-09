@@ -108,36 +108,4 @@ public class JooqUtils {
 
         return SQLDialect.SQL99;
     }
-
-    /**
-     * Database servers that have direct support for loading csv files.
-     */
-    static private Set<SQLDialect> DIALECTS_WITH_CSV_LOADS = new HashSet<SQLDialect>(
-            Arrays.asList(SQLDialect.H2)
-    );
-
-
-    public static boolean supportsCsvLoading(SQLDialect dialect) {
-        return DIALECTS_WITH_CSV_LOADS.contains(dialect);
-    }
-
-    /**
-     * Load a csv directly into
-     * @param conn
-     * @param table
-     * @param file
-     * @throws SQLException
-     */
-    public static void loadCsv(Connection conn, Table table, File file) throws SQLException {
-        SQLDialect dialect = dialect(conn);
-        if (dialect == SQLDialect.H2) {
-            Statement s = conn.createStatement();
-            String quotedPath = file.getAbsolutePath().replace("'", "''");
-            s.execute("INSERT INTO " + table.getName() +
-                    " SELECT * " +
-                    " FROM CSVREAD('" + quotedPath + "', null, 'charset=UTF-8')");
-        } else {
-            throw new UnsupportedOperationException("unknown loadCsv dialect: " + dialect);
-        }
-    }
 }
