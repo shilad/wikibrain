@@ -25,9 +25,9 @@ public class LuceneSearcher {
 
     public static final int DEFAULT_HIT_COUNT = 1000;
 
-    private final LuceneOptions options;
     private final File root;
     private final Map<Language, IndexSearcher> searchers;
+    private final LuceneOptions options;
 
     private int hitCount = DEFAULT_HIT_COUNT;
 
@@ -36,7 +36,7 @@ public class LuceneSearcher {
      * in any language in the LanguageSet. Note that root is the parent directory
      * of the directory where lucene indexes are stored, though it is the same
      * directory as was passed to the LuceneIndexer.
-     * @param languages
+     * @param languages the language set in which this searcher can operate
      * @param root the root directory in which each language contains its own lucene directory
      */
     public LuceneSearcher(LanguageSet languages, File root) {
@@ -46,7 +46,7 @@ public class LuceneSearcher {
     /**
      * Constructs a LuceneSearcher that will run lucene queries on sets of articles
      * in any language in the LanguageSet. The directory is specified within options.
-     * @param languages
+     * @param languages the language set in which this searcher can operate
      * @param options a LuceneOptions object containing specific options for lucene
      */
     public LuceneSearcher(LanguageSet languages, LuceneOptions options) {
@@ -66,6 +66,10 @@ public class LuceneSearcher {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public File getRoot() {
+        return root;
     }
 
     public LanguageSet getLanguageSet() {

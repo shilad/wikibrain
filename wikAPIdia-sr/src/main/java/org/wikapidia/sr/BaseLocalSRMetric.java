@@ -140,10 +140,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException, WikapidiaException;
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException, WikapidiaException;
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
@@ -154,7 +154,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
         LocalId similar = disambiguator.disambiguate(phrase,null);
-        return mostSimilar(similar.asLocalPage(), maxResults, explanations,validIds);
+        return mostSimilar(similar.asLocalPage(), maxResults, explanations, validIds);
     }
 
     @Override

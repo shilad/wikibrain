@@ -77,9 +77,9 @@ public abstract class LanguageTokenizer {
      * Returns an instance of a LanguageTokenizer for the specified language
      * with the filters specified by opts.
      *
-     * @param language
-     * @param opts
-     * @return
+     * @param language the language of the tokenizer to be retrieved
+     * @param opts the LuceneOptions object
+     * @return a LanguageTokenizer for language configured by opts
      */
     public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions opts) {
         try {

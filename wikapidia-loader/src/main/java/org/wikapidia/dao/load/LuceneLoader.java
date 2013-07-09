@@ -89,7 +89,7 @@ public class LuceneLoader {
                 nameSpaces.add(NameSpace.getNameSpaceByName(s));
             }
         } else {
-            nameSpaces = luceneOptions.nameSpaces;
+            nameSpaces = luceneOptions.namespaces;
         }
         File luceneRoot = luceneOptions.luceneRoot;
 

@@ -30,7 +30,7 @@ public class ESAMetric extends BaseLocalSRMetric {
     private Language language;
     private LuceneSearcher searcher;
 
-    public ESAMetric(Language language) throws WikapidiaException {
+    public ESAMetric(Language language) {
         this.language = language;
         searcher = new LuceneSearcher(new LanguageSet(language.getLangCode()), LuceneOptions.getDefaultOptions());
     }
@@ -81,8 +81,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         // TODO: prune
-        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
-        return result;
+        return SimUtils.normalizeVector(expandScores(scoreDocs));
     }
 
     /**
@@ -122,9 +121,8 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @param explanations
      * @return
      * @throws DaoException
-     * @throws WikapidiaException
      */
-    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations) throws DaoException, WikapidiaException {
+    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations) throws DaoException {
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
@@ -140,7 +138,7 @@ public class ESAMetric extends BaseLocalSRMetric {
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations, TIntSet validIds) throws DaoException, WikapidiaException {
+    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
         return null;
     }
 

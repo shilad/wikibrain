@@ -32,7 +32,7 @@ public class LuceneOptions {
     public final Configuration conf;
     public final Version matchVersion;
     public final File luceneRoot;
-    public final Collection<NameSpace> nameSpaces;
+    public final Collection<NameSpace> namespaces;
     public final TokenizerOptions options;
 
 //    public LuceneOptions() {
@@ -40,10 +40,10 @@ public class LuceneOptions {
 //        Config config = conf.get();
 //        matchVersion = Version.parseLeniently(config.getString("lucene.options.version"));
 //        luceneRoot = new File(config.getString("lucene.options.directory"));
-//        nameSpaces = new ArrayList<NameSpace>();
+//        namespaces = new ArrayList<NameSpace>();
 //        List<String> nsStrings = config.getStringList("lucene.options.namespaces");
 //        for (String s : nsStrings) {
-//            nameSpaces.add(NameSpace.getNameSpaceByName(s));
+//            namespaces.add(NameSpace.getNameSpaceByName(s));
 //        }
 //        options = buildOptions(
 //                config.getBoolean("lucene.options.caseInsensitive"),
@@ -55,13 +55,13 @@ public class LuceneOptions {
     /**
      * Used by provider only
      */
-    private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> nameSpaces, TokenizerOptions options) {
+    private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options) {
         this.conf = conf;
         this.matchVersion = Version.parseLeniently(matchVersion);
         this.luceneRoot = new File(luceneRoot);
-        this.nameSpaces = new ArrayList<NameSpace>();
-        for (String s : nameSpaces) {
-            this.nameSpaces.add(NameSpace.getNameSpaceByName(s));
+        this.namespaces = new ArrayList<NameSpace>();
+        for (String s : namespaces) {
+            this.namespaces.add(NameSpace.getNameSpaceByName(s));
         }
         this.options = options;
     }

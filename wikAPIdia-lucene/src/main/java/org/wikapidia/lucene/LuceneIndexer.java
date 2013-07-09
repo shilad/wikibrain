@@ -27,7 +27,6 @@ import java.util.*;
 public class LuceneIndexer {
 
     private final File root;
-    private final Map<Language, WikapidiaAnalyzer> analyzers;
     private final Map<Language, IndexWriter> writers;
     private final Collection<NameSpace> nameSpaces;
     private final LuceneOptions options;
@@ -36,33 +35,31 @@ public class LuceneIndexer {
      * Constructs a LuceneIndexer that will index any RawPage within a
      * specified LanguageSet and a Collection of NameSpaces. Indexes are
      * then placed in language-specific subdirectories in the specified file.
-     * @param languages
-     * @param nameSpaces
-     * @param root
+     * @param languages the language set in which this searcher can operate
+     * @param namespaces the namespaces to index
+     * @param root the root directory in which to save all the lucene directories
      */
-    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root) {
-        this(languages, nameSpaces, root, LuceneOptions.getDefaultOptions());
+    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> namespaces, File root) {
+        this(languages, namespaces, root, LuceneOptions.getDefaultOptions());
     }
 
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
      * specified LanguageSet. Indexes are then placed in language-specific
      * subdirectories specified by options.
-     * @param languages
+     * @param languages the language set in which this searcher can operate
      * @param options a LuceneOptions object containing specific options for lucene
      */
     public LuceneIndexer(LanguageSet languages, LuceneOptions options) {
-        this(languages, options.nameSpaces, options.luceneRoot, options);
+        this(languages, options.namespaces, options.luceneRoot, options);
     }
 
     private LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root, LuceneOptions options) {
         try {
             this.root = root;
-            analyzers = new HashMap<Language, WikapidiaAnalyzer>();
             writers = new HashMap<Language, IndexWriter>();
             for (Language language : languages) {
                 WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, options);
-                analyzers.put(language, analyzer);
                 Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
                 IndexWriterConfig iwc = new IndexWriterConfig(options.matchVersion, analyzer);
                 writers.put(language, new IndexWriter(directory, iwc));
@@ -74,8 +71,12 @@ public class LuceneIndexer {
         }
     }
 
+    public File getRoot() {
+        return root;
+    }
+
     public LanguageSet getLanguageSet() {
-        return new LanguageSet(analyzers.keySet());
+        return new LanguageSet(writers.keySet());
     }
 
     public LuceneOptions getOptions() {
@@ -84,11 +85,11 @@ public class LuceneIndexer {
 
     /**
      * Indexes a specific RawPage
-     * @param page
+     * @param page the page to index
      */
     public void indexPage(RawPage page) {
         Language language = page.getLang();
-        if (nameSpaces.contains(page.getNamespace()) && analyzers.containsKey(language)) {
+        if (nameSpaces.contains(page.getNamespace()) && getLanguageSet().containsLanguage(language)) {
             try {
                 IndexWriter writer = writers.get(language);
                 Document document = new Document();
