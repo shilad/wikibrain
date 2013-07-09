@@ -20,7 +20,8 @@ import java.util.logging.Logger;
 
 /**
  */
-public class WikiTextDumpParser {
+public class
+        WikiTextDumpParser {
     public static final Logger LOG = Logger.getLogger(WikiTextDumpParser.class.getName());
 
     // maximum number of raw pages in the parsing buffer

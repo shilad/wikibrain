@@ -94,22 +94,12 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     public void clear() throws DaoException {
         executeSqlScriptWithSuffix("-drop-indexes.sql");
         executeSqlScriptWithSuffix("-drop-tables.sql");
-        try {
-            String schema =IOUtils.toString(
-                    AbstractSqlDao.class.getResource(sqlScriptPrefix + "-create-tables.sql")
-            );
-            loader.setSchema(schema);
-        } catch (IOException e) {
-            throw new DaoException(e);
-        }
     }
 
     @Override
     public void beginLoad() throws  DaoException {
         executeSqlScriptWithSuffix("-drop-indexes.sql");
-        if (loader.getSchema() == null) {
-            executeSqlScriptWithSuffix("-create-tables.sql");
-        }
+        executeSqlScriptWithSuffix("-create-tables.sql");
     }
 
     /**
