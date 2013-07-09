@@ -7,6 +7,7 @@ import org.jooq.SQLDialect;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.supercsv.encoder.DefaultCsvEncoder;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.prefs.CsvPreference;
 import org.supercsv.quote.AlwaysQuoteMode;
@@ -76,6 +77,7 @@ public class FastLoader {
             LOG.info("creating tmp csv for " + table.getName() + " at " + csvFile.getAbsolutePath());
             CsvPreference pref = new CsvPreference.Builder(CsvPreference.STANDARD_PREFERENCE)
                     .useQuoteMode(new AlwaysQuoteMode())
+                    .useEncoder(new DefaultCsvEncoder())    // make it threadsafe
                     .build();
             writer = new CsvListWriter(WpIOUtils.openWriter(csvFile), pref);
             String [] names = new String[fields.length];
