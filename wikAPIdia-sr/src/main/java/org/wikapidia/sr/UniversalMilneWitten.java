@@ -117,15 +117,35 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         return super.similarity(phrase1,phrase2,explanations);
     }
 
+
     @Override
     public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) {
-        SRResultList mostSimilar = getCachedMostSimilarUniversal(page.getUnivId(), maxResults, null);
-        return null;
+        SRResultList mostSimilar;
+        if (hasCachedMostSimilarUniversal(page.getUnivId())&&!explanations){
+            mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, null);
+            if (mostSimilar.numDocs()>maxResults){
+                mostSimilar.truncate(maxResults);
+            }
+            return mostSimilar;
+        } else {
+            //TODO:Get results when not cached
+            return null;
+        }
     }
 
     @Override
     public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        SRResultList mostSimilar;
+        if (hasCachedMostSimilarUniversal(page.getUnivId())&&!explanations){
+            mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, validIds);
+            if (mostSimilar.numDocs()>maxResults){
+                mostSimilar.truncate(maxResults);
+            }
+            return mostSimilar;
+        } else {
+            //TODO:Get results when not cached
+            return null;
+        }
     }
 
     @Override
