@@ -1,11 +1,17 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.KnownSim;
@@ -13,23 +19,19 @@ import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class BaseLocalSRMetric implements LocalSRMetric {
     private static Logger LOG = Logger.getLogger(BaseLocalSRMetric.class.getName());
     protected int numThreads = Runtime.getRuntime().availableProcessors();
+    protected Disambiguator disambiguator;
+    protected LocalPageDao pageHelper;
 
     private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer similarityNormalizer = new IdentityNormalizer();
 
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
-
-
-    public BaseLocalSRMetric(){
-
-    }
 
 
 
@@ -120,24 +122,40 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
 
     @Override
-    public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations);
+    public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
 
 
 
     @Override
-    public abstract SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations);
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
+        HashSet<LocalString> context = new HashSet<LocalString>();
+        context.add(new LocalString(language,phrase2));
+        LocalId similar1 = disambiguator.disambiguate(new LocalString(language, phrase1), context);
+        context.clear();
+        context.add(new LocalString(language,phrase1));
+        LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
+        return similarity(pageHelper.getById(language,similar1.getId()),
+                pageHelper.getById(language,similar2.getId()),
+                explanations);
+    }
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations);
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds);
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
+        LocalId similar = disambiguator.disambiguate(phrase,null);
+        return mostSimilar(similar.asLocalPage(), maxResults, explanations);
+    }
 
     @Override
-    public abstract SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
+        LocalId similar = disambiguator.disambiguate(phrase,null);
+        return mostSimilar(similar.asLocalPage(), maxResults, explanations, validIds);
+    }
 
     @Override
     public abstract void write(File directory) throws IOException;
@@ -152,7 +170,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     public abstract void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds);
 
     @Override
-    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws IOException{
+    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws DaoException {
         double[][] cos = new double[wpRowIds.length][wpColIds.length];
         for (int i=0; i<wpRowIds.length; i++){
             for (int j=0; j<wpColIds.length; j++){
@@ -171,7 +189,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public double[][] cosimilarity(String[] rowPhrases, String[] colPhrases, Language language) throws IOException{
+    public double[][] cosimilarity(String[] rowPhrases, String[] colPhrases, Language language) throws DaoException {
         double[][] cos = new double[rowPhrases.length][colPhrases.length];
         for (int i=0; i<rowPhrases.length; i++){
             for (int j=0; j<colPhrases.length; j++){
@@ -187,7 +205,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public double[][] cosimilarity(int[] ids, Language language) throws IOException{
+    public double[][] cosimilarity(int[] ids, Language language) throws DaoException {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
             cos[i][i]=1;
@@ -209,7 +227,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public abstract double[][] cosimilarity(String[] phrases, Language language) throws IOException;
+    public abstract double[][] cosimilarity(String[] phrases, Language language);
 
 
 }
