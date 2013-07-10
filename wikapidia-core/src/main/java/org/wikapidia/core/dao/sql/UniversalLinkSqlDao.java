@@ -217,8 +217,8 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             public UniversalLink transform(Map.Entry<Integer, Integer> item) throws DaoException {
                 List<Record> records = new ArrayList<Record>();
                 for (Record record : result) {
-                    if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == item.getKey() &&
-                            record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == item.getValue()) {
+                    if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getKey()) &&
+                            record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getValue())) {
                         records.add(record);
                     }
                 }

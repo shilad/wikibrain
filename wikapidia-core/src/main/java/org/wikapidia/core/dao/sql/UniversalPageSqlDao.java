@@ -94,7 +94,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 public T transform(Integer item) throws DaoException {
                     List<Record> records = new ArrayList<Record>();
                     for (Record record : result) {
-                        if (record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID) == item) {
+                        if (record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID).equals(item)) {
                             records.add(record);
                         }
                     }
