@@ -87,8 +87,6 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-//        } finally {
-//            quietlyCloseConn(conn);
         }
     }
 
