@@ -146,8 +146,6 @@ public class TestPairwiseSimilarity {
 
         matrix = new SparseMatrix(tmpFile);
 
-        System.out.println(matrix.getRow(1).asMap());
-
         new SparseMatrixTransposer(matrix, tmpFile, 10).transpose();
         transpose = new SparseMatrix(tmpFile);
 
@@ -205,13 +203,8 @@ public class TestPairwiseSimilarity {
                     double xDotX = len2.get(id1);
                     double yDotY = len2.get(id2);
                     double xDotY = dot.get(pack(id1, id2));
-                    System.out.println(sims.getRow(1).asMap());
-                    System.out.println(sims.getRow(2).asMap());
-                    System.out.println(id1);
-                    System.out.println(id2);
-                    System.out.println(xDotY / Math.sqrt(xDotX * yDotY));
 
-//                    assertEquals(row.getColValue(i), xDotY / Math.sqrt(xDotX * yDotY), 0.001);
+                    assertEquals(row.getColValue(i), xDotY / Math.sqrt(xDotX * yDotY), 0.001);
                 }
             }
         }
