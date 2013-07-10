@@ -23,7 +23,7 @@ import java.util.List;
  * @author Ben Hillmann
  */
 
-public class SRMetricMatrixWriter {
+public class SRFeatureMatrixWriter {
     private SparseMatrixWriter writer;
     private ValueConf vconf;
     private LocalSRMetric localSRMetric = null;
@@ -31,29 +31,29 @@ public class SRMetricMatrixWriter {
     private Language language;
 
 
-    public SRMetricMatrixWriter(File outputFile, LocalSRMetric metric, Language language) throws IOException {
+    public SRFeatureMatrixWriter(File outputFile, LocalSRMetric metric, Language language) throws IOException {
         this.vconf = new ValueConf();
         this.writer = new SparseMatrixWriter(outputFile, vconf);
         this.language = language;
         this.localSRMetric = metric;
     }
 
-    public SRMetricMatrixWriter(File outputFile, UniversalSRMetric metric) throws IOException {
+    public SRFeatureMatrixWriter(File outputFile, UniversalSRMetric metric) throws IOException {
         this.vconf = new ValueConf();
         this.writer = new SparseMatrixWriter(outputFile, vconf);
         this.universalSRMetric = metric;
     }
 
-    public void writeSims(final int wpIds[], final int threads, int NUM_ROWS) throws WikapidiaException, InterruptedException {
+    public void writeFeatureVectors(final int wpIds[], final int threads, int NUM_ROWS) throws WikapidiaException, InterruptedException {
         List<Integer> wpIds2 = new ArrayList<Integer>();
         for (int id : wpIds) { wpIds2.add(id); }
-        writeSims(wpIds2, threads);
+        writeFeatureVectors(wpIds2, threads);
     }
 
-    public void writeSims(List<Integer> wpIds, int threads) throws WikapidiaException, InterruptedException{
+    public void writeFeatureVectors(List<Integer> wpIds, int threads) throws WikapidiaException, InterruptedException{
         ParallelForEach.loop(wpIds, threads, new Procedure<Integer>() {
             public void call(Integer wpId) throws IOException, DaoException, WikapidiaException {
-                writeSim(wpId);
+                writeFeatureVector(wpId);
             }
         }, Integer.MAX_VALUE);
         try {
@@ -63,7 +63,7 @@ public class SRMetricMatrixWriter {
         }
     }
 
-    private void writeSim(Integer id) throws WikapidiaException {
+    private void writeFeatureVector(Integer id) throws WikapidiaException {
         TIntDoubleMap scores;
         try {
             if (localSRMetric!=null){
@@ -71,7 +71,7 @@ public class SRMetricMatrixWriter {
             } else if (universalSRMetric!=null){
                 scores = universalSRMetric.getVector(id);
             } else {
-                throw new IllegalStateException("SRMetricMatrixWriter does not have a local or universal metric defined.");
+                throw new IllegalStateException("SRFeatureMatrixWriter does not have a local or universal metric defined.");
             }
         } catch (DaoException e){
             throw new WikapidiaException(e);

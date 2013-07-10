@@ -1,9 +1,14 @@
 package org.wikapidia.sr;
 
+import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
@@ -231,5 +236,26 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             }
         }
         return linkIds;
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LocalSRMetric.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "localSRMetric";
+        }
+
+        @Override
+        public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+
+        }
     }
 }

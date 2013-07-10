@@ -27,16 +27,11 @@ public class PairwiseCosineSimilarity {
     private SparseMatrix transpose;
     private TIntFloatHashMap lengths = null;   // lengths of each row
     private int maxResults = -1;
-    private boolean buildPhraseVectors; // if true, build phrase vectors using the underlying similarity metric.
     private TIntSet idsInResults = new TIntHashSet();
-    private String name;
 
     public PairwiseCosineSimilarity(SparseMatrix matrix, SparseMatrix transpose) throws IOException {
         this.matrix = matrix;
         this.transpose = transpose;
-        setName("pairwise-cosine-similarity (matrix=" +
-                matrix.getPath() + ", transpose=" +
-                transpose.getPath() + ")");
     }
 
     public synchronized void initIfNeeded() {
@@ -128,10 +123,6 @@ public class PairwiseCosineSimilarity {
         return Math.sqrt(length);
     }
 
-    public void setBuildPhraseVectors(boolean buildPhraseVectors) {
-        this.buildPhraseVectors = buildPhraseVectors;
-    }
-
     public static int PAGE_SIZE = 1024*1024*500;    // 500MB
     public static void main(String args[]) throws IOException, InterruptedException {
         if (args.length != 4 && args.length != 5) {
@@ -150,7 +141,4 @@ public class PairwiseCosineSimilarity {
         writer.writeSims(matrix.getRowIds(), cores, Integer.valueOf(args[3]));
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 }

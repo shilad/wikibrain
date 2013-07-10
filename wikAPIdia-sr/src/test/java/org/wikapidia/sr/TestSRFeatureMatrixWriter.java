@@ -18,7 +18,7 @@ import org.wikapidia.core.model.*;
 import org.wikapidia.matrix.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
-import org.wikapidia.sr.pairwise.SRMetricMatrixWriter;
+import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
 
 import java.io.File;
@@ -28,7 +28,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestSRMetricMatrixWriter {
+public class TestSRFeatureMatrixWriter {
     static int NUM_ROWS = 6;
 
     private static LocalMilneWitten srIn;
@@ -159,8 +159,8 @@ public class TestSRMetricMatrixWriter {
         simPath.deleteOnExit();
 
         PairwiseCosineSimilarity cosine = new PairwiseCosineSimilarity(matrix, transpose);
-        SRMetricMatrixWriter writer = new SRMetricMatrixWriter(simPath,srIn, Language.getByLangCode("simple"));
-        writer.writeSims(matrix.getRowIds(), 1, NUM_ROWS);
+        SRFeatureMatrixWriter writer = new SRFeatureMatrixWriter(simPath,srIn, Language.getByLangCode("simple"));
+        writer.writeFeatureVectors(matrix.getRowIds(), 1, NUM_ROWS);
         SparseMatrix sims = new SparseMatrix(simPath);
 
         // Calculate similarities by hand
