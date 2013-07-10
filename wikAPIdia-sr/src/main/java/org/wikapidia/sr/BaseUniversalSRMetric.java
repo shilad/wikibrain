@@ -42,7 +42,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         try {
             hasCached = mostSimilarUniversalMatrix != null && mostSimilarUniversalMatrix.getRow(wpId) != null;
         } catch (IOException e) {
-            hasCached = false;
+            return false;
         }
         return hasCached;
     }
@@ -113,10 +113,15 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         double[][] cos = new double[rowIds.length][colIds.length];
         for (int i=0; i<rowIds.length; i++){
             for (int j=0; j<colIds.length; j++){
-                cos[i][j]=similarity(
+                if (rowIds[i]==colIds[j]){
+                    cos[i][j]=1;
+                }
+                else {
+                    cos[i][j]=similarity(
                         new UniversalPage(rowIds[i], algorithmId, null, null),
                         new UniversalPage(colIds[j], algorithmId, null, null),
                         false).getValue();
+                }
             }
         }
         return cos;
