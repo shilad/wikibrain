@@ -75,7 +75,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
                     from(Tables.LOCAL_LINK).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new LocalSqlDaoIterable<LocalLink>(result, conn) {
+            return new SimpleSqlDaoIterable<LocalLink>(result, conn) {
                 @Override
                 public LocalLink transform(Record r) {
                     return buildLocalLink(r, true);
@@ -182,7 +182,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
     }
 
     private Iterable<LocalLink> buildLocalLinks(Cursor<Record> result, final boolean outlink, Connection conn){
-        return new LocalSqlDaoIterable<LocalLink>(result, conn) {
+        return new SimpleSqlDaoIterable<LocalLink>(result, conn) {
             @Override
             public LocalLink transform(Record r) {
                 return buildLocalLink(r, outlink);

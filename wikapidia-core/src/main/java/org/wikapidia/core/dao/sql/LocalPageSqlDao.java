@@ -88,7 +88,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new LocalSqlDaoIterable<T>(result, conn) {
+            return new SimpleSqlDaoIterable<T>(result, conn) {
                 @Override
                 public T transform(Record r) {
                     try {

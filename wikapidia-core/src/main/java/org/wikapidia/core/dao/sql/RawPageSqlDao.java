@@ -82,7 +82,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
                     from(Tables.RAW_PAGE).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new LocalSqlDaoIterable<RawPage>(result, conn) {
+            return new SimpleSqlDaoIterable<RawPage>(result, conn) {
                 @Override
                 public RawPage transform(Record r) {
                     return buildRawPage(r);

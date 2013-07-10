@@ -11,14 +11,19 @@ import java.util.Iterator;
  * @author Ari Weiland
  *
  * This iterable is used by the SQL Daos to convert a jOOQ Cursor into an
- * Iterable of the appropriate class. E is the output Iterable class, and T
- * is the object that is initially iterated over to generate E. For universal
- * entities, T should be an element of a collection that has a one-to-one
- * correspondence to each E to be generated. For example, for UniversalPage,
- * T might be an Integer from a collection of UniversalPage IDs.
- *
- * For local entities, a LocalSqlDaoIterable should be used.
- *
+ * Iterable of the appropriate class. E is the output class type that is
+ * iterated over, and T is an arbitrary object, such as an int that represents
+ * a single element E, and is initially iterated over to generate E.
+ * <p>
+ * For complex entities where an output E is composed of multiple input Records,
+ * T should be an element of a collection that has a one-to-one correspondence
+ * to each E to be generated. For example, for UniversalPage, T might be an
+ * Integer from a collection of UniversalPage IDs.
+ * <p>
+ * For simple entities where an output E is composed of a single input Record,
+ * a {@link SimpleSqlDaoIterable} should be used. It wraps T as a Record and
+ * provides a simpler constructor.
+ * <p>
  * This iterable can only be iterated over once, and will throw exceptions
  * if a user tries otherwise.
  */
