@@ -19,6 +19,7 @@ import org.wikapidia.sr.disambig.TopResultDisambiguator;
 
 /**
  * @author Matt Lesicko
+ * @author Ben Hillmann
  */
 public class SimilarityExample {
     private static void printResult(SRResult result, Language language,LocalPageDao localPageDao) throws DaoException {
