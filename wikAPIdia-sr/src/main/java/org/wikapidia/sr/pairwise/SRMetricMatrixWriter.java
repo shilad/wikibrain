@@ -44,7 +44,7 @@ public class SRMetricMatrixWriter {
         this.universalSRMetric = metric;
     }
 
-    public void writeSims(final int wpIds[], final int threads) throws WikapidiaException, InterruptedException {
+    public void writeSims(final int wpIds[], final int threads, int NUM_ROWS) throws WikapidiaException, InterruptedException {
         List<Integer> wpIds2 = new ArrayList<Integer>();
         for (int id : wpIds) { wpIds2.add(id); }
         writeSims(wpIds2, threads);
