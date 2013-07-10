@@ -23,114 +23,54 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Bulk loads data in batch form to speed up insertions.
  *
- * Right now this saves the data in a CSV and then loads it from the CSV.
- * While this is faster for databases that support loading from files, it
- * requires custom coding for each database and also requires that the
- * program is running on the same server as the database.
- *
- * TODO: improve batch performance for non-csv-loading dbs by using prepared
- * statements and batch execution.
- *
  * @author Shilad Sen
  */
 public class FastLoader {
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
-    static final int BATCH_SIZE = 10000;
+    static final int BATCH_SIZE = 2;
 
-    private static final boolean CONSIDER_CSV= false;
+    private final DataSource ds;
+    private final Table table;
+    private final TableField[] fields;
 
-    // these files could get huge, so be careful not to put them in /tmp which might be small.
-    static final File DEFAULT_TMP_DIR = new File(".tmp");
+    private BlockingQueue<Object[]> rowBuffer =
+            new ArrayBlockingQueue<Object[]>(BATCH_SIZE * 2);
 
-    private final SQLDialect dialect;
-
-    // Information for CSV
-    private TableField[] fields;
-    private DataSource ds;
-    private Table table;
-    private File csvFile = null;
-    private CsvListWriter writer = null;
-
-    // Information for non-csv
-    private PreparedStatement statement;
-    private Connection batchCnx;
-
-    private int batchSize;
-
-    private boolean useCsv = false;
-
+    private Thread inserter = null;
+    volatile private boolean finished = false;
 
     public FastLoader(DataSource ds, TableField[] fields) throws DaoException {
-        this(ds, fields, DEFAULT_TMP_DIR);
-    }
-
-    public FastLoader(DataSource ds, TableField[] fields, File tmpDir) throws DaoException {
         this.ds = ds;
         this.table = fields[0].getTable();
         this.fields = fields;
-        Connection cnx = null;
-        try {
-            cnx = ds.getConnection();
-            this.dialect = JooqUtils.dialect(cnx);
-            if (CONSIDER_CSV && dialect == SQLDialect.H2) {
-                useCsv = true;
-            }
-            if (useCsv) {
-                initCsv(tmpDir);
-            } else {
-                initSql();
-            }
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            AbstractSqlDao.quietlyCloseConn(cnx);
-        }
-    }
 
-    private void initCsv(File tmpDir) throws IOException {
-        if (tmpDir.exists() && !tmpDir.isDirectory()) {
-            FileUtils.forceDelete(tmpDir);
-        }
-        if (!tmpDir.exists()) {
-            tmpDir.mkdirs();
-        }
-        csvFile = File.createTempFile("table", ".csv", tmpDir);
-        csvFile.deleteOnExit();
-        LOG.info("creating tmp csv for " + table.getName() + " at " + csvFile.getAbsolutePath());
-        CsvPreference pref = new CsvPreference.Builder(CsvPreference.STANDARD_PREFERENCE)
-                .useQuoteMode(new AlwaysQuoteMode())
-                .useEncoder(new DefaultCsvEncoder())    // make it threadsafe
-                .build();
-        writer = new CsvListWriter(WpIOUtils.openWriter(csvFile), pref);
-        String [] names = new String[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            names[i] = fields[i].getName();
-        }
-        writer.writeHeader(names);
-    }
-
-    private void initSql() throws SQLException {
-        batchCnx = ds.getConnection();
-        String [] names = new String[fields.length];
-        String [] questions = new String[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            names[i] = fields[i].getName();
-            questions[i] = "?";
-        }
-        String sql = "INSERT INTO " +
-                table.getName() + "(" + StringUtils.join(names, ",") + ") " +
-                "VALUES (" + StringUtils.join(questions, ",") + ");";
-        statement = batchCnx.prepareStatement(sql);
-        batchSize = 0;
+        inserter = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    insertBatches();
+                } catch (DaoException e) {
+                    LOG.log(Level.SEVERE, "inserter failed", e);
+                } catch (SQLException e) {
+                    LOG.log(Level.SEVERE, "inserter failed", e);
+                } catch (InterruptedException e) {
+                    LOG.log(Level.SEVERE, "inserter interrupted", e);
+                }
+                inserter = null;
+            }
+        });
+        inserter.start();
     }
     /**
      * Saves a value to the datastore.
@@ -139,79 +79,72 @@ public class FastLoader {
      */
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     public void load(Object [] values) throws DaoException {
+        if (inserter == null) {
+            System.exit(1);
+            throw new IllegalStateException("inserter thread exited!");
+        }
         if (values.length != fields.length) {
             throw new IllegalArgumentException();
         }
         try {
-            if (useCsv) {
-                synchronized (writer) {
-                    for (int i = 0; i < values.length; i++) {
-                        if (values[i] != null && values[i] instanceof Date) {
-                            values[i] = DATE_FORMAT.format((Date)values[i]);
-                        }
-                    }
-                    writer.write(values);
-                }
-            } else {
-                synchronized (statement) {
-                    for (int i = 0; i < values.length; i++) {
-                        statement.setObject(i + 1, values[i]);
-                    }
-                    statement.addBatch();
-                    statement.clearParameters();
-                    if (batchSize++ >= BATCH_SIZE) {
-                        statement.executeBatch();
-                        batchSize = 0;
-                    }
-                }
+            rowBuffer.put(values);
+        } catch (InterruptedException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    private void insertBatches() throws DaoException, SQLException, InterruptedException {
+        Connection cnx = ds.getConnection();
+        try {
+            String [] names = new String[fields.length];
+            String [] questions = new String[fields.length];
+            for (int i = 0; i < fields.length; i++) {
+                names[i] = fields[i].getName();
+                questions[i] = "?";
             }
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e) {
-            throw new DaoException(e);
+            String sql = "INSERT INTO " +
+                    table.getName() + "(" + StringUtils.join(names, ",") + ") " +
+                    "VALUES (" + StringUtils.join(questions, ",") + ");";
+            PreparedStatement statement = cnx.prepareStatement(sql);
+
+
+            while (!rowBuffer.isEmpty() || !finished) {
+                // accumulate batch
+                int batchSize = 0;
+                while (batchSize < BATCH_SIZE) {
+                    Object row[] = rowBuffer.poll(100, TimeUnit.MILLISECONDS);
+                    if (row == null && finished) {
+                        break;
+                    }
+                    if (row != null) {
+                        batchSize++;
+                        for (int i = 0; i < row.length; i++) {
+                            statement.setObject(i + 1, row[i]);
+                        }
+                        statement.addBatch();
+                    }
+                }
+                statement.executeBatch();
+                statement.clearBatch();
+            }
+            cnx.commit();
+        } finally {
+            AbstractSqlDao.quietlyCloseConn(cnx);
         }
     }
 
     public void endLoad() throws DaoException {
-        if (useCsv) {
-            LOG.info("beginning load of " + csvFile);
-            if (dialect == SQLDialect.H2) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    throw new DaoException(e);
-                }
-                loadH2();
-            } else {
-                throw new IllegalStateException(dialect.toString());
+        finished = true;
+        if (inserter != null) {
+            try {
+                inserter.join(10000);
+            } catch (InterruptedException e) {
+                throw new DaoException(e);
             }
-            LOG.info("finished load of " + csvFile);
-        } else {
-            if (batchSize > 0) {
-                try {
-                    statement.executeBatch();
-                } catch (SQLException e) {
-                    throw new DaoException(e);
-                }
-            }
-            AbstractSqlDao.quietlyCloseConn(batchCnx);
         }
     }
 
-    private void loadH2() throws DaoException {
-        Connection cnx = null;
-        try {
-            cnx = ds.getConnection();
-            Statement s = cnx.createStatement();
-            String quotedPath = csvFile.getAbsolutePath().replace("'", "''");
-            s.execute("INSERT INTO " + table.getName() +
-                    " SELECT * " +
-                    " FROM CSVREAD('" + quotedPath + "', null, 'charset=UTF-8')");
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            FileUtils.deleteQuietly(csvFile);
-            AbstractSqlDao.quietlyCloseConn(cnx);
-        }
+    public void close() throws  DaoException {
+        endLoad();
     }
 }

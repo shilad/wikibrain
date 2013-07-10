@@ -19,7 +19,7 @@ import java.sql.SQLException;
  * csv load, JDB_URL_OPTS options setSchema 344K records per second
  * csv load, JDB_URL_OPTS options no setSchema 190K records per second (removed setSchema as a result of awesome batch performance)
  * non csv load, non-batch: 43K per second
- * non csv load, batch: 450K per second
+ * non csv load, batch: 363K per second
  *
  */
 public class BenchmarkFastLoader {
@@ -38,10 +38,6 @@ public class BenchmarkFastLoader {
     };
 
     public static void main(String args[]) throws IOException, DaoException, SQLException {
-        File csvPath = new File("tmp/benchmark-loader-csv");
-        if (csvPath.exists()) FileUtils.forceDelete(csvPath);
-        csvPath.getParentFile().mkdirs();
-        FileUtils.forceDeleteOnExit(csvPath);
         File dbPath = new File("tmp/benchmark-loader-db");
         if (dbPath.exists()) FileUtils.forceDelete(dbPath);
         dbPath.mkdirs();
@@ -66,7 +62,7 @@ public class BenchmarkFastLoader {
 
         ds.getConnection().createStatement().execute(schema);
 
-        FastLoader loader = new FastLoader(ds, INSERT_FIELDS, csvPath);
+        FastLoader loader = new FastLoader(ds, INSERT_FIELDS);
 
         long t1 = System.currentTimeMillis();
         for (int i = 0; i < NUM_ENTRIES; i++) {
@@ -93,5 +89,17 @@ public class BenchmarkFastLoader {
                 .executeQuery("select count(*) from local_link");
         rs.next();
         System.err.println("inserted " + rs.getInt(1) + " records");
+        rs = ds.getConnection().createStatement()
+                .executeQuery("select * from local_link limit 100000");
+
+        while (rs.next()) {
+            assert(rs.getInt(1) == 10);
+            assert(rs.getString(2).equals("Foo bar baz"));
+            assert(rs.getInt(3) == 324234);
+            assert(rs.getInt(4) == 3219);
+            assert(rs.getInt(5) == 313);
+            assert(rs.getBoolean(6));
+            assert(rs.getInt(7) == 99);
+        }
     }
 }

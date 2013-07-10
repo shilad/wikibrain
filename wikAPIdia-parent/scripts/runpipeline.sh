@@ -1,14 +1,39 @@
 #!/bin/bash
 
+stage=
+case "$1" in
+download)   stage=1 ;;
+dump)       stage=2 ;;
+wikitext)   stage=3 ;;
+concepts)   stage=4 ;;
+*)          echo "unknown stage: $1 (must be download, dump, wikitext, concept)" >&2; exit 1
+esac
+
+shift
 
 source ../wikapidia-utils/src/main/scripts/utils.sh &&
 mvn clean &&
-compile  &&
-(cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.RequestedLinkGetter $@) &&
-(cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.FileDownloader $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.DumpLoader -d $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.RedirectLoader -d $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.WikiTextLoader -d $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.ConceptLoader -d $@) &&
-(cd ${WP_LOADER} && execClass org.wikapidia.dao.load.UniversalLinkLoader -d $@) ||
-die "$0 failed"
+compile  || die "$0 failed"
+
+if [ "$stage" -le 1 ]; then
+    (cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.RequestedLinkGetter $@) &&
+    (cd ${WP_DOWNLOAD} && execClass org.wikapidia.download.FileDownloader $@) ||
+        die "$0 failed"
+fi
+
+if [ "$stage" -le 2 ]; then
+    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.DumpLoader -d $@) &&
+    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.RedirectLoader -d $@) ||
+        die "$0 failed"
+fi
+
+if [ "$stage" -le 3 ]; then
+    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.WikiTextLoader -d $@) ||
+        die "$0 failed"
+fi
+
+if [ "$stage" -le 4 ]; then
+    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.ConceptLoader -d $@) &&
+    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.UniversalLinkLoader -d $@) ||
+    die "$0 failed"
+fi

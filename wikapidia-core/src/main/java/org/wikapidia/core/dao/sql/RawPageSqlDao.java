@@ -52,7 +52,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
                 page.getPageId(),
                 page.getRevisionId(),
                 page.getBody() == null ? "" : page.getBody(),
-                page.getTitle(),
+                page.getTitle().getCanonicalTitle(),
                 page.getLastEdit(),
                 page.getNamespace().getArbitraryId(),
                 page.isRedirect(),
