@@ -91,33 +91,22 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             }
             return mostSimilar;
         } else {
-            TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
-
-            DaoFilter pageFilter = new DaoFilter();
-            Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
-            int numArticles = 0;
-            for (UniversalPage up : allPages){
-                numArticles++;
-            }
-
-            allPages = universalPageDao.get(pageFilter); //The iterable shouldn't be re-used
-            List<SRResult> results = new ArrayList<SRResult>();
-            for (UniversalPage up : allPages){
-                TIntSet comparisonLinks = getLinks(up.getUnivId(), algorithmId);
-                SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
-                if (explanations){
-                    result.setExplanations(reformatExplanations(result.getExplanations(),page,up));
+            //Only check pages that share at least one inlink/outlink.
+            TIntSet linkPages = getLinks(page.getUnivId(), algorithmId);
+            TIntSet worthChecking = new TIntHashSet();
+            for (int id : linkPages.toArray()){
+                Set<Integer> links;
+                if (outLinks){
+                    links = universalLinkDao.getInlinks(id,algorithmId).getLinks().keySet();
+                } else {
+                    links = universalLinkDao.getOutlinks(id,algorithmId).getLinks().keySet();
                 }
-                results.add(result);
-            }
-            Collections.sort(results);
-
-            SRResultList  resultList = new SRResultList(maxResults);
-            for (int i=0; i<maxResults&&i<results.size(); i++){
-                resultList.set(i,results.get(i));
+                for (int link : links){
+                    worthChecking.add(link);
+                }
             }
 
-            return resultList;
+            return mostSimilar(page, maxResults, explanations,worthChecking);
         }
     }
 
