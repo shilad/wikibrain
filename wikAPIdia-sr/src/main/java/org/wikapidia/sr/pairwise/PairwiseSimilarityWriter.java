@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 public class PairwiseSimilarityWriter {
     private static final Logger LOG = Logger.getLogger(PairwiseSimilarityWriter.class.getName());
     private SparseMatrixWriter writer;
+    private SparseMatrixWriter tmpWriter;
     private AtomicInteger idCounter = new AtomicInteger();
     private ValueConf vconf;
     private TIntSet validIds;
@@ -40,6 +41,9 @@ public class PairwiseSimilarityWriter {
     public PairwiseSimilarityWriter(File outputFile, LocalSRMetric metric, Language language) throws IOException {
         this.vconf = new ValueConf();
         this.writer = new SparseMatrixWriter(outputFile, vconf);
+        File tmpFile = File.createTempFile("matrix", null);
+        tmpFile.deleteOnExit();
+        this.tmpWriter = new SparseMatrixWriter(tmpFile, new ValueConf());
         this.language = language;
         this.localSRMetric = metric;
     }
@@ -47,6 +51,9 @@ public class PairwiseSimilarityWriter {
     public PairwiseSimilarityWriter(File outputFile, UniversalSRMetric metric) throws IOException {
         this.vconf = new ValueConf();
         this.writer = new SparseMatrixWriter(outputFile, vconf);
+        File tmpFile = File.createTempFile("matrix", null);
+        tmpFile.deleteOnExit();
+        this.tmpWriter = new SparseMatrixWriter(tmpFile, new ValueConf());
         this.universalSRMetric = metric;
     }
 
@@ -71,6 +78,8 @@ public class PairwiseSimilarityWriter {
         } catch (IOException e){
             throw new WikapidiaException(e);
         }
+
+
     }
 
     private void writeSim(Integer id, int maxSimsPerDoc) throws WikapidiaException {
@@ -82,19 +91,23 @@ public class PairwiseSimilarityWriter {
         }
         TIntDoubleMap scores;
         try {
-            if (localSRMetric!=null){
+            if (localSRMetric!=null) {
                 scores = localSRMetric.getVector(id, language);
-            } else if (universalSRMetric!=null){
+            } else if (universalSRMetric!=null) {
                 scores = universalSRMetric.getVector(id);
             } else {
                 throw new IllegalStateException("PairwiseSimilarityWriter does not have a local or universal metric defined.");
             }
-        } catch (DaoException e){
+        } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
+        LinkedHashMap<Integer,Float> linkedHashMap = new LinkedHashMap<Integer, Float>();
+        for (int i : scores.keys()) {
+            linkedHashMap.put(i,(float)scores.get(i));
+        }
         try {
-            writer.writeRow(new SparseMatrixRow(new ValueConf(), id, scores));
-        } catch (IOException e){
+            tmpWriter.writeRow(new SparseMatrixRow(new ValueConf(), id, linkedHashMap));
+        } catch (IOException e) {
             throw new WikapidiaException(e);
         }
     }

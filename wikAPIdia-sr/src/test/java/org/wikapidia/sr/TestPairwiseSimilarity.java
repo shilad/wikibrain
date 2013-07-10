@@ -1,24 +1,21 @@
 package org.wikapidia.sr;
 
 import com.jolbox.bonecp.BoneCPDataSource;
+import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TLongDoubleHashMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.model.LocalLink;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
-import org.wikapidia.matrix.MatrixRow;
-import org.wikapidia.matrix.SparseMatrix;
-import org.wikapidia.matrix.SparseMatrixRow;
-import org.wikapidia.matrix.SparseMatrixTransposer;
+import org.wikapidia.core.model.*;
+import org.wikapidia.matrix.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
@@ -27,29 +24,20 @@ import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
  import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
 public class TestPairwiseSimilarity {
     static int NUM_ROWS = 6;
 
+    private static LocalMilneWitten srIn;
+
     private static SparseMatrix matrix;
     private static SparseMatrix transpose;
 
     @BeforeClass
-    public static void createTestData() throws IOException {// Create test data and transpose
-        matrix = TestUtils.createSparseTestMatrix(NUM_ROWS, NUM_ROWS, false);
-        File tmpFile = File.createTempFile("matrix", null);
-        tmpFile.deleteOnExit();
-        new SparseMatrixTransposer(matrix, tmpFile, 10).transpose();
-        transpose = new SparseMatrix(tmpFile);
-
-    }
-
-    @Test
-    public void testSimilarity() throws IOException, InterruptedException, DaoException, ClassNotFoundException {
+    public static void createTestData() throws IOException, ClassNotFoundException, DaoException {// Create test data and transpose
         Class.forName("org.h2.Driver");
         File tmpDir = File.createTempFile("wikapidia-h2", null);
         tmpDir.delete();
@@ -127,9 +115,46 @@ public class TestPairwiseSimilarity {
         linkDao.save(link7);
         linkDao.endLoad();
 
+        List<SparseMatrixRow> rows = new ArrayList<SparseMatrixRow>();
+        DaoFilter pageFilter = new DaoFilter().setLanguages(Language.getByLangCode("simple"));
+
+
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
-        BaseLocalSRMetric srIn = new LocalMilneWitten(disambiguator,linkDao,dao);
+        srIn = new LocalMilneWitten(disambiguator,linkDao,dao);
+
+        File tmpFile = File.createTempFile("matrix", null);
+        tmpFile.deleteOnExit();
+        SparseMatrixWriter writer = new SparseMatrixWriter(tmpFile, new ValueConf());
+
+        Iterable<LocalArticle> articles = dao.get(pageFilter);
+
+        for (LocalArticle article : articles) {
+            TIntDoubleMap vector = srIn.getVector(article.getLocalId(), article.getLanguage());
+            System.out.println(vector);
+            LinkedHashMap<Integer,Float> linkedHashMap = new LinkedHashMap<Integer, Float>();
+            for (int i : vector.keys()){
+                linkedHashMap.put(i,(float)vector.get(i));
+            }
+
+            SparseMatrixRow row = new SparseMatrixRow(new ValueConf(), article.getLocalId(), linkedHashMap);
+            System.out.println(row.asMap());
+            writer.writeRow(row);
+        }
+
+        writer.finish();
+
+        matrix = new SparseMatrix(tmpFile);
+
+        new SparseMatrixTransposer(matrix, tmpFile, 10).transpose();
+        transpose = new SparseMatrix(tmpFile);
+
+    }
+
+    @Test
+    public void testSimilarity() throws IOException, InterruptedException, DaoException, ClassNotFoundException, WikapidiaException {
+
+
         File simPath = File.createTempFile("matrix", null);
         simPath.deleteOnExit();
 
@@ -143,6 +168,7 @@ public class TestPairwiseSimilarity {
         TIntDoubleHashMap len2 = new TIntDoubleHashMap();
 
         for (SparseMatrixRow row1 : matrix) {
+
             Map<Integer, Float> data1 = row1.asMap();
             int id1 = row1.getRowIndex();
 
@@ -177,6 +203,7 @@ public class TestPairwiseSimilarity {
                     double xDotX = len2.get(id1);
                     double yDotY = len2.get(id2);
                     double xDotY = dot.get(pack(id1, id2));
+
                     assertEquals(row.getColValue(i), xDotY / Math.sqrt(xDotX * yDotY), 0.001);
                 }
             }
