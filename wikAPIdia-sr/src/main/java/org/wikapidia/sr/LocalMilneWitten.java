@@ -99,43 +99,11 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         }
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
+        result.id = page2.getLocalId();
 
         //Reformat explanations to fit our metric.
         if (explanations) {
-            if (outLinks){
-                List<Explanation> explanationList = new ArrayList<Explanation>();
-                for (Explanation explanation : result.getExplanations()){
-                    String format = "Both ? and ? link to ?";
-                    int id = (Integer)explanation.getInformation().get(0);
-                    LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(),id);
-                    if (intersectionPage==null){
-                        continue;
-                    }
-                    List<LocalPage> formatPages = new ArrayList<LocalPage>();
-                    formatPages.add(page1);
-                    formatPages.add(page2);
-                    formatPages.add(intersectionPage);
-                    explanationList.add(new Explanation(format, formatPages));
-                }
-                result.setExplanations(explanationList);
-            }
-            else{
-                List<Explanation> explanationList = new ArrayList<Explanation>();
-                for (Explanation explanation : result.getExplanations()){
-                    String format = "? links to both ? and ?";
-                    int id = (Integer)explanation.getInformation().get(0);
-                    LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(),id);
-                    if (intersectionPage==null){
-                        continue;
-                    }
-                    List<LocalPage> formatPages = new ArrayList<LocalPage>();
-                    formatPages.add(intersectionPage);
-                    formatPages.add(page1);
-                    formatPages.add(page2);
-                    explanationList.add(new Explanation(format, formatPages));
-                }
-                result.setExplanations(explanationList);
-            }
+            result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
         }
 
         return result;
@@ -144,8 +112,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     @Override
     public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException {
         SRResultList mostSimilar;
-        if (hasCachedMostSimilarLocal(page.getLanguage(),page.getLocalId())&&!explanations){
-            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(),page.getLocalId(),maxResults,null);
+        if (hasCachedMostSimilarLocal(page.getLanguage(), page.getLocalId())&&!explanations){
+            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(), page.getLocalId(), maxResults, null);
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
@@ -165,7 +133,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                     worthChecking.add(link.getLocalId());
                 }
             }
-
             return mostSimilar(page, maxResults, explanations,worthChecking);
         }
     }
@@ -176,8 +143,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             return mostSimilar(page,maxResults,explanations);
         }
         SRResultList mostSimilar;
-        if (hasCachedMostSimilarLocal(page.getLanguage(),page.getLocalId())&&!explanations){
-            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(),page.getLocalId(),maxResults,validIds);
+        if (hasCachedMostSimilarLocal(page.getLanguage(), page.getLocalId())&&!explanations){
+            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(), page.getLocalId(), maxResults, validIds);
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
@@ -194,18 +161,21 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 
             List<SRResult> results = new ArrayList<SRResult>();
             for (int id : validIds.toArray()){
-                TIntSet comparisonLinks = getLinks(page.toLocalId());
+                TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id));
                 SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
+                result.id=id;
                 if (explanations){
-                    LocalPage up = pageHelper.getById(page.getLanguage(),id);
-                    result.setExplanations(reformatExplanations(result.getExplanations(),page,up));
+                    LocalPage lp = pageHelper.getById(page.getLanguage(),id);
+                    result.setExplanations(reformatExplanations(result.getExplanations(),page,lp));
                 }
                 results.add(result);
             }
             Collections.sort(results);
+            Collections.reverse(results);
 
             SRResultList  resultList = new SRResultList(maxResults);
             for (int i=0; i<maxResults&&i<results.size(); i++){
+
                 resultList.set(i,results.get(i));
             }
 
@@ -214,8 +184,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     private List<Explanation> reformatExplanations(List<Explanation> explanations, LocalPage page1, LocalPage page2) throws DaoException {
+        List<Explanation> explanationList = new ArrayList<Explanation>();
         if (outLinks){
-            List<Explanation> explanationList = new ArrayList<Explanation>();
             for (Explanation explanation : explanations){
                 String format = "Both ? and ? link to ?";
                 int id = (Integer)explanation.getInformation().get(0);
@@ -231,7 +201,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             }
         }
         else{
-            List<Explanation> explanationList = new ArrayList<Explanation>();
             for (Explanation explanation : explanations){
                 String format = "? links to both ? and ?";
                 int id = (Integer)explanation.getInformation().get(0);
@@ -246,7 +215,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                 explanationList.add(new Explanation(format, formatPages));
             }
         }
-        return explanations;
+        return explanationList;
     }
 
     private TIntSet getLinks(LocalId wpId) throws DaoException {

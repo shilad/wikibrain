@@ -67,6 +67,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         }
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
+        result.id = page2.getUnivId();
 
         if (explanations) {
             result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
@@ -136,6 +137,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             for (int id : validIds.toArray()){
                 TIntSet comparisonLinks = getLinks(id, algorithmId);
                 SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
+                result.id = id;
                 if (explanations){
                     UniversalPage up = universalPageDao.getById(id,algorithmId);
                     result.setExplanations(reformatExplanations(result.getExplanations(),page,up));
@@ -143,6 +145,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                 results.add(result);
             }
             Collections.sort(results);
+            Collections.reverse(results);
 
             SRResultList  resultList = new SRResultList(maxResults);
             for (int i=0; i<maxResults&&i<results.size(); i++){
@@ -181,8 +184,8 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
      * @throws DaoException
      */
     private List<Explanation> reformatExplanations(List<Explanation> explanations, UniversalPage page1, UniversalPage page2) throws DaoException {
+        List<Explanation> explanationList = new ArrayList<Explanation>();
         if (outLinks){
-            List<Explanation> explanationList = new ArrayList<Explanation>();
             for (Explanation explanation : explanations){
                 String format = "Both ? and ? link to ?";
                 int id = (Integer)explanation.getInformation().get(0);
@@ -198,7 +201,6 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             }
         }
         else{
-            List<Explanation> explanationList = new ArrayList<Explanation>();
             for (Explanation explanation : explanations){
                 String format = "? links to both ? and ?";
                 int id = (Integer)explanation.getInformation().get(0);
@@ -213,7 +215,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                 explanationList.add(new Explanation(format, formatPages));
             }
         }
-        return explanations;
+        return explanationList;
     }
 
     private TIntSet getLinks(int universeId, int algorithmId) throws DaoException {

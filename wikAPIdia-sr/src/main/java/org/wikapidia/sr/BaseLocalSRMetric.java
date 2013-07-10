@@ -175,13 +175,13 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
         LocalId similar = disambiguator.disambiguate(phrase,null);
-        return mostSimilar(similar.asLocalPage(), maxResults, explanations);
+        return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults, explanations);
     }
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
         LocalId similar = disambiguator.disambiguate(phrase,null);
-        return mostSimilar(similar.asLocalPage(), maxResults, explanations,validIds);
+        return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults, explanations,validIds);
     }
 
     @Override
