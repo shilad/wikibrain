@@ -1,6 +1,10 @@
 package org.wikapidia.sr.pairwise;
 
+import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
@@ -31,9 +35,9 @@ public class SRFeatureMatrixWriter {
     private Language language;
 
 
-    public SRFeatureMatrixWriter(File outputFile, LocalSRMetric metric, Language language) throws IOException {
+    public SRFeatureMatrixWriter(File matrix,  File transpose, LocalSRMetric metric, Language language) throws IOException {
         this.vconf = new ValueConf();
-        this.writer = new SparseMatrixWriter(outputFile, vconf);
+        this.writer = new SparseMatrixWriter(matrix, vconf);
         this.language = language;
         this.localSRMetric = metric;
     }
@@ -44,7 +48,7 @@ public class SRFeatureMatrixWriter {
         this.universalSRMetric = metric;
     }
 
-    public void writeFeatureVectors(final int wpIds[], final int threads, int NUM_ROWS) throws WikapidiaException, InterruptedException {
+    public void writeFeatureVectors(final int wpIds[], final int threads) throws WikapidiaException, InterruptedException {
         List<Integer> wpIds2 = new ArrayList<Integer>();
         for (int id : wpIds) { wpIds2.add(id); }
         writeFeatureVectors(wpIds2, threads);
@@ -55,7 +59,7 @@ public class SRFeatureMatrixWriter {
             public void call(Integer wpId) throws IOException, DaoException, WikapidiaException {
                 writeFeatureVector(wpId);
             }
-        }, Integer.MAX_VALUE);
+        }, 10000);
         try {
             this.writer.finish();
         } catch (IOException e){
@@ -84,6 +88,49 @@ public class SRFeatureMatrixWriter {
             writer.writeRow(new SparseMatrixRow(new ValueConf(), id, linkedHashMap));
         } catch (IOException e){
             throw new WikapidiaException(e);
+        }
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<SRFeatureMatrixWriter> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return SRFeatureMatrixWriter.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "matrix.feature";
+        }
+
+        @Override
+        public SRFeatureMatrixWriter get(String name, Config config) throws ConfigurationException {
+            if (config.getString("type").equals("local")) {
+                try {
+                    return new SRFeatureMatrixWriter(
+                            new File(config.getString("file")),
+                            new File(config.getString("transpose")),
+                            getConfigurator().get(LocalSRMetric.class,config.getString("metric")),
+                            Language.getByLangCode(config.getString("language"))
+                    );
+                } catch (IOException e) {
+                    throw new ConfigurationException(e);
+                }
+            } else if (config.getString("type").equals("universal")) {
+                try {
+                    return new SRFeatureMatrixWriter(
+                            new File(config.getString("file")),
+                            getConfigurator().get(UniversalSRMetric.class,config.getString("metric"))
+                    );
+                } catch (IOException e) {
+                    throw new ConfigurationException(e);
+                }
+            } else {
+                return null;
+            }
         }
     }
 

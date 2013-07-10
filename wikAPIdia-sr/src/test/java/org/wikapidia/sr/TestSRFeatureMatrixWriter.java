@@ -160,7 +160,7 @@ public class TestSRFeatureMatrixWriter {
 
         PairwiseCosineSimilarity cosine = new PairwiseCosineSimilarity(matrix, transpose);
         SRFeatureMatrixWriter writer = new SRFeatureMatrixWriter(simPath,srIn, Language.getByLangCode("simple"));
-        writer.writeFeatureVectors(matrix.getRowIds(), 1, NUM_ROWS);
+        writer.writeFeatureVectors(matrix.getRowIds(), 1);
         SparseMatrix sims = new SparseMatrix(simPath);
 
         // Calculate similarities by hand

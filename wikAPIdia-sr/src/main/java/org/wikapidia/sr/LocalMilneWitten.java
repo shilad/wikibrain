@@ -78,11 +78,18 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();
         TIntSet links = getLinks(new LocalId(language, id));
-        DaoFilter pageFilter = new DaoFilter();
-        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
-        for (LocalPage page: allPages) {
-            vector.put(page.getLocalId(), links.contains(page.getLocalId()) ? 1F:0F);
+
+        for (int link : links.toArray()) {
+            vector.put(link,1);
         }
+
+//        DaoFilter pageFilter = new DaoFilter();
+//        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
+//        for (LocalPage page: allPages) {
+//            if (page != null) {
+//            vector.put(page.getLocalId(), links.contains(page.getLocalId()) ? 1F:0F);
+//            }
+//        }
         return vector;
     }
 
