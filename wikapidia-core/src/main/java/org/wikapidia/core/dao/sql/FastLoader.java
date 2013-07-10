@@ -124,7 +124,11 @@ public class FastLoader {
                         statement.addBatch();
                     }
                 }
-                statement.executeBatch();
+                try {
+                    statement.executeBatch();
+                } catch (SQLException e) {
+                    LOG.log(Level.SEVERE, "insert batch failed, attempting to continue:", e);
+                }
                 statement.clearBatch();
             }
             cnx.commit();
