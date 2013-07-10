@@ -9,19 +9,24 @@ import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
+
+//Currently unsure what to do about this class.
+//Do we ever want to use a Most Similar Disambiguator?
 public class MostSimilarDisambiguator extends BaseDisambiguator{
-    MostSimilarDisambiguator(PhraseAnalyzer phraseAnalyzer, LocalSRMetric srMetric, int maxResults) {
-        super(phraseAnalyzer, srMetric, maxResults);
+    MostSimilarDisambiguator(PhraseAnalyzer phraseAnalyzer, LocalSRMetric srMetric) {
+        super(phraseAnalyzer, srMetric);
     }
 
     @Override
     public LocalId disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException {
         LocalId result = null;
         double bestScore = Double.NEGATIVE_INFINITY;
-        LinkedHashMap<LocalPage,Float> candidates1 = phraseAnalyzer.resolveLocal(phrase.getLanguage(),phrase.getString(),maxResults);
+        LinkedHashMap<LocalPage,Float> candidates1 = phraseAnalyzer.resolveLocal(phrase.getLanguage(),phrase.getString(),getNumCandidates());
 
         //If nothing can be done, just return null
         if (candidates1==null||candidates1.isEmpty()){
@@ -30,16 +35,22 @@ public class MostSimilarDisambiguator extends BaseDisambiguator{
 
         //If there is no context, just return the top match
         if (context==null||context.isEmpty()){
-            return topResult(candidates1);
+            Iterator<LocalPage> iterator = candidates1.keySet().iterator();
+            if (iterator.hasNext()){
+                return iterator.next().toLocalId();
+            }
+            else{
+                return null;
+            }
         }
         for (LocalString contextString: context){
-            LinkedHashMap<LocalPage,Float> candidates2 = phraseAnalyzer.resolveLocal(contextString.getLanguage(),contextString.getString(),maxResults);
+            LinkedHashMap<LocalPage,Float> candidates2 = phraseAnalyzer.resolveLocal(contextString.getLanguage(),contextString.getString(),getNumCandidates());
             if (candidates2==null||candidates2.isEmpty()){
                 continue;
             }
             for (LocalPage candidate1 : candidates1.keySet()){
                 double score1 = candidates1.get(candidate1);
-                SRResultList mostSimilar = srMetric.mostSimilar(candidate1,maxResults,false);
+                SRResultList mostSimilar = srMetric.mostSimilar(candidate1,getNumCandidates(),false);
                 for (LocalPage candidate2 : candidates2.keySet()){
                     double score2 = candidates2.get(candidate2);
                     double srscore = 0;
@@ -57,5 +68,10 @@ public class MostSimilarDisambiguator extends BaseDisambiguator{
             }
         }
         return result;
+    }
+
+    @Override
+    protected double[][] getCosimilarity(List<LocalPage> pages) throws DaoException {
+        throw new UnsupportedOperationException();
     }
 }

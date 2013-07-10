@@ -1,6 +1,7 @@
 package org.wikapidia.core.model;
 
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LocalId;
 
 /**
  */
@@ -72,6 +73,10 @@ public class LocalPage {
 
     public int hashCode(){
         return (language.getId() + "_" + localId).hashCode(); //non-optimal
+    }
+
+    public LocalId toLocalId() {
+        return new LocalId(language, localId);
     }
 
     public boolean equals(Object o){

@@ -1,7 +1,6 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -10,16 +9,12 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.parser.wiki.LocalCategoryVisitor;
-import org.wikapidia.parser.wiki.LocalLinkVisitor;
-import org.wikapidia.parser.wiki.ParserVisitor;
-import org.wikapidia.parser.wiki.WikiTextDumpParser;
+import org.wikapidia.parser.wiki.*;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -68,7 +63,7 @@ public class WikiTextLoader {
         }
     }
 
-    public static void main(String args[]) throws ConfigurationException, DaoException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()

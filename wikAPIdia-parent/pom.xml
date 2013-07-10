@@ -20,6 +20,7 @@
         <module>../wikAPIdia-download</module>
         <module>../wikAPIdia-sr</module>
         <module>../wikAPIdia-cookbook</module>
+        <module>../wikAPIdia-lucene</module>
     </modules>
 
     <build>

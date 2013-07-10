@@ -1,6 +1,9 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
@@ -25,7 +28,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations);
+    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
 
     /**
      * Determine the similarity between two strings in a given language by mapping through local pages
@@ -35,7 +38,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations);
+    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException, ParseException;
 
     /**
      * Find the most similar local pages to a local page within the same language
@@ -44,7 +47,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException, WikapidiaException;
 
     /**
      * Find the most similar local pages to a local page.
@@ -54,7 +57,7 @@ public interface LocalSRMetric {
      * @param validIds The local page ids to be considered.  Null means all ids in the language.
      * @return
      */
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException, WikapidiaException;
 
     /**
      * Find the most similar local pages to a phrase,
@@ -63,7 +66,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException;
 
     /**
      * Find the most similar local pages to a phrase
@@ -73,7 +76,7 @@ public interface LocalSRMetric {
      * @param validIds The local page ids to be considered.  Null means all ids in the language
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
     /**
      * Writes the metric to a directory.
@@ -96,7 +99,7 @@ public interface LocalSRMetric {
      * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
      * @param labeled The labeled gold standard dataset.
      */
-    public void trainSimilarity(List<KnownSim> labeled);
+    public void trainSimilarity(List<KnownSim> labeled) throws DaoException;
 
     /**
      * Train the mostSimilar() function
@@ -105,7 +108,7 @@ public interface LocalSRMetric {
      * @param numResults The maximum number of similar articles computed per phrase.
      * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
      */
-    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds);
+    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) throws DaoException;
 
 
     /**
@@ -116,7 +119,7 @@ public interface LocalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(int wpRowIds[], int wpColIds[], Language language) throws IOException;
+    public double[][] cosimilarity(int wpRowIds[], int wpColIds[], Language language) throws DaoException;
 
 
     /**
@@ -127,7 +130,7 @@ public interface LocalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(String rowPhrases[], String colPhrases[], Language language) throws IOException;
+    public double[][] cosimilarity(String rowPhrases[], String colPhrases[], Language language) throws DaoException;
 
     /**
      * Construct symmetric comsimilarity matrix of Wikipedia ids in a given language
@@ -135,7 +138,7 @@ public interface LocalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(int ids[], Language language) throws IOException;
+    public double[][] cosimilarity(int ids[], Language language) throws DaoException;
 
     /**
      * Construct symmetric cosimilarity matrix of phrases by mapping through local pages
@@ -144,5 +147,5 @@ public interface LocalSRMetric {
      * @return
      * @throws IOException
      */
-    public double[][] cosimilarity(String phrases[], Language language) throws IOException;
+    public double[][] cosimilarity(String phrases[], Language language) throws DaoException;
 }

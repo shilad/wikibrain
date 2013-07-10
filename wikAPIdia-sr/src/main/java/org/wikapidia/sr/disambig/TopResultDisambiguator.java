@@ -18,7 +18,7 @@ import java.util.Set;
 public class TopResultDisambiguator implements Disambiguator{
     private final PhraseAnalyzer phraseAnalyzer;
 
-    TopResultDisambiguator(PhraseAnalyzer phraseAnalyzer){
+    public TopResultDisambiguator(PhraseAnalyzer phraseAnalyzer){
         this.phraseAnalyzer=phraseAnalyzer;
     }
 

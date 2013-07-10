@@ -27,7 +27,7 @@ import java.util.Collection;
  * - Parseable flag          (LocalLink, Redirect)
  * - Algorithm ID collection (UniversalPage, UniversalLink)
  *
- * Not all filters are apply to all objects. Collections are specified as a collection
+ * Not all filters are applied to all objects. Collections are specified as a collection
  * of acceptable entries, while flags are booleans set to true, false, or null. Flags
  * and collections set to null will be ignored when the search is executed.
  *

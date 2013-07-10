@@ -43,6 +43,4 @@ public interface Disambiguator {
      * @return          The disambiguated pages. The order matches phrases.
      */
     public List<LocalId> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException;
-
-
 }

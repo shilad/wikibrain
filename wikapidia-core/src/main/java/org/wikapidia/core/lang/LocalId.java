@@ -1,5 +1,7 @@
 package org.wikapidia.core.lang;
 
+import org.wikapidia.core.model.LocalPage;
+
 /**
  * A language-specific id.
  * @author Shilad Sen
@@ -19,6 +21,15 @@ public class LocalId {
 
     public int getId() {
         return id;
+    }
+
+    public LocalPage asLocalPage(){
+        return new LocalPage(
+                language,
+                id,
+                null,
+                null
+        );
     }
 
     @Override
