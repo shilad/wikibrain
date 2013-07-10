@@ -10,17 +10,22 @@ import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+
 /**
  */
 public class LocalCategoryVisitor extends ParserVisitor {
+
+    private static final Logger LOG = Logger.getLogger(LocalCategoryVisitor.class.getName());
+
     private final LocalPageDao pageDao;
     private final LocalCategoryMemberDao catMemDao;
-    private int cats;
+    private AtomicInteger counter = new AtomicInteger();
 
     public LocalCategoryVisitor(LocalPageDao pageDao, LocalCategoryMemberDao catMemDao) {
         this.pageDao = pageDao;
         this.catMemDao = catMemDao;
-        cats = 0;
     }
 
     @Override
@@ -29,9 +34,8 @@ public class LocalCategoryVisitor extends ParserVisitor {
             Language lang = cat.category.getLanguage();
             LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
 
-            if(++cats%1000==0){
-                System.out.println("Visited cat #" + cats);
-            }
+            int c = counter.getAndIncrement();
+            if(c % 100000 == 0) LOG.info("Visited category #" + c);
 
             String catText = cat.category.getCanonicalTitle().split("\\|")[0]; //piped cat link
             catText = catText.split("#")[0]; //cat subsection
