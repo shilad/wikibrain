@@ -170,7 +170,8 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         }
         Multimap<Integer, Record> allRecords = HashMultimap.create();
         Set<Language> languages = new HashSet<Language>();
-        Record temp = null;
+        int commonId = -1;
+        int algorithmId = -1;
         for (Record record : result) {
             allRecords.put(
                     record.getValue(outlinks ?                      // Gets the unique ID of the links
@@ -178,7 +179,12 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                             Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),  // If links are inlinks, source ID is unique
                     record);
             languages.add(Language.getById(record.getValue(Tables.UNIVERSAL_LINK.LANG_ID)));
-            temp = record;
+            if (commonId == -1) {
+                commonId = record.getValue(outlinks ?               // Gets the common ID of the links
+                        Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID :      // If links are outlinks, source ID is common
+                        Tables.UNIVERSAL_LINK.DEST_UNIV_ID);        // If links are inlinks, dest ID is common;
+                algorithmId = record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID);
+            }
         }
         Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>();
         for (Integer integer : allRecords.keySet()) {
@@ -187,10 +193,8 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         return new UniversalLinkGroup(
                 map,
                 outlinks,
-                temp.getValue(outlinks ?                        // Gets the common ID of the links
-                        Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID :  // If links are outlinks, source ID is common
-                        Tables.UNIVERSAL_LINK.DEST_UNIV_ID),    // If links are inlinks, dest ID is common
-                temp.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID),
+                commonId,
+                algorithmId,
                 new LanguageSet(languages)
         );
     }
