@@ -21,7 +21,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  *
@@ -212,48 +211,62 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                     record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),
                     record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID));
         }
-        return new Iterable<UniversalLink>() {
-
-            private boolean closed = false;
+        return new SqlDaoIterable<UniversalLink, Map.Entry<Integer, Integer>>(result, univIds.entries().iterator()) {
 
             @Override
-            public Iterator<UniversalLink> iterator() {
-                if (closed) {
-                    throw new IllegalStateException("Iterable can only be iterated over once.");
+            public UniversalLink transform(Map.Entry<Integer, Integer> item) throws DaoException {
+                List<Record> records = new ArrayList<Record>();
+                for (Record record : result) {
+                    if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == item.getKey() &&
+                            record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == item.getValue()) {
+                        records.add(record);
+                    }
                 }
-                closed = true;
-                return new Iterator<UniversalLink>() {
-                    @Override
-                    public boolean hasNext() {
-                        return univIds.entries().iterator().hasNext();
-                    }
-
-                    @Override
-                    public UniversalLink next() {
-                        Map.Entry entry = univIds.entries().iterator().next();
-                        List<Record> records = new ArrayList<Record>();
-                        for (Record record : result) {
-                            if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getKey() &&
-                                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getValue())
-                            {
-                                records.add(record);
-                            }
-                        }
-                        try {
-                            return buildUniversalLink(records);
-                        } catch (DaoException e) {
-                            LOG.log(Level.WARNING, "Failed to build links: ", e);
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
+                return buildUniversalLink(records);
             }
         };
+//        return new Iterable<UniversalLink>() {
+//
+//            private boolean closed = false;
+//
+//            @Override
+//            public Iterator<UniversalLink> iterator() {
+//                if (closed) {
+//                    throw new IllegalStateException("Iterable can only be iterated over once.");
+//                }
+//                closed = true;
+//                return new Iterator<UniversalLink>() {
+//                    @Override
+//                    public boolean hasNext() {
+//                        return univIds.entries().iterator().hasNext();
+//                    }
+//
+//                    @Override
+//                    public UniversalLink next() {
+//                        Map.Entry entry = univIds.entries().iterator().next();
+//                        List<Record> records = new ArrayList<Record>();
+//                        for (Record record : result) {
+//                            if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getKey() &&
+//                                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getValue())
+//                            {
+//                                records.add(record);
+//                            }
+//                        }
+//                        try {
+//                            return buildUniversalLink(records);
+//                        } catch (DaoException e) {
+//                            LOG.log(Level.WARNING, "Failed to build links: ", e);
+//                        }
+//                        return null;
+//                    }
+//
+//                    @Override
+//                    public void remove() {
+//                        throw new UnsupportedOperationException();
+//                    }
+//                };
+//            }
+//        };
     }
 
     private UniversalLink buildUniversalLink(Collection<Record> records) throws DaoException {

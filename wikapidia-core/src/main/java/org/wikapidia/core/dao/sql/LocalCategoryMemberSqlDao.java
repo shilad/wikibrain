@@ -80,7 +80,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                     from(Tables.CATEGORY_MEMBERS).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SqlDaoIterable<LocalCategoryMember>(result) {
+            return new LocalSqlDaoIterable<LocalCategoryMember>(result) {
                 @Override
                 public LocalCategoryMember transform(Record r) {
                     return buildLocalCategoryMember(r);

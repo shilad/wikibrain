@@ -78,7 +78,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
                     from(Tables.LOCAL_LINK).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SqlDaoIterable<LocalLink>(result) {
+            return new LocalSqlDaoIterable<LocalLink>(result) {
                 @Override
                 public LocalLink transform(Record r) {
                     return buildLocalLink(r, true);
@@ -112,7 +112,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
     }
 
     @Override
-    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
+    public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -139,7 +139,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
     }
 
     @Override
-    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
+    public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -187,9 +187,9 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         }
     }
 
-    private SqlDaoIterable<LocalLink> buildLocalLinks(Cursor<Record> result, boolean outlink){
+    private Iterable<LocalLink> buildLocalLinks(Cursor<Record> result, boolean outlink){
         final boolean o = outlink;
-        return new SqlDaoIterable<LocalLink>(result) {
+        return new LocalSqlDaoIterable<LocalLink>(result) {
             @Override
             public LocalLink transform(Record r) {
                 return buildLocalLink(r, o);

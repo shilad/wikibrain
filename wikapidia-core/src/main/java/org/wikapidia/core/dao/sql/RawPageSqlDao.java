@@ -16,8 +16,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -87,7 +85,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
                     from(Tables.RAW_PAGE).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SqlDaoIterable<RawPage>(result) {
+            return new LocalSqlDaoIterable<RawPage>(result) {
                 @Override
                 public RawPage transform(Record r) {
                     return buildRawPage(r);
@@ -145,7 +143,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
      * @return
      * @throws DaoException
      */
-    public SqlDaoIterable<RawPage> getAllRedirects(Language language) throws DaoException{
+    public Iterable<RawPage> getAllRedirects(Language language) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -155,7 +153,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
                     where(Tables.RAW_PAGE.LANG_ID.eq(language.getId())).
                     and(Tables.RAW_PAGE.IS_REDIRECT.equal(true)).
                     fetchLazy();
-            return new SqlDaoIterable<RawPage>(result) {
+            return new LocalSqlDaoIterable<RawPage>(result) {
                 @Override
                 public RawPage transform(Record r) {
                     return buildRawPage(r);

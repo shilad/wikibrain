@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  *
@@ -89,44 +88,17 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             for (Record record : result) {
                 univIds.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
             }
-            return new Iterable<T>() {
-
-                private boolean closed = false;
+            return new SqlDaoIterable<T, Integer>(result, univIds.iterator()) {
 
                 @Override
-                public Iterator<T> iterator() {
-                    if (closed) {
-                        throw new IllegalStateException("Iterable can only be iterated over once.");
+                public T transform(Integer item) throws DaoException {
+                    List<Record> records = new ArrayList<Record>();
+                    for (Record record : result) {
+                        if (record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID) == item) {
+                            records.add(record);
+                        }
                     }
-                    closed = true;
-                    return new Iterator<T>() {
-                        @Override
-                        public boolean hasNext() {
-                            return univIds.iterator().hasNext();
-                        }
-
-                        @Override
-                        public T next() {
-                            Integer id = univIds.iterator().next();
-                            List<Record> records = new ArrayList<Record>();
-                            for (Record record : result) {
-                                if (record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID) == id) {
-                                    records.add(record);
-                                }
-                            }
-                            try {
-                                return (T)buildUniversalPage(records);
-                            } catch (DaoException e) {
-                                LOG.log(Level.WARNING, "Failed to build links: ", e);
-                            }
-                            return null;
-                        }
-
-                        @Override
-                        public void remove() {
-                            throw new UnsupportedOperationException();
-                        }
-                    };
+                    return (T)buildUniversalPage(records);
                 }
             };
         } catch (SQLException e) {
