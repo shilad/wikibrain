@@ -180,15 +180,14 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             languages.add(Language.getById(record.getValue(Tables.UNIVERSAL_LINK.LANG_ID)));
             temp = record;
         }
-        List<UniversalLink> links = new ArrayList<UniversalLink>();
-        Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>(links.size());
+        Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>();
         for (Integer integer : allRecords.keySet()) {
             map.put(integer, buildUniversalLink(allRecords.get(integer)));
         }
         return new UniversalLinkGroup(
                 map,
                 outlinks,
-                temp.getValue(outlinks ?           // Gets the common ID of the links
+                temp.getValue(outlinks ?                        // Gets the common ID of the links
                         Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID :  // If links are outlinks, source ID is common
                         Tables.UNIVERSAL_LINK.DEST_UNIV_ID),    // If links are inlinks, dest ID is common
                 temp.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID),
@@ -204,8 +203,8 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     once, which increases the time constraint by at least a factor of n.
     TODO: decide which of these methods to use
      */
-    private Iterable<UniversalLink> buildUniversalLinksIterable(final Cursor<Record> result) throws DaoException {
-        final Multimap<Integer, Integer> univIds = HashMultimap.create();
+    private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result) throws DaoException {
+        Multimap<Integer, Integer> univIds = HashMultimap.create();
         for (Record record : result) {
             univIds.put(
                     record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),
@@ -216,7 +215,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             @Override
             public UniversalLink transform(Map.Entry<Integer, Integer> item) throws DaoException {
                 List<Record> records = new ArrayList<Record>();
-                for (Record record : result) {
+                for (Record record : this.result) {
                     if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getKey()) &&
                             record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getValue())) {
                         records.add(record);

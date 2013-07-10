@@ -22,8 +22,8 @@ import java.util.Iterator;
  * if a user tries otherwise.
  */
 public abstract class SqlDaoIterable<E, T> implements Iterable<E> {
-    private Cursor<Record> result;
-    private Iterator<T> iterator;
+    protected Cursor<Record> result;
+    protected Iterator<T> iterator;
 
     private boolean usedUp = false;
     private boolean finished = false;
