@@ -45,10 +45,8 @@ public class SimilarityExample {
         Language lang = Language.getByLangCode("simple");
         Configurator c = new Configurator(new Configuration());
         PhraseAnalyzer pa = c.get(PhraseAnalyzer.class,"anchortext");
-        Disambiguator disambiguator = new TopResultDisambiguator(pa);
-        LocalLinkDao localLinkDao = c.get(LocalLinkDao.class);
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-        LocalSRMetric sr = new LocalMilneWitten(disambiguator,localLinkDao,localPageDao, false);
+        LocalSRMetric sr = c.get(LocalSRMetric.class);
 
         //Similarity between strings
         String string1 = "Barack Obama";

@@ -250,12 +250,21 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 
         @Override
         public String getPath() {
-            return "localSRMetric";
+            return "metric.local";
         }
 
         @Override
         public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("milneWitten")) {
+                return null;
+            }
 
+            return new LocalMilneWitten(
+                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
+                    getConfigurator().get(LocalLinkDao.class,config.getString("linkDao")),
+                    getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
+                    config.getBoolean("outLinks")
+            );
         }
     }
 }
