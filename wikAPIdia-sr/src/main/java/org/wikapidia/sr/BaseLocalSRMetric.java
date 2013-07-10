@@ -42,16 +42,27 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         this.mostSimilarLocalMatrices.put(language,sparseMatrix);
     }
 
-    public boolean hasCachedMostSimilarLocal(Language language, int wpId) throws  IOException{
-        return mostSimilarLocalMatrices != null && mostSimilarLocalMatrices.containsKey(language)
+    public boolean hasCachedMostSimilarLocal(Language language, int wpId) {
+        boolean hasCached;
+        try {
+            hasCached = mostSimilarLocalMatrices != null && mostSimilarLocalMatrices.containsKey(language)
                 && mostSimilarLocalMatrices.get(language).getRow(wpId) != null;
+        } catch (IOException e){
+            return false;
+        }
+        return hasCached;
     }
 
-    public SRResultList getCachedMostSimilarLocal(Language language, int wpId, int numResults, TIntSet validIds) throws IOException {
+    public SRResultList getCachedMostSimilarLocal(Language language, int wpId, int numResults, TIntSet validIds) {
         if (!hasCachedMostSimilarLocal(language, wpId)){
             return null;
         }
-        SparseMatrixRow row = mostSimilarLocalMatrices.get(language).getRow(wpId);
+        SparseMatrixRow row;
+        try {
+            row = mostSimilarLocalMatrices.get(language).getRow(wpId);
+        } catch (IOException e){
+            return null;
+        }
         int n = 0;
         SRResultList srl = new SRResultList(row.getNumCols());
         for (int i=0; i<row.getNumCols() && n < numResults; i++){
@@ -156,10 +167,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations);
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds);
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
@@ -243,7 +254,18 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public abstract double[][] cosimilarity(String[] phrases, Language language);
+    public double[][] cosimilarity(String[] phrases, Language language) throws DaoException {
+        int ids[] = new int[phrases.length];
+        List<LocalString> localStringList = new ArrayList<LocalString>();
+        for (String phrase : phrases){
+            localStringList.add(new LocalString(language, phrase));
+        }
+        List<LocalId> localIds = disambiguator.disambiguate(localStringList, null);
+        for (int i=0; i<phrases.length; i++){
+            ids[i] = localIds.get(i).getId();
+        }
+        return cosimilarity(ids, language);
+    }
 
 
 }

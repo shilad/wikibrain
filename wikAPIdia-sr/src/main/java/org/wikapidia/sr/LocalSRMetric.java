@@ -45,7 +45,7 @@ public interface LocalSRMetric {
      * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations);
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException;
 
     /**
      * Find the most similar local pages to a local page.
@@ -55,7 +55,7 @@ public interface LocalSRMetric {
      * @param validIds The local page ids to be considered.  Null means all ids in the language.
      * @return
      */
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds);
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
     /**
      * Find the most similar local pages to a phrase,

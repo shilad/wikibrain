@@ -18,9 +18,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 public class LocalMilneWitten extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
@@ -81,11 +79,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             vector.put(id, links.contains(page.getLocalId()) ? 1F:0F);
         }
         return new SparseMatrixRow(new ValueConf(), id, vector);
-    }
-
-    @Override
-    public double[][] cosimilarity(String[] phrases, Language language) {
-        return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     //TODO: Add a normalizer
@@ -149,18 +142,111 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException {
+        SRResultList mostSimilar;
+        if (hasCachedMostSimilarLocal(page.getLanguage(),page.getLocalId())&&!explanations){
+            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(),page.getLocalId(),maxResults,null);
+            if (mostSimilar.numDocs()>maxResults){
+                mostSimilar.truncate(maxResults);
+            }
+            return mostSimilar;
+        } else {
+            //Only check pages that share at least one inlink/outlink.
+            TIntSet linkPages = getLinks(page.toLocalId());
+            TIntSet worthChecking = new TIntHashSet();
+            for (int id : linkPages.toArray()){
+                Iterable<LocalLink> links;
+                if (outLinks){
+                    links = linkHelper.getLinks(page.getLanguage(),id,false);
+                } else {
+                    links = linkHelper.getLinks(page.getLanguage(),id,true);
+                }
+                for (LocalLink link : links){
+                    worthChecking.add(link.getLocalId());
+                }
+            }
+
+            return mostSimilar(page, maxResults, explanations,worthChecking);
+        }
     }
 
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
+        if (validIds==null){
+            return mostSimilar(page,maxResults,explanations);
+        }
+        SRResultList mostSimilar;
+        if (hasCachedMostSimilarLocal(page.getLanguage(),page.getLocalId())&&!explanations){
+            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(),page.getLocalId(),maxResults,validIds);
+            if (mostSimilar.numDocs()>maxResults){
+                mostSimilar.truncate(maxResults);
+            }
+            return mostSimilar;
+        } else {
+            TIntSet pageLinks = getLinks(page.toLocalId());
+
+            DaoFilter pageFilter = new DaoFilter();
+            Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
+            int numArticles = 0;
+            for (LocalPage lp : allPages){
+                numArticles++;
+            }
+
+            List<SRResult> results = new ArrayList<SRResult>();
+            for (int id : validIds.toArray()){
+                TIntSet comparisonLinks = getLinks(page.toLocalId());
+                SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
+                if (explanations){
+                    LocalPage up = pageHelper.getById(page.getLanguage(),id);
+                    result.setExplanations(reformatExplanations(result.getExplanations(),page,up));
+                }
+                results.add(result);
+            }
+            Collections.sort(results);
+
+            SRResultList  resultList = new SRResultList(maxResults);
+            for (int i=0; i<maxResults&&i<results.size(); i++){
+                resultList.set(i,results.get(i));
+            }
+
+            return resultList;
+        }
     }
 
-    @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    private List<Explanation> reformatExplanations(List<Explanation> explanations, LocalPage page1, LocalPage page2) throws DaoException {
+        if (outLinks){
+            List<Explanation> explanationList = new ArrayList<Explanation>();
+            for (Explanation explanation : explanations){
+                String format = "Both ? and ? link to ?";
+                int id = (Integer)explanation.getInformation().get(0);
+                LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(),id);
+                if (intersectionPage==null){
+                    continue;
+                }
+                List<LocalPage> formatPages = new ArrayList<LocalPage>();
+                formatPages.add(page1);
+                formatPages.add(page2);
+                formatPages.add(intersectionPage);
+                explanationList.add(new Explanation(format, formatPages));
+            }
+        }
+        else{
+            List<Explanation> explanationList = new ArrayList<Explanation>();
+            for (Explanation explanation : explanations){
+                String format = "? links to both ? and ?";
+                int id = (Integer)explanation.getInformation().get(0);
+                LocalPage intersectionPage = pageHelper.getById(page1.getLanguage(),id);
+                if (intersectionPage==null){
+                    continue;
+                }
+                List<LocalPage> formatPages = new ArrayList<LocalPage>();
+                formatPages.add(intersectionPage);
+                formatPages.add(page1);
+                formatPages.add(page2);
+                explanationList.add(new Explanation(format, formatPages));
+            }
+        }
+        return explanations;
     }
 
     private TIntSet getLinks(LocalId wpId) throws DaoException {
@@ -176,10 +262,5 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             }
         }
         return linkIds;
-    }
-
-    @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) {
-        throw new NotImplementedException();
     }
 }
