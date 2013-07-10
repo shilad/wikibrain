@@ -90,7 +90,7 @@ public class
         finished.set(false);
         for (Thread w : workers) {
             try {
-                w.join(1000);
+                w.join(10000);
             } catch (InterruptedException e) {
                 LOG.log(Level.SEVERE, "ignoring interrupted exception on thread join", e);
             }
