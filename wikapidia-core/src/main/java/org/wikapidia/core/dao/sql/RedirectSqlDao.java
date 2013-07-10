@@ -74,16 +74,15 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
                     from(Tables.REDIRECT).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new LocalSqlDaoIterable<Redirect>(result) {
+            return new LocalSqlDaoIterable<Redirect>(result, conn) {
                 @Override
                 public Redirect transform(Record r) {
                     return buildRedirect(r);
                 }
             };
         } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
             quietlyCloseConn(conn);
+            throw new DaoException(e);
         }
     }
 

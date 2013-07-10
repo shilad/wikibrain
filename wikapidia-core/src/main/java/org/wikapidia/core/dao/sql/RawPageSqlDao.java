@@ -78,23 +78,19 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
             if (daoFilter.isDisambig() != null) {
                 conditions.add(Tables.RAW_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
             }
-//            if (conditions.isEmpty()) {
-//                return null;
-//            }
             Cursor<Record> result = context.select().
                     from(Tables.RAW_PAGE).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new LocalSqlDaoIterable<RawPage>(result) {
+            return new LocalSqlDaoIterable<RawPage>(result, conn) {
                 @Override
                 public RawPage transform(Record r) {
                     return buildRawPage(r);
                 }
             };
         } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
             quietlyCloseConn(conn);
+            throw new DaoException(e);
         }
     }
 
@@ -130,35 +126,6 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
                 and(Tables.RAW_PAGE.LANG_ID.eq(language.getId())).
                 fetchOne().
                 getValue(Tables.RAW_PAGE.BODY);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    /**
-     * @deprecated Use get(new DaoFilter().setLanguages(language).setRedirect(true)) instead
-     * @param language
-     * @return
-     * @throws DaoException
-     */
-    public Iterable<RawPage> getAllRedirects(Language language) throws DaoException{
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Cursor<Record> result = context.select().
-                    from(Tables.RAW_PAGE).
-                    where(Tables.RAW_PAGE.LANG_ID.eq(language.getId())).
-                    and(Tables.RAW_PAGE.IS_REDIRECT.equal(true)).
-                    fetchLazy();
-            return new LocalSqlDaoIterable<RawPage>(result) {
-                @Override
-                public RawPage transform(Record r) {
-                    return buildRawPage(r);
-                }
-            };
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {

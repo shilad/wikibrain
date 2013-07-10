@@ -91,18 +91,14 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-//            if (conditions.isEmpty()) {
-//                return null;
-//            }
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return buildUniversalLinksIterable(result);
+            return buildUniversalLinksIterable(result, conn);
         } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
             quietlyCloseConn(conn);
+            throw new DaoException(e);
         }
     }
 
@@ -207,14 +203,14 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     once, which increases the time constraint by at least a factor of n.
     TODO: decide which of these methods to use
      */
-    private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result) throws DaoException {
+    private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result, Connection conn) throws DaoException {
         Multimap<Integer, Integer> univIds = HashMultimap.create();
         for (Record record : result) {
             univIds.put(
                     record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),
                     record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID));
         }
-        return new SqlDaoIterable<UniversalLink, Map.Entry<Integer, Integer>>(result, univIds.entries().iterator()) {
+        return new SqlDaoIterable<UniversalLink, Map.Entry<Integer, Integer>>(result, univIds.entries().iterator(), conn) {
 
             @Override
             public UniversalLink transform(Map.Entry<Integer, Integer> item) throws DaoException {
@@ -228,48 +224,6 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                 return buildUniversalLink(records);
             }
         };
-//        return new Iterable<UniversalLink>() {
-//
-//            private boolean closed = false;
-//
-//            @Override
-//            public Iterator<UniversalLink> iterator() {
-//                if (closed) {
-//                    throw new IllegalStateException("Iterable can only be iterated over once.");
-//                }
-//                closed = true;
-//                return new Iterator<UniversalLink>() {
-//                    @Override
-//                    public boolean hasNext() {
-//                        return univIds.entries().iterator().hasNext();
-//                    }
-//
-//                    @Override
-//                    public UniversalLink next() {
-//                        Map.Entry entry = univIds.entries().iterator().next();
-//                        List<Record> records = new ArrayList<Record>();
-//                        for (Record record : result) {
-//                            if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getKey() &&
-//                                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getValue())
-//                            {
-//                                records.add(record);
-//                            }
-//                        }
-//                        try {
-//                            return buildUniversalLink(records);
-//                        } catch (DaoException e) {
-//                            LOG.log(Level.WARNING, "Failed to build links: ", e);
-//                        }
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    public void remove() {
-//                        throw new UnsupportedOperationException();
-//                    }
-//                };
-//            }
-//        };
     }
 
     private UniversalLink buildUniversalLink(Collection<Record> records) throws DaoException {

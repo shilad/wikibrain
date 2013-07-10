@@ -4,6 +4,7 @@ import org.jooq.Cursor;
 import org.jooq.Record;
 import org.wikapidia.core.dao.DaoException;
 
+import java.sql.Connection;
 import java.util.Iterator;
 
 /**
@@ -24,9 +25,10 @@ import java.util.Iterator;
 public abstract class SqlDaoIterable<E, T> implements Iterable<E> {
     protected Cursor<Record> result;
     protected Iterator<T> iterator;
+    protected Connection conn;
 
-    private boolean usedUp = false;
-    private boolean finished = false;
+    protected boolean usedUp = false;
+    protected boolean finished = false;
 
     /**
      * Constructs a SqlDaoIterable that generates E objects from result.
@@ -35,9 +37,10 @@ public abstract class SqlDaoIterable<E, T> implements Iterable<E> {
      * @param result a collection of Records to be converted into outputs
      * @param iterator an iterator with a one-to-one relationship with the output iterable
      */
-    public SqlDaoIterable(Cursor<Record> result, Iterator<T> iterator){
+    public SqlDaoIterable(Cursor<Record> result, Iterator<T> iterator, Connection conn){
         this.result = result;
         this.iterator = iterator;
+        this.conn = conn;
     }
 
     /**
@@ -61,6 +64,7 @@ public abstract class SqlDaoIterable<E, T> implements Iterable<E> {
         if (!result.isClosed()) {
             result.close();
         }
+        AbstractSqlDao.quietlyCloseConn(conn);
     }
 
     @Override
