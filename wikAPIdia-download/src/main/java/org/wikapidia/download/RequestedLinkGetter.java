@@ -229,6 +229,7 @@ public class RequestedLinkGetter {
                             result.add(linkInfo.getLanguage().getLangCode() + "\t" +
                                     linkInfo.getDate() + "\t" +
                                     linkInfo.getLinkMatcher().getName() + "\t" +
+                                    linkInfo.getCounter() + "\t" +
                                     linkInfo.getUrl() + "\t" +
                                     linkInfo.getMd5());
                         }

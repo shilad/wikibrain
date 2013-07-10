@@ -58,7 +58,7 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         if (nameSpace != NameSpace.CATEGORY) {
             throw new DaoException("Tried to get CATEGORY, but found " + nameSpace);
         }

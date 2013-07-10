@@ -3,7 +3,6 @@ package org.wikapidia.core.dao.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.*;
@@ -19,7 +18,6 @@ import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -32,96 +30,50 @@ import java.util.logging.Level;
  * A SQL database implementation of the UniversalLinkDao.
  *
  */
-public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLinkDao {
+public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
 
     private final LocalLinkDao localLinkDao;
     
     public UniversalLinkSqlDao(DataSource dataSource, LocalLinkDao localLinkDao) throws DaoException {
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/universal-link");
         this.localLinkDao = localLinkDao;
     }
 
-    @Override
-    public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalLinkSqlDao.class.getResource("/db/universal-link-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.UNIVERSAL_LINK.LANG_ID,
+            Tables.UNIVERSAL_LINK.SOURCE_ID,
+            Tables.UNIVERSAL_LINK.DEST_ID,
+            Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID,
+            Tables.UNIVERSAL_LINK.DEST_UNIV_ID,
+            Tables.UNIVERSAL_LINK.ALGORITHM_ID,
+    };
 
     @Override
     public void save(UniversalLink link) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            for (Language language : link.getLanguageSetOfExistsInLangs()) {
-                for (LocalLink localLink : link.getLocalLinks(language)) {
-                    context.insertInto(Tables.UNIVERSAL_LINK).values(
-                            localLink.getLanguage().getId(),
-                            localLink.getSourceId(),
-                            localLink.getDestId(),
-                            link.getSourceUnivId(),
-                            link.getDestUnivId(),
-                            link.getAlgorithmId()
-                    ).execute();
-                }
+        for (Language language : link.getLanguageSetOfExistsInLangs()) {
+            for (LocalLink localLink : link.getLocalLinks(language)) {
+                insert(
+                    localLink.getLanguage().getId(),
+                    localLink.getSourceId(),
+                    localLink.getDestId(),
+                    link.getSourceUnivId(),
+                    link.getDestUnivId(),
+                    link.getAlgorithmId()
+                );
             }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
     @Override
     public void save(LocalLink localLink, int sourceUnivId, int destUnivId, int algorithmId) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.UNIVERSAL_LINK).values(
-                    localLink.getLanguage().getId(),
-                    localLink.getSourceId(),
-                    localLink.getDestId(),
-                    sourceUnivId,
-                    destUnivId,
-                    algorithmId
-            ).execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalLinkSqlDao.class.getResource("/db/universal-link-indexes.sql")
-                    )
-            );
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        insert(
+                localLink.getLanguage().getId(),
+                localLink.getSourceId(),
+                localLink.getDestId(),
+                sourceUnivId,
+                destUnivId,
+                algorithmId
+        );
     }
 
     @Override
@@ -140,9 +92,9 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
+//            if (conditions.isEmpty()) {
+//                return null;
+//            }
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
                     where(conditions).
@@ -261,8 +213,15 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                     record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID));
         }
         return new Iterable<UniversalLink>() {
+
+            private boolean closed = false;
+
             @Override
             public Iterator<UniversalLink> iterator() {
+                if (closed) {
+                    throw new IllegalStateException("Iterable can only be iterated over once.");
+                }
+                closed = true;
                 return new Iterator<UniversalLink>() {
                     @Override
                     public boolean hasNext() {

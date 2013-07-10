@@ -3,7 +3,7 @@ package org.wikapidia.core.dao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.RawPage;
 
-public interface RawPageDao extends Loader<RawPage> {
+public interface RawPageDao extends Dao<RawPage> {
 
     /**
      *

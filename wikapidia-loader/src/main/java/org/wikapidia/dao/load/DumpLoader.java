@@ -2,20 +2,15 @@ package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.parser.wiki.ParserVisitor;
-import org.wikapidia.parser.wiki.WikiTextDumpParser;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.utils.ParallelForEach;
@@ -92,12 +87,7 @@ public class DumpLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
-                        .create("t"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("create-indexes")
-                        .withDescription("create all indexes after loading")
-                        .create("i"));
+                        .create("d"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -112,22 +102,22 @@ public class DumpLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        LanguageSet languages = env.getLanguages();
+        List<String> langCodes = env.getLanguages().getLangCodes();
 
         File downloadPath = new File(conf.getConf().get().getString("download.path"));
         List<String> dumps = new ArrayList<String>();
-        if (!cmd.getArgList().isEmpty()) {                                          // There are files specified
-            dumps = cmd.getArgList();
-        } else {                                                                    // No specified files
-            if ((!downloadPath.isDirectory() || downloadPath.list().length == 0)) { // Default path is missing or empty
+        if (!cmd.getArgList().isEmpty()) {                                                  // There are files specified
+            dumps = cmd.getArgList();                                                       // Else no specified files
+        } else {                                                                            // Default path is missing or empty
+            if ((!downloadPath.isDirectory() || FileUtils.listFiles(downloadPath, DUMP_SUFFIXES, true).isEmpty())) {
                 System.err.println( "There is no download path. Please specify one or configure a default.");
                 new HelpFormatter().printHelp("DumpLoader", options);
                 return;
-            } else {                                                                                        // Default path is functional
-                for (File langDir : downloadPath.listFiles()) {                                             // Layered for-loops sift through
-                    if (langDir.isDirectory() && languages.getLangCodes().contains(langDir.getName())) {    // the directory structure of the
-                        for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {                  // download process:
-                            dumps.add(f.getPath());                                                         // ${PARENT}/langcode/date/dumpfile.xml.bz2
+            } else {                                                                        // Default path is functional
+                for (File langDir : downloadPath.listFiles()) {                             // Layered for-loops sift through
+                    if (langDir.isDirectory() && langCodes.contains(langDir.getName())) {   // the directory structure of the
+                        for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {  // download process:
+                            dumps.add(f.getPath());                                         // ${PARENT}/langcode/date/dumpfile.xml.bz2
                         }
                     }
                 }
@@ -139,10 +129,12 @@ public class DumpLoader {
 
         final DumpLoader loader = new DumpLoader(lpDao, rpDao);
 
-        if (cmd.hasOption("t")) {
-            lpDao.beginLoad();
-            rpDao.beginLoad();
+        if (cmd.hasOption("d")) {
+            lpDao.clear();
+            rpDao.clear();
         }
+        lpDao.beginLoad();
+        rpDao.beginLoad();
 
         // loads multiple dumps in parallel
         ParallelForEach.loop(dumps,
@@ -154,9 +146,7 @@ public class DumpLoader {
                     }
                 });
 
-        if (cmd.hasOption("i")) {
-            lpDao.endLoad();
-            rpDao.endLoad();
-        }
+        lpDao.endLoad();
+        rpDao.endLoad();
     }
 }

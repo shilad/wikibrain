@@ -1,5 +1,4 @@
-DROP TABLE if exists universal_link;
-CREATE TABLE universal_link (
+CREATE TABLE IF NOT EXISTS universal_link (
   lang_id SMALLINT NOT NULL,
   source_id INT NOT NULL,
   dest_id INT NOT NULL,
@@ -7,3 +6,4 @@ CREATE TABLE universal_link (
   dest_univ_id INT NOT NULL,
   algorithm_id INT NOT NULL
 );
+

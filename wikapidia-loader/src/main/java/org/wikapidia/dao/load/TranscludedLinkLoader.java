@@ -46,7 +46,7 @@ public class TranscludedLinkLoader {
             Integer destNamespace = (Integer) row[1];
             String destTitle = (String) row[2];
             Title title = new Title(destTitle, LanguageInfo.getByLanguage(language));
-            NameSpace ns = NameSpace.getNameSpaceById(destNamespace);
+            NameSpace ns = NameSpace.getNameSpaceByArbitraryId(destNamespace);
             LocalPage lp = pageDao.getByTitle(language, title, ns);
             if (lp == null) {
                 // Handle red link

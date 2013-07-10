@@ -8,24 +8,28 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+
 /**
  */
 public class LocalLinkVisitor extends ParserVisitor {
+    private static final Logger LOG = Logger.getLogger(LocalLinkVisitor.class.getName());
+
     private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;
-    private int counter;
+    private AtomicInteger counter = new AtomicInteger();
 
     public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao) {
         this.linkDao = linkDao;
         this.pageDao = pageDao;
-        this.counter = 0;
     }
 
     @Override
     public void link(ParsedLink link) throws WikapidiaException {
-        if(counter%10000==0)
-            System.out.println("Visited link #" + counter);
-        counter++;
+        int c = counter.getAndIncrement();
+        if(c % 100000==0) LOG.info("Visited link #" + c);
         try {
             LocalLink.LocationType loc = LocalLink.LocationType.NONE;
             if (link.location.getParagraph() == 0) {

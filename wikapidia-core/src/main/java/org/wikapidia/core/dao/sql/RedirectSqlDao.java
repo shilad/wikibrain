@@ -1,12 +1,10 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import gnu.trove.impl.*;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -15,14 +13,12 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RedirectDao;
-import org.wikapidia.core.dao.SqlDaoIterable;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.Redirect;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,74 +26,30 @@ import java.util.Collection;
 
 /**
  */
-public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
+public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements RedirectDao {
+
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.REDIRECT.LANG_ID,
+            Tables.REDIRECT.SRC_PAGE_ID,
+            Tables.REDIRECT.DEST_PAGE_ID,
+    };
 
     public RedirectSqlDao(DataSource dataSource) throws DaoException {
-        super(dataSource);
-    }
-
-    @Override
-    public void beginLoad() throws DaoException{
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            RedirectSqlDao.class.getResource("/db/redirect-schema.sql")
-                    )
-            );
-        } catch (IOException e){
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        super(dataSource, INSERT_FIELDS, "/db/redirect");
     }
 
     @Override
     public void save(Redirect redirect) throws DaoException {
-        save(redirect.getLanguage(), redirect.getSourceId(), redirect.getDestId());
+        insert(
+                redirect.getLanguage().getId(),
+                redirect.getSourceId(),
+                redirect.getDestId()
+        );
     }
 
     @Override
     public void save(Language lang, int src, int dest) throws DaoException {
-        Connection conn = null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,dialect);
-            context.insertInto(Tables.REDIRECT).values(
-                    lang.getId(),
-                    src,
-                    dest
-            ).execute();
-
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException{
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/redirect-indexes.sql")
-                    ));
-            if (cache!=null){
-                cache.updateTableLastModified(Tables.REDIRECT.getName());
-            }
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        save(new Redirect(lang, src, dest));
     }
 
     /**
@@ -115,8 +67,8 @@ public class RedirectSqlDao extends AbstractSqlDao implements RedirectDao {
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.REDIRECT.LANG_ID.in(daoFilter.getLangIds()));
-            } else {
-                return null;
+//            } else {
+//                return null;
             }
             Cursor<Record> result = context.select().
                     from(Tables.REDIRECT).

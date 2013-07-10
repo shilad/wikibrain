@@ -1,87 +1,52 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.*;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
+import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
 
-public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
+public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalLinkDao {
 
     public LocalLinkSqlDao (DataSource dataSource) throws DaoException {
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/local-link");
     }
 
-    @Override
-    public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalLinkSqlDao.class.getResource("/db/local-link-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.LOCAL_LINK.LANG_ID,
+            Tables.LOCAL_LINK.ANCHOR_TEXT,
+            Tables.LOCAL_LINK.SOURCE_ID,
+            Tables.LOCAL_LINK.DEST_ID,
+            Tables.LOCAL_LINK.LOCATION,
+            Tables.LOCAL_LINK.IS_PARSEABLE,
+            Tables.LOCAL_LINK.LOCATION_TYPE,
+    };
 
     @Override
     public void save(LocalLink localLink) throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.LOCAL_LINK).values(
-                    localLink.getLanguage().getId(),
-                    localLink.getAnchorText(),
-                    localLink.getSourceId(),
-                    localLink.getDestId(),
-                    localLink.getLocation(),
-                    localLink.isParseable(),
-                    localLink.getLocType().ordinal()
-            ).execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/local-link-indexes.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        insert(
+            localLink.getLanguage().getId(),
+            localLink.getAnchorText(),
+            localLink.getSourceId(),
+            localLink.getDestId(),
+            localLink.getLocation(),
+            localLink.isParseable(),
+            localLink.getLocType().ordinal()
+        );
     }
 
     @Override
@@ -106,9 +71,9 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
             if (daoFilter.isParseable() != null) {
                 conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(daoFilter.isParseable()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
+//            if (conditions.isEmpty()) {
+//                return null;
+//            }
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_LINK).
                     where(conditions).
@@ -163,7 +128,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(idField.equal(localId))
                     .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
-                    .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
+                    .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short) locationType.ordinal()))
                     .fetchLazy(getFetchSize());
             return buildLocalLinks(result, outlinks);
         } catch (SQLException e) {
@@ -270,7 +235,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao implements LocalLinkDao {
             }
             try {
                 return new LocalLinkSqlDao(
-                        (DataSource) getConfigurator().get(
+                        getConfigurator().get(
                                 DataSource.class,
                                 config.getString("dataSource"))
                 );

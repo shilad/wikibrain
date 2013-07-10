@@ -75,7 +75,7 @@ public class DumpLinkGetter {
             if (!results.isEmpty()) {
                 for (String url : results){
                     URL linkURL = new URL(BASEURL_STRING + url);
-                    DumpLinkInfo linkInfo = new DumpLinkInfo(lang, dumpDate, linkMatcher, linkURL);
+                    DumpLinkInfo linkInfo = new DumpLinkInfo(lang, dumpDate, linkMatcher, linkURL, linkMatcher.getNumber(url));
                     linkInfo.setMd5(md5s.get(linkInfo.getDownloadName()));
                     dumpLinks.put(linkMatcher, linkInfo);
                 }
