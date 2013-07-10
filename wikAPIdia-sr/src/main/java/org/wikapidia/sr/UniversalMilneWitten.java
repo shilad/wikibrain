@@ -1,9 +1,13 @@
 package org.wikapidia.sr;
 
+import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
@@ -232,5 +236,36 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             }
         }
         return linkIds;
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<UniversalMilneWitten> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return UniversalMilneWitten.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "metric.universal";
+        }
+
+        @Override
+        public UniversalMilneWitten get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("milneWitten")) {
+                return null;
+            }
+
+            return new UniversalMilneWitten(
+                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
+                    getConfigurator().get(UniversalPageDao.class,config.getString("pageDao")),
+                    config.getInt("algorithmId"),
+                    getConfigurator().get(UniversalLinkDao.class,config.getString("linkDao")),
+                    config.getBoolean("outLinks")
+            );
+        }
     }
 }
