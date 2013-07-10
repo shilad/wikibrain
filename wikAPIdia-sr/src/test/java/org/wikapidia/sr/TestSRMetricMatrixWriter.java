@@ -18,17 +18,17 @@ import org.wikapidia.core.model.*;
 import org.wikapidia.matrix.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
+import org.wikapidia.sr.pairwise.SRMetricMatrixWriter;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
-import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 
- import java.io.File;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestPairwiseSimilarity {
+public class TestSRMetricMatrixWriter {
     static int NUM_ROWS = 6;
 
     private static LocalMilneWitten srIn;
@@ -159,7 +159,7 @@ public class TestPairwiseSimilarity {
         simPath.deleteOnExit();
 
         PairwiseCosineSimilarity cosine = new PairwiseCosineSimilarity(matrix, transpose);
-        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(simPath,srIn, Language.getByLangCode("simple"));
+        SRMetricMatrixWriter writer = new SRMetricMatrixWriter(simPath,srIn, Language.getByLangCode("simple"));
         writer.writeSims(matrix.getRowIds(), 1, NUM_ROWS);
         SparseMatrix sims = new SparseMatrix(simPath);
 

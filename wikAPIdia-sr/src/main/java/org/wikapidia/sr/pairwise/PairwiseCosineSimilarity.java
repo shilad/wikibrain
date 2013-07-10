@@ -10,23 +10,33 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.Leaderboard;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
+
+/**
+ * @author Shilad Sen
+ * @author Ben Hillmann
+ */
+
 
 public class PairwiseCosineSimilarity {
     private static final Logger LOG = Logger.getLogger(PairwiseCosineSimilarity.class.getName());
 
     private SparseMatrix matrix;
     private SparseMatrix transpose;
-    private String name;
     private TIntFloatHashMap lengths = null;   // lengths of each row
     private int maxResults = -1;
+    private boolean buildPhraseVectors; // if true, build phrase vectors using the underlying similarity metric.
     private TIntSet idsInResults = new TIntHashSet();
+    private String name;
 
     public PairwiseCosineSimilarity(SparseMatrix matrix, SparseMatrix transpose) throws IOException {
         this.matrix = matrix;
         this.transpose = transpose;
-        this.name = "pairwise-cosine-similarity (matrix=" + matrix.getPath() + ", transpose=" + transpose.getPath() + ")";
+        setName("pairwise-cosine-similarity (matrix=" +
+                matrix.getPath() + ", transpose=" +
+                transpose.getPath() + ")");
     }
 
     public synchronized void initIfNeeded() {
@@ -66,6 +76,7 @@ public class PairwiseCosineSimilarity {
     private SRResultList mostSimilar(int maxResults, TIntSet validIds, TIntFloatHashMap vector) throws IOException {
         initIfNeeded();
         TIntDoubleHashMap dots = new TIntDoubleHashMap();
+
         for (int id : vector.keys()) {
             float val1 = vector.get(id);
             MatrixRow row2 = transpose.getRow(id);
@@ -79,6 +90,7 @@ public class PairwiseCosineSimilarity {
                 }
             }
         }
+
         final Leaderboard leaderboard = new Leaderboard(maxResults);
         double rowNorm = norm(vector);
         for (int id : dots.keys()) {
@@ -88,8 +100,10 @@ public class PairwiseCosineSimilarity {
             double sim = dot / (l1 * l2);
             leaderboard.tallyScore(id, sim);
         }
+
         return leaderboard.getTop();
     }
+
 
     private double cosineSimilarity(TIntFloatHashMap map1, TIntFloatHashMap map2) {
         double xDotX = 0.0;
@@ -112,5 +126,31 @@ public class PairwiseCosineSimilarity {
             length += x * x;
         }
         return Math.sqrt(length);
+    }
+
+    public void setBuildPhraseVectors(boolean buildPhraseVectors) {
+        this.buildPhraseVectors = buildPhraseVectors;
+    }
+
+    public static int PAGE_SIZE = 1024*1024*500;    // 500MB
+    public static void main(String args[]) throws IOException, InterruptedException {
+        if (args.length != 4 && args.length != 5) {
+            System.err.println("usage: " + PairwiseCosineSimilarity.class.getName()
+                    + " path_matrix path_matrix_transpose path_output maxResultsPerDoc [num-cores]");
+            System.exit(1);
+        }
+        SparseMatrix matrix = new SparseMatrix(new File(args[0]), 1, PAGE_SIZE);
+        SparseMatrix transpose = new SparseMatrix(new File(args[1]));
+        PairwiseCosineSimilarity sim = new PairwiseCosineSimilarity(matrix, transpose);
+        int cores = (args.length == 5)
+                ? Integer.valueOf(args[4])
+                : Runtime.getRuntime().availableProcessors();
+
+        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(new File(args[2]),sim);
+        writer.writeSims(matrix.getRowIds(), cores, Integer.valueOf(args[3]));
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
