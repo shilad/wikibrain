@@ -18,6 +18,11 @@ import java.util.logging.Logger;
 
 /**
  *
+ * This class provides various utilities for building different types of queries.
+ *
+ * @author Yulun Li
+ * @author Ari Weiland
+ *
  */
 public class QueryBuilder {
 

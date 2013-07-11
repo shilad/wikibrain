@@ -142,7 +142,7 @@ public class MilneWittenSimilarity extends BaseLocalSRMetric{
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) {
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -159,7 +159,7 @@ public class MilneWittenSimilarity extends BaseLocalSRMetric{
 
 
     private TIntSet getLinks(LocalId wpId) throws DaoException {
-        SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
+        Iterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
         TIntSet linkIds = new TIntHashSet();
         if(!outLinks) {
             for (LocalLink link : links){
@@ -174,7 +174,7 @@ public class MilneWittenSimilarity extends BaseLocalSRMetric{
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) {
+    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
         throw new NotImplementedException();
     }
 }

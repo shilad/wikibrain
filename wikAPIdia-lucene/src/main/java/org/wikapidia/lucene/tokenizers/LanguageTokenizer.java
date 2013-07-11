@@ -7,7 +7,6 @@ import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.lucene.LuceneException;
 import org.wikapidia.lucene.TokenizerOptions;
 import org.wikapidia.lucene.LuceneOptions;
 
@@ -15,23 +14,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  *
- * @author Ari Weiland
- *
  * This class is based on a class of the same name from Brent Hecht, WikAPIdia.
- * I have updated everything to properly function consistently with Lucene 4.3,
- * as well as adding functionality such as the booleans to determine which filters
- * should be applied. Lastly, I have broken up the language specific
- * subclasses into their own separate class files.
+ * I have updated everything to properly function consistently with Lucene 4.3.
+ *
+ * This class is used to generate Tokenizers for specific languages. It allows for
+ * specifying different types of filters to apply to the child Tokenizers.
  *
  * There are currently 26 language-specific tokenizer subclasses.
  * Note that simple English is treated as standard English
+ *
+ * @author Ari Weiland
  *
  */
 public abstract class LanguageTokenizer {

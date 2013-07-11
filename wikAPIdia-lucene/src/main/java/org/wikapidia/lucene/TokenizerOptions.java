@@ -2,9 +2,9 @@ package org.wikapidia.lucene;
 
 /**
  *
- * @author Ari Weiland
- *
  * A wrapper class that uses a simple builder pattern to select filters to use by the Analyzer.
+ *
+ * @author Ari Weiland
  *
  */
 public class TokenizerOptions {

@@ -1,5 +1,6 @@
 package org.wikapidia.lucene;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
@@ -16,45 +17,47 @@ import org.wikapidia.core.model.RawPage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  *
- * @author Ari Weiland
- *
  * This class is used to index raw pages during the load process.
+ *
+ * @author Ari Weiland
  *
  */
 public class LuceneIndexer {
 
     private final File root;
     private final Map<Language, IndexWriter> writers;
-    private final Collection<NameSpace> nameSpaces;
     private final LuceneOptions options;
+    private boolean closed = false;
 
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
-     * specified LanguageSet and a Collection of NameSpaces. Indexes are
-     * then placed in language-specific subdirectories in the specified file.
+     * specified LanguageSet. Indexes are then placed in language-specific
+     * subdirectories in the specified file.
+     *
      * @param languages the language set in which this searcher can operate
-     * @param namespaces the namespaces to index
      * @param root the root directory in which to save all the lucene directories
      */
-    public LuceneIndexer(LanguageSet languages, Collection<NameSpace> namespaces, File root) {
-        this(languages, namespaces, root, LuceneOptions.getDefaultOptions());
+    public LuceneIndexer(LanguageSet languages, File root) {
+        this(languages, root, LuceneOptions.getDefaultOptions());
     }
 
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
      * specified LanguageSet. Indexes are then placed in language-specific
      * subdirectories specified by options.
+     *
      * @param languages the language set in which this searcher can operate
      * @param options a LuceneOptions object containing specific options for lucene
      */
     public LuceneIndexer(LanguageSet languages, LuceneOptions options) {
-        this(languages, options.namespaces, options.luceneRoot, options);
+        this(languages, options.luceneRoot, options);
     }
 
-    private LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root, LuceneOptions options) {
+    private LuceneIndexer(LanguageSet languages, File root, LuceneOptions options) {
         try {
             this.root = root;
             writers = new HashMap<Language, IndexWriter>();
@@ -64,7 +67,6 @@ public class LuceneIndexer {
                 IndexWriterConfig iwc = new IndexWriterConfig(options.matchVersion, analyzer);
                 writers.put(language, new IndexWriter(directory, iwc));
             }
-            this.nameSpaces = nameSpaces;
             this.options = options;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -85,11 +87,15 @@ public class LuceneIndexer {
 
     /**
      * Indexes a specific RawPage
+     *
      * @param page the page to index
      */
     public void indexPage(RawPage page) {
+        if (closed) {
+            throw new IllegalStateException("Indexer has already been closed!");
+        }
         Language language = page.getLang();
-        if (nameSpaces.contains(page.getNamespace()) && getLanguageSet().containsLanguage(language)) {
+        if (getLanguageSet().containsLanguage(language)) {
             try {
                 IndexWriter writer = writers.get(language);
                 Document document = new Document();
@@ -105,6 +111,16 @@ public class LuceneIndexer {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    /**
+     * Method should be called when done indexing.
+     */
+    public void close() {
+        closed = true;
+        for (IndexWriter writer : writers.values()) {
+            IOUtils.closeQuietly(writer);
         }
     }
 }
