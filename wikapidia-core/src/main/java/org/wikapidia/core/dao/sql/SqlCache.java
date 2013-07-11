@@ -3,6 +3,7 @@ package org.wikapidia.core.dao.sql;
 import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.jooq.Tables;
@@ -13,12 +14,19 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class SqlCache extends AbstractSqlDao{
-    File directory;
+public class SqlCache {
+    private final DataSource ds;
+    private final SQLDialect dialect;
+    private File directory;
 
     public SqlCache(DataSource dataSource, File directory) throws DaoException {
-        super(dataSource);
+        this.ds = dataSource;
         this.directory=directory;
+        try {
+            this.dialect = JooqUtils.dialect(dataSource.getConnection());
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
         if (!this.directory.isDirectory()) {
             throw new IllegalArgumentException("" + directory + " is not a valid directory");
         }
@@ -30,14 +38,14 @@ public class SqlCache extends AbstractSqlDao{
             conn = ds.getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/table-modified-schema.sql")
+                            LocalPageSqlDao.class.getResource("/db/table-modified-create-tables.sql")
                     ));
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (SQLException e){
             throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            AbstractSqlDao.quietlyCloseConn(conn);
         }
     }
 
@@ -139,7 +147,7 @@ public class SqlCache extends AbstractSqlDao{
          } catch (SQLException e) {
              throw new DaoException(e);
          } finally {
-             quietlyCloseConn(conn);
+             AbstractSqlDao.quietlyCloseConn(conn);
          }
      }
 }

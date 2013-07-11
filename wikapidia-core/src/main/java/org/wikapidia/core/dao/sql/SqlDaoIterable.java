@@ -1,4 +1,4 @@
-package org.wikapidia.core.dao;
+package org.wikapidia.core.dao.sql;
 
 import org.jooq.Cursor;
 import org.jooq.Record;
@@ -33,7 +33,7 @@ public abstract class SqlDaoIterable<E> implements Iterable<E> {
             public boolean hasNext() {
                 if (!finished) {
                     finished = !recordIterator.hasNext();
-                    if (finished) { result.close(); }
+                    if (finished) { close(); }
                 }
                 return !finished;
             }
@@ -46,7 +46,7 @@ public abstract class SqlDaoIterable<E> implements Iterable<E> {
                 Record r = recordIterator.next();
                 if (r == null) {
                     finished = true;
-                    result.close();
+                    close();
                     return null;
                 }
                 return transform(r);
@@ -57,5 +57,9 @@ public abstract class SqlDaoIterable<E> implements Iterable<E> {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    public void close() {
+        this.result.close();
     }
 }

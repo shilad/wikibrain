@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.utils.WpStringUtils;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -117,10 +118,6 @@ public class Title implements Externalizable {
 		}
 	}
 	
-	public String toRawDataTableVersion(){
-		return canonicalTitle.replaceAll(" ", "_");
-	}
-	
 	/**
 	 * Needs langId because Title does not store it for memory reasons
 	 * @return
@@ -138,42 +135,23 @@ public class Title implements Externalizable {
 		}
 	}
 
-    /**
-     * Deconstructs a title such as "Mash_(film)" into "Mash" and "film"
-     * TODO: remove this, and have getNameAndDisambiguator return an array of 2 strings.
-     */
-	public static class NameAndDisambiguator{
-		
-		public final String name;
-		public final String disambiguator;
-		
-		public NameAndDisambiguator(String name, String disambiguator) {
-			super();
-			this.name = name;
-			this.disambiguator = disambiguator;
-		}
-		
-		public boolean hasDisambiguator(){
-			return (this.disambiguator != null);
-		}
-		
-		public String toString(){
-			
-			String rVal = this.name;
-			if (this.hasDisambiguator()){
-				rVal = rVal + " " + this.disambiguator;
-			}
-			return rVal;
-		}
-	}
+    public long longHashCode() {
+        return longHashCode(language.getLanguage(), getTitleStringWithoutNamespace(), getNamespace());
+    }
 
+    public static long longHashCode(Language l, String title, NameSpace ns) {
+        return longHashCode(l.getId(), title, ns.getArbitraryId());
+    }
+
+    public static long longHashCode(int langId, String title, int nsArbitraryId) {
+        return WpStringUtils.longHashCode(langId + "." + nsArbitraryId + "." + title);
+    }
 
     /**
-     * Deconstructs a title such as "Mash_(film)" into "Mash" and "film"
-     * TODO: remove this, and have getNameAndDisambiuator return an array of 2 strings.
+     * Deconstructs a title such as "Mash_(film)" into {"Mash", "film"}
      */
 	private static Pattern nameAndDisambiguatorPattern = Pattern.compile("(.+?)\\s*\\((.+?)\\)");
-	public NameAndDisambiguator getNameAndDisambiguator(){
+	public String[] getNameAndDisambiguator(){
 		String s = this.toString();
 		Matcher m = nameAndDisambiguatorPattern.matcher(s);
 		String disam = null;
@@ -182,7 +160,7 @@ public class Title implements Externalizable {
 			name = m.group(1);
 			disam = m.group(2);
 		}
-		return new NameAndDisambiguator(name, disam);
+		return new String[] {name, disam};
 
 	}
 

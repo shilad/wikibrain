@@ -5,7 +5,6 @@ import gnu.trove.set.TIntSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -117,6 +116,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     /**
      * Get wiki pages that are the most similar to the specified local page.
+     *
      * @param localPage
      * @param maxResults
      * @param explanations

@@ -1,7 +1,6 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -14,10 +13,11 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -26,71 +26,39 @@ import java.util.Date;
  * Retrieves and stores page text.
  * Wraps a LocalPageDao to build a full RawPage.
  */
-public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
+public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao {
 
     public RawPageSqlDao(DataSource dataSource) throws DaoException {
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/raw-page");
     }
 
-    @Override
-    public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            RawPageSqlDao.class.getResource("/db/raw-page-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.RAW_PAGE.LANG_ID,
+            Tables.RAW_PAGE.PAGE_ID,
+            Tables.RAW_PAGE.REVISION_ID,
+            Tables.RAW_PAGE.BODY,
+            Tables.RAW_PAGE.TITLE,
+            Tables.RAW_PAGE.LASTEDIT,
+            Tables.RAW_PAGE.NAME_SPACE,
+            Tables.RAW_PAGE.IS_REDIRECT,
+            Tables.RAW_PAGE.IS_DISAMBIG,
+            Tables.RAW_PAGE.REDIRECT_TITLE,
+    };
 
     @Override
     public void save(RawPage page) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.RAW_PAGE).values(
-                    page.getLang().getId(),
-                    page.getPageId(),
-                    page.getRevisionId(),
-                    page.getBody(),
-                    page.getTitle(),
-                    page.getLastEdit(),
-                    page.getNamespace().getArbitraryId(),
-                    page.isRedirect(),
-                    page.isDisambig(),
-                    page.getRedirectTitle()
-            ).execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            RawPageSqlDao.class.getResource("/db/raw-page-indexes.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        insert(
+                page.getLang().getId(),
+                page.getPageId(),
+                page.getRevisionId(),
+                page.getBody() == null ? "" : page.getBody(),
+                page.getTitle().getCanonicalTitle(),
+                page.getLastEdit(),
+                page.getNamespace().getArbitraryId(),
+                page.isRedirect(),
+                page.isDisambig(),
+                page.getRedirectTitle()
+        );
     }
 
     @Override
@@ -171,6 +139,12 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
         }
     }
 
+    /**
+     * @deprecated Use get(new DaoFilter().setLanguages(language).setRedirect(true)) instead
+     * @param language
+     * @return
+     * @throws DaoException
+     */
     public SqlDaoIterable<RawPage> getAllRedirects(Language language) throws DaoException{
         Connection conn = null;
         try {
@@ -202,7 +176,7 @@ public class RawPageSqlDao extends AbstractSqlDao implements RawPageDao {
                 record.getValue(Tables.RAW_PAGE.BODY),
                 new Date(timestamp.getTime()),
                 Language.getById(record.getValue(Tables.RAW_PAGE.LANG_ID)),
-                NameSpace.getNameSpaceById(record.getValue(Tables.RAW_PAGE.NAME_SPACE)),
+                NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.RAW_PAGE.NAME_SPACE)),
                 record.getValue(Tables.RAW_PAGE.IS_REDIRECT),
                 record.getValue(Tables.RAW_PAGE.IS_DISAMBIG),
                 record.getValue(Tables.RAW_PAGE.REDIRECT_TITLE)

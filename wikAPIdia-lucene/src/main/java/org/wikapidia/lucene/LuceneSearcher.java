@@ -16,9 +16,9 @@ import java.util.Map;
 
 /**
  *
- * @author Ari Weiland
- *
  * This class wraps the lucene search into a class that can handle any specified language
+ *
+ * @author Ari Weiland
  *
 */
 public class LuceneSearcher {
@@ -36,6 +36,7 @@ public class LuceneSearcher {
      * in any language in the LanguageSet. Note that root is the parent directory
      * of the directory where lucene indexes are stored, though it is the same
      * directory as was passed to the LuceneIndexer.
+     *
      * @param languages the language set in which this searcher can operate
      * @param root the root directory in which each language contains its own lucene directory
      */
@@ -46,6 +47,7 @@ public class LuceneSearcher {
     /**
      * Constructs a LuceneSearcher that will run lucene queries on sets of articles
      * in any language in the LanguageSet. The directory is specified within options.
+     *
      * @param languages the language set in which this searcher can operate
      * @param options a LuceneOptions object containing specific options for lucene
      */
@@ -89,7 +91,8 @@ public class LuceneSearcher {
     }
 
     /**
-     * Runs a specified lucene query in the specified language
+     * Runs a specified lucene query in the specified language.
+     *
      * @param query
      * @return
      */

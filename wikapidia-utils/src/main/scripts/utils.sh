@@ -43,8 +43,8 @@ function checksum() {
 function compileJooq() {
     schema_dir=${WP_CORE}/src/main/resources/db
     [ -d "$schema_dir" ] || die "missing sql schema directory $schema_dir"
-    cat ${schema_dir}/*-schema.sql > ${schema_dir}/full_schema.sql
-    cat ${schema_dir}/*-indexes.sql >> ${schema_dir}/full_schema.sql
+    cat ${schema_dir}/*-create-tables.sql > ${schema_dir}/full_schema.sql
+    cat ${schema_dir}/*-create-indexes.sql >> ${schema_dir}/full_schema.sql
     oldhash=$(cat ${schema_dir}/full_schema.hash | tr -d ' \n' )
     newhash=$(checksum ${schema_dir}/full_schema.sql)
 

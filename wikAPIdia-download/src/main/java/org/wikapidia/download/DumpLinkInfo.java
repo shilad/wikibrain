@@ -37,11 +37,12 @@ public class DumpLinkInfo {
     private String md5;
     private int counter;
 
-    public DumpLinkInfo(Language language, String date, LinkMatcher linkMatcher, URL url) {
+    public DumpLinkInfo(Language language, String date, LinkMatcher linkMatcher, URL url, int counter) {
         this.language = language;
         this.date = date;
         this.linkMatcher = linkMatcher;
         this.url = url;
+        this.counter = counter;
     }
 
     public DumpLinkInfo(String langCode, String date, String linkMatcher, String url, String md5, int counter) throws MalformedURLException {
@@ -149,7 +150,6 @@ public class DumpLinkInfo {
      */
     public static DumpLinkCluster parseFile(File file) {
         InputStream stream = null;
-        Map<String, AtomicInteger> counters = new HashMap<String, AtomicInteger>();
         try {
             stream = FileUtils.openInputStream(file);
             List<String> lines = IOUtils.readLines(stream, "UTF-8");
@@ -159,20 +159,18 @@ public class DumpLinkInfo {
                 String langCode     = parsedInfo[0];
                 String date         = parsedInfo[1];
                 String linkMatcher  = parsedInfo[2];
-                String url          = parsedInfo[3];
+                String counter      = parsedInfo[3];
+                String url          = parsedInfo[4];
                 String md5 = null;
-                if (parsedInfo.length == 5) md5 = parsedInfo[4];
+                if (parsedInfo.length == 6) md5 = parsedInfo[5];
                 try {
-                    if (!counters.containsKey(linkMatcher)) {
-                        counters.put(linkMatcher, new AtomicInteger(0));
-                    }
                     DumpLinkInfo temp = new DumpLinkInfo(
                             langCode,
                             date,
                             linkMatcher,
                             url,
                             md5,
-                            counters.get(linkMatcher).getAndIncrement()
+                            Integer.valueOf(counter)
                     );
                     dumpLinks.add(temp);
                 } catch (MalformedURLException e) {

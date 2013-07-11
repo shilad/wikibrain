@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -20,7 +19,6 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -28,79 +26,42 @@ import java.util.logging.Level;
 
 /**
  *
- * @author Ari Weiland
+ * @author Ari Weiland, Shilad Sen
  *
  * A SQL database implementation of the UniversalPageDao.
  *
  */
-public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao implements UniversalPageDao<T> {
+public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao<T> implements UniversalPageDao<T> {
 
     private final LocalPageDao localPageDao;
 
     public UniversalPageSqlDao(DataSource dataSource, LocalPageDao localPageDao) throws DaoException {
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/universal-page");
         this.localPageDao = localPageDao;
     }
 
-    @Override
-    public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalPageSqlDao.class.getResource("/db/universal-page-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.UNIVERSAL_PAGE.LANG_ID,
+            Tables.UNIVERSAL_PAGE.PAGE_ID,
+            Tables.UNIVERSAL_PAGE.NAME_SPACE,
+            Tables.UNIVERSAL_PAGE.UNIV_ID,
+            Tables.UNIVERSAL_PAGE.ALGORITHM_ID,
+    };
 
     @Override
     public void save(UniversalPage page) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            UniversalPage<LocalPage> temp = page;
-            NameSpace nameSpace = temp.getNameSpace();
-            for (Language language : temp.getLanguageSetOfExistsInLangs()) {
-                for (LocalPage localPage : temp.getLocalPages(language)) {
-                    context.insertInto(Tables.UNIVERSAL_PAGE).values(
-                            language.getId(),
-                            localPage.getLocalId(),
-                            nameSpace.getArbitraryId(),
-                            page.getUnivId(),
-                            page.getAlgorithmId()
-                    ).execute();
-                }
+        UniversalPage<LocalPage> temp = page;
+        NameSpace nameSpace = page.getNameSpace();
+        for (Language language : temp.getLanguageSetOfExistsInLangs()) {
+            for (LocalPage localPage : temp.getLocalPages(language)) {
+                insert(
+                    language.getId(),
+                    localPage.getLocalId(),
+                    nameSpace.getArbitraryId(),
+                    page.getUnivId(),
+                    page.getAlgorithmId()
+                );
             }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalPageSqlDao.class.getResource("/db/universal-page-indexes.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
@@ -117,9 +78,9 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
+//            if (conditions.isEmpty()) {
+//                return null;
+//            }
             final Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_PAGE).
                     where(conditions).
@@ -129,8 +90,15 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 univIds.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
             }
             return new Iterable<T>() {
+
+                private boolean closed = false;
+
                 @Override
                 public Iterator<T> iterator() {
+                    if (closed) {
+                        throw new IllegalStateException("Iterable can only be iterated over once.");
+                    }
+                    closed = true;
                     return new Iterator<T>() {
                         @Override
                         public boolean hasNext() {
@@ -272,7 +240,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             return null;
         }
         Multimap<Language, LocalPage> localPages = HashMultimap.create(result.size(), result.size());
-        NameSpace nameSpace = NameSpace.getNameSpaceById(result.get(0).getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(result.get(0).getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         for(Record record : result) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);

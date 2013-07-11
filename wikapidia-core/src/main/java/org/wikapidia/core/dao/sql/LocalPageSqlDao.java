@@ -3,11 +3,7 @@ package org.wikapidia.core.dao.sql;
 import com.typesafe.config.Config;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TLongIntHashMap;
-import org.apache.commons.io.IOUtils;
-import org.jooq.Condition;
-import org.jooq.Cursor;
-import org.jooq.DSLContext;
-import org.jooq.Record;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -22,9 +18,6 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +27,7 @@ import java.util.logging.Level;
 
 /**
  */
-public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao implements LocalPageDao<T> {
+public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> implements LocalPageDao<T> {
     private volatile TLongIntHashMap titlesToIds = null;
     private RedirectSqlDao redirectSqlDao;
 
@@ -43,75 +36,35 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
     }
 
     public LocalPageSqlDao(DataSource dataSource, boolean followRedirects) throws DaoException{
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/local-page");
         if (followRedirects){
             redirectSqlDao = new RedirectSqlDao(ds);
         }
     }
 
-    @Override
-    public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/local-page-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.LOCAL_PAGE.ID,
+            Tables.LOCAL_PAGE.LANG_ID,
+            Tables.LOCAL_PAGE.PAGE_ID,
+            Tables.LOCAL_PAGE.TITLE,
+            Tables.LOCAL_PAGE.NAME_SPACE,
+            Tables.LOCAL_PAGE.IS_REDIRECT,
+            Tables.LOCAL_PAGE.IS_DISAMBIG
+    };
 
     @Override
     public void save(LocalPage page) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.LOCAL_PAGE).values(
-                    null,
-                    page.getLanguage().getId(),
-                    page.getLocalId(),
-                    page.getTitle().getCanonicalTitle(),
-                    page.getNameSpace().getArbitraryId(),
-                    page.isRedirect(),
-                    page.isDisambig()
-            ).execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        insert(
+                null,
+                page.getLanguage().getId(),
+                page.getLocalId(),
+                page.getTitle().getCanonicalTitle(),
+                page.getNameSpace().getArbitraryId(),
+                page.isRedirect(),
+                page.isDisambig()
+        );
     }
 
-    @Override
-    public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/local-page-indexes.sql")
-                    ));
-            if (cache!=null){
-                cache.updateTableLastModified(Tables.LOCAL_PAGE.getName());
-            }
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    // This iterable can contain null entries, which originate from the cursor.
-    // TODO: Investigate this issue
     @Override
     public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
@@ -131,9 +84,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             if (daoFilter.isDisambig() != null) {
                 conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
+//            if (conditions.isEmpty()) {
+//                return null;
+//            }
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
@@ -230,7 +183,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         if (titlesToIds==null){
             buildTitlesToIds();
         }
-        return titlesToIds.get(hashTitle(title, language.getId(), nameSpace.getArbitraryId()));
+        return titlesToIds.get(Title.longHashCode(language, title, nameSpace));
     }
 
     /**
@@ -253,7 +206,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         return new LocalPage(
                 lang,
                 record.getValue(Tables.LOCAL_PAGE.PAGE_ID),
@@ -262,34 +215,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
                 record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT),
                 record.getValue(Tables.LOCAL_PAGE.IS_DISAMBIG)
         );
-    }
-
-    /**
-     *
-     * @param s The canonical title of the page.
-     * @param lang_id
-     * @param page_type_id
-     * @return
-     */
-    protected long hashTitle(String s, int lang_id, int page_type_id){
-        s = s+lang_id+page_type_id;
-        MessageDigest messageDigest = null;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace(); //There is no reason this should ever get thrown.
-        }
-        messageDigest.update(s.getBytes());
-        byte[] bytes = messageDigest.digest();
-        long h = 1125899906842597L; //prime
-        for (byte b: bytes) {
-            h = 31*h + b;
-        }
-        return h;
-    }
-
-    protected long hashTitle(Title title, Language language, NameSpace nameSpace){
-        return hashTitle(title.getCanonicalTitle(),language.getId(),nameSpace.ordinal());
     }
 
     protected synchronized void buildTitlesToIds() throws DaoException {
@@ -320,11 +245,9 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao impleme
             int numRedirects = 0;
             int numResolved = 0;
             for (Record record : cursor){
-                String title = record.getValue(Tables.LOCAL_PAGE.TITLE);
-                int lang_id = record.getValue(Tables.LOCAL_PAGE.LANG_ID);
-                int ns_id = record.getValue(Tables.LOCAL_PAGE.NAME_SPACE);
-                long hash = hashTitle(record.getValue(Tables.LOCAL_PAGE.TITLE),
+                long hash = Title.longHashCode(
                         record.getValue(Tables.LOCAL_PAGE.LANG_ID),
+                        record.getValue(Tables.LOCAL_PAGE.TITLE),
                         record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
                 if (redirectSqlDao != null && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)){
                     numRedirects++;

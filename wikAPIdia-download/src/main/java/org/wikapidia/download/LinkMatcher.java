@@ -3,6 +3,7 @@ package org.wikapidia.download;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -16,23 +17,23 @@ public enum LinkMatcher {
     MULTISTREAM       ("multistream", Pattern.compile(".+-pages-articles-multistream.xml.bz2")),
     MULTISTREAM_INDEX ("multistream_index", Pattern.compile(".+-pages-articles-multistream-index\\.txt\\.bz2")),
     EDIT_HISTORY_7z      ("edit_history_7z",
-            Pattern.compile(".+-pages-meta-history\\d+.xml-.+\\.7z"),
+            Pattern.compile(".+-pages-meta-history(\\d+).xml-.+\\.7z"),
             Pattern.compile(".+-pages-meta-history.xml.7z")),
     EDIT_HISTORY_bz2      ("edit_history_bz2",
-            Pattern.compile(".+-pages-meta-history\\d+.xml-.+\\.bz2"),
+            Pattern.compile(".+-pages-meta-history(\\d+).xml-.+\\.bz2"),
             Pattern.compile(".+-pages-meta-history.xml.bz2")),
     LOG               ("log_events", Pattern.compile(".+-pages-logging.xml.gz")),
     META_CURRENT      ("current_meta",
-            Pattern.compile(".+-pages-meta-current\\d+.xml-.+\\.bz2"),
+            Pattern.compile(".+-pages-meta-current(\\d+).xml-.+\\.bz2"),
             Pattern.compile(".+-pages-meta-current.xml.bz2")),
     ARTICLES          ("articles",
-            Pattern.compile(".+-pages-articles\\d+\\.xml-.+\\.bz2"),
+            Pattern.compile(".+-pages-articles(\\d+)\\.xml-.+\\.bz2"),
             Pattern.compile(".+-pages-articles.xml.bz2")),
     STUB_ARTICLES     ("stub_articles", Pattern.compile(".+-stub-articles\\d*.xml.gz")),
     STUB_META_CURRENT ("stub_meta_current", Pattern.compile(".+-stub-meta-current\\d*.xml.gz")),
     STUB_META_HISTORY ("stub_meta_histories", Pattern.compile(".+-stub-meta-history\\d*.xml.gz")),
     ABSTRACT          ("abstracts",
-            Pattern.compile(".+-abstract\\d+\\.xml"),
+            Pattern.compile(".+-abstract(\\d+)\\.xml"),
             Pattern.compile(".+-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
     TITLES            ("titles", Pattern.compile(".+-all-titles-in-ns0.gz")),
     INTERLINK         ("interwiki_links", Pattern.compile(".+-iwlinks.sql.gz")),
@@ -91,6 +92,24 @@ public enum LinkMatcher {
             }
         }
         return result;
+    }
+
+    /**
+     * @param link A link as returned by this.match() (e.g. enwiki-latest-abstract10.xml-rss.xml)
+     * @return The index of the file (e.g. 10). If there is no index, returns 1.
+     */
+    public int getNumber(String link) {
+        for (Pattern p : patterns) {
+            Matcher m = p.matcher(link);
+            if (m.matches()) {
+                if (m.groupCount() >= 1) {
+                    return Integer.valueOf(m.group(m.groupCount()));    // get last group
+                } else {
+                    return 1;   // Wikipedia file indexes start at 1
+                }
+            }
+        }
+        throw new IllegalStateException();
     }
 
     public String getName() {

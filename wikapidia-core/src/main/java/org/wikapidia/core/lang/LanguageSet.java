@@ -149,4 +149,8 @@ public class LanguageSet implements Iterable<Language> {
         }
         return languages;
     }
+
+    public int size() {
+        return getNumberOfLanguages();
+    }
 }
