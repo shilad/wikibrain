@@ -28,8 +28,9 @@ public class LuceneIndexer {
 
     private final File root;
     private final Map<Language, IndexWriter> writers;
-    private final Collection<NameSpace> nameSpaces;
+    private final Collection<NameSpace> namespaces;
     private final LuceneOptions options;
+    private boolean closed = false;
 
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
@@ -54,7 +55,7 @@ public class LuceneIndexer {
         this(languages, options.namespaces, options.luceneRoot, options);
     }
 
-    private LuceneIndexer(LanguageSet languages, Collection<NameSpace> nameSpaces, File root, LuceneOptions options) {
+    private LuceneIndexer(LanguageSet languages, Collection<NameSpace> namespaces, File root, LuceneOptions options) {
         try {
             this.root = root;
             writers = new HashMap<Language, IndexWriter>();
@@ -64,7 +65,7 @@ public class LuceneIndexer {
                 IndexWriterConfig iwc = new IndexWriterConfig(options.matchVersion, analyzer);
                 writers.put(language, new IndexWriter(directory, iwc));
             }
-            this.nameSpaces = nameSpaces;
+            this.namespaces = namespaces;
             this.options = options;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -88,8 +89,11 @@ public class LuceneIndexer {
      * @param page the page to index
      */
     public void indexPage(RawPage page) {
+        if (closed) {
+            throw new IllegalStateException("Indexer has already been closed!");
+        }
         Language language = page.getLang();
-        if (nameSpaces.contains(page.getNamespace()) && getLanguageSet().containsLanguage(language)) {
+        if (namespaces.contains(page.getNamespace()) && getLanguageSet().containsLanguage(language)) {
             try {
                 IndexWriter writer = writers.get(language);
                 Document document = new Document();
@@ -102,6 +106,20 @@ public class LuceneIndexer {
                 document.add(wikiTextField);
                 document.add(plainTextField);
                 writer.addDocument(document);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     * Method should be called when done indexing.
+     */
+    public void close() {
+        closed = true;
+        for (IndexWriter writer : writers.values()) {
+            try {
+                writer.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

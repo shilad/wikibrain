@@ -1,6 +1,7 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -58,8 +59,17 @@ public class LuceneLoader {
         }
     }
 
+    public void endLoad() {
+        luceneIndexer.close();
+    }
+
     public static void main(String args[]) throws ConfigurationException, WikapidiaException {
         Options options = new Options();
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("drop-indexes")
+                        .withDescription("drop and recreate all indexes")
+                        .create("d"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
@@ -100,6 +110,19 @@ public class LuceneLoader {
 
         final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer);
 
+        if (cmd.hasOption("d")) {
+            LOG.log(Level.INFO, "Dropping indexes");
+            for (String langCode : languages.getLangCodes()) {
+                File lang = new File(luceneRoot, langCode);
+                if (lang.exists()) {
+                    for (File file : FileUtils.listFiles(lang, null, true)) {
+                        file.delete();
+                    }
+                    lang.delete();
+                }
+            }
+        }
+
         LOG.log(Level.INFO, "Begin indexing");
 
         // TODO: parallelize by some more efficient method?
@@ -114,6 +137,7 @@ public class LuceneLoader {
                 }
         );
 
+        loader.endLoad();
         LOG.log(Level.INFO, "Done indexing");
     }
 }
