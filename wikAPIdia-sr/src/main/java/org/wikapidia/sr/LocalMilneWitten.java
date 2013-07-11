@@ -164,7 +164,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         } else {
             TIntSet pageLinks = getLinks(page.toLocalId());
 
-            DaoFilter pageFilter = new DaoFilter();
+            DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
             Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
             int numArticles = 0;
             for (LocalPage lp : allPages){
