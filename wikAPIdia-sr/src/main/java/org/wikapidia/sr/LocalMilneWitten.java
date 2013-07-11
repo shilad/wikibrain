@@ -10,6 +10,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
@@ -93,6 +94,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 //        }
         return vector;
     }
+
+
 
     //TODO: Add a normalizer
     @Override
@@ -274,5 +277,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                     config.getBoolean("outLinks")
             );
         }
+
+
     }
 }

@@ -1,9 +1,13 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
@@ -12,6 +16,8 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
+import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.KnownSim;
 
 
@@ -273,6 +279,25 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             ids[i] = localIds.get(i).getId();
         }
         return cosimilarity(ids, language);
+    }
+
+    @Override
+    public void writeCosimilarity(LanguageSet languages, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
+        for (Language language: languages) {
+            String path = "../dat/" + getName()+ "-" + language.getLangCode();
+            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this, language);
+            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
+            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
+            TIntSet pageIds = new TIntHashSet();
+            for (LocalPage page : localPages) {
+                if (page != null) {
+                    pageIds.add(page.getLocalId());
+                }
+            }
+            featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
+            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path);
+            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+        }
     }
 
 

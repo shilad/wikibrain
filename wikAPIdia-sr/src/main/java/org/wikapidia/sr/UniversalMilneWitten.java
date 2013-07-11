@@ -250,7 +250,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
 
         @Override
         public String getPath() {
-            return "metric.universal";
+            return "sr.metric.universal";
         }
 
         @Override

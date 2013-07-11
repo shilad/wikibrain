@@ -29,9 +29,9 @@ public class PairwiseCosineSimilarity {
     private int maxResults = -1;
     private TIntSet idsInResults = new TIntHashSet();
 
-    public PairwiseCosineSimilarity(SparseMatrix matrix, SparseMatrix transpose) throws IOException {
-        this.matrix = matrix;
-        this.transpose = transpose;
+    public PairwiseCosineSimilarity(String path) throws IOException {
+        this.matrix = new SparseMatrix(new File(path+"-feature"));
+        this.transpose = new SparseMatrix(new File(path+"-transpose"));
     }
 
     public synchronized void initIfNeeded() {
@@ -123,22 +123,22 @@ public class PairwiseCosineSimilarity {
         return Math.sqrt(length);
     }
 
-    public static int PAGE_SIZE = 1024*1024*500;    // 500MB
-    public static void main(String args[]) throws IOException, InterruptedException {
-        if (args.length != 4 && args.length != 5) {
-            System.err.println("usage: " + PairwiseCosineSimilarity.class.getName()
-                    + " path_matrix path_matrix_transpose path_output maxResultsPerDoc [num-cores]");
-            System.exit(1);
-        }
-        SparseMatrix matrix = new SparseMatrix(new File(args[0]), 1, PAGE_SIZE);
-        SparseMatrix transpose = new SparseMatrix(new File(args[1]));
-        PairwiseCosineSimilarity sim = new PairwiseCosineSimilarity(matrix, transpose);
-        int cores = (args.length == 5)
-                ? Integer.valueOf(args[4])
-                : Runtime.getRuntime().availableProcessors();
-
-        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(new File(args[2]),sim);
-        writer.writeSims(matrix.getRowIds(), cores, Integer.valueOf(args[3]));
-    }
+//    public static int PAGE_SIZE = 1024*1024*500;    // 500MB
+//    public static void main(String args[]) throws IOException, InterruptedException {
+//        if (args.length != 4 && args.length != 5) {
+//            System.err.println("usage: " + PairwiseCosineSimilarity.class.getName()
+//                    + " path_matrix path_matrix_transpose path_output maxResultsPerDoc [num-cores]");
+//            System.exit(1);
+//        }
+//        SparseMatrix matrix = new SparseMatrix(new File(args[0]), 1, PAGE_SIZE);
+//        SparseMatrix transpose = new SparseMatrix(new File(args[1]));
+//        PairwiseCosineSimilarity sim = new PairwiseCosineSimilarity(matrix, transpose);
+//        int cores = (args.length == 5)
+//                ? Integer.valueOf(args[4])
+//                : Runtime.getRuntime().availableProcessors();
+//
+//        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(new File(args[2]),sim);
+//        writer.writeSims(matrix.getRowIds(), cores, Integer.valueOf(args[3]));
+//    }
 
 }

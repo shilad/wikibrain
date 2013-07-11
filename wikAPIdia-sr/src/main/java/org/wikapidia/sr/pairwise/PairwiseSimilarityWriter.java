@@ -2,6 +2,7 @@ package org.wikapidia.sr.pairwise;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
@@ -33,10 +34,10 @@ public class PairwiseSimilarityWriter {
     private TIntSet usedIds = new TIntHashSet();
     private PairwiseCosineSimilarity metric;
 
-    public PairwiseSimilarityWriter(File outputFile, PairwiseCosineSimilarity metric) throws IOException {
+    public PairwiseSimilarityWriter(String path) throws IOException {
         this.vconf = new ValueConf();
-        this.writer = new SparseMatrixWriter(outputFile, vconf);
-        this.metric  = metric;
+        this.writer = new SparseMatrixWriter(new File(path+"-cosimilarity"), vconf);
+        this.metric  = new PairwiseCosineSimilarity(path);
     }
 
     public void setValidIds(TIntSet validIds) {

@@ -181,4 +181,9 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         }
         return cosimilarity(ids);
     }
+
+    @Override
+    public int getAlgorithmId() {
+        return this.algorithmId;
+    }
 }

@@ -4,9 +4,7 @@ import gnu.trove.map.TIntDoubleMap;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.matrix.SparseMatrixRow;
-import org.wikapidia.matrix.SparseMatrixWriter;
-import org.wikapidia.matrix.ValueConf;
+import org.wikapidia.matrix.*;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.utils.ParallelForEach;
@@ -29,34 +27,31 @@ public class SRFeatureMatrixWriter {
     private LocalSRMetric localSRMetric = null;
     private UniversalSRMetric universalSRMetric = null;
     private Language language;
+    private String path;
 
 
-    public SRFeatureMatrixWriter(File matrix,  File transpose, LocalSRMetric metric, Language language) throws IOException {
+    public SRFeatureMatrixWriter(String path, LocalSRMetric metric, Language language) throws IOException {
         this.vconf = new ValueConf();
-        this.writer = new SparseMatrixWriter(matrix, vconf);
+        this.path = path;
+        this.writer = new SparseMatrixWriter(new File(path + "-feature"), vconf);
         this.language = language;
         this.localSRMetric = metric;
     }
 
-    public SRFeatureMatrixWriter(LocalSRMetric metric, Language language) {
-        this.localSRMetric = metric;
-        this.language = language;
-
-    }
-
-    public SRFeatureMatrixWriter(File outputFile, UniversalSRMetric metric) throws IOException {
+    public SRFeatureMatrixWriter(String path, UniversalSRMetric metric) throws IOException {
         this.vconf = new ValueConf();
-        this.writer = new SparseMatrixWriter(outputFile, vconf);
+        this.path = path;
+        this.writer = new SparseMatrixWriter(new File(path + "-feature"), vconf);
         this.universalSRMetric = metric;
     }
 
-    public void writeFeatureVectors(final int wpIds[], final int threads) throws WikapidiaException, InterruptedException {
+    public void writeFeatureVectors(final int wpIds[], final int threads) throws WikapidiaException, InterruptedException, IOException {
         List<Integer> wpIds2 = new ArrayList<Integer>();
         for (int id : wpIds) { wpIds2.add(id); }
         writeFeatureVectors(wpIds2, threads);
     }
 
-    public void writeFeatureVectors(List<Integer> wpIds, int threads) throws WikapidiaException, InterruptedException{
+    public void writeFeatureVectors(List<Integer> wpIds, int threads) throws WikapidiaException, InterruptedException, IOException {
         ParallelForEach.loop(wpIds, threads, new Procedure<Integer>() {
             public void call(Integer wpId) throws IOException, DaoException, WikapidiaException {
                 writeFeatureVector(wpId);
@@ -67,6 +62,14 @@ public class SRFeatureMatrixWriter {
         } catch (IOException e){
             throw new WikapidiaException(e);
         }
+        writeTranspose();
+    }
+
+    public void writeTranspose() throws IOException {
+        SparseMatrixTransposer transposer = new SparseMatrixTransposer(new SparseMatrix(new File(path + "-feature")),
+                new File(path + "-transpose"),
+                1024*1024*500); //500mb buffer
+        transposer.transpose();
     }
 
     private void writeFeatureVector(Integer id) throws WikapidiaException {

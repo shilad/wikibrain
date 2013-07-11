@@ -9,8 +9,12 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
+
+import java.io.IOException;
 
 /**
  * @author Matt Lesicko
@@ -18,26 +22,12 @@ import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
  */
 public class CosimilarityMatrixExample {
 
-    public static void main(String args[]) throws ConfigurationException, DaoException, WikapidiaException, InterruptedException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, WikapidiaException, InterruptedException, IOException {
         //Set-up
         Configurator c = new Configurator(new Configuration());
-        SRFeatureMatrixWriter writer = c.get(SRFeatureMatrixWriter.class);
-        LocalPageDao localPageDao = c.get(LocalPageDao.class);
+        LocalSRMetric sr = c.get(LocalSRMetric.class);
 
-        //Write the feature matrix on all ids from simple english
-        Iterable<LocalPage> localPages = localPageDao.get(new DaoFilter());
-        TIntSet pageIds = new TIntHashSet();
-        for (LocalPage page : localPages) {
-            if (page != null) {
-            pageIds.add(page.getLocalId());
-            }
-        }
-        writer.writeFeatureVectors(pageIds.toArray(), 4);
-
-
+        LanguageSet languages = new LanguageSet("simple");
+        sr.writeCosimilarity(languages,8,100);
     }
-
-
-
-
 }

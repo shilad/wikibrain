@@ -16,6 +16,12 @@ public interface UniversalSRMetric {
      */
     public String getName();
 
+    /**
+     *
+     * @return the algorithm id
+     */
+    public int getAlgorithmId();
+
 
     /**
      * Determine the similarity between two universal pages
