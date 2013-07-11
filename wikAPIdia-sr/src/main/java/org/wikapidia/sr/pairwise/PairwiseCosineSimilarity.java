@@ -1,20 +1,13 @@
 package org.wikapidia.sr.pairwise;
 
-import com.typesafe.config.Config;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.matrix.MatrixRow;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResultList;
-import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.sr.utils.Leaderboard;
 
 import java.io.File;
@@ -146,38 +139,6 @@ public class PairwiseCosineSimilarity {
 
         PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(new File(args[2]),sim);
         writer.writeSims(matrix.getRowIds(), cores, Integer.valueOf(args[3]));
-    }
-
-    public static class Provider extends org.wikapidia.conf.Provider<PairwiseCosineSimilarity> {
-        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
-            super(configurator, config);
-        }
-
-        @Override
-        public Class getType() {
-            return PairwiseCosineSimilarity.class;
-        }
-
-        @Override
-        public String getPath() {
-            return "matrix.feature";
-        }
-
-        @Override
-        public PairwiseCosineSimilarity get(String name, Config config) throws ConfigurationException {
-            if (config.getString("type").equals("local")) {
-                try {
-                    return new PairwiseCosineSimilarity(
-                        new SparseMatrix(new File(config.getString("file"))),
-                        new SparseMatrix(new File(config.getString("transpose")))
-                    );
-                } catch (IOException e) {
-                    throw new ConfigurationException(e);
-                }
-            } else {
-                return null;
-            }
-        }
     }
 
 }

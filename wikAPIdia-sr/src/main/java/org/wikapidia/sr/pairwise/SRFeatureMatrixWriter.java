@@ -1,10 +1,6 @@
 package org.wikapidia.sr.pairwise;
 
-import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
@@ -40,6 +36,12 @@ public class SRFeatureMatrixWriter {
         this.writer = new SparseMatrixWriter(matrix, vconf);
         this.language = language;
         this.localSRMetric = metric;
+    }
+
+    public SRFeatureMatrixWriter(LocalSRMetric metric, Language language) {
+        this.localSRMetric = metric;
+        this.language = language;
+
     }
 
     public SRFeatureMatrixWriter(File outputFile, UniversalSRMetric metric) throws IOException {
@@ -88,49 +90,6 @@ public class SRFeatureMatrixWriter {
             writer.writeRow(new SparseMatrixRow(new ValueConf(), id, linkedHashMap));
         } catch (IOException e){
             throw new WikapidiaException(e);
-        }
-    }
-
-    public static class Provider extends org.wikapidia.conf.Provider<SRFeatureMatrixWriter> {
-        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
-            super(configurator, config);
-        }
-
-        @Override
-        public Class getType() {
-            return SRFeatureMatrixWriter.class;
-        }
-
-        @Override
-        public String getPath() {
-            return "matrix.feature";
-        }
-
-        @Override
-        public SRFeatureMatrixWriter get(String name, Config config) throws ConfigurationException {
-            if (config.getString("type").equals("local")) {
-                try {
-                    return new SRFeatureMatrixWriter(
-                            new File(config.getString("file")),
-                            new File(config.getString("transpose")),
-                            getConfigurator().get(LocalSRMetric.class,config.getString("metric")),
-                            Language.getByLangCode(config.getString("language"))
-                    );
-                } catch (IOException e) {
-                    throw new ConfigurationException(e);
-                }
-            } else if (config.getString("type").equals("universal")) {
-                try {
-                    return new SRFeatureMatrixWriter(
-                            new File(config.getString("file")),
-                            getConfigurator().get(UniversalSRMetric.class,config.getString("metric"))
-                    );
-                } catch (IOException e) {
-                    throw new ConfigurationException(e);
-                }
-            } else {
-                return null;
-            }
         }
     }
 
