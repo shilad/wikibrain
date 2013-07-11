@@ -27,12 +27,12 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
 
-    private Language language;
-    private LuceneSearcher searcher;
+    private final Language language;
+    private final LuceneSearcher searcher;
 
-    public ESAMetric(Language language) {
+    public ESAMetric(Language language, LuceneSearcher searcher) {
         this.language = language;
-        searcher = new LuceneSearcher(new LanguageSet(language.getLangCode()), LuceneOptions.getDefaultOptions());
+        this.searcher = searcher;
     }
 
     /**
