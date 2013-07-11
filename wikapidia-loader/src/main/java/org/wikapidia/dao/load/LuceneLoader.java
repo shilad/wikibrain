@@ -20,6 +20,7 @@ import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -27,11 +28,11 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Ari Weiland
- *
  * This loader indexes raw pages into the lucene index.
  * It should not be called sooner than the WikiTextLoader,
  * but where after that I am not sure.
+ *
+ * @author Ari Weiland
  *
  */
 public class LuceneLoader {
@@ -39,16 +40,21 @@ public class LuceneLoader {
 
     private final RawPageDao rawPageDao;
     private final LuceneIndexer luceneIndexer;
+    private final Collection<NameSpace> namespaces;
 
-    public LuceneLoader(RawPageDao rawPageDao, LuceneIndexer luceneIndexer) {
+    public LuceneLoader(RawPageDao rawPageDao, LuceneIndexer luceneIndexer, Collection<NameSpace> namespaces) {
         this.rawPageDao = rawPageDao;
         this.luceneIndexer = luceneIndexer;
+        this.namespaces = namespaces;
     }
 
     public void load(Language language) throws WikapidiaException {
         try {
             int i = 0;
-            Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter().setLanguages(language).setRedirect(false));
+            Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter()
+                    .setLanguages(language)
+                    .setNameSpaces(namespaces)
+                    .setRedirect(false));
             for (RawPage rawPage : rawPages) {
                 luceneIndexer.indexPage(rawPage);
                 i++;
@@ -63,7 +69,7 @@ public class LuceneLoader {
         luceneIndexer.close();
     }
 
-    public static void main(String args[]) throws ConfigurationException, WikapidiaException {
+    public static void main(String args[]) throws ConfigurationException, WikapidiaException, IOException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -94,31 +100,28 @@ public class LuceneLoader {
         LuceneOptions luceneOptions = conf.get(LuceneOptions.class, "options");
 
         LanguageSet languages = env.getLanguages();
-        Collection<NameSpace> nameSpaces = new ArrayList<NameSpace>();
+        Collection<NameSpace> namespaces = new ArrayList<NameSpace>();
         if (cmd.hasOption("p")) {
             String[] nsStrings = cmd.getOptionValues("p");
             for (String s : nsStrings) {
-                nameSpaces.add(NameSpace.getNameSpaceByName(s));
+                namespaces.add(NameSpace.getNameSpaceByName(s));
             }
         } else {
-            nameSpaces = luceneOptions.namespaces;
+            namespaces = luceneOptions.namespaces;
         }
         File luceneRoot = luceneOptions.luceneRoot;
 
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
-        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, nameSpaces, luceneRoot);
+        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneRoot);
 
-        final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer);
+        final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer, namespaces);
 
         if (cmd.hasOption("d")) {
             LOG.log(Level.INFO, "Dropping indexes");
             for (String langCode : languages.getLangCodes()) {
                 File lang = new File(luceneRoot, langCode);
                 if (lang.exists()) {
-                    for (File file : FileUtils.listFiles(lang, null, true)) {
-                        file.delete();
-                    }
-                    lang.delete();
+                    FileUtils.forceDelete(lang);
                 }
             }
         }

@@ -15,12 +15,13 @@ import java.io.Reader;
 
 /**
  *
- * @author Ari Weiland
- *
  * This class is based on a class of the same name from Brent Hecht, WikAPIdia.
- * I have updated everything to properly function consistently with lucene 4.3,
- * as well as adding functionality such as the FilterSelects and the getIndexWriter
- * and getIndexSearcher methods.
+ * I have updated everything to properly function consistently with lucene 4.3.
+ *
+ * This class functions as a Lucene Analyzer for a specific language. It runs
+ * off of the functions built into the LanguageTokenizer class.
+ *
+ * @author Ari Weiland
  *
  */
 public class WikapidiaAnalyzer extends Analyzer {

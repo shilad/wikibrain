@@ -16,9 +16,9 @@ import java.util.Map;
 
 /**
  *
- * @author Ari Weiland
- *
  * This class wraps the lucene search into a class that can handle any specified language
+ *
+ * @author Ari Weiland
  *
 */
 public class LuceneSearcher {

@@ -14,12 +14,12 @@ import java.util.List;
 
 /**
  *
- * @author Ari Weiland
- *
  * This class can be instantiated through a configurator or by default configuration.
  * It provides access to all configurable options relevant to Lucene, such as version,
  * directory, and namespaces to index.  It also contains static final variables for
  * different field names. It should be passed to all classes in the lucene package.
+ *
+ * @author Ari Weiland
  *
  */
 public class LuceneOptions {
@@ -35,23 +35,6 @@ public class LuceneOptions {
     public final Collection<NameSpace> namespaces;
     public final TokenizerOptions options;
 
-//    public LuceneOptions() {
-//        this.conf = new Configuration(null);
-//        Config config = conf.get();
-//        matchVersion = Version.parseLeniently(config.getString("lucene.options.version"));
-//        luceneRoot = new File(config.getString("lucene.options.directory"));
-//        namespaces = new ArrayList<NameSpace>();
-//        List<String> nsStrings = config.getStringList("lucene.options.namespaces");
-//        for (String s : nsStrings) {
-//            namespaces.add(NameSpace.getNameSpaceByName(s));
-//        }
-//        options = buildOptions(
-//                config.getBoolean("lucene.options.caseInsensitive"),
-//                config.getBoolean("lucene.options.useStopWords"),
-//                config.getBoolean("lucene.options.useStem")
-//        );
-//    }
-
     /**
      * Used by provider only
      */
@@ -66,6 +49,10 @@ public class LuceneOptions {
         this.options = options;
     }
 
+    /**
+     * Returns a default set of LuceneOptions
+     * @return a default set of LuceneOptions
+     */
     public static LuceneOptions getDefaultOptions() {
         try {
             return new Configurator(new Configuration(null)).get(LuceneOptions.class, "options");
