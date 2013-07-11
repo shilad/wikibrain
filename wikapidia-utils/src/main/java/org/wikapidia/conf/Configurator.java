@@ -251,6 +251,38 @@ public class Configurator {
     }
 
     /**
+     * Get every instance of the specified class
+     * 
+     * @param klass The generic interface or superclass, not the specific implementation.
+     * @return
+     * @throws ConfigurationException
+     */
+    public <T> List<T> getAll(Class<T> klass) throws ConfigurationException{
+        if (!providers.containsKey(klass)) {
+            throw new ConfigurationException("No registered providers for components with class " + klass);
+        }
+        ProviderSet pset = providers.get(klass);
+        if (!conf.get().hasPath(pset.path)) {
+            throw new ConfigurationException("Configuration path " + pset.path + " does not exist");
+        }
+        Config pConfig = conf.get().getConfig(pset.path);
+        List<T> classes = new ArrayList<T>();
+        for (String name : pConfig.root().keySet()){
+            String path = pset.path + "." + name;
+            Config config = conf.get().getConfig(path);
+            for (Provider p : pset.providers) {
+                Object o = p.get(name, config);
+                if (o != null) {
+                    classes.add ((T) o);
+                    break;
+                }
+            }
+        }
+        return classes;
+
+    }
+
+    /**
      * Get a specific named instance of the component with the specified class.
      * This method can only be used when there is exactly one instance of the component.
      *

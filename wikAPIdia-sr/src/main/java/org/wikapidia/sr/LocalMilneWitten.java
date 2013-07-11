@@ -52,7 +52,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     public String getName() {
-        return "Milne Witten";
+        return "MilneWitten";
     }
 
     public void write(File directory) throws IOException {
