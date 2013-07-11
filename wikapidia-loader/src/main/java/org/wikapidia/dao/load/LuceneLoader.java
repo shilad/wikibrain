@@ -47,7 +47,7 @@ public class LuceneLoader {
     public void load(Language language) throws WikapidiaException {
         try {
             int i = 0;
-            Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter().setLanguages(language));
+            Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter().setLanguages(language).setRedirect(false));
             for (RawPage rawPage : rawPages) {
                 luceneIndexer.indexPage(rawPage);
                 i++;
