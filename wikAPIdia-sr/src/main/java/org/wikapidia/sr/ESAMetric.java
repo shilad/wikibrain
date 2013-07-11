@@ -2,6 +2,7 @@ package org.wikapidia.sr;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.core.WikapidiaException;
@@ -65,7 +66,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         ScoreDoc[] scoreDocs = new ScoreDoc[0];
         scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
-        // TODO: prune
+        pruneSimilar(scoreDocs);
         TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
         return result;
     }
@@ -80,7 +81,7 @@ public class ESAMetric extends BaseLocalSRMetric {
     public TIntDoubleHashMap getConceptVector(LocalPage localPage, Language language) throws DaoException { // TODO: validIDs
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
-        // TODO: prune
+        pruneSimilar(scoreDocs);
         return SimUtils.normalizeVector(expandScores(scoreDocs));
     }
 
@@ -135,6 +136,25 @@ public class ESAMetric extends BaseLocalSRMetric {
             }
         }
         return srResults;
+    }
+
+    private void pruneSimilar(ScoreDoc[] scoreDocs) {
+        if (scoreDocs.length == 0) {
+            return;
+        }
+        int cutoff = scoreDocs.length;
+        double threshold = 0.005 * scoreDocs[0].score;
+        for (int i = 0, j = 100; j < scoreDocs.length; i++, j++) {
+            float delta = scoreDocs[i].score - scoreDocs[j].score;
+            if (delta < threshold) {
+                cutoff = j;
+                break;
+            }
+        }
+        if (cutoff < scoreDocs.length) {
+//            LOG.info("pruned results from " + docs.scoreDocs.length + " to " + cutoff);
+            scoreDocs = ArrayUtils.subarray(scoreDocs, 0, cutoff);
+        }
     }
 
     @Override
