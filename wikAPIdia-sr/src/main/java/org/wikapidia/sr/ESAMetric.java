@@ -3,13 +3,10 @@ package org.wikapidia.sr;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
 import org.wikapidia.sr.utils.KnownSim;
@@ -63,11 +60,9 @@ public class ESAMetric extends BaseLocalSRMetric {
      */
     public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws DaoException { // TODO: validIDs
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-        ScoreDoc[] scoreDocs = new ScoreDoc[0];
-        scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
         pruneSimilar(scoreDocs);
-        TIntDoubleHashMap result = SimUtils.normalizeVector(expandScores(scoreDocs));  // normalize vector to unit length
-        return result;
+        return SimUtils.normalizeVector(expandScores(scoreDocs));
     }
 
     /**

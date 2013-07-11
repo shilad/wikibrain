@@ -26,7 +26,6 @@ public class LuceneOptions {
 
     public static final String LOCAL_ID_FIELD_NAME = "local_id";
     public static final String LANG_ID_FIELD_NAME = "lang_id";
-    public static final String WIKITEXT_FIELD_NAME = "wikitext";
     public static final String PLAINTEXT_FIELD_NAME = "plaintext";
 
     public final Configuration conf;
@@ -56,7 +55,7 @@ public class LuceneOptions {
      */
     public static LuceneOptions getDefaultOptions() {
         try {
-            return new Configurator(new Configuration(null)).get(LuceneOptions.class, "options");
+            return new Configurator(new Configuration()).get(LuceneOptions.class, "options");
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -95,8 +94,7 @@ public class LuceneOptions {
                     buildOptions(
                             config.getBoolean("caseInsensitive"),
                             config.getBoolean("useStopWords"),
-                            config.getBoolean("useStem")
-                    )
+                            config.getBoolean("useStem"))
             );
         }
     }

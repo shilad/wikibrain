@@ -1,5 +1,6 @@
 package org.wikapidia.lucene;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -86,6 +87,22 @@ public class LuceneIndexer {
     }
 
     /**
+     * Clears all data for the languages from the file system
+     */
+    public void clearIndexes() {
+        for (Language language : writers.keySet()) {
+            File lang = new File(options.luceneRoot, language.getLangCode());
+            if (lang.exists()) {
+                try {
+                    FileUtils.forceDelete(lang);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    /**
      * Indexes a specific RawPage
      *
      * @param page the page to index
@@ -101,11 +118,9 @@ public class LuceneIndexer {
                 Document document = new Document();
                 Field localIdField = new IntField(LuceneOptions.LOCAL_ID_FIELD_NAME, page.getPageId(), Field.Store.YES);
                 Field langIdField = new IntField(LuceneOptions.LANG_ID_FIELD_NAME, page.getLang().getId(), Field.Store.YES);
-                Field wikiTextField = new TextField(LuceneOptions.WIKITEXT_FIELD_NAME, page.getBody(), Field.Store.YES);
                 Field plainTextField = new TextField(LuceneOptions.PLAINTEXT_FIELD_NAME, page.getPlainText(), Field.Store.YES);
                 document.add(localIdField);
                 document.add(langIdField);
-                document.add(wikiTextField);
                 document.add(plainTextField);
                 writer.addDocument(document);
             } catch (IOException e) {

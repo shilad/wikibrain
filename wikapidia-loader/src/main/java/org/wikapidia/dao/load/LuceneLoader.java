@@ -1,7 +1,7 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
+import org.apache.lucene.util.Version;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -19,7 +19,6 @@ import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +45,10 @@ public class LuceneLoader {
         this.rawPageDao = rawPageDao;
         this.luceneIndexer = luceneIndexer;
         this.namespaces = namespaces;
+    }
+
+    public void dropIndexes() {
+        luceneIndexer.clearIndexes();
     }
 
     public void load(Language language) throws WikapidiaException {
@@ -109,21 +112,15 @@ public class LuceneLoader {
         } else {
             namespaces = luceneOptions.namespaces;
         }
-        File luceneRoot = luceneOptions.luceneRoot;
 
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
-        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneRoot);
+        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneOptions);
 
         final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer, namespaces);
 
         if (cmd.hasOption("d")) {
             LOG.log(Level.INFO, "Dropping indexes");
-            for (String langCode : languages.getLangCodes()) {
-                File lang = new File(luceneRoot, langCode);
-                if (lang.exists()) {
-                    FileUtils.forceDelete(lang);
-                }
-            }
+            loader.dropIndexes();
         }
 
         LOG.log(Level.INFO, "Begin indexing");
