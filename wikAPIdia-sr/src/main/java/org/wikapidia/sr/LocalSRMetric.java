@@ -167,7 +167,7 @@ public interface LocalSRMetric {
      * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class
      * @param languages the set of languages that you would like matrices for
      * @param numThreads the number of threads
-     * @param maxHits the number document hits you would like returned from the most similar function
+     * @param maxHits the number of document hits you would like returned from the most similar function
      */
     public void writeCosimilarity(LanguageSet languages, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException;
 }

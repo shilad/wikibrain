@@ -2,7 +2,10 @@ package org.wikapidia.sr;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
@@ -10,6 +13,8 @@ import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
+import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -185,5 +190,22 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     @Override
     public int getAlgorithmId() {
         return this.algorithmId;
+    }
+
+    @Override
+    public void writeCosimilarity(int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
+        String path = "../dat/Universal" + getName() + "-" + algorithmId;
+        SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
+        DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+        Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
+        TIntSet pageIds = new TIntHashSet();
+        for (UniversalPage page : universalPages) {
+            if (page != null) {
+                pageIds.add(page.getUnivId());
+            }
+        }
+        featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
+        PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path);
+        pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
     }
 }
