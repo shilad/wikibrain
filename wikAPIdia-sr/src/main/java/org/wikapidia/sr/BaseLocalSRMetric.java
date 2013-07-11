@@ -161,6 +161,9 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         context.clear();
         context.add(new LocalString(language,phrase1));
         LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
+        if (similar1==null||similar2==null){
+            return new SRResult(Double.NaN);
+        }
         return similarity(pageHelper.getById(language,similar1.getId()),
                 pageHelper.getById(language,similar2.getId()),
                 explanations);
@@ -181,6 +184,11 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
         LocalId similar = disambiguator.disambiguate(phrase,null);
+        if (similar==null){
+            SRResultList resultList = new SRResultList(1);
+            resultList.set(0, new SRResult(Double.NaN));
+            return resultList;
+        }
         return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults, explanations,validIds);
     }
 

@@ -77,11 +77,14 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         HashSet<LocalString> context = new HashSet<LocalString>();
         context.add(phrase2);
         LocalId similar1 = disambiguator.disambiguate(phrase1, context);
-        int uId1 = universalPageDao.getUnivPageId(similar1.asLocalPage(),algorithmId);
-        UniversalPage up1 = universalPageDao.getById(uId1,algorithmId);
         context.clear();
         context.add(phrase1);
         LocalId similar2 = disambiguator.disambiguate(phrase2, context);
+        if (similar1==null|| similar2==null){
+            return new SRResult(Double.NaN);
+        }
+        int uId1 = universalPageDao.getUnivPageId(similar1.asLocalPage(),algorithmId);
+        UniversalPage up1 = universalPageDao.getById(uId1,algorithmId);
         int uId2 = universalPageDao.getUnivPageId(similar2.asLocalPage(),algorithmId);
         UniversalPage up2 = universalPageDao.getById(uId1,algorithmId);
         return similarity(up1,up2,explanations);
@@ -103,6 +106,11 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
         LocalId localId = disambiguator.disambiguate(phrase,null);
+        if (localId == null){
+            SRResultList resultList = new SRResultList(1);
+            resultList.set(0, new SRResult(Double.NaN));
+            return resultList;
+        }
         int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
         UniversalPage up = universalPageDao.getById(uId,algorithmId);
         return mostSimilar(up,maxResults,explanations,validIds);
