@@ -14,6 +14,7 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.UniversalId;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
@@ -80,21 +81,23 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     from(Tables.UNIVERSAL_PAGE).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            Set<Integer> univIds = new HashSet<Integer>();
+            Set<UniversalId> univIds = new HashSet<UniversalId>();
             for (Record record : result) {
-                univIds.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
+                univIds.add(new UniversalId(
+                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID),
+                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID)));
             }
-            return new SqlDaoIterable<T, Integer>(result, univIds.iterator(), conn) {
+            return new SqlDaoIterable<T, UniversalId>(result, univIds.iterator(), conn) {
 
                 @Override
-                public T transform(Integer item) throws DaoException {
-                    List<Record> records = new ArrayList<Record>();
-                    for (Record record : result) {
-                        if (record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID).equals(item)) {
-                            records.add(record);
-                        }
-                    }
-                    return (T)buildUniversalPage(records);
+                public T transform(UniversalId item) throws DaoException {
+//                    List<Record> records = new ArrayList<Record>();
+//                    for (Record record : result) {
+//                        if (record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID).equals(item)) {
+//                            records.add(record);
+//                        }
+//                    }
+                    return getById(item);
                 }
             };
         } catch (SQLException e) {
@@ -120,6 +123,10 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         } finally {
             quietlyCloseConn(conn);
         }
+    }
+
+    public T getById(UniversalId univId) throws DaoException {
+        return getById(univId.getId(), univId.getAlgorithmId());
     }
 
     @Override

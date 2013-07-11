@@ -13,6 +13,7 @@ import org.wikapidia.core.dao.UniversalLinkDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.UniversalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
@@ -51,13 +52,11 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     public void save(UniversalLink link) throws DaoException {
         for (Language language : link.getLanguageSetOfExistsInLangs()) {
             for (LocalLink localLink : link.getLocalLinks(language)) {
-                insert(
-                    localLink.getLanguage().getId(),
-                    localLink.getSourceId(),
-                    localLink.getDestId(),
-                    link.getSourceUnivId(),
-                    link.getDestUnivId(),
-                    link.getAlgorithmId()
+                save(
+                        localLink,
+                        link.getSourceUnivId(),
+                        link.getDestUnivId(),
+                        link.getAlgorithmId()
                 );
             }
         }
@@ -160,6 +159,13 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         }
     }
 
+    public UniversalLink getUniversalLink(UniversalId sourceId, UniversalId destId) throws DaoException {
+        if (sourceId.getAlgorithmId() != destId.getAlgorithmId()) {
+            throw new DaoException("Algorithm Mismatch!");
+        }
+        return getUniversalLink(sourceId.getId(), destId.getId(), sourceId.getAlgorithmId());
+    }
+
     private UniversalLinkGroup buildUniversalLinkGroup(Cursor<Record> result, boolean outlinks) throws DaoException {
         if (!result.hasNext()) {
             return null;
@@ -204,24 +210,25 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     TODO: decide which of these methods to use
      */
     private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result, Connection conn) throws DaoException {
-        Multimap<Integer, Integer> univIds = HashMultimap.create();
+        Multimap<UniversalId, UniversalId> univIds = HashMultimap.create();
         for (Record record : result) {
+            int algorithmId = record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID);
             univIds.put(
-                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),
-                    record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID));
+                    new UniversalId(record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID), algorithmId),
+                    new UniversalId(record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID), algorithmId));
         }
-        return new SqlDaoIterable<UniversalLink, Map.Entry<Integer, Integer>>(result, univIds.entries().iterator(), conn) {
+        return new SqlDaoIterable<UniversalLink, Map.Entry<UniversalId, UniversalId>>(result, univIds.entries().iterator(), conn) {
 
             @Override
-            public UniversalLink transform(Map.Entry<Integer, Integer> item) throws DaoException {
-                List<Record> records = new ArrayList<Record>();
-                for (Record record : this.result) {
-                    if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getKey()) &&
-                            record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getValue())) {
-                        records.add(record);
-                    }
-                }
-                return buildUniversalLink(records);
+            public UniversalLink transform(Map.Entry<UniversalId, UniversalId> item) throws DaoException {
+//                List<Record> records = new ArrayList<Record>();
+//                for (Record record : this.result) {
+//                    if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getKey()) &&
+//                            record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID).equals(item.getValue())) {
+//                        records.add(record);
+//                    }
+//                }
+                return getUniversalLink(item.getKey(), item.getValue());
             }
         };
     }
