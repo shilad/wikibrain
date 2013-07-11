@@ -102,7 +102,11 @@ public class RawPage {
      * @return
      */
     public String getPlainText() {
-        return new MediaWikiParserFactory().createParser().parse(body).getText();
+        if (body == null) {
+            return ""; // TODO: this is a bad workaround, we should fix it
+        } else {
+            return new MediaWikiParserFactory().createParser().parse(body).getText();
+        }
     }
 
     public String toString(){
