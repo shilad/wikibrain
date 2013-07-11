@@ -32,6 +32,7 @@ public class WikapidiaAnalyzer extends Analyzer {
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with all filters
      * and default options.
+     *
      * @param language the language this analyzer analyzes
      */
     public WikapidiaAnalyzer(Language language) {
@@ -41,6 +42,7 @@ public class WikapidiaAnalyzer extends Analyzer {
     /**
      * Constructs a WikapidiaAnalyzer for the specified language with specified filters
      * and specified options.
+     *
      * @param language the language this analyzer analyzes
      * @param options a LuceneOptions object containing specific options for lucene
      */

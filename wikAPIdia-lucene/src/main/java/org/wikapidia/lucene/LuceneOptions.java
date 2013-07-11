@@ -36,7 +36,7 @@ public class LuceneOptions {
     public final TokenizerOptions options;
 
     /**
-     * Used by provider only
+     * Used by provider only.
      */
     private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options) {
         this.conf = conf;
@@ -50,7 +50,8 @@ public class LuceneOptions {
     }
 
     /**
-     * Returns a default set of LuceneOptions
+     * Returns a default set of LuceneOptions.
+     *
      * @return a default set of LuceneOptions
      */
     public static LuceneOptions getDefaultOptions() {

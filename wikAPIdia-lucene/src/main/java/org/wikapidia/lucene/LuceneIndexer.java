@@ -35,8 +35,9 @@ public class LuceneIndexer {
 
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
-     * specified LanguageSet and a Collection of NameSpaces. Indexes are
-     * then placed in language-specific subdirectories in the specified file.
+     * specified LanguageSet. Indexes are then placed in language-specific
+     * subdirectories in the specified file.
+     *
      * @param languages the language set in which this searcher can operate
      * @param root the root directory in which to save all the lucene directories
      */
@@ -48,6 +49,7 @@ public class LuceneIndexer {
      * Constructs a LuceneIndexer that will index any RawPage within a
      * specified LanguageSet. Indexes are then placed in language-specific
      * subdirectories specified by options.
+     *
      * @param languages the language set in which this searcher can operate
      * @param options a LuceneOptions object containing specific options for lucene
      */
@@ -85,6 +87,7 @@ public class LuceneIndexer {
 
     /**
      * Indexes a specific RawPage
+     *
      * @param page the page to index
      */
     public void indexPage(RawPage page) {
