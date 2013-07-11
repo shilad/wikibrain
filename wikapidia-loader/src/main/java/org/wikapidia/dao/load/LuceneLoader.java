@@ -25,11 +25,11 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Ari Weiland
- *
  * This loader indexes raw pages into the lucene index.
  * It should not be called sooner than the WikiTextLoader,
  * but where after that I am not sure.
+ *
+ * @author Ari Weiland
  *
  */
 public class LuceneLoader {

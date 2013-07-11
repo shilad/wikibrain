@@ -25,9 +25,9 @@ import java.util.logging.Level;
 
 /**
  *
- * @author Ari Weiland
- *
  * A SQL database implementation of the UniversalLinkDao.
+ *
+ * @author Ari Weiland
  *
  */
 public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
