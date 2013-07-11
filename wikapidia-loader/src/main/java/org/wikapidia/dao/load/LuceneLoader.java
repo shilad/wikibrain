@@ -21,6 +21,7 @@ import org.wikapidia.utils.Procedure;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,7 +50,8 @@ public class LuceneLoader {
             Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter().setLanguages(language));
             for (RawPage rawPage : rawPages) {
                 luceneIndexer.indexPage(rawPage);
-                System.out.println(++i);
+                i++;
+                if (i%1000 == 0) LOG.log(Level.INFO, "RawPages indexed: " + i);
             }
         } catch (DaoException e) {
             throw new WikapidiaException(e);
@@ -98,6 +100,8 @@ public class LuceneLoader {
 
         final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer);
 
+        LOG.log(Level.INFO, "Begin indexing");
+
         // TODO: parallelize by some more efficient method?
         ParallelForEach.loop(
                 languages.getLanguages(),
@@ -110,5 +114,6 @@ public class LuceneLoader {
                 }
         );
 
+        LOG.log(Level.INFO, "Done indexing");
     }
 }
