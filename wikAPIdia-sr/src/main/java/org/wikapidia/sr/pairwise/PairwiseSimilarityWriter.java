@@ -1,19 +1,12 @@
 package org.wikapidia.sr.pairwise;
 
-import com.typesafe.config.Config;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResultList;
-import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -41,10 +34,10 @@ public class PairwiseSimilarityWriter {
     private TIntSet usedIds = new TIntHashSet();
     private PairwiseCosineSimilarity metric;
 
-    public PairwiseSimilarityWriter(File outputFile, PairwiseCosineSimilarity metric) throws IOException {
+    public PairwiseSimilarityWriter(String path) throws IOException {
         this.vconf = new ValueConf();
-        this.writer = new SparseMatrixWriter(outputFile, vconf);
-        this.metric  = metric;
+        this.writer = new SparseMatrixWriter(new File(path+"-cosimilarity"), vconf);
+        this.metric  = new PairwiseCosineSimilarity(path);
     }
 
     public void setValidIds(TIntSet validIds) {
@@ -84,29 +77,4 @@ public class PairwiseSimilarityWriter {
             writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
         }
     }
-
-    public static class Provider extends org.wikapidia.conf.Provider<PairwiseSimilarityWriter> {
-        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
-            super(configurator, config);
-        }
-
-        @Override
-        public Class getType() {
-            return PairwiseSimilarityWriter.class;
-        }
-
-        @Override
-        public String getPath() {
-            return "matrix.feature";
-        }
-
-        @Override
-        public PairwiseSimilarityWriter get(String name, Config config) throws ConfigurationException {
-            if (config.getString("type").equals("local")) {
-                return null;
-            }
-        }
-    }
-
-
 }

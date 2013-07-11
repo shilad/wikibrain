@@ -61,7 +61,7 @@ public class TopResultDisambiguator implements Disambiguator{
 
         @Override
         public String getPath(){
-            return "disambig";
+            return "sr.disambig";
         }
 
         @Override

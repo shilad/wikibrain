@@ -8,15 +8,12 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
-import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.matrix.SparseMatrixRow;
-import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -24,6 +21,11 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+/**
+ * @author Ben Hillmann
+ * @author Matt Lesicko
+ */
 
 public class LocalMilneWitten extends BaseLocalSRMetric{
     LocalLinkDao linkHelper;
@@ -92,6 +94,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 //        }
         return vector;
     }
+
+
 
     //TODO: Add a normalizer
     @Override
@@ -257,7 +261,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 
         @Override
         public String getPath() {
-            return "metric.local";
+            return "sr.metric.local";
         }
 
         @Override
@@ -273,5 +277,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                     config.getBoolean("outLinks")
             );
         }
+
+
     }
 }

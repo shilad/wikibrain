@@ -2,6 +2,7 @@ package org.wikapidia.sr;
 
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
@@ -9,12 +10,23 @@ import org.wikapidia.matrix.SparseMatrixRow;
 
 import java.io.IOException;
 
+/**
+ * @author Matt Lesicko
+ * @author Ben Hillmann
+ */
+
 public interface UniversalSRMetric {
     /**
      *
      * @return the name of the similarity metric in a human readable format
      */
     public String getName();
+
+    /**
+     *
+     * @return the algorithm id
+     */
+    public int getAlgorithmId();
 
 
     /**
@@ -115,5 +127,12 @@ public interface UniversalSRMetric {
      * @throws DaoException
      */
     public TIntDoubleMap getVector(int id) throws DaoException;
+
+    /**
+     * Writes a cosimilarity matrix to the dat directory based off of the getVector function and the pairwise cosine similarity class
+     * @param numThreads the number of threads
+     * @param maxHits the number of document hits you would like returned from the most similar function
+     */
+    public void writeCosimilarity(int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException;
 
 }

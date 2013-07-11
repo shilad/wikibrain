@@ -2,8 +2,10 @@ package org.wikapidia.sr;
 
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.matrix.SparseMatrixRow;
@@ -12,6 +14,11 @@ import org.wikapidia.sr.utils.KnownSim;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+/**
+ * @author Matt Lesicko
+ * @author Ben Hillmann
+ */
 
 public interface LocalSRMetric {
 
@@ -155,4 +162,12 @@ public interface LocalSRMetric {
      * @throws IOException
      */
     public double[][] cosimilarity(String phrases[], Language language) throws DaoException;
+
+    /**
+     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class
+     * @param languages the set of languages that you would like matrices for
+     * @param numThreads the number of threads
+     * @param maxHits the number of document hits you would like returned from the most similar function
+     */
+    public void writeCosimilarity(LanguageSet languages, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException;
 }
