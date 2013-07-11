@@ -41,7 +41,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
 
     @Override
     public String getName() {
-        return "Milne Witten";
+        return "MilneWitten";
     }
 
     public boolean isOutLinks() {
