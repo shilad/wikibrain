@@ -235,7 +235,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     private TIntSet getLinks(LocalId wpId) throws DaoException {
-        SqlDaoIterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
+        Iterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
         TIntSet linkIds = new TIntHashSet();
         if(!outLinks) {
             for (LocalLink link : links){

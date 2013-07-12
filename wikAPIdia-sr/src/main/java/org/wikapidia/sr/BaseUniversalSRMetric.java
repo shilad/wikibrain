@@ -105,7 +105,15 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
-        return mostSimilar(phrase, maxResults, explanations, null);
+        LocalId localId = disambiguator.disambiguate(phrase,null);
+        if (localId == null){
+            SRResultList resultList = new SRResultList(1);
+            resultList.set(0, new SRResult(Double.NaN));
+            return resultList;
+        }
+        int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
+        UniversalPage up = universalPageDao.getById(uId,algorithmId);
+        return mostSimilar(up,maxResults,explanations);
     }
 
     @Override

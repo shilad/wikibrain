@@ -110,7 +110,6 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                     worthChecking.add(link);
                 }
             }
-
             return mostSimilar(page, maxResults, explanations,worthChecking);
         }
     }
@@ -238,14 +237,14 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         return linkIds;
     }
 
-    public static class Provider extends org.wikapidia.conf.Provider<UniversalMilneWitten> {
+    public static class Provider extends org.wikapidia.conf.Provider<UniversalSRMetric> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return UniversalMilneWitten.class;
+            return UniversalSRMetric.class;
         }
 
         @Override
@@ -254,7 +253,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         }
 
         @Override
-        public UniversalMilneWitten get(String name, Config config) throws ConfigurationException {
+        public UniversalSRMetric get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("milneWitten")) {
                 return null;
             }
