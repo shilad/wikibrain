@@ -25,14 +25,31 @@ import java.util.Map;
 public class TestUniversalPageDao {
 
     @Test
-    public void testGet() throws ConfigurationException, DaoException {
+    public void testPageGet() throws ConfigurationException, DaoException {
+        Configurator configurator = new Configurator(new Configuration());
+        UniversalPageDao dao = configurator.get(UniversalPageDao.class);
+
+        Iterable<UniversalPage> iterable = dao.get(new DaoFilter());
+        int i = 0;
+        for (UniversalPage page : iterable) {
+            System.out.println(page.getUnivId());
+            i++;
+        }
+        System.out.println("Page count: " + i);
+    }
+
+    @Test
+    public void testLinkGet() throws ConfigurationException, DaoException {
         Configurator configurator = new Configurator(new Configuration());
         UniversalLinkDao dao = configurator.get(UniversalLinkDao.class);
 
-        Iterable<UniversalLink> iterable = dao.get(new DaoFilter().setAlgorithmIds(0));
+        Iterable<UniversalLink> iterable = dao.get(new DaoFilter().setSourceIds(0));
+        int i = 0;
         for (UniversalLink link : iterable) {
             System.out.println(link.getSourceUnivId() + " : " + link.getDestUnivId());
+            i++;
         }
+        System.out.println("Page count: " + i);
     }
 
 //    @Test

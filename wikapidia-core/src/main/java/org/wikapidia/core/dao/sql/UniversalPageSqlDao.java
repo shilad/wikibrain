@@ -81,17 +81,17 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     from(Tables.UNIVERSAL_PAGE).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            Set<UniversalId> univIds = new HashSet<UniversalId>();
+            Set<Integer[]> pages = new HashSet<Integer[]>();
             for (Record record : result) {
-                univIds.add(new UniversalId(
-                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID),
-                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID)));
+                pages.add(new Integer[]{
+                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
+                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
             }
-            return new SqlDaoIterable<T, UniversalId>(result, univIds.iterator(), conn) {
+            return new SqlDaoIterable<T, Integer[]>(result, pages.iterator(), conn) {
 
                 @Override
-                public T transform(UniversalId item) throws DaoException {
-                    return getById(item);
+                public T transform(Integer[] item) throws DaoException {
+                    return getById(item[0], item[1]);
                 }
             };
         } catch (SQLException e) {
@@ -117,10 +117,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         } finally {
             quietlyCloseConn(conn);
         }
-    }
-
-    public T getById(UniversalId univId) throws DaoException {
-        return getById(univId.getId(), univId.getAlgorithmId());
     }
 
     @Override

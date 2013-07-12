@@ -109,7 +109,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
-                    where(Tables.UNIVERSAL_LINK.SOURCE_ID.eq(sourceId)).
+                    where(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID.eq(sourceId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetchLazy(getFetchSize());
             return buildUniversalLinkGroup(result, true);
@@ -128,7 +128,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
-                    where(Tables.UNIVERSAL_LINK.DEST_ID.eq(destId)).
+                    where(Tables.UNIVERSAL_LINK.DEST_UNIV_ID.eq(destId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetchLazy(getFetchSize());
             return buildUniversalLinkGroup(result, false);
@@ -147,8 +147,8 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             DSLContext context = DSL.using(conn, dialect);
             Result<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
-                    where(Tables.UNIVERSAL_LINK.SOURCE_ID.eq(sourceId)).
-                    and(Tables.UNIVERSAL_LINK.DEST_ID.eq(destId)).
+                    where(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID.eq(sourceId)).
+                    and(Tables.UNIVERSAL_LINK.DEST_UNIV_ID.eq(destId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetch();
             return buildUniversalLink(result);
@@ -157,13 +157,6 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         } finally {
             quietlyCloseConn(conn);
         }
-    }
-
-    public UniversalLink getUniversalLink(UniversalId sourceId, UniversalId destId) throws DaoException {
-        if (sourceId.getAlgorithmId() != destId.getAlgorithmId()) {
-            throw new DaoException("Algorithm Mismatch!");
-        }
-        return getUniversalLink(sourceId.getId(), destId.getId(), sourceId.getAlgorithmId());
     }
 
     private UniversalLinkGroup buildUniversalLinkGroup(Cursor<Record> result, boolean outlinks) throws DaoException {
@@ -202,18 +195,18 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     }
 
     private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result, Connection conn) throws DaoException {
-        Multimap<UniversalId, UniversalId> univIds = HashMultimap.create();
+        Set<Integer[]> links = new HashSet<Integer[]>();
         for (Record record : result) {
-            int algorithmId = record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID);
-            univIds.put(
-                    new UniversalId(record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID), algorithmId),
-                    new UniversalId(record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID), algorithmId));
+            links.add(new Integer[]{
+                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),
+                    record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID),
+                    record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID)});
         }
-        return new SqlDaoIterable<UniversalLink, Map.Entry<UniversalId, UniversalId>>(result, univIds.entries().iterator(), conn) {
+        return new SqlDaoIterable<UniversalLink, Integer[]>(result, links.iterator(), conn) {
 
             @Override
-            public UniversalLink transform(Map.Entry<UniversalId, UniversalId> item) throws DaoException {
-                return getUniversalLink(item.getKey(), item.getValue());
+            public UniversalLink transform(Integer[] item) throws DaoException {
+                return getUniversalLink(item[0], item[1], item[2]);
             }
         };
     }
