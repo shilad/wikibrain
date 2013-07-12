@@ -34,20 +34,20 @@ import java.util.*;
  */
 public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao<T> implements UniversalPageDao<T> {
 
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.UNIVERSAL_PAGE.LANG_ID,
+            Tables.UNIVERSAL_PAGE.PAGE_ID,
+            Tables.UNIVERSAL_PAGE.NAME_SPACE,
+            Tables.UNIVERSAL_PAGE.UNIV_ID,
+            Tables.UNIVERSAL_PAGE.ALGORITHM_ID
+    };
+
     private final LocalPageDao localPageDao;
 
     public UniversalPageSqlDao(DataSource dataSource, LocalPageDao localPageDao) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-page");
         this.localPageDao = localPageDao;
     }
-
-    private static final TableField [] INSERT_FIELDS = new TableField[] {
-            Tables.UNIVERSAL_PAGE.LANG_ID,
-            Tables.UNIVERSAL_PAGE.PAGE_ID,
-            Tables.UNIVERSAL_PAGE.NAME_SPACE,
-            Tables.UNIVERSAL_PAGE.UNIV_ID,
-            Tables.UNIVERSAL_PAGE.ALGORITHM_ID,
-    };
 
     @Override
     public void save(UniversalPage page) throws DaoException {
@@ -78,10 +78,10 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            Cursor<Record> result = context.select().
-                    from(Tables.UNIVERSAL_PAGE).
-                    where(conditions).
-                    fetchLazy(getFetchSize());
+            Cursor<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(conditions)
+                    .fetchLazy(getFetchSize());
             Set<Integer[]> pages = new HashSet<Integer[]>();
             for (Record record : result) {
                 pages.add(new Integer[]{
@@ -107,11 +107,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            Result<Record> result = context.select().
-                    from(Tables.UNIVERSAL_PAGE).
-                    where(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(univId)).
-                    and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
-                    fetch();
+            Result<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(univId))
+                    .and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
+                    .fetch();
             return (T)buildUniversalPage(result);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -138,12 +138,12 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            Record record = context.select().
-                    from(Tables.UNIVERSAL_PAGE).
-                    where(Tables.UNIVERSAL_PAGE.LANG_ID.eq(language.getId())).
-                    and(Tables.UNIVERSAL_PAGE.PAGE_ID.eq(localPageId)).
-                    and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
-                    fetchOne();
+            Record record = context.select()
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(Tables.UNIVERSAL_PAGE.LANG_ID.eq(language.getId()))
+                    .and(Tables.UNIVERSAL_PAGE.PAGE_ID.eq(localPageId))
+                    .and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
+                    .fetchOne();
             if (record == null) {
                 return -1;
             } else {
@@ -169,11 +169,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             DSLContext context = DSL.using(conn,dialect);
             Map<Language, TIntIntMap> map = new HashMap<Language, TIntIntMap>();
             for (Language l : ls) {
-                Cursor<Record> cursor = context.select().
-                        from(Tables.UNIVERSAL_PAGE).
-                        where(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
-                        and(Tables.UNIVERSAL_PAGE.LANG_ID.eq(l.getId())).
-                        fetchLazy();
+                Cursor<Record> cursor = context.select()
+                        .from(Tables.UNIVERSAL_PAGE)
+                        .where(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
+                        .and(Tables.UNIVERSAL_PAGE.LANG_ID.eq(l.getId()))
+                        .fetchLazy(getFetchSize());
                 TIntIntMap ids = new TIntIntHashMap(
                         gnu.trove.impl.Constants.DEFAULT_CAPACITY,
                         gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
@@ -186,6 +186,29 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             }
             return map;
         } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public int getNumUniversalPages(int algorithmId) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Cursor<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .fetchLazy(getFetchSize());
+            Set<Integer[]> pages = new HashSet<Integer[]>();
+            for (Record record : result) {
+                pages.add(new Integer[]{
+                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
+                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
+            }
+            return pages.size();
+        } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
@@ -216,7 +239,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID),
                 nameSpace,
                 localPages
-        ){};
+        );
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<UniversalPageDao> {
