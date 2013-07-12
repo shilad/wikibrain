@@ -252,7 +252,7 @@ public class Configurator {
 
     /**
      * Get every instance of the specified class
-     * 
+     *
      * @param klass The generic interface or superclass, not the specific implementation.
      * @return
      * @throws ConfigurationException

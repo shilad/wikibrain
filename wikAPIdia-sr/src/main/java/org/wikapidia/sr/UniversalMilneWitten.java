@@ -63,7 +63,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         TIntSet A = getLinks(page1.getUnivId(), algorithmId);
         TIntSet B = getLinks(page2.getUnivId(), algorithmId);
 
-        DaoFilter pageFilter = new DaoFilter();
+        DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(page1.getAlgorithmId());
         Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
         int numArticles = 0;
         for (UniversalPage page : allPages){
@@ -130,7 +130,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         } else {
             TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
 
-            DaoFilter pageFilter = new DaoFilter();
+            DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(page.getAlgorithmId());
             Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
             int numArticles = 0;
             for (UniversalPage up : allPages){
