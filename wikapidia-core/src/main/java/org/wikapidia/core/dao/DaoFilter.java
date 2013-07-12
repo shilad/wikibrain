@@ -11,8 +11,6 @@ import java.util.Collection;
 
 /**
  *
- * @author Ari Weiland
- *
  * A helper class for specifying complex queries.  To use, instantiate a new instance,
  * than call the various set methods in a chain to set the filters.
  * Possible filters are, with the objects that use them:
@@ -27,16 +25,19 @@ import java.util.Collection;
  * - Parseable flag          (LocalLink, Redirect)
  * - Algorithm ID collection (UniversalPage, UniversalLink)
  *
- * Not all filters are apply to all objects. Collections are specified as a collection
+ * Not all filters are applied to all objects. Collections are specified as a collection
  * of acceptable entries, while flags are booleans set to true, false, or null. Flags
  * and collections set to null will be ignored when the search is executed.
  *
  * A call might look something like:
- * DaoFilter df = new DaoFilter.
- *          setLanguages(languageSet).
- *          setNameSpace(nameSpaces).
- *          setRedirect(true).
- *          setDisambig(false);
+ * DaoFilter df = new DaoFilter()
+ *          .setLanguages(languageSet)
+ *          .setNameSpace(nameSpaces)
+ *          .setRedirect(true)
+ *          .setDisambig(false);
+ *
+ * @author Ari Weiland
+ *
  */
 public class DaoFilter {
 

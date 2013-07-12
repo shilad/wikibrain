@@ -26,9 +26,10 @@ import java.util.*;
 
 /**
  *
- * @author Ari Weiland, Shilad Sen
- *
  * A SQL database implementation of the UniversalPageDao.
+ *
+ * @author Ari Weiland
+ * @author Shilad Sen
  *
  */
 public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao<T> implements UniversalPageDao<T> {

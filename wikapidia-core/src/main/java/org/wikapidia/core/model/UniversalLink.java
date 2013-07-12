@@ -8,9 +8,9 @@ import java.util.Collection;
 
 /**
  *
- * @author Ari Weiland
- *
  * A class to represent a Universal Link.
+ *
+ * @author Ari Weiland
  *
  */
 public class UniversalLink extends AbstractUniversalEntity<LocalLink> {

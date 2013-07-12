@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
-    private static Logger LOG = Logger.getLogger(BaseLocalSRMetric.class.getName());
+    private static Logger LOG = Logger.getLogger(BaseUniversalSRMetric.class.getName());
     protected int numThreads = Runtime.getRuntime().availableProcessors();
 
     protected LocalSRMetric localSRMetric;
@@ -31,7 +31,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     public SRResultList getCachedMostSimilarUniversal(int wpId, int numResults, TIntSet validIds) throws IOException {
         if (!hasCachedMostSimilarUniversal(wpId)){
-            return null;
+//            return null;
         }
         SparseMatrixRow row = mostSimilarUniversalMatrix.getRow(wpId);
         int n = 0;

@@ -32,11 +32,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author Ari Weiland
- * @author Yulun Li
  *
  * Get URLs of the dump file links with specified language, type of dump file and the date before which the dumps
  * are pulled.
+ *
+ * @author Ari Weiland
+ * @author Yulun Li
  *
  */
 public class RequestedLinkGetter {
