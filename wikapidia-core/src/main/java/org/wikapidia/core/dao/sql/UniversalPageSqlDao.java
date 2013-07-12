@@ -117,9 +117,9 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
+//            if (conditions.isEmpty()) {
+//                return null;
+//            }
             final Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_PAGE).
                     where(conditions).

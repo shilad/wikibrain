@@ -12,6 +12,7 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 
 import java.io.IOException;
@@ -29,5 +30,8 @@ public class CosimilarityMatrixExample {
 
         LanguageSet languages = new LanguageSet("simple");
         sr.writeCosimilarity(languages,8,100);
+        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
+        usr.writeCosimilarity(8,100);
+
     }
 }
