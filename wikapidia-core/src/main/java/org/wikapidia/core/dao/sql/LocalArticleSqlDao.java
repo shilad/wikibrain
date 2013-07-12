@@ -57,7 +57,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,
                 LanguageInfo.getByLanguage(lang));
-        NameSpace nameSpace = NameSpace.getNameSpaceById(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+        NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         if (nameSpace != NameSpace.ARTICLE) {
             throw new DaoException("Tried to get ARTICLE, but found " + nameSpace);
         }

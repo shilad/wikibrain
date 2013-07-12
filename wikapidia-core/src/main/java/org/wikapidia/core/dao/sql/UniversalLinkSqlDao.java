@@ -3,7 +3,6 @@ package org.wikapidia.core.dao.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
-import org.apache.commons.io.IOUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.*;
@@ -14,16 +13,15 @@ import org.wikapidia.core.dao.UniversalLinkDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.UniversalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  *
@@ -32,96 +30,48 @@ import java.util.logging.Level;
  * A SQL database implementation of the UniversalLinkDao.
  *
  */
-public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLinkDao {
+public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
 
     private final LocalLinkDao localLinkDao;
     
     public UniversalLinkSqlDao(DataSource dataSource, LocalLinkDao localLinkDao) throws DaoException {
-        super(dataSource);
+        super(dataSource, INSERT_FIELDS, "/db/universal-link");
         this.localLinkDao = localLinkDao;
     }
 
-    @Override
-    public void beginLoad() throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalLinkSqlDao.class.getResource("/db/universal-link-schema.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
+    private static final TableField [] INSERT_FIELDS = new TableField[] {
+            Tables.UNIVERSAL_LINK.LANG_ID,
+            Tables.UNIVERSAL_LINK.SOURCE_ID,
+            Tables.UNIVERSAL_LINK.DEST_ID,
+            Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID,
+            Tables.UNIVERSAL_LINK.DEST_UNIV_ID,
+            Tables.UNIVERSAL_LINK.ALGORITHM_ID,
+    };
 
     @Override
     public void save(UniversalLink link) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            for (Language language : link.getLanguageSetOfExistsInLangs()) {
-                for (LocalLink localLink : link.getLocalLinks(language)) {
-                    context.insertInto(Tables.UNIVERSAL_LINK).values(
-                            localLink.getLanguage().getId(),
-                            localLink.getSourceId(),
-                            localLink.getDestId(),
-                            link.getSourceUnivId(),
-                            link.getDestUnivId(),
-                            link.getAlgorithmId()
-                    ).execute();
-                }
+        for (Language language : link.getLanguageSetOfExistsInLangs()) {
+            for (LocalLink localLink : link.getLocalLinks(language)) {
+                save(
+                        localLink,
+                        link.getSourceUnivId(),
+                        link.getDestUnivId(),
+                        link.getAlgorithmId()
+                );
             }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
     @Override
     public void save(LocalLink localLink, int sourceUnivId, int destUnivId, int algorithmId) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            context.insertInto(Tables.UNIVERSAL_LINK).values(
-                    localLink.getLanguage().getId(),
-                    localLink.getSourceId(),
-                    localLink.getDestId(),
-                    sourceUnivId,
-                    destUnivId,
-                    algorithmId
-            ).execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public void endLoad() throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            UniversalLinkSqlDao.class.getResource("/db/universal-link-indexes.sql")
-                    )
-            );
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        insert(
+                localLink.getLanguage().getId(),
+                localLink.getSourceId(),
+                localLink.getDestId(),
+                sourceUnivId,
+                destUnivId,
+                algorithmId
+        );
     }
 
     @Override
@@ -140,18 +90,14 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            if (conditions.isEmpty()) {
-                return null;
-            }
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return buildUniversalLinksIterable(result);
+            return buildUniversalLinksIterable(result, conn);
         } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
             quietlyCloseConn(conn);
+            throw new DaoException(e);
         }
     }
 
@@ -213,13 +159,21 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
         }
     }
 
+    public UniversalLink getUniversalLink(UniversalId sourceId, UniversalId destId) throws DaoException {
+        if (sourceId.getAlgorithmId() != destId.getAlgorithmId()) {
+            throw new DaoException("Algorithm Mismatch!");
+        }
+        return getUniversalLink(sourceId.getId(), destId.getId(), sourceId.getAlgorithmId());
+    }
+
     private UniversalLinkGroup buildUniversalLinkGroup(Cursor<Record> result, boolean outlinks) throws DaoException {
         if (!result.hasNext()) {
             return null;
         }
         Multimap<Integer, Record> allRecords = HashMultimap.create();
         Set<Language> languages = new HashSet<Language>();
-        Record temp = null;
+        int commonId = -1;
+        int algorithmId = -1;
         for (Record record : result) {
             allRecords.put(
                     record.getValue(outlinks ?                      // Gets the unique ID of the links
@@ -227,20 +181,22 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
                             Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),  // If links are inlinks, source ID is unique
                     record);
             languages.add(Language.getById(record.getValue(Tables.UNIVERSAL_LINK.LANG_ID)));
-            temp = record;
+            if (commonId == -1) {
+                commonId = record.getValue(outlinks ?               // Gets the common ID of the links
+                        Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID :      // If links are outlinks, source ID is common
+                        Tables.UNIVERSAL_LINK.DEST_UNIV_ID);        // If links are inlinks, dest ID is common;
+                algorithmId = record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID);
+            }
         }
-        List<UniversalLink> links = new ArrayList<UniversalLink>();
-        Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>(links.size());
+        Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>();
         for (Integer integer : allRecords.keySet()) {
             map.put(integer, buildUniversalLink(allRecords.get(integer)));
         }
         return new UniversalLinkGroup(
                 map,
                 outlinks,
-                temp.getValue(outlinks ?           // Gets the common ID of the links
-                        Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID :  // If links are outlinks, source ID is common
-                        Tables.UNIVERSAL_LINK.DEST_UNIV_ID),    // If links are inlinks, dest ID is common
-                temp.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID),
+                commonId,
+                algorithmId,
                 new LanguageSet(languages)
         );
     }
@@ -253,46 +209,26 @@ public class UniversalLinkSqlDao extends AbstractSqlDao implements UniversalLink
     once, which increases the time constraint by at least a factor of n.
     TODO: decide which of these methods to use
      */
-    private Iterable<UniversalLink> buildUniversalLinksIterable(final Cursor<Record> result) throws DaoException {
-        final Multimap<Integer, Integer> univIds = HashMultimap.create();
+    private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result, Connection conn) throws DaoException {
+        Multimap<UniversalId, UniversalId> univIds = HashMultimap.create();
         for (Record record : result) {
+            int algorithmId = record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID);
             univIds.put(
-                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID),
-                    record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID));
+                    new UniversalId(record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID), algorithmId),
+                    new UniversalId(record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID), algorithmId));
         }
-        return new Iterable<UniversalLink>() {
+        return new SqlDaoIterable<UniversalLink, Map.Entry<UniversalId, UniversalId>>(result, univIds.entries().iterator(), conn) {
+
             @Override
-            public Iterator<UniversalLink> iterator() {
-                return new Iterator<UniversalLink>() {
-                    @Override
-                    public boolean hasNext() {
-                        return univIds.entries().iterator().hasNext();
-                    }
-
-                    @Override
-                    public UniversalLink next() {
-                        Map.Entry entry = univIds.entries().iterator().next();
-                        List<Record> records = new ArrayList<Record>();
-                        for (Record record : result) {
-                            if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getKey() &&
-                                    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID) == entry.getValue())
-                            {
-                                records.add(record);
-                            }
-                        }
-                        try {
-                            return buildUniversalLink(records);
-                        } catch (DaoException e) {
-                            LOG.log(Level.WARNING, "Failed to build links: ", e);
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
+            public UniversalLink transform(Map.Entry<UniversalId, UniversalId> item) throws DaoException {
+//                List<Record> records = new ArrayList<Record>();
+//                for (Record record : this.result) {
+//                    if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getKey()) &&
+//                            record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID).equals(item.getValue())) {
+//                        records.add(record);
+//                    }
+//                }
+                return getUniversalLink(item.getKey(), item.getValue());
             }
         };
     }

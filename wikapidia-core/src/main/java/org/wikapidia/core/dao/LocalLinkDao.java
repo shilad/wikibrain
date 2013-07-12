@@ -4,7 +4,7 @@ package org.wikapidia.core.dao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
 
-public interface LocalLinkDao extends Loader<LocalLink> {
+public interface LocalLinkDao extends Dao<LocalLink> {
 
     /**
      * Returns a single LocalLink based on language and source and destination within
@@ -20,6 +20,7 @@ public interface LocalLinkDao extends Loader<LocalLink> {
 
     /**
      * get all the links on a page matching criteria
+     *
      * @param language
      * @param localId
      * @param outlinks true for outlinks, false for inlinks
@@ -28,17 +29,18 @@ public interface LocalLinkDao extends Loader<LocalLink> {
      * @return
      * @throws DaoException
      */
-    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException;
+    public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException;
 
     /**
      * get all inlinks or outlinks for a page
+     *
      * @param language
      * @param localId
      * @param outlinks true for outlinks, false for inlinks
      * @return
      * @throws DaoException
      */
-    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException;
+    public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException;
 
     /**
      * Retrieve the number of links in a language meeting given criteria

@@ -8,7 +8,7 @@ import org.wikapidia.core.model.Redirect;
 
 /**
  */
-public interface RedirectDao extends Loader<Redirect> {
+public interface RedirectDao extends Dao<Redirect> {
 
     /**
      * Alternate method for saving a redirect to the database

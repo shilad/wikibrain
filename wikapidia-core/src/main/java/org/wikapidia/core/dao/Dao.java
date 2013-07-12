@@ -4,13 +4,21 @@ package org.wikapidia.core.dao;
  *
  * @author Ari Weiland
  *
- * Ubiquitous loader interface implemented by all Daos. Describes methods
+ * Ubiquitous Dao interface implemented by all Daos. Describes methods
  * to initiate the load process, to save items, to conclude the load process,
  * and an allpurpose get() method that relies on a {@link DaoFilter} to
  * retrieve an Iterable of items.
  *
  */
-public interface Loader<T> {
+public interface Dao<T> {
+
+    /**
+     * Removes all entities from the data store.
+     * For a sql table, this will be a "drop."
+     *
+     * @throws DaoException
+     */
+    public void clear() throws DaoException;
 
     /**
      * Runs front-end processes on the database

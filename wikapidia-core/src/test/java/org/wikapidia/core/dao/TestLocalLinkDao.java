@@ -39,7 +39,7 @@ public class TestLocalLinkDao {
         dao.save(link);
         dao.endLoad();
 
-        SqlDaoIterable<LocalLink> savedLinks = dao.getLinks(lang.getLanguage(), 1, true);
+        Iterable<LocalLink> savedLinks = dao.getLinks(lang.getLanguage(), 1, true);
         assert (savedLinks!=null);
         LocalLink savedLink = savedLinks.iterator().next();
         assert (savedLink.isOutlink());

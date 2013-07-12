@@ -23,6 +23,7 @@ import org.wikapidia.utils.Procedure;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
  */
 public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
-    private static String[] DUMP_SUFFIXES = { "xml", "xml.bz2", "xml.gz", "xml.7z" };
+    private static final String[] DUMP_SUFFIXES = { "xml", "xml.bz2", "xml.gz", "xml.7z" };
 
     private final AtomicInteger counter = new AtomicInteger();
     private final LocalPageDao localPageDao;
@@ -91,12 +92,7 @@ public class DumpLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
-                        .create("t"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("create-indexes")
-                        .withDescription("create all indexes after loading")
-                        .create("i"));
+                        .create("d"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -111,19 +107,24 @@ public class DumpLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
+        List<String> langCodes = env.getLanguages().getLangCodes();
 
         File downloadPath = new File(conf.getConf().get().getString("download.path"));
         List<String> dumps = new ArrayList<String>();
-        if (!cmd.getArgList().isEmpty()) {                                          // There are files specified
-            dumps = cmd.getArgList();
-        } else {                                                                    // No specified files
-            if ((!downloadPath.isDirectory() || downloadPath.list().length == 0)) { // Default path is missing or empty
+        if (!cmd.getArgList().isEmpty()) {                                                  // There are files specified
+            dumps = cmd.getArgList();                                                       // Else no specified files
+        } else {                                                                            // Default path is missing or empty
+            if ((!downloadPath.isDirectory() || FileUtils.listFiles(downloadPath, DUMP_SUFFIXES, true).isEmpty())) {
                 System.err.println( "There is no download path. Please specify one or configure a default.");
                 new HelpFormatter().printHelp("DumpLoader", options);
                 return;
-            } else {                                                                // Default path is functional
-                for (File f : FileUtils.listFiles(downloadPath, DUMP_SUFFIXES, true)) {
-                    dumps.add(f.getPath());
+            } else {                                                                        // Default path is functional
+                for (File langDir : downloadPath.listFiles()) {                             // Layered for-loops sift through
+                    if (langDir.isDirectory() && langCodes.contains(langDir.getName())) {   // the directory structure of the
+                        for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {  // download process:
+                            dumps.add(f.getPath());                                         // ${PARENT}/langcode/date/dumpfile.xml.bz2
+                        }
+                    }
                 }
             }
         }
@@ -133,10 +134,12 @@ public class DumpLoader {
 
         final DumpLoader loader = new DumpLoader(lpDao, rpDao);
 
-        if (cmd.hasOption("t")) {
-            lpDao.beginLoad();
-            rpDao.beginLoad();
+        if (cmd.hasOption("d")) {
+            lpDao.clear();
+            rpDao.clear();
         }
+        lpDao.beginLoad();
+        rpDao.beginLoad();
 
         // loads multiple dumps in parallel
         ParallelForEach.loop(dumps,
@@ -148,9 +151,7 @@ public class DumpLoader {
                     }
                 });
 
-        if (cmd.hasOption("i")) {
-            lpDao.endLoad();
-            rpDao.endLoad();
-        }
+        lpDao.endLoad();
+        rpDao.endLoad();
     }
 }
