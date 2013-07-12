@@ -201,14 +201,6 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         );
     }
 
-    /*
-    This method does the same thing as the method above it, except that it
-    should use much less memory because it doesn't load the entire cursor
-    into memory. Instead, it should run entirely on iterables. However, it
-    must instead iterate over the cursor multiple times, rather than just
-    once, which increases the time constraint by at least a factor of n.
-    TODO: decide which of these methods to use
-     */
     private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result, Connection conn) throws DaoException {
         Multimap<UniversalId, UniversalId> univIds = HashMultimap.create();
         for (Record record : result) {
@@ -221,13 +213,6 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
 
             @Override
             public UniversalLink transform(Map.Entry<UniversalId, UniversalId> item) throws DaoException {
-//                List<Record> records = new ArrayList<Record>();
-//                for (Record record : this.result) {
-//                    if (    record.getValue(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID).equals(item.getKey()) &&
-//                            record.getValue(Tables.UNIVERSAL_LINK.DEST_UNIV_ID).equals(item.getValue())) {
-//                        records.add(record);
-//                    }
-//                }
                 return getUniversalLink(item.getKey(), item.getValue());
             }
         };
