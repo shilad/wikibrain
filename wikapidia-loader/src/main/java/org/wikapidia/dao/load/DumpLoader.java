@@ -54,7 +54,7 @@ public class DumpLoader {
         LanguageInfo lang = LanguageInfo.getByLangCode(langCode);
         DumpPageXmlParser parser = new DumpPageXmlParser(file, lang);
         for (RawPage rp : parser) {
-            if (counter.incrementAndGet() % 1000 == 0) {
+            if (counter.incrementAndGet() % 10000 == 0) {
                 LOG.info("processing article " + counter.get());
             }
             save(file, rp);
