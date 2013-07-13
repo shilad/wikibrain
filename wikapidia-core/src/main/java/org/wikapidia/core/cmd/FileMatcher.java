@@ -1,9 +1,9 @@
-package org.wikapidia.download;
+package org.wikapidia.core.cmd;
 
 import org.wikapidia.core.lang.Language;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,111 +14,111 @@ import java.util.regex.Pattern;
  *
  * Given a list of urls as strings, finds a certain type of links
  */
-public enum LinkMatcher {
+public enum FileMatcher {
 
     MULTISTREAM       (
             "multistream",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-articles-multistream.xml.bz2")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-articles-multistream.xml.bz2")),
     MULTISTREAM_INDEX (
             "multistream_index",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-articles-multistream-index\\.txt\\.bz2")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-articles-multistream-index\\.txt\\.bz2")),
     EDIT_HISTORY_7z  (
             "edit_history_7z",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-history(\\d+).xml-.+\\.7z"),
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-history.xml.7z")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-meta-history(\\d+).xml-.+\\.7z"),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-meta-history.xml.7z")),
     EDIT_HISTORY_bz2 (
             "edit_history_bz2",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-history(\\d+).xml-.+\\.bz2"),
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-history.xml.bz2")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-meta-history(\\d+).xml-.+\\.bz2"),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-meta-history.xml.bz2")),
     LOG (
             "log_events",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-logging.xml.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-logging.xml.gz")),
     META_CURRENT (
             "current_meta",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-current(\\d+).xml-.+\\.bz2"),
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-current.xml.bz2")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-meta-current(\\d+).xml-.+\\.bz2"),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-meta-current.xml.bz2")),
     ARTICLES          ("articles",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-articles(\\d+)\\.xml-.+\\.bz2"),
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-articles.xml.bz2")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-articles(\\d+)\\.xml-.+\\.bz2"),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pages-articles.xml.bz2")),
     STUB_ARTICLES     (
             "stub_articles",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-stub-articles\\d*.xml.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-stub-articles\\d*.xml.gz")),
     STUB_META_CURRENT (
             "stub_meta_current",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-stub-meta-current\\d*.xml.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-stub-meta-current\\d*.xml.gz")),
     STUB_META_HISTORY (
             "stub_meta_histories",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-stub-meta-history\\d*.xml.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-stub-meta-history\\d*.xml.gz")),
     ABSTRACT          (
             "abstracts",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-abstract(\\d+)\\.xml"),
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-abstract(\\d+)\\.xml"),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
     TITLES            (
             "titles",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-all-titles-in-ns0.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-all-titles-in-ns0.gz")),
     INTERLINK         (
             "interwiki_links",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-iwlinks.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-iwlinks.sql.gz")),
     REDIRECT_LIST     (
             "redirect_lists",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-redirect.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-redirect.sql.gz")),
     PROTECTED_TITLES  (
             "protected_titles",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-protected_titles.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-protected_titles.sql.gz")),
     NAME_PAIRS        (
             "name-pairs",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-page_props.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-page_props.sql.gz")),
     PAGE_RESTRICTIONS (
             "page_restrictions",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-page_restrictions.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-page_restrictions.sql.gz")),
     PAGE_BASE         (
             "base_page_datas",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-page.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-page.sql.gz")),
     CATEGORY          (
             "categories",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-category.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-category.sql.gz")),
     USER_GROUP        (
             "user_groups",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-user_groups.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-user_groups.sql.gz")),
     INTERWIKI         (
             "interwiki_prefixes",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-interwiki.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-interwiki.sql.gz")),
     INTERLANG_LINKS   (
             "interlang_links",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-langlinks.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-langlinks.sql.gz")),
     EXTERNAL_LINKS    (
             "external_links",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-externallinks.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-externallinks.sql.gz")),
     TEMPLATE_LINKS    (
             "template_links",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-templatelinks.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-templatelinks.sql.gz")),
     IMAGE_LINKS       (
             "image_links",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-imagelinks.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-imagelinks.sql.gz")),
     CATEGORY_LINKS    (
             "category_links",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-categorylinks.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-categorylinks.sql.gz")),
     LINK_SQL          (
             "links",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-pagelinks.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-pagelinks.sql.gz")),
     OLD_MEDIA_META    (
             "old_media_metas",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-oldimage.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-oldimage.sql.gz")),
     CURRENT_MEDIA_META(
             "current_media_metas",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-image.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-image.sql.gz")),
     SITE_STATS        (
             "site_stats",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-site_stats.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-site_stats.sql.gz")),
     FLAGGED_REVISION  (
             "flagged_revisions",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-flaggedrevs.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-flaggedrevs.sql.gz")),
     FLAGGED_PAGES     (
             "flagged_pages",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-flaggedpages.sql.gz")),
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-flaggedpages.sql.gz")),
     MD5               (
             "md5_checksums",
-            Pattern.compile("([a-zA-Z_-]+)wiki.+-md5sums.txt"));
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-md5sums.txt"));
 
 
     private String name;
@@ -130,7 +130,7 @@ public enum LinkMatcher {
      * @param patterns A set of patterns that is tried in consecutive order until
      *                 at least one match is found.
      */
-    LinkMatcher(String name, Pattern... patterns) {
+    FileMatcher(String name, Pattern... patterns) {
         this.name = name;
         this.patterns = patterns;
     }
@@ -147,6 +147,26 @@ public enum LinkMatcher {
             for (String link : links) {
                 if (p.matcher(link).matches()) {
                     result.add(link);
+                }
+            }
+            if (result.size() > 0) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Return all files whose names match at least one of the specified regexes.
+     * @param paths
+     * @return
+     */
+    public List<File> matchFiles(List<File> paths) {
+        List<File> result = new ArrayList<File>();
+        for (Pattern p : patterns) {
+            for (File file : paths) {
+                if (p.matcher(file.getAbsolutePath()).matches()) {
+                    result.add(file);
                 }
             }
             if (result.size() > 0) {
@@ -188,8 +208,8 @@ public enum LinkMatcher {
         return name;
     }
 
-    public static LinkMatcher getByName(String name) {
-        for (LinkMatcher linkMatcher : LinkMatcher.values()) {
+    public static FileMatcher getByName(String name) {
+        for (FileMatcher linkMatcher : FileMatcher.values()) {
             if (linkMatcher.getName().equalsIgnoreCase(name)) {
                 return linkMatcher;
             }
@@ -197,8 +217,8 @@ public enum LinkMatcher {
         return null;
     }
 
-    public static List<LinkMatcher> getListByNames(List<String> listNames) {
-        List<LinkMatcher> listMatchers = new ArrayList<LinkMatcher>();
+    public static List<FileMatcher> getListByNames(List<String> listNames) {
+        List<FileMatcher> listMatchers = new ArrayList<FileMatcher>();
         for (String name : listNames) {
             listMatchers.add(getByName(name));
         }
@@ -207,7 +227,7 @@ public enum LinkMatcher {
 
     static public List<String> getAllNames() {
         List<String> result = new ArrayList<String>();
-        for (LinkMatcher matcher : LinkMatcher.values()) {
+        for (FileMatcher matcher : FileMatcher.values()) {
             result.add(matcher.getName());
         }
         return result;
