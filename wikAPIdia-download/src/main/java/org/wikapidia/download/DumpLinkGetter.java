@@ -9,9 +9,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.lang.Language;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
@@ -28,10 +28,10 @@ public class DumpLinkGetter {
     protected static final String BASEURL_STRING = "http://dumps.wikimedia.org";
 
     private Language lang;
-    private List<LinkMatcher> matchers;
+    private List<FileMatcher> matchers;
     private String dumpDate;    // This is the date of the dump.
 
-    public DumpLinkGetter(Language lang, List<LinkMatcher> matchers, String dumpDate) {
+    public DumpLinkGetter(Language lang, List<FileMatcher> matchers, String dumpDate) {
         this.lang = lang;
         this.matchers = matchers;
         this.dumpDate = dumpDate;
@@ -67,10 +67,10 @@ public class DumpLinkGetter {
      * Return all links of a particular language the fits one of the patterns
      * @return  hashmap with dump urls and names of dump type
      */
-    public Multimap<LinkMatcher, DumpLinkInfo> getDumpFiles(List<String> links) throws IOException {
-        Multimap<LinkMatcher, DumpLinkInfo> dumpLinks = HashMultimap.create();
+    public Multimap<FileMatcher, DumpLinkInfo> getDumpFiles(List<String> links) throws IOException {
+        Multimap<FileMatcher, DumpLinkInfo> dumpLinks = HashMultimap.create();
         Map<String, String> md5s = getMd5Sums(links);
-        for(LinkMatcher linkMatcher : matchers){
+        for(FileMatcher linkMatcher : matchers){
             List<String> results = linkMatcher.match(links);
             if (!results.isEmpty()) {
                 for (String url : results){
@@ -92,7 +92,7 @@ public class DumpLinkGetter {
      * @throws IOException
      */
     protected Map<String, String> getMd5Sums(List<String> links) throws IOException {
-        LinkMatcher md5Matcher = LinkMatcher.MD5;
+        FileMatcher md5Matcher = FileMatcher.MD5;
         URL md5Url = new URL(BASEURL_STRING + md5Matcher.match(links).get(0));
         List<String> lines = IOUtils.readLines(md5Url.openStream(), "UTF-8");
         HashMap<String, String> md5s = new HashMap<String, String>();
@@ -106,7 +106,7 @@ public class DumpLinkGetter {
     }
 
     public static void main(String[] args) throws IOException {
-        DumpLinkGetter testGetter = new DumpLinkGetter(Language.getByLangCode("en"), Arrays.asList(LinkMatcher.ARTICLES), "20130604");
+        DumpLinkGetter testGetter = new DumpLinkGetter(Language.getByLangCode("en"), Arrays.asList(FileMatcher.ARTICLES), "20130604");
 //        System.out.println(testGetter.getMd5Sums(testGetter.getFileLinks()));
         System.out.println(testGetter.getDumpFiles(testGetter.getFileLinks()));
 
