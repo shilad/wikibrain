@@ -12,7 +12,12 @@ import java.util.regex.Pattern;
  *
  * @author Yulun Li, Shilad Sen
  *
- * Given a list of urls as strings, finds a certain type of links
+ * Matches database dump files published by Wikipedia at:
+ * http://dumps.wikimedia.org based on their names.
+ *
+ * Extracts counter number (if a certain type of file is split into multiple pieces)
+ * and language.
+ *
  */
 public enum FileMatcher {
 

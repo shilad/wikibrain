@@ -3,7 +3,6 @@ package org.wikapidia.core.cmd;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -16,9 +15,11 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 /**
+ * Captures common environment components for WikAPIdia programs
+ * and handles command-line argument parsing for them.
+ *
  * @author Shilad Sen
  */
 public class Env {
