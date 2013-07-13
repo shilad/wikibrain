@@ -14,9 +14,9 @@ import java.util.Iterator;
 
 /**
  *
- * @author Ari Weiland
- *
  * An abstract superclass that lays the framework for a concept mapping algorithm.
+ *
+ * @author Ari Weiland
  *
  */
 public abstract class ConceptMapper {

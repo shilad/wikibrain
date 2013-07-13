@@ -2,12 +2,12 @@ package org.wikapidia.core.dao;
 
 /**
  *
- * @author Ari Weiland
- *
  * Ubiquitous Dao interface implemented by all Daos. Describes methods
  * to initiate the load process, to save items, to conclude the load process,
  * and an allpurpose get() method that relies on a {@link DaoFilter} to
  * retrieve an Iterable of items.
+ *
+ * @author Ari Weiland
  *
  */
 public interface Dao<T> {

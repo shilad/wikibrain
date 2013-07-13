@@ -25,9 +25,9 @@ import java.util.logging.Level;
 
 /**
  *
- * @author Ari Weiland
- *
  * A SQL database implementation of the UniversalLinkDao.
+ *
+ * @author Ari Weiland
  *
  */
 public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
@@ -115,7 +115,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
-                    where(Tables.UNIVERSAL_LINK.SOURCE_ID.eq(sourceId)).
+                    where(Tables.UNIVERSAL_LINK.SOURCE_UNIV_ID.eq(sourceId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetchLazy(getFetchSize());
             return buildUniversalLinkGroup(result, true);
@@ -134,7 +134,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
-                    where(Tables.UNIVERSAL_LINK.DEST_ID.eq(destId)).
+                    where(Tables.UNIVERSAL_LINK.DEST_UNIV_ID.eq(destId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetchLazy(getFetchSize());
             return buildUniversalLinkGroup(result, false);

@@ -10,12 +10,12 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Ari Weiland
- *
  * This class wraps a complex map of DumpLinkInfo, and provides iteration by language
  * so that during the download process, downloads proceed one language at a time.
  * The Iterator returns Multimaps of LinkMatchers mapped to DumpLinkInfo so that
  * the downloads can be additionally clustered by LinkMatcher.
+ *
+ * @author Ari Weiland
  *
  */
 public class DumpLinkCluster implements Iterable<Language> {

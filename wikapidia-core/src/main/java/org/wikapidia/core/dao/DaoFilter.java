@@ -11,8 +11,6 @@ import java.util.Collection;
 
 /**
  *
- * @author Ari Weiland
- *
  * A helper class for specifying complex queries.  To use, instantiate a new instance,
  * than call the various set methods in a chain to set the filters.
  * Possible filters are, with the objects that use them:
@@ -32,11 +30,14 @@ import java.util.Collection;
  * and collections set to null will be ignored when the search is executed.
  *
  * A call might look something like:
- * DaoFilter df = new DaoFilter.
- *          setLanguages(languageSet).
- *          setNameSpace(nameSpaces).
- *          setRedirect(true).
- *          setDisambig(false);
+ * DaoFilter df = new DaoFilter()
+ *          .setLanguages(languageSet)
+ *          .setNameSpace(nameSpaces)
+ *          .setRedirect(true)
+ *          .setDisambig(false);
+ *
+ * @author Ari Weiland
+ *
  */
 public class DaoFilter {
 

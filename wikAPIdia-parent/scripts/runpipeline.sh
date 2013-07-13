@@ -5,7 +5,7 @@ case "$1" in
 download)   stage=1 ;;
 dump)       stage=2 ;;
 wikitext)   stage=3 ;;
-concepts)   stage=4 ;;
+concept)    stage=4 ;;
 *)          echo "unknown stage: $1 (must be download, dump, wikitext, concept)" >&2; exit 1
 esac
 
