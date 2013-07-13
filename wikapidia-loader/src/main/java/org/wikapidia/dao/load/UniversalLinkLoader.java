@@ -23,9 +23,9 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Ari Weiland
- *
  * Generates and loads the Universal Link map into a database.
+ *
+ * @author Ari Weiland
  *
  */
 public class UniversalLinkLoader {

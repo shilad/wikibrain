@@ -25,9 +25,9 @@ import java.util.Map;
 
 /**
  *
- * @author Ari Weiland
- *
  * A SQL database implementation of the LocalCategoryMemberDao.
+ *
+ * @author Ari Weiland
  *
  */
 public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMember> implements LocalCategoryMemberDao {

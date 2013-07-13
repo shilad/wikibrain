@@ -19,10 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
- * @author Ari Weiland
- *
  * A basic ConceptMapper implementation with a very simple algorithm
  * that maps each Local Page across languages to a unique Universal Page.
+ *
+ * @author Ari Weiland
  *
  */
 public class MonolingualConceptMapper extends ConceptMapper {

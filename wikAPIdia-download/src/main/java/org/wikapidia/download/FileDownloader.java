@@ -24,9 +24,9 @@ import org.wikapidia.core.lang.Language;
 
 /**
  *
- * @author Ari Weiland
- *
  * Downloads dumps from a specified tsv file containing lines of dump links.
+ *
+ * @author Ari Weiland
  *
  */
 
