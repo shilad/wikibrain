@@ -71,23 +71,19 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
             if (daoFilter.isParseable() != null) {
                 conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(daoFilter.isParseable()));
             }
-//            if (conditions.isEmpty()) {
-//                return null;
-//            }
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_LINK).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SqlDaoIterable<LocalLink>(result) {
+            return new SimpleSqlDaoIterable<LocalLink>(result, conn) {
                 @Override
                 public LocalLink transform(Record r) {
                     return buildLocalLink(r, true);
                 }
             };
         } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
             quietlyCloseConn(conn);
+            throw new DaoException(e);
         }
     }
 
@@ -112,7 +108,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
     }
 
     @Override
-    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
+    public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -130,16 +126,15 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
                     .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
                     .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short) locationType.ordinal()))
                     .fetchLazy(getFetchSize());
-            return buildLocalLinks(result, outlinks);
+            return buildLocalLinks(result, outlinks, conn);
         } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
             quietlyCloseConn(conn);
+            throw new DaoException(e);
         }
     }
 
     @Override
-    public SqlDaoIterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
+    public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -155,11 +150,10 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(idField.equal(localId))
                     .fetchLazy(getFetchSize());
-            return buildLocalLinks(result, outlinks);
+            return buildLocalLinks(result, outlinks, conn);
         } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
             quietlyCloseConn(conn);
+            throw new DaoException(e);
         }
     }
 
@@ -187,12 +181,11 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         }
     }
 
-    private SqlDaoIterable<LocalLink> buildLocalLinks(Cursor<Record> result, boolean outlink){
-        final boolean o = outlink;
-        return new SqlDaoIterable<LocalLink>(result) {
+    private Iterable<LocalLink> buildLocalLinks(Cursor<Record> result, final boolean outlink, Connection conn){
+        return new SimpleSqlDaoIterable<LocalLink>(result, conn) {
             @Override
             public LocalLink transform(Record r) {
-                return buildLocalLink(r, o);
+                return buildLocalLink(r, outlink);
             }
         };
     }

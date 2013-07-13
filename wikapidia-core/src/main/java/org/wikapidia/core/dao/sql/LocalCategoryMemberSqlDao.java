@@ -46,10 +46,10 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     @Override
     public void save(LocalCategoryMember member) throws DaoException {
         insert(
-            null,
-            member.getLanguage().getId(),
-            member.getCategoryId(),
-            member.getArticleId()
+                null,
+                member.getLanguage().getId(),
+                member.getCategoryId(),
+                member.getArticleId()
         );
     }
 
@@ -73,23 +73,20 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.CATEGORY_MEMBERS.LANG_ID.in(daoFilter.getLangIds()));
-//            } else {
-//                return null;
             }
             Cursor<Record> result = context.select().
                     from(Tables.CATEGORY_MEMBERS).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SqlDaoIterable<LocalCategoryMember>(result) {
+            return new SimpleSqlDaoIterable<LocalCategoryMember>(result, conn) {
                 @Override
                 public LocalCategoryMember transform(Record r) {
                     return buildLocalCategoryMember(r);
                 }
             };
         } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
             quietlyCloseConn(conn);
+            throw new DaoException(e);
         }
     }
 
