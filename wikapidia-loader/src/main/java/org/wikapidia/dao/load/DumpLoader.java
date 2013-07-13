@@ -2,6 +2,8 @@ package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.AbstractFileFilter;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -113,14 +115,30 @@ public class DumpLoader {
                 System.err.println( "There is no download path. Please specify one or configure a default.");
                 new HelpFormatter().printHelp("DumpLoader", options);
                 return;
-            } else {                                                                        // Default path is functional
-                for (File langDir : downloadPath.listFiles()) {                             // Layered for-loops sift through
-                    if (langDir.isDirectory() && langCodes.contains(langDir.getName())) {   // the directory structure of the
-                        for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {  // download process:
-                            dumps.add(f.getPath());                                         // ${PARENT}/langcode/date/dumpfile.xml.bz2
-                        }
+            }
+            // ${PARENT}/langcode/date/dumpfile.xml.bz2
+            for (File langDir : downloadPath.listFiles()) {
+                if (!langDir.isDirectory() || !langCodes.contains(langDir.getName())) {
+                    continue;
+                }
+                File mostRecent = null;
+                for (File dateDir : langDir.listFiles((FileFilter) DirectoryFileFilter.INSTANCE)) {
+                    if (!dateDir.isDirectory() || !dateDir.getName().startsWith("20")) {
+                        continue;
+                    }
+                    if (mostRecent == null || mostRecent.getName().compareTo(dateDir.getName()) < 0) {
+                        mostRecent = dateDir;
+                    }
+                    for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {  // download process:
+                        dumps.add(f.getPath());
                     }
                 }
+                List<File> langFiles = new ArrayList<File>();
+                if (mostRecent != null) langFiles.addAll(FileUtils.listFiles(langDir, DUMP_SUFFIXES, true));
+                if (langFiles.isEmpty()) {
+                    LOG.warning("No dump files found for language dir " + langDir);
+                }
+                for (File f : langFiles) { dumps.add(f.getAbsolutePath()); }
             }
         }
 

@@ -3,6 +3,7 @@ package org.wikapidia.download;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.lang.Language;
 
 import java.io.File;
@@ -10,10 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,12 +31,12 @@ public class DumpLinkInfo {
 
     private Language language;
     private String date;
-    private LinkMatcher linkMatcher;
+    private FileMatcher linkMatcher;
     private URL url;
     private String md5;
     private int counter;
 
-    public DumpLinkInfo(Language language, String date, LinkMatcher linkMatcher, URL url, int counter) {
+    public DumpLinkInfo(Language language, String date, FileMatcher linkMatcher, URL url, int counter) {
         this.language = language;
         this.date = date;
         this.linkMatcher = linkMatcher;
@@ -49,7 +47,7 @@ public class DumpLinkInfo {
     public DumpLinkInfo(String langCode, String date, String linkMatcher, String url, String md5, int counter) throws MalformedURLException {
         this.language = Language.getByLangCode(langCode);
         this.date = date;
-        this.linkMatcher = LinkMatcher.getByName(linkMatcher);
+        this.linkMatcher = FileMatcher.getByName(linkMatcher);
         this.url = new URL(url);
         this.md5 = md5;
         this.counter = counter;
@@ -71,11 +69,11 @@ public class DumpLinkInfo {
         this.date = date;
     }
 
-    public LinkMatcher getLinkMatcher() {
+    public FileMatcher getLinkMatcher() {
         return linkMatcher;
     }
 
-    public void setLinkMatcher(LinkMatcher linkMatcher) {
+    public void setLinkMatcher(FileMatcher linkMatcher) {
         this.linkMatcher = linkMatcher;
     }
 
@@ -125,7 +123,7 @@ public class DumpLinkInfo {
 
     /**
      * Parses a file of info pertaining to dump links into a cluster of DumpLinkInfo.
-     * Info must be listed in order: lang code, date, LinkMatcher, URL, MD5 checksum
+     * Info must be listed in order: lang code, date, FileMatcher, URL, MD5 checksum
      * with each DumpLink reference on a new line.
      * @param file
      * @return
