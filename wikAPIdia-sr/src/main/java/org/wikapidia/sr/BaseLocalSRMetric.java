@@ -1,8 +1,6 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
