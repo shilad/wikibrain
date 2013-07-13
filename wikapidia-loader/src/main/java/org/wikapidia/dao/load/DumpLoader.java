@@ -8,9 +8,11 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.RawPageDao;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.RawPage;
@@ -47,14 +49,9 @@ public class DumpLoader {
      * @param file
      */
     public void load(File file) {
-        int i = file.getName().indexOf("wiki");
-        if (i < 0) {
-            throw new IllegalArgumentException("invalid filename. Expected prefix, for example 'enwiki-...'");
-        }
-        String langCode = file.getName().substring(0, i);
-        langCode = langCode.replace('_', '-');
-        LanguageInfo lang = LanguageInfo.getByLangCode(langCode);
-        DumpPageXmlParser parser = new DumpPageXmlParser(file, lang);
+        Language lang = FileMatcher.ARTICLES.getLanguage(file.getAbsolutePath());
+        DumpPageXmlParser parser = new DumpPageXmlParser(file,
+                LanguageInfo.getByLanguage(lang));
         for (RawPage rp : parser) {
             if (counter.incrementAndGet() % 10000 == 0) {
                 LOG.info("processing article " + counter.get());
@@ -104,43 +101,7 @@ public class DumpLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        List<String> langCodes = env.getLanguages().getLangCodes();
-
-        File downloadPath = new File(conf.getConf().get().getString("download.path"));
-        List<String> dumps = new ArrayList<String>();
-        if (!cmd.getArgList().isEmpty()) {                                                  // There are files specified
-            dumps = cmd.getArgList();                                                       // Else no specified files
-        } else {                                                                            // Default path is missing or empty
-            if ((!downloadPath.isDirectory() || FileUtils.listFiles(downloadPath, DUMP_SUFFIXES, true).isEmpty())) {
-                System.err.println( "There is no download path. Please specify one or configure a default.");
-                new HelpFormatter().printHelp("DumpLoader", options);
-                return;
-            }
-            // ${PARENT}/langcode/date/dumpfile.xml.bz2
-            for (File langDir : downloadPath.listFiles()) {
-                if (!langDir.isDirectory() || !langCodes.contains(langDir.getName())) {
-                    continue;
-                }
-                File mostRecent = null;
-                for (File dateDir : langDir.listFiles((FileFilter) DirectoryFileFilter.INSTANCE)) {
-                    if (!dateDir.isDirectory() || !dateDir.getName().startsWith("20")) {
-                        continue;
-                    }
-                    if (mostRecent == null || mostRecent.getName().compareTo(dateDir.getName()) < 0) {
-                        mostRecent = dateDir;
-                    }
-                    for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {  // download process:
-                        dumps.add(f.getPath());
-                    }
-                }
-                List<File> langFiles = new ArrayList<File>();
-                if (mostRecent != null) langFiles.addAll(FileUtils.listFiles(langDir, DUMP_SUFFIXES, true));
-                if (langFiles.isEmpty()) {
-                    LOG.warning("No dump files found for language dir " + langDir);
-                }
-                for (File f : langFiles) { dumps.add(f.getAbsolutePath()); }
-            }
-        }
+        List<File> paths = env.getInputFiles(true, FileMatcher.ARTICLES);
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
@@ -155,12 +116,12 @@ public class DumpLoader {
         rpDao.beginLoad();
 
         // loads multiple dumps in parallel
-        ParallelForEach.loop(dumps,
+        ParallelForEach.loop(paths,
                 env.getMaxThreads(),
-                new Procedure<String>() {
+                new Procedure<File>() {
                     @Override
-                    public void call(String path) throws Exception {
-                        loader.load(new File(path));
+                    public void call(File path) throws Exception {
+                        loader.load(path);
                     }
                 });
 
