@@ -1,6 +1,7 @@
 package org.wikapidia.download;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.lang.Language;
 
@@ -115,26 +116,7 @@ public class DumpLinkInfo {
      * @return
      */
     public String getFileName() {
-        return language.getLangCode() + "wiki." +
-                linkMatcher.getName() + "." +
-                counter + "." +
-                date +
-                getExtension();
-    }
-
-    /**
-     * Returns a string for the extension with which to save this dump file
-     * @return
-     */
-    public String getExtension() {
-        String terminal = url.toString().substring(url.toString().lastIndexOf("wiki"));
-        int first = terminal.indexOf(".");
-        int last = terminal.lastIndexOf(".");
-        if (first == last) {
-            return terminal.substring(last); // Only 1 extension
-        } else {
-            return terminal.substring(first, first+4) + terminal.substring(last); // 2 extensions
-        }
+        return FilenameUtils.getName(url.getPath());
     }
 
     public String getDownloadName() {

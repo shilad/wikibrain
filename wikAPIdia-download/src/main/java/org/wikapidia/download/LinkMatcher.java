@@ -1,5 +1,7 @@
 package org.wikapidia.download;
 
+import org.wikapidia.core.lang.Language;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,55 +10,115 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author Yulun Li
+ * @author Yulun Li, Shilad Sen
  *
  * Given a list of urls as strings, finds a certain type of links
  */
 public enum LinkMatcher {
 
-    MULTISTREAM       ("multistream", Pattern.compile(".+-pages-articles-multistream.xml.bz2")),
-    MULTISTREAM_INDEX ("multistream_index", Pattern.compile(".+-pages-articles-multistream-index\\.txt\\.bz2")),
-    EDIT_HISTORY_7z      ("edit_history_7z",
-            Pattern.compile(".+-pages-meta-history(\\d+).xml-.+\\.7z"),
-            Pattern.compile(".+-pages-meta-history.xml.7z")),
-    EDIT_HISTORY_bz2      ("edit_history_bz2",
-            Pattern.compile(".+-pages-meta-history(\\d+).xml-.+\\.bz2"),
-            Pattern.compile(".+-pages-meta-history.xml.bz2")),
-    LOG               ("log_events", Pattern.compile(".+-pages-logging.xml.gz")),
-    META_CURRENT      ("current_meta",
-            Pattern.compile(".+-pages-meta-current(\\d+).xml-.+\\.bz2"),
-            Pattern.compile(".+-pages-meta-current.xml.bz2")),
+    MULTISTREAM       (
+            "multistream",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-articles-multistream.xml.bz2")),
+    MULTISTREAM_INDEX (
+            "multistream_index",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-articles-multistream-index\\.txt\\.bz2")),
+    EDIT_HISTORY_7z  (
+            "edit_history_7z",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-history(\\d+).xml-.+\\.7z"),
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-history.xml.7z")),
+    EDIT_HISTORY_bz2 (
+            "edit_history_bz2",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-history(\\d+).xml-.+\\.bz2"),
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-history.xml.bz2")),
+    LOG (
+            "log_events",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-logging.xml.gz")),
+    META_CURRENT (
+            "current_meta",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-current(\\d+).xml-.+\\.bz2"),
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-meta-current.xml.bz2")),
     ARTICLES          ("articles",
-            Pattern.compile(".+-pages-articles(\\d+)\\.xml-.+\\.bz2"),
-            Pattern.compile(".+-pages-articles.xml.bz2")),
-    STUB_ARTICLES     ("stub_articles", Pattern.compile(".+-stub-articles\\d*.xml.gz")),
-    STUB_META_CURRENT ("stub_meta_current", Pattern.compile(".+-stub-meta-current\\d*.xml.gz")),
-    STUB_META_HISTORY ("stub_meta_histories", Pattern.compile(".+-stub-meta-history\\d*.xml.gz")),
-    ABSTRACT          ("abstracts",
-            Pattern.compile(".+-abstract(\\d+)\\.xml"),
-            Pattern.compile(".+-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
-    TITLES            ("titles", Pattern.compile(".+-all-titles-in-ns0.gz")),
-    INTERLINK         ("interwiki_links", Pattern.compile(".+-iwlinks.sql.gz")),
-    REDIRECT_LIST     ("redirect_lists", Pattern.compile(".+-redirect.sql.gz")),
-    PROTECTED_TITLES  ("protected_titles", Pattern.compile(".+-protected_titles.sql.gz")),
-    NAME_PAIRS        ("name-pairs", Pattern.compile(".+-page_props.sql.gz")),
-    PAGE_RESTRICTIONS ("page_restrictions", Pattern.compile(".+-page_restrictions.sql.gz")),
-    PAGE_BASE         ("base_page_datas", Pattern.compile(".+-page.sql.gz")),
-    CATEGORY          ("categories", Pattern.compile(".+-category.sql.gz")),
-    USER_GROUP        ("user_groups", Pattern.compile(".+-user_groups.sql.gz")),
-    INTERWIKI         ("interwiki_prefixes", Pattern.compile(".+-interwiki.sql.gz")),
-    INTERLANG_LINKS   ("interlang_links", Pattern.compile(".+-langlinks.sql.gz")),
-    EXTERNAL_LINKS    ("external_links", Pattern.compile(".+-externallinks.sql.gz")),
-    TEMPLATE_LINKS    ("template_links", Pattern.compile(".+-templatelinks.sql.gz")),
-    IMAGE_LINKS       ("image_links", Pattern.compile(".+-imagelinks.sql.gz")),
-    CATEGORY_LINKS    ("category_links", Pattern.compile(".+-categorylinks.sql.gz")),
-    LINK_SQL          ("links", Pattern.compile(".+-pagelinks.sql.gz")),
-    OLD_MEDIA_META    ("old_media_metas", Pattern.compile(".+-oldimage.sql.gz")),
-    CURRENT_MEDIA_META("current_media_metas", Pattern.compile(".+-image.sql.gz")),
-    SITE_STATS        ("site_stats", Pattern.compile(".+-site_stats.sql.gz")),
-    FLAGGED_REVISION  ("flagged_revisions", Pattern.compile(".+-flaggedrevs.sql.gz")),
-    FLAGGED_PAGES     ("flagged_pages", Pattern.compile(".+-flaggedpages.sql.gz")),
-    MD5               ("md5_checksums", Pattern.compile(".+-md5sums.txt"));
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-articles(\\d+)\\.xml-.+\\.bz2"),
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pages-articles.xml.bz2")),
+    STUB_ARTICLES     (
+            "stub_articles",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-stub-articles\\d*.xml.gz")),
+    STUB_META_CURRENT (
+            "stub_meta_current",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-stub-meta-current\\d*.xml.gz")),
+    STUB_META_HISTORY (
+            "stub_meta_histories",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-stub-meta-history\\d*.xml.gz")),
+    ABSTRACT          (
+            "abstracts",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-abstract(\\d+)\\.xml"),
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-abstract.*(?<!(\\.xml\\-rss))\\.xml")),
+    TITLES            (
+            "titles",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-all-titles-in-ns0.gz")),
+    INTERLINK         (
+            "interwiki_links",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-iwlinks.sql.gz")),
+    REDIRECT_LIST     (
+            "redirect_lists",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-redirect.sql.gz")),
+    PROTECTED_TITLES  (
+            "protected_titles",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-protected_titles.sql.gz")),
+    NAME_PAIRS        (
+            "name-pairs",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-page_props.sql.gz")),
+    PAGE_RESTRICTIONS (
+            "page_restrictions",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-page_restrictions.sql.gz")),
+    PAGE_BASE         (
+            "base_page_datas",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-page.sql.gz")),
+    CATEGORY          (
+            "categories",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-category.sql.gz")),
+    USER_GROUP        (
+            "user_groups",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-user_groups.sql.gz")),
+    INTERWIKI         (
+            "interwiki_prefixes",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-interwiki.sql.gz")),
+    INTERLANG_LINKS   (
+            "interlang_links",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-langlinks.sql.gz")),
+    EXTERNAL_LINKS    (
+            "external_links",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-externallinks.sql.gz")),
+    TEMPLATE_LINKS    (
+            "template_links",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-templatelinks.sql.gz")),
+    IMAGE_LINKS       (
+            "image_links",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-imagelinks.sql.gz")),
+    CATEGORY_LINKS    (
+            "category_links",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-categorylinks.sql.gz")),
+    LINK_SQL          (
+            "links",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-pagelinks.sql.gz")),
+    OLD_MEDIA_META    (
+            "old_media_metas",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-oldimage.sql.gz")),
+    CURRENT_MEDIA_META(
+            "current_media_metas",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-image.sql.gz")),
+    SITE_STATS        (
+            "site_stats",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-site_stats.sql.gz")),
+    FLAGGED_REVISION  (
+            "flagged_revisions",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-flaggedrevs.sql.gz")),
+    FLAGGED_PAGES     (
+            "flagged_pages",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-flaggedpages.sql.gz")),
+    MD5               (
+            "md5_checksums",
+            Pattern.compile("([a-zA-Z_-]+)wiki.+-md5sums.txt"));
 
 
     private String name;
@@ -75,7 +137,7 @@ public enum LinkMatcher {
 
     /**
      * Given a set of Strings containing urls, returns the subset of strings
-     * that match one of the specified regular expressions.
+     * that match at least one of the specified regular expressions.
      * @param links
      * @return
      */
@@ -102,11 +164,21 @@ public enum LinkMatcher {
         for (Pattern p : patterns) {
             Matcher m = p.matcher(link);
             if (m.matches()) {
-                if (m.groupCount() >= 1) {
+                if (m.groupCount() >= 2) {
                     return Integer.valueOf(m.group(m.groupCount()));    // get last group
                 } else {
                     return 1;   // Wikipedia file indexes start at 1
                 }
+            }
+        }
+        throw new IllegalStateException();
+    }
+
+    public Language getLanguage(String link) {
+        for (Pattern p : patterns) {
+            Matcher m = p.matcher(link);
+            if (m.matches()) {
+                return Language.getByLangCode(m.group(1));
             }
         }
         throw new IllegalStateException();
