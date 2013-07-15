@@ -20,10 +20,12 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Ari Weiland, Shilad Sen
- *
  * A SQL Dao superclass that contains a few important parameters and utility methods
  * ubiquitous to all SQL Daos.
+ *
+ * @author Ari Weiland
+ * @author Shilad Sen
+ *
  */
 public abstract class AbstractSqlDao<T> implements Dao<T> {
     public static final Logger LOG = Logger.getLogger(AbstractSqlDao.class.getName());

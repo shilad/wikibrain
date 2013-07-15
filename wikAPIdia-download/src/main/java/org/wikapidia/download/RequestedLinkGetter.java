@@ -12,16 +12,15 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.lang.Language;
 
 import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
 import org.wikapidia.core.lang.LanguageSet;
-import sun.security.provider.MD5;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,11 +31,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author Ari Weiland
- * @author Yulun Li
  *
  * Get URLs of the dump file links with specified language, type of dump file and the date before which the dumps
  * are pulled.
+ *
+ * @author Ari Weiland
+ * @author Yulun Li
  *
  */
 public class RequestedLinkGetter {
@@ -45,10 +45,10 @@ public class RequestedLinkGetter {
     private static final String DATE_FORMAT = "yyyyMMdd";
 
     private final Language lang;
-    private final List<LinkMatcher> matchers;
+    private final List<FileMatcher> matchers;
     private final Date requestDate;    // This is the date requested by the user.
 
-    public RequestedLinkGetter(Language lang, List<LinkMatcher> matchers, Date requestDate) {
+    public RequestedLinkGetter(Language lang, List<FileMatcher> matchers, Date requestDate) {
         this.lang = lang;
         this.matchers = matchers;
         this.requestDate = requestDate;
@@ -116,16 +116,16 @@ public class RequestedLinkGetter {
      * @throws IOException
      * @throws WikapidiaException
      */
-    protected Map<String, Multimap<LinkMatcher, DumpLinkInfo>> getDumps() throws ParseException, IOException, WikapidiaException {
+    protected Map<String, Multimap<FileMatcher, DumpLinkInfo>> getDumps() throws ParseException, IOException, WikapidiaException {
         List<String> availableDates = availableDumpDatesSorted(getAllDates());
-        Map<String, Multimap<LinkMatcher, DumpLinkInfo>> map = new HashMap<String, Multimap<LinkMatcher, DumpLinkInfo>>();
-        List<LinkMatcher> unfoundMatchers = new ArrayList<LinkMatcher>(matchers);
+        Map<String, Multimap<FileMatcher, DumpLinkInfo>> map = new HashMap<String, Multimap<FileMatcher, DumpLinkInfo>>();
+        List<FileMatcher> unfoundMatchers = new ArrayList<FileMatcher>(matchers);
         for (int i = availableDates.size() - 1; i > -1; i--) {
             DumpLinkGetter dumpLinkGetter = new DumpLinkGetter(lang, unfoundMatchers, availableDates.get(i));
-            Multimap<LinkMatcher, DumpLinkInfo> batchDumps = dumpLinkGetter.getDumpFiles(dumpLinkGetter.getFileLinks());
+            Multimap<FileMatcher, DumpLinkInfo> batchDumps = dumpLinkGetter.getDumpFiles(dumpLinkGetter.getFileLinks());
             map.put(availableDates.get(i), batchDumps);
             for (int j = 0; j < unfoundMatchers.size(); j++) {
-                LinkMatcher linkMatcher = unfoundMatchers.get(j);
+                FileMatcher linkMatcher = unfoundMatchers.get(j);
                 if (batchDumps.keySet().contains(linkMatcher)) {
                     unfoundMatchers.remove(linkMatcher);
                     j--;
@@ -186,14 +186,14 @@ public class RequestedLinkGetter {
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
 
-        List<LinkMatcher> linkMatchers = LinkMatcher.getListByNames(conf.getConf().get().getStringList("download.matcher"));
+        List<FileMatcher> linkMatchers = FileMatcher.getListByNames(conf.getConf().get().getStringList("download.matcher"));
         if (cmd.hasOption("n")) {
-            linkMatchers = new ArrayList<LinkMatcher>();
+            linkMatchers = new ArrayList<FileMatcher>();
             for (String name : cmd.getOptionValues("n")) {
-                LinkMatcher matcher = LinkMatcher.getByName(name);
+                FileMatcher matcher = FileMatcher.getByName(name);
                 if (matcher == null) {
                     System.err.println("Invalid matcher name: " + name
-                            + "\nValid matcher names: \n" + LinkMatcher.getAllNames().toString());
+                            + "\nValid matcher names: \n" + FileMatcher.getAllNames().toString());
                     System.exit(1);
                 }
                 linkMatchers.add(matcher);
@@ -222,9 +222,9 @@ public class RequestedLinkGetter {
         for (Language language : languages) {
             RequestedLinkGetter requestedLinkGetter = new RequestedLinkGetter(language, linkMatchers, getDumpByDate);
             try {
-                Map<String, Multimap<LinkMatcher, DumpLinkInfo>> dumpLinks = requestedLinkGetter.getDumps();
+                Map<String, Multimap<FileMatcher, DumpLinkInfo>> dumpLinks = requestedLinkGetter.getDumps();
                 for (String dumpDate : dumpLinks.keySet()) {
-                    for (LinkMatcher linkMatcher : dumpLinks.get(dumpDate).keySet()) {
+                    for (FileMatcher linkMatcher : dumpLinks.get(dumpDate).keySet()) {
                         for (DumpLinkInfo linkInfo : dumpLinks.get(dumpDate).get(linkMatcher)) {
                             result.add(linkInfo.getLanguage().getLangCode() + "\t" +
                                     linkInfo.getDate() + "\t" +

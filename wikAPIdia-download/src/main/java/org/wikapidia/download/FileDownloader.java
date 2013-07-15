@@ -20,13 +20,14 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.lang.Language;
 
 /**
  *
- * @author Ari Weiland
- *
  * Downloads dumps from a specified tsv file containing lines of dump links.
+ *
+ * @author Ari Weiland
  *
  */
 
@@ -101,8 +102,8 @@ public class FileDownloader {
         LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
         int success = 0;
         for (Language language : linkCluster) {
-            Multimap<LinkMatcher, DumpLinkInfo> map = linkCluster.get(language);
-            for (LinkMatcher linkMatcher : map.keySet()) {
+            Multimap<FileMatcher, DumpLinkInfo> map = linkCluster.get(language);
+            for (FileMatcher linkMatcher : map.keySet()) {
                 for (DumpLinkInfo link : map.get(linkMatcher)) {
                     File download = new File(output, link.getLocalPath()+"/"+link.getFileName());
                     if (download.exists()) {

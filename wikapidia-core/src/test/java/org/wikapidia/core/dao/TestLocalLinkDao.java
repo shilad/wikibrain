@@ -3,7 +3,6 @@ package org.wikapidia.core.dao;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
-import org.wikapidia.core.dao.sql.SqlDaoIterable;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalLink;
 
@@ -40,7 +39,7 @@ public class TestLocalLinkDao {
         dao.save(link);
         dao.endLoad();
 
-        SqlDaoIterable<LocalLink> savedLinks = dao.getLinks(lang.getLanguage(), 1, true);
+        Iterable<LocalLink> savedLinks = dao.getLinks(lang.getLanguage(), 1, true);
         assert (savedLinks!=null);
         LocalLink savedLink = savedLinks.iterator().next();
         assert (savedLink.isOutlink());

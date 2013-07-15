@@ -54,6 +54,8 @@ public class DataSourceProvider extends Provider<DataSource> {
             ds.setJdbcUrl(config.getString("url"));
             ds.setUsername(config.getString("username"));
             ds.setPassword(config.getString("password"));
+            ds.setPartitionCount(Runtime.getRuntime().availableProcessors());
+            ds.setMaxConnectionsPerPartition(3);
             return ds;
         } catch (ClassNotFoundException e) {
             throw new ConfigurationException(e);

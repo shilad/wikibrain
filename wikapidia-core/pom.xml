@@ -119,22 +119,25 @@
                     <password></password>
                     <!--all executions are ignored if -Dmaven.test.skip=true -->
                     <skip>${maven.test.skip}</skip>
-
                     <autocommit>true</autocommit>
-                    <srcFiles>
-                        <srcFile>src/main/resources/db/full_schema.sql</srcFile>
-                    </srcFiles>
+                    <!-- drops before creates -->
+                    <orderFile>descending</orderFile>
+                    <fileset>
+                        <basedir>${basedir}/src/main/resources/db</basedir>
+                        <includes>
+                            <include>*-drop-tables.sql</include>
+                            <include>*-create-tables.sql</include>
+                        </includes>
+                    </fileset>
                 </configuration>
 
                 <executions>
                     <execution>
                         <id>create-database</id>
-                        <phase>none</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>execute</goal>
                         </goals>
-                        <configuration>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -143,7 +146,7 @@
             <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
 
                 <dependencies>
                     <dependency>
@@ -156,7 +159,7 @@
                 <executions>
                     <execution>
                         <id>exec1</id>
-                        <phase>none</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -182,11 +185,12 @@
                         <generate>
                             <deprecated>false</deprecated>
                             <instanceFields>true</instanceFields>
-                            <pojos>true</pojos>
+                            <pojos>false</pojos>
+                            <records>false</records>
                         </generate>
                         <target>
                             <packageName>org.wikapidia.core.jooq</packageName>
-                            <directory>src/generated/jooq-h2</directory>
+                            <directory>${basedir}/src/generated/jooq-h2</directory>
                         </target>
                     </generator>
                 </configuration>
@@ -225,7 +229,7 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>src/generated/jooq-h2</source>
+                                <source>${basedir}/src/generated/jooq-h2</source>
                             </sources>
                         </configuration>
                     </execution>

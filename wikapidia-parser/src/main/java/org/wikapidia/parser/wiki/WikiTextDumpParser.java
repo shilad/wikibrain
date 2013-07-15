@@ -87,7 +87,7 @@ public class
     }
 
     private void cleanupWorkers() {
-        finished.set(false);
+        finished.set(true);
         for (Thread w : workers) {
             try {
                 w.join(10000);
