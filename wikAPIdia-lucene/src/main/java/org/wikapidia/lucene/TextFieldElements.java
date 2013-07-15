@@ -13,17 +13,17 @@ public class TextFieldElements {
 
     public TextFieldElements addTitle() {
         this.title = true;
-        return null;
+        return this;
     }
 
     public TextFieldElements addRedirects() {
         this.redirects = true;
-        return null;
+        return this;
     }
 
     public TextFieldElements addPlainText() {
         this.plainText = true;
-        return null;
+        return this;
     }
 
     public boolean usesTitle() {
