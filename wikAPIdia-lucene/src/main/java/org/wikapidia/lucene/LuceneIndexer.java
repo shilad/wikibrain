@@ -33,7 +33,8 @@ public class LuceneIndexer {
 
     private final File root;
     private final Map<Language, IndexWriter> writers;
-    private final LuceneOptions options;
+    private final LuceneOptions[] options;
+    private final LuceneOptions mainOptions;
     private final TextFieldBuilder builder;
     private boolean closed = false;
 
@@ -52,30 +53,31 @@ public class LuceneIndexer {
     /**
      * Constructs a LuceneIndexer that will index any RawPage within a
      * specified LanguageSet. Indexes are then placed in language-specific
-     * subdirectories specified by options.
+     * subdirectories specified by the first element in options.
      *
      * @param languages the language set in which this searcher can operate
-     * @param options a LuceneOptions object containing specific options for lucene
+     * @param options an array of LuceneOptions objects. There must be at least one specified.
      */
-    public LuceneIndexer(LanguageSet languages, LuceneOptions options) throws ConfigurationException {
-        this(languages, options.luceneRoot, options);
+    public LuceneIndexer(LanguageSet languages, LuceneOptions... options) throws ConfigurationException {
+        this(languages, options[0].luceneRoot, options);
     }
 
-    private LuceneIndexer(LanguageSet languages, File root, LuceneOptions options) throws ConfigurationException {
+    private LuceneIndexer(LanguageSet languages, File root, LuceneOptions... options) throws ConfigurationException {
         try {
             this.root = root;
             writers = new HashMap<Language, IndexWriter>();
+            this.options = options;
+            this.mainOptions = options[0];
+            this.builder = new TextFieldBuilder(
+                    mainOptions.configurator.get(LocalPageDao.class),
+                    mainOptions.configurator.get(RawPageDao.class),
+                    mainOptions.configurator.get(RedirectDao.class));
             for (Language language : languages) {
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, options);
+                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, mainOptions);
                 Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
-                IndexWriterConfig iwc = new IndexWriterConfig(options.matchVersion, analyzer);
+                IndexWriterConfig iwc = new IndexWriterConfig(mainOptions.matchVersion, analyzer);
                 writers.put(language, new IndexWriter(directory, iwc));
             }
-            this.options = options;
-            this.builder = new TextFieldBuilder(
-                    options.configurator.get(LocalPageDao.class),
-                    options.configurator.get(RawPageDao.class),
-                    options.configurator.get(RedirectDao.class));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -90,7 +92,7 @@ public class LuceneIndexer {
     }
 
     public LuceneOptions getOptions() {
-        return options;
+        return mainOptions;
     }
 
     /**
@@ -98,7 +100,7 @@ public class LuceneIndexer {
      */
     public void clearIndexes() {
         for (Language language : writers.keySet()) {
-            File lang = new File(options.luceneRoot, language.getLangCode());
+            File lang = new File(mainOptions.luceneRoot, language.getLangCode());
             if (lang.exists()) {
                 try {
                     FileUtils.forceDelete(lang);
@@ -125,10 +127,11 @@ public class LuceneIndexer {
                 Document document = new Document();
                 Field localIdField = new IntField(LuceneOptions.LOCAL_ID_FIELD_NAME, page.getLocalId(), Field.Store.YES);
                 Field langIdField = new IntField(LuceneOptions.LANG_ID_FIELD_NAME, page.getLanguage().getId(), Field.Store.YES);
-                Field plainTextField = builder.buildTextField(page, new TextFieldElements().addPlainText());
                 document.add(localIdField);
                 document.add(langIdField);
-                document.add(plainTextField);
+                for (LuceneOptions option : options) {
+                    document.add(builder.buildTextField(page, option.elements));
+                }
                 writer.addDocument(document);
             } catch (IOException e) {
                 throw new RuntimeException(e);

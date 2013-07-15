@@ -86,6 +86,13 @@ public class LuceneLoader {
                         .withLongOpt("namespaces")
                         .withDescription("the set of namespaces to index, separated by commas")
                         .create("p"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArgs()
+                        .withValueSeparator(',')
+                        .withLongOpt("index-type")
+                        .withDescription("the types of indexes to store, separated by commas")
+                        .create("i"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -100,7 +107,17 @@ public class LuceneLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        LuceneOptions luceneOptions = conf.get(LuceneOptions.class, "options");
+
+        LuceneOptions[] luceneOptions;
+        if (cmd.hasOption("i")) {
+            String[] optionType = cmd.getOptionValues("i");
+            luceneOptions = new LuceneOptions[optionType.length];
+            for (int i=0; i<optionType.length; i++) {
+                luceneOptions[i] = conf.get(LuceneOptions.class, optionType[i]);
+            }
+        } else {
+            luceneOptions = new LuceneOptions[] { conf.get(LuceneOptions.class) };
+        }
 
         LanguageSet languages = env.getLanguages();
         Collection<NameSpace> namespaces = new ArrayList<NameSpace>();
@@ -110,12 +127,11 @@ public class LuceneLoader {
                 namespaces.add(NameSpace.getNameSpaceByName(s));
             }
         } else {
-            namespaces = luceneOptions.namespaces;
+            namespaces = luceneOptions[0].namespaces;
         }
-
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
-        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneOptions);
 
+        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneOptions);
         final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer, namespaces);
 
         if (cmd.hasOption("d")) {

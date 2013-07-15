@@ -46,12 +46,19 @@ public class QueryBuilder {
         }
     }
 
+    /**
+     * Builds a phrase query for the default text field in LuceneOptions.
+     *
+     * @param searchString
+     * @return
+     * @throws ParseException
+     */
     public Query getPhraseQuery(String searchString) throws ParseException {
-        return getPhraseQuery(new TextFieldElements().addPlainText(), searchString);
+        return getPhraseQuery(options.elements, searchString);
     }
 
     /**
-     * Build a phrase query for the text field specified by elements
+     * Builds a phrase query for the text field specified by elements.
      *
      * @param elements specifies the text field in which to search
      * @param searchString
@@ -62,26 +69,56 @@ public class QueryBuilder {
         return parser.parse(searchString);
     }
 
-
+    /**
+     * Builds a page text query for the default text field in LuceneOptions.
+     *
+     * @param rawPage
+     * @return
+     * @throws ParseException
+     */
     public Query getPageTextQuery(RawPage rawPage) throws ParseException {
-        return getPhraseQuery(new TextFieldElements().addPlainText(), rawPage.getPlainText());
+        return getPageTextQuery(options.elements, rawPage);
     }
 
     /**
-     * Build a localpage query
+     * Builds a page text query for the text field specified by elements.
+     *
+     * @param elements specifies the text field in which to search
+     * @param rawPage
+     * @return
+     * @throws ParseException
+     */
+    public Query getPageTextQuery(TextFieldElements elements, RawPage rawPage) throws ParseException {
+        return getPhraseQuery(elements, rawPage.getPlainText());
+    }
+
+    /**
+     * Builds a local page query for the default text field in LuceneOptions.
      *
      * @param localPage
      * @return
      * @throws DaoException
      */
     public Query getLocalPageConceptQuery(LocalPage localPage) throws DaoException {
+        return getLocalPageConceptQuery(options.elements, localPage);
+    }
+
+    /**
+     * Builds a local page query for the text field specified by elements.
+     *
+     * @param elements specifies the text field in which to search
+     * @param localPage
+     * @return
+     * @throws DaoException
+     */
+    public Query getLocalPageConceptQuery(TextFieldElements elements, LocalPage localPage) throws DaoException {
         LinkedHashMap<String, Float> description = phraseAnalyzer.describeLocal(language, localPage, 20);
         MultiPhraseQuery multiPhraseQuery = new MultiPhraseQuery();
         Term[] terms = new Term[description.keySet().size() + 1];
-        terms[0] = new Term(TextFieldElements.getPlainTextFieldName(), localPage.getTitle().getCanonicalTitle());
+        terms[0] = new Term(elements.getTextFieldName(), localPage.getTitle().getCanonicalTitle());
         int i = 1;
         for (String phrase : description.keySet()) {
-            terms[i] = new Term(TextFieldElements.getPlainTextFieldName(), phrase);
+            terms[i] = new Term(elements.getTextFieldName(), phrase);
             i++;
         }
         multiPhraseQuery.add(terms);
