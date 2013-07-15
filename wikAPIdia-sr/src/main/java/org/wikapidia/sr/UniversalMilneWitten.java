@@ -157,16 +157,16 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     @Override
     public TIntDoubleMap getVector(int id) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();
-        Map<Integer, UniversalLink> links;
+        TIntSet links;
         if (outLinks){
-            links = universalLinkDao.getOutlinks(id,algorithmId).getLinks();
+            links = universalLinkDao.getOutlinkIds(id,algorithmId);
         } else {
-            links = universalLinkDao.getInlinks(id,algorithmId).getLinks();
+            links = universalLinkDao.getInlinkIds(id,algorithmId);
         }
         DaoFilter pageFilter = new DaoFilter();
         Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
         for (UniversalPage page : allPages){
-            if (links.containsKey(page.getUnivId())){
+            if (links.contains(page.getUnivId())){
                 vector.put(page.getUnivId(),1);
             }
         }
