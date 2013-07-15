@@ -13,6 +13,8 @@ import org.tartarus.snowball.ext.TurkishStemmer;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
+import java.io.Reader;
+
 /**
  * @author Ari Weiland
  */
@@ -23,8 +25,9 @@ public class TurkishTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) {
-        TokenStream stream = new StandardFilter(matchVersion, input);
+    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
+        TokenStream stream = getTokenizer(reader);
+        stream = new StandardFilter(matchVersion, stream);
         if (caseInsensitive)
             stream = new TurkishLowerCaseFilter(stream);
         if (useStopWords)

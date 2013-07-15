@@ -54,7 +54,7 @@ public abstract class LanguageTokenizer {
         this.language = language;
     }
 
-    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet);
+    public abstract TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet);
 
     public Tokenizer getTokenizer(Reader r) {
         return new StandardTokenizer(matchVersion, r);
@@ -108,6 +108,9 @@ public abstract class LanguageTokenizer {
 
     private static void mapTokenizers() {
         tokenizerClasses = new HashMap<Language, Class>();
+
+        // These 26 tokenizers are functionally identical to Brent's code,
+        // except for Dutch (nl), which I modified a good deal
         tokenizerClasses.put(Language.getByLangCode("en"), EnglishTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("de"), GermanTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("fr"), FrenchTokenizer.class);
@@ -135,7 +138,7 @@ public abstract class LanguageTokenizer {
         tokenizerClasses.put(Language.getByLangCode("he"), HebrewTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("lad"), LadinoTokenizer.class);
 
-        // I have added the rest of these myself
+        // I have added these 9 tokenizers myself
         tokenizerClasses.put(Language.getByLangCode("ar"), ArabicTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("bg"), BulgarianTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("el"), GreekTokenizer.class);
