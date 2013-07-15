@@ -68,4 +68,11 @@ public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {
      * @throws DaoException
      */
     public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(int algorithmId, LanguageSet ls) throws DaoException;
+
+    /**
+     * An efficient method to get the number of universal pages without
+     * building them all
+     * @return
+     */
+    public int getNumPages(int algorithmId) throws DaoException;
 }

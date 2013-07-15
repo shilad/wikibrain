@@ -63,12 +63,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         TIntSet A = getLinks(page1.getUnivId(), algorithmId);
         TIntSet B = getLinks(page2.getUnivId(), algorithmId);
 
-        DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(page1.getAlgorithmId());
-        Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
-        int numArticles = 0;
-        for (UniversalPage page : allPages){
-            numArticles++;
-        }
+        int numArticles = universalPageDao.getNumPages(page1.getAlgorithmId());
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
         result.id = page2.getUnivId();
@@ -100,15 +95,19 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             TIntSet linkPages = getLinks(page.getUnivId(), algorithmId);
             TIntSet worthChecking = new TIntHashSet();
             for (int id : linkPages.toArray()){
-                Set<Integer> links;
+                TIntSet links;
                 if (outLinks){
-                    links = universalLinkDao.getInlinks(id,algorithmId).getLinks().keySet();
+                    links = universalLinkDao.getInlinkIds(id,algorithmId);
                 } else {
-                    links = universalLinkDao.getOutlinks(id,algorithmId).getLinks().keySet();
+                    links = universalLinkDao.getOutlinkIds(id,algorithmId);
                 }
-                for (int link : links){
+                for (int link : links.toArray()){
                     worthChecking.add(link);
                 }
+            }
+            //Don't try to check red links.
+            if (worthChecking.contains(-1)){
+                worthChecking.remove(-1);
             }
             return mostSimilar(page, maxResults, explanations,worthChecking);
         }
@@ -129,12 +128,8 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         } else {
             TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
 
-            DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(page.getAlgorithmId());
-            Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
-            int numArticles = 0;
-            for (UniversalPage up : allPages){
-                numArticles++;
-            }
+
+            int numArticles = universalPageDao.getNumPages(algorithmId);
 
             List<SRResult> results = new ArrayList<SRResult>();
             for (int id : validIds.toArray()){
@@ -224,14 +219,14 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     private TIntSet getLinks(int universeId, int algorithmId) throws DaoException {
         TIntSet linkIds = new TIntHashSet();
         if(!outLinks) {
-            Map<Integer, UniversalLink> links = universalLinkDao.getInlinks(universeId,algorithmId).getLinks();
-            for (Integer link : links.keySet()){
-                linkIds.add(links.get(link).getSourceUnivId());
+            TIntSet links = universalLinkDao.getInlinkIds(universeId,algorithmId);
+            for (Integer link : links.toArray()){
+                linkIds.add(link);
             }
         } else {
-            Map<Integer, UniversalLink> links = universalLinkDao.getOutlinks(universeId, algorithmId).getLinks();
-            for (Integer link : links.keySet()){
-                linkIds.add(links.get(link).getDestUnivId());
+            TIntSet links = universalLinkDao.getInlinkIds(universeId,algorithmId);
+            for (Integer link : links.toArray()){
+                linkIds.add(link);
             }
         }
         return linkIds;

@@ -149,6 +149,10 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                     worthChecking.add(link.getLocalId());
                 }
             }
+            //Don't try to check red links.
+            if (worthChecking.contains(-1)){
+                worthChecking.remove(-1);
+            }
             return mostSimilar(page, maxResults, explanations,worthChecking);
         }
     }

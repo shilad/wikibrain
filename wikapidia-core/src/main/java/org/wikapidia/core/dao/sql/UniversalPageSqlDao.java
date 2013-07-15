@@ -5,6 +5,8 @@ import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -159,6 +161,28 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     @Override
     public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException {
         return getUnivPageId(localPage.getLanguage(), localPage.getLocalId(), algorithmId);
+    }
+
+    @Override
+    public int getNumPages(int algorithmId) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Cursor<Record> result = context.select().
+                    from(Tables.UNIVERSAL_PAGE).
+                    where(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
+                    fetchLazy();
+            TIntSet ids = new TIntHashSet();
+            for (Record record : result){
+                ids.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
+            }
+            return ids.size();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     @Override

@@ -91,7 +91,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         int uId1 = universalPageDao.getUnivPageId(similar1.asLocalPage(),algorithmId);
         UniversalPage up1 = universalPageDao.getById(uId1,algorithmId);
         int uId2 = universalPageDao.getUnivPageId(similar2.asLocalPage(),algorithmId);
-        UniversalPage up2 = universalPageDao.getById(uId1,algorithmId);
+        UniversalPage up2 = universalPageDao.getById(uId2,algorithmId);
         return similarity(up1,up2,explanations);
 
     }
