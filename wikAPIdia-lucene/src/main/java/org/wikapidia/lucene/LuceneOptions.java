@@ -1,6 +1,7 @@
 package org.wikapidia.lucene;
 
 import com.typesafe.config.Config;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -78,6 +79,18 @@ public class LuceneOptions {
         return elements;
     }
 
+    // TODO: make it so we can test if Configurators are equal?
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof LuceneOptions)) return false;
+        LuceneOptions opts = (LuceneOptions) o;
+        return (this.matchVersion == opts.matchVersion &&
+                this.luceneRoot.equals(opts.luceneRoot) &&
+                CollectionUtils.isEqualCollection(this.namespaces, opts.namespaces) &&
+                this.options.equals(opts.options) &&
+                this.elements.equals(opts.elements));
+    }
+
     public static class Provider extends org.wikapidia.conf.Provider<LuceneOptions> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -90,7 +103,7 @@ public class LuceneOptions {
 
         @Override
         public String getPath() {
-            return "lucene";
+            return "lucene.options";
         }
 
         @Override
