@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 
 
-public class PairwiseCosineSimilarity {
+public class PairwiseCosineSimilarity implements PairwiseSimilarity {
     private static final Logger LOG = Logger.getLogger(PairwiseCosineSimilarity.class.getName());
 
     private SparseMatrix matrix;
@@ -58,6 +58,7 @@ public class PairwiseCosineSimilarity {
         return sim;
     }
 
+    @Override
     public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException {
         MatrixRow row = matrix.getRow(wpId);
         if (row == null) {

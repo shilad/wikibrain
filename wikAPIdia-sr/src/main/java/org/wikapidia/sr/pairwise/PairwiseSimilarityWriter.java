@@ -32,7 +32,9 @@ public class PairwiseSimilarityWriter {
     private ValueConf vconf;
     private TIntSet validIds;
     private TIntSet usedIds = new TIntHashSet();
-    private PairwiseCosineSimilarity metric;
+    private PairwiseSimilarity metric;
+
+
 
     public PairwiseSimilarityWriter(String path) throws IOException {
         this.vconf = new ValueConf();

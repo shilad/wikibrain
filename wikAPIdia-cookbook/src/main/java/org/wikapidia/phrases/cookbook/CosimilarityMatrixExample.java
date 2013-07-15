@@ -26,10 +26,13 @@ public class CosimilarityMatrixExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, WikapidiaException, InterruptedException, IOException {
         //Set-up
         Configurator c = new Configurator(new Configuration());
-        LocalSRMetric sr = c.get(LocalSRMetric.class);
 
+        //Local pairwise cosimilarity
+        LocalSRMetric sr = c.get(LocalSRMetric.class);
         LanguageSet languages = new LanguageSet("simple");
         sr.writeCosimilarity(languages,8,100);
+
+        //Universal pairwise cosimilarity matrix
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
         usr.writeCosimilarity(8,100);
 
