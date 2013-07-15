@@ -1,5 +1,6 @@
 package org.wikapidia.sr;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import org.apache.commons.collections.iterators.ArrayIterator;
 
@@ -117,8 +118,12 @@ public class SRResultList implements  Iterable<SRResult>{
         }
     }
 
-    public void sort() {
+    public void sortAscending() {
         Arrays.sort(results, 0, numDocs);
+    }
+
+    public void sortDescending() {
+        Arrays.sort(results, 0, numDocs, Collections.reverseOrder());
     }
 
     @Override

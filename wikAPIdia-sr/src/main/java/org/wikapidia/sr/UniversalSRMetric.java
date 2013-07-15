@@ -130,9 +130,8 @@ public interface UniversalSRMetric {
 
     /**
      * Writes a cosimilarity matrix to the dat directory based off of the getVector function and the pairwise cosine similarity class
+     * @param path the directory to write the matrix in
      * @param numThreads the number of threads
      * @param maxHits the number of document hits you would like returned from the most similar function
-     */
-    public void writeCosimilarity(int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException;
-
+     */void writeCosimilarity(String path, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException;
 }

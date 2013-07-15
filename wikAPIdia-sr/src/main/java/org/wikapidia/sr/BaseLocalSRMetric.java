@@ -19,6 +19,7 @@ import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.KnownSim;
+import org.wikapidia.sr.utils.Leaderboard;
 
 
 import java.io.File;
@@ -35,10 +36,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
     private Normalizer defaultMostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer defaultSimilarityNormalizer = new IdentityNormalizer();
-    private Map<Language, Normalizer> similarityNormalizers;
-    private Map<Language, Normalizer> mostSimilarNormalizers;
+    private Map<Language, Normalizer> similarityNormalizers = new HashMap<Language, Normalizer>();
+    private Map<Language, Normalizer> mostSimilarNormalizers = new HashMap<Language, Normalizer>();
 
-    protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
+    protected Map<Language,SparseMatrix> mostSimilarLocalMatrices = new HashMap<Language, SparseMatrix>();
 
     public void setMostSimilarLocalMatrices(Map<Language,SparseMatrix> mostSimilarLocalMatrices){
         this.mostSimilarLocalMatrices=mostSimilarLocalMatrices;
@@ -69,16 +70,17 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         } catch (IOException e){
             return null;
         }
-        int n = 0;
-        SRResultList srl = new SRResultList(row.getNumCols());
-        for (int i=0; i<row.getNumCols() && n < numResults; i++){
+        Leaderboard leaderboard = new Leaderboard(numResults);
+        for (int i=0; i<row.getNumCols() ; i++){
             int wpId2 = row.getColIndex(i);
+            float value = row.getColValue(i);
             if (validIds == null || validIds.contains(wpId2)){
-                srl.set(n++, row.getColIndex(i), row.getColValue(i));
+                leaderboard.tallyScore(wpId2,value);
             }
         }
-        srl.truncate(n);
-        return srl;
+        SRResultList results = leaderboard.getTop();
+        results.sortDescending();
+        return results;
     }
 
     /**
@@ -282,9 +284,9 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(LanguageSet languages, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
+    public void writeCosimilarity(String path, LanguageSet languages, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
         for (Language language: languages) {
-            String path = "../dat/" + getName()+ "-" + language.getLangCode();
+            path = path + getName()+"-"+language.getLangCode();
             SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this, language);
             DaoFilter pageFilter = new DaoFilter().setLanguages(language);
             Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
@@ -297,6 +299,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
             PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path);
             pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(path+"-cosimilarity")));
         }
     }
 
