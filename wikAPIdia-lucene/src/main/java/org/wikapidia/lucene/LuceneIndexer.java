@@ -125,7 +125,7 @@ public class LuceneIndexer {
                 Document document = new Document();
                 Field localIdField = new IntField(LuceneOptions.LOCAL_ID_FIELD_NAME, page.getLocalId(), Field.Store.YES);
                 Field langIdField = new IntField(LuceneOptions.LANG_ID_FIELD_NAME, page.getLanguage().getId(), Field.Store.YES);
-                Field plainTextField = builder.buildTextField(page, options.elements);
+                Field plainTextField = builder.buildTextField(page, new TextFieldElements().addPlainText());
                 document.add(localIdField);
                 document.add(langIdField);
                 document.add(plainTextField);
