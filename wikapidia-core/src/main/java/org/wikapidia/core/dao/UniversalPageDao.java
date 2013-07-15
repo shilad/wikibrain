@@ -11,9 +11,9 @@ import java.util.Map;
 
 /**
  *
- * @author Ari Weiland
- *
  * An interface that describes a Dao to retrieve Universal Pages.
+ *
+ * @author Ari Weiland
  *
  */
 public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {

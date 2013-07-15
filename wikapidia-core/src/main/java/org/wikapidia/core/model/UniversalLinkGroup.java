@@ -6,9 +6,9 @@ import java.util.Map;
 
 /**
  *
- * @author Ari Weiland
- *
  * A convienent wrapper for a group of Universal Inlinks or Outlinks.
+ *
+ * @author Ari Weiland
  *
  */
 public class UniversalLinkGroup {

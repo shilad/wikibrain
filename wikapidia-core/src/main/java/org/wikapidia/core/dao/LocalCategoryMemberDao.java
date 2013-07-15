@@ -11,9 +11,9 @@ import java.util.Map;
 
 /**
  *
- * @author Ari Weiland
- *
  * An interface that describes a Dao to determine local category membership.
+ *
+ * @author Ari Weiland
  *
  */
 public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {

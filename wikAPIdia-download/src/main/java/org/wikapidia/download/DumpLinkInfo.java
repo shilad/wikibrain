@@ -18,12 +18,12 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Ari Weiland
- *
  * A wrapper class for storing and processing information about a dump link.
  * Contains static parser methods to generate DumpLinkInfo instances, and
  * useful getters for all parameters plus custom information related to
  * processing and downloading a dump.
+ *
+ * @author Ari Weiland
  *
  */
 public class DumpLinkInfo {

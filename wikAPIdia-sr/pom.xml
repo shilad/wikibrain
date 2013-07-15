@@ -35,14 +35,9 @@
             <version>3.0</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers-common</artifactId>
-            <version>4.3.1</version>
+            <groupId>org.wikapidia</groupId>
+            <artifactId>wikAPIdia-lucene</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
