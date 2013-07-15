@@ -5,6 +5,7 @@ import gnu.trove.set.TIntSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneSearcher;
@@ -14,7 +15,10 @@ import org.wikapidia.sr.utils.SimUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -26,6 +30,8 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private final Language language;
     private final LuceneSearcher searcher;
+
+    protected LocalPageDao pageHelper;
 
     public ESAMetric(Language language, LuceneSearcher searcher) {
         this.language = language;
@@ -106,7 +112,25 @@ public class ESAMetric extends BaseLocalSRMetric {
         TIntDoubleHashMap scores1 = getConceptVector(page1, language);
         TIntDoubleHashMap scores2 = getConceptVector(page2, language);
         double sim = SimUtils.cosineSimilarity(scores1, scores2);
-        return new SRResult(sim); // TODO: normalize
+        SRResult result = new SRResult(sim);
+
+        if (explanations) {
+            Map<Integer, Double>ids = SimUtils.sortByValue(scores1);
+            String format = "Top pages for ? include ?";
+            List<LocalPage> formatPages =new ArrayList<LocalPage>();
+            for (int id : ids.keySet()) {
+                LocalPage topPage = pageHelper.getById(language, id);
+                if (topPage==null) {
+                    continue;
+                }
+                formatPages.add(page1);
+                formatPages.add(topPage);
+                Explanation explanation = new Explanation(format, formatPages);
+                result.addExplanation(explanation);
+            }
+        }
+
+        return result; // TODO: normalize
     }
 
     /**
@@ -130,6 +154,22 @@ public class ESAMetric extends BaseLocalSRMetric {
                 i++;
             }
         }
+
+        if (explanations) {
+            String format = "? is a top page of ?";
+            List<LocalPage> formatPages =new ArrayList<LocalPage>();
+            for (SRResult srResult : srResults) {
+                LocalPage topPage = pageHelper.getById(language, srResult.id);
+                if (topPage==null) {
+                    continue;
+                }
+                formatPages.add(topPage);
+                formatPages.add(localPage);
+                Explanation explanation = new Explanation(format, formatPages);
+                srResult.addExplanation(explanation);
+            }
+        }
+
         return srResults;
     }
 
