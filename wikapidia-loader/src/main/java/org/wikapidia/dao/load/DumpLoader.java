@@ -1,14 +1,15 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.RawPageDao;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.RawPage;
@@ -18,7 +19,6 @@ import org.wikapidia.utils.Procedure;
 
 import java.io.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -45,16 +45,11 @@ public class DumpLoader {
      * @param file
      */
     public void load(File file) {
-        int i = file.getName().indexOf("wiki");
-        if (i < 0) {
-            throw new IllegalArgumentException("invalid filename. Expected prefix, for example 'enwiki-...'");
-        }
-        String langCode = file.getName().substring(0, i);
-        langCode = langCode.replace('_', '-');
-        LanguageInfo lang = LanguageInfo.getByLangCode(langCode);
-        DumpPageXmlParser parser = new DumpPageXmlParser(file, lang);
+        Language lang = FileMatcher.ARTICLES.getLanguage(file.getAbsolutePath());
+        DumpPageXmlParser parser = new DumpPageXmlParser(file,
+                LanguageInfo.getByLanguage(lang));
         for (RawPage rp : parser) {
-            if (counter.incrementAndGet() % 1000 == 0) {
+            if (counter.incrementAndGet() % 10000 == 0) {
                 LOG.info("processing article " + counter.get());
             }
             save(file, rp);
@@ -70,7 +65,7 @@ public class DumpLoader {
         }
         try {
             LocalPage lp = new LocalPage(
-                                rp.getLang(), rp.getPageId(),
+                                rp.getLanguage(), rp.getLocalId(),
                                 rp.getTitle(), rp.getNamespace(),
                                 rp.isRedirect(), rp.isDisambig()
                             );
@@ -102,27 +97,7 @@ public class DumpLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        List<String> langCodes = env.getLanguages().getLangCodes();
-
-        File downloadPath = new File(conf.getConf().get().getString("download.path"));
-        List<String> dumps = new ArrayList<String>();
-        if (!cmd.getArgList().isEmpty()) {                                                  // There are files specified
-            dumps = cmd.getArgList();                                                       // Else no specified files
-        } else {                                                                            // Default path is missing or empty
-            if ((!downloadPath.isDirectory() || FileUtils.listFiles(downloadPath, DUMP_SUFFIXES, true).isEmpty())) {
-                System.err.println( "There is no download path. Please specify one or configure a default.");
-                new HelpFormatter().printHelp("DumpLoader", options);
-                return;
-            } else {                                                                        // Default path is functional
-                for (File langDir : downloadPath.listFiles()) {                             // Layered for-loops sift through
-                    if (langDir.isDirectory() && langCodes.contains(langDir.getName())) {   // the directory structure of the
-                        for (File f : FileUtils.listFiles(langDir, DUMP_SUFFIXES, true)) {  // download process:
-                            dumps.add(f.getPath());                                         // ${PARENT}/langcode/date/dumpfile.xml.bz2
-                        }
-                    }
-                }
-            }
-        }
+        List<File> paths = env.getInputFiles(true, FileMatcher.ARTICLES);
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
@@ -137,12 +112,12 @@ public class DumpLoader {
         rpDao.beginLoad();
 
         // loads multiple dumps in parallel
-        ParallelForEach.loop(dumps,
+        ParallelForEach.loop(paths,
                 env.getMaxThreads(),
-                new Procedure<String>() {
+                new Procedure<File>() {
                     @Override
-                    public void call(String path) throws Exception {
-                        loader.load(new File(path));
+                    public void call(File path) throws Exception {
+                        loader.load(path);
                     }
                 });
 

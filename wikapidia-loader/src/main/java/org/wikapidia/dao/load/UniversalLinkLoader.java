@@ -23,13 +23,13 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Ari Weiland
- *
  * Generates and loads the Universal Link map into a database.
+ *
+ * @author Ari Weiland
  *
  */
 public class UniversalLinkLoader {
-    private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
+    private static final Logger LOG = Logger.getLogger(UniversalLinkLoader.class.getName());
 
     private final LanguageSet languageSet;
     private final LocalLinkDao localLinkDao;
@@ -43,13 +43,9 @@ public class UniversalLinkLoader {
         this.universalLinkDao = universalLinkDao;
     }
 
-    public UniversalLinkDao getDao() {
-        return universalLinkDao;
-    }
-
     /**
      * Loads the database of UniversalLinks. Requires a database of UniversalPages and LocalLinks
-     * @throws DaoException
+     * @throws WikapidiaException
      */
     public void loadLinkMap(int algorithmId) throws WikapidiaException {
         try {
@@ -62,21 +58,21 @@ public class UniversalLinkLoader {
                 i++;
                 if (i%100000 == 0)
                     LOG.log(Level.INFO, "UniversalLinks loaded: " + i);
-                int sourceUnivId, destUnivId;
+                int univSourceId, univDestId;
                 if (localLink.getSourceId() < 0) {
-                    sourceUnivId = -1;
+                    univSourceId = -1;
                 } else {
-                    sourceUnivId = map.get(localLink.getLanguage()).get(localLink.getSourceId());
+                    univSourceId = map.get(localLink.getLanguage()).get(localLink.getSourceId());
                 }
                 if (localLink.getDestId() < 0) {
-                    destUnivId = -1;
+                    univDestId = -1;
                 } else {
-                    destUnivId = map.get(localLink.getLanguage()).get(localLink.getDestId());
+                    univDestId = map.get(localLink.getLanguage()).get(localLink.getDestId());
                 }
                 universalLinkDao.save(
                         localLink,
-                        sourceUnivId,
-                        destUnivId,
+                        univSourceId,
+                        univDestId,
                         algorithmId
                 );
             }

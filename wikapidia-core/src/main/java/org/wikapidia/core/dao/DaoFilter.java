@@ -1,17 +1,15 @@
 package org.wikapidia.core.dao;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.NameSpace;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
- *
- * @author Ari Weiland
  *
  * A helper class for specifying complex queries.  To use, instantiate a new instance,
  * than call the various set methods in a chain to set the filters.
@@ -32,11 +30,14 @@ import java.util.Collection;
  * and collections set to null will be ignored when the search is executed.
  *
  * A call might look something like:
- * DaoFilter df = new DaoFilter.
- *          setLanguages(languageSet).
- *          setNameSpace(nameSpaces).
- *          setRedirect(true).
- *          setDisambig(false);
+ * DaoFilter df = new DaoFilter()
+ *          .setLanguages(languageSet)
+ *          .setNameSpace(nameSpaces)
+ *          .setRedirect(true)
+ *          .setDisambig(false);
+ *
+ * @author Ari Weiland
+ *
  */
 public class DaoFilter {
 
@@ -129,8 +130,14 @@ public class DaoFilter {
         return this;
     }
 
+    /**
+     * Sets the language filter to the specified language.
+     * Used by LocalPage, RawPage, LocalLink, Redirect, and LocalCategoryMember.
+     * @param language
+     * @return
+     */
     public DaoFilter setLanguages(Language language) {
-        return setLanguages(Arrays.asList(new Language[]{language}));
+        return setLanguages(Arrays.asList(language));
     }
 
     /**
@@ -151,6 +158,16 @@ public class DaoFilter {
         }
         this.nsIds = temp;
         return this;
+    }
+
+    /**
+     * Sets the namespace filter to the specified namespace constant.
+     * Used by LocalPage, RawPage, and UniversalPage.
+     * @param nameSpaces
+     * @return
+     */
+    public DaoFilter setNameSpaces(NameSpace nameSpaces) {
+        return setNameSpaces(Arrays.asList(nameSpaces));
     }
 
     /**
@@ -217,6 +234,16 @@ public class DaoFilter {
     }
 
     /**
+     * Sets the SourceIds filter to the specified source ID.
+     * Used by LocalLink, UniversalLink, and Redirect.
+     * @param sourceId
+     * @return
+     */
+    public DaoFilter setSourceIds(int sourceId) {
+        return setSourceIds(Arrays.asList(sourceId));
+    }
+
+    /**
      * Sets the DestinationIds filter to the specified collection.
      * Used by LocalLink, UniversalLink, and Redirect.
      * @param destIds
@@ -225,6 +252,16 @@ public class DaoFilter {
     public DaoFilter setDestIds(Collection<Integer> destIds) {
         this.destIds = destIds;
         return this;
+    }
+
+    /**
+     * Sets the DestinationIds filter to the specified destination ID.
+     * Used by LocalLink, UniversalLink, and Redirect.
+     * @param destId
+     * @return
+     */
+    public DaoFilter setDestIds(int destId) {
+        return setSourceIds(Arrays.asList(destId));
     }
 
     /**
@@ -239,16 +276,6 @@ public class DaoFilter {
     }
 
     /**
-     * Sets the AlgorithmIds filter to the specified single algorithm ID.
-     * Used by UniversalPage and UniversalLink.
-     * @param algorithmId
-     * @return
-     */
-    public DaoFilter setAlgorithmIds(int algorithmId) {
-        return setAlgorithmIds(Arrays.asList(new Integer[]{algorithmId}));
-    }
-
-    /**
      * Sets the AlgorithmIds filter to the specified collection of algorithm IDs.
      * Used by UniversalPage and UniversalLink.
      * @param algorithmIds
@@ -257,5 +284,15 @@ public class DaoFilter {
     public DaoFilter setAlgorithmIds(Collection<Integer> algorithmIds) {
         this.algorithmIds = algorithmIds;
         return this;
+    }
+
+    /**
+     * Sets the AlgorithmIds filter to the specified algorithm ID.
+     * Used by UniversalPage and UniversalLink.
+     * @param algorithmId
+     * @return
+     */
+    public DaoFilter setAlgorithmIds(int algorithmId) {
+        return setAlgorithmIds(Arrays.asList(new Integer[]{algorithmId}));
     }
 }

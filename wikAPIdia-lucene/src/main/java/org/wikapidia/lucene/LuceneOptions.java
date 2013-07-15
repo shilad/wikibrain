@@ -26,19 +26,19 @@ public class LuceneOptions {
 
     public static final String LOCAL_ID_FIELD_NAME = "local_id";
     public static final String LANG_ID_FIELD_NAME = "lang_id";
-    public static final String PLAINTEXT_FIELD_NAME = "plaintext";
 
-    public final Configuration conf;
+    public final Configurator configurator;
     public final Version matchVersion;
     public final File luceneRoot;
     public final Collection<NameSpace> namespaces;
     public final TokenizerOptions options;
+    public final TextFieldElements elements;
 
     /**
      * Used by provider only.
      */
-    private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options) {
-        this.conf = conf;
+    private LuceneOptions(Configurator configurator, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options, TextFieldElements elements) {
+        this.configurator = configurator;
         this.matchVersion = Version.parseLeniently(matchVersion);
         this.luceneRoot = new File(luceneRoot);
         this.namespaces = new ArrayList<NameSpace>();
@@ -46,6 +46,7 @@ public class LuceneOptions {
             this.namespaces.add(NameSpace.getNameSpaceByName(s));
         }
         this.options = options;
+        this.elements = elements;
     }
 
     /**
@@ -69,6 +70,14 @@ public class LuceneOptions {
         return options;
     }
 
+    private static TextFieldElements buildElements(boolean title, boolean redirects, boolean plainText) {
+        TextFieldElements elements = new TextFieldElements();
+        if (title) elements.addTitle();
+        if (redirects) elements.addRedirects();
+        if (plainText) elements.addPlainText();
+        return elements;
+    }
+
     public static class Provider extends org.wikapidia.conf.Provider<LuceneOptions> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -87,14 +96,18 @@ public class LuceneOptions {
         @Override
         public LuceneOptions get(String name, Config config) throws ConfigurationException {
             return new LuceneOptions(
-                    getConfig(),
+                    getConfigurator(),
                     config.getString("version"),
                     config.getString("directory"),
                     config.getStringList("namespaces"),
                     buildOptions(
                             config.getBoolean("caseInsensitive"),
                             config.getBoolean("useStopWords"),
-                            config.getBoolean("useStem"))
+                            config.getBoolean("useStem")),
+                    buildElements(
+                            config.getBoolean("title"),
+                            config.getBoolean("redirects"),
+                            config.getBoolean("plaintext"))
             );
         }
     }

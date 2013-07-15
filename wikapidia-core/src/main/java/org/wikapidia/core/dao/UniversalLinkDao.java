@@ -6,9 +6,9 @@ import org.wikapidia.core.model.UniversalLinkGroup;
 
 /**
  *
- * @author Ari Weiland
- *
  * An interface that describes a Dao to retrieve Universal Links.
+ *
+ * @author Ari Weiland
  *
  */
 public interface UniversalLinkDao extends Dao<UniversalLink> {

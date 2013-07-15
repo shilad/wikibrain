@@ -21,6 +21,10 @@ import java.io.Reader;
  * This class functions as a Lucene Analyzer for a specific language. It runs
  * off of the functions built into the LanguageTokenizer class.
  *
+ * TODO: add language overrides for unsupported languages?
+ * In other words, analyze language X as similar language Y
+ * ie. Ukrainian -> Russian and Ladino -> Spanish
+ *
  * @author Ari Weiland
  *
  */
@@ -61,20 +65,8 @@ public class WikapidiaAnalyzer extends Analyzer {
 
     @Override
     protected Analyzer.TokenStreamComponents createComponents(String s, Reader r) {
-        Tokenizer tokenizer;
-        String langCode = language.getLangCode();
-        if (langCode.equals("ja")) {
-            tokenizer = new JapaneseTokenizer(r, null, false, JapaneseTokenizer.DEFAULT_MODE);
-        } else if (langCode.equals("zh")) {
-            tokenizer = new SentenceTokenizer(r);
-        } else if (langCode.equals("he") || langCode.equals("sk")) {
-            tokenizer = new ICUTokenizer(r);
-        } else {
-            tokenizer = new StandardTokenizer(options.matchVersion,r);
-        }
-
         LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
-        TokenStream result = langTokenizer.getTokenStream(tokenizer, CharArraySet.EMPTY_SET);
-        return new TokenStreamComponents(tokenizer, result);
+        TokenStream result = langTokenizer.getTokenStream(r, CharArraySet.EMPTY_SET);
+        return new TokenStreamComponents(langTokenizer.getTokenizer(r), result);
     }
 }

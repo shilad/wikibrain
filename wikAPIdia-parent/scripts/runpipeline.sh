@@ -2,12 +2,24 @@
 
 stage=
 case "$1" in
-download)   stage=1 ;;
-dump)       stage=2 ;;
-wikitext)   stage=3 ;;
-concepts)   stage=4 ;;
-lucene)     stage=5 ;;
-*)          echo "unknown stage: $1 (must be download, dump, wikitext, concept)" >&2; exit 1
+    all|download)
+        stage=1
+        ;;
+    dump)
+        stage=2
+        ;;
+    wikitext)
+        stage=3
+        ;;
+    concept)
+        stage=4
+        ;;
+    lucene)
+        stage=5
+        ;;
+    *)
+        echo "unknown stage: $1 (must be 'all', 'download', 'dump', 'wikitext', or 'concept')" >&2
+        exit 1
 esac
 
 shift
@@ -41,5 +53,5 @@ fi
 
 if [ "$stage" -le 5 ]; then
     (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.LuceneLoader -d $@) ||
-        die "$0 failed"
+    die "$0 failed"
 fi

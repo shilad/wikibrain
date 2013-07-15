@@ -46,30 +46,25 @@ public class QueryBuilder {
         }
     }
 
-    public Query getPhraseQuery(String searchString) {
-        return getPhraseQuery(LuceneOptions.PLAINTEXT_FIELD_NAME, searchString);
+    public Query getPhraseQuery(String searchString) throws ParseException {
+        return getPhraseQuery(new TextFieldElements().addPlainText(), searchString);
     }
 
     /**
-     * Build a phrase query
+     * Build a phrase query for the text field specified by elements
      *
-     * @param fieldName
+     * @param elements specifies the text field in which to search
      * @param searchString
      * @return
      */
-    public Query getPhraseQuery(String fieldName, String searchString) {
-        try {
-            QueryParser parser = new QueryParser(options.matchVersion, fieldName, new WikapidiaAnalyzer(language, options));
-            return parser.parse(searchString);
-        } catch (ParseException e) {
-            LOG.log(Level.WARNING, "Unable to parse " + searchString);
-            return null; // TODO: this is actually not ideal, we should probably pass an exception upwards
-        }
+    public Query getPhraseQuery(TextFieldElements elements, String searchString) throws ParseException {
+        QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), new WikapidiaAnalyzer(language, options));
+        return parser.parse(searchString);
     }
 
 
-    public Query getPageTextQuery(RawPage rawPage) {
-        return getPhraseQuery(LuceneOptions.PLAINTEXT_FIELD_NAME, rawPage.getPlainText());
+    public Query getPageTextQuery(RawPage rawPage) throws ParseException {
+        return getPhraseQuery(new TextFieldElements().addPlainText(), rawPage.getPlainText());
     }
 
     /**
@@ -83,10 +78,10 @@ public class QueryBuilder {
         LinkedHashMap<String, Float> description = phraseAnalyzer.describeLocal(language, localPage, 20);
         MultiPhraseQuery multiPhraseQuery = new MultiPhraseQuery();
         Term[] terms = new Term[description.keySet().size() + 1];
-        terms[0] = new Term(LuceneOptions.PLAINTEXT_FIELD_NAME, localPage.getTitle().getCanonicalTitle());
+        terms[0] = new Term(TextFieldElements.getPlainTextFieldName(), localPage.getTitle().getCanonicalTitle());
         int i = 1;
         for (String phrase : description.keySet()) {
-            terms[i] = new Term(LuceneOptions.PLAINTEXT_FIELD_NAME, phrase);
+            terms[i] = new Term(TextFieldElements.getPlainTextFieldName(), phrase);
             i++;
         }
         multiPhraseQuery.add(terms);

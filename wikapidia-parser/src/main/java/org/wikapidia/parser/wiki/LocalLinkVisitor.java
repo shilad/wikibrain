@@ -8,7 +8,6 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -53,7 +52,7 @@ public class LocalLinkVisitor extends ParserVisitor {
                     new LocalLink(
                             lang,
                             link.text,
-                            link.location.getXml().getPageId(),
+                            link.location.getXml().getLocalId(),
                             destId,
                             true,
                             link.location.getLocation(),
