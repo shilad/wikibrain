@@ -34,7 +34,7 @@ public class TestESAMetric {
         ESAMetric esaMetric = new ESAMetric(testLanguage, searcher);
         LocalPage page = new Configurator(new Configuration()).get(LocalPageDao.class).getById(testLanguage, 6);
         System.out.println(page);
-        SRResultList srResults= esaMetric.mostSimilar(page, 100, false);
+        SRResultList srResults= esaMetric.mostSimilar(page, 20, false);
         System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
     }
 
