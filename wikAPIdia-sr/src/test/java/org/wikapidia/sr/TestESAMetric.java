@@ -21,6 +21,34 @@ import java.util.Arrays;
  */
 public class TestESAMetric {
 
+    private static void printResult(SRResult result){
+        if (result == null){
+            System.out.println("Result was null");
+        }
+        else {
+            System.out.println("Similarity value: "+result.getValue());
+            int explanationsSeen = 0;
+            for (Explanation explanation : result.getExplanations()){
+                System.out.println(explanation.getPlaintext());
+                if (++explanationsSeen>5){
+                    break;
+                }
+            }
+        }
+
+    }
+
+    private static void printResult(SRResultList results){
+        if (results == null){
+            System.out.println("Result was null");
+        }
+        else {
+            for (SRResult srResult : results) {
+                printResult(srResult);
+            }
+        }
+    }
+
 //    @Test
 //    public void testLuceneOptions() {
 //        LuceneOptions options = LuceneOptions.getDefaultOptions();
@@ -34,7 +62,10 @@ public class TestESAMetric {
         ESAMetric esaMetric = new ESAMetric(testLanguage, searcher);
         LocalPage page = new Configurator(new Configuration()).get(LocalPageDao.class).getById(testLanguage, 6);
         System.out.println(page);
-        SRResultList srResults= esaMetric.mostSimilar(page, 20, false);
+        SRResultList srResults= esaMetric.mostSimilar(page, 20, true);
+        for (SRResult srResult : srResults) {
+            printResult(srResult);
+        }
         System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
     }
 

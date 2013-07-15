@@ -3,6 +3,12 @@ package org.wikapidia.sr.utils;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.junit.Test;
 import org.junit.Assert;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Random;
+
 import static org.junit.Assert.*;
 
 /**
@@ -63,4 +69,25 @@ public class TestSimUtils {
         assertEquals("Normalized vector has length of 1",
                 1.0, testValue, 0.00001);
     }
+
+    @Test
+    public void testSortByValue() {
+        int testMapSize = 1000;
+        Random random = new Random(System.currentTimeMillis());
+        TIntDoubleHashMap testMap = new TIntDoubleHashMap();
+        for(int i = 0 ; i < testMapSize ; ++i) {
+            testMap.put(random.nextInt(), random.nextDouble());
+        }
+        Map<Integer, Double> sortedMap = SimUtils.sortByValue(testMap);
+        Assert.assertEquals(testMapSize, sortedMap.size() );
+        Double previous = null;
+        for(Map.Entry<Integer, Double> entry : sortedMap.entrySet()) {
+            Assert.assertNotNull( entry.getValue() );
+            if (previous != null) {
+                Assert.assertTrue( entry.getValue() >= previous );
+            }
+            previous = entry.getValue();
+        }
+    }
+
 }
