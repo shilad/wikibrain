@@ -225,7 +225,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
      * @throws DaoException if the record is not a Page
      */
     protected UniversalPage buildUniversalPage(List<Record> result) throws DaoException {
-        if (result == null) {
+        if (result == null || result.isEmpty()) {
             return null;
         }
         Multimap<Language, LocalPage> localPages = HashMultimap.create(result.size(), result.size());

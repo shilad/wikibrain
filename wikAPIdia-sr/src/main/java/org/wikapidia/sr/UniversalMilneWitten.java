@@ -163,12 +163,8 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         } else {
             links = universalLinkDao.getInlinkIds(id,algorithmId);
         }
-        DaoFilter pageFilter = new DaoFilter();
-        Iterable<UniversalPage> allPages = universalPageDao.get(pageFilter);
-        for (UniversalPage page : allPages){
-            if (links.contains(page.getUnivId())){
-                vector.put(page.getUnivId(),1);
-            }
+        for (int link : links.toArray()){
+            vector.put(link,1);
         }
         return vector;
     }

@@ -15,7 +15,9 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
+import org.wikapidia.sr.utils.Leaderboard;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,16 +64,17 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         } catch (IOException e) {
             return null;
         }
-        int n = 0;
-        SRResultList srl = new SRResultList(row.getNumCols());
-        for (int i = 0;i < row.getNumCols() &&  n < numResults; i++) {
+        Leaderboard leaderboard = new Leaderboard(numResults);
+        for (int i=0; i<row.getNumCols() ; i++){
             int wpId2 = row.getColIndex(i);
-            if (validIds == null || validIds.contains(wpId2)) {
-                srl.set(n++, row.getColIndex(i), row.getColValue(i));
+            float value = row.getColValue(i);
+            if (validIds == null || validIds.contains(wpId2)){
+                leaderboard.tallyScore(wpId2, value);
             }
         }
-        srl.truncate(n);
-        return srl;
+        SRResultList results = leaderboard.getTop();
+        results.sortDescending();
+        return results;
     }
 
     @Override
@@ -201,8 +204,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     }
 
     @Override
-    public void writeCosimilarity(int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
-        String path = "../dat/Universal" + getName() + "-" + algorithmId;
+    public void writeCosimilarity(String path, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
+        path = path + getName()+"-" + algorithmId;
         SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
         DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
         Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
@@ -215,5 +218,6 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
         PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path);
         pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+        mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
     }
 }
