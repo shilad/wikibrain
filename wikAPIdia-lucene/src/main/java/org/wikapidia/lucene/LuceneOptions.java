@@ -26,7 +26,6 @@ public class LuceneOptions {
 
     public static final String LOCAL_ID_FIELD_NAME = "local_id";
     public static final String LANG_ID_FIELD_NAME = "lang_id";
-    public static final String PLAINTEXT_FIELD_NAME = "plaintext";
 
     public final Configurator configurator;
     public final Version matchVersion;
