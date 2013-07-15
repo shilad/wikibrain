@@ -190,7 +190,7 @@
                         </generate>
                         <target>
                             <packageName>org.wikapidia.core.jooq</packageName>
-                            <directory>src/generated/jooq-h2</directory>
+                            <directory>${basedir}/src/generated/jooq-h2</directory>
                         </target>
                     </generator>
                 </configuration>
@@ -229,7 +229,7 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>src/generated/jooq-h2</source>
+                                <source>${basedir}/src/generated/jooq-h2</source>
                             </sources>
                         </configuration>
                     </execution>
