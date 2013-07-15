@@ -3,8 +3,11 @@ package org.wikapidia.core.dao.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -55,11 +58,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         for (Language language : page.getLanguageSetOfExistsInLangs()) {
             for (Object localPage : page.getLocalPages(language)) {
                 insert(
-                    language.getId(),
-                    ((LocalPage) localPage).getLocalId(),
-                    nameSpace.getArbitraryId(),
-                    page.getUnivId(),
-                    page.getAlgorithmId()
+                        language.getId(),
+                        ((LocalPage) localPage).getLocalId(),
+                        nameSpace.getArbitraryId(),
+                        page.getUnivId(),
+                        page.getAlgorithmId()
                 );
             }
         }
@@ -82,13 +85,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(conditions)
                     .fetchLazy(getFetchSize());
-            Set<Integer[]> pages = new HashSet<Integer[]>();
+            PageMap map = new PageMap();
             for (Record record : result) {
-                pages.add(new Integer[]{
-                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
-                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
+                map.put(record);
             }
-            return new SqlDaoIterable<T, Integer[]>(result, pages.iterator(), conn) {
+            return new SqlDaoIterable<T, Integer[]>(result, map.iterator(), conn) {
 
                 @Override
                 public T transform(Integer[] item) throws DaoException {
@@ -98,6 +99,56 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        }
+    }
+
+    private static class PageMap implements Iterable<Integer[]> {
+        private Map<Integer, TIntSet> pages;
+
+        public PageMap() {
+            this.pages = new HashMap<Integer, TIntSet>();
+        }
+
+        public void put(Record record) {
+            int algorithmId = record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID);
+            if (!pages.containsKey(algorithmId)) {
+                pages.put(algorithmId, new TIntHashSet());
+            }
+            pages.get(algorithmId).add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
+        }
+
+        @Override
+        public Iterator<Integer[]> iterator() {
+            return new Iterator<Integer[]>() {
+                private Iterator<Map.Entry<Integer, TIntSet>> iterator1 = pages.entrySet().iterator();
+                private Map.Entry<Integer, TIntSet> entry = iterator1.next();
+                private TIntIterator iterator2 = entry.getValue().iterator();
+
+                @Override
+                public boolean hasNext() {
+                    if (iterator2.hasNext()) {
+                        return true;
+                    } else if (iterator1.hasNext()) {
+                        entry = iterator1.next();
+                        iterator2 = entry.getValue().iterator();
+                        return hasNext();
+                    }
+                    return false;
+                }
+
+                @Override
+                public Integer[] next() {
+                    if (hasNext()) {
+                        return new Integer[] { iterator2.next(), entry.getKey() };
+                    }
+                    return null;
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            };
         }
     }
 
