@@ -21,6 +21,10 @@ import java.io.Reader;
  * This class functions as a Lucene Analyzer for a specific language. It runs
  * off of the functions built into the LanguageTokenizer class.
  *
+ * TODO: add language overrides for unsupported languages?
+ * In other words, analyze language X as similar language Y
+ * ie. Ukrainian -> Russian and Ladino -> Spanish
+ *
  * @author Ari Weiland
  *
  */
