@@ -1,5 +1,10 @@
 package org.wikapidia.sr.disambig;
 
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
@@ -42,5 +47,32 @@ public class TopResultDisambiguator implements Disambiguator{
             ids.add(disambiguate(phrase,context));
         }
         return ids;
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<Disambiguator>{
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super (configurator,config);
+        }
+
+        @Override
+        public Class getType(){
+            return Disambiguator.class;
+        }
+
+        @Override
+        public String getPath(){
+            return "sr.disambig";
+        }
+
+        @Override
+        public Disambiguator get(String name, Config config) throws ConfigurationException{
+            if (!config.getString("type").equals("topResult")){
+                return null;
+            }
+            return new TopResultDisambiguator(
+                    getConfigurator().get(PhraseAnalyzer.class,
+                            config.getString("phraseAnalyzer"))
+            );
+        }
     }
 }

@@ -3,6 +3,8 @@ package org.wikapidia.core.dao.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.*;
@@ -120,6 +122,29 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     }
 
     @Override
+    public TIntSet getOutlinkIds(int sourceId, int algorithmId) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Cursor<Record> result = context.select().
+                    from(Tables.UNIVERSAL_LINK).
+                    where(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID.eq(sourceId)).
+                    and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
+                    fetchLazy(getFetchSize());
+            TIntSet ids = new TIntHashSet();
+            for (Record record : result){
+                ids.add(record.getValue(Tables.UNIVERSAL_LINK.UNIV_DEST_ID));
+            }
+            return ids;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
     public UniversalLinkGroup getInlinks(int destId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
@@ -131,6 +156,29 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetchLazy(getFetchSize());
             return buildUniversalLinkGroup(result, false);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public TIntSet getInlinkIds(int destId, int algorithmId) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Cursor<Record> result = context.select().
+                    from(Tables.UNIVERSAL_LINK).
+                    where(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.eq(destId)).
+                    and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
+                    fetchLazy(getFetchSize());
+            TIntSet ids = new TIntHashSet();
+            for (Record record : result){
+                ids.add(record.getValue(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID));
+            }
+            return ids;
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {

@@ -20,12 +20,17 @@ public class TestExplanation {
                 lang.getLanguage(),
                 2,
                 new Title("Tower of London",lang));
-        ArrayList list = new ArrayList<Object>();
-        list.add(uk);
-        list.add(tower);
-        Explanation explanation = new Explanation("? links to ?",list);
-        System.out.println(explanation.getPlaintext());
-        assert (explanation.getPlaintext().equals("UK links to Tower of London"));
+        ArrayList pageList = new ArrayList<Object>();
+        pageList.add(uk);
+        pageList.add(tower);
+        Explanation pageExplanation = new Explanation("? links to ?",pageList);
+        assert (pageExplanation.getPlaintext().equals("UK links to Tower of London"));
+
+        ArrayList intList = new ArrayList<Integer>();
+        intList.add(7);
+        Explanation intExplanation = new Explanation("?",intList);
+        assert (intExplanation.getPlaintext().equals("7"));
+
     }
 
 

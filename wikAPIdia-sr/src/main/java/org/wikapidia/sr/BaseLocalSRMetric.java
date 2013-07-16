@@ -1,9 +1,13 @@
 package org.wikapidia.sr;
 
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
@@ -12,7 +16,9 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.*;
 import org.wikapidia.sr.utils.KnownSim;
+import org.wikapidia.sr.utils.Leaderboard;
 
 
 import java.io.File;
@@ -26,12 +32,13 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     protected Disambiguator disambiguator;
     protected LocalPageDao pageHelper;
 
-    private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
-    private Normalizer similarityNormalizer = new IdentityNormalizer();
 
-    protected Map<Language,SparseMatrix> mostSimilarLocalMatrices;
+    private Normalizer defaultMostSimilarNormalizer = new IdentityNormalizer();
+    private Normalizer defaultSimilarityNormalizer = new IdentityNormalizer();
+    private Map<Language, Normalizer> similarityNormalizers = new HashMap<Language, Normalizer>();
+    private Map<Language, Normalizer> mostSimilarNormalizers = new HashMap<Language, Normalizer>();
 
-
+    protected Map<Language,SparseMatrix> mostSimilarLocalMatrices = new HashMap<Language, SparseMatrix>();
 
     public void setMostSimilarLocalMatrices(Map<Language,SparseMatrix> mostSimilarLocalMatrices){
         this.mostSimilarLocalMatrices=mostSimilarLocalMatrices;
@@ -41,76 +48,105 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         this.mostSimilarLocalMatrices.put(language,sparseMatrix);
     }
 
-    public boolean hasCachedMostSimilarLocal(Language language, int wpId) throws  IOException{
-        return mostSimilarLocalMatrices != null && mostSimilarLocalMatrices.containsKey(language)
+    public boolean hasCachedMostSimilarLocal(Language language, int wpId) {
+        boolean hasCached;
+        try {
+            hasCached = mostSimilarLocalMatrices != null && mostSimilarLocalMatrices.containsKey(language)
                 && mostSimilarLocalMatrices.get(language).getRow(wpId) != null;
+        } catch (IOException e){
+            return false;
+        }
+        return hasCached;
     }
 
-    public SRResultList getCachedMostSimilarLocal(Language language, int wpId, int numResults, TIntSet validIds) throws IOException {
+    public SRResultList getCachedMostSimilarLocal(Language language, int wpId, int numResults, TIntSet validIds) {
         if (!hasCachedMostSimilarLocal(language, wpId)){
             return null;
         }
-        SparseMatrixRow row = mostSimilarLocalMatrices.get(language).getRow(wpId);
-        int n = 0;
-        SRResultList srl = new SRResultList(row.getNumCols());
-        for (int i=0; i<row.getNumCols() && n < numResults; i++){
+        SparseMatrixRow row;
+        try {
+            row = mostSimilarLocalMatrices.get(language).getRow(wpId);
+        } catch (IOException e){
+            return null;
+        }
+        Leaderboard leaderboard = new Leaderboard(numResults);
+        for (int i=0; i<row.getNumCols() ; i++){
             int wpId2 = row.getColIndex(i);
+            float value = row.getColValue(i);
             if (validIds == null || validIds.contains(wpId2)){
-                srl.set(n++, row.getColIndex(i), row.getColValue(i));
+                leaderboard.tallyScore(wpId2,value);
             }
         }
-        srl.truncate(n);
-        return srl;
+        SRResultList results = leaderboard.getTop();
+        results.sortDescending();
+        return results;
     }
 
     /**
      * Normalizers translate similarity scores to more meaningful values.
      * @param n
      */
-    public void setMostSimilarNormalizer(Normalizer n){
-        mostSimilarNormalizer = n;
+    public void setDefaultMostSimilarNormalizer(Normalizer n){
+        defaultMostSimilarNormalizer = n;
     }
 
+    public void setDefaultSimilarityNormalizer(Normalizer defaultSimilarityNormalizer) {
+        this.defaultSimilarityNormalizer = defaultSimilarityNormalizer;
+    }
 
-    public void setSimilarityNormalizer(Normalizer similarityNormalizer) {
-        this.similarityNormalizer = similarityNormalizer;
+    public void setMostSimilarNormalizer(Normalizer n, Language l){
+        mostSimilarNormalizers.put(l,n);
+    }
+
+    public void setSimilarityNormalizer(Normalizer n, Language l){
+        similarityNormalizers.put(l,n);
     }
 
     /**
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
     protected void ensureSimilarityTrained() {
-        if (!similarityNormalizer.isTrained()) {
-            throw new IllegalStateException("Model similarity has not been trained.");
+        if (!defaultSimilarityNormalizer.isTrained()) {
+            throw new IllegalStateException("Model default similarity has not been trained.");
         }
     }
     /**
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
     protected void ensureMostSimilarTrained() {
-        if (!mostSimilarNormalizer.isTrained()) {
-            throw new IllegalStateException("Model mostSimilar has not been trained.");
+        if (!defaultMostSimilarNormalizer.isTrained()) {
+            throw new IllegalStateException("Model default mostSimilar has not been trained.");
         }
     }
 
     /**
-     * Use the similarityNormalizer to normalize a similarity if it's available.
+     * Use the language-specific similarity normalizer to normalize a similarity if it exists.
+     * Otherwise use the default similarity normalizer if it's available.
      * @param sim
+     * @param language
      * @return
      */
-    protected double normalize(double sim) {
+    protected double normalize(double sim, Language language) {
+        if (similarityNormalizers.containsKey(language)){
+            return similarityNormalizers.get(language).normalize(sim);
+        }
         ensureSimilarityTrained();
-        return similarityNormalizer.normalize(sim);
+        return defaultSimilarityNormalizer.normalize(sim);
     }
 
     /**
-     * Use the mostSimilarNormalizer to normalize a list of score if possible.
+     * Use the language-specific most similar normalizer to normalize a similarity if it exists.
+     * Otherwise use the default most similar normalizer if it's available.
      * @param srl
+     * @param language
      * @return
      */
-    protected SRResultList normalize(SRResultList srl) {
+    protected SRResultList normalize(SRResultList srl, Language language) {
+        if (similarityNormalizers.containsKey(language)){
+            return similarityNormalizers.get(language).normalize(srl);
+        }
         ensureMostSimilarTrained();
-        return mostSimilarNormalizer.normalize(srl);
+        return defaultMostSimilarNormalizer.normalize(srl);
     }
 
     public void setNumThreads(int n) {
@@ -132,6 +168,9 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         context.clear();
         context.add(new LocalString(language,phrase1));
         LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
+        if (similar1==null||similar2==null){
+            return new SRResult(Double.NaN);
+        }
         return similarity(pageHelper.getById(language,similar1.getId()),
                 pageHelper.getById(language,similar2.getId()),
                 explanations);
@@ -146,13 +185,18 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
         LocalId similar = disambiguator.disambiguate(phrase,null);
-        return mostSimilar(similar.asLocalPage(), maxResults, explanations);
+        return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults, explanations);
     }
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
         LocalId similar = disambiguator.disambiguate(phrase,null);
-        return mostSimilar(similar.asLocalPage(), maxResults, explanations, validIds);
+        if (similar==null){
+            SRResultList resultList = new SRResultList(1);
+            resultList.set(0, new SRResult(Double.NaN));
+            return resultList;
+        }
+        return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults, explanations,validIds);
     }
 
     @Override
@@ -225,7 +269,40 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public abstract double[][] cosimilarity(String[] phrases, Language language);
+    public double[][] cosimilarity(String[] phrases, Language language) throws DaoException {
+        int ids[] = new int[phrases.length];
+        List<LocalString> localStringList = new ArrayList<LocalString>();
+        for (String phrase : phrases){
+            localStringList.add(new LocalString(language, phrase));
+        }
+        List<LocalId> localIds = disambiguator.disambiguate(localStringList, null);
+        for (int i=0; i<phrases.length; i++){
+            ids[i] = localIds.get(i).getId();
+        }
+        return cosimilarity(ids, language);
+    }
+
+    @Override
+    public void writeCosimilarity(String path, LanguageSet languages, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
+        for (Language language: languages) {
+            path = path + getName()+"-"+language.getLangCode();
+            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this, language);
+            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
+            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
+            TIntSet pageIds = new TIntHashSet();
+            for (LocalPage page : localPages) {
+                if (page != null) {
+                    pageIds.add(page.getLocalId());
+                }
+            }
+
+            featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
+            PairwiseSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
+            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
+            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(path+"-cosimilarity")));
+        }
+    }
 
 
 }

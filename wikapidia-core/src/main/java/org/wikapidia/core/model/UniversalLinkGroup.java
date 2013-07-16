@@ -12,7 +12,8 @@ import java.util.Map;
  *
  */
 public class UniversalLinkGroup {
-
+    //If isOutlink, maps dest id to UniversalLinks
+    //Otherwise maps source id to UniversalLinks
     private final Map<Integer, UniversalLink> links;
     private final boolean isOutlink;
     private final int univId;
@@ -25,5 +26,25 @@ public class UniversalLinkGroup {
         this.univId = univId;
         this.algorithmId = algorithmId;
         this.languageSet = languageSet;
+    }
+
+    public Map<Integer, UniversalLink> getLinks() {
+        return links;
+    }
+
+    public boolean isOutlink() {
+        return isOutlink;
+    }
+
+    public int getUnivId() {
+        return univId;
+    }
+
+    public int getAlgorithmId() {
+        return algorithmId;
+    }
+
+    public LanguageSet getLanguageSet() {
+        return languageSet;
     }
 }
