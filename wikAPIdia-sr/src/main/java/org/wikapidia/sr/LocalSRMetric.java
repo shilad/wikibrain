@@ -28,7 +28,8 @@ public interface LocalSRMetric {
     public String getName();
 
     /**
-     * Determine the similarity between two local pages
+     * Determine the similarity between two local pages.
+     *
      * @param page1 The first page.
      * @param page2 The second page.
      * @param explanations Whether explanations should be created.
@@ -37,7 +38,8 @@ public interface LocalSRMetric {
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
 
     /**
-     * Determine the similarity between two strings in a given language by mapping through local pages
+     * Determine the similarity between two strings in a given language by mapping through local pages.
+     *
      * @param phrase1 The first phrase.
      * @param phrase2 The second phrase.
      * @param language The language of the phrases.
@@ -47,7 +49,8 @@ public interface LocalSRMetric {
     public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException;
 
     /**
-     * Find the most similar local pages to a local page within the same language
+     * Find the most similar local pages to a local page within the same language.
+     *
      * @param page The local page whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
      * @param explanations Whether explanations should be created.
@@ -57,6 +60,7 @@ public interface LocalSRMetric {
 
     /**
      * Find the most similar local pages to a local page.
+     *
      * @param page The local page whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
      * @param explanations Whether explanations should be created.
@@ -66,7 +70,8 @@ public interface LocalSRMetric {
     public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
 
     /**
-     * Find the most similar local pages to a phrase,
+     * Find the most similar local pages to a phrase.
+     *
      * @param phrase The phrase whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
      * @param explanations Whether explanations should be created.
@@ -75,7 +80,8 @@ public interface LocalSRMetric {
     public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException;
 
     /**
-     * Find the most similar local pages to a phrase
+     * Find the most similar local pages to a phrase.
+     *
      * @param phrase The phrase whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
      * @param explanations Whether explanations should be created.
@@ -86,6 +92,7 @@ public interface LocalSRMetric {
 
     /**
      * Writes the metric to a directory.
+     *
      * @param directory A directory data will be written to.
      *                  Any existing data in the directory may be destroyed.
      * @throws java.io.IOException
@@ -94,6 +101,7 @@ public interface LocalSRMetric {
 
     /**
      * Reads the metric from a directory.
+     *
      * @param directory A directory data will be read from.
      *                  The directory previously will have been written to by write().
      * @throws IOException
@@ -103,13 +111,15 @@ public interface LocalSRMetric {
     /**
      * Train the similarity() function.
      * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     *
      * @param labeled The labeled gold standard dataset.
      */
     public void trainSimilarity(List<KnownSim> labeled) throws DaoException;
 
     /**
      * Train the mostSimilar() function
-     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2)
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     *
      * @param labeled The labeled gold standard dataset.
      * @param numResults The maximum number of similar articles computed per phrase.
      * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
@@ -126,7 +136,8 @@ public interface LocalSRMetric {
 
 
     /**
-     * Construct a cosimilarity matrix of Wikipedia ids in a given language
+     * Construct a cosimilarity matrix of Wikipedia ids in a given language.
+     *
      * @param wpRowIds
      * @param wpColIds
      * @param language The language of the pages.
@@ -138,6 +149,7 @@ public interface LocalSRMetric {
 
     /**
      * Construct a cosimilarity matrix of phrases.
+     *
      * @param rowPhrases
      * @param colPhrases
      * @param language The language of the phrases.
@@ -147,7 +159,8 @@ public interface LocalSRMetric {
     public double[][] cosimilarity(String rowPhrases[], String colPhrases[], Language language) throws DaoException;
 
     /**
-     * Construct symmetric comsimilarity matrix of Wikipedia ids in a given language
+     * Construct symmetric comsimilarity matrix of Wikipedia ids in a given language.
+     *
      * @param ids
      * @return
      * @throws IOException
@@ -155,7 +168,8 @@ public interface LocalSRMetric {
     public double[][] cosimilarity(int ids[], Language language) throws DaoException;
 
     /**
-     * Construct symmetric cosimilarity matrix of phrases by mapping through local pages
+     * Construct symmetric cosimilarity matrix of phrases by mapping through local pages.
+     *
      * @param phrases
      * @param language The language of the phrases.
      * @return
