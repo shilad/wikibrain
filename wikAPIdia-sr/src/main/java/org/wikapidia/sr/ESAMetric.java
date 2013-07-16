@@ -3,6 +3,8 @@ package org.wikapidia.sr;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.core.dao.DaoException;
@@ -125,6 +127,9 @@ public class ESAMetric extends BaseLocalSRMetric {
             List<LocalPage> formatPages =new ArrayList<LocalPage>();
             for (int id : ids.keySet()) {
                 LocalPage topPage = pageHelper.getById(language, id);
+
+//                Document d = searcher.;
+
                 if (topPage==null) {
                     continue;
                 }
