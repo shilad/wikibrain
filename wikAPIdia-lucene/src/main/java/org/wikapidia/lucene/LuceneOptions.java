@@ -57,7 +57,7 @@ public class LuceneOptions {
      */
     public static LuceneOptions getDefaultOptions() {
         try {
-            return new Configurator(new Configuration()).get(LuceneOptions.class, "options");
+            return new Configurator(new Configuration()).get(LuceneOptions.class, "plaintext");
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
