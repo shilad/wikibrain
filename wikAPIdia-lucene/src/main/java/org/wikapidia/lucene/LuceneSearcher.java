@@ -1,5 +1,6 @@
 package org.wikapidia.lucene;
 
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -99,6 +100,23 @@ public class LuceneSearcher {
     public ScoreDoc[] search(Query query, Language language) {
         try {
             return searchers.get(language).search(query, hitCount).scoreDocs;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Retrieves the local ID for a specified lucene document,
+     * within a given language.
+     *
+     * @param docId
+     * @param language
+     * @return
+     */
+    public int getLocalIdFromDocId(int docId, Language language) {
+        try {
+            Document document = searchers.get(language).doc(docId);
+            return (Integer) document.getField(LuceneOptions.LOCAL_ID_FIELD_NAME).numericValue();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
