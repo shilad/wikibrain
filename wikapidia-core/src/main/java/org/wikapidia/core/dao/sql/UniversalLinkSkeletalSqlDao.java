@@ -3,7 +3,7 @@ package org.wikapidia.core.dao.sql;
 import org.jooq.TableField;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.UniversalSkeletalLinkDao;
+import org.wikapidia.core.dao.UniversalLinkDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.UniversalLink;
@@ -15,9 +15,9 @@ import java.util.*;
 /**
  * @author Ari Weiland
  */
-public class UniversalSkeletalLinkSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalSkeletalLinkDao {
+public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
 
-    public UniversalSkeletalLinkSqlDao(DataSource dataSource) throws DaoException {
+    public UniversalLinkSkeletalSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-skeletal-link");
     }
 
@@ -308,8 +308,8 @@ public class UniversalSkeletalLinkSqlDao extends AbstractSqlDao<UniversalLink> i
             Tables.UNIVERSAL_SKELETAL_LINK.LANG_281,
             Tables.UNIVERSAL_SKELETAL_LINK.LANG_282,
             Tables.UNIVERSAL_SKELETAL_LINK.LANG_283,
-            Tables.UNIVERSAL_SKELETAL_LINK.LANG_284//,
-//            Tables.UNIVERSAL_SKELETAL_LINK.LANG_285
+            Tables.UNIVERSAL_SKELETAL_LINK.LANG_284,
+            Tables.UNIVERSAL_SKELETAL_LINK.LANG_285
     };
 
     @Override
