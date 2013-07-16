@@ -93,10 +93,10 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 }
                 pages.get(algorithmId).add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
             }
-            return new SqlDaoIterable<T, Integer[]>(result, new PageMap(pages), conn) {
+            return new SqlDaoIterable<T, int[]>(result, new PageMap(pages), conn) {
 
                 @Override
-                public T transform(Integer[] item) throws DaoException {
+                public T transform(int[] item) throws DaoException {
                     return getById(item[0], item[1]);
                 }
             };
@@ -106,27 +106,16 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         }
     }
 
-    private static class PageMap implements Iterator<Integer[]> {
-        private final Map<Integer, TIntSet> pages;
+    private static class PageMap implements Iterator<int[]> {
         private final Iterator<Map.Entry<Integer, TIntSet>> iterator1;
         private Map.Entry<Integer, TIntSet> entry;
         private TIntIterator iterator2;
 
         public PageMap(Map<Integer, TIntSet> pages) {
-            this.pages = pages;
             this.iterator1 = pages.entrySet().iterator();
             this.entry = iterator1.next();
             this.iterator2 = entry.getValue().iterator();
         }
-
-        public void put(Record record) {
-            int algorithmId = record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID);
-            if (!pages.containsKey(algorithmId)) {
-                pages.put(algorithmId, new TIntHashSet());
-            }
-            pages.get(algorithmId).add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
-        }
-
 
         @Override
         public boolean hasNext() {
@@ -141,9 +130,9 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         }
 
         @Override
-        public Integer[] next() {
+        public int[] next() {
             if (hasNext()) {
-                return new Integer[] { iterator2.next(), entry.getKey() };
+                return new int[] { iterator2.next(), entry.getKey() };
             }
             return null;
         }

@@ -3,6 +3,7 @@ package org.wikapidia.core.dao.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
+import org.apache.commons.lang.ArrayUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.*;
@@ -150,7 +151,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                     and(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.eq(destId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetch();
-            return buildUniversalLink(result);
+            return buildUniversalLink(result, true);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -182,7 +183,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         }
         Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>();
         for (Integer integer : allRecords.keySet()) {
-            map.put(integer, buildUniversalLink(allRecords.get(integer)));
+            map.put(integer, buildUniversalLink(allRecords.get(integer), outlinks));
         }
         return new UniversalLinkGroup(
                 map,
@@ -194,33 +195,92 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     }
 
     private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result, Connection conn) throws DaoException {
-        Set<Integer[]> links = new HashSet<Integer[]>();
+        LinkMap links = new LinkMap();
         for (Record record : result) {
-            links.add(new Integer[]{
-                    record.getValue(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID),
-                    record.getValue(Tables.UNIVERSAL_LINK.UNIV_DEST_ID),
-                    record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID)});
+            links.put(record);
         }
-        return new SqlDaoIterable<UniversalLink, Integer[]>(result, links.iterator(), conn) {
+        return new SqlDaoIterable<UniversalLink, int[]>(result, links, conn) {
 
             @Override
-            public UniversalLink transform(Integer[] item) throws DaoException {
+            public UniversalLink transform(int[] item) throws DaoException {
                 return getUniversalLink(item[0], item[1], item[2]);
             }
         };
     }
 
-    private UniversalLink buildUniversalLink(Collection<Record> records) throws DaoException {
+    private static class LinkMap implements Iterator<int[]> {
+        private int[][] links;
+        private int writeIndex;
+        private int readIndex;
+        private boolean write;
+
+        public LinkMap() {
+            links = new int[256][];
+            writeIndex = 0;
+            readIndex = 0;
+            write = true;
+        }
+
+        public boolean put(Record record) {
+            if (write) {
+                int[] link = new int[]{
+                        record.getValue(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID),
+                        record.getValue(Tables.UNIVERSAL_LINK.UNIV_DEST_ID),
+                        record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID)};
+                for (int[] l : links) {
+                    if (Arrays.equals(l, link)) return false;
+                }
+                if (writeIndex >= links.length) {
+                    int[][] temp = new int[links.length * 2][];
+                    ArrayUtils.addAll(temp, links);
+                    links = temp;
+                }
+                links[writeIndex] = link;
+                writeIndex++;
+                return true;
+            } else {
+                throw new IllegalStateException("Cannot rewrite Iterator!");
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (write) write = false;
+            return (readIndex < links.length && links[readIndex] != null);
+        }
+
+        @Override
+        public int[] next() {
+            if (hasNext()) {
+                int[] temp = links[readIndex];
+                readIndex++;
+                return temp;
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private UniversalLink buildUniversalLink(Collection<Record> records, boolean outlinks) throws DaoException {
         if (records == null || records.isEmpty()) {
             return null;
         }
         Multimap<Language, LocalLink> map = HashMultimap.create(records.size(), records.size());
         for (Record record : records) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_LINK.LANG_ID));
-            LocalLink temp = localLinkDao.getLink(
+            LocalLink temp = new LocalLink(
                     language,
+                    null,
                     record.getValue(Tables.UNIVERSAL_LINK.LOCAL_SOURCE_ID),
-                    record.getValue(Tables.UNIVERSAL_LINK.LOCAL_DEST_ID)
+                    record.getValue(Tables.UNIVERSAL_LINK.LOCAL_DEST_ID),
+                    outlinks,
+                    -1,
+                    true,
+                    null
             );
             map.put(language, temp);
         }
