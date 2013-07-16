@@ -48,8 +48,28 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
     @Override
     public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException {
         Leaderboard leaderboard = new Leaderboard(maxResults);
+        if (validIds==null){
+            validIds = new TIntHashSet(matrix.getRowIds());
+        }
+        MatrixRow rowA = matrix.getRow(wpId);
+        int sizeA = 0;
+        for (int i=0; i<rowA.getNumCols(); i++){
+            if (rowA.getColValue(i)==1){sizeA++;}
+        }
         for (int id: validIds.toArray()) {
-            leaderboard.tallyScore(id, similarity(wpId, id));
+            MatrixRow rowB = matrix.getRow(wpId);
+            if (rowB != null){
+                int sizeB = 0;
+                int intersection = 0;
+                for (int i=0; i<rowB.getNumCols(); i++){
+                    if (rowB.getColValue(i)==1){
+                        sizeB++;
+                    }
+                }
+//                double similarity = 1- (Math.log(Math.max(sizeA,sizeB))-Math.log(intersection))
+//                        / (Math.log(matrix.getNumRows())-Math.log(Math.min(sizeA,sizeB)));
+//                leaderboard.tallyScore(id, similarity);
+            }
         }
         return leaderboard.getTop();
     }

@@ -16,8 +16,7 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
-import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
-import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
+import org.wikapidia.sr.pairwise.*;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 
@@ -296,8 +295,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     pageIds.add(page.getLocalId());
                 }
             }
+
             featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path);
+            PairwiseSimilarity pairwise = new PairwiseCosineSimilarity(path);
+            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
             pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
             mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(path+"-cosimilarity")));
         }

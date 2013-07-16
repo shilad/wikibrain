@@ -13,6 +13,7 @@ import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Leaderboard;
@@ -215,8 +216,10 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
                 pageIds.add(page.getUnivId());
             }
         }
+
         featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-        PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path);
+        PairwiseMilneWittenSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
+        PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
         pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
         mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
     }

@@ -36,10 +36,10 @@ public class PairwiseSimilarityWriter {
 
 
 
-    public PairwiseSimilarityWriter(String path) throws IOException {
+    public PairwiseSimilarityWriter(String path, PairwiseSimilarity metric) throws IOException {
         this.vconf = new ValueConf();
         this.writer = new SparseMatrixWriter(new File(path+"-cosimilarity"), vconf);
-        this.metric  = new PairwiseCosineSimilarity(path);
+        this.metric  = metric;
     }
 
     public void setValidIds(TIntSet validIds) {

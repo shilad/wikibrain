@@ -7,6 +7,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.wikapidia.matrix.*;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 
 import java.io.File;
@@ -43,7 +45,9 @@ public class TestPairwiseSimilarity {
     @Test
     public void testSimilarity() throws IOException, InterruptedException {
 
-        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter("matrix");
+        String path = "matrix";
+        PairwiseSimilarity pairwiseSimilarity = new PairwiseMilneWittenSimilarity(path);
+        PairwiseSimilarityWriter writer = new PairwiseSimilarityWriter(path,pairwiseSimilarity);
         writer.writeSims(matrix.getRowIds(), 1, NUM_ROWS);
         SparseMatrix sims = new SparseMatrix(new File("matrix-cosimilarity"));
 
