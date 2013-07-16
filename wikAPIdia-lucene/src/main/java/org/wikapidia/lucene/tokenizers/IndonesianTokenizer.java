@@ -24,7 +24,7 @@ public class IndonesianTokenizer extends LanguageTokenizer {
 
     @Override
     public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = getTokenizer(reader);
+        TokenStream stream = setTokenizer(reader);
         stream = new StandardFilter(matchVersion, stream);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);

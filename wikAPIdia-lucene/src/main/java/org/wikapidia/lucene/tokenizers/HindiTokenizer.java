@@ -26,7 +26,7 @@ public class HindiTokenizer extends LanguageTokenizer {
 
     @Override
     public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = getTokenizer(reader);
+        TokenStream stream = setTokenizer(reader);
         stream = new StandardFilter(matchVersion, stream);
         stream = new HindiNormalizationFilter(stream);
         if (caseInsensitive)

@@ -62,6 +62,6 @@ public class WikapidiaAnalyzer extends Analyzer {
     protected Analyzer.TokenStreamComponents createComponents(String s, Reader r) {
         LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
         TokenStream result = langTokenizer.getTokenStream(r, CharArraySet.EMPTY_SET);
-        return new TokenStreamComponents(langTokenizer.getTokenizer(r), result);
+        return new TokenStreamComponents(langTokenizer.getTokenizer(), result);
     }
 }

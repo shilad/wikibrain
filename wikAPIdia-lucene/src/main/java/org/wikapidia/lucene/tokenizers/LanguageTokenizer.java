@@ -46,6 +46,8 @@ public abstract class LanguageTokenizer {
     protected final boolean useStem;
     protected final Language language;
 
+    protected Tokenizer tokenizer = null;
+
     protected LanguageTokenizer(Version version, TokenizerOptions tokenizerOptions, Language language) {
         this.matchVersion = version;
         this.caseInsensitive = tokenizerOptions.isCaseInsensitive();
@@ -54,10 +56,39 @@ public abstract class LanguageTokenizer {
         this.language = language;
     }
 
+    /**
+     * Primary workhorse method of this class. Children will implememnt this and apply
+     * appropriate filters to return a TokenStream. Note that all implementations must
+     * either manually instantiate the internal tokenizer, or call the setTokenizer
+     * method.
+     *
+     * @param reader
+     * @param stemExclusionSet
+     * @return
+     */
     public abstract TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet);
 
-    public Tokenizer getTokenizer(Reader r) {
-        return new StandardTokenizer(matchVersion, r);
+    /**
+     * Sets the internal tokenizer to a new StandardTokenizer based on the input reader.
+     * Additionally returns the tokenizer for convenience. If a child class requires
+     * something other than a StandardTokenizer, it should override this method.
+     *
+     * @param r
+     * @return
+     */
+    public Tokenizer setTokenizer(Reader r) {
+        tokenizer = new StandardTokenizer(matchVersion, r);
+        return tokenizer;
+    }
+
+    /**
+     * Gets the internal tokenizer.
+     * If the tokenizer has not been set, returns null.
+     *
+     * @return
+     */
+    public Tokenizer getTokenizer() {
+        return tokenizer;
     }
 
     public TokenizerOptions getTokenizerOptions() {

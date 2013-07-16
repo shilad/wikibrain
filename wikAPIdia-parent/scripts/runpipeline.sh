@@ -14,11 +14,11 @@ case "$1" in
     concept)
         stage=4
         ;;
-    lucene)
+    analysis)
         stage=5
         ;;
     *)
-        echo "unknown stage: $1 (must be 'all', 'download', 'dump', 'wikitext', or 'concept')" >&2
+        echo "unknown stage: $1 (must be 'all', 'download', 'dump', 'wikitext', 'concept', or 'analysis')" >&2
         exit 1
 esac
 
@@ -52,6 +52,7 @@ if [ "$stage" -le 4 ]; then
 fi
 
 if [ "$stage" -le 5 ]; then
+    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.PhraseLoader -n anchortext $@) &&
     (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.LuceneLoader -d $@) ||
     die "$0 failed"
 fi

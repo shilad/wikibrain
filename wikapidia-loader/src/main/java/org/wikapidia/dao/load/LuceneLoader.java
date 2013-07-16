@@ -59,6 +59,10 @@ public class LuceneLoader {
                     .setNameSpaces(namespaces)
                     .setRedirect(false));
             for (RawPage rawPage : rawPages) {
+//                if (i<3) {
+//                    i++;
+//                    continue;
+//                }
                 luceneIndexer.indexPage(rawPage);
                 i++;
                 if (i%1000 == 0) LOG.log(Level.INFO, "RawPages indexed: " + i);

@@ -4,7 +4,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.icu.segmentation.ICUTokenizer;
-import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.wikapidia.core.lang.Language;
@@ -24,8 +23,9 @@ public class SlovakTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public Tokenizer getTokenizer(Reader r) {
-        return new ICUTokenizer(r);
+    public Tokenizer setTokenizer(Reader r) {
+        tokenizer = new ICUTokenizer(r);
+        return tokenizer;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class SlovakTokenizer extends LanguageTokenizer {
         if (stopWords == null){
             stopWords = getStopWordsForNonLuceneLangFromFile(Language.getByLangCode("sk"));
         }
-        TokenStream stream = getTokenizer(reader);
+        TokenStream stream = setTokenizer(reader);
         if (useStopWords)
             stream = new StopFilter(matchVersion, stream, stopWords);
         return stream;
