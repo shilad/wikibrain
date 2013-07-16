@@ -105,18 +105,6 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     }
 
     /**
-     * Subclasses must override the save method.
-     * Note that they must use the save() method defined below instead of inserting
-     * directly to the database. This will speed up inserts.
-     *
-     * @param obj
-     */
-    @Override
-    public void save(T obj) throws DaoException {
-        throw new UnsupportedOperationException("subclasses must override this method.");
-    }
-
-    /**
      * Inserts values into the database.
      * Call this instead of direct sql inserts because the underlying code may optimize the inserts
      * by creating batch inserts or a cvs that can be directly loaded by the underlying database.
