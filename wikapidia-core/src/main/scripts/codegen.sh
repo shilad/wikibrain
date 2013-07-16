@@ -4,6 +4,6 @@
 # Requires no parameters, but must be run from the home directory
 # of any module.
 
-source ../wikapidia-utils/src/main/scripts/utils.sh &&
+source ../wikAPIdia-utils/src/main/scripts/utils.sh &&
 compileJooq ||
 die "$0 failed"
