@@ -64,8 +64,14 @@ public class LanguageSet implements Iterable<Language> {
      * Creates a LanguageSet instance with an undefined default language
      * @param inputLangs
      */
-    public LanguageSet(Collection<Language> inputLangs){
-        this(inputLangs.iterator().next(), inputLangs);
+    public LanguageSet(Collection<Language> inputLangs) {
+        this(getDefault(inputLangs), inputLangs);
+    }
+
+    private static Language getDefault(Collection<Language> inputLangs) {
+        List<Language> temp = new ArrayList<Language>(inputLangs);
+        Collections.sort(temp);
+        return temp.iterator().next();
     }
 
     /**
