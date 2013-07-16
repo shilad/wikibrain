@@ -18,6 +18,7 @@ import java.util.logging.Logger;
  * @author Ben Hillmann
  */
 public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
+    private static final double epsilon = 0.00001;
 
     private static final Logger LOG = Logger.getLogger(PairwiseCosineSimilarity.class.getName());
 
@@ -48,27 +49,48 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
     @Override
     public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException {
         Leaderboard leaderboard = new Leaderboard(maxResults);
-        if (validIds==null){
-            validIds = new TIntHashSet(matrix.getRowIds());
-        }
-        MatrixRow rowA = matrix.getRow(wpId);
+        TIntFloatHashMap rowA = matrix.getRow(wpId).asTroveMap();
         int sizeA = 0;
-        for (int i=0; i<rowA.getNumCols(); i++){
-            if (rowA.getColValue(i)==1){sizeA++;}
+        TIntSet linkIds = new TIntHashSet();
+        for (int i : rowA.keys()){
+            if (Math.abs(rowA.get(i)-1)<epsilon){
+                sizeA++;
+                linkIds.add(i);
+            }
         }
+
+        TIntSet possibleIds = new TIntHashSet();
+        for (int i: linkIds.toArray()){
+            TIntFloatHashMap finderRow = transpose.getRow(i).asTroveMap();
+            for (int j : finderRow.keys()){
+                if (Math.abs(finderRow.get(j)-1)<epsilon){
+                    possibleIds.add(j);
+                }
+            }
+        }
+
+        if (validIds==null){
+            validIds=possibleIds;
+        } else {
+            validIds.retainAll(possibleIds);
+        }
+
         for (int id: validIds.toArray()) {
-            MatrixRow rowB = matrix.getRow(wpId);
+            TIntFloatHashMap rowB = matrix.getRow(id).asTroveMap();
             if (rowB != null){
                 int sizeB = 0;
                 int intersection = 0;
-                for (int i=0; i<rowB.getNumCols(); i++){
-                    if (rowB.getColValue(i)==1){
+                for (int key : rowB.keys()){
+                    if (Math.abs(rowB.get(key)-1)<epsilon){
                         sizeB++;
+                        if (Math.abs(rowA.get(key)-1)<epsilon){
+                            intersection++;
+                        }
                     }
                 }
-//                double similarity = 1- (Math.log(Math.max(sizeA,sizeB))-Math.log(intersection))
-//                        / (Math.log(matrix.getNumRows())-Math.log(Math.min(sizeA,sizeB)));
-//                leaderboard.tallyScore(id, similarity);
+                double similarity = 1- (Math.log(Math.max(sizeA,sizeB))-Math.log(intersection))
+                        / (Math.log(matrix.getNumRows())-Math.log(Math.min(sizeA,sizeB)));
+                leaderboard.tallyScore(id, similarity);
             }
         }
         return leaderboard.getTop();

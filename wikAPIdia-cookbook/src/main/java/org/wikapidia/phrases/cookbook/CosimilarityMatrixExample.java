@@ -53,18 +53,18 @@ public class CosimilarityMatrixExample {
         for (LocalString phrase : phrases){
             System.out.println("\nMost similar to "+phrase.getString()+":");
             SRResultList results = sr.mostSimilar(phrase, 5, false);
-//            for (int i=0; i<results.numDocs(); i++){
-//                LocalPage page = localPageDao.getById(language,results.get(i).getId());
-//                String name = page.getTitle().getCanonicalTitle();
-//                System.out.println("#"+(i+1)+" "+name);
-//            }
+            for (int i=0; i<results.numDocs(); i++){
+                LocalPage page = localPageDao.getById(language,results.get(i).getId());
+                String name = page.getTitle().getCanonicalTitle();
+                System.out.println("#"+(i+1)+" "+name);
+            }
             System.out.println("\nWithout cache:");
             results = sr.mostSimilar(phrase, 5, true);
-//            for (int i=0; i<results.numDocs(); i++){
-//                LocalPage page = localPageDao.getById(language,results.get(i).getId());
-//                String name = page.getTitle().getCanonicalTitle();
-//                System.out.println("#"+(i+1)+" "+name);
-//            }
+            for (int i=0; i<results.numDocs(); i++){
+                LocalPage page = localPageDao.getById(language,results.get(i).getId());
+                String name = page.getTitle().getCanonicalTitle();
+                System.out.println("#"+(i+1)+" "+name);
+            }
         }
 
         for (LocalString phrase : phrases){
