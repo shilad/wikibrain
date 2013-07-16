@@ -85,11 +85,15 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(conditions)
                     .fetchLazy(getFetchSize());
-            PageMap map = new PageMap();
+            Map<Integer, TIntSet> pages = new HashMap<Integer, TIntSet>();
             for (Record record : result) {
-                map.put(record);
+                int algorithmId = record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID);
+                if (!pages.containsKey(algorithmId)) {
+                    pages.put(algorithmId, new TIntHashSet());
+                }
+                pages.get(algorithmId).add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
             }
-            return new SqlDaoIterable<T, Integer[]>(result, map.iterator(), conn) {
+            return new SqlDaoIterable<T, Integer[]>(result, new PageMap(pages), conn) {
 
                 @Override
                 public T transform(Integer[] item) throws DaoException {
@@ -102,11 +106,17 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         }
     }
 
-    private static class PageMap implements Iterable<Integer[]> {
-        private Map<Integer, TIntSet> pages;
+    private static class PageMap implements Iterator<Integer[]> {
+        private final Map<Integer, TIntSet> pages;
+        private final Iterator<Map.Entry<Integer, TIntSet>> iterator1;
+        private Map.Entry<Integer, TIntSet> entry;
+        private TIntIterator iterator2;
 
-        public PageMap() {
-            this.pages = new HashMap<Integer, TIntSet>();
+        public PageMap(Map<Integer, TIntSet> pages) {
+            this.pages = pages;
+            this.iterator1 = pages.entrySet().iterator();
+            this.entry = iterator1.next();
+            this.iterator2 = entry.getValue().iterator();
         }
 
         public void put(Record record) {
@@ -117,38 +127,30 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             pages.get(algorithmId).add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
         }
 
+
         @Override
-        public Iterator<Integer[]> iterator() {
-            return new Iterator<Integer[]>() {
-                private Iterator<Map.Entry<Integer, TIntSet>> iterator1 = pages.entrySet().iterator();
-                private Map.Entry<Integer, TIntSet> entry = iterator1.next();
-                private TIntIterator iterator2 = entry.getValue().iterator();
+        public boolean hasNext() {
+            if (iterator2.hasNext()) {
+                return true;
+            } else if (iterator1.hasNext()) {
+                entry = iterator1.next();
+                iterator2 = entry.getValue().iterator();
+                return hasNext();
+            }
+            return false;
+        }
 
-                @Override
-                public boolean hasNext() {
-                    if (iterator2.hasNext()) {
-                        return true;
-                    } else if (iterator1.hasNext()) {
-                        entry = iterator1.next();
-                        iterator2 = entry.getValue().iterator();
-                        return hasNext();
-                    }
-                    return false;
-                }
+        @Override
+        public Integer[] next() {
+            if (hasNext()) {
+                return new Integer[] { iterator2.next(), entry.getKey() };
+            }
+            return null;
+        }
 
-                @Override
-                public Integer[] next() {
-                    if (hasNext()) {
-                        return new Integer[] { iterator2.next(), entry.getKey() };
-                    }
-                    return null;
-                }
-
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
-            };
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
     }
 
