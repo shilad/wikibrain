@@ -76,29 +76,30 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
 
     @Override
     public Iterable<UniversalLink> get(DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Collection<Condition> conditions = new ArrayList<Condition>();
-            if (daoFilter.getNameSpaceIds() != null) {
-                conditions.add(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID.in(daoFilter.getSourceIds()));
-            }
-            if (daoFilter.getNameSpaceIds() != null) {
-                conditions.add(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.in(daoFilter.getDestIds()));
-            }
-            if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
-            }
-            Cursor<Record> result = context.select().
-                    from(Tables.UNIVERSAL_LINK).
-                    where(conditions).
-                    fetchLazy(getFetchSize());
-            return buildUniversalLinksIterable(result, conn);
-        } catch (SQLException e) {
-            quietlyCloseConn(conn);
-            throw new DaoException(e);
-        }
+        throw new UnsupportedOperationException("Temporarily out of order");
+//        Connection conn = null;
+//        try {
+//            conn = ds.getConnection();
+//            DSLContext context = DSL.using(conn, dialect);
+//            Collection<Condition> conditions = new ArrayList<Condition>();
+//            if (daoFilter.getNameSpaceIds() != null) {
+//                conditions.add(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID.in(daoFilter.getSourceIds()));
+//            }
+//            if (daoFilter.getNameSpaceIds() != null) {
+//                conditions.add(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.in(daoFilter.getDestIds()));
+//            }
+//            if (daoFilter.isRedirect() != null) {
+//                conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+//            }
+//            Cursor<Record> result = context.select().
+//                    from(Tables.UNIVERSAL_LINK).
+//                    where(conditions).
+//                    fetchLazy(getFetchSize());
+//            return buildUniversalLinksIterable(result, conn);
+//        } catch (SQLException e) {
+//            quietlyCloseConn(conn);
+//            throw new DaoException(e);
+//        }
     }
 
     @Override
@@ -192,77 +193,6 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                 algorithmId,
                 new LanguageSet(languages)
         );
-    }
-
-    private Iterable<UniversalLink> buildUniversalLinksIterable(Cursor<Record> result, Connection conn) throws DaoException {
-        LinkMap links = new LinkMap();
-        for (Record record : result) {
-            links.put(record);
-        }
-        return new SqlDaoIterable<UniversalLink, int[]>(result, links, conn) {
-
-            @Override
-            public UniversalLink transform(int[] item) throws DaoException {
-                return getUniversalLink(item[0], item[1], item[2]);
-            }
-        };
-    }
-
-    private static class LinkMap implements Iterator<int[]> {
-        private int[][] links;
-        private int writeIndex;
-        private int readIndex;
-        private boolean write;
-
-        public LinkMap() {
-            links = new int[256][];
-            writeIndex = 0;
-            readIndex = 0;
-            write = true;
-        }
-
-        public boolean put(Record record) {
-            if (write) {
-                int[] link = new int[]{
-                        record.getValue(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID),
-                        record.getValue(Tables.UNIVERSAL_LINK.UNIV_DEST_ID),
-                        record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID)};
-                for (int[] l : links) {
-                    if (Arrays.equals(l, link)) return false;
-                }
-                if (writeIndex >= links.length) {
-                    int[][] temp = new int[links.length * 2][];
-                    ArrayUtils.addAll(temp, links);
-                    links = temp;
-                }
-                links[writeIndex] = link;
-                writeIndex++;
-                return true;
-            } else {
-                throw new IllegalStateException("Cannot rewrite Iterator!");
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (write) write = false;
-            return (readIndex < links.length && links[readIndex] != null);
-        }
-
-        @Override
-        public int[] next() {
-            if (hasNext()) {
-                int[] temp = links[readIndex];
-                readIndex++;
-                return temp;
-            }
-            return null;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
     }
 
     private UniversalLink buildUniversalLink(Collection<Record> records, boolean outlinks) throws DaoException {
