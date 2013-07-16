@@ -297,7 +297,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             }
 
             featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-            PairwiseSimilarity pairwise = new PairwiseCosineSimilarity(path);
+            PairwiseSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
             PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
             pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
             mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(path+"-cosimilarity")));
