@@ -164,7 +164,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public int getNumPages(int algorithmId) throws DaoException {
+    public int getNumUniversalPages(int algorithmId) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -210,29 +210,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             }
             return map;
         } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public int getNumUniversalPages(int algorithmId) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Cursor<Record> result = context.select()
-                    .from(Tables.UNIVERSAL_PAGE)
-                    .fetchLazy(getFetchSize());
-            Set<Integer[]> pages = new HashSet<Integer[]>();
-            for (Record record : result) {
-                pages.add(new Integer[]{
-                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
-                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
-            }
-            return pages.size();
-        } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);

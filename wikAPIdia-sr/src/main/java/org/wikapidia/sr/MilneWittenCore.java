@@ -34,6 +34,8 @@ public class MilneWittenCore {
             return new SRResult(0.0);
         }
 
+
+
         SRResult result = new SRResult(1.0-(
                 (Math.log(Math.max(links1.size(),links2.size()))-Math.log(I.size()))
                 / (Math.log(numPages) - Math.log(Math.min(links1.size(),links2.size())))));

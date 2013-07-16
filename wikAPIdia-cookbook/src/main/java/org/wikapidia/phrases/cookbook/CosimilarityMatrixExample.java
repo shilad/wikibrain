@@ -38,17 +38,17 @@ public class CosimilarityMatrixExample {
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         String path = c.getConf().get().getString("sr.matrix.directory");
 
-//        Language language = Language.getByLangCode("simple");
-//        LanguageSet languages = new LanguageSet("simple");
-//        sr.writeCosimilarity(path,languages,8,100);
+        Language language = Language.getByLangCode("simple");
+        LanguageSet languages = new LanguageSet("simple");
+        sr.writeCosimilarity(path,languages,8,100);
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
         usr.writeCosimilarity(path,8,100);
 
         List<LocalString> phrases = new ArrayList<LocalString>();
-//        phrases.add(new LocalString(language, "United States"));
-//        phrases.add(new LocalString(language, "Barack Obama"));
-//        phrases.add(new LocalString(language, "brain"));
-//        phrases.add(new LocalString(language, "natural language processing"));
+        phrases.add(new LocalString(language, "United States"));
+        phrases.add(new LocalString(language, "Barack Obama"));
+        phrases.add(new LocalString(language, "brain"));
+        phrases.add(new LocalString(language, "natural language processing"));
 
         for (LocalString phrase : phrases){
             System.out.println("\nMost similar to "+phrase.getString()+":");

@@ -63,7 +63,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         TIntSet A = getLinks(page1.getUnivId(), algorithmId);
         TIntSet B = getLinks(page2.getUnivId(), algorithmId);
 
-        int numArticles = universalPageDao.getNumPages(page1.getAlgorithmId());
+        int numArticles = universalPageDao.getNumUniversalPages(page1.getAlgorithmId());
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
         result.id = page2.getUnivId();
@@ -129,7 +129,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
 
 
-            int numArticles = universalPageDao.getNumPages(algorithmId);
+            int numArticles = universalPageDao.getNumUniversalPages(algorithmId);
 
             List<SRResult> results = new ArrayList<SRResult>();
             for (int id : validIds.toArray()){
