@@ -3,7 +3,6 @@ package org.wikapidia.core.dao.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
-import org.apache.commons.lang.ArrayUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.*;

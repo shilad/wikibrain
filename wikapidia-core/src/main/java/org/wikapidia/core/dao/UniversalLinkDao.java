@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao;
 
-import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 
