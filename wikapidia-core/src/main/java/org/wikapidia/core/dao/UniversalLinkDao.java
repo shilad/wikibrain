@@ -14,16 +14,6 @@ import org.wikapidia.core.model.UniversalLinkGroup;
 public interface UniversalLinkDao extends Dao<UniversalLink> {
 
     /**
-     * Alternate method for saving a UniversalLink to the database
-     * @param localLink the LocalLink base of the UniversalLink
-     * @param sourceUnivId the source universal ID of the link
-     * @param destUnivId the destination universal ID of the link
-     * @param algorithmId the algorithm ID used to generate the link
-     * @throws DaoException
-     */
-    public void save(LocalLink localLink, int sourceUnivId, int destUnivId, int algorithmId) throws DaoException;
-
-    /**
      * Gets the outlinks from a given source universal ID in the form of a UniversalLinkGroup
      * @param sourceId
      * @param algorithmId

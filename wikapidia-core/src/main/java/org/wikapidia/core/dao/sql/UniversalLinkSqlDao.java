@@ -62,7 +62,6 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         }
     }
 
-    @Override
     public void save(LocalLink localLink, int sourceUnivId, int destUnivId, int algorithmId) throws DaoException {
         insert(
                 localLink.getLanguage().getId(),

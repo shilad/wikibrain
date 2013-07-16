@@ -2,6 +2,7 @@ package org.wikapidia.core.model;
 
 import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +21,12 @@ public class UniversalLink extends AbstractUniversalEntity<LocalLink> {
 
     public UniversalLink(int sourceUnivId, int destUnivId, int algorithmId, Multimap<Language, LocalLink> localEntities) {
         super(algorithmId, localEntities);
+        this.sourceUnivId = sourceUnivId;
+        this.destUnivId = destUnivId;
+    }
+
+    public UniversalLink(int sourceUnivId, int destUnivId, int algorithmId, LanguageSet languages) {
+        super(algorithmId, languages);
         this.sourceUnivId = sourceUnivId;
         this.destUnivId = destUnivId;
     }
