@@ -1,15 +1,23 @@
 package org.wikapidia.core.dao.sql;
 
-import org.jooq.TableField;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.UniversalLinkDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -315,38 +323,173 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     @Override
     public void save(UniversalLink item) throws DaoException {
         Collection<Language> temp = item.getLanguageSetOfExistsInLangs().getLanguages();
-        Map<Short, Language> languages = new HashMap<Short, Language>();
+        Set<Short> langIds = Sets.newHashSet();
         for (Language l : temp) {
-            languages.put(l.getId(), l);
+            langIds.add(l.getId());
         }
         Object[] toInsert = new Object[288];
         toInsert[0] = item.getSourceUnivId();
         toInsert[1] = item.getDestUnivId();
         toInsert[2] = item.getAlgorithmId();
         for (int i=3; i<toInsert.length; i++) {
-            toInsert[i] = languages.containsKey((short) (i-2));
+            toInsert[i] = langIds.contains((short) (i - 2));
         }
         insert(toInsert);
     }
 
     @Override
     public Iterable<UniversalLink> get(DaoFilter daoFilter) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.in(daoFilter.getSourceIds()));
+            }
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.in(daoFilter.getDestIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+            }
+            // for language, it will only return universal links that are in EVERY specified language
+            if (daoFilter.getLangIds() != null) {
+                for (short langId : daoFilter.getLangIds()) {
+                    conditions.add(getLangField(langId).eq(true));
+                }
+            }
+            Cursor<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_SKELETAL_LINK)
+                    .where(conditions)
+                    .fetchLazy(getFetchSize());
+            return new SimpleSqlDaoIterable<UniversalLink>(result, conn) {
+
+                @Override
+                public UniversalLink transform(Record item) throws DaoException {
+                    return buildUniversalLink(item);
+                }
+            };
+        } catch (SQLException e) {
+            quietlyCloseConn(conn);
+            throw new DaoException(e);
+        }
     }
 
     @Override
     public UniversalLinkGroup getOutlinks(int sourceId, int algorithmId) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Result<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_SKELETAL_LINK)
+                    .where(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.eq(sourceId))
+                    .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId))
+                    .fetch();
+            return buildUniversalLinkGroup(result, true);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     @Override
     public UniversalLinkGroup getInlinks(int destId, int algorithmId) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Result<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_SKELETAL_LINK)
+                    .where(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.eq(destId))
+                    .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId))
+                    .fetch();
+            return buildUniversalLinkGroup(result, false);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     @Override
     public UniversalLink getUniversalLink(int sourceId, int destId, int algorithmId) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Record record = context.select()
+                    .from(Tables.UNIVERSAL_SKELETAL_LINK)
+                    .where(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.eq(destId))
+                    .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId))
+                    .fetchOne();
+            return buildUniversalLink(record);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+    private UniversalLinkGroup buildUniversalLinkGroup(Result<Record> result, boolean outlinks) throws DaoException {
+        if (result == null || result.isEmpty()) {
+            return null;
+        }
+        Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>();
+        int commonId = -1;
+        int algorithmId = -1;
+        for (Record record : result) {
+            map.put(
+                    record.getValue(outlinks ?                          // Gets the unique ID of the links
+                            Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID :    // If links are outlinks, dest ID is unique
+                            Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID),  // If links are inlinks, source ID is unique
+                    buildUniversalLink(record));
+            if (commonId == -1) {
+                commonId = record.getValue(outlinks ?               // Gets the common ID of the links
+                        Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID :  // If links are outlinks, source ID is common
+                        Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID);    // If links are inlinks, dest ID is common;
+                algorithmId = record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID);
+            }
+        }
+        Set<Language> languages = new HashSet<Language>();
+        for (UniversalLink link : map.values()) {
+            for (Language language : link.getLanguageSetOfExistsInLangs()) {
+                languages.add(language);
+            }
+        }
+        return new UniversalLinkGroup(
+                map,
+                outlinks,
+                commonId,
+                algorithmId,
+                new LanguageSet(languages)
+        );
     }
 
+    private UniversalLink buildUniversalLink(Record record) throws DaoException {
+        if (record == null) {
+            return null;
+        }
+        List<Language> languages = new ArrayList<Language>();
+        for (Language language : LanguageSet.ALL) {
+            if (record.getValue(getLangField(language))) {
+                languages.add(language);
+            }
+        }
+        return new UniversalLink(
+                record.getValue(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID),
+                record.getValue(Tables.UNIVERSAL_LINK.UNIV_DEST_ID),
+                record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID),
+                new LanguageSet(languages)
+        );
+    }
+
+    private TableField<Record, Boolean> getLangField(Language language) {
+        return getLangField(language.getId());
+    }
+
+    private TableField<Record, Boolean> getLangField(short langId) {
+        return INSERT_FIELDS[langId + 2];
+    }
 }
