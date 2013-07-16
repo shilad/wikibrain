@@ -10,11 +10,11 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>../wikapidia-core</module>
-        <module>../wikapidia-loader</module>
-        <module>../wikapidia-parser</module>
+        <module>../wikAPIdia-core</module>
+        <module>../wikAPIdia-loader</module>
+        <module>../wikAPIdia-parser</module>
         <module>../wikAPIdia-phrases</module>
-        <module>../wikapidia-utils</module>
+        <module>../wikAPIdia-utils</module>
         <module>../wikAPIdia-mapper</module>
         <module>../wikAPIdia-matrix</module>
         <module>../wikAPIdia-download</module>

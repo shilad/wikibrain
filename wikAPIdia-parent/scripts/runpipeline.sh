@@ -24,7 +24,7 @@ esac
 
 shift
 
-source ../wikapidia-utils/src/main/scripts/utils.sh &&
+source ../wikAPIdia-utils/src/main/scripts/utils.sh &&
 mvn clean &&
 compile  || die "$0 failed"
 
