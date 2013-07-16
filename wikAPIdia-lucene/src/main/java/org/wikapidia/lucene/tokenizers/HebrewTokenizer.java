@@ -23,8 +23,9 @@ public class HebrewTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public Tokenizer getTokenizer(Reader r) {
-        return new ICUTokenizer(r);
+    public Tokenizer setTokenizer(Reader r) {
+        tokenizer = new ICUTokenizer(r);
+        return tokenizer;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class HebrewTokenizer extends LanguageTokenizer {
         if (stopWords == null){
             stopWords = LanguageTokenizer.getStopWordsForNonLuceneLangFromFile(Language.getByLangCode("he"));
         }
-        TokenStream stream = getTokenizer(reader);
+        TokenStream stream = setTokenizer(reader);
         if (useStopWords)
             stream = new StopFilter(matchVersion, stream, stopWords);
         return stream;

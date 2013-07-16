@@ -9,7 +9,6 @@ import org.apache.lucene.analysis.ja.JapaneseAnalyzer;
 import org.apache.lucene.analysis.ja.JapaneseBaseFormFilter;
 import org.apache.lucene.analysis.ja.JapaneseKatakanaStemFilter;
 import org.apache.lucene.analysis.ja.JapanesePartOfSpeechStopFilter;
-import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.wikapidia.core.lang.Language;
@@ -27,13 +26,14 @@ public class JapaneseTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public Tokenizer getTokenizer(Reader r) {
-        return new org.apache.lucene.analysis.ja.JapaneseTokenizer(r, null, false, org.apache.lucene.analysis.ja.JapaneseTokenizer.DEFAULT_MODE);
+    public Tokenizer setTokenizer(Reader r) {
+        tokenizer = new org.apache.lucene.analysis.ja.JapaneseTokenizer(r, null, false, org.apache.lucene.analysis.ja.JapaneseTokenizer.DEFAULT_MODE);
+        return tokenizer;
     }
 
     @Override
     public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = getTokenizer(reader);
+        TokenStream stream = setTokenizer(reader);
         stream = new JapaneseBaseFormFilter(stream);
         stream = new CJKWidthFilter(stream);
         if (caseInsensitive)

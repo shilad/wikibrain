@@ -24,13 +24,14 @@ public class ChineseTokenizer extends LanguageTokenizer{
     }
 
     @Override
-    public Tokenizer getTokenizer(Reader r) {
-        return new SentenceTokenizer(r);
+    public Tokenizer setTokenizer(Reader r) {
+        tokenizer = new SentenceTokenizer(r);
+        return tokenizer;
     }
 
     @Override
     public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = getTokenizer(reader);
+        TokenStream stream = setTokenizer(reader);
         stream = new WordTokenFilter(stream); // breaks Sentences into words
         // stream = new LowerCaseFilter(stream);
         // LowerCaseFilter is not needed, as SegTokenFilter lowercases Basic Latin text.

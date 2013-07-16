@@ -7,7 +7,6 @@ import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.wikapidia.core.lang.Language;
@@ -26,7 +25,7 @@ public class BulgarianTokenizer extends LanguageTokenizer {
 
     @Override
     public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = getTokenizer(reader);
+        TokenStream stream = setTokenizer(reader);
         stream = new StandardFilter(matchVersion, stream);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);

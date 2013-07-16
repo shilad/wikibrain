@@ -36,7 +36,7 @@ public class PolishTokenizer extends LanguageTokenizer {
                 throw new RuntimeException(e);
             }
         }
-        TokenStream stream = getTokenizer(reader);
+        TokenStream stream = setTokenizer(reader);
         stream = new StandardFilter(matchVersion, stream);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);
