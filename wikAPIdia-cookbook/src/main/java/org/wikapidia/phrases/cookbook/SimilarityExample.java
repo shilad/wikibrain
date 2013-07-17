@@ -121,8 +121,8 @@ public class SimilarityExample {
 //        localPrintResult(sr.similarity(page1,page1,true),lang,localPageDao);
 
         //Most Similar pages
-        System.out.println("Most similar to goat:");
-        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "goat"), 5, true);
+        System.out.println("Most similar to United States:");
+        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "united states"), 5, true);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao);

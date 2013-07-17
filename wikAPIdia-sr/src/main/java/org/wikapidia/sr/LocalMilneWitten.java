@@ -84,14 +84,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         for (int link : links.toArray()) {
             vector.put(link,1);
         }
-
-//        DaoFilter pageFilter = new DaoFilter();
-//        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
-//        for (LocalPage page: allPages) {
-//            if (page != null) {
-//            vector.put(page.getLocalId(), links.contains(page.getLocalId()) ? 1F:0F);
-//            }
-//        }
         return vector;
     }
 
@@ -139,20 +131,18 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             TIntSet linkPages = getLinks(page.toLocalId());
             TIntSet worthChecking = new TIntHashSet();
             for (int id : linkPages.toArray()){
-                Iterable<LocalLink> links;
-                if (outLinks){
-                    links = linkHelper.getLinks(page.getLanguage(),id,false);
-                } else {
-                    links = linkHelper.getLinks(page.getLanguage(),id,true);
-                }
-                for (LocalLink link : links){
-                    worthChecking.add(link.getLocalId());
+                TIntSet links = getLinks(new LocalId(page.getLanguage(), id), !outLinks);
+                for (int link: links.toArray()){
+                     worthChecking.add(link);
                 }
             }
+
             //Don't try to check red links.
             if (worthChecking.contains(-1)){
                 worthChecking.remove(-1);
             }
+
+            System.out.println(worthChecking.contains(page.getLocalId()));
             return mostSimilar(page, maxResults, explanations,worthChecking);
         }
     }
@@ -179,16 +169,17 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                 numArticles++;
             }
 
-            List<SRResult> results = new ArrayList<SRResult>();
+              List<SRResult> results = new ArrayList<SRResult>();
             for (int id : validIds.toArray()){
                 TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id));
-                SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
-                result.id=id;
-                if (explanations){
-                    LocalPage lp = pageHelper.getById(page.getLanguage(),id);
-                    result.setExplanations(reformatExplanations(result.getExplanations(),page,lp));
-                }
-                results.add(result);
+//                    System.out.println(page.getTitle());
+                    SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
+                    result.id=id;
+                    if (explanations){
+                        LocalPage lp = pageHelper.getById(page.getLanguage(),id);
+                        result.setExplanations(reformatExplanations(result.getExplanations(),page,lp));
+                    }
+                    results.add(result);
             }
             Collections.sort(results);
             Collections.reverse(results);
@@ -244,6 +235,21 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         if(!outLinks) {
             for (LocalLink link : links){
             linkIds.add(link.getSourceId());
+            }
+        } else {
+            for (LocalLink link : links){
+                linkIds.add(link.getDestId());
+            }
+        }
+        return linkIds;
+    }
+
+    private TIntSet getLinks(LocalId wpId, boolean outLinks) throws DaoException {
+        Iterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
+        TIntSet linkIds = new TIntHashSet();
+        if(!outLinks) {
+            for (LocalLink link : links){
+                linkIds.add(link.getSourceId());
             }
         } else {
             for (LocalLink link : links){

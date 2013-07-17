@@ -28,39 +28,9 @@ done
 # need to source this script to source everything
 source ${WP_UTILS}/src/main/scripts/conf.sh
 
-function checksum() {
-    if [ $(type -P md5) ]; then
-        md5 -q $@
-    elif [ $(type -P md5sum) ]; then
-        md5sum $@
-    elif [ $(type -P sum) ]; then
-        sum $@
-    else
-        die "no checksum binary found. please install md5 or md5sum."
-    fi
-}
-
-function compileJooq() {
-    schema_dir=${WP_CORE}/src/main/resources/db
-    [ -d "$schema_dir" ] || die "missing sql schema directory $schema_dir"
-    cat ${schema_dir}/*-create-tables.sql > ${schema_dir}/full_schema.sql
-    cat ${schema_dir}/*-create-indexes.sql >> ${schema_dir}/full_schema.sql
-    oldhash=$(cat ${schema_dir}/full_schema.hash | tr -d ' \n' )
-    newhash=$(checksum ${schema_dir}/full_schema.sql)
-
-    if [ "$oldhash" == "$newhash" ]; then
-        echo "jooq schema is already up to date." >&2
-        return
-    fi
-
-    (cd ${WP_CORE} && mvn sql:execute jooq-codegen:generate) ||
-        die "jooq compilation failed"
-    echo $newhash > ${schema_dir}/full_schema.hash
-}
 
 function compile() {
     echo compiling... &&
-    compileJooq &&
     (cd ${WP_PARENT} && mvn compile ) ||
     die "compilation failed"
 
