@@ -63,11 +63,11 @@ cp -p $DL/WikiSimi3000_1.csv  $SRC/titles/WikiSimi3000.tab ||
 
 for d in titles phrases; do
     python src/main/python/combine_gold.py $SRC/$d/*.* |
-    python src/main/python/filter_gold.py 10 >dat/gold/gold.$d.similarity.txt ||
+    python src/main/python/filter_gold.py 10 >../dat/gold/gold.$d.similarity.txt ||
         { echo "ERROR: combining $d datasets failed" >&2; exit 1;}
 
     python src/main/python/combine_gold.py $SRC/$d/*.* |
-    python src/main/python/filter_gold.py 4 0.6 >dat/gold/gold.$d.mostSimilar.txt ||
+    python src/main/python/filter_gold.py 4 0.6 >../dat/gold/gold.$d.mostSimilar.txt ||
         { echo "ERROR: combining $d datasets failed" >&2; exit 1;}
 done
 
