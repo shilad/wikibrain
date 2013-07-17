@@ -50,11 +50,11 @@ public class UniversalLinkLoader {
         if (shouldClear) {
             LOG.log(Level.INFO, "Clearing data");
             universalLinkDao.clear();
-            universalLinkSkeletalDao.clear();
+//            universalLinkSkeletalDao.clear();
         }
         LOG.log(Level.INFO, "Begin Load");
         universalLinkDao.beginLoad();
-        universalLinkSkeletalDao.beginLoad();
+//        universalLinkSkeletalDao.beginLoad();
     }
 
     /**
@@ -87,7 +87,7 @@ public class UniversalLinkLoader {
                 linkMap.put(localLink.getLanguage(), localLink);
                 UniversalLink link = new UniversalLink(univSourceId, univDestId, algorithmId, linkMap);
                 universalLinkDao.save(link);
-                universalLinkSkeletalDao.save(link);
+//                universalLinkSkeletalDao.save(link);
             }
             LOG.log(Level.INFO, "All UniversalLinks loaded: " + i);
         } catch (DaoException e) {
@@ -98,7 +98,7 @@ public class UniversalLinkLoader {
     public void endLoad() throws DaoException {
         LOG.log(Level.INFO, "End Load");
         universalLinkDao.endLoad();
-        universalLinkSkeletalDao.endLoad();
+//        universalLinkSkeletalDao.endLoad();
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
@@ -132,8 +132,8 @@ public class UniversalLinkLoader {
 
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
-        UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class);
-        UniversalLinkDao universalLinkSkeletalDao = conf.get(UniversalLinkDao.class, "skeletal");
+        UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class, "sql");
+        UniversalLinkDao universalLinkSkeletalDao = conf.get(UniversalLinkDao.class, "skeletal-sql");
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
 
         UniversalLinkLoader loader = new UniversalLinkLoader(
