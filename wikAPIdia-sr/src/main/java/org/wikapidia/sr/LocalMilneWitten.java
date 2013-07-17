@@ -79,7 +79,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();
-        TIntSet links = getLinks(new LocalId(language, id));
+        TIntSet links = getLinks(new LocalId(language, id),outLinks);
 
         for (int link : links.toArray()) {
             vector.put(link,1);
@@ -96,8 +96,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             throw new IllegalArgumentException();
         }
 
-        TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()));
-        TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()));
+        TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()),outLinks);
+        TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()),outLinks);
 
         DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
         Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
@@ -132,7 +132,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             return mostSimilar;
         } else {
             //Only check pages that share at least one inlink/outlink.
-            TIntSet linkPages = getLinks(page.toLocalId());
+            TIntSet linkPages = getLinks(page.toLocalId(),outLinks);
             TIntSet worthChecking = new TIntHashSet();
             for (int id : linkPages.toArray()){
                 TIntSet links = getLinks(new LocalId(page.getLanguage(), id), !outLinks);
@@ -168,7 +168,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             return new SRResultList(maxResults);
         }
 
-        TIntSet pageLinks = getLinks(page.toLocalId());
+        TIntSet pageLinks = getLinks(page.toLocalId(),outLinks);
 
         DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
         Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
@@ -179,7 +179,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 
         List<SRResult> results = new ArrayList<SRResult>();
         for (int id : worthChecking.toArray()){
-            TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id));
+            TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id),outLinks);
             SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles,false);
             result.id=id;
             results.add(result);
@@ -229,10 +229,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             }
         }
         return explanationList;
-    }
-
-    private TIntSet getLinks(LocalId wpId) throws DaoException {
-        return getLinks(wpId, outLinks);
     }
 
     private TIntSet getLinks(LocalId wpId, boolean outLinks) throws DaoException {
