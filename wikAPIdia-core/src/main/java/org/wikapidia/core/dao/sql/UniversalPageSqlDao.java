@@ -104,6 +104,36 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
+    public int getCount(DaoFilter daoFilter) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+            }
+            Cursor<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(conditions)
+                    .fetchLazy(getFetchSize());
+            Set<Integer[]> pages = new HashSet<Integer[]>();
+            for (Record record : result) {
+                pages.add(new Integer[]{
+                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
+                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
+            }
+            return pages.size();
+        } catch (SQLException e) {
+            quietlyCloseConn(conn);
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
     public T getById(int univId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
@@ -161,28 +191,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     @Override
     public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException {
         return getUnivPageId(localPage.getLanguage(), localPage.getLocalId(), algorithmId);
-    }
-
-    @Override
-    public int getNumUniversalPages(int algorithmId) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Cursor<Record> result = context.select().
-                    from(Tables.UNIVERSAL_PAGE).
-                    where(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
-                    fetchLazy();
-            TIntSet ids = new TIntHashSet();
-            for (Record record : result){
-                ids.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
-            }
-            return ids.size();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
     }
 
     @Override

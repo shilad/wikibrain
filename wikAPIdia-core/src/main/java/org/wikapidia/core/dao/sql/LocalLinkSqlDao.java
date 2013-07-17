@@ -87,6 +87,42 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         }
     }
 
+    public int getCount(DaoFilter daoFilter) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.LANG_ID.in(daoFilter.getLangIds()));
+            }
+            if (daoFilter.getLocTypes() != null) {
+                conditions.add(Tables.LOCAL_LINK.LOCATION_TYPE.in(daoFilter.getLocTypes()));
+            }
+            if (daoFilter.getSourceIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.SOURCE_ID.in(daoFilter.getSourceIds()));
+            }
+            if (daoFilter.getDestIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.DEST_ID.in(daoFilter.getDestIds()));
+            }
+            if (daoFilter.isParseable() != null) {
+                conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(daoFilter.isParseable()));
+            }
+            Cursor<Record> result = context.select().
+                    from(Tables.LOCAL_LINK).
+                    where(conditions).
+                    fetchLazy(getFetchSize());
+            int counts = 0;
+            for (Record record : result){
+                counts++;
+            }
+            return counts;
+        } catch (SQLException e) {
+            quietlyCloseConn(conn);
+            throw new DaoException(e);
+        }
+    }
+
     @Override
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
         Connection conn = null;
