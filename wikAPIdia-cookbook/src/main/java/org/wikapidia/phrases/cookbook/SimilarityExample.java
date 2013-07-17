@@ -122,27 +122,27 @@ public class SimilarityExample {
 
         //Most Similar pages
         System.out.println("Most similar to United States:");
-        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "united states"), 5, true);
+        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "united states"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao);
         }
         System.out.println("Most similar to science fiction:");
-        resultList = sr.mostSimilar(new LocalString(lang, "science fiction"), 5, true);
+        resultList = sr.mostSimilar(new LocalString(lang, "science fiction"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao);
         }
 
         System.out.println("Most similar to goat using universal");
-        resultList = usr.mostSimilar(new LocalString(lang, "goat"), 5, true);
+        resultList = usr.mostSimilar(new LocalString(lang, "goat"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#"+(i+1));
             universalPrintResult(resultList.get(i),usr.getAlgorithmId(),universalPageDao);
         }
 
         System.out.println("Most similar to science fiction using universal");
-        resultList = usr.mostSimilar(new LocalString(lang, "science fiction"), 5, true);
+        resultList = usr.mostSimilar(new LocalString(lang, "science fiction"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#"+(i+1));
             universalPrintResult(resultList.get(i),usr.getAlgorithmId(),universalPageDao);

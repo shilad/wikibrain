@@ -114,12 +114,11 @@ public class ESAMetric extends BaseLocalSRMetric {
      * Get wiki pages that are the most similar to the specified local page.
      *
      * @param localPage
-     * @param maxResults
-     * @param explanations
+     * @param maxResults\
      * @return
      * @throws DaoException
      */
-    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations) throws DaoException {
+    public SRResultList mostSimilar(LocalPage localPage, int maxResults) throws DaoException {
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
@@ -135,7 +134,7 @@ public class ESAMetric extends BaseLocalSRMetric {
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
+    public SRResultList mostSimilar(LocalPage localPage, int maxResults, TIntSet validIds) throws DaoException {
         return null;
     }
 

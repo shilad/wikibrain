@@ -52,40 +52,36 @@ public interface UniversalSRMetric {
      * Find the most similar universal pages to a universal page.
      * @param page The universal page whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException;
+    public SRResultList mostSimilar(UniversalPage page, int maxResults) throws DaoException;
 
     /**
      * Find the most similar universal pages to a universal page.
      * @param page The universal page whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @param validIds The universal page ids to be considered.  Null means all ids.
      * @return
      */
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public SRResultList mostSimilar(UniversalPage page, int maxResults, TIntSet validIds) throws DaoException;
 
 
     /**
      * Find the most similar universal concepts to a phrase
      * @param phrase The phrase whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException;
+    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException;
 
     /**
      * Find the most similar universal pages to a string in a given language from a set of universal pages
      * @param phrase The phrase whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.s
      * @param validIds  The UniversalPage ids to be considered.  Null means all ids.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException;
 
 
     /**

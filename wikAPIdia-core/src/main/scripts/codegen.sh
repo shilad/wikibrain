@@ -5,5 +5,5 @@
 # of any module.
 
 source ../wikAPIdia-utils/src/main/scripts/utils.sh &&
-compileJooq ||
+compile ||
 die "$0 failed"

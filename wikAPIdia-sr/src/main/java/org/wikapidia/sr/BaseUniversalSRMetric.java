@@ -102,13 +102,13 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
 
     @Override
-    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException;
+    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, TIntSet validIds) throws DaoException;
 
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
+    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException {
         LocalId localId = disambiguator.disambiguate(phrase,null);
         if (localId == null){
             SRResultList resultList = new SRResultList(1);
@@ -117,11 +117,11 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         }
         int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
         UniversalPage up = universalPageDao.getById(uId,algorithmId);
-        return mostSimilar(up,maxResults,explanations);
+        return mostSimilar(up,maxResults);
     }
 
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
         LocalId localId = disambiguator.disambiguate(phrase,null);
         if (localId == null){
             SRResultList resultList = new SRResultList(1);
@@ -130,7 +130,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         }
         int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
         UniversalPage up = universalPageDao.getById(uId,algorithmId);
-        return mostSimilar(up,maxResults,explanations,validIds);
+        return mostSimilar(up,maxResults,validIds);
     }
 
     @Override
