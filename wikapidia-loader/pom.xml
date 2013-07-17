@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.wikapidia</groupId>
-    <artifactId>wikapidia-loader</artifactId>
+    <artifactId>wikAPIdia-loader</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <dependencies>
@@ -19,17 +19,17 @@
         </dependency>
         <dependency>
             <groupId>org.wikapidia</groupId>
-            <artifactId>wikapidia-core</artifactId>
+            <artifactId>wikAPIdia-core</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikapidia</groupId>
-            <artifactId>wikapidia-utils</artifactId>
+            <artifactId>wikAPIdia-utils</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikapidia</groupId>
-            <artifactId>wikapidia-parser</artifactId>
+            <artifactId>wikAPIdia-parser</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

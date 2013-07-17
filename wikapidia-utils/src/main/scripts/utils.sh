@@ -8,19 +8,22 @@ function die() {
 }
 
 export WP_BASE=..
-export WP_CORE=$WP_BASE/wikapidia-core
-export WP_LOADER=$WP_BASE/wikapidia-loader
-export WP_MATRIX=$WP_BASE/wikAPIdia-matrix
-export WP_MAPPER=$WP_BASE/wikAPIdia-mapper
-export WP_PARENT=$WP_BASE/wikAPIdia-parent
-export WP_PARSER=$WP_BASE/wikapidia-parser
-export WP_UTILS=$WP_BASE/wikapidia-utils
+export WP_CORE=$WP_BASE/wikAPIdia-core
 export WP_DOWNLOAD=$WP_BASE/wikAPIdia-download
+export WP_LOADER=$WP_BASE/wikAPIdia-loader
+export WP_LUCENE=$WP_BASE/wikAPIdia-lucene
+export WP_MAPPER=$WP_BASE/wikAPIdia-mapper
+export WP_MATRIX=$WP_BASE/wikAPIdia-matrix
+export WP_PARENT=$WP_BASE/wikAPIdia-parent
+export WP_PARSER=$WP_BASE/wikAPIdia-parser
+export WP_PHRASES=$WP_BASE/wikAPIdia-phrases
+export WP_SR=$WP_BASE/wikAPIdia-sr
+export WP_UTILS=$WP_BASE/wikAPIdia-utils
 
 
 [ -d ${WP_BASE} ] || die "missing base directory ${WP_BASE}"
 
-for d in "${WP_CORE}" "${WP_LOADER}" "${WP_MAPPER}" "${WP_PARENT}" "${WP_PARSER}" "${WP_UTILS}" "${WP_MATRIX}" "${WP_DOWNLOAD}" ; do
+for d in "${WP_CORE}" "${WP_DOWNLOAD}" "${WP_LOADER}" "${WP_LUCENE}" "${WP_MAPPER}" "${WP_MATRIX}" "${WP_PARENT}" "${WP_PARSER}" "${WP_PHRASES}" "${WP_SR}" "${WP_UTILS}" ; do
     [ -d "$d" ] || die "missing module directory $d"
 done
                                                      
