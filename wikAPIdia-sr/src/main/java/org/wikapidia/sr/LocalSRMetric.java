@@ -48,39 +48,43 @@ public interface LocalSRMetric {
      */
     public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException;
 
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException;
+    /**
+     * Find the most similar local pages to a local page within the same language.
+     *
+     * @param page The local page whose similarity we are examining.
+     * @param maxResults The maximum number of results to return.
+     * @return
+     */
+    public SRResultList mostSimilar(LocalPage page, int maxResults) throws DaoException;
 
     /**
      * Find the most similar local pages to a local page.
      *
      * @param page The local page whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @param validIds The local page ids to be considered.  Null means all ids in the language.
      * @return
      */
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public SRResultList mostSimilar(LocalPage page, int maxResults, TIntSet validIds) throws DaoException;
 
     /**
      * Find the most similar local pages to a phrase.
      *
      * @param phrase The phrase whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException;
+    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException;
 
     /**
      * Find the most similar local pages to a phrase.
      *
      * @param phrase The phrase whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @param validIds The local page ids to be considered.  Null means all ids in the language
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException;
 
     /**
      * Writes the metric to a directory.

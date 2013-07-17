@@ -177,26 +177,26 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException;
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public abstract SRResultList mostSimilar(LocalPage page, int maxResults, TIntSet validIds) throws DaoException;
 
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
+    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException {
         LocalId similar = disambiguator.disambiguate(phrase,null);
-        return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults, explanations);
+        return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults);
     }
 
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
         LocalId similar = disambiguator.disambiguate(phrase,null);
         if (similar==null){
             SRResultList resultList = new SRResultList(1);
             resultList.set(0, new SRResult(Double.NaN));
             return resultList;
         }
-        return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults, explanations,validIds);
+        return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults,validIds);
     }
 
     @Override

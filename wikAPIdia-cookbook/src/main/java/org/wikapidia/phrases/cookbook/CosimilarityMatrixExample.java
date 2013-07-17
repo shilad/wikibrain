@@ -52,14 +52,14 @@ public class CosimilarityMatrixExample {
 
         for (LocalString phrase : phrases){
             System.out.println("\nMost similar to "+phrase.getString()+":");
-            SRResultList results = sr.mostSimilar(phrase, 5, false);
+            SRResultList results = sr.mostSimilar(phrase, 5);
             for (int i=0; i<results.numDocs(); i++){
                 LocalPage page = localPageDao.getById(language,results.get(i).getId());
                 String name = page.getTitle().getCanonicalTitle();
                 System.out.println("#"+(i+1)+" "+name);
             }
             System.out.println("\nWithout cache:");
-            results = sr.mostSimilar(phrase, 5, true);
+            results = sr.mostSimilar(phrase, 5);
             for (int i=0; i<results.numDocs(); i++){
                 LocalPage page = localPageDao.getById(language,results.get(i).getId());
                 String name = page.getTitle().getCanonicalTitle();
@@ -69,7 +69,7 @@ public class CosimilarityMatrixExample {
 
         for (LocalString phrase : phrases){
             System.out.println("\nMost similar to "+phrase.getString()+":");
-            SRResultList results = usr.mostSimilar(phrase, 5, false);
+            SRResultList results = usr.mostSimilar(phrase, 5);
             for (int i=0; i<results.numDocs(); i++){
                 UniversalPage page = universalPageDao.getById(results.get(i).getId(),usr.getAlgorithmId());
                 LocalPage namePage = (LocalPage) page.getLocalPages(page.getLanguageSetOfExistsInLangs().getDefaultLanguage()).toArray()[0];
@@ -77,7 +77,7 @@ public class CosimilarityMatrixExample {
                 System.out.println("#"+(i+1)+" "+name);
             }
             System.out.println("\nWithout cache:");
-            results = usr.mostSimilar(phrase, 5, true);
+            results = usr.mostSimilar(phrase, 5);
             for (int i=0; i<results.numDocs(); i++){
                 UniversalPage page = universalPageDao.getById(results.get(i).getId(),usr.getAlgorithmId());
                 LocalPage namePage = (LocalPage) page.getLocalPages(page.getLanguageSetOfExistsInLangs().getDefaultLanguage()).toArray()[0];

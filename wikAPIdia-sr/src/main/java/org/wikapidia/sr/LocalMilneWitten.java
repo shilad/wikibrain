@@ -79,7 +79,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();
-        TIntSet links = getLinks(new LocalId(language, id), outLinks);
+        TIntSet links = getLinks(new LocalId(language, id),outLinks);
 
         for (int link : links.toArray()) {
             vector.put(link,1);
@@ -96,8 +96,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             throw new IllegalArgumentException();
         }
 
-        TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()), outLinks);
-        TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()), outLinks);
+        TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()),outLinks);
+        TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()),outLinks);
 
         DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
         Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
@@ -118,17 +118,21 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException {
-        SRResultList mostSimilar;
-        if (hasCachedMostSimilarLocal(page.getLanguage(), page.getLocalId())&&!explanations){
-            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(), page.getLocalId(), maxResults, null);
+    public SRResultList mostSimilar(LocalPage page, int maxResults) throws DaoException {
+        return mostSimilar(page,maxResults,null);
+    }
+
+    @Override
+    public SRResultList mostSimilar(LocalPage page, int maxResults, TIntSet validIds) throws DaoException {
+        if (hasCachedMostSimilarLocal(page.getLanguage(), page.getLocalId())){
+            SRResultList mostSimilar= getCachedMostSimilarLocal(page.getLanguage(), page.getLocalId(), maxResults, validIds);
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
             return mostSimilar;
         } else {
             //Only check pages that share at least one inlink/outlink.
-            TIntSet linkPages = getLinks(page.toLocalId(), outLinks);
+            TIntSet linkPages = getLinks(page.toLocalId(),outLinks);
             TIntSet worthChecking = new TIntHashSet();
             for (int id : linkPages.toArray()){
                 TIntSet links = getLinks(new LocalId(page.getLanguage(), id), !outLinks);
@@ -142,56 +146,54 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                 worthChecking.remove(-1);
             }
 
-            System.out.println(worthChecking.contains(page.getLocalId()));
-            return mostSimilar(page, maxResults, explanations,worthChecking);
+            if (validIds!=null){
+                worthChecking.retainAll(validIds);
+            }
+
+            return mostSimilarFromKnown(page, maxResults,worthChecking);
         }
     }
 
-    @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
-        if (validIds==null){
-            return mostSimilar(page,maxResults,explanations);
+    /**
+     * This is an unoptimized mostSimilar method. It should never get called except from
+     * the mostSimilar methods that create a list of IDs that is worth checking.
+     * @param page
+     * @param maxResults
+     * @param worthChecking the only IDs that will be checked. These should be generated from a list of ids known to be similar.
+     * @return
+     * @throws DaoException
+     */
+    private SRResultList mostSimilarFromKnown(LocalPage page, int maxResults, TIntSet worthChecking) throws DaoException {
+        if (worthChecking==null){
+            return new SRResultList(maxResults);
         }
-        SRResultList mostSimilar;
-        if (hasCachedMostSimilarLocal(page.getLanguage(), page.getLocalId())&&!explanations){
-            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(), page.getLocalId(), maxResults, validIds);
-            if (mostSimilar.numDocs()>maxResults){
-                mostSimilar.truncate(maxResults);
-            }
-            return mostSimilar;
-        } else {
-            TIntSet pageLinks = getLinks(page.toLocalId(), outLinks);
 
-            DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
-            Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
-            int numArticles = 0;
-            for (LocalPage lp : allPages){
-                numArticles++;
-            }
+        TIntSet pageLinks = getLinks(page.toLocalId(),outLinks);
 
-              List<SRResult> results = new ArrayList<SRResult>();
-            for (int id : validIds.toArray()){
-                TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id), outLinks);
-//                    System.out.println(page.getTitle());
-                    SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
-                    result.id=id;
-                    if (explanations){
-                        LocalPage lp = pageHelper.getById(page.getLanguage(),id);
-                        result.setExplanations(reformatExplanations(result.getExplanations(),page,lp));
-                    }
-                    results.add(result);
-            }
-            Collections.sort(results);
-            Collections.reverse(results);
-
-            SRResultList  resultList = new SRResultList(maxResults);
-            for (int i=0; i<maxResults&&i<results.size(); i++){
-
-                resultList.set(i,results.get(i));
-            }
-
-            return resultList;
+        DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
+        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
+        int numArticles = 0;
+        for (LocalPage lp : allPages){
+            numArticles++;
         }
+
+        List<SRResult> results = new ArrayList<SRResult>();
+        for (int id : worthChecking.toArray()){
+            TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id),outLinks);
+            SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles,false);
+            result.id=id;
+            results.add(result);
+        }
+        Collections.sort(results);
+        Collections.reverse(results);
+
+        SRResultList  resultList = new SRResultList(maxResults);
+        for (int i=0; i<maxResults&&i<results.size(); i++){
+
+            resultList.set(i,results.get(i));
+        }
+
+        return resultList;
     }
 
     private List<Explanation> reformatExplanations(List<Explanation> explanations, LocalPage page1, LocalPage page2) throws DaoException {

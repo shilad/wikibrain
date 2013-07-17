@@ -80,12 +80,16 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         return super.similarity(phrase1,phrase2,explanations);
     }
 
+    @Override
+    public SRResultList mostSimilar(UniversalPage page, int maxResults) throws DaoException{
+        return mostSimilar(page,maxResults,null);
+    }
+
 
     @Override
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException {
-        SRResultList mostSimilar;
-        if (hasCachedMostSimilarUniversal(page.getUnivId())&&!explanations){
-            mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, null);
+    public SRResultList mostSimilar(UniversalPage page, int maxResults, TIntSet validIds) throws DaoException {
+        if (hasCachedMostSimilarUniversal(page.getUnivId())){
+            SRResultList mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, validIds);
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
@@ -109,49 +113,49 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             if (worthChecking.contains(-1)){
                 worthChecking.remove(-1);
             }
-            return mostSimilar(page, maxResults, explanations,worthChecking);
+
+            if (validIds!=null){
+                worthChecking.retainAll(validIds);
+            }
+
+            return mostSimilar(page, maxResults,worthChecking);
         }
     }
 
-    @Override
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
-        if (validIds==null){
-            return mostSimilar(page,maxResults,explanations);
+    /**
+     * This is an unoptimized mostSimilar method. It should never get called except from
+     * the mostSimilar methods that create a list of IDs that is worth checking.
+     * @param page
+     * @param maxResults
+     * @param worthChecking the only IDs that will be checked. These should be generated from a list of ids known to be similar.
+     * @return
+     * @throws DaoException
+     */
+    private SRResultList mostSimilarFromKnown(UniversalPage page, int maxResults, TIntSet worthChecking) throws DaoException {
+        if (worthChecking==null){
+            return new SRResultList(maxResults);
         }
-        SRResultList mostSimilar;
-        if (hasCachedMostSimilarUniversal(page.getUnivId())&&!explanations){
-            mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, validIds);
-            if (mostSimilar.numDocs()>maxResults){
-                mostSimilar.truncate(maxResults);
-            }
-            return mostSimilar;
-        } else {
-            TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
+        TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
 
 
-            int numArticles = universalPageDao.getNumUniversalPages(algorithmId);
+        int numArticles = universalPageDao.getNumUniversalPages(algorithmId);
 
-            List<SRResult> results = new ArrayList<SRResult>();
-            for (int id : validIds.toArray()){
-                TIntSet comparisonLinks = getLinks(id, algorithmId);
-                SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
-                result.id = id;
-                if (explanations){
-                    UniversalPage up = universalPageDao.getById(id,algorithmId);
-                    result.setExplanations(reformatExplanations(result.getExplanations(),page,up));
-                }
-                results.add(result);
-            }
-            Collections.sort(results);
-            Collections.reverse(results);
-
-            SRResultList  resultList = new SRResultList(maxResults);
-            for (int i=0; i<maxResults&&i<results.size(); i++){
-                resultList.set(i,results.get(i));
-            }
-
-            return resultList;
+        List<SRResult> results = new ArrayList<SRResult>();
+        for (int id : worthChecking.toArray()){
+            TIntSet comparisonLinks = getLinks(id, algorithmId);
+            SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, false);
+            result.id = id;
+            results.add(result);
         }
+        Collections.sort(results);
+        Collections.reverse(results);
+
+        SRResultList  resultList = new SRResultList(maxResults);
+        for (int i=0; i<maxResults&&i<results.size(); i++){
+            resultList.set(i,results.get(i));
+        }
+
+        return resultList;
     }
 
     @Override
@@ -220,7 +224,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                 linkIds.add(link);
             }
         } else {
-            TIntSet links = universalLinkDao.getInlinkIds(universeId,algorithmId);
+            TIntSet links = universalLinkDao.getInlinkIds(universeId, algorithmId);
             for (Integer link : links.toArray()){
                 linkIds.add(link);
             }
