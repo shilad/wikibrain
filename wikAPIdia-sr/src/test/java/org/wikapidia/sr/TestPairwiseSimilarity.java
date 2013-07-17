@@ -4,6 +4,7 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TLongDoubleHashMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.matrix.*;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
@@ -42,6 +43,7 @@ public class TestPairwiseSimilarity {
         new SparseMatrixTransposer(matrix, new File("matrix-transpose"), 10).transpose();
     }
 
+    @Ignore
     @Test
     public void testSimilarity() throws IOException, InterruptedException {
 
