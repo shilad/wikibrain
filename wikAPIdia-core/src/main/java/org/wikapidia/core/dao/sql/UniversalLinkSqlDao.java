@@ -198,7 +198,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                     and(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.eq(destId)).
                     and(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId)).
                     fetch();
-            return buildUniversalLink(result, true);
+            return buildUniversalLink(result);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -230,7 +230,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         }
         Map<Integer, UniversalLink> map = new HashMap<Integer, UniversalLink>();
         for (Integer integer : allRecords.keySet()) {
-            map.put(integer, buildUniversalLink(allRecords.get(integer), outlinks));
+            map.put(integer, buildUniversalLink(allRecords.get(integer)));
         }
         return new UniversalLinkGroup(
                 map,
@@ -241,23 +241,17 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         );
     }
 
-    private UniversalLink buildUniversalLink(Collection<Record> records, boolean outlinks) throws DaoException {
+    private UniversalLink buildUniversalLink(Collection<Record> records) throws DaoException {
         if (records == null || records.isEmpty()) {
             return null;
         }
         Multimap<Language, LocalLink> map = HashMultimap.create(records.size(), records.size());
         for (Record record : records) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_LINK.LANG_ID));
-            LocalLink temp = new LocalLink(
+            LocalLink temp = localLinkDao.getLink(
                     language,
-                    null,
                     record.getValue(Tables.UNIVERSAL_LINK.LOCAL_SOURCE_ID),
-                    record.getValue(Tables.UNIVERSAL_LINK.LOCAL_DEST_ID),
-                    outlinks,
-                    -1,
-                    true,
-                    null
-            );
+                    record.getValue(Tables.UNIVERSAL_LINK.LOCAL_DEST_ID));
             map.put(language, temp);
         }
         Record temp = records.iterator().next();
@@ -303,5 +297,4 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             }
         }
     }
-
 }

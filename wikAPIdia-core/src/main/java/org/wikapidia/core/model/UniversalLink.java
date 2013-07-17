@@ -42,4 +42,9 @@ public class UniversalLink extends AbstractUniversalEntity<LocalLink> {
     public Collection<LocalLink> getLocalLinks(Language language) {
         return new ArrayList<LocalLink>(getLocalEntities(language));
     }
+
+    public static Multimap<Language, LocalLink> mergeMaps(Multimap<Language, LocalLink> map1, Multimap<Language, LocalLink> map2) {
+        map1.putAll(map2);
+        return map1;
+    }
 }

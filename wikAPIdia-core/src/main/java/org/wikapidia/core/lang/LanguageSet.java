@@ -68,6 +68,14 @@ public class LanguageSet implements Iterable<Language> {
         this(getDefault(inputLangs), inputLangs);
     }
 
+    /**
+     * Creates a LanguageSet instance with a single language
+     * @param inputLang
+     */
+    public LanguageSet(Language inputLang) {
+        this(inputLang, Arrays.asList(inputLang));
+    }
+
     private static Language getDefault(Collection<Language> inputLangs) {
         List<Language> temp = new ArrayList<Language>(inputLangs);
         Collections.sort(temp);

@@ -1,5 +1,7 @@
 package org.wikapidia.dao.load;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import gnu.trove.map.TIntIntMap;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.ConfigurationException;
@@ -11,6 +13,7 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.mapper.ConceptMapper;
 
 import java.io.IOException;
@@ -33,12 +36,25 @@ public class UniversalLinkLoader {
     private final LocalLinkDao localLinkDao;
     private final UniversalPageDao universalPageDao;
     private final UniversalLinkDao universalLinkDao;
+    private final UniversalLinkDao universalLinkSkeletalDao;
 
-    public UniversalLinkLoader(LanguageSet languageSet, LocalLinkDao localLinkDao, UniversalPageDao universalPageDao, UniversalLinkDao universalLinkDao) {
+    public UniversalLinkLoader(LanguageSet languageSet, LocalLinkDao localLinkDao, UniversalPageDao universalPageDao, UniversalLinkDao universalLinkDao, UniversalLinkDao universalLinkSkeletalDao) {
         this.languageSet = languageSet;
         this.localLinkDao = localLinkDao;
         this.universalPageDao = universalPageDao;
         this.universalLinkDao = universalLinkDao;
+        this.universalLinkSkeletalDao = universalLinkSkeletalDao;
+    }
+
+    public void beginLoad(boolean shouldClear) throws DaoException {
+        if (shouldClear) {
+            LOG.log(Level.INFO, "Clearing data");
+            universalLinkDao.clear();
+            universalLinkSkeletalDao.clear();
+        }
+        LOG.log(Level.INFO, "Begin Load");
+        universalLinkDao.beginLoad();
+        universalLinkSkeletalDao.beginLoad();
     }
 
     /**
@@ -67,18 +83,22 @@ public class UniversalLinkLoader {
                 } else {
                     univDestId = map.get(localLink.getLanguage()).get(localLink.getDestId());
                 }
-                // TODO: this all needs to be fixed and stuff
-//                universalLinkDao.save(
-//                        localLink,
-//                        univSourceId,
-//                        univDestId,
-//                        algorithmId
-//                );
+                Multimap<Language, LocalLink> linkMap = HashMultimap.create();
+                linkMap.put(localLink.getLanguage(), localLink);
+                UniversalLink link = new UniversalLink(univSourceId, univDestId, algorithmId, linkMap);
+                universalLinkDao.save(link);
+                universalLinkSkeletalDao.save(link);
             }
             LOG.log(Level.INFO, "All UniversalLinks loaded: " + i);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         }
+    }
+
+    public void endLoad() throws DaoException {
+        LOG.log(Level.INFO, "End Load");
+        universalLinkDao.endLoad();
+        universalLinkSkeletalDao.endLoad();
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
@@ -113,26 +133,20 @@ public class UniversalLinkLoader {
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
         UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class);
+        UniversalLinkDao universalLinkSkeletalDao = conf.get(UniversalLinkDao.class, "skeletal");
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
 
         UniversalLinkLoader loader = new UniversalLinkLoader(
                 env.getLanguages(),
                 localLinkDao,
                 universalPageDao,
-                universalLinkDao
+                universalLinkDao,
+                universalLinkSkeletalDao
         );
 
-        if (cmd.hasOption("d")) {
-            LOG.log(Level.INFO, "Clearing data");
-            universalLinkDao.clear();
-        }
-        LOG.log(Level.INFO, "Begin Load");
-        universalLinkDao.beginLoad();
-
+        loader.beginLoad(cmd.hasOption("d"));
         loader.loadLinkMap(mapper.getId());
-
-        LOG.log(Level.INFO, "End Load");
-        universalLinkDao.endLoad();
+        loader.endLoad();
         LOG.log(Level.INFO, "DONE");
     }
 }
