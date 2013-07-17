@@ -87,6 +87,33 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
     }
 
     @Override
+    public int getCount(DaoFilter daoFilter) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.REDIRECT.LANG_ID.in(daoFilter.getLangIds()));
+//            } else {
+//                return null;
+            }
+            Cursor<Record> result = context.select().
+                    from(Tables.REDIRECT).
+                    where(conditions).
+                    fetchLazy(getFetchSize());
+            int counts = 0;
+            for (Record record : result){
+                counts++;
+            }
+            return counts;
+        } catch (SQLException e) {
+            quietlyCloseConn(conn);
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
     public Integer resolveRedirect(Language lang, int id) throws DaoException {
         Connection conn=null;
         try{

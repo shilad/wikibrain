@@ -48,4 +48,12 @@ public interface Dao<T> {
      */
     public Iterable<T> get(DaoFilter daoFilter) throws DaoException;
 
+    /**
+     * Returns the number of objects that fit the filters specified by the DaoFilter
+     * @param daoFilter a set of filters to limit the search
+     * @return the number of objects that fit the specified filters
+     * @throws DaoException if there was an error retrieving the objects
+     */
+    public int getCount(DaoFilter daoFilter) throws DaoException;
+
 }

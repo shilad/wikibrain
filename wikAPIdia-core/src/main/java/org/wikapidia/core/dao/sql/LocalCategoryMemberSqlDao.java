@@ -91,6 +91,31 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
+    public int getCount(DaoFilter daoFilter) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.CATEGORY_MEMBERS.LANG_ID.in(daoFilter.getLangIds()));
+            }
+            Cursor<Record> result = context.select().
+                    from(Tables.CATEGORY_MEMBERS).
+                    where(conditions).
+                    fetchLazy(getFetchSize());
+            int counts=0;
+            for (Record record : result){
+                counts++;
+            }
+            return counts;
+        } catch (SQLException e) {
+            quietlyCloseConn(conn);
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
     public Collection<Integer> getCategoryMemberIds(Language language, int categoryId) throws DaoException {
         Connection conn = null;
         try {

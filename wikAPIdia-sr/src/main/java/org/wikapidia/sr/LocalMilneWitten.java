@@ -100,11 +100,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()),outLinks);
 
         DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
-        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
-        int numArticles = 0;
-        for (LocalPage page : allPages){
-            numArticles++;
-        }
+        int numArticles = pageHelper.getCount(pageFilter);
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
         result.id = page2.getLocalId();
@@ -171,11 +167,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         TIntSet pageLinks = getLinks(page.toLocalId(),outLinks);
 
         DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
-        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
-        int numArticles = 0;
-        for (LocalPage lp : allPages){
-            numArticles++;
-        }
+        int numArticles = pageHelper.getCount(pageFilter);
 
         List<SRResult> results = new ArrayList<SRResult>();
         for (int id : worthChecking.toArray()){

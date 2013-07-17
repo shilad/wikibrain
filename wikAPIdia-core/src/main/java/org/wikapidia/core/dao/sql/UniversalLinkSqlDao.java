@@ -18,6 +18,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -100,6 +101,12 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             quietlyCloseConn(conn);
             throw new DaoException(e);
         }
+    }
+
+    //TODO: Implement me.
+    @Override
+    public int getCount(DaoFilter daoFilter) throws DaoException {
+        throw new NotImplementedException();
     }
 
     @Override
