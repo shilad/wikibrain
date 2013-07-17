@@ -57,7 +57,7 @@ public class TestMilneWitten {
         ds.setUsername("sa");
         ds.setPassword("");
 
-        LanguageInfo lang = LanguageInfo.getByLangCode("en");
+        LanguageInfo lang = LanguageInfo.getByLangCode("simple");
         LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
         LocalLinkSqlDao linkDao = new LocalLinkSqlDao(ds);
 
@@ -125,8 +125,8 @@ public class TestMilneWitten {
 
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
-        BaseLocalSRMetric srIn = new MilneWittenSimilarity(disambiguator,linkDao,dao);
-        BaseLocalSRMetric srOut =  new MilneWittenSimilarity(disambiguator,linkDao,dao,true);
+        BaseLocalSRMetric srIn = new LocalMilneWitten(disambiguator,linkDao,dao);
+        BaseLocalSRMetric srOut =  new LocalMilneWitten(disambiguator,linkDao,dao,true);
 
         double rIn = srIn.similarity(page1, page2, true).getValue();
         assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==rIn);
