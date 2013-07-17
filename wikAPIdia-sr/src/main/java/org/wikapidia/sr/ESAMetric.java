@@ -1,5 +1,6 @@
 package org.wikapidia.sr;
 
+import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.lucene.search.ScoreDoc;
@@ -156,6 +157,11 @@ public class ESAMetric extends BaseLocalSRMetric {
     @Override
     public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public TIntDoubleMap getVector(int id, Language language) throws DaoException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

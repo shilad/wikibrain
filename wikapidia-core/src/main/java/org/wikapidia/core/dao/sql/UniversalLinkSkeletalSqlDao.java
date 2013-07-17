@@ -1,6 +1,8 @@
 package org.wikapidia.core.dao.sql;
 
 import com.google.common.collect.Sets;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.core.dao.DaoException;
@@ -412,6 +414,52 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     }
 
     @Override
+    public TIntSet getOutlinkIds(int sourceId, int algorithmId) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Cursor<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_SKELETAL_LINK)
+                    .where(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.eq(sourceId))
+                    .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId))
+                    .fetchLazy(getFetchSize());
+            TIntSet ids = new TIntHashSet();
+            for (Record record : result){
+                ids.add(record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID));
+            }
+            return ids;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
+    public TIntSet getInlinkIds(int destId, int algorithmId) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Cursor<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_SKELETAL_LINK)
+                    .where(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.eq(destId))
+                    .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId))
+                    .fetchLazy(getFetchSize());
+            TIntSet ids = new TIntHashSet();
+            for (Record record : result){
+                ids.add(record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID));
+            }
+            return ids;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    @Override
     public UniversalLink getUniversalLink(int sourceId, int destId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
@@ -443,9 +491,9 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                             Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID),  // If links are inlinks, source ID is unique
                     buildUniversalLink(record));
             if (commonId == -1) {
-                commonId = record.getValue(outlinks ?               // Gets the common ID of the links
-                        Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID :  // If links are outlinks, source ID is common
-                        Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID);    // If links are inlinks, dest ID is common;
+                commonId = record.getValue(outlinks ?                   // Gets the common ID of the links
+                        Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID :      // If links are outlinks, source ID is common
+                        Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID);        // If links are inlinks, dest ID is common;
                 algorithmId = record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID);
             }
         }
