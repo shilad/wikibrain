@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 /**
  */
 public class TestWikiTextDumpParser {
-    public static final File SIMPLE_DUMP = new File("../wikapidia/wikapidia-loader/simplewiki-20130608-pages-articles.xml");
+    public static final File SIMPLE_DUMP = new File("../wikapidia/wikAPIdia-loader/simplewiki-20130608-pages-articles.xml");
     public static final LanguageInfo SIMPLE = LanguageInfo.getByLangCode("simple");
 
     @Ignore

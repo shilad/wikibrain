@@ -4,7 +4,7 @@
 # Must be invoked from the wikiapidia-loader directory.
 
 
-source ../wikapidia-utils/src/main/scripts/utils.sh &&
+source ../wikAPIdia-utils/src/main/scripts/utils.sh &&
 mvn clean &&
 compile  &&
 (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.DumpLoader -ti $@) &&

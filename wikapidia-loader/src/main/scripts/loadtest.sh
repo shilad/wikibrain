@@ -4,13 +4,13 @@ LANGS=simple,la
 DAT=../dat/
 
 
-if [ "$(basename $(pwd))" != 'wikapidia-loader' ]; then
-    echo "script must be executed from wikapidia-loader directory." >&2
+if [ "$(basename $(pwd))" != 'wikAPIdia-loader' ]; then
+    echo "script must be executed from wikAPIdia-loader directory." >&2
     exit 1
 fi
 
 
-source ../wikapidia-utils/src/main/scripts/utils.sh || exit 1
+source ../wikAPIdia-utils/src/main/scripts/utils.sh || exit 1
 
 
 mvn clean
