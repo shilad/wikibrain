@@ -118,7 +118,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                 worthChecking.retainAll(validIds);
             }
 
-            return mostSimilar(page, maxResults,worthChecking);
+            return mostSimilarFromKnown(page, maxResults,worthChecking);
         }
     }
 
