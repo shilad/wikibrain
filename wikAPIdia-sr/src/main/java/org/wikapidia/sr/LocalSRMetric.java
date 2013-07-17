@@ -9,6 +9,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.File;
@@ -108,19 +109,37 @@ public interface LocalSRMetric {
      * Train the similarity() function.
      * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
      *
-     * @param labeled The labeled gold standard dataset.
+     * @param dataset A gold standard dataset
      */
-    public void trainSimilarity(List<KnownSim> labeled) throws DaoException;
+    public void trainDefaultSimilarity(Dataset dataset) throws DaoException;
 
     /**
      * Train the mostSimilar() function
      * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
      *
-     * @param labeled The labeled gold standard dataset.
+     * @param dataset A gold standard dataset.
      * @param numResults The maximum number of similar articles computed per phrase.
      * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
      */
-    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) throws DaoException;
+    public void trainDefaultMostSimilar(Dataset dataset, int numResults, TIntSet validIds) throws DaoException;
+
+    /**
+     * Train the similarity() function.
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     *
+     * @param dataset A gold standard dataset
+     */
+    public void trainSimilarity(Dataset dataset) throws DaoException;
+
+    /**
+     * Train the mostSimilar() function
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     *
+     * @param dataset A gold standard dataset.
+     * @param numResults The maximum number of similar articles computed per phrase.
+     * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
+     */
+    public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) throws DaoException;
 
     /**
      * Return a vector representation of a LocalPage

@@ -17,6 +17,7 @@ import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.*;
+import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 
@@ -153,12 +154,75 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         this.numThreads = n;
     }
 
+    @Override
+    public void trainDefaultSimilarity(Dataset dataset){
+        trainSimilarityNormalizer(dataset, true);
+    }
 
+    @Override
+    public void trainSimilarity(Dataset dataset){
+        trainSimilarityNormalizer(dataset, false);
+    }
+
+    /**
+     * Trains the mostSimilarNormalizer to support the similarity() method.
+     * @param dataset
+     * @param isDefault
+     */
+    protected synchronized void trainSimilarityNormalizer(Dataset dataset, boolean isDefault) {
+        final Normalizer trainee = similarityNormalizer;
+        this.similarityNormalizer = new IdentityNormalizer();
+        ParallelForEach.loop(labeled, numThreads, new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws IOException, ParseException {
+                double sim = similarity(ks.phrase1, ks.phrase2);
+                trainee.observe(sim, ks.similarity);
+            }
+        });
+        trainee.observationsFinished();
+        similarityNormalizer = trainee;
+        LOG.info("trained most similarityNormalizer for " + getName() + ": " + trainee.dump());
+    }
+
+    @Override
+    public synchronized void trainDefaultMostSimilar(Dataset dataset, int numResults, TIntSet validIds){
+        trainMostSimilarNormalizer(dataset, numResults, validIds, true);
+    }
+
+    @Override
+    public synchronized void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds){
+        trainMostSimilarNormalizer(dataset, numResults, validIds, false);
+    }
+
+    /**
+     * Trains the mostSimilarNormalizer to support the mostSimilar() method.
+     * Also estimates the similarity score for articles that don't appear in top lists.
+     * Note that this (probably) is an overestimate, and depends on how well the
+     * distribution of scores in your gold standard matches your actual data.
+     *
+     * @param dataset
+     */
+    protected synchronized void trainMostSimilarNormalizer(Dataset dataset, final int numResults, final TIntSet validIds, boolean isDefault) {
+        final Normalizer trainee = mostSimilarNormalizer;
+        this.mostSimilarNormalizer = new IdentityNormalizer();
+        ParallelForEach.loop(labeled, numThreads, new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws IOException {
+                ks.maybeSwap();
+                Disambiguator.Match m = disambiguator.disambiguateMostSimilar(ks, numResults, validIds);
+                if (m != null) {
+                    DocScoreList dsl = mostSimilar(m.phraseWpId, numResults, validIds);
+                    if (dsl != null) {
+                        trainee.observe(dsl, dsl.getIndexForId(m.hintWpId), ks.similarity);
+                    }
+                }
+            }
+        });
+        trainee.observationsFinished();
+        mostSimilarNormalizer = trainee;
+        LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
+    }
 
     @Override
     public abstract SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
-
-
 
     @Override
     public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
@@ -198,18 +262,6 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         }
         return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults,validIds);
     }
-
-    @Override
-    public abstract void write(File directory) throws IOException;
-
-    @Override
-    public abstract void read(File directory) throws IOException;
-
-    @Override
-    public abstract void trainSimilarity(List<KnownSim> labeled);
-
-    @Override
-    public abstract void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds);
 
     @Override
     public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws DaoException {
