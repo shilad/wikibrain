@@ -64,46 +64,4 @@ public class TestNormalizer {
         assertTrue(p.normalize(20) < 1.0);
         assertTrue(p.normalize(20) < p.normalize(200));
     }
-
-    @Test
-    public void testPolyInterp(){
-        /* FIXME
-        LoessNormalizer polyInterp = new LoessNormalizer();
-        List<double[]> points= new ArrayList<double[]>();
-        points.add(new double[]{0,0});
-        points.add(new double[]{1.5,0.5});
-        points.add(new double[]{-2,0.025});
-        points.add(new double[]{4,0.7});
-        points.add(new double[]{13,0.9});
-        points.add(new double[]{0,0.1});
-        points.add(new double[]{0,0.3});
-        points.add(new double[]{-1,0.6});
-        points.add(new double[]{14,0.5});
-        points.add(new double[]{7,0.5});
-        points.add(new double[]{-3,0.1});
-        points.add(new double[]{4,0.6});
-        for (double[] p:points){
-            polyInterp.observe(p[0],p[1]);
-        }
-        polyInterp.observationsFinished();
-        double[][] nodes=new double[][]{{-2,0.2416},{0,0.1333},{3.1666,0.6},{11.3333,0.6333}};
-        double[][] acknodes=polyInterp.getNodes();
-        assertEquals(acknodes.length, nodes.length);
-        List<double[]> allpoints = polyInterp.getAllPoints();
-        assertEquals(-3.0, allpoints.get(0)[0],0.0001);
-        assertEquals(-2.0, allpoints.get(1)[0],0.0001);
-        assertEquals(-1.0, allpoints.get(2)[0],0.0001);
-        assertArrayEquals(nodes[0],acknodes[0],0.0001);
-        assertArrayEquals(nodes[1],acknodes[1],0.0001);
-        assertArrayEquals(nodes[2],acknodes[2],0.0001);
-        assertArrayEquals(nodes[3],acknodes[3],0.0001);
-        assertEquals(polyInterp.normalize(0),0.1333,0.0001);
-        assertEquals(polyInterp.normalize(1),0.2807,0.0001);
-        assertEquals(polyInterp.normalize(14),0.6442,0.0001);
-        assertEquals(polyInterp.normalize(4),0.6034,0.0001);
-        assertEquals(polyInterp.normalize(-2),0.2416,0.0001);
-        assertEquals(polyInterp.normalize(2.2),0.4575,0.0001);
-        assertEquals(polyInterp.normalize(10000),1,0.0001);
-        */
-    }
 }

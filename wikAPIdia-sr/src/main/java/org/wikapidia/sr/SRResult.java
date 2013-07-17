@@ -23,6 +23,10 @@ public class SRResult implements Comparable<SRResult>{
 
     public List<Explanation> getExplanations(){return explanations;}
 
+    public void setExplanations(List<Explanation> explanations) {
+        this.explanations = explanations;
+    }
+
     public boolean isValid(){return !Double.isNaN(value);}
 
     public double getValue(){return value;}
@@ -38,5 +42,4 @@ public class SRResult implements Comparable<SRResult>{
         this.value = this.value - zeroValue;
         if (this.value < 0) this.value = 0.0;
     }
-
 }

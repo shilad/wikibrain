@@ -93,12 +93,20 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            Record record = context.select().
+            Result<Record> result = context.select().
                     from(Tables.LOCAL_LINK).
                     where(Tables.LOCAL_LINK.LANG_ID.eq(language.getId())).
                     and(Tables.LOCAL_LINK.SOURCE_ID.eq(sourceId)).
                     and(Tables.LOCAL_LINK.DEST_ID.eq(destId)).
-                    fetchOne();
+                    fetch();
+            //Work-around to avoid pages that have multiple links to the same page
+            Record record;
+            if (result.isEmpty()){
+                record = null;
+            }
+            else {
+                record = result.get(0);
+            }
             return buildLocalLink(record, true);
         } catch (SQLException e) {
             throw new DaoException(e);
