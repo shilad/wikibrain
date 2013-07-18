@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -39,7 +38,7 @@ public class BenchmarkUniversalLink {
         int i=0;
         for (UniversalLink link : links) {
             i++;
-            System.out.println(i + " - Dest ID: " + link.getDestUnivId());
+            System.out.println(i + " - Dest ID: " + link.getDestId());
         }
         long end = System.currentTimeMillis();
         long total = end - start;

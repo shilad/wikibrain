@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
  * The set of all Languages is loaded when the system starts up from a text file.
  * Languages can be queried by langCode or id.
  */
-public class Language implements Comparable<Language>{
+public class Language implements Comparable<Language>, Serializable {
     private static Logger LOG = Logger.getLogger(Language.class.getName());
     public static final String LANGUAGE_TSV = "languages.tsv";
 

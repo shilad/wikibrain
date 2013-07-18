@@ -1,8 +1,10 @@
 package org.wikapidia.core.dao.sql;
 
+import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.ConfigurationException;
@@ -15,8 +17,11 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
+import org.wikapidia.utils.ObjectDb;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -24,11 +29,14 @@ import java.util.*;
 /**
  * An alternate implementation of a UniversalLinkSqlDao.
  * It ignores the underlying local link map of a universal link, and only
- * maintains the language set in the database via a massive array of booleans.
+ * maintains the language set in the database via a byte array where each
+ * element represents a single ID. IDs over 255 are represented by 2 bytes.
  *
  * @author Ari Weiland
  */
 public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
+
+    private ObjectDb<LanguageSet> objectDb;
 
     public UniversalLinkSkeletalSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-skeletal-link");
@@ -42,13 +50,50 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     };
 
     @Override
+    public void beginLoad() throws DaoException {
+        super.beginLoad();
+        try {
+            objectDb = new ObjectDb<LanguageSet>(new File("tmp"), true);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
     public void save(UniversalLink item) throws DaoException {
-        insert(
-                item.getSourceUnivId(),
-                item.getDestUnivId(),
-                item.getAlgorithmId(),
-                item.getLanguageSetOfExistsInLangs().toByteArray()
-        );
+        try {
+            int sourceId = item.getSourceId();
+            int destId = item.getDestId();
+            int algorithmId = item.getAlgorithmId();
+            LanguageSet languages = item.getLanguageSet();
+            String key = sourceId + "_" + destId + "_" + algorithmId;
+            LanguageSet temp = objectDb.get(key);
+            if (temp != null) {
+                objectDb.remove(key);
+                objectDb.put(key, new LanguageSet(Sets.union(temp.getLanguages(), languages.getLanguages())));
+            } else {
+                objectDb.put(key, languages);
+            }
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (ClassNotFoundException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
+    public void endLoad() throws DaoException {
+        for (Pair<String, LanguageSet> pair : objectDb) {
+            String[] ids = pair.getKey().split("_");
+            insert(
+                    Integer.valueOf(ids[0]),
+                    Integer.valueOf(ids[1]),
+                    Integer.valueOf(ids[2]),
+                    pair.getValue().toByteArray()
+            );
+        }
+        super.endLoad();
+        objectDb.close();
     }
 
     @Override
@@ -218,7 +263,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
         }
         Set<Language> languages = new HashSet<Language>();
         for (UniversalLink link : map.values()) {
-            for (Language language : link.getLanguageSetOfExistsInLangs()) {
+            for (Language language : link.getLanguageSet()) {
                 languages.add(language);
             }
         }
