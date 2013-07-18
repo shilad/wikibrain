@@ -90,20 +90,20 @@ public interface UniversalSRMetric {
     /**
      * Writes the metric to a directory.
      *
-     * @param directory A directory data will be written to.
+     * @param path A directory data will be written to.
      *                  Any existing data in the directory may be destroyed.
      * @throws java.io.IOException
      */
-    public void write(File directory) throws IOException;
+    public void write(String path) throws IOException;
 
     /**
      * Reads the metric from a directory.
      *
-     * @param directory A directory data will be read from.
+     * @param path A directory data will be read from.
      *                  The directory previously will have been written to by write().
      * @throws IOException
      */
-    public void read(File directory) throws IOException;
+    public void read(String path) throws IOException, ClassNotFoundException;
 
     /**
      * Train the similarity() function.

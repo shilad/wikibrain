@@ -33,7 +33,6 @@ public class TestTrainNormalizer {
         Dataset dataset = datasetDao.read(Language.getByLangCode("simple"), path);
 
         sr.trainDefaultSimilarity(dataset);
-
         usr.trainSimilarity(dataset);
     }
 

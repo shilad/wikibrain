@@ -141,16 +141,6 @@ public class ESAMetric extends BaseLocalSRMetric {
     }
 
     @Override
-    public void write(File directory) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void read(File directory) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }

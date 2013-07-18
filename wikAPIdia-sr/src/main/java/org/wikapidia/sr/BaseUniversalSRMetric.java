@@ -7,6 +7,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.UniversalPageDao;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
@@ -25,11 +26,11 @@ import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
@@ -41,6 +42,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer similarityNormalizer = new IdentityNormalizer();
+
 
     protected SparseMatrix mostSimilarUniversalMatrix;
 
@@ -143,15 +145,35 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     }
 
     @Override
-    public void write(File directory) throws IOException{
-        //TODO: implement me
-        throw new NotImplementedException();
+    public void write(String path) throws IOException {
+        ObjectOutputStream oop = new ObjectOutputStream(
+                new FileOutputStream(path + getName() + "-" + algorithmId + "-mostSimilarNormalizer")
+        );
+        oop.writeObject(mostSimilarNormalizer);
+        oop.flush();
+        oop.close();
+
+        oop = new ObjectOutputStream(
+                new FileOutputStream(path + getName() + "-" + algorithmId + "-similarityNormalizer")
+        );
+        oop.writeObject(similarityNormalizer);
+        oop.flush();
+        oop.close();
     }
 
     @Override
-    public void read(File directory) throws IOException{
-        //TODO: implement me
-        throw new NotImplementedException();
+    public void read(String path) throws IOException, ClassNotFoundException {
+        ObjectInputStream oip = new ObjectInputStream(
+                new FileInputStream(path + getName() + "-" + algorithmId + "-mostSimilarNormalizer")
+        );
+        this.mostSimilarNormalizer = (Normalizer)oip.readObject();
+        oip.close();
+
+        oip = new ObjectInputStream(
+                new FileInputStream(path + getName() + "-" + algorithmId + "-similarityNormalizer")
+        );
+        this.similarityNormalizer = (Normalizer)oip.readObject();
+        oip.close();
     }
 
     @Override

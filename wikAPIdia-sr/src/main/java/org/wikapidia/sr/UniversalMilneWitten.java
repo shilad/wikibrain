@@ -27,6 +27,8 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     private UniversalLinkDao universalLinkDao;
     private boolean outLinks;
     private MilneWittenCore core;
+    private Integer numArticles = null;
+
 
     public UniversalMilneWitten(Disambiguator disambiguator, UniversalPageDao universalPageDao, int algorithmId, UniversalLinkDao universalLinkDao){
         this(disambiguator, universalPageDao, algorithmId, universalLinkDao,false);
@@ -63,8 +65,10 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         TIntSet A = getLinks(page1.getUnivId(), algorithmId);
         TIntSet B = getLinks(page2.getUnivId(), algorithmId);
 
-        DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
-        int numArticles = universalPageDao.getCount(daoFilter);
+        if (numArticles == null) {
+            DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+            numArticles = universalPageDao.getCount(daoFilter);
+        }
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
         result.id = page2.getUnivId();
@@ -138,8 +142,10 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         }
         TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
 
-        DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
-        int numArticles = universalPageDao.getCount(daoFilter);
+        if (numArticles == null) {
+            DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+            numArticles = universalPageDao.getCount(daoFilter);
+        }
 
         List<SRResult> results = new ArrayList<SRResult>();
         for (int id : worthChecking.toArray()){

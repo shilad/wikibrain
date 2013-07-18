@@ -32,6 +32,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     //False is standard Milne Witten with in links, true is with out links
     private boolean outLinks;
     private MilneWittenCore core;
+    private Map<Language,Integer> numPages = new HashMap<Language, Integer>();
+
 
     public LocalMilneWitten(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
         this(disambiguator,linkHelper,pageHelper,false);
@@ -80,8 +82,14 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()),outLinks);
         TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()),outLinks);
 
-        DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
-        int numArticles = pageHelper.getCount(pageFilter);
+        int numArticles;
+        if (numPages.containsKey(page1.getLanguage())) {
+            numArticles = numPages.get(page1.getLanguage());
+        } else {
+            DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
+            numArticles = pageHelper.getCount(pageFilter);
+            numPages.put(page1.getLanguage(), numArticles);
+        }
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
         result.id = page2.getLocalId();
@@ -147,8 +155,14 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 
         TIntSet pageLinks = getLinks(page.toLocalId(),outLinks);
 
-        DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
-        int numArticles = pageHelper.getCount(pageFilter);
+        int numArticles;
+        if (numPages.containsKey(page.getLanguage())) {
+            numArticles = numPages.get(page.getLanguage());
+        } else {
+            DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
+            numArticles = pageHelper.getCount(pageFilter);
+            numPages.put(page.getLanguage(), numArticles);
+        }
 
         List<SRResult> results = new ArrayList<SRResult>();
         for (int id : worthChecking.toArray()){
