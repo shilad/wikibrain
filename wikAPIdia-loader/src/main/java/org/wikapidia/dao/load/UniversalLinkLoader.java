@@ -49,11 +49,11 @@ public class UniversalLinkLoader {
     public void beginLoad(boolean shouldClear) throws DaoException {
         if (shouldClear) {
             LOG.log(Level.INFO, "Clearing data");
-//            universalLinkDao.clear();
+            universalLinkDao.clear();
             universalLinkSkeletalDao.clear();
         }
         LOG.log(Level.INFO, "Begin Load");
-//        universalLinkDao.beginLoad();
+        universalLinkDao.beginLoad();
         universalLinkSkeletalDao.beginLoad();
     }
 
@@ -87,7 +87,7 @@ public class UniversalLinkLoader {
                 Multimap<Language, LocalLink> linkMap = HashMultimap.create();
                 linkMap.put(localLink.getLanguage(), localLink);
                 UniversalLink link = new UniversalLink(univSourceId, univDestId, algorithmId, linkMap);
-//                universalLinkDao.save(link);
+                universalLinkDao.save(link);
                 universalLinkSkeletalDao.save(link);
             }
             long end = System.currentTimeMillis();
@@ -102,7 +102,7 @@ public class UniversalLinkLoader {
     public void endLoad() throws DaoException {
         LOG.log(Level.INFO, "End Load");
         long start = System.currentTimeMillis();
-//        universalLinkDao.endLoad();
+        universalLinkDao.endLoad();
         universalLinkSkeletalDao.endLoad();
         long end = System.currentTimeMillis();
         double seconds = (end - start) / 1000.0;
