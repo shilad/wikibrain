@@ -113,11 +113,15 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                     .setSourceIds(link.getSourceId())
                     .setDestIds(link.getDestId())
                     .setAlgorithmIds(link.getAlgorithmId()));
-            Set<Language> languages = new HashSet<Language>();
+            Set<Language> languages = Sets.newHashSet();
             int i=0;
             for (UniversalLink duplicate : duplicates) {
                 i++;
-                languages = Sets.union(languages, duplicate.getLanguageSet().getLanguages());
+                if (i>1) {
+                    languages = Sets.union(languages, duplicate.getLanguageSet().getLanguages());
+                } else {
+                    languages = duplicate.getLanguageSet().getLanguages();
+                }
             }
             if (i>1) {
                 Connection conn = null;
