@@ -43,9 +43,8 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Tables.UNIVERSAL_PAGE.ALGORITHM_ID
     };
 
-    public UniversalPageSqlDao(DataSource dataSource, LocalPageDao localPageDao) throws DaoException {
+    public UniversalPageSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-page");
-        this.localPageDao = localPageDao;
     }
 
     @Override
@@ -273,10 +272,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 return new UniversalPageSqlDao(
                         getConfigurator().get(
                                 DataSource.class,
-                                config.getString("dataSource")),
-                        getConfigurator().get(
-                                LocalPageDao.class,
-                                config.getString("localPageDao"))
+                                config.getString("dataSource"))
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
