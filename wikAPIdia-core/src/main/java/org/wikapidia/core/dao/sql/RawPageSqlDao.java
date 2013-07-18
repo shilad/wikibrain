@@ -91,6 +91,8 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 
@@ -125,6 +127,8 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 

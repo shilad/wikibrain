@@ -100,6 +100,8 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 
