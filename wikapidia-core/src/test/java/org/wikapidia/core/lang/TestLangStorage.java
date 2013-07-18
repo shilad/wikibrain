@@ -1,5 +1,8 @@
 package org.wikapidia.core.lang;
 
+import gnu.trove.set.TByteSet;
+import gnu.trove.set.hash.TByteHashSet;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 
@@ -38,7 +41,7 @@ public class TestLangStorage {
 
         LanguageSet languages = new LanguageSet(new Configuration().get().getStringList("languages"));
         System.out.println(languages);
-        long[] bits = toLongBits(languages);
+        byte[] bits = toByteArray(languages);
         System.out.println(bits);
         LanguageSet output = getLanguageSet(bits);
         System.out.println(output);
@@ -53,14 +56,53 @@ public class TestLangStorage {
             }
             languages = new LanguageSet(langs);
             System.out.println(languages);
-            bits = toLongBits(languages);
-            System.out.println(bits);
-//            LanguageSet output123 = getLanguageSet(bits);
-//            System.out.println(output123);
-            assert languages.equals(getLanguageSet(bits));
+            bits = toByteArray(languages);
+            System.out.println(Arrays.toString(bits));
+            output = getLanguageSet(bits);
+            System.out.println(output);
+            assert languages.equals(output);
         }
 
     }
+
+    public static byte[] toByteArray(LanguageSet langs) {
+        TByteSet byteSet = new TByteHashSet();
+        Set<byte[]> extras = new HashSet<byte[]>();
+        for (Language l : langs) {
+            short id = l.getId();
+            if (id < 256) {
+                // id-1 because id ranges from 1 to >256 but byte ranges from -128 to 127
+                byteSet.add((byte) (id-128));
+            } else {
+                byte[] temp = new byte[2];
+                temp[0] = (byte) -128;
+                temp[1] = (byte) (id-255-128);
+                extras.add(temp);
+            }
+        }
+        byte[] output = byteSet.toArray();
+        for (byte[] b : extras) {
+            output = ArrayUtils.addAll(output, b);
+        }
+        return output;
+    }
+
+    public static LanguageSet getLanguageSet(byte[] truncated) {
+        Set<Language> languages = new HashSet<Language>();
+        boolean extra = false;
+        for (byte b : truncated) {
+            if (extra) {
+                languages.add(Language.getById(b+128+255));
+                extra = false;
+            } else if (b == -128) {
+                extra = true;
+            } else {
+                languages.add(Language.getById(b+128));
+            }
+        }
+        return new LanguageSet(languages);
+    }
+
 
     public static byte[] toByteBits(LanguageSet languages) {
         int index = 0;
@@ -81,27 +123,27 @@ public class TestLangStorage {
         return langBits;
     }
 
-    public static LanguageSet getLanguageSet(byte[] langBits) {
-        // 8 is the number of bits per int
-        if (langBits.length != TOTAL_LANGUAGES/8 + 1) {
-            throw new IllegalArgumentException();
-        }
-        byte[] copy = Arrays.copyOf(langBits, langBits.length);
-        List<Language> languages = new ArrayList<Language>();
-        int index = copy.length - 1;
-        for (int i=TOTAL_LANGUAGES; i > 0; i--) {
-            if (i%8 == 0) {
-                index--;
-            }
-            byte temp = copy[index];
-            if ((temp & 0x1) == 1) {
-                languages.add(Language.getById(i));
-            }
-            temp = (byte) (temp >> 1);
-            copy[index] = temp;
-        }
-        return new LanguageSet(languages);
-    }
+//    public static LanguageSet getLanguageSet(byte[] langBits) {
+//        // 8 is the number of bits per int
+//        if (langBits.length != TOTAL_LANGUAGES/8 + 1) {
+//            throw new IllegalArgumentException();
+//        }
+//        byte[] copy = Arrays.copyOf(langBits, langBits.length);
+//        List<Language> languages = new ArrayList<Language>();
+//        int index = copy.length - 1;
+//        for (int i=TOTAL_LANGUAGES; i > 0; i--) {
+//            if (i%8 == 0) {
+//                index--;
+//            }
+//            byte temp = copy[index];
+//            if ((temp & 0x1) == 1) {
+//                languages.add(Language.getById(i));
+//            }
+//            temp = (byte) (temp >> 1);
+//            copy[index] = temp;
+//        }
+//        return new LanguageSet(languages);
+//    }
 
     public static short[] toShortBits(LanguageSet languages) {
         int index = 0;

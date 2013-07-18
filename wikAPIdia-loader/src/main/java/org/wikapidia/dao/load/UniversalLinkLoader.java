@@ -49,11 +49,11 @@ public class UniversalLinkLoader {
     public void beginLoad(boolean shouldClear) throws DaoException {
         if (shouldClear) {
             LOG.log(Level.INFO, "Clearing data");
-//            universalLinkDao.clear();
+            universalLinkDao.clear();
             universalLinkSkeletalDao.clear();
         }
         LOG.log(Level.INFO, "Begin Load");
-//        universalLinkDao.beginLoad();
+        universalLinkDao.beginLoad();
         universalLinkSkeletalDao.beginLoad();
     }
 
@@ -67,6 +67,7 @@ public class UniversalLinkLoader {
             LOG.log(Level.INFO, "Fetching ID map");
             Map<Language, TIntIntMap> map = universalPageDao.getAllLocalToUnivIdsMap(algorithmId, languageSet);
             LOG.log(Level.INFO, "Loading links");
+            long start = System.currentTimeMillis();
             int i=0;
             for (LocalLink localLink : localLinks) {
                 i++;
@@ -86,9 +87,12 @@ public class UniversalLinkLoader {
                 Multimap<Language, LocalLink> linkMap = HashMultimap.create();
                 linkMap.put(localLink.getLanguage(), localLink);
                 UniversalLink link = new UniversalLink(univSourceId, univDestId, algorithmId, linkMap);
-//                universalLinkDao.save(link);
+                universalLinkDao.save(link);
                 universalLinkSkeletalDao.save(link);
             }
+            long end = System.currentTimeMillis();
+            double seconds = (end - start) / 1000.0;
+            LOG.log(Level.INFO, "Time (s): " + seconds);
             LOG.log(Level.INFO, "All UniversalLinks loaded: " + i);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
@@ -97,7 +101,7 @@ public class UniversalLinkLoader {
 
     public void endLoad() throws DaoException {
         LOG.log(Level.INFO, "End Load");
-//        universalLinkDao.endLoad();
+        universalLinkDao.endLoad();
         universalLinkSkeletalDao.endLoad();
     }
 

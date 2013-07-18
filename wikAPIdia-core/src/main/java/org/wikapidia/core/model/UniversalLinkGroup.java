@@ -2,6 +2,7 @@ package org.wikapidia.core.model;
 
 import org.wikapidia.core.lang.LanguageSet;
 
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Map;
  * @author Ari Weiland
  *
  */
-public class UniversalLinkGroup {
+public class UniversalLinkGroup implements Iterable<UniversalLink> {
     //If isOutlink, maps dest id to UniversalLinks
     //Otherwise maps source id to UniversalLinks
     private final Map<Integer, UniversalLink> links;
@@ -46,5 +47,10 @@ public class UniversalLinkGroup {
 
     public LanguageSet getLanguageSet() {
         return languageSet;
+    }
+
+    @Override
+    public Iterator<UniversalLink> iterator() {
+        return links.values().iterator();
     }
 }

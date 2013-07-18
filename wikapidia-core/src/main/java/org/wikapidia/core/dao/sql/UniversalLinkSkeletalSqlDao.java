@@ -47,7 +47,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                 item.getSourceUnivId(),
                 item.getDestUnivId(),
                 item.getAlgorithmId(),
-                item.getLanguageSetOfExistsInLangs().toTruncatedArray()
+                item.getLanguageSetOfExistsInLangs().toByteArray()
         );
     }
 
@@ -227,9 +227,9 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
             return null;
         }
         return new UniversalLink(
-                record.getValue(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID),
-                record.getValue(Tables.UNIVERSAL_LINK.UNIV_DEST_ID),
-                record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID),
+                record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID),
+                record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID),
+                record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID),
                 LanguageSet.getLanguageSet(record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.LANGS))
         );
     }
