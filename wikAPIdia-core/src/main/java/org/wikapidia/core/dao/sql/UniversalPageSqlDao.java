@@ -43,8 +43,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Tables.UNIVERSAL_PAGE.ALGORITHM_ID
     };
 
-    private final LocalPageDao localPageDao;
-
     public UniversalPageSqlDao(DataSource dataSource, LocalPageDao localPageDao) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-page");
         this.localPageDao = localPageDao;
@@ -68,41 +66,47 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
 
     @Override
     public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
-        throw new UnsupportedOperationException("Temporarily out of order");
-//        Connection conn = null;
-//        try {
-//            conn = ds.getConnection();
-//            DSLContext context = DSL.using(conn, dialect);
-//            Collection<Condition> conditions = new ArrayList<Condition>();
-//            if (daoFilter.getNameSpaceIds() != null) {
-//                conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
-//            }
-//            if (daoFilter.isRedirect() != null) {
-//                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
-//            }
-//            Cursor<Record> result = context.select()
-//                    .from(Tables.UNIVERSAL_PAGE)
-//                    .where(conditions)
-//                    .fetchLazy(getFetchSize());
-//            Map<Integer, TIntSet> pages = new HashMap<Integer, TIntSet>();
-//            for (Record record : result) {
-//                int algorithmId = record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID);
-//                if (!pages.containsKey(algorithmId)) {
-//                    pages.put(algorithmId, new TIntHashSet());
-//                }
-//                pages.get(algorithmId).add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
-//            }
-//            return new SqlDaoIterable<T, int[]>(result, new PageMap(pages), conn) {
-//
-//                @Override
-//                public T transform(int[] item) throws DaoException {
-//                    return getById(item[0], item[1]);
-//                }
-//            };
-//        } catch (SQLException e) {
-//            quietlyCloseConn(conn);
-//            throw new DaoException(e);
-//        }
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+            }
+            Cursor<Record> result = context.select()
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(conditions)
+                    .fetchLazy(getFetchSize());
+            Set<int[]> pages = new HashSet<int[]>();
+            for (Record record : result) {
+                pages.add(new int[]{
+                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
+                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
+            }
+            return new SqlDaoIterable<T, int[]>(result, pages.iterator(), conn) {
+
+                @Override
+                public T transform(int[] item) throws DaoException {
+                    return getById(item[0], item[1]);
+                }
+            };
+        } catch (SQLException e) {
+            quietlyCloseConn(conn);
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (T page : get(daoFilter)) {
+            i++;
+        }
+        return i;
     }
 
     @Override

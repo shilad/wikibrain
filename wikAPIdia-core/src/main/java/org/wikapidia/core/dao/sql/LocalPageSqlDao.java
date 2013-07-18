@@ -106,6 +106,15 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (T page : get(daoFilter)) {
+            i++;
+        }
+        return i;
+    }
+
+    @Override
     public T getById(Language language, int pageId) throws DaoException {
         Connection conn = null;
         try {

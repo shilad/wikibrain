@@ -91,6 +91,15 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (LocalCategoryMember lcm : get(daoFilter)) {
+            i++;
+        }
+        return i;
+    }
+
+    @Override
     public Collection<Integer> getCategoryMemberIds(Language language, int categoryId) throws DaoException {
         Connection conn = null;
         try {

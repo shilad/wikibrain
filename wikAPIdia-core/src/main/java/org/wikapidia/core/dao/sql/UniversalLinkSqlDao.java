@@ -76,7 +76,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
 
     @Override
     public Iterable<UniversalLink> get(DaoFilter daoFilter) throws DaoException {
-        throw new UnsupportedOperationException("Temporarily out of order");
+        throw new UnsupportedOperationException("For support for this operation, use a UniversalLinkSkeletalSqlDao");
 //        Connection conn = null;
 //        try {
 //            conn = ds.getConnection();
@@ -100,6 +100,16 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
 //            quietlyCloseConn(conn);
 //            throw new DaoException(e);
 //        }
+    }
+
+    @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        throw new UnsupportedOperationException("For support for this operation, use a UniversalLinkSkeletalSqlDao");
+//        int i=0;
+//        for (UniversalLink link : get(daoFilter)) {
+//            i++;
+//        }
+//        return i;
     }
 
     @Override
