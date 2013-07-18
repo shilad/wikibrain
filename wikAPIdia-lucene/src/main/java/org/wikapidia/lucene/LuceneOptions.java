@@ -108,6 +108,9 @@ public class LuceneOptions {
 
         @Override
         public LuceneOptions get(String name, Config config) throws ConfigurationException {
+//            if (config.getString("type").trim().equalsIgnoreCase(name.trim())) {
+//                throw new ConfigurationException("Could not find configuration " + name + ", found " + config.getString("type"));
+//            }
             return new LuceneOptions(
                     getConfigurator(),
                     config.getString("version"),
