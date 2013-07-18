@@ -22,6 +22,7 @@ import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 
 import java.io.File;
@@ -89,18 +90,22 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * Normalizers translate similarity scores to more meaningful values.
      * @param n
      */
+    @Override
     public void setDefaultMostSimilarNormalizer(Normalizer n){
         defaultMostSimilarNormalizer = n;
     }
 
+    @Override
     public void setDefaultSimilarityNormalizer(Normalizer defaultSimilarityNormalizer) {
         this.defaultSimilarityNormalizer = defaultSimilarityNormalizer;
     }
 
+    @Override
     public void setMostSimilarNormalizer(Normalizer n, Language l){
         mostSimilarNormalizers.put(l,n);
     }
 
+    @Override
     public void setSimilarityNormalizer(Normalizer n, Language l){
         similarityNormalizers.put(l,n);
     }
@@ -154,6 +159,18 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
     public void setNumThreads(int n) {
         this.numThreads = n;
+    }
+
+    @Override
+    public void write(File directory) throws IOException {
+        //TODO:implement me
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void read(File directory) throws IOException {
+        //TODO:implement me
+        throw new NotImplementedException();
     }
 
     @Override
@@ -233,7 +250,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             else {
                 trainee = new IdentityNormalizer();
             }
-            mostSimilarNormalizers.put(dataset.getLanguage(),new IdentityNormalizer());
+            mostSimilarNormalizers.put(dataset.getLanguage(), new IdentityNormalizer());
         }
         ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws DaoException {

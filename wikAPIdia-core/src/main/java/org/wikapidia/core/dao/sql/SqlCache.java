@@ -71,6 +71,8 @@ public class SqlCache {
             }
         }catch (SQLException e){
             throw new DaoException(e);
+        } finally {
+            AbstractSqlDao.quietlyCloseConn(conn);
         }
 
     }

@@ -9,6 +9,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 
@@ -140,6 +141,15 @@ public interface LocalSRMetric {
      * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
      */
     public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) throws DaoException;
+
+
+    public void setDefaultMostSimilarNormalizer(Normalizer n);
+
+    public void setDefaultSimilarityNormalizer(Normalizer defaultSimilarityNormalizer);
+
+    public void setMostSimilarNormalizer(Normalizer n, Language l);
+
+    public void setSimilarityNormalizer(Normalizer n, Language l);
 
     /**
      * Return a vector representation of a LocalPage

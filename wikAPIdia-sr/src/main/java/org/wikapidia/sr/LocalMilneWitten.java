@@ -57,15 +57,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         return "MilneWitten";
     }
 
-    public void write(File directory) throws IOException {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void read(File directory) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
     @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();

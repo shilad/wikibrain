@@ -83,6 +83,8 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 
@@ -110,6 +112,8 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 

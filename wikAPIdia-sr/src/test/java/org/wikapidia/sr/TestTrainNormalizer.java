@@ -19,6 +19,7 @@ public class TestTrainNormalizer {
 
         Configurator c = new Configurator(new Configuration());
         LocalSRMetric sr = c.get(LocalSRMetric.class);
+        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
 
 //        int i = 0;
 //        while(i < 30) {
@@ -33,8 +34,7 @@ public class TestTrainNormalizer {
 
         sr.trainDefaultSimilarity(dataset);
 
-        sr.trainDefaultMostSimilar(dataset,100,null);
-
+        usr.trainSimilarity(dataset);
     }
 
 }

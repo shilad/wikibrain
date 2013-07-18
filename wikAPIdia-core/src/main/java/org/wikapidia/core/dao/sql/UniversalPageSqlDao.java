@@ -100,6 +100,8 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 
@@ -130,6 +132,8 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 

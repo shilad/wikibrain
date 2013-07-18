@@ -13,10 +13,17 @@ import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.normalize.IdentityNormalizer;
+import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
+import org.wikapidia.sr.utils.Dataset;
+import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +39,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     protected Disambiguator disambiguator;
     protected int algorithmId;
 
+    private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
+    private Normalizer similarityNormalizer = new IdentityNormalizer();
 
     protected SparseMatrix mostSimilarUniversalMatrix;
 
@@ -131,6 +140,72 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
         UniversalPage up = universalPageDao.getById(uId,algorithmId);
         return mostSimilar(up,maxResults,validIds);
+    }
+
+    @Override
+    public void write(File directory) throws IOException{
+        //TODO: implement me
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void read(File directory) throws IOException{
+        //TODO: implement me
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void trainSimilarity(final Dataset dataset) throws DaoException{
+        final Normalizer trainee = similarityNormalizer;
+        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws IOException, DaoException {
+                LocalString ls1 = new LocalString(ks.language,ks.phrase1);
+                LocalString ls2 = new LocalString(ks.language,ks.phrase2);
+                SRResult sim = similarity(ls1,ls2, false);
+                trainee.observe(sim.getValue(), ks.similarity);
+
+            }
+        },1);
+        trainee.observationsFinished();
+        similarityNormalizer = trainee;
+        LOG.info("trained most similarityNormalizer for " + getName() + ": " + trainee.dump());
+    }
+
+    @Override
+    public void trainMostSimilar(final Dataset dataset, final int numResults, final TIntSet validIds) throws DaoException{
+        final Normalizer trainee = mostSimilarNormalizer;
+        mostSimilarNormalizer = new IdentityNormalizer();
+        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws DaoException {
+                ks.maybeSwap();
+                List<LocalString> localStrings = new ArrayList<LocalString>();
+                localStrings.add(new LocalString(ks.language, ks.phrase1));
+                localStrings.add(new LocalString(ks.language, ks.phrase2));
+                List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
+                int pageId1 = universalPageDao.getUnivPageId(ids.get(0).asLocalPage(), algorithmId);
+                int pageId2 = universalPageDao.getUnivPageId(ids.get(1).asLocalPage(),algorithmId);
+                UniversalPage page = universalPageDao.getById(pageId1,algorithmId);
+                if (page != null) {
+                    SRResultList dsl = mostSimilar(page, numResults, validIds);
+                    if (dsl != null) {
+                        trainee.observe(dsl, dsl.getIndexForId(pageId2), ks.similarity);
+                    }
+                }
+            }
+        }, 1);
+        trainee.observationsFinished();
+        mostSimilarNormalizer = trainee;
+        LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
+    }
+
+    @Override
+    public void setMostSimilarNormalizer(Normalizer n){
+        mostSimilarNormalizer = n;
+    }
+
+    @Override
+    public void setSimilarityNormalizer(Normalizer n){
+        similarityNormalizer = n;
     }
 
     @Override
