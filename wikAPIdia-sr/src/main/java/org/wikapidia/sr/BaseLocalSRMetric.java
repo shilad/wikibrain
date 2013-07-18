@@ -90,18 +90,22 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * Normalizers translate similarity scores to more meaningful values.
      * @param n
      */
+    @Override
     public void setDefaultMostSimilarNormalizer(Normalizer n){
         defaultMostSimilarNormalizer = n;
     }
 
+    @Override
     public void setDefaultSimilarityNormalizer(Normalizer defaultSimilarityNormalizer) {
         this.defaultSimilarityNormalizer = defaultSimilarityNormalizer;
     }
 
+    @Override
     public void setMostSimilarNormalizer(Normalizer n, Language l){
         mostSimilarNormalizers.put(l,n);
     }
 
+    @Override
     public void setSimilarityNormalizer(Normalizer n, Language l){
         similarityNormalizers.put(l,n);
     }
