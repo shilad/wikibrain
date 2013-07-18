@@ -32,11 +32,9 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
 
-    private final Language language;
     private final LuceneSearcher searcher;
 
     public ESAMetric(Language language, LuceneSearcher searcher, LocalPageDao pageHelper) {
-        this.language = language;
         this.searcher = searcher;
         this.pageHelper = pageHelper;
     }
@@ -58,7 +56,43 @@ public class ESAMetric extends BaseLocalSRMetric {
         TIntDoubleHashMap scores1 = getConceptVector(phrase1, language);
         TIntDoubleHashMap scores2 = getConceptVector(phrase2, language);
         double sim = SimUtils.cosineSimilarity(scores1, scores2);
-        return new SRResult(sim); // TODO: normalize
+        SRResult result = new SRResult(sim);
+
+        if (explanations) {
+
+            String format = "Five most similar pages to " + phrase1 + "" +
+                    "\n?\n?\n?\n?\n?\nFive most similar pages to " + phrase2 + "\n?\n?\n?\n?\n?";
+            List<LocalPage> formatPages =new ArrayList<LocalPage>();
+
+            Map<Integer, Double> ids = SimUtils.sortByValue(scores1);
+            int i = 0;
+            for (int id : ids.keySet()) {
+                if (i++ < 5) {
+                    int localPageId = searcher.getLocalIdFromDocId(id, language);
+                    LocalPage topPage = pageHelper.getById(language, localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(topPage);
+                }
+            }
+            Map<Integer, Double> ids1 = SimUtils.sortByValue(scores2);
+            int j = 0;
+            for (int id : ids1.keySet()) {
+                if (j++ < 5) {
+                    int localPageId = searcher.getLocalIdFromDocId(id, language);
+                    LocalPage topPage = pageHelper.getById(language, localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(topPage);
+                }
+            }
+            Explanation explanation = new Explanation(format, formatPages);
+            result.addExplanation(explanation);
+        }
+
+        return result; // TODO: normalize
     }
 
     /**
@@ -116,23 +150,41 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @throws DaoException
      */
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
-        TIntDoubleHashMap scores1 = getConceptVector(page1, language);
-        TIntDoubleHashMap scores2 = getConceptVector(page2, language);
+        TIntDoubleHashMap scores1 = getConceptVector(page1, page1.getLanguage());
+        TIntDoubleHashMap scores2 = getConceptVector(page2, page2.getLanguage());
         double sim = SimUtils.cosineSimilarity(scores1, scores2);
         SRResult result = new SRResult(sim);
 
         if (explanations) {
-            Map<Integer, Double> ids = SimUtils.sortByValue(scores1);
-            String format = "Five most similar pages to ?\n?\n?\n?\n?\n?";
+
+            String format = "Five most similar pages to ?\n?\n?\n?\n?\n?\nFive most similar pages to ?\n?\n?\n?\n?\n?";
             List<LocalPage> formatPages =new ArrayList<LocalPage>();
+
+            Map<Integer, Double> ids = SimUtils.sortByValue(scores1);
+            formatPages.add(page1);
+            int i = 0;
             for (int id : ids.keySet()) {
-                int localPageId = searcher.getLocalIdFromDocId(id, language);
-                LocalPage topPage = pageHelper.getById(language, localPageId);
-                if (topPage==null) {
-                    continue;
+                if (i++ < 5) {
+                    int localPageId = searcher.getLocalIdFromDocId(id, page1.getLanguage());
+                    LocalPage topPage = pageHelper.getById(page1.getLanguage(), localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(topPage);
                 }
-                formatPages.add(page1);
-                formatPages.add(topPage);
+            }
+            formatPages.add(page2);
+            Map<Integer, Double> ids1 = SimUtils.sortByValue(scores2);
+            int j = 0;
+            for (int id : ids1.keySet()) {
+                if (j++ < 5) {
+                    int localPageId = searcher.getLocalIdFromDocId(id, page2.getLanguage());
+                    LocalPage topPage = pageHelper.getById(page2.getLanguage(), localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(topPage);
+                }
             }
             Explanation explanation = new Explanation(format, formatPages);
             result.addExplanation(explanation);
@@ -151,6 +203,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @throws DaoException
      */
     public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations) throws DaoException {
+        Language language = localPage.getLanguage();
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
@@ -165,16 +218,18 @@ public class ESAMetric extends BaseLocalSRMetric {
         if (explanations) {
             String format = "?'s similar pages include ?";
             for (SRResult srResult : srResults) {
-                List<LocalPage> formatPages =new ArrayList<LocalPage>();
-                int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
-                LocalPage topPage = pageHelper.getById(language, localPageId);
-                if (topPage==null) {
-                    continue;
+                if (srResult.getValue() != 0) {
+                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
+                    int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
+                    LocalPage topPage = pageHelper.getById(language, localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(localPage);
+                    formatPages.add(topPage);
+                    Explanation explanation = new Explanation(format, formatPages);
+                    srResult.addExplanation(explanation);
                 }
-                formatPages.add(localPage);
-                formatPages.add(topPage);
-                Explanation explanation = new Explanation(format, formatPages);
-                srResult.addExplanation(explanation);
             }
         }
         return srResults;

@@ -77,25 +77,41 @@ public class TestESAMetric {
 
         ESAMetric esaMetric = new ESAMetric(lang, searcher, localPageDao);
 
-        String string1 = "Physics";
-        String string2 = "Canada";
+        String string1 = "Google Search";  //TODO: redirects: homo sapiens, null: nz
+        String string2 = "Arts";
+        String string3 = "United States";
+        String string4 = "Barack Obama";
 
         LocalPage page1 = localPageDao.getByTitle(lang, new Title(string1, lang), NameSpace.ARTICLE);
         LocalPage page2 = localPageDao.getByTitle(lang, new Title(string2, lang), NameSpace.ARTICLE);
+        LocalPage page3 = localPageDao.getByTitle(lang, new Title(string3, lang), NameSpace.ARTICLE);
+        LocalPage page4 = localPageDao.getByTitle(lang, new Title(string4, lang), NameSpace.ARTICLE);
 
-        System.out.println(page1);
-        SRResultList srResults= esaMetric.mostSimilar(page1, 20, true);
+//        printResult(esaMetric.similarity(page1, page2, true));
+//        printResult(esaMetric.similarity(string1, string2, lang, true));
+//
+        System.out.println(page3);
+        SRResultList srResults= esaMetric.mostSimilar(page3, 10, true);
         for (SRResult srResult : srResults) {
             printResult(srResult);
         }
-        System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
+//        System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
+//
+//        System.out.println(page4);
+//        SRResultList srResults2= esaMetric.mostSimilar(page4, 10, true);
+//        for (SRResult srResult : srResults2) {
+//            printResult(srResult);
+//        }
+//        System.out.println(Arrays.toString(srResults2.getScoresAsFloat()));
 
-        System.out.println(page2);
-        SRResultList srResults2= esaMetric.mostSimilar(page2, 20, true);
-        for (SRResult srResult : srResults2) {
-            printResult(srResult);
+        String[] testPhrases = {string3, string4};
+        for (int i = 0; i < testPhrases.length; i++) {
+            for (int j = i + 1; j < testPhrases.length; j++) {
+                SRResult srResult = esaMetric.similarity(testPhrases[i], testPhrases[j], lang, true);
+                System.out.println(testPhrases[i] + " and " + testPhrases[j] + ":");
+                printResult(srResult);
+            }
         }
-        System.out.println(Arrays.toString(srResults2.getScoresAsFloat()));
     }
 
 //    @Test

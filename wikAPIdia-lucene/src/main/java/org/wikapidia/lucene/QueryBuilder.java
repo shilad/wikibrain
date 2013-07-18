@@ -1,22 +1,27 @@
 package org.wikapidia.lucene;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.MultiPhraseQuery;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.search.*;
+import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.phrases.BasePhraseAnalyzer;
 import org.wikapidia.phrases.PhraseAnalyzer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,30 +71,10 @@ public class QueryBuilder {
      */
     public Query getPhraseQuery(TextFieldElements elements, String searchString) throws ParseException {
         QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), new WikapidiaAnalyzer(language, options));
-        return parser.parse(searchString);
-    }
-
-    /**
-     * Builds a page text query for the default text field in LuceneOptions.
-     *
-     * @param rawPage
-     * @return
-     * @throws ParseException
-     */
-    public Query getPageTextQuery(RawPage rawPage) throws ParseException {
-        return getPageTextQuery(options.elements, rawPage);
-    }
-
-    /**
-     * Builds a page text query for the text field specified by elements.
-     *
-     * @param elements specifies the text field in which to search
-     * @param rawPage
-     * @return
-     * @throws ParseException
-     */
-    public Query getPageTextQuery(TextFieldElements elements, RawPage rawPage) throws ParseException {
-        return getPhraseQuery(elements, rawPage.getPlainText());
+        Query query = parser.parse(searchString);
+        System.out.println(query.toString());
+        System.out.println(query.getClass());
+        return query;
     }
 
     /**
@@ -100,28 +85,33 @@ public class QueryBuilder {
      * @throws DaoException
      */
     public Query getLocalPageConceptQuery(LocalPage localPage) throws DaoException {
-        return getLocalPageConceptQuery(options.elements, localPage);
+        try {
+            return getLocalPageConceptQuery(options.elements, localPage);
+        } catch (ParseException e) {
+            throw new DaoException(e);
+        }
     }
 
     /**
-     * Builds a local page query for the text field specified by elements.
      *
-     * @param elements specifies the text field in which to search
+     * @param elements elements specifies the text field in which to search
      * @param localPage
      * @return
      * @throws DaoException
+     * @throws ParseException
      */
-    public Query getLocalPageConceptQuery(TextFieldElements elements, LocalPage localPage) throws DaoException {
+    public Query getLocalPageConceptQuery(TextFieldElements elements, LocalPage localPage) throws DaoException, ParseException {
         LinkedHashMap<String, Float> description = phraseAnalyzer.describeLocal(language, localPage, 20);
-        MultiPhraseQuery multiPhraseQuery = new MultiPhraseQuery();
-        Term[] terms = new Term[description.keySet().size() + 1];
-        terms[0] = new Term(elements.getTextFieldName(), localPage.getTitle().getCanonicalTitle());
-        int i = 1;
-        for (String phrase : description.keySet()) {
-            terms[i] = new Term(elements.getTextFieldName(), phrase);
-            i++;
+        BooleanQuery query = new BooleanQuery();
+        query.add(getPhraseQuery(localPage.getTitle().getCanonicalTitle()), BooleanClause.Occur.SHOULD);
+        for (String similarTitle : description.keySet()) {
+            query.add(getPhraseQuery(similarTitle), BooleanClause.Occur.SHOULD);
         }
-        multiPhraseQuery.add(terms);
-        return multiPhraseQuery;
+        return query;
+
+    }
+
+    public Query getLocalPageConceptQuery(LocalPage localPage, TextFieldElements elements) throws DaoException {
+        return null;
     }
 }

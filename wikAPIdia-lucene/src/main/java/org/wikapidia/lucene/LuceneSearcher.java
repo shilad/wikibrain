@@ -2,9 +2,11 @@ package org.wikapidia.lucene;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.wikapidia.core.lang.Language;
@@ -12,6 +14,7 @@ import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,4 +124,16 @@ public class LuceneSearcher {
             throw new RuntimeException(e);
         }
     }
+
+    public int getDocIdFromLocalId(int localId, Language language) {
+        Query query = new TermQuery(new Term("local_id", "" + localId));
+        LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(Arrays.asList(language)), LuceneOptions.getDefaultOptions());
+        ScoreDoc[] hits = searcher.search(query, language);
+        if (hits.length == 0) {
+            return -1;
+        } else {
+            return hits[0].doc;
+        }
+    }
+
 }
