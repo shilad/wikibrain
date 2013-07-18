@@ -1,7 +1,5 @@
 package org.wikapidia.core.model;
 
-import com.google.common.base.Strings;
-import com.google.common.primitives.Bytes;
 import org.apache.commons.lang.StringUtils;
 import org.wikapidia.core.lang.Language;
 
