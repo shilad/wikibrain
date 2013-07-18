@@ -50,7 +50,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     @Override
     public void save(UniversalPage page) throws DaoException {
         NameSpace nameSpace = page.getNameSpace();
-        for (Language language : page.getLanguageSetOfExistsInLangs()) {
+        for (Language language : page.getLanguageSet()) {
             for (Object localPage : page.getLocalPages(language)) {
                 insert(
                         language.getId(),

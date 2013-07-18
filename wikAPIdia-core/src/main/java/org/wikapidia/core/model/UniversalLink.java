@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -16,27 +17,27 @@ import java.util.Collection;
  */
 public class UniversalLink extends AbstractUniversalEntity<LocalLink> {
 
-    private final int sourceUnivId;
-    private final int destUnivId;
+    private final int sourceId;
+    private final int destId;
 
-    public UniversalLink(int sourceUnivId, int destUnivId, int algorithmId, Multimap<Language, LocalLink> localEntities) {
+    public UniversalLink(int sourceId, int destId, int algorithmId, Multimap<Language, LocalLink> localEntities) {
         super(algorithmId, localEntities);
-        this.sourceUnivId = sourceUnivId;
-        this.destUnivId = destUnivId;
+        this.sourceId = sourceId;
+        this.destId = destId;
     }
 
-    public UniversalLink(int sourceUnivId, int destUnivId, int algorithmId, LanguageSet languages) {
+    public UniversalLink(int sourceId, int destId, int algorithmId, LanguageSet languages) {
         super(algorithmId, languages);
-        this.sourceUnivId = sourceUnivId;
-        this.destUnivId = destUnivId;
+        this.sourceId = sourceId;
+        this.destId = destId;
     }
 
-    public int getSourceUnivId() {
-        return sourceUnivId;
+    public int getSourceId() {
+        return sourceId;
     }
 
-    public int getDestUnivId() {
-        return destUnivId;
+    public int getDestId() {
+        return destId;
     }
 
     public Collection<LocalLink> getLocalLinks(Language language) {

@@ -99,7 +99,7 @@ public abstract class AbstractUniversalEntity<T> {
      * TODO: choose an appropriate default language based on the config file.
      * @return
      */
-    public LanguageSet getLanguageSetOfExistsInLangs() {
+    public LanguageSet getLanguageSet() {
         return languages;
     }
 

@@ -10,12 +10,13 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.WikapidiaException;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * User: bjhecht
  */
-public class LanguageSet implements Iterable<Language> {
+public class LanguageSet implements Iterable<Language>, Serializable {
     public static final LanguageSet ALL = new LanguageSet(
             Language.getByLangCode("en"),
             Arrays.asList(Language.LANGUAGES));

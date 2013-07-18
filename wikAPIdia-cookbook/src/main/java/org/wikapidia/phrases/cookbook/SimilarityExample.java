@@ -44,7 +44,7 @@ public class SimilarityExample {
             }
             else {
                 UniversalPage up = universalPageDao.getById(result.getId(), algorithmId);
-                LanguageSet languages = up.getLanguageSetOfExistsInLangs();
+                LanguageSet languages = up.getLanguageSet();
                 LocalPage namePage = (LocalPage) up.getLocalPages(languages.getDefaultLanguage()).toArray()[0];
                 System.out.println(namePage.getTitle().getCanonicalTitle());
                 System.out.println("Similarity value: "+result.getValue());
