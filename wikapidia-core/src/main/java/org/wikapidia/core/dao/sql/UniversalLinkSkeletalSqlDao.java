@@ -85,6 +85,15 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     }
 
     @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (UniversalLink link : get(daoFilter)) {
+            i++;
+        }
+        return i;
+    }
+
+    @Override
     public UniversalLinkGroup getOutlinks(int sourceId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {
