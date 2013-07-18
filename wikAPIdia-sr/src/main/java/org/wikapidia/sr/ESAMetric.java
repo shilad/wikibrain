@@ -219,7 +219,6 @@ public class ESAMetric extends BaseLocalSRMetric {
                 if (srResult.getValue() != 0) {
                     List<LocalPage> formatPages =new ArrayList<LocalPage>();
                     int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
-                    System.out.println(localPageId);
                     LocalPage topPage = pageHelper.getById(language, localPageId);
                     if (topPage==null) {
                         continue;

@@ -112,6 +112,15 @@ public class TestESAMetric {
 //                printResult(srResult);
 //            }
 //        }
+
+        LocalPage[] testPages = {page3, page4};
+        for (int i = 0; i < testPages.length; i++) {
+            for (int j = i + 1; j < testPages.length; j++) {
+                SRResult srResult = esaMetric.similarity(testPages[i], testPages[j], true);
+                System.out.println(testPages[i].getTitle().getCanonicalTitle() + " and " + testPages[j].getTitle().getCanonicalTitle() + ":");
+                printResult(srResult);
+            }
+        }
     }
 
 //    @Test
