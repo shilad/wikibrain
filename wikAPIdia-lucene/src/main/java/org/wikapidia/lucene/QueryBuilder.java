@@ -1,27 +1,24 @@
 package org.wikapidia.lucene;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.Term;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.RawPage;
-import org.wikapidia.phrases.BasePhraseAnalyzer;
 import org.wikapidia.phrases.PhraseAnalyzer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.LinkedHashMap;
 
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,6 +31,16 @@ import java.util.logging.Logger;
  *
  */
 public class QueryBuilder {
+
+    public static final int DEFAULT_MAX_PERCENTAGE = 10;
+    public static final int DEFAULT_MAX_QUERY_TERMS = 100;
+    public static final int DEFAULT_MIN_TERM_FREQ = 2;
+    public static final int DEFAULT_MIN_DOC_FREQ = 2;
+
+    private int maxPercentage = DEFAULT_MAX_PERCENTAGE;
+    private int maxQueryTerms = DEFAULT_MAX_QUERY_TERMS;
+    private int minTermFreq = DEFAULT_MIN_TERM_FREQ;
+    private int minDocFreq = DEFAULT_MIN_DOC_FREQ;
 
     private static final Logger LOG = Logger.getLogger(QueryBuilder.class.getName());
 
@@ -72,8 +79,6 @@ public class QueryBuilder {
     public Query getPhraseQuery(TextFieldElements elements, String searchString) throws ParseException {
         QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), new WikapidiaAnalyzer(language, options));
         Query query = parser.parse(searchString);
-        System.out.println(query.toString());
-        System.out.println(query.getClass());
         return query;
     }
 
@@ -111,7 +116,34 @@ public class QueryBuilder {
 
     }
 
-    public Query getLocalPageConceptQuery(LocalPage localPage, TextFieldElements elements) throws DaoException {
-        return null;
+    public Query getMoreLikeThisQuery(int luceneId, DirectoryReader directoryReader) throws DaoException {
+        return getMoreLikeThisQuery(options.elements, luceneId, directoryReader);
     }
+
+    public Query getMoreLikeThisQuery(TextFieldElements elements, int luceneId, DirectoryReader directoryReader) throws DaoException {
+        if (luceneId >= 0) {
+            try {
+                MoreLikeThis mlt = getMoreLikeThis(directoryReader, elements);
+                Query query = mlt.like(luceneId);
+                return query;
+            } catch (IOException e) {
+                LOG.log(Level.WARNING, "Can't more like this query for luceneId: " + luceneId);
+                return null;
+            }
+        }  else {
+            return null;
+        }
+    }
+
+    private MoreLikeThis getMoreLikeThis(DirectoryReader reader, TextFieldElements elements) {
+        MoreLikeThis mlt = new MoreLikeThis(reader); // Pass the reader reader
+        mlt.setMaxDocFreqPct(maxPercentage);
+        mlt.setMaxQueryTerms(maxQueryTerms);
+        mlt.setMinDocFreq(minDocFreq);
+        mlt.setMinTermFreq(minTermFreq);
+        mlt.setAnalyzer(new WikapidiaAnalyzer(language, options));
+        mlt.setFieldNames(new String[]{elements.getTextFieldName()}); // specify the fields for similiarity
+        return mlt;
+    }
+
 }

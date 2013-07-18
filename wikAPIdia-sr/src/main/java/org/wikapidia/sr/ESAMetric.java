@@ -3,13 +3,11 @@ package org.wikapidia.sr;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneSearcher;
@@ -20,7 +18,6 @@ import org.wikapidia.sr.utils.SimUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -91,7 +88,6 @@ public class ESAMetric extends BaseLocalSRMetric {
             Explanation explanation = new Explanation(format, formatPages);
             result.addExplanation(explanation);
         }
-
         return result; // TODO: normalize
     }
 
@@ -121,7 +117,8 @@ public class ESAMetric extends BaseLocalSRMetric {
      */
     public TIntDoubleHashMap getConceptVector(LocalPage localPage, Language language) throws DaoException { // TODO: validIDs
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+//        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language)), language);
         pruneSimilar(scoreDocs);
         return SimUtils.normalizeVector(expandScores(scoreDocs));
     }
@@ -189,7 +186,6 @@ public class ESAMetric extends BaseLocalSRMetric {
             Explanation explanation = new Explanation(format, formatPages);
             result.addExplanation(explanation);
         }
-
         return result; // TODO: normalize
     }
 
@@ -206,7 +202,9 @@ public class ESAMetric extends BaseLocalSRMetric {
         Language language = localPage.getLanguage();
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+//        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+        Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
+        ScoreDoc[] scoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
         for (ScoreDoc scoreDoc : scoreDocs) {
@@ -221,6 +219,7 @@ public class ESAMetric extends BaseLocalSRMetric {
                 if (srResult.getValue() != 0) {
                     List<LocalPage> formatPages =new ArrayList<LocalPage>();
                     int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
+                    System.out.println(localPageId);
                     LocalPage topPage = pageHelper.getById(language, localPageId);
                     if (topPage==null) {
                         continue;

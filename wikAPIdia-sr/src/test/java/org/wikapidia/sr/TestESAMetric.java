@@ -104,14 +104,14 @@ public class TestESAMetric {
 //        }
 //        System.out.println(Arrays.toString(srResults2.getScoresAsFloat()));
 
-        String[] testPhrases = {string3, string4};
-        for (int i = 0; i < testPhrases.length; i++) {
-            for (int j = i + 1; j < testPhrases.length; j++) {
-                SRResult srResult = esaMetric.similarity(testPhrases[i], testPhrases[j], lang, true);
-                System.out.println(testPhrases[i] + " and " + testPhrases[j] + ":");
-                printResult(srResult);
-            }
-        }
+//        String[] testPhrases = {string3, string4};
+//        for (int i = 0; i < testPhrases.length; i++) {
+//            for (int j = i + 1; j < testPhrases.length; j++) {
+//                SRResult srResult = esaMetric.similarity(testPhrases[i], testPhrases[j], lang, true);
+//                System.out.println(testPhrases[i] + " and " + testPhrases[j] + ":");
+//                printResult(srResult);
+//            }
+//        }
     }
 
 //    @Test
