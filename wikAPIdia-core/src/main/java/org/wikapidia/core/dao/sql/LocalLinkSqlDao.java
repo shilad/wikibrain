@@ -84,6 +84,8 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        }   finally {
+            quietlyCloseConn(conn);
         }
     }
 
@@ -120,6 +122,8 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        }  finally {
+            quietlyCloseConn(conn);
         }
     }
 
@@ -198,6 +202,8 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        }  finally {
+            quietlyCloseConn(conn);
         }
     }
 

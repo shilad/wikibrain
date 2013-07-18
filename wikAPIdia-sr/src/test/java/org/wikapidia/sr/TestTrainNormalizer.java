@@ -33,6 +33,8 @@ public class TestTrainNormalizer {
 
         sr.trainDefaultSimilarity(dataset);
 
+        sr.trainDefaultMostSimilar(dataset,100,null);
+
     }
 
 }

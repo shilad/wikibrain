@@ -102,6 +102,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        }  finally {
+            quietlyCloseConn(conn);
         }
     }
 
@@ -138,6 +140,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 
