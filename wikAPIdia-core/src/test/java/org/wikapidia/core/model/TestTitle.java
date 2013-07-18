@@ -6,7 +6,7 @@ import org.wikapidia.core.lang.LanguageInfo;
 
 public class TestTitle {
     @Test
-    public void TestTitle(){
+    public void testTitle(){
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
         Title pokemon = new Title("Pokemon: The Movie",lang);
         assert (pokemon.getNamespaceString() == null);

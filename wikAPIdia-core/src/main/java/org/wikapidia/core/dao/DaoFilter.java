@@ -12,22 +12,22 @@ import java.util.Collection;
 /**
  *
  * A helper class for specifying complex queries.  To use, instantiate a new instance,
- * than call the various set methods in a chain to set the filters.
- * Possible filters are, with the objects that use them:
+ * than call the various set methods in a chain to set the filters. Not all filters
+ * are applied to all objects. Possible filters are, with the objects that use them:
  *
- * - Language collection     (LocalPage, RawPage, LocalLink, Redirect, LocalCategoryMember)
- * - NameSpace collection    (LocalPage, RawPage, UniversalPage)
- * - Redirect flag           (LocalPage, RawPage)
- * - Disambiguation flag     (LocalPage, RawPage)
- * - LocationType collection (LocalLink)
- * - Source ID collection    (LocalLink, Redirect, UniversalLink)
- * - Dest ID collection      (LocalLink, Redirect, UniversalLink)
- * - Parseable flag          (LocalLink, Redirect)
- * - Algorithm ID collection (UniversalPage, UniversalLink)
+ * - Language collection     (LocalPage, RawPage, LocalLink, Redirect, LocalCategoryMember) <p>
+ * - NameSpace collection    (LocalPage, RawPage, UniversalPage) <p>
+ * - Redirect flag           (LocalPage, RawPage) <p>
+ * - Disambiguation flag     (LocalPage, RawPage) <p>
+ * - LocationType collection (LocalLink) <p>
+ * - Source ID collection    (LocalLink, Redirect, UniversalLink) <p>
+ * - Dest ID collection      (LocalLink, Redirect, UniversalLink) <p>
+ * - Parseable flag          (LocalLink, Redirect) <p>
+ * - Algorithm ID collection (UniversalPage, UniversalLink) <p>
  *
- * Not all filters are applied to all objects. Collections are specified as a collection
- * of acceptable entries, while flags are booleans set to true, false, or null. Flags
- * and collections set to null will be ignored when the search is executed.
+ * Collections are specified as a collection of acceptable entries, while flags are
+ * booleans set to true, false, or null. Flags and collections set to null will be
+ * ignored when the search is executed.
  *
  * A call might look something like:
  * DaoFilter df = new DaoFilter()
@@ -118,7 +118,7 @@ public class DaoFilter {
      */
     public DaoFilter setLanguages(Collection<Language> languages) {
         Collection<Short> temp = new ArrayList<Short>();
-        if (languages.isEmpty() || languages==null) {
+        if (languages==null || languages.isEmpty()) {
             temp = null;
         }
         else {
@@ -148,7 +148,7 @@ public class DaoFilter {
      */
     public DaoFilter setNameSpaces(Collection<NameSpace> nameSpaces) {
         Collection<Short> temp = new ArrayList<Short>();
-        if (nameSpaces.isEmpty() || nameSpaces==null) {
+        if (nameSpaces == null || nameSpaces.isEmpty()) {
             temp = null;
         }
         else {
@@ -210,7 +210,7 @@ public class DaoFilter {
      */
     public DaoFilter setLocTypeIds(Collection<LocalLink.LocationType> locTypes) {
         Collection<Short> temp = new ArrayList<Short>();
-        if (locTypes.isEmpty() || locTypes==null) {
+        if (locTypes == null || locTypes.isEmpty()) {
             temp = null;
         }
         else {

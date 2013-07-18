@@ -1,7 +1,6 @@
 package org.wikapidia.core.lang;
 
 import org.junit.Test;
-import org.wikapidia.core.lang.Language;
 
 import static org.junit.Assert.*;
 

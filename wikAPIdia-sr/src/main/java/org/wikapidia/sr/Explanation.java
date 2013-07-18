@@ -38,7 +38,7 @@ public class Explanation {
             if (object instanceof LocalPage){
                 plaintext+=((LocalPage) object).getTitle().getCanonicalTitle();
             } else if (object instanceof UniversalPage){
-                Language language = ((UniversalPage) object).getLanguageSetOfExistsInLangs().getDefaultLanguage();
+                Language language = ((UniversalPage) object).getLanguageSet().getDefaultLanguage();
                 plaintext+=((LocalPage)((UniversalPage) object).getLocalPages(language).toArray()[0]).getTitle().getCanonicalTitle();
             }else {
                 plaintext+=object.toString();

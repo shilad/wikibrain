@@ -1,13 +1,10 @@
 package org.wikapidia.phrases.cookbook;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
@@ -18,7 +15,6 @@ import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.UniversalSRMetric;
-import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,7 +68,7 @@ public class CosimilarityMatrixExample {
             SRResultList results = usr.mostSimilar(phrase, 5, false);
             for (int i=0; i<results.numDocs(); i++){
                 UniversalPage page = universalPageDao.getById(results.get(i).getId(),usr.getAlgorithmId());
-                LocalPage namePage = (LocalPage) page.getLocalPages(page.getLanguageSetOfExistsInLangs().getDefaultLanguage()).toArray()[0];
+                LocalPage namePage = (LocalPage) page.getLocalPages(page.getLanguageSet().getDefaultLanguage()).toArray()[0];
                 String name = namePage.getTitle().getCanonicalTitle();
                 System.out.println("#"+(i+1)+" "+name);
             }
@@ -80,7 +76,7 @@ public class CosimilarityMatrixExample {
             results = usr.mostSimilar(phrase, 5, true);
             for (int i=0; i<results.numDocs(); i++){
                 UniversalPage page = universalPageDao.getById(results.get(i).getId(),usr.getAlgorithmId());
-                LocalPage namePage = (LocalPage) page.getLocalPages(page.getLanguageSetOfExistsInLangs().getDefaultLanguage()).toArray()[0];
+                LocalPage namePage = (LocalPage) page.getLocalPages(page.getLanguageSet().getDefaultLanguage()).toArray()[0];
                 String name = namePage.getTitle().getCanonicalTitle();
                 System.out.println("#"+(i+1)+" "+name);
             }

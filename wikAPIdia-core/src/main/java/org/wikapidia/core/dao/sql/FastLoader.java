@@ -1,31 +1,15 @@
 package org.wikapidia.core.dao.sql;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.jooq.tools.csv.CSVReader;
-import org.supercsv.encoder.DefaultCsvEncoder;
-import org.supercsv.io.CsvListWriter;
-import org.supercsv.prefs.CsvPreference;
-import org.supercsv.quote.AlwaysQuoteMode;
-import org.supercsv.quote.QuoteMode;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.utils.WpIOUtils;
 
 import javax.sql.DataSource;
-import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;

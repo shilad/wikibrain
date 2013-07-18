@@ -1,7 +1,5 @@
 package org.wikapidia.core.model;
 
-import java.util.HashMap;
-
 /**
  * A NameSpace defines the kind Wikipidia page a given page is.
  * The NameSpace contains the NameSpace enum that specifies what namespace a given NameSpace is in.

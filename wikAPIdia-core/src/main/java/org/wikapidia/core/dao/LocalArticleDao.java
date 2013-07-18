@@ -4,7 +4,6 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.Title;
 
-import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.Map;
 

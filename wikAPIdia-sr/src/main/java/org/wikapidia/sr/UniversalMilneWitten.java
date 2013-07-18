@@ -13,7 +13,6 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
