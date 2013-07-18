@@ -7,7 +7,9 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.sr.utils.Dataset;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -83,6 +85,41 @@ public interface UniversalSRMetric {
      */
     public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException;
 
+    /**
+     * Writes the metric to a directory.
+     *
+     * @param directory A directory data will be written to.
+     *                  Any existing data in the directory may be destroyed.
+     * @throws java.io.IOException
+     */
+    public void write(File directory) throws IOException;
+
+    /**
+     * Reads the metric from a directory.
+     *
+     * @param directory A directory data will be read from.
+     *                  The directory previously will have been written to by write().
+     * @throws IOException
+     */
+    public void read(File directory) throws IOException;
+
+    /**
+     * Train the similarity() function.
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     *
+     * @param dataset A gold standard dataset
+     */
+    public void trainSimilarity(Dataset dataset) throws DaoException;
+
+    /**
+     * Train the mostSimilar() function
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     *
+     * @param dataset A gold standard dataset.
+     * @param numResults The maximum number of similar articles computed per phrase.
+     * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
+     */
+    public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) throws DaoException;
 
     /**
      * Construct a cosimilarity matrix of Universal Page ids.

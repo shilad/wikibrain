@@ -16,7 +16,9 @@ import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
+import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.Leaderboard;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,6 +133,30 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
         UniversalPage up = universalPageDao.getById(uId,algorithmId);
         return mostSimilar(up,maxResults,validIds);
+    }
+
+    @Override
+    public void write(File directory) throws IOException{
+        //TODO: implement me
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void read(File directory) throws IOException{
+        //TODO: implement me
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void trainSimilarity(Dataset dataset) throws DaoException{
+        //TODO: implement me
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) throws DaoException{
+        //TODO: implement me
+        throw new NotImplementedException();
     }
 
     @Override

@@ -22,6 +22,7 @@ import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 
 import java.io.File;
@@ -157,6 +158,18 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
+    public void write(File directory) throws IOException {
+        //TODO:implement me
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void read(File directory) throws IOException {
+        //TODO:implement me
+        throw new NotImplementedException();
+    }
+
+    @Override
     public void trainDefaultSimilarity(Dataset dataset){
         trainSimilarityNormalizer(dataset, true);
     }
@@ -233,7 +246,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             else {
                 trainee = new IdentityNormalizer();
             }
-            mostSimilarNormalizers.put(dataset.getLanguage(),new IdentityNormalizer());
+            mostSimilarNormalizers.put(dataset.getLanguage(), new IdentityNormalizer());
         }
         ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws DaoException {
