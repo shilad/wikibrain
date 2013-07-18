@@ -39,7 +39,8 @@ public class DatasetDao {
                     result.add(new KnownSim(
                             tokens[0],
                             tokens[1],
-                            Double.valueOf(tokens[2])
+                            Double.valueOf(tokens[2]),
+                            language
                     ));
                 } else {
                     throw new DaoException("Invalid line in dataset file " + path+ ": " +

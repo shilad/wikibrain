@@ -20,6 +20,8 @@ import org.wikapidia.sr.pairwise.*;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
 
 
 import java.io.File;
@@ -169,17 +171,34 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @param dataset
      * @param isDefault
      */
-    protected synchronized void trainSimilarityNormalizer(Dataset dataset, boolean isDefault) {
-        final Normalizer trainee = similarityNormalizer;
-        this.similarityNormalizer = new IdentityNormalizer();
-        ParallelForEach.loop(labeled, numThreads, new Procedure<KnownSim>() {
-            public void call(KnownSim ks) throws IOException, ParseException {
-                double sim = similarity(ks.phrase1, ks.phrase2);
-                trainee.observe(sim, ks.similarity);
+    protected synchronized void trainSimilarityNormalizer(final Dataset dataset, boolean isDefault) {
+        final Normalizer trainee;
+        if (isDefault){
+            trainee = defaultSimilarityNormalizer;
+            defaultSimilarityNormalizer = new IdentityNormalizer();
+
+        } else {
+            if (similarityNormalizers.containsKey(dataset.getLanguage())){
+                trainee = similarityNormalizers.get(dataset.getLanguage());
             }
-        });
+            else {
+                trainee = new IdentityNormalizer();
+            }
+            similarityNormalizers.put(dataset.getLanguage(),new IdentityNormalizer());
+        }
+        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws IOException, DaoException {
+                SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
+                trainee.observe(sim.getValue(), ks.similarity);
+
+            }
+        },1);
         trainee.observationsFinished();
-        similarityNormalizer = trainee;
+        if (isDefault){
+            defaultSimilarityNormalizer = trainee;
+        } else {
+            similarityNormalizers.put(dataset.getLanguage(),trainee);
+        }
         LOG.info("trained most similarityNormalizer for " + getName() + ": " + trainee.dump());
     }
 
@@ -201,23 +220,43 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      *
      * @param dataset
      */
-    protected synchronized void trainMostSimilarNormalizer(Dataset dataset, final int numResults, final TIntSet validIds, boolean isDefault) {
-        final Normalizer trainee = mostSimilarNormalizer;
-        this.mostSimilarNormalizer = new IdentityNormalizer();
-        ParallelForEach.loop(labeled, numThreads, new Procedure<KnownSim>() {
-            public void call(KnownSim ks) throws IOException {
+    protected synchronized void trainMostSimilarNormalizer(final Dataset dataset, final int numResults, final TIntSet validIds, boolean isDefault) {
+        final Normalizer trainee;
+        if (isDefault){
+            trainee = defaultMostSimilarNormalizer;
+            defaultMostSimilarNormalizer = new IdentityNormalizer();
+
+        } else {
+            if (mostSimilarNormalizers.containsKey(dataset.getLanguage())){
+                trainee = mostSimilarNormalizers.get(dataset.getLanguage());
+            }
+            else {
+                trainee = new IdentityNormalizer();
+            }
+            mostSimilarNormalizers.put(dataset.getLanguage(),new IdentityNormalizer());
+        }
+        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws DaoException {
                 ks.maybeSwap();
-                Disambiguator.Match m = disambiguator.disambiguateMostSimilar(ks, numResults, validIds);
-                if (m != null) {
-                    DocScoreList dsl = mostSimilar(m.phraseWpId, numResults, validIds);
+                List<LocalString> localStrings = new ArrayList<LocalString>();
+                localStrings.add(new LocalString(ks.language, ks.phrase1));
+                localStrings.add(new LocalString(ks.language, ks.phrase2));
+                List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
+                LocalPage page = pageHelper.getById(ks.language,ids.get(0).getId());
+                if (page != null) {
+                    SRResultList dsl = mostSimilar(page, numResults, validIds);
                     if (dsl != null) {
-                        trainee.observe(dsl, dsl.getIndexForId(m.hintWpId), ks.similarity);
+                        trainee.observe(dsl, dsl.getIndexForId(ids.get(1).getId()), ks.similarity);
                     }
                 }
             }
-        });
+        },1);
         trainee.observationsFinished();
-        mostSimilarNormalizer = trainee;
+        if (isDefault){
+            defaultMostSimilarNormalizer = trainee;
+        } else {
+            mostSimilarNormalizers.put(dataset.getLanguage(),trainee);
+        }
         LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
     }
 
@@ -355,6 +394,5 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(path+"-cosimilarity")));
         }
     }
-
 
 }

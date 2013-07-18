@@ -20,11 +20,6 @@ public class TestKnownSim {
     @Test
     public void test() throws IOException, DaoException {
 
-
-
-        String gold = "/Users/research/IdeaProjects/wikapidia/dat/gold/gold.titles.similarity.txt";
-        List<KnownSim> knownSimList = KnownSim.read(new File(gold));
-
         String path = "/Users/research/IdeaProjects/wikapidia/dat/gold/cleaned/MC.txt";
         DatasetDao datasetDao = new DatasetDao();
 
@@ -33,6 +28,8 @@ public class TestKnownSim {
         for (KnownSim ks:dataset.getData()) {
             System.out.println(ks.toString());
         }
+
+
     }
 
 

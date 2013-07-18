@@ -11,6 +11,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
+import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.SimUtils;
 
@@ -146,16 +147,6 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     @Override
     public void read(File directory) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void trainSimilarity(List<KnownSim> labeled) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

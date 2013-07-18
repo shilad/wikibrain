@@ -67,16 +67,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     @Override
-    public void trainSimilarity(List<KnownSim> labeled) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();
         TIntSet links = getLinks(new LocalId(language, id),outLinks);
