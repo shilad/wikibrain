@@ -77,6 +77,12 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
         } catch (ClassNotFoundException e) {
             throw new DaoException(e);
         }
+//        insert(
+//                item.getSourceId(),
+//                item.getDestId(),
+//                item.getAlgorithmId(),
+//                item.getLanguageSet().toByteArray()
+//        );
     }
 
     @Override
@@ -90,6 +96,45 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                     pair.getValue().toByteArray()
             );
         }
+//        executeSqlScriptWithSuffix("-create-indexes.sql");
+//        Iterable<UniversalLink> links = get(new DaoFilter());
+//        for (UniversalLink link : links) {
+//            int sourceId = link.getSourceId();
+//            int destId = link.getDestId();
+//            int algorithmId = link.getAlgorithmId();
+//            Iterable<UniversalLink> duplicates = get(new DaoFilter()
+//                    .setSourceIds(link.getSourceId())
+//                    .setDestIds(link.getDestId())
+//                    .setAlgorithmIds(link.getAlgorithmId()));
+//            Set<Language> languages = new HashSet<Language>();
+//            int i=0;
+//            for (UniversalLink duplicate : duplicates) {
+//                i++;
+//                languages = Sets.union(languages, duplicate.getLanguageSet().getLanguages());
+//            }
+//            if (i>1) {
+//                Connection conn = null;
+//                try {
+//                    conn = ds.getConnection();
+//                    DSLContext context = DSL.using(conn, dialect);
+//                    context.delete(Tables.UNIVERSAL_SKELETAL_LINK)
+//                            .where(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.eq(sourceId))
+//                            .and(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.eq(destId))
+//                            .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId));
+//                } catch (SQLException e) {
+//                    throw new DaoException(e);
+//                } finally {
+//                    quietlyCloseConn(conn);
+//                }
+//                insert(
+//                        link.getSourceId(),
+//                        link.getDestId(),
+//                        link.getAlgorithmId(),
+//                        new LanguageSet(languages).toByteArray()
+//                );
+//            }
+//        }
+//        executeSqlScriptWithSuffix("-drop-indexes.sql");
         super.endLoad();
         objectDb.close();
     }

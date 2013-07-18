@@ -101,8 +101,12 @@ public class UniversalLinkLoader {
 
     public void endLoad() throws DaoException {
         LOG.log(Level.INFO, "End Load");
+        long start = System.currentTimeMillis();
 //        universalLinkDao.endLoad();
         universalLinkSkeletalDao.endLoad();
+        long end = System.currentTimeMillis();
+        double seconds = (end - start) / 1000.0;
+        LOG.log(Level.INFO, "Time (s): " + seconds);
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
