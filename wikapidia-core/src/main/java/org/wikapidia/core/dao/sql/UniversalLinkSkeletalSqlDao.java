@@ -69,11 +69,9 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
             String key = sourceId + "_" + destId + "_" + algorithmId;
             LanguageSet temp = objectDb.get(key);
             if (temp != null) {
-                objectDb.remove(key);
-                objectDb.put(key, new LanguageSet(Sets.union(temp.getLanguages(), languages.getLanguages())));
-            } else {
-                objectDb.put(key, languages);
+                languages = new LanguageSet(Sets.union(temp.getLanguages(), languages.getLanguages()));
             }
+            objectDb.put(key, languages);
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (ClassNotFoundException e) {
