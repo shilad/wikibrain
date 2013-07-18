@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -12,8 +13,11 @@ import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
+import org.wikapidia.utils.ObjectDb;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,6 +25,9 @@ import java.util.Collection;
 
 
 public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalLinkDao {
+
+    private File path;
+    private ObjectDb<byte[]> objectDb;
 
     public LocalLinkSqlDao (DataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/local-link");
@@ -37,16 +44,42 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
     };
 
     @Override
+    public void beginLoad() throws DaoException {
+        super.beginLoad();
+        try {
+            path = new File("tmp");
+            objectDb = new ObjectDb<byte[]>(path, true);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
     public void save(LocalLink localLink) throws DaoException {
-        insert(
-            localLink.getLanguage().getId(),
-            localLink.getAnchorText(),
-            localLink.getSourceId(),
-            localLink.getDestId(),
-            localLink.getLocation(),
-            localLink.isParseable(),
-            localLink.getLocType().ordinal()
-        );
+        try {
+            objectDb.put(localLink.getKey(), localLink.getBytes());
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
+    public void endLoad() throws DaoException {
+        for (Pair<String, byte[]> pair : objectDb) {
+            LocalLink localLink = LocalLink.getLocalLink(pair.getKey(), pair.getValue());
+            insert(
+                    localLink.getLanguage().getId(),
+                    localLink.getAnchorText(),
+                    localLink.getSourceId(),
+                    localLink.getDestId(),
+                    localLink.getLocation(),
+                    localLink.isParseable(),
+                    localLink.getLocType().ordinal()
+            );
+        }
+        objectDb.close();
+        path.delete();
+        super.endLoad();
     }
 
     @Override
@@ -102,20 +135,12 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            Result<Record> result = context.select().
+            Record record = context.select().
                     from(Tables.LOCAL_LINK).
                     where(Tables.LOCAL_LINK.LANG_ID.eq(language.getId())).
                     and(Tables.LOCAL_LINK.SOURCE_ID.eq(sourceId)).
                     and(Tables.LOCAL_LINK.DEST_ID.eq(destId)).
-                    fetch();
-            //Work-around to avoid pages that have multiple links to the same page
-            Record record;
-            if (result.isEmpty()){
-                record = null;
-            }
-            else {
-                record = result.get(0);
-            }
+                    fetchOne();
             return buildLocalLink(record, true);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -171,30 +196,6 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        }
-    }
-
-    @Override
-    public int getNumLinks(Language language, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Cursor<Record> result = context.select()
-                    .from(Tables.LOCAL_LINK)
-                    .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
-                    .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
-                    .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
-                    .fetchLazy(getFetchSize());
-            int i = 0;
-            for (Record r : result){
-                i++;
-            }
-            return i;
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
