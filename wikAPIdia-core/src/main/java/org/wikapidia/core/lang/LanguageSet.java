@@ -2,10 +2,13 @@ package org.wikapidia.core.lang;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import gnu.trove.set.TByteSet;
+import gnu.trove.set.TShortSet;
+import gnu.trove.set.hash.TByteHashSet;
+import gnu.trove.set.hash.TShortHashSet;
 import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.WikapidiaException;
 
-import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -32,16 +35,7 @@ public class LanguageSet implements Iterable<Language> {
     }
 
     public LanguageSet(List<String> langCodes) {
-        langs = Sets.newHashSet();
-        defaultLanguage = null;
-        for (String langCode : langCodes) {
-            langCode = langCode.trim(); // handle whitespace issues just in case
-            Language lang = Language.getByLangCode(langCode);
-            langs.add(lang);
-            if (defaultLanguage == null){
-                defaultLanguage = lang;
-            }
-        }
+        this(getLangsFromCodes(langCodes));
     }
 
     /**
@@ -178,6 +172,7 @@ public class LanguageSet implements Iterable<Language> {
         return new LanguageSet(languages);
     }
 
+    @Deprecated
     public short[] toShortBits() {
         int index = 0;
         // 16 is the number of bits per byte
@@ -197,28 +192,30 @@ public class LanguageSet implements Iterable<Language> {
         return langBits;
     }
 
-    public static LanguageSet getLanguageSet(short[] langBits) {
-        // 16 is the number of bits per int
-        if (langBits.length != TOTAL_LANGUAGES/16 + 1) {
-            throw new IllegalArgumentException();
-        }
-        short[] copy = Arrays.copyOf(langBits, langBits.length);
-        List<Language> languages = new ArrayList<Language>();
-        int index = copy.length - 1;
-        for (int i=TOTAL_LANGUAGES; i > 0; i--) {
-            if (i%16 == 0) {
-                index--;
-            }
-            short temp = copy[index];
-            if ((temp & 0x1) == 1) {
-                languages.add(Language.getById(i));
-            }
-            temp = (short) (temp >> 1);
-            copy[index] = temp;
-        }
-        return new LanguageSet(languages);
-    }
+//    @Deprecated
+//    public static LanguageSet getLanguageSet(short[] langBits) {
+//        // 16 is the number of bits per int
+//        if (langBits.length != TOTAL_LANGUAGES/16 + 1) {
+//            throw new IllegalArgumentException();
+//        }
+//        short[] copy = Arrays.copyOf(langBits, langBits.length);
+//        List<Language> languages = new ArrayList<Language>();
+//        int index = copy.length - 1;
+//        for (int i=TOTAL_LANGUAGES; i > 0; i--) {
+//            if (i%16 == 0) {
+//                index--;
+//            }
+//            short temp = copy[index];
+//            if ((temp & 0x1) == 1) {
+//                languages.add(Language.getById(i));
+//            }
+//            temp = (short) (temp >> 1);
+//            copy[index] = temp;
+//        }
+//        return new LanguageSet(languages);
+//    }
 
+    @Deprecated
     public int[] toIntBits() {
         int index = 0;
         // 32 is the number of bits per byte
@@ -238,6 +235,7 @@ public class LanguageSet implements Iterable<Language> {
         return langBits;
     }
 
+    @Deprecated
     public static LanguageSet getLanguageSet(int[] langBits) {
         // 32 is the number of bits per int
         if (langBits.length != TOTAL_LANGUAGES/32 + 1) {
@@ -260,6 +258,7 @@ public class LanguageSet implements Iterable<Language> {
         return new LanguageSet(languages);
     }
 
+    @Deprecated
     public long[] toLongBits() {
         int index = 0;
         // 64 is the number of bits per byte
@@ -279,6 +278,7 @@ public class LanguageSet implements Iterable<Language> {
         return langBits;
     }
 
+    @Deprecated
     public static LanguageSet getLanguageSet(long[] langBits) {
         // 64 is the number of bits per int
         if (langBits.length != TOTAL_LANGUAGES/64 + 1) {
@@ -319,10 +319,51 @@ public class LanguageSet implements Iterable<Language> {
         return new LanguageSet(languages);
     }
 
+    public short[] toShortArray() {
+        TShortSet shortSet = new TShortHashSet();
+        for (Language l : langs) {
+            shortSet.add(l.getId());
+        }
+        return shortSet.toArray();
+    }
+
+    public static LanguageSet getLanguageSet(short[] shorts) {
+        Set<Language> languages = new HashSet<Language>();
+        for (short langId : shorts) {
+            languages.add(Language.getById(langId));
+        }
+        return new LanguageSet(languages);
+    }
+
+    public byte[] toTruncatedArray() {
+        TByteSet byteSet = new TByteHashSet();
+        for (Language l : langs) {
+            short id = l.getId();
+            if (id <= 256) {
+                // id-1 because id ranges from 1 to >256 but byte ranges from -128 to 127
+                byteSet.add((byte) (id-129));
+            }
+        }
+        return byteSet.toArray();
+    }
+
+    public byte[] toTruncatedArray(int maxSize) {
+        byte[] temp = toTruncatedArray();
+        return Arrays.copyOf(temp, maxSize < temp.length ? maxSize : temp.length);
+    }
+
+    public static LanguageSet getTruncatedSet(byte[] truncated) {
+        Set<Language> languages = new HashSet<Language>();
+        for (byte b : truncated) {
+            languages.add(Language.getById(b+129));
+        }
+        return new LanguageSet(languages);
+    }
+
     private static Collection<Language> getLangsFromCodes(Collection<String> langCodes) {
         Collection<Language> languages = new ArrayList<Language>();
         for (String langCode : langCodes) {
-            languages.add(Language.getByLangCode(langCode));
+            languages.add(Language.getByLangCode(langCode.trim()));
         }
         return languages;
     }

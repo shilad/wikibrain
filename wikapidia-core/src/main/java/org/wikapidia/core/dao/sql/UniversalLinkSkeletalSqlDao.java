@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao.sql;
 
-import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -21,7 +20,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * An alternate implementation of a UniversalLinkSqlDao.
@@ -49,7 +47,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                 item.getSourceUnivId(),
                 item.getDestUnivId(),
                 item.getAlgorithmId(),
-                item.getLanguageSetOfExistsInLangs().toByteBits()
+                item.getLanguageSetOfExistsInLangs().toTruncatedArray()
         );
     }
 
@@ -68,12 +66,6 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
             }
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
-            }
-            // for language, it will only return universal links that are in EVERY specified language
-            if (daoFilter.getLangIds() != null) {
-                for (short langId : daoFilter.getLangIds()) {
-                    conditions.add(getLangField(langId).eq(true));
-                }
             }
             Cursor<Record> result = context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
@@ -234,26 +226,12 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
         if (record == null) {
             return null;
         }
-        List<Language> languages = new ArrayList<Language>();
-        for (Language language : LanguageSet.ALL) {
-            if (record.getValue(getLangField(language))) {
-                languages.add(language);
-            }
-        }
         return new UniversalLink(
                 record.getValue(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID),
                 record.getValue(Tables.UNIVERSAL_LINK.UNIV_DEST_ID),
                 record.getValue(Tables.UNIVERSAL_LINK.ALGORITHM_ID),
-                new LanguageSet(languages)
+                LanguageSet.getLanguageSet(record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.LANGS))
         );
-    }
-
-    private TableField<Record, Boolean> getLangField(Language language) {
-        return getLangField(language.getId());
-    }
-
-    private TableField<Record, Boolean> getLangField(short langId) {
-        return INSERT_FIELDS[langId + 2];
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<UniversalLinkDao> {

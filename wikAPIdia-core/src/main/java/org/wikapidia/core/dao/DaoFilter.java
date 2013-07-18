@@ -15,7 +15,7 @@ import java.util.Collection;
  * than call the various set methods in a chain to set the filters. Not all filters
  * are applied to all objects. Possible filters are, with the objects that use them:
  *
- * - Language collection     (LocalPage, RawPage, LocalLink, Redirect, LocalCategoryMember, UniversalLink *) <p>
+ * - Language collection     (LocalPage, RawPage, LocalLink, Redirect, LocalCategoryMember) <p>
  * - NameSpace collection    (LocalPage, RawPage, UniversalPage) <p>
  * - Redirect flag           (LocalPage, RawPage) <p>
  * - Disambiguation flag     (LocalPage, RawPage) <p>
@@ -24,9 +24,6 @@ import java.util.Collection;
  * - Dest ID collection      (LocalLink, Redirect, UniversalLink) <p>
  * - Parseable flag          (LocalLink, Redirect) <p>
  * - Algorithm ID collection (UniversalPage, UniversalLink) <p>
- *
- * * A UniversalLink must be in EVERY specified language for it to be retrieved.
- * However, any unspecified language is irrelevant.
  *
  * Collections are specified as a collection of acceptable entries, while flags are
  * booleans set to true, false, or null. Flags and collections set to null will be
