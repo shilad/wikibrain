@@ -37,6 +37,7 @@ import java.util.logging.Level;
  */
 public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
 
+    private File path;
     private ObjectDb<LanguageSet> objectDb;
 
     public UniversalLinkSkeletalSqlDao(DataSource dataSource) throws DaoException {
@@ -54,7 +55,8 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     public void beginLoad() throws DaoException {
         super.beginLoad();
         try {
-            objectDb = new ObjectDb<LanguageSet>(new File("tmp"), true);
+            path = new File("tmp");
+            objectDb = new ObjectDb<LanguageSet>(path, true);
         } catch (IOException e) {
             throw new DaoException(e);
         }
@@ -62,90 +64,37 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
 
     @Override
     public void save(UniversalLink item) throws DaoException {
-//        try {
-//            int sourceId = item.getSourceId();
-//            int destId = item.getDestId();
-//            int algorithmId = item.getAlgorithmId();
-//            LanguageSet languages = item.getLanguageSet();
-//            String key = sourceId + "_" + destId + "_" + algorithmId;
-//            LanguageSet temp = objectDb.get(key);
-//            if (temp != null) {
-//                languages = new LanguageSet(Sets.union(temp.getLanguages(), languages.getLanguages()));
-//            }
-//            objectDb.put(key, languages);
-//        } catch (IOException e) {
-//            throw new DaoException(e);
-//        } catch (ClassNotFoundException e) {
-//            throw new DaoException(e);
-//        }
-        insert(
-                item.getSourceId(),
-                item.getDestId(),
-                item.getAlgorithmId(),
-                item.getLanguageSet().toByteArray()
-        );
+        try {
+            int sourceId = item.getSourceId();
+            int destId = item.getDestId();
+            int algorithmId = item.getAlgorithmId();
+            LanguageSet languages = item.getLanguageSet();
+            String key = sourceId + "_" + destId + "_" + algorithmId;
+            LanguageSet temp = objectDb.get(key);
+            if (temp != null) {
+                languages = new LanguageSet(Sets.union(temp.getLanguages(), languages.getLanguages()));
+            }
+            objectDb.put(key, languages);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (ClassNotFoundException e) {
+            throw new DaoException(e);
+        }
     }
 
     @Override
     public void endLoad() throws DaoException {
-//        for (Pair<String, LanguageSet> pair : objectDb) {
-//            String[] ids = pair.getKey().split("_");
-//            insert(
-//                    Integer.valueOf(ids[0]),
-//                    Integer.valueOf(ids[1]),
-//                    Integer.valueOf(ids[2]),
-//                    pair.getValue().toByteArray()
-//            );
-//        }
-//        objectDb.close();
-        executeSqlScriptWithSuffix("-create-indexes.sql");
-        Iterable<UniversalLink> links = get(new DaoFilter());
-        int j=0;
-        for (UniversalLink link : links) {
-            j++;
-            if (j%100000 == 0)
-                LOG.log(Level.INFO, "UniversalLinks loaded: " + j);
-
-            int sourceId = link.getSourceId();
-            int destId = link.getDestId();
-            int algorithmId = link.getAlgorithmId();
-            Iterable<UniversalLink> duplicates = get(new DaoFilter()
-                    .setSourceIds(link.getSourceId())
-                    .setDestIds(link.getDestId())
-                    .setAlgorithmIds(link.getAlgorithmId()));
-            Set<Language> languages = Sets.newHashSet();
-            int i=0;
-            for (UniversalLink duplicate : duplicates) {
-                i++;
-                if (i>1) {
-                    languages = Sets.union(languages, duplicate.getLanguageSet().getLanguages());
-                } else {
-                    languages = duplicate.getLanguageSet().getLanguages();
-                }
-            }
-            if (i>1) {
-                Connection conn = null;
-                try {
-                    conn = ds.getConnection();
-                    DSLContext context = DSL.using(conn, dialect);
-                    context.delete(Tables.UNIVERSAL_SKELETAL_LINK)
-                            .where(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.eq(sourceId))
-                            .and(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.eq(destId))
-                            .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId));
-                } catch (SQLException e) {
-                    throw new DaoException(e);
-                } finally {
-                    quietlyCloseConn(conn);
-                }
-                insert(
-                        link.getSourceId(),
-                        link.getDestId(),
-                        link.getAlgorithmId(),
-                        new LanguageSet(languages).toByteArray()
-                );
-            }
+        for (Pair<String, LanguageSet> pair : objectDb) {
+            String[] ids = pair.getKey().split("_");
+            insert(
+                    Integer.valueOf(ids[0]),
+                    Integer.valueOf(ids[1]),
+                    Integer.valueOf(ids[2]),
+                    pair.getValue().toByteArray()
+            );
         }
-        executeSqlScriptWithSuffix("-drop-indexes.sql");
+        objectDb.close();
+        path.delete();
         super.endLoad();
     }
 
