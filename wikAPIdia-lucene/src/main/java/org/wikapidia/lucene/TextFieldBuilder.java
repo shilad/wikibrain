@@ -11,7 +11,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.RawPage;
 
 /**
- * This class builds custom lucene TextFields from pages based on
+ * This class builds custom Lucene TextFields from pages based on
  * title, title synonyms as defined by redirects, and plain text.
  *
  * @author Ari Weiland
@@ -65,8 +65,8 @@ public class TextFieldBuilder {
 
     private TextField buildTextField(LocalPage localPage, RawPage rawPage, TextFieldElements elements) throws DaoException {
         StringBuilder sb = new StringBuilder();
-        if (elements.usesTitle()) {
-            String title = localPage.getTitle().getCanonicalTitle();
+        String title = localPage.getTitle().getCanonicalTitle();
+        for (int i=0; i<elements.usesTitle(); i++) {
             sb.append(title);
             sb.append(" ");
         }
