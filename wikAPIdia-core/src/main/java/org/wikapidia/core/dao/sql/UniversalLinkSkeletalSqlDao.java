@@ -320,5 +320,4 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
             }
         }
     }
-
 }
