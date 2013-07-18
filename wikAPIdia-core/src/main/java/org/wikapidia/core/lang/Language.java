@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  * The set of all Languages is loaded when the system starts up from a text file.
  * Languages can be queried by langCode or id.
  */
-public class Language implements Comparable<Language>, Serializable {
+public class Language implements Comparable<Language> {
     private static Logger LOG = Logger.getLogger(Language.class.getName());
     public static final String LANGUAGE_TSV = "languages.tsv";
 

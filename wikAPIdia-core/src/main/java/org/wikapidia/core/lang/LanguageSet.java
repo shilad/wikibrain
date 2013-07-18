@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * User: bjhecht
  */
-public class LanguageSet implements Iterable<Language>, Serializable {
+public class LanguageSet implements Iterable<Language> {
     public static final LanguageSet ALL = new LanguageSet(
             Language.getByLangCode("en"),
             Arrays.asList(Language.LANGUAGES));

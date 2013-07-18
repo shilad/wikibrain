@@ -37,7 +37,7 @@ import java.util.*;
 public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
 
     private File path;
-    private ObjectDb<LanguageSet> objectDb;
+    private ObjectDb<byte[]> objectDb;
 
     public UniversalLinkSkeletalSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-skeletal-link");
@@ -55,7 +55,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
         super.beginLoad();
         try {
             path = new File("tmp");
-            objectDb = new ObjectDb<LanguageSet>(path, true);
+            objectDb = new ObjectDb<byte[]>(path, true);
         } catch (IOException e) {
             throw new DaoException(e);
         }
@@ -69,11 +69,11 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
             int algorithmId = item.getAlgorithmId();
             LanguageSet languages = item.getLanguageSet();
             String key = sourceId + "_" + destId + "_" + algorithmId;
-            LanguageSet temp = objectDb.get(key);
+            byte[] temp = objectDb.get(key);
             if (temp != null) {
-                languages = new LanguageSet(Sets.union(temp.getLanguages(), languages.getLanguages()));
+                languages = new LanguageSet(Sets.union(LanguageSet.getLanguageSet(temp).getLanguages(), languages.getLanguages()));
             }
-            objectDb.put(key, languages);
+            objectDb.put(key, languages.toByteArray());
         } catch (IOException e) {
             throw new DaoException(e);
         } catch (ClassNotFoundException e) {
@@ -83,13 +83,13 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
 
     @Override
     public void endLoad() throws DaoException {
-        for (Pair<String, LanguageSet> pair : objectDb) {
+        for (Pair<String, byte[]> pair : objectDb) {
             String[] ids = pair.getKey().split("_");
             insert(
                     Integer.valueOf(ids[0]),
                     Integer.valueOf(ids[1]),
                     Integer.valueOf(ids[2]),
-                    pair.getValue().toByteArray()
+                    pair.getValue()
             );
         }
         objectDb.close();
