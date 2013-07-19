@@ -9,7 +9,6 @@ import org.wikapidia.utils.WpStringUtils;
 
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -220,7 +219,7 @@ public class Title implements Externalizable {
     @Override
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
-        this.canonicalTitle = (String)in.readUTF();
+        this.canonicalTitle = in.readUTF();
     }
 
     @Override

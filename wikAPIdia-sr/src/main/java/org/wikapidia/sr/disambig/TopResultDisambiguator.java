@@ -4,7 +4,6 @@ import com.typesafe.config.Config;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;

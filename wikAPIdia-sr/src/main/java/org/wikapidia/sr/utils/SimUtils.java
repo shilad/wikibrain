@@ -63,12 +63,12 @@ public class SimUtils {
         List<Map.Entry> list = new LinkedList<Map.Entry>(tempMap.entrySet());
 
         // sort list based on comparator
-        Collections.sort(list, new Comparator() {
+        Collections.sort(list, Collections.reverseOrder(new Comparator() {
             public int compare(Object o1, Object o2) {
                 return ((Comparable) ((Map.Entry) (o1)).getValue())
                         .compareTo(((Map.Entry) (o2)).getValue());
             }
-        });
+        }));
 
         Map sortedMap = new LinkedHashMap();
         for (Iterator it = list.iterator(); it.hasNext();) {

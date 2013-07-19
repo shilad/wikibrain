@@ -88,6 +88,15 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
     }
 
     @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (LocalLink link : get(daoFilter)) {
+            i++;
+        }
+        return i;
+    }
+
+    @Override
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
         Connection conn = null;
         try {

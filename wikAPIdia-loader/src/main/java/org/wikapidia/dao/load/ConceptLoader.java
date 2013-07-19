@@ -1,7 +1,6 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -10,12 +9,10 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 
 import org.wikapidia.core.dao.UniversalPageDao;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.mapper.ConceptMapper;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;

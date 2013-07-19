@@ -15,7 +15,7 @@ public class LocalLink {
     private final boolean isParseable;
     private final LocationType locType;
 
-    public static enum LocationType {FIRST_PARA, FIRST_SEC, NONE};
+    public static enum LocationType {FIRST_PARA, FIRST_SEC, NONE}
 
     public LocalLink(Language language, String anchorText, int sourceId, int destId, boolean outlink, int location, boolean parseable, LocationType locType) {
         this.language = language;

@@ -92,7 +92,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
             }
             try {
                 return new LocalArticleSqlDao(
-                        (DataSource) getConfigurator().get(
+                        getConfigurator().get(
                                 DataSource.class,
                                 config.getString("dataSource"))
                 );

@@ -20,13 +20,12 @@ import org.wikapidia.sr.utils.Leaderboard;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
-    private static Logger LOG = Logger.getLogger(BaseUniversalSRMetric.class.getName());
+    private static final Logger LOG = Logger.getLogger(BaseUniversalSRMetric.class.getName());
     protected int numThreads = Runtime.getRuntime().availableProcessors();
     protected UniversalPageDao universalPageDao;
     protected Disambiguator disambiguator;
@@ -143,8 +142,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
                 }
                 else {
                     cos[i][j]=similarity(
-                        new UniversalPage(rowIds[i], algorithmId, null, null),
-                        new UniversalPage(colIds[j], algorithmId, null, null),
+                        new UniversalPage(rowIds[i], algorithmId),
+                        new UniversalPage(colIds[j], algorithmId),
                         false).getValue();
                 }
             }
@@ -176,8 +175,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         for (int i=0; i<ids.length; i++){
             for (int j=i+1; j<ids.length; j++){
                 cos[i][j]=similarity(
-                        new UniversalPage(ids[i], 0, null, null),
-                        new UniversalPage(ids[j], 0, null, null),
+                        new UniversalPage(ids[i], 0),
+                        new UniversalPage(ids[j], 0),
                         false).getValue();
             }
         }

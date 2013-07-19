@@ -1,15 +1,11 @@
 import com.jolbox.bonecp.BoneCPDataSource;
 import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
 import org.wikapidia.core.lang.Language;
-
-import javax.sql.DataSource;
-import java.io.File;
 
 /**
  */

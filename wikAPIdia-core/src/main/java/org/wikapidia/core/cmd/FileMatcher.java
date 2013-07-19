@@ -154,7 +154,7 @@ public enum FileMatcher {
                     result.add(link);
                 }
             }
-            if (result.size() > 0) {
+            if (!result.isEmpty()) {
                 break;
             }
         }
@@ -174,7 +174,7 @@ public enum FileMatcher {
                     result.add(file);
                 }
             }
-            if (result.size() > 0) {
+            if (!result.isEmpty()) {
                 break;
             }
         }

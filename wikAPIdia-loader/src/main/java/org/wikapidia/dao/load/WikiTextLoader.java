@@ -47,7 +47,7 @@ public class WikiTextLoader {
     }
 
     private void load(LanguageInfo lang) throws DaoException {
-        int numLanguageThreads = 0;
+        int numLanguageThreads;
         synchronized (availableThreads) {
             numLanguageThreads = Math.min(availableThreads.get(), maxThreadsPerLang);
             availableThreads.getAndAdd(-numLanguageThreads);
