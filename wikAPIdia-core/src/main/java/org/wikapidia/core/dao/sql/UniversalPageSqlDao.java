@@ -127,15 +127,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public int getNumItems(DaoFilter daoFilter) throws DaoException {
-        int i=0;
-        for (T page : get(daoFilter)) {
-            i++;
-        }
-        return i;
-    }
-
-    @Override
     public T getById(int univId, int algorithmId) throws DaoException {
         Connection conn = null;
         try {

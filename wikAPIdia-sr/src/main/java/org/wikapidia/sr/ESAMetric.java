@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * @author Yulun Li
- */
+* @author Yulun Li
+*/
 public class ESAMetric extends BaseLocalSRMetric {
 
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());

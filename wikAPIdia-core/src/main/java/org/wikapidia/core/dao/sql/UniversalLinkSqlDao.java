@@ -52,19 +52,18 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
 
     @Override
     public void save(UniversalLink link) throws DaoException {
-        for (Language language : link.getLanguageSetOfExistsInLangs()) {
+        for (Language language : link.getLanguageSet()) {
             for (LocalLink localLink : link.getLocalLinks(language)) {
                 save(
                         localLink,
-                        link.getSourceUnivId(),
-                        link.getDestUnivId(),
+                        link.getSourceId(),
+                        link.getDestId(),
                         link.getAlgorithmId()
                 );
             }
         }
     }
 
-    @Override
     public void save(LocalLink localLink, int sourceUnivId, int destUnivId, int algorithmId) throws DaoException {
         insert(
                 localLink.getLanguage().getId(),

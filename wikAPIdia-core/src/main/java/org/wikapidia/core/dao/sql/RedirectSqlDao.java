@@ -111,15 +111,6 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
     }
 
     @Override
-    public int getNumItems(DaoFilter daoFilter) throws DaoException {
-        int i=0;
-        for (Redirect r : get(daoFilter)) {
-            i++;
-        }
-        return i;
-    }
-
-    @Override
     public Integer resolveRedirect(Language lang, int id) throws DaoException {
         Connection conn=null;
         try{

@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- *
- */
+*
+*/
 public class TestESAMetric {
 
     private static void printResult(SRResult result){
