@@ -13,6 +13,7 @@ import org.apache.lucene.util.Version;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
+import java.io.Reader;
 import java.util.Arrays;
 
 /**
@@ -31,9 +32,9 @@ public class ItalianTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) {
-
-        TokenStream stream = new StandardFilter(matchVersion, input);
+    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
+        TokenStream stream = setTokenizer(reader);
+        stream = new StandardFilter(matchVersion, stream);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);
         if (useStopWords) {

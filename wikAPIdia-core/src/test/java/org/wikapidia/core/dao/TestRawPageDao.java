@@ -57,7 +57,7 @@ public class TestRawPageDao {
 
         RawPage rawSaved = rpDao.getById(lang.getLanguage(), 7);
         assert (rawSaved != null);
-        assert (page.getLocalId() == rawSaved.getPageId());
+        assert (page.getLocalId() == rawSaved.getLocalId());
         assert (page.getTitle().equals(rawSaved.getTitle()));
         assert (page.getNameSpace().equals(rawSaved.getNamespace()));
         assert (body.equals(rawSaved.getBody()));
@@ -70,7 +70,7 @@ public class TestRawPageDao {
         assert (savedRaw.getLastEdit().equals(rawPage.getLastEdit()));
         assert (savedRaw.getRevisionId() == rawPage.getRevisionId());
         assert (savedRaw.getBody().equals(body));
-        assert (savedRaw.getLang().equals(rawPage.getLang()));
+        assert (savedRaw.getLanguage().equals(rawPage.getLanguage()));
         assert (savedRaw.getTitle().equals(rawPage.getTitle()));
         assert (savedRaw.isRedirect());
     }

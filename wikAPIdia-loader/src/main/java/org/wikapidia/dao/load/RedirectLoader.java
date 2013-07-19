@@ -52,7 +52,7 @@ public class RedirectLoader {
         LOG.info("Begin loading redirects into memory: ");
         for (RawPage p : rawPages.get(new DaoFilter().setLanguages(language).setRedirect(true))) {
            Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
-           redirectIdsToPageIds.put(p.getPageId(),
+           redirectIdsToPageIds.put(p.getLocalId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));
            if(i%10000==0)
                LOG.info("loading redirect # " + i);
