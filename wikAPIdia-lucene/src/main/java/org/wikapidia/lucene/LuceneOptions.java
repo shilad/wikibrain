@@ -1,6 +1,7 @@
 package org.wikapidia.lucene;
 
 import com.typesafe.config.Config;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.lucene.util.Version;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -26,20 +27,19 @@ public class LuceneOptions {
 
     public static final String LOCAL_ID_FIELD_NAME = "local_id";
     public static final String LANG_ID_FIELD_NAME = "lang_id";
-    public static final String WIKITEXT_FIELD_NAME = "wikitext";
-    public static final String PLAINTEXT_FIELD_NAME = "plaintext";
 
-    public final Configuration conf;
+    public final Configurator configurator;
     public final Version matchVersion;
     public final File luceneRoot;
     public final Collection<NameSpace> namespaces;
     public final TokenizerOptions options;
+    public final TextFieldElements elements;
 
     /**
      * Used by provider only.
      */
-    private LuceneOptions(Configuration conf, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options) {
-        this.conf = conf;
+    private LuceneOptions(Configurator configurator, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options, TextFieldElements elements) {
+        this.configurator = configurator;
         this.matchVersion = Version.parseLeniently(matchVersion);
         this.luceneRoot = new File(luceneRoot);
         this.namespaces = new ArrayList<NameSpace>();
@@ -47,6 +47,7 @@ public class LuceneOptions {
             this.namespaces.add(NameSpace.getNameSpaceByName(s));
         }
         this.options = options;
+        this.elements = elements;
     }
 
     /**
@@ -56,7 +57,7 @@ public class LuceneOptions {
      */
     public static LuceneOptions getDefaultOptions() {
         try {
-            return new Configurator(new Configuration(null)).get(LuceneOptions.class, "options");
+            return new Configurator(new Configuration()).get(LuceneOptions.class, "plaintext");
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -68,6 +69,26 @@ public class LuceneOptions {
         if (useStopWords) options.useStopWords();
         if (useStem) options.useStem();
         return options;
+    }
+
+    private static TextFieldElements buildElements(int title, boolean redirects, boolean plainText) {
+        TextFieldElements elements = new TextFieldElements();
+        elements.addTitle(title);
+        if (redirects) elements.addRedirects();
+        if (plainText) elements.addPlainText();
+        return elements;
+    }
+
+    // TODO: make it so we can test if Configurators are equal?
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof LuceneOptions)) return false;
+        LuceneOptions opts = (LuceneOptions) o;
+        return (this.matchVersion == opts.matchVersion &&
+                this.luceneRoot.equals(opts.luceneRoot) &&
+                CollectionUtils.isEqualCollection(this.namespaces, opts.namespaces) &&
+                this.options.equals(opts.options) &&
+                this.elements.equals(opts.elements));
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LuceneOptions> {
@@ -82,21 +103,27 @@ public class LuceneOptions {
 
         @Override
         public String getPath() {
-            return "lucene";
+            return "lucene.options";
         }
 
         @Override
         public LuceneOptions get(String name, Config config) throws ConfigurationException {
+//            if (config.getString("type").trim().equalsIgnoreCase(name.trim())) {
+//                throw new ConfigurationException("Could not find configuration " + name + ", found " + config.getString("type"));
+//            }
             return new LuceneOptions(
-                    getConfig(),
+                    getConfigurator(),
                     config.getString("version"),
                     config.getString("directory"),
                     config.getStringList("namespaces"),
                     buildOptions(
                             config.getBoolean("caseInsensitive"),
                             config.getBoolean("useStopWords"),
-                            config.getBoolean("useStem")
-                    )
+                            config.getBoolean("useStem")),
+                    buildElements(
+                            config.getInt("title"),
+                            config.getBoolean("redirects"),
+                            config.getBoolean("plaintext"))
             );
         }
     }

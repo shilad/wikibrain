@@ -1,7 +1,7 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
+import org.apache.lucene.util.Version;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -19,7 +19,6 @@ import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,6 +47,10 @@ public class LuceneLoader {
         this.namespaces = namespaces;
     }
 
+    public void dropIndexes() {
+        luceneIndexer.clearIndexes();
+    }
+
     public void load(Language language) throws WikapidiaException {
         try {
             int i = 0;
@@ -56,6 +59,10 @@ public class LuceneLoader {
                     .setNameSpaces(namespaces)
                     .setRedirect(false));
             for (RawPage rawPage : rawPages) {
+//                if (i<3) {
+//                    i++;
+//                    continue;
+//                }
                 luceneIndexer.indexPage(rawPage);
                 i++;
                 if (i%1000 == 0) LOG.log(Level.INFO, "RawPages indexed: " + i);
@@ -83,6 +90,13 @@ public class LuceneLoader {
                         .withLongOpt("namespaces")
                         .withDescription("the set of namespaces to index, separated by commas")
                         .create("p"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArgs()
+                        .withValueSeparator(',')
+                        .withLongOpt("index-type")
+                        .withDescription("the types of indexes to store, separated by commas")
+                        .create("i"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -97,7 +111,17 @@ public class LuceneLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        LuceneOptions luceneOptions = conf.get(LuceneOptions.class, "options");
+
+        LuceneOptions[] luceneOptions;
+        if (cmd.hasOption("i")) {
+            String[] optionType = cmd.getOptionValues("i");
+            luceneOptions = new LuceneOptions[optionType.length];
+            for (int i=0; i<optionType.length; i++) {
+                luceneOptions[i] = conf.get(LuceneOptions.class, optionType[i]);
+            }
+        } else {
+            luceneOptions = new LuceneOptions[] { conf.get(LuceneOptions.class) };
+        }
 
         LanguageSet languages = env.getLanguages();
         Collection<NameSpace> namespaces = new ArrayList<NameSpace>();
@@ -107,23 +131,16 @@ public class LuceneLoader {
                 namespaces.add(NameSpace.getNameSpaceByName(s));
             }
         } else {
-            namespaces = luceneOptions.namespaces;
+            namespaces = luceneOptions[0].namespaces;
         }
-        File luceneRoot = luceneOptions.luceneRoot;
-
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
-        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneRoot);
 
+        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneOptions);
         final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer, namespaces);
 
         if (cmd.hasOption("d")) {
             LOG.log(Level.INFO, "Dropping indexes");
-            for (String langCode : languages.getLangCodes()) {
-                File lang = new File(luceneRoot, langCode);
-                if (lang.exists()) {
-                    FileUtils.forceDelete(lang);
-                }
-            }
+            loader.dropIndexes();
         }
 
         LOG.log(Level.INFO, "Begin indexing");

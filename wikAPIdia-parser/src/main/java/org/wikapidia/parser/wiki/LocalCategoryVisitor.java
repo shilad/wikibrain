@@ -49,7 +49,7 @@ public class LocalCategoryVisitor extends ParserVisitor {
             catMemDao.save(
                     new LocalCategoryMember(
                             catId,
-                            cat.location.getXml().getPageId(),
+                            cat.location.getXml().getLocalId(),
                             lang
                     ));
         } catch (DaoException e) {

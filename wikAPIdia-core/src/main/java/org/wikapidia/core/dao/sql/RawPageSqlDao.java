@@ -46,8 +46,8 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
     @Override
     public void save(RawPage page) throws DaoException {
         insert(
-                page.getLang().getId(),
-                page.getPageId(),
+                page.getLanguage().getId(),
+                page.getLocalId(),
                 page.getRevisionId(),
                 page.getBody() == null ? "" : page.getBody(),
                 page.getTitle().getCanonicalTitle(),

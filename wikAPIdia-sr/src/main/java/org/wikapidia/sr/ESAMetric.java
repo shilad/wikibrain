@@ -3,12 +3,14 @@ package org.wikapidia.sr;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
 import org.wikapidia.sr.utils.KnownSim;
@@ -16,7 +18,9 @@ import org.wikapidia.sr.utils.SimUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -26,12 +30,11 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
 
-    private Language language;
-    private LuceneSearcher searcher;
+    private final LuceneSearcher searcher;
 
-    public ESAMetric(Language language) {
-        this.language = language;
-        searcher = new LuceneSearcher(new LanguageSet(language.getLangCode()), LuceneOptions.getDefaultOptions());
+    public ESAMetric(Language language, LuceneSearcher searcher, LocalPageDao pageHelper) {
+        this.searcher = searcher;
+        this.pageHelper = pageHelper;
     }
 
     /**
@@ -42,6 +45,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @param language
      * @param explanations
      * @return
+     * @throws DaoException
      */
     public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
         if (phrase1 == null || phrase2 == null) {
@@ -50,7 +54,42 @@ public class ESAMetric extends BaseLocalSRMetric {
         TIntDoubleHashMap scores1 = getConceptVector(phrase1, language);
         TIntDoubleHashMap scores2 = getConceptVector(phrase2, language);
         double sim = SimUtils.cosineSimilarity(scores1, scores2);
-        return new SRResult(sim); // TODO: normalize
+        SRResult result = new SRResult(sim);
+
+        if (explanations) {
+
+            String format = "Five most similar pages to " + phrase1 + "" +
+                    "\n?\n?\n?\n?\n?\nFive most similar pages to " + phrase2 + "\n?\n?\n?\n?\n?";
+            List<LocalPage> formatPages =new ArrayList<LocalPage>();
+
+            Map<Integer, Double> ids = SimUtils.sortByValue(scores1);
+            int i = 0;
+            for (int id : ids.keySet()) {
+                if (i++ < 5) {
+                    int localPageId = searcher.getLocalIdFromDocId(id, language);
+                    LocalPage topPage = pageHelper.getById(language, localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(topPage);
+                }
+            }
+            Map<Integer, Double> ids1 = SimUtils.sortByValue(scores2);
+            int j = 0;
+            for (int id : ids1.keySet()) {
+                if (j++ < 5) {
+                    int localPageId = searcher.getLocalIdFromDocId(id, language);
+                    LocalPage topPage = pageHelper.getById(language, localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(topPage);
+                }
+            }
+            Explanation explanation = new Explanation(format, formatPages);
+            result.addExplanation(explanation);
+        }
+        return result; // TODO: normalize
     }
 
     /**
@@ -59,11 +98,15 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @param phrase
      * @return
      */
-    public TIntDoubleHashMap getConceptVector(String phrase, Language language) { // TODO: validIDs
-        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
-        return SimUtils.normalizeVector(expandScores(scoreDocs));
-        // TODO: prune
+    public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws DaoException { // TODO: validIDs
+        try {
+            QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
+            ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
+            pruneSimilar(scoreDocs);
+            return SimUtils.normalizeVector(expandScores(scoreDocs));
+        } catch (ParseException e) {
+            throw new DaoException(e);
+        }
     }
 
     /**
@@ -75,8 +118,9 @@ public class ESAMetric extends BaseLocalSRMetric {
      */
     public TIntDoubleHashMap getConceptVector(LocalPage localPage, Language language) throws DaoException { // TODO: validIDs
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
-        // TODO: prune
+//        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language)), language);
+        pruneSimilar(scoreDocs);
         return SimUtils.normalizeVector(expandScores(scoreDocs));
     }
 
@@ -104,10 +148,46 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @throws DaoException
      */
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
-        TIntDoubleHashMap scores1 = getConceptVector(page1, language);
-        TIntDoubleHashMap scores2 = getConceptVector(page2, language);
+        TIntDoubleHashMap scores1 = getConceptVector(page1, page1.getLanguage());
+        TIntDoubleHashMap scores2 = getConceptVector(page2, page2.getLanguage());
         double sim = SimUtils.cosineSimilarity(scores1, scores2);
-        return new SRResult(sim); // TODO: normalize
+        SRResult result = new SRResult(sim);
+
+        if (explanations) {
+
+            String format = "Five most similar pages to ?\n?\n?\n?\n?\n?\nFive most similar pages to ?\n?\n?\n?\n?\n?";
+            List<LocalPage> formatPages =new ArrayList<LocalPage>();
+
+            Map<Integer, Double> ids = SimUtils.sortByValue(scores1);
+            formatPages.add(page1);
+            int i = 0;
+            for (int id : ids.keySet()) {
+                if (i++ < 5) {
+                    int localPageId = searcher.getLocalIdFromDocId(id, page1.getLanguage());
+                    LocalPage topPage = pageHelper.getById(page1.getLanguage(), localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(topPage);
+                }
+            }
+            formatPages.add(page2);
+            Map<Integer, Double> ids1 = SimUtils.sortByValue(scores2);
+            int j = 0;
+            for (int id : ids1.keySet()) {
+                if (j++ < 5) {
+                    int localPageId = searcher.getLocalIdFromDocId(id, page2.getLanguage());
+                    LocalPage topPage = pageHelper.getById(page2.getLanguage(), localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(topPage);
+                }
+            }
+            Explanation explanation = new Explanation(format, formatPages);
+            result.addExplanation(explanation);
+        }
+        return result; // TODO: normalize
     }
 
     /**
@@ -120,9 +200,12 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @throws DaoException
      */
     public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations) throws DaoException {
+        Language language = localPage.getLanguage();
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+//        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
+        Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
+        ScoreDoc[] scoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
         for (ScoreDoc scoreDoc : scoreDocs) {
@@ -131,7 +214,43 @@ public class ESAMetric extends BaseLocalSRMetric {
                 i++;
             }
         }
+        if (explanations) {
+            String format = "?'s similar pages include ?";
+            for (SRResult srResult : srResults) {
+                if (srResult.getValue() != 0) {
+                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
+                    int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
+                    LocalPage topPage = pageHelper.getById(language, localPageId);
+                    if (topPage==null) {
+                        continue;
+                    }
+                    formatPages.add(localPage);
+                    formatPages.add(topPage);
+                    Explanation explanation = new Explanation(format, formatPages);
+                    srResult.addExplanation(explanation);
+                }
+            }
+        }
         return srResults;
+    }
+
+    private void pruneSimilar(ScoreDoc[] scoreDocs) {
+        if (scoreDocs.length == 0) {
+            return;
+        }
+        int cutoff = scoreDocs.length;
+        double threshold = 0.005 * scoreDocs[0].score;
+        for (int i = 0, j = 100; j < scoreDocs.length; i++, j++) {
+            float delta = scoreDocs[i].score - scoreDocs[j].score;
+            if (delta < threshold) {
+                cutoff = j;
+                break;
+            }
+        }
+        if (cutoff < scoreDocs.length) {
+//            LOG.info("pruned results from " + docs.scoreDocs.length + " to " + cutoff);
+            scoreDocs = ArrayUtils.subarray(scoreDocs, 0, cutoff);
+        }
     }
 
     @Override

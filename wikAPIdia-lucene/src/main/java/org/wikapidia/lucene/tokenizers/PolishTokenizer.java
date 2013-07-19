@@ -14,6 +14,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
 import java.io.IOException;
+import java.io.Reader;
 
 /**
  * @author Ari Weiland
@@ -27,24 +28,25 @@ public class PolishTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) {
-        try{
-            if (stemmer == null) {
+    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
+        if (stemmer == null) {
+            try{
                 stemmer = new StempelStemmer(StempelStemmer.load(PolishAnalyzer.class.getResourceAsStream("stemmer_20000.tbl")));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            TokenStream stream = new StandardFilter(matchVersion, input);
-            if (caseInsensitive)
-                stream = new LowerCaseFilter(matchVersion, stream);
-            if (useStopWords)
-                stream = new StopFilter(matchVersion, stream, PolishAnalyzer.getDefaultStopSet());
-            if (useStem) {
-                if (!stemExclusionSet.isEmpty())
-                    stream = new SetKeywordMarkerFilter(stream, stemExclusionSet);
-                stream = new StempelFilter(stream, stemmer);
-            }
-            return stream;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
+        TokenStream stream = setTokenizer(reader);
+        stream = new StandardFilter(matchVersion, stream);
+        if (caseInsensitive)
+            stream = new LowerCaseFilter(matchVersion, stream);
+        if (useStopWords)
+            stream = new StopFilter(matchVersion, stream, PolishAnalyzer.getDefaultStopSet());
+        if (useStem) {
+            if (!stemExclusionSet.isEmpty())
+                stream = new SetKeywordMarkerFilter(stream, stemExclusionSet);
+            stream = new StempelFilter(stream, stemmer);
+        }
+        return stream;
     }
 }
