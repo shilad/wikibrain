@@ -141,6 +141,29 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         return mostSimilar(up,maxResults,validIds);
     }
 
+    protected void ensureSimilarityTrained(){
+        if(!similarityNormalizer.isTrained()){
+            throw new IllegalStateException("Model default similarity has not been trained.");
+        }
+    }
+
+    protected void ensureMostSimilarTrained(){
+        if(!mostSimilarNormalizer.isTrained()){
+            throw new IllegalStateException("Model default mostSimilar has not been trained.");
+        }
+    }
+
+    protected SRResult normalize(SRResult sr){
+        ensureSimilarityTrained();
+        sr.value=similarityNormalizer.normalize(sr.value);
+        return sr;
+    }
+
+    protected SRResultList normalize(SRResultList srl){
+        ensureMostSimilarTrained();
+        return mostSimilarNormalizer.normalize(srl);
+    }
+
     @Override
     public void write(String path) throws IOException {
         ObjectOutputStream oop = new ObjectOutputStream(

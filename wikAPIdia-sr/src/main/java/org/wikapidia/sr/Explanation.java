@@ -37,10 +37,13 @@ public class Explanation {
             //Add additional handlers as appropriate
             if (object instanceof LocalPage){
                 plaintext+=((LocalPage) object).getTitle().getCanonicalTitle();
-            } else if (object instanceof UniversalPage){
-                Language language = ((UniversalPage) object).getLanguageSet().getDefaultLanguage();
-                plaintext+=((LocalPage)((UniversalPage) object).getLocalPages(language).toArray()[0]).getTitle().getCanonicalTitle();
-            }else {
+            }
+            //TODO:Fix universal explanations.
+//            else if (object instanceof UniversalPage){
+//                Language language = ((UniversalPage) object).getLanguageSet().getDefaultLanguage();
+//                plaintext+=((LocalPage)((UniversalPage) object).getLocalPages(language).toArray()[0]).getTitle().getCanonicalTitle();
+//            }
+            else {
                 plaintext+=object.toString();
             }
 

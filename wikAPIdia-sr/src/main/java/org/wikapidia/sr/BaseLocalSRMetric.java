@@ -132,16 +132,18 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     /**
      * Use the language-specific similarity normalizer to normalize a similarity if it exists.
      * Otherwise use the default similarity normalizer if it's available.
-     * @param sim
+     * @param sr
      * @param language
      * @return
      */
-    protected double normalize(double sim, Language language) {
+    protected SRResult normalize(SRResult sr, Language language) {
         if (similarityNormalizers.containsKey(language)){
-            return similarityNormalizers.get(language).normalize(sim);
+            sr.value = similarityNormalizers.get(language).normalize(sr.value);
+            return sr;
         }
         ensureSimilarityTrained();
-        return defaultSimilarityNormalizer.normalize(sim);
+        sr.value=defaultSimilarityNormalizer.normalize(sr.value);
+        return sr;
     }
 
     /**

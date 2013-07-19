@@ -76,7 +76,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
         }
 
-        return result;
+        return normalize(result);
     }
 
     @Override
@@ -161,7 +161,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             resultList.set(i,results.get(i));
         }
 
-        return resultList;
+        return normalize(resultList);
     }
 
     @Override

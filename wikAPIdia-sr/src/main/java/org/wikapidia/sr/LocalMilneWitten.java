@@ -98,7 +98,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
         }
 
-        return result;
+        return normalize(result,page1.getLanguage());
     }
 
     @Override
@@ -179,7 +179,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             resultList.set(i,results.get(i));
         }
 
-        return resultList;
+        return normalize(resultList,page.getLanguage());
     }
 
     private List<Explanation> reformatExplanations(List<Explanation> explanations, LocalPage page1, LocalPage page2) throws DaoException {
