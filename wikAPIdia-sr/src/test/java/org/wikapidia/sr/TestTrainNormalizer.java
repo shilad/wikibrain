@@ -35,13 +35,13 @@ public class TestTrainNormalizer {
         String path = "/Users/research/IdeaProjects/wikapidia/dat/";
         Language l = Language.getByLangCode("simple");
         SparseMatrix mLocal = new SparseMatrix(new File(path + "MilneWitten-simple-feature"));
-
-        usr.writeCosimilarity(path, 100, 10);
+        SparseMatrix mUniversal = new SparseMatrix(new File(path + "MilneWitten-0-feature"));
 
 
 
 
         sr.setMostSimilarLocalMatrix(l, mLocal);
+        usr.setMostSimilarUniversalMatrix(mUniversal);
         DatasetDao datasetDao = new DatasetDao();
         Dataset dataset = datasetDao.read(l, path + "gold/cleaned/MC.txt");
 
