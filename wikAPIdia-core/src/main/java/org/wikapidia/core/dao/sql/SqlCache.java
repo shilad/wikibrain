@@ -65,16 +65,17 @@ public class SqlCache {
                     .execute();
 
             if (n == 0) {
-                n = context.insertInto(Tables.TABLE_MODIFIED, Tables.TABLE_MODIFIED.TABLE_NAME, Tables.TABLE_MODIFIED.LAST_MODIFIED)
+                context.insertInto(Tables.TABLE_MODIFIED, Tables.TABLE_MODIFIED.TABLE_NAME, Tables.TABLE_MODIFIED.LAST_MODIFIED)
                     .values(tableName, now)
                     .execute();
             }
-        }catch (SQLException e){
+        } catch (SQLException e){
             throw new DaoException(e);
+        } finally {
+            AbstractSqlDao.quietlyCloseConn(conn);
         }
 
     }
-
 
     /**
      * Save a named object to the cache. Name is a unique identifier for the object

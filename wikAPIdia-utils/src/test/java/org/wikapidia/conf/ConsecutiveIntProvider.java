@@ -2,8 +2,6 @@ package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
 
-import static org.junit.Assert.assertEquals;
-
 public class ConsecutiveIntProvider extends Provider<Integer> {
     private int count = 0;
 

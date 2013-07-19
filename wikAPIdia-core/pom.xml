@@ -118,7 +118,7 @@
                     <username>sa</username>
                     <password></password>
                     <!--all executions are ignored if -Dmaven.test.skip=true -->
-                    <skip>${maven.test.skip}</skip>
+                    <!--<skip>${maven.test.skip}</skip>-->
                     <autocommit>true</autocommit>
                     <!-- drops before creates -->
                     <orderFile>descending</orderFile>

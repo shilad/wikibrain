@@ -16,7 +16,6 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.lang.UniversalId;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
@@ -44,24 +43,21 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Tables.UNIVERSAL_PAGE.ALGORITHM_ID
     };
 
-    private final LocalPageDao localPageDao;
-
-    public UniversalPageSqlDao(DataSource dataSource, LocalPageDao localPageDao) throws DaoException {
+    public UniversalPageSqlDao(DataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-page");
-        this.localPageDao = localPageDao;
     }
 
     @Override
     public void save(UniversalPage page) throws DaoException {
         NameSpace nameSpace = page.getNameSpace();
-        for (Language language : page.getLanguageSetOfExistsInLangs()) {
+        for (Language language : page.getLanguageSet()) {
             for (Object localPage : page.getLocalPages(language)) {
                 insert(
-                    language.getId(),
-                    ((LocalPage) localPage).getLocalId(),
-                    nameSpace.getArbitraryId(),
-                    page.getUnivId(),
-                    page.getAlgorithmId()
+                        language.getId(),
+                        ((LocalPage) localPage).getLocalId(),
+                        nameSpace.getArbitraryId(),
+                        page.getUnivId(),
+                        page.getAlgorithmId()
                 );
             }
         }
@@ -84,16 +80,16 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(conditions)
                     .fetchLazy(getFetchSize());
-            Set<Integer[]> pages = new HashSet<Integer[]>();
+            Set<int[]> pages = new HashSet<int[]>();
             for (Record record : result) {
-                pages.add(new Integer[]{
+                pages.add(new int[]{
                         record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
                         record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
             }
-            return new SqlDaoIterable<T, Integer[]>(result, pages.iterator(), conn) {
+            return new SqlDaoIterable<T, int[]>(result, pages.iterator(), conn) {
 
                 @Override
-                public T transform(Integer[] item) throws DaoException {
+                public T transform(int[] item) throws DaoException {
                     return getById(item[0], item[1]);
                 }
             };
@@ -101,6 +97,15 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             quietlyCloseConn(conn);
             throw new DaoException(e);
         }
+    }
+
+    @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (T page : get(daoFilter)) {
+            i++;
+        }
+        return i;
     }
 
     @Override
@@ -233,7 +238,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         for(Record record : result) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
-            localPages.put(language, localPageDao.getById(language, pageId));
+            localPages.put(language, new LocalPage(language, pageId, null, nameSpace));
         }
         return new UniversalPage<LocalPage>(
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
@@ -267,10 +272,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 return new UniversalPageSqlDao(
                         getConfigurator().get(
                                 DataSource.class,
-                                config.getString("dataSource")),
-                        getConfigurator().get(
-                                LocalPageDao.class,
-                                config.getString("localPageDao"))
+                                config.getString("dataSource"))
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);

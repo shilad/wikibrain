@@ -4,10 +4,7 @@ import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -21,10 +18,26 @@ public abstract class AbstractUniversalEntity<T> {
 
     protected final int algorithmId;
     protected final Multimap<Language, T> localEntities;
+    protected final LanguageSet languages;
+
+    protected AbstractUniversalEntity(int algorithmId) {
+        this.algorithmId = algorithmId;
+        this.localEntities = null;
+        this.languages = null;
+    }
 
     public AbstractUniversalEntity(int algorithmId, Multimap<Language, T> localEntities) {
         this.algorithmId = algorithmId;
         this.localEntities = localEntities;
+        List<Language> langs = new ArrayList<Language>(localEntities.keySet());
+        Collections.sort(langs);
+        this.languages = new LanguageSet(langs);
+    }
+
+    protected AbstractUniversalEntity(int algorithmId, LanguageSet languages) {
+        this.algorithmId = algorithmId;
+        this.localEntities = null;
+        this.languages = languages;
     }
 
     public int getAlgorithmId() {
@@ -46,7 +59,7 @@ public abstract class AbstractUniversalEntity<T> {
      * @return True if UniversalEntity has page in input language, false otherwise.
      */
     public boolean isInLanguage(Language language){
-        return localEntities.containsKey(language);
+        return languages.containsLanguage(language);
     }
 
     /**
@@ -60,7 +73,7 @@ public abstract class AbstractUniversalEntity<T> {
      */
     public boolean isInLanguageSet(LanguageSet ls, boolean mustBeInAllLangs) {
 
-        for (Language lang : ls.getLanguages()) {
+        for (Language lang : ls) {
             boolean isInLang = isInLanguage(lang);
             if (isInLang && !mustBeInAllLangs){
                 return true;
@@ -69,15 +82,15 @@ public abstract class AbstractUniversalEntity<T> {
                 return false;
             }
         }
-        return true;
+        return false;
     }
 
     /**
      * Returns the number of languages in which this UniversalEntity exists.
      * @return
      */
-    public Integer getNumberOfLanguages(){
-        return localEntities.size();
+    public int getNumberOfLanguages(){
+        return languages.size();
     }
 
     /**
@@ -86,15 +99,8 @@ public abstract class AbstractUniversalEntity<T> {
      * TODO: choose an appropriate default language based on the config file.
      * @return
      */
-    public LanguageSet getLanguageSetOfExistsInLangs() {
-        Language en = Language.getByLangCode("en");
-        if (localEntities.containsKey(en)) {
-            return new LanguageSet(en, localEntities.keys());
-        } else {
-            List<Language> langs = new ArrayList<Language>(localEntities.keySet());
-            Collections.sort(langs);
-            return new LanguageSet(langs);
-        }
+    public LanguageSet getLanguageSet() {
+        return languages;
     }
 
     /**
@@ -103,9 +109,8 @@ public abstract class AbstractUniversalEntity<T> {
      * If a UniversalEntity has a clarity of 1, this means it has only one page per language. A lower clarity means that there is more than one page in at least one language.
      * @return
      */
-    public double getClarity(){
-        double rVal = localEntities.keySet().size() / ((double)getNumberOfEntities());
-        return rVal;
+    public double getClarity() {
+        return localEntities.keySet().size() / ((double)getNumberOfEntities());
     }
 
     /**
