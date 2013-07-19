@@ -18,17 +18,32 @@ public class TokenizerOptions {
         useStem = false;
     }
 
+    /**
+     * Sets the option to filter out case.
+     * @return
+     */
     public TokenizerOptions caseInsensitive() {
         caseInsensitive = true;
         return this;
     }
 
+    /**
+     * Sets the option to filter out stop words.
+     * @return
+     */
     public TokenizerOptions useStopWords() {
         useStopWords = true;
         return this;
     }
 
+    /**
+     * Sets the option to filter using stemming.
+     * Note that stemming generally requires case insensitivity,
+     * so this also sets the option to filter out case.
+     * @return
+     */
     public TokenizerOptions useStem() {
+        caseInsensitive = true;
         useStem = true;
         return this;
     }
@@ -43,5 +58,14 @@ public class TokenizerOptions {
 
     public boolean doesUseStem() {
         return useStem;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TokenizerOptions)) return false;
+        TokenizerOptions opts = (TokenizerOptions) o;
+        return (this.caseInsensitive == opts.caseInsensitive &&
+                this.useStopWords == opts.useStopWords &&
+                this.useStem == opts.useStem);
     }
 }

@@ -8,7 +8,6 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -44,7 +43,7 @@ public class LocalLinkVisitor extends ParserVisitor {
 
             //Wikipedia ignores colons at the beginning of links
             // and uses them to overcome technical restrictions
-            if (targetText.length()>0&&targetText.charAt(0)==':'){
+            if (!targetText.isEmpty() && targetText.charAt(0)==':'){
                 targetText = targetText.substring(1,targetText.length());
                 link.target = new Title(targetText, langInfo);
             }
@@ -53,7 +52,7 @@ public class LocalLinkVisitor extends ParserVisitor {
                     new LocalLink(
                             lang,
                             link.text,
-                            link.location.getXml().getPageId(),
+                            link.location.getXml().getLocalId(),
                             destId,
                             true,
                             link.location.getLocation(),

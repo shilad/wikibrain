@@ -26,7 +26,8 @@ import java.util.Map;
  * This class is used to generate Tokenizers for specific languages. It allows for
  * specifying different types of filters to apply to the child Tokenizers.
  *
- * There are currently 26 language-specific tokenizer subclasses.
+ * There are currently 35 language-specific tokenizer subclasses, plus a
+ * DefaultTokenizer that will do its best on all other languages.
  * Note that simple English is treated as standard English
  *
  * @author Ari Weiland
@@ -45,6 +46,8 @@ public abstract class LanguageTokenizer {
     protected final boolean useStem;
     protected final Language language;
 
+    protected Tokenizer tokenizer = null;
+
     protected LanguageTokenizer(Version version, TokenizerOptions tokenizerOptions, Language language) {
         this.matchVersion = version;
         this.caseInsensitive = tokenizerOptions.isCaseInsensitive();
@@ -53,10 +56,39 @@ public abstract class LanguageTokenizer {
         this.language = language;
     }
 
-    public abstract TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet);
+    /**
+     * Primary workhorse method of this class. Children will implememnt this and apply
+     * appropriate filters to return a TokenStream. Note that all implementations must
+     * either manually instantiate the internal tokenizer, or call the setTokenizer
+     * method.
+     *
+     * @param reader
+     * @param stemExclusionSet
+     * @return
+     */
+    public abstract TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet);
 
-    public Tokenizer getTokenizer(Reader r) {
-        return new StandardTokenizer(matchVersion, r);
+    /**
+     * Sets the internal tokenizer to a new StandardTokenizer based on the input reader.
+     * Additionally returns the tokenizer for convenience. If a child class requires
+     * something other than a StandardTokenizer, it should override this method.
+     *
+     * @param r
+     * @return
+     */
+    public Tokenizer setTokenizer(Reader r) {
+        tokenizer = new StandardTokenizer(matchVersion, r);
+        return tokenizer;
+    }
+
+    /**
+     * Gets the internal tokenizer.
+     * If the tokenizer has not been set, returns null.
+     *
+     * @return
+     */
+    public Tokenizer getTokenizer() {
+        return tokenizer;
     }
 
     public TokenizerOptions getTokenizerOptions() {
@@ -84,15 +116,22 @@ public abstract class LanguageTokenizer {
             LanguageTokenizer.opts = opts;
             mapTokenizers();
             if (language.equals(Language.getByLangCode("simple"))) language = Language.getByLangCode("en"); // simple english
-            return (LanguageTokenizer) tokenizerClasses.get(language)                                       // is just english
-                    .getDeclaredConstructor(
-                            Version.class,
-                            TokenizerOptions.class,
-                            Language.class)
-                    .newInstance(
-                            opts.matchVersion,
-                            opts.options,
-                            language);
+            if (tokenizerClasses.containsKey(language)) {                                                   // is just english
+                return (LanguageTokenizer) tokenizerClasses.get(language)
+                        .getDeclaredConstructor(
+                                Version.class,
+                                TokenizerOptions.class,
+                                Language.class)
+                        .newInstance(
+                                opts.matchVersion,
+                                opts.options,
+                                language);
+            } else {
+                return new DefaultTokenizer(
+                        opts.matchVersion,
+                        opts.options,
+                        language);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e); // These exceptions are based on hard code and should never get thrown
         }
@@ -100,6 +139,9 @@ public abstract class LanguageTokenizer {
 
     private static void mapTokenizers() {
         tokenizerClasses = new HashMap<Language, Class>();
+
+        // These 26 tokenizers are functionally identical to Brent's code,
+        // except for Dutch (nl), which I modified a good deal
         tokenizerClasses.put(Language.getByLangCode("en"), EnglishTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("de"), GermanTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("fr"), FrenchTokenizer.class);
@@ -126,6 +168,23 @@ public abstract class LanguageTokenizer {
         tokenizerClasses.put(Language.getByLangCode("da"), DanishTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("he"), HebrewTokenizer.class);
         tokenizerClasses.put(Language.getByLangCode("lad"), LadinoTokenizer.class);
+
+        // I have added these 9 tokenizers myself
+        tokenizerClasses.put(Language.getByLangCode("ar"), ArabicTokenizer.class);
+        tokenizerClasses.put(Language.getByLangCode("bg"), BulgarianTokenizer.class);
+        tokenizerClasses.put(Language.getByLangCode("el"), GreekTokenizer.class);
+        tokenizerClasses.put(Language.getByLangCode("eu"), BasqueTokenizer.class);
+        tokenizerClasses.put(Language.getByLangCode("ga"), IrishTokenizer.class);
+        tokenizerClasses.put(Language.getByLangCode("gl"), GalicianTokenizer.class);
+        tokenizerClasses.put(Language.getByLangCode("hi"), HindiTokenizer.class);
+        tokenizerClasses.put(Language.getByLangCode("hy"), ArmenianTokenizer.class);
+        tokenizerClasses.put(Language.getByLangCode("lv"), LatvianTokenizer.class);
+
+        // The following two tokenizers are of questionable functionality
+        // and are not currently implemented
+//        tokenizerClasses.put(Language.getByLangCode("fa"), PersianTokenizer.class);
+//        tokenizerClasses.put(Language.getByLangCode("th"), ThaiTokenizer.class);
+
     }
 
     protected static CharArraySet getStopWordsForNonLuceneLangFromFile(Language language) {

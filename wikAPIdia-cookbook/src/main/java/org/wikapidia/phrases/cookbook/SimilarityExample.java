@@ -4,22 +4,16 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.disambig.TopResultDisambiguator;
-
 
 /**
  * @author Matt Lesicko
@@ -50,7 +44,7 @@ public class SimilarityExample {
             }
             else {
                 UniversalPage up = universalPageDao.getById(result.getId(), algorithmId);
-                LanguageSet languages = up.getLanguageSetOfExistsInLangs();
+                LanguageSet languages = up.getLanguageSet();
                 LocalPage namePage = (LocalPage) up.getLocalPages(languages.getDefaultLanguage()).toArray()[0];
                 System.out.println(namePage.getTitle().getCanonicalTitle());
                 System.out.println("Similarity value: "+result.getValue());

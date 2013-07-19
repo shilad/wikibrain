@@ -7,7 +7,6 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.UniversalPageDao;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
@@ -24,17 +23,15 @@ import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
-    private static Logger LOG = Logger.getLogger(BaseUniversalSRMetric.class.getName());
+    private static final Logger LOG = Logger.getLogger(BaseUniversalSRMetric.class.getName());
     protected int numThreads = Runtime.getRuntime().availableProcessors();
     protected UniversalPageDao universalPageDao;
     protected Disambiguator disambiguator;
@@ -42,7 +39,6 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer similarityNormalizer = new IdentityNormalizer();
-
 
     protected SparseMatrix mostSimilarUniversalMatrix;
 
@@ -241,8 +237,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
                 }
                 else {
                     cos[i][j]=similarity(
-                        new UniversalPage(rowIds[i], algorithmId, null, null),
-                        new UniversalPage(colIds[j], algorithmId, null, null),
+                        new UniversalPage(rowIds[i], algorithmId),
+                        new UniversalPage(colIds[j], algorithmId),
                         false).getValue();
                 }
             }
@@ -274,8 +270,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         for (int i=0; i<ids.length; i++){
             for (int j=i+1; j<ids.length; j++){
                 cos[i][j]=similarity(
-                        new UniversalPage(ids[i], 0, null, null),
-                        new UniversalPage(ids[j], 0, null, null),
+                        new UniversalPage(ids[i], 0),
+                        new UniversalPage(ids[j], 0),
                         false).getValue();
             }
         }

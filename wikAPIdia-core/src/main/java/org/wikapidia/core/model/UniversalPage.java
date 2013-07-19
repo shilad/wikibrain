@@ -2,6 +2,7 @@ package org.wikapidia.core.model;
 
 import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,8 +19,20 @@ public class UniversalPage<T extends LocalPage> extends AbstractUniversalEntity<
     private final int univId;
     private final NameSpace nameSpace;
 
+    public UniversalPage(int univId, int algorithmId) {
+        super(algorithmId);
+        this.univId = univId;
+        this.nameSpace = null;
+    }
+
     public UniversalPage(int univId, int algorithmId, NameSpace nameSpace, Multimap<Language, T> localPages) {
         super(algorithmId, localPages);
+        this.univId = univId;
+        this.nameSpace = nameSpace;
+    }
+
+    public UniversalPage(int univId, int algorithmId, NameSpace nameSpace, LanguageSet languages) {
+        super(algorithmId, languages);
         this.univId = univId;
         this.nameSpace = nameSpace;
     }
@@ -45,10 +58,8 @@ public class UniversalPage<T extends LocalPage> extends AbstractUniversalEntity<
         if (o instanceof UniversalPage) {
             UniversalPage other = (UniversalPage) o;
             return (this.getUnivId() == other.getUnivId() &&
-                    this.getNameSpace() == other.getNameSpace()
-            );
-        }
-        else {
+                    this.getAlgorithmId() == other.getAlgorithmId());
+        } else {
             return false;
         }
     }

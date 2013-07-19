@@ -67,8 +67,6 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.REDIRECT.LANG_ID.in(daoFilter.getLangIds()));
-//            } else {
-//                return null;
             }
             Cursor<Record> result = context.select().
                     from(Tables.REDIRECT).
@@ -110,6 +108,15 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
         } finally {
             quietlyCloseConn(conn);
         }
+    }
+
+    @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (Redirect r : get(daoFilter)) {
+            i++;
+        }
+        return i;
     }
 
     @Override

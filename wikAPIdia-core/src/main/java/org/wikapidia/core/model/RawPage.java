@@ -20,21 +20,21 @@ public class RawPage {
 
     private final Language lang;
     private final int revisionId;
-    private final int pageId;
+    private final int localId;
 
     private final NameSpace namespace;
     private final boolean isRedirect;
     private final boolean isDisambig;
     private String redirectTitle = null;
 
-    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace) {
+    public RawPage(int localId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace) {
         this.title = new Title(title, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
         this.namespace = namespace;
         this.lang = lang;
         this.revisionId = revisionId;
-        this.pageId = pageId;
+        this.localId = localId;
         isRedirect = false;
         isDisambig = false;
     }
@@ -47,14 +47,14 @@ public class RawPage {
         this.redirectTitle = redirectTitle;
     }
 
-    public RawPage(int pageId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace,
+    public RawPage(int localId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace,
                    boolean redirect, boolean disambig, String redirectTitle) {
         this.title = new Title(title, LanguageInfo.getByLanguage(lang));
         this.body = body;
         this.lastEdit = lastEdit;
         this.lang = lang;
         this.revisionId = revisionId;
-        this.pageId = pageId;
+        this.localId = localId;
         this.namespace = namespace;
         isRedirect = redirect;
         isDisambig = disambig;
@@ -73,7 +73,7 @@ public class RawPage {
         return lastEdit;
     }
 
-    public Language getLang() {
+    public Language getLanguage() {
         return lang;
     }
 
@@ -81,8 +81,8 @@ public class RawPage {
         return revisionId;
     }
 
-    public int getPageId() {
-        return pageId;
+    public int getLocalId() {
+        return localId;
     }
 
     public NameSpace getNamespace() {
@@ -110,6 +110,6 @@ public class RawPage {
     }
 
     public String toString(){
-        return String.format("%s / %s (%s)", this.getTitle(), this.pageId, lang.getLangCode());
+        return String.format("%s / %s (%s)", this.getTitle(), this.localId, lang.getLangCode());
     }
 }

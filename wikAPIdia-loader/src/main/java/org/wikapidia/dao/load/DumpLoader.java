@@ -1,9 +1,6 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.AbstractFileFilter;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -22,7 +19,6 @@ import org.wikapidia.utils.Procedure;
 
 import java.io.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -33,7 +29,6 @@ import java.util.logging.Logger;
  */
 public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
-    private static final String[] DUMP_SUFFIXES = { "xml", "xml.bz2", "xml.gz", "xml.7z" };
 
     private final AtomicInteger counter = new AtomicInteger();
     private final LocalPageDao localPageDao;
@@ -69,7 +64,7 @@ public class DumpLoader {
         }
         try {
             LocalPage lp = new LocalPage(
-                                rp.getLang(), rp.getPageId(),
+                                rp.getLanguage(), rp.getLocalId(),
                                 rp.getTitle(), rp.getNamespace(),
                                 rp.isRedirect(), rp.isDisambig()
                             );

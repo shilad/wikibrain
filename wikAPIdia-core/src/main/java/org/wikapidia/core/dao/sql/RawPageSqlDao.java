@@ -46,8 +46,8 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
     @Override
     public void save(RawPage page) throws DaoException {
         insert(
-                page.getLang().getId(),
-                page.getPageId(),
+                page.getLanguage().getId(),
+                page.getLocalId(),
                 page.getRevisionId(),
                 page.getBody() == null ? "" : page.getBody(),
                 page.getTitle().getCanonicalTitle(),
@@ -125,6 +125,15 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
         } finally {
             quietlyCloseConn(conn);
         }
+    }
+
+    @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (RawPage page : get(daoFilter)) {
+            i++;
+        }
+        return i;
     }
 
     @Override

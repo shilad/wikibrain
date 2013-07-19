@@ -1,13 +1,8 @@
 package org.wikapidia.core.dao.sql;
 
 import org.apache.commons.io.IOUtils;
-import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
-import org.jooq.Table;
 import org.jooq.TableField;
-import org.jooq.impl.DSL;
-import org.supercsv.io.CsvListWriter;
-import org.supercsv.prefs.CsvPreference;
 import org.wikapidia.core.dao.Dao;
 import org.wikapidia.core.dao.DaoException;
 
@@ -102,18 +97,6 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         executeSqlScriptWithSuffix("-drop-indexes.sql");
         executeSqlScriptWithSuffix("-create-tables.sql");
         loader = new FastLoader(ds, fields);
-    }
-
-    /**
-     * Subclasses must override the save method.
-     * Note that they must use the save() method defined below instead of inserting
-     * directly to the database. This will speed up inserts.
-     *
-     * @param obj
-     */
-    @Override
-    public void save(T obj) throws DaoException {
-        throw new UnsupportedOperationException("subclasses must override this method.");
     }
 
     /**

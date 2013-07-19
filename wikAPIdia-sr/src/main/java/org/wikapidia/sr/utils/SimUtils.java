@@ -1,6 +1,9 @@
 package org.wikapidia.sr.utils;
 
+import gnu.trove.iterator.TIntDoubleIterator;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+
+import java.util.*;
 
 /**
  *
@@ -45,5 +48,33 @@ public class SimUtils {
             return Y;
         }
         return X;
+    }
+
+    public static Map sortByValue(TIntDoubleHashMap unsortMap) {
+        if (unsortMap.isEmpty()) {
+            return new HashMap();
+        }
+        HashMap<Integer, Double> tempMap = new HashMap<Integer, Double>();
+        TIntDoubleIterator iterator = unsortMap.iterator();
+        for ( int i = unsortMap.size(); i-- > 0; ) {
+            iterator.advance();
+            tempMap.put( iterator.key(), iterator.value() );
+        }
+        List<Map.Entry> list = new LinkedList<Map.Entry>(tempMap.entrySet());
+
+        // sort list based on comparator
+        Collections.sort(list, Collections.reverseOrder(new Comparator() {
+            public int compare(Object o1, Object o2) {
+                return ((Comparable) ((Map.Entry) (o1)).getValue())
+                        .compareTo(((Map.Entry) (o2)).getValue());
+            }
+        }));
+
+        Map sortedMap = new LinkedHashMap();
+        for (Iterator it = list.iterator(); it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+        return sortedMap;
     }
 }

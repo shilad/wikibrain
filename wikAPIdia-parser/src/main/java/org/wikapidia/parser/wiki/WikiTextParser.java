@@ -82,7 +82,7 @@ public class WikiTextParser {
                 for (Content curContent : curSection.getContentList()){
                     // EASY LINKS
                     for (Link curLink : curContent.getLinks()){
-                        if (curLink.getTarget().length() == 0){
+                        if (curLink.getTarget().isEmpty()){
                             LOG.warning("Found link with empty target: \t" + xml + "\t text=" + curLink.getText());
                             continue;
                         }
@@ -149,7 +149,7 @@ public class WikiTextParser {
                         }else{
                             List<String> dests = subarticleParser.getContentsOfTemplatePipe(templateText);
                             for (String dest : dests){
-                                dest = subarticleParser.removeTemplateAnchor(dest);
+                                dest = SubarticleParser.removeTemplateAnchor(dest);
                                 Title destTitle = new Title(dest, lang);
                                 try {
                                     ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
@@ -205,7 +205,7 @@ public class WikiTextParser {
                             LOG.warning("unkonwn lang code:\t" + langCode);
                         } else if (l != lang.getLanguage()) {
                             ParsedIll pill = new ParsedIll();
-                            pill.location = new ParsedLocation(xml, -1, -1, ill.getSrcSpan().getStart());;
+                            pill.location = new ParsedLocation(xml, -1, -1, ill.getSrcSpan().getStart());
                             pill.title = new Title(target, false, lang);
                             visitIll(pill);
                         }

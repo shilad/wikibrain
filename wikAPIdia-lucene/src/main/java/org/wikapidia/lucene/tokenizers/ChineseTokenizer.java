@@ -1,6 +1,8 @@
 package org.wikapidia.lucene.tokenizers;
 
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.cn.smart.SentenceTokenizer;
 import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.analysis.cn.smart.WordTokenFilter;
 import org.apache.lucene.analysis.core.StopFilter;
@@ -9,6 +11,8 @@ import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
+
+import java.io.Reader;
 
 /**
  * @author Ari Weiland
@@ -20,8 +24,15 @@ public class ChineseTokenizer extends LanguageTokenizer{
     }
 
     @Override
-    public TokenStream getTokenStream(TokenStream input, CharArraySet stemExclusionSet) {
-        TokenStream stream = new WordTokenFilter(input); // breaks Sentences into words
+    public Tokenizer setTokenizer(Reader r) {
+        tokenizer = new SentenceTokenizer(r);
+        return tokenizer;
+    }
+
+    @Override
+    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
+        TokenStream stream = setTokenizer(reader);
+        stream = new WordTokenFilter(stream); // breaks Sentences into words
         // stream = new LowerCaseFilter(stream);
         // LowerCaseFilter is not needed, as SegTokenFilter lowercases Basic Latin text.
         // The porter stemming is too strict, this is not a bug, this is a feature:)
