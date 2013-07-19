@@ -71,9 +71,9 @@ public class LuceneOptions {
         return options;
     }
 
-    private static TextFieldElements buildElements(boolean title, boolean redirects, boolean plainText) {
+    private static TextFieldElements buildElements(int title, boolean redirects, boolean plainText) {
         TextFieldElements elements = new TextFieldElements();
-        if (title) elements.addTitle();
+        elements.addTitle(title);
         if (redirects) elements.addRedirects();
         if (plainText) elements.addPlainText();
         return elements;
@@ -108,6 +108,9 @@ public class LuceneOptions {
 
         @Override
         public LuceneOptions get(String name, Config config) throws ConfigurationException {
+//            if (config.getString("type").trim().equalsIgnoreCase(name.trim())) {
+//                throw new ConfigurationException("Could not find configuration " + name + ", found " + config.getString("type"));
+//            }
             return new LuceneOptions(
                     getConfigurator(),
                     config.getString("version"),
@@ -118,7 +121,7 @@ public class LuceneOptions {
                             config.getBoolean("useStopWords"),
                             config.getBoolean("useStem")),
                     buildElements(
-                            config.getBoolean("title"),
+                            config.getInt("title"),
                             config.getBoolean("redirects"),
                             config.getBoolean("plaintext"))
             );

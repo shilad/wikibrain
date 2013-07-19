@@ -1,18 +1,36 @@
 package org.wikapidia.lucene;
 
+/**
+ * TextFieldElements is a builder pattern that dictates how a
+ * TextFieldBuilder should build a specific Lucene TextField.
+ * It also contains a method to retrieve the name of the generated
+ * TextField, and a few static TextField names for convenience.
+ *
+ * TextField elements consist of the page title, redirect synonyms,
+ * and the page plain text. To add the title, either use addTitle()
+ * to add the title once, or specify an int to add the title multiple
+ * times. Redirect synonyms and plain text can only be added once.
+ *
+ * @author Ari Weiland
+ */
 public class TextFieldElements {
-    private boolean title;
+    private int title;
     private boolean redirects;
     private boolean plainText;
 
     public TextFieldElements() {
-        this.title = false;
+        this.title = 0;
         this.redirects = false;
         this.plainText = false;
     }
 
     public TextFieldElements addTitle() {
-        this.title = true;
+        this.title = 1;
+        return this;
+    }
+
+    public TextFieldElements addTitle(int i) {
+        this.title = i;
         return this;
     }
 
@@ -26,7 +44,7 @@ public class TextFieldElements {
         return this;
     }
 
-    public boolean usesTitle() {
+    public int usesTitle() {
         return title;
     }
 
@@ -45,9 +63,7 @@ public class TextFieldElements {
      */
     public String getTextFieldName() {
         StringBuilder sb = new StringBuilder();
-        if (title) {
-            sb.append("title_");
-        }
+        sb.append("title_").append(title).append("_");
         if (redirects) {
             sb.append("redirects_");
         }
@@ -59,7 +75,7 @@ public class TextFieldElements {
     }
 
     /**
-     * Returns the name of the text field representing only the title.
+     * Returns the name of the text field representing only the title, once.
      *
      * @return
      */
@@ -73,7 +89,7 @@ public class TextFieldElements {
      * @return
      */
     public static String getRedirectsFieldName() {
-        return new TextFieldElements().addTitle().getTextFieldName();
+        return new TextFieldElements().addRedirects().getTextFieldName();
     }
 
     /**
@@ -82,7 +98,7 @@ public class TextFieldElements {
      * @return
      */
     public static String getPlainTextFieldName() {
-        return new TextFieldElements().addTitle().getTextFieldName();
+        return new TextFieldElements().addPlainText().getTextFieldName();
     }
 
     @Override
