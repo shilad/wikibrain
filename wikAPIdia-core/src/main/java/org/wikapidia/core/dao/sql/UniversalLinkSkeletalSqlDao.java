@@ -151,8 +151,9 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                     .where(conditions)
                     .fetchCount();
         } catch (SQLException e) {
-            quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 

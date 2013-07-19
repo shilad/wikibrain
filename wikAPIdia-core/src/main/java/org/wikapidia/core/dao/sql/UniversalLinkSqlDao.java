@@ -18,7 +18,6 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -99,15 +98,34 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
-    //TODO: Implement me.
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException {
-        throw new NotImplementedException();
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID.in(daoFilter.getSourceIds()));
+            }
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.in(daoFilter.getDestIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+            }
+            return context.selectDistinct(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID, Tables.UNIVERSAL_LINK.UNIV_DEST_ID, Tables.UNIVERSAL_LINK.ALGORITHM_ID)
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(conditions)
+                    .fetchCount();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
     }
 
     @Override

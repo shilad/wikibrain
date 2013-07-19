@@ -81,8 +81,6 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
@@ -95,15 +93,12 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.REDIRECT.LANG_ID.in(daoFilter.getLangIds()));
-//            } else {
-//                return null;
             }
             return context.select().
                     from(Tables.REDIRECT).
                     where(conditions).
                     fetchCount();
         } catch (SQLException e) {
-            quietlyCloseConn(conn);
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);

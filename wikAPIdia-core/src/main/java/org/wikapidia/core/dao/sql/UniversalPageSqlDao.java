@@ -5,8 +5,6 @@ import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -96,8 +94,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
@@ -114,12 +110,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            return context.selectDistinct(Tables.UNIVERSAL_PAGE.UNIV_ID)
+            return context.selectDistinct(Tables.UNIVERSAL_PAGE.UNIV_ID, Tables.UNIVERSAL_PAGE.ALGORITHM_ID)
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(conditions)
                     .fetchCount();
         } catch (SQLException e) {
-            quietlyCloseConn(conn);
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
