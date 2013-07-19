@@ -18,7 +18,7 @@ def main(paths):
         if len(values) > 1:
             #warn('pair (%s, %s) has scores: %s' % (w1, w2, values))
             num_duplicate += 1
-        print '%s\t%s\t%s' % (w1, w2, mean(values))
+        print ('%s\t%s\t%s' % (w1, w2, mean(values)))
 
 def clean(s):
     return s.replace('_', ' ').lower()
@@ -39,11 +39,11 @@ def getSims(path):
             (w1, w2, s) = line.strip().split(delim)
             sims.append((w1, w2, float(s)))
         except:
-            warn('invalid line in %s: %s' % (`path`, `line`))
+            warn('invalid line in %s: %s' % ('path', 'line'))
 
     min_sim = min([s for w1, w2, s in sims])
     max_sim = max([s for w1, w2, s in sims])
-    warn('%s has sims in range [%s to %s]' % (`path`, min_sim, max_sim))
+    warn('%s has sims in range [%s to %s]' % ('path', min_sim, max_sim))
 
     result = []
     for (w1, w2, s) in sims:

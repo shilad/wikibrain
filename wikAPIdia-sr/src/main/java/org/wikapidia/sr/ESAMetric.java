@@ -253,30 +253,6 @@ public class ESAMetric extends BaseLocalSRMetric {
         }
     }
 
-    @Override
-    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
-        return null;
-    }
-
-    @Override
-    public void write(File directory) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void read(File directory) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void trainSimilarity(List<KnownSim> labeled) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
 
     @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
