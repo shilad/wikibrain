@@ -42,13 +42,4 @@ public interface LocalLinkDao extends Dao<LocalLink> {
      */
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException;
 
-    /**
-     * Retrieve the number of links in a language meeting given criteria
-     * @param language
-     * @param isParseable
-     * @param locationType
-     * @return
-     * @throws DaoException
-     */
-    public int getNumLinks (Language language, boolean isParseable, LocalLink.LocationType locationType) throws DaoException;
 }

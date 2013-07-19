@@ -1,5 +1,6 @@
 package org.wikapidia.core.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.wikapidia.core.lang.Language;
 
 /**
@@ -96,5 +97,35 @@ public class LocalLink {
 
     public long longHashCode() {
         return ((long)sourceId << 32) | destId + 232421 * language.getId();
+    }
+
+    public String getKey() {
+        return language.getId() + "_" + sourceId + "_" + destId;
+    }
+
+    public byte[] getBytes() {
+        Object[] fields = new Object[5];
+        fields[0] = anchorText;
+        fields[1] = isOutlink;
+        fields[2] = location;
+        fields[3] = isParseable;
+        fields[4] = locType.toString();
+        String temp = StringUtils.join(fields, "__");
+        return temp.getBytes();
+    }
+
+    public static LocalLink getLocalLink(String key, byte[] bytes) {
+        String[] keys = key.split("_");
+        String[] fields = new String(bytes).split("__");
+        return new LocalLink(
+                Language.getById(Integer.valueOf(keys[0])),
+                fields[0],
+                Integer.valueOf(keys[1]),
+                Integer.valueOf(keys[2]),
+                Boolean.valueOf(fields[1]),
+                Integer.valueOf(fields[2]),
+                Boolean.valueOf(fields[3]),
+                LocationType.valueOf(fields[4])
+        );
     }
 }
