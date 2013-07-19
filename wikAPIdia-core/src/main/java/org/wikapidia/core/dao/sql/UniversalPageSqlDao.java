@@ -118,17 +118,10 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            Cursor<Record> result = context.select()
+            return context.selectDistinct(Tables.UNIVERSAL_PAGE.UNIV_ID)
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(conditions)
-                    .fetchLazy(getFetchSize());
-            Set<Integer[]> pages = new HashSet<Integer[]>();
-            for (Record record : result) {
-                pages.add(new Integer[]{
-                        record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
-                        record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
-            }
-            return pages.size();
+                    .fetchCount();
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
