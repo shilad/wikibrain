@@ -63,9 +63,6 @@ public class TestESAMetric {
 //        assert (options.matchVersion == Version.LUCENE_43);
 //    }
 
-
-
-
     @Test
     public void testMostSimilarPages() throws WikapidiaException, DaoException, ConfigurationException, ClassNotFoundException, IOException {
 
@@ -89,29 +86,29 @@ public class TestESAMetric {
 
 //        printResult(esaMetric.similarity(page1, page2, true));
 //        printResult(esaMetric.similarity(string1, string2, lang, true));
-//
+
         System.out.println(page3);
         SRResultList srResults= esaMetric.mostSimilar(page3, 10, true);
         for (SRResult srResult : srResults) {
             printResult(srResult);
         }
-//        System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
-//
-//        System.out.println(page4);
-//        SRResultList srResults2= esaMetric.mostSimilar(page4, 10, true);
-//        for (SRResult srResult : srResults2) {
-//            printResult(srResult);
-//        }
-//        System.out.println(Arrays.toString(srResults2.getScoresAsFloat()));
+        System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
 
-//        String[] testPhrases = {string3, string4};
-//        for (int i = 0; i < testPhrases.length; i++) {
-//            for (int j = i + 1; j < testPhrases.length; j++) {
-//                SRResult srResult = esaMetric.similarity(testPhrases[i], testPhrases[j], lang, true);
-//                System.out.println(testPhrases[i] + " and " + testPhrases[j] + ":");
-//                printResult(srResult);
-//            }
-//        }
+        System.out.println(page4);
+        SRResultList srResults2= esaMetric.mostSimilar(page4, 10, true);
+        for (SRResult srResult : srResults2) {
+            printResult(srResult);
+        }
+        System.out.println(Arrays.toString(srResults2.getScoresAsFloat()));
+
+        String[] testPhrases = {string3, string4};
+        for (int i = 0; i < testPhrases.length; i++) {
+            for (int j = i + 1; j < testPhrases.length; j++) {
+                SRResult srResult = esaMetric.similarity(testPhrases[i], testPhrases[j], lang, true);
+                System.out.println(testPhrases[i] + " and " + testPhrases[j] + ":");
+                printResult(srResult);
+            }
+        }
 
         LocalPage[] testPages = {page3, page4};
         for (int i = 0; i < testPages.length; i++) {
