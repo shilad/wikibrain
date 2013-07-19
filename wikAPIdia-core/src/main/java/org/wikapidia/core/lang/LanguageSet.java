@@ -2,6 +2,9 @@ package org.wikapidia.core.lang;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import gnu.trove.set.TByteSet;
+import gnu.trove.set.hash.TByteHashSet;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.WikapidiaException;
 
@@ -14,6 +17,7 @@ public class LanguageSet implements Iterable<Language> {
     public static final LanguageSet ALL = new LanguageSet(
             Language.getByLangCode("en"),
             Arrays.asList(Language.LANGUAGES));
+    public static final int TOTAL_LANGUAGES = ALL.size();
 
     private Set<Language> langs;
     private Language defaultLanguage;
@@ -30,16 +34,7 @@ public class LanguageSet implements Iterable<Language> {
     }
 
     public LanguageSet(List<String> langCodes) {
-        langs = Sets.newHashSet();
-        defaultLanguage = null;
-        for (String langCode : langCodes) {
-            langCode = langCode.trim(); // handle whitespace issues just in case
-            Language lang = Language.getByLangCode(langCode);
-            langs.add(lang);
-            if (defaultLanguage == null){
-                defaultLanguage = lang;
-            }
-        }
+        this(getLangsFromCodes(langCodes));
     }
 
     /**
@@ -64,8 +59,22 @@ public class LanguageSet implements Iterable<Language> {
      * Creates a LanguageSet instance with an undefined default language
      * @param inputLangs
      */
-    public LanguageSet(Collection<Language> inputLangs){
-        this(inputLangs.iterator().next(), inputLangs);
+    public LanguageSet(Collection<Language> inputLangs) {
+        this(getDefault(inputLangs), inputLangs);
+    }
+
+    /**
+     * Creates a LanguageSet instance with a single language
+     * @param inputLang
+     */
+    public LanguageSet(Language inputLang) {
+        this(inputLang, Arrays.asList(inputLang));
+    }
+
+    private static Language getDefault(Collection<Language> inputLangs) {
+        List<Language> temp = new ArrayList<Language>(inputLangs);
+        Collections.sort(temp);
+        return temp.iterator().next();
     }
 
     /**
@@ -92,22 +101,12 @@ public class LanguageSet implements Iterable<Language> {
         return Collections.unmodifiableSet(langs);
     }
 
-    public int getNumberOfLanguages(){
+    public int size() {
         return langs.size();
     }
 
     public boolean containsLanguage(Language language){
         return langs.contains(language);
-    }
-
-
-    public boolean equals(Object o){
-        if (o instanceof LanguageSet){
-            String myString = this.toString();
-            String theirString = ((LanguageSet)o).toString();
-            return (myString.equals(theirString));
-        }
-        return false;
     }
 
     public String getLangCodeString() {
@@ -131,6 +130,66 @@ public class LanguageSet implements Iterable<Language> {
         return output;
     }
 
+    public byte[] toByteArray() {
+        TByteSet byteSet = new TByteHashSet();
+        Set<byte[]> extras = new HashSet<byte[]>();
+        for (Language l : langs) {
+            short id = l.getId();
+            if (id < 256) {
+                byteSet.add((byte) (id-128));
+            } else {
+                byte[] temp = new byte[2];
+                temp[0] = (byte) -128;
+                temp[1] = (byte) (id-255-128);
+                extras.add(temp);
+            }
+        }
+        byte[] output = byteSet.toArray();
+        for (byte[] b : extras) {
+            output = ArrayUtils.addAll(output, b);
+        }
+        return output;
+    }
+
+    public byte[] toByteArray(int maxSize) {
+        byte[] temp = toByteArray();
+        return Arrays.copyOf(temp, maxSize < temp.length ? maxSize : temp.length);
+    }
+
+    public static LanguageSet getLanguageSet(byte[] truncated) {
+        Set<Language> languages = new HashSet<Language>();
+        boolean extra = false;
+        for (byte b : truncated) {
+            if (extra) {
+                languages.add(Language.getById(b+128+255));
+                extra = false;
+            } else if (b == -128) {
+                extra = true;
+            } else {
+                languages.add(Language.getById(b + 128));
+            }
+        }
+        return new LanguageSet(languages);
+    }
+
+    private static Collection<Language> getLangsFromCodes(Collection<String> langCodes) {
+        Collection<Language> languages = new ArrayList<Language>();
+        for (String langCode : langCodes) {
+            languages.add(Language.getByLangCode(langCode.trim()));
+        }
+        return languages;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (o instanceof LanguageSet){
+            String myString = this.toString();
+            String theirString = o.toString();
+            return (myString.equals(theirString));
+        }
+        return false;
+    }
+
     @Override
     public String toString(){
         return "(" + getLangCodeString() + ")";
@@ -140,17 +199,5 @@ public class LanguageSet implements Iterable<Language> {
     @Override
     public Iterator<Language> iterator() {
         return langs.iterator();
-    }
-
-    private static Collection<Language> getLangsFromCodes(Collection<String> langCodes) {
-        Collection<Language> languages = new ArrayList<Language>();
-        for (String langCode : langCodes) {
-            languages.add(Language.getByLangCode(langCode));
-        }
-        return languages;
-    }
-
-    public int size() {
-        return getNumberOfLanguages();
     }
 }

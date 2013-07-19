@@ -14,38 +14,44 @@ public interface Dao<T> {
 
     /**
      * Removes all entities from the data store.
-     * For a sql table, this will be a "drop."
-     *
+     * For a sql table, this will be a "drop".
      * @throws DaoException
      */
     public void clear() throws DaoException;
 
     /**
-     * Runs front-end processes on the database
+     * Runs front-end processes on the database.
      * @throws DaoException if there was an error connecting to the database
      */
     public void beginLoad() throws DaoException;
 
     /**
-     * Saves an item to the database
+     * Saves an item to the database.
      * @param item the item to be saved
      * @throws DaoException if there was an error saving the item
      */
     public void save(T item) throws DaoException;
 
     /**
-     * Runs back-end processes on the database
+     * Runs back-end processes on the database.
      * @throws DaoException if there was an error connecting to the database
      */
     public void endLoad() throws DaoException;
 
     /**
      * Returns an Iterable of T objects that fit the filters specified by the DaoFilter.
-     *
      * @param daoFilter a set of filters to limit the search
      * @return an Iterable of objects that fit the specified filters
      * @throws DaoException if there was an error retrieving the objects
      */
     public Iterable<T> get(DaoFilter daoFilter) throws DaoException;
+
+    /**
+     * Returns the number of items that fit the filters specified by the DaoFilter.
+     * @param daoFilter a set of filters to limit the search
+     * @return the number of items that fit the specified filters
+     * @throws DaoException if there was an error retrieving the objects
+     */
+    public int getNumItems(DaoFilter daoFilter) throws DaoException;
 
 }

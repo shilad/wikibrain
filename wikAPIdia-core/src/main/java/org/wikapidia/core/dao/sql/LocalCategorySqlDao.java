@@ -92,7 +92,7 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
             }
             try {
                 return new LocalCategorySqlDao(
-                        (DataSource) getConfigurator().get(
+                        getConfigurator().get(
                                 DataSource.class,
                                 config.getString("dataSource"))
                 );

@@ -95,6 +95,15 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
     }
 
     @Override
+    public int getNumItems(DaoFilter daoFilter) throws DaoException {
+        int i=0;
+        for (RawPage page : get(daoFilter)) {
+            i++;
+        }
+        return i;
+    }
+
+    @Override
     public RawPage getById(Language language, int rawLocalPageId) throws DaoException {
         Connection conn = null;
         try {

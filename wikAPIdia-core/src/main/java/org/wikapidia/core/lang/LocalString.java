@@ -28,10 +28,8 @@ public class LocalString {
 
         LocalString that = (LocalString) o;
 
-        if (!language.equals(that.language)) return false;
-        if (!string.equals(that.string)) return false;
+        return language.equals(that.language) && string.equals(that.string);
 
-        return true;
     }
 
     @Override

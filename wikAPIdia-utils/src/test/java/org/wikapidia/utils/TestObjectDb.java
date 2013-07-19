@@ -19,22 +19,22 @@ public class TestObjectDb {
     public void testPutGet() throws ConfigurationException, IOException, DatabaseException, ClassNotFoundException {
         ObjectDb<Integer> db = getObjectDb();
         assertNull(db.get("foo"));
-        db.put("foo", new Integer(324));
+        db.put("foo", 324);
         assertEquals(db.get("foo"), 324);
-        db.put("bar", new Integer(11));
+        db.put("bar", 11);
         assertEquals(db.get("bar"), 11);
-        db.put("foo", new Integer(24));
+        db.put("foo", 24);
         assertEquals(db.get("foo"), 24);
     }
 
     @Test
     public void testIterate() throws ConfigurationException, IOException, DatabaseException, ClassNotFoundException {
         ObjectDb<Integer> db = getObjectDb();
-        db.put("foo", new Integer(324));
-        db.put("bar", new Integer(11));
-        db.put("foo", new Integer(24));
-        db.put("asdfasdf", new Integer(24));
-        db.put("zab", new Integer(26));
+        db.put("foo", 324);
+        db.put("bar", 11);
+        db.put("foo", 24);
+        db.put("asdfasdf", 24);
+        db.put("zab", 26);
         db.remove("asdfasdf");
 
 
@@ -52,9 +52,9 @@ public class TestObjectDb {
     @Test
     public void testIterateRemove() throws ConfigurationException, IOException, DatabaseException, ClassNotFoundException {
         ObjectDb<Integer> db = getObjectDb();
-        db.put("foo", new Integer(324));
-        db.put("bar", new Integer(11));
-        db.put("baz", new Integer(24));
+        db.put("foo", 324);
+        db.put("bar", 11);
+        db.put("baz", 24);
 
 
         int i = 0;

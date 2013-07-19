@@ -29,7 +29,6 @@ import java.util.logging.Logger;
  */
 public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
-    private static final String[] DUMP_SUFFIXES = { "xml", "xml.bz2", "xml.gz", "xml.7z" };
 
     private final AtomicInteger counter = new AtomicInteger();
     private final LocalPageDao localPageDao;

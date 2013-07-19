@@ -27,9 +27,6 @@ public class UniversalId {
 
         UniversalId universalId = (UniversalId) o;
 
-        if (id != universalId.id) return false;
-        if (algorithmId != universalId.algorithmId) return false;
-
-        return true;
+        return id == universalId.id && algorithmId == universalId.algorithmId;
     }
 }

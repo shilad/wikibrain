@@ -39,10 +39,8 @@ public class LocalId {
 
         LocalId localId = (LocalId) o;
 
-        if (id != localId.id) return false;
-        if (!language.equals(localId.language)) return false;
+        return id == localId.id && language.equals(localId.language);
 
-        return true;
     }
 
     @Override

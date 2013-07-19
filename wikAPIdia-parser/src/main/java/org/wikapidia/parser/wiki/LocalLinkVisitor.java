@@ -43,7 +43,7 @@ public class LocalLinkVisitor extends ParserVisitor {
 
             //Wikipedia ignores colons at the beginning of links
             // and uses them to overcome technical restrictions
-            if (targetText.length()>0&&targetText.charAt(0)==':'){
+            if (!targetText.isEmpty() && targetText.charAt(0)==':'){
                 targetText = targetText.substring(1,targetText.length());
                 link.target = new Title(targetText, langInfo);
             }
