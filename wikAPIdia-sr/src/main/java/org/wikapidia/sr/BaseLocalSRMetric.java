@@ -44,10 +44,12 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices = new HashMap<Language, SparseMatrix>();
 
+    @Override
     public void setMostSimilarLocalMatrices(Map<Language,SparseMatrix> mostSimilarLocalMatrices){
         this.mostSimilarLocalMatrices=mostSimilarLocalMatrices;
     }
 
+    @Override
     public void setMostSimilarLocalMatrix(Language language, SparseMatrix sparseMatrix){
         this.mostSimilarLocalMatrices.put(language,sparseMatrix);
     }

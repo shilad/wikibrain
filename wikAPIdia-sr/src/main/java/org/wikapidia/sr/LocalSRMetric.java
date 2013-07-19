@@ -8,6 +8,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Dataset;
@@ -16,6 +17,7 @@ import org.wikapidia.sr.utils.KnownSim;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Matt Lesicko
@@ -38,6 +40,19 @@ public interface LocalSRMetric {
      * @return
      */
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
+
+    /**
+     * Set the cached matrice for similarity metrics
+     * @param mostSimilarLocalMatrices
+     */
+    public void setMostSimilarLocalMatrices(Map<Language,SparseMatrix> mostSimilarLocalMatrices);
+
+    /**
+     * Set the cached matrix for a similarity metric
+     * @param language
+     * @param sparseMatrix
+     */
+    public void setMostSimilarLocalMatrix(Language language, SparseMatrix sparseMatrix);
 
     /**
      * Determine the similarity between two strings in a given language by mapping through local pages.

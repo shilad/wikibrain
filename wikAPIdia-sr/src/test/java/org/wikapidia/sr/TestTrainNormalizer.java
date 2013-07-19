@@ -4,10 +4,15 @@ import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Matt Lesicko
@@ -15,7 +20,7 @@ import org.wikapidia.sr.utils.DatasetDao;
  */
 public class TestTrainNormalizer {
     @Test
-    public void test() throws ConfigurationException, DaoException {
+    public void test() throws ConfigurationException, DaoException, IOException, WikapidiaException, InterruptedException {
 
         Configurator c = new Configurator(new Configuration());
         LocalSRMetric sr = c.get(LocalSRMetric.class);
@@ -27,10 +32,18 @@ public class TestTrainNormalizer {
 //            System.out.println(result.getValue());
 //            i++;
 //        }
+        String path = "/Users/research/IdeaProjects/wikapidia/dat/";
+        Language l = Language.getByLangCode("simple");
+        SparseMatrix mLocal = new SparseMatrix(new File(path + "MilneWitten-simple-feature"));
 
-        String path = "/Users/research/IdeaProjects/wikapidia/dat/gold/cleaned/MC.txt";
+        usr.writeCosimilarity(path, 100, 10);
+
+
+
+
+        sr.setMostSimilarLocalMatrix(l, mLocal);
         DatasetDao datasetDao = new DatasetDao();
-        Dataset dataset = datasetDao.read(Language.getByLangCode("simple"), path);
+        Dataset dataset = datasetDao.read(l, path + "gold/cleaned/MC.txt");
 
         sr.trainDefaultSimilarity(dataset);
         usr.trainSimilarity(dataset);

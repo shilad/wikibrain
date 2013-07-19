@@ -52,6 +52,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         this.algorithmId = algorithmId;
     }
 
+    @Override
     public void setMostSimilarUniversalMatrix(SparseMatrix matrix) {
         this.mostSimilarUniversalMatrix = matrix;
     }

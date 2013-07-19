@@ -7,6 +7,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Dataset;
@@ -32,14 +33,19 @@ public interface UniversalSRMetric {
      */
     public int getAlgorithmId();
 
-
     /**
-     * Determine the similarity between two universal pages
-     * @param page1 The first page.
-     * @param page2 The second page.
-     * @param explanations Whether explanations should be created.
-     * @return
+     * Set the cached matrix for a universal metric
+     * @param matrix
      */
+    public void setMostSimilarUniversalMatrix(SparseMatrix matrix);
+
+        /**
+         * Determine the similarity between two universal pages
+         * @param page1 The first page.
+         * @param page2 The second page.
+         * @param explanations Whether explanations should be created.
+         * @return
+         */
     public SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations) throws DaoException;
 
 
