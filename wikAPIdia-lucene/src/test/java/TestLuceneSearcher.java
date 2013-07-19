@@ -1,3 +1,4 @@
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 public class TestLuceneSearcher {
 
     @Test
+    @Ignore
     public void testGetDocIdFromLocalId() throws IOException, DaoException {
         int[] testIds = {368995, 144220, 363993, 134311, 315324, 219587, 86956, 69758, 33638, 294524};
         Language lang = Language.getByLangCode("simple");
