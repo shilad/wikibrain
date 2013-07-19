@@ -100,15 +100,10 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.CATEGORY_MEMBERS.LANG_ID.in(daoFilter.getLangIds()));
             }
-            Cursor<Record> result = context.select().
+            return context.select().
                     from(Tables.CATEGORY_MEMBERS).
                     where(conditions).
-                    fetchLazy(getFetchSize());
-            int counts=0;
-            for (Record record : result){
-                counts++;
-            }
-            return counts;
+                    fetchCount();
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);

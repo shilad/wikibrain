@@ -128,15 +128,10 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
             if (daoFilter.isDisambig() != null) {
                 conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
             }
-            Cursor<Record> result = context.select().
+            return context.select().
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
-                    fetchLazy(getFetchSize());
-            int counts = 0;
-            for (Record record : result){
-                counts++;
-            }
-            return counts;
+                    fetchCount();
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
