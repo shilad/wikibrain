@@ -18,6 +18,17 @@ Software and Hardware Recommendations
 
 User Instructions
 -----------
+* Universal parameters for all scripts:
+
+```bash
+[-c conf] [-l languages...] [-h threads]
+```
+```bash
+-c      Sets configuration file to the specified path
+-l      Selects languages by language code to retrieve from wikimedia, separated by commas
+-h      Sets the maximum amount of processors to use for parallel language processing
+```
+
 * Run the requestedlinkgetter.sh file. The parameters should be formatted to match the following:
 
 ```bash
