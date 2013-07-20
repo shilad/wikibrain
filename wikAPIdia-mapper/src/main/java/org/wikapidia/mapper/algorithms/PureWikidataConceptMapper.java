@@ -15,6 +15,7 @@ import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
@@ -55,7 +56,7 @@ public class PureWikidataConceptMapper extends ConceptMapper {
 
         File wikiDataDumpFile = new File(WIKIDATA_MAPPING_FILE_PATH);
 
-        final Map<Integer, Multimap<Language, LocalPage>> backend = Maps.newHashMap();
+        final Map<Integer, Multimap<Language, LocalId>> backend = Maps.newHashMap();
         final Map<Integer, NameSpace> nsBackend = Maps.newHashMap();
 
         // loop through sql dump
@@ -69,11 +70,11 @@ public class PureWikidataConceptMapper extends ConceptMapper {
                 Integer univId = (Integer)line[1];
                 LocalPage localPage = localPageDao.getById(lang, localId);
                 if (!backend.containsKey(univId)){
-                    Multimap<Language, LocalPage> mmap = HashMultimap.create();
+                    Multimap<Language, LocalId> mmap = HashMultimap.create();
                     backend.put(univId, mmap);
                     nsBackend.put(univId, localPage.getNameSpace()); // defines the universal page as having the namespace of the first LocalPage encountered
                 }
-                backend.get(univId).put(lang, localPage);
+                backend.get(univId).put(lang, localPage.toLocalId());
             }
         }
 
@@ -81,7 +82,7 @@ public class PureWikidataConceptMapper extends ConceptMapper {
             @Override
             public UniversalPage transform(Object obj) {
                 Integer univId = (Integer)obj;
-                return new UniversalPage<LocalPage>(univId, getId(), nsBackend.get(univId), backend.get(univId));
+                return new UniversalPage(univId, getId(), nsBackend.get(univId), backend.get(univId));
             }
         };
 

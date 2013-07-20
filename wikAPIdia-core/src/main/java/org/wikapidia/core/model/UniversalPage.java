@@ -3,6 +3,7 @@ package org.wikapidia.core.model;
 import com.google.common.collect.Multimap;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,7 +12,7 @@ import java.util.Collection;
  * Created with IntelliJ IDEA.
  * User: Brent Hecht
  */
-public class UniversalPage<T extends LocalPage> extends AbstractUniversalEntity<T> {
+public class UniversalPage extends AbstractUniversalEntity<LocalId> {
 
     /**
      * The universal id for the universal page. Universal ids are defined within but not across namespaces.
@@ -25,7 +26,7 @@ public class UniversalPage<T extends LocalPage> extends AbstractUniversalEntity<
         this.nameSpace = null;
     }
 
-    public UniversalPage(int univId, int algorithmId, NameSpace nameSpace, Multimap<Language, T> localPages) {
+    public UniversalPage(int univId, int algorithmId, NameSpace nameSpace, Multimap<Language, LocalId> localPages) {
         super(algorithmId, localPages);
         this.univId = univId;
         this.nameSpace = nameSpace;
@@ -45,12 +46,12 @@ public class UniversalPage<T extends LocalPage> extends AbstractUniversalEntity<
         return nameSpace;
     }
 
-    public Collection<T> getLocalPages(Language language) {
-        return new ArrayList<T>(getLocalEntities(language));
+    public Collection<LocalId> getLocalPages(Language language) {
+        return new ArrayList<LocalId>(getLocalEntities(language));
     }
 
-    public static interface LocalPageChooser<T extends LocalPage> {
-        public T choose(Collection<T> localPages);
+    public static interface LocalPageChooser {
+        public LocalId choose(Collection<LocalId> localPages);
     }
 
     @Override

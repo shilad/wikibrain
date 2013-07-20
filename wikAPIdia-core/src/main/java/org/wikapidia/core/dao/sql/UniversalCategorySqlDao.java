@@ -11,6 +11,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.UniversalCategoryDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalCategory;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalCategory;
@@ -34,7 +35,7 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
         if (result.isEmpty()) {
             return null;
         }
-        Multimap<Language, LocalCategory> localPages = HashMultimap.create(result.size(), result.size());
+        Multimap<Language, LocalId> localPages = HashMultimap.create(result.size(), result.size());
         for(Record record : result) {
             NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
             if (nameSpace != NameSpace.CATEGORY) {
@@ -43,7 +44,7 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
             LocalCategorySqlDao localDao = new LocalCategorySqlDao(ds);
-            localPages.put(language, localDao.getById(language, pageId));
+            localPages.put(language, new LocalId(language,pageId));
         }
         return new UniversalCategory(
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
