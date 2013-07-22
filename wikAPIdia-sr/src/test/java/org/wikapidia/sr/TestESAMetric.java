@@ -90,14 +90,14 @@ public class TestESAMetric {
 //        printResult(esaMetric.similarity(string1, string2, lang, true));
 
         System.out.println(page3);
-        SRResultList srResults= esaMetric.mostSimilar(page3, 10, true);
+        SRResultList srResults= esaMetric.mostSimilar(page3, 10);
         for (SRResult srResult : srResults) {
             printResult(srResult);
         }
         System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
 
         System.out.println(page4);
-        SRResultList srResults2= esaMetric.mostSimilar(page4, 10, true);
+        SRResultList srResults2= esaMetric.mostSimilar(page4, 10);
         for (SRResult srResult : srResults2) {
             printResult(srResult);
         }
