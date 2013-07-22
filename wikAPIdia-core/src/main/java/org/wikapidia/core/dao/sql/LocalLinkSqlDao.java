@@ -84,11 +84,10 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        }   finally {
-            quietlyCloseConn(conn);
         }
     }
 
+    @Override
     public int getCount(DaoFilter daoFilter) throws DaoException{
         Connection conn = null;
         try {
@@ -115,9 +114,8 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
                     where(conditions).
                     fetchCount();
         } catch (SQLException e) {
-            quietlyCloseConn(conn);
             throw new DaoException(e);
-        }  finally {
+        } finally {
             quietlyCloseConn(conn);
         }
     }
@@ -197,32 +195,6 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        }  finally {
-            quietlyCloseConn(conn);
-        }
-    }
-
-    @Override
-    public int getNumLinks(Language language, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Cursor<Record> result = context.select()
-                    .from(Tables.LOCAL_LINK)
-                    .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
-                    .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
-                    .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
-                    .fetchLazy(getFetchSize());
-            int i = 0;
-            for (Record r : result){
-                i++;
-            }
-            return i;
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 

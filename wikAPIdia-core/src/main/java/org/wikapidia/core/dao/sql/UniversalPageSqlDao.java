@@ -5,8 +5,6 @@ import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -16,6 +14,7 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
@@ -51,10 +50,10 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     public void save(UniversalPage page) throws DaoException {
         NameSpace nameSpace = page.getNameSpace();
         for (Language language : page.getLanguageSet()) {
-            for (Object localPage : page.getLocalPages(language)) {
+            for (LocalId localPage : page.getLocalPages(language)) {
                 insert(
                         language.getId(),
-                        ((LocalPage) localPage).getLocalId(),
+                        localPage.getId(),
                         nameSpace.getArbitraryId(),
                         page.getUnivId(),
                         page.getAlgorithmId()
@@ -96,8 +95,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 
@@ -114,12 +111,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
-            return context.selectDistinct(Tables.UNIVERSAL_PAGE.UNIV_ID)
+            return context.selectDistinct(Tables.UNIVERSAL_PAGE.UNIV_ID, Tables.UNIVERSAL_PAGE.ALGORITHM_ID)
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(conditions)
                     .fetchCount();
         } catch (SQLException e) {
-            quietlyCloseConn(conn);
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);
@@ -229,14 +225,14 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         if (result == null || result.isEmpty()) {
             return null;
         }
-        Multimap<Language, LocalPage> localPages = HashMultimap.create(result.size(), result.size());
+        Multimap<Language, LocalId> localPages = HashMultimap.create(result.size(), result.size());
         NameSpace nameSpace = NameSpace.getNameSpaceByArbitraryId(result.get(0).getValue(Tables.LOCAL_PAGE.NAME_SPACE));
         for(Record record : result) {
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
-            localPages.put(language, new LocalPage(language, pageId, null, nameSpace));
+            localPages.put(language, new LocalId(language, pageId));
         }
-        return new UniversalPage<LocalPage>(
+        return new UniversalPage(
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
                 result.get(0).getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID),
                 nameSpace,

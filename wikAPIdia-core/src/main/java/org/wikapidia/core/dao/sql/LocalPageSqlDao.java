@@ -102,8 +102,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        }  finally {
-            quietlyCloseConn(conn);
         }
     }
 
@@ -120,9 +118,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
             if (daoFilter.getNameSpaceIds() != null) {
                 conditions.add(Tables.LOCAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
             }
-            if (redirectSqlDao!=null){
-                conditions.add(Tables.LOCAL_PAGE.IS_REDIRECT.in(Boolean.FALSE));
-            }else if (daoFilter.isRedirect() != null) {
+            if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.LOCAL_PAGE.IS_REDIRECT.in(daoFilter.isRedirect()));
             }
             if (daoFilter.isDisambig() != null) {
@@ -133,7 +129,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     where(conditions).
                     fetchCount();
         } catch (SQLException e) {
-            quietlyCloseConn(conn);
             throw new DaoException(e);
         } finally {
             quietlyCloseConn(conn);

@@ -8,19 +8,23 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.NameSpace;
+import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.utils.ExplanationFormatter;
 
 /**
  * @author Matt Lesicko
  * @author Ben Hillmann
  */
 public class SimilarityExample {
-    private static void localPrintResult(SRResult result, Language language,LocalPageDao localPageDao) throws DaoException {
+    private static void localPrintResult(SRResult result, Language language,LocalPageDao localPageDao, ExplanationFormatter expf) throws DaoException {
         if (result == null){
             System.out.println("Result was null");
         }
@@ -29,7 +33,7 @@ public class SimilarityExample {
             System.out.println("Similarity value: "+result.getValue());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
-                System.out.println(explanation.getPlaintext());
+                System.out.println(expf.formatExplanation(explanation));
                 if (++explanationsSeen>5){
                     break;
                 }
@@ -38,20 +42,20 @@ public class SimilarityExample {
 
     }
 
-        private static void universalPrintResult(SRResult result, int algorithmId, UniversalPageDao universalPageDao, LocalPageDao localPageDao) throws DaoException {
+        private static void universalPrintResult(SRResult result, int algorithmId, UniversalPageDao universalPageDao, LocalPageDao localPageDao, ExplanationFormatter expf) throws DaoException {
             if (result == null){
                 System.out.println("Result was null");
             }
             else {
                 UniversalPage up = universalPageDao.getById(result.getId(), algorithmId);
                 LanguageSet languages = up.getLanguageSet();
-                LocalPage namePage = (LocalPage) up.getLocalPages(languages.getDefaultLanguage()).toArray()[0];
-                namePage = localPageDao.getById(namePage.getLanguage(),namePage.getLocalId());
+                LocalId nameId = (LocalId) up.getLocalPages(languages.getDefaultLanguage()).toArray()[0];
+                LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
                 System.out.println(namePage.getTitle().getCanonicalTitle());
                 System.out.println("Similarity value: "+result.getValue());
                 int explanationsSeen = 0;
                 for (Explanation explanation : result.getExplanations()){
-                    System.out.println(explanation.getPlaintext());
+                    System.out.println(expf.formatExplanation(explanation));
                     if (++explanationsSeen>5){
                         break;
                     }
@@ -71,6 +75,7 @@ public class SimilarityExample {
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
         Disambiguator disambiguator = c.get(Disambiguator.class);
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
+        ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
 
         //Similarity between strings
         String s1 = "Barack Obama";
@@ -79,13 +84,13 @@ public class SimilarityExample {
         String s4 = "vim";
         System.out.println("Using local");
         System.out.println("Barack Obama and US:");
-        localPrintResult(sr.similarity(s1,s2,lang,true),lang,localPageDao);
+        localPrintResult(sr.similarity(s1,s2,lang,true),lang,localPageDao, expf);
         System.out.println("Barack Obama and Canada:");
-        localPrintResult(sr.similarity(s1,s3,lang,true),lang,localPageDao);
+        localPrintResult(sr.similarity(s1,s3,lang,true),lang,localPageDao, expf);
         System.out.println("Barack Obama and vim:");
-        localPrintResult(sr.similarity(s1,s4,lang,true),lang,localPageDao);
+        localPrintResult(sr.similarity(s1,s4,lang,true),lang,localPageDao, expf);
         System.out.println("Barack Obama and Barack Obama");
-        localPrintResult(sr.similarity(s1,s1,lang,true),lang,localPageDao);
+        localPrintResult(sr.similarity(s1,s1,lang,true),lang,localPageDao, expf);
 
         LocalString ls1 = new LocalString(lang, s1);
         LocalString ls2 = new LocalString(lang, s2);
@@ -93,54 +98,54 @@ public class SimilarityExample {
         LocalString ls4 = new LocalString(lang, s4);
         System.out.println("Using universal");
         System.out.println("Barack Obama and US:");
-        universalPrintResult(usr.similarity(ls1,ls2,true),usr.getAlgorithmId(),universalPageDao, localPageDao);
+        universalPrintResult(usr.similarity(ls1,ls2,true),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);
         System.out.println("Barack Obama and Canada:");
-        universalPrintResult(usr.similarity(ls1,ls3,true),usr.getAlgorithmId(),universalPageDao, localPageDao);
+        universalPrintResult(usr.similarity(ls1,ls3,true),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);
         System.out.println("Barack Obama and vim:");
-        universalPrintResult(usr.similarity(ls1,ls4,true),usr.getAlgorithmId(),universalPageDao, localPageDao);
+        universalPrintResult(usr.similarity(ls1,ls4,true),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);
         System.out.println("Barack Obama and Barack Obama");
-        universalPrintResult(usr.similarity(ls1,ls1,true),usr.getAlgorithmId(),universalPageDao, localPageDao);
+        universalPrintResult(usr.similarity(ls1,ls1,true),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);
 
         //Similarity between pages
-//        LocalPage page1 = localPageDao.getByTitle(lang, new Title(string1, lang), NameSpace.ARTICLE);
-//        LocalPage page2 = localPageDao.getByTitle(lang, new Title(string2, lang), NameSpace.ARTICLE);
-//        LocalPage page3 = localPageDao.getByTitle(lang, new Title(string3,lang),NameSpace.ARTICLE);
-//        LocalPage page4 = localPageDao.getByTitle(lang, new Title(string4, lang),NameSpace.ARTICLE);
-//        System.out.println("Barack Obama and US:");
-//        localPrintResult(sr.similarity(page1,page2,true),lang,localPageDao);
-//        System.out.println("Barack Obama and Canada:");
-//        localPrintResult(sr.similarity(page1,page3,true),lang,localPageDao);
-//        System.out.println("Barack Obama and vim:");
-//        localPrintResult(sr.similarity(page1,page4,true),lang,localPageDao);
-//        System.out.println("Barack Obama and Barack Obama:");
-//        localPrintResult(sr.similarity(page1,page1,true),lang,localPageDao);
+        LocalPage page1 = localPageDao.getByTitle(lang, new Title(s1, lang), NameSpace.ARTICLE);
+        LocalPage page2 = localPageDao.getByTitle(lang, new Title(s2, lang), NameSpace.ARTICLE);
+        LocalPage page3 = localPageDao.getByTitle(lang, new Title(s3,lang),NameSpace.ARTICLE);
+        LocalPage page4 = localPageDao.getByTitle(lang, new Title(s4, lang),NameSpace.ARTICLE);
+        System.out.println("Barack Obama and US:");
+        localPrintResult(sr.similarity(page1,page2,true),lang,localPageDao, expf);
+        System.out.println("Barack Obama and Canada:");
+        localPrintResult(sr.similarity(page1,page3,true),lang,localPageDao, expf);
+        System.out.println("Barack Obama and vim:");
+        localPrintResult(sr.similarity(page1,page4,true),lang,localPageDao, expf);
+        System.out.println("Barack Obama and Barack Obama:");
+        localPrintResult(sr.similarity(page1,page1,true),lang,localPageDao, expf);
 
         //Most Similar pages
         System.out.println("Most similar to United States:");
         SRResultList resultList = sr.mostSimilar(new LocalString(lang, "united states"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
-            localPrintResult(resultList.get(i),lang,localPageDao);
+            localPrintResult(resultList.get(i),lang,localPageDao, expf);
         }
         System.out.println("Most similar to science fiction:");
         resultList = sr.mostSimilar(new LocalString(lang, "science fiction"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
-            localPrintResult(resultList.get(i),lang,localPageDao);
+            localPrintResult(resultList.get(i),lang,localPageDao, expf);
         }
 
         System.out.println("Most similar to goat using universal");
         resultList = usr.mostSimilar(new LocalString(lang, "goat"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#"+(i+1));
-            universalPrintResult(resultList.get(i),usr.getAlgorithmId(),universalPageDao, localPageDao);
+            universalPrintResult(resultList.get(i),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);
         }
 
         System.out.println("Most similar to science fiction using universal");
         resultList = usr.mostSimilar(new LocalString(lang, "science fiction"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#"+(i+1));
-            universalPrintResult(resultList.get(i),usr.getAlgorithmId(),universalPageDao, localPageDao);
+            universalPrintResult(resultList.get(i),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);
         }
     }
 }

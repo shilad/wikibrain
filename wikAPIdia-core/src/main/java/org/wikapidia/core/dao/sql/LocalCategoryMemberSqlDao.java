@@ -105,8 +105,9 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                     where(conditions).
                     fetchCount();
         } catch (SQLException e) {
-            quietlyCloseConn(conn);
             throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
     }
 
