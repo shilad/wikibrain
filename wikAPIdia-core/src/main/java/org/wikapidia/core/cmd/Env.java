@@ -1,5 +1,6 @@
 package org.wikapidia.core.cmd;
 
+import com.typesafe.config.Config;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -37,6 +38,11 @@ public class Env {
      */
     public static void addStandardOptions(Options options) {
         Option toAdd[] = new Option[] {
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("algorithmId")
+                        .withDescription("universal concept map algorithm id")
+                        .create("a"),
                 new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("conf")
@@ -79,6 +85,11 @@ public class Env {
         // Override configuration parameters using system properties
         for (String key : confOverrides.keySet()) {
             System.setProperty(key, confOverrides.get(key));
+        }
+
+        // if an algorithm id is passed in the configuration file
+        if (cmd.hasOption("a")) {
+            System.setProperty("mapper.default", cmd.getOptionValue("a"));
         }
 
         // Load basic configuration
@@ -170,6 +181,10 @@ public class Env {
         return matchingFiles;
     }
 
+    public int getUniversalConceptAlgorithmId() {
+        return getUniversalConceptAlgorithmId(configuration.get());
+    }
+
     public LanguageSet getLanguages() {
         return languages;
     }
@@ -184,5 +199,12 @@ public class Env {
 
     public int getMaxThreads() {
         return maxThreads;
+    }
+
+    public static int getUniversalConceptAlgorithmId(Config conf) {
+        // look up mapper.default
+        String path = conf.getString("mapper.default");
+        // look up algorithmId under that.
+        return conf.getInt("mapper."+path+".algorithmId");
     }
 }

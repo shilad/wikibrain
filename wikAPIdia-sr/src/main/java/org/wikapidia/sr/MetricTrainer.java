@@ -37,8 +37,15 @@ public class MetricTrainer {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .withLongOpt("algorithm")
-                        .withDescription("an algorithm id for the universal pages")
+                        .withLongOpt("universal")
+                        .withDescription("set a universal metric")
+                        .create("u"));
+
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("algorithms")
+                        .withDescription("the set of algorithm ids for universal pages to process, separated by commas")
                         .create("a"));
         //Number of Max Results(otherwise take from config)
         options.addOption(
@@ -59,7 +66,7 @@ public class MetricTrainer {
                 new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("metrics")
-                        .withDescription("the set of metrics to build on, separated by commas")
+                        .withDescription("set a local metric")
                         .create("m"));
 
         Env.addStandardOptions(options);
