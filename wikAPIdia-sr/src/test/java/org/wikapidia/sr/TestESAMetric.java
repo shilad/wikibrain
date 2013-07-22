@@ -20,6 +20,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
+import org.wikapidia.sr.utils.ExplanationFormatter;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.Arrays;
 */
 public class TestESAMetric {
 
-    private static void printResult(SRResult result){
+    private static void printResult(SRResult result, ExplanationFormatter expf) throws DaoException {
         if (result == null){
             System.out.println("Result was null");
         }
@@ -38,7 +39,7 @@ public class TestESAMetric {
             System.out.println("Similarity value: "+result.getValue());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
-                System.out.println(explanation.getPlaintext());
+                System.out.println(expf.formatExplanation(explanation));
                 if (++explanationsSeen>5){
                     break;
                 }
@@ -47,13 +48,13 @@ public class TestESAMetric {
 
     }
 
-    private static void printResult(SRResultList results){
+    private static void printResult(SRResultList results, ExplanationFormatter expf) throws DaoException {
         if (results == null){
             System.out.println("Result was null");
         }
         else {
             for (SRResult srResult : results) {
-                printResult(srResult);
+                printResult(srResult, expf);
             }
         }
     }
@@ -70,6 +71,7 @@ public class TestESAMetric {
 
         Configurator c = new Configurator(new Configuration());
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
+        ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
 
         Language lang = Language.getByLangCode("simple");
         LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(Arrays.asList(lang)), LuceneOptions.getDefaultOptions());
@@ -92,14 +94,14 @@ public class TestESAMetric {
         System.out.println(page3);
         SRResultList srResults= esaMetric.mostSimilar(page3, 10, true);
         for (SRResult srResult : srResults) {
-            printResult(srResult);
+            printResult(srResult, expf);
         }
         System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
 
         System.out.println(page4);
         SRResultList srResults2= esaMetric.mostSimilar(page4, 10, true);
         for (SRResult srResult : srResults2) {
-            printResult(srResult);
+            printResult(srResult, expf);
         }
         System.out.println(Arrays.toString(srResults2.getScoresAsFloat()));
 
@@ -108,7 +110,7 @@ public class TestESAMetric {
             for (int j = i + 1; j < testPhrases.length; j++) {
                 SRResult srResult = esaMetric.similarity(testPhrases[i], testPhrases[j], lang, true);
                 System.out.println(testPhrases[i] + " and " + testPhrases[j] + ":");
-                printResult(srResult);
+                printResult(srResult, expf);
             }
         }
 
@@ -117,7 +119,7 @@ public class TestESAMetric {
             for (int j = i + 1; j < testPages.length; j++) {
                 SRResult srResult = esaMetric.similarity(testPages[i], testPages[j], true);
                 System.out.println(testPages[i].getTitle().getCanonicalTitle() + " and " + testPages[j].getTitle().getCanonicalTitle() + ":");
-                printResult(srResult);
+                printResult(srResult, expf);
             }
         }
     }

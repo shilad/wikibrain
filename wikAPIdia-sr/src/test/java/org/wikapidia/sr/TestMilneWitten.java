@@ -13,6 +13,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
+import org.wikapidia.sr.utils.ExplanationFormatter;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import java.sql.SQLException;
  */
 public class TestMilneWitten {
 
-    private static void printResult(SRResult result){
+    private static void printResult(SRResult result, ExplanationFormatter expf) throws DaoException {
         if (result == null){
             System.out.println("Result was null");
         }
@@ -35,7 +36,7 @@ public class TestMilneWitten {
             System.out.println("Similarity value: "+result.getValue());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
-                System.out.println(explanation.getPlaintext());
+                System.out.println(expf.formatExplanation(explanation));
                 if (++explanationsSeen>5){
                     break;
                 }
@@ -60,6 +61,7 @@ public class TestMilneWitten {
         LanguageInfo lang = LanguageInfo.getByLangCode("simple");
         LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
         LocalLinkSqlDao linkDao = new LocalLinkSqlDao(ds);
+        ExplanationFormatter expf = new ExplanationFormatter(dao);
 
         dao.beginLoad();
         LocalPage page1 = new LocalPage(

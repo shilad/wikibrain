@@ -10,6 +10,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.mapper.ConceptMapper;
@@ -52,9 +53,9 @@ public class MonolingualConceptMapper extends ConceptMapper {
             @Override
             public UniversalPage transform(Object obj) {
                 LocalPage page = (LocalPage) obj;
-                Multimap<Language, LocalPage> map = HashMultimap.create();
-                map.put(page.getLanguage(), page);
-                return new UniversalPage<LocalPage>(
+                Multimap<Language, LocalId> map = HashMultimap.create();
+                map.put(page.getLanguage(), page.toLocalId());
+                return new UniversalPage(
                         nextUnivId.getAndIncrement(),
                         getId(),
                         page.getNameSpace(),
