@@ -42,7 +42,7 @@ public class Env {
                         .hasArg()
                         .withLongOpt("algorithmId")
                         .withDescription("universal concept map algorithm id")
-                        .create("a"),
+                        .create("n"),
                 new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("conf")
@@ -88,7 +88,7 @@ public class Env {
         }
 
         // if an algorithm id is passed in the configuration file
-        if (cmd.hasOption("a")) {
+        if (cmd.hasOption("n")) {
             System.setProperty("mapper.default", cmd.getOptionValue("a"));
         }
 
