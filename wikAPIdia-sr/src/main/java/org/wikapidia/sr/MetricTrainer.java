@@ -32,7 +32,6 @@ public class MetricTrainer {
 //                        .withLongOpt("normalizer")
 //                        .withDescription("specify which normalizer to use")
 //                        .create("n"));
-        //A list of universal algorithm ids
 
         options.addOption(
                 new DefaultOptionBuilder()
@@ -40,13 +39,6 @@ public class MetricTrainer {
                         .withLongOpt("universal")
                         .withDescription("set a universal metric")
                         .create("u"));
-
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("algorithms")
-                        .withDescription("the set of algorithm ids for universal pages to process, separated by commas")
-                        .create("a"));
         //Number of Max Results(otherwise take from config)
         options.addOption(
                 new DefaultOptionBuilder()
@@ -58,9 +50,9 @@ public class MetricTrainer {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .withLongOpt("datasets")
-                        .withDescription("the set of datasets to train on, separated by commas")
-                        .create("d"));
+                        .withLongOpt("gold")
+                        .withDescription("the set of gold standard datasets to train on, separated by commas")
+                        .create("g"));
         //Specify the Metrics
         options.addOption(
                 new DefaultOptionBuilder()
