@@ -32,10 +32,10 @@ public class TestTrainNormalizer {
 //            System.out.println(result.getValue());
 //            i++;
 //        }
-        String path = "/Users/research/IdeaProjects/wikapidia/dat/";
+        String path = "../dat/";
         Language l = Language.getByLangCode("simple");
-        SparseMatrix mLocal = new SparseMatrix(new File(path + "MilneWitten-simple-feature"));
-        SparseMatrix mUniversal = new SparseMatrix(new File(path + "MilneWitten-0-feature"));
+        SparseMatrix mLocal = new SparseMatrix(new File(path + "sr/matrix/MilneWitten-simple-feature"));
+        SparseMatrix mUniversal = new SparseMatrix(new File(path + "sr/matrix/MilneWitten-0-feature"));
 
 
 
