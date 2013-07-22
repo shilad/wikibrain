@@ -204,12 +204,14 @@ public class ESAMetric extends BaseLocalSRMetric {
         searcher.setHitCount(maxResults);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
+        System.out.println(query);
         ScoreDoc[] scoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
         for (ScoreDoc scoreDoc : scoreDocs) {
             if (i < srResults.numDocs()) {
-                srResults.set(i, scoreDoc.doc, scoreDoc.score);
+                int localId = searcher.getLocalIdFromDocId(scoreDoc.doc, language);
+                srResults.set(i, localId, scoreDoc.score);
                 i++;
             }
         }
