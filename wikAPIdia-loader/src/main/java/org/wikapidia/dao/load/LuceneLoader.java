@@ -1,7 +1,6 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.apache.lucene.util.Version;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -59,10 +58,6 @@ public class LuceneLoader {
                     .setNameSpaces(namespaces)
                     .setRedirect(false));
             for (RawPage rawPage : rawPages) {
-//                if (i<3) {
-//                    i++;
-//                    continue;
-//                }
                 luceneIndexer.indexPage(rawPage);
                 i++;
                 if (i%1000 == 0) LOG.log(Level.INFO, "RawPages indexed: " + i);
@@ -89,12 +84,12 @@ public class LuceneLoader {
                         .withValueSeparator(',')
                         .withLongOpt("namespaces")
                         .withDescription("the set of namespaces to index, separated by commas")
-                        .create("p"));
+                        .create("n"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
                         .withValueSeparator(',')
-                        .withLongOpt("index-type")
+                        .withLongOpt("indexes")
                         .withDescription("the types of indexes to store, separated by commas")
                         .create("i"));
         Env.addStandardOptions(options);

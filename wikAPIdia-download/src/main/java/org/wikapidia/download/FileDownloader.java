@@ -143,6 +143,12 @@ public class FileDownloader {
                         .withLongOpt("output")
                         .withDescription("Path to output file.")
                         .create("o"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("input")
+                        .withDescription("Path to input tsv file.")
+                        .create("i"));
 
         Env.addStandardOptions(options);
         CommandLineParser parser = new PosixParser();
@@ -161,8 +167,8 @@ public class FileDownloader {
 
         List argList = Arrays.asList(conf.getConf().get().getString("download.listFile"));
         String filePath = cmd.getOptionValue('o', conf.getConf().get().getString("download.path"));
-        if (!cmd.getArgList().isEmpty()) {
-            argList = cmd.getArgList();
+        if (cmd.hasOption("t")) {
+            argList = Arrays.asList(cmd.getOptionValues("t"));
         }
 
         FileDownloader downloader = new FileDownloader(new File(filePath));

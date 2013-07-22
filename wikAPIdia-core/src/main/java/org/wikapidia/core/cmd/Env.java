@@ -134,7 +134,7 @@ public class Env {
             for (FileMatcher fm : matchers) {
                 List<File> f = getFiles(l, fm);
                 if (f.isEmpty()) {
-                    LOG.warning("no files matching language " + f + ", matcher " + fm.getName());
+                    LOG.warning("no files matching language " + l + ", matcher " + fm.getName());
                 }
                 matches.addAll(f);
             }
