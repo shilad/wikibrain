@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  *
  */
 public class ConceptLoader {
-    private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
+    private static final Logger LOG = Logger.getLogger(ConceptLoader.class.getName());
     private final LanguageSet languageSet;
     private final UniversalPageDao dao;
 
@@ -65,9 +65,10 @@ public class ConceptLoader {
                         .create("d"));
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("algorithm")
-                        .withDescription("the name of the algorithm to execute")
+                        .hasArgs()
+                        .withValueSeparator(',')
+                        .withLongOpt("algorithms")
+                        .withDescription("the names of the algorithms to execute, separated by commas")
                         .create("n"));
         Env.addStandardOptions(options);
 
@@ -83,10 +84,14 @@ public class ConceptLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        String algorithm = cmd.getOptionValue("n", null);
+        String[] algorithms;
+        if (cmd.hasOption("n")) {
+            algorithms = cmd.getOptionValues("n");
+        } else {
+            algorithms = new String[] { null };
+        }
 
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
-        ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
         final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao);
 
         if (cmd.hasOption("d")) {
@@ -96,7 +101,10 @@ public class ConceptLoader {
         LOG.log(Level.INFO, "Begin Load");
         dao.beginLoad();
 
-        loader.load(mapper);
+        for (String algorithm : algorithms) {
+            ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
+            loader.load(mapper);
+        }
 
         LOG.log(Level.INFO, "End Load");
         dao.endLoad();
