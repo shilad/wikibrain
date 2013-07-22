@@ -118,9 +118,10 @@ public class UniversalLinkLoader {
                         .create("d"));
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("algorithm")
-                        .withDescription("the name of the algorithm to execute")
+                        .hasArgs()
+                        .withValueSeparator(',')
+                        .withLongOpt("algorithms")
+                        .withDescription("the names of the algorithms to execute, separated by commas")
                         .create("n"));
         Env.addStandardOptions(options);
 
@@ -136,13 +137,17 @@ public class UniversalLinkLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        String algorithm = cmd.getOptionValue("n", null);
+        String[] algorithms;
+        if (cmd.hasOption("n")) {
+            algorithms = cmd.getOptionValues("n");
+        } else {
+            algorithms = new String[] { null };
+        }
 
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
         UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class);
         UniversalLinkDao universalLinkSkeletalDao = conf.get(UniversalLinkDao.class, "skeletal-sql");
-        ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
 
         UniversalLinkLoader loader = new UniversalLinkLoader(
                 env.getLanguages(),
@@ -153,7 +158,10 @@ public class UniversalLinkLoader {
         );
 
         loader.beginLoad(cmd.hasOption("d"));
-        loader.loadLinkMap(mapper.getId());
+        for (String algorithm : algorithms) {
+            ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
+            loader.loadLinkMap(mapper.getId());
+        }
         loader.endLoad();
         LOG.log(Level.INFO, "DONE");
     }

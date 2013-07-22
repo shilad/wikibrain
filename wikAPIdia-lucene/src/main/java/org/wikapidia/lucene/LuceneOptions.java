@@ -28,7 +28,7 @@ public class LuceneOptions {
     public static final String LOCAL_ID_FIELD_NAME = "local_id";
     public static final String LANG_ID_FIELD_NAME = "lang_id";
 
-    public final String type;
+    public final String name;
     public final Configurator configurator;
     public final Version matchVersion;
     public final File luceneRoot;
@@ -39,8 +39,8 @@ public class LuceneOptions {
     /**
      * Used by provider only.
      */
-    private LuceneOptions(String type, Configurator configurator, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options, TextFieldElements elements) {
-        this.type = type;
+    private LuceneOptions(String name, Configurator configurator, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options, TextFieldElements elements) {
+        this.name = name;
         this.configurator = configurator;
         this.matchVersion = Version.parseLeniently(matchVersion);
         this.luceneRoot = new File(luceneRoot);
@@ -85,7 +85,7 @@ public class LuceneOptions {
     public boolean equals(Object o) {
         if (!(o instanceof LuceneOptions)) return false;
         LuceneOptions opts = (LuceneOptions) o;
-        return (this.type.equalsIgnoreCase(opts.type) &&
+        return (this.name.equalsIgnoreCase(opts.name) &&
                 this.matchVersion == opts.matchVersion &&
                 this.luceneRoot.equals(opts.luceneRoot) &&
                 CollectionUtils.isEqualCollection(this.namespaces, opts.namespaces) &&
