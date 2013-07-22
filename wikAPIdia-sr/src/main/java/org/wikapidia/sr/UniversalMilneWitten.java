@@ -263,7 +263,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             return new UniversalMilneWitten(
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(UniversalPageDao.class,config.getString("pageDao")),
-                    Env.getUniversalConceptAlgorithmId(config),
+                    Env.getUniversalConceptAlgorithmId(getConfig()),
                     getConfigurator().get(UniversalLinkDao.class,config.getString("linkDao")),
                     config.getBoolean("outLinks")
             );
