@@ -32,11 +32,10 @@ User Instructions
 * Run the requestedlinkgetter.sh file. The parameters should be formatted to match the following:
 
 ```bash
-[-o outputpath] [-l languages...] [-n names...] [-d date]
+[-o outputpath] [-n names...] [-d date]
 ```
 ```bash
 -o      Sets the path to output the tsv file containing all the links
--l      Selects languages by language code to retrieve from wikimedia, separated by commas
 -n      Selects types of dump files to retrieve, separated by commas
 -d      Sets the date to retrieve from. Files are retrieve from on or before this date
 ```
@@ -44,72 +43,80 @@ User Instructions
 * Run the filedownloader.sh file. The parameters should be formatted to match the following:
 
 ```bash
-[-o outputpath] [file]
+[-o outputpath] [-t tsvpath]
 ```
 ```bash
 -o      Sets the directory in which to output the downloaded dumps
-file    Selects the tsv file from which to read the download links
+-t      Selects the tsv file from which to read the download links
 ```
 
 * Run the dumploader.sh file. The parameters should be formatted to match the following:
 
 ```bash
-[-c .conf] [-it] [file ...]
+[file ...]
 ```
 ```bash
--c      Sets configuration file. Include that file .conf
--i      Creates all indexes after loading
--t      Drops and recreates all tables
 file    Selects the dump files to load
 ```
 	
-* Run the redirectloader.sh file. The pareameters should be formatted to match the following:
+* Run the redirectloader.sh file. The parameters should be formatted to match the following:
 
 ```bash
-[-c .conf] [-it] [-l lang ...]
+[-d]
 ```
 ```bash
--c      Sets configuration file. Include that file .conf
--i      Creates all indexes after loading
--l      Sets languages for redirects to be resolved in. Enter as lang codes with commas between them
--t      Drops and recreates all tables
+-d      Drops and recreates all tables and indexes
 ```
  	
-* Run the wikitextdumploader.sh file. The pareameters should be formatted to match the following:
+* Run the wikitextdumploader.sh file. The parameters should be formatted to match the following:
 
 ```bash
-[-c .conf] [-it] [-l lang ...]
+[-d]
 ```
 ```bash
--c      Sets configuration file. Include that file .conf
--i      Creates all indexes after loading
--l      Set languages to be processed. Also sets ills (Inter Language Links). Enter as lang codes with commas between them.
--t      Drops and recreates all tables
+-d      Drops and recreates all tables and indexes
 ```
+
 * Run conceptmapper.sh file. The parameters should be formatted to match the following:
 
 ```bash
-[-c .conf] [-it] [-l lang ...] [-n algorithm]
+[-d] [-n algorithms]
 ```
 ```bash
--c      Sets configuration file. Include that file .conf
--i      reates all indexes after loading
--l      Sets languages to be processed. Enter as lang codes with commas between them
--t      Drops and recreates all tables
--n      Selects the algorithm to use to map concepts
+-d      Drops and recreates all tables and indexes
+-n      Selects the algorithms to use to map concepts
 ```
 
 * Run universallinkloader.sh. The parameters should be formatted to match the following:
 
 ```bash
-[-c .conf] [-it] [-l lang ...] [-n algorithm]
+[-d] [-n algorithms]
 ```
 ```bash
--c      Sets configuration file. Include that file .conf
--i      reates all indexes after loading
--l      Sets languages to be processed. Enter as lang codes with commas between them
--t      Drops and recreates all tables
--n      Selects the algorithm to use to map concepts
+-d      Drops and recreates all tables and indexes
+-n      Selects the algorithms to use to map concepts
+```
+
+Optional scripts:
+
+* Run phraseloader.sh. The parameters should be formatted to match the following:
+
+```bash
+[-n analyzer]
+```
+```bash
+-n      Selects the phrase analyzer to use
+```
+
+* Run luceneloader.sh. The parameters should be formatted to match the following:
+
+```bash
+[-d] [-n namespace...] [-i index...]
+```
+```bash
+-d      Drops and recreates all Lucene indexes
+-n      Specifies the namespaces to indexes
+-i      Selects the types of indexes to use, as described by the configuration file
 ```
  
 A Basic Outline of the Process 
@@ -118,8 +125,11 @@ A Basic Outline of the Process
 * Load the Dump as XML <ul><li>Convert Dump into RawPages </li> <li>Convert RawPages into LocalPages <ul>
 					<li>Mark Redirects to be dealt with after this process</li> </ul></li>
 			</ul>
-* Resolve Redirects <ul><li>Load into Redirect Table, fully resolved </li></ul></li>
-* WikiTextParser does the following <ul><li>load links into table with src/dest IDs </li> <li>load categories with the source article as a category member</li></ul></li>
+* Resolve Redirects <ul><li>Load into Redirect Table, fully resolved </li></ul>
+* WikiTextParser does the following <ul><li>load links into table with src/dest IDs </li> <li>load categories with the source article as a category member</li></ul>
 * Load Concepts
 * Load Concept Links
-</ol>
+
+Optional:
+* Load Phrases Database
+* Load Lucene Database
