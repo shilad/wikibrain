@@ -49,7 +49,7 @@ public class MetricTrainer {
         //Specify the Dataset
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
+                        .hasArgs()
                         .withLongOpt("gold")
                         .withDescription("the set of gold standard datasets to train on, separated by commas")
                         .create("g"));
@@ -77,8 +77,12 @@ public class MetricTrainer {
         Env env = new Env(cmd);
         Configurator c = new Configurator(new Configuration());
 
-        LocalSRMetric sr = c.get(LocalSRMetric.class);
-        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
+        LocalSRMetric sr = cmd.hasOption("m")? c.get(LocalSRMetric.class,cmd.getOptionValue("m")):null;
+        UniversalSRMetric usr = cmd.hasOption("u")? c.get(UniversalSRMetric.class,cmd.getOptionValue("u")):null;
+
+        if (sr==null&&usr==null){
+            throw new IllegalArgumentException("Must specify a metric to train.");
+        }
 
         List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
 
@@ -96,27 +100,42 @@ public class MetricTrainer {
         List<Dataset> datasets = new ArrayList<Dataset>();
         DatasetDao datasetDao = new DatasetDao();
 
-        for (int i = 0; i < datasetConfig.size();i+=2) {
-            String language = datasetConfig.get(i);
-            String datasetName = datasetConfig.get(i+1);
-            datasets.add(datasetDao.read(Language.getByLangCode(language), datasetPath + datasetName));
+        if (cmd.hasOption("g")){
+            String[] datasetNames = cmd.getOptionValues("g");
+            for (String name : datasetNames){
+                if (datasetConfig.contains(name)){
+                    int langPosition = datasetConfig.indexOf(name)-1;
+                    Language language = Language.getByLangCode(datasetConfig.get(langPosition));
+                    datasets.add(datasetDao.read(language,datasetPath+name));
+                }
+                else {
+                    throw new IllegalArgumentException("Specified dataset "+name+" is not in the configuration file.");
+                }
+            }
+        }
+        else{
+            for (int i = 0; i < datasetConfig.size();i+=2) {
+                String language = datasetConfig.get(i);
+                String datasetName = datasetConfig.get(i+1);
+                datasets.add(datasetDao.read(Language.getByLangCode(language), datasetPath + datasetName));
+            }
         }
 
         for (Dataset dataset: datasets) {
-            usr.trainSimilarity(dataset);
-            usr.trainMostSimilar(dataset,maxResults,null);
-            sr.trainDefaultSimilarity(dataset);
-            sr.trainDefaultMostSimilar(dataset,maxResults,null);
-            sr.trainSimilarity(dataset);
-            sr.trainMostSimilar(dataset,maxResults,null);
+            if (usr!=null){
+                usr.trainSimilarity(dataset);
+                usr.trainMostSimilar(dataset,maxResults,null);
+            }
+            if (sr!=null){
+                sr.trainDefaultSimilarity(dataset);
+                sr.trainDefaultMostSimilar(dataset,maxResults,null);
+                sr.trainSimilarity(dataset);
+                sr.trainMostSimilar(dataset,maxResults,null);
+            }
         }
 
-        usr.write(normalizerPath);
-        sr.write(normalizerPath);
-
-        usr.read(normalizerPath);
-        sr.read(normalizerPath);
-
+        if (usr!=null){usr.write(normalizerPath);usr.read(normalizerPath);}
+        if (sr!=null){sr.write(normalizerPath);sr.read(normalizerPath);}
 
 
         System.out.println(datasets.get(0));
