@@ -36,24 +36,28 @@ public class MetricTrainer {
 
         options.addOption(
                 new DefaultOptionBuilder()
-                        .withLongOpt("algorithms")
-                        .withDescription("the set of algorithm ids for universal pages to process, separated by commas")
+                        .hasArg()
+                        .withLongOpt("algorithm")
+                        .withDescription("an algorithm id for the universal pages")
                         .create("a"));
         //Number of Max Results(otherwise take from config)
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArg()
                         .withLongOpt("max-results")
                         .withDescription("the set of algorithms for universal pages to process, separated by commas")
                         .create("r"));
         //Specify the Dataset
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArg()
                         .withLongOpt("datasets")
                         .withDescription("the set of datasets to train on, separated by commas")
                         .create("d"));
         //Specify the Metrics
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArg()
                         .withLongOpt("metrics")
                         .withDescription("the set of metrics to build on, separated by commas")
                         .create("m"));
@@ -79,6 +83,10 @@ public class MetricTrainer {
 
         List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
 
+        int maxResults = cmd.hasOption("r")? Integer.parseInt(cmd.getOptionValue("r")) : c.getConf().get().getInt("sr.normalizer.defaultmaxresults");
+
+
+
         if (datasetConfig.size()%2 != 0) {
             throw new ConfigurationException("Datasets must be paired with a matching language");
         }
@@ -97,11 +105,11 @@ public class MetricTrainer {
 
         for (Dataset dataset: datasets) {
             usr.trainSimilarity(dataset);
-            usr.trainMostSimilar(dataset,100,null);
+            usr.trainMostSimilar(dataset,maxResults,null);
             sr.trainDefaultSimilarity(dataset);
-            sr.trainDefaultMostSimilar(dataset,100,null);
+            sr.trainDefaultMostSimilar(dataset,maxResults,null);
             sr.trainSimilarity(dataset);
-            sr.trainMostSimilar(dataset,100,null);
+            sr.trainMostSimilar(dataset,maxResults,null);
         }
 
         usr.write(normalizerPath);
