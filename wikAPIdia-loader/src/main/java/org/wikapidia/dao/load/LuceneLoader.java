@@ -120,8 +120,8 @@ public class LuceneLoader {
 
         LanguageSet languages = env.getLanguages();
         Collection<NameSpace> namespaces = new ArrayList<NameSpace>();
-        if (cmd.hasOption("p")) {
-            String[] nsStrings = cmd.getOptionValues("p");
+        if (cmd.hasOption("n")) {
+            String[] nsStrings = cmd.getOptionValues("n");
             for (String s : nsStrings) {
                 namespaces.add(NameSpace.getNameSpaceByName(s));
             }

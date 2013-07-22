@@ -167,8 +167,8 @@ public class FileDownloader {
 
         List argList = Arrays.asList(conf.getConf().get().getString("download.listFile"));
         String filePath = cmd.getOptionValue('o', conf.getConf().get().getString("download.path"));
-        if (cmd.hasOption("t")) {
-            argList = Arrays.asList(cmd.getOptionValues("t"));
+        if (cmd.hasOption("i")) {
+            argList = Arrays.asList(cmd.getOptionValues("i"));
         }
 
         FileDownloader downloader = new FileDownloader(new File(filePath));
