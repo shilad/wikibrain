@@ -28,30 +28,30 @@ public class IdentityNormalizer extends BaseNormalizer{
         return true;
     }
 
-//    public static class Provider extends org.wikapidia.conf.Provider<IdentityNormalizer> {
-//        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
-//            super(configurator, config);
-//        }
-//
-//        @Override
-//        public Class getType() {
-//            return IdentityNormalizer.class;
-//        }
-//
-//        @Override
-//        public String getPath() {
-//            return "sr.normalizers";
-//        }
-//
-//        @Override
-//        public IdentityNormalizer get(String name, Config config) throws ConfigurationException {
-//            if (!config.getString("type").equals("identity")) {
-//                return null;
-//            }
-//
-//            return new IdentityNormalizer(
-//            );
-//        }
-//
-//    }
+    public static class Provider extends org.wikapidia.conf.Provider<IdentityNormalizer> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return IdentityNormalizer.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "sr.normalizer";
+        }
+
+        @Override
+        public IdentityNormalizer get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("identity")) {
+                return null;
+            }
+
+            return new IdentityNormalizer(
+            );
+        }
+
+    }
 }

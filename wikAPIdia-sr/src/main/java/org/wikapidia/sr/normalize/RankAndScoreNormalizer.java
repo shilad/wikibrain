@@ -1,8 +1,12 @@
 package org.wikapidia.sr.normalize;
 
+import com.typesafe.config.Config;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.sr.SRResultList;
 
 import java.text.DecimalFormat;
@@ -88,5 +92,32 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
                 df.format(scoreCoeff) + "*score + " +
                 df.format(intercept)
             );
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<RankAndScoreNormalizer> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return RankAndScoreNormalizer.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "sr.normalizer";
+        }
+
+        @Override
+        public RankAndScoreNormalizer get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("rank")) {
+                return null;
+            }
+
+            return new RankAndScoreNormalizer(
+            );
+        }
+
     }
 }

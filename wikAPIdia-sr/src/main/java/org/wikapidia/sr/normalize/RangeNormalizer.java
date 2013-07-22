@@ -1,5 +1,10 @@
 package org.wikapidia.sr.normalize;
 
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+
 /**
  * Normalizes values to fall within a particular range.
  */
@@ -39,5 +44,32 @@ public class RangeNormalizer extends BaseNormalizer {
         return ("range normalizer from [" +
                 min + ", " + max + "] to [" +
                 desiredMin + ", " + desiredMax + "]");
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<RangeNormalizer> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return RangeNormalizer.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "sr.normalizer";
+        }
+
+        @Override
+        public RangeNormalizer get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("range")) {
+                return null;
+            }
+
+            return new RangeNormalizer(
+            );
+        }
+
     }
 }
