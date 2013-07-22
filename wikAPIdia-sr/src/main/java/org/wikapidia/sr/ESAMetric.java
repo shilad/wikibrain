@@ -195,43 +195,48 @@ public class ESAMetric extends BaseLocalSRMetric {
      *
      * @param localPage
      * @param maxResults
-     * @param explanations
      * @return
      * @throws DaoException
      */
-    public SRResultList mostSimilar(LocalPage localPage, int maxResults, boolean explanations) throws DaoException {
+    public SRResultList mostSimilar(LocalPage localPage, int maxResults) throws DaoException {
         Language language = localPage.getLanguage();
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
+        System.out.println(query);
         ScoreDoc[] scoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
         for (ScoreDoc scoreDoc : scoreDocs) {
             if (i < srResults.numDocs()) {
-                srResults.set(i, scoreDoc.doc, scoreDoc.score);
+                int localId = searcher.getLocalIdFromDocId(scoreDoc.doc, language);
+                srResults.set(i, localId, scoreDoc.score);
                 i++;
             }
         }
-        if (explanations) {
-            String format = "?'s similar pages include ?";
-            for (SRResult srResult : srResults) {
-                if (srResult.getValue() != 0) {
-                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
-                    int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
-                    LocalPage topPage = pageHelper.getById(language, localPageId);
-                    if (topPage==null) {
-                        continue;
-                    }
-                    formatPages.add(localPage);
-                    formatPages.add(topPage);
-                    Explanation explanation = new Explanation(format, formatPages);
-                    srResult.addExplanation(explanation);
-                }
-            }
-        }
+//        if (explanations) {
+//            String format = "?'s similar pages include ?";
+//            for (SRResult srResult : srResults) {
+//                if (srResult.getValue() != 0) {
+//                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
+//                    int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
+//                    LocalPage topPage = pageHelper.getById(language, localPageId);
+//                    if (topPage==null) {
+//                        continue;
+//                    }
+//                    formatPages.add(localPage);
+//                    formatPages.add(topPage);
+//                    Explanation explanation = new Explanation(format, formatPages);
+//                    srResult.addExplanation(explanation);
+//                }
+//            }
+//        }
         return srResults;
+    }
+
+    public SRResultList mostSimilar(LocalPage page, int maxResults, TIntSet validIds) throws DaoException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     private void pruneSimilar(ScoreDoc[] scoreDocs) {

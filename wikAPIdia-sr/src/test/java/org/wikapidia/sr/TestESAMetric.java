@@ -91,20 +91,20 @@ public class TestESAMetric {
 //        printResult(esaMetric.similarity(page1, page2, true));
 //        printResult(esaMetric.similarity(string1, string2, lang, true));
 
-        System.out.println(page3);
-        SRResultList srResults= esaMetric.mostSimilar(page3, 10, true);
-        for (SRResult srResult : srResults) {
-            printResult(srResult, expf);
-        }
-        System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
-
-        System.out.println(page4);
-        SRResultList srResults2= esaMetric.mostSimilar(page4, 10, true);
-        for (SRResult srResult : srResults2) {
-            printResult(srResult, expf);
-        }
-        System.out.println(Arrays.toString(srResults2.getScoresAsFloat()));
-
+//        System.out.println(page3);
+//        SRResultList srResults= esaMetric.mostSimilar(page3, 10);
+//        for (SRResult srResult : srResults) {
+//            printResult(srResult, expf);
+//        }
+//        System.out.println(Arrays.toString(srResults.getScoresAsFloat()));
+//
+//        System.out.println(page4);
+//        SRResultList srResults2= esaMetric.mostSimilar(page4, 10);
+//        for (SRResult srResult : srResults2) {
+//            printResult(srResult, expf);
+//        }
+//        System.out.println(Arrays.toString(srResults2.getScoresAsFloat()));
+//
         String[] testPhrases = {string3, string4};
         for (int i = 0; i < testPhrases.length; i++) {
             for (int j = i + 1; j < testPhrases.length; j++) {
@@ -113,15 +113,15 @@ public class TestESAMetric {
                 printResult(srResult, expf);
             }
         }
-
-        LocalPage[] testPages = {page3, page4};
-        for (int i = 0; i < testPages.length; i++) {
-            for (int j = i + 1; j < testPages.length; j++) {
-                SRResult srResult = esaMetric.similarity(testPages[i], testPages[j], true);
-                System.out.println(testPages[i].getTitle().getCanonicalTitle() + " and " + testPages[j].getTitle().getCanonicalTitle() + ":");
-                printResult(srResult, expf);
-            }
-        }
+//
+//        LocalPage[] testPages = {page3, page4};
+//        for (int i = 0; i < testPages.length; i++) {
+//            for (int j = i + 1; j < testPages.length; j++) {
+//                SRResult srResult = esaMetric.similarity(testPages[i], testPages[j], true);
+//                System.out.println(testPages[i].getTitle().getCanonicalTitle() + " and " + testPages[j].getTitle().getCanonicalTitle() + ":");
+//                printResult(srResult, expf);
+//            }
+//        }
     }
 
 //    @Test

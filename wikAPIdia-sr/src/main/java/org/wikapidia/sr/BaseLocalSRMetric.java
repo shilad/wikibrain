@@ -22,7 +22,6 @@ import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
-import sun.plugin2.message.Serializer;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 

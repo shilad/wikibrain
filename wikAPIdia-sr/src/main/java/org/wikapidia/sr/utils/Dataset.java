@@ -1,6 +1,5 @@
 package org.wikapidia.sr.utils;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.wikapidia.core.lang.Language;
 
 import java.io.File;
