@@ -1,17 +1,21 @@
 package org.wikapidia.sr;
 
 import org.junit.Test;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.Title;
+import org.wikapidia.sr.utils.ExplanationFormatter;
 
 import java.util.ArrayList;
 
 
 public class TestExplanation {
     @Test
-    public void test(){
+    public void test() throws DaoException {
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
+        //TODO: Set up test to work for universal pages.
+        ExplanationFormatter explanationFormatter = new ExplanationFormatter(null);
         LocalArticle uk = new LocalArticle(
                 lang.getLanguage(),
                 1,
@@ -24,12 +28,12 @@ public class TestExplanation {
         pageList.add(uk);
         pageList.add(tower);
         Explanation pageExplanation = new Explanation("? links to ?",pageList);
-        assert (pageExplanation.getPlaintext().equals("UK links to Tower of London"));
+        assert (explanationFormatter.formatExplanation(pageExplanation).equals("UK links to Tower of London"));
 
         ArrayList intList = new ArrayList<Integer>();
         intList.add(7);
         Explanation intExplanation = new Explanation("?",intList);
-        assert (intExplanation.getPlaintext().equals("7"));
+        assert (explanationFormatter.formatExplanation(intExplanation).equals("7"));
 
     }
 

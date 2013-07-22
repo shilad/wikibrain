@@ -42,7 +42,7 @@ public class TestLangStorage {
         LanguageSet languages = new LanguageSet(new Configuration().get().getStringList("languages"));
         System.out.println(languages);
         byte[] bits = toByteArray(languages);
-        System.out.println(bits);
+        System.out.println(Arrays.toString(bits));
         LanguageSet output = getLanguageSet(bits);
         System.out.println(output);
         assert languages.equals(output);
