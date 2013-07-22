@@ -8,6 +8,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
@@ -262,7 +263,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             return new UniversalMilneWitten(
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(UniversalPageDao.class,config.getString("pageDao")),
-                    config.getInt("algorithmId"),
+                    Env.getUniversalConceptAlgorithmId(config),
                     getConfigurator().get(UniversalLinkDao.class,config.getString("linkDao")),
                     config.getBoolean("outLinks")
             );

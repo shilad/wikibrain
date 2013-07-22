@@ -36,6 +36,12 @@ public class MetricTrainer {
 
         options.addOption(
                 new DefaultOptionBuilder()
+                        .withLongOpt("universal")
+                        .withDescription("set a universal metric")
+                        .create("u"));
+
+        options.addOption(
+                new DefaultOptionBuilder()
                         .withLongOpt("algorithms")
                         .withDescription("the set of algorithm ids for universal pages to process, separated by commas")
                         .create("a"));
@@ -55,7 +61,7 @@ public class MetricTrainer {
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("metrics")
-                        .withDescription("the set of metrics to build on, separated by commas")
+                        .withDescription("set a local metric")
                         .create("m"));
 
         Env.addStandardOptions(options);
@@ -72,10 +78,13 @@ public class MetricTrainer {
         }
 
         Env env = new Env(cmd);
+
         Configurator c = new Configurator(new Configuration());
 
         LocalSRMetric sr = c.get(LocalSRMetric.class);
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
+
+
 
         List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
 
