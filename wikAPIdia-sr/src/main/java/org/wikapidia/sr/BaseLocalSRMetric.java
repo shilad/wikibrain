@@ -22,8 +22,6 @@ import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
-import sun.plugin2.message.Serializer;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 
 import java.io.*;
@@ -175,21 +173,21 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path + "-" + getName() + "-defaultSimilarityNormalizer")
+                new FileOutputStream(path + getName() + "-defaultSimilarityNormalizer")
         );
         oop.writeObject(defaultSimilarityNormalizer);
         oop.flush();
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path + "-" + getName() + "-mostSimilarNormalizers")
+                new FileOutputStream(path + getName() + "-mostSimilarNormalizers")
         );
         oop.writeObject(mostSimilarNormalizers);
         oop.flush();
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path + "-" + getName() + "-similarityNormalizers")
+                new FileOutputStream(path + getName() + "-similarityNormalizers")
         );
         oop.writeObject(similarityNormalizers);
         oop.flush();
@@ -199,25 +197,25 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public void read(String path) throws IOException, ClassNotFoundException {
         ObjectInputStream oip = new ObjectInputStream(
-                new FileInputStream(path + "-" + getName() + "-defaultMostSimilarNormalizer")
+                new FileInputStream(path + getName() + "-defaultMostSimilarNormalizer")
         );
         this.defaultMostSimilarNormalizer = (Normalizer)oip.readObject();
         oip.close();
 
         oip = new ObjectInputStream(
-                new FileInputStream(path + "-" + getName() + "-defaultSimilarityNormalizer")
+                new FileInputStream(path + getName() + "-defaultSimilarityNormalizer")
         );
         this.defaultSimilarityNormalizer = (Normalizer)oip.readObject();
         oip.close();
 
         oip = new ObjectInputStream(
-                new FileInputStream(path + "-" + getName() + "-mostSimilarNormalizers")
+                new FileInputStream(path + getName() + "-mostSimilarNormalizers")
         );
         this.mostSimilarNormalizers = (Map<Language,Normalizer>)oip.readObject();
         oip.close();
 
         oip = new ObjectInputStream(
-                new FileInputStream(path + "-" + getName() + "-similarityNormalizers")
+                new FileInputStream(path + getName() + "-similarityNormalizers")
         );
         this.similarityNormalizers = (Map<Language,Normalizer>)oip.readObject();
         oip.close();

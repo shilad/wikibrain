@@ -1,14 +1,18 @@
 package org.wikapidia.sr;
 
+import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.PosixParser;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +24,54 @@ import java.util.List;
 public class MetricTrainer {
 
     public static void main(String[] args) throws ConfigurationException, DaoException, IOException, ClassNotFoundException {
+        Options options = new Options();
 
-        //Needs command line arguments
+//        //Which normalizer to use
+//        options.addOption(
+//                new DefaultOptionBuilder()
+//                        .withLongOpt("normalizer")
+//                        .withDescription("specify which normalizer to use")
+//                        .create("n"));
+        //A list of universal algorithm ids
 
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("algorithms")
+                        .withDescription("the set of algorithm ids for universal pages to process, separated by commas")
+                        .create("a"));
+        //Number of Max Results(otherwise take from config)
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("max-results")
+                        .withDescription("the set of algorithms for universal pages to process, separated by commas")
+                        .create("r"));
+        //Specify the Dataset
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("datasets")
+                        .withDescription("the set of datasets to train on, separated by commas")
+                        .create("d"));
+        //Specify the Metrics
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("metrics")
+                        .withDescription("the set of metrics to build on, separated by commas")
+                        .create("m"));
+
+        Env.addStandardOptions(options);
+
+
+        CommandLineParser parser = new PosixParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println("Invalid option usage: " + e.getMessage());
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
+        }
+
+        Env env = new Env(cmd);
         Configurator c = new Configurator(new Configuration());
 
         LocalSRMetric sr = c.get(LocalSRMetric.class);

@@ -14,11 +14,7 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.utils.KnownSim;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -260,7 +256,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                     config.getBoolean("outLinks")
             );
         }
-
 
     }
 }
