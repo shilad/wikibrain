@@ -5,10 +5,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -54,8 +51,15 @@ public class DatasetDao {
         return new Dataset(language, result);
     }
 
-    //TODO: Implement me
-    public void write(Dataset dataset, String path) {
-        throw new NotImplementedException();
+    public void write(Dataset dataset, String path) throws DaoException {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+            String delim = "\t";
+            for (KnownSim ks: dataset.data) {
+                writer.write(ks.phrase1 + delim + ks.phrase2 + delim + ks.similarity + "\n");
+            }
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
     }
 }

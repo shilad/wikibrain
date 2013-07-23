@@ -5,6 +5,8 @@ import org.wikapidia.core.lang.Language;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,5 +56,30 @@ public class Dataset {
 
     public void setData(List<KnownSim> data) {
         this.data = data;
+    }
+
+    /**
+     * Shuffles a dataset and splits it into k equally sized subsets, and returns them all
+     * @param k the number of desired subsets
+     * @return a list of k equally sized subsets of the original dataset
+     */
+    public List<Dataset> split(int k) {
+
+        if (k>data.size()){
+            k=data.size();
+        }
+        List<KnownSim> clone = new ArrayList<KnownSim>();
+        for (KnownSim ks : data){
+            clone.add(ks);
+        }
+        Collections.shuffle(clone);
+        List<Dataset> splitSets = new ArrayList<Dataset>();
+        for (int i=0; i<k; i++) {
+            splitSets.add(new Dataset(language));
+        }
+        for (int i=0; i< clone.size(); i++) {
+            splitSets.get(i%k).getData().add(clone.get(i));
+        }
+        return splitSets;
     }
 }
