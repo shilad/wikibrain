@@ -51,7 +51,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     public String getName() {
-        return "MilneWitten";
+        return "LocalMilneWitten";
     }
 
     @Override

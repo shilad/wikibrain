@@ -80,11 +80,11 @@ public class SimilarityExample {
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
 
-        String normalizerPath = c.getConf().get().getString("sr.normalizer.directory");
+        String path = c.getConf().get().getString("sr.metric.path");
 
         try {
-            usr.read(normalizerPath);
-            sr.read(normalizerPath);
+            usr.read(path);
+            sr.read(path);
         } catch (IOException e) {
             throw new InvalidStateException("Cached normalizers not found");
         } catch (ClassNotFoundException e) {

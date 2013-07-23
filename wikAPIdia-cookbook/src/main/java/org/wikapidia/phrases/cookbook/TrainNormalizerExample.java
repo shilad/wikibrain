@@ -28,8 +28,8 @@ public class TrainNormalizerExample {
 
         String path = "../dat/";
         Language l = Language.getByLangCode("simple");
-        SparseMatrix mLocal = new SparseMatrix(new File(path + "sr/matrix/MilneWitten-simple-feature"));
-        SparseMatrix mUniversal = new SparseMatrix(new File(path + "sr/matrix/MilneWitten-0-feature"));
+        SparseMatrix mLocal = new SparseMatrix(new File(path + "sr/LocalMilneWitten/matrix/simple-feature"));
+        SparseMatrix mUniversal = new SparseMatrix(new File(path + "sr/UniversalMilneWitten/matrix/0-feature"));
 
         sr.setMostSimilarLocalMatrix(l, mLocal);
         usr.setMostSimilarUniversalMatrix(mUniversal);
@@ -38,6 +38,9 @@ public class TrainNormalizerExample {
 
         sr.trainDefaultSimilarity(dataset);
         usr.trainSimilarity(dataset);
+
+        sr.write(path + "/sr/");
+        usr.write(path + "/sr/");
     }
 
 }

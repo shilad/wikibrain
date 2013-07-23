@@ -166,28 +166,28 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public void write(String path) throws IOException {
         ObjectOutputStream oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "-defaultMostSimilarNormalizer")
+                new FileOutputStream(path + getName() + "/normalizer/defaultMostSimilarNormalizer")
         );
         oop.writeObject(defaultMostSimilarNormalizer);
         oop.flush();
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "-defaultSimilarityNormalizer")
+                new FileOutputStream(path + getName() + "/normalizer/defaultSimilarityNormalizer")
         );
         oop.writeObject(defaultSimilarityNormalizer);
         oop.flush();
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "-mostSimilarNormalizers")
+                new FileOutputStream(path + getName() + "/normalizer/mostSimilarNormalizers")
         );
         oop.writeObject(mostSimilarNormalizers);
         oop.flush();
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "-similarityNormalizers")
+                new FileOutputStream(path + getName() + "/normalizer/similarityNormalizers")
         );
         oop.writeObject(similarityNormalizers);
         oop.flush();
@@ -197,25 +197,25 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public void read(String path) throws IOException, ClassNotFoundException {
         ObjectInputStream oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "-defaultMostSimilarNormalizer")
+                new FileInputStream(path + getName() + "/normalizer/defaultMostSimilarNormalizer")
         );
         this.defaultMostSimilarNormalizer = (Normalizer)oip.readObject();
         oip.close();
 
         oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "-defaultSimilarityNormalizer")
+                new FileInputStream(path + getName() + "/normalizer/defaultSimilarityNormalizer")
         );
         this.defaultSimilarityNormalizer = (Normalizer)oip.readObject();
         oip.close();
 
         oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "-mostSimilarNormalizers")
+                new FileInputStream(path + getName() + "/normalizer/mostSimilarNormalizers")
         );
         this.mostSimilarNormalizers = (Map<Language,Normalizer>)oip.readObject();
         oip.close();
 
         oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "-similarityNormalizers")
+                new FileInputStream(path + getName() + "/normalizer/similarityNormalizers")
         );
         this.similarityNormalizers = (Map<Language,Normalizer>)oip.readObject();
         oip.close();
@@ -441,7 +441,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public void writeCosimilarity(String path, LanguageSet languages, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
         for (Language language: languages) {
-            path = path + getName()+"-"+language.getLangCode();
+            path = path + getName() + "/matrix/" + language.getLangCode();
             SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this, language);
             DaoFilter pageFilter = new DaoFilter().setLanguages(language);
             Iterable<LocalPage> localPages = pageHelper.get(pageFilter);

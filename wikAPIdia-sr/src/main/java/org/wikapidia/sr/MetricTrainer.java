@@ -107,7 +107,7 @@ public class MetricTrainer {
         }
 
         String datasetPath = c.getConf().get().getString("sr.dataset.path");
-        String normalizerPath = c.getConf().get().getString("sr.normalizer.directory");
+        String path = c.getConf().get().getString("sr.metric.path");
 
         List<Dataset> datasets = new ArrayList<Dataset>();
         DatasetDao datasetDao = new DatasetDao();
@@ -152,8 +152,8 @@ public class MetricTrainer {
             }
         }
 
-        if (usr!=null){usr.write(normalizerPath);usr.read(normalizerPath);}
-        if (sr!=null){sr.write(normalizerPath);sr.read(normalizerPath);}
+        if (usr!=null){usr.write(path);usr.read(path);}
+        if (sr!=null){sr.write(path);sr.read(path);}
 
 
         System.out.println(datasets.get(0));
