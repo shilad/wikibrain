@@ -167,14 +167,14 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     @Override
     public void write(String path) throws IOException {
         ObjectOutputStream oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "-" + algorithmId + "-mostSimilarNormalizer")
+                new FileOutputStream(path + getName() + "/normalizer/" + algorithmId + "-mostSimilarNormalizer")
         );
         oop.writeObject(mostSimilarNormalizer);
         oop.flush();
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "-" + algorithmId + "-similarityNormalizer")
+                new FileOutputStream(path + getName() + "/normalizer/" + algorithmId + "-similarityNormalizer")
         );
         oop.writeObject(similarityNormalizer);
         oop.flush();
@@ -184,13 +184,13 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     @Override
     public void read(String path) throws IOException, ClassNotFoundException {
         ObjectInputStream oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "-" + algorithmId + "-mostSimilarNormalizer")
+                new FileInputStream(path + getName() + "/normalizer/" + algorithmId + "-mostSimilarNormalizer")
         );
         this.mostSimilarNormalizer = (Normalizer)oip.readObject();
         oip.close();
 
         oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "-" + algorithmId + "-similarityNormalizer")
+                new FileInputStream(path + getName() + "/normalizer/" + algorithmId + "-similarityNormalizer")
         );
         this.similarityNormalizer = (Normalizer)oip.readObject();
         oip.close();
@@ -324,7 +324,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     @Override
     public void writeCosimilarity(String path, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
-        path = path + getName()+"-" + algorithmId;
+        path = path + getName()+"/matrix/" + algorithmId;
         SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
         DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
         Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
