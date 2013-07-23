@@ -199,6 +199,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     @Override
     public void trainSimilarity(final Dataset dataset) throws DaoException{
         final Normalizer trainee = similarityNormalizer;
+        similarityNormalizer = new IdentityNormalizer();
         ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws IOException, DaoException {
                 LocalString ls1 = new LocalString(ks.language,ks.phrase1);

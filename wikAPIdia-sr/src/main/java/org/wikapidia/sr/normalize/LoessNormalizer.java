@@ -203,7 +203,7 @@ public class LoessNormalizer extends BaseNormalizer {
 
         @Override
         public Class getType() {
-            return LoessNormalizer.class;
+            return Normalizer.class;
         }
 
         @Override

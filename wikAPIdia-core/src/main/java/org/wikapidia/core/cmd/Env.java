@@ -182,7 +182,7 @@ public class Env {
     }
 
     public int getUniversalConceptAlgorithmId() {
-        return getUniversalConceptAlgorithmId(configuration.get());
+        return getUniversalConceptAlgorithmId(configuration);
     }
 
     public LanguageSet getLanguages() {
@@ -201,10 +201,10 @@ public class Env {
         return maxThreads;
     }
 
-    public static int getUniversalConceptAlgorithmId(Config conf) {
+    public static int getUniversalConceptAlgorithmId(Configuration conf) {
         // look up mapper.default
-        String path = conf.getString("mapper.default");
+        String path = conf.get().getString("mapper.default");
         // look up algorithmId under that.
-        return conf.getInt("mapper."+path+".algorithmId");
+        return conf.get().getInt("mapper."+path+".algorithmId");
     }
 }

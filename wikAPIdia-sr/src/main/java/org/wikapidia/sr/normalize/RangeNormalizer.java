@@ -53,7 +53,7 @@ public class RangeNormalizer extends BaseNormalizer {
 
         @Override
         public Class getType() {
-            return RangeNormalizer.class;
+            return Normalizer.class;
         }
 
         @Override

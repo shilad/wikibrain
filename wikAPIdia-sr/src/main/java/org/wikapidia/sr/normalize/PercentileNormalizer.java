@@ -87,7 +87,7 @@ public class PercentileNormalizer extends BaseNormalizer {
 
         @Override
         public Class getType() {
-            return PercentileNormalizer.class;
+            return Normalizer.class;
         }
 
         @Override

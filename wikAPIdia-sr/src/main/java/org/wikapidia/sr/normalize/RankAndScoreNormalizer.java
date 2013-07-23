@@ -101,7 +101,7 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
 
         @Override
         public Class getType() {
-            return RankAndScoreNormalizer.class;
+            return Normalizer.class;
         }
 
         @Override

@@ -166,7 +166,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public void write(String path) throws IOException {
         ObjectOutputStream oop = new ObjectOutputStream(
-                new FileOutputStream(path + "-" + getName() + "-defaultMostSimilarNormalizer")
+                new FileOutputStream(path + getName() + "-defaultMostSimilarNormalizer")
         );
         oop.writeObject(defaultMostSimilarNormalizer);
         oop.flush();
