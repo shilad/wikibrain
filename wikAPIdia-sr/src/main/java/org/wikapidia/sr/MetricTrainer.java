@@ -10,6 +10,7 @@ import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
 
@@ -75,10 +76,22 @@ public class MetricTrainer {
         }
 
         Env env = new Env(cmd);
-        Configurator c = new Configurator(new Configuration());
+        Configurator c = env.getConfigurator();
 
-        LocalSRMetric sr = cmd.hasOption("m")? c.get(LocalSRMetric.class,cmd.getOptionValue("m")):null;
-        UniversalSRMetric usr = cmd.hasOption("u")? c.get(UniversalSRMetric.class,cmd.getOptionValue("u")):null;
+        LocalSRMetric sr=null;
+        UniversalSRMetric usr=null;
+        Normalizer localNormalizer=null;
+        Normalizer universalNormalizer=null;
+        if (cmd.hasOption("m")){
+            sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
+            String normalizer = c.getConf().get().getString("sr.metric.local."+cmd.getOptionValue("m")+".normalizer");
+            localNormalizer = c.get(Normalizer.class,normalizer);
+        }
+        if (cmd.hasOption("u")){
+            usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
+            String normalizer = c.getConf().get().getString("sr.metric.universal."+cmd.getOptionValue("u")+".normalizer");
+            universalNormalizer = c.get(Normalizer.class,normalizer);
+        }
 
         if (sr==null&&usr==null){
             throw new IllegalArgumentException("Must specify a metric to train.");
@@ -95,7 +108,7 @@ public class MetricTrainer {
         }
 
         String datasetPath = c.getConf().get().getString("sr.dataset.path");
-        String normalizerPath = c.getConf().get().getString("sr.normalizers.directory");
+        String normalizerPath = c.getConf().get().getString("sr.normalizer.directory");
 
         List<Dataset> datasets = new ArrayList<Dataset>();
         DatasetDao datasetDao = new DatasetDao();
@@ -123,13 +136,19 @@ public class MetricTrainer {
 
         for (Dataset dataset: datasets) {
             if (usr!=null){
+                usr.setSimilarityNormalizer(universalNormalizer);
                 usr.trainSimilarity(dataset);
+                usr.setMostSimilarNormalizer(universalNormalizer);
                 usr.trainMostSimilar(dataset,maxResults,null);
             }
             if (sr!=null){
+                sr.setDefaultSimilarityNormalizer(localNormalizer);
                 sr.trainDefaultSimilarity(dataset);
+                sr.setDefaultMostSimilarNormalizer(localNormalizer);
                 sr.trainDefaultMostSimilar(dataset,maxResults,null);
+                sr.setSimilarityNormalizer(localNormalizer,dataset.getLanguage());
                 sr.trainSimilarity(dataset);
+                sr.setMostSimilarNormalizer(localNormalizer,dataset.getLanguage());
                 sr.trainMostSimilar(dataset,maxResults,null);
             }
         }

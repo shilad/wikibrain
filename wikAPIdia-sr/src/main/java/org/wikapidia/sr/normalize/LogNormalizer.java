@@ -72,7 +72,7 @@ public class LogNormalizer implements Normalizer{
 
         @Override
         public Class getType() {
-            return LogNormalizer.class;
+            return Normalizer.class;
         }
 
         @Override

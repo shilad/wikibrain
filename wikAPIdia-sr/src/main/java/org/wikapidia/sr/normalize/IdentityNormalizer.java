@@ -35,7 +35,7 @@ public class IdentityNormalizer extends BaseNormalizer{
 
         @Override
         public Class getType() {
-            return IdentityNormalizer.class;
+            return Normalizer.class;
         }
 
         @Override
