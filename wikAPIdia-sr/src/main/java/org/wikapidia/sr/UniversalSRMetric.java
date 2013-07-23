@@ -107,9 +107,9 @@ public interface UniversalSRMetric {
      *
      * @param path A directory data will be read from.
      *                  The directory previously will have been written to by write().
-     * @throws IOException
+     * @throws IOException if the file is not found or is unusable
      */
-    public void read(String path) throws IOException, ClassNotFoundException;
+    public void read(String path) throws IOException;
 
     /**
      * Train the similarity() function.

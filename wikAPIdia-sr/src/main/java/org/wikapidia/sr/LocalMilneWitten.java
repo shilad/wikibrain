@@ -8,13 +8,16 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.normalize.Normalizer;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -249,12 +252,25 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
                 return null;
             }
 
-            return new LocalMilneWitten(
+            LocalSRMetric sr = new LocalMilneWitten(
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(LocalLinkDao.class,config.getString("linkDao")),
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
                     config.getBoolean("outLinks")
             );
+            try {
+                sr.read(getConfig().get().getString("sr.metric.path"));
+            } catch (IOException e){
+                sr.setDefaultSimilarityNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
+                sr.setDefaultMostSimilarNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
+                List<String> langCodes = getConfig().get().getStringList("languages");
+                for (String langCode : langCodes){
+                    Language language = Language.getByLangCode(langCode);
+                    sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
+                    sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
+                }
+            }
+            return sr;
         }
 
     }

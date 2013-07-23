@@ -82,15 +82,6 @@ public class SimilarityExample {
 
         String path = c.getConf().get().getString("sr.metric.path");
 
-        try {
-            usr.read(path);
-            sr.read(path);
-        } catch (IOException e) {
-            throw new InvalidStateException("Cached normalizers not found");
-        } catch (ClassNotFoundException e) {
-            throw new InvalidStateException("Stored normalizers in the wrong format");
-        }
-
         //Similarity between strings
         String s1 = "Barack Obama";
         String s2 = "US";

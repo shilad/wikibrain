@@ -182,7 +182,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     }
 
     @Override
-    public void read(String path) throws IOException, ClassNotFoundException {
+    public void read(String path) throws IOException {
+        try {
         ObjectInputStream oip = new ObjectInputStream(
                 new FileInputStream(path + getName() + "/normalizer/" + algorithmId + "-mostSimilarNormalizer")
         );
@@ -194,6 +195,9 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         );
         this.similarityNormalizer = (Normalizer)oip.readObject();
         oip.close();
+        }catch (ClassNotFoundException e){
+            throw new IOException("Malformed normalizer file",e);
+        }
     }
 
     @Override

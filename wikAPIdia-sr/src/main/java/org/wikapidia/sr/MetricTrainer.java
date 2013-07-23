@@ -7,6 +7,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class MetricTrainer {
 
-    public static void main(String[] args) throws ConfigurationException, DaoException, IOException, ClassNotFoundException {
+    public static void main(String[] args) throws ConfigurationException, DaoException, IOException{
         Options options = new Options();
 
         options.addOption(

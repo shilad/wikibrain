@@ -195,7 +195,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public void read(String path) throws IOException, ClassNotFoundException {
+    public void read(String path) throws IOException {
+        try {
         ObjectInputStream oip = new ObjectInputStream(
                 new FileInputStream(path + getName() + "/normalizer/defaultMostSimilarNormalizer")
         );
@@ -219,6 +220,9 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         );
         this.similarityNormalizers = (Map<Language,Normalizer>)oip.readObject();
         oip.close();
+        }catch (ClassNotFoundException e){
+            throw new IOException("Malformed normalizer file",e);
+        }
     }
 
     @Override
