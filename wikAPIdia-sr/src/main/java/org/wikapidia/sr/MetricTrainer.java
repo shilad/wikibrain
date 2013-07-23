@@ -32,34 +32,31 @@ public class MetricTrainer {
 //                        .withLongOpt("normalizer")
 //                        .withDescription("specify which normalizer to use")
 //                        .create("n"));
-        //A list of universal algorithm ids
 
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArg()
                         .withLongOpt("universal")
                         .withDescription("set a universal metric")
                         .create("u"));
-
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("algorithms")
-                        .withDescription("the set of algorithm ids for universal pages to process, separated by commas")
-                        .create("a"));
         //Number of Max Results(otherwise take from config)
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArg()
                         .withLongOpt("max-results")
                         .withDescription("the set of algorithms for universal pages to process, separated by commas")
                         .create("r"));
         //Specify the Dataset
         options.addOption(
                 new DefaultOptionBuilder()
-                        .withLongOpt("datasets")
-                        .withDescription("the set of datasets to train on, separated by commas")
-                        .create("d"));
+                        .hasArg()
+                        .withLongOpt("gold")
+                        .withDescription("the set of gold standard datasets to train on, separated by commas")
+                        .create("g"));
         //Specify the Metrics
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArg()
                         .withLongOpt("metrics")
                         .withDescription("set a local metric")
                         .create("m"));
@@ -78,15 +75,16 @@ public class MetricTrainer {
         }
 
         Env env = new Env(cmd);
-
         Configurator c = new Configurator(new Configuration());
 
         LocalSRMetric sr = c.get(LocalSRMetric.class);
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
 
-
-
         List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
+
+        int maxResults = cmd.hasOption("r")? Integer.parseInt(cmd.getOptionValue("r")) : c.getConf().get().getInt("sr.normalizer.defaultmaxresults");
+
+
 
         if (datasetConfig.size()%2 != 0) {
             throw new ConfigurationException("Datasets must be paired with a matching language");
@@ -106,11 +104,11 @@ public class MetricTrainer {
 
         for (Dataset dataset: datasets) {
             usr.trainSimilarity(dataset);
-            usr.trainMostSimilar(dataset,100,null);
+            usr.trainMostSimilar(dataset,maxResults,null);
             sr.trainDefaultSimilarity(dataset);
-            sr.trainDefaultMostSimilar(dataset,100,null);
+            sr.trainDefaultMostSimilar(dataset,maxResults,null);
             sr.trainSimilarity(dataset);
-            sr.trainMostSimilar(dataset,100,null);
+            sr.trainMostSimilar(dataset,maxResults,null);
         }
 
         usr.write(normalizerPath);

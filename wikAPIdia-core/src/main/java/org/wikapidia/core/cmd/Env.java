@@ -40,8 +40,8 @@ public class Env {
         Option toAdd[] = new Option[] {
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .withLongOpt("algorithmId")
-                        .withDescription("universal concept map algorithm id")
+                        .withLongOpt("algorithmId ")
+                        .withDescription("universal concept map algorithm name")
                         .create("n"),
                 new DefaultOptionBuilder()
                         .hasArg()
@@ -89,7 +89,7 @@ public class Env {
 
         // if an algorithm id is passed in the configuration file
         if (cmd.hasOption("n")) {
-            System.setProperty("mapper.default", cmd.getOptionValue("a"));
+            System.setProperty("mapper.default", cmd.getOptionValue("n"));
         }
 
         // Load basic configuration
