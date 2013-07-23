@@ -1,6 +1,6 @@
 #!/bin/bash
 
 source ../wikAPIdia-utils/src/main/scripts/utils.sh &&
-mvn clean &&
 compile  &&
-execClass org.wikapidia.sr.MetricTrainer || exit 1
+execClass org.wikapidia.sr.MetricTrainer $@ ||
+die "$0 failed"

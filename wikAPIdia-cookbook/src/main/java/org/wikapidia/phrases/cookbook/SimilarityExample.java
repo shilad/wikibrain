@@ -18,6 +18,9 @@ import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.ExplanationFormatter;
+import sun.plugin.dom.exception.InvalidStateException;
+
+import java.io.IOException;
 
 /**
  * @author Matt Lesicko
@@ -76,6 +79,17 @@ public class SimilarityExample {
         Disambiguator disambiguator = c.get(Disambiguator.class);
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
+
+        String normalizerPath = c.getConf().get().getString("sr.normalizer.directory");
+
+        try {
+            usr.read(normalizerPath);
+            sr.read(normalizerPath);
+        } catch (IOException e) {
+            throw new InvalidStateException("Cached normalizers not found");
+        } catch (ClassNotFoundException e) {
+            throw new InvalidStateException("Stored normalizers in the wrong format");
+        }
 
         //Similarity between strings
         String s1 = "Barack Obama";

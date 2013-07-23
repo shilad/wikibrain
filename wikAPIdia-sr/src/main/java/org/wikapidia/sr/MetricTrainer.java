@@ -51,7 +51,7 @@ public class MetricTrainer {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .withLongOpt("metrics")
+                        .withLongOpt("metric")
                         .withDescription("set a local metric")
                         .create("m"));
 
