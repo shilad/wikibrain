@@ -44,6 +44,7 @@ public class DatasetDao {
                             "'" + StringEscapeUtils.escapeJava(line) + "'");
                 }
             }
+            reader.close();
 
         } catch (IOException e) {
             throw new DaoException(e);
@@ -58,6 +59,8 @@ public class DatasetDao {
             for (KnownSim ks: dataset.data) {
                 writer.write(ks.phrase1 + delim + ks.phrase2 + delim + ks.similarity + "\n");
             }
+            writer.flush();
+            writer.close();
         } catch (IOException e) {
             throw new DaoException(e);
         }

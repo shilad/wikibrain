@@ -135,7 +135,7 @@ public class CrossValidation {
 
         }
 
-        int sumError = 0;
+        double sumError = 0;
 
         
         
