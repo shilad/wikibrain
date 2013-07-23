@@ -1,0 +1,343 @@
+antecedent	precedent	0.5946775844421699
+major depressive disorder	psychology	0.735926305015353
+credit (finance)	credit card	0.8014329580348004
+terrorism	yasser arafat	0.759467758444217
+mars	scientist	0.5527123848515865
+money	property	0.7512794268167861
+monk	slavery	0.07062436028659162
+nurse	physician	0.6929375639713409
+observation	serial (radio and television)	0.28045035823950876
+furnace	stove	0.8761514841351074
+celebrity	film	0.7318321392016377
+drink	mouth	0.586489252814739
+intelligence	student	0.4493346980552712
+image	surface	0.443193449334698
+market	stock	0.8034800409416581
+cabbage	king	0.0
+industry	opera	0.24564994882292732
+museum	theater (structure)	0.7123848515864892
+coast	forest	0.29887410440122825
+attitude (psychology)	social change	0.5332650972364381
+food	fruit	0.7461617195496417
+group (sociology)	precedent	0.15762538382804506
+capital punishment	convict	0.49129989764585463
+alcohol	chemistry	0.5435005117707267
+forest	graveyard	0.16581371545547596
+calculation	computation	0.8403275332650971
+dividend	payment	0.7574206755373593
+governor	interview	0.3091095189355169
+investor	null	0.706243602865916
+biological type	null	0.8945752302968271
+food	seafood	0.8300921187308086
+rooster	voyage	0.03991811668372569
+man	nature (innate)	0.616171954964176
+federal bureau of investigation	fingerprint	0.6867963152507677
+distance	listed building	0.2384851586489253
+energy	secretary	0.1617195496417605
+fear	psychology	0.6775844421699079
+crane (machine)	tool	0.25179119754350054
+7 (number)	series (mathematics)	0.34083930399181167
+credibility	probability	0.3735926305015353
+astronomer	planet	0.7891504605936541
+game	team	0.7635619242579325
+precedent	null	0.5752302968270214
+death	life	0.7830092118730808
+insurance	peace	0.2773797338792221
+mass media	radio broadcasting	0.735926305015353
+jaguar cars	stock	0.07062436028659162
+aluminium	metal	0.7778915046059366
+fuck	sexual intercourse	0.9426816786079836
+artifact (archaeology)	drinkware	0.27533265097236437
+music	project	0.34800409416581374
+automobile	automobile	0.8915046059365404
+anxiety	psychology	0.6929375639713409
+egg (food)	stock	0.1617195496417605
+minister (government)	political party	0.6550665301944728
+intelligence	stupidity	0.571136131013306
+drinkware	tableware	0.6775844421699079
+law	lawyer	0.8341862845445241
+news	wednesday	0.20368474923234395
+computer	news	0.4339815762538382
+experience	music	0.3316274309109519
+soldier	war	0.8085977482088025
+psychiatric hospital	null	0.8843398157625383
+drinking	eating	0.6796315250767656
+monk	monk	0.6182190378710337
+gin	vodka	0.8423746161719551
+psychiatry	psychology	0.8034800409416581
+emergency	victimology	0.638689866939611
+shore	woodland	0.29170931422722624
+energy	investigation	0.4462640736949846
+calculation	division (mathematics)	0.6397134083930399
+criminal procedure	federal bureau of investigation	0.8270214943705221
+drinkware	null	0.22210849539406347
+delay	news	0.3152507676560901
+currency	money	0.901740020470829
+coast	shore	0.9078812691914022
+century	year	0.7533265097236438
+film	movie theater	0.7871033776867963
+physician	psychology	0.6335721596724667
+king	queen regnant	0.8546571136131014
+cat	jaguar	0.735926305015353
+crisis	energy industry	0.5844421699078813
+liability	physician	0.5076765609007164
+death	disability	0.5363357215967246
+mind	psychology	0.7635619242579325
+attention	personal life	0.39201637666325484
+avenue (landscape)	street	0.8853633572159674
+closet	clothing	0.7952917093142272
+travel	voyage	0.9273285568065506
+infant	mother	0.7799385875127942
+military deployment	withdrawal (military)	0.578300921187308
+delay	racism	0.09825997952917093
+energy	laboratory	0.4974411463664278
+cucumber	potato	0.5823950870010235
+marathon	sprint (race)	0.7410440122824974
+automobile	train	0.6223132036847492
+automobile	luxury vehicle	0.638689866939611
+physical exercise	travel	0.48822927328556803
+hotel	month	0.1617195496417605
+architecture	century	0.3633572159672467
+consumer	energy (society)	0.4626407369498464
+film	popcorn	0.6100307062436029
+drink	mother	0.24769703172978505
+mars	water	0.2773797338792221
+clinic	psychology	0.6499488229273286
+collection (museum)	souvenir	0.5199590583418627
+law	precedent	0.6571136131013307
+crew	manufacturing	0.616171954964176
+food	lobster	0.7758444216990787
+soil mechanics	water	0.6479017400204707
+dollar	japanese yen	0.7727737973387923
+drinkware	food	0.48822927328556803
+compact disc	stock	0.11054247697031731
+concert	virtuoso	0.6734902763561924
+natural environment	nature	0.8270214943705221
+bishop	rabbi	0.6612077789150461
+gemstone	gemstone	0.8935516888433982
+competition (economics)	price	0.6356192425793245
+abuse	drug	0.6775844421699079
+sea	seafood	0.7410440122824974
+index	null	0.41146366427840325
+hospital	stroke	0.6960081883316275
+people	planet	0.5649948822927329
+architecture	observation	0.42476970317297846
+announcer	energy	0.2579324462640737
+sugar	null	0.06653019447287616
+school	null	0.3285568065506653
+conclusion	null	0.46878198567041957
+planet	sun	0.797338792221085
+tool	tool	0.6376663254861822
+japanese people	united states	0.6417604912998977
+girl	possibility	0.17502558853633574
+liquid	water	0.7840327533265097
+surface	territory	0.5230296827021494
+chemistry	space	0.4759467758444217
+citizenship	country	0.7246673490276355
+championship	tournament	0.8321392016376663
+sacred	sexual intercourse	0.14227226202661208
+currency	market	0.744114636642784
+radio broadcasting	television	0.6693961105424769
+size	topographic prominence	0.5199590583418627
+association football	association football	0.9007164790174002
+city block	street	0.6806550665301945
+kilometre	mile	0.8628454452405323
+noon	noon	0.9273285568065506
+space	world	0.6448311156601843
+reason	null	0.5813715455475946
+population	null	0.3602865916069601
+tiger	zoo	0.5772773797338793
+money	wealth (economics)	0.8229273285568065
+archive	video	0.6253838280450358
+announcer	news	0.7502558853633572
+film	television	0.7666325486182191
+impartiality	interest (emotion)	0.5046059365404298
+culture	minister (christianity)	0.4564994882292733
+importance	morality	0.3152507676560901
+dollar	money	0.8382804503582395
+number	world record	0.6223132036847492
+baseball	season (sports)	0.5875127942681678
+atmosphere	peace	0.35414534288638694
+planet	star	0.841351074718526
+food	rooster	0.42886386898669393
+airport	problem	0.22006141248720573
+century	nation	0.29989764585465717
+similarity	word	0.4626407369498464
+computer hardware	computer network	0.8270214943705221
+insurance	liability	0.6960081883316275
+jerusalem	palestinian people	0.759467758444217
+association football	diego maradona	0.8587512794268167
+human resources	physician	0.48822927328556803
+null	null	0.5905834186284544
+alcoholic beverage	automobile	0.28761514841351077
+bird	rooster	0.7031729785056294
+forest	wood	0.7676560900716479
+problem	null	0.6673490276356192
+bed	closet	0.6642784032753326
+opera	performance	0.6806550665301945
+weather	weather forecasting	0.8300921187308086
+drinkware	liquid	0.5803480040941659
+insurance	telephone line	0.25179119754350054
+history	theatre	0.37666325486182195
+king (chess)	rook (chess)	0.5823950870010235
+automobile	jaguar cars	0.72057318321392
+computer	internet	0.7523029682702149
+doctorate	professor	0.654042988741044
+cucumber	professor	0.00818833162743091
+prejudice	recognition	0.2835209825997953
+mammal	tiger	0.6775844421699079
+dawn	day	0.7471852610030706
+gain (finance)	mass media	0.2712384851586489
+discovery (observation)	space	0.6253838280450358
+marriage	morality	0.35414534288638694
+family	planning	0.616171954964176
+area	disaster	0.616171954964176
+outer space	planet	0.7871033776867963
+minority group	peace	0.35414534288638694
+telephone	tool	0.706243602865916
+psychology	science	0.6632548618219037
+magician (fantasy)	null	0.07062436028659162
+opera	soap opera	0.7891504605936541
+place	street	0.6356192425793245
+grocery store	money	0.5844421699078813
+drink	drinkware	0.7185261003070624
+atmosphere	landscape	0.35414534288638694
+lobster	wine	0.5598771750255885
+governor	man	0.5138178096212896
+constellation	planet	0.8014329580348004
+book	paper	0.7400204708290685
+deficit	dollar	0.5997952917093142
+egg (biology)	fertility	0.6612077789150461
+money	money laundering	0.5547594677584442
+boxing	null	0.7553735926305015
+cooking	food	0.6131013306038894
+physics	proton	0.8075742067553735
+peace	plan (policy debate)	0.4626407369498464
+book	library	0.7400204708290685
+money	possession (law)	0.7226202661207779
+deposit account	money	0.7676560900716479
+profit	null	0.3735926305015353
+canyon	landscape	0.7471852610030706
+boy	null	0.8802456499488229
+healing	medication	0.7860798362333674
+computer	computer software	0.8464687819856704
+natural satellite	planet	0.8034800409416581
+drinkware	physical body	0.35414534288638694
+secrecy	weapon	0.5967246673490276
+manslaughter	murder	0.8495394063459569
+drought	summer	0.7093142272262026
+cemetery	woodland	0.18935516888433984
+peace	null	0.41146366427840325
+eye	skin	0.6131013306038894
+death	null	0.5138178096212896
+michael jackson	yasser arafat	0.2323439099283521
+evidence (law)	lawyer	0.6612077789150461
+noon	twine	0.031729785056294785
+galaxy	planet	0.8065506653019446
+health	psychology	0.7164790174002047
+brandy	vodka	0.8085977482088025
+deficit	profit	0.7574206755373593
+gain (finance)	report	0.34800409416581374
+money	null	0.6806550665301945
+country	opec	0.5527123848515865
+day	summer	0.3797338792221085
+crisis	government	0.6479017400204707
+company	stock	0.7011258955987717
+peace	yasser arafat	0.6653019447287616
+kilometre	territory	0.5168884339815762
+glass	magic (illusion)	0.18935516888433984
+collecting	precedent	0.2323439099283521
+cognition	precedent	0.2640736949846469
+solitude	null	0.3735926305015353
+mass media	trade	0.3735926305015353
+american football	basketball	0.6734902763561924
+organism	tiger	0.46468781985670415
+professor	student	0.6734902763561924
+psychology	sigmund freud	0.8167860798362334
+courage	military decoration	0.5527123848515865
+animal	tiger	0.6929375639713409
+economic development	issue (legal)	0.38280450358239515
+jazz	rock music	0.7533265097236438
+jaguar	tiger	0.7952917093142272
+drinkware	entity	0.19651995905834185
+automobile	fixed-wing aircraft	0.5670419651995905
+recess (break)	sign	0.22006141248720573
+rain	thunderstorm	0.6223132036847492
+computer	keyboard (computing)	0.7563971340839304
+life imprisonment	null	0.43705220061412486
+film	film criticism	0.6653019447287616
+opec	oil	0.8556806550665301
+cash	money	0.9094165813715456
+money	surgery	0.3152507676560901
+life	stock	0.214431934493347
+game	null	0.6074718526100307
+magician (fantasy)	magician (fantasy)	0.8996929375639713
+bread	butter	0.6100307062436029
+bank	money	0.827021494370522
+list of academic disciplines	psychology	0.5475946775844421
+manufacturing	tool	0.5813715455475946
+board of directors	recommendation	0.4339815762538382
+information	precedent	0.37052200614124875
+drinkware	substance	0.172978505629478
+bird	crane (bird)	0.7318321392016377
+motto	volunteer	0.2384851586489253
+tiger	tiger	1.0
+hospital	infrastructure	0.4503582395087001
+oil	stock	0.6253838280450358
+chord (geometry)	smile	0.031729785056294785
+personal life	null	0.5844421699078813
+nature	summer	0.5527123848515865
+environmental preservation	world	0.6100307062436029
+institution	null	0.3029682702149437
+child	street	0.4820880245649949
+dollar	profit	0.7318321392016377
+minister (government)	senate	0.4943705220061412
+carnivore	tiger	0.7011258955987717
+admission to an event or establishment	ticket (admission)	0.7635619242579325
+man	woman	0.8259979529170932
+100 (number)	percentage	0.7318321392016377
+israel	jerusalem	0.8423746161719551
+news	report	0.8116683725690891
+sibling	null	0.4329580348004094
+governor	office	0.6253838280450358
+game	tournament	0.5875127942681678
+academic journal	professional body	0.48515864892528143
+hypertension	reason	0.2128966223132037
+glass	metal	0.5455475946775844
+5 (number)	month	0.3224155578300921
+combat	null	0.7349027635619243
+departure	military deployment	0.41146366427840325
+confidence	consumer	0.3991811668372569
+automobile	travel	0.5752302968270214
+coffee	drinkware	0.6499488229273286
+hotel	null	0.694472876151484
+medal	president	0.2835209825997953
+association football	tennis	0.6550665301944728
+love	sexual intercourse	0.6693961105424769
+racquet	tennis	0.7502558853633572
+sexual partner	null	0.6100307062436029
+cellular network	telephone	0.7758444216990787
+harvard university	yale university	0.8085977482088025
+credit (finance)	information	0.5199590583418627
+year	null	0.39201637666325484
+cat	tiger	0.728761514841351
+lobster	seafood	0.8669396110542477
+brazil	mexico	0.7379733879222109
+automobile	flight	0.4820880245649949
+fauna	tiger	0.5516888433981576
+cognition	psychology	0.7420675537359264
+computer	laboratory	0.6704196519959058
+flood	rain	0.593654042988741
+telecommunication	telephone	0.744114636642784
+dollar	dollar	0.9201637666325487
+ecology	natural environment	0.8781985670419652
+stock	telephone	0.14227226202661208
+manufacturing	null	0.3224155578300921
+monk	oracle	0.48822927328556803
+drink	ear	0.11054247697031731
+categorization	null	0.6294779938587513
+lodging	null	0.5301944728761515
+coast	hill	0.42476970317297846
+chemistry	physics	0.728761514841351
+equality	gender	0.6325486182190379
+felidae	tiger	0.7952917093142272

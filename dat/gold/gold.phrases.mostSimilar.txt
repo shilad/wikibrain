@@ -1,0 +1,280 @@
+law	precedent	0.6571136131013307
+defeat	game	0.6898669396110542
+council	minister	0.6524784483321102
+islam	north america	0.65
+shower	thunderstorm	0.6223132036847492
+battle	prisoners	0.695740365189288
+eagle	war	0.675
+dove	war	0.7
+lover	quarrel	0.6100307062436029
+cup	tableware	0.6775844421699079
+catholics	protestant	0.6524784483321102
+miniature	statue	0.6637931035054995
+art	youtube	0.625
+archive	video	0.6253838280450358
+ship	storm	0.6336206897097949
+cheese	england	0.625
+hospital	stroke	0.6960081883316275
+boxing	soccer	0.6034482759140903
+leonhard euler	physics	0.7
+abba	rock music	0.7
+democracy	religion	0.625
+doctor	psychology	0.6335721596724667
+competition	price	0.6356192425793245
+banker	coin	0.6733212340666657
+radio	television	0.6693961105424769
+dog	love	0.7
+eye	skin	0.6131013306038894
+love	sex	0.6693961105424769
+equality	gender	0.6325486182190379
+doctor	professor	0.654042988741044
+honolulu	vacation	0.690193965576741
+abuse	drug	0.6775844421699079
+led zeppelin	pop music	0.7
+crisis	government	0.6479017400204707
+homeless	refugees	0.6684350132041754
+oracle	sage	0.6641025641025641
+computer	laboratory	0.6704196519959058
+budget	scale	0.6336206897097949
+barack obama	christianity	0.65
+egg	fertility	0.6612077789150461
+american	japanese	0.6417604912998977
+insurance	liability	0.6960081883316275
+place	street	0.6356192425793245
+beethoven	composer	0.6779918866101718
+category	listing	0.6294779938587513
+oil	stock	0.6253838280450358
+crew	production	0.616171954964176
+calculation	dividend	0.6397134083930399
+bread	butter	0.6100307062436029
+television	truth	0.625
+rental	sale	0.6247464502693748
+britain	france	0.6982758620429548
+barack obama	blue	0.675
+minister	party	0.6550665301944728
+fear	yellow	0.6
+deputy	shariff	0.6767241380324763
+governor	office	0.6253838280450358
+space	world	0.6448311156601843
+deception	television	0.6
+drink	eat	0.6796315250767656
+preservation	world	0.6100307062436029
+arafat	peace	0.6653019447287616
+costume	halloween	0.6147629310874796
+animal	tiger	0.6929375639713409
+discovery	space	0.6253838280450358
+psychology	science	0.6632548618219037
+landscape	mountain	0.6524784483321102
+food	preparation	0.6131013306038894
+coffee	cup	0.6499488229273286
+day	independence	0.6256805809591105
+currency	market	0.744114636642784
+arafat	terror	0.759467758444217
+carnivore	tiger	0.7011258955987717
+feline	tiger	0.7952917093142272
+movie	star	0.7318321392016377
+newspaper	truth	0.775
+bird	cock	0.7152804159121328
+recovery	treatment	0.7860798362333674
+lion	war	0.725
+forest	wood	0.7676560900716479
+score	sports	0.7442528737279529
+admission	ticket	0.7635619242579325
+militia	weapon	0.7198275863551576
+company	stock	0.7011258955987717
+nuclear	plant	0.7040229884658641
+newspaper	technology	0.725
+bird	crane	0.7178890250330245
+poland	russia	0.7844827586883175
+english	french	0.7312373226492447
+religion	united states constitution	0.75
+announcement	news	0.7502558853633572
+defeating	fighting	0.7349027635619243
+canyon	landscape	0.7471852610030706
+dividend	payment	0.7574206755373593
+bread	italy	0.775
+africa	islam	0.775
+jazz	rock	0.7533265097236438
+sea	seafood	0.7410440122824974
+planet	sun	0.797338792221085
+aluminum	metal	0.7778915046059366
+lion	mouse	0.775
+chemistry	physics	0.728761514841351
+jaguar	tiger	0.7952917093142272
+dawn	day	0.7471852610030706
+aol instant messenger	community	0.8
+equipment	phone	0.706243602865916
+hotel	reservation	0.7983623336745137
+beer	england	0.75
+hundred	percent	0.7318321392016377
+piano	tone	0.700670498077644
+marie curie	physics	0.8
+game	team	0.7635619242579325
+candy	chocolate	0.7134888437684043
+dollar	yen	0.7727737973387923
+cat	jaguar	0.735926305015353
+assaulted	crime	0.7667342801092012
+movie	theater	0.7871033776867963
+racket	tennis	0.7502558853633572
+astronomer	planet	0.7891504605936541
+brazil	mexico	0.7379733879222109
+computer	keyboard	0.7563971340839304
+media	radio	0.735926305015353
+berlin	germany	0.7844827586883175
+planet	space	0.7871033776867963
+money	property	0.7512794268167861
+community	flickr	0.8
+opera	soap	0.7891504605936541
+communication	telephone	0.744114636642784
+century	year	0.7533265097236438
+dove	love	0.725
+museum	theater	0.7123848515864892
+artist	poetry	0.7241379310969084
+boxing	round	0.7553735926305015
+city	kansas	0.7148541113978323
+food	lobster	0.7758444216990787
+closet	clothes	0.7952917093142272
+albert einstein	chemistry	0.775
+money	possession	0.7226202661207779
+earning	investor	0.706243602865916
+marathon	sprint	0.7410440122824974
+mud	soil	0.8554766736082307
+law	lawyer	0.8341862845445241
+constellation	planet	0.8014329580348004
+harvard	yale	0.8085977482088025
+ecology	environment	0.8781985670419652
+disease	plague	0.8199797161482743
+troops	war	0.8085977482088025
+lobster	seafood	0.8669396110542477
+hawk	war	0.825
+assassination	killed	0.8706896553336803
+magician	wizard	0.8694222185042296
+art	exhibition	0.8199797161482743
+community	deviantart	0.825
+glass	tumbler	0.8794871794871796
+moon	planet	0.8034800409416581
+king	queen	0.8546571136131014
+peace	treaty	0.8347701151150665
+anniversary	marriage	0.8850574712400912
+pop music	queen (band)	0.875
+news	report	0.8116683725690891
+cord	string	0.8692307692307693
+psychiatry	psychology	0.8034800409416581
+artist	paint	0.8199797161482743
+barack obama	recession	0.9
+environment	nature	0.8270214943705221
+opec	oil	0.8556806550665301
+dollar	money	0.8382804503582395
+freud	psychology	0.8167860798362334
+israel	jerusalem	0.8423746161719551
+avenue	street	0.8853633572159674
+fishing	sea	0.8922413793441589
+computer	software	0.8464687819856704
+church	gospel	0.8033405173106328
+exchange	market	0.864942528910771
+kilometer	mile	0.8628454452405323
+forecast	weather	0.8300921187308086
+brandy	vodka	0.8085977482088025
+bank	money	0.827021494370522
+manslaughter	murder	0.8495394063459569
+actor	actress	0.8033405173106328
+money	wealth	0.8229273285568065
+battle	warships	0.8377281947273904
+calculation	computation	0.8403275332650971
+error	mistake	0.8909736307664633
+man	woman	0.8259979529170932
+community	skype	0.825
+aeronautics	plane	0.868295019298991
+peace	yasser arafat	0.825
+alan turing	computer science	0.85
+market	stock	0.8034800409416581
+asia	islam	0.875
+army	battleship	0.8554766736082307
+albert	einstein	0.864942528910771
+food	seafood	0.8300921187308086
+islam	terrorism	0.875
+kind	type	0.8945752302968271
+close	open	0.8022312372674336
+gin	vodka	0.8423746161719551
+carnivore	mammal	0.825
+alcohol	drink	0.8909736307664633
+genius	intellect	0.8119122258027512
+maradona	football	0.8587512794268167
+hill	mound	0.8794871794871796
+fire	water	0.864942528910771
+abortion	morality	0.85
+furnace	stove	0.8191738921475998
+fbi	investigation	0.8270214943705221
+planet	star	0.841351074718526
+championship	tournament	0.8321392016376663
+ocean	pacific	0.864942528910771
+dog	loyalty	1.0
+bridge	river	0.975
+autumn	summer	1.0
+liquor	scotch	0.9568965516773188
+autograph	signature	0.9153846153846154
+alligator	crocodile	1.0
+bread	france	0.95
+death	funeral	1.0
+apple inc.	google	0.925
+journey	voyage	0.9397719120979101
+blue	sadness	1.0
+cat	mouse	1.0
+mathematics	physics	1.0
+apple inc.	microsoft	0.9624999999999999
+dove	peace	0.975
+christianity	europe	0.925
+israel	war	0.975
+cat	dog	1.0
+france	wine	0.975
+autumn	spring (season)	0.975
+art	flickr	0.925
+gem	jewel	0.9567180843153208
+architect	architecture	1.0
+cushion	pillow	0.9794871794871794
+aircraft	plane	0.9274047189161556
+isaac newton	physics	1.0
+grain	wheat	1.0
+buck	dollar	0.9201637666325487
+cash	money	0.9094165813715456
+middle east	peace	0.95
+spring (season)	winter	1.0
+cheese	france	0.9125000000000001
+asylum	madhouse	0.9106052591003332
+jurisdiction	law	0.9216300942604854
+galileo galilei	physics	1.0
+community	twitter	0.925
+isaac newton	mathematics	0.95
+summer	winter	0.9363146552111048
+george w. bush	war	1.0
+football	soccer	0.9007164790174002
+midday	noon	0.931518706969705
+leonhard euler	mathematics	1.0
+cock	rooster	0.9384615384615386
+morning	sunrise	1.0
+currency	money	0.901740020470829
+radio	technology	0.925
+tiger	tiger	1.0
+art	deviantart	0.95
+automobile	car	0.9638348686455135
+beer	ireland	0.975
+facebook	google	0.925
+autumn	winter	1.0
+cemetery	graveyard	0.9897435897435898
+jazz	music	0.9454022988315002
+envy	green	1.0
+michael jackson	pop music	1.0
+spring (season)	summer	1.0
+forest	woodland	0.9307692307692308
+coast	shore	0.9228461068244845
+bear	panda	1.0
+news	radio	0.925
+ethics	evil	0.975
+community	myspace	0.975
+biology	charles darwin	1.0
+philosophy	science	0.925
+fuck	sex	0.9426816786079836
+boy	lad	0.9376459858803768
+carnivore	carnivore	1.0
+pop music	the beatles	0.975
+google	internet	1.0
