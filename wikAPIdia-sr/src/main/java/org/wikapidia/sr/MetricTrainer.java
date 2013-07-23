@@ -26,13 +26,6 @@ public class MetricTrainer {
     public static void main(String[] args) throws ConfigurationException, DaoException, IOException, ClassNotFoundException {
         Options options = new Options();
 
-//        //Which normalizer to use
-//        options.addOption(
-//                new DefaultOptionBuilder()
-//                        .withLongOpt("normalizer")
-//                        .withDescription("specify which normalizer to use")
-//                        .create("n"));
-
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
