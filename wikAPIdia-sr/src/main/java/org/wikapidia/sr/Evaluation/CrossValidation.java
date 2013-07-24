@@ -1,6 +1,8 @@
 package org.wikapidia.sr.Evaluation;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -26,45 +28,57 @@ public class CrossValidation {
 
     //Evaluation
     private static double evaluate(LocalSRMetric srMetric, Dataset dataset) throws DaoException {
-        double sum = 0;
+        int size = dataset.getData().size();
+        double[] estimate = new double[size];
+        double[] real = new double[size];
+
         int missing = 0;
         int failed = 0;
-        for (KnownSim knownSim : dataset.getData()){
+        for (int i=0; i<size; i++){
             try {
+                KnownSim knownSim = dataset.getData().get(i);
                 SRResult result = srMetric.similarity(knownSim.phrase1, knownSim.phrase2, knownSim.language, false);
                 if (Double.isNaN(result.getValue())){
                     missing++;
                 }
-                sum += Math.pow(result.getNormalized() - knownSim.similarity, 2);
+                estimate[i]=result.getNormalized();
+                real[i]=knownSim.similarity;
             } catch (Exception e){
                 failed++;
             }
 
         }
         System.out.println(missing+" missing and "+failed+" failed");
-        return sum/dataset.data.size();
+        SpearmansCorrelation pearsonsCorrelation = new SpearmansCorrelation();
+        return pearsonsCorrelation.correlation(estimate,real);
     }
 
     private static double evaluate(UniversalSRMetric srMetric, Dataset dataset) throws DaoException {
-        double sum = 0;
+        int size = dataset.getData().size();
+        double[] estimate = new double[size];
+        double[] real = new double[size];
+
         int missing = 0;
         int failed = 0;
-        for (KnownSim knownSim : dataset.getData()){
+        for (int i=0; i<size; i++){
             try {
+                KnownSim knownSim = dataset.getData().get(i);
                 LocalString phrase1 = new LocalString(knownSim.language, knownSim.phrase1);
                 LocalString phrase2 = new LocalString(knownSim.language, knownSim.phrase2);
                 SRResult result = srMetric.similarity(phrase1, phrase2, false);
                 if (Double.isNaN(result.getValue())){
                     missing++;
                 }
-                sum += Math.pow(result.getNormalized() - knownSim.similarity, 2);
+                estimate[i]=result.getNormalized();
+                real[i]=knownSim.similarity;
             }
             catch (Exception e){
                 failed++;
             }
         }
         System.out.println(missing+" missing and "+failed+" failed");
-        return sum/dataset.data.size();
+        PearsonsCorrelation pearsonsCorrelation = new PearsonsCorrelation();
+        return pearsonsCorrelation.correlation(estimate,real);
     }
 
 
@@ -160,7 +174,6 @@ public class CrossValidation {
         double sumError = 0;
 
 
-
         for (Dataset testSet : datasets){
             LocalSRMetric sr = null;
             UniversalSRMetric usr = null;
@@ -188,7 +201,6 @@ public class CrossValidation {
             }
         }
         System.out.println(sumError/k);
-
     }
 
 }
