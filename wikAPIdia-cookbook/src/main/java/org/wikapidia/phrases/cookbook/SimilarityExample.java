@@ -18,9 +18,6 @@ import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.ExplanationFormatter;
-import sun.plugin.dom.exception.InvalidStateException;
-
-import java.io.IOException;
 
 /**
  * @author Matt Lesicko
@@ -32,8 +29,8 @@ public class SimilarityExample {
             System.out.println("Result was null");
         }
         else {
-            System.out.println(localPageDao.getById(language, result.getId()).getTitle().getCanonicalTitle());
-            System.out.println("Similarity value: "+result.getValue());
+            System.out.println(localPageDao.getById(language, result.getId2()).getTitle().getCanonicalTitle());
+            System.out.println("Similarity value: "+result.getNormalized());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
                 System.out.println(expf.formatExplanation(explanation));
@@ -50,12 +47,12 @@ public class SimilarityExample {
                 System.out.println("Result was null");
             }
             else {
-                UniversalPage up = universalPageDao.getById(result.getId(), algorithmId);
+                UniversalPage up = universalPageDao.getById(result.getId2(), algorithmId);
                 LanguageSet languages = up.getLanguageSet();
                 LocalId nameId = (LocalId) up.getLocalPages(languages.getDefaultLanguage()).toArray()[0];
                 LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
                 System.out.println(namePage.getTitle().getCanonicalTitle());
-                System.out.println("Similarity value: "+result.getValue());
+                System.out.println("Similarity value: "+result.getNormalized());
                 int explanationsSeen = 0;
                 for (Explanation explanation : result.getExplanations()){
                     System.out.println(expf.formatExplanation(explanation));

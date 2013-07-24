@@ -69,7 +69,7 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
         for (int i = 0; i < list.numDocs(); i++) {
             double s = logIfNecessary(list.getScore(i));
             double score = intercept + rankCoeff * Math.log(i + 1) + scoreCoeff * s;
-            normalized.set(i, list.getId(i), score);
+            normalized.set(i, list.getId(i), list.getScore(i), score);
         }
         return normalized;
 

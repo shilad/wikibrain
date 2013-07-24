@@ -33,7 +33,7 @@ public class TestMilneWitten {
             System.out.println("Result was null");
         }
         else {
-            System.out.println("Similarity value: "+result.getValue());
+            System.out.println("Similarity value: "+result.getNormalized());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
                 System.out.println(expf.formatExplanation(explanation));

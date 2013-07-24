@@ -211,7 +211,8 @@ public class ESAMetric extends BaseLocalSRMetric {
         for (ScoreDoc scoreDoc : scoreDocs) {
             if (i < srResults.numDocs()) {
                 int localId = searcher.getLocalIdFromDocId(scoreDoc.doc, language);
-                srResults.set(i, localId, scoreDoc.score);
+                //TODO: normalize me!
+                srResults.set(i, localId, scoreDoc.score, scoreDoc.score);
                 i++;
             }
         }
@@ -220,7 +221,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 //            for (SRResult srResult : srResults) {
 //                if (srResult.getValue() != 0) {
 //                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
-//                    int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
+//                    int localPageId = searcher.getLocalIdFromDocId(srResult.id2, language);
 //                    LocalPage topPage = pageHelper.getById(language, localPageId);
 //                    if (topPage==null) {
 //                        continue;

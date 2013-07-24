@@ -46,7 +46,7 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
     @Override
     public void observe(SRResultList sims, int rank, double y) {
         if (rank >= 0) {
-            observe(sims.get(rank).getValue(), y);
+            observe(sims.get(rank).getNormalized(), y);
         } else {
             observe(Double.NaN, y);
         }
@@ -101,7 +101,7 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
         SRResultList dsl = new SRResultList(list.numDocs());
         list.setMissingScore(missingMean);
         for (int i = 0; i < list.numDocs(); i++) {
-            dsl.set(i, list.getId(i), normalize(list.getScore(i)));
+            dsl.set(i, list.getId(i), list.getScore(i), normalize(list.getScore(i)));
         }
         return dsl;
     }

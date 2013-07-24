@@ -52,6 +52,9 @@ public class PercentileNormalizer extends BaseNormalizer {
 
     @Override
     public double normalize(double x) {
+        if (Double.isNaN(x) || Double.isInfinite(x)) {
+            return missingMean;
+        }
         double sMin = sample.get(0);
         double sMax = sample.get(sample.size() - 1);
         double halfLife = (sMax - sMin) / 4.0;

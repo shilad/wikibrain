@@ -51,7 +51,7 @@ public class CosimilarityMatrixExample {
             System.out.println("\nMost similar to "+phrase.getString()+":");
             SRResultList results = sr.mostSimilar(phrase, 5);
             for (int i=0; i<results.numDocs(); i++){
-                LocalPage page = localPageDao.getById(language,results.get(i).getId());
+                LocalPage page = localPageDao.getById(language,results.get(i).getId2());
                 String name = page.getTitle().getCanonicalTitle();
                 System.out.println("#"+(i+1)+" "+name);
             }
@@ -61,7 +61,7 @@ public class CosimilarityMatrixExample {
             System.out.println("\nMost similar to "+phrase.getString()+":");
             SRResultList results = usr.mostSimilar(phrase, 5);
             for (int i=0; i<results.numDocs(); i++){
-                UniversalPage page = universalPageDao.getById(results.get(i).getId(),usr.getAlgorithmId());
+                UniversalPage page = universalPageDao.getById(results.get(i).getId2(),usr.getAlgorithmId());
                 LocalId nameId = (LocalId) page.getLocalPages(page.getLanguageSet().getDefaultLanguage()).toArray()[0];
                 LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
                 String name = namePage.getTitle().getCanonicalTitle();

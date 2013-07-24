@@ -104,7 +104,7 @@ public class Leaderboard {
     public SRResultList getTop() {
         SRResultList scores = new SRResultList(size);
         for (int i = 1; i <= size; i++) {
-            scores.set(i - 1, keys[i], values[i]);
+            scores.set(i - 1, keys[i], values[i], values[i]);
         }
         scores.sortAscending();
         return scores;

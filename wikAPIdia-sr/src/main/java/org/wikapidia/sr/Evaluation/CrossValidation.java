@@ -27,21 +27,43 @@ public class CrossValidation {
     //Evaluation
     private static double evaluate(LocalSRMetric srMetric, Dataset dataset) throws DaoException {
         double sum = 0;
+        int missing = 0;
+        int failed = 0;
         for (KnownSim knownSim : dataset.getData()){
-            SRResult result = srMetric.similarity(knownSim.phrase1, knownSim.phrase2, knownSim.language, false);
-            sum += Math.pow(result.getValue() - knownSim.similarity, 2);
+            try {
+                SRResult result = srMetric.similarity(knownSim.phrase1, knownSim.phrase2, knownSim.language, false);
+                if (Double.isNaN(result.getValue())){
+                    missing++;
+                }
+                sum += Math.pow(result.getNormalized() - knownSim.similarity, 2);
+            } catch (Exception e){
+                failed++;
+            }
+
         }
+        System.out.println(missing+" missing and "+failed+" failed");
         return sum/dataset.data.size();
     }
 
     private static double evaluate(UniversalSRMetric srMetric, Dataset dataset) throws DaoException {
         double sum = 0;
+        int missing = 0;
+        int failed = 0;
         for (KnownSim knownSim : dataset.getData()){
-            LocalString phrase1 = new LocalString(knownSim.language, knownSim.phrase1);
-            LocalString phrase2 = new LocalString(knownSim.language, knownSim.phrase2);
-            SRResult result = srMetric.similarity(phrase1, phrase2, false);
-            sum += Math.pow(result.getValue() - knownSim.similarity, 2);
+            try {
+                LocalString phrase1 = new LocalString(knownSim.language, knownSim.phrase1);
+                LocalString phrase2 = new LocalString(knownSim.language, knownSim.phrase2);
+                SRResult result = srMetric.similarity(phrase1, phrase2, false);
+                if (Double.isNaN(result.getValue())){
+                    missing++;
+                }
+                sum += Math.pow(result.getNormalized() - knownSim.similarity, 2);
+            }
+            catch (Exception e){
+                failed++;
+            }
         }
+        System.out.println(missing+" missing and "+failed+" failed");
         return sum/dataset.data.size();
     }
 
@@ -107,17 +129,17 @@ public class CrossValidation {
         List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
         String datasetPath = c.getConf().get().getString("sr.dataset.path");
         if (cmd.hasOption("g")) {
-                String[] datasetNames = cmd.getOptionValues("g");
-                for (String name : datasetNames){
-                    if (datasetConfig.contains(name)){
-                        int langPosition = datasetConfig.indexOf(name)-1;
-                        Language language = Language.getByLangCode(datasetConfig.get(langPosition));
-                        datasets.add(datasetDao.read(language,datasetPath+name));
-                    }
-                    else {
-                        throw new IllegalArgumentException("Specified dataset "+name+" is not in the configuration file.");
-                    }
+            String[] datasetNames = cmd.getOptionValues("g");
+            for (String name : datasetNames){
+                if (datasetConfig.contains(name)){
+                    int langPosition = datasetConfig.indexOf(name)-1;
+                    Language language = Language.getByLangCode(datasetConfig.get(langPosition));
+                    datasets.add(datasetDao.read(language,datasetPath+name));
                 }
+                else {
+                    throw new IllegalArgumentException("Specified dataset "+name+" is not in the configuration file.");
+                }
+            }
         } else {
             for (int i = 0; i < datasetConfig.size();i+=2) {
                 String language = datasetConfig.get(i);
@@ -137,8 +159,8 @@ public class CrossValidation {
 
         double sumError = 0;
 
-        
-        
+
+
         for (Dataset testSet : datasets){
             LocalSRMetric sr = null;
             UniversalSRMetric usr = null;
@@ -148,7 +170,7 @@ public class CrossValidation {
             if (cmd.hasOption("u")){
                 usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
             }
-            
+
             if (sr!=null){
                 for (Dataset trainingSet : datasets){
                     if (trainingSet!=testSet){

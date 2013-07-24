@@ -25,6 +25,9 @@ public class RangeNormalizer extends BaseNormalizer {
     }
 
     public double normalize(double x) {
+        if (Double.isNaN(x) || Double.isInfinite(x)) {
+            return missingMean;
+        }
         if (truncate) {
             x = Math.max(x, min);
             x = Math.min(x, max);

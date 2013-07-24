@@ -140,7 +140,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             return sr;
         }
         ensureSimilarityTrained();
-        sr.value=defaultSimilarityNormalizer.normalize(sr.value);
+        sr.normalized=defaultSimilarityNormalizer.normalize(sr.value);
         return sr;
     }
 
@@ -258,7 +258,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws IOException, DaoException {
                 SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
-                trainee.observe(sim.getValue(), ks.similarity);
+                trainee.observe(sim.getNormalized(), ks.similarity);
 
             }
         },1);
@@ -383,7 +383,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     cos[i][j]=similarity(
                             new LocalPage(language,wpRowIds[i],null,null),
                             new LocalPage(language,wpColIds[j],null,null),
-                            false).getValue();
+                            false).getNormalized();
                 }
             }
         }
@@ -399,7 +399,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     cos[i][j]=1;
                 }
                 else{
-                    cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getValue();
+                    cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getNormalized();
                 }
             }
         }
@@ -417,7 +417,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 cos[i][j]=similarity(
                         new LocalPage(language, ids[i], null, null),
                         new LocalPage(language, ids[j], null, null),
-                        false).getValue();
+                        false).getNormalized();
             }
         }
         for (int i=1; i<ids.length; i++){

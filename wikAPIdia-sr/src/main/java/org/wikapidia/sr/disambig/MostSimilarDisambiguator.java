@@ -55,8 +55,8 @@ public class MostSimilarDisambiguator extends BaseDisambiguator{
                     double score2 = candidates2.get(candidate2);
                     double srscore = 0;
                     for (SRResult score : mostSimilar){
-                        if (score.getId()==candidate2.getLocalId()){
-                            srscore=score.getValue();
+                        if (score.getId2()==candidate2.getLocalId()){
+                            srscore=score.getNormalized();
                         }
                     }
                     double score = score1*score2*srscore;
