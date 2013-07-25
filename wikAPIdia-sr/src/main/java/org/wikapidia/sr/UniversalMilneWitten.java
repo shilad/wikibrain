@@ -259,7 +259,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
 
         @Override
         public UniversalSRMetric get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("milneWitten")) {
+            if (!config.getString("type").equals("UniversalMilneWitten")) {
                 return null;
             }
 

@@ -157,7 +157,7 @@ public class RequestedLinkGetter {
                         .withValueSeparator(',')
                         .withLongOpt("names")
                         .withDescription("Names of file types, separated by comma (e.g. 'articles,abstracts'). \nDefault is " + new Configuration().get().getStringList("download.matcher"))
-                        .create("n"));
+                        .create("f"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
@@ -169,7 +169,7 @@ public class RequestedLinkGetter {
                         .hasArg()
                         .withLongOpt("date")
                         .withDescription("Dumps are pulled from on or before this date. Default is today")
-                        .create("d"));
+                        .create("y"));
 
         Env.addStandardOptions(options);
         CommandLineParser parser = new PosixParser();

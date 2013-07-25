@@ -248,7 +248,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 
         @Override
         public LocalSRMetric get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("milneWitten")) {
+            if (!config.getString("type").equals("LocalMilneWitten")) {
                 return null;
             }
 
