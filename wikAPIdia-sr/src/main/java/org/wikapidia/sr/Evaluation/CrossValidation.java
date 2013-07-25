@@ -1,7 +1,6 @@
-package org.wikapidia.sr.Evaluation;
+package org.wikapidia.sr.evaluation;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -26,7 +25,7 @@ import java.util.List;
  */
 public class CrossValidation {
 
-    //Evaluation
+    //evaluation
     private static double evaluate(LocalSRMetric srMetric, Dataset dataset) throws DaoException {
         int size = dataset.getData().size();
         double[] estimate = new double[size];
