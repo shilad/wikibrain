@@ -36,8 +36,8 @@ User Instructions
 ```
 ```bash
 -o      Sets the path to output the tsv file containing all the links
--n      Selects types of dump files to retrieve, separated by commas
--d      Sets the date to retrieve from. Files are retrieve from on or before this date
+-f      Selects types of dump files to retrieve, separated by commas
+-y      Sets the date to retrieve from. Files are retrieve from on or before this date
 ```
 
 * Run the filedownloader.sh file. The parameters should be formatted to match the following:
@@ -105,7 +105,7 @@ Optional scripts:
 [-n analyzer]
 ```
 ```bash
--n      Selects the phrase analyzer to use
+-p      Selects the phrase analyzer to use
 ```
 
 * Run luceneloader.sh. The parameters should be formatted to match the following:
@@ -115,7 +115,7 @@ Optional scripts:
 ```
 ```bash
 -d      Drops and recreates all Lucene indexes
--n      Specifies the namespaces to indexes
+-p      Specifies the namespaces to indexes
 -i      Selects the types of indexes to use, as described by the configuration file
 ```
  
