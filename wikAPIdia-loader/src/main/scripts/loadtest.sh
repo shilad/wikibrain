@@ -20,7 +20,7 @@ mvn clean
     compile  &&
     execClass org.wikapidia.download.RequestedLinkGetter \
             -l $LANGS \
-            -n articles,interlang_links,links \
+            -f articles,interlang_links,links \
             -o $DAT/dump_files.tsv &&
     execClass org.wikapidia.download.FileDownloader \
             -o $DAT/dump/ \

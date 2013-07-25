@@ -18,7 +18,6 @@ import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.ExplanationFormatter;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.io.IOException;
 
