@@ -108,7 +108,7 @@ public class TestPairwiseSimilarity {
         for (int id : ids) {
             sims.put(id, new TIntDoubleHashMap());
             for (SRResult score : cosine.mostSimilar(id, NUM_ROWS, null)) {
-                sims.get(id).put(score.getId2(), score.getValue());
+                sims.get(id).put(score.getId(), score.getValue());
             }
         }
         for (int id1 : ids) {

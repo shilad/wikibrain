@@ -8,6 +8,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
@@ -89,8 +90,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         }
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
-        result.id1=page1.getLocalId();
-        result.id2 = page2.getLocalId();
+        result.id = page2.getLocalId();
 
         //Reformat explanations to fit our metric.
         if (explanations) {
@@ -166,8 +166,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         for (int id : worthChecking.toArray()){
             TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id),outLinks);
             SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles,false);
-            result.id1 =page.getLocalId();
-            result.id2 =id;
+            result.id=id;
             results.add(result);
         }
         Collections.sort(results);

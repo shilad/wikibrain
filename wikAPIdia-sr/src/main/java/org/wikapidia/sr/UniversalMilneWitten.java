@@ -8,6 +8,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.LocalString;
@@ -73,7 +74,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         }
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
-        result.id2 = page2.getUnivId();
+        result.id = page2.getUnivId();
 
         if (explanations) {
             result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
@@ -153,7 +154,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         for (int id : worthChecking.toArray()){
             TIntSet comparisonLinks = getLinks(id, algorithmId);
             SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, false);
-            result.id2 = id;
+            result.id = id;
             results.add(result);
         }
         Collections.sort(results);

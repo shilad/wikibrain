@@ -18,6 +18,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalLinkDao {
@@ -174,9 +175,16 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         }
     }
 
+    private static final AtomicLong counter = new AtomicLong();
+    private static final AtomicLong timer = new AtomicLong();
     @Override
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
+        if (counter.incrementAndGet() % 1000 == 0) {
+            double mean = 1.0 * timer.get() / counter.get();
+            System.out.println("counter is " + counter.get() + ", mean millis is " + mean);
+        }
         Connection conn = null;
+        long start = System.currentTimeMillis();
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
@@ -191,6 +199,8 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(idField.equal(localId))
                     .fetchLazy(getFetchSize());
+            long end = System.currentTimeMillis();
+            timer.addAndGet(end - start);
             return buildLocalLinks(result, outlinks, conn);
         } catch (SQLException e) {
             quietlyCloseConn(conn);

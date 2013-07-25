@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SRResult implements Comparable<SRResult>{
-    protected int id1;
-    protected int id2;
+    protected int id;
     protected double value;
-    protected double normalized;
     protected List<Explanation> explanations;
 
     public SRResult(){
@@ -33,15 +31,11 @@ public class SRResult implements Comparable<SRResult>{
 
     public double getValue(){return value;}
 
-    public double getNormalized(){return normalized;}
-
-    public int getId1(){return id1;}
-
-    public int getId2(){return id2;}
+    public int getId(){return id;}
 
     @Override
     public int compareTo(SRResult result){
-        return ((Double)this.value).compareTo(result.getNormalized());
+        return ((Double)this.value).compareTo(result.getValue());
     }
 
     public void centerValue(double zeroValue){

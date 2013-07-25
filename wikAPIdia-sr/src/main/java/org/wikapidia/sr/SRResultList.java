@@ -28,7 +28,7 @@ public class SRResultList implements  Iterable<SRResult>{
 
     public int getIndexForId(int id) {
         for (int i = 0; i < numDocs(); i++) {
-            if (results[i].id2 == id) {
+            if (results[i].id == id) {
                 return i;
             }
         }
@@ -37,7 +37,7 @@ public class SRResultList implements  Iterable<SRResult>{
 
     public double getScoreForId(int id) {
         for (int i = 0; i < numDocs(); i++) {
-            if (results[i].id2 == id) {
+            if (results[i].id == id) {
                 return results[i].getValue();
             }
         }
@@ -45,7 +45,7 @@ public class SRResultList implements  Iterable<SRResult>{
     }
     public int getId(int i) {
         assert(i < numDocs);
-        return results[i].id2;
+        return results[i].id;
     }
 
     public double getScore(int i) {
@@ -58,23 +58,22 @@ public class SRResultList implements  Iterable<SRResult>{
         this.numDocs = numDocs;
     }
 
-    public void set(int i, int id, double score, double normalized) {
+    public void set(int i, int id, double score) {
         assert(i < numDocs);
-        results[i].id2 = id;
+        results[i].id = id;
         results[i].value = score;
-        results[i].normalized = normalized;
     }
 
     public void set (int i, SRResult result){
         assert(i<numDocs());
-        results[i].id2 =result.getId2();
+        results[i].id=result.getId();
         results[i].value=result.getValue();
         results[i].explanations = result.getExplanations();
     }
 
     public void set (int i, int id, double score, List<Explanation> explanationList){
         assert (i<numDocs);
-        results[i].id2 = id;
+        results[i].id = id;
         results[i].value = score;
         results[i].explanations = explanationList;
     }
@@ -82,7 +81,7 @@ public class SRResultList implements  Iterable<SRResult>{
     public int[] getIds() {
         int ids[] = new int[numDocs];
         for (int i = 0; i < numDocs; i++) {
-            ids[i] = results[i].id2;
+            ids[i] = results[i].id;
         }
         return ids;
     }
@@ -100,7 +99,7 @@ public class SRResultList implements  Iterable<SRResult>{
     public TIntFloatHashMap asTroveMap() {
         TIntFloatHashMap map = new TIntFloatHashMap();
         for (int i = 0; i < numDocs; i++) {
-            map.put(results[i].id2, (float) results[i].getValue());
+            map.put(results[i].id, (float) results[i].getValue());
         }
         return map;
     }

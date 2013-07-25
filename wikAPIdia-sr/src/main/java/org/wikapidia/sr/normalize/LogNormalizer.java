@@ -19,7 +19,7 @@ public class LogNormalizer implements Normalizer{
     public SRResultList normalize(SRResultList list) {
         SRResultList normalized = new SRResultList(list.numDocs());
         for (int i = 0; i < list.numDocs(); i++) {
-            normalized.set(i, list.getId(i), list.getScore(i), normalize(list.getScore(i)));
+            normalized.set(i, list.getId(i), normalize(list.getScore(i)));
         }
         return normalized;
     }
@@ -36,7 +36,7 @@ public class LogNormalizer implements Normalizer{
     @Override
     public void observe(SRResultList sims, int rank, double y) {
         for (SRResult sr : sims) {
-            observe(sr.getNormalized());
+            observe(sr.getValue());
         }
     }
 

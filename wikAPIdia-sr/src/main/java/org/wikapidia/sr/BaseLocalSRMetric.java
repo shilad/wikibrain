@@ -37,8 +37,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
     private Normalizer defaultMostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer defaultSimilarityNormalizer = new IdentityNormalizer();
-    private Map<Language, Normalizer> similarityNormalizers = new HashMap<Language, Normalizer>();
-    private Map<Language, Normalizer> mostSimilarNormalizers = new HashMap<Language, Normalizer>();
+    private Map<Integer, Normalizer> similarityNormalizers = new HashMap<Integer, Normalizer>();
+    private Map<Integer, Normalizer> mostSimilarNormalizers = new HashMap<Integer, Normalizer>();
 
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices = new HashMap<Language, SparseMatrix>();
 
@@ -102,12 +102,12 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
     @Override
     public void setMostSimilarNormalizer(Normalizer n, Language l){
-        mostSimilarNormalizers.put(l,n);
+        mostSimilarNormalizers.put((int)l.getId(),n);
     }
 
     @Override
     public void setSimilarityNormalizer(Normalizer n, Language l){
-        similarityNormalizers.put(l,n);
+        similarityNormalizers.put((int)l.getId(),n);
     }
 
     /**
@@ -140,7 +140,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             return sr;
         }
         ensureSimilarityTrained();
-        sr.normalized=defaultSimilarityNormalizer.normalize(sr.value);
+        sr.value=defaultSimilarityNormalizer.normalize(sr.value);
         return sr;
     }
 
@@ -212,13 +212,13 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         oip = new ObjectInputStream(
                 new FileInputStream(path + getName() + "/normalizer/mostSimilarNormalizers")
         );
-        this.mostSimilarNormalizers = (Map<Language,Normalizer>)oip.readObject();
+        this.mostSimilarNormalizers = (Map<Integer,Normalizer>)oip.readObject();
         oip.close();
 
         oip = new ObjectInputStream(
                 new FileInputStream(path + getName() + "/normalizer/similarityNormalizers")
         );
-        this.similarityNormalizers = (Map<Language,Normalizer>)oip.readObject();
+        this.similarityNormalizers = (Map<Integer,Normalizer>)oip.readObject();
         oip.close();
         }catch (ClassNotFoundException e){
             throw new IOException("Malformed normalizer file",e);
@@ -247,18 +247,16 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             defaultSimilarityNormalizer = new IdentityNormalizer();
 
         } else {
-            if (similarityNormalizers.containsKey(dataset.getLanguage())){
-                trainee = similarityNormalizers.get(dataset.getLanguage());
-            }
-            else {
-                trainee = new IdentityNormalizer();
-            }
-            similarityNormalizers.put(dataset.getLanguage(),new IdentityNormalizer());
+            trainee = similarityNormalizers.get((int)dataset.getLanguage().getId());
+            System.out.println(similarityNormalizers.get(Language.getByLangCode("simple")));
+            System.out.println(similarityNormalizers.toString());
+            System.out.println(similarityNormalizers.containsKey(45));
+            similarityNormalizers.put((int)dataset.getLanguage().getId(),new IdentityNormalizer());
         }
         ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws IOException, DaoException {
                 SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
-                trainee.observe(sim.getNormalized(), ks.similarity);
+                trainee.observe(sim.getValue(), ks.similarity);
 
             }
         },1);
@@ -266,7 +264,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         if (isDefault){
             defaultSimilarityNormalizer = trainee;
         } else {
-            similarityNormalizers.put(dataset.getLanguage(),trainee);
+            similarityNormalizers.put((int)dataset.getLanguage().getId(),trainee);
         }
         LOG.info("trained most similarityNormalizer for " + getName() + ": " + trainee.dump());
     }
@@ -296,13 +294,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             defaultMostSimilarNormalizer = new IdentityNormalizer();
 
         } else {
-            if (mostSimilarNormalizers.containsKey(dataset.getLanguage())){
-                trainee = mostSimilarNormalizers.get(dataset.getLanguage());
-            }
-            else {
-                trainee = new IdentityNormalizer();
-            }
-            mostSimilarNormalizers.put(dataset.getLanguage(), new IdentityNormalizer());
+            trainee = mostSimilarNormalizers.get((int)dataset.getLanguage().getId());
+            mostSimilarNormalizers.put((int)dataset.getLanguage().getId(), new IdentityNormalizer());
         }
         ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws DaoException {
@@ -324,7 +317,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         if (isDefault){
             defaultMostSimilarNormalizer = trainee;
         } else {
-            mostSimilarNormalizers.put(dataset.getLanguage(),trainee);
+            mostSimilarNormalizers.put((int)dataset.getLanguage().getId(),trainee);
         }
         LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
     }
@@ -383,7 +376,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     cos[i][j]=similarity(
                             new LocalPage(language,wpRowIds[i],null,null),
                             new LocalPage(language,wpColIds[j],null,null),
-                            false).getNormalized();
+                            false).getValue();
                 }
             }
         }
@@ -399,7 +392,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     cos[i][j]=1;
                 }
                 else{
-                    cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getNormalized();
+                    cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getValue();
                 }
             }
         }
@@ -417,7 +410,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 cos[i][j]=similarity(
                         new LocalPage(language, ids[i], null, null),
                         new LocalPage(language, ids[j], null, null),
-                        false).getNormalized();
+                        false).getValue();
             }
         }
         for (int i=1; i<ids.length; i++){

@@ -41,7 +41,7 @@ public class CrossValidation {
                 if (Double.isNaN(result.getValue())){
                     missing++;
                 }
-                estimate[i]=result.getNormalized();
+                estimate[i]=result.getValue();
                 real[i]=knownSim.similarity;
             } catch (Exception e){
                 failed++;
@@ -69,7 +69,7 @@ public class CrossValidation {
                 if (Double.isNaN(result.getValue())){
                     missing++;
                 }
-                estimate[i]=result.getNormalized();
+                estimate[i]=result.getValue();
                 real[i]=knownSim.similarity;
             }
             catch (Exception e){
@@ -77,7 +77,7 @@ public class CrossValidation {
             }
         }
         System.out.println(missing+" missing and "+failed+" failed");
-        PearsonsCorrelation pearsonsCorrelation = new PearsonsCorrelation();
+        SpearmansCorrelation pearsonsCorrelation = new SpearmansCorrelation();
         return pearsonsCorrelation.correlation(estimate,real);
     }
 

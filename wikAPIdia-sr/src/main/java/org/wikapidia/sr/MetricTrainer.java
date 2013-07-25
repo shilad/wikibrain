@@ -3,6 +3,7 @@ package org.wikapidia.sr;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.PosixParser;
+import org.h2.util.Profiler;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -122,16 +123,20 @@ public class MetricTrainer {
             }
         }
 
+
         for (Dataset dataset: datasets) {
             if (usr!=null){
                 usr.trainSimilarity(dataset);
                 usr.trainMostSimilar(dataset,maxResults,null);
             }
             if (sr!=null){
+//                Profiler profiler = new Profiler();
+//                profiler.startCollecting();
                 sr.trainDefaultSimilarity(dataset);
                 sr.trainDefaultMostSimilar(dataset,maxResults,null);
                 sr.trainSimilarity(dataset);
                 sr.trainMostSimilar(dataset,maxResults,null);
+//                System.out.println(profiler.getTop(20));
             }
         }
 

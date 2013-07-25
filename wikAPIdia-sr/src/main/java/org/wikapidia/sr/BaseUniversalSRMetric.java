@@ -155,7 +155,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     protected SRResult normalize(SRResult sr){
         ensureSimilarityTrained();
-        sr.normalized=similarityNormalizer.normalize(sr.value);
+        sr.value=similarityNormalizer.normalize(sr.value);
         return sr;
     }
 
@@ -209,7 +209,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
                 LocalString ls1 = new LocalString(ks.language,ks.phrase1);
                 LocalString ls2 = new LocalString(ks.language,ks.phrase2);
                 SRResult sim = similarity(ls1,ls2, false);
-                trainee.observe(sim.getNormalized(), ks.similarity);
+                trainee.observe(sim.getValue(), ks.similarity);
 
             }
         },1);
@@ -267,7 +267,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
                     cos[i][j]=similarity(
                         new UniversalPage(rowIds[i], algorithmId),
                         new UniversalPage(colIds[j], algorithmId),
-                        false).getNormalized();
+                        false).getValue();
                 }
             }
         }
@@ -300,7 +300,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
                 cos[i][j]=similarity(
                         new UniversalPage(ids[i], 0),
                         new UniversalPage(ids[j], 0),
-                        false).getNormalized();
+                        false).getValue();
             }
         }
         for (int i=1; i<ids.length; i++){
