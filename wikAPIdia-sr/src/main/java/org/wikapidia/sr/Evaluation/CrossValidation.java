@@ -25,15 +25,19 @@ import java.util.List;
  * @author Matt Lesicko
  */
 public class CrossValidation {
+    int missing;
+    int failed;
+
+    public CrossValidation(){
+        missing=0;
+        failed=0;
+    }
 
     //Evaluation
-    private static double evaluate(LocalSRMetric srMetric, Dataset dataset) throws DaoException {
+    private double evaluate(LocalSRMetric srMetric, Dataset dataset) throws DaoException {
         int size = dataset.getData().size();
         double[] estimate = new double[size];
         double[] real = new double[size];
-
-        int missing = 0;
-        int failed = 0;
         for (int i=0; i<size; i++){
             try {
                 KnownSim knownSim = dataset.getData().get(i);
@@ -53,13 +57,11 @@ public class CrossValidation {
         return pearsonsCorrelation.correlation(estimate,real);
     }
 
-    private static double evaluate(UniversalSRMetric srMetric, Dataset dataset) throws DaoException {
+    private double evaluate(UniversalSRMetric srMetric, Dataset dataset) throws DaoException {
         int size = dataset.getData().size();
         double[] estimate = new double[size];
         double[] real = new double[size];
 
-        int missing = 0;
-        int failed = 0;
         for (int i=0; i<size; i++){
             try {
                 KnownSim knownSim = dataset.getData().get(i);
@@ -140,9 +142,38 @@ public class CrossValidation {
 
         List<Dataset> datasets = new ArrayList<Dataset>();
         DatasetDao datasetDao = new DatasetDao();
+
+        if (!cmd.hasOption("u")&&!cmd.hasOption("m")){
+            throw new IllegalArgumentException("Must specify a metric to evaluate.");
+        }
+
+        //Build up the datasets
+        //Possible ways to build datasets:
+        //-g {DATASET NAMES} build, train and test the set of datasets against
+        //      each other
+        //-d SAVE_NAME -g {DATASET NAMES} -k # combine the datasets and split them
+        //      randomly into # folds, saving the resultant split datasets
+        //      into SAVE_NAME
+        //-l LANGUAGE -g DATASET NAME -k # load the split dataset saved as DATASET
+        //      NAME that is in LANGUAGE
+        //-l LANGUAGE -d SAVE_NAME -g DATASET NAME -k load resplit the split
+        //      dataset into # folds, saving the resultant split datasets
+        //      into SAVE_NAME
         List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
         String datasetPath = c.getConf().get().getString("sr.dataset.path");
-        if (cmd.hasOption("g")) {
+        if (cmd.hasOption("l")){
+            Language language = Language.getByLangCode(cmd.getOptionValue("l"));
+            if (cmd.hasOption("g")){
+                String name = cmd.getOptionValue("g");
+                int splits = Integer.parseInt(cmd.getOptionValue("k"));
+                for (int i=1;i<=Integer.parseInt(cmd.getOptionValue("k"));i++){
+                    datasets.add(datasetDao.read(language,datasetPath+name+"-"+i+"of"+splits+".txt"));
+                }
+            } else {
+                throw new IllegalArgumentException("Did not specify a dataset to reload.");
+            }
+        }
+        else if (cmd.hasOption("g")) {
             String[] datasetNames = cmd.getOptionValues("g");
             for (String name : datasetNames){
                 if (datasetConfig.contains(name)){
@@ -174,6 +205,8 @@ public class CrossValidation {
         double sumError = 0;
 
 
+        CrossValidation crossValidation = new CrossValidation();
+
         for (Dataset testSet : datasets){
             LocalSRMetric sr = null;
             UniversalSRMetric usr = null;
@@ -187,20 +220,22 @@ public class CrossValidation {
             if (sr!=null){
                 for (Dataset trainingSet : datasets){
                     if (trainingSet!=testSet){
+                        sr.trainDefaultSimilarity(trainingSet);
                         sr.trainSimilarity(trainingSet);
                     }
                 }
-                sumError+=evaluate(sr,testSet);
+                sumError+=crossValidation.evaluate(sr,testSet);
             } else if (usr!=null){
                 for (Dataset trainingSet : datasets){
                     if (trainingSet!=testSet){
                         usr.trainSimilarity(trainingSet);
                     }
                 }
-                sumError+=evaluate(usr,testSet);
+                sumError+=crossValidation.evaluate(usr,testSet);
             }
         }
         System.out.println(sumError/k);
+        System.out.println(crossValidation.missing+" missing and "+crossValidation.failed+" failed");
     }
 
 }

@@ -2,7 +2,9 @@ package org.wikapidia.sr;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
@@ -116,21 +118,19 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         } else {
             //Only check pages that share at least one inlink/outlink.
             TIntSet linkPages = getLinks(page.toLocalId(),outLinks);
-            TIntSet worthChecking = new TIntHashSet();
+            TIntIntMap worthChecking = new TIntIntHashMap();
             for (int id : linkPages.toArray()){
                 TIntSet links = getLinks(new LocalId(page.getLanguage(), id), !outLinks);
                 for (int link: links.toArray()){
-                     worthChecking.add(link);
+                    if (validIds==null||validIds.contains(link)){
+                        worthChecking.adjustOrPutValue(link,1,1);
+                    }
                 }
             }
 
             //Don't try to check red links.
-            if (worthChecking.contains(-1)){
+            if (worthChecking.containsKey(-1)){
                 worthChecking.remove(-1);
-            }
-
-            if (validIds!=null){
-                worthChecking.retainAll(validIds);
             }
 
             return mostSimilarFromKnown(page, maxResults,worthChecking);
@@ -146,12 +146,12 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
      * @return
      * @throws DaoException
      */
-    private SRResultList mostSimilarFromKnown(LocalPage page, int maxResults, TIntSet worthChecking) throws DaoException {
+    private SRResultList mostSimilarFromKnown(LocalPage page, int maxResults, TIntIntMap worthChecking) throws DaoException {
         if (worthChecking==null){
             return new SRResultList(maxResults);
         }
 
-        TIntSet pageLinks = getLinks(page.toLocalId(),outLinks);
+        int pageLinks = getNumLinks(page.toLocalId(),outLinks);
 
         int numArticles;
         if (numPages.containsKey(page.getLanguage())) {
@@ -163,9 +163,13 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         }
 
         List<SRResult> results = new ArrayList<SRResult>();
-        for (int id : worthChecking.toArray()){
-            TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id),outLinks);
-            SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles,false);
+        for (int id : worthChecking.keys()){
+            int comparisonLinks = getNumLinks(new LocalId(page.getLanguage(),id), outLinks);
+            SRResult result = new SRResult(1.0-(
+                    (Math.log(Math.max(pageLinks,comparisonLinks))
+                            -Math.log(worthChecking.get(id)))
+                            / (Math.log(numArticles)
+                            - Math.log(Math.min(pageLinks,comparisonLinks)))));
             result.id=id;
             results.add(result);
         }
@@ -229,6 +233,16 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             }
         }
         return linkIds;
+    }
+
+    private int getNumLinks(LocalId id, boolean outLinks) throws DaoException {
+        DaoFilter daoFilter = new DaoFilter().setLanguages(id.getLanguage());
+        if (outLinks){
+            daoFilter.setSourceIds(id.getId());
+        } else {
+            daoFilter.setDestIds(id.getId());
+        }
+        return linkHelper.getCount(daoFilter);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {

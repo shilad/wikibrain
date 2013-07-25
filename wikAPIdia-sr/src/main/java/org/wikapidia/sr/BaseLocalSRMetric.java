@@ -248,9 +248,6 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
         } else {
             trainee = similarityNormalizers.get((int)dataset.getLanguage().getId());
-            System.out.println(similarityNormalizers.get(Language.getByLangCode("simple")));
-            System.out.println(similarityNormalizers.toString());
-            System.out.println(similarityNormalizers.containsKey(45));
             similarityNormalizers.put((int)dataset.getLanguage().getId(),new IdentityNormalizer());
         }
         ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
