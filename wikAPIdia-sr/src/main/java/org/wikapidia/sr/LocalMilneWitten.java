@@ -86,7 +86,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         if (numPages.containsKey(page1.getLanguage())) {
             numArticles = numPages.get(page1.getLanguage());
         } else {
-            DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
+            DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage()).setRedirect(false);
             numArticles = pageHelper.getCount(pageFilter);
             numPages.put(page1.getLanguage(), numArticles);
         }

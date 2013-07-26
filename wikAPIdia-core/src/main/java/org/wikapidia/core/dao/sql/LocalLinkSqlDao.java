@@ -110,7 +110,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
             if (daoFilter.isParseable() != null) {
                 conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(daoFilter.isParseable()));
             }
-            return context.select().
+            return context.selectDistinct(Tables.LOCAL_LINK.SOURCE_ID,Tables.LOCAL_LINK.DEST_ID).
                     from(Tables.LOCAL_LINK).
                     where(conditions).
                     fetchCount();
