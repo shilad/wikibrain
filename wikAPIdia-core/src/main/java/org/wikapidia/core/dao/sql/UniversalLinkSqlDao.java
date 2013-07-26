@@ -81,10 +81,10 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
-            if (daoFilter.getNameSpaceIds() != null) {
+            if (daoFilter.getSourceIds() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID.in(daoFilter.getSourceIds()));
             }
-            if (daoFilter.getNameSpaceIds() != null) {
+            if (daoFilter.getDestIds() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.in(daoFilter.getDestIds()));
             }
             if (daoFilter.isRedirect() != null) {
@@ -108,17 +108,17 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
-            if (daoFilter.getNameSpaceIds() != null) {
+            if (daoFilter.getSourceIds() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID.in(daoFilter.getSourceIds()));
             }
-            if (daoFilter.getNameSpaceIds() != null) {
+            if (daoFilter.getDestIds() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.in(daoFilter.getDestIds()));
             }
             if (daoFilter.isRedirect() != null) {
                 conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
             }
             return context.selectDistinct(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID, Tables.UNIVERSAL_LINK.UNIV_DEST_ID, Tables.UNIVERSAL_LINK.ALGORITHM_ID)
-                    .from(Tables.UNIVERSAL_PAGE)
+                    .from(Tables.UNIVERSAL_LINK)
                     .where(conditions)
                     .fetchCount();
         } catch (SQLException e) {
