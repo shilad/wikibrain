@@ -52,7 +52,6 @@ public class CrossValidation {
             }
 
         }
-        System.out.println(missing+" missing and "+failed+" failed");
         SpearmansCorrelation pearsonsCorrelation = new SpearmansCorrelation();
         return pearsonsCorrelation.correlation(estimate,real);
     }
