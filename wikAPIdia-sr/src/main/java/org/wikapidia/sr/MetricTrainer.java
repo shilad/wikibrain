@@ -14,6 +14,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
@@ -29,7 +30,7 @@ import java.util.List;
  */
 public class MetricTrainer {
 
-    public static void main(String[] args) throws ConfigurationException, DaoException, IOException{
+    public static void main(String[] args) throws ConfigurationException, DaoException, IOException, WikapidiaException {
         Options options = new Options();
 
         options.addOption(
@@ -117,6 +118,12 @@ public class MetricTrainer {
             }
         }
 
+
+        List<Language> languages = new ArrayList<Language>();
+        for (Dataset dataset : datasets){
+            languages.add(dataset.getLanguage());
+        }
+        LanguageSet languageSet = new LanguageSet(languages);
 
         LocalSRMetric sr=null;
         UniversalSRMetric usr=null;

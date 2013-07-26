@@ -291,6 +291,9 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                 usr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")));
                 usr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")));
             }
+            try {
+                usr.readCosimilarity(getConfig().get().getString("sr.metric.path"));
+            } catch (IOException e){}
             return usr;
         }
     }

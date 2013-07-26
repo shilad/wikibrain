@@ -327,22 +327,32 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     }
 
     @Override
-    public void writeCosimilarity(String path, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
-        path = path + getName()+"/matrix/" + algorithmId;
-        SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
-        DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
-        Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
-        TIntSet pageIds = new TIntHashSet();
-        for (UniversalPage page : universalPages) {
-            if (page != null) {
-                pageIds.add(page.getUnivId());
+    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException{
+        try {
+            path = path + getName()+"/matrix/" + algorithmId;
+            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
+            DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+            Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
+            TIntSet pageIds = new TIntHashSet();
+            for (UniversalPage page : universalPages) {
+                if (page != null) {
+                    pageIds.add(page.getUnivId());
+                }
             }
-        }
 
-        featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-        PairwiseMilneWittenSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
-        PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
-        pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
-        mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
+            featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
+            PairwiseMilneWittenSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
+            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
+            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+            mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
+        }catch (InterruptedException e){
+            throw new RuntimeException();
+        }
+    }
+
+    @Override
+    public void readCosimilarity (String path) throws IOException{
+        path = path + getName()+"/matrix/" + algorithmId + "-cosimilarity";
+        mostSimilarUniversalMatrix = new SparseMatrix(new File(path));
     }
 }

@@ -32,11 +32,12 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private final LuceneSearcher searcher;
 
-    public ESAMetric(Language language, LuceneSearcher searcher, LocalPageDao pageHelper) {
+    public ESAMetric(LuceneSearcher searcher, LocalPageDao pageHelper) {
         this.searcher = searcher;
         this.pageHelper = pageHelper;
     }
 
+    //TODO: mostSimilar directly on a phrase
     /**
      * Get cosine similarity between two phrases.
      *
@@ -47,6 +48,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      * @throws DaoException
      */
+    @Override
     public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
         if (phrase1 == null || phrase2 == null) {
             throw new NullPointerException("Null phrase passed to similarity");
@@ -116,7 +118,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      * @throws DaoException
      */
-    public TIntDoubleHashMap getConceptVector(LocalPage localPage, Language language) throws DaoException { // TODO: validIDs
+    private TIntDoubleHashMap getConceptVector(LocalPage localPage, Language language) throws DaoException { // TODO: validIDs
         QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language)), language);
@@ -216,23 +218,6 @@ public class ESAMetric extends BaseLocalSRMetric {
                 i++;
             }
         }
-//        if (explanations) {
-//            String format = "?'s similar pages include ?";
-//            for (SRResult srResult : srResults) {
-//                if (srResult.getValue() != 0) {
-//                    List<LocalPage> formatPages =new ArrayList<LocalPage>();
-//                    int localPageId = searcher.getLocalIdFromDocId(srResult.id, language);
-//                    LocalPage topPage = pageHelper.getById(language, localPageId);
-//                    if (topPage==null) {
-//                        continue;
-//                    }
-//                    formatPages.add(localPage);
-//                    formatPages.add(topPage);
-//                    Explanation explanation = new Explanation(format, formatPages);
-//                    srResult.addExplanation(explanation);
-//                }
-//            }
-//        }
         return srResults;
     }
 
@@ -263,11 +248,6 @@ public class ESAMetric extends BaseLocalSRMetric {
     @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public double[][] cosimilarity(String[] phrases, Language language) {
-        return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public String getName() {

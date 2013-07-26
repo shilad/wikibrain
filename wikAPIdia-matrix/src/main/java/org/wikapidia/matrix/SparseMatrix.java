@@ -42,7 +42,11 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
     public SparseMatrix(File path, int maxOpenPages, int maxPageSize) throws IOException {
         this.path = path;
         this.maxPageSize = maxPageSize;
-        info("initializing sparse matrix with file length " + FileUtils.sizeOf(path));
+        try { //If the file doesn't exist, throw an IOException
+            info("initializing sparse matrix with file length " + FileUtils.sizeOf(path));
+        }catch (IllegalArgumentException e){
+            throw new IOException(e);
+        }
         this.channel = (new FileInputStream(path)).getChannel();
         readHeaders();
         rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets, maxOpenPages, maxPageSize);

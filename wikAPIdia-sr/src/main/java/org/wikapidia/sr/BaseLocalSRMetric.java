@@ -433,25 +433,35 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(String path, LanguageSet languages, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
-        for (Language language: languages) {
-            path = path + getName() + "/matrix/" + language.getLangCode();
-            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this, language);
-            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
-            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
-            TIntSet pageIds = new TIntHashSet();
-            for (LocalPage page : localPages) {
-                if (page != null) {
-                    pageIds.add(page.getLocalId());
+    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException{
+        try {
+            for (Language language: languages) {
+                String fullPath = path + getName() + "/matrix/" + language.getLangCode();
+                SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(fullPath, this, language);
+                DaoFilter pageFilter = new DaoFilter().setLanguages(language);
+                Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
+                TIntSet pageIds = new TIntHashSet();
+                for (LocalPage page : localPages) {
+                    if (page != null) {
+                        pageIds.add(page.getLocalId());
+                    }
                 }
-            }
 
-            featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-            PairwiseSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
-            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
-            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
-            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(path+"-cosimilarity")));
+                featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
+                PairwiseSimilarity pairwise = new PairwiseMilneWittenSimilarity(fullPath);
+                PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(fullPath,pairwise);
+                pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+                mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
+            }
+        } catch (InterruptedException e){
+            throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void readCosimilarity(String path, Language language) throws IOException {
+        String fullPath = path + getName() + "/matrix/" + language.getLangCode()+"-cosimilarity";
+        mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath)));
     }
 
 }
