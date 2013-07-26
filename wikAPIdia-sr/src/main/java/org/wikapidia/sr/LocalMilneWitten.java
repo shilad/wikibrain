@@ -157,7 +157,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         if (numPages.containsKey(page.getLanguage())) {
             numArticles = numPages.get(page.getLanguage());
         } else {
-            DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
+            DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage()).setRedirect(false);
             numArticles = pageHelper.getCount(pageFilter);
             numPages.put(page.getLanguage(), numArticles);
         }
@@ -237,6 +237,11 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 
     private int getNumLinks(LocalId id, boolean outLinks) throws DaoException {
         DaoFilter daoFilter = new DaoFilter().setLanguages(id.getLanguage());
+//        if (outLinks){
+//            daoFilter.setDestIds(id.getId());
+//        } else {
+//            daoFilter.setSourceIds(id.getId());
+//        }
         if (outLinks){
             daoFilter.setSourceIds(id.getId());
         } else {
