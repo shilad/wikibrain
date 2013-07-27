@@ -19,6 +19,9 @@ import org.wikapidia.utils.ObjectDb;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -163,17 +166,148 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
     @Override
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException {
-        return delegate.getLinks(language, localId, outlinks);
+        LocalId id = new LocalId(language, localId);
+        if (!id.canPackInInt()) {
+            return delegate.getLinks(language, localId, outlinks);
+        }
+        List<LocalLink> links = new ArrayList<LocalLink>();
+        try {
+            SparseMatrixRow row = outlinks ? matrix.getRow(id.toInt()) : transpose.getRow(id.toInt());
+            if (row == null) {
+                return links;
+            }
+            for (int i = 0; i < row.getNumCols(); i++) {
+                LocalId lid = LocalId.fromInt(row.getColIndex(i));
+                int srcId = outlinks ? localId : lid.getId();
+                int destId = outlinks ? lid.getId() : localId;
+                LocalLink ll = new LocalLink(
+                        lid.getLanguage(),
+                        null,
+                        srcId,
+                        destId,
+                        outlinks,
+                        0,
+                        true,
+                        LocalLink.LocationType.NONE
+                );
+                links.add(ll);
+            }
+            return links;
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
     }
 
     @Override
     public Iterable<LocalLink> get(DaoFilter daoFilter) throws DaoException {
-        return delegate.get(daoFilter);
+        // there must be languages
+        if (daoFilter.getLangIds() == null) {
+            return delegate.get(daoFilter);
+        }
+        // either source ids or dest ids must be set
+        if (daoFilter.getSourceIds() == null && daoFilter.getDestIds() == null) {
+            return delegate.get(daoFilter);
+        }
+        // both must not be set
+        if (daoFilter.getSourceIds() != null && daoFilter.getDestIds() != null) {
+            return delegate.get(daoFilter);
+        }
+        // we don't handle location types
+        if (daoFilter.getLocTypes() != null || daoFilter.isParseable() != null) {
+            return delegate.get(daoFilter);
+        }
+
+        // collect link set
+        List<LocalLink> links = new ArrayList<LocalLink>();
+        if (daoFilter.getSourceIds() != null) {
+            for (int langId : daoFilter.getLangIds()) {
+                for (int srcId : daoFilter.getSourceIds()) {
+                    for (LocalLink ll : getLinks(Language.getById(langId), srcId, true)) {
+                        links.add(ll);
+                    }
+                }
+            }
+        } else if (daoFilter.getDestIds() != null) {
+            for (int langId : daoFilter.getLangIds()) {
+                for (int destId : daoFilter.getDestIds()) {
+                    for (LocalLink ll : getLinks(Language.getById(langId), destId, false)) {
+                        links.add(ll);
+                    }
+                }
+            }
+        }
+        return links;
     }
 
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException {
-        return delegate.getCount(daoFilter);
+        // there must be languages
+        if (daoFilter.getLangIds() == null) {
+            return delegate.getCount(daoFilter);
+        }
+        // either source ids or dest ids must be set
+        if (daoFilter.getSourceIds() == null && daoFilter.getDestIds() == null) {
+            return delegate.getCount(daoFilter);
+        }
+        // both must not be set
+        if (daoFilter.getSourceIds() != null && daoFilter.getDestIds() != null) {
+            return delegate.getCount(daoFilter);
+        }
+        // we don't handle location types
+        if (daoFilter.getLocTypes() != null || daoFilter.isParseable() != null) {
+            return delegate.getCount(daoFilter);
+        }
+
+        // collect link count
+        try {
+            int count = 0;
+            if (daoFilter.getSourceIds() != null) {
+                List<Integer> packed = getPackedIds(daoFilter);
+                if (packed == null) {
+                    return delegate.getCount(daoFilter);
+                }
+                for (int key : packed) {
+                    SparseMatrixRow row = matrix.getRow(key);
+                    count += (row == null) ? 0 : row.getNumCols();
+                }
+            } else if (daoFilter.getDestIds() != null) {
+                List<Integer> packed = getPackedIds(daoFilter);
+                if (packed == null) {
+                    return delegate.getCount(daoFilter);
+                }
+                for (int key : packed) {
+                    SparseMatrixRow row = transpose.getRow(key);
+                    count += (row == null) ? 0 : row.getNumCols();
+                }
+            } else {
+                throw new IllegalArgumentException();
+            }
+            return count;
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    private List<Integer> getPackedIds(DaoFilter filter) {
+        if (filter.getSourceIds() != null && filter.getDestIds() != null) {
+            throw new IllegalArgumentException();
+        }
+        Collection<Integer> ids = (filter.getSourceIds() != null)
+                ? filter.getSourceIds() : filter.getDestIds();
+        if (ids == null) {
+            throw new IllegalArgumentException();
+        }
+        List<Integer> packed = new ArrayList<Integer>();
+        for (int langId : filter.getLangIds()) {
+            for (int id : ids) {
+                LocalId lid = new LocalId(Language.getById(langId), id);
+                if (!lid.canPackInInt()) {
+                    return null;
+                }
+                packed.add(lid.toInt());
+            }
+        }
+        return packed;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalLinkDao> {
