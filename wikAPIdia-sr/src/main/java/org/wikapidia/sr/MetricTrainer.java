@@ -154,12 +154,12 @@ public class MetricTrainer {
         }
 
         if (usr!=null){
-            (new File(path + cmd.getOptionValue("u") + "/" + "normalizer/")).mkdir();
+            (new File(path + cmd.getOptionValue("u") + "/" + "normalizer/")).mkdirs();
             usr.write(path);
             usr.read(path);
         }
         if (sr!=null){
-            (new File(path + cmd.getOptionValue("m") + "/" + "normalizer/")).mkdir();
+            (new File(path + cmd.getOptionValue("m") + "/" + "normalizer/")).mkdirs();
             sr.write(path);
             sr.read(path);
         }

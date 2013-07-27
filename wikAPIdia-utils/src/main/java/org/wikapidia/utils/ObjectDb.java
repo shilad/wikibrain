@@ -93,6 +93,10 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
         this.env.close();
     }
 
+    public void flush() {
+        this.db.sync();
+    }
+
     public void remove(String key) throws UnsupportedEncodingException, DatabaseException {
         this.db.delete(null, new DatabaseEntry(key.getBytes("UTF-8")));
     }
