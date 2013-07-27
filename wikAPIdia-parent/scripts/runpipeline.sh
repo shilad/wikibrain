@@ -52,7 +52,7 @@ if [ "$stage" -le 4 ]; then
 fi
 
 if [ "$stage" -le 5 ]; then
-    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.PhraseLoader -n anchortext $@) &&
+    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.PhraseLoader -p anchortext $@) &&
     (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.LuceneLoader -d $@) ||
     die "$0 failed"
 fi

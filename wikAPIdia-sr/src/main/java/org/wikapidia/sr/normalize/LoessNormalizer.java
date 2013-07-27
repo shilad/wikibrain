@@ -1,5 +1,6 @@
 package org.wikapidia.sr.normalize;
 
+import com.typesafe.config.Config;
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -7,6 +8,9 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
 import org.apache.commons.math3.stat.ranking.NaturalRanking;
 import org.apache.commons.math3.stat.ranking.TiesStrategy;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.utils.MathUtils;
 
 import java.text.DecimalFormat;
@@ -190,5 +194,32 @@ public class LoessNormalizer extends BaseNormalizer {
 
     public void setMonotonic(boolean b) {
         this.monotonic = b;
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LoessNormalizer> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return Normalizer.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "sr.normalizer";
+        }
+
+        @Override
+        public LoessNormalizer get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("loess")) {
+                return null;
+            }
+
+            return new LoessNormalizer(
+            );
+        }
+
     }
 }

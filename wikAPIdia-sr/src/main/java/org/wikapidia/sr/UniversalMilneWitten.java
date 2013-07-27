@@ -2,17 +2,23 @@ package org.wikapidia.sr;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.normalize.Normalizer;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -26,6 +32,8 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
     private UniversalLinkDao universalLinkDao;
     private boolean outLinks;
     private MilneWittenCore core;
+    private Integer numArticles = null;
+
 
     public UniversalMilneWitten(Disambiguator disambiguator, UniversalPageDao universalPageDao, int algorithmId, UniversalLinkDao universalLinkDao){
         this(disambiguator, universalPageDao, algorithmId, universalLinkDao,false);
@@ -40,7 +48,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
 
     @Override
     public String getName() {
-        return "MilneWitten";
+        return "UniversalMilneWitten";
     }
 
     public boolean isOutLinks() {
@@ -62,7 +70,10 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         TIntSet A = getLinks(page1.getUnivId(), algorithmId);
         TIntSet B = getLinks(page2.getUnivId(), algorithmId);
 
-        int numArticles = universalPageDao.getNumUniversalPages(page1.getAlgorithmId());
+        if (numArticles == null) {
+            DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+            numArticles = universalPageDao.getCount(daoFilter);
+        }
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
         result.id = page2.getUnivId();
@@ -71,7 +82,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
         }
 
-        return result;
+        return normalize(result);
     }
 
     @Override
@@ -79,12 +90,16 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         return super.similarity(phrase1,phrase2,explanations);
     }
 
+    @Override
+    public SRResultList mostSimilar(UniversalPage page, int maxResults) throws DaoException{
+        return mostSimilar(page,maxResults,null);
+    }
+
 
     @Override
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException {
-        SRResultList mostSimilar;
-        if (hasCachedMostSimilarUniversal(page.getUnivId())&&!explanations){
-            mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, null);
+    public SRResultList mostSimilar(UniversalPage page, int maxResults, TIntSet validIds) throws DaoException {
+        if (hasCachedMostSimilarUniversal(page.getUnivId())){
+            SRResultList mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, validIds);
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
@@ -92,7 +107,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         } else {
             //Only check pages that share at least one inlink/outlink.
             TIntSet linkPages = getLinks(page.getUnivId(), algorithmId);
-            TIntSet worthChecking = new TIntHashSet();
+            TIntIntMap worthChecking = new TIntIntHashMap();
             for (int id : linkPages.toArray()){
                 TIntSet links;
                 if (outLinks){
@@ -101,56 +116,60 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                     links = universalLinkDao.getOutlinkIds(id,algorithmId);
                 }
                 for (int link : links.toArray()){
-                    worthChecking.add(link);
+                    if (validIds==null||validIds.contains(link)){
+                        worthChecking.adjustOrPutValue(link,1,1);
+                    }
                 }
             }
             //Don't try to check red links.
-            if (worthChecking.contains(-1)){
+            if (worthChecking.containsKey(-1)){
                 worthChecking.remove(-1);
             }
-            return mostSimilar(page, maxResults, explanations,worthChecking);
+
+            return mostSimilarFromKnown(page, maxResults, worthChecking);
         }
     }
 
-    @Override
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
-        if (validIds==null){
-            return mostSimilar(page,maxResults,explanations);
+    /**
+     * This is an unoptimized mostSimilar method. It should never get called except from
+     * the mostSimilar methods that create a list of IDs that is worth checking.
+     * @param page
+     * @param maxResults
+     * @param worthChecking the only IDs that will be checked. These should be generated from a list of ids known to be similar.
+     * @return
+     * @throws DaoException
+     */
+    private SRResultList mostSimilarFromKnown(UniversalPage page, int maxResults, TIntIntMap worthChecking) throws DaoException {
+        if (worthChecking==null){
+            return new SRResultList(maxResults);
         }
-        SRResultList mostSimilar;
-        if (hasCachedMostSimilarUniversal(page.getUnivId())&&!explanations){
-            mostSimilar= getCachedMostSimilarUniversal(page.getUnivId(), maxResults, validIds);
-            if (mostSimilar.numDocs()>maxResults){
-                mostSimilar.truncate(maxResults);
-            }
-            return mostSimilar;
-        } else {
-            TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
+        int pageLinks = getNumLinks(page.getUnivId(), algorithmId, outLinks);
 
-
-            int numArticles = universalPageDao.getNumUniversalPages(algorithmId);
-
-            List<SRResult> results = new ArrayList<SRResult>();
-            for (int id : validIds.toArray()){
-                TIntSet comparisonLinks = getLinks(id, algorithmId);
-                SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
-                result.id = id;
-                if (explanations){
-                    UniversalPage up = universalPageDao.getById(id,algorithmId);
-                    result.setExplanations(reformatExplanations(result.getExplanations(),page,up));
-                }
-                results.add(result);
-            }
-            Collections.sort(results);
-            Collections.reverse(results);
-
-            SRResultList  resultList = new SRResultList(maxResults);
-            for (int i=0; i<maxResults&&i<results.size(); i++){
-                resultList.set(i,results.get(i));
-            }
-
-            return resultList;
+        if (numArticles == null) {
+            DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+            numArticles = universalPageDao.getCount(daoFilter);
         }
+
+        List<SRResult> results = new ArrayList<SRResult>();
+        for (int id : worthChecking.keys()){
+            int comparisonLinks = getNumLinks(id, algorithmId, outLinks);
+            SRResult result = new SRResult(1.0-(
+                    (Math.log(Math.max(pageLinks,comparisonLinks))
+                            -Math.log(worthChecking.get(id)))
+                            / (Math.log(numArticles)
+                            - Math.log(Math.min(pageLinks,comparisonLinks)))));
+            result.id = id;
+            results.add(result);
+        }
+        Collections.sort(results);
+        Collections.reverse(results);
+
+        SRResultList  resultList = new SRResultList(maxResults);
+        for (int i=0; i<maxResults&&i<results.size(); i++){
+            resultList.set(i,results.get(i));
+        }
+
+        return normalize(resultList);
     }
 
     @Override
@@ -219,12 +238,23 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                 linkIds.add(link);
             }
         } else {
-            TIntSet links = universalLinkDao.getInlinkIds(universeId,algorithmId);
+            TIntSet links = universalLinkDao.getOutlinkIds(universeId, algorithmId);
             for (Integer link : links.toArray()){
                 linkIds.add(link);
             }
         }
         return linkIds;
+    }
+
+    private int getNumLinks(int universeId, int algorithmId, boolean outLinks) throws DaoException {
+        DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+        if (outLinks){
+            daoFilter.setSourceIds(universeId);
+        }
+        else {
+            daoFilter.setDestIds(universeId);
+        }
+        return universalLinkDao.getCount(daoFilter);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<UniversalSRMetric> {
@@ -244,17 +274,27 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
 
         @Override
         public UniversalSRMetric get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("milneWitten")) {
+            if (!config.getString("type").equals("UniversalMilneWitten")) {
                 return null;
             }
 
-            return new UniversalMilneWitten(
+            UniversalSRMetric usr = new UniversalMilneWitten(
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(UniversalPageDao.class,config.getString("pageDao")),
-                    config.getInt("algorithmId"),
+                    Env.getUniversalConceptAlgorithmId(getConfig()),
                     getConfigurator().get(UniversalLinkDao.class,config.getString("linkDao")),
                     config.getBoolean("outLinks")
             );
+            try {
+                usr.read(getConfig().get().getString("sr.metric.path"));
+            } catch (IOException e){
+                usr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")));
+                usr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")));
+            }
+            try {
+                usr.readCosimilarity(getConfig().get().getString("sr.metric.path"));
+            } catch (IOException e){}
+            return usr;
         }
     }
 }

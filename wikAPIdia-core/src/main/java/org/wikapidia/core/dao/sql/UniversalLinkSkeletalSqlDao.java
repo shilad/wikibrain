@@ -131,12 +131,30 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     }
 
     @Override
-    public int getNumItems(DaoFilter daoFilter) throws DaoException {
-        int i=0;
-        for (UniversalLink link : get(daoFilter)) {
-            i++;
+    public int getCount(DaoFilter daoFilter) throws DaoException {
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.in(daoFilter.getSourceIds()));
+            }
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.in(daoFilter.getDestIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+            }
+            return context.select()
+                    .from(Tables.UNIVERSAL_SKELETAL_LINK)
+                    .where(conditions)
+                    .fetchCount();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
-        return i;
     }
 
     @Override

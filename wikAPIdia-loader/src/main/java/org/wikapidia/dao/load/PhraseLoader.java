@@ -31,7 +31,7 @@ public class PhraseLoader {
                         .isRequired()
                         .withLongOpt("analyzer")
                         .withDescription("the name of the phrase analyzer to use")
-                        .create("n"));
+                        .create("p"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();

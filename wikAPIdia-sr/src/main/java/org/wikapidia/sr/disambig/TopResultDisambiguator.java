@@ -10,10 +10,7 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Resolves disambiguations by naively choosing the most common
@@ -29,7 +26,11 @@ public class TopResultDisambiguator implements Disambiguator{
 
     @Override
     public LocalId disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException {
-        Iterator<LocalPage> pageIterator = phraseAnalyzer.resolveLocal(phrase.getLanguage(),phrase.getString(),1).keySet().iterator();
+        LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolveLocal(phrase.getLanguage(), phrase.getString(), 1);
+        if (localMap==null){
+            return null;
+        }
+        Iterator<LocalPage> pageIterator = localMap.keySet().iterator();
         if (pageIterator.hasNext()){
             LocalPage localPage = pageIterator.next();
             return new LocalId(localPage.getLanguage(),localPage.getLocalId());

@@ -50,7 +50,7 @@ public class MostSimilarDisambiguator extends BaseDisambiguator{
             }
             for (LocalPage candidate1 : candidates1.keySet()){
                 double score1 = candidates1.get(candidate1);
-                SRResultList mostSimilar = srMetric.mostSimilar(candidate1,getNumCandidates(),false);
+                SRResultList mostSimilar = srMetric.mostSimilar(candidate1,getNumCandidates());
                 for (LocalPage candidate2 : candidates2.keySet()){
                     double score2 = candidates2.get(candidate2);
                     double srscore = 0;

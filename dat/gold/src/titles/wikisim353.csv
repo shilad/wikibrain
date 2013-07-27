@@ -1,0 +1,353 @@
+Love,Sexual intercourse,6.77
+Tiger,Cat,7.35
+Tiger,Tiger,10
+Book,Paper,7.46
+Computer,Keyboard (computing),7.62
+Computer,Internet,7.58
+Fixed-wing aircraft,Automobile,5.77
+Train,Automobile,6.31
+Telephone,Telecommunication,7.5
+Television,Radio broadcasting,6.77
+Mass media,Radio broadcasting,7.42
+Drug,Abuse,6.85
+Bread,Butter,6.19
+Cucumber,Potato,5.92
+Physician,Nurse,7
+Professor,Doctorate,6.62
+Student,Professor,6.81
+Intelligence,Student,4.62
+Intelligence,Stupidity,5.81
+Company,Stock,7.08
+Stock,Market,8.08
+Stock,Telephone,1.62
+Stock,Compact Disc,1.31
+Stock,Jaguar Cars,0.92
+Stock,Egg (food),1.81
+Fertility,Egg (biology),6.69
+Stock,Life,3.73
+Stock,Life,0.92
+Book,Library,7.46
+Bank,Money,8.12
+Wood,Forest,7.73
+Money,Cash,9.15
+Professor,Cucumber,0.31
+King,Cabbage,0.23
+King,Queen regnant,8.58
+King (chess),Rook (chess),5.92
+Bishop,Rabbi,6.69
+Jerusalem,Israel,8.46
+Jerusalem,Palestinian people,7.65
+Sacred,Sexual intercourse,1.62
+Fuck,Sexual intercourse,9.44
+Diego Maradona,Association football,8.62
+Association football,Association football,9.03
+American football,Basketball,6.81
+Association football,Tennis,6.63
+Tennis,Racquet,7.56
+Yasser Arafat,Peace,6.73
+Yasser Arafat,Terrorism,7.65
+Yasser Arafat,Michael Jackson,2.5
+Law,Lawyer,8.38
+Film,Celebrity,7.38
+Film,Popcorn,6.19
+Film,Film criticism,6.73
+Film,Movie theater,7.92
+Physics,Proton,8.12
+Physics,Chemistry,7.35
+Space,Chemistry,4.88
+Alcohol,Chemistry,5.54
+Vodka,Gin,8.46
+Vodka,Brandy,8.13
+Alcoholic beverage,Automobile,3.04
+Drink,Ear,1.31
+Drink,Mouth,5.96
+Drinking,Eating,6.87
+Infant,Mother,7.85
+Drink,Mother,2.65
+Automobile,Automobile,8.94
+Gemstone,Gemstone,8.96
+Travel,Voyage,9.29
+Boy,null,8.83
+Coast,Shore,9.1
+Psychiatric hospital,null,8.87
+Magician (fantasy),Magician (fantasy),9.02
+Noon,Noon,9.29
+Furnace,Stove,8.79
+Food,Fruit,7.52
+Bird,Rooster,7.1
+Bird,Crane (bird),7.38
+Tool,Tool,6.46
+Monk,Monk,6.27
+Crane (machine),Tool,2.69
+null,Sibling,4.46
+Travel,Automobile,5.85
+Monk,Oracle,5
+Cemetery,Woodland,2.08
+Food,Rooster,4.42
+Coast,Hill,4.38
+Forest,Graveyard,1.85
+Shore,Woodland,3.08
+Monk,Slavery,0.92
+Coast,Forest,3.15
+null,Magician (fantasy),0.92
+Chord (geometry),Smile,0.54
+Glass,Magic (illusion),2.08
+Noon,Twine,0.54
+Rooster,Voyage,0.62
+Money,Dollar,8.42
+Money,Cash,9.08
+Money,Currency,9.04
+Money,Wealth (economics),8.27
+Money,Property,7.57
+Money,Possession (law),7.29
+Money,Bank,8.5
+Money,Deposit account,7.73
+Money,null,6.88
+Money,Money laundering,5.65
+Money,Surgery,3.31
+Tiger,Jaguar,8
+Tiger,Felidae,8
+Tiger,Carnivore,7.08
+Tiger,Mammal,6.85
+Tiger,Animal,7
+Tiger,Organism,4.77
+Tiger,Fauna,5.62
+Tiger,Zoo,5.87
+Psychology,Psychiatry,8.08
+Psychology,Anxiety,7
+Psychology,Fear,6.85
+Psychology,Major depressive disorder,7.42
+Psychology,Clinic,6.58
+Psychology,Physician,6.42
+Psychology,Sigmund Freud,8.21
+Psychology,Mind,7.69
+Psychology,Health,7.23
+Psychology,Science,6.71
+Psychology,List of academic disciplines,5.58
+Psychology,Cognition,7.48
+Planet,Star,8.45
+Planet,Constellation,8.06
+Planet,Natural satellite,8.08
+Planet,Sun,8.02
+Planet,Galaxy,8.11
+Planet,Outer space,7.92
+Planet,Astronomer,7.94
+Precedent,null,5.85
+Precedent,Information,3.85
+Precedent,Cognition,2.81
+Precedent,Law,6.65
+Precedent,Collecting,2.5
+Precedent,Group (sociology),1.77
+Precedent,Antecedent,6.04
+Drinkware,Coffee,6.58
+Drinkware,Tableware,6.85
+Drinkware,null,2.4
+Drinkware,Artifact (archaeology),2.92
+Drinkware,Physical body,3.69
+Drinkware,Entity,2.15
+Drinkware,Drink,7.25
+Drinkware,Food,5
+Drinkware,Substance,1.92
+Drinkware,Liquid,5.9
+Jaguar,Cat,7.42
+Jaguar Cars,Automobile,7.27
+Energy,Secretary,1.81
+Minister (government),Senate,5.06
+Energy,Laboratory,5.09
+Computer,Laboratory,6.78
+Weapon,Secrecy,6.06
+Federal Bureau of Investigation,Fingerprint,6.94
+Federal Bureau of Investigation,Criminal procedure,8.31
+Investigation,Energy,4.59
+Mars,Water,2.94
+Mars,Scientist,5.63
+News,Report,8.16
+Canyon,Landscape,7.53
+Image,Surface,4.56
+Discovery (observation),Space,6.34
+Water,Soil mechanics,6.56
+Sign,Recess (break),2.38
+Wednesday,News,2.22
+Mile,Kilometre,8.66
+Computer,News,4.47
+Territory,Surface,5.34
+Atmosphere,Landscape,3.69
+President,Medal,3
+War,Soldier,8.13
+World record,Number,6.31
+Skin,Eye,6.22
+Japanese people,United States,6.5
+Theatre,History,3.91
+Volunteer,Motto,2.56
+Prejudice,Recognition,3
+Military decoration,Courage,5.63
+Century,Year,7.59
+Century,Nation,3.16
+Delay,Racism,1.19
+Delay,News,3.31
+Minister (government),Political party,6.63
+Peace,Plan (policy debate),4.75
+Minority group,Peace,3.69
+null,Peace,4.25
+Government,Crisis,6.56
+Military deployment,Departure,4.25
+Military deployment,Withdrawal (military),5.88
+Energy industry,Crisis,5.94
+Announcer,News,7.56
+Announcer,Energy,2.75
+Stroke,Hospital,7.03
+Disability,Death,5.47
+Victimology,Emergency,6.47
+Medication,Healing,7.91
+Academic journal,Professional body,4.97
+Physician,Human resources,5
+Physician,Liability,5.19
+Liability,Insurance,7.03
+School,null,3.44
+Reason,Hypertension,2.31
+Reason,null,5.91
+100 (number),Percentage,7.38
+Harvard University,Yale University,8.13
+Hospital,Infrastructure,4.63
+Death,null,5.25
+Capital punishment,Convict,5.03
+Lawyer,Evidence (law),6.69
+Life,Death,7.88
+Life imprisonment,null,4.5
+Word,Similarity,4.75
+Board of directors,Recommendation,4.47
+Governor,Interview,3.25
+OPEC,Country,5.63
+Peace,Atmosphere,3.69
+Peace,Insurance,2.94
+Territory,Kilometre,5.28
+Travel,Physical exercise,5
+Competition (economics),Price,6.44
+Consumer,Confidence,4.13
+Consumer,Energy (society),4.75
+Problem,Airport,2.38
+Automobile,Flight,4.94
+Credit (finance),Credit card,8.06
+Credit (finance),Information,5.31
+Hotel,null,8.03
+Grocery store,Money,5.94
+null,null,6
+null,Lodging,5.41
+Month,Hotel,1.81
+Biological type,null,8.97
+null,Hotel,6
+Bed,Closet,6.72
+Closet,Clothing,8
+null,Conclusion,4.81
+null,Solitude,3.88
+Impartiality,Interest (emotion),5.16
+"Direction (geometry,5308,Combination
+Street,Place,6.44
+Street,Avenue (landscape),8.88
+Street,City block,6.88
+Street,Child,4.94
+Listed building,Distance,2.56
+null,Categorization,6.38
+Cellular network,Telephone,7.81
+"Production,hike,null
+null,Index,4.25
+Mass media,Trade,3.88
+Mass media,Gain (finance),2.88
+Dividend,Payment,7.63
+Division (mathematics),Calculation,6.48
+Calculation,Computation,8.44
+Currency,Market,7.5
+OPEC,Oil,8.59
+Oil,Stock,6.34
+null,Manufacturing,3.38
+null,null,6
+Profit,null,3.88
+Profit,Deficit,7.63
+Dollar,Japanese yen,7.78
+Dollar,Dollar,9.22
+Dollar,Profit,7.38
+Dollar,Deficit,6.09
+Computer,Computer software,8.5
+Computer network,Computer hardware,8.31
+Telephone,Tool,7.13
+Tool,Manufacturing,5.91
+Luxury vehicle,Automobile,6.47
+5 (number),Month,3.38
+Report,Gain (finance),3.63
+Investor,null,7.13
+Liquid,Water,7.89
+Baseball,Season (sports),5.97
+Game,null,7.03
+Game,Team,7.69
+Marathon,Sprint (race),7.47
+Game,null,6.19
+Game,null,6.97
+7 (number),Series (mathematics),3.56
+Seafood,Sea,7.47
+Seafood,Food,8.34
+Seafood,Lobster,8.7
+Lobster,Food,7.81
+Lobster,Wine,5.7
+Food,Cooking,6.22
+Video,Archive,6.34
+null,Year,4.06
+null,Game,4.47
+Game,Tournament,5.97
+Boxing,null,7.61
+Championship,Tournament,8.36
+Combat,null,7.41
+Telephone line,Insurance,2.69
+Day,Summer,3.94
+Summer,Drought,7.16
+Summer,Nature,5.63
+Day,Dawn,7.53
+Nature,Natural environment,8.31
+Natural environment,Ecology,8.81
+Nature (innate),Man,6.25
+Man,Woman,8.3
+Man,Governor,5.25
+Murder,Manslaughter,8.53
+Soap opera,Opera,7.94
+Opera,Performance,6.88
+Personal life,null,5.94
+Attention,Personal life,4.06
+Manufacturing,Crew,6.25
+Television,Film,7.72
+Sexual partner,null,6.19
+Observation,Serial (radio and television),2.97
+Possibility,Girl,1.94
+Population,null,3.75
+Morality,Importance,3.31
+Morality,Marriage,3.69
+Mexico,Brazil,7.44
+Gender,Equality,6.41
+Social change,Attitude (psychology),5.44
+Family,Planning,6.25
+Opera,Industry,2.63
+Sugar,null,0.88
+null,Institution,3.19
+Minister (Christianity),Culture,4.69
+Problem,null,6.75
+Size,Topographic prominence,5.31
+Country,Citizenship,7.31
+Planet,People,5.75
+Economic development,Issue (legal),3.97
+Experience,Music,3.47
+Music,Project,3.63
+Glass,Metal,5.56
+Aluminium,Metal,7.83
+Probability,Credibility,3.88
+Collection (museum),Souvenir,5.31
+Concert,Virtuoso,6.81
+Rock music,Jazz,7.59
+Museum,Theater (structure),7.19
+Observation,Architecture,4.38
+Space,World,6.53
+Environmental preservation,World,6.19
+Admission to an event or establishment,Ticket (admission),7.69
+Rain,Thunderstorm,6.31
+Rain,Flood,6.03
+Weather,Weather forecasting,8.34
+Disaster,Area,6.25
+Governor,Office,6.34
+Architecture,Century,3.78

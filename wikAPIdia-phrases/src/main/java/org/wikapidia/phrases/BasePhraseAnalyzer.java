@@ -3,12 +3,12 @@ package org.wikapidia.phrases;
 import com.google.code.externalsorting.ExternalSort;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.jooq.tables.UniversalPage;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
+import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpStringUtils;
 

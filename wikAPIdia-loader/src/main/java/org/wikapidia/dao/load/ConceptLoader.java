@@ -63,13 +63,6 @@ public class ConceptLoader {
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("d"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArgs()
-                        .withValueSeparator(',')
-                        .withLongOpt("algorithms")
-                        .withDescription("the names of the algorithms to execute, separated by commas")
-                        .create("n"));
         Env.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -84,14 +77,10 @@ public class ConceptLoader {
 
         Env env = new Env(cmd);
         Configurator conf = env.getConfigurator();
-        String[] algorithms;
-        if (cmd.hasOption("n")) {
-            algorithms = cmd.getOptionValues("n");
-        } else {
-            algorithms = new String[] { null };
-        }
+        String algorithm = cmd.getOptionValue("n", null);
 
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
+        ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
         final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao);
 
         if (cmd.hasOption("d")) {
@@ -101,10 +90,7 @@ public class ConceptLoader {
         LOG.log(Level.INFO, "Begin Load");
         dao.beginLoad();
 
-        for (String algorithm : algorithms) {
-            ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
-            loader.load(mapper);
-        }
+        loader.load(mapper);
 
         LOG.log(Level.INFO, "End Load");
         dao.endLoad();
