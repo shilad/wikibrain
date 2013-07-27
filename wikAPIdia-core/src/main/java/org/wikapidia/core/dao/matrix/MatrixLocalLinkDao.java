@@ -93,10 +93,8 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         LocalId src = new LocalId(item.getLanguage(), item.getSourceId());
         LocalId dest = new LocalId(item.getLanguage(), item.getDestId());
         if (!src.canPackInInt() || !dest.canPackInInt()) {
-            System.err.println("here1");
             return;
         }
-        System.err.println("here2");
         try {
             String key = "" + src.toInt();
             int[] val = objectDb.get(key);
@@ -126,6 +124,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     @Override
     public void endLoad() throws DaoException {
         delegate.endLoad();
+        objectDb.flush();
 
         try {
             LOG.info("writing adjacency matrix rows");

@@ -94,7 +94,7 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
     }
 
     public void flush() {
-        this.db.sync();
+        this.env.flushLog(true);
     }
 
     public void remove(String key) throws UnsupportedEncodingException, DatabaseException {
