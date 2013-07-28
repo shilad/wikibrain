@@ -1,7 +1,6 @@
-package org.wikapidia.sr.Evaluation;
+package org.wikapidia.sr.evaluation;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -116,6 +115,7 @@ public class CrossValidation {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
+                        .isRequired()
                         .withLongOpt("folds" )
                         .withDescription("set the number of folds to evaluate on" )
                         .create("k"));
