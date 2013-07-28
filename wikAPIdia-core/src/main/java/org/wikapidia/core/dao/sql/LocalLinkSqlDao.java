@@ -18,6 +18,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalLinkDao {
@@ -88,12 +89,36 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
     }
 
     @Override
-    public int getNumItems(DaoFilter daoFilter) throws DaoException {
-        int i=0;
-        for (LocalLink link : get(daoFilter)) {
-            i++;
+    public int getCount(DaoFilter daoFilter) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.LANG_ID.in(daoFilter.getLangIds()));
+            }
+            if (daoFilter.getLocTypes() != null) {
+                conditions.add(Tables.LOCAL_LINK.LOCATION_TYPE.in(daoFilter.getLocTypes()));
+            }
+            if (daoFilter.getSourceIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.SOURCE_ID.in(daoFilter.getSourceIds()));
+            }
+            if (daoFilter.getDestIds() != null) {
+                conditions.add(Tables.LOCAL_LINK.DEST_ID.in(daoFilter.getDestIds()));
+            }
+            if (daoFilter.isParseable() != null) {
+                conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(daoFilter.isParseable()));
+            }
+            return context.selectDistinct(Tables.LOCAL_LINK.SOURCE_ID,Tables.LOCAL_LINK.DEST_ID).
+                    from(Tables.LOCAL_LINK).
+                    where(conditions).
+                    fetchCount();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
-        return i;
     }
 
     @Override
@@ -150,9 +175,16 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         }
     }
 
+    private static final AtomicLong counter = new AtomicLong();
+    private static final AtomicLong timer = new AtomicLong();
     @Override
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
+        if (counter.incrementAndGet() % 1000 == 0) {
+            double mean = 1.0 * timer.get() / counter.get();
+            System.out.println("counter is " + counter.get() + ", mean millis is " + mean);
+        }
         Connection conn = null;
+        long start = System.currentTimeMillis();
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
@@ -167,34 +199,12 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(idField.equal(localId))
                     .fetchLazy(getFetchSize());
+            long end = System.currentTimeMillis();
+            timer.addAndGet(end - start);
             return buildLocalLinks(result, outlinks, conn);
         } catch (SQLException e) {
             quietlyCloseConn(conn);
             throw new DaoException(e);
-        }
-    }
-
-    @Override
-    public int getNumLinks(Language language, boolean isParseable, LocalLink.LocationType locationType) throws DaoException{
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Cursor<Record> result = context.select()
-                    .from(Tables.LOCAL_LINK)
-                    .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
-                    .and(Tables.LOCAL_LINK.IS_PARSEABLE.equal(isParseable))
-                    .and(Tables.LOCAL_LINK.LOCATION_TYPE.equal((short)locationType.ordinal()))
-                    .fetchLazy(getFetchSize());
-            int i = 0;
-            for (Record r : result){
-                i++;
-            }
-            return i;
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
         }
     }
 

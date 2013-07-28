@@ -13,13 +13,19 @@ import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.normalize.IdentityNormalizer;
+import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
+import org.wikapidia.sr.utils.Dataset;
+import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
@@ -31,6 +37,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     protected Disambiguator disambiguator;
     protected int algorithmId;
 
+    private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
+    private Normalizer similarityNormalizer = new IdentityNormalizer();
 
     protected SparseMatrix mostSimilarUniversalMatrix;
 
@@ -40,6 +48,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         this.algorithmId = algorithmId;
     }
 
+    @Override
     public void setMostSimilarUniversalMatrix(SparseMatrix matrix) {
         this.mostSimilarUniversalMatrix = matrix;
     }
@@ -101,13 +110,13 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
 
     @Override
-    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException;
+    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults) throws DaoException;
 
     @Override
-    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public abstract SRResultList mostSimilar(UniversalPage page, int maxResults, TIntSet validIds) throws DaoException;
 
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException {
+    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException {
         LocalId localId = disambiguator.disambiguate(phrase,null);
         if (localId == null){
             SRResultList resultList = new SRResultList(1);
@@ -116,11 +125,11 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         }
         int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
         UniversalPage up = universalPageDao.getById(uId,algorithmId);
-        return mostSimilar(up,maxResults,explanations);
+        return mostSimilar(up,maxResults);
     }
 
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
         LocalId localId = disambiguator.disambiguate(phrase,null);
         if (localId == null){
             SRResultList resultList = new SRResultList(1);
@@ -129,7 +138,121 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         }
         int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
         UniversalPage up = universalPageDao.getById(uId,algorithmId);
-        return mostSimilar(up,maxResults,explanations,validIds);
+        return mostSimilar(up,maxResults,validIds);
+    }
+
+    protected void ensureSimilarityTrained(){
+        if(!similarityNormalizer.isTrained()){
+            throw new IllegalStateException("Model default similarity has not been trained.");
+        }
+    }
+
+    protected void ensureMostSimilarTrained(){
+        if(!mostSimilarNormalizer.isTrained()){
+            throw new IllegalStateException("Model default mostSimilar has not been trained.");
+        }
+    }
+
+    protected SRResult normalize(SRResult sr){
+        ensureSimilarityTrained();
+        sr.value=similarityNormalizer.normalize(sr.value);
+        return sr;
+    }
+
+    protected SRResultList normalize(SRResultList srl){
+        ensureMostSimilarTrained();
+        return mostSimilarNormalizer.normalize(srl);
+    }
+
+    @Override
+    public void write(String path) throws IOException {
+        ObjectOutputStream oop = new ObjectOutputStream(
+                new FileOutputStream(path + getName() + "/normalizer/" + algorithmId + "-mostSimilarNormalizer")
+        );
+        oop.writeObject(mostSimilarNormalizer);
+        oop.flush();
+        oop.close();
+
+        oop = new ObjectOutputStream(
+                new FileOutputStream(path + getName() + "/normalizer/" + algorithmId + "-similarityNormalizer")
+        );
+        oop.writeObject(similarityNormalizer);
+        oop.flush();
+        oop.close();
+    }
+
+    @Override
+    public void read(String path) throws IOException {
+        try {
+        ObjectInputStream oip = new ObjectInputStream(
+                new FileInputStream(path + getName() + "/normalizer/" + algorithmId + "-mostSimilarNormalizer")
+        );
+        this.mostSimilarNormalizer = (Normalizer)oip.readObject();
+        oip.close();
+
+        oip = new ObjectInputStream(
+                new FileInputStream(path + getName() + "/normalizer/" + algorithmId + "-similarityNormalizer")
+        );
+        this.similarityNormalizer = (Normalizer)oip.readObject();
+        oip.close();
+        }catch (ClassNotFoundException e){
+            throw new IOException("Malformed normalizer file",e);
+        }
+    }
+
+    @Override
+    public void trainSimilarity(final Dataset dataset) throws DaoException{
+        final Normalizer trainee = similarityNormalizer;
+        similarityNormalizer = new IdentityNormalizer();
+        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws IOException, DaoException {
+                LocalString ls1 = new LocalString(ks.language,ks.phrase1);
+                LocalString ls2 = new LocalString(ks.language,ks.phrase2);
+                SRResult sim = similarity(ls1,ls2, false);
+                trainee.observe(sim.getValue(), ks.similarity);
+
+            }
+        },1);
+        trainee.observationsFinished();
+        similarityNormalizer = trainee;
+        LOG.info("trained most similarityNormalizer for " + getName() + ": " + trainee.dump());
+    }
+
+    @Override
+    public void trainMostSimilar(final Dataset dataset, final int numResults, final TIntSet validIds) throws DaoException{
+        final Normalizer trainee = mostSimilarNormalizer;
+        mostSimilarNormalizer = new IdentityNormalizer();
+        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws DaoException {
+                ks.maybeSwap();
+                List<LocalString> localStrings = new ArrayList<LocalString>();
+                localStrings.add(new LocalString(ks.language, ks.phrase1));
+                localStrings.add(new LocalString(ks.language, ks.phrase2));
+                List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
+                int pageId1 = universalPageDao.getUnivPageId(ids.get(0).asLocalPage(), algorithmId);
+                int pageId2 = universalPageDao.getUnivPageId(ids.get(1).asLocalPage(),algorithmId);
+                UniversalPage page = universalPageDao.getById(pageId1,algorithmId);
+                if (page != null) {
+                    SRResultList dsl = mostSimilar(page, numResults, validIds);
+                    if (dsl != null) {
+                        trainee.observe(dsl, dsl.getIndexForId(pageId2), ks.similarity);
+                    }
+                }
+            }
+        }, 1);
+        trainee.observationsFinished();
+        mostSimilarNormalizer = trainee;
+        LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
+    }
+
+    @Override
+    public void setMostSimilarNormalizer(Normalizer n){
+        mostSimilarNormalizer = n;
+    }
+
+    @Override
+    public void setSimilarityNormalizer(Normalizer n){
+        similarityNormalizer = n;
     }
 
     @Override
@@ -204,22 +327,32 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     }
 
     @Override
-    public void writeCosimilarity(String path, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException {
-        path = path + getName()+"-" + algorithmId;
-        SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
-        DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
-        Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
-        TIntSet pageIds = new TIntHashSet();
-        for (UniversalPage page : universalPages) {
-            if (page != null) {
-                pageIds.add(page.getUnivId());
+    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException{
+        try {
+            path = path + getName()+"/matrix/" + algorithmId;
+            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
+            DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+            Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
+            TIntSet pageIds = new TIntHashSet();
+            for (UniversalPage page : universalPages) {
+                if (page != null) {
+                    pageIds.add(page.getUnivId());
+                }
             }
-        }
 
-        featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-        PairwiseMilneWittenSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
-        PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
-        pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
-        mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
+            featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
+            PairwiseMilneWittenSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
+            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
+            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+            mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
+        }catch (InterruptedException e){
+            throw new RuntimeException();
+        }
+    }
+
+    @Override
+    public void readCosimilarity (String path) throws IOException{
+        path = path + getName()+"/matrix/" + algorithmId + "-cosimilarity";
+        mostSimilarUniversalMatrix = new SparseMatrix(new File(path));
     }
 }

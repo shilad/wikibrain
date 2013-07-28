@@ -106,12 +106,33 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     @Override
-    public int getNumItems(DaoFilter daoFilter) throws DaoException {
-        int i=0;
-        for (T page : get(daoFilter)) {
-            i++;
+    public int getCount(DaoFilter daoFilter) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.LOCAL_PAGE.LANG_ID.in(daoFilter.getLangIds()));
+            }
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.LOCAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.LOCAL_PAGE.IS_REDIRECT.in(daoFilter.isRedirect()));
+            }
+            if (daoFilter.isDisambig() != null) {
+                conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
+            }
+            return context.select().
+                    from(Tables.LOCAL_PAGE).
+                    where(conditions).
+                    fetchCount();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
-        return i;
     }
 
     @Override
@@ -136,7 +157,11 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
 
     @Override
     public void setFollowRedirects(boolean followRedirects) throws DaoException {
-        redirectSqlDao = new RedirectSqlDao(ds);
+        if (followRedirects){
+            redirectSqlDao = new RedirectSqlDao(ds);
+        } else {
+            redirectSqlDao = null;
+        }
     }
 
     @Override

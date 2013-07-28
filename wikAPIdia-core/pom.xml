@@ -23,6 +23,11 @@
           <version>0.1-SNAPSHOT</version>
       </dependency>
       <dependency>
+          <groupId>org.wikapidia</groupId>
+          <artifactId>wikAPIdia-matrix</artifactId>
+          <version>0.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
           <groupId>org.jooq</groupId>
           <artifactId>jooq</artifactId>
           <version>3.0.0</version>

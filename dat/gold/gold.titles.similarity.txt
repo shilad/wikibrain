@@ -1,0 +1,990 @@
+global warming	japan	0.0
+léon theremin	television	0.1
+baseball	national hockey league	0.1
+personal computer	wood	0.0
+macintosh	market research	0.0
+smartphone	usa	0.1
+immigration	japan	0.0
+cheese	world war ii	0.0
+high school	japan	0.0
+macintosh	republican party (united states)	0.0
+1896	bicycle	0.1
+first language	japan	0.0
+1,000,000 (number)	personal computer	0.0
+delay	racism	0.0982599795292
+new zealand	olympic games	0.1
+cheese	greek mythology	0.1
+chocolate	statistical population	0.0
+protestant reformation	university	0.0
+homosexuality	microsoft	0.0
+new york city	television	0.1
+dog	moult	0.1
+million	personal computer	0.0
+microsoft	solar panels	0.0
+greek language	television	0.0
+dog	pleistocene	0.1
+fuel economy	japan	0.0
+nipkow disk	television	0.1
+cheese	school bus yellow	0.1
+chord (geometry)	smile	0.0317297850563
+book	culture of ancient rome	0.1
+baby boomer	bill clinton	0.0
+lesbian	microsoft	0.0
+sugar	null	0.0665301944729
+castile	police	0.1
+olympic games	shropshire	0.1
+aluminium	personal computer	0.0
+personal computer	steel	0.0
+columbo (tv series)	ichiro suzuki	0.0
+football (soccer)	hamburger	0.0
+gross domestic product	japan	0.0
+tropical cyclone	united states government	0.0
+olympic games	spain under franco	0.1
+personal computer	plastic	0.0
+paul gottlieb nipkow	television	0.0
+buke shohatto	japan	0.1
+arabic numerals	japan	0.0
+ichiro suzuki	los angeles dodgers	0.1
+macintosh	rush limbaugh	0.0
+japan	latin alphabet	0.0
+independent school (united kingdom)	olympic games	0.0
+personal computer	thousand	0.0
+microsoft	the washington post	0.0
+association football	baseball	0.0
+europe	smartphone	0.1
+automobile	greek language	0.0
+before christ	pasta	0.0
+personal computer	plexiglas	0.0
+bisexuality	microsoft	0.0
+bicycle	new woman	0.1
+rooster	voyage	0.0399181166837
+1000000000 (number)	microsoft	0.0
+book	roman empire	0.0
+cheese	john heywood	0.1
+climate change	japan	0.0
+herbert e. ives	television	0.0
+microsoft	sexual orientation	0.0
+book	gutenberg galaxy	0.1
+personal computer	specification	0.0
+bill clinton	hiv	0.0
+olympic games	south africa	0.1
+japan	junior college	0.0
+halloween	head	0.1
+marxism-leninism	university	0.0
+ireland	police	0.1
+microsoft	polyethylene terephthalate	0.0
+dog	monogamous	0.1
+microsoft	renewable energy	0.0
+japan	university	0.0
+chocolate	dog	0.1
+greenhouse gasses	microsoft	0.0
+noon	twine	0.0317297850563
+automobile	french language	0.0
+dog	houston	0.1
+halftone	television	0.1
+family name	ichiro suzuki	0.0
+magician (fantasy)	null	0.0706243602866
+chocolate	philology	0.1
+angle	television	0.1
+automobile	first world war	0.0
+industrial revolution	university	0.1
+chocolate	turkey (bird)	0.1
+elvis presley	heart attack	0.0
+baseball	the new york times	0.1
+renaissance humanism	university	0.1
+elvis presley	federal bureau of investigation	0.0
+death	elvis presley	0.0
+aids	bill clinton	0.0
+coca-cola	football (soccer)	0.0
+automobile	brazil	0.1
+girl	possibility	0.175025588536
+hong kong	pasta	0.2
+cd-rom	video game console	0.2
+glass	magic (illusion)	0.189355168884
+mouse (computing)	transparency (optics)	0.2
+cheese	malay language	0.2
+book	playing-cards	0.2
+mobile phone	vehicle	0.2
+ichiro suzuki	september 3	0.2
+bicycle	women’s christian temperance union	0.2
+age of enlightenment	university	0.2
+mouse (computing)	muroidea	0.2
+dog	molecular systematics	0.2
+japan	office lady	0.2
+alma mater	bill clinton	0.2
+group (sociology)	precedent	0.157625383828
+pasta	specious	0.2
+dog	founder effect	0.2
+china	pasta	0.2
+automobile	climate change	0.2
+drinkware	entity	0.196519959058
+gd-rom	video game console	0.2
+star wars episode iv: a new hope	united states	0.2
+japan	okinawa prefecture	0.2
+france	police	0.2
+ainu language	japan	0.2
+cheese	prehistory	0.2
+ichiro suzuki	jamie moyer	0.2
+chocolate	myocardial infarction	0.2
+record label	will smith	0.2
+digital video recorder	personal computer	0.2
+dog	feral	0.2
+summer vacation	university	0.2
+dog	scavenger	0.2
+illumination	mouse (computing)	0.2
+music	university	0.2
+mouse	mouse (computing)	0.2
+book	computer software	0.2
+tea	world war ii	0.2
+floppy disk	video game console	0.2
+abstract (summary)	book	0.2
+magnetic storage	video game console	0.2
+chocolate	fermentation (food)	0.2
+chocolate	tax	0.2
+energy	secretary	0.161719549642
+archer daniels midland	chocolate	0.2
+dvd	video game console	0.2
+compact disc	stock	0.11054247697
+ichiro suzuki	manga	0.2
+japan	salaryman	0.2
+book	cassiodorus	0.2
+blu-ray disc	video game console	0.2
+buddhism	japan	0.2
+law for the restoration of the professional civil service	university	0.2
+bibliophile	book	0.2
+island country	japan	0.2
+police	scythian	0.2
+ichiro suzuki	lake washington	0.2
+ichiro suzuki	january 30	0.2
+product placement	television	0.2
+sd card	video game console	0.2
+stock	telephone	0.142272262027
+coca-cola	premier league	0.2
+hotel	month	0.161719549642
+sacred	sexual intercourse	0.142272262027
+drink	ear	0.11054247697
+book	scriptorium	0.2
+2000 in baseball	ichiro suzuki	0.2
+france	olympic games	0.2
+keyboard (computing)	music	0.2
+forest	graveyard	0.165813715455
+personal computer	television	0.2
+assembly line	cheese	0.2
+japan	kujikata osadamegaki	0.2
+industry standard	smartphone	0.2
+drinkware	substance	0.172978505629
+coca-cola	logo	0.2
+dog	intelligence (trait)	0.2
+cheese	spanish language	0.2
+black ships	japan	0.2
+chocolate	currency	0.2
+smart card	video game console	0.2
+ancient greek	police	0.2
+macintosh	microsoft	0.2
+blood pressure	chocolate	0.2
+hd dvd	video game console	0.2
+anime	ichiro suzuki	0.2
+chocolate	mars, incorporated	0.2
+emerging market	personal computer	0.2
+catalan language	cheese	0.2
+police	social hierarchy	0.2
+cemetery	woodland	0.189355168884
+automobile	rudolf diesel	0.2
+amazon basin	chocolate	0.2
+japan	ryukyuan languages	0.2
+egg (food)	stock	0.161719549642
+cheese	old high german	0.2
+automobile	rail transport	0.2
+cheese	proto-indo-european language	0.2
+singapore	stamford raffles	0.3
+japan	tokugawa ieyasu	0.3
+niijima	tokyo	0.3
+dragon quest	slime (dragon quest)	0.3
+dragon quest	nintendo	0.3
+carnegie classification of institutions of higher education	university	0.3
+medal	president	0.2835209826
+great barrier reef	humpback whale	0.3
+dog	predator	0.3
+folklore in hawaii	hawaii	0.3
+book	collection (museum)	0.3
+cook islands maori	hawaii	0.3
+battle of sekigahara	japan	0.3
+tokyo	tokyo medical and dental university	0.3
+elvis presley	musical instrument	0.3
+video game console	virtua racing	0.3
+goh chok tong	singapore	0.3
+minami iwo jima	tokyo	0.3
+asian american	united states	0.3
+prejudice	recognition	0.2835209826
+boreas	silk road	0.3
+chōnin	japan	0.3
+dragon quest	satellaview	0.3
+bally astrocade	video game console	0.3
+olympic games	paganism	0.3
+tokyo	tokyo university of agriculture and technology	0.3
+benjamin "bugsy" siegel	las vegas, nevada	0.3
+book	dvd	0.3
+personal computer	typewriter	0.3
+guadalajara, jalisco	kyoto	0.3
+hindu	music	0.3
+japan	sengoku period	0.3
+okino torishima	tokyo	0.3
+olympic games	world's fair	0.3
+dragon ball	journey to the west	0.3
+japan	taishō period	0.3
+fujiwara-kyō	japan	0.3
+mouse (computing)	william english (computer engineer)	0.3
+godzilla	tokyo	0.3
+bone	dog	0.3
+international christian university	tokyo	0.3
+cheese	cynara	0.3
+cantopop	hong kong	0.3
+everyday shooter	video game console	0.3
+hawaii	liliuokalani	0.3
+temple university japan	tokyo	0.3
+hitotsubashi university	tokyo	0.3
+news	wednesday	0.203684749232
+bishop	dragon quest	0.3
+las vegas, nevada	meyer lansky	0.3
+japan	yukio mishima	0.3
+japan	meiji restoration	0.3
+japan	yomihon	0.3
+british india	singapore	0.3
+japan	united nations	0.3
+malaysia	singapore	0.3
+kyoto	sen-oku hakuko kan	0.3
+cheese	salmonellosis	0.3
+electronic circuit	television	0.3
+peranakan	singapore	0.3
+coca-cola	japan	0.3
+light-emitting diode	mouse (computing)	0.3
+dragon quest	mobile phone	0.3
+recess (break)	sign	0.220061412487
+byzantine	cairo	0.3
+mount kumotori	tokyo	0.3
+mikurajima	tokyo	0.3
+dragon ball	shueisha	0.3
+kozushima	tokyo	0.3
+boss (video game)	dragon quest	0.3
+cairo	fatimid	0.3
+greece	pasta	0.3
+keio university	tokyo	0.3
+african american	music	0.3
+izu Ōshima	tokyo	0.3
+tokyo	toshima island	0.3
+cairo	list of most populous cities in africa	0.3
+psa international	singapore	0.3
+automobile	internal combustion engine	0.3
+chocolate	gallic acid	0.3
+antarctica	glaciology	0.3
+antioxidant	chocolate	0.3
+japan	toyotomi hideyori	0.3
+console role-playing game	dragon quest	0.3
+interference	mouse (computing)	0.3
+observation	serial (radio and television)	0.28045035824
+cairo	egyptian media production city	0.3
+drink	mother	0.24769703173
+hong kong	treaty of nanking	0.3
+firearm	japan	0.3
+ralph h. baer	video game console	0.3
+chocolate	theobromine	0.3
+japan	list of countries by military expenditures	0.3
+comdex	smartphone	0.3
+hawaii	us dollars	0.3
+japan	russo-japanese war	0.3
+japan	kamakura, kanagawa	0.3
+japan	kamikaze (typhoon)	0.3
+city designated by government ordinance	kyoto	0.3
+cairo	confederation of african football	0.4
+mouse (computing)	sensor	0.4
+geisha	kyoto	0.4
+j. league	japan	0.4
+black sea	silk road	0.4
+chocolate	christmas	0.4
+confidence	consumer	0.399181166837
+domain name system	personal computer	0.4
+school	null	0.328556806551
+earthquake	japan	0.4
+japan	torii	0.4
+credibility	probability	0.373592630502
+münchenstein	roger federer	0.4
+bicycle	mannheim	0.4
+breeds	dog	0.4
+gain (finance)	report	0.348004094166
+japan	tanegashima space center	0.4
+alcohol	tea	0.4
+dog	subspecies	0.4
+macintosh	microsoft windows	0.4
+barcelona	kobe	0.4
+governor	interview	0.309109518936
+economic development	issue (legal)	0.382804503582
+alps	cheese	0.4
+microsoft office	smartphone	0.4
+monochrome	television	0.4
+japan	japanese brazilian	0.4
+african american	united states	0.4
+year	null	0.392016376663
+hong kong	standard mandarin	0.4
+mass media	trade	0.373592630502
+bicycle	los angeles	0.4
+artificial selection	dog	0.4
+day	summer	0.379733879222
+microcomputers	video game console	0.4
+bill clinton	republican revolution	0.4
+great barrier reef	queensland museum	0.4
+filipinos in japan	japan	0.4
+police	united states government	0.4
+marriage	morality	0.354145342886
+personal computer	usability	0.4
+internet	music	0.4
+drinkware	physical body	0.354145342886
+hamburger	india	0.4
+hawaii	kamehameha iii	0.4
+australia	kobe	0.4
+delay	news	0.315250767656
+cheese	lactose	0.4
+fluoride	tea	0.4
+fungus	tea	0.4
+atmosphere	peace	0.354145342886
+japan	nippon professional baseball	0.4
+japan	list of japanese games	0.4
+pacific ocean	typhoon	0.4
+architecture	century	0.363357215967
+h-iia	japan	0.4
+mouse (computing)	sri international	0.4
+portable document format	smartphone	0.4
+hawaii	kamehameha ii	0.4
+money	surgery	0.315250767656
+music	project	0.348004094166
+executive (government)	police	0.4
+japan	nenko system	0.4
+5 (number)	month	0.32241555783
+hamburger	japan	0.4
+macintosh	operating system	0.4
+japan	noh	0.4
+ichiro suzuki	new york yankees	0.4
+academician	book	0.4
+japan	nemawashi	0.4
+manufacturing	null	0.32241555783
+history	theatre	0.376663254862
+attention	personal life	0.392016376663
+bali	music	0.4
+crowd control	police	0.4
+automobile	semiconductor	0.4
+fushimi inari-taisha	japan	0.4
+mouse (computing)	sun microsystems	0.4
+sea surface temperature	tropical cyclone	0.4
+coronation of the british monarch	victoria of the united kingdom	0.4
+gravity	tropical cyclone	0.4
+ichiro suzuki	posting system	0.4
+cairo	pan-arab games	0.4
+minority group	peace	0.354145342886
+japan	japanese martial arts	0.4
+japan	kabuki	0.4
+japan	koreans in japan	0.4
+japan	tokyo stock exchange	0.4
+ldap	personal computer	0.4
+7 (number)	series (mathematics)	0.340839303992
+solitude	null	0.373592630502
+hawaii	kamehameha v	0.4
+japan	rakugo	0.4
+george michael	mc hammer	0.4
+outreach	police	0.4
+japan	tsunami	0.4
+comic book	japan	0.4
+african slave trade	united states	0.4
+keihanshin	kobe	0.4
+chocolate	mexico	0.5
+tama river	tokyo	0.5
+pokémon	wizards of the coast	0.5
+ichiro suzuki	randy johnson	0.5
+mount mckinley	united states	0.5
+hong kong	south china sea	0.5
+roger federer	rome masters	0.5
+old catholic church	switzerland	0.5
+hawaii	uss arizona memorial	0.5
+arctic ocean	pacific ocean	0.5
+kyoto	kyoto international manga museum	0.5
+miami masters	roger federer	0.5
+tokyo	ueno park	0.5
+george michael	queen (band)	0.5
+osaka	osaka university of arts	0.5
+cairo	john malkovich	0.5
+pda	video game	0.5
+empire of japan	japan	0.5
+benq	smartphone	0.5
+book	bookland (imaginary place)	0.5
+fireworks	tokyo	0.5
+baseball	defense (sports)	0.5
+den den town	osaka	0.5
+honshū	japan	0.5
+taliban	united states	0.5
+japan	music of japan	0.5
+macintosh	macworld conference & expo	0.5
+boiling point	tea	0.5
+japan	qrio	0.5
+japan	mitsubishi estate	0.5
+personal computer	static random access memory	0.5
+hawaii	hawaiian pidgin	0.5
+human resources	physician	0.488229273286
+kansai university	osaka	0.5
+lapis lazuli	silk road	0.5
+criminal procedure	police	0.5
+hawaii	pu'ukohola heiau national historic site	0.5
+olympic games	wreath	0.5
+singapore	singapore grand prix	0.5
+dvd recordable	personal computer	0.5
+kamo shrine	kyoto	0.5
+final fantasy	voice acting	0.5
+donkey kong country	video game console	0.5
+antarctica	ozone depletion	0.5
+halloween	pop culture	0.5
+ogasawara islands	tokyo	0.5
+minami	osaka	0.5
+izu islands	tokyo	0.5
+extras (tv series)	george michael	0.5
+bhutan	forestry	0.5
+isetan	kyoto	0.5
+super mario bros	video game console	0.5
+pacific ocean	tasman sea	0.5
+hawaii	mount waiʻaleʻale	0.5
+american public transportation association	hawaii	0.5
+ease of use	mouse (computing)	0.5
+osaka	osaka institute of technology	0.5
+hie shrine	tokyo	0.5
+hong kong	new territories	0.5
+hawaii	seminary	0.5
+asuka, yamato	japan	0.5
+lg group	smartphone	0.5
+roger federer	tennis masters cup	0.5
+minister (government)	senate	0.494370522006
+great barrier reef	great dividing range	0.5
+ikebana	japan	0.5
+japan	ministry of the environment (japan)	0.5
+osaka	sakuya konohana kan	0.5
+hawaii	macadamia	0.5
+olympic games	pelops	0.5
+bicycle	iso	0.5
+hawaii	pineapple	0.5
+book	newspaper	0.5
+final fantasy	super nintendo entertainment system	0.5
+university	university of constantinople	0.5
+hakka	hong kong	0.5
+george michael	imagine (song)	0.5
+pacific ocean	southern ocean	0.5
+calcutta	malaysia	0.5
+japan	japanese experiment module	0.5
+pilgrim	silk road	0.5
+okonomiyaki	osaka	0.5
+physical exercise	travel	0.488229273286
+japan	kana	0.5
+american top 40	george michael	0.5
+energy	investigation	0.446264073695
+personal computer	touchscreen	0.5
+local area network	personal computer	0.5
+japan	japanese archipelago	0.5
+japan	japanese post-war economic miracle	0.5
+integrated circuit	personal computer	0.5
+automobile	diesel	0.5
+kyoto	tenryū-ji	0.5
+final fantasy	playstation	0.5
+fc basel	roger federer	0.5
+antarctica	ozone layer	0.5
+china	hong kong	0.5
+osaka	yodo river	0.5
+osaka	shinsekai	0.5
+hong kong	hong kong university of science and technology	0.6
+tea	vanilla	0.6
+final fantasy	final fantasy: unlimited	0.6
+british international school in cairo	cairo	0.6
+kyoto	nishikyogoku athletic stadium	0.6
+hawaii	kwbn	0.6
+2006 african nations cup	cairo	0.6
+cattle	cheese	0.6
+dragon quest	dragon quest heroes: rocket slime	0.6
+baseball	season (sports)	0.587512794268
+singapore	singapore airlines	0.6
+hawaii	hawaii five-o	0.6
+pacific ocean	polynesians	0.6
+bhutan	cottage industry	0.6
+apple inc.	next	0.6
+japan	kanji	0.6
+boeing 747-400	pokémon	0.6
+furuhata ninzaburō	ichiro suzuki	0.6
+cairo	misr international university	0.6
+impartiality	interest (emotion)	0.50460593654
+university	university of naples federico ii	0.6
+coca-cola	television advertisement	0.6
+kyoto	murata machinery	0.6
+null	null	0.590583418628
+honda	japan	0.6
+hawaii	hawaii republican party	0.6
+death	disability	0.536335721597
+hawaii	kalo	0.6
+tiger	zoo	0.577277379734
+denmark	rugbrød	0.6
+courage	military decoration	0.552712384852
+alcohol	chemistry	0.543500511771
+netherlands	tulip mania	0.6
+book	handbook	0.6
+cairo	cairo international stadium	0.6
+kyoto	wacoal	0.6
+cheese	monterey jack	0.6
+personal computer	softmodem	0.6
+kyoto	uji river	0.6
+university	university of montpellier	0.6
+personal computer	qwerty	0.6
+european ethnic groups	hong kong	0.6
+kobe	prc	0.6
+antarctic circumpolar current	pacific ocean	0.6
+personal computer	subnotebook	0.6
+japan's non-nuclear policy	kobe	0.6
+kobe	spain	0.6
+mario	wario	0.6
+fish	norway	0.6
+hong kong	international commerce centre	0.6
+hong kong	peak tram	0.6
+las vegas, nevada	las vegas city hall	0.6
+international olympic committee	singapore	0.6
+nature	summer	0.552712384852
+al azhar university	cairo	0.6
+apple desktop bus	mouse (computing)	0.6
+awaji island	kobe	0.6
+dragon quest	dragon quest: monster battle road	0.6
+kobe	riga	0.6
+dragon quest	mystery dungeon	0.6
+pasta	shiitake	0.6
+dragon quest	torneko: the last hope	0.6
+alexander cameron sim	kobe	0.6
+netherlands	netherlands antilles	0.6
+japan	kyoto protocol	0.6
+japan	sadaharu oh	0.6
+japan	sony	0.6
+japanese school uniform	sailor moon	0.6
+kilometre	territory	0.516888433982
+saddam hussein	united states	0.6
+monk	silk road	0.6
+dragon quest	slime morimori dragon quest	0.6
+nakayoshi	sailor moon	0.6
+mariana trench	pacific ocean	0.6
+singapore	singapore press holdings	0.6
+sea level	tropical cyclone	0.6
+crime prevention	police	0.6
+governor	man	0.513817809621
+brisbane city council	kobe	0.6
+antarctica	james cook	0.6
+hong kong	kai tak airport	0.6
+christianity in the united states	united states	0.6
+lobster	wine	0.559877175026
+cairo	sadat academy for management sciences	0.6
+japan	karate	0.6
+cairo	nile university	0.6
+missouri river	united states	0.6
+hawaii	kfve	0.6
+culture	silk road	0.6
+ichiro suzuki	julio cruz (baseball)	0.6
+chocolate	polyphenol antioxidant	0.6
+game development	video game console	0.6
+nomad	silk road	0.6
+at&t park	ichiro suzuki	0.6
+motherboard form factor	personal computer	0.6
+kobe	peru	0.6
+sailor moon	seiyuu	0.6
+empress place building	singapore	0.6
+british university in egypt	cairo	0.6
+final fantasy	final fantasy ix	0.7
+mario	mario kart wii	0.7
+coral sea	great barrier reef	0.7
+denmark	military of denmark	0.7
+central processing unit	personal computer	0.7
+final fantasy	final fantasy adventure	0.7
+japan	japanese work environment	0.7
+pokémon	pokémon usa	0.7
+nintendo ds	video game console	0.7
+kita-ku, osaka	osaka	0.7
+ajinomoto stadium	tokyo	0.7
+osaka	shinsaibashi	0.7
+department of justice (hong kong)	hong kong	0.7
+kyoto	machiya	0.7
+playstation 2	video game console	0.7
+music	television	0.7
+netherlands	religion in the netherlands	0.7
+personal computer	samsung	0.7
+hardware	video game	0.7
+dragon ball	sleeping princess in devil's castle	0.7
+goods and services tax (singapore)	singapore	0.7
+crisis	government	0.64790174002
+malaysia-singapore second link	singapore	0.7
+minato, tokyo	tokyo	0.7
+netherlands	rembrandt harmenszoon van rijn	0.7
+final fantasy	final fantasy xi	0.7
+bhutan	paro airport	0.7
+japan	onsen	0.7
+naniwa-ku, osaka	osaka	0.7
+singapore	sri mariamman temple, singapore	0.7
+las vegas, nevada	las vegas police department	0.7
+alexander graham bell	united states	0.7
+artepiazza	dragon quest	0.7
+final fantasy	final fantasy tactics	0.7
+final fantasy	final fantasy iv	0.7
+bread	butter	0.610030706244
+final fantasy	final fantasy vi	0.7
+personal computer	windows server 2008	0.7
+hawaii	honolulu star-bulletin	0.7
+coca-cola	sponsor	0.7
+dragon ball	dragon ball z: wrath of the dragon	0.7
+blackberry thumb	smartphone	0.7
+game	null	0.60747185261
+video game console	wii remote	0.7
+dr. mario 64	mario	0.7
+keretapi tanah melayu	malaysia	0.7
+chiyoda, tokyo	tokyo	0.7
+hong kong	urban area	0.7
+hawaii	hawaii's 1st congressional district	0.7
+kyoto	kyoto sanga f.c	0.7
+singapore	singapore river	0.7
+japan	shibuya, tokyo	0.7
+electronic dictionary	smartphone	0.7
+rolls-royce plc	united kingdom	0.7
+accelerometer	smartphone	0.7
+japan	jōmon period	0.7
+kim jong-il	south korea	0.7
+tachikawa, tokyo	tokyo	0.7
+flow	video game console	0.7
+sir alexander fleming	united kingdom	0.7
+japan	osaka	0.7
+colecovision	video game console	0.7
+personal computer	serial port	0.7
+medicine	university	0.7
+hong kong	hong kong basic law	0.7
+las vegas, nevada	list of films shot in las vegas	0.7
+chōfu, tokyo	tokyo	0.7
+edo-tokyo museum	tokyo	0.7
+four big pollution diseases of japan	japan	0.7
+governor	office	0.625383828045
+dragon ball	dragon ball z: return of cooler	0.7
+film	film criticism	0.665301944729
+french language	monaco	0.7
+constitution of norway	norway	0.7
+bardock: the father of goku	dragon ball	0.7
+architecture	university	0.7
+chocolate	white day	0.7
+denmark	vikings	0.7
+george michael	virgin records	0.7
+hong kong	new kowloon	0.7
+neo geo (console)	video game console	0.7
+antarctica	rockhopper penguin	0.7
+kyoto	nakagyo-ku, kyoto	0.7
+anxiety	psychology	0.692937563971
+problem	null	0.667349027636
+dragon ball	dragonball (film)	0.7
+ichiro suzuki	inside-the-park home run	0.7
+24 hours of le mans	monaco	0.7
+japanese invasion of malaya	malaysia	0.7
+program director	television	0.7
+edogawa, tokyo	tokyo	0.7
+hamburger	onion	0.7
+dragon ball	dragon ball: yo! son goku and his friends return!!	0.7
+hawaii	maui	0.7
+doctorate	professor	0.654042988741
+kyoto	kyoto mayoral election, 2008	0.7
+sailor moon	sailor moon musicals	0.7
+osaka	yodogawa-ku, osaka	0.7
+mitaka, tokyo	tokyo	0.7
+computer memory	personal computer	0.8
+book	pulp magazines	0.8
+switzerland	united nations	0.8
+personal computer	video card	0.8
+osaka	osaka university	0.8
+dragon quest	dragon quest vi	0.8
+hong kong	hong kong academy for performing arts	0.8
+antarctica	mount terror (antarctica)	0.8
+blue cheese	cheese	0.8
+people%27s republic of china	severe acute respiratory syndrome	0.8
+singapore	transport in singapore	0.8
+elton john	george michael	0.8
+hamburger	pickles	0.8
+kingdom of scotland	united kingdom	0.8
+money	property	0.751279426817
+journalism	television	0.8
+cairo	old cairo	0.8
+hiroshima prefecture	japan	0.8
+jr kobe line	kobe	0.8
+final fantasy	final fantasy x	0.8
+mp3	mobile phone	0.8
+chihuahua (dog)	dog	0.8
+cold war	south korea	0.8
+dragon ball	super saiyan	0.8
+infant	mother	0.779938587513
+people%27s republic of china	shenzhou spacecraft	0.8
+policing in the united states	united states	0.8
+fremont street experience	las vegas, nevada	0.8
+new zealand	polynesians	0.8
+kobe	onsen	0.8
+investor	null	0.706243602866
+founding of modern singapore	singapore	0.8
+canyon	landscape	0.747185261003
+hong kong	media in hong kong	0.8
+cheese	whey	0.8
+space race	united states	0.8
+central, hong kong	hong kong	0.8
+denmark	Øresund bridge	0.8
+cat	tiger	0.728761514841
+macintosh	powerpc	0.8
+president of singapore	singapore	0.8
+kobe	orix buffaloes	0.8
+credit suisse	switzerland	0.8
+cheese	cheesemaker	0.8
+cat	jaguar	0.735926305015
+ham	pasta	0.8
+kyocera	kyoto	0.8
+book	bookselling	0.8
+mobile phone	public switched telephone network	0.8
+income in the united states	united states	0.8
+hawaii	house of kamehameha	0.8
+pasta	sausage	0.8
+amalienborg palace	denmark	0.8
+john locke	united kingdom	0.8
+antarctica	penguin	0.8
+japan	japanese yen	0.8
+university	university of poznań	0.8
+norway	politics of norway	0.8
+smartphone	sony ericsson	0.8
+bhutan	dzongkha language	0.8
+switzerland	ubs ag	0.8
+boxing	null	0.755373592631
+automobile	jaguar cars	0.720573183214
+cairo	nile	0.8
+tokyo	tokyo 2016 olympic bid	0.8
+dragon ball	mystical adventure	0.8
+cathode ray tube	television	0.8
+baseball	major league baseball	0.8
+japan	ministry of education, culture, sports, science and technology (japan)	0.8
+kota kinabalu	malaysia	0.8
+monaco	monte carlo rally	0.8
+notebook	personal computer	0.8
+fukuoka prefecture	japan	0.8
+drink	drinkware	0.718526100307
+dragon quest	dragon quest iv: chapters of the chosen	0.8
+celebrity	film	0.731832139202
+multi-sport event	olympic games	0.8
+announcer	news	0.750255885363
+tropical cyclone	vorticity	0.8
+red river delta	vietnam	0.8
+dutch east india company	south africa	0.8
+computer graphics	video game	0.8
+hawaii	literature in hawaii	0.8
+phoenix, arizona	united states	0.8
+akira toriyama	dragon ball	0.8
+baseball	united states	0.8
+hamburger	pork	0.8
+singapore	urban planning in singapore	0.8
+netherlands	river delta	0.8
+apple inc.	mobileme	0.8
+gun politics in the united states	united states	0.8
+north korea	south korea	0.75
+halloween	mask	0.8
+cairo	cairo international airport	0.8
+history of norway	norway	0.8
+las vegas, nevada	las vegas strip	0.8
+list of hospitals in malaysia	malaysia	0.8
+singapore	tourism in singapore	0.8
+kobe	konan university	0.8
+baseball	strikeout	0.9
+cities of norway	norway	0.9
+computer	computer software	0.846468781986
+kitano-chō	kobe	0.9
+planet	star	0.841351074719
+apple inc.	time capsule (apple)	0.9
+food	seafood	0.830092118731
+macintosh	powerbook g4	0.9
+luigi	mario	0.9
+melanesia	pacific ocean	0.9
+football in the united kingdom	united kingdom	0.9
+astrolabe	silk road	0.9
+apple inc.	mac os x	0.9
+people%27s republic of china	taoism	0.9
+electronic device	mobile phone	0.9
+champion	roger federer	0.9
+mobile phone	sony ericsson	0.9
+nokia	smartphone	0.9
+list of rivers of switzerland	switzerland	0.9
+manslaughter	murder	0.849539406346
+culture of malaysia	malaysia	0.9
+sailor moon	tuxedo mask	0.9
+baseball	strike zone	0.9
+ichiro suzuki	world baseball classic	0.9
+formula one	monaco	0.9
+graphical user interface	mouse (computing)	0.9
+canidae	dog	0.9
+avenue (landscape)	street	0.885363357216
+costume party	halloween	0.9
+microsoft	windows xp	0.9
+constellation	planet	0.801432958035
+common elements of final fantasy	final fantasy	0.9
+high-definition television	television	0.9
+olympic flame	olympic games	0.9
+boy	null	0.880245649949
+bicycle	human-powered transport	0.9
+microsoft	windows vista	0.9
+koban (police box)	police	0.9
+hamburger	sandwich	0.9
+elvis presley	united states	0.9
+samsung group	south korea	0.9
+british empire	victoria of the united kingdom	0.9
+noodles	pasta	0.9
+culture of switzerland	switzerland	0.9
+club tropicana	george michael	0.9
+baseball	baseball (ball)	0.9
+nokia 9000	smartphone	0.9
+police	sheriff	0.9
+iphone os	smartphone	0.9
+mp3	music	0.9
+bank	money	0.827021494371
+kimchi	south korea	0.9
+mario	super smash bros. (series)	0.9
+halloween	harvest	0.9
+sailor moon	sailor venus	0.9
+mobile phone	wireless modem	0.9
+credit (finance)	credit card	0.801432958035
+mobile news	mobile phone	0.9
+baseball	pitcher	0.9
+television	television set	0.9
+aids	south africa	0.9
+land reclamation	netherlands	0.9
+apple inc.	gil amelio	0.9
+people%27s republic of china	tiananmen square protests of 1989	0.9
+laboratory	university	0.9
+computer game	personal computer	0.9
+people%27s republic of china	tai chi chuan	0.9
+balk	baseball	0.9
+computer keyboard	personal computer	0.9
+malaysia	tourism in malaysia	0.9
+ntt docomo	smartphone	0.9
+kilometre	mile	0.862845445241
+madonna (entertainer)	united states	0.9
+apple inc.	macbook pro	0.9
+coca-cola	soft drink	0.9
+bicycle	kick stand	0.9
+law	lawyer	0.834186284545
+imac g5	macintosh	0.9
+bicycle	bicycle saddle	0.9
+eyewall	tropical cyclone	0.9
+mac os	personal computer	0.9
+physics	proton	0.807574206755
+printing	silk road	0.9
+king	queen regnant	0.854657113613
+netherlands	vincent van gogh	0.9
+kia motors	south korea	0.9
+chelsea f.c	united kingdom	0.9
+education in malaysia	malaysia	0.9
+pasta	pizza	0.9
+final fantasy	minigames of final fantasy	0.9
+police	police officer	0.9
+final fantasy	final fantasy battle systems	0.9
+soldier	war	0.808597748209
+comparison of smartphones	smartphone	0.9
+mobile phone	nokia	0.9
+gendarmerie	police	0.9
+las vegas, nevada	las vegas monorail	0.9
+galaxy	planet	0.806550665302
+apple inc.	quicktime	0.9
+history of monaco	monaco	1.0
+list of largest united kingdom settlements by population	united kingdom	1.0
+antarctica	economy of antarctica	1.0
+tea	tea (meal)	1.0
+vietnam	vietnamese art	1.0
+father figure (song)	george michael	1.0
+george h. w. bush	united states	1.0
+demography of the united kingdom	united kingdom	1.0
+religion in switzerland	switzerland	1.0
+music	soul music	1.0
+monaco	saint roman	1.0
+men in black (film)	will smith	1.0
+george michael	wake me up before you go-go	1.0
+mobile phone	willcom	1.0
+apple inc.	steve jobs	1.0
+elvis presley	pompadour (haircut)	1.0
+kobe	kobe port tower	1.0
+provinces of south africa	south africa	1.0
+republic of vietnam	vietnam	1.0
+antarctica	flag of antarctica	1.0
+kobe	kobe beef	1.0
+people%27s republic of china	shanghai stock exchange	1.0
+final fantasy	final fantasy (video game)	1.0
+antarctica	extreme points of antarctica	1.0
+south africa	statistics south africa	1.0
+media in the united kingdom	united kingdom	1.0
+chocolate	valentine's day	1.0
+united states	washington, d.c	1.0
+monaco	prince's palace of monaco	1.0
+norway	norwegian language	1.0
+las vegas, nevada	sin city (description)	1.0
+dragon quest	dragon warrior	1.0
+people's liberation army	vietnam	1.0
+bhutan	culture of bhutan	1.0
+personal computer	tablet computer	1.0
+south korea	south korean culture	1.0
+george michael	listen without prejudice vol. 1	1.0
+final fantasy	music of final fantasy	1.0
+history of japan	japan	1.0
+north korea	tumen river	1.0
+republic of south vietnam	vietnam	1.0
+south vietnam	vietnam	1.0
+military of new zealand	new zealand	1.0
+south korea	transportation in south korea	1.0
+mario	princess peach	1.0
+the new york times	united states	1.0
+kiwi	new zealand	1.0
+video game	wii	1.0
+game programmer	video game	1.0
+dragon ball	dragon ball (artifact)	1.0
+pg tips	tea	1.0
+vietnam	vietnamese music	1.0
+geography of switzerland	switzerland	1.0
+gwangju	south korea	1.0
+nuclear power in switzerland	switzerland	1.0
+bill clinton	president	1.0
+monaco	saint michel, monaco	1.0
+demographics of vietnam	vietnam	1.0
+oolong tea	tea	1.0
+communications in north korea	north korea	1.0
+politics of switzerland	switzerland	1.0
+geography of monaco	monaco	1.0
+antarctica	south pole	1.0
+gyeonggi-do	south korea	1.0
+foreign cemeteries in japan	kobe	1.0
+environment of the united states	united states	1.0
+mobile phone	short message service	1.0
+republic of korea airforce	south korea	1.0
+hawaii	waikiki	1.0
+antarctica	demographics of antarctica	1.0
+la condamine	monaco	1.0
+amazon.com	united states	1.0
+sport in the united kingdom	united kingdom	1.0
+south korea	ulsan	1.0
+korean social democratic party	north korea	1.0
+foreign relations of north korea	north korea	1.0
+vietnam	vietnam national convention center	1.0
+list of pokémon items	pokémon	1.0
+mario	mario bros	1.0
+final fantasy	monsters of final fantasy	1.0
+mcdonald's	united states	1.0
+korea aerospace research institute	south korea	1.0
+1988 summer olympics	south korea	1.0
+seoul tower	south korea	1.0
+swiss people	switzerland	1.0
+mobile phone	ntt docomo	1.0
+harry potter	united kingdom	1.0
+bicycle	bicycle pump	1.0
+switzerland	taxation in switzerland	1.0
+lake taupo	new zealand	1.0
+state of vietnam referendum, 1955	vietnam	1.0
+bicycle	bicycle frame	1.0
+monaco	transport in monaco	1.0
+new zealand	wellington	1.0
+heian-kyō	kyoto	1.0
+communications in monaco	monaco	1.0
+denmark	lego	1.0
+antarctic territorial claims	antarctica	1.0
+higashinada-ku, kobe	kobe	1.0

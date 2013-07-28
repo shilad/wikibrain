@@ -261,7 +261,7 @@ public class DaoFilter {
      * @return
      */
     public DaoFilter setDestIds(int destId) {
-        return setSourceIds(Arrays.asList(destId));
+        return setDestIds(Arrays.asList(destId));
     }
 
     /**

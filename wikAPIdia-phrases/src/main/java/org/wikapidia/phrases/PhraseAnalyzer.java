@@ -1,11 +1,10 @@
 package org.wikapidia.phrases;
 
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.jooq.tables.UniversalPage;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.phrases.PhraseAnalyzerDao;
+import org.wikapidia.core.model.UniversalPage;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;

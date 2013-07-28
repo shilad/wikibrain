@@ -1,0 +1,354 @@
+termA,idA,titleA,termB,idB,titleB,relatedness
+love,17547,Love,sex,27546,Sexual intercourse,6.77
+tiger,30075,Tiger,cat,6678,Cat,7.35
+tiger,30075,Tiger,tiger,30075,Tiger,10
+book,3778,Book,paper,16861908,Paper,7.46
+computer,7878457,Computer,keyboard,5266,Keyboard (computing),7.62
+computer,7878457,Computer,internet,14539,Internet,7.58
+plane,46770,Fixed-wing aircraft,car,13673345,Automobile,5.77
+train,30598,Train,car,13673345,Automobile,6.31
+telephone,30003,Telephone,communication,30322,Telecommunication,7.5
+television,29831,Television,radio,173088,Radio broadcasting,6.77
+media,19641,Mass media,radio,173088,Radio broadcasting,7.42
+drug,9311172,Drug,abuse,424739,Abuse,6.85
+bread,36969,Bread,butter,46183,Butter,6.19
+cucumber,164491,Cucumber,potato,23501,Potato,5.92
+doctor,23315,Physician,nurse,55292,Nurse,7
+professor,167800,Professor,doctor,188886,Doctorate,6.62
+student,155526,Student,professor,167800,Professor,6.81
+smart,519280,Intelligence,student,155526,Student,4.62
+smart,519280,Intelligence,stupid,7597826,Stupidity,5.81
+company,4918223,Company,stock,29249,Stock,7.08
+stock,29249,Stock,market,3736784,Market,8.08
+stock,29249,Stock,phone,30003,Telephone,1.62
+stock,29249,Stock,CD,6429,Compact Disc,1.31
+stock,29249,Stock,jaguar,147676,Jaguar Cars,0.92
+stock,29249,Stock,egg,694135,Egg (food),1.81
+fertility,257215,Fertility,egg,484939,Egg (biology),6.69
+stock,29249,Stock,live,18393,Life,3.73
+stock,29249,Stock,life,18393,Life,0.92
+book,3778,Book,library,17727,Library,7.46
+bank,3753,Bank,money,8983183,Money,8.12
+wood,33550,Wood,forest,11090,Forest,7.73
+money,8983183,Money,cash,55336,Cash,9.15
+professor,167800,Professor,cucumber,164491,Cucumber,0.31
+king,10934824,King,cabbage,55115,Cabbage,0.23
+king,10934824,King,queen,887147,Queen regnant,8.58
+king,47485,King (chess),rook,47615,Rook (chess),5.92
+bishop,4092,Bishop,rabbi,51273,Rabbi,6.69
+Jerusalem,16043,Jerusalem,Israel,9282173,Israel,8.46
+Jerusalem,16043,Jerusalem,Palestinian,23267,Palestinian people,7.65
+holy,12178732,Sacred,sex,27546,Sexual intercourse,1.62
+fuck,5575722,Fuck,sex,27546,Sexual intercourse,9.44
+Maradona,8485,Diego Maradona,football,10568,Association football,8.62
+football,10568,Association football,soccer,10568,Association football,9.03
+football,770,American football,basketball,3921,Basketball,6.81
+football,10568,Association football,tennis,29773,Tennis,6.63
+tennis,29773,Tennis,racket,52664,Racquet,7.56
+Arafat,34289,Yasser Arafat,peace,24702,Peace,6.73
+Arafat,34289,Yasser Arafat,terror,30636,Terrorism,7.65
+Arafat,34289,Yasser Arafat,Jackson,1499535,Michael Jackson,2.5
+law,17538,Law,lawyer,17541,Lawyer,8.38
+movie,10571,Film,star,5796,Celebrity,7.38
+movie,10571,Film,popcorn,232176,Popcorn,6.19
+movie,10571,Film,critic,11065202,Film criticism,6.73
+movie,10571,Film,theater,77819,Movie theater,7.92
+physics,22939,Physics,proton,23317,Proton,8.12
+physics,22939,Physics,chemistry,5180,Chemistry,7.35
+space,27667,Space,chemistry,5180,Chemistry,4.88
+alcohol,1014,Alcohol,chemistry,5180,Chemistry,5.54
+vodka,32787,Vodka,gin,12988,Gin,8.46
+vodka,32787,Vodka,brandy,45189,Brandy,8.13
+drink,2978,Alcoholic beverage,car,13673345,Automobile,3.04
+drink,7984,Drink,ear,768413,Ear,1.31
+drink,7984,Drink,mouth,9293603,Mouth,5.96
+drink,66254,Drinking,eat,212818,Eating,6.87
+baby,73165,Infant,mother,83430,Mother,7.85
+drink,7984,Drink,mother,83430,Mother,2.65
+car,13673345,Automobile,automobile,13673345,Automobile,8.94
+gem,12806,Gemstone,jewel,12806,Gemstone,8.96
+journey,155747,Travel,voyage,2173925,Voyage,9.29
+boy,194253,Boy,lad,null,null,8.83
+coast,5236,Coast,shore,480527,Shore,9.1
+asylum,38722,Psychiatric hospital,madhouse,null,null,8.87
+magician,7689495,Magician (fantasy),wizard,7689495,Magician (fantasy),9.02
+midday,209005,Noon,noon,209005,Noon,9.29
+furnace,238150,Furnace,stove,556358,Stove,8.79
+food,10646,Food,fruit,10843,Fruit,7.52
+bird,3410,Bird,cock,26574,Rooster,7.1
+bird,3410,Bird,crane,198041,Crane (bird),7.38
+tool,30677,Tool,implement,30677,Tool,6.46
+brother,419369,Monk,monk,419369,Monk,6.27
+crane,318378,Crane (machine),implement,30677,Tool,2.69
+lad,null,null,brother,352169,Sibling,4.46
+journey,155747,Travel,car,13673345,Automobile,5.85
+monk,419369,Monk,oracle,22589,Oracle,5
+cemetery,63752,Cemetery,woodland,66986,Woodland,2.08
+food,10646,Food,rooster,26574,Rooster,4.42
+coast,5236,Coast,hill,1408983,Hill,4.38
+forest,11090,Forest,graveyard,247010,Graveyard,1.85
+shore,480527,Shore,woodland,66986,Woodland,3.08
+monk,419369,Monk,slave,27992,Slavery,0.92
+coast,5236,Coast,forest,11090,Forest,3.15
+lad,null,null,wizard,7689495,Magician (fantasy),0.92
+chord,297947,Chord (geometry),smile,187557,Smile,0.54
+glass,12581,Glass,magician,53226,Magic (illusion),2.08
+noon,209005,Noon,string,1810027,Twine,0.54
+rooster,26574,Rooster,voyage,2173925,Voyage,0.62
+money,8983183,Money,dollar,8100,Dollar,8.42
+money,8983183,Money,cash,55336,Cash,9.08
+money,8983183,Money,currency,5665,Currency,9.04
+money,8983183,Money,wealth,9390638,Wealth (economics),8.27
+money,8983183,Money,property,23626,Property,7.57
+money,8983183,Money,possession,24189,Possession (law),7.29
+money,8983183,Money,bank,3753,Bank,8.5
+money,8983183,Money,deposit,4415862,Deposit account,7.73
+money,8983183,Money,withdrawal,null,null,6.88
+money,8983183,Money,laundering,19390,Money laundering,5.65
+money,8983183,Money,operation,45599,Surgery,3.31
+tiger,30075,Tiger,jaguar,16217,Jaguar,8
+tiger,30075,Tiger,feline,11302,Felidae,8
+tiger,30075,Tiger,carnivore,6543,Carnivore,7.08
+tiger,30075,Tiger,mammal,18838,Mammal,6.85
+tiger,30075,Tiger,animal,11039790,Animal,7
+tiger,30075,Tiger,organism,22613,Organism,4.77
+tiger,30075,Tiger,fauna,722672,Fauna,5.62
+tiger,30075,Tiger,zoo,9096372,Zoo,5.87
+psychology,22921,Psychology,psychiatry,23502,Psychiatry,8.08
+psychology,22921,Psychology,anxiety,922,Anxiety,7
+psychology,22921,Psychology,fear,10828,Fear,6.85
+psychology,22921,Psychology,depression,8389,Major depressive disorder,7.42
+psychology,22921,Psychology,clinic,832314,Clinic,6.58
+psychology,22921,Psychology,doctor,23315,Physician,6.42
+psychology,22921,Psychology,Freud,26743,Sigmund Freud,8.21
+psychology,22921,Psychology,mind,19378,Mind,7.69
+psychology,22921,Psychology,health,80381,Health,7.23
+psychology,22921,Psychology,science,26700,Science,6.71
+psychology,22921,Psychology,discipline,242710,List of academic disciplines,5.58
+psychology,22921,Psychology,cognition,106238,Cognition,7.48
+planet,22915,Planet,star,26808,Star,8.45
+planet,22915,Planet,constellation,5267,Constellation,8.06
+planet,22915,Planet,moon,53306,Natural satellite,8.08
+planet,22915,Planet,sun,26751,Sun,8.02
+planet,22915,Planet,galaxy,12558,Galaxy,8.11
+planet,22915,Planet,space,177602,Outer space,7.92
+planet,22915,Planet,astronomer,580,Astronomer,7.94
+precedent,23004,Precedent,example,null,null,5.85
+precedent,23004,Precedent,information,15248,Information,3.85
+precedent,23004,Precedent,cognition,106238,Cognition,2.81
+precedent,23004,Precedent,law,17538,Law,6.65
+precedent,23004,Precedent,collection,40097,Collecting,2.5
+precedent,23004,Precedent,group,191253,Group (sociology),1.77
+precedent,23004,Precedent,antecedent,2012141,Antecedent,6.04
+cup,1424937,Drinkware,coffee,604727,Coffee,6.58
+cup,1424937,Drinkware,tableware,1151989,Tableware,6.85
+cup,1424937,Drinkware,article,null,null,2.4
+cup,1424937,Drinkware,artifact,584894,Artifact (archaeology),2.92
+cup,1424937,Drinkware,object,1722616,Physical body,3.69
+cup,1424937,Drinkware,entity,42176,Entity,2.15
+cup,1424937,Drinkware,drink,7984,Drink,7.25
+cup,1424937,Drinkware,food,10646,Food,5
+cup,1424937,Drinkware,substance,26979,Substance,1.92
+cup,1424937,Drinkware,liquid,17941,Liquid,5.9
+jaguar,16217,Jaguar,cat,6678,Cat,7.42
+jaguar,147676,Jaguar Cars,car,13673345,Automobile,7.27
+energy,9649,Energy,secretary,214196,Secretary,1.81
+secretary,739237,Minister (government),senate,44417,Senate,5.06
+energy,9649,Energy,laboratory,173351,Laboratory,5.09
+computer,7878457,Computer,laboratory,173351,Laboratory,6.78
+weapon,33496,Weapon,secret,66505,Secrecy,6.06
+FBI,11127,Federal Bureau of Investigation,fingerprint,84777,Fingerprint,6.94
+FBI,11127,Federal Bureau of Investigation,investigation,37297,Criminal procedure,8.31
+investigation,1022425,Investigation,effort,9649,Energy,4.59
+Mars,14640471,Mars,water,33306,Water,2.94
+Mars,14640471,Mars,scientist,26997,Scientist,5.63
+news,22041,News,report,4692150,Report,8.16
+canyon,78478,Canyon,landscape,205135,Landscape,7.53
+image,71925,Image,surface,27865,Surface,4.56
+discovery,53231,Discovery (observation),space,27667,Space,6.34
+water,33306,Water,seepage,1276437,Soil mechanics,6.56
+sign,28130,Sign,recess,1134265,Recess (break),2.38
+Wednesday,54634,Wednesday,news,22041,News,2.22
+mile,19159,Mile,kilometer,50510,Kilometre,8.66
+computer,7878457,Computer,news,22041,News,4.47
+territory,212970,Territory,surface,27865,Surface,5.34
+atmosphere,202899,Atmosphere,landscape,205135,Landscape,3.69
+president,24110,President,medal,375211,Medal,3
+war,33158,War,troops,37338,Soldier,8.13
+record,4380391,World record,number,21690,Number,6.31
+skin,27978,Skin,eye,157898,Eye,6.22
+Japanese,186932,Japanese people,American,3434750,United States,6.5
+theater,29776,Theatre,history,10772350,History,3.91
+volunteer,32705,Volunteer,motto,70210,Motto,2.56
+prejudice,77182,Prejudice,recognition,1208543,Recognition,3
+decoration,250041,Military decoration,valor,49899,Courage,5.63
+century,5881,Century,year,34341,Year,7.59
+century,5881,Century,nation,21754,Nation,3.16
+delay,41012,Delay,racism,25613,Racism,1.19
+delay,41012,Delay,news,22041,News,3.31
+minister,739237,Minister (government),party,23996,Political party,6.63
+peace,24702,Peace,plan,3526835,Plan (policy debate),4.75
+minority,437868,Minority group,peace,24702,Peace,3.69
+attempt,null,null,peace,24702,Peace,4.25
+government,12229,Government,crisis,492128,Crisis,6.56
+deployment,3758871,Military deployment,departure,1048636,Departure,4.25
+deployment,3758871,Military deployment,withdrawal,1531454,Withdrawal (military),5.88
+energy,2935251,Energy industry,crisis,492128,Crisis,5.94
+announcement,156659,Announcer,news,22041,News,7.56
+announcement,156659,Announcer,effort,9649,Energy,2.75
+stroke,625404,Stroke,hospital,67214,Hospital,7.03
+disability,56285,Disability,death,8221,Death,5.47
+victim,32573,Victimology,emergency,146334,Emergency,6.47
+treatment,180121,Medication,recovery,239217,Healing,7.91
+journal,324572,Academic journal,association,377828,Professional body,4.97
+doctor,23315,Physician,personnel,46053,Human resources,5
+doctor,23315,Physician,liability,101757,Liability,5.19
+liability,101757,Liability,insurance,15176,Insurance,7.03
+school,28022,School,center,null,null,3.44
+reason,42446,Reason,hypertension,77432,Hypertension,2.31
+reason,42446,Reason,criterion,null,null,5.91
+hundred,407384,100 (number),percent,64493,Percentage,7.38
+Harvard,18426501,Harvard University,Yale,34273,Yale University,8.13
+hospital,67214,Hospital,infrastructure,174521,Infrastructure,4.63
+death,8221,Death,row,null,null,5.25
+death,5902,Capital punishment,inmate,232180,Convict,5.03
+lawyer,17541,Lawyer,evidence,2001231,Evidence (law),6.69
+life,18393,Life,death,8221,Death,7.88
+life,148681,Life imprisonment,term,null,null,4.5
+word,1449866,Word,similarity,532523,Similarity,4.75
+board,4822,Board of directors,recommendation,1305558,Recommendation,4.47
+governor,56231,Governor,interview,236975,Interview,3.25
+OPEC,166346,OPEC,country,5165,Country,5.63
+peace,24702,Peace,atmosphere,202899,Atmosphere,3.69
+peace,24702,Peace,insurance,15176,Insurance,2.94
+territory,212970,Territory,kilometer,50510,Kilometre,5.28
+travel,155747,Travel,activity,189037,Physical exercise,5
+competition,4715992,Competition (economics),price,211295,Price,6.44
+consumer,7818,Consumer,confidence,2973525,Confidence,4.13
+consumer,7818,Consumer,energy,9181522,Energy (society),4.75
+problem,608760,Problem,airport,37575,Airport,2.38
+car,13673345,Automobile,flight,159472,Flight,4.94
+credit,1698417,Credit (finance),card,17182301,Credit card,8.06
+credit,1698417,Credit (finance),information,15248,Information,5.31
+hotel,14276,Hotel,reservation,null,null,8.03
+grocery,239196,Grocery store,money,8983183,Money,5.94
+registration,null,null,arrangement,null,null,6
+arrangement,null,null,accommodation,230468,Lodging,5.41
+month,20354,Month,hotel,14276,Hotel,1.81
+type,533069,Biological type,kind,null,null,8.97
+arrival,null,null,hotel,14276,Hotel,6
+bed,951407,Bed,closet,49402,Closet,6.72
+closet,49402,Closet,clothes,38180,Clothing,8
+situation,null,null,conclusion,307907,Conclusion,4.81
+situation,null,null,isolation,962509,Solitude,3.88
+impartiality,1659824,Impartiality,interest,15130731,Interest (emotion),5.16
+direction,4767947,"Direction (geometry, geography)",combination,5308,Combination,2.25
+street,199065,Street,place,586851,Place,6.44
+street,199065,Street,avenue,1006179,Avenue (landscape),8.88
+street,199065,Street,block,948686,City block,6.88
+street,199065,Street,children,128987,Child,4.94
+listing,202009,Listed building,proximity,39378,Distance,2.56
+listing,null,null,category,72717,Categorization,6.38
+cell,735672,Cellular network,phone,30003,Telephone,7.81
+production,255625,"Production, costs, and pricing",hike,null,null,1.75
+benchmark,null,null,index,15270,Index,4.25
+media,19641,Mass media,trading,29678,Trade,3.88
+media,19641,Mass media,gain,3371752,Gain (finance),2.88
+dividend,41930,Dividend,payment,3648961,Payment,7.63
+dividend,53696,Division (mathematics),calculation,239121,Calculation,6.48
+calculation,239121,Calculation,computation,5926,Computation,8.44
+currency,5665,Currency,market,3736784,Market,7.5
+OPEC,166346,OPEC,oil,4207510,Oil,8.59
+oil,4207510,Oil,stock,29249,Stock,6.34
+announcement,null,null,production,39388,Manufacturing,3.38
+announcement,null,null,warning,null,null,6
+profit,90492,Profit,warning,null,null,3.88
+profit,90492,Profit,loss,312605,Deficit,7.63
+dollar,8100,Dollar,yen,34392,Japanese yen,7.78
+dollar,8100,Dollar,buck,8100,Dollar,9.22
+dollar,8100,Dollar,profit,90492,Profit,7.38
+dollar,8100,Dollar,loss,312605,Deficit,6.09
+computer,7878457,Computer,software,5309,Computer software,8.5
+network,4122592,Computer network,hardware,5310,Computer hardware,8.31
+phone,30003,Telephone,equipment,30677,Tool,7.13
+equipment,30677,Tool,maker,39388,Manufacturing,5.91
+luxury,251887,Luxury vehicle,car,13673345,Automobile,6.47
+five,6412297,5 (number),month,20354,Month,3.38
+report,4692150,Report,gain,3371752,Gain (finance),3.63
+investor,332730,Investor,earning,null,null,7.13
+liquid,17941,Liquid,water,33306,Water,7.89
+baseball,3850,Baseball,season,690345,Season (sports),5.97
+game,11970,Game,victory,null,null,7.03
+game,11970,Game,team,140801,Team,7.69
+marathon,49132,Marathon,sprint,89276,Sprint (race),7.47
+game,11970,Game,series,null,null,6.19
+game,11970,Game,defeat,null,null,6.97
+seven,208159,7 (number),series,15287,Series (mathematics),3.56
+seafood,26866,Seafood,sea,26831,Sea,7.47
+seafood,26866,Seafood,food,10646,Food,8.34
+seafood,26866,Seafood,lobster,46310,Lobster,8.7
+lobster,46310,Lobster,food,10646,Food,7.81
+lobster,46310,Lobster,wine,32961,Wine,5.7
+food,10646,Food,preparation,5355,Cooking,6.22
+video,32441,Video,archive,316723,Archive,6.34
+start,null,null,year,34341,Year,4.06
+start,null,null,match,11970,Game,4.47
+game,11970,Game,round,146996,Tournament,5.97
+boxing,4243,Boxing,round,null,null,7.61
+championship,3884434,Championship,tournament,146996,Tournament,8.36
+fighting,43702,Combat,defeating,null,null,7.41
+line,946963,Telephone line,insurance,15176,Insurance,2.69
+day,8376,Day,summer,29392,Summer,3.94
+summer,29392,Summer,drought,37335,Drought,7.16
+summer,29392,Summer,nature,21830,Nature,5.63
+day,8376,Day,dawn,191061,Dawn,7.53
+nature,21830,Nature,environment,558685,Natural environment,8.31
+environment,558685,Natural environment,ecology,9630,Ecology,8.81
+nature,664213,Nature (innate),man,15822899,Man,6.25
+man,15822899,Man,woman,33183,Woman,8.3
+man,15822899,Man,governor,56231,Governor,5.25
+murder,20171,Murder,manslaughter,7397035,Manslaughter,8.53
+soap,27009,Soap opera,opera,22348,Opera,7.94
+opera,22348,Opera,performance,224515,Performance,6.88
+life,162456,Personal life,lesson,null,null,5.94
+focus,68753,Attention,life,162456,Personal life,4.06
+production,39388,Manufacturing,crew,6801,Crew,6.25
+television,29831,Television,film,10571,Film,7.72
+lover,2024408,Sexual partner,quarrel,null,null,6.19
+viewer,22649,Observation,serial,12749659,Serial (radio and television),2.97
+possibility,142919,Possibility,girl,1723133,Girl,1.94
+population,22949,Population,development,null,null,3.75
+morality,43254,Morality,importance,14633324,Importance,3.31
+morality,43254,Morality,marriage,19728,Marriage,3.69
+Mexico,3966054,Mexico,Brazil,3383,Brazil,7.44
+gender,38076,Gender,equality,718020,Equality,6.41
+change,329948,Social change,attitude,363996,Attitude (psychology),5.44
+family,10401954,Family,planning,378010,Planning,6.25
+opera,22348,Opera,industry,14543,Industry,2.63
+sugar,27712,Sugar,approach,null,null,0.88
+practice,null,null,institution,294833,Institution,3.19
+ministry,739238,Minister (Christianity),culture,6418,Culture,4.69
+problem,608760,Problem,challenge,null,null,6.75
+size,264558,Size,prominence,751115,Topographic prominence,5.31
+country,5165,Country,citizen,6784,Citizenship,7.31
+planet,22915,Planet,people,3488351,People,5.75
+development,148131,Economic development,issue,4550188,Issue (legal),3.97
+experience,297724,Experience,music,18839,Music,3.47
+music,18839,Music,project,160483,Project,3.63
+glass,12581,Glass,metal,19042,Metal,5.56
+aluminum,904,Aluminium,metal,19042,Metal,7.83
+chance,22934,Probability,credibility,651358,Credibility,3.88
+exhibit,3218952,Collection (museum),memorabilia,937531,Souvenir,5.31
+concert,236918,Concert,virtuoso,201480,Virtuoso,6.81
+rock,25423,Rock music,jazz,15613,Jazz,7.59
+museum,37585,Museum,theater,1690649,Theater (structure),7.19
+observation,22649,Observation,architecture,903378,Architecture,4.38
+space,27667,Space,world,38714,World,6.53
+preservation,5196417,Environmental preservation,world,38714,World,6.19
+admission,3570144,Admission to an event or establishment,ticket,9958345,Ticket (admission),7.69
+shower,26564,Rain,thunderstorm,70807,Thunderstorm,6.31
+shower,26564,Rain,flood,50482,Flood,6.03
+weather,33978,Weather,forecast,73231,Weather forecasting,8.34
+disaster,8137,Disaster,area,1209,Area,6.25
+governor,56231,Governor,office,382507,Office,6.34
+architecture,903378,Architecture,century,5881,Century,3.78

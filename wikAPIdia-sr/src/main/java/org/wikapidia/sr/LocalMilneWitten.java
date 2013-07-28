@@ -2,22 +2,23 @@ package org.wikapidia.sr;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.utils.KnownSim;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import org.wikapidia.sr.normalize.Normalizer;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -31,6 +32,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     //False is standard Milne Witten with in links, true is with out links
     private boolean outLinks;
     private MilneWittenCore core;
+    private Map<Language,Integer> numPages = new HashMap<Language, Integer>();
+
 
     public LocalMilneWitten(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
         this(disambiguator,linkHelper,pageHelper,false);
@@ -53,32 +56,13 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     }
 
     public String getName() {
-        return "MilneWitten";
-    }
-
-    public void write(File directory) throws IOException {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void read(File directory) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void trainSimilarity(List<KnownSim> labeled) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void trainMostSimilar(List<KnownSim> labeled, int numResults, TIntSet validIds) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        return "LocalMilneWitten";
     }
 
     @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();
-        TIntSet links = getLinks(new LocalId(language, id));
+        TIntSet links = getLinks(new LocalId(language, id),outLinks);
 
         for (int link : links.toArray()) {
             vector.put(link,1);
@@ -95,14 +79,16 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             throw new IllegalArgumentException();
         }
 
-        TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()));
-        TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()));
+        TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()),outLinks);
+        TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()),outLinks);
 
-        DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage());
-        Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
-        int numArticles = 0;
-        for (LocalPage page : allPages){
-            numArticles++;
+        int numArticles;
+        if (numPages.containsKey(page1.getLanguage())) {
+            numArticles = numPages.get(page1.getLanguage());
+        } else {
+            DaoFilter pageFilter = new DaoFilter().setLanguages(page1.getLanguage()).setRedirect(false);
+            numArticles = pageHelper.getCount(pageFilter);
+            numPages.put(page1.getLanguage(), numArticles);
         }
 
         SRResult result = core.similarity(A,B,numArticles,explanations);
@@ -113,84 +99,90 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
         }
 
-        return result;
+        return normalize(result,page1.getLanguage());
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations) throws DaoException {
-        SRResultList mostSimilar;
-        if (hasCachedMostSimilarLocal(page.getLanguage(), page.getLocalId())&&!explanations){
-            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(), page.getLocalId(), maxResults, null);
+    public SRResultList mostSimilar(LocalPage page, int maxResults) throws DaoException {
+        return mostSimilar(page,maxResults,null);
+    }
+
+    @Override
+    public SRResultList mostSimilar(LocalPage page, int maxResults, TIntSet validIds) throws DaoException {
+        if (hasCachedMostSimilarLocal(page.getLanguage(), page.getLocalId())){
+            SRResultList mostSimilar= getCachedMostSimilarLocal(page.getLanguage(), page.getLocalId(), maxResults, validIds);
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
             return mostSimilar;
         } else {
             //Only check pages that share at least one inlink/outlink.
-            TIntSet linkPages = getLinks(page.toLocalId());
-            TIntSet worthChecking = new TIntHashSet();
+            TIntSet linkPages = getLinks(page.toLocalId(),outLinks);
+            TIntIntMap worthChecking = new TIntIntHashMap();
             for (int id : linkPages.toArray()){
                 TIntSet links = getLinks(new LocalId(page.getLanguage(), id), !outLinks);
                 for (int link: links.toArray()){
-                     worthChecking.add(link);
+                    if (validIds==null||validIds.contains(link)){
+                        worthChecking.adjustOrPutValue(link,1,1);
+                    }
                 }
             }
 
             //Don't try to check red links.
-            if (worthChecking.contains(-1)){
+            if (worthChecking.containsKey(-1)){
                 worthChecking.remove(-1);
             }
 
-            System.out.println(worthChecking.contains(page.getLocalId()));
-            return mostSimilar(page, maxResults, explanations,worthChecking);
+            return mostSimilarFromKnown(page, maxResults,worthChecking);
         }
     }
 
-    @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException {
-        if (validIds==null){
-            return mostSimilar(page,maxResults,explanations);
+    /**
+     * This is an unoptimized mostSimilar method. It should never get called except from
+     * the mostSimilar methods that create a list of IDs that is worth checking.
+     * @param page
+     * @param maxResults
+     * @param worthChecking the only IDs that will be checked. These should be generated from a list of ids known to be similar.
+     * @return
+     * @throws DaoException
+     */
+    private SRResultList mostSimilarFromKnown(LocalPage page, int maxResults, TIntIntMap worthChecking) throws DaoException {
+        if (worthChecking==null){
+            return new SRResultList(maxResults);
         }
-        SRResultList mostSimilar;
-        if (hasCachedMostSimilarLocal(page.getLanguage(), page.getLocalId())&&!explanations){
-            mostSimilar= getCachedMostSimilarLocal(page.getLanguage(), page.getLocalId(), maxResults, validIds);
-            if (mostSimilar.numDocs()>maxResults){
-                mostSimilar.truncate(maxResults);
-            }
-            return mostSimilar;
+
+        int pageLinks = getNumLinks(page.toLocalId(),outLinks);
+
+        int numArticles;
+        if (numPages.containsKey(page.getLanguage())) {
+            numArticles = numPages.get(page.getLanguage());
         } else {
-            TIntSet pageLinks = getLinks(page.toLocalId());
-
-            DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage());
-            Iterable<LocalPage> allPages = pageHelper.get(pageFilter);
-            int numArticles = 0;
-            for (LocalPage lp : allPages){
-                numArticles++;
-            }
-
-              List<SRResult> results = new ArrayList<SRResult>();
-            for (int id : validIds.toArray()){
-                TIntSet comparisonLinks = getLinks(new LocalId(page.getLanguage(),id));
-//                    System.out.println(page.getTitle());
-                    SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, explanations);
-                    result.id=id;
-                    if (explanations){
-                        LocalPage lp = pageHelper.getById(page.getLanguage(),id);
-                        result.setExplanations(reformatExplanations(result.getExplanations(),page,lp));
-                    }
-                    results.add(result);
-            }
-            Collections.sort(results);
-            Collections.reverse(results);
-
-            SRResultList  resultList = new SRResultList(maxResults);
-            for (int i=0; i<maxResults&&i<results.size(); i++){
-
-                resultList.set(i,results.get(i));
-            }
-
-            return resultList;
+            DaoFilter pageFilter = new DaoFilter().setLanguages(page.getLanguage()).setRedirect(false);
+            numArticles = pageHelper.getCount(pageFilter);
+            numPages.put(page.getLanguage(), numArticles);
         }
+
+        List<SRResult> results = new ArrayList<SRResult>();
+        for (int id : worthChecking.keys()){
+            int comparisonLinks = getNumLinks(new LocalId(page.getLanguage(),id), outLinks);
+            SRResult result = new SRResult(1.0-(
+                    (Math.log(Math.max(pageLinks,comparisonLinks))
+                            -Math.log(worthChecking.get(id)))
+                            / (Math.log(numArticles)
+                            - Math.log(Math.min(pageLinks,comparisonLinks)))));
+            result.id=id;
+            results.add(result);
+        }
+        Collections.sort(results);
+        Collections.reverse(results);
+
+        SRResultList  resultList = new SRResultList(maxResults);
+        for (int i=0; i<maxResults&&i<results.size(); i++){
+
+            resultList.set(i,results.get(i));
+        }
+
+        return normalize(resultList,page.getLanguage());
     }
 
     private List<Explanation> reformatExplanations(List<Explanation> explanations, LocalPage page1, LocalPage page2) throws DaoException {
@@ -228,21 +220,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
         return explanationList;
     }
 
-    private TIntSet getLinks(LocalId wpId) throws DaoException {
-        Iterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
-        TIntSet linkIds = new TIntHashSet();
-        if(!outLinks) {
-            for (LocalLink link : links){
-            linkIds.add(link.getSourceId());
-            }
-        } else {
-            for (LocalLink link : links){
-                linkIds.add(link.getDestId());
-            }
-        }
-        return linkIds;
-    }
-
     private TIntSet getLinks(LocalId wpId, boolean outLinks) throws DaoException {
         Iterable<LocalLink> links = linkHelper.getLinks(wpId.getLanguage(), wpId.getId(), outLinks);
         TIntSet linkIds = new TIntHashSet();
@@ -256,6 +233,21 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             }
         }
         return linkIds;
+    }
+
+    private int getNumLinks(LocalId id, boolean outLinks) throws DaoException {
+        DaoFilter daoFilter = new DaoFilter().setLanguages(id.getLanguage());
+//        if (outLinks){
+//            daoFilter.setDestIds(id.getId());
+//        } else {
+//            daoFilter.setSourceIds(id.getId());
+//        }
+        if (outLinks){
+            daoFilter.setSourceIds(id.getId());
+        } else {
+            daoFilter.setDestIds(id.getId());
+        }
+        return linkHelper.getCount(daoFilter);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {
@@ -275,18 +267,36 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
 
         @Override
         public LocalSRMetric get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("milneWitten")) {
+            if (!config.getString("type").equals("LocalMilneWitten")) {
                 return null;
             }
 
-            return new LocalMilneWitten(
+            LocalSRMetric sr = new LocalMilneWitten(
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(LocalLinkDao.class,config.getString("linkDao")),
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
                     config.getBoolean("outLinks")
             );
-        }
+            List<String> langCodes = getConfig().get().getStringList("languages");
+            try {
+                sr.read(getConfig().get().getString("sr.metric.path"));
+            } catch (IOException e){
+                sr.setDefaultSimilarityNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
+                sr.setDefaultMostSimilarNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
+                for (String langCode : langCodes){
+                    Language language = Language.getByLangCode(langCode);
+                    sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
+                    sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
+                }
+            }
 
+            for (String langCode : langCodes){
+                try {
+                    sr.readCosimilarity(getConfig().get().getString("sr.metric.path"), Language.getByLangCode(langCode));
+                } catch (IOException e) {}
+            }
+            return sr;
+        }
 
     }
 }
