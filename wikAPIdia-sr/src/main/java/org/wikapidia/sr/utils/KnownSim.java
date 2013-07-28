@@ -26,18 +26,20 @@ public class KnownSim {
     public Language language;
     public double similarity;
 
-    public KnownSim(String phrase1, String phrase2, double similarity) {
+    public KnownSim(String phrase1, String phrase2, double similarity, Language language) {
         this.phrase1 = phrase1;
         this.phrase2 = phrase2;
         this.similarity = similarity;
+        this.language = language;
     }
 
-    public KnownSim(String phrase1, String phrase2, int wpId1, int wpId2, double similarity) {
+    public KnownSim(String phrase1, String phrase2, int wpId1, int wpId2, double similarity, Language language) {
         this.wpId1 = wpId1;
         this.wpId2 = wpId2;
         this.phrase1 = phrase1;
         this.phrase2 = phrase2;
         this.similarity = similarity;
+        this.language = language;
     }
 
     @Override
@@ -63,31 +65,4 @@ public class KnownSim {
         }
     }
 
-    public static final Logger LOG = Logger.getLogger(KnownSim.class.getName());
-
-    public static List<KnownSim> read(File path) throws IOException {
-        List<KnownSim> result = new ArrayList<KnownSim>();
-        BufferedReader reader = new BufferedReader(new FileReader(path));
-        String delim = "\t";
-        if (path.getName().toLowerCase().endsWith("csv")) {
-            delim = ",";
-        }
-        while (true) {
-            String line = reader.readLine();
-            if (line == null)
-                break;
-            String tokens[] = line.split(delim);
-            if (tokens.length == 3) {
-                result.add(new KnownSim(
-                        tokens[0],
-                        tokens[1],
-                        Double.valueOf(tokens[2])
-                ));
-            } else {
-                LOG.info("invalid line in gold standard file " + path + ": " +
-                        "'" + StringEscapeUtils.escapeJava(line) + "'");
-            }
-        }
-        return result;
-    }
 }

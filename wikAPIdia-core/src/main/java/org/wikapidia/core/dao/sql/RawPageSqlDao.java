@@ -95,12 +95,33 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
     }
 
     @Override
-    public int getNumItems(DaoFilter daoFilter) throws DaoException {
-        int i=0;
-        for (RawPage page : get(daoFilter)) {
-            i++;
+    public int getCount(DaoFilter daoFilter) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.RAW_PAGE.LANG_ID.in(daoFilter.getLangIds()));
+            }
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.RAW_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.RAW_PAGE.IS_REDIRECT.in(daoFilter.isRedirect()));
+            }
+            if (daoFilter.isDisambig() != null) {
+                conditions.add(Tables.RAW_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
+            }
+            return context.selectCount().
+                    from(Tables.RAW_PAGE).
+                    where(conditions).
+                    fetchCount();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
-        return i;
     }
 
     @Override

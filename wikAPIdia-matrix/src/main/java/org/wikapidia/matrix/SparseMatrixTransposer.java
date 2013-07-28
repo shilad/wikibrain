@@ -53,7 +53,7 @@ public class SparseMatrixTransposer {
         Arrays.sort(colIds);
     }
 
-    public Map<Integer, RowAccumulator> accumulateBatch() {
+    protected Map<Integer, RowAccumulator> accumulateBatch() {
         Map<Integer, RowAccumulator> transposedBatch = new LinkedHashMap<Integer, RowAccumulator>();
 
         // figure out which columns we are tracking
@@ -96,7 +96,7 @@ public class SparseMatrixTransposer {
         return transposedBatch;
     }
 
-    public void writeBatch(Collection<RowAccumulator> batch) throws IOException {
+    protected void writeBatch(Collection<RowAccumulator> batch) throws IOException {
         for (RowAccumulator ra: batch) {
             writer.writeRow(ra.toRow(matrix.getValueConf()));
         }

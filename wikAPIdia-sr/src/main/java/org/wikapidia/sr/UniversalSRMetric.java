@@ -4,9 +4,15 @@ import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.matrix.SparseMatrix;
+import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.utils.Dataset;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -27,14 +33,19 @@ public interface UniversalSRMetric {
      */
     public int getAlgorithmId();
 
-
     /**
-     * Determine the similarity between two universal pages
-     * @param page1 The first page.
-     * @param page2 The second page.
-     * @param explanations Whether explanations should be created.
-     * @return
+     * Set the cached matrix for a universal metric
+     * @param matrix
      */
+    public void setMostSimilarUniversalMatrix(SparseMatrix matrix);
+
+        /**
+         * Determine the similarity between two universal pages
+         * @param page1 The first page.
+         * @param page2 The second page.
+         * @param explanations Whether explanations should be created.
+         * @return
+         */
     public SRResult similarity(UniversalPage page1, UniversalPage page2, boolean explanations) throws DaoException;
 
 
@@ -51,41 +62,76 @@ public interface UniversalSRMetric {
      * Find the most similar universal pages to a universal page.
      * @param page The universal page whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations) throws DaoException;
+    public SRResultList mostSimilar(UniversalPage page, int maxResults) throws DaoException;
 
     /**
      * Find the most similar universal pages to a universal page.
      * @param page The universal page whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @param validIds The universal page ids to be considered.  Null means all ids.
      * @return
      */
-    public SRResultList mostSimilar(UniversalPage page, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public SRResultList mostSimilar(UniversalPage page, int maxResults, TIntSet validIds) throws DaoException;
 
 
     /**
      * Find the most similar universal concepts to a phrase
      * @param phrase The phrase whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations) throws DaoException;
+    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException;
 
     /**
      * Find the most similar universal pages to a string in a given language from a set of universal pages
      * @param phrase The phrase whose similarity we are examining.
      * @param maxResults The maximum number of results to return.
-     * @param explanations Whether explanations should be created.s
      * @param validIds  The UniversalPage ids to be considered.  Null means all ids.
      * @return
      */
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, boolean explanations, TIntSet validIds) throws DaoException;
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException;
 
+    /**
+     * Writes the metric to a directory.
+     *
+     * @param path A directory data will be written to.
+     *                  Any existing data in the directory may be destroyed.
+     * @throws java.io.IOException
+     */
+    public void write(String path) throws IOException;
+
+    /**
+     * Reads the metric from a directory.
+     *
+     * @param path A directory data will be read from.
+     *                  The directory previously will have been written to by write().
+     * @throws IOException if the file is not found or is unusable
+     */
+    public void read(String path) throws IOException;
+
+    /**
+     * Train the similarity() function.
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     *
+     * @param dataset A gold standard dataset
+     */
+    public void trainSimilarity(Dataset dataset) throws DaoException;
+
+    /**
+     * Train the mostSimilar() function
+     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
+     *
+     * @param dataset A gold standard dataset.
+     * @param numResults The maximum number of similar articles computed per phrase.
+     * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
+     */
+    public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) throws DaoException;
+
+    public void setMostSimilarNormalizer(Normalizer n);
+
+    public void setSimilarityNormalizer(Normalizer n);
 
     /**
      * Construct a cosimilarity matrix of Universal Page ids.
@@ -130,7 +176,9 @@ public interface UniversalSRMetric {
     /**
      * Writes a cosimilarity matrix to the dat directory based off of the getVector function and the pairwise cosine similarity class
      * @param path the directory to write the matrix in
-     * @param numThreads the number of threads
      * @param maxHits the number of document hits you would like returned from the most similar function
-     */void writeCosimilarity(String path, int numThreads, int maxHits) throws IOException, DaoException, WikapidiaException, InterruptedException;
+     */
+    void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException;
+
+    void readCosimilarity(String path) throws IOException;
 }

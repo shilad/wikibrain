@@ -19,6 +19,8 @@ import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
+import java.io.IOException;
+
 /**
  * @author Matt Lesicko
  * @author Ben Hillmann
@@ -77,6 +79,8 @@ public class SimilarityExample {
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
 
+        String path = c.getConf().get().getString("sr.metric.path");
+
         //Similarity between strings
         String s1 = "Barack Obama";
         String s2 = "US";
@@ -122,27 +126,27 @@ public class SimilarityExample {
 
         //Most Similar pages
         System.out.println("Most similar to United States:");
-        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "united states"), 5, true);
+        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "united states"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao, expf);
         }
         System.out.println("Most similar to science fiction:");
-        resultList = sr.mostSimilar(new LocalString(lang, "science fiction"), 5, true);
+        resultList = sr.mostSimilar(new LocalString(lang, "science fiction"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao, expf);
         }
 
         System.out.println("Most similar to goat using universal");
-        resultList = usr.mostSimilar(new LocalString(lang, "goat"), 5, true);
+        resultList = usr.mostSimilar(new LocalString(lang, "goat"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#"+(i+1));
             universalPrintResult(resultList.get(i),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);
         }
 
         System.out.println("Most similar to science fiction using universal");
-        resultList = usr.mostSimilar(new LocalString(lang, "science fiction"), 5, true);
+        resultList = usr.mostSimilar(new LocalString(lang, "science fiction"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#"+(i+1));
             universalPrintResult(resultList.get(i),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);

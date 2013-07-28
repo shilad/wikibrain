@@ -5,8 +5,6 @@ import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -101,12 +99,27 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public int getNumItems(DaoFilter daoFilter) throws DaoException {
-        int i=0;
-        for (T page : get(daoFilter)) {
-            i++;
+    public int getCount(DaoFilter daoFilter) throws DaoException{
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+            }
+            return context.selectDistinct(Tables.UNIVERSAL_PAGE.UNIV_ID, Tables.UNIVERSAL_PAGE.ALGORITHM_ID)
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(conditions)
+                    .fetchCount();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
         }
-        return i;
     }
 
     @Override
@@ -167,28 +180,6 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     @Override
     public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException {
         return getUnivPageId(localPage.getLanguage(), localPage.getLocalId(), algorithmId);
-    }
-
-    @Override
-    public int getNumUniversalPages(int algorithmId) throws DaoException {
-        Connection conn = null;
-        try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Cursor<Record> result = context.select().
-                    from(Tables.UNIVERSAL_PAGE).
-                    where(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId)).
-                    fetchLazy();
-            TIntSet ids = new TIntHashSet();
-            for (Record record : result){
-                ids.add(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID));
-            }
-            return ids.size();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
     }
 
     @Override

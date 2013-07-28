@@ -1,5 +1,9 @@
 package org.wikapidia.sr.normalize;
 
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 
@@ -59,5 +63,32 @@ public class LogNormalizer implements Normalizer{
     @Override
     public String dump() {
         return "log normalizer: log(" + c + " + x)";
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LogNormalizer> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return Normalizer.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "sr.normalizer";
+        }
+
+        @Override
+        public LogNormalizer get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("log")) {
+                return null;
+            }
+
+            return new LogNormalizer(
+            );
+        }
+
     }
 }
