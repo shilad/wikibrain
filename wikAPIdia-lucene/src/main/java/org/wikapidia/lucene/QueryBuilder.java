@@ -4,12 +4,10 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.Query;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.lang.Language;
 
 import java.io.IOException;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,12 +33,12 @@ public class QueryBuilder {
 
     private static final Logger LOG = Logger.getLogger(QueryBuilder.class.getName());
 
-    private final Language language;
+    private final WikapidiaAnalyzer analyzer;
     private final LuceneOptions options;
 
-    public QueryBuilder(Language language, LuceneOptions options) {
-        this.language = language;
-        this.options = options;
+    public QueryBuilder(WikapidiaAnalyzer analyzer) {
+        this.analyzer = analyzer;
+        this.options = analyzer.getOptions();
 //        try {
 //            this.phraseAnalyzer = new Configurator(new Configuration()).get(PhraseAnalyzer.class, "anchortext");
 //        } catch (ConfigurationException e) {
@@ -71,9 +69,8 @@ public class QueryBuilder {
      * @return
      */
     public Query getPhraseQuery(TextFieldElements elements, String searchString) throws ParseException {
-        QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), new WikapidiaAnalyzer(language, options));
-        Query query = parser.parse(searchString);
-        return query;
+        QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), analyzer);
+        return parser.parse(searchString);
     }
 
 
@@ -98,7 +95,7 @@ public class QueryBuilder {
         mlt.setMaxQueryTerms(maxQueryTerms);
         mlt.setMinDocFreq(minDocFreq);
         mlt.setMinTermFreq(minTermFreq);
-        mlt.setAnalyzer(new WikapidiaAnalyzer(language, options));
+        mlt.setAnalyzer(analyzer);
         mlt.setFieldNames(new String[]{elements.getTextFieldName()}); // specify the fields for similiarity
         return mlt;
     }
