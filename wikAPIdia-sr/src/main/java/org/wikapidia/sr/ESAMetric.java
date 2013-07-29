@@ -4,23 +4,21 @@ import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
-import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.SimUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -37,7 +35,36 @@ public class ESAMetric extends BaseLocalSRMetric {
         this.pageHelper = pageHelper;
     }
 
-    //TODO: mostSimilar directly on a phrase
+    /**
+     * Get the most similar Wikipedia pages of a specified localString.
+     * @param phrase local string containing the language information
+     * @param maxResults number of results returned
+     * @return SRResulList
+     * @throws DaoException
+     */
+    @Override
+    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException {
+        List<SRResult> results = new ArrayList<SRResult>();
+        Language language = phrase.getLanguage();
+        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
+
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase.getString()), language);
+
+        for (ScoreDoc scoreDoc : scoreDocs) {
+            int localPageId = searcher.getLocalIdFromDocId(scoreDoc.doc, language);
+            SRResult result = new SRResult((double) scoreDoc.score);
+            result.id  = localPageId;
+            results.add(result);
+        }
+        SRResultList resultList = new SRResultList(maxResults);
+        for (int j = 0; j < maxResults && j < results.size(); j++){
+            resultList.set(j, results.get(j));
+        }
+        return resultList;
+    }
+
+
+
     /**
      * Get cosine similarity between two phrases.
      *
@@ -101,13 +128,15 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      */
     public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws DaoException { // TODO: validIDs
-        try {
-            QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-            ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
+        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
+        Query query = queryBuilder.getPhraseQuery(phrase);
+        if (query != null) {
+            ScoreDoc[] scoreDocs = searcher.search(query, language);
             pruneSimilar(scoreDocs);
             return SimUtils.normalizeVector(expandScores(scoreDocs));
-        } catch (ParseException e) {
-            throw new DaoException(e);
+        } else {
+            LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query.");
+            return null;
         }
     }
 
