@@ -28,6 +28,15 @@ import java.util.logging.Logger;
  * Wraps a local link dao delegate and builds a fast, sparse, matrix and its
  * transpose to speed up graph lookups.
  *
+ * Three API calls are partially supported:
+ * 1. The three-argument version of getLinks()
+ * 2. get() if a) a language and b) either a src or dest is specified.
+ * 3. count() for the same requirements as 2.
+ *
+ * All other calls are delegated to the passed-in delegate.
+ *
+ * Note that this dao also loads the links into the delegate.
+ *
  * @author Shilad Sen
  */
 public class MatrixLocalLinkDao implements LocalLinkDao {
