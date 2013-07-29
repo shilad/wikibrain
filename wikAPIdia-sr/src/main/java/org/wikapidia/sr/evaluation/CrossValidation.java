@@ -116,7 +116,7 @@ public class CrossValidation {
                 new DefaultOptionBuilder()
                         .hasArg()
                         .isRequired()
-                        .withLongOpt("folds" )
+                        .withLongOpt("folds")
                         .withDescription("set the number of folds to evaluate on" )
                         .create("k"));
 
@@ -215,20 +215,22 @@ public class CrossValidation {
                 usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
             }
 
-            if (sr!=null){
-                for (Dataset trainingSet : datasets){
-                    if (trainingSet!=testSet){
-                        sr.trainDefaultSimilarity(trainingSet);
-                        sr.trainSimilarity(trainingSet);
-                    }
+            List<Dataset> trainingSets = new ArrayList<Dataset>();
+
+            for (Dataset dataset: datasets) {
+                if (dataset!=testSet) {
+                    trainingSets.add(dataset);
                 }
+            }
+
+            Dataset trainingSet = new Dataset(trainingSets);
+
+            if (sr!=null){
+                sr.trainDefaultSimilarity(trainingSet);
+                sr.trainSimilarity(trainingSet);
                 sumError+=crossValidation.evaluate(sr,testSet);
             } else if (usr!=null){
-                for (Dataset trainingSet : datasets){
-                    if (trainingSet!=testSet){
-                        usr.trainSimilarity(trainingSet);
-                    }
-                }
+                usr.trainSimilarity(trainingSet);
                 sumError+=crossValidation.evaluate(usr,testSet);
             }
         }
