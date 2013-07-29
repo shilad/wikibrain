@@ -65,8 +65,12 @@ public class QueryBuilder {
      * @return
      * @throws ParseException
      */
-    public Query getPhraseQuery(String searchString) throws ParseException {
-        return getPhraseQuery(options.elements, searchString);
+    public Query getPhraseQuery(String searchString) {
+        try {
+            return getPhraseQuery(options.elements, searchString);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
     /**
