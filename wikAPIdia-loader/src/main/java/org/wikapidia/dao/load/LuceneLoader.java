@@ -84,7 +84,7 @@ public class LuceneLoader {
                         .withValueSeparator(',')
                         .withLongOpt("namespaces")
                         .withDescription("the set of namespaces to index, separated by commas")
-                        .create("n"));
+                        .create("p"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
@@ -120,8 +120,8 @@ public class LuceneLoader {
 
         LanguageSet languages = env.getLanguages();
         Collection<NameSpace> namespaces = new ArrayList<NameSpace>();
-        if (cmd.hasOption("n")) {
-            String[] nsStrings = cmd.getOptionValues("n");
+        if (cmd.hasOption("p")) {
+            String[] nsStrings = cmd.getOptionValues("p");
             for (String s : nsStrings) {
                 namespaces.add(NameSpace.getNameSpaceByName(s));
             }

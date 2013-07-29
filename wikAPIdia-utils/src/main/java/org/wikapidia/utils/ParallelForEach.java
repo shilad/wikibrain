@@ -76,7 +76,7 @@ public class ParallelForEach {
                         T obj = asList.get(finalI);
                         try {
                             if (finalI % logModulo == 0) {
-                                LOG.info("processing list element " + finalI + " of " + asList.size());
+                                LOG.info("processing list element " + (finalI+1) + " of " + asList.size());
                             }
                             R r = fn.call(obj);
                             result.set(finalI, r);

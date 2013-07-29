@@ -54,7 +54,7 @@ public class LocalLink {
      * @return sourceId or destId, depending on the field isOutlink
      */
     public int getLocalId() {
-        return (isOutlink ? sourceId : destId);
+        return (isOutlink ? destId : sourceId);
     }
 
     /**

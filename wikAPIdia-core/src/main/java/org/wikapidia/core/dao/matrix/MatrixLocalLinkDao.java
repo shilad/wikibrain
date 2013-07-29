@@ -93,6 +93,11 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     @Override
     public void save(LocalLink item) throws DaoException {
         delegate.save(item);
+
+        // skip red links
+        if (item.getDestId() < 0 || item.getSourceId() < 0) {
+            return;
+        }
         LocalId src = new LocalId(item.getLanguage(), item.getSourceId());
         LocalId dest = new LocalId(item.getLanguage(), item.getDestId());
         if (!src.canPackInInt() || !dest.canPackInInt()) {
