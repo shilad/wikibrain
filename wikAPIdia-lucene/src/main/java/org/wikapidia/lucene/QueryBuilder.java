@@ -1,23 +1,14 @@
 package org.wikapidia.lucene;
 
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.phrases.PhraseAnalyzer;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.LinkedHashMap;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,16 +37,15 @@ public class QueryBuilder {
 
     private final Language language;
     private final LuceneOptions options;
-    private final PhraseAnalyzer phraseAnalyzer;
 
     public QueryBuilder(Language language, LuceneOptions options) {
         this.language = language;
         this.options = options;
-        try {
-            this.phraseAnalyzer = new Configurator(new Configuration()).get(PhraseAnalyzer.class, "anchortext");
-        } catch (ConfigurationException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            this.phraseAnalyzer = new Configurator(new Configuration()).get(PhraseAnalyzer.class, "anchortext");
+//        } catch (ConfigurationException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     /**
