@@ -314,7 +314,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
             List<String> langCodes = getConfig().get().getStringList("languages");
 
-            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(langCodes), LuceneOptions.getDefaultOptions());
+            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(langCodes), getConfigurator().get(LuceneOptions.class, "esa"));
             ESAMetric sr = new ESAMetric(
                     searcher,
                     getConfigurator().get(LocalPageDao.class, config.getString("pageDao"))
