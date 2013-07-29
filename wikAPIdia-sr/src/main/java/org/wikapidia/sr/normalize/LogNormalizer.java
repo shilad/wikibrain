@@ -12,7 +12,7 @@ import org.wikapidia.sr.SRResultList;
  * In the case that an x is observed that is less than min-value, it returns 0.
  */
 public class LogNormalizer implements Normalizer{
-    private double c;
+    private double c=Double.POSITIVE_INFINITY;
     private boolean trained = false;
 
     @Override
@@ -28,7 +28,7 @@ public class LogNormalizer implements Normalizer{
     public double normalize(double x) {
         if (Double.isNaN(x)) {
             return x;
-        } else if (x < c) {
+        } else if (1 + x < c) {
             return 0;
         } else {
             return Math.log(c + x);
@@ -49,8 +49,8 @@ public class LogNormalizer implements Normalizer{
 
     @Override
     public void observe(double x) {
-        if (!Double.isNaN(x) && !Double.isInfinite(x)) {
-            c = Math.min(x, 1 + c);
+        if (!Double.isNaN(x) && !Double.isInfinite(x))  {
+            c = Math.min(1 +x,c);
         }
     }
 
