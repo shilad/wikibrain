@@ -86,43 +86,6 @@ public class QueryBuilder {
         return query;
     }
 
-    /**
-     * Builds a local page query for the default text field in LuceneOptions.
-     *
-     * @param localPage
-     * @return
-     * @throws DaoException
-     */
-    public Query getLocalPageConceptQuery(LocalPage localPage) throws DaoException {
-        try {
-            return getLocalPageConceptQuery(options.elements, localPage);
-        } catch (ParseException e) {
-            throw new DaoException(e);
-        }
-    }
-
-    /**
-     *
-     * @param elements elements specifies the text field in which to search
-     * @param localPage
-     * @return
-     * @throws DaoException
-     * @throws ParseException
-     */
-    public Query getLocalPageConceptQuery(TextFieldElements elements, LocalPage localPage) throws DaoException, ParseException {
-        LinkedHashMap<String, Float> description = phraseAnalyzer.describeLocal(language, localPage, 20);
-        BooleanQuery query = new BooleanQuery();
-        query.add(getPhraseQuery(localPage.getTitle().getCanonicalTitle()), BooleanClause.Occur.SHOULD);
-        for (String similarTitle : description.keySet()) {
-            query.add(getPhraseQuery(similarTitle), BooleanClause.Occur.SHOULD);
-        }
-        return query;
-
-    }
-
-    public Query getMoreLikeThisQuery(int luceneId, DirectoryReader directoryReader) throws DaoException {
-        return getMoreLikeThisQuery(options.elements, luceneId, directoryReader);
-    }
 
     public Query getMoreLikeThisQuery(TextFieldElements elements, int luceneId, DirectoryReader directoryReader) throws DaoException {
         if (luceneId >= 0) {
@@ -150,4 +113,41 @@ public class QueryBuilder {
         return mlt;
     }
 
+    public Query getMoreLikeThisQuery(int luceneId, DirectoryReader directoryReader) throws DaoException {
+        return getMoreLikeThisQuery(options.elements, luceneId, directoryReader);
+    }
+
+//    /**
+//     * Builds a local page query for the default text field in LuceneOptions.
+//     *
+//     * @param localPage
+//     * @return
+//     * @throws DaoException
+//     */
+//    public Query getLocalPageConceptQuery(LocalPage localPage) throws DaoException {
+//        try {
+//            return getLocalPageConceptQuery(options.elements, localPage);
+//        } catch (ParseException e) {
+//            throw new DaoException(e);
+//        }
+//    }
+//
+//    /**
+//     *
+//     * @param elements elements specifies the text field in which to search
+//     * @param localPage
+//     * @return
+//     * @throws DaoException
+//     * @throws ParseException
+//     */
+//    public Query getLocalPageConceptQuery(TextFieldElements elements, LocalPage localPage) throws DaoException, ParseException {
+//        LinkedHashMap<String, Float> description = phraseAnalyzer.describeLocal(language, localPage, 20);
+//        BooleanQuery query = new BooleanQuery();
+//        query.add(getPhraseQuery(localPage.getTitle().getCanonicalTitle()), BooleanClause.Occur.SHOULD);
+//        for (String similarTitle : description.keySet()) {
+//            query.add(getPhraseQuery(similarTitle), BooleanClause.Occur.SHOULD);
+//        }
+//        return query;
+//
+//    }
 }
