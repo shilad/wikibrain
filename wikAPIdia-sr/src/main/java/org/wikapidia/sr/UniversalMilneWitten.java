@@ -2,7 +2,9 @@ package org.wikapidia.sr;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
@@ -105,7 +107,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         } else {
             //Only check pages that share at least one inlink/outlink.
             TIntSet linkPages = getLinks(page.getUnivId(), algorithmId);
-            TIntSet worthChecking = new TIntHashSet();
+            TIntIntMap worthChecking = new TIntIntHashMap();
             for (int id : linkPages.toArray()){
                 TIntSet links;
                 if (outLinks){
@@ -114,16 +116,14 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                     links = universalLinkDao.getOutlinkIds(id,algorithmId);
                 }
                 for (int link : links.toArray()){
-                    worthChecking.add(link);
+                    if (validIds==null||validIds.contains(link)){
+                        worthChecking.adjustOrPutValue(link,1,1);
+                    }
                 }
             }
             //Don't try to check red links.
-            if (worthChecking.contains(-1)){
+            if (worthChecking.containsKey(-1)){
                 worthChecking.remove(-1);
-            }
-
-            if (validIds!=null){
-                worthChecking.retainAll(validIds);
             }
 
             return mostSimilarFromKnown(page, maxResults, worthChecking);
@@ -139,11 +139,11 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
      * @return
      * @throws DaoException
      */
-    private SRResultList mostSimilarFromKnown(UniversalPage page, int maxResults, TIntSet worthChecking) throws DaoException {
+    private SRResultList mostSimilarFromKnown(UniversalPage page, int maxResults, TIntIntMap worthChecking) throws DaoException {
         if (worthChecking==null){
             return new SRResultList(maxResults);
         }
-        TIntSet pageLinks = getLinks(page.getUnivId(), algorithmId);
+        int pageLinks = getNumLinks(page.getUnivId(), algorithmId, outLinks);
 
         if (numArticles == null) {
             DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
@@ -151,9 +151,13 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         }
 
         List<SRResult> results = new ArrayList<SRResult>();
-        for (int id : worthChecking.toArray()){
-            TIntSet comparisonLinks = getLinks(id, algorithmId);
-            SRResult result = core.similarity(pageLinks, comparisonLinks, numArticles, false);
+        for (int id : worthChecking.keys()){
+            int comparisonLinks = getNumLinks(id, algorithmId, outLinks);
+            SRResult result = new SRResult(1.0-(
+                    (Math.log(Math.max(pageLinks,comparisonLinks))
+                            -Math.log(worthChecking.get(id)))
+                            / (Math.log(numArticles)
+                            - Math.log(Math.min(pageLinks,comparisonLinks)))));
             result.id = id;
             results.add(result);
         }
@@ -234,12 +238,23 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                 linkIds.add(link);
             }
         } else {
-            TIntSet links = universalLinkDao.getInlinkIds(universeId, algorithmId);
+            TIntSet links = universalLinkDao.getOutlinkIds(universeId, algorithmId);
             for (Integer link : links.toArray()){
                 linkIds.add(link);
             }
         }
         return linkIds;
+    }
+
+    private int getNumLinks(int universeId, int algorithmId, boolean outLinks) throws DaoException {
+        DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+        if (outLinks){
+            daoFilter.setSourceIds(universeId);
+        }
+        else {
+            daoFilter.setDestIds(universeId);
+        }
+        return universalLinkDao.getCount(daoFilter);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<UniversalSRMetric> {
@@ -276,6 +291,9 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
                 usr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")));
                 usr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")));
             }
+            try {
+                usr.readCosimilarity(getConfig().get().getString("sr.metric.path"));
+            } catch (IOException e){}
             return usr;
         }
     }

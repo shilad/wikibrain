@@ -37,9 +37,9 @@ public class CosimilarityMatrixExample {
 
         Language language = Language.getByLangCode("simple");
         LanguageSet languages = new LanguageSet("simple");
-        sr.writeCosimilarity(path,languages,8,100);
+        sr.writeCosimilarity(path,languages, 100);
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
-        usr.writeCosimilarity(path,8,100);
+        usr.writeCosimilarity(path,100);
 
         List<LocalString> phrases = new ArrayList<LocalString>();
         phrases.add(new LocalString(language, "United States"));

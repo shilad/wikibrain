@@ -28,6 +28,7 @@ public class LuceneOptions {
     public static final String LOCAL_ID_FIELD_NAME = "local_id";
     public static final String LANG_ID_FIELD_NAME = "lang_id";
 
+    public final String name;
     public final Configurator configurator;
     public final Version matchVersion;
     public final File luceneRoot;
@@ -38,7 +39,8 @@ public class LuceneOptions {
     /**
      * Used by provider only.
      */
-    private LuceneOptions(Configurator configurator, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options, TextFieldElements elements) {
+    private LuceneOptions(String name, Configurator configurator, String matchVersion, String luceneRoot, List<String> namespaces, TokenizerOptions options, TextFieldElements elements) {
+        this.name = name;
         this.configurator = configurator;
         this.matchVersion = Version.parseLeniently(matchVersion);
         this.luceneRoot = new File(luceneRoot);
@@ -79,12 +81,12 @@ public class LuceneOptions {
         return elements;
     }
 
-    // TODO: make it so we can test if Configurators are equal?
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof LuceneOptions)) return false;
         LuceneOptions opts = (LuceneOptions) o;
-        return (this.matchVersion == opts.matchVersion &&
+        return (this.name.equalsIgnoreCase(opts.name) &&
+                this.matchVersion == opts.matchVersion &&
                 this.luceneRoot.equals(opts.luceneRoot) &&
                 CollectionUtils.isEqualCollection(this.namespaces, opts.namespaces) &&
                 this.options.equals(opts.options) &&
@@ -108,10 +110,11 @@ public class LuceneOptions {
 
         @Override
         public LuceneOptions get(String name, Config config) throws ConfigurationException {
-//            if (config.getString("type").trim().equalsIgnoreCase(name.trim())) {
-//                throw new ConfigurationException("Could not find configuration " + name + ", found " + config.getString("type"));
-//            }
+            if (!name.equalsIgnoreCase(config.getString("type"))) {
+                throw new ConfigurationException("Could not find configuration " + name);
+            }
             return new LuceneOptions(
+                    name,
                     getConfigurator(),
                     config.getString("version"),
                     config.getString("directory"),

@@ -1,8 +1,10 @@
 package org.wikapidia.sr;
 
+import com.google.common.io.Files;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.io.FileUtils;
 import org.h2.util.Profiler;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -12,10 +14,12 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +30,7 @@ import java.util.List;
  */
 public class MetricTrainer {
 
-    public static void main(String[] args) throws ConfigurationException, DaoException, IOException{
+    public static void main(String[] args) throws ConfigurationException, DaoException, IOException, WikapidiaException {
         Options options = new Options();
 
         options.addOption(
@@ -73,16 +77,7 @@ public class MetricTrainer {
         Env env = new Env(cmd);
         Configurator c = env.getConfigurator();
 
-        LocalSRMetric sr=null;
-        UniversalSRMetric usr=null;
-        if (cmd.hasOption("m")){
-            sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
-        }
-        if (cmd.hasOption("u")){
-            usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
-        }
-
-        if (sr==null&&usr==null){
+        if (!cmd.hasOption("m")&&!cmd.hasOption("u")){
             throw new IllegalArgumentException("Must specify a metric to train.");
         }
 
@@ -124,6 +119,24 @@ public class MetricTrainer {
         }
 
 
+        List<Language> languages = new ArrayList<Language>();
+        for (Dataset dataset : datasets){
+            languages.add(dataset.getLanguage());
+        }
+        LanguageSet languageSet = new LanguageSet(languages);
+
+        LocalSRMetric sr=null;
+        UniversalSRMetric usr=null;
+        if (cmd.hasOption("m")){
+            FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("m")+"/"+"normalizer/"));
+            sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
+        }
+        if (cmd.hasOption("u")){
+            FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("u")+"/"+"normalizer/"));
+            usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
+        }
+
+
         for (Dataset dataset: datasets) {
             if (usr!=null){
                 usr.trainSimilarity(dataset);
@@ -140,8 +153,16 @@ public class MetricTrainer {
             }
         }
 
-        if (usr!=null){usr.write(path);usr.read(path);}
-        if (sr!=null){sr.write(path);sr.read(path);}
+        if (usr!=null){
+            (new File(path + cmd.getOptionValue("u") + "/" + "normalizer/")).mkdirs();
+            usr.write(path);
+            usr.read(path);
+        }
+        if (sr!=null){
+            (new File(path + cmd.getOptionValue("m") + "/" + "normalizer/")).mkdirs();
+            sr.write(path);
+            sr.read(path);
+        }
 
 
         System.out.println(datasets.get(0));

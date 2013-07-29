@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  *
  */
 public class ConceptLoader {
-    private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
+    private static final Logger LOG = Logger.getLogger(ConceptLoader.class.getName());
     private final LanguageSet languageSet;
     private final UniversalPageDao dao;
 

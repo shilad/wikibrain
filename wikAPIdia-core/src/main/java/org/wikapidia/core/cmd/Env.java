@@ -57,7 +57,12 @@ public class Env {
                         .hasArg()
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process, separated by commas")
-                        .create("l")
+                        .create("l"),
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("baseDir")
+                        .withDescription("the base directory used to resolve relative directories")
+                        .create()
         };
         for (Option o : toAdd) {
             if (options.hasOption(o.getOpt())) {
@@ -82,6 +87,8 @@ public class Env {
      * @throws ConfigurationException
      */
     public Env(CommandLine cmd, Map<String, String> confOverrides) throws ConfigurationException {
+        this.cmd = cmd;
+
         // Override configuration parameters using system properties
         for (String key : confOverrides.keySet()) {
             System.setProperty(key, confOverrides.get(key));
@@ -91,10 +98,14 @@ public class Env {
         if (cmd.hasOption("n")) {
             System.setProperty("mapper.default", cmd.getOptionValue("n"));
         }
+        // if an algorithm id is passed in the configuration file
+        if (cmd.hasOption("baseDir")) {
+            System.setProperty("baseDir", cmd.getOptionValue("baseDir"));
+        }
 
         // Load basic configuration
         File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        this.cmd = cmd;
+        LOG.info("local configuration path is " + pathConf);
         configuration = new Configuration(pathConf);
         configurator = new Configurator(configuration);
 
@@ -145,7 +156,7 @@ public class Env {
             for (FileMatcher fm : matchers) {
                 List<File> f = getFiles(l, fm);
                 if (f.isEmpty()) {
-                    LOG.warning("no files matching language " + f + ", matcher " + fm.getName());
+                    LOG.warning("no files matching language " + l + ", matcher " + fm.getName());
                 }
                 matches.addAll(f);
             }
@@ -158,6 +169,7 @@ public class Env {
         if (downloadPath == null) {
             throw new IllegalArgumentException("missing configuration for download.path");
         }
+        LOG.info("scanning download path " + downloadPath + " for files");
         List<File> matchingFiles = new ArrayList<File>();
         File langDir = new File(downloadPath, lang.getLangCode());
         if (!langDir.isDirectory()) {
