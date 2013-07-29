@@ -66,7 +66,7 @@ public class TestESAMetric {
 //    }
 
     @Test
-    @Ignore
+
     public void testMostSimilarPages() throws WikapidiaException, DaoException, ConfigurationException, ClassNotFoundException, IOException {
 
         Configurator c = new Configurator(new Configuration());

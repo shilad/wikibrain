@@ -1,20 +1,28 @@
 package org.wikapidia.sr;
 
+import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
+import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.SimUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -276,10 +284,60 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     public String getName() {
         return "ESA";
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LocalSRMetric.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "sr.metric.local";
+        }
+
+        @Override
+        public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("ESA")) {
+                return null;
+            }
+
+            List<String> langCodes = getConfig().get().getStringList("languages");
+
+            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(langCodes), LuceneOptions.getDefaultOptions());
+            ESAMetric sr = new ESAMetric(
+                    searcher,
+                    getConfigurator().get(LocalPageDao.class, config.getString("pageDao"))
+            );
+            try {
+                sr.read(getConfig().get().getString("sr.metric.path"));
+            } catch (IOException e){
+                sr.setDefaultSimilarityNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
+                sr.setDefaultMostSimilarNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
+                for (String langCode : langCodes){
+                    Language language = Language.getByLangCode(langCode);
+                    sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
+                    sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
+                }
+            }
+
+            for (String langCode : langCodes){
+                try {
+                    sr.readCosimilarity(getConfig().get().getString("sr.metric.path"), Language.getByLangCode(langCode));
+                } catch (IOException e) {}
+            }
+            return sr;
+        }
+
     }
 }
