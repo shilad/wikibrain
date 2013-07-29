@@ -114,7 +114,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
                 continue;
             }
             numEntriesRetained++;
-            e.phrase.replace("\n", " ");
+            e.phrase = e.phrase.replace("\n", " ");
             // phrase is last because it may contain tabs.
             String line = e.language.getLangCode() + "\t" + e.localId + "\t" + e.count + "\t" + e.phrase + "\n";
             byPhrase.write(e.language.getLangCode() + ":" + WpStringUtils.normalize(e.phrase) + "\t" + line);
@@ -145,6 +145,10 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
                 break;
             }
             String tokens[] = line.split("\t", 5);
+            if (tokens.length != 5) {
+                LOG.warning("invalid line in file " + input + ": " + line);
+                continue;
+            }
 
             // if new id, write out buffer and clear it
             if (lastKey != null && !tokens[0].equals(lastKey)) {
