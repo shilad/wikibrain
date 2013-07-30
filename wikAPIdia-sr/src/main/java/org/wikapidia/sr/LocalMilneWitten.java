@@ -13,11 +13,14 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 
 import java.io.IOException;
 import java.util.*;
@@ -76,7 +79,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
         if (page1.getLanguage()!=page2.getLanguage()){
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Tried to compute local similarity of pages in different languages: page1 was in"+page1.getLanguage().getEnLangName()+" and page2 was in "+ page2.getLanguage().getEnLangName());
         }
 
         TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()),outLinks);
@@ -114,6 +117,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
+            System.out.println("from cache!");
             return mostSimilar;
         } else {
             //Only check pages that share at least one inlink/outlink.
@@ -248,6 +252,12 @@ public class LocalMilneWitten extends BaseLocalSRMetric{
             daoFilter.setDestIds(id.getId());
         }
         return linkHelper.getCount(daoFilter);
+    }
+
+    @Override
+    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException{
+        PairwiseSimilarity pairwiseSimilarity = new PairwiseMilneWittenSimilarity();
+        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {

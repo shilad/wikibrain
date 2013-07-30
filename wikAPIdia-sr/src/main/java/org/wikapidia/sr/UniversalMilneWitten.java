@@ -13,10 +13,13 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.*;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 
 import java.io.IOException;
 import java.util.*;
@@ -255,6 +258,12 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             daoFilter.setDestIds(universeId);
         }
         return universalLinkDao.getCount(daoFilter);
+    }
+
+    @Override
+    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException{
+        PairwiseSimilarity pairwiseSimilarity = new PairwiseMilneWittenSimilarity();
+        super.writeCosimilarity(path, maxHits, pairwiseSimilarity);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<UniversalSRMetric> {

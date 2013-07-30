@@ -29,7 +29,10 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
     private TIntSet idsInResults = new TIntHashSet();
     MilneWittenCore milneWittenCore = new MilneWittenCore();
 
-    public PairwiseMilneWittenSimilarity(String path) throws IOException {
+    public PairwiseMilneWittenSimilarity() {
+    }
+
+    public void initMatrices(String path) throws IOException {
         this.matrix = new SparseMatrix(new File(path+"-feature"));
         this.transpose = new SparseMatrix(new File(path+"-transpose"));
     }
