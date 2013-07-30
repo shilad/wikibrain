@@ -1,5 +1,14 @@
 package org.wikapidia.phrases;
 
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
+
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -49,6 +58,33 @@ public class SimplePruner<K> implements PrunedCounts.Pruner<K> {
             return null;
         } else {
             return pruned;
+        }
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<PrunedCounts.Pruner> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return PrunedCounts.Pruner.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "phrases.pruners";
+        }
+
+        @Override
+        public PrunedCounts.Pruner get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("simple")) {
+                return null;
+            }
+            int minCount = config.getInt("minCount");
+            int maxRank = config.getInt("maxRank");
+            double minFraction = config.getDouble("minFraction");
+            return new SimplePruner(minCount, maxRank, minFraction);
         }
     }
 }

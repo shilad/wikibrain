@@ -57,7 +57,17 @@ public class Env {
                         .hasArg()
                         .withLongOpt("languages")
                         .withDescription("the set of languages to process, separated by commas")
-                        .create("l")
+                        .create("l"),
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("base-dir")
+                        .withDescription("the base directory used to resolve relative directories")
+                        .create(),
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("tmp-dir")
+                        .withDescription("the temporary directory")
+                        .create()
         };
         for (Option o : toAdd) {
             if (options.hasOption(o.getOpt())) {
@@ -82,6 +92,8 @@ public class Env {
      * @throws ConfigurationException
      */
     public Env(CommandLine cmd, Map<String, String> confOverrides) throws ConfigurationException {
+        this.cmd = cmd;
+
         // Override configuration parameters using system properties
         for (String key : confOverrides.keySet()) {
             System.setProperty(key, confOverrides.get(key));
@@ -91,10 +103,13 @@ public class Env {
         if (cmd.hasOption("n")) {
             System.setProperty("mapper.default", cmd.getOptionValue("n"));
         }
+        if (cmd.hasOption("base-dir")) {
+            System.setProperty("baseDir", cmd.getOptionValue("base-dir"));
+        }
 
         // Load basic configuration
         File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        this.cmd = cmd;
+        LOG.info("local configuration path is " + pathConf);
         configuration = new Configuration(pathConf);
         configurator = new Configurator(configuration);
 
@@ -110,8 +125,21 @@ public class Env {
             maxThreads = new Integer(cmd.getOptionValue("h"));
         }
 
+        // Set the temporary directory if it is specified
+        if (cmd.hasOption("tmp-dir")) {
+            System.setProperty("tmpDir", cmd.getOptionValue("tmp-dir"));
+            System.setProperty("java.io.tmpdir", cmd.getOptionValue("tmp-dir"));
+        } else if (configuration.get().hasPath("tmpDir")) {
+            System.setProperty("java.io.tmpdir", configuration.get().getString("tmpDir"));
+        }
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        if (!tmpDir.exists()) {
+            tmpDir.mkdirs();
+        }
+
         LOG.info("using languages " + languages);
         LOG.info("using maxThreads " + maxThreads);
+        LOG.info("using tmpDir " + tmpDir);
     }
 
     public List<File> getInputFiles(FileMatcher ... matchers) {
@@ -158,6 +186,7 @@ public class Env {
         if (downloadPath == null) {
             throw new IllegalArgumentException("missing configuration for download.path");
         }
+        LOG.info("scanning download path " + downloadPath + " for files");
         List<File> matchingFiles = new ArrayList<File>();
         File langDir = new File(downloadPath, lang.getLangCode());
         if (!langDir.isDirectory()) {

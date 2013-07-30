@@ -209,12 +209,22 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         return map;
     }
 
+    @Override
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException {
         if (titlesToIds==null){
             buildTitlesToIds();
         }
         return titlesToIds.get(Title.longHashCode(language, title, nameSpace));
     }
+
+    @Override
+    public int getIdByTitle(Title title) throws DaoException {
+        if (titlesToIds==null){
+            buildTitlesToIds();
+        }
+        return titlesToIds.get(title.longHashCode());
+    }
+
 
     /**
      * Build a LocalPage from a database record representation.

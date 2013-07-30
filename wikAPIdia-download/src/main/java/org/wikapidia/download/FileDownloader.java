@@ -22,6 +22,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.utils.WpIOUtils;
 
 /**
  *
@@ -38,13 +39,18 @@ public class FileDownloader {
     private static final int MAX_ATTEMPT = 30;      // number of attempts before getDump gives up downloading the dump
     private static final int DISPLAY_INFO = 10000;  // amount of time between displaying download progress
 
-    private final File tmp = new File(".tmp").getAbsoluteFile();
+    private final File tmp;
     private final File output;
 
     private DownloadInfo info;
 
     public FileDownloader(File output) {
         this.output = output;
+        try {
+            tmp = WpIOUtils.createTempDirectory("download");
+        } catch (IOException e) {
+            throw new RuntimeException(e);  // shouldn't happen.
+        }
     }
 
     /**
