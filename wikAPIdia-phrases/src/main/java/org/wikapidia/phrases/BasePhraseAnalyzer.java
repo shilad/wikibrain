@@ -114,7 +114,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
                 continue;
             }
             numEntriesRetained++;
-            e.phrase = e.phrase.replace("\n", " ");
+            e.phrase = e.phrase.replace("\n", " ").replace("\t", " ");
             // phrase is last because it may contain tabs.
             String line = e.language.getLangCode() + "\t" + e.localId + "\t" + e.count + "\t" + e.phrase + "\n";
             byPhrase.write(e.language.getLangCode() + ":" + WpStringUtils.normalize(e.phrase) + "\t" + line);
@@ -152,7 +152,11 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
 
             // if new id, write out buffer and clear it
             if (lastKey != null && !tokens[0].equals(lastKey)) {
-                if (ltype == RecordType.PAGES) writePage(buffer, pruner); else writePhrase(buffer, pruner);
+                if (ltype == RecordType.PAGES) {
+                    writePage(buffer, pruner);
+                } else {
+                    writePhrase(buffer, pruner);
+                }
                 buffer.clear();
             }
             Entry e = new Entry(
@@ -164,7 +168,11 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             buffer.add(e);
             lastKey = tokens[0];
         }
-        if (ltype == RecordType.PAGES) writePage(buffer, pruner); else writePhrase(buffer, pruner);
+        if (ltype == RecordType.PAGES) {
+            writePage(buffer, pruner);
+        } else {
+            writePhrase(buffer, pruner);
+        }
     }
 
     protected void writePage(List<Entry> pageCounts, PrunedCounts.Pruner pruner) throws DaoException {
@@ -197,8 +205,12 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         String phrase = WpStringUtils.normalize(pageCounts.get(0).phrase);
         Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
         for (Entry e : pageCounts) {
-            if (!WpStringUtils.normalize(e.phrase).equals(phrase)) throw new IllegalStateException();
-            if (e.language != lang) throw new IllegalStateException();
+            if (!WpStringUtils.normalize(e.phrase).equals(phrase)) {
+                LOG.warning("disagreement between phrases " + phrase + " and " + e.phrase);
+            }
+            if (e.language != lang) {
+                LOG.warning("disagreement between languages " + lang+ " and " + e.language);
+            }
             if (counts.containsKey(e.localId)) {
                 counts.put(e.localId, counts.get(e.localId) + e.count);
             } else {
