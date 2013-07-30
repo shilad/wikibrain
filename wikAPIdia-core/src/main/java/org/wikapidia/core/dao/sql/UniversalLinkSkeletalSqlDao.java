@@ -54,7 +54,9 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     public void beginLoad() throws DaoException {
         super.beginLoad();
         try {
-            path = new File("tmp");
+            path = File.createTempFile("univ-links", "odb");
+            if (path.isFile()) { path.delete(); }
+            path.mkdirs();
             objectDb = new ObjectDb<byte[]>(path, true);
         } catch (IOException e) {
             throw new DaoException(e);
