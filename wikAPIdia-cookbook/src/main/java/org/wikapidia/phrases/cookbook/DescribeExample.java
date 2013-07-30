@@ -25,10 +25,10 @@ public class DescribeExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         Language lang = Language.getByLangCode("simple");   // simple english
         Configurator c = new Configurator(new Configuration());
-        PhraseAnalyzer pa = c.get(PhraseAnalyzer.class, "anchortext");
+        PhraseAnalyzer pa = c.get(PhraseAnalyzer.class, "stanford");
         LocalPageDao pageDao = c.get(LocalPageDao.class);
         LocalPage page = pageDao.getByTitle(lang, new Title("Obama", lang), NameSpace.ARTICLE);
-        System.out.println("description of " + page.getTitle() + ":"); // should resolve redirect to Barack Obama
+        System.out.println("description of " + page + ":"); // should resolve redirect to Barack Obama
         LinkedHashMap<String, Float> description = pa.describeLocal(lang, page, 20);
         if (description == null) {
             System.out.println("\tno description!");

@@ -24,6 +24,8 @@ import java.util.logging.Logger;
  */
 public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
+    private final PrunedCounts.Pruner<String> phrasePruner;
+    private final PrunedCounts.Pruner<Integer> pagePruner;
 
     /**
      * An entry in the phrase corpus.
@@ -55,7 +57,9 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     protected PhraseAnalyzerDao phraseDao;
     protected LocalPageDao pageDao;
 
-    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao) {
+    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao,  PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner) {
+        this.phrasePruner = phrasePruner;
+        this.pagePruner = pagePruner;
         this.phraseDao = phraseDao;
         this.pageDao = pageDao;
     }
@@ -77,7 +81,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
      * @throws IOException
      */
     @Override
-    public void loadCorpus(LanguageSet langs, PrunedCounts.Pruner<String> pagePruner, PrunedCounts.Pruner<Integer> phrasePruner) throws DaoException, IOException {
+    public void loadCorpus(LanguageSet langs) throws DaoException, IOException {
         // create temp files for storing corpus entries by phrase and local id.
         // these will ultimately be sorted to group together records with the same phrase / id.
         File byWpIdFile = File.createTempFile("wp_phrases_by_id", "txt");
@@ -94,7 +98,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         long numEntries = 0;
         long numEntriesRetained = 0;
         for (Entry e : getCorpus(langs)) {
-            if (++numEntries % 100000 == 0) {
+            if (++numEntries % 1000000 == 0) {
                 double p = 100.0 * numEntriesRetained / numEntries;
                 LOG.info("processing entry: " + numEntries +
                         ", retained " + numEntriesRetained +
@@ -104,7 +108,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
                 continue;
             }
             if (e.title != null && e.localId < 0) {
-                int localId = pageDao.getIdByTitle(e.title, e.language,NameSpace.ARTICLE);
+                int localId = pageDao.getIdByTitle(new Title(e.title, e.language));
                 e.localId = (localId <= 0) ? -1 : localId;
             }
             if (e.localId < 0) {
@@ -122,9 +126,11 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
 
         // sort phrases by phrase / id and load them
         sortInPlace(byWpIdFile);
-        loadFromFile(RecordType.PAGES, byWpIdFile, pagePruner);
+        loadFromFile(RecordType.PAGES, byWpIdFile, phrasePruner);
         sortInPlace(byPhraseFile);
-        loadFromFile(RecordType.PHRASES, byPhraseFile, phrasePruner);
+        loadFromFile(RecordType.PHRASES, byPhraseFile, pagePruner);
+
+        phraseDao.close();
     }
 
     private static enum RecordType {
@@ -233,12 +239,13 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {
         LinkedHashMap<String, Float> result = new LinkedHashMap<String, Float>();
         PrunedCounts<String> counts = phraseDao.getPageCounts(language, page.getLocalId(), maxPhrases);
+        System.out.println(counts);
         if (counts == null) {
             return null;
         }
         for (String phrase : counts.keySet()) {
             result.put(phrase, (float)1.0 * counts.get(phrase) / counts.getTotal());
-            if (counts.size() >= maxPhrases) {
+            if (result.size() >= maxPhrases) {
                 break;
             }
         }

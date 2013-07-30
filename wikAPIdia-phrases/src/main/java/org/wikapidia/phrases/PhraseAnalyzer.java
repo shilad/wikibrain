@@ -20,7 +20,7 @@ public interface PhraseAnalyzer {
      * @throws DaoException
      * @throws IOException
      */
-    void loadCorpus(LanguageSet langs, PrunedCounts.Pruner<String> pagePruner, PrunedCounts.Pruner<Integer> phrasePruner) throws DaoException, IOException;
+    void loadCorpus(LanguageSet langs) throws DaoException, IOException;
 
     /**
      * Returns the most descriptive phrases for a wikipedia page.

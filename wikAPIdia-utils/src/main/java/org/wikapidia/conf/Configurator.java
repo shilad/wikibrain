@@ -233,53 +233,41 @@ public class Configurator {
         synchronized (cache) {
             if (cache.containsKey(name)) {
                 return (T) cache.get(name);
-            }
-            for (Provider p : pset.providers) {
-                Object o = p.get(name, config);
-                if (o != null) {
-                    cache.put(name, o);
-                    return (T) o;
-                }
+            } else {
+                T elem = construct(klass, name, config);
+                cache.put(name, elem);
+                return elem;
             }
         }
-        throw new ConfigurationException(
-                "None of the " + pset.providers.size() + " providers claimed ownership of component " +
-                "with class " + klass +
-                ", name '" + name +
-                "' and configuration path '" + path + "'"
-        );
     }
 
     /**
-     * Get every instance of the specified class
+     * Constructs an instance of the specified class with the passed
+     * in config. This bypasses the cache and the configuration object.
      *
-     * @param klass The generic interface or superclass, not the specific implementation.
-     * @return
-     * @throws ConfigurationException
+     * @param klass The class being created.
+     * @param name  An arbitrary name for the object. Can be null.
+     * @param conf The configuration for the object.
+     * @param <T>
+     * @return The object
      */
-    public <T> List<T> getAll(Class<T> klass) throws ConfigurationException{
+    public <T> T construct(Class<T> klass, String name, Config conf) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
-        ProviderSet pset = providers.get(klass);
-        if (!conf.get().hasPath(pset.path)) {
-            throw new ConfigurationException("Configuration path " + pset.path + " does not exist");
-        }
-        Config pConfig = conf.get().getConfig(pset.path);
-        List<T> classes = new ArrayList<T>();
-        for (String name : pConfig.root().keySet()){
-            String path = pset.path + "." + name;
-            Config config = conf.get().getConfig(path);
-            for (Provider p : pset.providers) {
-                Object o = p.get(name, config);
-                if (o != null) {
-                    classes.add ((T) o);
-                    break;
-                }
+        List<Provider> pset = providers.get(klass).providers;
+        for (Provider p : pset) {
+            Object o = p.get(name, conf);
+            if (o != null) {
+                return (T) o;
             }
         }
-        return classes;
-
+        throw new ConfigurationException(
+                "None of the " + pset.size() + " providers claimed ownership of component " +
+                        "with class " + klass +
+                        ", name '" + name +
+                        "' and configuration '" + conf + "'"
+        );
     }
 
     /**

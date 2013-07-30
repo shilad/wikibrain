@@ -38,8 +38,8 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
 
     private final File path;
 
-    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, File path) {
-        super(phraseDao, pageDao);
+    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao,  PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, File path) {
+        super(phraseDao, pageDao, phrasePruner, pagePruner);
         this.path = path;
     }
 
@@ -192,7 +192,11 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
             PhraseAnalyzerDao paDao = getConfigurator().get(PhraseAnalyzerDao.class, config.getString("phraseDao"));
             LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             File path = new File(config.getString("path"));
-            return new StanfordPhraseAnalyzer(paDao, lpDao, path);
+            PrunedCounts.Pruner<String> phrasePruner = getConfigurator().construct(
+                    PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"));
+            PrunedCounts.Pruner<Integer> pagePruner = getConfigurator().construct(
+                    PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"));
+            return new StanfordPhraseAnalyzer(paDao, lpDao, phrasePruner, pagePruner, path);
         }
     }
 }
