@@ -13,6 +13,7 @@ import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpStringUtils;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Logger;
@@ -227,8 +228,8 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         Comparator<String> comparator = new Comparator<String>() {
             public int compare(String r1, String r2){
                 return r1.compareTo(r2);}};
-        List<File> l = ExternalSort.sortInBatch(file, comparator) ;
-        ExternalSort.mergeSortedFiles(l, file, comparator);
+        List<File> l = ExternalSort.sortInBatch(file, comparator, 1024, Charset.forName("utf-8"), null, false);
+        ExternalSort.mergeSortedFiles(l, file, comparator, Charset.forName("utf-8"));
     }
 
 
