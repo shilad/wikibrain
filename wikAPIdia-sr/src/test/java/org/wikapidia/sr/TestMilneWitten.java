@@ -14,6 +14,7 @@ import org.wikapidia.core.model.Title;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
 import org.wikapidia.sr.utils.ExplanationFormatter;
+import org.wikapidia.utils.WpIOUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,11 +49,7 @@ public class TestMilneWitten {
     @Test
     public void testArticle() throws ClassNotFoundException, IOException, SQLException, DaoException, ConfigurationException {
         Class.forName("org.h2.Driver");
-        File tmpDir = File.createTempFile("wikapidia-h2", null);
-        tmpDir.delete();
-        tmpDir.deleteOnExit();
-        tmpDir.mkdirs();
-
+        File tmpDir = WpIOUtils.createTempDirectory("wikapidia-h2");
         BoneCPDataSource ds = new BoneCPDataSource();
         ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
         ds.setUsername("sa");

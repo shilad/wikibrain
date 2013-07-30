@@ -1,26 +1,32 @@
 package org.wikapidia.sr;
 
+import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
-import org.wikapidia.sr.utils.KnownSim;
+import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.SimUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -37,7 +43,36 @@ public class ESAMetric extends BaseLocalSRMetric {
         this.pageHelper = pageHelper;
     }
 
-    //TODO: mostSimilar directly on a phrase
+    /**
+     * Get the most similar Wikipedia pages of a specified localString.
+     * @param phrase local string containing the language information
+     * @param maxResults number of results returned
+     * @return SRResulList
+     * @throws DaoException
+     */
+    @Override
+    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException {
+        List<SRResult> results = new ArrayList<SRResult>();
+        Language language = phrase.getLanguage();
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
+
+        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase.getString()), language);
+
+        for (ScoreDoc scoreDoc : scoreDocs) {
+            int localPageId = searcher.getLocalIdFromDocId(scoreDoc.doc, language);
+            SRResult result = new SRResult((double) scoreDoc.score);
+            result.id  = localPageId;
+            results.add(result);
+        }
+        SRResultList resultList = new SRResultList(maxResults);
+        for (int j = 0; j < maxResults && j < results.size(); j++){
+            resultList.set(j, results.get(j));
+        }
+        return resultList;
+    }
+
+
+
     /**
      * Get cosine similarity between two phrases.
      *
@@ -101,13 +136,15 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      */
     public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws DaoException { // TODO: validIDs
-        try {
-            QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
-            ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
+        Query query = queryBuilder.getPhraseQuery(phrase);
+        if (query != null) {
+            ScoreDoc[] scoreDocs = searcher.search(query, language);
             pruneSimilar(scoreDocs);
             return SimUtils.normalizeVector(expandScores(scoreDocs));
-        } catch (ParseException e) {
-            throw new DaoException(e);
+        } else {
+            LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query.");
+            return null;
         }
     }
 
@@ -119,7 +156,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @throws DaoException
      */
     private TIntDoubleHashMap getConceptVector(LocalPage localPage, Language language) throws DaoException { // TODO: validIDs
-        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language)), language);
         pruneSimilar(scoreDocs);
@@ -202,7 +239,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      */
     public SRResultList mostSimilar(LocalPage localPage, int maxResults) throws DaoException {
         Language language = localPage.getLanguage();
-        QueryBuilder queryBuilder = new QueryBuilder(language, searcher.getOptions());
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
         searcher.setHitCount(maxResults);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
@@ -247,10 +284,60 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     @Override
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     public String getName() {
         return "ESA";
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LocalSRMetric.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "sr.metric.local";
+        }
+
+        @Override
+        public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("ESA")) {
+                return null;
+            }
+
+            List<String> langCodes = getConfig().get().getStringList("languages");
+
+            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(langCodes), getConfigurator().get(LuceneOptions.class, "esa"));
+            ESAMetric sr = new ESAMetric(
+                    searcher,
+                    getConfigurator().get(LocalPageDao.class, config.getString("pageDao"))
+            );
+            try {
+                sr.read(getConfig().get().getString("sr.metric.path"));
+            } catch (IOException e){
+                sr.setDefaultSimilarityNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
+                sr.setDefaultMostSimilarNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
+                for (String langCode : langCodes){
+                    Language language = Language.getByLangCode(langCode);
+                    sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
+                    sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
+                }
+            }
+
+            for (String langCode : langCodes){
+                try {
+                    sr.readCosimilarity(getConfig().get().getString("sr.metric.path"), Language.getByLangCode(langCode));
+                } catch (IOException e) {}
+            }
+            return sr;
+        }
+
     }
 }

@@ -34,7 +34,7 @@ public class TrainNormalizerExample {
         sr.setMostSimilarLocalMatrix(l, mLocal);
         usr.setMostSimilarUniversalMatrix(mUniversal);
         DatasetDao datasetDao = new DatasetDao();
-        Dataset dataset = datasetDao.read(l, path + "gold/cleaned/MC.txt");
+        Dataset dataset = datasetDao.read(l, path + "gold/cleaned/atlasify240.txt");
 
         sr.trainDefaultSimilarity(dataset);
         usr.trainSimilarity(dataset);

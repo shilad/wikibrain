@@ -1,15 +1,12 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.phrases.NormalizedStringPruner;
 import org.wikapidia.phrases.PhraseAnalyzer;
-import org.wikapidia.phrases.SimplePruner;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -49,21 +46,12 @@ public class PhraseLoader {
 
         Env env = new Env(cmd, confOverrides);
 
-        String name = cmd.getOptionValue("n");
+        String name = cmd.getOptionValue("p");
 
         PhraseAnalyzer analyzer = env.getConfigurator().get(PhraseAnalyzer.class, name);
 
         LOG.log(Level.INFO, "LOADING PHRASE CORPUS FOR " + name);
-        Configuration c = env.getConfiguration();
-        int minCount = c.get().getInt("phrases.pruning.minCount");
-        int maxRank = c.get().getInt("phrases.pruning.maxRank");
-        double minFraction = c.get().getDouble("phrases.pruning.minFraction");
-
-        analyzer.loadCorpus(
-                env.getLanguages(),
-                new NormalizedStringPruner(minCount, maxRank, minFraction),
-                new SimplePruner<Integer>(minCount, maxRank, minFraction)
-        );
+        analyzer.loadCorpus(env.getLanguages());
         LOG.log(Level.INFO, "DONE");
     }
 }

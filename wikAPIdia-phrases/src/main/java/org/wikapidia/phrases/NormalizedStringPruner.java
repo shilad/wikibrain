@@ -1,5 +1,9 @@
 package org.wikapidia.phrases;
 
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.utils.WpStringUtils;
 
 import java.util.HashMap;
@@ -36,5 +40,31 @@ public class NormalizedStringPruner extends SimplePruner<String> {
             normalizedCounts.put(key, sums.get(WpStringUtils.normalize(key)));
         }
         return super.prune(normalizedCounts);
+    }
+    public static class Provider extends org.wikapidia.conf.Provider<PrunedCounts.Pruner> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return PrunedCounts.Pruner.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "phrases.pruners";
+        }
+
+        @Override
+        public PrunedCounts.Pruner get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("string")) {
+                return null;
+            }
+            int minCount = config.getInt("minCount");
+            int maxRank = config.getInt("maxRank");
+            double minFraction = config.getDouble("minFraction");
+            return new NormalizedStringPruner(minCount, maxRank, minFraction);
+        }
     }
 }

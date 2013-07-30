@@ -26,6 +26,7 @@ import java.io.Reader;
 public class WikapidiaAnalyzer extends Analyzer {
 
     private final Language language;
+    private final LanguageTokenizer tokenizer;
     private final LuceneOptions options;
 
     /**
@@ -47,21 +48,21 @@ public class WikapidiaAnalyzer extends Analyzer {
      */
     public WikapidiaAnalyzer(Language language, LuceneOptions options) {
         this.language = language;
+        this.tokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
         this.options = options;
-    }
-
-    public LuceneOptions getOptions() {
-        return options;
     }
 
     public Language getLanguage() {
         return language;
     }
 
+    public LuceneOptions getOptions() {
+        return options;
+    }
+
     @Override
     protected Analyzer.TokenStreamComponents createComponents(String s, Reader r) {
-        LanguageTokenizer langTokenizer = LanguageTokenizer.getLanguageTokenizer(language, options);
-        TokenStream result = langTokenizer.getTokenStream(r, CharArraySet.EMPTY_SET);
-        return new TokenStreamComponents(langTokenizer.getTokenizer(), result);
+        TokenStream result = tokenizer.getTokenStream(r, CharArraySet.EMPTY_SET);
+        return new TokenStreamComponents(tokenizer.getTokenizer(), result);
     }
 }

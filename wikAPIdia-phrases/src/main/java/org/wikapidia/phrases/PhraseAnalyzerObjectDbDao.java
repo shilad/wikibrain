@@ -138,6 +138,11 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
         }
     }
 
+    public void close() {
+        this.describeDb.close();
+        this.resolveDb.close();
+    }
+
     public static class Provider extends org.wikapidia.conf.Provider<PhraseAnalyzerDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -155,7 +160,6 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
 
         @Override
         public PhraseAnalyzerDao get(String name, Config config) throws ConfigurationException {
-            System.err.println("type is " + config.getString("type"));
             if (!config.getString("type").equals("objectdb")) {
                 return null;
             }

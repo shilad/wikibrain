@@ -2,8 +2,10 @@ package org.wikapidia.lucene;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.NumericRangeQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.wikapidia.core.dao.DaoException;
@@ -12,7 +14,6 @@ import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -34,6 +35,7 @@ public class LuceneSearcher {
     private final File root;
     private final Map<Language, IndexSearcher> searchers;
     private final Map<Language, DirectoryReader> readers;
+    private final Map<Language, WikapidiaAnalyzer> analyzers;
     private final LuceneOptions options;
 
     private int hitCount = DEFAULT_HIT_COUNT;
@@ -67,11 +69,13 @@ public class LuceneSearcher {
             this.root = root;
             this.searchers = new HashMap<Language, IndexSearcher>();
             this.readers = new HashMap<Language, DirectoryReader>();
+            this.analyzers = new HashMap<Language, WikapidiaAnalyzer>();
             for (Language language : languages) {
                 Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
                 DirectoryReader reader = DirectoryReader.open(directory);
                 readers.put(language, reader);
                 searchers.put(language, new IndexSearcher(reader));
+                analyzers.put(language, new WikapidiaAnalyzer(language, options));
             }
             this.options = options;
         } catch (IOException e) {
@@ -151,5 +155,17 @@ public class LuceneSearcher {
 
     public DirectoryReader getReaderByLanguage(Language language) {
         return readers.get(language);
+    }
+
+    public IndexSearcher getSearcherByLanguage(Language language) {
+        return searchers.get(language);
+    }
+
+    public WikapidiaAnalyzer getAnalyzerByLanguage(Language language) {
+        return analyzers.get(language);
+    }
+
+    public QueryBuilder getQueryBuilderByLanguage(Language language) {
+        return new QueryBuilder(analyzers.get(language));
     }
 }

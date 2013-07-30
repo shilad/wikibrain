@@ -1,6 +1,7 @@
 package org.wikapidia.utils;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
@@ -71,5 +72,35 @@ public class WpIOUtils {
      */
     public static BufferedWriter openWriter(File path) throws IOException {
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8"));
+    }
+
+    /**
+     * Creates a new temporary directory
+     * @param name Name to be embedded within the tmp dir
+     * @param deleteOnExit If true, try to delete the directory when the JVM exits.
+     * @return
+     * @throws IOException
+     */
+    public static File createTempDirectory(String name, boolean deleteOnExit) throws IOException {
+        File tmpDir = File.createTempFile(name, null);
+        if(!tmpDir.delete()) {
+            throw new IOException("Could not delete temp file: " + tmpDir.getAbsolutePath());
+        }
+        if(!tmpDir.mkdir()) {
+            throw new IOException("Could not create temp directory: " + tmpDir.getAbsolutePath());
+        }
+        if (deleteOnExit) {
+            FileUtils.forceDeleteOnExit(tmpDir);
+        }
+        return tmpDir;
+    }
+
+    /**
+     * @see WpIOUtils#createTempDirectory(String, boolean)
+     * @return
+     * @throws IOException
+     */
+    public static File createTempDirectory(String name) throws IOException {
+        return createTempDirectory(name, true);
     }
 }

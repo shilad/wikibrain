@@ -80,4 +80,12 @@ public class LocalId {
     public boolean canPackInInt() {
         return (language.getId() <= MAX_PACKED_LANGUAGE_ID && id <= MAX_PACKED_ID);
     }
+
+    @Override
+    public String toString() {
+        return "LocalId{" +
+                "language=" + language +
+                ", id=" + id +
+                '}';
+    }
 }

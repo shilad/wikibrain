@@ -62,4 +62,12 @@ public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
      * @return
      */
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException;
+
+
+    /**
+     * Get an id from a title. Returns -1 if it doesn't exist.
+     * @param title
+     * @return
+     */
+    public int getIdByTitle(Title title) throws DaoException;
 }

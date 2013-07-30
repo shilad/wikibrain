@@ -31,6 +31,8 @@ public class Configuration {
     public Configuration(File file) {
         if (file == null) {
             this.config = ConfigFactory.load();
+        } else if (!file.isFile()) {
+            throw new IllegalArgumentException("configuration file " + file + " does not exist");
         } else {
             this.config = ConfigFactory.load(ConfigFactory.parseFile(file));
         }

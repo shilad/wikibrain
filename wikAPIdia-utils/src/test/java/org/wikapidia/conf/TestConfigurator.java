@@ -32,6 +32,7 @@ public class TestConfigurator {
         FileUtils.write(tmp,
                 "providers : { some.path.intMaker += org.wikapidia.conf.OddIntProvider }\n" +
                 "some.path.intMaker : { aaa : { type : odd } }\n" +
+                "some.path.intMaker : { bar : { value : 99 } }\n" +
                 "some.path.intMaker : { bbb : { type : odd } }\n"
             );
         Configurator conf = new Configurator(new Configuration(tmp));
@@ -39,7 +40,7 @@ public class TestConfigurator {
         Integer i = conf.get(Integer.class, "foo");
         assertEquals(i, 42);
         Integer j = conf.get(Integer.class, "bar");
-        assertEquals(j, 23);
+        assertEquals(j, 99);
         Integer k = conf.get(Integer.class, "baz");
         assertEquals(k, 0);
         Integer l = conf.get(Integer.class, "biff");
@@ -49,6 +50,8 @@ public class TestConfigurator {
         assertEquals(m, 1);
         Integer n = conf.get(Integer.class, "bbb");
         assertEquals(n, 3);
+
+        assertEquals(conf.getConf().get().getInt("some.path.intMaker.bar.value"), 99);
 
         tmp.delete();
     }
