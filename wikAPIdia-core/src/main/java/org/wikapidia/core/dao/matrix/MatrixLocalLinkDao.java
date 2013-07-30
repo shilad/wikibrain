@@ -90,9 +90,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     public void beginLoad() throws DaoException {
         delegate.beginLoad();
         try {
-            File f = new File(".tmp");
-            f.mkdirs();
-            objectDbPath = File.createTempFile("local-links", "odb", f);
+            objectDbPath = File.createTempFile("local-links", "odb");
             FileUtils.forceDeleteOnExit(objectDbPath);
             objectDb = new ObjectDb<int[]>(objectDbPath, true);
         } catch (IOException e) {

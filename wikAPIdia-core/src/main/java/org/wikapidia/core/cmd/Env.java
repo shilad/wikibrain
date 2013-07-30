@@ -60,8 +60,13 @@ public class Env {
                         .create("l"),
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .withLongOpt("baseDir")
+                        .withLongOpt("base-dir")
                         .withDescription("the base directory used to resolve relative directories")
+                        .create(),
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("tmp-dir")
+                        .withDescription("the temporary directory")
                         .create()
         };
         for (Option o : toAdd) {
@@ -98,9 +103,8 @@ public class Env {
         if (cmd.hasOption("n")) {
             System.setProperty("mapper.default", cmd.getOptionValue("n"));
         }
-        // if an algorithm id is passed in the configuration file
-        if (cmd.hasOption("baseDir")) {
-            System.setProperty("baseDir", cmd.getOptionValue("baseDir"));
+        if (cmd.hasOption("base-dir")) {
+            System.setProperty("baseDir", cmd.getOptionValue("base-dir"));
         }
 
         // Load basic configuration
@@ -121,8 +125,21 @@ public class Env {
             maxThreads = new Integer(cmd.getOptionValue("h"));
         }
 
+        // Set the temporary directory if it is specified
+        if (cmd.hasOption("tmp-dir")) {
+            System.setProperty("tmpDir", cmd.getOptionValue("tmp-dir"));
+            System.setProperty("java.io.tmpdir", cmd.getOptionValue("tmp-dir"));
+        } else if (configuration.get().hasPath("tmpDir")) {
+            System.setProperty("java.io.tmpdir", configuration.get().getString("tmpDir"));
+        }
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        if (!tmpDir.exists()) {
+            tmpDir.mkdirs();
+        }
+
         LOG.info("using languages " + languages);
         LOG.info("using maxThreads " + maxThreads);
+        LOG.info("using tmpDir " + tmpDir);
     }
 
     public List<File> getInputFiles(FileMatcher ... matchers) {
