@@ -1,7 +1,9 @@
-package org.wikapidia.sr;
+package org.wikapidia.sr.milnewitten;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikapidia.sr.Explanation;
+import org.wikapidia.sr.SRResult;
 
 import java.util.ArrayList;
 import java.util.List;

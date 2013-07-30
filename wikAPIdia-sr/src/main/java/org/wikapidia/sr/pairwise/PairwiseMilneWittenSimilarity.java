@@ -5,7 +5,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.matrix.MatrixRow;
 import org.wikapidia.matrix.SparseMatrix;
-import org.wikapidia.sr.MilneWittenCore;
+import org.wikapidia.sr.milnewitten.MilneWittenCore;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.Leaderboard;
 

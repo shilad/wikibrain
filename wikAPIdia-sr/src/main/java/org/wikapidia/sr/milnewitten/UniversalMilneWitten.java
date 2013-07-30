@@ -1,4 +1,4 @@
-package org.wikapidia.sr;
+package org.wikapidia.sr.milnewitten;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
@@ -16,6 +16,7 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
+import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
@@ -31,7 +32,7 @@ import java.util.*;
  * Time: 2:55 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UniversalMilneWitten extends BaseUniversalSRMetric{
+public class UniversalMilneWitten extends BaseUniversalSRMetric {
     private UniversalLinkDao universalLinkDao;
     private boolean outLinks;
     private MilneWittenCore core;

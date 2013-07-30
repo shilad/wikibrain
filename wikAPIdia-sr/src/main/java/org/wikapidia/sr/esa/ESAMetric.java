@@ -1,4 +1,4 @@
-package org.wikapidia.sr;
+package org.wikapidia.sr.esa;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.hash.TIntDoubleHashMap;
@@ -19,6 +19,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
+import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;

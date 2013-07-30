@@ -1,4 +1,4 @@
-package org.wikapidia.sr;
+package org.wikapidia.sr.milnewitten;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
@@ -17,6 +17,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
@@ -30,7 +31,7 @@ import java.util.*;
  * @author Matt Lesicko
  */
 
-public class LocalMilneWitten extends BaseLocalSRMetric{
+public class LocalMilneWitten extends BaseLocalSRMetric {
     LocalLinkDao linkHelper;
     //False is standard Milne Witten with in links, true is with out links
     private boolean outLinks;
