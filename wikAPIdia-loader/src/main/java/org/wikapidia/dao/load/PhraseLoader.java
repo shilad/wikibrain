@@ -49,7 +49,7 @@ public class PhraseLoader {
 
         Env env = new Env(cmd, confOverrides);
 
-        String name = cmd.getOptionValue("n");
+        String name = cmd.getOptionValue("p");
 
         PhraseAnalyzer analyzer = env.getConfigurator().get(PhraseAnalyzer.class, name);
 
