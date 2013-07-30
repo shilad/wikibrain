@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -37,9 +38,10 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
     private static final Language LANG_SIMPLE = Language.getByLangCode("simple");
 
     private final File path;
+    private LanguageSet languages;
 
-    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, File path) {
-        super(phraseDao, pageDao);
+    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao,  PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, File path) {
+        super(phraseDao, pageDao, phrasePruner, pagePruner);
         this.path = path;
     }
 
@@ -55,6 +57,7 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
                 LOG.warning("Stanford only supports English and Simple English (not " + l + ")");
             }
         }
+        this.languages = langs;
         return new Iterable<Entry>() {
             @Override
             public Iterator<Entry> iterator() {
@@ -121,12 +124,13 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
                 return;
             }
             Record r = new Record(line);
-            buffer.add(
-                    new BasePhraseAnalyzer.Entry(Language.getByLangCode("en"),
-                    r.article, r.phrase, r.getNumEnglishLinks()));
-            buffer.add(
-                    new BasePhraseAnalyzer.Entry(Language.getByLangCode("simple"),
-                            r.article, r.phrase, r.getNumEnglishLinks()));
+            for (Language l : Arrays.asList(LANG_EN, LANG_SIMPLE)) {
+                if (languages.containsLanguage(l)) {
+                    buffer.add(
+                            new BasePhraseAnalyzer.Entry(
+                                    l, r.article, r.phrase, r.getNumEnglishLinks()));
+                }
+            }
         }
     }
 
@@ -192,7 +196,11 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
             PhraseAnalyzerDao paDao = getConfigurator().get(PhraseAnalyzerDao.class, config.getString("phraseDao"));
             LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             File path = new File(config.getString("path"));
-            return new StanfordPhraseAnalyzer(paDao, lpDao, path);
+            PrunedCounts.Pruner<String> phrasePruner = getConfigurator().construct(
+                    PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"));
+            PrunedCounts.Pruner<Integer> pagePruner = getConfigurator().construct(
+                    PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"));
+            return new StanfordPhraseAnalyzer(paDao, lpDao, phrasePruner, pagePruner, path);
         }
     }
 }
