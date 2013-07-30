@@ -104,12 +104,8 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
                 continue;
             }
             if (e.title != null && e.localId < 0) {
-                LocalPage lp = pageDao.getByTitle(e.language,
-                        new Title(e.title, e.language),
-                        NameSpace.ARTICLE);
-                if (lp != null) {
-                    e.localId = lp.getLocalId();
-                }
+                int localId = pageDao.getIdByTitle(e.title, e.language,NameSpace.ARTICLE);
+                e.localId = (localId <= 0) ? -1 : localId;
             }
             if (e.localId < 0) {
                 continue;
