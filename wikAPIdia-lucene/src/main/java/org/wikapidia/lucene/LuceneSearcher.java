@@ -128,6 +128,30 @@ public class LuceneSearcher {
     }
 
     /**
+     * Runs a specified lucene query in the specified language with a specified hitcount.
+     * @param query
+     * @param language
+     * @param hitCount
+     * @return
+     */
+    public WikapidiaScoreDoc[] search(Query query, Language language, int hitCount) {
+        try {
+            this.hitCount = hitCount;
+            ScoreDoc[] scoreDocs = searchers.get(language).search(query, hitCount).scoreDocs;
+            WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
+            int i = 0;
+            for (ScoreDoc scoreDoc : scoreDocs) {
+                WikapidiaScoreDoc wikapidiaScoreDoc = new WikapidiaScoreDoc(scoreDoc.doc, scoreDoc.score);
+                wikapidiaScoreDocs[i] = wikapidiaScoreDoc;
+                i++;
+            }
+            return wikapidiaScoreDocs;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Retrieves the local ID for a specified lucene document,
      * within a given language.
      *

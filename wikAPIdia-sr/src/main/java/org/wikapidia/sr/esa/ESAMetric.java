@@ -3,9 +3,7 @@ package org.wikapidia.sr.esa;
 import com.typesafe.config.Config;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -160,7 +158,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         Query query = queryBuilder.getPhraseQuery(phrase);
         if (query != null) {
             WikapidiaScoreDoc[] scoreDocs = searcher.search(query, language);
-            pruneSimilar(scoreDocs);
+            SimUtils.pruneSimilar(scoreDocs);
             return SimUtils.normalizeVector(expandScores(scoreDocs));
         } else {
             LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query.");
@@ -179,7 +177,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(id, language), searcher.getReaderByLanguage(language)), language);
-        pruneSimilar(wikapidiaScoreDocs);
+        SimUtils.pruneSimilar(wikapidiaScoreDocs);
         return SimUtils.normalizeVector(expandScores(wikapidiaScoreDocs));
     }
 
@@ -292,25 +290,6 @@ public class ESAMetric extends BaseLocalSRMetric {
             }
         }
         return normalize(srResults,language);
-    }
-
-    private void pruneSimilar(WikapidiaScoreDoc[] wikapidiaScoreDocs) {
-        if (wikapidiaScoreDocs.length == 0) {
-            return;
-        }
-        int cutoff = wikapidiaScoreDocs.length;
-        double threshold = 0.005 * wikapidiaScoreDocs[0].score;
-        for (int i = 0, j = 100; j < wikapidiaScoreDocs.length; i++, j++) {
-            float delta = wikapidiaScoreDocs[i].score - wikapidiaScoreDocs[j].score;
-            if (delta < threshold) {
-                cutoff = j;
-                break;
-            }
-        }
-        if (cutoff < wikapidiaScoreDocs.length) {
-//            LOG.info("pruned results from " + docs.scoreDocs.length + " to " + cutoff);
-            wikapidiaScoreDocs = ArrayUtils.subarray(wikapidiaScoreDocs, 0, cutoff);
-        }
     }
 
     public String getName() {

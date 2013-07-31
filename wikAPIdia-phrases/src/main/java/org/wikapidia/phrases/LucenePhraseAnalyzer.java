@@ -10,6 +10,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
 import org.wikapidia.lucene.WikapidiaScoreDoc;
@@ -19,13 +20,17 @@ import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
 /**
- *
+ * Using Lucene in a phrase analyzer.
+ * @author Yulun Li
  */
 public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
     private final LuceneSearcher searcher;
 
-    public LucenePhraseAnalyzer(LuceneSearcher searcher) {
+    protected LocalPageDao localPageDao;
+
+    public LucenePhraseAnalyzer(LocalPageDao localPageDao, LuceneSearcher searcher) {
+        this.localPageDao = localPageDao;
         this.searcher = searcher;
     }
 
@@ -33,24 +38,20 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
-        try {
-            Configurator conf = new Configurator(new Configuration());
-            LocalPageDao localPageDao = conf.get(LocalPageDao.class);
-            WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language);
-
-            for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-                int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-                LocalPage localPage = localPageDao.getById(language, localPageId);
-                result.put(localPage, wikapidiaScoreDoc.score);
-            }
-        } catch (ConfigurationException e) {
-            throw new DaoException(e);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language, maxPages);
+        float totalScore = 0;
+        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
+            totalScore += wikapidiaScoreDoc.score;
+        }
+        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
+            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+            LocalPage localPage = localPageDao.getById(language, localPageId);
+            result.put(localPage, wikapidiaScoreDoc.score / totalScore);
         }
         return result;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<PhraseAnalyzer> {
-
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
@@ -66,11 +67,13 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
         }
         @Override
         public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("lucene")) {
+            if (!config.getString("type").equals("luceneAnalyzer")) {
                 return null;
             }
+            LocalPageDao localPageDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
+            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(getConfig().get().getStringList("languages")), getConfigurator().get(LuceneOptions.class, "esa"));
 
-            return null;
+            return new LucenePhraseAnalyzer(localPageDao, searcher);
         }
 
     }
