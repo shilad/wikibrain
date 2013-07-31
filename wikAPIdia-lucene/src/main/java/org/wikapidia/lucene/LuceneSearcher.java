@@ -15,6 +15,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +25,7 @@ import java.util.logging.Logger;
  * This class wraps the lucene search into a class that can handle any specified language
  *
  * @author Ari Weiland
+ * @author Yulun Li
  *
 */
 public class LuceneSearcher {
@@ -109,9 +111,17 @@ public class LuceneSearcher {
      * @param query
      * @return
      */
-    public ScoreDoc[] search(Query query, Language language) {
+    public WikapidiaScoreDoc[] search(Query query, Language language) {
         try {
-            return searchers.get(language).search(query, hitCount).scoreDocs;
+            ScoreDoc[] scoreDocs = searchers.get(language).search(query, hitCount).scoreDocs;
+            WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
+            int i = 0;
+            for (ScoreDoc scoreDoc : scoreDocs) {
+                WikapidiaScoreDoc wikapidiaScoreDoc = new WikapidiaScoreDoc(scoreDoc.doc, scoreDoc.score);
+                wikapidiaScoreDocs[i] = wikapidiaScoreDoc;
+                i++;
+            }
+            return wikapidiaScoreDocs;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
