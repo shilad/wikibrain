@@ -289,7 +289,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
         System.out.println(query);
-        ScoreDoc[] scoreDocs = searcher.search(query, language);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
