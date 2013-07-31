@@ -3,12 +3,16 @@ package org.wikapidia.sr.esa;
 import com.typesafe.config.Config;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -17,6 +21,10 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
+import org.wikapidia.matrix.SparseMatrix;
+import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.matrix.SparseMatrixWriter;
+import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.lucene.WikapidiaScoreDoc;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
@@ -24,9 +32,13 @@ import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 import org.wikapidia.sr.utils.SimUtils;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -277,7 +289,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
         System.out.println(query);
-        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(query, language);
+        ScoreDoc[] scoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
@@ -296,10 +308,40 @@ public class ESAMetric extends BaseLocalSRMetric {
         return "ESA";
     }
 
+//    @Override
+//    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
+//        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
+//        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+//    }
+
     @Override
-    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
-        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
-        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+    public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
+        final ValueConf vconf = new ValueConf();
+        for (final Language language: languages) {
+            String fullPath = path + getName() + "/matrix/" + language.getLangCode();
+            final SparseMatrixWriter writer = new SparseMatrixWriter(new File(fullPath+"-cosimilarity"), vconf);
+            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
+            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
+            TIntSet pageIds = new TIntHashSet();
+            for (LocalPage page : localPages) {
+                if (page != null) {
+                    pageIds.add(page.getLocalId());
+                }
+            }
+            List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
+            ParallelForEach.loop(wpIds, numThreads, new Procedure<Integer>() {
+                public void call(Integer wpId) throws IOException, DaoException {
+                    //I'm concerned about making this fake page, but it SHOULDN'T cause problems.
+                    SRResultList scores = mostSimilar(new LocalPage(language,wpId,null,null),maxhits);
+                    if (scores !=null){
+                        int ids[]=scores.getIds();
+                        writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
+                    }
+                }
+            }, Integer.MAX_VALUE);
+            writer.finish();
+            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
+        }
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {
