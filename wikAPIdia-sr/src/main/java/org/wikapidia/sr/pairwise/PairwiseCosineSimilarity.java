@@ -29,7 +29,10 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
     private int maxResults = -1;
     private TIntSet idsInResults = new TIntHashSet();
 
-    public PairwiseCosineSimilarity(String path) throws IOException {
+    public PairwiseCosineSimilarity() {
+    }
+
+    public void initMatrices(String path) throws IOException{
         this.matrix = new SparseMatrix(new File(path+"-feature"));
         this.transpose = new SparseMatrix(new File(path+"-transpose"));
     }

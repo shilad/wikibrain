@@ -26,15 +26,13 @@ public class JapaneseTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public Tokenizer setTokenizer(Reader r) {
-        tokenizer = new org.apache.lucene.analysis.ja.JapaneseTokenizer(r, null, false, org.apache.lucene.analysis.ja.JapaneseTokenizer.DEFAULT_MODE);
-        return tokenizer;
+    public Tokenizer makeTokenizer(Reader r) {
+        return new org.apache.lucene.analysis.ja.JapaneseTokenizer(r, null, false, org.apache.lucene.analysis.ja.JapaneseTokenizer.DEFAULT_MODE);
     }
 
     @Override
-    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = setTokenizer(reader);
-        stream = new JapaneseBaseFormFilter(stream);
+    public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
+        TokenStream stream = new JapaneseBaseFormFilter(tokenizer);
         stream = new CJKWidthFilter(stream);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);

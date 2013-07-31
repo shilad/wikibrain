@@ -20,6 +20,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
+import org.wikapidia.sr.esa.ESAMetric;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
 import java.io.File;
