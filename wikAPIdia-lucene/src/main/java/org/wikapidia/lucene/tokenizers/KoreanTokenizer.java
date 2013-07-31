@@ -1,6 +1,7 @@
 package org.wikapidia.lucene.tokenizers;
 
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.cjk.CJKAnalyzer;
 import org.apache.lucene.analysis.cjk.CJKBigramFilter;
 import org.apache.lucene.analysis.cjk.CJKWidthFilter;
@@ -10,8 +11,6 @@ import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
-
-import java.io.Reader;
 
 /**
  * @author Ari Weiland
@@ -23,9 +22,8 @@ public class KoreanTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = setTokenizer(reader);
-        stream = new CJKWidthFilter(stream);
+    public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
+        TokenStream stream = new CJKWidthFilter(tokenizer);
         stream = new CJKBigramFilter(stream);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);

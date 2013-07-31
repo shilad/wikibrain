@@ -7,6 +7,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.UniversalPageDao;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
@@ -16,6 +17,7 @@ import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Dataset;
@@ -326,8 +328,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         return this.algorithmId;
     }
 
-    @Override
-    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException{
+    protected void writeCosimilarity(String path, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
         try {
             path = path + getName()+"/matrix/" + algorithmId;
             SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
@@ -341,7 +342,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
             }
 
             featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-            PairwiseMilneWittenSimilarity pairwise = new PairwiseMilneWittenSimilarity(path);
+            pairwise.initMatrices(path);
             PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
             pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
             mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));

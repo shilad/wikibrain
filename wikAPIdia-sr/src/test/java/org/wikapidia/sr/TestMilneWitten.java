@@ -13,6 +13,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
+import org.wikapidia.sr.milnewitten.LocalMilneWitten;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 import org.wikapidia.utils.WpIOUtils;
 

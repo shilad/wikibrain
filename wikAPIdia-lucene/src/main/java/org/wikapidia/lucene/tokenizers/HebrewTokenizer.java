@@ -22,18 +22,16 @@ public class HebrewTokenizer extends LanguageTokenizer {
         super(version, options, language);
     }
 
-    @Override
-    public Tokenizer setTokenizer(Reader r) {
-        tokenizer = new ICUTokenizer(r);
-        return tokenizer;
+    public Tokenizer makeTokenizer(Reader r) {
+        return new ICUTokenizer(r);
     }
 
     @Override
-    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
+    public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
         if (stopWords == null){
             stopWords = LanguageTokenizer.getStopWordsForNonLuceneLangFromFile(Language.getByLangCode("he"));
         }
-        TokenStream stream = setTokenizer(reader);
+        TokenStream stream = tokenizer;
         if (useStopWords)
             stream = new StopFilter(matchVersion, stream, stopWords);
         return stream;

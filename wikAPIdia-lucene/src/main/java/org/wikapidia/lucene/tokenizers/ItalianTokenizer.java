@@ -1,6 +1,7 @@
 package org.wikapidia.lucene.tokenizers;
 
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.it.ItalianAnalyzer;
@@ -13,7 +14,6 @@ import org.apache.lucene.util.Version;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
-import java.io.Reader;
 import java.util.Arrays;
 
 /**
@@ -32,9 +32,8 @@ public class ItalianTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = setTokenizer(reader);
-        stream = new StandardFilter(matchVersion, stream);
+    public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
+        TokenStream stream = new StandardFilter(matchVersion, tokenizer);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);
         if (useStopWords) {

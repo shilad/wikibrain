@@ -1,6 +1,7 @@
 package org.wikapidia.lucene.tokenizers;
 
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
@@ -14,7 +15,6 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
 import java.io.IOException;
-import java.io.Reader;
 
 /**
  * @author Ari Weiland
@@ -28,7 +28,7 @@ public class PolishTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
+    public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
         if (stemmer == null) {
             try{
                 stemmer = new StempelStemmer(StempelStemmer.load(PolishAnalyzer.class.getResourceAsStream("stemmer_20000.tbl")));
@@ -36,8 +36,7 @@ public class PolishTokenizer extends LanguageTokenizer {
                 throw new RuntimeException(e);
             }
         }
-        TokenStream stream = setTokenizer(reader);
-        stream = new StandardFilter(matchVersion, stream);
+        TokenStream stream = new StandardFilter(matchVersion, tokenizer);
         if (caseInsensitive)
             stream = new LowerCaseFilter(matchVersion, stream);
         if (useStopWords)

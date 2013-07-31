@@ -11,6 +11,8 @@ import java.io.IOException;
  */
 public interface PairwiseSimilarity {
 
+    public void initMatrices (String path) throws IOException;
+
     public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException;
 
 }

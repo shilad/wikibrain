@@ -2,6 +2,8 @@ package org.wikapidia.sr.utils;
 
 import gnu.trove.iterator.TIntDoubleIterator;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import org.apache.commons.lang3.ArrayUtils;
+import org.wikapidia.lucene.WikapidiaScoreDoc;
 
 import java.util.*;
 
@@ -76,5 +78,28 @@ public class SimUtils {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
         return sortedMap;
+    }
+
+    /**
+     * Prune a WikapidiaScoreDoc array.
+     * @param wikapidiaScoreDocs array of WikapidiaScoreDoc
+     */
+    public static void pruneSimilar(WikapidiaScoreDoc[] wikapidiaScoreDocs) {
+        if (wikapidiaScoreDocs.length == 0) {
+            return;
+        }
+        int cutoff = wikapidiaScoreDocs.length;
+        double threshold = 0.005 * wikapidiaScoreDocs[0].score;
+        for (int i = 0, j = 100; j < wikapidiaScoreDocs.length; i++, j++) {
+            float delta = wikapidiaScoreDocs[i].score - wikapidiaScoreDocs[j].score;
+            if (delta < threshold) {
+                cutoff = j;
+                break;
+            }
+        }
+        if (cutoff < wikapidiaScoreDocs.length) {
+//            LOG.info("pruned results from " + docs.scoreDocs.length + " to " + cutoff);
+            wikapidiaScoreDocs = ArrayUtils.subarray(wikapidiaScoreDocs, 0, cutoff);
+        }
     }
 }

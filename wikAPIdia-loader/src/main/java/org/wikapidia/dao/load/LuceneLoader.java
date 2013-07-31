@@ -115,7 +115,10 @@ public class LuceneLoader {
                 luceneOptions[i] = conf.get(LuceneOptions.class, optionType[i]);
             }
         } else {
-            luceneOptions = new LuceneOptions[] { conf.get(LuceneOptions.class) };
+            luceneOptions = new LuceneOptions[] {
+                    conf.get(LuceneOptions.class, "plaintext"),
+                    conf.get(LuceneOptions.class, "esa")
+            };
         }
 
         LanguageSet languages = env.getLanguages();

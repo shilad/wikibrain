@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SRResult implements Comparable<SRResult>{
-    protected int id;
-    protected double value;
-    protected List<Explanation> explanations;
+    public int id;
+    public double value;
+    public List<Explanation> explanations;
 
     public SRResult(){
         explanations = new ArrayList<Explanation>();

@@ -78,10 +78,9 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
             if (daoFilter.isDisambig() != null) {
                 conditions.add(Tables.RAW_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
             }
-            Cursor<Record> result = context.select().
-                    from(Tables.RAW_PAGE).
-                    where(conditions).
-                    fetchLazy(getFetchSize());
+            Cursor<Record> result = context.selectFrom(Tables.RAW_PAGE)
+                    .where(conditions)
+                    .fetchLazy(getFetchSize());
             return new SimpleSqlDaoIterable<RawPage>(result, conn) {
                 @Override
                 public RawPage transform(Record r) {

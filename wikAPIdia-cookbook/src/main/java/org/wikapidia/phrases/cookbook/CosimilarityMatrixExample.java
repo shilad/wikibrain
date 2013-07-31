@@ -38,8 +38,8 @@ public class CosimilarityMatrixExample {
         Language language = Language.getByLangCode("simple");
         LanguageSet languages = new LanguageSet("simple");
         sr.writeCosimilarity(path,languages, 100);
-        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
-        usr.writeCosimilarity(path,100);
+//        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
+//        usr.writeCosimilarity(path,100);
 
         List<LocalString> phrases = new ArrayList<LocalString>();
         phrases.add(new LocalString(language, "United States"));
@@ -57,17 +57,17 @@ public class CosimilarityMatrixExample {
             }
         }
 
-        for (LocalString phrase : phrases){
-            System.out.println("\nMost similar to "+phrase.getString()+":");
-            SRResultList results = usr.mostSimilar(phrase, 5);
-            for (int i=0; i<results.numDocs(); i++){
-                UniversalPage page = universalPageDao.getById(results.get(i).getId(),usr.getAlgorithmId());
-                LocalId nameId = (LocalId) page.getLocalPages(page.getLanguageSet().getDefaultLanguage()).toArray()[0];
-                LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
-                String name = namePage.getTitle().getCanonicalTitle();
-                System.out.println("#"+(i+1)+" "+name);
-            }
-        }
+//        for (LocalString phrase : phrases){
+//            System.out.println("\nMost similar to "+phrase.getString()+":");
+//            SRResultList results = usr.mostSimilar(phrase, 5);
+//            for (int i=0; i<results.numDocs(); i++){
+//                UniversalPage page = universalPageDao.getById(results.get(i).getId(),usr.getAlgorithmId());
+//                LocalId nameId = (LocalId) page.getLocalPages(page.getLanguageSet().getDefaultLanguage()).toArray()[0];
+//                LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
+//                String name = namePage.getTitle().getCanonicalTitle();
+//                System.out.println("#"+(i+1)+" "+name);
+//            }
+//        }
 
     }
 }
