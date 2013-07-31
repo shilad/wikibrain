@@ -1,6 +1,7 @@
 package org.wikapidia.lucene.tokenizers;
 
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.ga.IrishAnalyzer;
 import org.apache.lucene.analysis.ga.IrishLowerCaseFilter;
@@ -13,8 +14,6 @@ import org.tartarus.snowball.ext.IrishStemmer;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.TokenizerOptions;
 
-import java.io.Reader;
-
 /**
  * @author Ari Weiland
  */
@@ -25,9 +24,8 @@ public class IrishTokenizer extends LanguageTokenizer {
     }
 
     @Override
-    public TokenStream getTokenStream(Reader reader, CharArraySet stemExclusionSet) {
-        TokenStream stream = setTokenizer(reader);
-        stream = new StandardFilter(matchVersion, stream);
+    public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
+        TokenStream stream = new StandardFilter(matchVersion, tokenizer);
         if (caseInsensitive)
             stream = new IrishLowerCaseFilter(stream);
         if (useStopWords)
