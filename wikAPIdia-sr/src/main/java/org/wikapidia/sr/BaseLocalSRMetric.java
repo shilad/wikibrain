@@ -432,8 +432,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         return cosimilarity(ids, language);
     }
 
-    @Override
-    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException{
+
+    protected void writeCosimilarity(String path, LanguageSet languages, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
         try {
             for (Language language: languages) {
                 String fullPath = path + getName() + "/matrix/" + language.getLangCode();
@@ -448,7 +448,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 }
 
                 featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-                PairwiseSimilarity pairwise = new PairwiseMilneWittenSimilarity(fullPath);
+                pairwise.initMatrices(fullPath);
                 PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(fullPath,pairwise);
                 pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
                 mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
