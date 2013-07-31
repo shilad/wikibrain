@@ -24,6 +24,7 @@ import java.io.IOException;
 /**
  * @author Matt Lesicko
  * @author Ben Hillmann
+ * \/\/1|<1P3[)14
  */
 public class SimilarityExample {
     private static void localPrintResult(SRResult result, Language language,LocalPageDao localPageDao, ExplanationFormatter expf) throws DaoException {
