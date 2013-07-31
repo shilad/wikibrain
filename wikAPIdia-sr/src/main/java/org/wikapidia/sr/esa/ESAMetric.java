@@ -26,6 +26,7 @@ import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
+import org.wikapidia.lucene.WikapidiaScoreDoc;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
@@ -83,11 +84,11 @@ public class ESAMetric extends BaseLocalSRMetric {
         Language language = phrase.getLanguage();
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
 
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase.getString()), language);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase.getString()), language);
 
-        for (ScoreDoc scoreDoc : scoreDocs) {
-            int localPageId = searcher.getLocalIdFromDocId(scoreDoc.doc, language);
-            SRResult result = new SRResult((double) scoreDoc.score);
+        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
+            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+            SRResult result = new SRResult((double) wikapidiaScoreDoc.score);
             result.id  = localPageId;
             results.add(result);
         }
@@ -169,8 +170,8 @@ public class ESAMetric extends BaseLocalSRMetric {
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
         Query query = queryBuilder.getPhraseQuery(phrase);
         if (query != null) {
-            ScoreDoc[] scoreDocs = searcher.search(query, language);
-            pruneSimilar(scoreDocs);
+            WikapidiaScoreDoc[] scoreDocs = searcher.search(query, language);
+            SimUtils.pruneSimilar(scoreDocs);
             return SimUtils.normalizeVector(expandScores(scoreDocs));
         } else {
             LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query.");
@@ -188,21 +189,21 @@ public class ESAMetric extends BaseLocalSRMetric {
     public TIntDoubleHashMap getVector(int id, Language language) throws DaoException { // TODO: validIDs
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
-        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(id, language), searcher.getReaderByLanguage(language)), language);
-        pruneSimilar(scoreDocs);
-        return SimUtils.normalizeVector(expandScores(scoreDocs));
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(id, language), searcher.getReaderByLanguage(language)), language);
+        SimUtils.pruneSimilar(wikapidiaScoreDocs);
+        return SimUtils.normalizeVector(expandScores(wikapidiaScoreDocs));
     }
 
     /**
      * Put data in a scoreDoc into a TIntDoubleHashMap
      *
-     * @param scores
+     * @param wikapidiaScoreDocs
      * @return
      */
-    private TIntDoubleHashMap expandScores(ScoreDoc scores[]) {
+    private TIntDoubleHashMap expandScores(WikapidiaScoreDoc[] wikapidiaScoreDocs) {
         TIntDoubleHashMap expanded = new TIntDoubleHashMap();
-        for (ScoreDoc sd : scores) {
-            expanded.put(sd.doc, sd.score);
+        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
+            expanded.put(wikapidiaScoreDoc.doc, wikapidiaScoreDoc.score);
         }
         return expanded;
     }
@@ -259,7 +260,7 @@ public class ESAMetric extends BaseLocalSRMetric {
             Explanation explanation = new Explanation(format, formatPages);
             result.addExplanation(explanation);
         }
-        return normalize(result,page1.getLanguage());
+        return normalize(result, page1.getLanguage());
     }
 
     /**
@@ -287,25 +288,6 @@ public class ESAMetric extends BaseLocalSRMetric {
         return normalize(srResults,localPage.getLanguage());
     }
 
-    private void pruneSimilar(ScoreDoc[] scoreDocs) {
-        if (scoreDocs.length == 0) {
-            return;
-        }
-        int cutoff = scoreDocs.length;
-        double threshold = 0.005 * scoreDocs[0].score;
-        for (int i = 0, j = 100; j < scoreDocs.length; i++, j++) {
-            float delta = scoreDocs[i].score - scoreDocs[j].score;
-            if (delta < threshold) {
-                cutoff = j;
-                break;
-            }
-        }
-        if (cutoff < scoreDocs.length) {
-//            LOG.info("pruned results from " + docs.scoreDocs.length + " to " + cutoff);
-            scoreDocs = ArrayUtils.subarray(scoreDocs, 0, cutoff);
-        }
-    }
-
     public String getName() {
         return "ESA";
     }
@@ -330,14 +312,14 @@ public class ESAMetric extends BaseLocalSRMetric {
         searcher.setHitCount(maxResults);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getId(), language), searcher.getReaderByLanguage(language));
-        ScoreDoc[] scoreDocs = searcher.search(query, language);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
-        for (ScoreDoc scoreDoc : scoreDocs) {
+        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             if (i < srResults.numDocs()) {
-                int localId = searcher.getLocalIdFromDocId(scoreDoc.doc, language);
+                int localId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
                 if (validIds==null||validIds.contains(localId)){
-                    srResults.set(i, localId, scoreDoc.score);
+                    srResults.set(i, localId, wikapidiaScoreDoc.score);
                     i++;
                 }
             }
