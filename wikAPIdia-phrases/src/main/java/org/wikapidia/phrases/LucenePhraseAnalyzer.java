@@ -38,7 +38,12 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
-        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language, maxPages);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language, 10);
+        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
+            int docId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+            System.out.println("doc=" + docId + " title=" + localPageDao.getById(language, docId).getTitle().getCanonicalTitle() +
+                    " score=" + wikapidiaScoreDoc.score); //TODO
+        }
         float totalScore = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             totalScore += wikapidiaScoreDoc.score;
@@ -71,7 +76,8 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
                 return null;
             }
             LocalPageDao localPageDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
-            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(getConfig().get().getStringList("languages")), getConfigurator().get(LuceneOptions.class, "esa"));
+            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(getConfig().get().getStringList("languages")),
+                    getConfigurator().get(LuceneOptions.class, "luceneTitle"));
 
             return new LucenePhraseAnalyzer(localPageDao, searcher);
         }
