@@ -21,15 +21,6 @@ import java.util.List;
  *@author Matt Lesicko
  */
 public class CosimilartyExample {
-    private static String toAlphanumeric (String s){
-        String t = "";
-        for (char c : s.toCharArray()){
-            if(Character.isDigit(c)||Character.isLetter(c)){
-                t+=c;
-            }
-        }
-        return t;
-    }
 
     public static void main (String args[]) throws ConfigurationException, DaoException {
         Language language = Language.getByLangCode("simple");
@@ -46,7 +37,7 @@ public class CosimilartyExample {
            if (pages.hasNext()){
                LocalPage tempPage = pages.next();
                ids[i]= tempPage.getLocalId();
-               names[i]=toAlphanumeric(tempPage.getTitle().getCanonicalTitle());
+               names[i]=tempPage.getTitle().getCanonicalTitle();
            } else {
                throw new RuntimeException();
            }
