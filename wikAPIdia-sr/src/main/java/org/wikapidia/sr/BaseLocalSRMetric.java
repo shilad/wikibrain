@@ -135,8 +135,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResult normalize(SRResult sr, Language language) {
-        if (similarityNormalizers.containsKey(language)){
-            sr.value = similarityNormalizers.get(language).normalize(sr.value);
+        if (similarityNormalizers.containsKey((int) language.getId())){
+            sr.value = similarityNormalizers.get((int) language.getId()).normalize(sr.value);
             return sr;
         }
         ensureSimilarityTrained();
@@ -152,8 +152,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResultList normalize(SRResultList srl, Language language) {
-        if (similarityNormalizers.containsKey(language)){
-            return similarityNormalizers.get(language).normalize(srl);
+        if (similarityNormalizers.containsKey((int) language.getId())){
+            return similarityNormalizers.get((int) language.getId()).normalize(srl);
         }
         ensureMostSimilarTrained();
         return defaultMostSimilarNormalizer.normalize(srl);
