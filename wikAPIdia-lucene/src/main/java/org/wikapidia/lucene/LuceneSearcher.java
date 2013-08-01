@@ -1,5 +1,6 @@
 package org.wikapidia.lucene;
 
+import com.typesafe.config.Config;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
@@ -8,6 +9,9 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -201,5 +205,32 @@ public class LuceneSearcher {
 
     public QueryBuilder getQueryBuilderByLanguage(Language language) {
         return new QueryBuilder(analyzers.get(language));
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LuceneSearcher> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LuceneSearcher.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "lucene.searcher";
+        }
+
+        @Override
+        public LuceneSearcher get(String name, Config config) throws ConfigurationException {
+            if (!name.equalsIgnoreCase(config.getString("type"))) {
+                throw new ConfigurationException("Could not find configuration " + name);
+            }
+            return new LuceneSearcher(
+                    new LanguageSet(config.getStringList("langs")),
+                    getConfigurator().get(LuceneOptions.class, config.getString("options"))
+            );
+        }
     }
 }

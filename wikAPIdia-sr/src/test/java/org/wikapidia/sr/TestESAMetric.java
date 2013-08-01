@@ -1,8 +1,5 @@
 package org.wikapidia.sr;
 
-import com.jolbox.bonecp.BoneCPDataSource;
-import org.apache.lucene.util.Version;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -10,10 +7,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
-import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
@@ -23,7 +17,6 @@ import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.sr.esa.ESAMetric;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -37,7 +30,7 @@ public class TestESAMetric {
             System.out.println("Result was null");
         }
         else {
-            System.out.println("Similarity value: "+result.getValue());
+            System.out.println("Similarity score: "+result.getScore());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
                 System.out.println(expf.formatExplanation(explanation));
@@ -134,7 +127,7 @@ public class TestESAMetric {
 //        for (int i = 0; i < testPhrases.length; i++) {
 //            for (int j = i; j < testPhrases.length; j++) {
 //                SRResult srResult = esaMetric.similarity(testPhrases[i], testPhrases[j], testLanguage, false);
-//                System.out.println("Similarity score between " + testPhrases[i] + " and " + testPhrases[j] + " is " + srResult.getValue());
+//                System.out.println("Similarity score between " + testPhrases[i] + " and " + testPhrases[j] + " is " + srResult.getScore());
 //            }
 //        }
 //    }
