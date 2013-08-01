@@ -16,6 +16,7 @@ import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneOptions;
@@ -283,12 +284,34 @@ public class ESAMetric extends BaseLocalSRMetric {
             System.out.println("from cache!");
             return mostSimilar;
         }
+        SRResultList srResults = baseMostSimilar(localPage.toLocalId(),maxResults,validIds);
+        return normalize(srResults,localPage.getLanguage());
+    }
+
+    public String getName() {
+        return "ESA";
+    }
+
+//    @Override
+//    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
+//        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
+//        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+//    }
+
+    /**
+     * Construct mostSimilar results without normalizing or accessing the cache.
+     * @param localPage
+     * @param maxResults
+     * @param validIds
+     * @return
+     * @throws DaoException
+     */
+    private SRResultList baseMostSimilar(LocalId localPage, int maxResults, TIntSet validIds) throws DaoException {
         Language language = localPage.getLanguage();
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
         searcher.setHitCount(maxResults);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
-        Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
-        System.out.println(query);
+        Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getId(), language), searcher.getReaderByLanguage(language));
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
@@ -301,18 +324,8 @@ public class ESAMetric extends BaseLocalSRMetric {
                 }
             }
         }
-        return normalize(srResults,language);
+        return srResults;
     }
-
-    public String getName() {
-        return "ESA";
-    }
-
-//    @Override
-//    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
-//        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
-//        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
-//    }
 
     @Override
     public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
@@ -331,8 +344,7 @@ public class ESAMetric extends BaseLocalSRMetric {
             List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
             ParallelForEach.loop(wpIds, numThreads, new Procedure<Integer>() {
                 public void call(Integer wpId) throws IOException, DaoException {
-                    //I'm concerned about making this fake page, but it SHOULDN'T cause problems.
-                    SRResultList scores = mostSimilar(new LocalPage(language,wpId,null,null),maxhits);
+                    SRResultList scores = baseMostSimilar(new LocalId(language,wpId),maxhits,null);
                     if (scores !=null){
                         int ids[]=scores.getIds();
                         writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));

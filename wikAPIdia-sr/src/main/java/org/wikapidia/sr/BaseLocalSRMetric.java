@@ -16,13 +16,14 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
-import org.wikapidia.sr.pairwise.*;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
+import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
-
 
 import java.io.*;
 import java.util.*;
@@ -135,8 +136,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResult normalize(SRResult sr, Language language) {
-        if (similarityNormalizers.containsKey(language)){
-            sr.value = similarityNormalizers.get(language).normalize(sr.value);
+        if (similarityNormalizers.containsKey((int) language.getId())){
+            sr.value = similarityNormalizers.get((int) language.getId()).normalize(sr.value);
             return sr;
         }
         ensureSimilarityTrained();
@@ -152,8 +153,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResultList normalize(SRResultList srl, Language language) {
-        if (similarityNormalizers.containsKey(language)){
-            return similarityNormalizers.get(language).normalize(srl);
+        if (similarityNormalizers.containsKey((int) language.getId())){
+            return similarityNormalizers.get((int) language.getId()).normalize(srl);
         }
         ensureMostSimilarTrained();
         return defaultMostSimilarNormalizer.normalize(srl);

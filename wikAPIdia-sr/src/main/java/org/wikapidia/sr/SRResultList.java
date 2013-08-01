@@ -18,6 +18,7 @@ public class SRResultList implements  Iterable<SRResult>{
         this.results = new SRResult[maxNumDocs];
         for (int i = 0; i < this.results.length; i++) {
             results[i] = new SRResult();
+            results[i].id = -1;
         }
         numDocs = maxNumDocs;
     }
