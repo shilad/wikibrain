@@ -1,5 +1,6 @@
 package org.wikapidia.lucene;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -39,11 +40,6 @@ public class QueryBuilder {
     public QueryBuilder(WikapidiaAnalyzer analyzer) {
         this.analyzer = analyzer;
         this.options = analyzer.getOptions();
-//        try {
-//            this.phraseAnalyzer = new Configurator(new Configuration()).get(PhraseAnalyzer.class, "anchortext");
-//        } catch (ConfigurationException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     /**
@@ -54,11 +50,7 @@ public class QueryBuilder {
      * @throws ParseException
      */
     public Query getPhraseQuery(String searchString) {
-        try {
-            return getPhraseQuery(options.elements, searchString);
-        } catch (ParseException e) {
-            return null;
-        }
+        return getPhraseQuery(options.elements, searchString);
     }
 
     /**
@@ -68,9 +60,13 @@ public class QueryBuilder {
      * @param searchString
      * @return
      */
-    public Query getPhraseQuery(TextFieldElements elements, String searchString) throws ParseException {
+    public Query getPhraseQuery(TextFieldElements elements, String searchString) {
         QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), analyzer);
-        return parser.parse(searchString);
+        try {
+            return parser.parse(escapeSpecialChars(searchString));
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
 
@@ -78,8 +74,7 @@ public class QueryBuilder {
         if (luceneId >= 0) {
             try {
                 MoreLikeThis mlt = getMoreLikeThis(directoryReader, elements);
-                Query query = mlt.like(luceneId);
-                return query;
+                return mlt.like(luceneId);
             } catch (IOException e) {
                 LOG.log(Level.WARNING, "Can't more like this query for luceneId: " + luceneId);
                 return null;
@@ -102,6 +97,17 @@ public class QueryBuilder {
 
     public Query getMoreLikeThisQuery(int luceneId, DirectoryReader directoryReader) throws DaoException {
         return getMoreLikeThisQuery(options.elements, luceneId, directoryReader);
+    }
+
+    public static final String[] SPECIAL_CHARS = new String[] {
+            "+", "-", "&&", "||", "!", "(", ")", "{", "}",
+            "[", "]", "^", "\"", "~", "*", "?", ":", "\\" };
+    public static String escapeSpecialChars(String string) {
+        String[] replacement = new String[SPECIAL_CHARS.length];
+        for (int i=0; i<SPECIAL_CHARS.length; i++) {
+            replacement[i] = "\\" + SPECIAL_CHARS[i];
+        }
+        return StringUtils.replaceEach(string, SPECIAL_CHARS, replacement);
     }
 
 //    /**

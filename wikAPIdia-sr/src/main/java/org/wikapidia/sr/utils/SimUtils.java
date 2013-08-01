@@ -102,11 +102,4 @@ public class SimUtils {
             wikapidiaScoreDocs = ArrayUtils.subarray(wikapidiaScoreDocs, 0, cutoff);
         }
     }
-    
-    public static String toAlphaNumeric(String string) {
-        string = string.replace('_', ' ');
-        string = string.replaceAll("[^\\d\\w]+", " ");
-        string = string.trim();
-        return string;
-    }
 }
