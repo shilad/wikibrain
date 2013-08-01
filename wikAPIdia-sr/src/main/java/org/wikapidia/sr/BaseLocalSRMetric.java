@@ -136,12 +136,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResult normalize(SRResult sr, Language language) {
-        if (similarityNormalizers.containsKey((int) language.getId())){
-            sr.value = similarityNormalizers.get((int) language.getId()).normalize(sr.value);
-            return sr;
-        }
-        ensureSimilarityTrained();
-        sr.value=defaultSimilarityNormalizer.normalize(sr.value);
+        sr.value=normalize(sr.value,language);
         return sr;
     }
 
@@ -158,6 +153,14 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         }
         ensureMostSimilarTrained();
         return defaultMostSimilarNormalizer.normalize(srl);
+    }
+
+    protected double normalize (double score, Language language){
+        if (similarityNormalizers.containsKey((int) language.getId())){
+            return similarityNormalizers.get((int) language.getId()).normalize(score);
+        }
+        ensureMostSimilarTrained();
+        return defaultMostSimilarNormalizer.normalize(score);
     }
 
     public void setNumThreads(int n) {
@@ -368,7 +371,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         for (int i=0; i<wpRowIds.length; i++){
             for (int j=0; j<wpColIds.length; j++){
                 if (wpRowIds[i]==wpColIds[j]){
-                    cos[i][j]=1;
+                    cos[i][j]=normalize(1.0,language);
                 }
                 else{
                     cos[i][j]=similarity(
@@ -387,7 +390,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         for (int i=0; i<rowPhrases.length; i++){
             for (int j=0; j<colPhrases.length; j++){
                 if (rowPhrases[i].equals(colPhrases[j])){
-                    cos[i][j]=1;
+                    cos[i][j]=normalize(1.0,language);
                 }
                 else{
                     cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getValue();
@@ -401,7 +404,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     public double[][] cosimilarity(int[] ids, Language language) throws DaoException {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
-            cos[i][i]=1;
+            cos[i][i]=normalize(1.0,language);
         }
         for (int i=0; i<ids.length; i++){
             for (int j=i+1; j<ids.length; j++){
@@ -409,11 +412,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                         new LocalPage(language, ids[i], null, null),
                         new LocalPage(language, ids[j], null, null),
                         false).getValue();
-            }
-        }
-        for (int i=1; i<ids.length; i++){
-            for (int j=i-1; j>-1; j--){
-                cos[i][j]=cos[j][i];
+                cos[j][i]=cos[i][j];
             }
         }
         return cos;
