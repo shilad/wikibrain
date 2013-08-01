@@ -54,11 +54,7 @@ public class QueryBuilder {
      * @throws ParseException
      */
     public Query getPhraseQuery(String searchString) {
-        try {
-            return getPhraseQuery(options.elements, searchString);
-        } catch (ParseException e) {
-            return null;
-        }
+        return getPhraseQuery(options.elements, searchString);
     }
 
     /**
@@ -68,9 +64,13 @@ public class QueryBuilder {
      * @param searchString
      * @return
      */
-    public Query getPhraseQuery(TextFieldElements elements, String searchString) throws ParseException {
+    public Query getPhraseQuery(TextFieldElements elements, String searchString) {
         QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), analyzer);
-        return parser.parse(searchString);
+        try {
+            return parser.parse(searchString);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
 

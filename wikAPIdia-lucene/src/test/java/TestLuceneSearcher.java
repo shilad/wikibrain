@@ -1,3 +1,4 @@
+import org.apache.lucene.document.Document;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
@@ -38,6 +39,7 @@ public class TestLuceneSearcher {
     }
 
     @Test
+    @Ignore
     public void testResolveLocalId() throws ConfigurationException, DaoException {
         Configurator conf = new Configurator(new Configuration());
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
@@ -51,8 +53,7 @@ public class TestLuceneSearcher {
                 .setNameSpaces(namespaces)
                 .setRedirect(false));
         for (RawPage rawPage : rawPages) {
-            if (i > -1
-                    ) {
+            if (i > -1) {
                 int testId = rawPage.getLocalId();
                 int docID = searcher.getDocIdFromLocalId(testId, lang);
                 int returnedId = searcher.getLocalIdFromDocId(docID, lang);
@@ -65,5 +66,22 @@ public class TestLuceneSearcher {
                 break;
             }
         }
+    }
+
+    @Test
+    @Ignore
+    public void testGetDoc() throws ConfigurationException, IOException, DaoException {
+        Configurator conf = new Configurator(new Configuration());
+        RawPageDao rawPageDao = conf.get(RawPageDao.class);
+        LuceneOptions[] luceneOptions = new LuceneOptions[] {conf.get(LuceneOptions.class)};
+        Collection<NameSpace> namespaces = luceneOptions[0].namespaces;
+        Language lang = Language.getByLangCode("simple");
+        LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(Arrays.asList(lang)), LuceneOptions.getDefaultOptions());
+
+        int localId = 1; // or something else
+        int luceneId = searcher.getDocIdFromLocalId(localId, lang);
+        System.out.println(luceneId);
+        Document doc = searcher.getSearcherByLanguage(lang).doc(luceneId);
+        System.out.println(doc.toString());
     }
 }

@@ -10,10 +10,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.lucene.LuceneOptions;
-import org.wikapidia.lucene.LuceneSearcher;
-import org.wikapidia.lucene.QueryBuilder;
-import org.wikapidia.lucene.WikapidiaScoreDoc;
+import org.wikapidia.lucene.*;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -38,12 +35,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
-        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase), language, 10);
-        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            int docId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-            System.out.println("doc=" + docId + " title=" + localPageDao.getById(language, docId).getTitle().getCanonicalTitle() +
-                    " score=" + wikapidiaScoreDoc.score); //TODO
-        }
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(new TextFieldElements().addTitle(), phrase), language, 10);
         float totalScore = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             totalScore += wikapidiaScoreDoc.score;
@@ -77,7 +69,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
             }
             LocalPageDao localPageDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(getConfig().get().getStringList("languages")),
-                    getConfigurator().get(LuceneOptions.class, "luceneTitle"));
+                    getConfigurator().get(LuceneOptions.class));
 
             return new LucenePhraseAnalyzer(localPageDao, searcher);
         }

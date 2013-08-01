@@ -55,8 +55,7 @@ public class LuceneLoader {
             int i = 0;
             Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter()
                     .setLanguages(language)
-                    .setNameSpaces(namespaces)
-                    .setRedirect(false));
+                    .setNameSpaces(namespaces));
             for (RawPage rawPage : rawPages) {
                 luceneIndexer.indexPage(rawPage);
                 i++;

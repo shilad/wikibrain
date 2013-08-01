@@ -79,6 +79,9 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
     //TODO: Add a normalizer
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
+        if (page1 == null || page2 == null) {
+           return new SRResult(Double.NaN);
+        }
         if (page1.getLanguage()!=page2.getLanguage()){
             throw new IllegalArgumentException("Tried to compute local similarity of pages in different languages: page1 was in"+page1.getLanguage().getEnLangName()+" and page2 was in "+ page2.getLanguage().getEnLangName());
         }
