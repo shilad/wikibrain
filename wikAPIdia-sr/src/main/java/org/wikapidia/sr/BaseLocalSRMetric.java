@@ -16,13 +16,14 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
-import org.wikapidia.sr.pairwise.*;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
+import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
-
 
 import java.io.*;
 import java.util.*;
@@ -400,7 +401,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     public double[][] cosimilarity(int[] ids, Language language) throws DaoException {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
-            cos[i][i]=normalize(new SRResult(1.0),language).getValue();
+            cos[i][i]=1;
         }
         for (int i=0; i<ids.length; i++){
             for (int j=i+1; j<ids.length; j++){
