@@ -385,7 +385,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         for (int i=0; i<rowPhrases.length; i++){
             for (int j=0; j<colPhrases.length; j++){
                 if (rowPhrases[i].equals(colPhrases[j])){
-                    cos[i][j]=normalize(new SRResult(1.0),language).getValue();
+                    cos[i][j]=normalize(new SRResult(1.0),language).getScore();
                 }
                 else {
                     cos[i][j]=normalize (SimUtils.cosineSimilarity(rowVectors[i],colVectors[j]),language);
@@ -410,7 +410,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         for (int i=0; i<wpRowIds.length; i++){
             for (int j=0; j<wpColIds.length; j++){
                 if (wpRowIds[i]==wpColIds[j]){
-                    cos[i][j]=normalize(new SRResult(1.0),language).getValue();
+                    cos[i][j]=normalize(new SRResult(1.0),language).getScore();
                 }
                 else {
                     cos[i][j]=normalize (SimUtils.cosineSimilarity(rowVectors[i],colVectors[j]),language);

@@ -37,7 +37,7 @@ public class CosimilartyExample {
         LocalSRMetric sr = c.get(LocalSRMetric.class,"ESA");
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
 
-        int numpages = 10000;
+        int numpages = 1000;
         int[] ids = new int[numpages];
         String[] names = new String[numpages];
         DaoFilter daoFilter = new DaoFilter().setRedirect(false).setNameSpaces(NameSpace.ARTICLE);
