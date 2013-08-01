@@ -30,26 +30,21 @@ public class MilneWittenCore {
      * @return
      */
     public SRResult similarity(TIntSet links1, TIntSet links2, int numPages, boolean explanations){
-        TIntSet I = new TIntHashSet(links1);
-        I.retainAll(links2);
-        if (I.size()==0){
+        TIntSet i = new TIntHashSet(links1);
+        i.retainAll(links2);
+        if (i.isEmpty()){
             return new SRResult(0.0);
         }
-
-
-
         SRResult result = new SRResult(1.0-(
-                (Math.log(Math.max(links1.size(),links2.size()))-Math.log(I.size()))
+                (Math.log(Math.max(links1.size(),links2.size()))-Math.log(i.size()))
                 / (Math.log(numPages) - Math.log(Math.min(links1.size(),links2.size())))));
-
-        if (explanations){
-            for (int id: I.toArray()){
+        if (explanations) {
+            for (int id: i.toArray()) {
                 List<Integer> formatPages = new ArrayList();
                 formatPages.add(id);
                 result.addExplanation(new Explanation("?",formatPages));
             }
         }
-
         return result;
     }
 
