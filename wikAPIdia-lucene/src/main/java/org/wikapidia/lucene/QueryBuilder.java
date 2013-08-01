@@ -101,11 +101,11 @@ public class QueryBuilder {
 
     public static final String[] SPECIAL_CHARS = new String[] {
             "+", "-", "&&", "||", "!", "(", ")", "{", "}",
-            "[", "]", "^", "\"", "~", "*", "?", ":", "\\" };
+            "[", "]", "^", "\"", "~", "*", "?", ":", "\\", "/" };
     public static String escapeSpecialChars(String string) {
         String[] replacement = new String[SPECIAL_CHARS.length];
         for (int i=0; i<SPECIAL_CHARS.length; i++) {
-            replacement[i] = "\\" + SPECIAL_CHARS[i];
+            replacement[i] = '\\' + SPECIAL_CHARS[i];
         }
         return StringUtils.replaceEach(string, SPECIAL_CHARS, replacement);
     }
