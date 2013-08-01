@@ -400,7 +400,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     public double[][] cosimilarity(int[] ids, Language language) throws DaoException {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
-            cos[i][i]=1;
+            cos[i][i]=normalize(new SRResult(1.0),language).getValue();
         }
         for (int i=0; i<ids.length; i++){
             for (int j=i+1; j<ids.length; j++){
