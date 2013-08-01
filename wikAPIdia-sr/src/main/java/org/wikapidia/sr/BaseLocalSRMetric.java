@@ -136,7 +136,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResult normalize(SRResult sr, Language language) {
-        sr.value=normalize(sr.value,language);
+        sr.score=normalize(sr.score,language);
         return sr;
     }
 
@@ -257,7 +257,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws IOException, DaoException {
                 SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
-                trainee.observe(sim.getValue(), ks.similarity);
+                trainee.observe(sim.getScore(), ks.similarity);
 
             }
         },1);
@@ -335,7 +335,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         context.add(new LocalString(language,phrase1));
         LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
         if (similar1==null||similar2==null){
-            return new SRResult(Double.NaN);
+            return new SRResult();
         }
         return similarity(pageHelper.getById(language,similar1.getId()),
                 pageHelper.getById(language,similar2.getId()),
@@ -359,7 +359,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         LocalId similar = disambiguator.disambiguate(phrase,null);
         if (similar==null){
             SRResultList resultList = new SRResultList(1);
-            resultList.set(0, new SRResult(Double.NaN));
+            resultList.set(0, new SRResult());
             return resultList;
         }
         return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults,validIds);
@@ -377,7 +377,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     cos[i][j]=similarity(
                             new LocalPage(language,wpRowIds[i],null,null),
                             new LocalPage(language,wpColIds[j],null,null),
-                            false).getValue();
+                            false).getScore();
                 }
             }
         }
@@ -393,7 +393,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     cos[i][j]=normalize(1.0,language);
                 }
                 else{
-                    cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getValue();
+                    cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getScore();
                 }
             }
         }
@@ -411,7 +411,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 cos[i][j]=similarity(
                         new LocalPage(language, ids[i], null, null),
                         new LocalPage(language, ids[j], null, null),
-                        false).getValue();
+                        false).getScore();
                 cos[j][i]=cos[i][j];
             }
         }

@@ -8,8 +8,8 @@ import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 
 /**
- * A simple normalizer that returns log(1 + min-value).
- * In the case that an x is observed that is less than min-value, it returns 0.
+ * A simple normalizer that returns log(1 + min-score).
+ * In the case that an x is observed that is less than min-score, it returns 0.
  */
 public class LogNormalizer implements Normalizer{
     private double c=Double.POSITIVE_INFINITY;
@@ -38,7 +38,7 @@ public class LogNormalizer implements Normalizer{
     @Override
     public void observe(SRResultList sims, int rank, double y) {
         for (SRResult sr : sims) {
-            observe(sr.getValue());
+            observe(sr.getScore());
         }
     }
 

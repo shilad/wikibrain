@@ -46,7 +46,7 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
     @Override
     public void observe(SRResultList sims, int rank, double y) {
         if (rank >= 0) {
-            observe(sims.get(rank).getValue(), y);
+            observe(sims.get(rank).getScore(), y);
         } else {
             observe(Double.NaN, y);
         }

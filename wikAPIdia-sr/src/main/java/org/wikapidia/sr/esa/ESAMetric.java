@@ -84,8 +84,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-            SRResult result = new SRResult((double) wikapidiaScoreDoc.score);
-            result.id  = localPageId;
+            SRResult result = new SRResult(localPageId, wikapidiaScoreDoc.score);
             results.add(result);
         }
         SRResultList resultList = new SRResultList(maxResults);
