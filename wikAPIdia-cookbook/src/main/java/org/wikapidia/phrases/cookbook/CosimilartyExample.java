@@ -27,9 +27,7 @@ public class CosimilartyExample {
         Configurator c = new Configurator(new Configuration());
         LocalSRMetric sr = c.get(LocalSRMetric.class,"ESA");
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-
-        sr.similarity("Escape characters","/ + - && || ! ( ) { } [ ] ^ \" ~ * ? : \\",language,false);
-
+        
         int numpages = 1000;
         int[] ids = new int[numpages];
         String[] names = new String[numpages];
