@@ -148,19 +148,21 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResultList normalize(SRResultList srl, Language language) {
-        if (similarityNormalizers.containsKey((int) language.getId())){
-            return similarityNormalizers.get((int) language.getId()).normalize(srl);
+        if (mostSimilarNormalizers.containsKey((int) language.getId())
+                &&mostSimilarNormalizers.get((int) language.getId()).isTrained()){
+            return mostSimilarNormalizers.get((int) language.getId()).normalize(srl);
         }
         ensureMostSimilarTrained();
         return defaultMostSimilarNormalizer.normalize(srl);
     }
 
     protected double normalize (double score, Language language){
-        if (similarityNormalizers.containsKey((int) language.getId())){
+        if (similarityNormalizers.containsKey((int) language.getId())
+                &&similarityNormalizers.get((int) language.getId()).isTrained()){
             return similarityNormalizers.get((int) language.getId()).normalize(score);
         }
-        ensureMostSimilarTrained();
-        return defaultMostSimilarNormalizer.normalize(score);
+        ensureSimilarityTrained();
+        return defaultSimilarityNormalizer.normalize(score);
     }
 
     public void setNumThreads(int n) {
