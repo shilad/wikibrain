@@ -1,5 +1,6 @@
 package org.wikapidia.lucene;
 
+import com.typesafe.config.Config;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
@@ -8,6 +9,9 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -15,6 +19,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +29,7 @@ import java.util.logging.Logger;
  * This class wraps the lucene search into a class that can handle any specified language
  *
  * @author Ari Weiland
+ * @author Yulun Li
  *
 */
 public class LuceneSearcher {
@@ -109,9 +115,41 @@ public class LuceneSearcher {
      * @param query
      * @return
      */
-    public ScoreDoc[] search(Query query, Language language) {
+    public WikapidiaScoreDoc[] search(Query query, Language language) {
         try {
-            return searchers.get(language).search(query, hitCount).scoreDocs;
+            ScoreDoc[] scoreDocs = searchers.get(language).search(query, hitCount).scoreDocs;
+            WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
+            int i = 0;
+            for (ScoreDoc scoreDoc : scoreDocs) {
+                WikapidiaScoreDoc wikapidiaScoreDoc = new WikapidiaScoreDoc(scoreDoc.doc, scoreDoc.score);
+                wikapidiaScoreDocs[i] = wikapidiaScoreDoc;
+                i++;
+            }
+            return wikapidiaScoreDocs;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Runs a specified lucene query in the specified language with a specified hitcount.
+     * @param query
+     * @param language
+     * @param hitCount
+     * @return
+     */
+    public WikapidiaScoreDoc[] search(Query query, Language language, int hitCount) {
+        try {
+            this.hitCount = hitCount;
+            ScoreDoc[] scoreDocs = searchers.get(language).search(query, hitCount).scoreDocs;
+            WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
+            int i = 0;
+            for (ScoreDoc scoreDoc : scoreDocs) {
+                WikapidiaScoreDoc wikapidiaScoreDoc = new WikapidiaScoreDoc(scoreDoc.doc, scoreDoc.score);
+                wikapidiaScoreDocs[i] = wikapidiaScoreDoc;
+                i++;
+            }
+            return wikapidiaScoreDocs;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -167,5 +205,32 @@ public class LuceneSearcher {
 
     public QueryBuilder getQueryBuilderByLanguage(Language language) {
         return new QueryBuilder(analyzers.get(language));
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<LuceneSearcher> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return LuceneSearcher.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "lucene.searcher";
+        }
+
+        @Override
+        public LuceneSearcher get(String name, Config config) throws ConfigurationException {
+            if (!name.equalsIgnoreCase(config.getString("type"))) {
+                throw new ConfigurationException("Could not find configuration " + name);
+            }
+            return new LuceneSearcher(
+                    new LanguageSet(config.getStringList("langs")),
+                    getConfigurator().get(LuceneOptions.class, config.getString("options"))
+            );
+        }
     }
 }

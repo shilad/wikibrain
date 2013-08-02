@@ -44,7 +44,7 @@ public class MetricTrainer {
                 new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("max-results")
-                        .withDescription("the set of algorithms for universal pages to process, separated by commas")
+                        .withDescription("maximum number of results")
                         .create("r"));
         //Specify the Dataset
         options.addOption(

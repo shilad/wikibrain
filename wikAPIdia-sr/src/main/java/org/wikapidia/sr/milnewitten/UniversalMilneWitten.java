@@ -1,4 +1,4 @@
-package org.wikapidia.sr;
+package org.wikapidia.sr.milnewitten;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
@@ -13,10 +13,14 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.*;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
+import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,7 +32,7 @@ import java.util.*;
  * Time: 2:55 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UniversalMilneWitten extends BaseUniversalSRMetric{
+public class UniversalMilneWitten extends BaseUniversalSRMetric {
     private UniversalLinkDao universalLinkDao;
     private boolean outLinks;
     private MilneWittenCore core;
@@ -67,16 +71,16 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         }
         int algorithmId = page1.getAlgorithmId();
 
-        TIntSet A = getLinks(page1.getUnivId(), algorithmId);
-        TIntSet B = getLinks(page2.getUnivId(), algorithmId);
+        TIntSet a = getLinks(page1.getUnivId(), algorithmId);
+        TIntSet b = getLinks(page2.getUnivId(), algorithmId);
 
         if (numArticles == null) {
             DaoFilter daoFilter = new DaoFilter().setAlgorithmIds(algorithmId);
             numArticles = universalPageDao.getCount(daoFilter);
         }
 
-        SRResult result = core.similarity(A,B,numArticles,explanations);
-        result.id = page2.getUnivId();
+        SRResult result = core.similarity(a,b,numArticles,explanations);
+        result.setId(page2.getUnivId());
 
         if (explanations) {
             result.setExplanations(reformatExplanations(result.getExplanations(),page1,page2));
@@ -153,12 +157,11 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
         List<SRResult> results = new ArrayList<SRResult>();
         for (int id : worthChecking.keys()){
             int comparisonLinks = getNumLinks(id, algorithmId, outLinks);
-            SRResult result = new SRResult(1.0-(
+            SRResult result = new SRResult(id, 1.0-(
                     (Math.log(Math.max(pageLinks,comparisonLinks))
                             -Math.log(worthChecking.get(id)))
                             / (Math.log(numArticles)
                             - Math.log(Math.min(pageLinks,comparisonLinks)))));
-            result.id = id;
             results.add(result);
         }
         Collections.sort(results);
@@ -255,6 +258,12 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric{
             daoFilter.setDestIds(universeId);
         }
         return universalLinkDao.getCount(daoFilter);
+    }
+
+    @Override
+    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException{
+        PairwiseSimilarity pairwiseSimilarity = new PairwiseMilneWittenSimilarity();
+        super.writeCosimilarity(path, maxHits, pairwiseSimilarity);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<UniversalSRMetric> {

@@ -13,6 +13,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
+import org.wikapidia.sr.milnewitten.LocalMilneWitten;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 import org.wikapidia.utils.WpIOUtils;
 
@@ -34,7 +35,7 @@ public class TestMilneWitten {
             System.out.println("Result was null");
         }
         else {
-            System.out.println("Similarity value: "+result.getValue());
+            System.out.println("Similarity score: "+result.getScore());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
                 System.out.println(expf.formatExplanation(explanation));
@@ -127,13 +128,13 @@ public class TestMilneWitten {
         BaseLocalSRMetric srIn = new LocalMilneWitten(disambiguator,linkDao,dao);
         BaseLocalSRMetric srOut =  new LocalMilneWitten(disambiguator,linkDao,dao,true);
 
-        double rIn = srIn.similarity(page1, page2, true).getValue();
+        double rIn = srIn.similarity(page1, page2, true).getScore();
         assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==rIn);
-        assert(srIn.similarity(page1,page1,true).getValue()==1);
+        assert(srIn.similarity(page1,page1,true).getScore()==1);
 
-        double rOut = srOut.similarity(page3,page4,true).getValue();
+        double rOut = srOut.similarity(page3,page4,true).getScore();
         assert((1-((Math.log(2)-Math.log(1)) / (Math.log(6) - Math.log(1))))==rOut);
-        assert(srOut.similarity(page3,page3,true).getValue()==1);
+        assert(srOut.similarity(page3,page3,true).getScore()==1);
     }
 
 

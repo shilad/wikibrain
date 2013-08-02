@@ -55,8 +55,7 @@ public class LuceneLoader {
             int i = 0;
             Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter()
                     .setLanguages(language)
-                    .setNameSpaces(namespaces)
-                    .setRedirect(false));
+                    .setNameSpaces(namespaces));
             for (RawPage rawPage : rawPages) {
                 luceneIndexer.indexPage(rawPage);
                 i++;
@@ -115,7 +114,10 @@ public class LuceneLoader {
                 luceneOptions[i] = conf.get(LuceneOptions.class, optionType[i]);
             }
         } else {
-            luceneOptions = new LuceneOptions[] { conf.get(LuceneOptions.class) };
+            luceneOptions = new LuceneOptions[] {
+                    conf.get(LuceneOptions.class, "plaintext"),
+                    conf.get(LuceneOptions.class, "esa")
+            };
         }
 
         LanguageSet languages = env.getLanguages();

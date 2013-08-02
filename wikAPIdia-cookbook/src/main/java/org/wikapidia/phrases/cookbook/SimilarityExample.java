@@ -19,8 +19,6 @@ import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
-import java.io.IOException;
-
 /**
  * @author Matt Lesicko
  * @author Ben Hillmann
@@ -35,7 +33,7 @@ public class SimilarityExample {
             if (namepage!=null){
                 System.out.println(namepage.getTitle().getCanonicalTitle());
             }
-            System.out.println("Similarity value: "+result.getValue());
+            System.out.println("Similarity score: "+result.getScore());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
                 System.out.println(expf.formatExplanation(explanation));
@@ -57,7 +55,7 @@ public class SimilarityExample {
                 LocalId nameId = (LocalId) up.getLocalPages(languages.getDefaultLanguage()).toArray()[0];
                 LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
                 System.out.println(namePage.getTitle().getCanonicalTitle());
-                System.out.println("Similarity value: "+result.getValue());
+                System.out.println("Similarity score: "+result.getScore());
                 int explanationsSeen = 0;
                 for (Explanation explanation : result.getExplanations()){
                     System.out.println(expf.formatExplanation(explanation));

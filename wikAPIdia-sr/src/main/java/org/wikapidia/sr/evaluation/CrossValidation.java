@@ -41,10 +41,10 @@ public class CrossValidation {
             try {
                 KnownSim knownSim = dataset.getData().get(i);
                 SRResult result = srMetric.similarity(knownSim.phrase1, knownSim.phrase2, knownSim.language, false);
-                if (Double.isNaN(result.getValue())){
+                if (Double.isNaN(result.getScore())){
                     missing++;
                 }
-                estimate[i]=result.getValue();
+                estimate[i]=result.getScore();
                 real[i]=knownSim.similarity;
             } catch (Exception e){
                 failed++;
@@ -66,10 +66,10 @@ public class CrossValidation {
                 LocalString phrase1 = new LocalString(knownSim.language, knownSim.phrase1);
                 LocalString phrase2 = new LocalString(knownSim.language, knownSim.phrase2);
                 SRResult result = srMetric.similarity(phrase1, phrase2, false);
-                if (Double.isNaN(result.getValue())){
+                if (Double.isNaN(result.getScore())){
                     missing++;
                 }
-                estimate[i]=result.getValue();
+                estimate[i]=result.getScore();
                 real[i]=knownSim.similarity;
             }
             catch (Exception e){
