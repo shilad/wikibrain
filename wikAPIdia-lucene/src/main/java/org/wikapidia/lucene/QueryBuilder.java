@@ -36,9 +36,9 @@ public class QueryBuilder {
     private final WikapidiaAnalyzer analyzer;
     private final LuceneOptions options;
 
-    public QueryBuilder(WikapidiaAnalyzer analyzer) {
+    public QueryBuilder(WikapidiaAnalyzer analyzer, LuceneOptions options) {
         this.analyzer = analyzer;
-        this.options = analyzer.getOptions();
+        this.options = options;
 //        try {
 //            this.phraseAnalyzer = new Configurator(new Configuration()).get(PhraseAnalyzer.class, "anchortext");
 //        } catch (ConfigurationException e) {
@@ -74,6 +74,10 @@ public class QueryBuilder {
     }
 
 
+    public Query getMoreLikeThisQuery(int luceneId, DirectoryReader directoryReader) throws DaoException {
+        return getMoreLikeThisQuery(options.elements, luceneId, directoryReader);
+    }
+
     public Query getMoreLikeThisQuery(TextFieldElements elements, int luceneId, DirectoryReader directoryReader) throws DaoException {
         if (luceneId >= 0) {
             try {
@@ -98,10 +102,6 @@ public class QueryBuilder {
         mlt.setAnalyzer(analyzer);
         mlt.setFieldNames(new String[]{elements.getTextFieldName()}); // specify the fields for similiarity
         return mlt;
-    }
-
-    public Query getMoreLikeThisQuery(int luceneId, DirectoryReader directoryReader) throws DaoException {
-        return getMoreLikeThisQuery(options.elements, luceneId, directoryReader);
     }
 
 //    /**
