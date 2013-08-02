@@ -6,16 +6,15 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneOptions;
@@ -29,8 +28,6 @@ import org.wikapidia.lucene.WikapidiaScoreDoc;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
-import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
-import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 import org.wikapidia.sr.utils.SimUtils;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
@@ -87,8 +84,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-            SRResult result = new SRResult((double) wikapidiaScoreDoc.score);
-            result.id  = localPageId;
+            SRResult result = new SRResult(localPageId, wikapidiaScoreDoc.score);
             results.add(result);
         }
         SRResultList resultList = new SRResultList(maxResults);
@@ -118,8 +114,8 @@ public class ESAMetric extends BaseLocalSRMetric {
         if (phrase1 == null || phrase2 == null) {
             throw new NullPointerException("Null phrase passed to similarity");
         }
-        TIntDoubleHashMap scores1 = getConceptVector(phrase1, language);
-        TIntDoubleHashMap scores2 = getConceptVector(phrase2, language);
+        TIntDoubleHashMap scores1 = getVector(phrase1, language);
+        TIntDoubleHashMap scores2 = getVector(phrase2, language);
         double sim = SimUtils.cosineSimilarity(scores1, scores2);
         SRResult result = new SRResult(sim);
 
@@ -165,7 +161,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @param phrase
      * @return
      */
-    public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws DaoException { // TODO: validIDs
+    public TIntDoubleHashMap getVector(String phrase, Language language) throws DaoException { // TODO: validIDs
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
         Query query = queryBuilder.getPhraseQuery(phrase);
         if (query != null) {
@@ -173,7 +169,7 @@ public class ESAMetric extends BaseLocalSRMetric {
             SimUtils.pruneSimilar(scoreDocs);
             return SimUtils.normalizeVector(expandScores(scoreDocs));
         } else {
-            LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query.");
+            LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query. "+phrase);
             return null;
         }
     }
@@ -283,12 +279,34 @@ public class ESAMetric extends BaseLocalSRMetric {
             System.out.println("from cache!");
             return mostSimilar;
         }
+        SRResultList srResults = baseMostSimilar(localPage.toLocalId(),maxResults,validIds);
+        return normalize(srResults,localPage.getLanguage());
+    }
+
+    public String getName() {
+        return "ESA";
+    }
+
+//    @Override
+//    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
+//        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
+//        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+//    }
+
+    /**
+     * Construct mostSimilar results without normalizing or accessing the cache.
+     * @param localPage
+     * @param maxResults
+     * @param validIds
+     * @return
+     * @throws DaoException
+     */
+    private SRResultList baseMostSimilar(LocalId localPage, int maxResults, TIntSet validIds) throws DaoException {
         Language language = localPage.getLanguage();
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
         searcher.setHitCount(maxResults);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
-        Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
-        System.out.println(query);
+        Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getId(), language), searcher.getReaderByLanguage(language));
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(query, language);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
@@ -301,18 +319,8 @@ public class ESAMetric extends BaseLocalSRMetric {
                 }
             }
         }
-        return normalize(srResults,language);
+        return srResults;
     }
-
-    public String getName() {
-        return "ESA";
-    }
-
-//    @Override
-//    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
-//        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
-//        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
-//    }
 
     @Override
     public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
@@ -331,8 +339,7 @@ public class ESAMetric extends BaseLocalSRMetric {
             List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
             ParallelForEach.loop(wpIds, numThreads, new Procedure<Integer>() {
                 public void call(Integer wpId) throws IOException, DaoException {
-                    //I'm concerned about making this fake page, but it SHOULDN'T cause problems.
-                    SRResultList scores = mostSimilar(new LocalPage(language,wpId,null,null),maxhits);
+                    SRResultList scores = baseMostSimilar(new LocalId(language,wpId),maxhits,null);
                     if (scores !=null){
                         int ids[]=scores.getIds();
                         writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
@@ -342,6 +349,95 @@ public class ESAMetric extends BaseLocalSRMetric {
             writer.finish();
             mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
         }
+    }
+
+    @Override
+    public double[][] cosimilarity(String[] phrases, Language language) throws DaoException {
+        TIntDoubleHashMap[] vectors = new TIntDoubleHashMap[phrases.length];
+        for (int i=0; i<phrases.length; i++){
+            vectors[i]=getVector(phrases[i],language);
+        }
+        double[][] cos = new double[phrases.length][phrases.length];
+        for (int i=0; i<phrases.length; i++){
+            cos[i][i]=normalize(1.0,language);
+        }
+        for (int i=0; i<phrases.length; i++){
+            for (int j=i+1; j<phrases.length; j++){
+                cos[i][j]= normalize(SimUtils.cosineSimilarity(vectors[i],vectors[j]),language);
+                cos[j][i]=cos[i][j];
+            }
+        }
+        return cos;
+
+    }
+
+    @Override
+    public double[][] cosimilarity(String[] rowPhrases, String[] colPhrases, Language language) throws DaoException {
+        TIntDoubleHashMap[] rowVectors = new TIntDoubleHashMap[rowPhrases.length];
+        for (int i=0; i<rowPhrases.length; i++){
+            rowVectors[i]=getVector(rowPhrases[i],language);
+        }
+        TIntDoubleHashMap[] colVectors = new TIntDoubleHashMap[colPhrases.length];
+        for (int i=0; i<colPhrases.length; i++){
+            colVectors[i]=getVector(colPhrases[i],language);
+        }
+        double [][] cos = new double[rowPhrases.length][colPhrases.length];
+        for (int i=0; i<rowPhrases.length; i++){
+            for (int j=0; j<colPhrases.length; j++){
+                if (rowPhrases[i].equals(colPhrases[j])){
+                    cos[i][j]=normalize(new SRResult(1.0),language).getScore();
+                }
+                else {
+                    cos[i][j]=normalize (SimUtils.cosineSimilarity(rowVectors[i],colVectors[j]),language);
+                }
+            }
+        }
+        return cos;
+
+    }
+
+    @Override
+    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws DaoException {
+        TIntDoubleHashMap[] rowVectors = new TIntDoubleHashMap[wpRowIds.length];
+        for (int i=0; i<wpRowIds.length; i++){
+            rowVectors[i]=getVector(wpRowIds[i],language);
+        }
+        TIntDoubleHashMap[] colVectors = new TIntDoubleHashMap[wpColIds.length];
+        for (int i=0; i<wpColIds.length; i++){
+            colVectors[i]=getVector(wpColIds[i],language);
+        }
+        double [][] cos = new double[wpRowIds.length][wpColIds.length];
+        for (int i=0; i<wpRowIds.length; i++){
+            for (int j=0; j<wpColIds.length; j++){
+                if (wpRowIds[i]==wpColIds[j]){
+                    cos[i][j]=normalize(new SRResult(1.0),language).getScore();
+                }
+                else {
+                    cos[i][j]=normalize (SimUtils.cosineSimilarity(rowVectors[i],colVectors[j]),language);
+                }
+            }
+        }
+        return cos;
+
+    }
+
+    @Override
+    public double[][] cosimilarity(int [] ids, Language language) throws DaoException {
+        TIntDoubleHashMap[] vectors = new TIntDoubleHashMap[ids.length];
+        for (int i=0; i<ids.length; i++){
+            vectors[i]=getVector(ids[i],language);
+        }
+        double[][] cos = new double[ids.length][ids.length];
+        for (int i=0; i<ids.length; i++){
+            cos[i][i]=normalize(1.0,language);
+        }
+        for (int i=0; i<ids.length; i++){
+            for (int j=i+1; j<ids.length; j++){
+                cos[i][j]= normalize(SimUtils.cosineSimilarity(vectors[i],vectors[j]),language);
+                cos[j][i]=cos[i][j];
+            }
+        }
+        return cos;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {
