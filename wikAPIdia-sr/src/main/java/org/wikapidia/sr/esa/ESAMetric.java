@@ -276,7 +276,6 @@ public class ESAMetric extends BaseLocalSRMetric {
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
-            System.out.println("from cache!");
             return mostSimilar;
         }
         SRResultList srResults = baseMostSimilar(localPage.toLocalId(),maxResults,validIds);
@@ -337,7 +336,7 @@ public class ESAMetric extends BaseLocalSRMetric {
                 }
             }
             List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
-            ParallelForEach.loop(wpIds, numThreads, new Procedure<Integer>() {
+            ParallelForEach.loop(wpIds, new Procedure<Integer>() {
                 public void call(Integer wpId) throws IOException, DaoException {
                     SRResultList scores = baseMostSimilar(new LocalId(language,wpId),maxhits,null);
                     if (scores !=null){

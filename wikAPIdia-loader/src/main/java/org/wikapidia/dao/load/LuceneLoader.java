@@ -145,7 +145,6 @@ public class LuceneLoader {
         // TODO: parallelize by some more efficient method?
         ParallelForEach.loop(
                 languages.getLanguages(),
-                env.getMaxThreads(),
                 new Procedure<Language>() {
                     @Override
                     public void call(Language language) throws Exception {

@@ -6,6 +6,7 @@ import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.utils.WpThreadUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class
     private final LanguageInfo language;
     private final RawPageDao rawPageDao;
     private final LanguageSet allowedLanguages;
-    private int maxThreads = Runtime.getRuntime().availableProcessors();
+    private int maxThreads = WpThreadUtils.getMaxThreads();
     private final BlockingQueue<RawPage> queue = new ArrayBlockingQueue<RawPage>(MAX_QUEUE);
     private final List<Thread> workers = new ArrayList<Thread>();
     private AtomicBoolean finished = new AtomicBoolean(false);
