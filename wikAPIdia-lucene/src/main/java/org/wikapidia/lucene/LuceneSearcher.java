@@ -203,8 +203,8 @@ public class LuceneSearcher {
         return analyzers.get(language);
     }
 
-    public QueryBuilder getQueryBuilderByLanguage(Language language) {
-        return new QueryBuilder(analyzers.get(language));
+    public QueryBuilder getQueryBuilderByLanguage(Language language, LuceneOptions options) {
+        return new QueryBuilder(analyzers.get(language), options);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LuceneSearcher> {

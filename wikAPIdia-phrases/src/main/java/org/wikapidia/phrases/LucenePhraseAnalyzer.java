@@ -34,7 +34,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     @Override
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(new TextFieldElements().addTitle(), phrase), language, 10);
         float totalScore = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {

@@ -78,7 +78,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         }
         List<SRResult> results = new ArrayList<SRResult>();
         Language language = phrase.getLanguage();
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
 
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase.getString()), language);
 
@@ -162,7 +162,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      */
     public TIntDoubleHashMap getVector(String phrase, Language language) throws DaoException { // TODO: validIDs
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
         Query query = queryBuilder.getPhraseQuery(phrase);
         if (query != null) {
             WikapidiaScoreDoc[] scoreDocs = searcher.search(query, language);
@@ -182,7 +182,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @throws DaoException
      */
     public TIntDoubleHashMap getVector(int id, Language language) throws DaoException { // TODO: validIDs
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(id, language), searcher.getReaderByLanguage(language)), language);
         SimUtils.pruneSimilar(wikapidiaScoreDocs);
@@ -303,7 +303,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      */
     private SRResultList baseMostSimilar(LocalId localPage, int maxResults, TIntSet validIds) throws DaoException {
         Language language = localPage.getLanguage();
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
+        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
         searcher.setHitCount(maxResults);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getId(), language), searcher.getReaderByLanguage(language));
