@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 
 public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     private static final Logger LOG = Logger.getLogger(BaseUniversalSRMetric.class.getName());
-    protected int numThreads = Runtime.getRuntime().availableProcessors();
     protected UniversalPageDao universalPageDao;
     protected Disambiguator disambiguator;
     protected int algorithmId;
@@ -204,7 +203,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     public void trainSimilarity(final Dataset dataset) throws DaoException{
         final Normalizer trainee = similarityNormalizer;
         similarityNormalizer = new IdentityNormalizer();
-        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws IOException, DaoException {
                 LocalString ls1 = new LocalString(ks.language,ks.phrase1);
                 LocalString ls2 = new LocalString(ks.language,ks.phrase2);
@@ -222,7 +221,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     public void trainMostSimilar(final Dataset dataset, final int numResults, final TIntSet validIds) throws DaoException{
         final Normalizer trainee = mostSimilarNormalizer;
         mostSimilarNormalizer = new IdentityNormalizer();
-        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws DaoException {
                 ks.maybeSwap();
                 List<LocalString> localStrings = new ArrayList<LocalString>();
@@ -342,7 +341,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
             featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
             pairwise.initMatrices(path);
             PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
-            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),maxHits);
             mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
         }catch (InterruptedException e){
             throw new RuntimeException();

@@ -127,10 +127,14 @@ public class LuceneIndexer {
                 Document document = new Document();
                 Field localIdField = new IntField(LuceneOptions.LOCAL_ID_FIELD_NAME, page.getLocalId(), Field.Store.YES);
                 Field langIdField = new IntField(LuceneOptions.LANG_ID_FIELD_NAME, page.getLanguage().getId(), Field.Store.YES);
+                Field canonicalTitleField = builder.buildTextField(page, new TextFieldElements().addTitle());
                 document.add(localIdField);
                 document.add(langIdField);
-                for (LuceneOptions option : options) {
-                    document.add(builder.buildTextField(page, option.elements));
+                document.add(canonicalTitleField);
+                if (!page.isRedirect()) {
+                    for (LuceneOptions option : options) {
+                        document.add(builder.buildTextField(page, option.elements));
+                    }
                 }
                 writer.addDocument(document);
             } catch (IOException e) {

@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 
 public abstract class BaseLocalSRMetric implements LocalSRMetric {
     private static Logger LOG = Logger.getLogger(BaseLocalSRMetric.class.getName());
-    protected int numThreads = Runtime.getRuntime().availableProcessors();
     protected Disambiguator disambiguator;
     protected LocalPageDao pageHelper;
 
@@ -148,23 +147,21 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResultList normalize(SRResultList srl, Language language) {
-        if (similarityNormalizers.containsKey((int) language.getId())){
-            return similarityNormalizers.get((int) language.getId()).normalize(srl);
+        if (mostSimilarNormalizers.containsKey((int) language.getId())
+                &&mostSimilarNormalizers.get((int) language.getId()).isTrained()){
+            return mostSimilarNormalizers.get((int) language.getId()).normalize(srl);
         }
         ensureMostSimilarTrained();
         return defaultMostSimilarNormalizer.normalize(srl);
     }
 
     protected double normalize (double score, Language language){
-        if (similarityNormalizers.containsKey((int) language.getId())){
+        if (similarityNormalizers.containsKey((int) language.getId())
+                &&similarityNormalizers.get((int) language.getId()).isTrained()){
             return similarityNormalizers.get((int) language.getId()).normalize(score);
         }
-        ensureMostSimilarTrained();
-        return defaultMostSimilarNormalizer.normalize(score);
-    }
-
-    public void setNumThreads(int n) {
-        this.numThreads = n;
+        ensureSimilarityTrained();
+        return defaultSimilarityNormalizer.normalize(score);
     }
 
     @Override
@@ -254,7 +251,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             trainee = similarityNormalizers.get((int)dataset.getLanguage().getId());
             similarityNormalizers.put((int)dataset.getLanguage().getId(),new IdentityNormalizer());
         }
-        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws IOException, DaoException {
                 SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
                 trainee.observe(sim.getScore(), ks.similarity);
@@ -298,7 +295,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             trainee = mostSimilarNormalizers.get((int)dataset.getLanguage().getId());
             mostSimilarNormalizers.put((int)dataset.getLanguage().getId(), new IdentityNormalizer());
         }
-        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws DaoException {
                 ks.maybeSwap();
                 List<LocalString> localStrings = new ArrayList<LocalString>();
@@ -450,7 +447,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
                 pairwise.initMatrices(fullPath);
                 PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(fullPath,pairwise);
-                pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+                pairwiseSimilarityWriter.writeSims(pageIds.toArray(),maxHits);
                 mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
             }
         } catch (InterruptedException e){
