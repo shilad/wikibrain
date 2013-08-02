@@ -9,6 +9,7 @@ import org.apache.lucene.search.Query;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -28,6 +29,8 @@ import org.wikapidia.lucene.WikapidiaScoreDoc;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 import org.wikapidia.sr.utils.SimUtils;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
@@ -166,7 +169,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         Query query = queryBuilder.getPhraseQuery(phrase);
         if (query != null) {
             WikapidiaScoreDoc[] scoreDocs = searcher.search(query, language);
-            SimUtils.pruneSimilar(scoreDocs);
+            scoreDocs = SimUtils.pruneSimilar(scoreDocs);
             return SimUtils.normalizeVector(expandScores(scoreDocs));
         } else {
             LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query. "+phrase);
@@ -185,7 +188,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(id, language), searcher.getReaderByLanguage(language)), language);
-        SimUtils.pruneSimilar(wikapidiaScoreDocs);
+        wikapidiaScoreDocs = SimUtils.pruneSimilar(wikapidiaScoreDocs);
         return SimUtils.normalizeVector(expandScores(wikapidiaScoreDocs));
     }
 
@@ -276,20 +279,50 @@ public class ESAMetric extends BaseLocalSRMetric {
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
+            System.out.println("from cache!");
             return mostSimilar;
         }
         SRResultList srResults = baseMostSimilar(localPage.toLocalId(),maxResults,validIds);
-        return normalize(srResults,localPage.getLanguage());
+        return normalize(srResults, localPage.getLanguage());
     }
 
     public String getName() {
         return "ESA";
     }
 
+    @Override
+    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException, WikapidiaException {
+        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
+        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+    }
+
 //    @Override
-//    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
-//        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
-//        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+//    public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
+//        final ValueConf vconf = new ValueConf();
+//        for (final Language language: languages) {
+//            String fullPath = path + getName() + "/matrix/" + language.getLangCode();
+//            final SparseMatrixWriter writer = new SparseMatrixWriter(new File(fullPath+"-cosimilarity"), vconf);
+//            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
+//            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
+//            TIntSet pageIds = new TIntHashSet();
+//            for (LocalPage page : localPages) {
+//                if (page != null) {
+//                    pageIds.add(page.getLocalId());
+//                }
+//            }
+//            List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
+//            ParallelForEach.loop(wpIds, new Procedure<Integer>() {
+//                public void call(Integer wpId) throws IOException, DaoException {
+//                    SRResultList scores = baseMostSimilar(new LocalId(language,wpId),maxhits,null);
+//                    if (scores !=null){
+//                        int ids[]=scores.getIds();
+//                        writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
+//                    }
+//                }
+//            }, Integer.MAX_VALUE);
+//            writer.finish();
+//            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
+//        }
 //    }
 
     /**
@@ -319,35 +352,6 @@ public class ESAMetric extends BaseLocalSRMetric {
             }
         }
         return srResults;
-    }
-
-    @Override
-    public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
-        final ValueConf vconf = new ValueConf();
-        for (final Language language: languages) {
-            String fullPath = path + getName() + "/matrix/" + language.getLangCode();
-            final SparseMatrixWriter writer = new SparseMatrixWriter(new File(fullPath+"-cosimilarity"), vconf);
-            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
-            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
-            TIntSet pageIds = new TIntHashSet();
-            for (LocalPage page : localPages) {
-                if (page != null) {
-                    pageIds.add(page.getLocalId());
-                }
-            }
-            List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
-            ParallelForEach.loop(wpIds, new Procedure<Integer>() {
-                public void call(Integer wpId) throws IOException, DaoException {
-                    SRResultList scores = baseMostSimilar(new LocalId(language,wpId),maxhits,null);
-                    if (scores !=null){
-                        int ids[]=scores.getIds();
-                        writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
-                    }
-                }
-            }, Integer.MAX_VALUE);
-            writer.finish();
-            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
-        }
     }
 
     @Override
