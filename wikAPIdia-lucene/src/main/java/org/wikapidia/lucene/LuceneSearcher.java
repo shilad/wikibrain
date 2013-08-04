@@ -77,7 +77,11 @@ public class LuceneSearcher {
             this.readers = new HashMap<Language, DirectoryReader>();
             this.analyzers = new HashMap<Language, WikapidiaAnalyzer>();
             for (Language language : languages) {
-                Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
+                File langRoot = new File(root, language.getLangCode());
+                if (!langRoot.isDirectory()) {
+                    throw new IllegalArgumentException("no index at location: " + langRoot);
+                }
+                Directory directory = FSDirectory.open(langRoot);
                 DirectoryReader reader = DirectoryReader.open(directory);
                 readers.put(language, reader);
                 searchers.put(language, new IndexSearcher(reader));
@@ -116,6 +120,7 @@ public class LuceneSearcher {
      * @return
      */
     public WikapidiaScoreDoc[] search(Query query, Language language) {
+        if (!searchers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
         try {
             ScoreDoc[] scoreDocs = searchers.get(language).search(query, hitCount).scoreDocs;
             WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
@@ -139,6 +144,7 @@ public class LuceneSearcher {
      * @return
      */
     public WikapidiaScoreDoc[] search(Query query, Language language, int hitCount) {
+        if (!searchers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
         try {
             this.hitCount = hitCount;
             ScoreDoc[] scoreDocs = searchers.get(language).search(query, hitCount).scoreDocs;
@@ -192,18 +198,22 @@ public class LuceneSearcher {
     }
 
     public DirectoryReader getReaderByLanguage(Language language) {
+        if (!readers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
         return readers.get(language);
     }
 
     public IndexSearcher getSearcherByLanguage(Language language) {
+        if (!searchers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
         return searchers.get(language);
     }
 
     public WikapidiaAnalyzer getAnalyzerByLanguage(Language language) {
+        if (!analyzers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
         return analyzers.get(language);
     }
 
     public QueryBuilder getQueryBuilderByLanguage(Language language, LuceneOptions options) {
+        if (!analyzers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
         return new QueryBuilder(analyzers.get(language), options);
     }
 
