@@ -60,6 +60,6 @@ if [ "$stage" -le 5 ]; then
 fi
 
 if [ "$stage" -le 6 ]; then
-    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.LuceneLoader -d $@) ||
+    (cd ${WP_LOADER} && execClass org.wikapidia.dao.load.LuceneLoader $@) ||
     die "$0 failed"
 fi
