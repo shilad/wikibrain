@@ -88,6 +88,7 @@ public class QueryBuilder {
                 fieldName,
                 searcher.getAnalyzerByLanguage(language));
         try {
+            searchString = QueryParserUtil.escape(searchString);
             // Lucene doesn't escape forward slash, but it needs to
             searchString = StringUtils.replace(searchString, "/", "\\/");
             query = parser.parse(QueryParserUtil.escape(searchString));
