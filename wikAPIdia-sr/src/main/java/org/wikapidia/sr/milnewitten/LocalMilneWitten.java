@@ -121,7 +121,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
-            System.out.println("from cache!");
             return mostSimilar;
         } else {
             //Only check pages that share at least one inlink/outlink.

@@ -4,6 +4,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil;
 import org.apache.lucene.search.Query;
 import org.wikapidia.core.dao.DaoException;
 
@@ -67,7 +68,7 @@ public class QueryBuilder {
     public Query getPhraseQuery(TextFieldElements elements, String searchString) {
         QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), analyzer);
         try {
-            return parser.parse(searchString);
+            return parser.parse(QueryParserUtil.escape(searchString));
         } catch (ParseException e) {
             return null;
         }

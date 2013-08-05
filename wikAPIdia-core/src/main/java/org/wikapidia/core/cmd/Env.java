@@ -31,7 +31,6 @@ public class Env {
     private LanguageSet languages;
     private Configuration configuration;
     private Configurator configurator;
-    private int maxThreads = Runtime.getRuntime().availableProcessors();
 
     /**
      * Adds the standard command line options to an options argument.

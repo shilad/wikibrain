@@ -22,6 +22,7 @@ import org.wikapidia.sr.utils.ExplanationFormatter;
 /**
  * @author Matt Lesicko
  * @author Ben Hillmann
+ * \/\/1|<1P3[)14
  */
 public class SimilarityExample {
     private static void localPrintResult(SRResult result, Language language,LocalPageDao localPageDao, ExplanationFormatter expf) throws DaoException {
@@ -72,11 +73,9 @@ public class SimilarityExample {
         //Set-up
         Language lang = Language.getByLangCode("simple");
         Configurator c = new Configurator(new Configuration());
-        PhraseAnalyzer pa = c.get(PhraseAnalyzer.class,"anchortext");
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
         LocalSRMetric sr = c.get(LocalSRMetric.class);
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
-        Disambiguator disambiguator = c.get(Disambiguator.class);
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
 
@@ -127,7 +126,7 @@ public class SimilarityExample {
 
         //Most Similar pages
         System.out.println("Most similar to United States:");
-        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "united states"), 5);
+        SRResultList resultList = sr.mostSimilar(page2, 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao, expf);

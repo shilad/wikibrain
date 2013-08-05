@@ -165,9 +165,6 @@ public class MetricTrainer {
         }
 
 
-        System.out.println(datasets.get(0));
-
-
 
     }
 }
