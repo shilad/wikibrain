@@ -42,8 +42,11 @@ import java.util.logging.Logger;
 
 /**
 * @author Yulun Li
+ *@author Matt Lesicko
+ *@author Ben Hillmann
 */
 public class ESAMetric extends BaseLocalSRMetric {
+    private int POOL_SIZE = 10;
 
     private static final Logger LOG = Logger.getLogger(ESAMetric.class.getName());
 
@@ -82,6 +85,8 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     /**
      * Get the most similar Wikipedia pages of a specified localString.
+     * If the matrix was not built, this may not find the highest scores,
+     * but should find a set that is fairly close.
      * @param phrase local string containing the language information
      * @param maxResults number of results returned
      * @return SRResulList
@@ -92,13 +97,14 @@ public class ESAMetric extends BaseLocalSRMetric {
         if (resolvePhrases){
             return super.mostSimilar(phrase,maxResults);
         }
-        List<SRResult> results = new ArrayList<SRResult>();
         Language language = phrase.getLanguage();
         WikapidiaScoreDoc[] wikapidiaScoreDocs = getQueryBuilderByLanguage(language)
                                             .setPhraseQuery(phrase.getString())
+                                            .setNumHits(maxResults*POOL_SIZE)
                                             .search();
 
         TIntDoubleHashMap vector = getVector(phrase.getString(),phrase.getLanguage());
+        List<SRResult> results = new ArrayList<SRResult>();
 
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
 
@@ -107,6 +113,8 @@ public class ESAMetric extends BaseLocalSRMetric {
             SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
             results.add(result);
         }
+        Collections.sort(results);
+        Collections.reverse(results);
         SRResultList resultList = new SRResultList(maxResults);
         for (int j = 0; j < maxResults && j < results.size(); j++){
             resultList.set(j, results.get(j));
@@ -354,6 +362,8 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     /**
      * Construct mostSimilar results without normalizing or accessing the cache.
+     * If the matrix was not built, this may not find the highest scores,
+     * but should find a set that is fairly close.
      * @param localPage
      * @param maxResults
      * @param validIds
@@ -365,21 +375,27 @@ public class ESAMetric extends BaseLocalSRMetric {
         int luceneId = searcher.getDocIdFromLocalId(localPage.getId(), language);
         WikapidiaScoreDoc[] wikapidiaScoreDocs = getQueryBuilderByLanguage(language)
                                     .setMoreLikeThisQuery(luceneId)
-                                    .setNumHits(maxResults)
+                                    .setNumHits(maxResults*POOL_SIZE)
                                     .search();
         SRResultList srResults = new SRResultList(wikapidiaScoreDocs.length);
         int i = 0;
+        TIntDoubleHashMap vector = getVector(localPage.getId(),localPage.getLanguage());
+        List<SRResult> results = new ArrayList<SRResult>();
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            if (i < srResults.numDocs()) {
-                int localId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-                if (validIds==null||validIds.contains(localId)){
-                    SRResult result = similarity(localPage.asLocalPage(), new LocalPage(localPage.getLanguage(), localId, null, null), false);
-                    srResults.set(i, localId, result.getScore());
-                    i++;
-                }
+            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+            TIntDoubleHashMap comparison = getVector(localPageId, localPage.getLanguage());
+            if (validIds==null||validIds.contains(localPageId)){
+                SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
+                results.add(result);
             }
         }
-        return srResults;
+        Collections.sort(results);
+        Collections.reverse(results);
+        SRResultList resultList = new SRResultList(maxResults);
+        for (int j = 0; j < maxResults && j < results.size(); j++){
+            resultList.set(j, results.get(j));
+        }
+        return resultList;
     }
 
     @Override

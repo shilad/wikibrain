@@ -86,15 +86,15 @@ public class SimilarityExample {
         String s2 = "US";
         String s3 = "Canada";
         String s4 = "vim";
-        System.out.println("Using local");
-        System.out.println("Barack Obama and US:");
-        localPrintResult(sr.similarity(s1,s2,lang,true),lang,localPageDao, expf);
-        System.out.println("Barack Obama and Canada:");
-        localPrintResult(sr.similarity(s1,s3,lang,true),lang,localPageDao, expf);
-        System.out.println("Barack Obama and vim:");
-        localPrintResult(sr.similarity(s1,s4,lang,true),lang,localPageDao, expf);
-        System.out.println("Barack Obama and Barack Obama");
-        localPrintResult(sr.similarity(s1,s1,lang,true),lang,localPageDao, expf);
+//        System.out.println("Using local");
+//        System.out.println("Barack Obama and US:");
+//        localPrintResult(sr.similarity(s1,s2,lang,true),lang,localPageDao, expf);
+//        System.out.println("Barack Obama and Canada:");
+//        localPrintResult(sr.similarity(s1,s3,lang,true),lang,localPageDao, expf);
+//        System.out.println("Barack Obama and vim:");
+//        localPrintResult(sr.similarity(s1,s4,lang,true),lang,localPageDao, expf);
+//        System.out.println("Barack Obama and Barack Obama");
+//        localPrintResult(sr.similarity(s1,s1,lang,true),lang,localPageDao, expf);
 
 //        LocalString ls1 = new LocalString(lang, s1);
 //        LocalString ls2 = new LocalString(lang, s2);
@@ -115,28 +115,42 @@ public class SimilarityExample {
         LocalPage page2 = localPageDao.getByTitle(lang, new Title(s2, lang), NameSpace.ARTICLE);
         LocalPage page3 = localPageDao.getByTitle(lang, new Title(s3,lang),NameSpace.ARTICLE);
         LocalPage page4 = localPageDao.getByTitle(lang, new Title(s4, lang),NameSpace.ARTICLE);
-        System.out.println("Barack Obama and US:");
-        localPrintResult(sr.similarity(page1,page2,true),lang,localPageDao, expf);
-        System.out.println("Barack Obama and Canada:");
-        localPrintResult(sr.similarity(page1,page3,true),lang,localPageDao, expf);
-        System.out.println("Barack Obama and vim:");
-        localPrintResult(sr.similarity(page1,page4,true),lang,localPageDao, expf);
-        System.out.println("Barack Obama and Barack Obama:");
-        localPrintResult(sr.similarity(page1,page1,true),lang,localPageDao, expf);
-
-        //Most Similar pages
+//        System.out.println("Barack Obama and US:");
+//        localPrintResult(sr.similarity(page1,page2,true),lang,localPageDao, expf);
+//        System.out.println("Barack Obama and Canada:");
+//        localPrintResult(sr.similarity(page1,page3,true),lang,localPageDao, expf);
+//        System.out.println("Barack Obama and vim:");
+//        localPrintResult(sr.similarity(page1,page4,true),lang,localPageDao, expf);
+//        System.out.println("Barack Obama and Barack Obama:");
+//        localPrintResult(sr.similarity(page1,page1,true),lang,localPageDao, expf);
+//
+//        Most Similar pages
         System.out.println("Most similar to United States:");
         SRResultList resultList = sr.mostSimilar(page2, 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao, expf);
         }
-        System.out.println("Most similar to science fiction:");
-        resultList = sr.mostSimilar(new LocalString(lang, "science fiction"), 5);
+//        System.out.println("Most similar to science fiction:");
+//        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "science fiction"), 5);
+//        for (int i=0; i<resultList.numDocs(); i++){
+//            System.out.println("#" + (i + 1));
+//            localPrintResult(resultList.get(i),lang,localPageDao, expf);
+//        }
+
+        System.out.println("Most similar to natural language processing:");
+        resultList = sr.mostSimilar(new LocalString(lang, "natural language processing"), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao, expf);
         }
+
+//        System.out.println("Most similar to natural language processing:");
+//        resultList = sr.mostSimilar(new LocalString(lang, "natural language processing"), 10000);
+//        for (int i=0; i<5; i++){
+//            System.out.println("#" + (i + 1));
+//            localPrintResult(resultList.get(i),lang,localPageDao, expf);
+//        }
 
 //        System.out.println("Most similar to goat using universal");
 //        resultList = usr.mostSimilar(new LocalString(lang, "goat"), 5);
