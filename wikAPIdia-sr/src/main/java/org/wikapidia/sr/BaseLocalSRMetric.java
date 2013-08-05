@@ -257,7 +257,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 trainee.observe(sim.getScore(), ks.similarity);
 
             }
-        },1);
+        },100);
         trainee.observationsFinished();
         if (isDefault){
             defaultSimilarityNormalizer = trainee;
@@ -310,7 +310,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     }
                 }
             }
-        },1);
+        },100);
         trainee.observationsFinished();
         if (isDefault){
             defaultMostSimilarNormalizer = trainee;

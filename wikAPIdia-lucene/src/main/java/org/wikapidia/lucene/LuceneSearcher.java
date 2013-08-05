@@ -3,10 +3,7 @@ package org.wikapidia.lucene;
 import com.typesafe.config.Config;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.NumericRangeQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.wikapidia.conf.Configuration;
@@ -120,20 +117,11 @@ public class LuceneSearcher {
      * @return
      */
     public WikapidiaScoreDoc[] search(Query query, Language language) {
-        if (!searchers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
-        try {
-            ScoreDoc[] scoreDocs = searchers.get(language).search(query, hitCount).scoreDocs;
-            WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
-            int i = 0;
-            for (ScoreDoc scoreDoc : scoreDocs) {
-                WikapidiaScoreDoc wikapidiaScoreDoc = new WikapidiaScoreDoc(scoreDoc.doc, scoreDoc.score);
-                wikapidiaScoreDocs[i] = wikapidiaScoreDoc;
-                i++;
-            }
-            return wikapidiaScoreDocs;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return search(query, language, this.hitCount, null);
+    }
+
+    public WikapidiaScoreDoc[] search(Query query, Language language, int hitCount) {
+        return search(query, language, hitCount, null);
     }
 
     /**
@@ -143,11 +131,11 @@ public class LuceneSearcher {
      * @param hitCount
      * @return
      */
-    public WikapidiaScoreDoc[] search(Query query, Language language, int hitCount) {
+    public WikapidiaScoreDoc[] search(Query query, Language language, int hitCount, Filter filter) {
         if (!searchers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
         try {
             this.hitCount = hitCount;
-            ScoreDoc[] scoreDocs = searchers.get(language).search(query, hitCount).scoreDocs;
+            ScoreDoc[] scoreDocs = searchers.get(language).search(query, filter, hitCount).scoreDocs;
             WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
             int i = 0;
             for (ScoreDoc scoreDoc : scoreDocs) {
@@ -212,9 +200,9 @@ public class LuceneSearcher {
         return analyzers.get(language);
     }
 
-    public QueryBuilder getQueryBuilderByLanguage(Language language, LuceneOptions options) {
+    public QueryBuilder getQueryBuilderByLanguage(Language language) {
         if (!analyzers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
-        return new QueryBuilder(analyzers.get(language), options);
+        return new QueryBuilder(this, language);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LuceneSearcher> {
