@@ -21,5 +21,6 @@ target/
 
 # tmp
 */tmp/
+dat/
 
 db/
