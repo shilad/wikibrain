@@ -123,6 +123,9 @@ public class QueryBuilder {
     }
 
     public WikapidiaScoreDoc[] search() {
+        if (!hasQuery()) {
+            throw new IllegalArgumentException("no query specified. call one of the QueryBuilder.set* methods to specify a query");
+        }
         return searcher.search(query, language, numHits, getFilters());
     }
 
