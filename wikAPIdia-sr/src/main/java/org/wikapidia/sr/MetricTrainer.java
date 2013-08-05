@@ -50,8 +50,9 @@ public class MetricTrainer {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
+                        .isRequired()
                         .withLongOpt("gold")
-                        .withDescription("the set of gold standard datasets to train on, separated by commas")
+                        .withDescription("the set of gold standard datasets to train on")
                         .create("g"));
         //Specify the Metrics
         options.addOption(
@@ -81,15 +82,11 @@ public class MetricTrainer {
             throw new IllegalArgumentException("Must specify a metric to train.");
         }
 
-        List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
+
 
         int maxResults = cmd.hasOption("r")? Integer.parseInt(cmd.getOptionValue("r")) : c.getConf().get().getInt("sr.normalizer.defaultmaxresults");
 
 
-
-        if (datasetConfig.size()%2 != 0) {
-            throw new ConfigurationException("Datasets must be paired with a matching language");
-        }
 
         String datasetPath = c.getConf().get().getString("sr.dataset.path");
         String path = c.getConf().get().getString("sr.metric.path");
@@ -100,21 +97,10 @@ public class MetricTrainer {
         if (cmd.hasOption("g")){
             String[] datasetNames = cmd.getOptionValues("g");
             for (String name : datasetNames){
-                if (datasetConfig.contains(name)){
-                    int langPosition = datasetConfig.indexOf(name)-1;
-                    Language language = Language.getByLangCode(datasetConfig.get(langPosition));
-                    datasets.add(datasetDao.read(language,datasetPath+name));
+                List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+name);
+                for (String langCode : languages){
+                    datasets.add(datasetDao.read(Language.getByLangCode(langCode),datasetPath+name));
                 }
-                else {
-                    throw new IllegalArgumentException("Specified dataset "+name+" is not in the configuration file.");
-                }
-            }
-        }
-        else{
-            for (int i = 0; i < datasetConfig.size();i+=2) {
-                String language = datasetConfig.get(i);
-                String datasetName = datasetConfig.get(i+1);
-                datasets.add(datasetDao.read(Language.getByLangCode(language), datasetPath + datasetName));
             }
         }
 

@@ -157,7 +157,6 @@ public class CrossValidation {
         //-l LANGUAGE -d SAVE_NAME -g DATASET NAME -k load resplit the split
         //      dataset into # folds, saving the resultant split datasets
         //      into SAVE_NAME
-        List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
         String datasetPath = c.getConf().get().getString("sr.dataset.path");
         if (cmd.hasOption("l")){
             Language language = Language.getByLangCode(cmd.getOptionValue("l"));
@@ -174,21 +173,13 @@ public class CrossValidation {
         else if (cmd.hasOption("g")) {
             String[] datasetNames = cmd.getOptionValues("g");
             for (String name : datasetNames){
-                if (datasetConfig.contains(name)){
-                    int langPosition = datasetConfig.indexOf(name)-1;
-                    Language language = Language.getByLangCode(datasetConfig.get(langPosition));
-                    datasets.add(datasetDao.read(language,datasetPath+name));
-                }
-                else {
-                    throw new IllegalArgumentException("Specified dataset "+name+" is not in the configuration file.");
+                List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+name);
+                for (String langCode : languages){
+                    datasets.add(datasetDao.read(Language.getByLangCode(langCode),datasetPath+name));
                 }
             }
         } else {
-            for (int i = 0; i < datasetConfig.size();i+=2) {
-                String language = datasetConfig.get(i);
-                String datasetName = datasetConfig.get(i+1);
-                datasets.add(datasetDao.read(Language.getByLangCode(language), datasetPath + datasetName));
-            }
+            throw new IllegalArgumentException("Did not specify a dataset to use.");
         }
         if (cmd.hasOption("d")){
             String name = cmd.getOptionValue("d");
