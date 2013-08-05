@@ -27,9 +27,12 @@ import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
+import org.wikapidia.sr.utils.Dataset;
+import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.SimUtils;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
@@ -54,17 +57,11 @@ public class ESAMetric extends BaseLocalSRMetric {
     private boolean resolvePhrases;
     private Map<Language, WpIdFilter> conceptFilter = new HashMap<Language, WpIdFilter>();
 
-    public ESAMetric(LuceneSearcher searcher, LocalPageDao pageHelper) {
-        this.searcher = searcher;
-        this.pageHelper = pageHelper;
-        resolvePhrases = false;
-    }
-
-    public ESAMetric(LuceneSearcher searcher, LocalPageDao pageHelper, Disambiguator disambiguator){
+    public ESAMetric(LuceneSearcher searcher, LocalPageDao pageHelper, Disambiguator disambiguator, boolean resolvePhrases) {
         this.searcher = searcher;
         this.pageHelper = pageHelper;
         this.disambiguator = disambiguator;
-        resolvePhrases = true;
+        this.resolvePhrases = resolvePhrases;
     }
 
     public void setConcepts(File dir) throws IOException {
@@ -339,6 +336,8 @@ public class ESAMetric extends BaseLocalSRMetric {
         super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
     }
 
+
+
 //    @Override
 //    public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
 //        final ValueConf vconf = new ValueConf();
@@ -404,6 +403,42 @@ public class ESAMetric extends BaseLocalSRMetric {
             resultList.set(j, results.get(j));
         }
         return resultList;
+    }
+
+    @Override
+    protected synchronized void trainMostSimilarNormalizer(final Dataset dataset, final int numResults, final TIntSet validIds, boolean isDefault) {
+        if (resolvePhrases){
+            super.trainMostSimilarNormalizer(dataset, numResults, validIds, isDefault);
+        }
+        final Normalizer trainee;
+        if (isDefault){
+            trainee = defaultMostSimilarNormalizer;
+            defaultMostSimilarNormalizer = new IdentityNormalizer();
+
+        } else {
+            trainee = mostSimilarNormalizers.get((int)dataset.getLanguage().getId());
+            mostSimilarNormalizers.put((int)dataset.getLanguage().getId(), new IdentityNormalizer());
+        }
+        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
+            public void call(KnownSim ks) throws DaoException {
+                ks.maybeSwap();
+                List<LocalString> localStrings = new ArrayList<LocalString>();
+                localStrings.add(new LocalString(ks.language, ks.phrase1));
+                localStrings.add(new LocalString(ks.language, ks.phrase2));
+                List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
+                SRResultList dsl = mostSimilar(localStrings.get(0), numResults, validIds);
+                if (dsl != null) {
+                    trainee.observe(dsl, dsl.getIndexForId(ids.get(1).getId()), ks.similarity);
+                }
+            }
+        },100);
+        trainee.observationsFinished();
+        if (isDefault){
+            defaultMostSimilarNormalizer = trainee;
+        } else {
+            mostSimilarNormalizers.put((int)dataset.getLanguage().getId(),trainee);
+        }
+        LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
     }
 
     @Override
@@ -519,19 +554,12 @@ public class ESAMetric extends BaseLocalSRMetric {
             List<String> langCodes = getConfig().get().getStringList("languages");
 
             LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(langCodes), getConfigurator().get(LuceneOptions.class, "esa"));
-            ESAMetric sr;
-            if (config.getBoolean("resolvephrases")){
-                sr = new ESAMetric(
+            ESAMetric sr = new ESAMetric(
                         searcher,
                         getConfigurator().get(LocalPageDao.class, config.getString("pageDao")),
-                        getConfigurator().get(Disambiguator.class, config.getString("disambiguator"))
-                );
-            } else{
-                sr = new ESAMetric(
-                        searcher,
-                        getConfigurator().get(LocalPageDao.class, config.getString("pageDao"))
-                );
-            }
+                        getConfigurator().get(Disambiguator.class, config.getString("disambiguator")),
+                        config.getBoolean("resolvephrases")
+            );
             if (config.hasPath("concepts")) {
                 try {
                     sr.setConcepts(new File(config.getString("concepts")));

@@ -35,10 +35,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     protected LocalPageDao pageHelper;
 
 
-    private Normalizer defaultMostSimilarNormalizer = new IdentityNormalizer();
-    private Normalizer defaultSimilarityNormalizer = new IdentityNormalizer();
-    private Map<Integer, Normalizer> similarityNormalizers = new HashMap<Integer, Normalizer>();
-    private Map<Integer, Normalizer> mostSimilarNormalizers = new HashMap<Integer, Normalizer>();
+    protected Normalizer defaultMostSimilarNormalizer = new IdentityNormalizer();
+    protected Normalizer defaultSimilarityNormalizer = new IdentityNormalizer();
+    protected Map<Integer, Normalizer> similarityNormalizers = new HashMap<Integer, Normalizer>();
+    protected Map<Integer, Normalizer> mostSimilarNormalizers = new HashMap<Integer, Normalizer>();
 
     protected Map<Language,SparseMatrix> mostSimilarLocalMatrices = new HashMap<Language, SparseMatrix>();
 
