@@ -11,6 +11,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
@@ -435,7 +436,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             for (Language language: languages) {
                 String fullPath = path + getName() + "/matrix/" + language.getLangCode();
                 SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(fullPath, this, language);
-                DaoFilter pageFilter = new DaoFilter().setLanguages(language);
+                DaoFilter pageFilter = new DaoFilter()
+                        .setLanguages(language)
+                        .setNameSpaces(NameSpace.ARTICLE)
+                        .setRedirect(false);
                 Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
                 TIntSet pageIds = new TIntHashSet();
                 for (LocalPage page : localPages) {
