@@ -110,7 +110,7 @@ public class WikiTextLoader {
         lcmDao.beginLoad();
 
         ParallelForEach.loop(env.getLanguages().getLanguages(),
-                Math.max(1, env.getLanguages().size() / maxThreadsPerLang),
+                Math.max(1, env.getMaxThreads() / maxThreadsPerLang),
                 new Procedure<Language>() {
                     @Override
                     public void call(Language lang) throws Exception {

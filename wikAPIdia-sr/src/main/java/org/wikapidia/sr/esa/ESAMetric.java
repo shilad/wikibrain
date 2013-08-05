@@ -4,9 +4,10 @@ import com.typesafe.config.Config;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -16,16 +17,14 @@ import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.lucene.LuceneOptions;
-import org.wikapidia.lucene.LuceneSearcher;
-import org.wikapidia.lucene.QueryBuilder;
+import org.wikapidia.lucene.*;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
-import org.wikapidia.lucene.WikapidiaScoreDoc;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
@@ -37,10 +36,7 @@ import org.wikapidia.utils.Procedure;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +49,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private final LuceneSearcher searcher;
     private boolean resolvePhrases;
+    private Map<Language, WpIdFilter> conceptFilter = new HashMap<Language, WpIdFilter>();
 
     public ESAMetric(LuceneSearcher searcher, LocalPageDao pageHelper) {
         this.searcher = searcher;
@@ -65,6 +62,22 @@ public class ESAMetric extends BaseLocalSRMetric {
         this.pageHelper = pageHelper;
         this.disambiguator = disambiguator;
         resolvePhrases = true;
+    }
+
+    public void setConcepts(File dir) throws IOException {
+        conceptFilter.clear();
+        if (!dir.isDirectory()) {
+            LOG.warning("concept path " + dir + " not a directory; defaulting to all concepts");
+        }
+        for (String file : dir.list()) {
+            String langCode = FilenameUtils.getBaseName(file);
+            TIntSet ids = new TIntHashSet();
+            for (String wpId : FileUtils.readLines(new File(dir, file))) {
+                ids.add(Integer.valueOf(wpId));
+            }
+            conceptFilter.put(Language.getByLangCode(langCode), new WpIdFilter(ids.toArray()));
+            LOG.warning("installed " + ids.size() + " concepts for " + langCode);
+        }
     }
 
     /**
@@ -81,14 +94,17 @@ public class ESAMetric extends BaseLocalSRMetric {
         }
         List<SRResult> results = new ArrayList<SRResult>();
         Language language = phrase.getLanguage();
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = getQueryBuilderByLanguage(language)
+                                            .setPhraseQuery(phrase.getString())
+                                            .search();
 
-        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(phrase.getString()), language);
+        TIntDoubleHashMap vector = getVector(phrase.getString(),phrase.getLanguage());
 
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
+
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-            SRResult result = new SRResult((double) wikapidiaScoreDoc.score);
-            result.id  = localPageId;
+            TIntDoubleHashMap comparison = getVector(localPageId, phrase.getLanguage());
+            SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
             results.add(result);
         }
         SRResultList resultList = new SRResultList(maxResults);
@@ -118,8 +134,8 @@ public class ESAMetric extends BaseLocalSRMetric {
         if (phrase1 == null || phrase2 == null) {
             throw new NullPointerException("Null phrase passed to similarity");
         }
-        TIntDoubleHashMap scores1 = getConceptVector(phrase1, language);
-        TIntDoubleHashMap scores2 = getConceptVector(phrase2, language);
+        TIntDoubleHashMap scores1 = getVector(phrase1, language);
+        TIntDoubleHashMap scores2 = getVector(phrase2, language);
         double sim = SimUtils.cosineSimilarity(scores1, scores2);
         SRResult result = new SRResult(sim);
 
@@ -165,15 +181,15 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @param phrase
      * @return
      */
-    public TIntDoubleHashMap getConceptVector(String phrase, Language language) throws DaoException { // TODO: validIDs
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
-        Query query = queryBuilder.getPhraseQuery(phrase);
-        if (query != null) {
-            WikapidiaScoreDoc[] scoreDocs = searcher.search(query, language);
-            SimUtils.pruneSimilar(scoreDocs);
+    public TIntDoubleHashMap getVector(String phrase, Language language) throws DaoException { // TODO: validIDs
+        QueryBuilder builder = getQueryBuilderByLanguage(language)
+                                    .setPhraseQuery(phrase);
+        if (builder.hasQuery()) {
+            WikapidiaScoreDoc[] scoreDocs = builder.search();
+            scoreDocs = SimUtils.pruneSimilar(scoreDocs);
             return SimUtils.normalizeVector(expandScores(scoreDocs));
         } else {
-            LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query.");
+            LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query. "+phrase);
             return null;
         }
     }
@@ -185,12 +201,22 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      * @throws DaoException
      */
-    public TIntDoubleHashMap getVector(int id, Language language) throws DaoException { // TODO: validIDs
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
-//        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
-        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(id, language), searcher.getReaderByLanguage(language)), language);
-        SimUtils.pruneSimilar(wikapidiaScoreDocs);
+    public TIntDoubleHashMap getVector(int id, Language language) throws DaoException {
+        int luceneId = searcher.getDocIdFromLocalId(id, language);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs =  getQueryBuilderByLanguage(language)
+                                .setMoreLikeThisQuery(luceneId)
+                                .search();
+        wikapidiaScoreDocs = SimUtils.pruneSimilar(wikapidiaScoreDocs);
         return SimUtils.normalizeVector(expandScores(wikapidiaScoreDocs));
+    }
+
+    private QueryBuilder getQueryBuilderByLanguage(Language language) {
+        QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
+        WpIdFilter filter = conceptFilter.get(language);
+        if (filter != null) {
+            builder.addFilter(filter);
+        }
+        return builder;
     }
 
     /**
@@ -283,65 +309,166 @@ public class ESAMetric extends BaseLocalSRMetric {
             System.out.println("from cache!");
             return mostSimilar;
         }
-        Language language = localPage.getLanguage();
-        QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language);
-        searcher.setHitCount(maxResults);
-//        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
-        Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getLocalId(), language), searcher.getReaderByLanguage(language));
-        System.out.println(query);
-        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(query, language);
-        SRResultList srResults = new SRResultList(maxResults);
-        int i = 0;
-        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            if (i < srResults.numDocs()) {
-                int localId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-                if (validIds==null||validIds.contains(localId)){
-                    srResults.set(i, localId, wikapidiaScoreDoc.score);
-                    i++;
-                }
-            }
-        }
-        return normalize(srResults,language);
+        SRResultList srResults = baseMostSimilar(localPage.toLocalId(),maxResults,validIds);
+        return normalize(srResults, localPage.getLanguage());
     }
 
     public String getName() {
         return "ESA";
     }
 
+    @Override
+    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException, WikapidiaException {
+        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
+        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+    }
+
 //    @Override
-//    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
-//        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
-//        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+//    public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
+//        final ValueConf vconf = new ValueConf();
+//        for (final Language language: languages) {
+//            String fullPath = path + getName() + "/matrix/" + language.getLangCode();
+//            final SparseMatrixWriter writer = new SparseMatrixWriter(new File(fullPath+"-cosimilarity"), vconf);
+//            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
+//            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
+//            TIntSet pageIds = new TIntHashSet();
+//            for (LocalPage page : localPages) {
+//                if (page != null) {
+//                    pageIds.add(page.getLocalId());
+//                }
+//            }
+//            List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
+//            ParallelForEach.loop(wpIds, new Procedure<Integer>() {
+//                public void call(Integer wpId) throws IOException, DaoException {
+//                    SRResultList scores = baseMostSimilar(new LocalId(language,wpId),maxhits,null);
+//                    if (scores !=null){
+//                        int ids[]=scores.getIds();
+//                        writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
+//                    }
+//                }
+//            }, Integer.MAX_VALUE);
+//            writer.finish();
+//            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
+//        }
 //    }
 
-    @Override
-    public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
-        final ValueConf vconf = new ValueConf();
-        for (final Language language: languages) {
-            String fullPath = path + getName() + "/matrix/" + language.getLangCode();
-            final SparseMatrixWriter writer = new SparseMatrixWriter(new File(fullPath+"-cosimilarity"), vconf);
-            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
-            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
-            TIntSet pageIds = new TIntHashSet();
-            for (LocalPage page : localPages) {
-                if (page != null) {
-                    pageIds.add(page.getLocalId());
+    /**
+     * Construct mostSimilar results without normalizing or accessing the cache.
+     * @param localPage
+     * @param maxResults
+     * @param validIds
+     * @return
+     * @throws DaoException
+     */
+    private SRResultList baseMostSimilar(LocalId localPage, int maxResults, TIntSet validIds) throws DaoException {
+        Language language = localPage.getLanguage();
+        int luceneId = searcher.getDocIdFromLocalId(localPage.getId(), language);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = getQueryBuilderByLanguage(language)
+                                    .setMoreLikeThisQuery(luceneId)
+                                    .setNumHits(maxResults)
+                                    .search();
+        SRResultList srResults = new SRResultList(wikapidiaScoreDocs.length);
+        int i = 0;
+        for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
+            if (i < srResults.numDocs()) {
+                int localId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+                if (validIds==null||validIds.contains(localId)){
+                    SRResult result = similarity(localPage.asLocalPage(), new LocalPage(localPage.getLanguage(), localId, null, null), false);
+                    srResults.set(i, localId, result.getScore());
+                    i++;
                 }
             }
-            List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
-            ParallelForEach.loop(wpIds, numThreads, new Procedure<Integer>() {
-                public void call(Integer wpId) throws IOException, DaoException {
-                    //I'm concerned about making this fake page, but it SHOULDN'T cause problems.
-                    SRResultList scores = mostSimilar(new LocalPage(language,wpId,null,null),maxhits);
-                    if (scores !=null){
-                        int ids[]=scores.getIds();
-                        writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
-                    }
-                }
-            }, Integer.MAX_VALUE);
-            writer.finish();
-            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
         }
+        return srResults;
+    }
+
+    @Override
+    public double[][] cosimilarity(String[] phrases, Language language) throws DaoException {
+        TIntDoubleHashMap[] vectors = new TIntDoubleHashMap[phrases.length];
+        for (int i=0; i<phrases.length; i++){
+            vectors[i]=getVector(phrases[i],language);
+        }
+        double[][] cos = new double[phrases.length][phrases.length];
+        for (int i=0; i<phrases.length; i++){
+            cos[i][i]=normalize(1.0,language);
+        }
+        for (int i=0; i<phrases.length; i++){
+            for (int j=i+1; j<phrases.length; j++){
+                cos[i][j]= normalize(SimUtils.cosineSimilarity(vectors[i],vectors[j]),language);
+                cos[j][i]=cos[i][j];
+            }
+        }
+        return cos;
+
+    }
+
+    @Override
+    public double[][] cosimilarity(String[] rowPhrases, String[] colPhrases, Language language) throws DaoException {
+        TIntDoubleHashMap[] rowVectors = new TIntDoubleHashMap[rowPhrases.length];
+        for (int i=0; i<rowPhrases.length; i++){
+            rowVectors[i]=getVector(rowPhrases[i],language);
+        }
+        TIntDoubleHashMap[] colVectors = new TIntDoubleHashMap[colPhrases.length];
+        for (int i=0; i<colPhrases.length; i++){
+            colVectors[i]=getVector(colPhrases[i],language);
+        }
+        double [][] cos = new double[rowPhrases.length][colPhrases.length];
+        for (int i=0; i<rowPhrases.length; i++){
+            for (int j=0; j<colPhrases.length; j++){
+                if (rowPhrases[i].equals(colPhrases[j])){
+                    cos[i][j]=normalize(new SRResult(1.0),language).getScore();
+                }
+                else {
+                    cos[i][j]=normalize (SimUtils.cosineSimilarity(rowVectors[i],colVectors[j]),language);
+                }
+            }
+        }
+        return cos;
+
+    }
+
+    @Override
+    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws DaoException {
+        TIntDoubleHashMap[] rowVectors = new TIntDoubleHashMap[wpRowIds.length];
+        for (int i=0; i<wpRowIds.length; i++){
+            rowVectors[i]=getVector(wpRowIds[i],language);
+        }
+        TIntDoubleHashMap[] colVectors = new TIntDoubleHashMap[wpColIds.length];
+        for (int i=0; i<wpColIds.length; i++){
+            colVectors[i]=getVector(wpColIds[i],language);
+        }
+        double [][] cos = new double[wpRowIds.length][wpColIds.length];
+        for (int i=0; i<wpRowIds.length; i++){
+            for (int j=0; j<wpColIds.length; j++){
+                if (wpRowIds[i]==wpColIds[j]){
+                    cos[i][j]=normalize(new SRResult(1.0),language).getScore();
+                }
+                else {
+                    cos[i][j]=normalize (SimUtils.cosineSimilarity(rowVectors[i],colVectors[j]),language);
+                }
+            }
+        }
+        return cos;
+
+    }
+
+    @Override
+    public double[][] cosimilarity(int [] ids, Language language) throws DaoException {
+        TIntDoubleHashMap[] vectors = new TIntDoubleHashMap[ids.length];
+        for (int i=0; i<ids.length; i++){
+            vectors[i]=getVector(ids[i],language);
+        }
+        double[][] cos = new double[ids.length][ids.length];
+        for (int i=0; i<ids.length; i++){
+            cos[i][i]=normalize(1.0,language);
+        }
+        for (int i=0; i<ids.length; i++){
+            for (int j=i+1; j<ids.length; j++){
+                cos[i][j]= normalize(SimUtils.cosineSimilarity(vectors[i],vectors[j]),language);
+                cos[j][i]=cos[i][j];
+            }
+        }
+        return cos;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {
@@ -380,6 +507,13 @@ public class ESAMetric extends BaseLocalSRMetric {
                         searcher,
                         getConfigurator().get(LocalPageDao.class, config.getString("pageDao"))
                 );
+            }
+            if (config.hasPath("concepts")) {
+                try {
+                    sr.setConcepts(new File(config.getString("concepts")));
+                } catch (IOException e) {
+                    throw new ConfigurationException(e);
+                }
             }
             try {
                 sr.read(getConfig().get().getString("sr.metric.path"));

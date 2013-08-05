@@ -216,9 +216,11 @@ public class LoessNormalizer extends BaseNormalizer {
             if (!config.getString("type").equals("loess")) {
                 return null;
             }
-
-            return new LoessNormalizer(
-            );
+            LoessNormalizer ln = new LoessNormalizer();
+            if (config.hasPath("log")) {
+                ln.setLogTransform(config.getBoolean("log"));
+            }
+            return ln;
         }
 
     }

@@ -1,13 +1,19 @@
 package org.wikapidia.lucene;
 
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.queries.ChainedFilter;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.lang.Language;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,25 +31,29 @@ public class QueryBuilder {
     public static final int DEFAULT_MAX_QUERY_TERMS = 100;
     public static final int DEFAULT_MIN_TERM_FREQ = 2;
     public static final int DEFAULT_MIN_DOC_FREQ = 2;
+    public static final int DEFAULT_HIT_COUNT = 1000;
 
+
+
+    private final Language language;
+    private final LuceneSearcher searcher;
+    private Query query = null;
+    private int numHits = DEFAULT_HIT_COUNT;
+
+    // For more like this queries
     private int maxPercentage = DEFAULT_MAX_PERCENTAGE;
     private int maxQueryTerms = DEFAULT_MAX_QUERY_TERMS;
     private int minTermFreq = DEFAULT_MIN_TERM_FREQ;
     private int minDocFreq = DEFAULT_MIN_DOC_FREQ;
 
+
     private static final Logger LOG = Logger.getLogger(QueryBuilder.class.getName());
 
-    private final WikapidiaAnalyzer analyzer;
-    private final LuceneOptions options;
+    private final List<Filter> filters = new ArrayList<Filter>();
 
-    public QueryBuilder(WikapidiaAnalyzer analyzer) {
-        this.analyzer = analyzer;
-        this.options = analyzer.getOptions();
-//        try {
-//            this.phraseAnalyzer = new Configurator(new Configuration()).get(PhraseAnalyzer.class, "anchortext");
-//        } catch (ConfigurationException e) {
-//            throw new RuntimeException(e);
-//        }
+    public QueryBuilder(LuceneSearcher searcher, Language language) {
+        this.searcher = searcher;
+        this.language = language;
     }
 
     /**
@@ -53,12 +63,8 @@ public class QueryBuilder {
      * @return
      * @throws ParseException
      */
-    public Query getPhraseQuery(String searchString) {
-        try {
-            return getPhraseQuery(options.elements, searchString);
-        } catch (ParseException e) {
-            return null;
-        }
+    public QueryBuilder setPhraseQuery(String searchString) {
+        return setPhraseQuery(searcher.getOptions().elements, searchString);
     }
 
     /**
@@ -68,73 +74,75 @@ public class QueryBuilder {
      * @param searchString
      * @return
      */
-    public Query getPhraseQuery(TextFieldElements elements, String searchString) throws ParseException {
-        QueryParser parser = new QueryParser(options.matchVersion, elements.getTextFieldName(), analyzer);
-        return parser.parse(searchString);
-    }
-
-
-    public Query getMoreLikeThisQuery(TextFieldElements elements, int luceneId, DirectoryReader directoryReader) throws DaoException {
-        if (luceneId >= 0) {
-            try {
-                MoreLikeThis mlt = getMoreLikeThis(directoryReader, elements);
-                Query query = mlt.like(luceneId);
-                return query;
-            } catch (IOException e) {
-                LOG.log(Level.WARNING, "Can't more like this query for luceneId: " + luceneId);
-                return null;
-            }
-        }  else {
-            return null;
+    public QueryBuilder setPhraseQuery(TextFieldElements elements, String searchString) {
+        QueryParser parser = new QueryParser(
+                searcher.getOptions().matchVersion,
+                elements.getTextFieldName(),
+                searcher.getAnalyzerByLanguage(language));
+        try {
+            query = parser.parse(QueryParserUtil.escape(searchString));
+            return this;
+        } catch (ParseException e) {
+            throw new RuntimeException(e);  // should never happen after escaping
         }
     }
 
-    private MoreLikeThis getMoreLikeThis(DirectoryReader reader, TextFieldElements elements) {
-        MoreLikeThis mlt = new MoreLikeThis(reader); // Pass the reader reader
-        mlt.setMaxDocFreqPct(maxPercentage);
-        mlt.setMaxQueryTerms(maxQueryTerms);
-        mlt.setMinDocFreq(minDocFreq);
-        mlt.setMinTermFreq(minTermFreq);
-        mlt.setAnalyzer(analyzer);
-        mlt.setFieldNames(new String[]{elements.getTextFieldName()}); // specify the fields for similiarity
-        return mlt;
+    public QueryBuilder setMoreLikeThisQuery(int luceneId) throws DaoException {
+        return setMoreLikeThisQuery(
+                searcher.getOptions().elements,
+                luceneId);
     }
 
-    public Query getMoreLikeThisQuery(int luceneId, DirectoryReader directoryReader) throws DaoException {
-        return getMoreLikeThisQuery(options.elements, luceneId, directoryReader);
+    public QueryBuilder setMoreLikeThisQuery(TextFieldElements elements, int luceneId) throws DaoException {
+        if (luceneId >= 0) {
+            try {
+                MoreLikeThis mlt = new MoreLikeThis(searcher.getReaderByLanguage(language));
+                mlt.setMaxDocFreqPct(maxPercentage);
+                mlt.setMaxQueryTerms(maxQueryTerms);
+                mlt.setMinDocFreq(minDocFreq);
+                mlt.setMinTermFreq(minTermFreq);
+                mlt.setAnalyzer(searcher.getAnalyzerByLanguage(language));
+                mlt.setFieldNames(new String[]{elements.getTextFieldName()});
+                query = mlt.like(luceneId);
+            } catch (IOException e) {
+                LOG.log(Level.WARNING, "Can't more like this query for luceneId: " + luceneId);
+            }
+        }  else {
+            LOG.log(Level.WARNING, "Can't more like this query for luceneId: " + luceneId);
+        }
+        return this;
     }
 
-//    /**
-//     * Builds a local page query for the default text field in LuceneOptions.
-//     *
-//     * @param localPage
-//     * @return
-//     * @throws DaoException
-//     */
-//    public Query getLocalPageConceptQuery(LocalPage localPage) throws DaoException {
-//        try {
-//            return getLocalPageConceptQuery(options.elements, localPage);
-//        } catch (ParseException e) {
-//            throw new DaoException(e);
-//        }
-//    }
-//
-//    /**
-//     *
-//     * @param elements elements specifies the text field in which to search
-//     * @param localPage
-//     * @return
-//     * @throws DaoException
-//     * @throws ParseException
-//     */
-//    public Query getLocalPageConceptQuery(TextFieldElements elements, LocalPage localPage) throws DaoException, ParseException {
-//        LinkedHashMap<String, Float> description = phraseAnalyzer.describeLocal(language, localPage, 20);
-//        BooleanQuery query = new BooleanQuery();
-//        query.add(getPhraseQuery(localPage.getTitle().getCanonicalTitle()), BooleanClause.Occur.SHOULD);
-//        for (String similarTitle : description.keySet()) {
-//            query.add(getPhraseQuery(similarTitle), BooleanClause.Occur.SHOULD);
-//        }
-//        return query;
-//
-//    }
+    public boolean hasQuery() {
+        return query != null;
+    }
+
+    public QueryBuilder setNumHits(int hits) {
+        this.numHits = hits;
+        return this;
+    }
+
+    public WikapidiaScoreDoc[] search() {
+        if (!hasQuery()) {
+            throw new IllegalArgumentException("no query specified. call one of the QueryBuilder.set* methods to specify a query");
+        }
+        return searcher.search(query, language, numHits, getFilters());
+    }
+
+    /**
+     * Adds a filter to the chain of filters. DOES NOT remove existing filters.
+     */
+    public void addFilter(Filter filter) {
+        this.filters.add(filter);
+    }
+
+    public Filter getFilters() {
+        if (filters.isEmpty()) {
+            return null;
+        } else if (filters.size() == 1) {
+            return filters.get(0);
+        } else {
+            return new ChainedFilter((Filter[]) filters.toArray());
+        }
+    }
 }

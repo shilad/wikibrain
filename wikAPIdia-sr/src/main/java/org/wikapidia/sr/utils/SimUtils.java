@@ -84,9 +84,9 @@ public class SimUtils {
      * Prune a WikapidiaScoreDoc array.
      * @param wikapidiaScoreDocs array of WikapidiaScoreDoc
      */
-    public static void pruneSimilar(WikapidiaScoreDoc[] wikapidiaScoreDocs) {
+    public static WikapidiaScoreDoc[] pruneSimilar(WikapidiaScoreDoc[] wikapidiaScoreDocs) {
         if (wikapidiaScoreDocs.length == 0) {
-            return;
+            return wikapidiaScoreDocs;
         }
         int cutoff = wikapidiaScoreDocs.length;
         double threshold = 0.005 * wikapidiaScoreDocs[0].score;
@@ -101,5 +101,6 @@ public class SimUtils {
 //            LOG.info("pruned results from " + docs.scoreDocs.length + " to " + cutoff);
             wikapidiaScoreDocs = ArrayUtils.subarray(wikapidiaScoreDocs, 0, cutoff);
         }
+        return wikapidiaScoreDocs;
     }
 }

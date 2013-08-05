@@ -12,6 +12,10 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * @author Shilad Sen
+ * Utilities to run for each loops in parallel.
+ */
 public class ParallelForEach {
     public static final Logger LOG = Logger.getLogger(ParallelForEach.class.getName());
 
@@ -28,16 +32,33 @@ public class ParallelForEach {
         for (int i = from; i < to; i++) { range.add(i); }
         loop(range, numThreads, fn);
     }
+    public static void range(int from, int to, final Procedure<Integer> fn) {
+        range(from, to, WpThreadUtils.getMaxThreads(), fn);
+    }
     public static <T,R> List<R> range(int from, int to, int numThreads, final Function<Integer, R> fn) {
         List<Integer> range = new ArrayList<Integer>();
         for (int i = from; i < to; i++) { range.add(i); }
         return loop(range, numThreads, fn);
     }
+    public static <T,R> List<R> range(int from, int to, final Function<Integer, R> fn) {
+        return range(from, to, WpThreadUtils.getMaxThreads(), fn);
+    }
+
     public static <T,R> List<R> loop(
             Collection<T> collection,
             int numThreads,
             final Function<T,R> fn) {
         return loop(collection, numThreads, fn, 50);
+    }
+    public static <T,R> List<R> loop(
+            Collection<T> collection,
+            final Function<T,R> fn) {
+        return loop(collection, WpThreadUtils.getMaxThreads(), fn, 50);
+    }
+    public static <T> void loop(
+            Collection<T> collection,
+            final Procedure<T> fn) {
+        loop(collection, WpThreadUtils.getMaxThreads(), fn, 50);
     }
     public static <T> void loop(
             Collection<T> collection,
@@ -57,6 +78,24 @@ public class ParallelForEach {
             }
         }, logModulo);
     }
+    public static <T> void loop(
+            Collection<T> collection,
+            final Procedure<T> fn,
+            final int logModulo) {
+        loop(collection, WpThreadUtils.getMaxThreads(), new Function<T, Object> () {
+            public Object call(T arg) throws Exception {
+                fn.call(arg);
+                return null;
+            }
+        }, logModulo);
+    }
+    public static <T,R> List<R> loop(
+            Collection<T> collection,
+            final Function<T,R> fn,
+            final int logModulo) {
+        return loop(collection, WpThreadUtils.getMaxThreads(), fn, logModulo);
+    }
+
     public static <T,R> List<R> loop(
             Collection<T> collection,
             int numThreads,

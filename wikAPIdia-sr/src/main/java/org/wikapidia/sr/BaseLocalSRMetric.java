@@ -16,13 +16,14 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
-import org.wikapidia.sr.pairwise.*;
+import org.wikapidia.sr.pairwise.PairwiseSimilarity;
+import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
+import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
-
 
 import java.io.*;
 import java.util.*;
@@ -30,7 +31,6 @@ import java.util.logging.Logger;
 
 public abstract class BaseLocalSRMetric implements LocalSRMetric {
     private static Logger LOG = Logger.getLogger(BaseLocalSRMetric.class.getName());
-    protected int numThreads = Runtime.getRuntime().availableProcessors();
     protected Disambiguator disambiguator;
     protected LocalPageDao pageHelper;
 
@@ -135,12 +135,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResult normalize(SRResult sr, Language language) {
-        if (similarityNormalizers.containsKey(language)){
-            sr.value = similarityNormalizers.get(language).normalize(sr.value);
-            return sr;
-        }
-        ensureSimilarityTrained();
-        sr.value=defaultSimilarityNormalizer.normalize(sr.value);
+        sr.score=normalize(sr.score,language);
         return sr;
     }
 
@@ -152,15 +147,21 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * @return
      */
     protected SRResultList normalize(SRResultList srl, Language language) {
-        if (similarityNormalizers.containsKey(language)){
-            return similarityNormalizers.get(language).normalize(srl);
+        if (mostSimilarNormalizers.containsKey((int) language.getId())
+                &&mostSimilarNormalizers.get((int) language.getId()).isTrained()){
+            return mostSimilarNormalizers.get((int) language.getId()).normalize(srl);
         }
         ensureMostSimilarTrained();
         return defaultMostSimilarNormalizer.normalize(srl);
     }
 
-    public void setNumThreads(int n) {
-        this.numThreads = n;
+    protected double normalize (double score, Language language){
+        if (similarityNormalizers.containsKey((int) language.getId())
+                &&similarityNormalizers.get((int) language.getId()).isTrained()){
+            return similarityNormalizers.get((int) language.getId()).normalize(score);
+        }
+        ensureSimilarityTrained();
+        return defaultSimilarityNormalizer.normalize(score);
     }
 
     @Override
@@ -250,13 +251,13 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             trainee = similarityNormalizers.get((int)dataset.getLanguage().getId());
             similarityNormalizers.put((int)dataset.getLanguage().getId(),new IdentityNormalizer());
         }
-        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws IOException, DaoException {
                 SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
-                trainee.observe(sim.getValue(), ks.similarity);
+                trainee.observe(sim.getScore(), ks.similarity);
 
             }
-        },1);
+        },100);
         trainee.observationsFinished();
         if (isDefault){
             defaultSimilarityNormalizer = trainee;
@@ -294,7 +295,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             trainee = mostSimilarNormalizers.get((int)dataset.getLanguage().getId());
             mostSimilarNormalizers.put((int)dataset.getLanguage().getId(), new IdentityNormalizer());
         }
-        ParallelForEach.loop(dataset.getData(), numThreads, new Procedure<KnownSim>() {
+        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
             public void call(KnownSim ks) throws DaoException {
                 ks.maybeSwap();
                 List<LocalString> localStrings = new ArrayList<LocalString>();
@@ -309,7 +310,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     }
                 }
             }
-        },1);
+        },100);
         trainee.observationsFinished();
         if (isDefault){
             defaultMostSimilarNormalizer = trainee;
@@ -331,7 +332,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         context.add(new LocalString(language,phrase1));
         LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
         if (similar1==null||similar2==null){
-            return new SRResult(Double.NaN);
+            return new SRResult();
         }
         return similarity(pageHelper.getById(language,similar1.getId()),
                 pageHelper.getById(language,similar2.getId()),
@@ -355,7 +356,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         LocalId similar = disambiguator.disambiguate(phrase,null);
         if (similar==null){
             SRResultList resultList = new SRResultList(1);
-            resultList.set(0, new SRResult(Double.NaN));
+            resultList.set(0, new SRResult());
             return resultList;
         }
         return mostSimilar(pageHelper.getById(similar.getLanguage(),similar.getId()), maxResults,validIds);
@@ -367,13 +368,13 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         for (int i=0; i<wpRowIds.length; i++){
             for (int j=0; j<wpColIds.length; j++){
                 if (wpRowIds[i]==wpColIds[j]){
-                    cos[i][j]=1;
+                    cos[i][j]=normalize(1.0,language);
                 }
                 else{
                     cos[i][j]=similarity(
                             new LocalPage(language,wpRowIds[i],null,null),
                             new LocalPage(language,wpColIds[j],null,null),
-                            false).getValue();
+                            false).getScore();
                 }
             }
         }
@@ -386,10 +387,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         for (int i=0; i<rowPhrases.length; i++){
             for (int j=0; j<colPhrases.length; j++){
                 if (rowPhrases[i].equals(colPhrases[j])){
-                    cos[i][j]=1;
+                    cos[i][j]=normalize(1.0,language);
                 }
                 else{
-                    cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getValue();
+                    cos[i][j]=similarity(rowPhrases[i],colPhrases[j],language, false).getScore();
                 }
             }
         }
@@ -400,19 +401,15 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     public double[][] cosimilarity(int[] ids, Language language) throws DaoException {
         double[][] cos = new double[ids.length][ids.length];
         for (int i=0; i<ids.length; i++){
-            cos[i][i]=1;
+            cos[i][i]=normalize(1.0,language);
         }
         for (int i=0; i<ids.length; i++){
             for (int j=i+1; j<ids.length; j++){
                 cos[i][j]=similarity(
                         new LocalPage(language, ids[i], null, null),
                         new LocalPage(language, ids[j], null, null),
-                        false).getValue();
-            }
-        }
-        for (int i=1; i<ids.length; i++){
-            for (int j=i-1; j>-1; j--){
-                cos[i][j]=cos[j][i];
+                        false).getScore();
+                cos[j][i]=cos[i][j];
             }
         }
         return cos;
@@ -450,7 +447,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
                 pairwise.initMatrices(fullPath);
                 PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(fullPath,pairwise);
-                pairwiseSimilarityWriter.writeSims(pageIds.toArray(),numThreads,maxHits);
+                pairwiseSimilarityWriter.writeSims(pageIds.toArray(),maxHits);
                 mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
             }
         } catch (InterruptedException e){

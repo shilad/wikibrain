@@ -19,11 +19,10 @@ import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
-import java.io.IOException;
-
 /**
  * @author Matt Lesicko
  * @author Ben Hillmann
+ * \/\/1|<1P3[)14
  */
 public class SimilarityExample {
     private static void localPrintResult(SRResult result, Language language,LocalPageDao localPageDao, ExplanationFormatter expf) throws DaoException {
@@ -35,7 +34,7 @@ public class SimilarityExample {
             if (namepage!=null){
                 System.out.println(namepage.getTitle().getCanonicalTitle());
             }
-            System.out.println("Similarity value: "+result.getValue());
+            System.out.println("Similarity score: "+result.getScore());
             int explanationsSeen = 0;
             for (Explanation explanation : result.getExplanations()){
                 System.out.println(expf.formatExplanation(explanation));
@@ -57,7 +56,7 @@ public class SimilarityExample {
                 LocalId nameId = (LocalId) up.getLocalPages(languages.getDefaultLanguage()).toArray()[0];
                 LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
                 System.out.println(namePage.getTitle().getCanonicalTitle());
-                System.out.println("Similarity value: "+result.getValue());
+                System.out.println("Similarity score: "+result.getScore());
                 int explanationsSeen = 0;
                 for (Explanation explanation : result.getExplanations()){
                     System.out.println(expf.formatExplanation(explanation));
@@ -74,11 +73,9 @@ public class SimilarityExample {
         //Set-up
         Language lang = Language.getByLangCode("simple");
         Configurator c = new Configurator(new Configuration());
-        PhraseAnalyzer pa = c.get(PhraseAnalyzer.class,"anchortext");
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
         LocalSRMetric sr = c.get(LocalSRMetric.class);
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
-        Disambiguator disambiguator = c.get(Disambiguator.class);
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
 
@@ -129,7 +126,7 @@ public class SimilarityExample {
 
         //Most Similar pages
         System.out.println("Most similar to United States:");
-        SRResultList resultList = sr.mostSimilar(new LocalString(lang, "united states"), 5);
+        SRResultList resultList = sr.mostSimilar(page2, 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao, expf);

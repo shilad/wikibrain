@@ -108,7 +108,7 @@
 //        for (int id : ids) {
 //            sims.put(id, new TIntDoubleHashMap());
 //            for (SRResult score : cosine.mostSimilar(id, NUM_ROWS, null)) {
-//                sims.get(id).put(score.getId(), score.getValue());
+//                sims.get(id).put(score.getId(), score.getScore());
 //            }
 //        }
 //        for (int id1 : ids) {
