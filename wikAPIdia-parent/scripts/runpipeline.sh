@@ -21,7 +21,7 @@ case "$1" in
         stage=6
         ;;
     *)
-        echo "unknown stage: $1 (must be 'all', 'download', 'dump', 'wikitext', 'concept', or 'analysis')" >&2
+        echo "unknown stage: $1 (must be 'all', 'download', 'dump', 'wikitext', 'concept', 'phrases', or 'lucene')" >&2
         exit 1
 esac
 
