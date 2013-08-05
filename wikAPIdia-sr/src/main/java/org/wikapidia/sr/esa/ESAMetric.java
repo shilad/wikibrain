@@ -365,8 +365,9 @@ public class ESAMetric extends BaseLocalSRMetric {
         int luceneId = searcher.getDocIdFromLocalId(localPage.getId(), language);
         WikapidiaScoreDoc[] wikapidiaScoreDocs = getQueryBuilderByLanguage(language)
                                     .setMoreLikeThisQuery(luceneId)
+                                    .setNumHits(maxResults)
                                     .search();
-        SRResultList srResults = new SRResultList(maxResults);
+        SRResultList srResults = new SRResultList(wikapidiaScoreDocs.length);
         int i = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             if (i < srResults.numDocs()) {

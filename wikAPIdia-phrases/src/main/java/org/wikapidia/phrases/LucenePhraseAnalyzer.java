@@ -38,6 +38,18 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
                                     .setPhraseQuery(phrase)
                                     .setNumHits(10)
                                     .search();
+        if (wikapidiaScoreDocs.length == 0 && phrase.indexOf(" ") < 0) {
+            String phraseMultiVersion = "";
+            for (int i = 1; i < phrase.length(); i++) {
+                phraseMultiVersion += (i > 2 ? phrase.substring(0, i) + " " : "");
+                phraseMultiVersion += (phrase.length() - i > 2 ? phrase.substring(i, phrase.length()) + " " : "");
+            }
+            wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
+                    .setPhraseQuery(phraseMultiVersion)
+                    .setNumHits(10)
+                    .search();
+        }
+        
         float totalScore = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             totalScore += wikapidiaScoreDoc.score;
