@@ -22,23 +22,60 @@ import java.util.logging.Logger;
  */
 public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
+
+    /**
+     * Analyzer retrieves this times as many results as needed and
+     * sums scores for all results. The effect of this variable is
+     * smoothing out and lowering probability scores in the returned results.
+     */
+    public static final int DOC_MULTIPLIER = 3;
+
     private final LuceneSearcher searcher;
+    // Use a phraseanalyzer before running Lucene
+    private final PhraseAnalyzer delegate;
 
     protected LocalPageDao localPageDao;
 
     public LucenePhraseAnalyzer(LocalPageDao localPageDao, LuceneSearcher searcher) {
+        this(null, localPageDao, searcher);
+    }
+
+    public LucenePhraseAnalyzer(PhraseAnalyzer delegate, LocalPageDao localPageDao, LuceneSearcher searcher) {
         this.localPageDao = localPageDao;
         this.searcher = searcher;
+        this.delegate = delegate;
     }
+
 
     @Override
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
+        // Run delegate phrase analyzer first.
+        if (delegate != null) {
+            result = delegate.resolveLocal(language, phrase, maxPages);
+            if (result != null && !result.isEmpty()) {
+                return result;
+            } else {
+                result = new LinkedHashMap<LocalPage, Float>();
+            }
+        }
+        // If there is no result from the delegate, query the title field for the phrase.
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
-                                    .setPhraseQuery(phrase)
-                                    .setNumHits(10)
+                                    .setPhraseQuery(new TextFieldElements().addTitle(), phrase)
+                                    .setNumHits(maxPages * DOC_MULTIPLIER)
                                     .search();
-        if (wikapidiaScoreDocs.length == 0 && phrase.indexOf(" ") < 0 && phrase.length() > 3) {
+        if (wikapidiaScoreDocs.length == 0) {
+            // If there is no result from title field query, query the plaintext field.
+            wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
+                                        .setPhraseQuery(new TextFieldElements().addPlainText(), phrase)
+                                        .setNumHits(maxPages * DOC_MULTIPLIER)
+                                        .search();
+        }
+        // When the phrase does not get an result from title or plaintext, this section
+        // creates a search query of substrings with at least 3 characters and concatenate
+        // them with space. This aims at phrases like "bioarchaeology" of which part
+        // of the phrase may get a result while the phrase as a whole may not.
+        if (wikapidiaScoreDocs.length == 0 && !phrase.contains(" ") && phrase.length() > 3) {
             String phraseMultiVersion = "";
             for (int i = 1; i < phrase.length(); i++) {
                 phraseMultiVersion += (i > 2 ? phrase.substring(0, i) + " " : "");
@@ -49,8 +86,9 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
                     .setNumHits(10)
                     .search();
         }
-        
+
         float totalScore = 0;
+        // The scores represent probability so they should sum to 1.
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             totalScore += wikapidiaScoreDoc.score;
         }
@@ -58,10 +96,16 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
             LocalPage localPage = localPageDao.getById(language, localPageId);
             result.put(localPage, wikapidiaScoreDoc.score / totalScore);
+            if (result.size() >= maxPages) {
+                break;
+            }
         }
         return result;
     }
 
+    /**
+     * Use a Provider to get configuration in phrases.analyzer.
+     */
     public static class Provider extends org.wikapidia.conf.Provider<PhraseAnalyzer> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -78,31 +122,35 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
         }
         @Override
         public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("luceneAnalyzer")) {
+            if (!config.getString("type").equals("lucene")) {
                 return null;
+            }
+            PhraseAnalyzer delegate = null;
+            if (config.hasPath("delegate")) {
+                delegate = getConfigurator().get(PhraseAnalyzer.class, config.getString("delegate"));
             }
             LocalPageDao localPageDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(getConfig().get().getStringList("languages")),
                     getConfigurator().get(LuceneOptions.class));
 
-            return new LucenePhraseAnalyzer(localPageDao, searcher);
+            return new LucenePhraseAnalyzer(delegate, localPageDao, searcher);
         }
 
     }
 
     @Override
     public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public LinkedHashMap<String, Float> describeUniversal(Language language, UniversalPage page, int maxPhrases) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
