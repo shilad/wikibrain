@@ -304,10 +304,9 @@ public class ESAMetric extends BaseLocalSRMetric {
     private SRResultList baseMostSimilar(LocalId localPage, int maxResults, TIntSet validIds) throws DaoException {
         Language language = localPage.getLanguage();
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
-        searcher.setHitCount(maxResults);
 //        ScoreDoc[] scoreDocs = searcher.search(queryBuilder.getLocalPageConceptQuery(localPage), language);
         Query query = queryBuilder.getMoreLikeThisQuery(searcher.getDocIdFromLocalId(localPage.getId(), language), searcher.getReaderByLanguage(language));
-        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(query, language);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(query, language, maxResults);
         SRResultList srResults = new SRResultList(maxResults);
         int i = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {

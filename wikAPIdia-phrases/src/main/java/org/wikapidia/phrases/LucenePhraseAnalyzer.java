@@ -35,7 +35,39 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
-        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(new TextFieldElements().addTitle(), phrase), language, 10);
+//        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(new TextFieldElements().addTitle(), phrase), language, 10);
+        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(new TextFieldElements().addPlainText(), phrase), language, 10);
+        if (wikapidiaScoreDocs.length == 0 && phrase.indexOf(" ") < 0) {
+            String phraseMultiVersion = "";
+            for (int i = 1; i < phrase.length(); i++) {
+                phraseMultiVersion += (i > 2 ? phrase.substring(0, i) + " " : "");
+                phraseMultiVersion += (phrase.length() - i > 2 ? phrase.substring(i, phrase.length()) + " " : "");
+            }
+            wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(new TextFieldElements().addPlainText(), phraseMultiVersion), language, 10);
+        }
+
+//        if (wikapidiaScoreDocs.length != 0) {
+//            if (wikapidiaScoreDocs1.length !=0) {
+//                if (wikapidiaScoreDocs[0].doc != wikapidiaScoreDocs1[0].doc) {
+//                    System.out.println(phrase);
+//                    System.out.println("Using title:" + localPageDao.getById(language, searcher.getLocalIdFromDocId(wikapidiaScoreDocs[0].doc, language)).getTitle().getCanonicalTitle() + " Score:" + wikapidiaScoreDocs[0].score);
+//                    System.out.println("Using title:" + localPageDao.getById(language, searcher.getLocalIdFromDocId(wikapidiaScoreDocs1[0].doc, language)).getTitle().getCanonicalTitle() + " Score:" + wikapidiaScoreDocs1[0].score);
+//                }
+//            } else {
+//                System.out.println(phrase);
+//                System.out.println("Plainttext!! " + localPageDao.getById(language, searcher.getLocalIdFromDocId(wikapidiaScoreDocs1[0].doc, language)).getTitle().getCanonicalTitle() + " Score:" + wikapidiaScoreDocs1[0].score);
+//            }
+//        } else {
+//            if (wikapidiaScoreDocs1.length !=0) {
+//                System.out.println(phrase);
+//                System.out.println("Title!! " + localPageDao.getById(language, searcher.getLocalIdFromDocId1(wikapidiaScoreDocs[0].doc, language)).getTitle().getCanonicalTitle() + " Score:" + wikapidiaScoreDocs1[0].score);
+//            } else {
+//                System.out.println(phrase);
+//                System.out.println("!!!!!");
+//            }
+//        }
+
+
         float totalScore = 0;
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             totalScore += wikapidiaScoreDoc.score;
@@ -68,7 +100,8 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
                 return null;
             }
             LocalPageDao localPageDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
-            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(getConfig().get().getStringList("languages")),
+            LuceneSearcher searcher = new LuceneSearcher(
+                    new LanguageSet(getConfig().get().getStringList("languages")),
                     getConfigurator().get(LuceneOptions.class));
 
             return new LucenePhraseAnalyzer(localPageDao, searcher);
