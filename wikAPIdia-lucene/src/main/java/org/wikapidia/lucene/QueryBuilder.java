@@ -91,7 +91,7 @@ public class QueryBuilder {
             searchString = QueryParserUtil.escape(searchString);
             // Lucene doesn't escape forward slash, but it needs to
             searchString = StringUtils.replace(searchString, "/", "\\/");
-            query = parser.parse(QueryParserUtil.escape(searchString));
+            query = parser.parse(searchString);
             return this;
         } catch (ParseException e) {
             throw new RuntimeException(e);  // should never happen after escaping
