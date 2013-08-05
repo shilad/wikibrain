@@ -37,7 +37,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
         QueryBuilder queryBuilder = searcher.getQueryBuilderByLanguage(language, searcher.getOptions());
 //        WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(new TextFieldElements().addTitle(), phrase), language, 10);
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.search(queryBuilder.getPhraseQuery(new TextFieldElements().addPlainText(), phrase), language, 10);
-        if (wikapidiaScoreDocs.length == 0 && phrase.indexOf(" ") < 0) {
+        if (wikapidiaScoreDocs.length == 0 && phrase.indexOf(" ") < 0 && phrase.length() > 3) {
             String phraseMultiVersion = "";
             for (int i = 1; i < phrase.length(); i++) {
                 phraseMultiVersion += (i > 2 ? phrase.substring(0, i) + " " : "");
