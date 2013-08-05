@@ -94,6 +94,11 @@ public class ESAMetric extends BaseLocalSRMetric {
      */
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException {
+        return mostSimilar(phrase, maxResults,null);
+    }
+
+    @Override
+    public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
         if (resolvePhrases){
             return super.mostSimilar(phrase,maxResults);
         }
@@ -109,9 +114,12 @@ public class ESAMetric extends BaseLocalSRMetric {
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
 
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-            TIntDoubleHashMap comparison = getVector(localPageId, phrase.getLanguage());
-            SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
-            results.add(result);
+            if (validIds==null||validIds.contains(localPageId)){
+                TIntDoubleHashMap comparison = getVector(localPageId, phrase.getLanguage());
+                SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
+                results.add(result);
+            }
+
         }
         Collections.sort(results);
         Collections.reverse(results);
