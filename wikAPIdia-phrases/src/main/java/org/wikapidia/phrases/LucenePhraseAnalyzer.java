@@ -38,7 +38,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
                                     .setPhraseQuery(phrase)
                                     .setNumHits(10)
                                     .search();
-        if (wikapidiaScoreDocs.length == 0 && phrase.indexOf(" ") < 0) {
+        if (wikapidiaScoreDocs.length == 0 && phrase.indexOf(" ") < 0 && phrase.length() > 3) {
             String phraseMultiVersion = "";
             for (int i = 1; i < phrase.length(); i++) {
                 phraseMultiVersion += (i > 2 ? phrase.substring(0, i) + " " : "");
