@@ -70,7 +70,7 @@ public class TestESAMetric {
         Language lang = Language.getByLangCode("simple");
         LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(Arrays.asList(lang)), LuceneOptions.getDefaultOptions());
 
-        ESAMetric esaMetric = new ESAMetric(searcher, localPageDao);
+        LocalSRMetric esaMetric = c.get(LocalSRMetric.class,"ESA");
 
         String string1 = "Google Search";  //TODO: redirects: homo sapiens, null: nz
         String string2 = "Arts";
