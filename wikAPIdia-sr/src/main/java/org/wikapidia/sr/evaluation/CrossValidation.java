@@ -16,6 +16,7 @@ import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
 import org.wikapidia.sr.utils.KnownSim;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -137,7 +138,6 @@ public class CrossValidation {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .isRequired()
                         .withLongOpt("folds")
                         .withDescription("set the number of folds to evaluate on" )
                         .create("k"));
@@ -168,10 +168,11 @@ public class CrossValidation {
         // TODO: figure out interaction with "-d"
         // TODO: display error if neither "-d" or "-g" are specified
         // TODO: handle multiple languages
+        File datasetPath = new File(c.getConf().get().getString("sr.dataset.path"));
         Language lang = env.getLanguages().getDefaultLanguage();
         List<Dataset> datasets = new ArrayList<Dataset>();
         for (String dsName : cmd.getOptionValues("g")) {
-            datasets.add(datasetDao.read(lang, dsName));
+            datasets.add(datasetDao.read(lang, new File(datasetPath, dsName).getAbsolutePath()));
         }
 
         List<Dataset> allTrain = new ArrayList<Dataset>();
