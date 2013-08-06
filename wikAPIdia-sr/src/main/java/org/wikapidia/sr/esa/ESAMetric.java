@@ -6,14 +6,11 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.lucene.search.Query;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -21,10 +18,6 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.*;
-import org.wikapidia.matrix.SparseMatrix;
-import org.wikapidia.matrix.SparseMatrixRow;
-import org.wikapidia.matrix.SparseMatrixWriter;
-import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
@@ -319,7 +312,6 @@ public class ESAMetric extends BaseLocalSRMetric {
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
-            System.out.println("from cache!");
             return mostSimilar;
         }
         SRResultList srResults = baseMostSimilar(localPage.toLocalId(),maxResults,validIds);
