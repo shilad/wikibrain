@@ -176,36 +176,28 @@ public class CrossValidation {
         // TODO: display error if neither "-d" or "-g" are specified
         // TODO: handle multiple languages
         File datasetPath = new File(c.getConf().get().getString("sr.dataset.path"));
-        LanguageSet validLanguages = env.getLanguages();
+        Language lang = env.getLanguages().getDefaultLanguage();
         List<Dataset> datasets = new ArrayList<Dataset>();
         for (String dsName : cmd.getOptionValues("g")) {
-            boolean foundOne = false;
             //Check if it's a known dataset
             try {
                 List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+dsName);
-                for (String langCode : languages){
-                    Language lang = Language.getByLangCode(langCode);
-                    if (validLanguages==null||validLanguages.containsLanguage(lang)){
-                        datasets.add(datasetDao.read(lang,new File(datasetPath, dsName).getAbsolutePath()));
-                    }
+                if (languages.contains(lang.getLangCode())){
+                    datasets.add(datasetDao.read(lang,new File(datasetPath, dsName).getAbsolutePath()));
                 }
             }catch (ConfigException.Missing e){
                 //Check if it's a stored dataset
-                for (Language lang : validLanguages){
                     try {
-                        for (int i=0; i<k; i++){
+                        for (int i=1; i<k+1; i++){
                             String name = lang.getLangCode()+"-"+dsName+"-"+i+"of"+k+".txt";
                             datasets.add(datasetDao.read(lang, new File(datasetPath, name).getAbsolutePath()));
                         }
-                        foundOne = true;
                     }
-                    catch (DaoException f){}
-                }
-                if (!foundOne){
-                    throw new IllegalArgumentException("Could not find valid dataset "+dsName+" in languages "+validLanguages.getLangCodes().toString());
+                    catch (DaoException f){
+                        throw new IllegalArgumentException("Could not find valid dataset "+dsName+" in language "+lang.getEnLangName());
+                    }
                 }
             }
-        }
 
         List<Dataset> allTrain = new ArrayList<Dataset>();
         List<Dataset> allTest = new ArrayList<Dataset>();
@@ -230,6 +222,14 @@ public class CrossValidation {
         double sumError = 0;
         CrossValidation crossValidation = new CrossValidation();
 
+        String saveName = cmd.getOptionValue("d");
+        if (cmd.hasOption("d")){
+            for (int i=0; i<allTest.size(); i++){
+                String name = lang.getLangCode()+"-"+saveName+"-"+(i+1)+"of"+allTest.size()+".txt";
+                datasetDao.write(allTest.get(i), new File(datasetPath, name).getAbsolutePath());
+            }
+        }
+;
         for (int i = 0; i < allTrain.size(); i++) {
             Dataset train = allTrain.get(i);
             Dataset test = allTest.get(i);
