@@ -2,8 +2,13 @@ package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigObject;
+import com.typesafe.config.ConfigParseOptions;
+import com.typesafe.config.impl.Parseable;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A generic configuration file.
@@ -21,21 +26,41 @@ public class Configuration {
         this(null);
     }
 
-    /**
-     * Creates a configuration using a specific file that overrides the standard
-     * defaults listed at https://github.com/typesafehub/config. The file is loaded
-     * in ADDITION to the standard files, but it takes precedence.
-     *
-     * @param file
-     */
     public Configuration(File file) {
-        if (file == null) {
-            this.config = ConfigFactory.load();
-        } else if (!file.isFile()) {
-            throw new IllegalArgumentException("configuration file " + file + " does not exist");
-        } else {
-            this.config = ConfigFactory.load(ConfigFactory.parseFile(file));
+        this(null, file);
+    }
+
+    /**
+     * Creates a configuration using a specific series of overrides.
+     * The order of priority from highest to lowest is:
+     * - Parameter map
+     * - System properties
+     * - Files specified to constructor (in order)
+     * - Defaults listed at https://github.com/typesafehub/config (i.e. reference.conf).
+     *
+     * @param params, File files
+     */
+    public Configuration(Map<String, String> params, File ... files) {
+        Config config = ConfigFactory.empty();
+        if (params != null)
+            config = config.withFallback(ConfigFactory.parseMap(params));
+        config = config.withFallback(ConfigFactory.defaultOverrides());
+        for (File file : files) {
+            if (file == null) {
+                continue;
+            }
+            if (!file.isFile()) {
+                throw new IllegalArgumentException("configuration file " + file + " does not exist");
+            }
+            config = config.withFallback(
+                    Parseable.newFile(file, ConfigParseOptions.defaults()).parse());
         }
+        config = config.withFallback(
+                Parseable.newResources("reference.conf",
+                        ConfigParseOptions.defaults().setClassLoader(
+                                ClassLoader.getSystemClassLoader()))
+                        .parse());
+        this.config = config.resolve();
     }
 
     /**
