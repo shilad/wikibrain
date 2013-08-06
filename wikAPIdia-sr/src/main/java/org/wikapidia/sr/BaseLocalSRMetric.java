@@ -252,20 +252,23 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             trainee = similarityNormalizers.get((int)dataset.getLanguage().getId());
             similarityNormalizers.put((int)dataset.getLanguage().getId(),new IdentityNormalizer());
         }
-        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
-            public void call(KnownSim ks) throws IOException, DaoException {
-                SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
-                trainee.observe(sim.getScore(), ks.similarity);
-
+        try {
+            trainee.reset();
+            ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
+                public void call(KnownSim ks) throws IOException, DaoException {
+                    SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
+                    trainee.observe(sim.getScore(), ks.similarity);
+                }
+            },100);
+            trainee.observationsFinished();
+            LOG.info("trained most similarityNormalizer for " + getName() + ": " + trainee.dump());
+        } finally {
+            if (isDefault){
+                defaultSimilarityNormalizer = trainee;
+            } else {
+                similarityNormalizers.put((int)dataset.getLanguage().getId(),trainee);
             }
-        },100);
-        trainee.observationsFinished();
-        if (isDefault){
-            defaultSimilarityNormalizer = trainee;
-        } else {
-            similarityNormalizers.put((int)dataset.getLanguage().getId(),trainee);
         }
-        LOG.info("trained most similarityNormalizer for " + getName() + ": " + trainee.dump());
     }
 
     @Override

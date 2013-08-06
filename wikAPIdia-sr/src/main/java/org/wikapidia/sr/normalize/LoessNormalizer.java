@@ -32,11 +32,19 @@ public class LoessNormalizer extends BaseNormalizer {
     private boolean logTransform = false;
     private boolean monotonic = false;
 
-    transient private double minX;
     transient private double interpolatorMin;
     transient private double interpolatorMax;
     transient private UnivariateFunction interpolator = null;
-    transient private boolean isSorted = false;
+
+    @Override
+    public void reset() {
+        super.reset();
+        X.clear();
+        Y.clear();
+        interpolatorMin = 0;
+        interpolatorMax = 0;
+        interpolator = null;
+    }
 
     @Override
     public void observe(double x, double y){
@@ -119,7 +127,6 @@ public class LoessNormalizer extends BaseNormalizer {
         }
         X = sortedX;
         Y = sortedY;
-        minX = X.min();
 
         // create the smoothed points.
         int windowSize = Math.min(20, X.size() / 10);

@@ -14,4 +14,6 @@ public interface Normalizer extends Serializable {
     public void observationsFinished();
     public String dump();
     public boolean isTrained();
+
+    public void reset();
 }
