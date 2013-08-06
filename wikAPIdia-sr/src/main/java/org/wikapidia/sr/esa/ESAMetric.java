@@ -209,6 +209,9 @@ public class ESAMetric extends BaseLocalSRMetric {
      */
     public TIntDoubleHashMap getVector(int id, Language language) throws DaoException {
         int luceneId = searcher.getDocIdFromLocalId(id, language);
+        if (luceneId < 0) {
+            throw new DaoException("Unindexed document " + id + " in " + language.getEnLangName());
+        }
         WikapidiaScoreDoc[] wikapidiaScoreDocs =  getQueryBuilderByLanguage(language)
                                 .setMoreLikeThisQuery(luceneId)
                                 .search();

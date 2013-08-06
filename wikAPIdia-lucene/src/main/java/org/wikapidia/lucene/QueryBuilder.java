@@ -149,7 +149,7 @@ public class QueryBuilder {
                 LOG.log(Level.WARNING, "Can't more like this query for luceneId: " + luceneId);
             }
         }  else {
-            LOG.log(Level.WARNING, "Can't more like this query for luceneId: " + luceneId);
+            throw new IllegalArgumentException("Illegal Lucene ID: " + luceneId);
         }
         return this;
     }

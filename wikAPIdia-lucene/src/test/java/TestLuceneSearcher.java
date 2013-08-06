@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RawPageDao;
@@ -18,7 +17,7 @@ import org.wikapidia.lucene.LuceneSearcher;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.logging.Level;
+import java.util.Collections;
 
 /**
  *
@@ -68,17 +67,17 @@ public class TestLuceneSearcher {
         }
     }
 
-    @Test
     @Ignore
+    @Test
     public void testGetDoc() throws ConfigurationException, IOException, DaoException {
         Configurator conf = new Configurator(new Configuration());
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
         LuceneOptions[] luceneOptions = new LuceneOptions[] {conf.get(LuceneOptions.class)};
         Collection<NameSpace> namespaces = luceneOptions[0].namespaces;
         Language lang = Language.getByLangCode("simple");
-        LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(Arrays.asList(lang)), LuceneOptions.getDefaultOptions());
+        LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(Collections.singletonList(lang)), LuceneOptions.getDefaultOptions());
 
-        int localId = 1; // or something else
+        int localId = 410732; // this is the last valid ID
         int luceneId = searcher.getDocIdFromLocalId(localId, lang);
         System.out.println(luceneId);
         Document doc = searcher.getSearcherByLanguage(lang).doc(luceneId);

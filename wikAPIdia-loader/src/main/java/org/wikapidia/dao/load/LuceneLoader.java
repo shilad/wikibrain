@@ -15,8 +15,6 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.lucene.LuceneIndexer;
 import org.wikapidia.lucene.LuceneOptions;
-import org.wikapidia.parser.wiki.ParserVisitor;
-import org.wikapidia.parser.wiki.WikiTextParser;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpThreadUtils;
@@ -28,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +51,6 @@ public class LuceneLoader {
 
     private final BlockingQueue<RawPage> queue = new ArrayBlockingQueue<RawPage>(MAX_QUEUE);
     private final List<Thread> workers = new ArrayList<Thread>();
-    private AtomicBoolean finished = new AtomicBoolean(false);
 
     public LuceneLoader(RawPageDao rawPageDao, LuceneIndexer luceneIndexer, Collection<NameSpace> namespaces) {
         this.rawPageDao = rawPageDao;
@@ -68,11 +64,20 @@ public class LuceneLoader {
             int i = 0;
             Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter()
                     .setLanguages(language)
-                    .setNameSpaces(namespaces));
+                    .setNameSpaces(namespaces)
+                    .setRedirect(false));
             for (RawPage rawPage : rawPages) {
                 queue.put(rawPage);
                 if (++i%1000 == 0) LOG.log(Level.INFO, "RawPages indexed: " + i);
             }
+            queue.put(new RawPage(
+                    -2,
+                    0,
+                    "Poison Pill",
+                    null,
+                    null,
+                    Language.getByLangCode("en"),
+                    null));
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         } catch (InterruptedException e) {
@@ -88,7 +93,6 @@ public class LuceneLoader {
 
     private void createWorkers() {
         workers.clear();
-        finished.set(false);
         for (int i = 0; i < WpThreadUtils.getMaxThreads(); i++) {
             Thread t = new Thread(new Worker());
             t.start();
@@ -97,10 +101,9 @@ public class LuceneLoader {
     }
 
     private void cleanupWorkers() {
-        finished.set(true);
         for (Thread w : workers) {
             try {
-                w.join(10000);
+                w.join(2*60*1000);
             } catch (InterruptedException e) {
                 LOG.log(Level.SEVERE, "ignoring interrupted exception on thread join", e);
             }
@@ -115,11 +118,17 @@ public class LuceneLoader {
         @Override
         public void run() {
             RawPage rp = null;
-            while (!finished.get()) {
+            boolean finished = false;
+            while (!finished) {
                 try {
                     rp = queue.poll(100, TimeUnit.MILLISECONDS);
                     if (rp != null) {
-                        luceneIndexer.indexPage(rp);
+                        if (rp.getLocalId() == -2) {
+                            queue.put(rp);
+                            finished = true;
+                        } else {
+                            luceneIndexer.indexPage(rp);
+                        }
                     }
                 } catch (InterruptedException e) {
                     LOG.log(Level.WARNING, "LuceneLoader.Worker received interrupt.");
@@ -200,7 +209,6 @@ public class LuceneLoader {
 
         LOG.log(Level.INFO, "Begin indexing");
 
-        // TODO: parallelize by some more efficient method?
         ParallelForEach.loop(
                 languages.getLanguages(),
                 new Procedure<Language>() {

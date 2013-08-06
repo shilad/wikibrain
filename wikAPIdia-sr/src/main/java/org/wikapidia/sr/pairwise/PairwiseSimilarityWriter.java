@@ -12,7 +12,6 @@ import org.wikapidia.utils.Procedure;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -64,8 +63,7 @@ public class PairwiseSimilarityWriter {
     private void writeSim(Integer wpId, int maxSimsPerDoc) throws IOException {
         if (idCounter.incrementAndGet() % 10000 == 0) {
             String nValidStr  = (validIds == null) ? "infinite" : ("" + validIds.size());
-            System.err.println("" + new Date() +
-                    ": finding matches for doc " + idCounter.get() +
+            LOG.info("finding matches for doc " + idCounter.get() +
                     ", used " + usedIds.size() + " of " + nValidStr);
         }
         SRResultList scores = metric.mostSimilar(wpId, maxSimsPerDoc, validIds);

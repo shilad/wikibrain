@@ -441,7 +441,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(fullPath, this, language);
                 DaoFilter pageFilter = new DaoFilter()
                         .setLanguages(language)
-                        .setNameSpaces(NameSpace.ARTICLE)
+                        .setNameSpaces(NameSpace.ARTICLE) // TODO: should this come from conf?
                         .setRedirect(false);
                 Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
                 TIntSet pageIds = new TIntHashSet();
