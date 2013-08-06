@@ -16,6 +16,12 @@ public class LogNormalizer implements Normalizer{
     private boolean trained = false;
 
     @Override
+    public void reset() {
+        c = Double.POSITIVE_INFINITY;
+        trained = false;
+    }
+
+    @Override
     public SRResultList normalize(SRResultList list) {
         SRResultList normalized = new SRResultList(list.numDocs());
         for (int i = 0; i < list.numDocs(); i++) {

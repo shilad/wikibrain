@@ -27,7 +27,6 @@ public class SparseMatrixWriter {
 
     public SparseMatrixWriter(File path, ValueConf conf) throws IOException {
         this.path = path;
-        FileUtils.openOutputStream(path);
         this.vconf = conf;
         info("writing matrix to " + path);
 
