@@ -1,5 +1,6 @@
 package org.wikapidia.sr.evaluation;
 
+import com.typesafe.config.ConfigException;
 import org.apache.commons.cli.*;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.conf.ConfigurationException;
@@ -8,6 +9,7 @@ import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
@@ -114,6 +116,7 @@ public class CrossValidation {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
+                        .isRequired()
                         .withLongOpt("gold")
                         .withDescription("the set of gold standard datasets to train on, separated by commas")
                         .create("g"));
@@ -165,14 +168,43 @@ public class CrossValidation {
             throw new IllegalArgumentException("Must specify a metric to evaluate.");
         }
 
+        int k =  cmd.hasOption("k")
+                ? Integer.parseInt(cmd.getOptionValue("k" ))
+                : DEFAULT_SPLITS;
+
         // TODO: figure out interaction with "-d"
         // TODO: display error if neither "-d" or "-g" are specified
         // TODO: handle multiple languages
         File datasetPath = new File(c.getConf().get().getString("sr.dataset.path"));
-        Language lang = env.getLanguages().getDefaultLanguage();
+        LanguageSet validLanguages = env.getLanguages();
         List<Dataset> datasets = new ArrayList<Dataset>();
         for (String dsName : cmd.getOptionValues("g")) {
-            datasets.add(datasetDao.read(lang, new File(datasetPath, dsName).getAbsolutePath()));
+            boolean foundOne = false;
+            //Check if it's a known dataset
+            try {
+                List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+dsName);
+                for (String langCode : languages){
+                    Language lang = Language.getByLangCode(langCode);
+                    if (validLanguages==null||validLanguages.containsLanguage(lang)){
+                        datasets.add(datasetDao.read(lang,new File(datasetPath, dsName).getAbsolutePath()));
+                    }
+                }
+            }catch (ConfigException.Missing e){
+                //Check if it's a stored dataset
+                for (Language lang : validLanguages){
+                    try {
+                        for (int i=0; i<k; i++){
+                            String name = lang.getLangCode()+"-"+dsName+"-"+i+"of"+k+".txt";
+                            datasets.add(datasetDao.read(lang, new File(datasetPath, name).getAbsolutePath()));
+                        }
+                        foundOne = true;
+                    }
+                    catch (DaoException f){}
+                }
+                if (!foundOne){
+                    throw new IllegalArgumentException("Could not find valid dataset "+dsName+" in languages "+validLanguages.getLangCodes().toString());
+                }
+            }
         }
 
         List<Dataset> allTrain = new ArrayList<Dataset>();
@@ -185,10 +217,6 @@ public class CrossValidation {
                 allTest.add(ds);
             }
         } else if (mode.equals("within-dataset")) {
-            int k =  cmd.hasOption("k")
-                    ? Integer.parseInt(cmd.getOptionValue("k" ))
-                    : DEFAULT_SPLITS;
-
             for (Dataset ds : datasets) {
                 makeFolds(ds.split(k), allTrain, allTest);
             }

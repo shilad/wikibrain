@@ -22,6 +22,7 @@ import org.wikapidia.sr.utils.DatasetDao;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -90,6 +91,7 @@ public class MetricTrainer {
 
         String datasetPath = c.getConf().get().getString("sr.dataset.path");
         String path = c.getConf().get().getString("sr.metric.path");
+        List<String> validLanguages = cmd.hasOption("l")? Arrays.asList(cmd.getOptionValue("l").split(",")) : null;
 
         List<Dataset> datasets = new ArrayList<Dataset>();
         DatasetDao datasetDao = new DatasetDao();
@@ -99,7 +101,9 @@ public class MetricTrainer {
             for (String name : datasetNames){
                 List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+name);
                 for (String langCode : languages){
-                    datasets.add(datasetDao.read(Language.getByLangCode(langCode),datasetPath+name));
+                    if (validLanguages==null||validLanguages.contains(langCode)){
+                        datasets.add(datasetDao.read(Language.getByLangCode(langCode),datasetPath+name));
+                    }
                 }
             }
         }
