@@ -53,7 +53,9 @@ public class MatrixBuilder {
         Configurator c = env.getConfigurator();
 
         if (!cmd.hasOption("m")&&!cmd.hasOption("u")){
-            throw new IllegalArgumentException("Must specify a metric to build the matrix for.");
+            System.err.println("Must specify a metric using -u or -m");
+            new HelpFormatter().printHelp("MatrixBuilder", options);
+            return;
         }
 
         LanguageSet languages = env.getLanguages();
