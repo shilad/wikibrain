@@ -261,7 +261,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 }
             },100);
             trainee.observationsFinished();
-            LOG.info("trained most similarityNormalizer for " + getName() + ": " + trainee.dump());
+            LOG.info("trained similarity normalizer for " + getName() + ": " + trainee.dump());
         } finally {
             if (isDefault){
                 defaultSimilarityNormalizer = trainee;
