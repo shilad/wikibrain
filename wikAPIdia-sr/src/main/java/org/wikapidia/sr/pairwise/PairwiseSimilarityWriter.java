@@ -12,7 +12,6 @@ import org.wikapidia.utils.Procedure;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -45,14 +44,14 @@ public class PairwiseSimilarityWriter {
         this.validIds = validIds;
     }
 
-    public void writeSims(final int wpIds[], final int threads, final int maxSimsPerDoc) throws IOException, InterruptedException {
+    public void writeSims(final int wpIds[], final int maxSimsPerDoc) throws IOException, InterruptedException {
         List<Integer> wpIds2 = new ArrayList<Integer>();
         for (int id : wpIds) { wpIds2.add(id); }
-        writeSims(wpIds2, threads, maxSimsPerDoc);
+        writeSims(wpIds2, maxSimsPerDoc);
     }
 
-    public void writeSims(List<Integer> wpIds, int threads, final int maxSimsPerDoc) throws IOException, InterruptedException {
-        ParallelForEach.loop(wpIds, threads, new Procedure<Integer>() {
+    public void writeSims(List<Integer> wpIds, final int maxSimsPerDoc) throws IOException, InterruptedException {
+        ParallelForEach.loop(wpIds, new Procedure<Integer>() {
             public void call(Integer wpId) throws IOException {
                 writeSim(wpId, maxSimsPerDoc);
             }
@@ -64,8 +63,7 @@ public class PairwiseSimilarityWriter {
     private void writeSim(Integer wpId, int maxSimsPerDoc) throws IOException {
         if (idCounter.incrementAndGet() % 10000 == 0) {
             String nValidStr  = (validIds == null) ? "infinite" : ("" + validIds.size());
-            System.err.println("" + new Date() +
-                    ": finding matches for doc " + idCounter.get() +
+            LOG.info("finding matches for doc " + idCounter.get() +
                     ", used " + usedIds.size() + " of " + nValidStr);
         }
         SRResultList scores = metric.mostSimilar(wpId, maxSimsPerDoc, validIds);

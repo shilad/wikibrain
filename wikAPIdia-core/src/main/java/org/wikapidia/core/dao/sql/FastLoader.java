@@ -1,7 +1,8 @@
 package org.wikapidia.core.dao.sql;
 
-import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
+import org.apache.commons.lang3.StringUtils;
+import org.jooq.Table;
+import org.jooq.TableField;
 import org.wikapidia.core.dao.DaoException;
 
 import javax.sql.DataSource;

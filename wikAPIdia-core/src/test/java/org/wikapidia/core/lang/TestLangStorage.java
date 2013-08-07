@@ -2,7 +2,7 @@ package org.wikapidia.core.lang;
 
 import gnu.trove.set.TByteSet;
 import gnu.trove.set.hash.TByteHashSet;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 

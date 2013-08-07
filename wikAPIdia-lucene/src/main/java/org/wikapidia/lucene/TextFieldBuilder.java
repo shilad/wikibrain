@@ -65,7 +65,7 @@ public class TextFieldBuilder {
 
     private TextField buildTextField(LocalPage localPage, RawPage rawPage, TextFieldElements elements) throws DaoException {
         StringBuilder sb = new StringBuilder();
-        String title = localPage.getTitle().getCanonicalTitle();
+        String title = rawPage.getTitle().getCanonicalTitle();
         for (int i=0; i<elements.usesTitle(); i++) {
             sb.append(title);
             sb.append(" ");
@@ -84,7 +84,7 @@ public class TextFieldBuilder {
             String plainText = rawPage.getPlainText();
             sb.append(plainText);
         }
-        return new TextField(elements.getTextFieldName(), sb.toString(), Field.Store.YES);
+        return new TextField(elements.getTextFieldName(), sb.toString().trim(), Field.Store.YES);
     }
 
 }

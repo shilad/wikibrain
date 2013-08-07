@@ -112,7 +112,6 @@ public class DumpLoader {
 
         // loads multiple dumps in parallel
         ParallelForEach.loop(paths,
-                env.getMaxThreads(),
                 new Procedure<File>() {
                     @Override
                     public void call(File path) throws Exception {

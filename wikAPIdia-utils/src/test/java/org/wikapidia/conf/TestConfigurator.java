@@ -55,4 +55,24 @@ public class TestConfigurator {
 
         tmp.delete();
     }
+
+    @Test
+    public void testOverrideVariables() throws ConfigurationException, IOException {
+        File tmp = File.createTempFile("myconf", ".conf", null);
+        tmp.deleteOnExit();
+        FileUtils.write(tmp, "constants.x : 9\n");
+        Configurator conf = new Configurator(new Configuration(tmp));
+
+        assertEquals(conf.getConf().get().getInt("constants.x"), 9);
+        Integer i = conf.get(Integer.class, "foo");
+        assertEquals(i, 92);
+        Integer j = conf.get(Integer.class, "bar");
+        assertEquals(j, 23);
+        Integer k = conf.get(Integer.class, "baz");
+        assertEquals(k, 0);
+        Integer l = conf.get(Integer.class, "biff");
+        assertEquals(l, 1);
+
+        tmp.delete();
+    }
 }

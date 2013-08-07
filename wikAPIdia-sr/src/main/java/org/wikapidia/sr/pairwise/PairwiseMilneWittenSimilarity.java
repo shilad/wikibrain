@@ -100,19 +100,19 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
     }
 
     private double milneWittenSimilarity(TIntFloatHashMap map1, TIntFloatHashMap map2) {
-        TIntSet A = new TIntHashSet();
-        TIntSet B = new TIntHashSet();
+        TIntSet a = new TIntHashSet();
+        TIntSet b = new TIntHashSet();
 
         for(int key: map1.keys()) {
             if (map1.get(key) == 1) {
-                A.add(key);
+                a.add(key);
             }
             if (map2.get(key) == 1) {
-                B.add(key);
+                b.add(key);
             }
         }
 
-        return milneWittenCore.similarity(A, B, map1.size(), false).getValue();
+        return milneWittenCore.similarity(a, b, map1.size(), false).getScore();
     }
 
 

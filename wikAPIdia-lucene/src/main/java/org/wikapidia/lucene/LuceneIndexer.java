@@ -72,9 +72,15 @@ public class LuceneIndexer {
                     mainOptions.configurator.get(LocalPageDao.class),
                     mainOptions.configurator.get(RawPageDao.class),
                     mainOptions.configurator.get(RedirectDao.class));
+
+
             for (Language language : languages) {
+                File langRoot = new File(root, language.getLangCode());
+                if (langRoot.exists()) {
+                    FileUtils.deleteQuietly(langRoot);
+                }
                 WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, mainOptions);
-                Directory directory = FSDirectory.open(new File(root, language.getLangCode()));
+                Directory directory = FSDirectory.open(langRoot);
                 IndexWriterConfig iwc = new IndexWriterConfig(mainOptions.matchVersion, analyzer);
                 writers.put(language, new IndexWriter(directory, iwc));
             }
@@ -96,22 +102,6 @@ public class LuceneIndexer {
     }
 
     /**
-     * Clears all data for the languages from the file system
-     */
-    public void clearIndexes() {
-        for (Language language : writers.keySet()) {
-            File lang = new File(mainOptions.luceneRoot, language.getLangCode());
-            if (lang.exists()) {
-                try {
-                    FileUtils.forceDelete(lang);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
-
-    /**
      * Indexes a specific RawPage
      *
      * @param page the page to index
@@ -123,16 +113,19 @@ public class LuceneIndexer {
         Language language = page.getLanguage();
         if (getLanguageSet().containsLanguage(language)) {
             try {
-                IndexWriter writer = writers.get(language);
                 Document document = new Document();
                 Field localIdField = new IntField(LuceneOptions.LOCAL_ID_FIELD_NAME, page.getLocalId(), Field.Store.YES);
                 Field langIdField = new IntField(LuceneOptions.LANG_ID_FIELD_NAME, page.getLanguage().getId(), Field.Store.YES);
+                Field canonicalTitleField = builder.buildTextField(page, new TextFieldElements().addTitle());
                 document.add(localIdField);
                 document.add(langIdField);
-                for (LuceneOptions option : options) {
-                    document.add(builder.buildTextField(page, option.elements));
+                document.add(canonicalTitleField);
+                if (!page.isRedirect()) {
+                    for (LuceneOptions option : options) {
+                        document.add(builder.buildTextField(page, option.elements));
+                    }
                 }
-                writer.addDocument(document);
+                writers.get(language).addDocument(document);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

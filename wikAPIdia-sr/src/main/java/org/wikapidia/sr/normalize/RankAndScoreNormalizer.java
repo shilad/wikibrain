@@ -26,6 +26,13 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
     private transient TDoubleArrayList ys = new TDoubleArrayList();
 
     @Override
+    public void reset() {
+        ranks.clear();
+        scores.clear();
+        ys.clear();
+    }
+
+    @Override
     public void observe(SRResultList list, int index, double y) {
         if (index >= 0) {
             double score = list.getScore(index);

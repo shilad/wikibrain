@@ -3,6 +3,7 @@ package org.wikapidia.core.dao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.Collection;
  * A helper class for specifying complex queries.  To use, instantiate a new instance,
  * than call the various set methods in a chain to set the filters. Not all filters
  * are applied to all objects. Possible filters are, with the objects that use them:
- *
+ * <p>
  * - Language collection     (LocalPage, RawPage, LocalLink, Redirect, LocalCategoryMember) <p>
  * - NameSpace collection    (LocalPage, RawPage, UniversalPage) <p>
  * - Redirect flag           (LocalPage, RawPage) <p>
@@ -294,5 +295,19 @@ public class DaoFilter {
      */
     public DaoFilter setAlgorithmIds(int algorithmId) {
         return setAlgorithmIds(Arrays.asList(new Integer[]{algorithmId}));
+    }
+
+    /**
+     * Returns true if and only if the page is valid within the
+     * parameters of this DaoFilter.
+     * @param page
+     * @return
+     */
+    public boolean isValidLocalPage(LocalPage page) {
+        return page != null
+                && (langIds    == null || langIds.contains(page.getLanguage().getId()))
+                && (nsIds      == null || nsIds.contains(page.getNameSpace().getArbitraryId()))
+                && (isRedirect == null || isRedirect == page.isRedirect())
+                && (isDisambig == null || isDisambig == page.isDisambig());
     }
 }

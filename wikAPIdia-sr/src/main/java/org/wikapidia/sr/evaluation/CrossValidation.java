@@ -1,5 +1,6 @@
 package org.wikapidia.sr.evaluation;
 
+import com.typesafe.config.ConfigException;
 import org.apache.commons.cli.*;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.conf.ConfigurationException;
@@ -8,6 +9,7 @@ import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
@@ -16,6 +18,7 @@ import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
 import org.wikapidia.sr.utils.KnownSim;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +27,9 @@ import java.util.List;
  * @author Matt Lesicko
  */
 public class CrossValidation {
-    int missing;
-    int failed;
+    private static final int DEFAULT_SPLITS = 7;
+    private int missing;
+    private int failed;
 
     public CrossValidation(){
         missing=0;
@@ -41,10 +45,10 @@ public class CrossValidation {
             try {
                 KnownSim knownSim = dataset.getData().get(i);
                 SRResult result = srMetric.similarity(knownSim.phrase1, knownSim.phrase2, knownSim.language, false);
-                if (Double.isNaN(result.getValue())){
+                if (Double.isNaN(result.getScore())){
                     missing++;
                 }
-                estimate[i]=result.getValue();
+                estimate[i]=result.getScore();
                 real[i]=knownSim.similarity;
             } catch (Exception e){
                 failed++;
@@ -66,10 +70,10 @@ public class CrossValidation {
                 LocalString phrase1 = new LocalString(knownSim.language, knownSim.phrase1);
                 LocalString phrase2 = new LocalString(knownSim.language, knownSim.phrase2);
                 SRResult result = srMetric.similarity(phrase1, phrase2, false);
-                if (Double.isNaN(result.getValue())){
+                if (Double.isNaN(result.getScore())){
                     missing++;
                 }
-                estimate[i]=result.getValue();
+                estimate[i]=result.getScore();
                 real[i]=knownSim.similarity;
             }
             catch (Exception e){
@@ -80,6 +84,15 @@ public class CrossValidation {
         return pearsonsCorrelation.correlation(estimate,real);
     }
 
+    public static void makeFolds(List<Dataset> splits, List<Dataset> trains, List<Dataset> tests) {
+        for (int i = 0; i < splits.size(); i++) {
+            tests.add(splits.get(i));
+            // make copy of datasets without test set
+            List<Dataset> splits2 = new ArrayList<Dataset>(splits);
+            splits2.remove(i);
+            trains.add(new Dataset(splits2));
+        }
+    }
 
     public static void main(String[] args) throws DaoException, ConfigurationException {
         Options options = new Options();
@@ -90,6 +103,7 @@ public class CrossValidation {
                         .withLongOpt("datasets" )
                         .withDescription("drop and create the split datasets with given name" )
                         .create("d" ));
+
         //Specify for universal metric
         options.addOption(
                 new DefaultOptionBuilder()
@@ -97,13 +111,16 @@ public class CrossValidation {
                         .withLongOpt("universal")
                         .withDescription("set a universal metric")
                         .create("u"));
+
         //Specify the Dataset
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
+                        .isRequired()
                         .withLongOpt("gold")
                         .withDescription("the set of gold standard datasets to train on, separated by commas")
                         .create("g"));
+
         //Specify the Metrics
         options.addOption(
                 new DefaultOptionBuilder()
@@ -111,11 +128,19 @@ public class CrossValidation {
                         .withLongOpt("metric")
                         .withDescription("set a local metric")
                         .create("m"));
+
+        //Cross-validation mode
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("cross-validation-mode")
+                        .withDescription("Set cross validation mode (none, within-dataset, between-dataset)")
+                        .create("x"));
+
         //Specify the Folds
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .isRequired()
                         .withLongOpt("folds")
                         .withDescription("set the number of folds to evaluate on" )
                         .create("k"));
@@ -136,76 +161,79 @@ public class CrossValidation {
         Env env = new Env(cmd);
         Configurator c = env.getConfigurator();
 
-        int k = Integer.parseInt(cmd.getOptionValue("k" ));
 
-        List<Dataset> datasets = new ArrayList<Dataset>();
         DatasetDao datasetDao = new DatasetDao();
 
         if (!cmd.hasOption("u")&&!cmd.hasOption("m")){
             throw new IllegalArgumentException("Must specify a metric to evaluate.");
         }
 
-        //Build up the datasets
-        //Possible ways to build datasets:
-        //-g {DATASET NAMES} build, train and test the set of datasets against
-        //      each other
-        //-d SAVE_NAME -g {DATASET NAMES} -k # combine the datasets and split them
-        //      randomly into # folds, saving the resultant split datasets
-        //      into SAVE_NAME
-        //-l LANGUAGE -g DATASET NAME -k # load the split dataset saved as DATASET
-        //      NAME that is in LANGUAGE
-        //-l LANGUAGE -d SAVE_NAME -g DATASET NAME -k load resplit the split
-        //      dataset into # folds, saving the resultant split datasets
-        //      into SAVE_NAME
-        List<String> datasetConfig = c.getConf().get().getStringList("sr.dataset.names");
-        String datasetPath = c.getConf().get().getString("sr.dataset.path");
-        if (cmd.hasOption("l")){
-            Language language = Language.getByLangCode(cmd.getOptionValue("l"));
-            if (cmd.hasOption("g")){
-                String name = cmd.getOptionValue("g");
-                int splits = Integer.parseInt(cmd.getOptionValue("k"));
-                for (int i=1;i<=Integer.parseInt(cmd.getOptionValue("k"));i++){
-                    datasets.add(datasetDao.read(language,datasetPath+name+"-"+i+"of"+splits+".txt"));
-                }
-            } else {
-                throw new IllegalArgumentException("Did not specify a dataset to reload.");
-            }
-        }
-        else if (cmd.hasOption("g")) {
-            String[] datasetNames = cmd.getOptionValues("g");
-            for (String name : datasetNames){
-                if (datasetConfig.contains(name)){
-                    int langPosition = datasetConfig.indexOf(name)-1;
-                    Language language = Language.getByLangCode(datasetConfig.get(langPosition));
-                    datasets.add(datasetDao.read(language,datasetPath+name));
-                }
-                else {
-                    throw new IllegalArgumentException("Specified dataset "+name+" is not in the configuration file.");
-                }
-            }
-        } else {
-            for (int i = 0; i < datasetConfig.size();i+=2) {
-                String language = datasetConfig.get(i);
-                String datasetName = datasetConfig.get(i+1);
-                datasets.add(datasetDao.read(Language.getByLangCode(language), datasetPath + datasetName));
-            }
-        }
-        if (cmd.hasOption("d")){
-            String name = cmd.getOptionValue("d");
-            Dataset combinedDataset = new Dataset(datasets);
-            datasets = combinedDataset.split(k);
-            for (int i=0; i<k; i++){
-                datasetDao.write(datasets.get(i),datasetPath+name+"-"+(i+1)+"of"+k+".txt");
-            }
+        int k =  cmd.hasOption("k")
+                ? Integer.parseInt(cmd.getOptionValue("k" ))
+                : DEFAULT_SPLITS;
 
+        // TODO: figure out interaction with "-d"
+        // TODO: display error if neither "-d" or "-g" are specified
+        // TODO: handle multiple languages
+        File datasetPath = new File(c.getConf().get().getString("sr.dataset.path"));
+        LanguageSet validLanguages = env.getLanguages();
+        List<Dataset> datasets = new ArrayList<Dataset>();
+        for (String dsName : cmd.getOptionValues("g")) {
+            boolean foundOne = false;
+            //Check if it's a known dataset
+            try {
+                List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+dsName);
+                for (String langCode : languages){
+                    Language lang = Language.getByLangCode(langCode);
+                    if (validLanguages==null||validLanguages.containsLanguage(lang)){
+                        datasets.add(datasetDao.read(lang,new File(datasetPath, dsName).getAbsolutePath()));
+                    }
+                }
+            }catch (ConfigException.Missing e){
+                //Check if it's a stored dataset
+                for (Language lang : validLanguages){
+                    try {
+                        for (int i=0; i<k; i++){
+                            String name = lang.getLangCode()+"-"+dsName+"-"+i+"of"+k+".txt";
+                            datasets.add(datasetDao.read(lang, new File(datasetPath, name).getAbsolutePath()));
+                        }
+                        foundOne = true;
+                    }
+                    catch (DaoException f){}
+                }
+                if (!foundOne){
+                    throw new IllegalArgumentException("Could not find valid dataset "+dsName+" in languages "+validLanguages.getLangCodes().toString());
+                }
+            }
+        }
+
+        List<Dataset> allTrain = new ArrayList<Dataset>();
+        List<Dataset> allTest = new ArrayList<Dataset>();
+        String mode = cmd.hasOption("x") ? cmd.getOptionValue("x") : "within-dataset";
+
+        if (mode.equals("none")) {
+            for (Dataset ds : datasets) {
+                allTrain.add(ds);
+                allTest.add(ds);
+            }
+        } else if (mode.equals("within-dataset")) {
+            for (Dataset ds : datasets) {
+                makeFolds(ds.split(k), allTrain, allTest);
+            }
+        } else if (mode.equals("across-dataset")) {
+            makeFolds(datasets, allTrain, allTest);
+        } else {
+            System.err.println("Unknown mode: " + mode);
+            System.exit(1);
         }
 
         double sumError = 0;
-
-
         CrossValidation crossValidation = new CrossValidation();
 
-        for (Dataset testSet : datasets){
+        for (int i = 0; i < allTrain.size(); i++) {
+            Dataset train = allTrain.get(i);
+            Dataset test = allTest.get(i);
+
             LocalSRMetric sr = null;
             UniversalSRMetric usr = null;
             if (cmd.hasOption("m")){
@@ -215,26 +243,16 @@ public class CrossValidation {
                 usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
             }
 
-            List<Dataset> trainingSets = new ArrayList<Dataset>();
-
-            for (Dataset dataset: datasets) {
-                if (dataset!=testSet) {
-                    trainingSets.add(dataset);
-                }
-            }
-
-            Dataset trainingSet = new Dataset(trainingSets);
-
             if (sr!=null){
-                sr.trainDefaultSimilarity(trainingSet);
-                sr.trainSimilarity(trainingSet);
-                sumError+=crossValidation.evaluate(sr,testSet);
+                sr.trainDefaultSimilarity(train);
+                sr.trainSimilarity(train);
+                sumError+=crossValidation.evaluate(sr, test);
             } else if (usr!=null){
-                usr.trainSimilarity(trainingSet);
-                sumError+=crossValidation.evaluate(usr,testSet);
+                usr.trainSimilarity(train);
+                sumError+=crossValidation.evaluate(usr, test);
             }
         }
-        System.out.println(sumError/k);
+        System.out.println(sumError / allTrain.size());
         System.out.println(crossValidation.missing+" missing and "+crossValidation.failed+" failed");
     }
 

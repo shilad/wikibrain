@@ -59,7 +59,7 @@ public class TestSimUtils {
         TIntDoubleHashMap testVector2Normalized = SimUtils.normalizeVector(testVector2);
         // Normalize a zero vector returns the original zero vector
         for (int keyNum : zeroVector1.keys()) {
-            assertEquals("Every value in the zero vector remains the same after normalization",
+            assertEquals("Every score in the zero vector remains the same after normalization",
                     zeroVector1.get(keyNum), zeroVector1Normalized.get(keyNum), 0.0);
         }
         double testValue = 0.0;
@@ -82,11 +82,11 @@ public class TestSimUtils {
         Assert.assertEquals(testMapSize, sortedMap.size() );
         Double previous = null;
 //        for(Map.Entry<Integer, Double> entry : sortedMap.entrySet()) {
-//            Assert.assertNotNull( entry.getValue() );
+//            Assert.assertNotNull( entry.getScore() );
 //            if (previous != null) {
-//                Assert.assertTrue( entry.getValue() >= previous );
+//                Assert.assertTrue( entry.getScore() >= previous );
 //            }
-//            previous = entry.getValue();
+//            previous = entry.getScore();
 //        }
     }
 

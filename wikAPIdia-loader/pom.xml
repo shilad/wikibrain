@@ -10,29 +10,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.0</version>
-            <type>jar</type>
-            <scope>test</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-core</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-utils</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-parser</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.wikapidia</groupId>
             <artifactId>wikAPIdia-phrases</artifactId>
             <version>0.1-SNAPSHOT</version>
@@ -73,28 +50,8 @@
             <version>3.1</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-        <dependency>
             <groupId>org.wikapidia</groupId>
             <artifactId>wikAPIdia-mapper</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-lucene</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>

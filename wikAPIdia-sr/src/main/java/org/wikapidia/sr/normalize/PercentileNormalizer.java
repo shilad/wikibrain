@@ -21,6 +21,12 @@ public class PercentileNormalizer extends BaseNormalizer {
     protected transient PolynomialSplineFunction interpolator;
 
     @Override
+    public void reset() {
+        super.reset();
+        interpolator = null;
+    }
+
+    @Override
     public void observationsFinished() {
         super.observationsFinished();
         makeInterpolater();
