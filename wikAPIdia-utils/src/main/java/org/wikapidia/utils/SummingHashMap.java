@@ -4,11 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: bjhecht
- * Date: 6/26/13
- * Time: 4:21 PM
- *
  * Class that maintains counts when adding things to HashMaps. That is, when an object is added n times
  * to a HashMap, it will maintain a count for that object equal to n. Somewhat analogous to MultiHashmap,
  * but likely has a lower memory footprint. It's also less overkill for the simple task of maintaining counts.

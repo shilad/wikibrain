@@ -8,8 +8,9 @@ import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.*;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -18,7 +19,8 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -66,7 +68,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     @Override
-    public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
+    public Iterable<T> get(final DaoFilter daoFilter) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -92,7 +94,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                 @Override
                 public T transform(Record r) {
                     try {
-                        return (T)buildLocalPage(r);
+                        return (T)buildLocalPage(r, daoFilter);
                     } catch (DaoException e) {
                         LOG.log(Level.WARNING, e.getMessage(), e);
                         return null;
@@ -225,7 +227,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         return titlesToIds.get(title.longHashCode());
     }
 
-
     /**
      * Build a LocalPage from a database record representation.
      * Classes that extend class this should override this method.
@@ -235,13 +236,25 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
      * @throws DaoException if the record is not a Page
      */
     protected LocalPage buildLocalPage(Record record) throws DaoException {
+        return buildLocalPage(record, new DaoFilter());
+    }
+
+    protected LocalPage buildLocalPage(Record record, DaoFilter daoFilter) throws DaoException {
         if (record == null) {
             return null;
         }
         Language lang = Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID));
-        if (record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)&&redirectSqlDao!=null){
-            return getById(lang,
-                    redirectSqlDao.resolveRedirect(lang,record.getValue(Tables.LOCAL_PAGE.PAGE_ID)));
+        if (redirectSqlDao != null
+                // either null or false
+                // If true, we don't want to resolve redirects because they're all redirects
+                && (daoFilter.isRedirect() == null || !daoFilter.isRedirect())
+                && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)) {
+            LocalPage page = getById(lang, redirectSqlDao.resolveRedirect(
+                    lang,
+                    record.getValue(Tables.LOCAL_PAGE.PAGE_ID)));
+            if (daoFilter.isValidLocalPage(page)) {
+                return page;
+            }
         }
         Title title = new Title(
                 record.getValue(Tables.LOCAL_PAGE.TITLE), true,

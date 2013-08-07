@@ -12,12 +12,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-core</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-utils</artifactId>
+            <artifactId>wikAPIdia-lucene</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -26,19 +21,9 @@
             <version>3.2.76</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.externalsortinginjava</groupId>
             <artifactId>externalsortinginjava</artifactId>
             <version>0.1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-lucene</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

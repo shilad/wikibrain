@@ -79,12 +79,15 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
     //TODO: Add a normalizer
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
+        if (page1 == null || page2 == null) {
+           return new SRResult(Double.NaN);
+        }
         if (page1.getLanguage()!=page2.getLanguage()){
             throw new IllegalArgumentException("Tried to compute local similarity of pages in different languages: page1 was in"+page1.getLanguage().getEnLangName()+" and page2 was in "+ page2.getLanguage().getEnLangName());
         }
 
-        TIntSet A = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()),outLinks);
-        TIntSet B = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()),outLinks);
+        TIntSet a = getLinks(new LocalId(page1.getLanguage(), page1.getLocalId()),outLinks);
+        TIntSet b = getLinks(new LocalId(page2.getLanguage(), page2.getLocalId()),outLinks);
 
         int numArticles;
         if (numPages.containsKey(page1.getLanguage())) {
@@ -95,8 +98,8 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
             numPages.put(page1.getLanguage(), numArticles);
         }
 
-        SRResult result = core.similarity(A,B,numArticles,explanations);
-        result.id = page2.getLocalId();
+        SRResult result = core.similarity(a,b,numArticles,explanations);
+        result.setId(page2.getLocalId());
 
         //Reformat explanations to fit our metric.
         if (explanations) {
@@ -118,7 +121,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
             if (mostSimilar.numDocs()>maxResults){
                 mostSimilar.truncate(maxResults);
             }
-            System.out.println("from cache!");
             return mostSimilar;
         } else {
             //Only check pages that share at least one inlink/outlink.
@@ -170,12 +172,11 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
         List<SRResult> results = new ArrayList<SRResult>();
         for (int id : worthChecking.keys()){
             int comparisonLinks = getNumLinks(new LocalId(page.getLanguage(),id), outLinks);
-            SRResult result = new SRResult(1.0-(
+            SRResult result = new SRResult(id, 1.0-(
                     (Math.log(Math.max(pageLinks,comparisonLinks))
                             -Math.log(worthChecking.get(id)))
                             / (Math.log(numArticles)
                             - Math.log(Math.min(pageLinks,comparisonLinks)))));
-            result.id=id;
             results.add(result);
         }
         Collections.sort(results);

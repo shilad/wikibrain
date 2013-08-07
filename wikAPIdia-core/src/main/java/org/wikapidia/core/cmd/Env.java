@@ -11,6 +11,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.utils.WpThreadUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -30,7 +31,6 @@ public class Env {
     private LanguageSet languages;
     private Configuration configuration;
     private Configurator configurator;
-    private int maxThreads = Runtime.getRuntime().availableProcessors();
 
     /**
      * Adds the standard command line options to an options argument.
@@ -122,7 +122,7 @@ public class Env {
 
         // Load numThreads
         if (cmd.hasOption("h")) {
-            maxThreads = new Integer(cmd.getOptionValue("h"));
+            WpThreadUtils.setMaxThreads(new Integer(cmd.getOptionValue("h")));
         }
 
         // Set the temporary directory if it is specified
@@ -138,7 +138,7 @@ public class Env {
         }
 
         LOG.info("using languages " + languages);
-        LOG.info("using maxThreads " + maxThreads);
+        LOG.info("using maxThreads " + WpThreadUtils.getMaxThreads());
         LOG.info("using tmpDir " + tmpDir);
     }
 
@@ -227,7 +227,7 @@ public class Env {
     }
 
     public int getMaxThreads() {
-        return maxThreads;
+        return WpThreadUtils.getMaxThreads();
     }
 
     public static int getUniversalConceptAlgorithmId(Configuration conf) {

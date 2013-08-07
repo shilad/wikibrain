@@ -44,9 +44,22 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
     protected BaseNormalizer() {}
 
     @Override
+    public void reset() {
+        min = Double.MIN_VALUE;
+        max = -Double.MAX_VALUE;
+        sample.clear();
+        stats = null;
+        numObservations = 0;
+        missingMean = Double.NaN;
+        missingSum = 0.0;
+        missingCount = 0;
+        trained = false;
+    }
+
+    @Override
     public void observe(SRResultList sims, int rank, double y) {
         if (rank >= 0) {
-            observe(sims.get(rank).getValue(), y);
+            observe(sims.get(rank).getScore(), y);
         } else {
             observe(Double.NaN, y);
         }

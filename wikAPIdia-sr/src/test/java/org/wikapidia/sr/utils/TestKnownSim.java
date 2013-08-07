@@ -1,12 +1,11 @@
 package org.wikapidia.sr.utils;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,6 +16,7 @@ import java.util.List;
  */
 public class TestKnownSim {
 
+    @Ignore
     @Test
     public void test() throws IOException, DaoException {
 
