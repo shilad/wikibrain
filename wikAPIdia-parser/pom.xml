@@ -10,47 +10,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.0</version>
-            <type>jar</type>
-            <scope>test</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.8.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-utils</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.wikapidia</groupId>
             <artifactId>wikAPIdia-core</artifactId>
             <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>de.tudarmstadt.ukp.wikipedia</groupId>
-            <artifactId>de.tudarmstadt.ukp.wikipedia.parser</artifactId>
-            <version>0.9.2</version>
         </dependency>
         <dependency>
             <groupId>com.akiban</groupId>
