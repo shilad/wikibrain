@@ -58,7 +58,7 @@ public class Configuration {
         config = config.withFallback(
                 Parseable.newResources("reference.conf",
                         ConfigParseOptions.defaults().setClassLoader(
-                                ClassLoader.getSystemClassLoader()))
+                                Configuration.class.getClassLoader()))
                         .parse());
         this.config = config.resolve();
     }
