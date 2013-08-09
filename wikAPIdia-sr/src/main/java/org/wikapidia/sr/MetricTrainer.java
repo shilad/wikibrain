@@ -51,7 +51,6 @@ public class MetricTrainer {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
-                        .isRequired()
                         .withLongOpt("gold")
                         .withDescription("the set of gold standard datasets to train on")
                         .create("g"));
@@ -91,19 +90,23 @@ public class MetricTrainer {
 
         String datasetPath = c.getConf().get().getString("sr.dataset.path");
         String path = c.getConf().get().getString("sr.metric.path");
-        List<String> validLanguages = cmd.hasOption("l")? Arrays.asList(cmd.getOptionValue("l").split(",")) : null;
+        LanguageSet validLanguages = env.getLanguages();
 
         List<Dataset> datasets = new ArrayList<Dataset>();
         DatasetDao datasetDao = new DatasetDao();
 
+        List<String> datasetNames;
         if (cmd.hasOption("g")){
-            String[] datasetNames = cmd.getOptionValues("g");
-            for (String name : datasetNames){
-                List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+name);
-                for (String langCode : languages){
-                    if (validLanguages==null||validLanguages.contains(langCode)){
-                        datasets.add(datasetDao.read(Language.getByLangCode(langCode),datasetPath+name));
-                    }
+            datasetNames = Arrays.asList(cmd.getOptionValues("g"));
+        } else {
+            datasetNames = c.getConf().get().getStringList("sr.dataset.defaultsets");
+        }
+        for (String name : datasetNames){
+            List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+name);
+            for (String langCode : languages){
+                Language language = Language.getByLangCode(langCode);
+                if (validLanguages==null||validLanguages.containsLanguage(language)){
+                    datasets.add(datasetDao.read(language,datasetPath+name));
                 }
             }
         }
