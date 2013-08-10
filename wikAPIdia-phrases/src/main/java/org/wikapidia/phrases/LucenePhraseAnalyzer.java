@@ -31,34 +31,19 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     public static final int DOC_MULTIPLIER = 3;
 
     private final LuceneSearcher searcher;
-    // Use a phraseanalyzer before running Lucene
-    private final PhraseAnalyzer delegate;
 
     protected LocalPageDao localPageDao;
 
     public LucenePhraseAnalyzer(LocalPageDao localPageDao, LuceneSearcher searcher) {
-        this(null, localPageDao, searcher);
-    }
-
-    public LucenePhraseAnalyzer(PhraseAnalyzer delegate, LocalPageDao localPageDao, LuceneSearcher searcher) {
         this.localPageDao = localPageDao;
         this.searcher = searcher;
-        this.delegate = delegate;
     }
 
 
     @Override
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
-        // Run delegate phrase analyzer first.
-        if (delegate != null) {
-            result = delegate.resolveLocal(language, phrase, maxPages);
-            if (result != null && !result.isEmpty()) {
-                return result;
-            } else {
-                result = new LinkedHashMap<LocalPage, Float>();
-            }
-        }
+
         // If there is no result from the delegate, query the title field for the phrase.
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
                                     .setPhraseQuery(new TextFieldElements().addTitle(), phrase)
@@ -67,7 +52,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
         if (wikapidiaScoreDocs.length == 0) {
             // If there is no result from title field query, query the plaintext field.
             wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
-                                        .setPhraseQuery(new TextFieldElements().addPlainText(), phrase)
+                                        .setPhraseQuery(phrase)
                                         .setNumHits(maxPages * DOC_MULTIPLIER)
                                         .search();
         }
@@ -125,15 +110,11 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
             if (!config.getString("type").equals("lucene")) {
                 return null;
             }
-            PhraseAnalyzer delegate = null;
-            if (config.hasPath("delegate")) {
-                delegate = getConfigurator().get(PhraseAnalyzer.class, config.getString("delegate"));
-            }
             LocalPageDao localPageDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(getConfig().get().getStringList("languages")),
                     getConfigurator().get(LuceneOptions.class));
 
-            return new LucenePhraseAnalyzer(delegate, localPageDao, searcher);
+            return new LucenePhraseAnalyzer(localPageDao, searcher);
         }
 
     }
