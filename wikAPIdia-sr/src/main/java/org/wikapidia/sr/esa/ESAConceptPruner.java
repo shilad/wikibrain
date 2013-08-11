@@ -8,6 +8,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
@@ -152,7 +153,7 @@ public class ESAConceptPruner {
                         .withDescription("maximum number of concepts")
                         .create("x"));
 
-        Env.addStandardOptions(options);
+        EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -167,7 +168,8 @@ public class ESAConceptPruner {
         int maxConcepts = cmd.hasOption("x")
                 ? Integer.valueOf(cmd.getOptionValue("x"))
                 : DEFAULT_MAX_CONCEPTS;
-        Env env = new Env(cmd);
+
+        Env env = new EnvBuilder(cmd).build();
         Configurator c = env.getConfigurator();
 
         LocalLinkDao linkDao = c.get(LocalLinkDao.class);

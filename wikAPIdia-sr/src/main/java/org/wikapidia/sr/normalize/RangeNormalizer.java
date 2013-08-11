@@ -13,6 +13,7 @@ public class RangeNormalizer extends BaseNormalizer {
     protected double desiredMin;
     protected double desiredMax;
 
+    //TODO:This seems like a questionable thing to do.
     public RangeNormalizer() {
         super();
     }
@@ -68,6 +69,9 @@ public class RangeNormalizer extends BaseNormalizer {
             }
 
             return new RangeNormalizer(
+                    config.getDouble("min"),
+                    config.getDouble("max"),
+                    config.getBoolean("truncate")
             );
         }
 

@@ -82,11 +82,11 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
             if (!Double.isNaN(x)) {
                 if (x < min) { min = x; }
                 if (x > max) { max = x; }
-            }
-            if (sample.size() < SAMPLE_SIZE) {
-                sample.add(x);
-            } else if (random.nextDouble() < 1.0 * sample.size() / (numObservations + 1)) {
-                sample.set(random.nextInt(sample.size()),  x);
+                if (sample.size() < SAMPLE_SIZE) {
+                    sample.add(x);
+                } else if (random.nextDouble() < 1.0 * sample.size() / (numObservations + 1)) {
+                    sample.set(random.nextInt(sample.size()),  x);
+                }
             }
             numObservations++;
         }
