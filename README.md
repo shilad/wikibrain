@@ -111,3 +111,11 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=App Store (iOS), localId=216566, language=Simple English}: 0.010526316
 	LocalPage{nameSpace=ARTICLE, title=Apple Corps, localId=48013, language=Simple English}: 0.005263158
 ```
+TODO: List and one-sentence description of most important components
+
+###Configuring the WikAPIdia framework
+The behavior of WikAPIdia can be customized through configuration files or code.
+The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia/blob/master/wikAPIdia-core/src/main/resources/reference.conf).
+The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
+To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
+For exmaple, we could write.
