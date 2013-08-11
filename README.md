@@ -64,7 +64,7 @@ if (resolution == null) {
 
 When you run this program, you'll see output:
 
-```txt
+```text
 resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple, localId=39, language=Simple English}: 0.070175424
 	LocalPage{nameSpace=ARTICLE, title=Apple juice, localId=19351, language=Simple English}: 0.043859642
@@ -111,6 +111,10 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=App Store (iOS), localId=216566, language=Simple English}: 0.010526316
 	LocalPage{nameSpace=ARTICLE, title=Apple Corps, localId=48013, language=Simple English}: 0.005263158
 ```
+
+###Main WikAPIdia components
+The WikAPIdia Configurator offers a set of components that you can use as building blocks in your application.
+To get one of these components, use the Configurator.get() method.
 TODO: List and one-sentence description of most important components
 
 ###Configuring the WikAPIdia framework
@@ -118,4 +122,9 @@ The behavior of WikAPIdia can be customized through configuration files or code.
 The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia/blob/master/wikAPIdia-core/src/main/resources/reference.conf).
 The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
 To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
-For exmaple, we could write.
+For example, we could write a file called myapp.conf:
+```text
+maxThreads : 8
+baseDir : /my/path/to/foo
+```
+
