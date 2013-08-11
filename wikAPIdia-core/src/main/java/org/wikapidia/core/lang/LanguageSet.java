@@ -218,12 +218,12 @@ public class LanguageSet implements Iterable<Language> {
 
         @Override
         public String getPath() {
-            return "languages";
+            return "languages";   // hack: languages are in the root element
         }
 
         @Override
         public LanguageSet get(String name, Config config) throws ConfigurationException {
-            return new LanguageSet(getConfig().get().getStringList("languages"));
+            return new LanguageSet(config.getStringList("langCodes"));
         }
     }
 }

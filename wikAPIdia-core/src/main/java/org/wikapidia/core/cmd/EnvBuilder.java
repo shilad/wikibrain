@@ -75,7 +75,8 @@ public class EnvBuilder {
     }
 
     public EnvBuilder setLanguages(LanguageSet langs) {
-        params.put("languages", langs.getLangCodes());
+        params.put("languages.custom.langCodes", langs.getLangCodes());
+        params.put("languages.default", "custom");
         return this;
     }
 
