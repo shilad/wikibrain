@@ -54,6 +54,10 @@ public class EnvBuilder {
         return this;
     }
 
+    public EnvBuilder setBaseDir(String dir) {
+        return setBaseDir(new File(dir));
+    }
+
     public EnvBuilder setBaseDir(File dir) {
         params.put("baseDir", dir.getAbsolutePath());
         return this;
@@ -64,9 +68,17 @@ public class EnvBuilder {
         return this;
     }
 
+    public EnvBuilder setTmpDir(String dir) {
+        return setTmpDir(new File(dir));
+    }
+
     public EnvBuilder setTmpDir(File dir) {
         params.put("tmpDir", dir.getAbsolutePath());
         return this;
+    }
+
+    public EnvBuilder setConfigFile(String file) {
+        return setConfigFile(new File(file));
     }
 
     public EnvBuilder setConfigFile(File file) {
