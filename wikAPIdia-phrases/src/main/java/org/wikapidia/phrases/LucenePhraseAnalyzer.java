@@ -111,8 +111,8 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
                 return null;
             }
             LocalPageDao localPageDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
-            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(getConfig().get().getStringList("languages")),
-                    getConfigurator().get(LuceneOptions.class));
+            LanguageSet langs = getConfigurator().get(LanguageSet.class);
+            LuceneSearcher searcher = new LuceneSearcher(langs, getConfigurator().get(LuceneOptions.class));
 
             return new LucenePhraseAnalyzer(localPageDao, searcher);
         }

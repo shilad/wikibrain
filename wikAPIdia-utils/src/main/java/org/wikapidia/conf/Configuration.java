@@ -40,7 +40,7 @@ public class Configuration {
      *
      * @param params, File files
      */
-    public Configuration(Map<String, String> params, File ... files) {
+    public Configuration(Map<String, Object> params, File ... files) {
         Config config = ConfigFactory.empty();
         if (params != null)
             config = config.withFallback(ConfigFactory.parseMap(params));

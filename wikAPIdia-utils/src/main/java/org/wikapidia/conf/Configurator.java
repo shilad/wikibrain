@@ -1,10 +1,12 @@
 package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.clapper.util.classutil.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -131,12 +133,22 @@ public class Configurator {
             }
         }
 
+        // map from class names to file they are registered in.
+        Set<String> visited = new HashSet<String>();    // files already scanned
+        Map<String, File> registered = new HashMap<String, File>();
+
         for (String entry : classPath.split(":")) {
             File file = new File(entry);
             if (file.length() > MAX_FILE_SIZE) {
-                LOG.info("skipping looking for components in large file " + file);
+                LOG.info("skipping looking for providers in large file " + file);
                 continue;
             }
+            String canonical = FilenameUtils.normalize(file.getAbsolutePath());
+            if (visited.contains(canonical)) {
+                LOG.info("skipping looking for providers in duplicate classpath entry " + canonical);
+                continue;
+            }
+            visited.add(canonical);
 
             ClassFinder finder = new ClassFinder();
             finder.add(new File(entry));
@@ -146,8 +158,16 @@ public class Configurator {
             finder.findClasses (foundClasses,filter);
 
             for (ClassInfo classInfo : foundClasses) {
-                LOG.fine("registering component " + classInfo);
-                registerProvider(classInfo.getClassName());
+                if (registered.containsKey(classInfo.getClassName())) {
+                    LOG.warning("class " + classInfo.getClassName() +
+                            " found in " + file +
+                            " but previously found in " + registered.get(classInfo.getClassName()) +
+                            ". Skipping!");
+                } else {
+                    LOG.fine("registering component " + classInfo);
+                    registerProvider(classInfo.getClassName());
+                    registered.put(classInfo.getClassName(), file);
+                }
             }
         }
 
