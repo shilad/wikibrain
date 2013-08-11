@@ -45,7 +45,7 @@ public class PhraseLoader {
         Map<String, String> confOverrides = new HashMap<String, String>();
         confOverrides.put("phrases.loading", "true");
 
-        Env env = new Env(cmd, confOverrides);
+        Env env = new EnvBuilder(cmd).setProperty("phrases.loading", true).build();
 
         String name = cmd.getOptionValue("p");
 

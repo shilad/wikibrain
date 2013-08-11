@@ -168,7 +168,8 @@ public class ESAConceptPruner {
         int maxConcepts = cmd.hasOption("x")
                 ? Integer.valueOf(cmd.getOptionValue("x"))
                 : DEFAULT_MAX_CONCEPTS;
-        Env env = new Env(cmd);
+
+        Env env = new EnvBuilder(cmd).build();
         Configurator c = env.getConfigurator();
 
         LocalLinkDao linkDao = c.get(LocalLinkDao.class);

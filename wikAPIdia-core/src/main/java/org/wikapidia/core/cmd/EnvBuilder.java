@@ -3,31 +3,85 @@ package org.wikapidia.core.cmd;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Builds an environment by setting common options.
+ *
+ * Example usage:
+ *
+ * Env env = new EnvBuilder(cmd)
+ *                  .setProperty("phrases.loading", true)
+ *                  .build();
+ *
  * @author Shilad Sen
  */
 public class EnvBuilder {
-    private Map<String, Object> params = new HashMap<String, Object>();
+    private final Map<String, Object> params = new HashMap<String, Object>();
     File configOverride = null;
 
     public EnvBuilder() {}
 
     public EnvBuilder(CommandLine cmd) {
         if (cmd.hasOption("n")) {
-            params.put("mapper.default", cmd.getOptionValue("n"));
+            setConceptMapper(cmd.getOptionValue("n"));
         }
         if (cmd.hasOption("base-dir")) {
-            params.put("baseDir", cmd.getOptionValue("base-dir"));
+            setBaseDir(new File(cmd.getOptionValue("base-dir")));
+        }
+        if (cmd.hasOption("h")) {
+            setMaxThreads(Integer.valueOf(cmd.getOptionValue("h")));
         }
         if (cmd.hasOption("c")) {
-            configOverride = new File(cmd.getOptionValue("c"));
+            setConfigFile(new File(cmd.getOptionValue("c")));
         }
+        if (cmd.hasOption("l")) {
+            setLanguages(new LanguageSet(cmd.getOptionValue("l")));
+        }
+        if (cmd.hasOption("tmp-dir")) {
+            setTmpDir(new File(cmd.getOptionValue("tmp-dir")));
+        }
+    }
+
+    public EnvBuilder setConceptMapper(String name) {
+        params.put("mapper.default", name);
+        return this;
+    }
+
+    public EnvBuilder setBaseDir(File dir) {
+        params.put("baseDir", dir.getAbsolutePath());
+        return this;
+    }
+
+    public EnvBuilder setMaxThreads(int threads) {
+        params.put("maxThreads", threads);
+        return this;
+    }
+
+    public EnvBuilder setTmpDir(File dir) {
+        params.put("tmpDir", dir.getAbsolutePath());
+        return this;
+    }
+
+    public EnvBuilder setConfigFile(File file) {
+        this.configOverride = file;
+        return this;
+    }
+
+    public EnvBuilder setLanguages(LanguageSet langs) {
+        params.put("languages", langs.getLangCodes());
+        return this;
+    }
+
+    public EnvBuilder setProperty(String name, Object value) {
+        params.put(name, value);
+        return this;
     }
 
     /**
@@ -75,7 +129,11 @@ public class EnvBuilder {
         }
     }
 
-    public Env build() {
-        return null;
+    public Env build() throws ConfigurationException {
+        if (configOverride == null) {
+            return new Env(params);
+        } else {
+            return new Env(params, configOverride);
+        }
     }
 }

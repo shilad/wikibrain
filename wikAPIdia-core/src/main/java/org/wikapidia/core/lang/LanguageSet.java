@@ -2,10 +2,15 @@ package org.wikapidia.core.lang;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.typesafe.config.Config;
 import gnu.trove.set.TByteSet;
 import gnu.trove.set.hash.TByteHashSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.Provider;
 import org.wikapidia.core.WikapidiaException;
 
 import java.util.*;
@@ -199,5 +204,26 @@ public class LanguageSet implements Iterable<Language> {
     @Override
     public Iterator<Language> iterator() {
         return langs.iterator();
+    }
+
+    static class Provider extends org.wikapidia.conf.Provider<LanguageSet> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class<LanguageSet> getType() {
+            return LanguageSet.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "languages";
+        }
+
+        @Override
+        public LanguageSet get(String name, Config config) throws ConfigurationException {
+            return new LanguageSet(getConfig().get().getStringList("languages"));
+        }
     }
 }

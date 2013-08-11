@@ -176,7 +176,7 @@ public class LuceneLoader {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
         LuceneOptions[] luceneOptions;

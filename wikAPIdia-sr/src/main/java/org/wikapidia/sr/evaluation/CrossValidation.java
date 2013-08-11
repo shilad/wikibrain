@@ -275,7 +275,7 @@ public class CrossValidation {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator c = env.getConfigurator();
 
 

@@ -95,9 +95,9 @@ public class DumpLoader {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
-        List<File> paths = env.getInputFiles(true, FileMatcher.ARTICLES);
+        List<File> paths = env.getInputFiles(true, cmd.getArgList(), FileMatcher.ARTICLES);
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);

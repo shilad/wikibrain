@@ -184,7 +184,7 @@ public class RequestedLinkGetter {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
         List<FileMatcher> linkMatchers = FileMatcher.getListByNames(conf.getConf().get().getStringList("download.matcher"));

@@ -113,7 +113,7 @@ public class RedirectLoader {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
         DataSource dataSource = conf.get(DataSource.class);

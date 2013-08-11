@@ -72,7 +72,7 @@ public class MetricTrainer {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator c = env.getConfigurator();
 
         if (!cmd.hasOption("m")&&!cmd.hasOption("u")){

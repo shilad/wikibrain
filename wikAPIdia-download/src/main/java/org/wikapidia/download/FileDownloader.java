@@ -169,7 +169,7 @@ public class FileDownloader {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
         List argList = Arrays.asList(conf.getConf().get().getString("download.listFile"));

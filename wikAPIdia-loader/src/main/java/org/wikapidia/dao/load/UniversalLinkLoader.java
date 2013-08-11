@@ -129,7 +129,7 @@ public class UniversalLinkLoader {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
         String algorithm = cmd.getOptionValue("n", null);
 

@@ -26,65 +26,39 @@ import java.util.logging.Logger;
  */
 public class Env {
     private static final Logger LOG = Logger.getLogger(Env.class.getName());
-    private final CommandLine cmd;
 
-    private LanguageSet languages;
     private Configuration configuration;
     private Configurator configurator;
 
     /**
      * Parses standard command line arguments and builds the environment using them.
-     * @param cmd
      * @throws ConfigurationException
      */
-    public Env(CommandLine cmd) throws ConfigurationException {
-        this(cmd, new HashMap<String, String>());
+    public Env() throws ConfigurationException {
+        this(new HashMap<String, Object>());
     }
 
     /**
      * Parses standard command line arguments and builds the environment using them.
-     * @param cmd
+     * @param confParams
+     * @param pathConfs
      * @throws ConfigurationException
      */
-    public Env(CommandLine cmd, Map<String, String> confOverrides) throws ConfigurationException {
-        this.cmd = cmd;
-
-        // Override configuration parameters using system properties
-        for (String key : confOverrides.keySet()) {
-            System.setProperty(key, confOverrides.get(key));
-        }
-
-        // if an algorithm id is passed in the configuration file
-        if (cmd.hasOption("n")) {
-            System.setProperty("mapper.default", cmd.getOptionValue("n"));
-        }
-        if (cmd.hasOption("base-dir")) {
-            System.setProperty("baseDir", cmd.getOptionValue("base-dir"));
-        }
-
+    public Env(Map<String, Object> confParams, File ... pathConfs) throws ConfigurationException {
         // Load basic configuration
-        File pathConf = cmd.hasOption('c') ? new File(cmd.getOptionValue('c')) : null;
-        LOG.info("local configuration path is " + pathConf);
-        configuration = new Configuration(pathConf);
+        configuration = new Configuration(confParams, pathConfs);
         configurator = new Configurator(configuration);
 
-        // Load languages
-        if (cmd.hasOption("l")) {
-            languages = new LanguageSet(cmd.getOptionValue("l"));
-        } else {
-            languages = new LanguageSet(configuration.get().getStringList("languages"));
-        }
-
-        // Load numThreads
-        if (cmd.hasOption("h")) {
-            WpThreadUtils.setMaxThreads(new Integer(cmd.getOptionValue("h")));
+        // Set the max threads
+        if (configuration.get().hasPath("maxThreads")) {
+            int maxThreads = configuration.get().getInt("maxThreads");
+            if (maxThreads > 0) {
+                WpThreadUtils.setMaxThreads(maxThreads);
+            }
         }
 
         // Set the temporary directory if it is specified
-        if (cmd.hasOption("tmp-dir")) {
-            System.setProperty("tmpDir", cmd.getOptionValue("tmp-dir"));
-            System.setProperty("java.io.tmpdir", cmd.getOptionValue("tmp-dir"));
-        } else if (configuration.get().hasPath("tmpDir")) {
+        if (configuration.get().hasPath("tmpDir")) {
             System.setProperty("java.io.tmpdir", configuration.get().getString("tmpDir"));
         }
         File tmpDir = new File(System.getProperty("java.io.tmpdir"));
@@ -92,13 +66,13 @@ public class Env {
             tmpDir.mkdirs();
         }
 
-        LOG.info("using languages " + languages);
+        LOG.info("using languages " + getLanguages());
         LOG.info("using maxThreads " + WpThreadUtils.getMaxThreads());
         LOG.info("using tmpDir " + tmpDir);
     }
 
-    public List<File> getInputFiles(FileMatcher ... matchers) {
-        return getInputFiles(false, matchers);
+    public List<File> getInputFiles(List argList, FileMatcher ... matchers) {
+        return getInputFiles(false, argList, matchers);
     }
 
     /**
@@ -109,10 +83,12 @@ public class Env {
      * @param matchers
      * @return
      */
-    public List<File> getInputFiles(boolean useExtraArgs, FileMatcher ... matchers) {
-        if (useExtraArgs && !cmd.getArgList().isEmpty()) {
+
+
+    public List<File> getInputFiles(boolean useExtraArgs, List argList, FileMatcher ... matchers) {
+        if (useExtraArgs && !argList.isEmpty()) {
             List<File> results = new ArrayList<File>();
-            for (Object s : cmd.getArgList()) {
+            for (Object s : argList) {
                 results.add(new File((String)s));
             }
             return results;
@@ -124,7 +100,7 @@ public class Env {
         }
 
         List<File> matches = new ArrayList<File>();
-        for (Language l : languages) {
+        for (Language l : getLanguages()) {
             for (FileMatcher fm : matchers) {
                 List<File> f = getFiles(l, fm);
                 if (f.isEmpty()) {
@@ -170,7 +146,11 @@ public class Env {
     }
 
     public LanguageSet getLanguages() {
-        return languages;
+        try {
+            return configurator.get(LanguageSet.class);
+        } catch (ConfigurationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Configuration getConfiguration() {
