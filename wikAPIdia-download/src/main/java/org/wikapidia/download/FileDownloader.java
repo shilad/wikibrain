@@ -20,6 +20,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.utils.WpIOUtils;
@@ -156,7 +157,7 @@ public class FileDownloader {
                         .withDescription("Path to input tsv file.")
                         .create("i"));
 
-        Env.addStandardOptions(options);
+        EnvBuilder.addStandardOptions(options);
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
 
@@ -168,7 +169,7 @@ public class FileDownloader {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
         List argList = Arrays.asList(conf.getConf().get().getString("download.listFile"));

@@ -5,6 +5,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.phrases.PhraseAnalyzer;
 
@@ -29,7 +30,7 @@ public class PhraseLoader {
                         .withLongOpt("analyzer")
                         .withDescription("the name of the phrase analyzer to use")
                         .create("p"));
-        Env.addStandardOptions(options);
+        EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -44,7 +45,7 @@ public class PhraseLoader {
         Map<String, String> confOverrides = new HashMap<String, String>();
         confOverrides.put("phrases.loading", "true");
 
-        Env env = new Env(cmd, confOverrides);
+        Env env = new EnvBuilder(cmd).setProperty("phrases.loading", true).build();
 
         String name = cmd.getOptionValue("p");
 

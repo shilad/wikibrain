@@ -1,14 +1,12 @@
 package org.wikapidia.phrases.cookbook;
 
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
 import org.wikapidia.phrases.PhraseAnalyzer;
 
 import java.io.IOException;
@@ -19,10 +17,21 @@ import java.util.LinkedHashMap;
  */
 public class ResolveExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
-        Language lang = Language.getByLangCode("simple");   // simple english
-        Configurator c = new Configurator(new Configuration());
-        PhraseAnalyzer pa = c.get(PhraseAnalyzer.class, "cascading");
-        LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(lang, "lucene", 20);
+
+        // Prepare the environment; set the root to the current directory (".").
+        Env env = new EnvBuilder()
+                .setBaseDir(".")
+                .build();
+
+        // Get the configurator that creates components and a phraze analyzer from it
+        Configurator configurator = env.getConfigurator();
+        PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
+
+        // get the most common phrases in simple
+        Language simple = Language.getByLangCode("simple");   // simple english
+        LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(simple, "apple", 20);
+
+        // show the closest pages
         System.out.println("resolution of apple");
         if (resolution == null) {
             System.out.println("\tno resolution !");
