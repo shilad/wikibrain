@@ -33,51 +33,6 @@ public class Env {
     private Configurator configurator;
 
     /**
-     * Adds the standard command line options to an options argument.
-     * @param options
-     */
-    public static void addStandardOptions(Options options) {
-        Option toAdd[] = new Option[] {
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("algorithmId ")
-                        .withDescription("universal concept map algorithm name")
-                        .create("n"),
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("conf")
-                        .withDescription("configuration file")
-                        .create("c"),
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("threads")
-                        .withDescription("the maximum number of threads that should be used")
-                        .create("h"),
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("languages")
-                        .withDescription("the set of languages to process, separated by commas")
-                        .create("l"),
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("base-dir")
-                        .withDescription("the base directory used to resolve relative directories")
-                        .create(),
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("tmp-dir")
-                        .withDescription("the temporary directory")
-                        .create()
-        };
-        for (Option o : toAdd) {
-            if (options.hasOption(o.getOpt())) {
-                throw new IllegalArgumentException("Standard command line option " + o.getOpt() + " reused");
-            }
-            options.addOption(o);
-        }
-    }
-
-    /**
      * Parses standard command line arguments and builds the environment using them.
      * @param cmd
      * @throws ConfigurationException

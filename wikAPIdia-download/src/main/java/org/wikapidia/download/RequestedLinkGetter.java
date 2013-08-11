@@ -12,6 +12,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.lang.Language;
 
@@ -171,7 +172,7 @@ public class RequestedLinkGetter {
                         .withDescription("Dumps are pulled from on or before this date. Default is today")
                         .create("y"));
 
-        Env.addStandardOptions(options);
+        EnvBuilder.addStandardOptions(options);
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
 

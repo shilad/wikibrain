@@ -22,7 +22,7 @@ public class ResolveExample {
         Language lang = Language.getByLangCode("simple");   // simple english
         Configurator c = new Configurator(new Configuration());
         PhraseAnalyzer pa = c.get(PhraseAnalyzer.class, "cascading");
-        LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(lang, "lucene", 20);
+        LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(lang, "apple", 20);
         System.out.println("resolution of apple");
         if (resolution == null) {
             System.out.println("\tno resolution !");
