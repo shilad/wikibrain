@@ -36,7 +36,6 @@ public class PercentileNormalizer extends BaseNormalizer {
         TDoubleArrayList X = new TDoubleArrayList();
         TDoubleArrayList Y = new TDoubleArrayList();
 
-        // save two "fake" sample observations worth of wiggle room for low and high out of range values.
         for (int i = 0; i < sample.size(); i++) {
             double fudge = max * 10E-8 * i;    // ensures monotonic increasing
             X.add(sample.get(i) + fudge);

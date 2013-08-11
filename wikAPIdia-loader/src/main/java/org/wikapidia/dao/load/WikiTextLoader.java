@@ -5,6 +5,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -70,7 +71,7 @@ public class WikiTextLoader {
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("d"));
-        Env.addStandardOptions(options);
+        EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -82,7 +83,7 @@ public class WikiTextLoader {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
 
