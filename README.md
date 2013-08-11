@@ -1,135 +1,82 @@
 wikAPIdia
 =====
-An API for accessing and organizing Wikipedia's language dumps. Specifically we:
-* Support multiple languages in parallel.
-* Resolve all redirected links to the page they point to.
-* Document all links out from a given Wikipedia page.
-* Document all of the members of a specific Wikipedia category.
-* Overlay concepts that are cross-lingual and links between concepts.
+WikAPIdia is a multi-lingual Java framework that provides easy and efficient access to Wikipedia data. Specifically we:
+* Offer convient tools for downloading and organizing Wikipedia data.
+* Support multi-lingual data analysis that analyzes relationships between multiple language editions of Wikipedia.
+* Provide semantic-relatedness algorithms that measure the relationship between two concepts such as "racecar" and "engine."
 
-This API is meant to be used for anyone wishing to manipulate Wikipedia's vast information.
-
-Software and Hardware Recommendations
------------
+###System Requirements
 * Maven (required)
 * Bash (required)
-* One of the following <ul> <li>md5sum</li> <li>md5</li> <li>sum</li></ul>
-* Hardware stuff (to be filled out)
+* A clone of this repository
 
-User Instructions
------------
-* Universal parameters for all scripts:
+###Importing data into WikAPIdia
 
-```bash
-[-c conf] [-l languages...] [-h threads]
-```
-```bash
--c      Sets configuration file to the specified path
--l      Selects languages by language code to retrieve from wikimedia, separated by commas
--h      Sets the maximum amount of processors to use for parallel language processing
-```
-
-* Run the requestedlinkgetter.sh file. The parameters should be formatted to match the following:
+* Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
+* Download and process the dataset:
 
 ```bash
-[-o outputpath] [-n names...] [-d date]
-```
-```bash
--o      Sets the path to output the tsv file containing all the links
--f      Selects types of dump files to retrieve, separated by commas
--y      Sets the date to retrieve from. Files are retrieve from on or before this date
+	cd wikAPIdia
+	cd wikAPIdia-parent
+	./scripts/run-pipeline all -l simple
 ```
 
-* Run the filedownloader.sh file. The parameters should be formatted to match the following:
+The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. 
+
+You can customize WikAPIdia's importing procedure, but the run-pipeline-sh script should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
-[-o outputpath] [-t tsvpath]
-```
-```bash
--o      Sets the directory in which to output the downloaded dumps
--t      Selects the tsv file from which to read the download links
+./scripts/run-pipeline all -l en,fr
+``` 
+(beware that this is a lot of data!).
+
+
+###Writing Java programs that use the WikAPIdia framework to analyze data
+Once you have imported data (above), your are ready to write programs that analyze Wikipedia!
+Here's a [simple example](https://github.com/shilad/wikAPIdia/blob/master/wikAPIdia-cookbook/src/main/java/org/wikapidia/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
+
+```java
+// Prepare the environment; set the root to the current directory (".").
+Env env = new EnvBuilder()
+        .setBaseDir(".")
+        .build();
+
+// Get the configurator that creates components and a phraze analyzer from it 
+Configurator configurator = env.getConfigurator();
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
+
+// get the most common phrases in simple  
+Language simple = Language.getByLangCode("simple");   // simple english 
+LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(simple, "apple", 5);
+        
+// show the closest pages
+System.out.println("resolution of apple");
+if (resolution == null) { 
+    System.out.println("\tno resolution !");
+} else {
+    for (LocalPage p : resolution.keySet()) {
+        System.out.println("\t" + p + ": " + resolution.get(p));
+    }       
+} 
 ```
 
-* Run the dumploader.sh file. The parameters should be formatted to match the following:
+When you run this program, you'll see output:
 
-```bash
-[file ...]
-```
-```bash
-file    Selects the dump files to load
-```
-	
-* Run the redirectloader.sh file. The parameters should be formatted to match the following:
-
-```bash
-[-d]
-```
-```bash
--d      Drops and recreates all tables and indexes
-```
- 	
-* Run the wikitextdumploader.sh file. The parameters should be formatted to match the following:
-
-```bash
-[-d]
-```
-```bash
--d      Drops and recreates all tables and indexes
+```txt
+resolution of apple
+	LocalPage{nameSpace=ARTICLE, title=Apple, localId=39, language=Simple English}: 0.070175424
+	LocalPage{nameSpace=ARTICLE, title=Apple juice, localId=19351, language=Simple English}: 0.043859642
+	LocalPage{nameSpace=ARTICLE, title=Apple Macintosh, localId=517, language=Simple English}: 0.043859642
+	LocalPage{nameSpace=ARTICLE, title=Apple Inc., localId=7111, language=Simple English}: 0.043859642
+	LocalPage{nameSpace=ARTICLE, title=Apple A4, localId=251288, language=Simple English}: 0.043859642
 ```
 
-* Run conceptmapper.sh file. The parameters should be formatted to match the following:
-
-```bash
-[-d] [-n algorithms]
-```
-```bash
--d      Drops and recreates all tables and indexes
--n      Selects the algorithms to use to map concepts
+Let's walk through this program to explain each piece. 
+First, we create an ```Env``, a WikAPIdia environment that provides access to the components we need:
+```java
+Env env = new EnvBuilder()
+        .setBaseDir(".")
+        .build();
 ```
 
-* Run universallinkloader.sh. The parameters should be formatted to match the following:
 
-```bash
-[-d] [-n algorithms]
-```
-```bash
--d      Drops and recreates all tables and indexes
--n      Selects the algorithms to use to map concepts
-```
-
-Optional scripts:
-
-* Run phraseloader.sh. The parameters should be formatted to match the following:
-
-```bash
-[-n analyzer]
-```
-```bash
--p      Selects the phrase analyzer to use
-```
-
-* Run luceneloader.sh. The parameters should be formatted to match the following:
-
-```bash
-[-d] [-n namespace...] [-i index...]
-```
-```bash
--d      Drops and recreates all Lucene indexes
--p      Specifies the namespaces to indexes
--i      Selects the types of indexes to use, as described by the configuration file
-```
- 
-A Basic Outline of the Process 
------------
-* Download dump files <ul><li>Obtain dump links</li> <li>Download files from those links</li></ul>
-* Load the Dump as XML <ul><li>Convert Dump into RawPages </li> <li>Convert RawPages into LocalPages <ul>
-					<li>Mark Redirects to be dealt with after this process</li> </ul></li>
-			</ul>
-* Resolve Redirects <ul><li>Load into Redirect Table, fully resolved </li></ul>
-* WikiTextParser does the following <ul><li>load links into table with src/dest IDs </li> <li>load categories with the source article as a category member</li></ul>
-* Load Concepts
-* Load Concept Links
-
-Optional:
-* Load Phrases Database
-* Load Lucene Database
