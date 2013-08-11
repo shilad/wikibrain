@@ -1,9 +1,11 @@
 wikAPIdia
 =====
-WikAPIdia is a multi-lingual Java framework that provides easy and efficient access to Wikipedia data. Specifically we:
-* Offer convient tools for downloading and organizing Wikipedia data.
-* Support multi-lingual data analysis that analyzes relationships between multiple language editions of Wikipedia.
+The WikAPIdia Java framework provides easy and efficient access to multi-lingual Wikipedia data. Specifically we:
+* Offer tools that download and organize specific Wikipedia datasets across several languages.
+* Provide tools that parse the Wikipedia datasets and load them into databases for data analysis.
+* Provide "concept mapping" algorithms that identify cross-lingual concepts and the pages in each language edition that link to those concepts.
 * Provide semantic-relatedness algorithms that measure the relationship between two concepts such as "racecar" and "engine."
+* Support parallelization.
 
 ###System Requirements
 * Maven (required)
@@ -78,5 +80,34 @@ Env env = new EnvBuilder()
         .setBaseDir(".")
         .build();
 ```
+The [```EnvBuilder```](wikAPIdia/tree/master/wikAPIdia-core/src/main/java/org/wikapidia/core/cmd/EnvBuilder.java) 
+provides utility methods to set the languages you want to support, the maximum number of threads available to your program, etc.
+There are more advanced ways of configuring WikAPIdia - both programatically and through configuration files - described in the Configuration section of this page.
 
+The Env provides access to a 
+[```Configurator```](wikAPIdia/tree/master/wikAPIdia-utils/src/main/java/org/wikapidia/conf/Configurator.java) -
+essentially a Factory for creating WikAPIdia components. We get the Page Resolution component next:
+```java
+Configurator configurator = env.getConfigurator();
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
+```
 
+A key feature of WikAPIdia is that it supports multiple implementations of the same component. 
+For example, the default PhraseAnalayzer uses the [Lucene](http://lucene.apache.org/) search engine. 
+We could have explicitly requested the lucene implementation of the PhraseAnalyzer:
+```java
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "lucene");
+```
+If we instead wanted to use a phrase analyzer that resolves phrases to pages by looking at "intra-wiki" links, we could have used:
+```java
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "anchortext");
+```
+And received the results:
+```text
+resolution of apple
+	LocalPage{nameSpace=ARTICLE, title=Apple, localId=39, language=Simple English}: 0.55263156
+	LocalPage{nameSpace=ARTICLE, title=Apple Inc., localId=7111, language=Simple English}: 0.30526316
+	LocalPage{nameSpace=ARTICLE, title=Apple Records, localId=47698, language=Simple English}: 0.12631579
+	LocalPage{nameSpace=ARTICLE, title=App Store (iOS), localId=216566, language=Simple English}: 0.010526316
+	LocalPage{nameSpace=ARTICLE, title=Apple Corps, localId=48013, language=Simple English}: 0.005263158
+```
