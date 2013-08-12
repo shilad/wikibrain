@@ -14,6 +14,9 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 * Maven (required)
 * Bash (required)
 * A clone of this repository
+* Hardware varies depending on the languages you want to import:
+  * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
+  * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
 ###Importing data into WikAPIdia
 
