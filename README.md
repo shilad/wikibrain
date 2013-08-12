@@ -1,11 +1,14 @@
 wikAPIdia
 =====
-The WikAPIdia Java framework provides easy and efficient access to multi-lingual Wikipedia data. Specifically we:
-* Offer tools that download and organize specific Wikipedia datasets across several languages.
-* Provide tools that parse the Wikipedia datasets and load them into databases for data analysis.
-* Provide "concept mapping" algorithms that identify cross-lingual concepts and the pages in each language edition that link to those concepts.
-* Provide semantic-relatedness algorithms that measure the relationship between two concepts such as "racecar" and "engine."
-* Support parallelization.
+The WikAPIdia Java framework provides easy and efficient access to multi-lingual Wikipedia data.
+
+###Main features
+* Support for all Wikipedia language editions and analyses that compare multiple languages.
+* Tools that download and organize Wikipedia datasets published by the Wikimedia foundation.
+* Tools that parse downloaded Wikipedia datasets and load them into databases for analysis.
+* Tools that produce multi-lingual "concept maps" that identify cross-lingual concepts and the pages in each language edition that link to those concepts.
+* Semantic-relatedness algorithms that measure the relationship between two concepts such as "racecar" and "engine."
+* Single-machine parallelization (i.e. multi-threading support) for all computationally intensive features.
 
 ###System Requirements
 * Maven (required)
