@@ -84,12 +84,12 @@ Env env = new EnvBuilder()
         .setBaseDir(".")
         .build();
 ```
-The [```EnvBuilder```](wikAPIdia/tree/master/wikAPIdia-core/src/main/java/org/wikapidia/core/cmd/EnvBuilder.java) 
+The [```EnvBuilder```](wikAPIdia-core/src/main/java/org/wikapidia/core/cmd/EnvBuilder.java) 
 provides utility methods to set the languages you want to support, the maximum number of threads available to your program, etc.
 There are more advanced ways of configuring WikAPIdia - both programatically and through configuration files - described in the Configuration section of this page.
 
 The Env provides access to a 
-[```Configurator```](wikAPIdia/tree/master/wikAPIdia-utils/src/main/java/org/wikapidia/conf/Configurator.java) -
+[```Configurator```](wikAPIdia-utils/src/main/java/org/wikapidia/conf/Configurator.java) -
 essentially a Factory for creating WikAPIdia components. We get the Page Resolution component next:
 ```java
 Configurator configurator = env.getConfigurator();
@@ -123,7 +123,7 @@ TODO: List and one-sentence description of most important components
 
 ###Configuring the WikAPIdia framework
 The behavior of WikAPIdia can be customized through configuration files or code.
-The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia/blob/master/wikAPIdia-core/src/main/resources/reference.conf).
+The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
 The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
 To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
 
