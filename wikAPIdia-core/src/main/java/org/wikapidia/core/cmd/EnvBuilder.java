@@ -18,6 +18,7 @@ import java.util.Map;
  *
  * Env env = new EnvBuilder(cmd)
  *                  .setProperty("phrases.loading", true)
+ *                  .setLanguageSet(new LanguageSet(Arrays.asList("en", "it")))
  *                  .build();
  *
  * @author Shilad Sen
