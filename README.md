@@ -3,12 +3,12 @@ wikAPIdia
 The WikAPIdia Java framework provides easy and efficient access to multi-lingual Wikipedia data.
 
 ###Main features
-* Support for all Wikipedia language editions and analyses that compare multiple languages.
-* Tools that download and organize Wikipedia datasets published by the Wikimedia foundation.
-* Tools that parse downloaded Wikipedia datasets and load them into databases for analysis.
-* Tools that produce multi-lingual "concept maps" that identify cross-lingual concepts and the pages in each language edition that link to those concepts.
-* Semantic-relatedness algorithms that measure the relationship between two concepts such as "racecar" and "engine."
-* Single-machine parallelization (i.e. multi-threading support) for all computationally intensive features.
+* Support for **all Wikipedia language** editions and comparisons between multiple languages.
+* Tools that **download** and organize [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
+* Tools that load downloaded Wikipedia datasets into **databases** for analysis.
+* Tools that identify **multi-lingual concepts** and the pages in each language edition that link to those concepts.
+* **Semantic-relatedness algorithms** that measure the relationship between two concepts such as "racecar" and "engine."
+* Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
 ###System Requirements
 * Maven (required)
@@ -36,7 +36,7 @@ You can customize WikAPIdia's importing procedure, but the run-pipeline-sh scrip
 (beware that this is a lot of data!).
 
 
-###Writing Java programs that use the WikAPIdia framework to analyze data
+###An example program
 Once you have imported data (above), your are ready to write programs that analyze Wikipedia!
 Here's a [simple example](https://github.com/shilad/wikAPIdia/blob/master/wikAPIdia-cookbook/src/main/java/org/wikapidia/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
 
@@ -76,6 +76,7 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple A4, localId=251288, language=Simple English}: 0.043859642
 ```
 
+###A tour of the example program
 Let's walk through this program to explain each piece. 
 First, we create an ```Env``, a WikAPIdia environment that provides access to the components we need:
 ```java
@@ -125,9 +126,25 @@ The behavior of WikAPIdia can be customized through configuration files or code.
 The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia/blob/master/wikAPIdia-core/src/main/resources/reference.conf).
 The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
 To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
-For example, we could write a file called myapp.conf:
+
+For example, suppose we wantd to set the root directory, maxThreads to 8, and the phrase analyzer to the anchortext-based analyzer
+We could create a file called myapp.conf containing:
 ```text
 maxThreads : 8
-baseDir : /my/path/to/foo
+baseDir : /my/path/to/wikAPIdia
+phrases.analyzer.default : anchortext
 ```
-
+We would then tell the EnvBuilder to use the new config to override the default settings:
+```java
+Env env = new EnvBuilder()
+        .setConfigFile("./path/to/myapp.conf")
+        .build();
+```
+We could also make these changes directly in Java, without the config file:
+```java
+Env env = new EnvBuilder()
+        .setMaxThreads(8)
+        .setBaseDir('/my/path/to/wikAPIdia')
+        .setProperty('phrases.analyzer.default', 'anchortext')
+        .build();
+```
