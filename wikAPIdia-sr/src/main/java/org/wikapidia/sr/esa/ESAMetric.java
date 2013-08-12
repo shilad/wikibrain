@@ -546,9 +546,8 @@ public class ESAMetric extends BaseLocalSRMetric {
                 return null;
             }
 
-            List<String> langCodes = getConfig().get().getStringList("languages");
-
-            LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(langCodes), getConfigurator().get(LuceneOptions.class, "esa"));
+            LanguageSet languages = getConfigurator().get(LanguageSet.class);
+            LuceneSearcher searcher = new LuceneSearcher(languages, getConfigurator().get(LuceneOptions.class, "esa"));
             ESAMetric sr = new ESAMetric(
                         searcher,
                         getConfigurator().get(LocalPageDao.class, config.getString("pageDao")),
@@ -567,16 +566,15 @@ public class ESAMetric extends BaseLocalSRMetric {
             } catch (IOException e){
                 sr.setDefaultSimilarityNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
                 sr.setDefaultMostSimilarNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
-                for (String langCode : langCodes){
-                    Language language = Language.getByLangCode(langCode);
+                for (Language language: languages){
                     sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
                     sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
                 }
             }
 
-            for (String langCode : langCodes){
+            for (Language language: languages){
                 try {
-                    sr.readCosimilarity(getConfig().get().getString("sr.metric.path"), Language.getByLangCode(langCode));
+                    sr.readCosimilarity(getConfig().get().getString("sr.metric.path"), language);
                 } catch (IOException e) {}
             }
             return sr;

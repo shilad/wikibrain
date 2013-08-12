@@ -126,20 +126,18 @@ public class MetricTrainer {
             usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
         }
 
+        double mostSimilarThreshold = c.getConf().get().getDouble("sr.dataset.mostSimilarThreshold");
 
         for (Dataset dataset: datasets) {
             if (usr!=null){
                 usr.trainSimilarity(dataset);
-                usr.trainMostSimilar(dataset,maxResults,null);
+                usr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
             }
             if (sr!=null){
-//                Profiler profiler = new Profiler();
-//                profiler.startCollecting();
                 sr.trainDefaultSimilarity(dataset);
-                sr.trainDefaultMostSimilar(dataset,maxResults,null);
+                sr.trainDefaultMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
                 sr.trainSimilarity(dataset);
-                sr.trainMostSimilar(dataset,maxResults,null);
-//                System.out.println(profiler.getTop(20));
+                sr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
             }
         }
 

@@ -58,6 +58,16 @@ public class Dataset {
         this.data = data;
     }
 
+    public Dataset prune(double minSim, double maxSim) {
+        List<KnownSim> pruned = new ArrayList<KnownSim>();
+        for (KnownSim ks : data) {
+            if (minSim <= ks.similarity && ks.similarity <= maxSim) {
+                pruned.add(ks);
+            }
+        }
+        return new Dataset(language, pruned);
+    }
+
     /**
      * Shuffles a dataset and splits it into k equally sized subsets, and returns them all
      * @param k the number of desired subsets

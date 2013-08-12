@@ -291,14 +291,20 @@ public class CrossValidation {
                 : DEFAULT_SPLITS;
 
         if (!cmd.hasOption("u")&&!cmd.hasOption("m")){
-            throw new IllegalArgumentException("Must specify a metric to evaluate.");
+            System.err.println("Must specify a metric to evaluate.");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
         }
         if (cmd.hasOption("u")&&cmd.hasOption("m")){
-            throw new IllegalArgumentException("Can only operate on one metric at a time");
+            System.err.println("Can only operate on one metric at a time");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
         }
         if (cmd.hasOption("r")){
             if (cmd.hasOption("k")||cmd.hasOption("g")||cmd.hasOption("d")||cmd.hasOption("x")){
-                throw new IllegalArgumentException("Options d, g, k, and x are invalid with option r");
+                System.err.println("Options d, g, k, and x are invalid with option r");
+                new HelpFormatter().printHelp("MetricTrainer", options);
+                return;
             } else {
                 mode = "across-dataset";
                 String datasetName = cmd.getOptionValue("r");
@@ -325,7 +331,9 @@ public class CrossValidation {
                 datasetNames.add(dsName);
             }
         } else {
-            throw new IllegalArgumentException("Must specify a dataset using either -g or -r");
+            System.err.println("Must specify a dataset using either -g or -r");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
         }
 
         List<Dataset> allTrain = new ArrayList<Dataset>();
