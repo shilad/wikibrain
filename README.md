@@ -18,7 +18,7 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
   * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
   * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
-###Importing data into WikAPIdia
+###Importing data
 
 * Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
 * Download and process the dataset:
@@ -79,7 +79,7 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple A4, localId=251288, language=Simple English}: 0.043859642
 ```
 
-###A tour of the example program
+###A tour of the example
 Let's walk through this program to explain each piece. 
 First, we create an ```Env``, a WikAPIdia environment that provides access to the components we need:
 ```java
@@ -119,12 +119,12 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple Corps, localId=48013, language=Simple English}: 0.005263158
 ```
 
-###Main WikAPIdia components
+###Main components
 The WikAPIdia Configurator offers a set of components that you can use as building blocks in your application.
 To get one of these components, use the Configurator.get() method.
 TODO: List and one-sentence description of most important components
 
-###Configuring the WikAPIdia framework
+###Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
 The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
 The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
