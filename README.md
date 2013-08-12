@@ -1,18 +1,24 @@
 wikAPIdia
 =====
-The WikAPIdia Java framework provides easy and efficient access to multi-lingual Wikipedia data. Specifically we:
-* Offer tools that download and organize specific Wikipedia datasets across several languages.
-* Provide tools that parse the Wikipedia datasets and load them into databases for data analysis.
-* Provide "concept mapping" algorithms that identify cross-lingual concepts and the pages in each language edition that link to those concepts.
-* Provide semantic-relatedness algorithms that measure the relationship between two concepts such as "racecar" and "engine."
-* Support parallelization.
+The WikAPIdia Java framework provides easy and efficient access to multi-lingual Wikipedia data.
+
+###Main features
+* Support for **all Wikipedia language** editions and comparisons between multiple languages.
+* Tools that **download** and organize [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
+* Tools that load downloaded Wikipedia datasets into **databases** for analysis.
+* Tools that identify **multi-lingual concepts** and the pages in each language edition that link to those concepts.
+* **Semantic-relatedness algorithms** that measure the relationship between two concepts such as "racecar" and "engine."
+* Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
 ###System Requirements
 * Maven (required)
 * Bash (required)
 * A clone of this repository
+* Hardware varies depending on the languages you want to import:
+  * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
+  * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
-###Importing data into WikAPIdia
+###Importing data
 
 * Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
 * Download and process the dataset:
@@ -33,7 +39,7 @@ You can customize WikAPIdia's importing procedure, but the run-pipeline-sh scrip
 (beware that this is a lot of data!).
 
 
-###Writing Java programs that use the WikAPIdia framework to analyze data
+###An example program
 Once you have imported data (above), your are ready to write programs that analyze Wikipedia!
 Here's a [simple example](https://github.com/shilad/wikAPIdia/blob/master/wikAPIdia-cookbook/src/main/java/org/wikapidia/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
 
@@ -64,7 +70,7 @@ if (resolution == null) {
 
 When you run this program, you'll see output:
 
-```txt
+```text
 resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple, localId=39, language=Simple English}: 0.070175424
 	LocalPage{nameSpace=ARTICLE, title=Apple juice, localId=19351, language=Simple English}: 0.043859642
@@ -73,6 +79,7 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple A4, localId=251288, language=Simple English}: 0.043859642
 ```
 
+###A tour of the example
 Let's walk through this program to explain each piece. 
 First, we create an ```Env``, a WikAPIdia environment that provides access to the components we need:
 ```java
@@ -80,12 +87,12 @@ Env env = new EnvBuilder()
         .setBaseDir(".")
         .build();
 ```
-The [```EnvBuilder```](wikAPIdia/tree/master/wikAPIdia-core/src/main/java/org/wikapidia/core/cmd/EnvBuilder.java) 
+The [```EnvBuilder```](wikAPIdia-core/src/main/java/org/wikapidia/core/cmd/EnvBuilder.java) 
 provides utility methods to set the languages you want to support, the maximum number of threads available to your program, etc.
 There are more advanced ways of configuring WikAPIdia - both programatically and through configuration files - described in the Configuration section of this page.
 
 The Env provides access to a 
-[```Configurator```](wikAPIdia/tree/master/wikAPIdia-utils/src/main/java/org/wikapidia/conf/Configurator.java) -
+[```Configurator```](wikAPIdia-utils/src/main/java/org/wikapidia/conf/Configurator.java) -
 essentially a Factory for creating WikAPIdia components. We get the Page Resolution component next:
 ```java
 Configurator configurator = env.getConfigurator();
@@ -110,4 +117,37 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple Records, localId=47698, language=Simple English}: 0.12631579
 	LocalPage{nameSpace=ARTICLE, title=App Store (iOS), localId=216566, language=Simple English}: 0.010526316
 	LocalPage{nameSpace=ARTICLE, title=Apple Corps, localId=48013, language=Simple English}: 0.005263158
+```
+
+###Main components
+The WikAPIdia Configurator offers a set of components that you can use as building blocks in your application.
+To get one of these components, use the Configurator.get() method.
+TODO: List and one-sentence description of most important components
+
+###Configuration
+The behavior of WikAPIdia can be customized through configuration files or code.
+The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
+The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
+To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
+
+For example, suppose we wantd to set the root directory, maxThreads to 8, and the phrase analyzer to the anchortext-based analyzer
+We could create a file called myapp.conf containing:
+```text
+maxThreads : 8
+baseDir : /my/path/to/wikAPIdia
+phrases.analyzer.default : anchortext
+```
+We would then tell the EnvBuilder to use the new config to override the default settings:
+```java
+Env env = new EnvBuilder()
+        .setConfigFile("./path/to/myapp.conf")
+        .build();
+```
+We could also make these changes directly in Java, without the config file:
+```java
+Env env = new EnvBuilder()
+        .setMaxThreads(8)
+        .setBaseDir('/my/path/to/wikAPIdia')
+        .setProperty('phrases.analyzer.default', 'anchortext')
+        .build();
 ```
