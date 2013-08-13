@@ -72,11 +72,15 @@ public class MetricTrainer {
             return;
         }
 
-        Env env = new EnvBuilder(cmd).build();
+        Env env = new EnvBuilder(cmd)
+                        .setProperty("sr.training", true)
+                        .build();
         Configurator c = env.getConfigurator();
 
         if (!cmd.hasOption("m")&&!cmd.hasOption("u")){
-            throw new IllegalArgumentException("Must specify a metric to train.");
+            System.err.println("Must specify a metric to train using -m or -u.");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
         }
 
 

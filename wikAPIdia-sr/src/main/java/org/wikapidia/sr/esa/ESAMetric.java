@@ -331,37 +331,6 @@ public class ESAMetric extends BaseLocalSRMetric {
         super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
     }
 
-
-
-//    @Override
-//    public void writeCosimilarity(String path, LanguageSet languages, final int maxhits) throws IOException, DaoException {
-//        final ValueConf vconf = new ValueConf();
-//        for (final Language language: languages) {
-//            String fullPath = path + getName() + "/matrix/" + language.getLangCode();
-//            final SparseMatrixWriter writer = new SparseMatrixWriter(new File(fullPath+"-cosimilarity"), vconf);
-//            DaoFilter pageFilter = new DaoFilter().setLanguages(language);
-//            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
-//            TIntSet pageIds = new TIntHashSet();
-//            for (LocalPage page : localPages) {
-//                if (page != null) {
-//                    pageIds.add(page.getLocalId());
-//                }
-//            }
-//            List<Integer> wpIds = Arrays.asList(ArrayUtils.toObject(pageIds.toArray()));
-//            ParallelForEach.loop(wpIds, new Procedure<Integer>() {
-//                public void call(Integer wpId) throws IOException, DaoException {
-//                    SRResultList scores = baseMostSimilar(new LocalId(language,wpId),maxhits,null);
-//                    if (scores !=null){
-//                        int ids[]=scores.getIds();
-//                        writer.writeRow(new SparseMatrixRow(vconf, wpId, ids, scores.getScoresAsFloat()));
-//                    }
-//                }
-//            }, Integer.MAX_VALUE);
-//            writer.finish();
-//            mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
-//        }
-//    }
-
     /**
      * Construct mostSimilar results without normalizing or accessing the cache.
      * If the matrix was not built, this may not find the highest scores,
@@ -398,42 +367,6 @@ public class ESAMetric extends BaseLocalSRMetric {
             resultList.set(j, results.get(j));
         }
         return resultList;
-    }
-
-    @Override
-    protected synchronized void trainMostSimilarNormalizer(final Dataset dataset, final int numResults, final TIntSet validIds, boolean isDefault) {
-        if (resolvePhrases){
-            super.trainMostSimilarNormalizer(dataset, numResults, validIds, isDefault);
-        }
-        final Normalizer trainee;
-        if (isDefault){
-            trainee = defaultMostSimilarNormalizer;
-            defaultMostSimilarNormalizer = new IdentityNormalizer();
-
-        } else {
-            trainee = mostSimilarNormalizers.get((int)dataset.getLanguage().getId());
-            mostSimilarNormalizers.put((int)dataset.getLanguage().getId(), new IdentityNormalizer());
-        }
-        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
-            public void call(KnownSim ks) throws DaoException {
-                ks.maybeSwap();
-                List<LocalString> localStrings = new ArrayList<LocalString>();
-                localStrings.add(new LocalString(ks.language, ks.phrase1));
-                localStrings.add(new LocalString(ks.language, ks.phrase2));
-                List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
-                SRResultList dsl = mostSimilar(localStrings.get(0), numResults, validIds);
-                if (dsl != null) {
-                    trainee.observe(dsl, dsl.getIndexForId(ids.get(1).getId()), ks.similarity);
-                }
-            }
-        },100);
-        trainee.observationsFinished();
-        if (isDefault){
-            defaultMostSimilarNormalizer = trainee;
-        } else {
-            mostSimilarNormalizers.put((int)dataset.getLanguage().getId(),trainee);
-        }
-        LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
     }
 
     @Override
@@ -561,24 +494,9 @@ public class ESAMetric extends BaseLocalSRMetric {
                     throw new ConfigurationException(e);
                 }
             }
-            try {
-                sr.read(getConfig().get().getString("sr.metric.path"));
-            } catch (IOException e){
-                sr.setDefaultSimilarityNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
-                sr.setDefaultMostSimilarNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
-                for (Language language: languages){
-                    sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
-                    sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
-                }
-            }
+            configureBase(getConfigurator(), sr, config);
 
-            for (Language language: languages){
-                try {
-                    sr.readCosimilarity(getConfig().get().getString("sr.metric.path"), language);
-                } catch (IOException e) {}
-            }
             return sr;
         }
-
     }
 }

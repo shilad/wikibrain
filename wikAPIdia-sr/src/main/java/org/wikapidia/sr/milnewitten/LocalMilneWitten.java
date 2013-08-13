@@ -279,34 +279,17 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
 
         @Override
         public LocalSRMetric get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("LocalMilneWitten")) {
+            if (!config.getString("type").equals("milnewitten")) {
                 return null;
             }
 
-            LocalSRMetric sr = new LocalMilneWitten(
+            LocalMilneWitten sr = new LocalMilneWitten(
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(LocalLinkDao.class,config.getString("linkDao")),
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
                     config.getBoolean("outLinks")
             );
-            List<String> langCodes = getConfig().get().getStringList("languages");
-            try {
-                sr.read(getConfig().get().getString("sr.metric.path"));
-            } catch (IOException e){
-                sr.setDefaultSimilarityNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
-                sr.setDefaultMostSimilarNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
-                for (String langCode : langCodes){
-                    Language language = Language.getByLangCode(langCode);
-                    sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
-                    sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
-                }
-            }
-
-            for (String langCode : langCodes){
-                try {
-                    sr.readCosimilarity(getConfig().get().getString("sr.metric.path"), Language.getByLangCode(langCode));
-                } catch (IOException e) {}
-            }
+            configureBase(getConfigurator(), sr, config);
             return sr;
         }
 

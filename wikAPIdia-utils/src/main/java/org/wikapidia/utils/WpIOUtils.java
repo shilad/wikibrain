@@ -8,6 +8,14 @@ import java.io.*;
 import java.util.zip.GZIPInputStream;
 
 public class WpIOUtils {
+
+    public static void mkdirsQuietly(File dir) {
+        if (!dir.isDirectory()) {
+            FileUtils.deleteQuietly(dir);
+            dir.mkdirs();
+        }
+    }
+
     /**
      * Deserialize an array of bytes into an object.
      * @param input Serialized stream of bytes

@@ -275,7 +275,9 @@ public class CrossValidation {
             return;
         }
 
-        Env env = new EnvBuilder(cmd).build();
+        Env env = new EnvBuilder(cmd)
+                .setProperty("sr.training", true)
+                .build();
         Configurator c = env.getConfigurator();
 
 
@@ -373,8 +375,8 @@ public class CrossValidation {
         String metricName = cmd.hasOption("m")? cmd.getOptionValue("m"): cmd.getOptionValue("u");
         String recordPath = c.getConf().get().getString("sr.dataset.records");
 
-
         CrossValidation crossValidation = new CrossValidation();
+
         //Run evaluation
         for (int i = 0; i < allTrain.size(); i++) {
             Dataset train = allTrain.get(i);
