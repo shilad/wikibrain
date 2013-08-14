@@ -101,6 +101,11 @@ public class PercentileNormalizer extends BaseNormalizer {
         }
 
         @Override
+        public Scope getScope() {
+            return Scope.INSTANCE;
+        }
+
+        @Override
         public PercentileNormalizer get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("percentile")) {
                 return null;

@@ -73,7 +73,7 @@ public class MetricTrainer {
         }
 
         Env env = new EnvBuilder(cmd)
-                        .setProperty("sr.training", true)
+                        .setProperty("sr.metric.training", true)
                         .build();
         Configurator c = env.getConfigurator();
 

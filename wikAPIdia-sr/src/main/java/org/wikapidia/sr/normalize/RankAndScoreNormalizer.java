@@ -117,6 +117,11 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
         }
 
         @Override
+        public Scope getScope() {
+            return Scope.INSTANCE;
+        }
+
+        @Override
         public RankAndScoreNormalizer get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("rank")) {
                 return null;

@@ -276,7 +276,7 @@ public class CrossValidation {
         }
 
         Env env = new EnvBuilder(cmd)
-                .setProperty("sr.training", true)
+                .setProperty("sr.metric.training", true)
                 .build();
         Configurator c = env.getConfigurator();
 
@@ -384,11 +384,12 @@ public class CrossValidation {
 
             LocalSRMetric sr = null;
             UniversalSRMetric usr = null;
+            // skip cache to create new metrics each time
             if (cmd.hasOption("m")){
-                sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
+                sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"), false);
             }
             if (cmd.hasOption("u")){
-                usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
+                usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"), false);
             }
 
             if (sr!=null){
