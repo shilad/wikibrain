@@ -104,6 +104,9 @@ public class SparseMatrixWriter {
         w.finish();
     }
 
+    public ValueConf getValueConf() {
+        return vconf;
+    }
 
     private static byte[] intToBytes(int i) {
         return ByteBuffer.allocate(4).putInt(i).array();

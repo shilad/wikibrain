@@ -207,6 +207,7 @@ public class ESAMetric extends BaseLocalSRMetric {
      * @return
      * @throws DaoException
      */
+    @Override
     public TIntDoubleHashMap getVector(int id, Language language) throws DaoException {
         int luceneId = searcher.getDocIdFromLocalId(id, language);
         if (luceneId < 0) {
@@ -329,6 +330,12 @@ public class ESAMetric extends BaseLocalSRMetric {
     public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException, WikapidiaException {
         PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
         super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+    }
+
+    @Override
+    public void readCosimilarity(String path, LanguageSet languages) throws IOException {
+        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
+        super.readCosimilarity(path, languages, pairwiseSimilarity);
     }
 
     /**

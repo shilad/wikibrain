@@ -28,8 +28,8 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class NormalizerPair {
-    private static final Logger LOG = Logger.getLogger(NormalizerPair.class.getName());
+public class SrNormalizers {
+    private static final Logger LOG = Logger.getLogger(SrNormalizers.class.getName());
 
     public static final String SIMILARITY_NORMALIZER = "similarityNormalizer";
     public static final String MOST_SIMILAR_NORMALIZER = "mostSimilarNormalizer";
@@ -37,7 +37,7 @@ public class NormalizerPair {
     private Normalizer mostSimilarNormalizer = new IdentityNormalizer();
     private Normalizer similarityNormalizer = new IdentityNormalizer();
 
-    public NormalizerPair() {}
+    public SrNormalizers() {}
 
     public Normalizer getMostSimilarNormalizer() {
         return mostSimilarNormalizer;
@@ -182,6 +182,13 @@ public class NormalizerPair {
         }
     }
 
+    /**
+     * Writes a single normalizer to disk.
+     * @param dir
+     * @param name
+     * @param normalizer
+     * @throws IOException
+     */
     private void writeNormalizer(File dir, String name, Normalizer normalizer) throws IOException {
         ObjectOutputStream oop = new ObjectOutputStream(new FileOutputStream(new File(dir, name)));
         oop.writeObject(normalizer);

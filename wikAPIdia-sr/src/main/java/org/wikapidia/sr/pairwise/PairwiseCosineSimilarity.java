@@ -68,12 +68,9 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
             LOG.info("unknown wpId: " + wpId);
             return new SRResultList(0);
         }
-        TIntFloatHashMap vector = row.asTroveMap();
-        return mostSimilar(maxResults, validIds, vector);
-    }
-
-    private SRResultList mostSimilar(int maxResults, TIntSet validIds, TIntFloatHashMap vector) throws IOException {
         initIfNeeded();
+
+        TIntFloatHashMap vector = row.asTroveMap();
         TIntDoubleHashMap dots = new TIntDoubleHashMap();
 
         for (int id : vector.keys()) {
@@ -125,6 +122,14 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
             length += x * x;
         }
         return Math.sqrt(length);
+    }
+
+    public double getMinValue() {
+        return -1;
+    }
+
+    public double getMaxValue() {
+        return +1;
     }
 
 }

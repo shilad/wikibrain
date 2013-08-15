@@ -115,5 +115,15 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
         return milneWittenCore.similarity(a, b, map1.size(), false).getScore();
     }
 
+    @Override
+    public double getMaxValue() {
+        return 1.0;
+    }
+
+    @Override
+    public double getMinValue() {
+        return 0.0;
+    }
+
 
 }

@@ -10,6 +10,8 @@ import java.io.IOException;
  * @author Ben Hillmann
  */
 public interface PairwiseSimilarity {
+    public double getMinValue();
+    public double getMaxValue();
 
     public void initMatrices (String path) throws IOException;
 

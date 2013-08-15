@@ -3,7 +3,8 @@ package org.wikapidia.sr;
 import com.typesafe.config.Config;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.wikapidia.conf.Configuration;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
@@ -24,9 +25,11 @@ import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
 import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Dataset;
+import org.wikapidia.sr.utils.SRMatrices;
 import org.wikapidia.sr.utils.Leaderboard;
-import org.wikapidia.sr.utils.NormalizerPair;
+import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.WpIOUtils;
+import org.wikapidia.utils.WpThreadUtils;
 
 import java.io.*;
 import java.util.*;
@@ -38,31 +41,21 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     protected LocalPageDao pageHelper;
 
 
-    protected  NormalizerPair defaultNormalizers = new NormalizerPair();
-    protected Map<Language, NormalizerPair> normalizers = new HashMap<Language, NormalizerPair>();
+    protected SrNormalizers defaultNormalizers = new SrNormalizers();
+    protected Map<Language, SrNormalizers> normalizers = new HashMap<Language, SrNormalizers>();
 
-    protected Map<Language,SparseMatrix> mostSimilarLocalMatrices = new HashMap<Language, SparseMatrix>();
+    protected Map<Language,SRMatrices> mostSimilarMatrices = new HashMap<Language, SRMatrices>();
     private boolean shouldReadNormalizers = true;
 
-    @Override
-    public void setMostSimilarLocalMatrices(Map<Language,SparseMatrix> mostSimilarLocalMatrices){
-        this.mostSimilarLocalMatrices=mostSimilarLocalMatrices;
-    }
-
-    @Override
-    public void setMostSimilarLocalMatrix(Language language, SparseMatrix sparseMatrix){
-        this.mostSimilarLocalMatrices.put(language,sparseMatrix);
-    }
-
     public boolean hasCachedMostSimilarLocal(Language language, int wpId) {
-        boolean hasCached;
-        try {
-            hasCached = mostSimilarLocalMatrices != null && mostSimilarLocalMatrices.containsKey(language)
-                && mostSimilarLocalMatrices.get(language).getRow(wpId) != null;
-        } catch (IOException e){
+        if (!mostSimilarMatrices.containsKey(language)) {
             return false;
         }
-        return hasCached;
+        try {
+            return mostSimilarMatrices.get(language).getCosimilarityMatrix().getRow(wpId) != null;
+        } catch (IOException e) {
+            throw new RuntimeException(e);  // should not happen
+        }
     }
 
     public SRResultList getCachedMostSimilarLocal(Language language, int wpId, int numResults, TIntSet validIds) {
@@ -71,7 +64,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         }
         SparseMatrixRow row;
         try {
-            row = mostSimilarLocalMatrices.get(language).getRow(wpId);
+            row = mostSimilarMatrices.get(language).getCosimilarityMatrix().getRow(wpId);
         } catch (IOException e){
             return null;
         }
@@ -105,7 +98,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public void setMostSimilarNormalizer(Normalizer n, Language l){
         if (!normalizers.containsKey(l)) {
-            normalizers.put(l, new NormalizerPair());
+            normalizers.put(l, new SrNormalizers());
         }
         normalizers.get(l).setMostSimilarNormalizer(n);
     }
@@ -113,7 +106,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public void setSimilarityNormalizer(Normalizer n, Language l){
         if (!normalizers.containsKey(l)) {
-            normalizers.put(l, new NormalizerPair());
+            normalizers.put(l, new SrNormalizers());
         }
         normalizers.get(l).setSimilarityNormalizer(n);
     }
@@ -202,8 +195,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             for (File f : dir.listFiles()) {
                 if (f.isDirectory() && Language.hasLangCode(f.getName())) {
                     Language l = Language.getByLangCode(f.getName());
-                    NormalizerPair np = normalizers.get(l);
-                    if (np == null) np = new NormalizerPair();
+                    SrNormalizers np = normalizers.get(l);
+                    if (np == null) np = new SrNormalizers();
                     if (np.hasReadableNormalizers(f)) {
                         np.read(f);
                     }
@@ -221,7 +214,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public void trainSimilarity(Dataset dataset){
         if (!normalizers.containsKey(dataset.language)) {
-            normalizers.put(dataset.getLanguage(), new NormalizerPair());
+            normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
         normalizers.get(dataset.getLanguage()).trainSimilarity(this, dataset);
     }
@@ -234,7 +227,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     @Override
     public synchronized void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds){
         if (!normalizers.containsKey(dataset.language)) {
-            normalizers.put(dataset.getLanguage(), new NormalizerPair());
+            normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
         normalizers.get(dataset.getLanguage())
                 .trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
@@ -349,15 +342,14 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         return cosimilarity(ids, language);
     }
 
-
-    protected void writeCosimilarity(String path, LanguageSet languages, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
+    protected void writeCosimilarity(String parentDir, LanguageSet languages, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
         try {
             for (Language language: languages) {
-                String fullPath = path + getName() + "/matrix/" + language.getLangCode();
-                SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(fullPath, this, language);
+                // Get all page ids
                 DaoFilter pageFilter = new DaoFilter()
                         .setLanguages(language)
                         .setNameSpaces(NameSpace.ARTICLE) // TODO: should this come from conf?
+                        .setDisambig(false)
                         .setRedirect(false);
                 Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
                 TIntSet pageIds = new TIntHashSet();
@@ -367,21 +359,31 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     }
                 }
 
-                featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-                pairwise.initMatrices(fullPath);
-                PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(fullPath,pairwise);
-                pairwiseSimilarityWriter.writeSims(pageIds.toArray(),maxHits);
-                mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
+                File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
+                SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
+                srm.writeFeatureMatrix(pageIds.toArray(), WpThreadUtils.getMaxThreads());
+                srm.writeTranspose();
+                srm.writeCosimilarity(pageIds.toArray(), null, maxHits);
             }
         } catch (InterruptedException e){
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public void readCosimilarity(String path, Language language) throws IOException {
-        String fullPath = path + getName() + "/matrix/" + language.getLangCode()+"-cosimilarity";
-        mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath)));
+    protected void readCosimilarity(String parentDir, LanguageSet languages, PairwiseSimilarity pairwise) throws IOException {
+        for (SRMatrices srm : mostSimilarMatrices.values()) {
+            IOUtils.closeQuietly(srm);
+        }
+        mostSimilarMatrices.clear();
+
+        for (Language language: languages) {
+            File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
+            SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
+            if (srm.hasReadableMatrices()) {
+                srm.readMatrices();
+                mostSimilarMatrices.put(language, srm);
+            }
+        }
     }
 
     protected static void configureBase(Configurator configurator, BaseLocalSRMetric sr, Config config) throws ConfigurationException {
@@ -409,10 +411,10 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             throw new ConfigurationException(e);
         }
 
-        for (Language language: languages){
-            try {
-                sr.readCosimilarity(path.getAbsolutePath(), language);
-            } catch (IOException e) {}
+        try {
+            sr.readCosimilarity(path.getAbsolutePath(), languages);
+        } catch (IOException e) {
+            // FIXME
         }
     }
 }

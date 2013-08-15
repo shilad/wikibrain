@@ -66,7 +66,8 @@ public class SRFeatureMatrixWriter {
     }
 
     public void writeTranspose() throws IOException {
-        SparseMatrixTransposer transposer = new SparseMatrixTransposer(new SparseMatrix(new File(path + "-feature")),
+        SparseMatrixTransposer transposer = new SparseMatrixTransposer(
+                new SparseMatrix(new File(path + "-feature")),
                 new File(path + "-transpose"),
                 1024*1024*500); //500mb buffer
         transposer.transpose();

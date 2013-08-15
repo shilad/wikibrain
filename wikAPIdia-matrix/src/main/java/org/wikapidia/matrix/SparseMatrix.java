@@ -137,6 +137,10 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
         }
     }
 
+    public void close() throws IOException {
+        rowBuffers.close();
+    }
+
     @Override
     public File getPath() {
         return path;
