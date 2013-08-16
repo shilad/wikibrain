@@ -17,15 +17,12 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
-import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Dataset;
-import org.wikapidia.sr.utils.SRMatrices;
+import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.WpIOUtils;
@@ -361,9 +358,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
                 File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
                 SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
-                srm.writeFeatureMatrix(pageIds.toArray(), WpThreadUtils.getMaxThreads());
-                srm.writeTranspose();
-                srm.writeCosimilarity(pageIds.toArray(), null, maxHits);
+                srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
             }
         } catch (InterruptedException e){
             throw new RuntimeException(e);
@@ -414,7 +409,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         try {
             sr.readCosimilarity(path.getAbsolutePath(), languages);
         } catch (IOException e) {
-            // FIXME
+            throw new ConfigurationException(e);
         }
     }
 }

@@ -4,12 +4,10 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.matrix.MatrixRow;
-import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.sr.milnewitten.MilneWittenCore;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.Leaderboard;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -22,26 +20,16 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
 
     private static final Logger LOG = Logger.getLogger(PairwiseCosineSimilarity.class.getName());
 
-    private SparseMatrix matrix;
-    private SparseMatrix transpose;
-    private TIntFloatHashMap lengths = null;   // lengths of each row
-    private int maxResults = -1;
-    private TIntSet idsInResults = new TIntHashSet();
     MilneWittenCore milneWittenCore = new MilneWittenCore();
 
     public PairwiseMilneWittenSimilarity() {
     }
 
-    public void initMatrices(String path) throws IOException {
-        this.matrix = new SparseMatrix(new File(path+"-feature"));
-        this.transpose = new SparseMatrix(new File(path+"-transpose"));
-    }
-
-    public double similarity(int wpID1, int wpId2) throws IOException {
+    public double similarity(SRMatrices matrices, int wpID1, int wpId2) throws IOException {
         double sim = 0;
-        MatrixRow row1 = matrix.getRow(wpID1);
+        MatrixRow row1 = matrices.getFeatureMatrix().getRow(wpID1);
         if (row1 != null) {
-            MatrixRow row2 = matrix.getRow(wpId2);
+            MatrixRow row2 = matrices.getFeatureMatrix().getRow(wpId2);
             if (row2 != null) {
                 sim = milneWittenSimilarity(row1.asTroveMap(), row2.asTroveMap());
             }
@@ -50,9 +38,9 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
     }
 
     @Override
-    public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
         Leaderboard leaderboard = new Leaderboard(maxResults);
-        TIntFloatHashMap rowA = matrix.getRow(wpId).asTroveMap();
+        TIntFloatHashMap rowA = matrices.getFeatureMatrix().getRow(wpId).asTroveMap();
         int sizeA = 0;
         TIntSet linkIds = new TIntHashSet();
         for (int i : rowA.keys()){
@@ -64,7 +52,7 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
 
         TIntSet possibleIds = new TIntHashSet();
         for (int i: linkIds.toArray()){
-            TIntFloatHashMap finderRow = transpose.getRow(i).asTroveMap();
+            TIntFloatHashMap finderRow = matrices.getFeatureTransposeMatrix().getRow(i).asTroveMap();
             for (int j : finderRow.keys()){
                 if (Math.abs(finderRow.get(j)-1)<epsilon){
                     possibleIds.add(j);
@@ -79,7 +67,7 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
         }
 
         for (int id: validIds.toArray()) {
-            TIntFloatHashMap rowB = matrix.getRow(id).asTroveMap();
+            TIntFloatHashMap rowB = matrices.getFeatureMatrix().getRow(id).asTroveMap();
             if (rowB != null){
                 int sizeB = 0;
                 int intersection = 0;
@@ -92,7 +80,7 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
                     }
                 }
                 double similarity = 1- (Math.log(Math.max(sizeA,sizeB))-Math.log(intersection))
-                        / (Math.log(matrix.getNumRows())-Math.log(Math.min(sizeA,sizeB)));
+                        / (Math.log(matrices.getFeatureMatrix().getNumRows())-Math.log(Math.min(sizeA,sizeB)));
                 leaderboard.tallyScore(id, similarity);
             }
         }

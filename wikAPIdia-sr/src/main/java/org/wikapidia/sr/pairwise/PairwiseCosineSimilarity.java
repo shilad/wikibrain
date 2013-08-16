@@ -5,12 +5,10 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.matrix.MatrixRow;
-import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.Leaderboard;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -23,8 +21,6 @@ import java.util.logging.Logger;
 public class PairwiseCosineSimilarity implements PairwiseSimilarity {
     private static final Logger LOG = Logger.getLogger(PairwiseCosineSimilarity.class.getName());
 
-    private SparseMatrix matrix;
-    private SparseMatrix transpose;
     private TIntFloatHashMap lengths = null;   // lengths of each row
     private int maxResults = -1;
     private TIntSet idsInResults = new TIntHashSet();
@@ -32,28 +28,23 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
     public PairwiseCosineSimilarity() {
     }
 
-    public void initMatrices(String path) throws IOException{
-        this.matrix = new SparseMatrix(new File(path+"-feature"));
-        this.transpose = new SparseMatrix(new File(path+"-transpose"));
-    }
-
-    public synchronized void initIfNeeded() {
+    public synchronized void initIfNeeded(SRMatrices matrices) {
         if (lengths == null) {
             LOG.info("building cached matrix information");
             lengths = new TIntFloatHashMap();
-            for (SparseMatrixRow row : matrix) {
+            for (SparseMatrixRow row : matrices.getFeatureMatrix()) {
                 lengths.put(row.getRowIndex(), (float) row.getNorm());
                 maxResults = Math.max(maxResults, row.getNumCols());
             }
-            idsInResults.addAll(transpose.getRowIds());
+            idsInResults.addAll(matrices.getFeatureTransposeMatrix().getRowIds());
         }
     }
 
-    public double similarity(int wpId1, int wpId2) throws IOException {
+    public double similarity(SRMatrices matrices, int wpId1, int wpId2) throws IOException {
         double sim = 0;
-        MatrixRow row1 = matrix.getRow(wpId1);
+        MatrixRow row1 = matrices.getFeatureMatrix().getRow(wpId1);
         if (row1 != null) {
-            MatrixRow row2 = matrix.getRow(wpId2);
+            MatrixRow row2 = matrices.getFeatureMatrix().getRow(wpId2);
             if (row2 != null) {
                     sim = cosineSimilarity(row1.asTroveMap(), row2.asTroveMap());
             }
@@ -62,20 +53,20 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
     }
 
     @Override
-    public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException {
-        MatrixRow row = matrix.getRow(wpId);
+    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
+        MatrixRow row = matrices.getFeatureMatrix().getRow(wpId);
         if (row == null) {
             LOG.info("unknown wpId: " + wpId);
             return new SRResultList(0);
         }
-        initIfNeeded();
+        initIfNeeded(matrices);
 
         TIntFloatHashMap vector = row.asTroveMap();
         TIntDoubleHashMap dots = new TIntDoubleHashMap();
 
         for (int id : vector.keys()) {
             float val1 = vector.get(id);
-            MatrixRow row2 = transpose.getRow(id);
+            MatrixRow row2 = matrices.getFeatureTransposeMatrix().getRow(id);
             if (row2 != null) {
                 for (int j = 0; j < row2.getNumCols(); j++) {
                     int id2 = row2.getColIndex(j);

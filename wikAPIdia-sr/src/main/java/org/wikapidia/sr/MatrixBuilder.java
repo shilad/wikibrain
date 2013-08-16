@@ -66,14 +66,10 @@ public class MatrixBuilder {
         LocalSRMetric sr=null;
         UniversalSRMetric usr=null;
         if (cmd.hasOption("m")){
-            FileUtils.deleteDirectory(new File(path + cmd.getOptionValue("m") + "/" + "matrix/"));
-            (new File(path + cmd.getOptionValue("m") + "/" + "matrix/")).mkdirs();
             sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
             sr.writeCosimilarity(path,languages,maxResults);
         }
         if (cmd.hasOption("u")){
-            FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("u")+"/"+"matrix/"));
-            (new File(path + cmd.getOptionValue("u") + "/" + "matrix/")).mkdirs();
             usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
             usr.writeCosimilarity(path,maxResults);
         }

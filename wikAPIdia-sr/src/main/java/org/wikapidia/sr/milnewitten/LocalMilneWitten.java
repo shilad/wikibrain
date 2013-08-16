@@ -36,6 +36,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
     //False is standard Milne Witten with in links, true is with out links
     private boolean outLinks;
     private MilneWittenCore core;
+    private String name = "localmilnewitten";
     private Map<Language,Integer> numPages = new HashMap<Language, Integer>();
 
 
@@ -59,8 +60,12 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
         this.outLinks = outLinks;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getName() {
-        return "LocalMilneWitten";
+        return name;
     }
 
     @Override
@@ -258,8 +263,13 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
 
     @Override
     public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException{
-        PairwiseSimilarity pairwiseSimilarity = new PairwiseMilneWittenSimilarity();
-        super.writeCosimilarity(path, languages, maxHits,pairwiseSimilarity);
+        super.writeCosimilarity(path, languages, maxHits, new PairwiseMilneWittenSimilarity());
+    }
+
+
+    @Override
+    public void readCosimilarity(String path, LanguageSet languages) throws IOException {
+        super.readCosimilarity(path, languages, new PairwiseMilneWittenSimilarity());
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalSRMetric> {
@@ -289,6 +299,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
                     config.getBoolean("outLinks")
             );
+            sr.setName(name);
             configureBase(getConfigurator(), sr, config);
             return sr;
         }

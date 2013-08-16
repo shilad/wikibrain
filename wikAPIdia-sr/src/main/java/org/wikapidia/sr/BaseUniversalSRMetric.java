@@ -16,8 +16,6 @@ import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
-import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
@@ -326,26 +324,26 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     }
 
     protected void writeCosimilarity(String path, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
-        try {
-            path = path + getName()+"/matrix/" + algorithmId;
-            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
-            DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
-            Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
-            TIntSet pageIds = new TIntHashSet();
-            for (UniversalPage page : universalPages) {
-                if (page != null) {
-                    pageIds.add(page.getUnivId());
-                }
-            }
-
-            featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-            pairwise.initMatrices(path);
-            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
-            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),maxHits);
-            mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
-        }catch (InterruptedException e){
-            throw new RuntimeException();
-        }
+//        try {
+//            path = path + getName()+"/matrix/" + algorithmId;
+//            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
+//            DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
+//            Iterable<UniversalPage> universalPages = universalPageDao.get(pageFilter);
+//            TIntSet pageIds = new TIntHashSet();
+//            for (UniversalPage page : universalPages) {
+//                if (page != null) {
+//                    pageIds.add(page.getUnivId());
+//                }
+//            }
+//
+//            featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
+//            pairwise.initMatrices(path);
+//            PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(path,pairwise);
+//            pairwiseSimilarityWriter.writeSims(pageIds.toArray(),maxHits);
+//            mostSimilarUniversalMatrix = new SparseMatrix(new File(path+"-cosimilarity"));
+//        }catch (InterruptedException e){
+//            throw new RuntimeException();
+//        }
     }
 
     @Override

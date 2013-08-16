@@ -6,6 +6,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.UniversalSRMetric;
@@ -28,11 +29,10 @@ public class TrainNormalizerExample {
 
         String path = "../dat/";
         Language l = Language.getByLangCode("simple");
-        SparseMatrix mLocal = new SparseMatrix(new File(path + "sr/LocalMilneWitten/matrix/simple-feature"));
-        SparseMatrix mUniversal = new SparseMatrix(new File(path + "sr/UniversalMilneWitten/matrix/0-feature"));
 
-        sr.setMostSimilarLocalMatrix(l, mLocal);
-        usr.setMostSimilarUniversalMatrix(mUniversal);
+        // This needs to happen at least once...
+//        sr.writeCosimilarity("../dat/sr", new LanguageSet(l), 500);
+
         DatasetDao datasetDao = new DatasetDao();
         Dataset dataset = datasetDao.read(l, path + "gold/cleaned/atlasify240.txt");
 

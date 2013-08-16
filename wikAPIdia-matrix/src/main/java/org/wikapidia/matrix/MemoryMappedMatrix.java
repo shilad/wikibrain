@@ -52,6 +52,9 @@ public class MemoryMappedMatrix {
 
     private void pageInRows() throws IOException {
         int rowIds[] = getRowIdsInOrder();
+        if (rowIds.length == 0) {
+            return;
+        }
 
         // tricky: pages must align with row boundaries
         long startPos = rowOffsets.get(rowIds[0]);

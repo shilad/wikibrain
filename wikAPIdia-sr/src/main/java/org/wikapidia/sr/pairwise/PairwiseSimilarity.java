@@ -6,15 +6,13 @@ import org.wikapidia.sr.SRResultList;
 import java.io.IOException;
 
 /**
+ * Minimal interface needed for vector-based cosimilarity matrices.
+ *
  * @author Matt Lesicko
  * @author Ben Hillmann
  */
 public interface PairwiseSimilarity {
     public double getMinValue();
     public double getMaxValue();
-
-    public void initMatrices (String path) throws IOException;
-
-    public SRResultList mostSimilar(int wpId, int maxResults, TIntSet validIds) throws IOException;
-
+    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException;
 }
