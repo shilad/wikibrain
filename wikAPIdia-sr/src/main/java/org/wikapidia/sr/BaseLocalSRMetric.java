@@ -228,12 +228,12 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public void trainDefaultSimilarity(Dataset dataset){
+    public void trainDefaultSimilarity(Dataset dataset) throws DaoException {
         trainSimilarityNormalizer(dataset, true);
     }
 
     @Override
-    public void trainSimilarity(Dataset dataset){
+    public void trainSimilarity(Dataset dataset) throws DaoException {
         trainSimilarityNormalizer(dataset, false);
     }
 

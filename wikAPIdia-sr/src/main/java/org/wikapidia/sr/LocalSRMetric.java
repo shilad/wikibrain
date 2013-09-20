@@ -137,7 +137,7 @@ public interface LocalSRMetric {
      * @param numResults The maximum number of similar articles computed per phrase.
      * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
      */
-    public void trainDefaultMostSimilar(Dataset dataset, int numResults, TIntSet validIds) throws DaoException;
+    public void trainDefaultMostSimilar(Dataset dataset, int numResults, TIntSet validIds);
 
     /**
      * Train the similarity() function.
@@ -155,7 +155,7 @@ public interface LocalSRMetric {
      * @param numResults The maximum number of similar articles computed per phrase.
      * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
      */
-    public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) throws DaoException;
+    public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds);
 
 
     public void setDefaultMostSimilarNormalizer(Normalizer n);
