@@ -1,14 +1,16 @@
 package org.wikapidia.sr.ensemble;
 
 import com.typesafe.config.Config;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
+import org.wikapidia.sr.SRResultList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,13 +41,26 @@ public class EvenEnsemble implements Ensemble{
     }
 
     @Override
-    public SRResult predictMostSimilar(List<SRResult> scores) {
-        double result=0.0;
-        for (SRResult score : scores){
-            result+=score.getScore();
+    public SRResultList predictMostSimilar(List<SRResultList> scores, int maxResults) {
+        int numMetrics = scores.size();
+        TIntDoubleHashMap scoreMap = new TIntDoubleHashMap();
+        for (SRResultList resultList : scores){
+            for (SRResult result : resultList){
+                double value = result.getScore()/numMetrics;
+                scoreMap.adjustOrPutValue(result.getId(),value,value);
+            }
         }
-        result/=scores.size();
-        return new SRResult(result);
+        List<SRResult> resultList = new ArrayList<SRResult>();
+        for (int id : scoreMap.keys()){
+            resultList.add(new SRResult(id,scoreMap.get(id)));
+        }
+        Collections.sort(resultList);
+        Collections.reverse(resultList);
+        SRResultList result = new SRResultList(maxResults);
+        for (int i=0; i<maxResults&&i<resultList.size();i++){
+            result.set(i,resultList.get(i));
+        }
+        return result;
     }
 
     @Override
