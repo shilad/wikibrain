@@ -220,7 +220,7 @@ public class EnsembleMetric extends BaseLocalSRMetric{
                 return null;
             }
 
-            List<String> langCodes = getConfig().get().getStringList("languages");
+            LanguageSet langs = getConfigurator().get(LanguageSet.class);
 
             if (config.hasPath("metrics")){
                 EnsembleMetric sr;
@@ -251,8 +251,7 @@ public class EnsembleMetric extends BaseLocalSRMetric{
                 //Set up normalizers
                 sr.setDefaultSimilarityNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
                 sr.setDefaultMostSimilarNormalizer(getConfigurator().get(Normalizer.class,config.getString("similaritynormalizer")));
-                for (String langCode : langCodes){
-                    Language language = Language.getByLangCode(langCode);
+                for (Language language : langs){
                     sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
                     sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")), language);
                 }

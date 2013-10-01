@@ -1,6 +1,6 @@
 #!/bin/bash
 
-localmetrics=("ESA" "LocalMilneWitten")
+localmetrics=("ESA" "milnewitten")
 universalmetrics=("UniversalMilneWitten")
 
 
