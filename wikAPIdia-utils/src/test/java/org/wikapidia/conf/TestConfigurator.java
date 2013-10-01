@@ -5,6 +5,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -72,6 +75,30 @@ public class TestConfigurator {
         assertEquals(k, 0);
         Integer l = conf.get(Integer.class, "biff");
         assertEquals(l, 1);
+
+        tmp.delete();
+    }
+
+    @Test
+    public void testOverrideMap() throws ConfigurationException, IOException {
+        File tmp = File.createTempFile("myconf", ".conf", null);
+        tmp.deleteOnExit();
+        FileUtils.write(tmp, "constants.x : 9\n");
+        Map<String, Object> overrides = new HashMap<String, Object>();
+        overrides.put("foo", Arrays.asList("a", "b", "c"));
+        overrides.put("constants.x", 8);
+        Configurator conf = new Configurator(new Configuration(overrides, tmp));
+
+        assertEquals(conf.getConf().get().getInt("constants.x"), 8);
+        Integer i = conf.get(Integer.class, "foo");
+        assertEquals(i, 82);
+        Integer j = conf.get(Integer.class, "bar");
+        assertEquals(j, 23);
+        Integer k = conf.get(Integer.class, "baz");
+        assertEquals(k, 0);
+        Integer l = conf.get(Integer.class, "biff");
+        assertEquals(l, 1);
+        assertEquals(conf.getConf().get().getStringList("foo"), Arrays.asList("a", "b", "c"));
 
         tmp.delete();
     }

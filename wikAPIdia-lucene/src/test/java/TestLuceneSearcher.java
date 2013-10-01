@@ -1,3 +1,4 @@
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Document;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -67,7 +69,7 @@ public class TestLuceneSearcher {
         }
     }
 
-    @Ignore
+//    @Ignore
     @Test
     public void testGetDoc() throws ConfigurationException, IOException, DaoException {
         Configurator conf = new Configurator(new Configuration());
@@ -77,10 +79,8 @@ public class TestLuceneSearcher {
         Language lang = Language.getByLangCode("simple");
         LuceneSearcher searcher = new LuceneSearcher(new LanguageSet(Collections.singletonList(lang)), LuceneOptions.getDefaultOptions());
 
-        int localId = 410732; // this is the last valid ID
+        int localId = 39; // this is the last valid ID
         int luceneId = searcher.getDocIdFromLocalId(localId, lang);
         System.out.println(luceneId);
-        Document doc = searcher.getSearcherByLanguage(lang).doc(luceneId);
-        System.out.println(doc.toString());
     }
 }

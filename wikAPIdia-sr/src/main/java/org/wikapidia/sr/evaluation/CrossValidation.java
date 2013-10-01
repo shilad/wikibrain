@@ -1,7 +1,6 @@
 package org.wikapidia.sr.evaluation;
 
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigObject;
 import org.apache.commons.cli.*;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
@@ -9,9 +8,9 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
@@ -264,7 +263,7 @@ public class CrossValidation {
                         .create("k"));
 
 
-        Env.addStandardOptions(options);
+        EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -276,7 +275,9 @@ public class CrossValidation {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd)
+                .setProperty("sr.metric.training", true)
+                .build();
         Configurator c = env.getConfigurator();
 
 
@@ -292,14 +293,20 @@ public class CrossValidation {
                 : DEFAULT_SPLITS;
 
         if (!cmd.hasOption("u")&&!cmd.hasOption("m")){
-            throw new IllegalArgumentException("Must specify a metric to evaluate.");
+            System.err.println("Must specify a metric to evaluate.");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
         }
         if (cmd.hasOption("u")&&cmd.hasOption("m")){
-            throw new IllegalArgumentException("Can only operate on one metric at a time");
+            System.err.println("Can only operate on one metric at a time");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
         }
         if (cmd.hasOption("r")){
             if (cmd.hasOption("k")||cmd.hasOption("g")||cmd.hasOption("d")||cmd.hasOption("x")){
-                throw new IllegalArgumentException("Options d, g, k, and x are invalid with option r");
+                System.err.println("Options d, g, k, and x are invalid with option r");
+                new HelpFormatter().printHelp("MetricTrainer", options);
+                return;
             } else {
                 mode = "across-dataset";
                 String datasetName = cmd.getOptionValue("r");
@@ -326,7 +333,9 @@ public class CrossValidation {
                 datasetNames.add(dsName);
             }
         } else {
-            throw new IllegalArgumentException("Must specify a dataset using either -g or -r");
+            System.err.println("Must specify a dataset using either -g or -r");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
         }
 
         List<Dataset> allTrain = new ArrayList<Dataset>();
@@ -366,8 +375,8 @@ public class CrossValidation {
         String metricName = cmd.hasOption("m")? cmd.getOptionValue("m"): cmd.getOptionValue("u");
         String recordPath = c.getConf().get().getString("sr.dataset.records");
 
-
         CrossValidation crossValidation = new CrossValidation();
+
         //Run evaluation
         for (int i = 0; i < allTrain.size(); i++) {
             Dataset train = allTrain.get(i);
@@ -375,11 +384,12 @@ public class CrossValidation {
 
             LocalSRMetric sr = null;
             UniversalSRMetric usr = null;
+            // skip cache to create new metrics each time
             if (cmd.hasOption("m")){
-                sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
+                sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"), false);
             }
             if (cmd.hasOption("u")){
-                usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
+                usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"), false);
             }
 
             if (sr!=null){

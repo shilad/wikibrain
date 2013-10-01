@@ -7,6 +7,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
@@ -100,7 +101,7 @@ public class RedirectLoader {
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("d"));
-        Env.addStandardOptions(options);
+        EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
@@ -112,7 +113,7 @@ public class RedirectLoader {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
         DataSource dataSource = conf.get(DataSource.class);

@@ -1,135 +1,153 @@
 wikAPIdia
 =====
-An API for accessing and organizing Wikipedia's language dumps. Specifically we:
-* Support multiple languages in parallel.
-* Resolve all redirected links to the page they point to.
-* Document all links out from a given Wikipedia page.
-* Document all of the members of a specific Wikipedia category.
-* Overlay concepts that are cross-lingual and links between concepts.
+The WikAPIdia Java framework provides easy and efficient access to multi-lingual Wikipedia data.
 
-This API is meant to be used for anyone wishing to manipulate Wikipedia's vast information.
+###Main features
+* Support for **all Wikipedia language** editions and comparisons between multiple languages.
+* Tools that **download** and organize [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
+* Tools that load downloaded Wikipedia datasets into **databases** for analysis.
+* Tools that identify **multi-lingual concepts** and the pages in each language edition that link to those concepts.
+* **Semantic-relatedness algorithms** that measure the relationship between two concepts such as "racecar" and "engine."
+* Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
-Software and Hardware Recommendations
------------
+###System Requirements
 * Maven (required)
 * Bash (required)
-* One of the following <ul> <li>md5sum</li> <li>md5</li> <li>sum</li></ul>
-* Hardware stuff (to be filled out)
+* A clone of this repository
+* Hardware varies depending on the languages you want to import:
+  * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
+  * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
-User Instructions
------------
-* Universal parameters for all scripts:
+###Importing data
 
-```bash
-[-c conf] [-l languages...] [-h threads]
-```
-```bash
--c      Sets configuration file to the specified path
--l      Selects languages by language code to retrieve from wikimedia, separated by commas
--h      Sets the maximum amount of processors to use for parallel language processing
-```
-
-* Run the requestedlinkgetter.sh file. The parameters should be formatted to match the following:
+* Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
+* Download and process the dataset:
 
 ```bash
-[-o outputpath] [-n names...] [-d date]
-```
-```bash
--o      Sets the path to output the tsv file containing all the links
--f      Selects types of dump files to retrieve, separated by commas
--y      Sets the date to retrieve from. Files are retrieve from on or before this date
+	cd wikAPIdia
+	cd wikAPIdia-parent
+	./scripts/run-pipeline all -l simple
 ```
 
-* Run the filedownloader.sh file. The parameters should be formatted to match the following:
+The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. 
+
+You can customize WikAPIdia's importing procedure, but the run-pipeline-sh script should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
-[-o outputpath] [-t tsvpath]
-```
-```bash
--o      Sets the directory in which to output the downloaded dumps
--t      Selects the tsv file from which to read the download links
+./scripts/run-pipeline all -l en,fr
+``` 
+(beware that this is a lot of data!).
+
+
+###An example program
+Once you have imported data (above), your are ready to write programs that analyze Wikipedia!
+Here's a [simple example](https://github.com/shilad/wikAPIdia/blob/master/wikAPIdia-cookbook/src/main/java/org/wikapidia/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
+
+```java
+// Prepare the environment; set the root to the current directory (".").
+Env env = new EnvBuilder()
+        .setBaseDir(".")
+        .build();
+
+// Get the configurator that creates components and a phraze analyzer from it 
+Configurator configurator = env.getConfigurator();
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
+
+// get the most common phrases in simple  
+Language simple = Language.getByLangCode("simple");   // simple english 
+LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(simple, "apple", 5);
+        
+// show the closest pages
+System.out.println("resolution of apple");
+if (resolution == null) { 
+    System.out.println("\tno resolution !");
+} else {
+    for (LocalPage p : resolution.keySet()) {
+        System.out.println("\t" + p + ": " + resolution.get(p));
+    }       
+} 
 ```
 
-* Run the dumploader.sh file. The parameters should be formatted to match the following:
+When you run this program, you'll see output:
 
-```bash
-[file ...]
-```
-```bash
-file    Selects the dump files to load
-```
-	
-* Run the redirectloader.sh file. The parameters should be formatted to match the following:
-
-```bash
-[-d]
-```
-```bash
--d      Drops and recreates all tables and indexes
-```
- 	
-* Run the wikitextdumploader.sh file. The parameters should be formatted to match the following:
-
-```bash
-[-d]
-```
-```bash
--d      Drops and recreates all tables and indexes
+```text
+resolution of apple
+	LocalPage{nameSpace=ARTICLE, title=Apple, localId=39, language=Simple English}: 0.070175424
+	LocalPage{nameSpace=ARTICLE, title=Apple juice, localId=19351, language=Simple English}: 0.043859642
+	LocalPage{nameSpace=ARTICLE, title=Apple Macintosh, localId=517, language=Simple English}: 0.043859642
+	LocalPage{nameSpace=ARTICLE, title=Apple Inc., localId=7111, language=Simple English}: 0.043859642
+	LocalPage{nameSpace=ARTICLE, title=Apple A4, localId=251288, language=Simple English}: 0.043859642
 ```
 
-* Run conceptmapper.sh file. The parameters should be formatted to match the following:
-
-```bash
-[-d] [-n algorithms]
+###A tour of the example
+Let's walk through this program to explain each piece. 
+First, we create an ```Env``, a WikAPIdia environment that provides access to the components we need:
+```java
+Env env = new EnvBuilder()
+        .setBaseDir(".")
+        .build();
 ```
-```bash
--d      Drops and recreates all tables and indexes
--n      Selects the algorithms to use to map concepts
-```
+The [```EnvBuilder```](wikAPIdia-core/src/main/java/org/wikapidia/core/cmd/EnvBuilder.java) 
+provides utility methods to set the languages you want to support, the maximum number of threads available to your program, etc.
+There are more advanced ways of configuring WikAPIdia - both programatically and through configuration files - described in the Configuration section of this page.
 
-* Run universallinkloader.sh. The parameters should be formatted to match the following:
-
-```bash
-[-d] [-n algorithms]
-```
-```bash
--d      Drops and recreates all tables and indexes
--n      Selects the algorithms to use to map concepts
-```
-
-Optional scripts:
-
-* Run phraseloader.sh. The parameters should be formatted to match the following:
-
-```bash
-[-n analyzer]
-```
-```bash
--p      Selects the phrase analyzer to use
+The Env provides access to a 
+[```Configurator```](wikAPIdia-utils/src/main/java/org/wikapidia/conf/Configurator.java) -
+essentially a Factory for creating WikAPIdia components. We get the Page Resolution component next:
+```java
+Configurator configurator = env.getConfigurator();
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
 ```
 
-* Run luceneloader.sh. The parameters should be formatted to match the following:
-
-```bash
-[-d] [-n namespace...] [-i index...]
+A key feature of WikAPIdia is that it supports multiple implementations of the same component. 
+For example, the default PhraseAnalayzer uses the [Lucene](http://lucene.apache.org/) search engine. 
+We could have explicitly requested the lucene implementation of the PhraseAnalyzer:
+```java
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "lucene");
 ```
-```bash
--d      Drops and recreates all Lucene indexes
--p      Specifies the namespaces to indexes
--i      Selects the types of indexes to use, as described by the configuration file
+If we instead wanted to use a phrase analyzer that resolves phrases to pages by looking at "intra-wiki" links, we could have used:
+```java
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "anchortext");
 ```
- 
-A Basic Outline of the Process 
------------
-* Download dump files <ul><li>Obtain dump links</li> <li>Download files from those links</li></ul>
-* Load the Dump as XML <ul><li>Convert Dump into RawPages </li> <li>Convert RawPages into LocalPages <ul>
-					<li>Mark Redirects to be dealt with after this process</li> </ul></li>
-			</ul>
-* Resolve Redirects <ul><li>Load into Redirect Table, fully resolved </li></ul>
-* WikiTextParser does the following <ul><li>load links into table with src/dest IDs </li> <li>load categories with the source article as a category member</li></ul>
-* Load Concepts
-* Load Concept Links
+And received the results:
+```text
+resolution of apple
+	LocalPage{nameSpace=ARTICLE, title=Apple, localId=39, language=Simple English}: 0.55263156
+	LocalPage{nameSpace=ARTICLE, title=Apple Inc., localId=7111, language=Simple English}: 0.30526316
+	LocalPage{nameSpace=ARTICLE, title=Apple Records, localId=47698, language=Simple English}: 0.12631579
+	LocalPage{nameSpace=ARTICLE, title=App Store (iOS), localId=216566, language=Simple English}: 0.010526316
+	LocalPage{nameSpace=ARTICLE, title=Apple Corps, localId=48013, language=Simple English}: 0.005263158
+```
 
-Optional:
-* Load Phrases Database
-* Load Lucene Database
+###Main components
+The WikAPIdia Configurator offers a set of components that you can use as building blocks in your application.
+To get one of these components, use the Configurator.get() method.
+TODO: List and one-sentence description of most important components
+
+###Configuration
+The behavior of WikAPIdia can be customized through configuration files or code.
+The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
+The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
+To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
+
+For example, suppose we wantd to set the root directory, maxThreads to 8, and the phrase analyzer to the anchortext-based analyzer
+We could create a file called myapp.conf containing:
+```text
+maxThreads : 8
+baseDir : /my/path/to/wikAPIdia
+phrases.analyzer.default : anchortext
+```
+We would then tell the EnvBuilder to use the new config to override the default settings:
+```java
+Env env = new EnvBuilder()
+        .setConfigFile("./path/to/myapp.conf")
+        .build();
+```
+We could also make these changes directly in Java, without the config file:
+```java
+Env env = new EnvBuilder()
+        .setMaxThreads(8)
+        .setBaseDir('/my/path/to/wikAPIdia')
+        .setProperty('phrases.analyzer.default', 'anchortext')
+        .build();
+```

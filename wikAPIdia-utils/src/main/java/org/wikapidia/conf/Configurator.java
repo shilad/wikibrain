@@ -1,10 +1,13 @@
 package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.clapper.util.classutil.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -131,12 +134,22 @@ public class Configurator {
             }
         }
 
+        // map from class names to file they are registered in.
+        Set<String> visited = new HashSet<String>();    // files already scanned
+        Map<String, File> registered = new HashMap<String, File>();
+
         for (String entry : classPath.split(":")) {
             File file = new File(entry);
             if (file.length() > MAX_FILE_SIZE) {
-                LOG.info("skipping looking for components in large file " + file);
+                LOG.info("skipping looking for providers in large file " + file);
                 continue;
             }
+            String canonical = FilenameUtils.normalize(file.getAbsolutePath());
+            if (visited.contains(canonical)) {
+                LOG.info("skipping looking for providers in duplicate classpath entry " + canonical);
+                continue;
+            }
+            visited.add(canonical);
 
             ClassFinder finder = new ClassFinder();
             finder.add(new File(entry));
@@ -146,8 +159,16 @@ public class Configurator {
             finder.findClasses (foundClasses,filter);
 
             for (ClassInfo classInfo : foundClasses) {
-                LOG.fine("registering component " + classInfo);
-                registerProvider(classInfo.getClassName());
+                if (registered.containsKey(classInfo.getClassName())) {
+                    LOG.warning("class " + classInfo.getClassName() +
+                            " found in " + file +
+                            " but previously found in " + registered.get(classInfo.getClassName()) +
+                            ". Skipping!");
+                } else {
+                    LOG.fine("registering component " + classInfo);
+                    registerProvider(classInfo.getClassName());
+                    registered.put(classInfo.getClassName(), file);
+                }
             }
         }
 
@@ -206,6 +227,20 @@ public class Configurator {
         }
     }
 
+
+    /**
+     * @see #get(Class, String, boolean)
+     *
+     * @param klass
+     * @param name
+     * @param <T>
+     * @return
+     * @throws ConfigurationException
+     */
+    public <T> T get(Class<T> klass, String name) throws ConfigurationException {
+        return get(klass, name, true);
+    }
+
     /**
      * Get a specific named instance of the component with the specified class.
      *
@@ -215,9 +250,11 @@ public class Configurator {
      *             the config that provides the name for a default implementation or, if
      *             there is exactly one implementation returning it. Otherwise, if name is
      *             null it throws an error.
+     * @param tryCache If true, and the provider scope is singleton will query / populate the
+     *                 cache for the named object.
      * @return The requested component.
      */
-    public <T> T get(Class<T> klass, String name) throws ConfigurationException {
+    public <T> T get(Class<T> klass, String name, boolean tryCache) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
@@ -257,12 +294,14 @@ public class Configurator {
         Map<String, Object> cache = components.get(klass);
 
         synchronized (cache) {
-            if (cache.containsKey(name)) {
+            if (tryCache && cache.containsKey(name)) {
                 return (T) cache.get(name);
             } else {
-                T elem = construct(klass, name, config);
-                cache.put(name, elem);
-                return elem;
+                Pair<Provider, T> pair = constructInternal(klass, name, config);
+                if (tryCache && pair.getLeft().getScope() == Provider.Scope.SINGLETON) {
+                    cache.put(name, pair.getRight());
+                }
+                return pair.getRight();
             }
         }
     }
@@ -278,6 +317,10 @@ public class Configurator {
      * @return The object
      */
     public <T> T construct(Class<T> klass, String name, Config conf) throws ConfigurationException {
+        return constructInternal(klass, name, conf).getRight();
+    }
+
+    private <T> Pair<Provider, T> constructInternal(Class<T> klass, String name, Config conf) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
@@ -285,7 +328,7 @@ public class Configurator {
         for (Provider p : pset) {
             Object o = p.get(name, conf);
             if (o != null) {
-                return (T) o;
+                return Pair.of(p, (T) o);
             }
         }
         throw new ConfigurationException(

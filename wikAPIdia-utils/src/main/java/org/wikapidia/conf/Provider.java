@@ -6,6 +6,11 @@ import com.typesafe.config.Config;
  * Generates some type of object using a configuration file
  */
 public abstract class Provider<T> {
+    public enum Scope {
+        SINGLETON,
+        INSTANCE
+    };
+
     private final Configurator configurator;
     private final Configuration config;
 
@@ -41,6 +46,13 @@ public abstract class Provider<T> {
      * have two different named options.
      */
     public abstract String getPath();
+
+    /**
+     * Returns the scope of the
+     *
+     * @return
+     */
+    public Scope getScope() { return Scope.SINGLETON; }
 
     /**
      * Should return a configured instance of the requested class,

@@ -42,19 +42,6 @@ public interface LocalSRMetric {
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException;
 
     /**
-     * Set the cached matrice for similarity metrics
-     * @param mostSimilarLocalMatrices
-     */
-    public void setMostSimilarLocalMatrices(Map<Language,SparseMatrix> mostSimilarLocalMatrices);
-
-    /**
-     * Set the cached matrix for a similarity metric
-     * @param language
-     * @param sparseMatrix
-     */
-    public void setMostSimilarLocalMatrix(Language language, SparseMatrix sparseMatrix);
-
-    /**
      * Determine the similarity between two strings in a given language by mapping through local pages.
      *
      * @param phrase1 The first phrase.
@@ -168,8 +155,8 @@ public interface LocalSRMetric {
 
     /**
      * Return a vector representation of a LocalPage
-     * @param id
-     * @param language
+     * @param id Local id of the page to be described.
+     * @param language Language of the page to be described
      * @return A vector of a page's scores versus all other pages
      */
     public TIntDoubleMap getVector(int id, Language language) throws DaoException;
@@ -225,5 +212,5 @@ public interface LocalSRMetric {
      */
     public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException;
 
-    public void readCosimilarity(String path, Language language) throws IOException;
+    public void readCosimilarity(String path, LanguageSet languages) throws IOException;
 }

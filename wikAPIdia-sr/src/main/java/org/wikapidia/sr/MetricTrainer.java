@@ -1,21 +1,18 @@
 package org.wikapidia.sr;
 
-import com.google.common.io.Files;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
-import org.h2.util.Profiler;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
 
@@ -62,7 +59,7 @@ public class MetricTrainer {
                         .withDescription("set a local metric")
                         .create("m"));
 
-        Env.addStandardOptions(options);
+        EnvBuilder.addStandardOptions(options);
 
 
         CommandLineParser parser = new PosixParser();
@@ -75,11 +72,15 @@ public class MetricTrainer {
             return;
         }
 
-        Env env = new Env(cmd);
+        Env env = new EnvBuilder(cmd)
+                        .setProperty("sr.metric.training", true)
+                        .build();
         Configurator c = env.getConfigurator();
 
         if (!cmd.hasOption("m")&&!cmd.hasOption("u")){
-            throw new IllegalArgumentException("Must specify a metric to train.");
+            System.err.println("Must specify a metric to train using -m or -u.");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            return;
         }
 
 
@@ -129,20 +130,18 @@ public class MetricTrainer {
             usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
         }
 
+        double mostSimilarThreshold = c.getConf().get().getDouble("sr.dataset.mostSimilarThreshold");
 
         for (Dataset dataset: datasets) {
             if (usr!=null){
                 usr.trainSimilarity(dataset);
-                usr.trainMostSimilar(dataset,maxResults,null);
+                usr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
             }
             if (sr!=null){
-//                Profiler profiler = new Profiler();
-//                profiler.startCollecting();
                 sr.trainDefaultSimilarity(dataset);
-                sr.trainDefaultMostSimilar(dataset,maxResults,null);
+                sr.trainDefaultMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
                 sr.trainSimilarity(dataset);
-                sr.trainMostSimilar(dataset,maxResults,null);
-//                System.out.println(profiler.getTop(20));
+                sr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
             }
         }
 

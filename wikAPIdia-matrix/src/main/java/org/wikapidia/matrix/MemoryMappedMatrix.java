@@ -43,8 +43,18 @@ public class MemoryMappedMatrix {
         pageInRows();
     }
 
+    public void close() throws IOException {
+        channel.close();
+        for (MappedBufferWrapper buffer : buffers) {
+            buffer.close();
+        }
+    }
+
     private void pageInRows() throws IOException {
         int rowIds[] = getRowIdsInOrder();
+        if (rowIds.length == 0) {
+            return;
+        }
 
         // tricky: pages must align with row boundaries
         long startPos = rowOffsets.get(rowIds[0]);

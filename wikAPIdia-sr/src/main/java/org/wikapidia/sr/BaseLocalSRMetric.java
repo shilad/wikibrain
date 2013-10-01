@@ -1,7 +1,12 @@
 package org.wikapidia.sr;
 
+import com.typesafe.config.Config;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
@@ -12,19 +17,16 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.pairwise.PairwiseSimilarityWriter;
-import org.wikapidia.sr.pairwise.SRFeatureMatrixWriter;
 import org.wikapidia.sr.utils.Dataset;
-import org.wikapidia.sr.utils.KnownSim;
+import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.Leaderboard;
-import org.wikapidia.utils.ParallelForEach;
-import org.wikapidia.utils.Procedure;
+import org.wikapidia.sr.utils.SrNormalizers;
+import org.wikapidia.utils.WpIOUtils;
+import org.wikapidia.utils.WpThreadUtils;
 
 import java.io.*;
 import java.util.*;
@@ -36,32 +38,21 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     protected LocalPageDao pageHelper;
 
 
-    protected Normalizer defaultMostSimilarNormalizer = new IdentityNormalizer();
-    protected Normalizer defaultSimilarityNormalizer = new IdentityNormalizer();
-    protected Map<Integer, Normalizer> similarityNormalizers = new HashMap<Integer, Normalizer>();
-    protected Map<Integer, Normalizer> mostSimilarNormalizers = new HashMap<Integer, Normalizer>();
+    protected SrNormalizers defaultNormalizers = new SrNormalizers();
+    protected Map<Language, SrNormalizers> normalizers = new HashMap<Language, SrNormalizers>();
 
-    protected Map<Language,SparseMatrix> mostSimilarLocalMatrices = new HashMap<Language, SparseMatrix>();
-
-    @Override
-    public void setMostSimilarLocalMatrices(Map<Language,SparseMatrix> mostSimilarLocalMatrices){
-        this.mostSimilarLocalMatrices=mostSimilarLocalMatrices;
-    }
-
-    @Override
-    public void setMostSimilarLocalMatrix(Language language, SparseMatrix sparseMatrix){
-        this.mostSimilarLocalMatrices.put(language,sparseMatrix);
-    }
+    protected Map<Language,SRMatrices> mostSimilarMatrices = new HashMap<Language, SRMatrices>();
+    private boolean shouldReadNormalizers = true;
 
     public boolean hasCachedMostSimilarLocal(Language language, int wpId) {
-        boolean hasCached;
-        try {
-            hasCached = mostSimilarLocalMatrices != null && mostSimilarLocalMatrices.containsKey(language)
-                && mostSimilarLocalMatrices.get(language).getRow(wpId) != null;
-        } catch (IOException e){
+        if (!mostSimilarMatrices.containsKey(language)) {
             return false;
         }
-        return hasCached;
+        try {
+            return mostSimilarMatrices.get(language).getCosimilarityMatrix().getRow(wpId) != null;
+        } catch (IOException e) {
+            throw new RuntimeException(e);  // should not happen
+        }
     }
 
     public SRResultList getCachedMostSimilarLocal(Language language, int wpId, int numResults, TIntSet validIds) {
@@ -70,7 +61,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         }
         SparseMatrixRow row;
         try {
-            row = mostSimilarLocalMatrices.get(language).getRow(wpId);
+            row = mostSimilarMatrices.get(language).getCosimilarityMatrix().getRow(wpId);
         } catch (IOException e){
             return null;
         }
@@ -93,29 +84,35 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      */
     @Override
     public void setDefaultMostSimilarNormalizer(Normalizer n){
-        defaultMostSimilarNormalizer = n;
+        this.defaultNormalizers.setMostSimilarNormalizer(n);
     }
 
     @Override
     public void setDefaultSimilarityNormalizer(Normalizer defaultSimilarityNormalizer) {
-        this.defaultSimilarityNormalizer = defaultSimilarityNormalizer;
+        this.defaultNormalizers.setSimilarityNormalizer(defaultSimilarityNormalizer);
     }
 
     @Override
     public void setMostSimilarNormalizer(Normalizer n, Language l){
-        mostSimilarNormalizers.put((int)l.getId(),n);
+        if (!normalizers.containsKey(l)) {
+            normalizers.put(l, new SrNormalizers());
+        }
+        normalizers.get(l).setMostSimilarNormalizer(n);
     }
 
     @Override
     public void setSimilarityNormalizer(Normalizer n, Language l){
-        similarityNormalizers.put((int)l.getId(),n);
+        if (!normalizers.containsKey(l)) {
+            normalizers.put(l, new SrNormalizers());
+        }
+        normalizers.get(l).setSimilarityNormalizer(n);
     }
 
     /**
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
     protected void ensureSimilarityTrained() {
-        if (!defaultSimilarityNormalizer.isTrained()) {
+        if (!defaultNormalizers.getSimilarityNormalizer().isTrained()) {
             throw new IllegalStateException("Model default similarity has not been trained.");
         }
     }
@@ -123,7 +120,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
     protected void ensureMostSimilarTrained() {
-        if (!defaultMostSimilarNormalizer.isTrained()) {
+        if (!defaultNormalizers.getMostSimilarNormalizer().isTrained()) {
             throw new IllegalStateException("Model default mostSimilar has not been trained.");
         }
     }
@@ -144,184 +141,93 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
      * Use the language-specific most similar normalizer to normalize a similarity if it exists.
      * Otherwise use the default most similar normalizer if it's available.
      * @param srl
-     * @param language
+     * @param l
      * @return
      */
-    protected SRResultList normalize(SRResultList srl, Language language) {
-        if (mostSimilarNormalizers.containsKey((int) language.getId())
-                &&mostSimilarNormalizers.get((int) language.getId()).isTrained()){
-            return mostSimilarNormalizers.get((int) language.getId()).normalize(srl);
+    protected SRResultList normalize(SRResultList srl, Language l) {
+        if (normalizers.containsKey(l) &&
+            normalizers.get(l).getMostSimilarNormalizer().isTrained()) {
+            return normalizers.get(l).getMostSimilarNormalizer().normalize(srl);
         }
         ensureMostSimilarTrained();
-        return defaultMostSimilarNormalizer.normalize(srl);
+        return defaultNormalizers.getMostSimilarNormalizer().normalize(srl);
     }
 
-    protected double normalize (double score, Language language){
-        if (similarityNormalizers.containsKey((int) language.getId())
-                &&similarityNormalizers.get((int) language.getId()).isTrained()){
-            return similarityNormalizers.get((int) language.getId()).normalize(score);
+    protected double normalize (double score, Language l){
+        if (normalizers.containsKey(l) &&
+                normalizers.get(l).getSimilarityNormalizer().isTrained()) {
+            return normalizers.get(l).getSimilarityNormalizer().normalize(score);
         }
         ensureSimilarityTrained();
-        return defaultSimilarityNormalizer.normalize(score);
+        return defaultNormalizers.getSimilarityNormalizer().normalize(score);
     }
 
     @Override
     public void write(String path) throws IOException {
-        ObjectOutputStream oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "/normalizer/defaultMostSimilarNormalizer")
-        );
-        oop.writeObject(defaultMostSimilarNormalizer);
-        oop.flush();
-        oop.close();
+        File dir = new File(path, getName());
+        WpIOUtils.mkdirsQuietly(dir);
+        defaultNormalizers.write(dir);
+        for (Language l : normalizers.keySet()) {
+            File langDir = new File(dir, l.getLangCode());
+            WpIOUtils.mkdirsQuietly(langDir);
+            normalizers.get(l).write(langDir);
+        }
+    }
 
-        oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "/normalizer/defaultSimilarityNormalizer")
-        );
-        oop.writeObject(defaultSimilarityNormalizer);
-        oop.flush();
-        oop.close();
-
-        oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "/normalizer/mostSimilarNormalizers")
-        );
-        oop.writeObject(mostSimilarNormalizers);
-        oop.flush();
-        oop.close();
-
-        oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "/normalizer/similarityNormalizers")
-        );
-        oop.writeObject(similarityNormalizers);
-        oop.flush();
-        oop.close();
+    public void setReadNormalizers(boolean shouldRead) {
+        this.shouldReadNormalizers = shouldRead;
     }
 
     @Override
     public void read(String path) throws IOException {
-        try {
-        ObjectInputStream oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "/normalizer/defaultMostSimilarNormalizer")
-        );
-        this.defaultMostSimilarNormalizer = (Normalizer)oip.readObject();
-        oip.close();
-
-        oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "/normalizer/defaultSimilarityNormalizer")
-        );
-        this.defaultSimilarityNormalizer = (Normalizer)oip.readObject();
-        oip.close();
-
-        oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "/normalizer/mostSimilarNormalizers")
-        );
-        this.mostSimilarNormalizers = (Map<Integer,Normalizer>)oip.readObject();
-        oip.close();
-
-        oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "/normalizer/similarityNormalizers")
-        );
-        this.similarityNormalizers = (Map<Integer,Normalizer>)oip.readObject();
-        oip.close();
-        }catch (ClassNotFoundException e){
-            throw new IOException("Malformed normalizer file",e);
+        File dir = new File(path, getName());
+        if (!dir.isDirectory()) {
+            LOG.warning("directory " + dir + " does not exist; cannot read files");
+            return;
         }
-    }
-
-    @Override
-    public void trainDefaultSimilarity(Dataset dataset) throws DaoException {
-        trainSimilarityNormalizer(dataset, true);
-    }
-
-    @Override
-    public void trainSimilarity(Dataset dataset) throws DaoException {
-        trainSimilarityNormalizer(dataset, false);
-    }
-
-    /**
-     * Trains the mostSimilarNormalizer to support the similarity() method.
-     * @param dataset
-     * @param isDefault
-     */
-    protected synchronized void trainSimilarityNormalizer(final Dataset dataset, boolean isDefault) {
-        final Normalizer trainee;
-        if (isDefault){
-            trainee = defaultSimilarityNormalizer;
-            defaultSimilarityNormalizer = new IdentityNormalizer();
-
-        } else {
-            trainee = similarityNormalizers.get((int)dataset.getLanguage().getId());
-            similarityNormalizers.put((int)dataset.getLanguage().getId(),new IdentityNormalizer());
-        }
-        try {
-            trainee.reset();
-            ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
-                public void call(KnownSim ks) throws IOException, DaoException {
-                    SRResult sim = similarity(ks.phrase1, ks.phrase2, ks.language, false);
-                    trainee.observe(sim.getScore(), ks.similarity);
+        if (shouldReadNormalizers) {
+            if (defaultNormalizers.hasReadableNormalizers(dir)) {
+                defaultNormalizers.read(dir);
+            }
+            for (File f : dir.listFiles()) {
+                if (f.isDirectory() && Language.hasLangCode(f.getName())) {
+                    Language l = Language.getByLangCode(f.getName());
+                    SrNormalizers np = normalizers.get(l);
+                    if (np == null) np = new SrNormalizers();
+                    if (np.hasReadableNormalizers(f)) {
+                        np.read(f);
+                    }
+                    normalizers.put(l, np);
                 }
-            },100);
-            trainee.observationsFinished();
-            LOG.info("trained similarity normalizer for " + getName() + ": " + trainee.dump());
-        } finally {
-            if (isDefault){
-                defaultSimilarityNormalizer = trainee;
-            } else {
-                similarityNormalizers.put((int)dataset.getLanguage().getId(),trainee);
             }
         }
+    }
+
+    @Override
+    public void trainDefaultSimilarity(Dataset dataset){
+        defaultNormalizers.trainSimilarity(this, dataset);
+    }
+
+    @Override
+    public void trainSimilarity(Dataset dataset){
+        if (!normalizers.containsKey(dataset.language)) {
+            normalizers.put(dataset.getLanguage(), new SrNormalizers());
+        }
+        normalizers.get(dataset.getLanguage()).trainSimilarity(this, dataset);
     }
 
     @Override
     public synchronized void trainDefaultMostSimilar(Dataset dataset, int numResults, TIntSet validIds){
-        trainMostSimilarNormalizer(dataset, numResults, validIds, true);
+        defaultNormalizers.trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
     }
 
     @Override
     public synchronized void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds){
-        trainMostSimilarNormalizer(dataset, numResults, validIds, false);
-    }
-
-    /**
-     * Trains the mostSimilarNormalizer to support the mostSimilar() method.
-     * Also estimates the similarity score for articles that don't appear in top lists.
-     * Note that this (probably) is an overestimate, and depends on how well the
-     * distribution of scores in your gold standard matches your actual data.
-     *
-     * @param dataset
-     */
-    protected synchronized void trainMostSimilarNormalizer(final Dataset dataset, final int numResults, final TIntSet validIds, boolean isDefault) {
-        final Normalizer trainee;
-        if (isDefault){
-            trainee = defaultMostSimilarNormalizer;
-            defaultMostSimilarNormalizer = new IdentityNormalizer();
-
-        } else {
-            trainee = mostSimilarNormalizers.get((int)dataset.getLanguage().getId());
-            mostSimilarNormalizers.put((int)dataset.getLanguage().getId(), new IdentityNormalizer());
+        if (!normalizers.containsKey(dataset.language)) {
+            normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
-        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
-            public void call(KnownSim ks) throws DaoException {
-                ks.maybeSwap();
-                List<LocalString> localStrings = new ArrayList<LocalString>();
-                localStrings.add(new LocalString(ks.language, ks.phrase1));
-                localStrings.add(new LocalString(ks.language, ks.phrase2));
-                List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
-                LocalPage page = pageHelper.getById(ks.language,ids.get(0).getId());
-                if (page != null) {
-                    SRResultList dsl = mostSimilar(page, numResults, validIds);
-                    if (dsl != null) {
-                        trainee.observe(dsl, dsl.getIndexForId(ids.get(1).getId()), ks.similarity);
-                    }
-                }
-            }
-        },100);
-        trainee.observationsFinished();
-        if (isDefault){
-            defaultMostSimilarNormalizer = trainee;
-        } else {
-            mostSimilarNormalizers.put((int)dataset.getLanguage().getId(),trainee);
-        }
-        LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
+        normalizers.get(dataset.getLanguage())
+                .trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
     }
 
     @Override
@@ -433,15 +339,14 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         return cosimilarity(ids, language);
     }
 
-
-    protected void writeCosimilarity(String path, LanguageSet languages, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
+    protected void writeCosimilarity(String parentDir, LanguageSet languages, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
         try {
             for (Language language: languages) {
-                String fullPath = path + getName() + "/matrix/" + language.getLangCode();
-                SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(fullPath, this, language);
+                // Get all page ids
                 DaoFilter pageFilter = new DaoFilter()
                         .setLanguages(language)
                         .setNameSpaces(NameSpace.ARTICLE) // TODO: should this come from conf?
+                        .setDisambig(false)
                         .setRedirect(false);
                 Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
                 TIntSet pageIds = new TIntHashSet();
@@ -451,21 +356,60 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                     }
                 }
 
-                featureMatrixWriter.writeFeatureVectors(pageIds.toArray(), 4);
-                pairwise.initMatrices(fullPath);
-                PairwiseSimilarityWriter pairwiseSimilarityWriter = new PairwiseSimilarityWriter(fullPath,pairwise);
-                pairwiseSimilarityWriter.writeSims(pageIds.toArray(),maxHits);
-                mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath+"-cosimilarity")));
+                File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
+                SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
+                srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
             }
         } catch (InterruptedException e){
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public void readCosimilarity(String path, Language language) throws IOException {
-        String fullPath = path + getName() + "/matrix/" + language.getLangCode()+"-cosimilarity";
-        mostSimilarLocalMatrices.put(language,new SparseMatrix(new File(fullPath)));
+    protected void readCosimilarity(String parentDir, LanguageSet languages, PairwiseSimilarity pairwise) throws IOException {
+        for (SRMatrices srm : mostSimilarMatrices.values()) {
+            IOUtils.closeQuietly(srm);
+        }
+        mostSimilarMatrices.clear();
+
+        for (Language language: languages) {
+            File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
+            SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
+            if (srm.hasReadableMatrices()) {
+                srm.readMatrices();
+                mostSimilarMatrices.put(language, srm);
+            }
+        }
     }
 
+    protected static void configureBase(Configurator configurator, BaseLocalSRMetric sr, Config config) throws ConfigurationException {
+        Config rootConfig = configurator.getConf().get();
+        File path = new File(rootConfig.getString("sr.metric.path"));
+        boolean isTraining = rootConfig.getBoolean("sr.metric.training");
+        LanguageSet languages = configurator.get(LanguageSet.class);
+
+        // initialize normalizers
+        sr.setDefaultSimilarityNormalizer(configurator.get(Normalizer.class, config.getString("similaritynormalizer")));
+        sr.setDefaultMostSimilarNormalizer(configurator.get(Normalizer.class, config.getString("mostsimilarnormalizer")));
+
+
+        for (Language language: languages){
+            sr.setSimilarityNormalizer(configurator.get(Normalizer.class, config.getString("similaritynormalizer")), language);
+            sr.setMostSimilarNormalizer(configurator.get(Normalizer.class, config.getString("mostsimilarnormalizer")), language);
+        }
+        if (isTraining) {
+            sr.setReadNormalizers(false);
+        }
+
+        try {
+            sr.read(path.getAbsolutePath());
+        } catch (IOException e){
+            throw new ConfigurationException(e);
+        }
+
+        try {
+            sr.readCosimilarity(path.getAbsolutePath(), languages);
+        } catch (IOException e) {
+            throw new ConfigurationException(e);
+        }
+    }
 }

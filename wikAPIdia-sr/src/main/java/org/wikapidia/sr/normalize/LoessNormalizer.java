@@ -219,6 +219,11 @@ public class LoessNormalizer extends BaseNormalizer {
         }
 
         @Override
+        public Scope getScope() {
+            return Scope.INSTANCE;
+        }
+
+        @Override
         public LoessNormalizer get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("loess")) {
                 return null;

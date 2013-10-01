@@ -171,6 +171,11 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
         return path;
     }
 
+    @Override
+    public void close() throws IOException {
+        rowBuffers.close();
+    }
+
     private void info(String message) {
         LOG.log(Level.WARNING, "dense matrix " + path + ": " + message);
     }

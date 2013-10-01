@@ -92,6 +92,15 @@ public class Language implements Comparable<Language>, Serializable {
         throw new IllegalArgumentException("unknown langCode: '" + langCode + "'");
     }
 
+    public static boolean hasLangCode(String langCode) {
+        for (Language lang : LANGUAGES) {
+            if (lang.langCode.equalsIgnoreCase(langCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @param id numeric id associated with the language
      * @return associated language
