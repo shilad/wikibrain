@@ -92,16 +92,22 @@ public class EnsembleMetric extends BaseLocalSRMetric{
     }
 
     @Override
-    public void trainSimilarity(Dataset dataset) throws DaoException {
+    public void trainSimilarity(Dataset dataset) {
         List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
         for (KnownSim ks : dataset.getData()){
             List<Double> scores = new ArrayList<Double>();
             for (LocalSRMetric metric : metrics){
-                double score = metric.similarity(ks.phrase1,ks.phrase2,ks.language,false).getScore();
+                double score;
+                try {
+                    score = metric.similarity(ks.phrase1,ks.phrase2,ks.language,false).getScore();
+                }
+                catch (DaoException e){
+                    score = Double.NaN;
+                }
                 if (!Double.isNaN(score)&&!Double.isInfinite(score)){
                     scores.add(score);
                 } else {
-                    scores.add(0.0);
+                    scores.add(missingScore);
                 }
             }
             ensembleSims.add(new EnsembleSim(scores,ks));
@@ -110,12 +116,17 @@ public class EnsembleMetric extends BaseLocalSRMetric{
     }
 
     @Override
-    public void trainDefaultSimilarity(Dataset dataset) throws DaoException {
+    public void trainDefaultSimilarity(Dataset dataset) {
         List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
         for (KnownSim ks : dataset.getData()){
             List<Double> scores = new ArrayList<Double>();
             for (LocalSRMetric metric : metrics){
-                scores.add(metric.similarity(ks.phrase1,ks.phrase2,ks.language,false).getScore());
+                try {
+                    scores.add(metric.similarity(ks.phrase1,ks.phrase2,ks.language,false).getScore());
+                }
+                catch (DaoException e){
+                    scores.add(missingScore);
+                }
             }
             ensembleSims.add(new EnsembleSim(scores,ks));
         }
@@ -178,6 +189,12 @@ public class EnsembleMetric extends BaseLocalSRMetric{
 
     @Override
     public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
+        //TODO: implement me
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void readCosimilarity(String path, LanguageSet languages) throws IOException {
         //TODO: implement me
         throw new UnsupportedOperationException();
     }
