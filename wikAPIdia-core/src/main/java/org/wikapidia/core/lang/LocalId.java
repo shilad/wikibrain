@@ -57,6 +57,11 @@ public class LocalId {
         return result;
     }
 
+    public long toLong() {
+        long l = language.getId();
+        return (l << 32) | id;
+    }
+
     public int toInt() {
         // crazy scheme that breaks if languages "in the tail" get page ids that are too big
         // TODO: this could be smarter
@@ -75,6 +80,13 @@ public class LocalId {
             throw new IllegalArgumentException("illegal languageId: " + languageId + " in " + packed);
         int id = packed & MAX_PACKED_ID;
         return new LocalId(Language.getById(languageId), id);
+    }
+
+    public static LocalId fromLong(long packed) {
+        long languageId = packed >>> 32;
+        long id = packed & MAX_PACKED_ID;
+        return new LocalId(Language.getById((int)languageId), (int)id);
+
     }
 
     public boolean canPackInInt() {

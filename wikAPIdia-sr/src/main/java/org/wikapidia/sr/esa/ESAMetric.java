@@ -20,15 +20,9 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.*;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.normalize.IdentityNormalizer;
-import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.utils.Dataset;
-import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.SimUtils;
-import org.wikapidia.utils.ParallelForEach;
-import org.wikapidia.utils.Procedure;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +42,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private final LuceneSearcher searcher;
     private boolean resolvePhrases;
+
     private Map<Language, WpIdFilter> conceptFilter = new HashMap<Language, WpIdFilter>();
 
     public ESAMetric(LuceneSearcher searcher, LocalPageDao pageHelper, Disambiguator disambiguator, boolean resolvePhrases) {
@@ -89,9 +84,11 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
+        System.out.println("HERE 1");
         if (resolvePhrases){
             return super.mostSimilar(phrase,maxResults);
         }
+        System.out.println("HERE 2");
         Language language = phrase.getLanguage();
         WikapidiaScoreDoc[] wikapidiaScoreDocs = getQueryBuilderByLanguage(language)
                                             .setPhraseQuery(phrase.getString())
@@ -221,6 +218,15 @@ public class ESAMetric extends BaseLocalSRMetric {
     }
 
     private QueryBuilder getQueryBuilderByLanguage(Language language) {
+        QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
+        WpIdFilter filter = conceptFilter.get(language);
+        if (filter != null) {
+            builder.addFilter(filter);
+        }
+        return builder;
+    }
+
+    private QueryBuilder getQueryBuilderByLanguage(Language language, TIntSet wpIds) {
         QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
         WpIdFilter filter = conceptFilter.get(language);
         if (filter != null) {

@@ -33,12 +33,6 @@ public interface UniversalSRMetric {
      */
     public int getAlgorithmId();
 
-    /**
-     * Set the cached matrix for a universal metric
-     * @param matrix
-     */
-    public void setMostSimilarUniversalMatrix(SparseMatrix matrix);
-
         /**
          * Determine the similarity between two universal pages
          * @param page1 The first page.

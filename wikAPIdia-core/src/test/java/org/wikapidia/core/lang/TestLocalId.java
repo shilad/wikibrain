@@ -27,6 +27,9 @@ public class TestLocalId {
         int packed = lid.toInt();
         LocalId lid2 = LocalId.fromInt(packed);
         assertEquals(lid, lid2);
+        long lpacked = lid.toLong();
+        LocalId lid3 = LocalId.fromLong(lpacked);
+        assertEquals(lid, lid3);
     }
 
 }

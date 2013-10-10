@@ -59,23 +59,11 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         if (!hasCachedMostSimilarLocal(language, wpId)){
             return null;
         }
-        SparseMatrixRow row;
         try {
-            row = mostSimilarMatrices.get(language).getCosimilarityMatrix().getRow(wpId);
+            return mostSimilarMatrices.get(language).mostSimilar(wpId, numResults, validIds);
         } catch (IOException e){
             return null;
         }
-        Leaderboard leaderboard = new Leaderboard(numResults);
-        for (int i=0; i<row.getNumCols() ; i++){
-            int wpId2 = row.getColIndex(i);
-            float value = row.getColValue(i);
-            if (validIds == null || validIds.contains(wpId2)){
-                leaderboard.tallyScore(wpId2,value);
-            }
-        }
-        SRResultList results = leaderboard.getTop();
-        results.sortDescending();
-        return results;
     }
 
     /**

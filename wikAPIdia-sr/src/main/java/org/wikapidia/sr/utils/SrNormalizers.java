@@ -4,13 +4,16 @@ import gnu.trove.set.TIntSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
+import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
@@ -123,6 +126,32 @@ public class SrNormalizers {
         }
     }
 
+    /**
+     *
+     * @param metric
+     * @param dataset
+     */
+    public void trainSimilarity(final UniversalSRMetric metric, Dataset dataset) {
+        final Normalizer trainee = similarityNormalizer;
+        similarityNormalizer = new IdentityNormalizer();
+        try {
+            trainee.reset();
+            ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
+                public void call(KnownSim ks) throws IOException, DaoException {
+                    ks.maybeSwap();
+                    LocalString ls1 = new LocalString(ks.language,ks.phrase1);
+                    LocalString ls2 = new LocalString(ks.language,ks.phrase2);
+                    SRResult sim = metric.similarity(ls1, ls2, false);
+                    trainee.observe(sim.getScore(), ks.similarity);
+                }
+            }, 100);
+            trainee.observationsFinished();
+            LOG.info("trained similarity normalizer: " + trainee.dump());
+        } finally {
+            similarityNormalizer = trainee;
+        }
+    }
+
 
     /**
      *
@@ -161,6 +190,47 @@ public class SrNormalizers {
             mostSimilarNormalizer = trainee;
         }
     }
+
+    /**
+     *
+     * @param metric
+     * @param disambiguator
+     * @param dataset
+     * @param validIds
+     * @param maxResults
+     */
+    public void trainMostSimilar(final UniversalSRMetric metric, final Disambiguator disambiguator, final UniversalPageDao dao, final int algorithmId, Dataset dataset, final TIntSet validIds, final int maxResults) {
+        final Normalizer trainee = mostSimilarNormalizer;
+        mostSimilarNormalizer = new IdentityNormalizer();
+        try {
+            trainee.reset();
+            ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
+                public void call(KnownSim ks) throws IOException, DaoException {
+                    ks.maybeSwap();
+                    List<LocalString> localStrings = new ArrayList<LocalString>();
+                    localStrings.add(new LocalString(ks.language, ks.phrase1));
+                    localStrings.add(new LocalString(ks.language, ks.phrase2));
+                    List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
+                    if (ids != null && ids.size() == 2) {
+                        int pageId1 = dao.getUnivPageId(ids.get(0).asLocalPage(), algorithmId);
+                        int pageId2 = dao.getUnivPageId(ids.get(1).asLocalPage(),algorithmId);
+                        UniversalPage page = dao.getById(pageId1,algorithmId);
+                        if (page != null) {
+                            SRResultList dsl = metric.mostSimilar(page, maxResults, validIds);
+                            if (dsl != null) {
+                                trainee.observe(dsl, dsl.getIndexForId(pageId2), ks.similarity);
+                            }
+                        }
+                    }
+                }
+            }, 100);
+            trainee.observationsFinished();
+            LOG.info("trained most similar normalizer: " + trainee.dump());
+        } finally {
+            mostSimilarNormalizer = trainee;
+        }
+    }
+
 
     /**
      * Reads a single normalizer from disk.
