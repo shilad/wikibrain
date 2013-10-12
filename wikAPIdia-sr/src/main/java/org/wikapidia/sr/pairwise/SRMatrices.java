@@ -138,16 +138,16 @@ public class SRMatrices implements Closeable {
     public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException {
         long l = System.currentTimeMillis();
         try {
-        MatrixRow row = cosimilarityMatrix.getRow(wpId);
-        SRResultList results = null;
-        if (row != null && row.getNumCols() >= numResults ) {
-            results = rowToResultList(row, numResults, validIds);
-        }
-        if (results != null && results.numDocs() >= numResults) {
-            return results;
-        } else {
-            return similarity.mostSimilar(this, wpId, numResults, validIds);
-        }
+            MatrixRow row = cosimilarityMatrix.getRow(wpId);
+            SRResultList results = null;
+            if (row != null && row.getNumCols() >= numResults ) {
+                results = rowToResultList(row, numResults, validIds);
+            }
+            if (results != null && results.numDocs() >= numResults) {
+                return results;
+            } else {
+                return similarity.mostSimilar(this, wpId, numResults, validIds);
+            }
         } finally {
             System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
         }

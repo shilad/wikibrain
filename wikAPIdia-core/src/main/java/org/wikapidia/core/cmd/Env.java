@@ -39,6 +39,15 @@ public class Env {
     }
 
     /**
+     *
+     * @param pathConfs
+     * @throws ConfigurationException
+     */
+    public Env(File ... pathConfs) throws ConfigurationException {
+        this(new HashMap<String, Object>(), pathConfs);
+    }
+
+    /**
      * Parses standard command line arguments and builds the environment using them.
      * @param confParams
      * @param pathConfs

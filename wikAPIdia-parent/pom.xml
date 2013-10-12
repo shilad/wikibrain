@@ -21,6 +21,7 @@
         <module>../wikAPIdia-phrases</module>
         <module>../wikAPIdia-sr</module>
         <module>../wikAPIdia-utils</module>
+        <module>../wikAPIdia-integration-tests</module>
     </modules>
 
     <build>

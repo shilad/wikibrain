@@ -25,6 +25,7 @@ import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
+import org.wikapidia.utils.WpIOUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -98,7 +99,6 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         int uId2 = universalPageDao.getUnivPageId(similar2.asLocalPage(),algorithmId);
         UniversalPage up2 = universalPageDao.getById(uId2,algorithmId);
         return similarity(up1,up2,explanations);
-
     }
 
 
@@ -159,38 +159,21 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     @Override
     public void write(String path) throws IOException {
-        ObjectOutputStream oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "/normalizer/" + algorithmId + "-mostSimilarNormalizer")
-        );
-//        oop.writeObject(mostSimilarNormalizer);
-        oop.flush();
-        oop.close();
-
-        oop = new ObjectOutputStream(
-                new FileOutputStream(path + getName() + "/normalizer/" + algorithmId + "-normalizers.getSimilarityNormalizer")
-        );
-//        oop.writeObject(normalizers.getSimilarityNormalizer);
-        oop.flush();
-        oop.close();
+        File dir = new File(path, getName());
+        WpIOUtils.mkdirsQuietly(dir);
+        normalizers.write(dir);
     }
 
     @Override
     public void read(String path) throws IOException {
-//        try {
-        ObjectInputStream oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "/normalizer/" + algorithmId + "-mostSimilarNormalizer")
-        );
-//        this.mostSimilarNormalizer = (Normalizer)oip.readObject();
-        oip.close();
-
-        oip = new ObjectInputStream(
-                new FileInputStream(path + getName() + "/normalizer/" + algorithmId + "-similarityNormalizer")
-        );
-//        this.similarityNormalizer = (Normalizer)oip.readObject();
-        oip.close();
-//        }catch (ClassNotFoundException e){
-//            throw new IOException("Malformed normalizer file",e);
-//        }
+        File dir = new File(path, getName());
+        if (!dir.isDirectory()) {
+            LOG.warning("directory " + dir + " does not exist; cannot read files");
+            return;
+        }
+        if (normalizers.hasReadableNormalizers(dir)) {
+            normalizers.read(dir);
+        }
     }
 
     @Override
@@ -200,39 +183,17 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     @Override
     public void trainMostSimilar(final Dataset dataset, final int numResults, final TIntSet validIds) throws DaoException{
-//        final Normalizer trainee = mostSimilarNormalizer;
-//        mostSimilarNormalizer = new IdentityNormalizer();
-//        ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
-//            public void call(KnownSim ks) throws DaoException {
-//                ks.maybeSwap();
-//                List<LocalString> localStrings = new ArrayList<LocalString>();
-//                localStrings.add(new LocalString(ks.language, ks.phrase1));
-//                localStrings.add(new LocalString(ks.language, ks.phrase2));
-//                List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
-//                int pageId1 = universalPageDao.getUnivPageId(ids.get(0).asLocalPage(), algorithmId);
-//                int pageId2 = universalPageDao.getUnivPageId(ids.get(1).asLocalPage(),algorithmId);
-//                UniversalPage page = universalPageDao.getById(pageId1,algorithmId);
-//                if (page != null) {
-//                    SRResultList dsl = mostSimilar(page, numResults, validIds);
-//                    if (dsl != null) {
-//                        trainee.observe(dsl, dsl.getIndexForId(pageId2), ks.similarity);
-//                    }
-//                }
-//            }
-//        }, 1);
-//        trainee.observationsFinished();
-//        mostSimilarNormalizer = trainee;
-//        LOG.info("trained most similar normalizer for " + getName() + ": " + trainee.dump());
+        normalizers.trainMostSimilar(this, disambiguator, universalPageDao, algorithmId, dataset, validIds, numResults);
     }
 
     @Override
     public void setMostSimilarNormalizer(Normalizer n){
-//        mostSimilarNormalizer = n;
+        this.normalizers.setMostSimilarNormalizer(n);
     }
 
     @Override
     public void setSimilarityNormalizer(Normalizer n){
-//        similarityNormalizer = n;
+        this.normalizers.setSimilarityNormalizer(n);
     }
 
     @Override
