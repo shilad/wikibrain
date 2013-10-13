@@ -218,6 +218,7 @@ public class RequestedLinkGetter {
         if (cmd.hasOption('o')) {
             filePath = cmd.getOptionValue('o');
         }
+        LOG.info("writing download list to " + filePath);
 
         List<String> result = new ArrayList<String>();
         for (Language language : languages) {

@@ -107,10 +107,6 @@ public class Env {
         }
 
         File downloadPath = new File(configuration.get().getString("download.path"));
-        if (downloadPath == null) {
-            throw new IllegalArgumentException("missing configuration for download.path");
-        }
-
         List<File> matches = new ArrayList<File>();
         for (Language l : getLanguages()) {
             for (FileMatcher fm : matchers) {

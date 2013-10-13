@@ -65,19 +65,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            Collection<Condition> conditions = new ArrayList<Condition>();
-            if (daoFilter.getLangIds() != null) {
-                conditions.add(Tables.RAW_PAGE.LANG_ID.in(daoFilter.getLangIds()));
-            }
-            if (daoFilter.getNameSpaceIds() != null) {
-                conditions.add(Tables.RAW_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
-            }
-            if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.RAW_PAGE.IS_REDIRECT.in(daoFilter.isRedirect()));
-            }
-            if (daoFilter.isDisambig() != null) {
-                conditions.add(Tables.RAW_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
-            }
+            Collection<Condition> conditions = getConditions(daoFilter);
             Cursor<Record> result = context.selectFrom(Tables.RAW_PAGE)
                     .where(conditions)
                     .fetchLazy(getFetchSize());
@@ -93,29 +81,34 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
         }
     }
 
+    private Collection<Condition> getConditions(DaoFilter daoFilter) {
+        Collection<Condition> conditions = new ArrayList<Condition>();
+        if (daoFilter.getLangIds() != null) {
+            conditions.add(Tables.RAW_PAGE.LANG_ID.in(daoFilter.getLangIds()));
+        }
+        if (daoFilter.getNameSpaceIds() != null) {
+            conditions.add(Tables.RAW_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
+        }
+        if (daoFilter.isRedirect() != null) {
+            conditions.add(Tables.RAW_PAGE.IS_REDIRECT.in(daoFilter.isRedirect()));
+        }
+        if (daoFilter.isDisambig() != null) {
+            conditions.add(Tables.RAW_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
+        }
+        return conditions;
+    }
+
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException{
         Connection conn = null;
         try {
             conn = ds.getConnection();
             DSLContext context = DSL.using(conn, dialect);
-            Collection<Condition> conditions = new ArrayList<Condition>();
-            if (daoFilter.getLangIds() != null) {
-                conditions.add(Tables.RAW_PAGE.LANG_ID.in(daoFilter.getLangIds()));
-            }
-            if (daoFilter.getNameSpaceIds() != null) {
-                conditions.add(Tables.RAW_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
-            }
-            if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.RAW_PAGE.IS_REDIRECT.in(daoFilter.isRedirect()));
-            }
-            if (daoFilter.isDisambig() != null) {
-                conditions.add(Tables.RAW_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
-            }
+            Collection<Condition> conditions = getConditions(daoFilter);
             return context.selectCount().
                     from(Tables.RAW_PAGE).
                     where(conditions).
-                    fetchCount();
+                    fetchOne().value1();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {

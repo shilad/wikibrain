@@ -116,6 +116,7 @@ public class DumpLoader {
                 new Procedure<File>() {
                     @Override
                     public void call(File path) throws Exception {
+                        LOG.info("processing file: " + path);
                         loader.load(path);
                     }
                 });
