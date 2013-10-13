@@ -3,6 +3,7 @@ package org.wikapidia.integration;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RawPageDao;

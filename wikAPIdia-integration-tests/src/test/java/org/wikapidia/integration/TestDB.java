@@ -2,6 +2,7 @@ package org.wikapidia.integration;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.h2.tools.Restore;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
@@ -31,8 +32,8 @@ import java.util.logging.Logger;
 public class TestDB {
     private static final Logger LOG = Logger.getLogger(TestDB.class.getName());
 
-    private final Env env;
-    private final DataSource ds;
+    private Env env;
+    private DataSource ds;
     private final File dir;
 
 
@@ -54,10 +55,10 @@ public class TestDB {
         dir.mkdirs();
 
         createDownloads();
-        createRawAndLocal();
 
         */
-        createRedirect();
+        createRawAndLocal();
+//        createRedirect();
     }
 
     /**
@@ -97,13 +98,13 @@ public class TestDB {
     }
 
     public void createRawAndLocal() throws ClassNotFoundException, SQLException, DaoException, ConfigurationException, IOException {
-        deleteH2Backup("rawAndLocal.sql");
+        deleteH2Backup("rawAndLocal.zip");
         DumpLoader.main(TestUtils.getArgs("-d"));
-        backupH2To("rawAndLocal.sql");
+        backupH2To("rawAndLocal.zip");
     }
 
-    public void restoreRawAndLocal() throws SQLException {
-        restoreH2From("rawAndLocal.sql");
+    public void restoreRawAndLocal() throws SQLException, ConfigurationException {
+        restoreH2From("rawAndLocal.zip");
     }
 
     public void createRedirect() throws DaoException, ConfigurationException, SQLException {
@@ -112,7 +113,7 @@ public class TestDB {
         backupH2To("redirect.sql");
     }
 
-    public void restoreRedirect() throws SQLException {
+    public void restoreRedirect() throws SQLException, ConfigurationException {
         restoreH2From("redirect.sql");
     }
 
@@ -123,21 +124,32 @@ public class TestDB {
     private void backupH2To(String fileName) throws SQLException {
         Connection cnx = ds.getConnection();
         try {
-            cnx.createStatement().execute("SCRIPT TO '" + new File(dir, fileName) + "' COMPRESSION LZF");
+            cnx.createStatement().execute("BACKUP TO '" + new File(dir, fileName) + "'");
         } finally {
             AbstractSqlDao.quietlyCloseConn(cnx);
         }
     }
 
-    private void restoreH2From(String fileName) throws SQLException {
+    private void restoreH2From(String fileName) throws SQLException, ConfigurationException {
         LOG.info("restoring " + fileName);
+        shutdownH2();
+        Restore.main(
+                "-file", new File(dir, fileName).toString(),
+                "-dir", env.getConfiguration().get().getString("baseDir") + "/db",
+                "-db", "h2"
+        );
+        LOG.info("finished restoring " + fileName);
+    }
+
+    private void shutdownH2() throws SQLException, ConfigurationException {
         Connection cnx = ds.getConnection();
         try {
-            cnx.createStatement().execute("DROP ALL OBJECTS; RUNSCRIPT FROM '" + new File(dir, fileName) + "' COMPRESSION LZF");
+            cnx.createStatement().execute("SHUTDOWN IMMEDIATELY");
         } finally {
             AbstractSqlDao.quietlyCloseConn(cnx);
         }
-        LOG.info("finished restoring " + fileName);
+        env = TestUtils.getEnv();
+        ds = env.getConfigurator().get(DataSource.class);
     }
 
     public Env getEnv() {
