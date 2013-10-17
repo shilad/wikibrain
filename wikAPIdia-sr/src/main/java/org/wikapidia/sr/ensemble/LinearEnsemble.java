@@ -26,8 +26,18 @@ public class LinearEnsemble implements Ensemble{
         simlarityCoefficients = new TDoubleArrayList();
         simlarityCoefficients.add(0.0);
         for (int i=0; i<numMetrics; i++){
-            simlarityCoefficients.add(1 / numMetrics);
+            simlarityCoefficients.add(1.0 / numMetrics);
         }
+        mostSimilarCoefficients = new TDoubleArrayList();
+        mostSimilarCoefficients.add(0.0);
+        for (int i=0; i<numMetrics; i++){
+            mostSimilarCoefficients.add(1.0/numMetrics);
+            mostSimilarCoefficients.add(0);
+        }
+    }
+
+    public String  getName(){
+        return "LinearEnsemble";
     }
 
     @Override
@@ -57,12 +67,13 @@ public class LinearEnsemble implements Ensemble{
         if (simList.isEmpty()){
             throw new IllegalStateException("no examples to train on!");
         }
-        double[][] X = new double[simList.size()][numMetrics];
+        double[][] X = new double[simList.size()][numMetrics*2];
         double[] Y = new double[simList.size()];
         for (int i=0; i<simList.size(); i++){
             Y[i]=simList.get(i).knownSim.similarity;
             for (int j=0; j<numMetrics; j++){
-                X[i][j]= simList.get(i).getScores().get(j);
+                X[i][2*j]= simList.get(i).getScores().get(j);
+                X[i][2*j+1]= Math.log(simList.get(i).getRanks().get(j)+1);
             }
         }
         OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
@@ -94,9 +105,11 @@ public class LinearEnsemble implements Ensemble{
         for (SRResultList resultList : scores){
             for (SRResult result : resultList){
                 double value = result.getScore()*mostSimilarCoefficients.get(i);
+                int rank = resultList.getIndexForId(result.getId())+1;
+                value +=Math.log(rank)*mostSimilarCoefficients.get(i+1);
                 scoreMap.adjustOrPutValue(result.getId(),value,value+mostSimilarCoefficients.get(0));
             }
-            i++;
+            i+=2;
         }
         List<SRResult> resultList = new ArrayList<SRResult>();
         for (int id : scoreMap.keys()){
@@ -104,8 +117,9 @@ public class LinearEnsemble implements Ensemble{
         }
         Collections.sort(resultList);
         Collections.reverse(resultList);
-        SRResultList result = new SRResultList(maxResults);
-        for (i=0; i<maxResults&&i<resultList.size();i++){
+        int size = maxResults>resultList.size()? resultList.size() : maxResults;
+        SRResultList result = new SRResultList(size);
+        for (i=0; i<size;i++){
             result.set(i,resultList.get(i));
         }
         return result;
@@ -115,12 +129,12 @@ public class LinearEnsemble implements Ensemble{
     public void read(String path) throws IOException {
         try {
             ObjectInputStream oip = new ObjectInputStream(
-                    new FileInputStream(path+"/similarityCoefficients")
+                    new FileInputStream(path+"/ensemble/"+getName()+"/similarityCoefficients")
             );
             this.simlarityCoefficients = (TDoubleArrayList)oip.readObject();
             oip.close();
             oip = new ObjectInputStream(
-                    new FileInputStream(path+"/mostSimilarCoefficients")
+                    new FileInputStream(path+"/ensemble/"+getName()+"/mostSimilarCoefficients")
             );
             this.mostSimilarCoefficients = (TDoubleArrayList)oip.readObject();
             oip.close();
@@ -132,14 +146,14 @@ public class LinearEnsemble implements Ensemble{
     @Override
     public void write(String path) throws IOException{
         ObjectOutputStream oop = new ObjectOutputStream(
-                new FileOutputStream(path + "/similarityCoefficients")
+                new FileOutputStream(path +"/ensemble/"+getName()+ "/similarityCoefficients")
         );
         oop.writeObject(simlarityCoefficients);
         oop.flush();
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path + "/mostSimilarCoefficients")
+                new FileOutputStream(path +"/ensemble/"+getName()+ "/mostSimilarCoefficients")
         );
         oop.writeObject(mostSimilarCoefficients);
         oop.flush();

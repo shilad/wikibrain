@@ -209,7 +209,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public void trainSimilarity(Dataset dataset){
+    public void trainSimilarity(Dataset dataset) throws DaoException {
         if (!normalizers.containsKey(dataset.language)) {
             normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
