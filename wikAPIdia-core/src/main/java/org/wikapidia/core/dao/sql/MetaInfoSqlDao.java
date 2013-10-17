@@ -13,6 +13,7 @@ import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.MetaInfo;
 
 import javax.sql.DataSource;
@@ -202,6 +203,12 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 quietlyCloseConn(conn);
             }
         }
+    }
+
+
+    @Override
+    public LanguageSet getLoadedLanguages() throws DaoException {
+        return getLoadedLanguages(LocalPage.class);
     }
 
     @Override
