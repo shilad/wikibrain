@@ -9,6 +9,7 @@ import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -34,10 +35,12 @@ public class DumpLoader {
     private final AtomicInteger counter = new AtomicInteger();
     private final LocalPageDao localPageDao;
     private final RawPageDao rawPageDao;
+    private final MetaInfoDao metaDao;
 
-    public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao) {
+    public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao, MetaInfoDao metaDao) {
         this.localPageDao = localPageDao;
         this.rawPageDao = rawPageDao;
+        this.metaDao = metaDao;
     }
 
     /**
@@ -59,9 +62,10 @@ public class DumpLoader {
     private void save(File file, RawPage rp) {
         try {
             rawPageDao.save(rp);
+            metaDao.incrementRecords(rp.getClass(), rp.getLanguage());
         } catch (Exception e) {
             LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
-
+            metaDao.incrementErrorsQuietly(rp.getClass(), rp.getLanguage());
         }
         try {
             LocalPage lp = new LocalPage(
@@ -70,8 +74,10 @@ public class DumpLoader {
                                 rp.isRedirect(), rp.isDisambig()
                             );
             localPageDao.save(lp);
+            metaDao.incrementRecords(lp.getClass(), lp.getLanguage());
         } catch (Exception e) {
             LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
+            metaDao.incrementErrorsQuietly(LocalPage.class, rp.getLanguage());
         }
 
     }
@@ -101,15 +107,18 @@ public class DumpLoader {
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
+        MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
-        final DumpLoader loader = new DumpLoader(lpDao, rpDao);
+        final DumpLoader loader = new DumpLoader(lpDao, rpDao, metaDao);
 
         if (cmd.hasOption("d")) {
             lpDao.clear();
             rpDao.clear();
+            metaDao.clear();
         }
         lpDao.beginLoad();
         rpDao.beginLoad();
+        metaDao.clear();
 
         // loads multiple dumps in parallel
         ParallelForEach.loop(paths,
@@ -123,5 +132,6 @@ public class DumpLoader {
 
         lpDao.endLoad();
         rpDao.endLoad();
+        metaDao.endLoad();
     }
 }

@@ -1,7 +1,6 @@
 package org.wikapidia.integration;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.h2.tools.Restore;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.WikapidiaException;
@@ -10,6 +9,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.AbstractSqlDao;
 import org.wikapidia.dao.load.DumpLoader;
 import org.wikapidia.dao.load.RedirectLoader;
+import org.wikapidia.dao.load.WikiTextLoader;
 import org.wikapidia.download.FileDownloader;
 import org.wikapidia.download.RequestedLinkGetter;
 
@@ -48,17 +48,16 @@ public class TestDB {
      * @throws Exception
      */
     public void createBackups() throws Exception {
-/*
+       shutdownH2(true);
         if (dir.exists()) {
             FileUtils.deleteQuietly(dir);
         }
         dir.mkdirs();
 
         createDownloads();
-
-        */
         createRawAndLocal();
-//        createRedirect();
+        createRedirect();
+        createWikiText();
     }
 
     /**
@@ -108,13 +107,24 @@ public class TestDB {
     }
 
     public void createRedirect() throws DaoException, ConfigurationException, SQLException {
-        deleteH2Backup("redirect.sql");
+        deleteH2Backup("redirect.zip");
         RedirectLoader.main(TestUtils.getArgs("-d"));
-        backupH2To("redirect.sql");
+        backupH2To("redirect.zip");
     }
 
     public void restoreRedirect() throws SQLException, ConfigurationException {
-        restoreH2From("redirect.sql");
+        restoreH2From("redirect.zip");
+    }
+
+    public void createWikiText() throws IOException, DaoException, ConfigurationException, SQLException {
+        deleteH2Backup("wikitext.zip");
+        WikiTextLoader.main(TestUtils.getArgs("-d"));
+        backupH2To("wikitext.zip");
+    }
+
+
+    public void restoreWikiText() throws SQLException, ConfigurationException {
+        restoreH2From("wikitext.zip");
     }
 
     private void deleteH2Backup(String filename) {
@@ -132,7 +142,8 @@ public class TestDB {
 
     private void restoreH2From(String fileName) throws SQLException, ConfigurationException {
         LOG.info("restoring " + fileName);
-        shutdownH2();
+        shutdownH2(true);
+        LOG.info("finished shutting down ");
         Restore.main(
                 "-file", new File(dir, fileName).toString(),
                 "-dir", env.getConfiguration().get().getString("baseDir") + "/db",
@@ -141,13 +152,17 @@ public class TestDB {
         LOG.info("finished restoring " + fileName);
     }
 
-    private void shutdownH2() throws SQLException, ConfigurationException {
+    private void shutdownH2(boolean delete) throws SQLException, ConfigurationException {
         Connection cnx = ds.getConnection();
         try {
+//            if (delete) {
+//                cnx.createStatement().execute("DROP ALL OBJECTS DELETE FILES");
+//            }
             cnx.createStatement().execute("SHUTDOWN IMMEDIATELY");
         } finally {
             AbstractSqlDao.quietlyCloseConn(cnx);
         }
+        // Reset the environment because the database is no longer available.
         env = TestUtils.getEnv();
         ds = env.getConfigurator().get(DataSource.class);
     }
