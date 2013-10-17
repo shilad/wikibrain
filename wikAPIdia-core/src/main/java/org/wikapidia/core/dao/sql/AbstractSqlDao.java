@@ -92,11 +92,17 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         executeSqlScriptWithSuffix("-drop-tables.sql");
     }
 
-    @Override
-    public void beginLoad() throws  DaoException {
+    public void createTables() throws DaoException {
         executeSqlScriptWithSuffix("-drop-indexes.sql");
         executeSqlScriptWithSuffix("-create-tables.sql");
-        loader = new FastLoader(ds, fields);
+    }
+
+    @Override
+    public void beginLoad() throws  DaoException {
+        createTables();
+        if (fields != null) {
+            loader = new FastLoader(ds, fields);
+        }
     }
 
     /**
@@ -112,7 +118,9 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
 
     @Override
     public void endLoad() throws  DaoException {
-        loader.endLoad();
+        if (loader != null) {
+            loader.endLoad();
+        }
         executeSqlScriptWithSuffix("-create-indexes.sql");
     }
 
