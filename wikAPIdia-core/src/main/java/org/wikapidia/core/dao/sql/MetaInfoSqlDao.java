@@ -1,10 +1,7 @@
 package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record3;
-import org.jooq.Result;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -15,13 +12,16 @@ import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.MetaInfo;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -195,6 +195,35 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 accumulated.merge(info);
             }
             return accumulated;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            if (conn != null) {
+                quietlyCloseConn(conn);
+            }
+        }
+    }
+
+    @Override
+    public LanguageSet getLoadedLanguages(Class component) throws DaoException {
+        sync(component);
+        Connection conn = null;
+        try {
+            conn = ds.getConnection();
+            DSLContext context = DSL.using(conn, dialect);
+
+            Set<Language> langs = new HashSet<Language>();
+            Result<Record1<Short>> records =
+                    context.select(Tables.META_INFO.LANG_ID)
+                            .from(Tables.META_INFO)
+                            .where(Tables.META_INFO.COMPONENT.eq(component.getSimpleName()))
+                            .and(Tables.META_INFO.LANG_ID.isNotNull())
+                            .fetch();
+
+            for (Record1<Short> record : records) {
+                langs.add(Language.getById(record.value1()));
+            }
+            return new LanguageSet(langs);
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {

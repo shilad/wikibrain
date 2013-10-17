@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao;
 
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.MetaInfo;
 
 import java.util.Date;
@@ -65,7 +66,6 @@ public interface MetaInfoDao extends Dao<MetaInfo> {
     public int incrementErrors(Class component) throws DaoException;
 
     /**
-     *
      * Increment the count of recrods with errors for a particular component.
      * Implementations need not write the counts to the database after
      * every increment.
@@ -120,6 +120,11 @@ public interface MetaInfoDao extends Dao<MetaInfo> {
      * @throws DaoException
      */
     MetaInfo getInfo(Class component) throws DaoException;
+
+    /**
+     * Returns all languages with at least one record.
+     */
+    LanguageSet getLoadedLanguages(Class component) throws DaoException;
 
     /**
      * Returns the current MetaInfo value for the current component.

@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.MetaInfoSqlDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -52,6 +53,7 @@ public class TestMetaInfoDao {
         assertEquals(0, dao.getInfo(Boolean.class, EN).getNumErrors());
         assertEquals(0, dao.getInfo(String.class, IT).getNumRecords());
         assertEquals(0, dao.getInfo(String.class, IT).getNumErrors());
+
     }
 
 
@@ -89,5 +91,16 @@ public class TestMetaInfoDao {
         assertEquals(5, dao.getInfo(String.class).getNumRecords());
         assertEquals(1, dao.getInfo(Boolean.class).getNumRecords());
         assertEquals(0, dao.getInfo(String.class).getNumErrors());
+
+
+        LanguageSet langs = dao.getLoadedLanguages(String.class);
+        assertEquals(langs.size(), 2);
+        assertTrue(langs.containsLanguage(EN));
+        assertTrue(langs.containsLanguage(IT));
+
+        langs = dao.getLoadedLanguages(Boolean.class);
+        assertEquals(langs.size(), 1);
+        assertTrue(langs.containsLanguage(EN));
+
     }
 }

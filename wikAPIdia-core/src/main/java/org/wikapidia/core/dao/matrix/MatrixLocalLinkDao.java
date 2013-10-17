@@ -11,6 +11,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.matrix.*;
@@ -298,6 +299,11 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         } catch (IOException e) {
             throw new DaoException(e);
         }
+    }
+
+    @Override
+    public LanguageSet getLoadedLanguages() throws DaoException {
+        return delegate.getLoadedLanguages();
     }
 
     private List<Integer> getPackedIds(DaoFilter filter) {

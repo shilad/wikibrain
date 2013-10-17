@@ -48,7 +48,7 @@ public class TestDB {
      * @throws Exception
      */
     public void createBackups() throws Exception {
-       shutdownH2(true);
+       shutdownH2();
         if (dir.exists()) {
             FileUtils.deleteQuietly(dir);
         }
@@ -142,7 +142,7 @@ public class TestDB {
 
     private void restoreH2From(String fileName) throws SQLException, ConfigurationException {
         LOG.info("restoring " + fileName);
-        shutdownH2(true);
+        shutdownH2();
         LOG.info("finished shutting down ");
         Restore.main(
                 "-file", new File(dir, fileName).toString(),
@@ -152,12 +152,9 @@ public class TestDB {
         LOG.info("finished restoring " + fileName);
     }
 
-    private void shutdownH2(boolean delete) throws SQLException, ConfigurationException {
+    private void shutdownH2() throws SQLException, ConfigurationException {
         Connection cnx = ds.getConnection();
         try {
-//            if (delete) {
-//                cnx.createStatement().execute("DROP ALL OBJECTS DELETE FILES");
-//            }
             cnx.createStatement().execute("SHUTDOWN IMMEDIATELY");
         } finally {
             AbstractSqlDao.quietlyCloseConn(cnx);
