@@ -118,7 +118,7 @@ public class DumpLoader {
         }
         lpDao.beginLoad();
         rpDao.beginLoad();
-        metaDao.clear();
+        metaDao.beginLoad();
 
         // loads multiple dumps in parallel
         ParallelForEach.loop(paths,

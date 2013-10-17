@@ -60,7 +60,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
 
     @Override
     public void clear(Class component) throws DaoException {
-        if (tableExists()) {
+        if (!tableExists()) {
             return;
         }
         Connection conn = null;
@@ -84,7 +84,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
 
     @Override
     public void clear(Class component, Language lang) throws DaoException {
-        if (tableExists()) {
+        if (!tableExists()) {
             return;
         }
         Connection conn = null;
@@ -219,7 +219,9 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         MetaInfo info = langInfos.get(langKey);
         if (info == null) {
             synchronized (langInfos) {
-                if (!langInfos.containsKey(langKey)) {
+                if (langInfos.containsKey(langKey)) {
+                    info = langInfos.get(langKey);
+                } else {
                     Connection conn = null;
                     try {
                         conn = ds.getConnection();
