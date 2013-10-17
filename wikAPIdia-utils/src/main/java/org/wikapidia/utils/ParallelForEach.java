@@ -6,9 +6,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -101,9 +99,10 @@ public class ParallelForEach {
             int numThreads,
             final Function<T,R> fn,
             final int logModulo) {
+
         final List<R> result = new ArrayList<R>();
         for (int i = 0; i < collection.size(); i++) result.add(null);
-        final ExecutorService exec = Executors.newFixedThreadPool(numThreads);
+        final ExecutorService exec = new ThreadPoolErrors(numThreads);
         final CountDownLatch latch = new CountDownLatch(collection.size());
         try {
             // create a copy so that modifications to original list are safe
@@ -137,4 +136,42 @@ public class ParallelForEach {
         }
 
     }
+
+    /**
+     * This code adapted from:
+     * http://stackoverflow.com/questions/2248131/handling-exceptions-from-java-executorservice-tasks
+     */
+    private static class ThreadPoolErrors extends ThreadPoolExecutor {
+        public ThreadPoolErrors(int threads) {
+            super(  threads, // core threads
+                    threads, // max threads
+                    0, // timeout
+                    TimeUnit.MILLISECONDS, // timeout units
+                    new LinkedBlockingQueue<Runnable>() // work queue
+            );
+        }
+
+        protected void afterExecute(Runnable r, Throwable t) {
+            super.afterExecute(r, t);
+            if (t == null && r instanceof Future<?>) {
+                try {
+                    Future<?> future = (Future<?>) r;
+                    if (future.isDone()) {
+                        future.get();
+                    }
+                } catch (CancellationException ce) {
+                    t = ce;
+                } catch (ExecutionException ee) {
+                    t = ee.getCause();
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt(); // ignore/reset
+                }
+            }
+            if (t != null) {
+                LOG.log(Level.SEVERE, "Uncaught Exception: ", t);
+                LOG.log(Level.SEVERE, "stacktrace: " + ExceptionUtils.getStackTrace(t).replaceAll("\n", " ").replaceAll("\\s+", " "));
+            }
+        }
+    }
+
 }

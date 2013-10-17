@@ -12,6 +12,7 @@ import org.wikapidia.matrix.*;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.UniversalSRMetric;
+import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -132,6 +133,37 @@ public class SRMatrices implements Closeable {
 
     public SparseMatrix getCosimilarityMatrix() {
         return cosimilarityMatrix;
+    }
+
+    public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException {
+        long l = System.currentTimeMillis();
+        try {
+            MatrixRow row = cosimilarityMatrix.getRow(wpId);
+            SRResultList results = null;
+            if (row != null && row.getNumCols() >= numResults ) {
+                results = rowToResultList(row, numResults, validIds);
+            }
+            if (results != null && results.numDocs() >= numResults) {
+                return results;
+            } else {
+                return similarity.mostSimilar(this, wpId, numResults, validIds);
+            }
+        } finally {
+            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
+        }
+    }
+
+    public static SRResultList rowToResultList(MatrixRow row, int maxResults, TIntSet validIds) {
+        Leaderboard leaderboard = new Leaderboard(maxResults);
+        for (int i=0; i<row.getNumCols() ; i++){
+            int wpId2 = row.getColIndex(i);
+            if (validIds == null || validIds.contains(wpId2)){
+                leaderboard.tallyScore(wpId2, row.getColValue(i));
+            }
+        }
+        SRResultList results = leaderboard.getTop();
+        results.sortDescending();
+        return results;
     }
 
     public void close() {

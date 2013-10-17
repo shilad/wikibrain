@@ -2,6 +2,9 @@ package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * Generates some type of object using a configuration file
  */

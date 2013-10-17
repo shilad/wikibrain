@@ -266,6 +266,11 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric {
         super.writeCosimilarity(path, maxHits, pairwiseSimilarity);
     }
 
+    @Override
+    public void readCosimilarity(String path) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
     public static class Provider extends org.wikapidia.conf.Provider<UniversalSRMetric> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);

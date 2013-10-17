@@ -1,10 +1,14 @@
 package org.wikapidia.core.dao.sql;
 
 import org.apache.commons.io.IOUtils;
+import org.jodah.typetools.TypeResolver;
 import org.jooq.SQLDialect;
 import org.jooq.TableField;
 import org.wikapidia.core.dao.Dao;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.MetaInfoDao;
+import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.model.MetaInfo;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -30,6 +34,8 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     protected final SQLDialect dialect;
     private final String sqlScriptPrefix;
     private final TableField[] fields;
+    private final Class<T> klass;
+    private final MetaInfoSqlDao metaDao;
     protected DataSource ds;
     protected SqlCache cache;
     private int fetchSize = DEFAULT_FETCH_SIZE;
@@ -49,6 +55,9 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
      * @throws DaoException
      */
     public AbstractSqlDao(DataSource dataSource, TableField [] fields, String sqlScriptPrefix) throws DaoException {
+        Class<?>[] typeArguments = TypeResolver.resolveRawArguments(AbstractSqlDao.class, getClass());
+        this.klass = (Class<T>) typeArguments[0];
+
         ds = dataSource;
         Connection conn = null;
         try {
@@ -60,6 +69,13 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
             quietlyCloseConn(conn);
         }
         cache = null;
+
+        // TODO: pass this through the constructor
+        if (this instanceof MetaInfoDao) {
+            this.metaDao = (MetaInfoSqlDao) this;
+        } else {
+            this.metaDao = new MetaInfoSqlDao(ds);
+        }
         this.fields = fields;
         this.sqlScriptPrefix = sqlScriptPrefix;
     }
@@ -87,6 +103,11 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     }
 
     @Override
+    public LanguageSet getLoadedLanguages() throws DaoException {
+        return metaDao.getLoadedLanguages(klass);
+    }
+
+    @Override
     public void clear() throws DaoException {
         executeSqlScriptWithSuffix("-drop-indexes.sql");
         executeSqlScriptWithSuffix("-drop-tables.sql");
@@ -96,7 +117,9 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     public void beginLoad() throws  DaoException {
         executeSqlScriptWithSuffix("-drop-indexes.sql");
         executeSqlScriptWithSuffix("-create-tables.sql");
-        loader = new FastLoader(ds, fields);
+        if (fields != null) {
+            loader = new FastLoader(ds, fields);
+        }
     }
 
     /**
@@ -112,7 +135,9 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
 
     @Override
     public void endLoad() throws  DaoException {
-        loader.endLoad();
+        if (loader != null) {
+            loader.endLoad();
+        }
         executeSqlScriptWithSuffix("-create-indexes.sql");
     }
 

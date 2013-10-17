@@ -39,6 +39,15 @@ public class Env {
     }
 
     /**
+     *
+     * @param pathConfs
+     * @throws ConfigurationException
+     */
+    public Env(File ... pathConfs) throws ConfigurationException {
+        this(new HashMap<String, Object>(), pathConfs);
+    }
+
+    /**
      * Parses standard command line arguments and builds the environment using them.
      * @param confParams
      * @param pathConfs
@@ -98,10 +107,6 @@ public class Env {
         }
 
         File downloadPath = new File(configuration.get().getString("download.path"));
-        if (downloadPath == null) {
-            throw new IllegalArgumentException("missing configuration for download.path");
-        }
-
         List<File> matches = new ArrayList<File>();
         for (Language l : getLanguages()) {
             for (FileMatcher fm : matchers) {

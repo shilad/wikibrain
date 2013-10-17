@@ -93,9 +93,10 @@ public class WikiTextLoader {
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         LocalLinkDao llDao = conf.get(LocalLinkDao.class);
         LocalCategoryMemberDao lcmDao = conf.get(LocalCategoryMemberDao.class);
+        MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
-        ParserVisitor linkVisitor = new LocalLinkVisitor(llDao, lpDao);
-        ParserVisitor catVisitor = new LocalCategoryVisitor(lpDao, lcmDao);
+        ParserVisitor linkVisitor = new LocalLinkVisitor(llDao, lpDao, metaDao);
+        ParserVisitor catVisitor = new LocalCategoryVisitor(lpDao, lcmDao, metaDao);
         //TODO: ill visitor
 
         visitors.add(linkVisitor);

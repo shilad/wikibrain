@@ -59,23 +59,11 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         if (!hasCachedMostSimilarLocal(language, wpId)){
             return null;
         }
-        SparseMatrixRow row;
         try {
-            row = mostSimilarMatrices.get(language).getCosimilarityMatrix().getRow(wpId);
+            return mostSimilarMatrices.get(language).mostSimilar(wpId, numResults, validIds);
         } catch (IOException e){
             return null;
         }
-        Leaderboard leaderboard = new Leaderboard(numResults);
-        for (int i=0; i<row.getNumCols() ; i++){
-            int wpId2 = row.getColIndex(i);
-            float value = row.getColValue(i);
-            if (validIds == null || validIds.contains(wpId2)){
-                leaderboard.tallyScore(wpId2,value);
-            }
-        }
-        SRResultList results = leaderboard.getTop();
-        results.sortDescending();
-        return results;
     }
 
     /**
@@ -116,6 +104,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             throw new IllegalStateException("Model default similarity has not been trained.");
         }
     }
+
     /**
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
@@ -359,6 +348,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
                 SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
                 srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
+                mostSimilarMatrices.put(language, srm);
             }
         } catch (InterruptedException e){
             throw new RuntimeException(e);
