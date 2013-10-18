@@ -13,6 +13,7 @@ import org.wikapidia.dao.load.RedirectLoader;
 import org.wikapidia.dao.load.WikiTextLoader;
 import org.wikapidia.download.FileDownloader;
 import org.wikapidia.download.RequestedLinkGetter;
+import org.wikapidia.utils.ZipDir;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -58,7 +59,8 @@ public class TestDB {
 //        createDownloads();
 //        createRawAndLocal();
 //        createRedirect();
-        createWikiText();
+//        createWikiText();
+        createLucene();
     }
 
     /**
@@ -130,9 +132,11 @@ public class TestDB {
 
 
     private void createLucene() throws DaoException, WikapidiaException, ConfigurationException, IOException, SQLException {
+        File luceneDir = new File(env.getConfiguration().get().getString("lucene.directory"));
         deleteH2Backup("lucene.zip");
-
+        FileUtils.deleteQuietly(luceneDir);
         LuceneLoader.main(TestUtils.getArgs());
+        ZipDir.zip(luceneDir, new File(dir, "lucene-dir.zip"));
         backupH2To("lucene.zip");
     }
 

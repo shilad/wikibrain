@@ -248,6 +248,8 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 if (!counters.containsKey(component)) {
                     langInfos = new ConcurrentHashMap<Language, MetaInfo>();
                     counters.put(component, langInfos);
+                } else {
+                    langInfos = counters.get(component);
                 }
             }
         }

@@ -1,6 +1,7 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.IOUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -44,56 +45,70 @@ import java.util.logging.Logger;
 public class LuceneLoader {
     private static final Logger LOG = Logger.getLogger(LuceneLoader.class.getName());
 
+    private static final RawPage POISON_PILL =
+            new RawPage(0, 0, "", null, null, Language.getByLangCode("en"), null);
+
     // maximum number of raw pages in the parsing buffer
     public static final int MAX_QUEUE = 1000;
 
     private final RawPageDao rawPageDao;
-    private final LuceneIndexer luceneIndexer;
     private final Collection<NameSpace> namespaces;
 
 
     private final BlockingQueue<RawPage> queue = new ArrayBlockingQueue<RawPage>(MAX_QUEUE);
     private final List<Thread> workers = new ArrayList<Thread>();
     private final MetaInfoDao metaDao;
+    private final LuceneOptions[] luceneOptions;
 
-    public LuceneLoader(RawPageDao rawPageDao, MetaInfoDao metaDao, LuceneIndexer luceneIndexer, Collection<NameSpace> namespaces) {
+    private LuceneIndexer luceneIndexer;
+
+    public LuceneLoader(RawPageDao rawPageDao, MetaInfoDao metaDao, LuceneOptions[] luceneOptions, Collection<NameSpace> namespaces) {
         this.rawPageDao = rawPageDao;
         this.metaDao = metaDao;
-        this.luceneIndexer = luceneIndexer;
+        this.luceneOptions = luceneOptions;
         this.namespaces = namespaces;
     }
 
-    public void load(Language language) throws WikapidiaException {
+    /**
+     * NOTE: only one language can be loaded at a time.
+     * @param language
+     * @throws WikapidiaException
+     */
+    public synchronized void load(Language language) throws WikapidiaException, ConfigurationException {
         try {
             createWorkers();
-            int i = 0;
-            Iterable<RawPage> rawPages = rawPageDao.get(new DaoFilter()
+            DaoFilter filter = new DaoFilter()
                     .setLanguages(language)
                     .setNameSpaces(namespaces)
-                    .setRedirect(false));
-            for (RawPage rawPage : rawPages) {
+                    .setRedirect(false);
+            int n = rawPageDao.getCount(filter);
+            int i = 0;
+            luceneIndexer = new LuceneIndexer(language, luceneOptions);
+            for (RawPage rawPage : rawPageDao.get(filter)) {
                 queue.put(rawPage);
-                if (++i%1000 == 0) LOG.log(Level.INFO, "RawPages indexed: " + i);
+                if (++i % 1000 == 0) {
+                    LOG.log(Level.INFO, "RawPages indexed " + language + ": " + i + " of " + n);
+                }
             }
-            queue.put(new RawPage(
-                    -2,
-                    0,
-                    "Poison Pill",
-                    null,
-                    null,
-                    Language.getByLangCode("en"),
-                    null));
+            queue.put(POISON_PILL);
         } catch (DaoException e) {
             throw new WikapidiaException(e);
         } catch (InterruptedException e) {
             throw new WikapidiaException(e);
         } finally {
             cleanupWorkers();
+            queue.clear();
+            if (luceneIndexer != null) {
+                IOUtils.closeQuietly(luceneIndexer);
+                luceneIndexer = null;
+            }
         }
     }
 
     public void endLoad() {
-        luceneIndexer.close();
+        if (luceneIndexer != null) {
+            luceneIndexer.close();
+        }
     }
 
     private void createWorkers() {
@@ -106,9 +121,10 @@ public class LuceneLoader {
     }
 
     private void cleanupWorkers() {
+        long maxMillis = System.currentTimeMillis() + 2 * 60 * 1000;
         for (Thread w : workers) {
             try {
-                w.join(2*60*1000);
+                w.join(Math.max(0, maxMillis - System.currentTimeMillis()));
             } catch (InterruptedException e) {
                 LOG.log(Level.SEVERE, "ignoring interrupted exception on thread join", e);
             }
@@ -116,6 +132,7 @@ public class LuceneLoader {
         for (Thread w : workers) {
             w.interrupt();
         }
+        workers.clear();
     }
 
     private class Worker implements Runnable {
@@ -128,15 +145,12 @@ public class LuceneLoader {
                 Language lang = null;
                 try {
                     rp = queue.poll(100, TimeUnit.MILLISECONDS);
-                    if (rp != null) {
-                        lang = rp.getLanguage();
-                        if (rp.getLocalId() == -2) {
-                            queue.put(rp);
-                            finished = true;
-                        } else {
-                            luceneIndexer.indexPage(rp);
-                            metaDao.incrementRecords(LuceneSearcher.class, lang);
-                        }
+                    if (rp == POISON_PILL) {
+                        queue.put(rp);
+                        finished = true;
+                    } else if (rp != null) {
+                        luceneIndexer.indexPage(rp);
+                        metaDao.incrementRecords(LuceneSearcher.class, lang);
                     }
                 } catch (InterruptedException e) {
                     LOG.log(Level.WARNING, "LuceneLoader.Worker received interrupt.");
@@ -218,20 +232,13 @@ public class LuceneLoader {
             metaDao.clear(LuceneSearcher.class, lang);
         }
 
-        LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneOptions);
-        final LuceneLoader loader = new LuceneLoader(rawPageDao, metaDao, luceneIndexer, namespaces);
+        final LuceneLoader loader = new LuceneLoader(rawPageDao, metaDao, luceneOptions, namespaces);
 
         LOG.log(Level.INFO, "Begin indexing");
 
-        ParallelForEach.loop(
-                languages.getLanguages(),
-                new Procedure<Language>() {
-                    @Override
-                    public void call(Language language) throws Exception {
-                        loader.load(language);
-                    }
-                }
-        );
+        for (Language lang : languages) {
+            loader.load(lang);
+        }
 
         loader.endLoad();
         metaDao.endLoad();
