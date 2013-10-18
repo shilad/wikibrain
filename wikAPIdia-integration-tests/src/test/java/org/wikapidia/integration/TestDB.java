@@ -8,6 +8,7 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.AbstractSqlDao;
 import org.wikapidia.dao.load.DumpLoader;
+import org.wikapidia.dao.load.LuceneLoader;
 import org.wikapidia.dao.load.RedirectLoader;
 import org.wikapidia.dao.load.WikiTextLoader;
 import org.wikapidia.download.FileDownloader;
@@ -48,15 +49,15 @@ public class TestDB {
      * @throws Exception
      */
     public void createBackups() throws Exception {
-       shutdownH2();
-        if (dir.exists()) {
-            FileUtils.deleteQuietly(dir);
-        }
-        dir.mkdirs();
-
-        createDownloads();
-        createRawAndLocal();
-        createRedirect();
+//       shutdownH2();
+//        if (dir.exists()) {
+//            FileUtils.deleteQuietly(dir);
+//        }
+//        dir.mkdirs();
+//
+//        createDownloads();
+//        createRawAndLocal();
+//        createRedirect();
         createWikiText();
     }
 
@@ -125,6 +126,14 @@ public class TestDB {
 
     public void restoreWikiText() throws SQLException, ConfigurationException {
         restoreH2From("wikitext.zip");
+    }
+
+
+    private void createLucene() throws DaoException, WikapidiaException, ConfigurationException, IOException, SQLException {
+        deleteH2Backup("lucene.zip");
+
+        LuceneLoader.main(TestUtils.getArgs());
+        backupH2To("lucene.zip");
     }
 
     private void deleteH2Backup(String filename) {

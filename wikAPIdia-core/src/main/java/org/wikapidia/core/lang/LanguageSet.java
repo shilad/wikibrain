@@ -50,7 +50,7 @@ public class LanguageSet implements Iterable<Language> {
      */
     public LanguageSet(Language defaultLang, Collection<Language> inputLangs) {
 
-        if (!inputLangs.contains(defaultLang)) {
+        if (defaultLang != null && !inputLangs.contains(defaultLang)) {
             throw new IllegalArgumentException("Attempted to initiate a LanguageSet with a default language" +
                     " that is not in the input collection of languages");
         }
@@ -77,6 +77,9 @@ public class LanguageSet implements Iterable<Language> {
     }
 
     private static Language getDefault(Collection<Language> inputLangs) {
+        if (inputLangs.isEmpty()) {
+            return null;
+        }
         List<Language> temp = new ArrayList<Language>(inputLangs);
         Collections.sort(temp);
         return temp.iterator().next();

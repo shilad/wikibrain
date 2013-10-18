@@ -63,9 +63,9 @@ public class LocalLinkVisitor extends ParserVisitor {
                             true,
                             loc
                     ));
-            metaDao.incrementRecords(LocalPage.class, lang);
+            metaDao.incrementRecords(LocalLink.class, lang);
         } catch (DaoException e) {
-            metaDao.incrementErrorsQuietly(LocalPage.class, lang);
+            metaDao.incrementErrorsQuietly(LocalLink.class, lang);
             throw new WikapidiaException(e);
         }
     }

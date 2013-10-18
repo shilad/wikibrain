@@ -38,7 +38,7 @@ public class TestLanguageTokenizer {
     @Test
     public void test() throws IOException {
         LuceneOptions opts = LuceneOptions.getDefaultOptions();
-        List<String> langCodes = new Configuration().get().getStringList("languages");
+        List<String> langCodes = new Configuration().get().getStringList("languages.big-economies.langCodes");
         langCodes.add("he");
         langCodes.add("sk");
         LanguageSet langSet = new LanguageSet(langCodes);

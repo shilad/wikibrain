@@ -9,6 +9,7 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
+import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -16,6 +17,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.lucene.LuceneIndexer;
 import org.wikapidia.lucene.LuceneOptions;
+import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpThreadUtils;
@@ -52,9 +54,11 @@ public class LuceneLoader {
 
     private final BlockingQueue<RawPage> queue = new ArrayBlockingQueue<RawPage>(MAX_QUEUE);
     private final List<Thread> workers = new ArrayList<Thread>();
+    private final MetaInfoDao metaDao;
 
-    public LuceneLoader(RawPageDao rawPageDao, LuceneIndexer luceneIndexer, Collection<NameSpace> namespaces) {
+    public LuceneLoader(RawPageDao rawPageDao, MetaInfoDao metaDao, LuceneIndexer luceneIndexer, Collection<NameSpace> namespaces) {
         this.rawPageDao = rawPageDao;
+        this.metaDao = metaDao;
         this.luceneIndexer = luceneIndexer;
         this.namespaces = namespaces;
     }
@@ -118,23 +122,27 @@ public class LuceneLoader {
         public Worker() { }
         @Override
         public void run() {
-            RawPage rp = null;
             boolean finished = false;
             while (!finished) {
+                RawPage rp = null;
+                Language lang = null;
                 try {
                     rp = queue.poll(100, TimeUnit.MILLISECONDS);
                     if (rp != null) {
+                        lang = rp.getLanguage();
                         if (rp.getLocalId() == -2) {
                             queue.put(rp);
                             finished = true;
                         } else {
                             luceneIndexer.indexPage(rp);
+                            metaDao.incrementRecords(LuceneSearcher.class, lang);
                         }
                     }
                 } catch (InterruptedException e) {
                     LOG.log(Level.WARNING, "LuceneLoader.Worker received interrupt.");
                     return;
                 } catch (Exception e) {
+                    metaDao.incrementErrorsQuietly(LuceneSearcher.class, lang);
                     String title = "unknown";
                     if (rp != null) title = rp.getTitle().toString();
                     LOG.log(Level.WARNING, "exception while parsing " + title, e);
@@ -143,7 +151,7 @@ public class LuceneLoader {
         }
     }
 
-    public static void main(String args[]) throws ConfigurationException, WikapidiaException, IOException {
+    public static void main(String args[]) throws ConfigurationException, WikapidiaException, IOException, DaoException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -204,9 +212,14 @@ public class LuceneLoader {
             namespaces = luceneOptions[0].namespaces;
         }
         RawPageDao rawPageDao = conf.get(RawPageDao.class);
+        MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
+        metaDao.beginLoad();
+        for (Language lang : languages) {
+            metaDao.clear(LuceneSearcher.class, lang);
+        }
 
         LuceneIndexer luceneIndexer = new LuceneIndexer(languages, luceneOptions);
-        final LuceneLoader loader = new LuceneLoader(rawPageDao, luceneIndexer, namespaces);
+        final LuceneLoader loader = new LuceneLoader(rawPageDao, metaDao, luceneIndexer, namespaces);
 
         LOG.log(Level.INFO, "Begin indexing");
 
@@ -221,6 +234,7 @@ public class LuceneLoader {
         );
 
         loader.endLoad();
+        metaDao.endLoad();
         LOG.log(Level.INFO, "Done indexing");
     }
 }
