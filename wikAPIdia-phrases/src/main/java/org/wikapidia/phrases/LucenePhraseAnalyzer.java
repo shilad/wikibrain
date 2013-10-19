@@ -78,8 +78,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
             totalScore += wikapidiaScoreDoc.score;
         }
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-            LocalPage localPage = localPageDao.getById(language, localPageId);
+            LocalPage localPage = localPageDao.getById(language, wikapidiaScoreDoc.wpId);
             result.put(localPage, wikapidiaScoreDoc.score / totalScore);
             if (result.size() >= maxPages) {
                 break;

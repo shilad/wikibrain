@@ -84,11 +84,9 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
-        System.out.println("HERE 1");
         if (resolvePhrases){
             return super.mostSimilar(phrase,maxResults);
         }
-        System.out.println("HERE 2");
         Language language = phrase.getLanguage();
         WikapidiaScoreDoc[] wikapidiaScoreDocs = getQueryBuilderByLanguage(language)
                                             .setPhraseQuery(phrase.getString())
@@ -100,7 +98,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
 
-            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.luceneId, language);
             if (validIds==null||validIds.contains(localPageId)){
                 TIntDoubleHashMap comparison = getVector(localPageId, phrase.getLanguage());
                 SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
@@ -219,6 +217,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private QueryBuilder getQueryBuilderByLanguage(Language language) {
         QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
+        builder.setResolveWikipediaIds(false);
         WpIdFilter filter = conceptFilter.get(language);
         if (filter != null) {
             builder.addFilter(filter);
@@ -228,6 +227,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private QueryBuilder getQueryBuilderByLanguage(Language language, TIntSet wpIds) {
         QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
+        builder.setResolveWikipediaIds(false);
         WpIdFilter filter = conceptFilter.get(language);
         if (filter != null) {
             builder.addFilter(filter);
@@ -244,7 +244,7 @@ public class ESAMetric extends BaseLocalSRMetric {
     private TIntDoubleHashMap expandScores(WikapidiaScoreDoc[] wikapidiaScoreDocs) {
         TIntDoubleHashMap expanded = new TIntDoubleHashMap();
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            expanded.put(wikapidiaScoreDoc.doc, wikapidiaScoreDoc.score);
+            expanded.put(wikapidiaScoreDoc.luceneId, wikapidiaScoreDoc.score);
         }
         return expanded;
     }
@@ -366,7 +366,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         TIntDoubleHashMap vector = getVector(localPage.getId(),localPage.getLanguage());
         List<SRResult> results = new ArrayList<SRResult>();
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.luceneId, language);
             TIntDoubleHashMap comparison = getVector(localPageId, localPage.getLanguage());
             if (validIds==null||validIds.contains(localPageId)){
                 SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));

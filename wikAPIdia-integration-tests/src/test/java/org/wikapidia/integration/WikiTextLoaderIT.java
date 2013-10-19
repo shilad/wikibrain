@@ -26,13 +26,12 @@ public class WikiTextLoaderIT {
     @BeforeClass
     public static void prepareDump() throws ConfigurationException, IOException, SQLException {
         TestDB db = TestUtils.getTestDb();
-//        db.restoreRedirect();
-//        db.restoreWikiText();
+        db.restoreRedirect();
     }
 
     @Test
     public void testLoader() throws ClassNotFoundException, SQLException, DaoException, ConfigurationException, IOException {
-//        WikiTextLoader.main(TestUtils.getArgs("-d"));
+        WikiTextLoader.main(TestUtils.getArgs("-d"));
         Env env = TestUtils.getEnv();
         LocalLinkDao lldao = env.getConfigurator().get(LocalLinkDao.class);
         MetaInfoDao metaDao = env.getConfigurator().get(MetaInfoDao.class);

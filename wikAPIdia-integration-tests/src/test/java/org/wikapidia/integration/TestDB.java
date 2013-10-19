@@ -50,16 +50,16 @@ public class TestDB {
      * @throws Exception
      */
     public void createBackups() throws Exception {
-//       shutdownH2();
-//        if (dir.exists()) {
-//            FileUtils.deleteQuietly(dir);
-//        }
-//        dir.mkdirs();
-//
-//        createDownloads();
-//        createRawAndLocal();
-//        createRedirect();
-//        createWikiText();
+       shutdownH2();
+        if (dir.exists()) {
+            FileUtils.deleteQuietly(dir);
+        }
+        dir.mkdirs();
+
+        createDownloads();
+        createRawAndLocal();
+        createRedirect();
+        createWikiText();
         createLucene();
     }
 

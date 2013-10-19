@@ -149,6 +149,7 @@ public class LuceneLoader {
                         queue.put(rp);
                         finished = true;
                     } else if (rp != null) {
+                        lang = rp.getLanguage();
                         luceneIndexer.indexPage(rp);
                         metaDao.incrementRecords(LuceneSearcher.class, lang);
                     }
