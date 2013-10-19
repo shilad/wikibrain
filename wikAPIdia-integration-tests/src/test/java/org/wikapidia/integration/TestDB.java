@@ -71,7 +71,7 @@ public class TestDB {
      * @throws IOException
      * @throws ParseException
      */
-    public void createDownloads() throws InterruptedException, WikapidiaException, ConfigurationException, IOException, ParseException {
+    private void createDownloads() throws InterruptedException, WikapidiaException, ConfigurationException, IOException, ParseException {
         File pathList = new File(env.getConfiguration().get().getString("download.listFile"));
         File pathDownload = new File(env.getConfiguration().get().getString("download.path"));
         FileUtils.deleteQuietly(pathList);
@@ -99,7 +99,7 @@ public class TestDB {
         FileUtils.copyDirectory(new File(dir, "download"), pathDownload);
     }
 
-    public void createRawAndLocal() throws ClassNotFoundException, SQLException, DaoException, ConfigurationException, IOException {
+    private void createRawAndLocal() throws ClassNotFoundException, SQLException, DaoException, ConfigurationException, IOException {
         deleteH2Backup("rawAndLocal.zip");
         DumpLoader.main(TestUtils.getArgs("-d"));
         backupH2To("rawAndLocal.zip");
@@ -109,7 +109,7 @@ public class TestDB {
         restoreH2From("rawAndLocal.zip");
     }
 
-    public void createRedirect() throws DaoException, ConfigurationException, SQLException {
+    private void createRedirect() throws DaoException, ConfigurationException, SQLException {
         deleteH2Backup("redirect.zip");
         RedirectLoader.main(TestUtils.getArgs("-d"));
         backupH2To("redirect.zip");
@@ -119,7 +119,7 @@ public class TestDB {
         restoreH2From("redirect.zip");
     }
 
-    public void createWikiText() throws IOException, DaoException, ConfigurationException, SQLException {
+    private void createWikiText() throws IOException, DaoException, ConfigurationException, SQLException {
         deleteH2Backup("wikitext.zip");
         WikiTextLoader.main(TestUtils.getArgs("-d"));
         backupH2To("wikitext.zip");
@@ -130,7 +130,6 @@ public class TestDB {
         restoreH2From("wikitext.zip");
     }
 
-
     private void createLucene() throws DaoException, WikapidiaException, ConfigurationException, IOException, SQLException {
         File luceneDir = new File(env.getConfiguration().get().getString("lucene.directory"));
         deleteH2Backup("lucene.zip");
@@ -138,6 +137,12 @@ public class TestDB {
         LuceneLoader.main(TestUtils.getArgs());
         ZipDir.zip(luceneDir, new File(dir, "lucene-dir.zip"));
         backupH2To("lucene.zip");
+    }
+
+    public void restoreLucene() throws SQLException, ConfigurationException, IOException {
+        File luceneDir = new File(env.getConfiguration().get().getString("lucene.directory"));
+        ZipDir.unzip(new File(dir, "lucene-dir.zip"), luceneDir);
+        restoreH2From("lucene.zip");
     }
 
     private void deleteH2Backup(String filename) {
