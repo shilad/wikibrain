@@ -56,6 +56,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         conceptFilter.clear();
         if (!dir.isDirectory()) {
             LOG.warning("concept path " + dir + " not a directory; defaulting to all concepts");
+            return;
         }
         for (String file : dir.list()) {
             String langCode = FilenameUtils.getBaseName(file);
@@ -142,36 +143,37 @@ public class ESAMetric extends BaseLocalSRMetric {
 
         if (explanations) {
 
-            String format = "Five most similar pages to " + phrase1 + "" +
-                    "\n?\n?\n?\n?\n?\nFive most similar pages to " + phrase2 + "\n?\n?\n?\n?\n?";
             List<LocalPage> formatPages =new ArrayList<LocalPage>();
 
-            Map<Integer, Double> ids = SimUtils.sortByValue(scores1);
-            int i = 0;
-            for (int id : ids.keySet()) {
-                if (i++ < 5) {
+            TIntDoubleHashMap dots = new TIntDoubleHashMap();
+            for (int id : scores1.keys()) {
+                if (scores2.containsKey(id)) {
+                    dots.put(id, scores1.get(id) * scores2.get(id));
+                }
+            }
+            String format;
+            if (dots.isEmpty()) {
+                 format = "No overlapping concepts for '" + phrase1 + "', '" + phrase2 + "'";
+            } else {
+                int n = Math.min(5, dots.size());
+                String num  = new String[] { null, "One", "Two", "Three", "Four", "Five"}[n];
+                format = num + " most similar overlapping concepts for " + phrase1 + ", " + phrase2 + ":";
+                Map<Integer, Double> ids = SimUtils.sortByValue(dots);
+                int i = 0;
+                for (int id : ids.keySet()) {
                     int localPageId = searcher.getLocalIdFromDocId(id, language);
                     LocalPage topPage = pageHelper.getById(language, localPageId);
                     if (topPage==null) {
                         continue;
                     }
+                    format += "\n\t\t?";
                     formatPages.add(topPage);
-                }
-            }
-            Map<Integer, Double> ids1 = SimUtils.sortByValue(scores2);
-            int j = 0;
-            for (int id : ids1.keySet()) {
-                if (j++ < 5) {
-                    int localPageId = searcher.getLocalIdFromDocId(id, language);
-                    LocalPage topPage = pageHelper.getById(language, localPageId);
-                    if (topPage==null) {
-                        continue;
+                    if (formatPages.size() >= 5) {
+                        break;
                     }
-                    formatPages.add(topPage);
                 }
             }
-            Explanation explanation = new Explanation(format, formatPages);
-            result.addExplanation(explanation);
+            result.addExplanation(new Explanation(format, formatPages));
         }
         return normalize(result,language);
     }
