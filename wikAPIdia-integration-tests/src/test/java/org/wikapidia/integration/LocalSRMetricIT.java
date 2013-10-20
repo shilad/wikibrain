@@ -3,19 +3,13 @@ package org.wikapidia.integration;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.dao.load.PhraseLoader;
-import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.Explanation;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.evaluation.CrossValidation;
-import org.wikapidia.sr.milnewitten.LocalMilneWitten;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
 import org.wikapidia.sr.utils.ExplanationFormatter;
@@ -24,10 +18,10 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Shilad Sen
@@ -37,20 +31,20 @@ public class LocalSRMetricIT {
 
     @BeforeClass
     public static void prepareDump() throws ConfigurationException, IOException, SQLException {
-//        TestDB db = TestUtils.getTestDb();
-//        db.restoreLucene();
+        TestDB db = TestUtils.getTestDb();
+        db.restoreLucene();
     }
 
     @Test
     public void testESAAccuracy() throws Exception {
         testExplain("ESA", "President", "Obama");
-//        testAccuracy("ESA", 0.50, 0.58, 0);
+        testAccuracy("ESA", 0.50, 0.58, 0);
     }
 
     @Test
     public void testMilneWittenAccuracy() throws Exception {
         testExplain("milnewitten", "President", "Obama");
-//        testAccuracy("milnewitten", 0.35, 0.37, 0);
+        testAccuracy("milnewitten", 0.35, 0.37, 0);
     }
 
     public void testAccuracy(String srName, double minPearson, double minSpearman, int maxNoPred) throws ConfigurationException, DaoException {
@@ -90,6 +84,5 @@ public class LocalSRMetricIT {
         for (Explanation ex : result.getExplanations()) {
             System.out.println("\t" + formatter.formatExplanation(ex));
         }
-
     }
 }
