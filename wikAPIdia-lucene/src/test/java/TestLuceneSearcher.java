@@ -69,7 +69,7 @@ public class TestLuceneSearcher {
         }
     }
 
-//    @Ignore
+    @Ignore
     @Test
     public void testGetDoc() throws ConfigurationException, IOException, DaoException {
         Configurator conf = new Configurator(new Configuration());
