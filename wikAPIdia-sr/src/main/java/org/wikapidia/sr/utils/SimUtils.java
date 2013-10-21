@@ -1,6 +1,7 @@
 package org.wikapidia.sr.utils;
 
 import gnu.trove.iterator.TIntDoubleIterator;
+import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.wikapidia.lucene.WikapidiaScoreDoc;
@@ -13,7 +14,7 @@ import java.util.*;
  */
 public class SimUtils {
 
-    public static double cosineSimilarity(TIntDoubleHashMap X, TIntDoubleHashMap Y) {
+    public static double cosineSimilarity(TIntDoubleMap X, TIntDoubleMap Y) {
         double xDotX = 0.0;
         double yDotY = 0.0;
         double xDotY = 0.0;
