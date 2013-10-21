@@ -18,6 +18,7 @@ import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
 import org.wikapidia.sr.utils.KnownSim;
+import org.wikapidia.utils.MathUtils;
 
 import java.io.*;
 import java.util.*;
@@ -46,7 +47,7 @@ public class CrossValidation {
     }
 
     //Evaluation
-    private void evaluate(LocalSRMetric srMetric, Dataset dataset) throws DaoException {
+    public void evaluate(LocalSRMetric srMetric, Dataset dataset) throws DaoException {
         int size = dataset.getData().size();
         double[] estimate = new double[size];
         double[] real = new double[size];
@@ -203,6 +204,22 @@ public class CrossValidation {
         }
         return disambigName+"="+disambigConf.toString();
 
+    }
+
+    public int getMissing() {
+        return missing;
+    }
+
+    public int getFailed() {
+        return failed;
+    }
+
+    public double getSpearman() {
+        return MathUtils.mean(spearmanScores);
+    }
+
+    public double getPearson() {
+        return MathUtils.mean(pearsonScores);
     }
 
     public static void main(String[] args) throws DaoException, ConfigurationException, IOException {

@@ -39,7 +39,7 @@ public class TestLangStorage {
     public void test() {
         System.out.println(TOTAL_LANGUAGES);
 
-        LanguageSet languages = new LanguageSet(new Configuration().get().getStringList("languages"));
+        LanguageSet languages = new LanguageSet(new Configuration().get().getStringList("languages.big-economies.langCodes"));
         System.out.println(languages);
         byte[] bits = toByteArray(languages);
         System.out.println(Arrays.toString(bits));
@@ -62,7 +62,6 @@ public class TestLangStorage {
             System.out.println(output);
             assert languages.equals(output);
         }
-
     }
 
     public static byte[] toByteArray(LanguageSet langs) {

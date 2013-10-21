@@ -18,6 +18,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -29,43 +30,44 @@ import java.util.*;
  * @author Ari Weiland
  *
  */
-public class LuceneIndexer {
+public class LuceneIndexer implements Closeable {
 
     private final File root;
-    private final Map<Language, IndexWriter> writers;
+    private final Language language;
+    private final IndexWriter writer;
     private final LuceneOptions[] options;
     private final LuceneOptions mainOptions;
     private final TextFieldBuilder builder;
     private boolean closed = false;
 
     /**
-     * Constructs a LuceneIndexer that will index any RawPage within a
-     * specified LanguageSet. Indexes are then placed in language-specific
+     * Constructs a LuceneIndexer that will index any RawPage in a
+     * specified Language. Indexes are then placed in language-specific
      * subdirectories in the specified file.
      *
-     * @param languages the language set in which this searcher can operate
+     * @param language the language in which this searcher can operate
      * @param root the root directory in which to save all the lucene directories
      */
-    public LuceneIndexer(LanguageSet languages, File root) throws ConfigurationException {
-        this(languages, root, LuceneOptions.getDefaultOptions());
+    public LuceneIndexer(Language language, File root) throws ConfigurationException {
+        this(language, root, LuceneOptions.getDefaultOptions());
     }
 
     /**
-     * Constructs a LuceneIndexer that will index any RawPage within a
-     * specified LanguageSet. Indexes are then placed in language-specific
+     * Constructs a LuceneIndexer that will index a RawPage in the
+     * specified language. Indexes are then placed in language-specific
      * subdirectories specified by the first element in options.
      *
-     * @param languages the language set in which this searcher can operate
+     * @param language the language in which this searcher can operate
      * @param options an array of LuceneOptions objects. There must be at least one specified.
      */
-    public LuceneIndexer(LanguageSet languages, LuceneOptions... options) throws ConfigurationException {
-        this(languages, options[0].luceneRoot, options);
+    public LuceneIndexer(Language language, LuceneOptions... options) throws ConfigurationException {
+        this(language, options[0].luceneRoot, options);
     }
 
-    private LuceneIndexer(LanguageSet languages, File root, LuceneOptions... options) throws ConfigurationException {
+    private LuceneIndexer(Language language, File root, LuceneOptions... options) throws ConfigurationException {
         try {
             this.root = root;
-            writers = new HashMap<Language, IndexWriter>();
+            this.language = language;
             this.options = options;
             this.mainOptions = options[0];
             this.builder = new TextFieldBuilder(
@@ -74,7 +76,6 @@ public class LuceneIndexer {
                     mainOptions.configurator.get(RedirectDao.class));
 
 
-            for (Language language : languages) {
                 File langRoot = new File(root, language.getLangCode());
                 if (langRoot.exists()) {
                     FileUtils.deleteQuietly(langRoot);
@@ -82,8 +83,7 @@ public class LuceneIndexer {
                 WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, mainOptions);
                 Directory directory = FSDirectory.open(langRoot);
                 IndexWriterConfig iwc = new IndexWriterConfig(mainOptions.matchVersion, analyzer);
-                writers.put(language, new IndexWriter(directory, iwc));
-            }
+                writer = new IndexWriter(directory, iwc);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -91,10 +91,6 @@ public class LuceneIndexer {
 
     public File getRoot() {
         return root;
-    }
-
-    public LanguageSet getLanguageSet() {
-        return new LanguageSet(writers.keySet());
     }
 
     public LuceneOptions getOptions() {
@@ -110,25 +106,25 @@ public class LuceneIndexer {
         if (closed) {
             throw new IllegalStateException("Indexer has already been closed!");
         }
-        Language language = page.getLanguage();
-        if (getLanguageSet().containsLanguage(language)) {
-            try {
-                Document document = new Document();
-                Field localIdField = new IntField(LuceneOptions.LOCAL_ID_FIELD_NAME, page.getLocalId(), Field.Store.YES);
-                Field langIdField = new IntField(LuceneOptions.LANG_ID_FIELD_NAME, page.getLanguage().getId(), Field.Store.YES);
-                Field canonicalTitleField = builder.buildTextField(page, new TextFieldElements().addTitle());
-                document.add(localIdField);
-                document.add(langIdField);
-                document.add(canonicalTitleField);
-                if (!page.isRedirect()) {
-                    for (LuceneOptions option : options) {
-                        document.add(builder.buildTextField(page, option.elements));
-                    }
+        if (!language.equals(page.getLanguage())) {
+            throw new IllegalStateException("Language mismatch!");
+        }
+        try {
+            Document document = new Document();
+            Field localIdField = new IntField(LuceneOptions.LOCAL_ID_FIELD_NAME, page.getLocalId(), Field.Store.YES);
+            Field langIdField = new IntField(LuceneOptions.LANG_ID_FIELD_NAME, page.getLanguage().getId(), Field.Store.YES);
+            Field canonicalTitleField = builder.buildTextField(page, new TextFieldElements().addTitle());
+            document.add(localIdField);
+            document.add(langIdField);
+            document.add(canonicalTitleField);
+            if (!page.isRedirect()) {
+                for (LuceneOptions option : options) {
+                    document.add(builder.buildTextField(page, option.elements));
                 }
-                writers.get(language).addDocument(document);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+            writer.addDocument(document);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -137,8 +133,6 @@ public class LuceneIndexer {
      */
     public void close() {
         closed = true;
-        for (IndexWriter writer : writers.values()) {
-            IOUtils.closeQuietly(writer);
-        }
+        IOUtils.closeQuietly(writer);
     }
 }

@@ -240,7 +240,7 @@ public class SRMatrices implements Closeable {
 
     private void writeSim(SparseMatrixWriter writer, Integer wpId, TIntSet colIds, int maxSimsPerDoc, AtomicInteger idCounter, AtomicLong cellCounter) throws IOException {
         if (idCounter.incrementAndGet() % 10000 == 0) {
-            LOG.info("finding matches for doc " + idCounter.get());
+            LOG.info("finding matches for luceneId " + idCounter.get());
         }
         SRResultList scores = similarity.mostSimilar(this, wpId, maxSimsPerDoc, colIds);
         if (scores != null) {

@@ -10,6 +10,8 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.model.LocalCategoryMember;
+import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.parser.wiki.*;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
@@ -107,9 +109,12 @@ public class WikiTextLoader {
         if(cmd.hasOption("d")) {
             llDao.clear();
             lcmDao.clear();
+            metaDao.clear(LocalLink.class);
+            metaDao.clear(LocalCategoryMember.class);
         }
         llDao.beginLoad();
         lcmDao.beginLoad();
+        metaDao.beginLoad();
 
         ParallelForEach.loop(env.getLanguages().getLanguages(),
                 Math.max(1, env.getMaxThreads() / maxThreadsPerLang),
@@ -122,6 +127,7 @@ public class WikiTextLoader {
 
         llDao.endLoad();
         lcmDao.endLoad();
+        metaDao.endLoad();
     }
 
 

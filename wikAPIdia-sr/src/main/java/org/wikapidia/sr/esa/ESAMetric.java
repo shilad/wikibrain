@@ -56,6 +56,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         conceptFilter.clear();
         if (!dir.isDirectory()) {
             LOG.warning("concept path " + dir + " not a directory; defaulting to all concepts");
+            return;
         }
         for (String file : dir.list()) {
             String langCode = FilenameUtils.getBaseName(file);
@@ -84,11 +85,9 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
-        System.out.println("HERE 1");
         if (resolvePhrases){
             return super.mostSimilar(phrase,maxResults);
         }
-        System.out.println("HERE 2");
         Language language = phrase.getLanguage();
         WikapidiaScoreDoc[] wikapidiaScoreDocs = getQueryBuilderByLanguage(language)
                                             .setPhraseQuery(phrase.getString())
@@ -100,7 +99,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
 
-            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.luceneId, language);
             if (validIds==null||validIds.contains(localPageId)){
                 TIntDoubleHashMap comparison = getVector(localPageId, phrase.getLanguage());
                 SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
@@ -144,36 +143,37 @@ public class ESAMetric extends BaseLocalSRMetric {
 
         if (explanations) {
 
-            String format = "Five most similar pages to " + phrase1 + "" +
-                    "\n?\n?\n?\n?\n?\nFive most similar pages to " + phrase2 + "\n?\n?\n?\n?\n?";
             List<LocalPage> formatPages =new ArrayList<LocalPage>();
 
-            Map<Integer, Double> ids = SimUtils.sortByValue(scores1);
-            int i = 0;
-            for (int id : ids.keySet()) {
-                if (i++ < 5) {
+            TIntDoubleHashMap dots = new TIntDoubleHashMap();
+            for (int id : scores1.keys()) {
+                if (scores2.containsKey(id)) {
+                    dots.put(id, scores1.get(id) * scores2.get(id));
+                }
+            }
+            String format;
+            if (dots.isEmpty()) {
+                 format = "No overlapping concepts for '" + phrase1 + "', '" + phrase2 + "'";
+            } else {
+                int n = Math.min(5, dots.size());
+                String num  = new String[] { null, "One", "Two", "Three", "Four", "Five"}[n];
+                format = num + " most similar overlapping concepts for " + phrase1 + ", " + phrase2 + ":";
+                Map<Integer, Double> ids = SimUtils.sortByValue(dots);
+                int i = 0;
+                for (int id : ids.keySet()) {
                     int localPageId = searcher.getLocalIdFromDocId(id, language);
                     LocalPage topPage = pageHelper.getById(language, localPageId);
                     if (topPage==null) {
                         continue;
                     }
+                    format += "\n\t\t?";
                     formatPages.add(topPage);
-                }
-            }
-            Map<Integer, Double> ids1 = SimUtils.sortByValue(scores2);
-            int j = 0;
-            for (int id : ids1.keySet()) {
-                if (j++ < 5) {
-                    int localPageId = searcher.getLocalIdFromDocId(id, language);
-                    LocalPage topPage = pageHelper.getById(language, localPageId);
-                    if (topPage==null) {
-                        continue;
+                    if (formatPages.size() >= 5) {
+                        break;
                     }
-                    formatPages.add(topPage);
                 }
             }
-            Explanation explanation = new Explanation(format, formatPages);
-            result.addExplanation(explanation);
+            result.addExplanation(new Explanation(format, formatPages));
         }
         return normalize(result,language);
     }
@@ -219,6 +219,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private QueryBuilder getQueryBuilderByLanguage(Language language) {
         QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
+        builder.setResolveWikipediaIds(false);
         WpIdFilter filter = conceptFilter.get(language);
         if (filter != null) {
             builder.addFilter(filter);
@@ -228,6 +229,7 @@ public class ESAMetric extends BaseLocalSRMetric {
 
     private QueryBuilder getQueryBuilderByLanguage(Language language, TIntSet wpIds) {
         QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
+        builder.setResolveWikipediaIds(false);
         WpIdFilter filter = conceptFilter.get(language);
         if (filter != null) {
             builder.addFilter(filter);
@@ -244,7 +246,7 @@ public class ESAMetric extends BaseLocalSRMetric {
     private TIntDoubleHashMap expandScores(WikapidiaScoreDoc[] wikapidiaScoreDocs) {
         TIntDoubleHashMap expanded = new TIntDoubleHashMap();
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            expanded.put(wikapidiaScoreDoc.doc, wikapidiaScoreDoc.score);
+            expanded.put(wikapidiaScoreDoc.luceneId, wikapidiaScoreDoc.score);
         }
         return expanded;
     }
@@ -366,7 +368,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         TIntDoubleHashMap vector = getVector(localPage.getId(),localPage.getLanguage());
         List<SRResult> results = new ArrayList<SRResult>();
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
+            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.luceneId, language);
             TIntDoubleHashMap comparison = getVector(localPageId, localPage.getLanguage());
             if (validIds==null||validIds.contains(localPageId)){
                 SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));

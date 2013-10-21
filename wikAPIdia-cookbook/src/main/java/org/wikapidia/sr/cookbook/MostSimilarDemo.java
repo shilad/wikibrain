@@ -1,4 +1,4 @@
-package org.wikapidia.phrases.cookbook;
+package org.wikapidia.sr.cookbook;
 
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.Configurator;

@@ -10,8 +10,24 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.util.MathArrays;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class MathUtils {
+    /**
+     * @param nums Any descendant of Number (Integer, Short, Double, Float, etc)
+     * @return The mean of the number, or Double.NaN if the list is empty.
+     */
+    public static double mean(Collection<? extends Number> nums) {
+        if (nums == null || nums.isEmpty()) {
+            return Double.NaN;
+        }
+        double sum = 0.0;
+        for (Number n : nums) {
+            sum += n.doubleValue();
+        }
+        return sum / nums.size();
+    }
 
     /**
      * Returns true if the number is not NaN or infinite.

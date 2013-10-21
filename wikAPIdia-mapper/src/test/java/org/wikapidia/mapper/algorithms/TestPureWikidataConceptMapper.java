@@ -22,6 +22,7 @@ import org.wikapidia.mapper.algorithms.PureWikidataConceptMapper;
 */
 public class TestPureWikidataConceptMapper {
 
+    @Ignore
     @Test
     public void testBasic(){
 
@@ -33,7 +34,7 @@ public class TestPureWikidataConceptMapper {
             ds.setPassword("");
             LocalPageDao lpDao = new LocalPageSqlDao(ds);
 
-            PureWikidataConceptMapper mapper = new PureWikidataConceptMapper(lpDao);
+            PureWikidataConceptMapper mapper = new PureWikidataConceptMapper(0, lpDao);
             mapper.getConceptMap(LanguageSet.ALL);
 
         } catch (Exception e) {

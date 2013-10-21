@@ -55,9 +55,9 @@ public class LocalCategoryVisitor extends ParserVisitor {
                             cat.location.getXml().getLocalId(),
                             lang
                     ));
-            metaDao.incrementRecords(ParsedCategory.class, lang);
+            metaDao.incrementRecords(LocalCategoryMember.class, lang);
         } catch (DaoException e) {
-            metaDao.incrementErrorsQuietly(ParsedCategory.class, lang);
+            metaDao.incrementErrorsQuietly(LocalCategoryMember.class, lang);
             throw new WikapidiaException(e);
         }
 
