@@ -1,5 +1,6 @@
 package org.wikapidia.sr;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -59,8 +60,8 @@ public class TestESAMetric {
 //        assert (options.matchVersion == Version.LUCENE_43);
 //    }
 
+    @Ignore
     @Test
-
     public void testMostSimilarPages() throws WikapidiaException, DaoException, ConfigurationException, ClassNotFoundException, IOException {
 
         Configurator c = new Configurator(new Configuration());

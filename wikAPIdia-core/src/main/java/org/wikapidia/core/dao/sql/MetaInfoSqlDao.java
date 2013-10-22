@@ -41,7 +41,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
             new ConcurrentHashMap<Class, Map<Language, MetaInfo>>();
 
     public MetaInfoSqlDao(DataSource dataSource) throws DaoException {
-        super(dataSource, null, "/db/meta");
+        super(dataSource, null, "/db/meta-info");
     }
 
     public boolean tableExists() throws DaoException {
