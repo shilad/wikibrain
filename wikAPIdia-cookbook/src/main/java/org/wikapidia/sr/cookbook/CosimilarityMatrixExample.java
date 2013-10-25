@@ -62,7 +62,7 @@ public class CosimilarityMatrixExample {
 //            SRResultList results = usr.mostSimilar(phrase, 5);
 //            for (int i=0; i<results.numDocs(); i++){
 //                UniversalPage page = universalPageDao.getById(results.get(i).getId(),usr.getAlgorithmId());
-//                LocalId nameId = (LocalId) page.getLocalPages(page.getLanguageSet().getDefaultLanguage()).toArray()[0];
+//                LocalId nameId = (LocalId) page.getLocalIds(page.getLanguageSet().getDefaultLanguage()).toArray()[0];
 //                LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
 //                String name = namePage.getTitle().getCanonicalTitle();
 //                System.out.println("#"+(i+1)+" "+name);

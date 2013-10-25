@@ -46,9 +46,9 @@ public class UniversalPage extends AbstractUniversalEntity<LocalId> {
         return nameSpace;
     }
 
-    public Collection<LocalId> getLocalPages(Language language) {
-        return new ArrayList<LocalId>(getLocalEntities(language));
-    }
+//    public Collection<LocalId> getLocalIds(Language language) {
+//        return new ArrayList<LocalId>(getLocalEntities(language));
+//    }
 
     public static interface LocalPageChooser {
         public LocalId choose(Collection<LocalId> localPages);

@@ -6,14 +6,11 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.sr.Explanation;
-
-import javax.sql.DataSource;
 
 /**
  * @author Matt Lesicko
@@ -40,7 +37,7 @@ public class ExplanationFormatter {
                 plaintext+=((LocalPage) object).getTitle().getCanonicalTitle();
             }else if(object instanceof UniversalPage){
                 Language defaultlang = ((UniversalPage) object).getLanguageSet().getDefaultLanguage();
-                LocalId nameId = (LocalId)((UniversalPage) object).getLocalPages(defaultlang).toArray()[0];
+                LocalId nameId = (LocalId)((UniversalPage) object).getLocalEntities(defaultlang).toArray()[0];
                 LocalPage namePage = localPageDao.getById(nameId.getLanguage(), nameId.getId());
                 plaintext+=namePage.getTitle().getCanonicalTitle();
             }else {

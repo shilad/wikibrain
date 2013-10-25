@@ -54,6 +54,14 @@ public abstract class AbstractUniversalEntity<T> {
     }
 
     /**
+     * Gets the set of entities for all languages
+     * @return
+     */
+    public Collection<T> getLocalEntities(){
+        return Collections.unmodifiableCollection(localEntities.values());
+    }
+
+    /**
      * Returns true iff UniversalEntity has page in input language.
      * @param language
      * @return True if UniversalEntity has page in input language, false otherwise.
