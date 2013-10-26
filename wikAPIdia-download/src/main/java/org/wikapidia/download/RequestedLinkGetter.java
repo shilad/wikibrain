@@ -173,6 +173,12 @@ public class RequestedLinkGetter {
                         .create("y"));
 
         EnvBuilder.addStandardOptions(options);
+
+        // You MUST specify a language set when downloading files
+        Option o = options.getOption("l");
+        o.setRequired(true);
+        options.addOption(o);
+
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
 

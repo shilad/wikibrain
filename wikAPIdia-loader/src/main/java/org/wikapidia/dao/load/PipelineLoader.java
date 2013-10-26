@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class PipelineLoader {
     public static void main(String args[]) throws IOException, InterruptedException {
-        run(RequestedLinkGetter.class, args);
+//        run(RequestedLinkGetter.class, args);
         run(FileDownloader.class, args);
         run(DumpLoader.class, ArrayUtils.add(args, "-d"));
         run(RedirectLoader.class, ArrayUtils.add(args, "-d"));

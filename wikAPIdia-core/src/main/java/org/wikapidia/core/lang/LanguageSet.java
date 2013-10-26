@@ -3,6 +3,7 @@ package org.wikapidia.core.lang;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigObject;
 import gnu.trove.set.TByteSet;
 import gnu.trove.set.hash.TByteHashSet;
 import org.apache.commons.lang3.ArrayUtils;
@@ -12,17 +13,22 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.Provider;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.FileMatcher;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.MetaInfoDao;
+import org.wikapidia.core.model.LocalPage;
 
 import java.util.*;
 
 /**
- * User: bjhecht
+ * Author: bjhecht, shilad
  */
 public class LanguageSet implements Iterable<Language> {
+
     public static final LanguageSet ALL = new LanguageSet(
             Language.getByLangCode("en"),
             Arrays.asList(Language.LANGUAGES));
-    public static final int TOTAL_LANGUAGES = ALL.size();
 
     private Set<Language> langs;
     private Language defaultLanguage;
@@ -209,6 +215,14 @@ public class LanguageSet implements Iterable<Language> {
         return langs.iterator();
     }
 
+    // If the language set in the configuration file is this value, use the set
+    // of languages whose main article dump is downloaded.
+    public static final String DOWNLOADED = "downloaded";
+
+    // If the language set in the configuration file is this value, use the set
+    // of loaded languages returned by the meta info dao for LocalPages.
+    public static final String LOADED = "loaded";
+
     static class Provider extends org.wikapidia.conf.Provider<LanguageSet> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -226,7 +240,27 @@ public class LanguageSet implements Iterable<Language> {
 
         @Override
         public LanguageSet get(String name, Config config) throws ConfigurationException {
-            return new LanguageSet(config.getStringList("langCodes"));
+            try {
+                if (config.hasPath(LOADED) && config.getBoolean(LOADED)) {
+                    MetaInfoDao miDao = getConfigurator().get(MetaInfoDao.class);
+                    return miDao.getLoadedLanguages(LocalPage.class);
+                } else if (config.hasPath(DOWNLOADED) && config.getBoolean(DOWNLOADED)) {
+                    List<Language> languages = new ArrayList<Language>();
+                    // TODO: set the default language reasonably
+                    for (Language lang : Language.LANGUAGES) {
+                        if (Env.getFiles(lang, FileMatcher.ARTICLES, getConfig()).size() > 0) {
+                            languages.add(lang);
+                        }
+                    }
+                    return new LanguageSet(languages);
+                } else if (config.hasPath("langCodes")) {
+                    return new LanguageSet(config.getStringList("langCodes"));
+                } else {
+                    throw new ConfigurationException("Unexpected configuration: " + config);
+                }
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
         }
     }
 }

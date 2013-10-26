@@ -21,15 +21,25 @@ import java.util.Map;
  *                  .setLanguageSet(new LanguageSet(Arrays.asList("en", "it")))
  *                  .build();
  *
+ * Three methods that can be used to set the LanguageSet:
+ *      env.setUseLoaded() (default) uses the languages that have local pages loaded in the db
+ *      env.setUseDownloaded() uses the languages that have downloaded article dumps
+ *      env.setLanguageSet() explicitly specifies the language set.
+ *
+ * All three can also be passed via the command line (-l loaded, -l downloaded, or -l en,simple,fr).
+ *
  * @author Shilad Sen
  */
 public class EnvBuilder {
     private final Map<String, Object> params = new HashMap<String, Object>();
     File configOverride = null;
 
-    public EnvBuilder() {}
+    public EnvBuilder() {
+        setUseLoadedLanguages();
+    }
 
     public EnvBuilder(CommandLine cmd) {
+        setUseLoadedLanguages();
         if (cmd.hasOption("n")) {
             setConceptMapper(cmd.getOptionValue("n"));
         }
@@ -43,7 +53,14 @@ public class EnvBuilder {
             setConfigFile(new File(cmd.getOptionValue("c")));
         }
         if (cmd.hasOption("l")) {
-            setLanguages(new LanguageSet(cmd.getOptionValue("l")));
+            String val = cmd.getOptionValue("l");
+            if (val.equals("loaded")) {
+                setUseLoadedLanguages();
+            } else if (val.equals("downloaded")) {
+                setUseDownloadedLanguages();
+            } else {
+                setLanguages(new LanguageSet(cmd.getOptionValue("l")));
+            }
         }
         if (cmd.hasOption("tmp-dir")) {
             setTmpDir(new File(cmd.getOptionValue("tmp-dir")));
@@ -87,10 +104,32 @@ public class EnvBuilder {
         return this;
     }
 
+    public EnvBuilder setUseLoadedLanguages() {
+        params.put("languages.custom.loaded", true);
+        params.remove("languages.custom.downloaded");
+        params.remove("languages.custom.langCodes");
+        params.put("languages.default", "custom");
+        return this;
+    }
+
+    public EnvBuilder setUseDownloadedLanguages() {
+        params.put("languages.custom.downloaded", true);
+        params.remove("languages.custom.loaded");
+        params.remove("languages.custom.langCodes");
+        params.put("languages.default", "custom");
+        return this;
+    }
+
     public EnvBuilder setLanguages(LanguageSet langs) {
+        params.remove("languages.custom.loaded");
+        params.remove("languages.custom.downloaded");
         params.put("languages.custom.langCodes", langs.getLangCodes());
         params.put("languages.default", "custom");
         return this;
+    }
+
+    public EnvBuilder setLanguages(String langCodes) {
+        return setLanguages(new LanguageSet(langCodes));
     }
 
     public EnvBuilder setProperty(String name, Object value) {
@@ -122,7 +161,7 @@ public class EnvBuilder {
                 new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("languages")
-                        .withDescription("the set of languages to process, separated by commas")
+                        .withDescription("the set of languages to process, separated by commas or 'LOADED'")
                         .create("l"),
                 new DefaultOptionBuilder()
                         .hasArg()
