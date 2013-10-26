@@ -33,6 +33,7 @@ public class TopResultDisambiguator implements Disambiguator{
         Iterator<LocalPage> pageIterator = localMap.keySet().iterator();
         if (pageIterator.hasNext()){
             LocalPage localPage = pageIterator.next();
+//            System.err.println("returinging " + localPage + " for " + phrase);
             return new LocalId(localPage.getLanguage(),localPage.getLocalId());
         }
         else {

@@ -11,6 +11,11 @@
     <dependencies>
         <dependency>
             <groupId>org.wikapidia</groupId>
+            <artifactId>wikAPIdia-download</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikapidia</groupId>
             <artifactId>wikAPIdia-phrases</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>

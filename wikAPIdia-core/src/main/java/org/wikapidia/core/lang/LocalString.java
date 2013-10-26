@@ -38,4 +38,12 @@ public class LocalString {
         result = 31 * result + string.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "LocalString{" +
+                "language=" + language +
+                ", string='" + string + '\'' +
+                '}';
+    }
 }
