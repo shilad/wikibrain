@@ -14,9 +14,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.sr.*;
-import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
 /**
@@ -53,7 +51,7 @@ public class SimilarityExample {
             else {
                 UniversalPage up = universalPageDao.getById(result.getId(), algorithmId);
                 LanguageSet languages = up.getLanguageSet();
-                LocalId nameId = (LocalId) up.getLocalPages(languages.getDefaultLanguage()).toArray()[0];
+                LocalId nameId = (LocalId) up.getLocalEntities(languages.getDefaultLanguage()).toArray()[0];
                 LocalPage namePage = localPageDao.getById(nameId.getLanguage(),nameId.getId());
                 System.out.println(namePage.getTitle().getCanonicalTitle());
                 System.out.println("Similarity score: "+result.getScore());

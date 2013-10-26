@@ -82,6 +82,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
 
 
     //TODO: Add a normalizer
+    //TODO: similarity -> relatedness
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
         if (page1 == null || page2 == null) {
