@@ -1,6 +1,12 @@
-package org.wikapidia.core.dao;
+package org.wikapidia.core.dao.remote;
 
 import com.google.gson.JsonElement;
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.RemotePageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RemotePage;
@@ -14,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import javax.sql.DataSource;
 
 
 /**
@@ -23,18 +30,22 @@ import com.google.gson.JsonParser;
  * Time: 6:12 PM
  * To change this template use File | Settings | File Templates.
  */
-public class GetRemotePage {
+public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> {
 
     /**
      * Sets if we should try to follow the redirects or not. Default is true (to following them).
      * @param followRedirects
      */
 
+
+
     private boolean followRedirects = true;
 
+    public RemotePageURLDao() throws DaoException {
 
+    }
 
-    public void setFollowRedirects(boolean followRedirects) throws DaoException{
+    public void setFollowRedirects(boolean followRedirects) throws DaoException {
         this.followRedirects = followRedirects;
     }
 
@@ -46,9 +57,9 @@ public class GetRemotePage {
      * @return the requested LocalPage
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
-    public RemotePage getByTitle(Language language, Title title, NameSpace ns) throws DaoException{
+    public T getByTitle(Language language, Title title, NameSpace ns) throws DaoException{
         QueryType info = getPageInfo(getInfoByQuery(getQueryByTitle(title, language)));
-        return new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
+        return (T)new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }
 
     /**
@@ -58,9 +69,9 @@ public class GetRemotePage {
      * @return the requested LocalPage
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
-    public RemotePage getById(Language language, int pageId) throws DaoException{
+    public T getById(Language language, int pageId) throws DaoException{
         QueryType info = getPageInfo(getInfoByQuery(getQueryByID(pageId, language)));
-        return new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
+        return (T)new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }
 
     /**
@@ -70,11 +81,11 @@ public class GetRemotePage {
      * @return a map of ids to pages
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the pages
      */
-    public Map<Integer, RemotePage> getByIds(Language language, Collection<Integer> pageIds) throws DaoException{
-        Map<Integer, RemotePage> pageMap = new HashMap<Integer, RemotePage>();
+    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException{
+        Map<Integer,T> pageMap = new HashMap<Integer, T>();
         for(Integer pageId : pageIds){
             QueryType info = getPageInfo(getInfoByQuery(getQueryByID(pageId, language)));
-            pageMap.put(pageId, new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
+            pageMap.put(pageId, (T)new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
         }
         return pageMap;
     }
@@ -87,11 +98,11 @@ public class GetRemotePage {
      * @return a map of titles to pages
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the pages
      */
-    public Map<Title, RemotePage> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException{
-        Map<Title, RemotePage> pageMap = new HashMap<Title, RemotePage>();
+    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException{
+        Map<Title, T> pageMap = new HashMap<Title, T>();
         for(Title title : titles){
             QueryType info = getPageInfo(getInfoByQuery(getQueryByTitle(title, language)));
-            pageMap.put(title, new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
+            pageMap.put(title, (T)new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
         }
         return pageMap;
     }
@@ -225,4 +236,33 @@ public class GetRemotePage {
     }
 
 
+    public static class Provider extends org.wikapidia.conf.Provider<RemotePageDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return RemotePageDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.remotePage";
+        }
+
+        @Override
+        public RemotePageDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("url")) {
+                return null;
+            }
+            try {
+                return new RemotePageURLDao();
+
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+    }
 }
+

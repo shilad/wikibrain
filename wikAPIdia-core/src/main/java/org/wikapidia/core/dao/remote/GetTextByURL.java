@@ -1,4 +1,4 @@
-package org.wikapidia.core.dao;
+package org.wikapidia.core.dao.remote;
 
 import java.net.*;
 import java.io.*;
