@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * Analyzes the overlap in popular concepts.
+ * Experimental code for Shilad's intro Java course.
  *
  * @author Shilad Sen
  */
@@ -33,9 +34,8 @@ public class PopularArticleAnalyzer {
         for (LocalPagePopularity lpp : popularities.subList(0, 20)) {
             LocalPage lp = lpp.getPage();
             int pop = lpp.getPopularity();
-            int concept = wpApi.getConceptId(lp);
             System.out.println("popular page is " + lp + " with pop " + pop);
-            for (LocalPage lp2 : wpApi.getConceptPages(concept)) {
+            for (LocalPage lp2 : wpApi.getInOtherLanguages(lp)) {
                 if (lp2 != lp) {
                     System.out.println("\t" + lp2);
                 }

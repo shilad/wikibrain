@@ -16,11 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This is a wrapper I wrote around the WikAPIdia API for my intro
- * Java course.
+ * This is a wrapper I wrote around the WikAPIdia API for Shilad's intro Java course.
  *
- * The design strives to be easy for intro students, so it is not always
- * perfect Java code.
+ * The design strives to be understandable to intro students, so parts of it may seem
+ * awkward to experienced Java programmers.
  *
  * @author Shilad Sen
  */
@@ -32,6 +31,11 @@ public class WikAPIdiaWrapper {
     private LocalLinkDao llDao;
     private UniversalPageDao upDao;
 
+    /**
+     * Creates a new wrapper object with default configuration settings.
+     *
+     * @throws ConfigurationException
+     */
     public WikAPIdiaWrapper() throws ConfigurationException {
         this.env = new EnvBuilder().build();
         this.lpDao = env.getConfigurator().get(LocalPageDao.class);
@@ -39,11 +43,20 @@ public class WikAPIdiaWrapper {
         this.upDao = env.getConfigurator().get(UniversalPageDao.class);
     }
 
+    /**
+     * @return The list of installed languages.
+     */
     public List<Language> getLanguages() {
         LanguageSet lset = env.getLanguages();
         return new ArrayList<Language>(lset.getLanguages());
     }
 
+    /**
+     * Returns the number of WikiLinks to a particular page.
+     * @param page
+     * @return
+     * @throws DaoException
+     */
     public int getNumInLinks(LocalPage page) throws DaoException {
         DaoFilter filter = new DaoFilter()
                 .setLanguages(page.getLanguage())
@@ -51,6 +64,12 @@ public class WikAPIdiaWrapper {
         return llDao.getCount(filter);
     }
 
+    /**
+     * Returns a list of ALL the local pages in a particular language.
+     * @param language
+     * @return
+     * @throws DaoException
+     */
     public List<LocalPage> getLocalPages(Language language) throws DaoException {
         DaoFilter df = new DaoFilter()
                 .setLanguages(language)
@@ -60,20 +79,25 @@ public class WikAPIdiaWrapper {
         return IteratorUtils.toList(lpDao.get(df).iterator());
     }
 
-    public int getConceptId(LocalPage page) throws DaoException {
-        return upDao.getUnivPageId(page, CONCEPT_ALGORITHM_ID);
-    }
-
-    public List<LocalPage> getConceptPages(int conceptId) throws DaoException {
+    /**
+     * Returns a list of the pages that represent the same concept in other languages.
+     * @param page
+     * @return
+     * @throws DaoException
+     */
+    public List<LocalPage> getInOtherLanguages(LocalPage page) throws DaoException {
+        int conceptId = upDao.getUnivPageId(page, CONCEPT_ALGORITHM_ID);
         List<LocalPage> results = new ArrayList<LocalPage>();
         UniversalPage up = upDao.getById(conceptId, CONCEPT_ALGORITHM_ID);
         if (up == null) {
             return results;
         }
         for (LocalId lid : up.getLocalEntities()) {
-            LocalPage lp = lpDao.getById(lid.getLanguage(), lid.getId());
-            if (lp != null) {
-                results.add(lp);
+            if (!lid.equals(page.toLocalId())) {
+                LocalPage lp = lpDao.getById(lid.getLanguage(), lid.getId());
+                if (lp != null) {
+                    results.add(lp);
+                }
             }
         }
         return results;
