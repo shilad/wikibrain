@@ -16,7 +16,7 @@ import java.io.IOException;
  * Time: 9:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TestGetRemotePage {
+public class SampleGetRemotePage {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
        String string = new String();
        String url = new String("http://en.wikipedia.org//w/api.php?action=query&prop=info&format=json&titles=hi");
