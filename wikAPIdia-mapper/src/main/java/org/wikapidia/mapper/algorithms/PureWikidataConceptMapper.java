@@ -11,6 +11,8 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -36,34 +38,29 @@ import java.util.logging.Logger;
  * Date: 6/25/13
  * Time: 1:59 PM
  */
-
-
 public class PureWikidataConceptMapper extends ConceptMapper {
 
-    // Need to make it so it pulls from "http://dumps.wikimedia.org/wikidatawiki/latest/wikidatawiki-latest-wb_items_per_site.sql.gz"
-    private static final String WIKIDATA_MAPPING_FILE_PATH = "/Users/bjhecht/Downloads/wikidatawiki-20131021-wb_items_per_site.sql";
     private static Logger LOG = Logger.getLogger(PureWikidataConceptMapper.class.getName());
+    private final File wikiDataPath;
 
-    protected PureWikidataConceptMapper(int id, LocalPageDao<LocalPage> localPageDao) {
-        super(id, localPageDao);    //To change body of overridden methods use File | Settings | File Templates.
+    protected PureWikidataConceptMapper(File wikiDataPath, int id, LocalPageDao localPageDao) {
+        super(id, localPageDao);
+        this.wikiDataPath = wikiDataPath;
     }
 
     @Override
     public int getId() {
-        return super.getId();    //To change body of overridden methods use File | Settings | File Templates.
+        return super.getId();
     }
 
     @Override
     public Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException {
-
-        File wikiDataDumpFile = new File(WIKIDATA_MAPPING_FILE_PATH);
-
         final Map<Integer, Multimap<Language, LocalId>> backend = Maps.newHashMap();
         final Map<Integer, NameSpace> nsBackend = Maps.newHashMap();
 
         // loop through sql dump
         MySqlDumpParser dumpParser = new MySqlDumpParser();
-        Iterable<Object[]> lines = dumpParser.parse(wikiDataDumpFile);
+        Iterable<Object[]> lines = dumpParser.parse(wikiDataPath);
         int lineCounter = 0; int validLineCounter = 0;
         int[] numLangsCount = new int[ls.size()];
         for (Object[] line : lines){
@@ -110,7 +107,6 @@ public class PureWikidataConceptMapper extends ConceptMapper {
             if (lineCounter % 1000000 == 0){
                 LOG.info(String.format("Done with %d total lines of Wikidata dump file", lineCounter));
             }
-
         }
 
         return new MapperIterator<UniversalPage>(backend.keySet()) {
@@ -143,7 +139,12 @@ public class PureWikidataConceptMapper extends ConceptMapper {
             if (!config.getString("type").equals("purewikidata")) {
                 return null;
             }
+            List<File> paths = Env.getFiles(Language.WIKIDATA, FileMatcher.WIKIDATA_ITEMS, getConfig());
+            if (paths.isEmpty()) {
+                throw new ConfigurationException("No wikidata file available for PurWikidataConceptMapper");
+            }
             return new PureWikidataConceptMapper(
+                    paths.get(0),
                     config.getInt("algorithmId"),
                     getConfigurator().get(
                             LocalPageDao.class,

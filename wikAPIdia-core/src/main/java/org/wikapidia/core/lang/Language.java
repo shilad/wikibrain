@@ -37,6 +37,11 @@ public class Language implements Comparable<Language>, Serializable {
         }
     }
 
+    /**
+     * HACK: Not really a language, but treated as a language by Wikimedia.
+     */
+    public static Language WIKIDATA = new Language((short) -1, "wikidata", "Wikidata", "Wikidata");
+
     private final short id;
     private final String langCode;
     private final String enLangName;
@@ -84,6 +89,9 @@ public class Language implements Comparable<Language>, Serializable {
      * @throws IllegalArgumentException if langCode is unknown.
      */
     public static Language getByLangCode(String langCode) {
+        if (WIKIDATA.getLangCode().equals(langCode)) {
+            return WIKIDATA;
+        }
         for (Language lang : LANGUAGES) {
             if (lang.langCode.equalsIgnoreCase(langCode)) {
                 return lang;
