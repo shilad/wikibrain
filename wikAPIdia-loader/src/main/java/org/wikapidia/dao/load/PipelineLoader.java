@@ -13,9 +13,9 @@ import java.io.IOException;
  */
 public class PipelineLoader {
     public static void main(String args[]) throws IOException, InterruptedException {
-//        run(RequestedLinkGetter.class, args);
+        run(RequestedLinkGetter.class, args);
         run(FileDownloader.class, args);
-        run(DumpLoader.class, ArrayUtils.add(args, "-d"));
+        run(DumpLoader.class, ArrayUtils.addAll(args, "-d", "-l", "ie,lad"));
         run(RedirectLoader.class, ArrayUtils.add(args, "-d"));
         run(WikiTextLoader.class, ArrayUtils.add(args, "-d"));
         run(LuceneLoader.class, args);

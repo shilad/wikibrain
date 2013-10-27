@@ -58,7 +58,7 @@ public class EnvBuilder {
                 setUseLoadedLanguages();
             } else if (val.equals("downloaded")) {
                 setUseDownloadedLanguages();
-            } else {
+            } else {  // TODO: handle world economies, etc.
                 setLanguages(new LanguageSet(cmd.getOptionValue("l")));
             }
         }
@@ -105,27 +105,24 @@ public class EnvBuilder {
     }
 
     public EnvBuilder setUseLoadedLanguages() {
-        params.put("languages.custom.loaded", true);
-        params.remove("languages.custom.downloaded");
-        params.remove("languages.custom.langCodes");
-        params.put("languages.default", "custom");
+        params.put("languages.default", "loaded");
         return this;
     }
 
     public EnvBuilder setUseDownloadedLanguages() {
-        params.put("languages.custom.downloaded", true);
-        params.remove("languages.custom.loaded");
-        params.remove("languages.custom.langCodes");
-        params.put("languages.default", "custom");
+        params.put("languages.default", "downloaded");
         return this;
     }
 
     public EnvBuilder setLanguages(LanguageSet langs) {
-        params.remove("languages.custom.loaded");
-        params.remove("languages.custom.downloaded");
-        params.put("languages.custom.langCodes", langs.getLangCodes());
-        params.put("languages.default", "custom");
+        params.put("languages.default", "manual");
+        params.put("languages.manual.langCodes", langs.getLangCodes());
         return this;
+    }
+
+    public boolean hasExplicitLanguageSet() {
+        String name = (String) params.get("languages.default");
+        return !name.equals("loaded") && !name.equals("downloaded");
     }
 
     public EnvBuilder setLanguages(String langCodes) {

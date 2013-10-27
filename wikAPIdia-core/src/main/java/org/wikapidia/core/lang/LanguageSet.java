@@ -215,14 +215,6 @@ public class LanguageSet implements Iterable<Language> {
         return langs.iterator();
     }
 
-    // If the language set in the configuration file is this value, use the set
-    // of languages whose main article dump is downloaded.
-    public static final String DOWNLOADED = "downloaded";
-
-    // If the language set in the configuration file is this value, use the set
-    // of loaded languages returned by the meta info dao for LocalPages.
-    public static final String LOADED = "loaded";
-
     static class Provider extends org.wikapidia.conf.Provider<LanguageSet> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -241,10 +233,11 @@ public class LanguageSet implements Iterable<Language> {
         @Override
         public LanguageSet get(String name, Config config) throws ConfigurationException {
             try {
-                if (config.hasPath(LOADED) && config.getBoolean(LOADED)) {
+                String type = config.getString("type");
+                if (type.equals("loaded")) {
                     MetaInfoDao miDao = getConfigurator().get(MetaInfoDao.class);
                     return miDao.getLoadedLanguages(LocalPage.class);
-                } else if (config.hasPath(DOWNLOADED) && config.getBoolean(DOWNLOADED)) {
+                } else if (type.equals("downloaded")) {
                     List<Language> languages = new ArrayList<Language>();
                     // TODO: set the default language reasonably
                     for (Language lang : Language.LANGUAGES) {
@@ -253,10 +246,10 @@ public class LanguageSet implements Iterable<Language> {
                         }
                     }
                     return new LanguageSet(languages);
-                } else if (config.hasPath("langCodes")) {
+                } else if (type.equals("custom")) {
                     return new LanguageSet(config.getStringList("langCodes"));
                 } else {
-                    throw new ConfigurationException("Unexpected configuration: " + config);
+                    throw new ConfigurationException("Unknown LanguageSet type: " + type);
                 }
             } catch (DaoException e) {
                 throw new ConfigurationException(e);

@@ -110,7 +110,7 @@ public class Env {
         if (downloadPath == null) {
             throw new IllegalArgumentException("missing configuration for download.path");
         }
-        LOG.info("scanning download path " + downloadPath + " for files");
+        LOG.fine("scanning download path " + downloadPath + " for files");
         List<File> matchingFiles = new ArrayList<File>();
         File langDir = new File(downloadPath, lang.getLangCode());
         if (!langDir.isDirectory()) {

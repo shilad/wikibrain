@@ -102,16 +102,20 @@ public class DumpLoader {
             return;
         }
 
-        Env env = new EnvBuilder(cmd).setUseDownloadedLanguages().build();
+        EnvBuilder builder = new EnvBuilder(cmd);
+        if (!builder.hasExplicitLanguageSet()) {
+            builder.setUseDownloadedLanguages();
+        }
+        Env env = builder.build();
         Configurator conf = env.getConfigurator();
         List<File> paths;
         if (cmd.getArgList().isEmpty()) {
+            paths = env.getFiles(FileMatcher.ARTICLES);
+        } else {
             paths = new ArrayList<File>();
             for (Object arg : cmd.getArgList()) {
                 paths.add(new File((String)arg));
             }
-        } else {
-            paths = env.getFiles(FileMatcher.ARTICLES);
         }
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
