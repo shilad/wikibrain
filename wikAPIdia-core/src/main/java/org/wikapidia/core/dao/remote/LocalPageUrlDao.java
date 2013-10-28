@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao.remote;
 
-import com.google.gson.JsonElement;
 import com.typesafe.config.Config;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -16,10 +15,6 @@ import org.wikapidia.core.model.Title;
 
 import java.util.*;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,7 +23,16 @@ import com.google.gson.JsonParser;
  * Time: 6:12 PM
  * To change this template use File | Settings | File Templates.
  */
-public class LocalPageURLDao<T extends LocalPage> implements LocalPageDao<T> {
+
+
+/**
+ *
+ * Get this dao by using "LocalPageDao YOUR_DAO_NAME_HERE = new Configurator(new Configuration()).get(LocalPageDao.class, "url");"
+ *
+ */
+
+
+public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
 
     /**
      * Sets if we should try to follow the redirects or not. Default is true (to following them).
@@ -39,17 +43,35 @@ public class LocalPageURLDao<T extends LocalPage> implements LocalPageDao<T> {
 
     private boolean followRedirects = true;
 
-    public LocalPageURLDao() throws DaoException {
+    public LocalPageUrlDao() throws DaoException {
 
     }
 
-    //TODO: Try to get rid of those methods!
-    public void clear(){}
-    public void beginLoad(){}
-    public void endLoad(){}
-    public void save(T a){}
-    public int getCount(DaoFilter a){return 1;}
-    public Iterable<T> get(DaoFilter a){return new ArrayList<T>();}
+    //Notice: A DaoException will be thrown if you call the methods below!
+    public void clear() throws DaoException
+    {
+       throw new DaoException("Can't use this method for remote wiki server!");
+    }
+    public void beginLoad()throws DaoException
+    {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+    public void endLoad()throws DaoException
+    {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+    public void save(T a)throws DaoException
+    {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+    public int getCount(DaoFilter a)throws DaoException
+    {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+    public Iterable<T> get(DaoFilter a)throws DaoException
+    {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
 
 
 
@@ -177,7 +199,7 @@ public class LocalPageURLDao<T extends LocalPage> implements LocalPageDao<T> {
     private String getInfoByQuery(String query){
         String info = new String();
         try{
-            info = GetTextByURL.getText(query);
+            info = GetTextByUrl.getText(query);
         }
         catch(Exception e){
             System.out.println("Error get info from wiki server");
@@ -207,7 +229,7 @@ public class LocalPageURLDao<T extends LocalPage> implements LocalPageDao<T> {
                 return null;
             }
             try {
-                return new LocalPageURLDao();
+                return new LocalPageUrlDao();
 
             } catch (DaoException e) {
                 throw new ConfigurationException(e);

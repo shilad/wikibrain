@@ -16,7 +16,7 @@ import java.io.*;
 
 
 
-public class GetTextByURL {
+public class GetTextByUrl {
 
     /**
      *

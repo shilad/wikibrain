@@ -3,7 +3,7 @@ package org.wikapidia.core.dao;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.remote.GetTextByURL;
+import org.wikapidia.core.dao.remote.GetTextByUrl;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.*;
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class SampleGetLocalPageByUrl{
        String string = new String();
        String url = new String("http://en.wikipedia.org//w/api.php?action=query&prop=info&format=json&titles=hi");
        try{
-           string = GetTextByURL.getText(url);
+           string = GetTextByUrl.getText(url);
        }
        catch(Exception e){
            System.out.println("Error get info from wiki server");
@@ -28,8 +28,7 @@ public class SampleGetLocalPageByUrl{
 
        //Test GetTextByURL
        System.out.println(string);
-       Configurator c = new Configurator(new Configuration());
-       LocalPageDao testClass = c.get(LocalPageDao.class, "url");
+       LocalPageDao testClass = new Configurator(new Configuration()).get(LocalPageDao.class, "url");
        Language lang = Language.getByLangCode("en");
 
        System.out.println(testClass.getByTitle(lang,new Title("Apple", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
