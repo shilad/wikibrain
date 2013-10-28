@@ -6,21 +6,19 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.RemotePageDao;
+import org.wikapidia.core.dao.DaoFilter;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.RemotePage;
+import org.wikapidia.core.model.LocalPage;
+
 import org.wikapidia.core.model.Title;
 
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import javax.sql.DataSource;
 
 
 /**
@@ -30,7 +28,7 @@ import javax.sql.DataSource;
  * Time: 6:12 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> {
+public class LocalPageURLDao<T extends LocalPage> implements LocalPageDao<T> {
 
     /**
      * Sets if we should try to follow the redirects or not. Default is true (to following them).
@@ -41,9 +39,20 @@ public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> 
 
     private boolean followRedirects = true;
 
-    public RemotePageURLDao() throws DaoException {
+    public LocalPageURLDao() throws DaoException {
 
     }
+
+    //TODO: Try to get rid of those methods!
+    public void clear(){}
+    public void beginLoad(){}
+    public void endLoad(){}
+    public void save(T a){}
+    public int getCount(DaoFilter a){return 1;}
+    public Iterable<T> get(DaoFilter a){return new ArrayList<T>();}
+
+
+
 
     public void setFollowRedirects(boolean followRedirects) throws DaoException {
         this.followRedirects = followRedirects;
@@ -58,8 +67,8 @@ public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> 
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
     public T getByTitle(Language language, Title title, NameSpace ns) throws DaoException{
-        QueryType info = getPageInfo(getInfoByQuery(getQueryByTitle(title, language)));
-        return (T)new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title, language)));
+        return (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }
 
     /**
@@ -70,8 +79,8 @@ public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> 
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
     public T getById(Language language, int pageId) throws DaoException{
-        QueryType info = getPageInfo(getInfoByQuery(getQueryByID(pageId, language)));
-        return (T)new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByID(pageId, language)));
+        return (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }
 
     /**
@@ -84,8 +93,8 @@ public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> 
     public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException{
         Map<Integer,T> pageMap = new HashMap<Integer, T>();
         for(Integer pageId : pageIds){
-            QueryType info = getPageInfo(getInfoByQuery(getQueryByID(pageId, language)));
-            pageMap.put(pageId, (T)new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
+            QueryReply info = new QueryReply(getInfoByQuery(getQueryByID(pageId, language)));
+            pageMap.put(pageId, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
         }
         return pageMap;
     }
@@ -101,8 +110,8 @@ public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> 
     public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException{
         Map<Title, T> pageMap = new HashMap<Title, T>();
         for(Title title : titles){
-            QueryType info = getPageInfo(getInfoByQuery(getQueryByTitle(title, language)));
-            pageMap.put(title, (T)new RemotePage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
+            QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title, language)));
+            pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
         }
         return pageMap;
     }
@@ -116,7 +125,7 @@ public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> 
      * @return
      */
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException{
-        QueryType info = getPageInfo(getInfoByQuery(getQueryByTitle(new Title(title, language), language)));
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(new Title(title, language), language)));
         return info.getId();
     }
 
@@ -127,70 +136,11 @@ public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> 
      * @return
      */
     public int getIdByTitle(Title title) throws DaoException{
-        QueryType info = getPageInfo(getInfoByQuery(getQueryByTitle(title)));
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title)));
         return info.getId();
     }
 
 
-
-    private class QueryType{
-        QueryType(Long pageid, String title, String pagelanguage, Long ns, boolean isRedirect, boolean isDisambig){
-            this.pageid = pageid;
-            this.title = title;
-            this.pagelanguage = pagelanguage;
-            this.ns = ns;
-            this.isRedirect = isRedirect;
-            this.isDisambig = isDisambig;
-
-        }
-        QueryType(){};
-
-        public int getId(){
-            return pageid.intValue();
-        }
-        public Title getTitle(){
-            return new Title(title, Language.getByLangCode(pagelanguage));
-        }
-        public NameSpace getNameSpace(){
-            return NameSpace.getNameSpaceByArbitraryId(ns.intValue());
-        }
-        public boolean isRedirect(){
-            return isRedirect;
-        }
-
-        public boolean isDisambig(){
-            return isDisambig;
-        }
-
-        private Long pageid;
-        private String title;
-        private String pagelanguage;
-        private Long ns;
-        private boolean isRedirect;
-        private boolean isDisambig;
-
-    }
-
-
-    private QueryType getPageInfo(String text){
-        Gson gson = new Gson();
-        JsonParser jp = new JsonParser();
-        JsonObject test = jp.parse(text).getAsJsonObject();
-        Set<Map.Entry<String, JsonElement>> pageSet = jp.parse(text).getAsJsonObject().get("query").getAsJsonObject().get("pages").getAsJsonObject().entrySet();
-        QueryType query = new QueryType();
-        for (Map.Entry<String, JsonElement> entry: pageSet)
-        {
-            Long pageid = entry.getValue().getAsJsonObject().get("pageid").getAsLong();
-            String title = entry.getValue().getAsJsonObject().get("title").getAsString();
-            String pagelanguage = entry.getValue().getAsJsonObject().get("pagelanguage").getAsString();
-            Long ns = entry.getValue().getAsJsonObject().get("ns").getAsLong();
-            Boolean isRedirect = entry.getValue().getAsJsonObject().has("redirect");
-            Boolean isDisambig = entry.getValue().getAsJsonObject().get("title").getAsString().contains("(disambiguation)");
-            query = new QueryType(pageid, title, pagelanguage, ns, isRedirect, isDisambig);
-        }
-
-        return query;
-    }
 
     private String getQueryByTitle(Title title, Language language){
         String http = new String("http://");
@@ -236,28 +186,28 @@ public class RemotePageURLDao<T extends RemotePage> implements RemotePageDao<T> 
     }
 
 
-    public static class Provider extends org.wikapidia.conf.Provider<RemotePageDao> {
+    public static class Provider extends org.wikapidia.conf.Provider<LocalPageDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return RemotePageDao.class;
+            return LocalPageDao.class;
         }
 
         @Override
         public String getPath() {
-            return "dao.remotePage";
+            return "dao.localPage";
         }
 
         @Override
-        public RemotePageDao get(String name, Config config) throws ConfigurationException {
+        public LocalPageDao get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("url")) {
                 return null;
             }
             try {
-                return new RemotePageURLDao();
+                return new LocalPageURLDao();
 
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
