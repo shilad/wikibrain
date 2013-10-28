@@ -69,6 +69,7 @@ public class LuceneSearcher {
 
     private LuceneSearcher(LanguageSet languages, File root, LuceneOptions options) {
         try {
+            System.err.println("LOADING LANGUAGES " + languages);
             this.root = root;
             this.searchers = new HashMap<Language, IndexSearcher>();
             this.readers = new HashMap<Language, DirectoryReader>();
@@ -132,16 +133,29 @@ public class LuceneSearcher {
      * @return
      */
     public WikapidiaScoreDoc[] search(Query query, Language language, int hitCount, Filter filter) {
+        return search(query, language, hitCount, filter, true);
+
+    }
+
+    /**
+     * Runs a specified lucene query in the specified language with a specified hitcount.
+     * @param query
+     * @param language
+     * @param hitCount
+     * @param filter
+     * @param resolveWpIds if True, returns wikipedia ids. otherwise returns lucene ids.
+     * @return
+     */
+    public WikapidiaScoreDoc[] search(Query query, Language language, int hitCount, Filter filter, boolean resolveWpIds) {
         if (!searchers.containsKey(language)) throw new IllegalArgumentException("Unknown language: " + language);
         try {
             this.hitCount = hitCount;
             ScoreDoc[] scoreDocs = searchers.get(language).search(query, filter, hitCount).scoreDocs;
             WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
-            int i = 0;
-            for (ScoreDoc scoreDoc : scoreDocs) {
-                WikapidiaScoreDoc wikapidiaScoreDoc = new WikapidiaScoreDoc(scoreDoc.doc, scoreDoc.score);
-                wikapidiaScoreDocs[i] = wikapidiaScoreDoc;
-                i++;
+            for (int i = 0; i < scoreDocs.length; i++) {
+                ScoreDoc scoreDoc = scoreDocs[i];
+                int wpId = resolveWpIds ? getLocalIdFromDocId(scoreDoc.doc, language) : -1;
+                wikapidiaScoreDocs[i] = new WikapidiaScoreDoc(scoreDoc.doc, wpId, scoreDoc.score);
             }
             return wikapidiaScoreDocs;
         } catch (IOException e) {
@@ -222,11 +236,8 @@ public class LuceneSearcher {
 
         @Override
         public LuceneSearcher get(String name, Config config) throws ConfigurationException {
-            if (!name.equalsIgnoreCase(config.getString("type"))) {
-                throw new ConfigurationException("Could not find configuration " + name);
-            }
             return new LuceneSearcher(
-                    new LanguageSet(config.getStringList("langs")),
+                    getConfigurator().get(LanguageSet.class),
                     getConfigurator().get(LuceneOptions.class, config.getString("options"))
             );
         }

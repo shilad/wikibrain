@@ -3,13 +3,11 @@ package org.wikapidia.parser;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalCategoryMemberDao;
-import org.wikapidia.core.dao.LocalLinkDao;
-import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.dao.sql.LocalCategoryMemberSqlDao;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
+import org.wikapidia.core.dao.sql.MetaInfoSqlDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.*;
 import org.wikapidia.core.model.RawPage;
@@ -79,12 +77,13 @@ public class TestWikiTextDumpParser {
         LocalLinkDao linkDao = new LocalLinkSqlDao(ds);
         LocalPageDao pageDao = new LocalPageSqlDao(ds);
         LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(ds);
+        MetaInfoDao metaDao = new MetaInfoSqlDao(ds);
 
         linkDao.beginLoad();
         catMemDao.beginLoad();
 
-        ParserVisitor linkVisitor = new LocalLinkVisitor(linkDao, pageDao);
-        ParserVisitor catVisitor = new LocalCategoryVisitor(pageDao, catMemDao);
+        ParserVisitor linkVisitor = new LocalLinkVisitor(linkDao, pageDao, metaDao);
+        ParserVisitor catVisitor = new LocalCategoryVisitor(pageDao, catMemDao, metaDao);
 
         visitors.add(visitor);
         visitors.add(linkVisitor);

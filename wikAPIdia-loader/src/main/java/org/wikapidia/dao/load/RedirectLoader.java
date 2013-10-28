@@ -10,12 +10,14 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
+import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.core.model.Redirect;
 import org.wikapidia.core.model.Title;
 
 import javax.sql.DataSource;
@@ -31,16 +33,18 @@ import java.util.logging.Logger;
  */
 public class RedirectLoader {
     private static final Logger LOG = Logger.getLogger(RedirectLoader.class.getName());
+    private final MetaInfoDao metaDao;
 
     private TIntIntHashMap redirectIdsToPageIds;
     private final RawPageSqlDao rawPages;
     private final LocalPageSqlDao localPages;
     private final RedirectSqlDao redirects;
 
-    public RedirectLoader(DataSource ds) throws DaoException{
+    public RedirectLoader(DataSource ds, MetaInfoDao metaDao) throws DaoException{
         this.rawPages = new RawPageSqlDao(ds);
         this.localPages = new LocalPageSqlDao(ds,false);
         this.redirects = new RedirectSqlDao(ds);
+        this.metaDao = metaDao;
     }
 
     public RedirectSqlDao getDao() {
@@ -89,6 +93,7 @@ public class RedirectLoader {
             if(i%10000==0)
                 LOG.info("loaded " + i + " into database.");
             redirects.save(language, src, redirectIdsToPageIds.get(src));
+            metaDao.incrementRecords(Redirect.class, language);
             i++;
         }
         LOG.info("End loading redirects into database.");
@@ -117,14 +122,18 @@ public class RedirectLoader {
         Configurator conf = env.getConfigurator();
 
         DataSource dataSource = conf.get(DataSource.class);
-        RedirectLoader redirectLoader = new RedirectLoader(dataSource);
+        MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
+
+        RedirectLoader redirectLoader = new RedirectLoader(dataSource, metaDao);
         if (cmd.hasOption("d")){
             LOG.info("Clearing data provider: ");
             redirectLoader.getDao().clear();
+            metaDao.clear(Redirect.class);
         }
 
         LOG.info("Begin Load: ");
         redirectLoader.getDao().beginLoad();
+        metaDao.beginLoad();
 
         for(Language l : env.getLanguages()){
             LOG.info("LOADING REDIRECTS FOR " + l);
@@ -134,6 +143,7 @@ public class RedirectLoader {
         }
 
         redirectLoader.getDao().endLoad();
+        metaDao.endLoad();
     }
 
 }

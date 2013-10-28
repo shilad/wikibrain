@@ -8,6 +8,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.LocalPage;
 
@@ -47,32 +48,32 @@ public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
 
     }
 
+
+
+
     //Notice: A DaoException will be thrown if you call the methods below!
-    public void clear() throws DaoException
-    {
+    public void clear()throws DaoException{
        throw new DaoException("Can't use this method for remote wiki server!");
     }
-    public void beginLoad()throws DaoException
-    {
+    public void beginLoad()throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
-    public void endLoad()throws DaoException
-    {
+    public void endLoad()throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
-    public void save(T a)throws DaoException
-    {
+    public void save(T a)throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
-    public int getCount(DaoFilter a)throws DaoException
-    {
+    public int getCount(DaoFilter a)throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
-    public Iterable<T> get(DaoFilter a)throws DaoException
-    {
+    public Iterable<T> get(DaoFilter a)throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
+    public LanguageSet getLoadedLanguages() throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
 
+    }
 
 
 

@@ -2,6 +2,7 @@ package org.wikapidia.core.provider;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 import com.typesafe.config.Config;
+import org.apache.commons.io.IOUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;

@@ -9,15 +9,21 @@ import java.util.List;
  */
 public class EnsembleSim {
     List<Double> scores;
+    List<Integer> ranks;
     KnownSim knownSim;
 
-    public EnsembleSim(List<Double> scores, KnownSim knownSim){
+    public EnsembleSim(List<Double> scores, List<Integer> ranks, KnownSim knownSim){
         this.scores=scores;
+        this.ranks=ranks;
         this.knownSim=knownSim;
     }
 
     public List<Double> getScores() {
         return scores;
+    }
+
+    public List<Integer> getRanks(){
+        return ranks;
     }
 
     public void setScores(List<Double> scores) {

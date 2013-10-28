@@ -1,5 +1,7 @@
 package org.wikapidia.core.dao;
 
+import org.wikapidia.core.lang.LanguageSet;
+
 /**
  *
  * Ubiquitous Dao interface implemented by all Daos. Describes methods
@@ -55,5 +57,11 @@ public interface Dao<T> {
      * @throws DaoException if there was an error retrieving the objects
      */
     public int getCount(DaoFilter daoFilter) throws DaoException;
+
+    /**
+     * @return The set of loaded languages.
+     * @throws DaoException
+     */
+    public LanguageSet getLoadedLanguages() throws DaoException;
 
 }

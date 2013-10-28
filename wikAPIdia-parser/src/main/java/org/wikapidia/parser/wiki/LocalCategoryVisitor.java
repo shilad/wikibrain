@@ -4,6 +4,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalCategoryMember;
@@ -21,17 +22,19 @@ public class LocalCategoryVisitor extends ParserVisitor {
 
     private final LocalPageDao pageDao;
     private final LocalCategoryMemberDao catMemDao;
+    private final MetaInfoDao metaDao;
     private AtomicInteger counter = new AtomicInteger();
 
-    public LocalCategoryVisitor(LocalPageDao pageDao, LocalCategoryMemberDao catMemDao) {
+    public LocalCategoryVisitor(LocalPageDao pageDao, LocalCategoryMemberDao catMemDao, MetaInfoDao metaDao) {
         this.pageDao = pageDao;
         this.catMemDao = catMemDao;
+        this.metaDao = metaDao;
     }
 
     @Override
     public void category(ParsedCategory cat) throws WikapidiaException {
+        Language lang = cat.category.getLanguage();
         try{
-            Language lang = cat.category.getLanguage();
             LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
 
             int c = counter.getAndIncrement();
@@ -52,7 +55,9 @@ public class LocalCategoryVisitor extends ParserVisitor {
                             cat.location.getXml().getLocalId(),
                             lang
                     ));
+            metaDao.incrementRecords(LocalCategoryMember.class, lang);
         } catch (DaoException e) {
+            metaDao.incrementErrorsQuietly(LocalCategoryMember.class, lang);
             throw new WikapidiaException(e);
         }
 

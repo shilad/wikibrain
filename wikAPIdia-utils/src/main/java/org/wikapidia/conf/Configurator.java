@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.clapper.util.classutil.*;
+import org.wikapidia.utils.JvmUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -111,28 +112,7 @@ public class Configurator {
      * @throws ConfigurationException
      */
     private void registerProviders() throws ConfigurationException {
-        String classPath = System.getProperty("java.class.path", ".");
-
-        // Try to get the URL class loader to make dynamic class loading work for Grails, etc.
-        ClassLoader loader = Configurator.class.getClassLoader();
-        while (loader.getParent() != null && loader.getParent() instanceof URLClassLoader) {
-            if (loader.getClass().getName().contains("RootLoader")) {
-                break;  // hack for Groovy / Grails RootLoader s
-            }
-            loader = loader.getParent();
-        }
-        LOG.info("looking for classes in classloader " + loader);
-        if (loader instanceof URLClassLoader) {
-            for (URL url : ((URLClassLoader)loader).getURLs()) {
-                if (isLocalFile(url)) {
-                    try {
-                        classPath += ":" + new File(url.toURI());
-                    } catch (URISyntaxException e) {
-                        LOG.warning("Illegal url: " + url);
-                    }
-                }
-            }
-        }
+        String classPath = JvmUtils.getClassPath();
 
         // map from class names to file they are registered in.
         Set<String> visited = new HashSet<String>();    // files already scanned
@@ -141,12 +121,12 @@ public class Configurator {
         for (String entry : classPath.split(":")) {
             File file = new File(entry);
             if (file.length() > MAX_FILE_SIZE) {
-                LOG.info("skipping looking for providers in large file " + file);
+                LOG.fine("skipping looking for providers in large file " + file);
                 continue;
             }
             String canonical = FilenameUtils.normalize(file.getAbsolutePath());
             if (visited.contains(canonical)) {
-                LOG.info("skipping looking for providers in duplicate classpath entry " + canonical);
+                LOG.fine("skipping looking for providers in duplicate classpath entry " + canonical);
                 continue;
             }
             visited.add(canonical);
@@ -350,13 +330,4 @@ public class Configurator {
         return get(klass, null);
     }
 
-    /**
-     * Adapted from http://www.java2s.com/Code/Java/Network-Protocol/IsURLalocalfile.htm
-     * @param file
-     * @return
-     */
-    public boolean isLocalFile(URL url) {
-        return ((url.getProtocol().equals("file"))
-        &&      (url.getHost() == null || url.getHost().equals("")));
-    }
 }

@@ -7,16 +7,22 @@ package org.wikapidia.lucene;
 public class WikapidiaScoreDoc {
     public float score;
 
-    public int doc;
+    public int luceneId;
 
-    public WikapidiaScoreDoc(int doc, float score) {
+    /**
+     * If this is -1, it has not been looked up.
+     */
+    public int wpId = -1;
+
+    public WikapidiaScoreDoc(int luceneId, int wpId, float score) {
         this.score = score;
-        this.doc = doc;
+        this.luceneId = luceneId;
+        this.wpId = wpId;
     }
 
     // A convenience method for debugging.
     @Override
     public String toString() {
-        return "doc=" + doc + " score=" + score;
+        return "luceneId=" + luceneId + " wpId=" + wpId + " score=" + score;
     }
 }

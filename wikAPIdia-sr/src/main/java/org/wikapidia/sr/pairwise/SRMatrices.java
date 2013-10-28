@@ -138,16 +138,16 @@ public class SRMatrices implements Closeable {
     public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException {
         long l = System.currentTimeMillis();
         try {
-        MatrixRow row = cosimilarityMatrix.getRow(wpId);
-        SRResultList results = null;
-        if (row != null && row.getNumCols() >= numResults ) {
-            results = rowToResultList(row, numResults, validIds);
-        }
-        if (results != null && results.numDocs() >= numResults) {
-            return results;
-        } else {
-            return similarity.mostSimilar(this, wpId, numResults, validIds);
-        }
+            MatrixRow row = cosimilarityMatrix.getRow(wpId);
+            SRResultList results = null;
+            if (row != null && row.getNumCols() >= numResults ) {
+                results = rowToResultList(row, numResults, validIds);
+            }
+            if (results != null && results.numDocs() >= numResults) {
+                return results;
+            } else {
+                return similarity.mostSimilar(this, wpId, numResults, validIds);
+            }
         } finally {
             System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
         }
@@ -240,7 +240,7 @@ public class SRMatrices implements Closeable {
 
     private void writeSim(SparseMatrixWriter writer, Integer wpId, TIntSet colIds, int maxSimsPerDoc, AtomicInteger idCounter, AtomicLong cellCounter) throws IOException {
         if (idCounter.incrementAndGet() % 10000 == 0) {
-            LOG.info("finding matches for doc " + idCounter.get());
+            LOG.info("finding matches for luceneId " + idCounter.get());
         }
         SRResultList scores = similarity.mostSimilar(this, wpId, maxSimsPerDoc, colIds);
         if (scores != null) {

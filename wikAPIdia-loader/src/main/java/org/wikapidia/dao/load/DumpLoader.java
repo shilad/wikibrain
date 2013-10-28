@@ -9,6 +9,7 @@ import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -20,6 +21,7 @@ import org.wikapidia.utils.Procedure;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -34,10 +36,12 @@ public class DumpLoader {
     private final AtomicInteger counter = new AtomicInteger();
     private final LocalPageDao localPageDao;
     private final RawPageDao rawPageDao;
+    private final MetaInfoDao metaDao;
 
-    public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao) {
+    public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao, MetaInfoDao metaDao) {
         this.localPageDao = localPageDao;
         this.rawPageDao = rawPageDao;
+        this.metaDao = metaDao;
     }
 
     /**
@@ -59,9 +63,10 @@ public class DumpLoader {
     private void save(File file, RawPage rp) {
         try {
             rawPageDao.save(rp);
+            metaDao.incrementRecords(rp.getClass(), rp.getLanguage());
         } catch (Exception e) {
             LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
-
+            metaDao.incrementErrorsQuietly(rp.getClass(), rp.getLanguage());
         }
         try {
             LocalPage lp = new LocalPage(
@@ -70,8 +75,10 @@ public class DumpLoader {
                                 rp.isRedirect(), rp.isDisambig()
                             );
             localPageDao.save(lp);
+            metaDao.incrementRecords(lp.getClass(), lp.getLanguage());
         } catch (Exception e) {
             LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
+            metaDao.incrementErrorsQuietly(LocalPage.class, rp.getLanguage());
         }
 
     }
@@ -95,32 +102,49 @@ public class DumpLoader {
             return;
         }
 
-        Env env = new EnvBuilder(cmd).build();
+        EnvBuilder builder = new EnvBuilder(cmd);
+        if (!builder.hasExplicitLanguageSet()) {
+            builder.setUseDownloadedLanguages();
+        }
+        Env env = builder.build();
         Configurator conf = env.getConfigurator();
-        List<File> paths = env.getInputFiles(true, cmd.getArgList(), FileMatcher.ARTICLES);
+        List<File> paths;
+        if (cmd.getArgList().isEmpty()) {
+            paths = env.getFiles(FileMatcher.ARTICLES);
+        } else {
+            paths = new ArrayList<File>();
+            for (Object arg : cmd.getArgList()) {
+                paths.add(new File((String)arg));
+            }
+        }
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
+        MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
-        final DumpLoader loader = new DumpLoader(lpDao, rpDao);
+        final DumpLoader loader = new DumpLoader(lpDao, rpDao, metaDao);
 
         if (cmd.hasOption("d")) {
             lpDao.clear();
             rpDao.clear();
+            metaDao.clear();
         }
         lpDao.beginLoad();
         rpDao.beginLoad();
+        metaDao.beginLoad();
 
         // loads multiple dumps in parallel
         ParallelForEach.loop(paths,
                 new Procedure<File>() {
                     @Override
                     public void call(File path) throws Exception {
+                        LOG.info("processing file: " + path);
                         loader.load(path);
                     }
                 });
 
         lpDao.endLoad();
         rpDao.endLoad();
+        metaDao.endLoad();
     }
 }

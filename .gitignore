@@ -24,4 +24,4 @@ target/
 .tmp/
 dat/
 
-db/
+/db/

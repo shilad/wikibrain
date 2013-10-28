@@ -104,6 +104,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             throw new IllegalStateException("Model default similarity has not been trained.");
         }
     }
+
     /**
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
@@ -197,7 +198,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public void trainSimilarity(Dataset dataset){
+    public void trainSimilarity(Dataset dataset) throws DaoException {
         if (!normalizers.containsKey(dataset.language)) {
             normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
@@ -347,6 +348,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
                 File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
                 SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
                 srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
+                mostSimilarMatrices.put(language, srm);
             }
         } catch (InterruptedException e){
             throw new RuntimeException(e);

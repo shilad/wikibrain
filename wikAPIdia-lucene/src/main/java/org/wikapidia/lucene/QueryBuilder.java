@@ -48,6 +48,9 @@ public class QueryBuilder {
     private int minTermFreq = DEFAULT_MIN_TERM_FREQ;
     private int minDocFreq = DEFAULT_MIN_DOC_FREQ;
 
+    // If true, lookup upwikipedia ids for lucene ids.
+    private boolean resolveWikipediaIds = true;
+
     public QueryBuilder(LuceneSearcher searcher, Language language) {
         this.searcher = searcher;
         this.language = language;
@@ -158,11 +161,15 @@ public class QueryBuilder {
         return query != null;
     }
 
+    public void setResolveWikipediaIds(boolean resolve) {
+        this.resolveWikipediaIds = resolve;
+    }
+
     public WikapidiaScoreDoc[] search() {
         if (!hasQuery()) {
             throw new IllegalArgumentException("no query specified. call one of the QueryBuilder.set* methods to specify a query");
         }
-        return searcher.search(query, language, numHits, getFilters());
+        return searcher.search(query, language, numHits, getFilters(), resolveWikipediaIds);
     }
 
     /**

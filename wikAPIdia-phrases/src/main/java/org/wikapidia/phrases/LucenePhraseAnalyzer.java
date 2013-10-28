@@ -39,7 +39,6 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
         this.searcher = searcher;
     }
 
-
     @Override
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
@@ -52,7 +51,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
         if (wikapidiaScoreDocs.length == 0) {
             // If there is no result from title field query, query the plaintext field.
             wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
-                                        .setPhraseQuery(phrase)
+                                        .setPhraseQuery(new TextFieldElements().addPlainText(), phrase)
                                         .setNumHits(maxPages * DOC_MULTIPLIER)
                                         .search();
         }
@@ -78,8 +77,10 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
             totalScore += wikapidiaScoreDoc.score;
         }
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-            int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.doc, language);
-            LocalPage localPage = localPageDao.getById(language, localPageId);
+            LocalPage localPage = localPageDao.getById(language, wikapidiaScoreDoc.wpId);
+//            if (result.isEmpty()) {
+//                System.out.println("top result for " + phrase + " is " + localPage.getTitle());
+//            }
             result.put(localPage, wikapidiaScoreDoc.score / totalScore);
             if (result.size() >= maxPages) {
                 break;
@@ -116,7 +117,6 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
 
             return new LucenePhraseAnalyzer(localPageDao, searcher);
         }
-
     }
 
     @Override

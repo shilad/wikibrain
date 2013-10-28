@@ -4,6 +4,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
@@ -18,15 +19,20 @@ public class LocalLinkVisitor extends ParserVisitor {
 
     private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;
+    private final MetaInfoDao metaDao;
     private AtomicInteger counter = new AtomicInteger();
 
-    public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao) {
+    public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao, MetaInfoDao metaDao) {
         this.linkDao = linkDao;
         this.pageDao = pageDao;
+        this.metaDao = metaDao;
     }
 
     @Override
     public void link(ParsedLink link) throws WikapidiaException {
+        Language lang = link.target.getLanguage();
+        LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
+
         int c = counter.getAndIncrement();
         if(c % 100000==0) LOG.info("Visited link #" + c);
         try {
@@ -36,8 +42,6 @@ public class LocalLinkVisitor extends ParserVisitor {
             } else if (link.location.getSection() == 0) {
                 loc = LocalLink.LocationType.FIRST_SEC;
             }
-            Language lang = link.target.getLanguage();
-            LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
 
             String targetText = link.target.getCanonicalTitle();
 
@@ -59,7 +63,9 @@ public class LocalLinkVisitor extends ParserVisitor {
                             true,
                             loc
                     ));
+            metaDao.incrementRecords(LocalLink.class, lang);
         } catch (DaoException e) {
+            metaDao.incrementErrorsQuietly(LocalLink.class, lang);
             throw new WikapidiaException(e);
         }
     }
