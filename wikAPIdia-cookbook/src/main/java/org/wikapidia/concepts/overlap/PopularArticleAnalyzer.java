@@ -44,7 +44,7 @@ public class PopularArticleAnalyzer {
     }
 
     public static void main(String args[]) throws ConfigurationException, DaoException {
-        WikAPIdiaWrapper wpApi = new WikAPIdiaWrapper();
+        WikAPIdiaWrapper wpApi = new WikAPIdiaWrapper(".");
         PopularArticleAnalyzer analyzer = new PopularArticleAnalyzer(wpApi);
         for (Language lang : wpApi.getLanguages()) {
             System.out.println("Analyzing language: " + lang);
