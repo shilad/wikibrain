@@ -57,7 +57,10 @@ public class JvmUtils {
         JavaProcessBuilder builder = new JavaProcessBuilder();
         RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
         for (String jvmArg : runtimeMxBean.getInputArguments()) {
-            if (jvmArg.startsWith("-X") || jvmArg.startsWith("-D")) {
+            if (!jvmArg.startsWith("-")) {
+                break;
+            }
+            if (!jvmArg.equals("-jar")) {
                 builder.jvmArg(jvmArg);
             }
         }
@@ -76,6 +79,6 @@ public class JvmUtils {
      */
     private static boolean isLocalFile(URL url) {
         return ((url.getProtocol().equals("file"))
-                &&      (url.getHost() == null || url.getHost().equals("")));
+        &&      (url.getHost() == null || url.getHost().equals("")));
     }
 }

@@ -1,7 +1,6 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.download.FileDownloader;
 import org.wikapidia.download.RequestedLinkGetter;
 import org.wikapidia.utils.JvmUtils;

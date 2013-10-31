@@ -164,6 +164,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     .where(Tables.UNIVERSAL_PAGE.LANG_ID.eq(language.getId()))
                     .and(Tables.UNIVERSAL_PAGE.PAGE_ID.eq(localPageId))
                     .and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
+                    .limit(1)   // TODO: Remove
                     .fetchOne();
             if (record == null) {
                 return -1;

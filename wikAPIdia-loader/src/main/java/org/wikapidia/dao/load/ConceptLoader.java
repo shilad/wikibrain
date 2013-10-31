@@ -81,6 +81,9 @@ public class ConceptLoader {
         String algorithm = cmd.getOptionValue("n", null);
 
         UniversalPageDao dao = conf.get(UniversalPageDao.class);
+        if (algorithm == null) {
+            algorithm = (env.getLanguages().size() <= 1) ? "monolingual" : "purewikidata";
+        }
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
         final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao);
 
