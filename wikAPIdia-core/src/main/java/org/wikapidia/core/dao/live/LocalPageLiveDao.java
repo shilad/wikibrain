@@ -197,14 +197,14 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
                 info = IOUtils.toString(inputStr);
             }
             catch(Exception e){
-                throw new DaoException("Error getting text from Wikipedia Server");
+                throw new DaoException("Error parsing URL");
             }
             finally {
                 IOUtils.closeQuietly(inputStr);
             }
         }
         catch(Exception e){
-            throw new DaoException("Error parsing URL");
+            throw new DaoException("Error getting page from the Wikipedia Server ");
         }
 
         return info;
