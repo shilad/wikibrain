@@ -1,4 +1,4 @@
-package org.wikapidia.core.dao.remote;
+package org.wikapidia.core.dao.live;
 
 import com.typesafe.config.Config;
 import org.wikapidia.conf.Configuration;
@@ -11,9 +11,13 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.LocalPage;
+import org.apache.commons.io.IOUtils;
 
 import org.wikapidia.core.model.Title;
 
+import java.io.InputStream;
+
+import java.net.URL;
 import java.util.*;
 
 
@@ -27,29 +31,21 @@ import java.util.*;
 
 
 /**
- *
- * Get this dao by using "LocalPageDao YOUR_DAO_NAME_HERE = new Configurator(new Configuration()).get(LocalPageDao.class, "url");"
- *
+ * Fetch a LocalPage object from Wikipedia Server
+ * @param <T> LocalPage object fetched
  */
 
-
-public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
-
+public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     /**
      * Sets if we should try to follow the redirects or not. Default is true (to following them).
      * @param followRedirects
      */
 
-
-
     private boolean followRedirects = true;
 
-    public LocalPageUrlDao() throws DaoException {
+    public LocalPageLiveDao() throws DaoException {
 
     }
-
-
-
 
     //Notice: A DaoException will be thrown if you call the methods below!
     public void clear()throws DaoException{
@@ -74,8 +70,6 @@ public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
         throw new DaoException("Can't use this method for remote wiki server!");
 
     }
-
-
 
     public void setFollowRedirects(boolean followRedirects) throws DaoException {
         this.followRedirects = followRedirects;
@@ -152,7 +146,6 @@ public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
         return info.getId();
     }
 
-
     /**
      * Get an id from a title. Returns -1 if it doesn't exist.
      * @param title
@@ -162,8 +155,6 @@ public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
         QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title)));
         return info.getId();
     }
-
-
 
     private String getQueryByTitle(Title title, Language language){
         String http = new String("http://");
@@ -197,14 +188,25 @@ public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
             return http + language.getLangCode() + host + query + pageId.toString() + "&redirects=";
     }
 
-    private String getInfoByQuery(String query){
+    private String getInfoByQuery(String query) throws DaoException{
         String info = new String();
+        InputStream inputStr;
         try{
-            info = GetTextByUrl.getText(query);
+            inputStr = new URL(query).openStream();
+            try {
+                info = IOUtils.toString(inputStr);
+            }
+            catch(Exception e){
+                throw new DaoException("Error parsing URL");
+            }
+            finally {
+                IOUtils.closeQuietly(inputStr);
+            }
         }
         catch(Exception e){
-            System.out.println("Error get info from wiki server");
+            throw new DaoException("Error getting page from the Wikipedia Server ");
         }
+
         return info;
     }
 
@@ -226,11 +228,11 @@ public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
 
         @Override
         public LocalPageDao get(String name, Config config) throws ConfigurationException {
-            if (!config.getString("type").equals("url")) {
+            if (!config.getString("type").equals("live")) {
                 return null;
             }
             try {
-                return new LocalPageUrlDao();
+                return new LocalPageLiveDao();
 
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
