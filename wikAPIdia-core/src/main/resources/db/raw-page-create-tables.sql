@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS raw_page (
   lang_id SMALLINT NOT NULL,
   page_id INT NOT NULL,
   revision_id INT NOT NULL,
-  body CLOB NOT NULL,
+  body TEXT NOT NULL,
   title VARCHAR(256) NOT NULL,
   lastEdit TIMESTAMP,
   name_space SMALLINT NOT NULL,
