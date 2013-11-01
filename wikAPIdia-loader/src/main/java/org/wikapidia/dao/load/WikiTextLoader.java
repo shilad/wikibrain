@@ -128,7 +128,9 @@ public class WikiTextLoader {
         llDao.endLoad();
         lcmDao.endLoad();
         metaDao.endLoad();
+
+        // Why is this necessary???
+        // It seems like things die without it :(
+        System.exit(0);
     }
-
-
 }
