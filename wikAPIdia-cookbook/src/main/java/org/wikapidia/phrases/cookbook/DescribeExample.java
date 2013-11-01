@@ -1,6 +1,5 @@
 package org.wikapidia.phrases.cookbook;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -11,10 +10,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.phrases.PhraseAnalyzer;
-import org.wikapidia.phrases.PrunedCounts;
-import org.wikapidia.utils.ObjectDb;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
@@ -27,7 +23,7 @@ public class DescribeExample {
         Configurator c = new Configurator(new Configuration());
         PhraseAnalyzer pa = c.get(PhraseAnalyzer.class, "stanford");
         LocalPageDao pageDao = c.get(LocalPageDao.class);
-        LocalPage page = pageDao.getByTitle(lang, new Title("Obama", lang), NameSpace.ARTICLE);
+        LocalPage page = pageDao.getByTitle(new Title("Obama", lang), NameSpace.ARTICLE);
         System.out.println("description of " + page + ":"); // should resolve redirect to Barack Obama
         LinkedHashMap<String, Float> description = pa.describeLocal(lang, page, 20);
         if (description == null) {

@@ -3,18 +3,13 @@ package org.wikapidia.mapper.algorithms;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.typesafe.config.Config;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -71,7 +66,7 @@ public class PureWikidataConceptMapper extends ConceptMapper {
                     Integer univId = (Integer)line[1];
                     String strTitle = (String)line[3];
                     Title title = new Title(strTitle, lang);
-                    LocalPage localPage = localPageDao.getByTitle(lang, title, title.getNamespace());
+                    LocalPage localPage = localPageDao.getByTitle(title, title.getNamespace());
                     if (localPage != null){
                         if (!backend.containsKey(univId)){
                             Multimap<Language, LocalId> mmap = HashMultimap.create();

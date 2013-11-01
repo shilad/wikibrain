@@ -83,13 +83,13 @@ public class LocalPageUrlDao<T extends LocalPage> implements LocalPageDao<T> {
 
     /**
      * Get a single page by its title
-     * @param language the page's language
+     *
      * @param title the page's title
      * @param ns the page's namespace
      * @return the requested LocalPage
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
-    public T getByTitle(Language language, Title title, NameSpace ns) throws DaoException{
+    public T getByTitle(Title title, NameSpace ns) throws DaoException{
         QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title, language)));
         return (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }

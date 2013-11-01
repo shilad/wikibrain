@@ -31,20 +31,20 @@ public class SampleGetLocalPageByUrl{
        LocalPageDao testClass = new Configurator(new Configuration()).get(LocalPageDao.class, "url");
        Language lang = Language.getByLangCode("en");
 
-       System.out.println(testClass.getByTitle(lang,new Title("Apple", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
-       System.out.println(testClass.getByTitle(lang,new Title("University of Minnesota", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
+       System.out.println(testClass.getByTitle(new Title("Apple", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
+       System.out.println(testClass.getByTitle(new Title("University of Minnesota", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
        System.out.println(testClass.getById(lang,16308));
 
        System.out.println(testClass.getById(lang,416813));
 
         //Test Following/Unfollowing Redirect
         //Follow Redirect
-        System.out.println(testClass.getByTitle(lang,new Title("Apple Tree", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
-        System.out.println("isRedirect? "+testClass.getByTitle(lang,new Title("Apple Tree", lang), NameSpace.getNameSpaceByArbitraryId(0)).isRedirect());
+        System.out.println(testClass.getByTitle(new Title("Apple Tree", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
+        System.out.println("isRedirect? "+testClass.getByTitle(new Title("Apple Tree", lang), NameSpace.getNameSpaceByArbitraryId(0)).isRedirect());
         //Not Follow Redirect (Get a Redirect Page)
         testClass.setFollowRedirects(false);
-        System.out.println(testClass.getByTitle(lang,new Title("Apple Tree", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
-        System.out.println("isRedirect? "+testClass.getByTitle(lang,new Title("Apple Tree", lang), NameSpace.getNameSpaceByArbitraryId(0)).isRedirect());
+        System.out.println(testClass.getByTitle(new Title("Apple Tree", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
+        System.out.println("isRedirect? "+testClass.getByTitle(new Title("Apple Tree", lang), NameSpace.getNameSpaceByArbitraryId(0)).isRedirect());
 
         //Test Disambig
         System.out.println(testClass.getById(lang,32672164));

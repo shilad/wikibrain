@@ -33,7 +33,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
      * @throws DaoException
      */
     public LocalArticle getByTitle(Language language, Title title) throws DaoException {
-        return super.getByTitle(language, title, NameSpace.ARTICLE);
+        return super.getByTitle(title, NameSpace.ARTICLE);
     }
 
     /**

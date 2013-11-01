@@ -68,7 +68,7 @@ public class LocalPageDaoIT {
 
     @Test
     public void testSearch() throws DaoException {
-        LocalPage lp = dao.getByTitle(Language.getByLangCode("simple"), new Title("Barack Obama", Language.getByLangCode("simple")), NameSpace.ARTICLE);
+        LocalPage lp = dao.getByTitle(new Title("Barack Obama", Language.getByLangCode("simple")), NameSpace.ARTICLE);
         assertNotNull(lp);
     }
 

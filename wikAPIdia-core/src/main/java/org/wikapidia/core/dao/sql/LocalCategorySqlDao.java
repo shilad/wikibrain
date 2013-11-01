@@ -32,7 +32,7 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
      */
     @Override
     public LocalCategory getByTitle(Language language, Title title) throws DaoException {
-        return super.getByTitle(language, title, NameSpace.CATEGORY);
+        return super.getByTitle(title, NameSpace.CATEGORY);
     }
 
     /**

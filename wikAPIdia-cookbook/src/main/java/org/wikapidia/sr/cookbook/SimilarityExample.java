@@ -109,10 +109,10 @@ public class SimilarityExample {
 //        universalPrintResult(usr.similarity(ls1,ls1,true),usr.getAlgorithmId(),universalPageDao, localPageDao, expf);
 
         //Similarity between pages
-        LocalPage page1 = localPageDao.getByTitle(lang, new Title(s1, lang), NameSpace.ARTICLE);
-        LocalPage page2 = localPageDao.getByTitle(lang, new Title(s2, lang), NameSpace.ARTICLE);
-        LocalPage page3 = localPageDao.getByTitle(lang, new Title(s3,lang),NameSpace.ARTICLE);
-        LocalPage page4 = localPageDao.getByTitle(lang, new Title(s4, lang),NameSpace.ARTICLE);
+        LocalPage page1 = localPageDao.getByTitle(new Title(s1, lang), NameSpace.ARTICLE);
+        LocalPage page2 = localPageDao.getByTitle(new Title(s2, lang), NameSpace.ARTICLE);
+        LocalPage page3 = localPageDao.getByTitle(new Title(s3,lang),NameSpace.ARTICLE);
+        LocalPage page4 = localPageDao.getByTitle(new Title(s4, lang),NameSpace.ARTICLE);
 //        System.out.println("Barack Obama and US:");
 //        localPrintResult(sr.similarity(page1,page2,true),lang,localPageDao, expf);
 //        System.out.println("Barack Obama and Canada:");

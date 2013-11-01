@@ -167,7 +167,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     @Override
-    public T getByTitle(Language language, Title title, NameSpace nameSpace) throws DaoException {
+    public T getByTitle(Title title, NameSpace nameSpace) throws DaoException {
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -206,7 +206,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         }
         Map<Title, T> map = new HashMap<Title, T>();
         for (Title title : titles){
-            map.put(title, getByTitle(language, title, nameSpace));
+            map.put(title, getByTitle(title, nameSpace));
         }
         return map;
     }
