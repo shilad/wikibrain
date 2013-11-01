@@ -44,30 +44,29 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     private boolean followRedirects = true;
 
     public LocalPageLiveDao() throws DaoException {
-
     }
 
     //Notice: A DaoException will be thrown if you call the methods below!
     public void clear()throws DaoException{
-       throw new DaoException("Can't use this method for remote wiki server!");
+       throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public void beginLoad()throws DaoException{
-        throw new DaoException("Can't use this method for remote wiki server!");
+        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public void endLoad()throws DaoException{
-        throw new DaoException("Can't use this method for remote wiki server!");
+        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public void save(T a)throws DaoException{
-        throw new DaoException("Can't use this method for remote wiki server!");
+        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public int getCount(DaoFilter a)throws DaoException{
-        throw new DaoException("Can't use this method for remote wiki server!");
+        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public Iterable<T> get(DaoFilter a)throws DaoException{
-        throw new DaoException("Can't use this method for remote wiki server!");
+        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public LanguageSet getLoadedLanguages() throws DaoException {
-        throw new DaoException("Can't use this method for remote wiki server!");
+        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
 
     }
 
@@ -84,8 +83,8 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
     public T getByTitle(Title title, NameSpace ns) throws DaoException{
-        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title, language)));
-        return (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title)));
+        return (T)new LocalPage(title.getLanguage(), info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }
 
     /**
@@ -127,7 +126,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException{
         Map<Title, T> pageMap = new HashMap<Title, T>();
         for(Title title : titles){
-            QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title, language)));
+            QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title)));
             pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
         }
         return pageMap;
@@ -142,7 +141,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return
      */
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException{
-        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(new Title(title, language), language)));
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(new Title(title, language))));
         return info.getId();
     }
 
@@ -156,7 +155,8 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
         return info.getId();
     }
 
-    private String getQueryByTitle(Title title, Language language){
+    private String getQueryByTitle(Title title){
+        Language language = title.getLanguage();
         String http = new String("http://");
         String host = new String(".wikipedia.org");
         String query = new String("/w/api.php?action=query&prop=info&format=json&titles=");
@@ -165,17 +165,6 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
         else
             return http + language.getLangCode() + host + query + title.getCanonicalTitle().replaceAll(" ", "_");
 
-    }
-
-    private String getQueryByTitle(Title title){
-        String http = new String("http://");
-        String host = new String(".wikipedia.org");
-        String query = new String("/w/api.php?action=query&prop=info&format=json&titles=");
-        //default language : en
-        if(followRedirects)
-            return http + "en" + host + query + title.getCanonicalTitle().replaceAll(" ", "_");
-        else
-            return http + "en" + host + query + title.getCanonicalTitle().replaceAll(" ", "_")+ "&redirects=";
     }
 
     private String getQueryByID(Integer pageId, Language language){
