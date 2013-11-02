@@ -1,16 +1,19 @@
-package org.wikapidia.core.dao;
+package org.wikapidia.core.cookbook;
 
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.DaoFilter;
+import org.wikapidia.core.dao.UniversalLinkDao;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 
 /**
  * @author Ari Weiland
  */
-public class BenchmarkUniversalLink {
+public class UniversalLinkExplorer {
 
     @Test
     public void benchmarkTest() throws ConfigurationException, DaoException {

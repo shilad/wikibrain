@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao;
 
 import com.jolbox.bonecp.BoneCPDataSource;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.SqlCache;
@@ -23,6 +24,7 @@ public class Benchmark {
     boolean shouldBuildLastModified = true;
     LanguageInfo lang;
 
+    @Ignore
     @Test
     public void articleBenchmark() throws DaoException {
         lang = LanguageInfo.getByLangCode("en");
