@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.UniversalLinkDao;
@@ -11,13 +13,16 @@ import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 
 /**
+ *
  * @author Ari Weiland
  */
 public class UniversalLinkExplorer {
 
     @Test
     public void benchmarkTest() throws ConfigurationException, DaoException {
-        UniversalLinkDao dao = new Configurator(new Configuration()).get(UniversalLinkDao.class, "skeletal-sql");
+        Env env = new EnvBuilder().build();
+        Configurator configurator = env.getConfigurator();
+        UniversalLinkDao dao = configurator.get(UniversalLinkDao.class, "skeletal-sql");
         long start = System.currentTimeMillis();
         Iterable<UniversalLink> links = dao.get(new DaoFilter());
         int i=0;
@@ -35,7 +40,9 @@ public class UniversalLinkExplorer {
 
     @Test
     public void testGetOutlinks() throws ConfigurationException, DaoException {
-        UniversalLinkDao dao = new Configurator(new Configuration()).get(UniversalLinkDao.class, "skeletal-sql");
+        Env env = new EnvBuilder().build();
+        Configurator configurator = env.getConfigurator();
+        UniversalLinkDao dao = configurator.get(UniversalLinkDao.class, "skeletal-sql");
         long start = System.currentTimeMillis();
         UniversalLinkGroup links = dao.getOutlinks(0, 0);
         int i=0;

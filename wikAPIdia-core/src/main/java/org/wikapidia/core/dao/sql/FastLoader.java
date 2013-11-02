@@ -65,7 +65,6 @@ public class FastLoader {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     public void load(Object [] values) throws DaoException {
         if (inserter == null) {
-            System.exit(1);
             throw new IllegalStateException("inserter thread exited!");
         }
         if (values.length != fields.length) {
@@ -93,7 +92,7 @@ public class FastLoader {
             PreparedStatement statement = cnx.prepareStatement(sql);
 
 
-            while (!rowBuffer.isEmpty() || !finished) {
+            while (!(rowBuffer.isEmpty() && finished)) {
                 // accumulate batch
                 int batchSize = 0;
                 while (batchSize < BATCH_SIZE) {
@@ -126,7 +125,7 @@ public class FastLoader {
         finished = true;
         if (inserter != null) {
             try {
-                inserter.join(10000);
+                inserter.join(60000);
             } catch (InterruptedException e) {
                 throw new DaoException(e);
             }
