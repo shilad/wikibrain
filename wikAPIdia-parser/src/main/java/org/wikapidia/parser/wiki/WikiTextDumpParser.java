@@ -6,6 +6,8 @@ import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpThreadUtils;
 
 import java.util.ArrayList;
@@ -31,9 +33,7 @@ public class
     private final RawPageDao rawPageDao;
     private final LanguageSet allowedLanguages;
     private int maxThreads = WpThreadUtils.getMaxThreads();
-    private final BlockingQueue<RawPage> queue = new ArrayBlockingQueue<RawPage>(MAX_QUEUE);
-    private final List<Thread> workers = new ArrayList<Thread>();
-    private AtomicBoolean finished = new AtomicBoolean(false);
+
 
     public WikiTextDumpParser(RawPageDao rawPageDao, LanguageInfo language) {
         this(rawPageDao, language, null);
@@ -60,71 +60,42 @@ public class
     }
 
     public synchronized void parse(List<ParserVisitor> visitors) throws DaoException {
+
         DaoFilter daoFilter = new DaoFilter().setLanguages(language.getLanguage());
-        try {
-            createWorkers(visitors);
-            for(RawPage page : rawPageDao.get(daoFilter)) {
-                try {
-                    queue.put(page);
-                } catch (InterruptedException e) {
-                    LOG.log(Level.WARNING, "master parser interrupted, breaking:", e);
-                    break;
-                }
-            }
-        } finally {
-            cleanupWorkers();
-        }
+        ParallelForEach.iterate(
+                rawPageDao.get(daoFilter).iterator(),
+                maxThreads,
+                MAX_QUEUE,
+                new ParserProcedure(visitors),
+                10000
+        );
     }
 
-    private void createWorkers(List<ParserVisitor> visitors) {
-        workers.clear();
-        finished.set(false);
-        for (int i = 0; i < maxThreads; i++) {
-            Thread t = new Thread(new Worker(finished, visitors));
-            t.start();
-            workers.add(t);
-        }
-    }
+    class ParserProcedure implements Procedure<RawPage> {
+        private final ThreadLocal<WikiTextParser> parserHolder = new ThreadLocal<WikiTextParser>();
+        private final List<ParserVisitor> visitors;
 
-    private void cleanupWorkers() {
-        finished.set(true);
-        for (Thread w : workers) {
-            try {
-                w.join(10000);
-            } catch (InterruptedException e) {
-                LOG.log(Level.SEVERE, "ignoring interrupted exception on thread join", e);
-            }
+        ParserProcedure(List<ParserVisitor> visitors) {
+            this.visitors = visitors;
         }
-        for (Thread w : workers) {
-            w.interrupt();
-        }
-    }
 
-    private class Worker implements Runnable {
-        private final AtomicBoolean finished;
-        private final WikiTextParser parser;
-
-        public Worker(AtomicBoolean finished, List<ParserVisitor> visitors) {
-            this.parser = new WikiTextParser(language, allowedLanguages, visitors);
-            this.finished = finished;
-        }
         @Override
-        public void run() {
-            RawPage rp = null;
-            while (!finished.get()) {
-                try {
-                    rp = queue.poll(100, TimeUnit.MILLISECONDS);
-                    if (rp != null) {
-                        parser.parse(rp);
-                    }
-                } catch (InterruptedException e) {
-                    LOG.log(Level.WARNING, "WikiTextDumpParser.Worker received interrupt.");
-                    return;
-                } catch (Exception e) {
-                    String title = "unknown";
-                    if (rp != null) title = rp.getTitle().toString();
-                    LOG.log(Level.WARNING, "exception while parsing " + title, e);
-                }
+        public void call(RawPage rp) {
+            if (rp == null) {
+                return;
+            }
+
+            WikiTextParser parser = parserHolder.get();
+            if (parser == null) {
+                parser = new WikiTextParser(language, allowedLanguages, visitors);
+                parserHolder.set(parser);
+            }
+
+            try {
+                parser.parse(rp);
+            } catch (Exception e) {
+                String title = "unknown";
+                LOG.log(Level.WARNING, "exception while parsing " + title, e);
             }
         }
     }

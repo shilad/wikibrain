@@ -70,4 +70,10 @@ public class LocalLinkVisitor extends ParserVisitor {
         }
     }
 
+    @Override
+    public void parseError(RawPage rp, Exception e) {
+        metaDao.incrementErrorsQuietly(LocalLink.class, rp.getLanguage());
+    }
+
+
 }
