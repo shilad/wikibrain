@@ -4,6 +4,7 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.MetaInfoSqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
@@ -20,11 +21,11 @@ public class TestMetaInfoDao {
     private MetaInfoSqlDao dao;
     private Language EN = Language.getByLangCode("en");
     private Language IT = Language.getByLangCode("it");
-    private DataSource ds;
+    private WpDataSource ds;
 
     @Before
     public void setupDao() throws ClassNotFoundException, IOException, DaoException {
-        ds = TestDaoUtil.getDataSource();
+        ds = TestDaoUtil.getWpDataSource();
         dao = new MetaInfoSqlDao(ds);
         assertFalse(dao.tableExists());
         dao.beginLoad();

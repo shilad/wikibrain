@@ -1,6 +1,9 @@
 package org.wikapidia.core.dao.sql;
 
+import org.jooq.ConnectionProvider;
+import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.impl.DefaultConnectionProvider;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -100,5 +103,19 @@ public class JooqUtils {
         }
 
         return SQLDialect.SQL99;
+    }
+
+    /**
+     * Return the SQL connection associated with a DSLContext
+     * @param context
+     * @return the connection, or null.
+     */
+    public static Connection getConnection(DSLContext context) {
+        ConnectionProvider provider = context.configuration().connectionProvider();
+        if (provider instanceof DefaultConnectionProvider) {
+            return ((DefaultConnectionProvider) provider).acquire();
+        } else {
+            return null;
+        }
     }
 }

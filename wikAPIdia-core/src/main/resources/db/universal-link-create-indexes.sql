@@ -1,3 +1,3 @@
-CREATE INDEX IF NOT EXISTS universal_link_idx_source_id ON universal_link(univ_source_id, algorithm_id);
-CREATE INDEX IF NOT EXISTS universal_link_idx_dest_id ON universal_link(univ_dest_id, algorithm_id);
-CREATE INDEX IF NOT EXISTS universal_link_idx_both_ids ON universal_link(univ_source_id, univ_dest_id, algorithm_id);
+CREATE INDEX IF NOT EXISTS UNIVERSAL_LINK_IDX_SOURCE_ID ON UNIVERSAL_LINK(UNIV_SOURCE_ID, ALGORITHM_ID);
+CREATE INDEX IF NOT EXISTS UNIVERSAL_LINK_IDX_DEST_ID ON UNIVERSAL_LINK(UNIV_DEST_ID, ALGORITHM_ID);
+CREATE INDEX IF NOT EXISTS UNIVERSAL_LINK_IDX_BOTH_IDS ON UNIVERSAL_LINK(UNIV_SOURCE_ID, UNIV_DEST_ID, ALGORITHM_ID);

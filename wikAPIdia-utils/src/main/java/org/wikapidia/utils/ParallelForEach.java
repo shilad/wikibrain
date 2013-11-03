@@ -5,8 +5,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -134,7 +136,54 @@ public class ParallelForEach {
         } finally {
             exec.shutdown();
         }
+    }
 
+    public static <T> void iterate(
+            Iterator<T> iterator,
+            int numThreads,
+            int queueSize,
+            final Procedure<T> fn,
+            final int logModulo) {
+
+        final ExecutorService exec = new ThreadPoolErrors(numThreads);
+        BoundedExecutor boundedExec = new BoundedExecutor(exec, queueSize);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicInteger elemsToGo = new AtomicInteger(0);
+
+        int i = 0;
+        try {
+            // create a copy so that modifications to original list are safe
+            elemsToGo.incrementAndGet();
+            while (iterator.hasNext()) {
+                if (i++ % logModulo == 0) {
+                    LOG.info("processing iterable " + i);
+                }
+                final T obj = iterator.next();
+                elemsToGo.incrementAndGet();
+                boundedExec.submitTask(new Runnable() {
+                    public void run() {
+                        try {
+                            fn.call(obj);
+                        } catch (Exception e) {
+                            LOG.log(Level.SEVERE, "error processing list element " + obj, e);
+                            LOG.log(Level.SEVERE, "stacktrace: " + ExceptionUtils.getStackTrace(e).replaceAll("\n", " ").replaceAll("\\s+", " "));
+                        } finally {
+                            if (elemsToGo.decrementAndGet() == 0) {
+                                latch.countDown();
+                            }
+                        }
+                    }
+                });
+            }
+            if (elemsToGo.decrementAndGet() > 0) {
+                latch.await();
+            }
+        } catch (InterruptedException e) {
+            LOG.log(Level.SEVERE, "Interrupted parallel for each", e);
+            throw new RuntimeException(e);
+        } finally {
+            exec.shutdown();
+        }
     }
 
     /**
@@ -174,4 +223,35 @@ public class ParallelForEach {
         }
     }
 
+    /**
+     * From
+     */
+    public static class BoundedExecutor {
+        private final Executor exec;
+        private final Semaphore semaphore;
+
+        public BoundedExecutor(Executor exec, int bound) {
+            this.exec = exec;
+            this.semaphore = new Semaphore(bound);
+        }
+
+        public void submitTask(final Runnable command)
+                throws InterruptedException, RejectedExecutionException {
+            semaphore.acquire();
+            try {
+                exec.execute(new Runnable() {
+                    public void run() {
+                        try {
+                            command.run();
+                        } finally {
+                            semaphore.release();
+                        }
+                    }
+                });
+            } catch (RejectedExecutionException e) {
+                semaphore.release();
+                throw e;
+            }
+        }
+    }
 }

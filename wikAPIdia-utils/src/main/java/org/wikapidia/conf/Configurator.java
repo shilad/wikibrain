@@ -118,7 +118,8 @@ public class Configurator {
         Set<String> visited = new HashSet<String>();    // files already scanned
         Map<String, File> registered = new HashMap<String, File>();
 
-        for (String entry : classPath.split(":")) {
+        String separator = System.getProperty("path.separator");
+        for (String entry : classPath.split(separator)) {
             File file = new File(entry);
             if (file.length() > MAX_FILE_SIZE) {
                 LOG.fine("skipping looking for providers in large file " + file);

@@ -3,6 +3,7 @@ package org.wikapidia.integration;
 import org.apache.commons.lang3.ArrayUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 
 import java.io.File;
 
@@ -16,14 +17,15 @@ public class TestUtils {
                     "-l", "simple,la"
             };
 
-
-
     public static String[] getArgs(String ...args) {
         return ArrayUtils.addAll(DEFAULT_ARGS, args);
     }
 
     public static Env getEnv() throws ConfigurationException {
-        return new Env(new File(INTEGRATION_TEST_CONF));
+        return new EnvBuilder()
+                .setConfigFile(INTEGRATION_TEST_CONF)
+                .setLanguages("simple,la")
+                .build();
     }
 
     public static TestDB getTestDb() throws ConfigurationException {

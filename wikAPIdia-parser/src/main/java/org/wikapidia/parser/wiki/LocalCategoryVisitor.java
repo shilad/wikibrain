@@ -9,6 +9,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.NameSpace;
+import org.wikapidia.core.model.RawPage;
 import org.wikapidia.core.model.Title;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,6 +63,12 @@ public class LocalCategoryVisitor extends ParserVisitor {
         }
 
     }
+
+    @Override
+    public void parseError(RawPage rp, Exception e) {
+        metaDao.incrementErrorsQuietly(LocalCategoryMember.class, rp.getLanguage());
+    }
+
     private boolean isCategory(String link, LanguageInfo lang){
         for(String categoryName : lang.getCategoryNames()){
             if(link.length()>categoryName.length()&&

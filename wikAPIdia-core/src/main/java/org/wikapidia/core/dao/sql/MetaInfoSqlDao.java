@@ -40,22 +40,16 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
     private final Map<Class, Map<Language, MetaInfo>> counters =
             new ConcurrentHashMap<Class, Map<Language, MetaInfo>>();
 
-    public MetaInfoSqlDao(DataSource dataSource) throws DaoException {
+    public MetaInfoSqlDao(WpDataSource dataSource) throws DaoException {
         super(dataSource, null, "/db/meta-info");
     }
 
     public boolean tableExists() throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             return (context.meta().getTables().contains(Tables.META_INFO));
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            if (conn != null) {
-                quietlyCloseConn(conn);
-            }
+            freeJooq(context);
         }
     }
 
@@ -64,22 +58,16 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         if (!tableExists()) {
             return;
         }
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             if (!context.meta().getTables().contains(Tables.META_INFO)) {
                 return;
             }
             context.delete(Tables.META_INFO)
                     .where(Tables.META_INFO.COMPONENT.eq(component.getSimpleName()))
                     .execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            if (conn != null) {
-                quietlyCloseConn(conn);
-            }
+            freeJooq(context);
         }
     }
 
@@ -88,20 +76,14 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         if (!tableExists()) {
             return;
         }
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             context.delete(Tables.META_INFO)
                     .where(Tables.META_INFO.COMPONENT.eq(component.getSimpleName()))
                     .and(Tables.META_INFO.LANG_ID.eq(lang.getId()))
                     .execute();
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            if (conn != null) {
-                quietlyCloseConn(conn);
-            }
+            freeJooq(context);
         }
     }
 
@@ -180,11 +162,8 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
     public MetaInfo getInfo(Class component) throws DaoException {
         sync(component);
         MetaInfo accumulated = new MetaInfo(component);
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-
             Result<Record3<Integer, Integer, Timestamp>> records =
                     context.select(Tables.META_INFO.NUM_RECORDS, Tables.META_INFO.NUM_ERRORS, Tables.META_INFO.LAST_UPDATED)
                             .from(Tables.META_INFO)
@@ -196,12 +175,8 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 accumulated.merge(info);
             }
             return accumulated;
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            if (conn != null) {
-                quietlyCloseConn(conn);
-            }
+            freeJooq(context);
         }
     }
 
@@ -214,11 +189,8 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
     @Override
     public LanguageSet getLoadedLanguages(Class component) throws DaoException {
         sync(component);
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-
             Set<Language> langs = new HashSet<Language>();
             Result<Record1<Short>> records =
                     context.select(Tables.META_INFO.LANG_ID)
@@ -231,12 +203,8 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 langs.add(Language.getById(record.value1()));
             }
             return new LanguageSet(langs);
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            if (conn != null) {
-                quietlyCloseConn(conn);
-            }
+            freeJooq(context);
         }
     }
 
@@ -260,11 +228,8 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 if (langInfos.containsKey(langKey)) {
                     info = langInfos.get(langKey);
                 } else {
-                    Connection conn = null;
+                    DSLContext context = getJooq();
                     try {
-                        conn = ds.getConnection();
-                        DSLContext context = DSL.using(conn, dialect);
-
                         Condition langCondition = (lang == null)
                                 ? Tables.META_INFO.LANG_ID.isNull()
                                 : Tables.META_INFO.LANG_ID.eq(lang.getId());
@@ -280,12 +245,8 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                         } else {
                             info = new MetaInfo(component, lang, record.value1(), record.value2(), record.value3());
                         }
-                    } catch (SQLException e) {
-                        throw new DaoException(e);
                     } finally {
-                        if (conn != null) {
-                            quietlyCloseConn(conn);
-                        }
+                        freeJooq(context);
                     }
                     ((Map)langInfos).put(langKey, info);
                 }
@@ -306,10 +267,8 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
 
     private void flush(MetaInfo info) throws DaoException {
         synchronized (info) {
-            Connection conn = null;
+            DSLContext context = getJooq();
             try {
-                conn = ds.getConnection();
-                DSLContext context = DSL.using(conn, dialect);
 
                 Condition langCondition = (info.getLanguage() == null)
                         ? Tables.META_INFO.LANG_ID.isNull()
@@ -324,19 +283,18 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                         .execute();
                 if (n == 0) {
                     Short langId = (info.getLanguage() == null) ? null : info.getLanguage().getId();
-                    context.insertInto(Tables.META_INFO)
-                            .values(null, info.getComponent().getSimpleName(), langId,
+                    context.insertInto(Tables.META_INFO,
+                            Tables.META_INFO.COMPONENT, Tables.META_INFO.LANG_ID,
+                            Tables.META_INFO.NUM_RECORDS, Tables.META_INFO.NUM_ERRORS,
+                            Tables.META_INFO.LAST_UPDATED)
+                            .values(info.getComponent().getSimpleName(), langId,
                                     info.getNumRecords(), info.getNumErrors(),
-                                    info.getLastUpdated(), null)
+                                    new Timestamp(info.getLastUpdated().getTime()))
                             .execute();
                 }
                 info.markAsWritten();
-            } catch (SQLException e) {
-                throw new DaoException(e);
             } finally {
-                if (conn != null) {
-                    quietlyCloseConn(conn);
-                }
+                freeJooq(context);
             }
         }
     }
@@ -380,7 +338,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
             try {
                 return new MetaInfoSqlDao(
                         getConfigurator().get(
-                                DataSource.class,
+                                WpDataSource.class,
                                 config.getString("dataSource"))
                 );
             } catch (DaoException e) {

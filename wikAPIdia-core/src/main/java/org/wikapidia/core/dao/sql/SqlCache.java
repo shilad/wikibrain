@@ -15,18 +15,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public class SqlCache {
-    private final DataSource ds;
-    private final SQLDialect dialect;
+    private final WpDataSource ds;
     private File directory;
 
-    public SqlCache(DataSource dataSource, File directory) throws DaoException {
+    public SqlCache(WpDataSource dataSource, File directory) throws DaoException {
         this.ds = dataSource;
         this.directory=directory;
-        try {
-            this.dialect = JooqUtils.dialect(dataSource.getConnection());
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
         if (!this.directory.isDirectory()) {
             throw new IllegalArgumentException("" + directory + " is not a valid directory");
         }
@@ -35,7 +29,7 @@ public class SqlCache {
     public void makeLastModifiedDb () throws DaoException {
         Connection conn=null;
         try {
-            conn = ds.getConnection();
+            conn = ds.getDataSource().getConnection();
             conn.createStatement().execute(
                     IOUtils.toString(
                             LocalPageSqlDao.class.getResource("/db/table-modified-create-tables.sql")
@@ -53,12 +47,9 @@ public class SqlCache {
      * Updates the timestamp in table "table_modified" to the current time
      */
     public void updateTableLastModified(String tableName) throws DaoException {
-        Connection conn = null;
+        DSLContext context = ds.getJooq();
         try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Timestamp now = new Timestamp(System.currentTimeMillis()/1000*1000);  //rounds to seconds
-
             int n = context.update(Tables.TABLE_MODIFIED)
                     .set(Tables.TABLE_MODIFIED.LAST_MODIFIED, now)
                     .where(Tables.TABLE_MODIFIED.TABLE_NAME.eq(tableName))
@@ -69,10 +60,8 @@ public class SqlCache {
                     .values(tableName, now)
                     .execute();
             }
-        } catch (SQLException e){
-            throw new DaoException(e);
         } finally {
-            AbstractSqlDao.quietlyCloseConn(conn);
+            ds.freeJooq(context);
         }
 
     }
@@ -132,10 +121,8 @@ public class SqlCache {
     }
 
      public Timestamp getLastModified(String tableName) throws DaoException {
-         Connection conn=null;
+         DSLContext context = ds.getJooq();
          try {
-             conn = ds.getConnection();
-             DSLContext context = DSL.using(conn, dialect);
              Record record = context.select()
                      .from(Tables.TABLE_MODIFIED)
                      .where(Tables.TABLE_MODIFIED.TABLE_NAME.equal(tableName))
@@ -145,10 +132,8 @@ public class SqlCache {
              } else {
                 return record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED);
              }
-         } catch (SQLException e) {
-             throw new DaoException(e);
          } finally {
-             AbstractSqlDao.quietlyCloseConn(conn);
+             ds.freeJooq(context);
          }
      }
 }
