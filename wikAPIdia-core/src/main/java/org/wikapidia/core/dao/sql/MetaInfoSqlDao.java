@@ -283,10 +283,13 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                         .execute();
                 if (n == 0) {
                     Short langId = (info.getLanguage() == null) ? null : info.getLanguage().getId();
-                    context.insertInto(Tables.META_INFO)
-                            .values(null, info.getComponent().getSimpleName(), langId,
+                    context.insertInto(Tables.META_INFO,
+                            Tables.META_INFO.COMPONENT, Tables.META_INFO.LANG_ID,
+                            Tables.META_INFO.NUM_RECORDS, Tables.META_INFO.NUM_ERRORS,
+                            Tables.META_INFO.LAST_UPDATED)
+                            .values(info.getComponent().getSimpleName(), langId,
                                     info.getNumRecords(), info.getNumErrors(),
-                                    info.getLastUpdated(), null)
+                                    new Timestamp(info.getLastUpdated().getTime()))
                             .execute();
                 }
                 info.markAsWritten();

@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  */
 public class FastLoader {
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
-    static final int BATCH_SIZE = 2;
+    static final int BATCH_SIZE = 2000;
 
     private final DataSource ds;
     private final Table table;
@@ -123,7 +123,8 @@ public class FastLoader {
                 }
                 statement.clearBatch();
             }
-            cnx.commit();
+            if (!cnx.getAutoCommit())
+                cnx.commit();
         } finally {
             AbstractSqlDao.quietlyCloseConn(cnx);
         }

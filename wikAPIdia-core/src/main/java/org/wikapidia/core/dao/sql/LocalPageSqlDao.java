@@ -45,7 +45,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
-            Tables.LOCAL_PAGE.ID,
             Tables.LOCAL_PAGE.LANG_ID,
             Tables.LOCAL_PAGE.PAGE_ID,
             Tables.LOCAL_PAGE.TITLE,
@@ -57,7 +56,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     @Override
     public void save(LocalPage page) throws DaoException {
         insert(
-                null,
                 page.getLanguage().getId(),
                 page.getLocalId(),
                 page.getTitle().getCanonicalTitle(),

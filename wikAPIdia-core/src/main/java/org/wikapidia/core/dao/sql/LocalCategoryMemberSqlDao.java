@@ -31,7 +31,6 @@ import java.util.Map;
 public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMember> implements LocalCategoryMemberDao {
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
-            Tables.CATEGORY_MEMBERS.ID,
             Tables.CATEGORY_MEMBERS.LANG_ID,
             Tables.CATEGORY_MEMBERS.CATEGORY_ID,
             Tables.CATEGORY_MEMBERS.ARTICLE_ID,
@@ -48,7 +47,6 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     @Override
     public void save(LocalCategoryMember member) throws DaoException {
         insert(
-                null,
                 member.getLanguage().getId(),
                 member.getCategoryId(),
                 member.getArticleId()

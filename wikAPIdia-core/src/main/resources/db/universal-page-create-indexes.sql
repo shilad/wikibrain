@@ -1,2 +1,2 @@
-CREATE INDEX IF NOT EXISTS universal_page_idx_page_id ON universal_page(univ_id, algorithm_id);
-CREATE INDEX IF NOT EXISTS universal_page_idx_page_type ON universal_page(univ_id, algorithm_id, name_space);
+CREATE INDEX IF NOT EXISTS UNIVERSAL_PAGE_IDX_PAGE_ID ON UNIVERSAL_PAGE(UNIV_ID, ALGORITHM_ID);
+CREATE INDEX IF NOT EXISTS UNIVERSAL_PAGE_IDX_PAGE_TYPE ON UNIVERSAL_PAGE(UNIV_ID, ALGORITHM_ID, NAME_SPACE);

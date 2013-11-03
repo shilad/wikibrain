@@ -5,6 +5,9 @@ import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.conf.MappedSchema;
+import org.jooq.conf.RenderMapping;
+import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
@@ -31,6 +34,7 @@ public class WpDataSource {
     private SQLDialect dialect;
 
     public WpDataSource(DataSource dataSource) throws DaoException {
+        this.settings = new Settings();
         this.dataSource = dataSource;
         Connection conn = null;
         try {
@@ -41,6 +45,18 @@ public class WpDataSource {
         } finally {
             closeQuietly(conn);
         }
+        // Postgres uses a lowercase "public" main schema
+        if (this.dialect == SQLDialect.POSTGRES) {
+
+            settings.setRenderNameStyle(RenderNameStyle.LOWER);
+//            DSLContext ctx = DSL.using(c, dialect, settings);
+//            settings = new Settings()
+//                .withRenderMapping(new RenderMapping()
+//                        .withSchemata(
+//                                new MappedSchema().withInput("PUBLIC")
+//                                        .withOutput("public")));
+
+        }
     }
 
     public DataSource getDataSource() {
@@ -49,7 +65,7 @@ public class WpDataSource {
 
     public DSLContext getJooq() throws DaoException {
         try {
-            return DSL.using(dataSource.getConnection(), dialect);
+            return DSL.using(dataSource.getConnection(), dialect, settings);
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -69,15 +85,19 @@ public class WpDataSource {
      * @throws DaoException
      */
     public void executeSqlResource(String name) throws DaoException {
-        Connection conn=null;
+        String script = null;
         try {
-            String script = IOUtils.toString(AbstractSqlDao.class.getResource(name));
-            script = translateSqlScript(script);
-            conn = dataSource.getConnection();
-            conn.createStatement().execute(script);
+            script = IOUtils.toString(AbstractSqlDao.class.getResource(name));
         } catch (IOException e) {
             throw new DaoException(e);
+        }
+        script = translateSqlScript(script);
+        Connection conn=null;
+        try {
+            conn = dataSource.getConnection();
+            conn.createStatement().execute(script);
         } catch (SQLException e){
+            LOG.warning("error executing: " + script);
             throw new DaoException(e);
         } finally {
             closeQuietly(conn);
@@ -89,6 +109,12 @@ public class WpDataSource {
             script = script.replaceAll(
                     "(?i) BIGINT AUTO_INCREMENT ", " BIGSERIAL "
             );
+            if (script.toLowerCase().contains(" index ")) {
+                script = script.replaceAll(
+                        "(?i) IF NOT EXISTS ", " "
+                );
+            }
+            return script.toUpperCase();
         }
         return script;
     }
@@ -123,7 +149,7 @@ public class WpDataSource {
 
         @Override
         public String getPath() {
-            return "dao.wpDataSource";
+            return "dao.dataSource";
         }
 
         @Override
