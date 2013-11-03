@@ -5,9 +5,11 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.LocalCategorySqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -18,19 +20,11 @@ import java.util.Map;
 public class TestLocalPageDao {
     @Test
     public void testArticle() throws ClassNotFoundException, IOException, SQLException, DaoException {
-        Class.forName("org.h2.Driver");
-        File tmpDir = File.createTempFile("wikapidia-h2", null);
-        tmpDir.delete();
-        tmpDir.deleteOnExit();
-        tmpDir.mkdirs();
-
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
-        ds.setUsername("sa");
-        ds.setPassword("");
+        WpDataSource wpDs = TestDaoUtil.getWpDataSource();
+        DataSource ds = wpDs.getDataSource();
 
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
+        LocalArticleSqlDao dao = new LocalArticleSqlDao(wpDs);
         dao.beginLoad();
         LocalPage page = new LocalPage(
                 lang.getLanguage(),
@@ -73,19 +67,10 @@ public class TestLocalPageDao {
 
     @Test
     public void TestCategory () throws ClassNotFoundException, IOException, SQLException, DaoException {
-        Class.forName("org.h2.Driver");
-        File tmpDir = File.createTempFile("wikapidia-h2", null);
-        tmpDir.delete();
-        tmpDir.deleteOnExit();
-        tmpDir.mkdirs();
-
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
-        ds.setUsername("sa");
-        ds.setPassword("");
+        WpDataSource wpDs = TestDaoUtil.getWpDataSource();
 
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        LocalCategorySqlDao dao = new LocalCategorySqlDao(ds);
+        LocalCategorySqlDao dao = new LocalCategorySqlDao(wpDs);
         dao.beginLoad();
         LocalPage page = new LocalPage(
                 lang.getLanguage(),

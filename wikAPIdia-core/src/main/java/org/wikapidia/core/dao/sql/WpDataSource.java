@@ -1,0 +1,160 @@
+package org.wikapidia.core.dao.sql;
+
+import com.jolbox.bonecp.BoneCPDataSource;
+import com.typesafe.config.Config;
+import org.apache.commons.io.IOUtils;
+import org.jooq.ConnectionProvider;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.conf.Settings;
+import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultConnectionProvider;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.Provider;
+import org.wikapidia.core.dao.DaoException;
+
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * @author Shilad Sen
+ */
+public class WpDataSource {
+    private static final Logger LOG = Logger.getLogger(WpDataSource.class.getName());
+
+    private DataSource dataSource;
+    private Settings settings;
+    private SQLDialect dialect;
+
+    public WpDataSource(DataSource dataSource) throws DaoException {
+        this.dataSource = dataSource;
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+            this.dialect = JooqUtils.dialect(conn);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public Connection getConnection(DSLContext context) {
+        ConnectionProvider provider = context.configuration().connectionProvider();
+        if (provider instanceof DefaultConnectionProvider) {
+            return ((DefaultConnectionProvider) provider).acquire();
+        } else {
+            return null;
+        }
+    }
+
+    public DSLContext getJooq() throws DaoException {
+        try {
+            return DSL.using(dataSource.getConnection(), dialect);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public void freeJooq(DSLContext context) {
+        ConnectionProvider provider = context.configuration().connectionProvider();
+        if (provider instanceof DefaultConnectionProvider) {
+            Connection conn = ((DefaultConnectionProvider) provider).acquire();
+            quietlyCloseConn(conn);
+        }
+    }
+
+
+    /**
+     * Executes a sql resource on the classpath
+     * @param name Resource path - e.g. "/db/local-page.schema.sql"
+     * @throws DaoException
+     */
+    public void executeSqlResource(String name) throws DaoException {
+        Connection conn=null;
+        try {
+            String script = IOUtils.toString(AbstractSqlDao.class.getResource(name));
+            script = translateSqlScript(script);
+            conn = dataSource.getConnection();
+            conn.createStatement().execute(script);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (SQLException e){
+            throw new DaoException(e);
+        } finally {
+            quietlyCloseConn(conn);
+        }
+    }
+
+    public String translateSqlScript(String script) {
+        if (dialect == SQLDialect.POSTGRES) {
+            script = script.replaceAll(
+                    "(?i) BIGINT AUTO_INCREMENT ", " BIGSERIAL "
+            );
+        }
+        return script;
+    }
+
+    public static void quietlyCloseConn(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                LOG.log(Level.WARNING, "Failed to close connection: ", e);
+            }
+        }
+    }
+
+    public static class WpDsProvider extends Provider<WpDataSource> {
+
+        /**
+         * Creates a new provider instance.
+         * Concrete implementations must only use this two-argument constructor.
+         *
+         * @param configurator
+         * @param config
+         */
+        public WpDsProvider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return WpDataSource.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.wpDataSource";
+        }
+
+        @Override
+        public WpDataSource get(String name, Config config) throws ConfigurationException {
+            try {
+                Class.forName(config.getString("driver"));
+                BoneCPDataSource ds = new BoneCPDataSource();
+                ds.setJdbcUrl(config.getString("url"));
+                ds.setUsername(config.getString("username"));
+                ds.setPassword(config.getString("password"));
+                ds.setPartitionCount(Runtime.getRuntime().availableProcessors());
+                ds.setMaxConnectionsPerPartition(3);
+                return new WpDataSource(ds);
+            } catch (ClassNotFoundException e) {
+                throw new ConfigurationException(e);
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+
+    }
+}

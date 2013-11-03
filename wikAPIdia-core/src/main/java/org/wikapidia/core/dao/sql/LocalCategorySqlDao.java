@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implements LocalCategoryDao {
 
-    public LocalCategorySqlDao(DataSource dataSource) throws DaoException {
+    public LocalCategorySqlDao(WpDataSource dataSource) throws DaoException {
         super(dataSource);
     }
 
@@ -93,7 +93,7 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
             try {
                 return new LocalCategorySqlDao(
                         getConfigurator().get(
-                                DataSource.class,
+                                WpDataSource.class,
                                 config.getString("dataSource"))
                 );
             } catch (DaoException e) {

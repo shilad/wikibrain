@@ -43,7 +43,6 @@ public class UniversalArticleSqlDao extends UniversalPageSqlDao<UniversalArticle
             }
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
-            LocalArticleSqlDao localDao = new LocalArticleSqlDao(ds);
             localPages.put(language, new LocalId(language,pageId));
         }
         return new UniversalArticle(

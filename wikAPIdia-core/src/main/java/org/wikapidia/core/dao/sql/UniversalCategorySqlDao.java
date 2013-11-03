@@ -8,6 +8,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalCategoryDao;
 import org.wikapidia.core.dao.UniversalCategoryDao;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
@@ -43,7 +44,6 @@ public class UniversalCategorySqlDao extends UniversalPageSqlDao<UniversalCatego
             }
             Language language = Language.getById(record.getValue(Tables.UNIVERSAL_PAGE.LANG_ID));
             int pageId = record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
-            LocalCategorySqlDao localDao = new LocalCategorySqlDao(ds);
             localPages.put(language, new LocalId(language,pageId));
         }
         return new UniversalCategory(

@@ -5,6 +5,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.SqlCache;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
@@ -33,11 +34,12 @@ public class Benchmark {
         ds.setJdbcUrl("jdbc:h2:~/benchmark-small-db");
         ds.setUsername("sa");
         ds.setPassword("");
+        WpDataSource wpDs = new WpDataSource(ds);
 
         if (shouldBuildLastModified){
             (new SqlCache(ds, new File("."))).makeLastModifiedDb();
         }
-        LocalArticleSqlDao ad = new LocalArticleSqlDao(ds);
+        LocalArticleSqlDao ad = new LocalArticleSqlDao(wpDs);
         ad.useCache(new File("."));
         System.out.println("Data source established.");
         List<LocalArticle> list = null;

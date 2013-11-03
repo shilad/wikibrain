@@ -2,6 +2,7 @@ package org.wikapidia.core.dao.sql;
 
 import org.apache.commons.io.IOUtils;
 import org.jodah.typetools.TypeResolver;
+import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.TableField;
 import org.wikapidia.core.dao.Dao;
@@ -37,6 +38,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     private final Class<T> klass;
     private final MetaInfoSqlDao metaDao;
     protected DataSource ds;
+    protected WpDataSource wpDs;
     protected SqlCache cache;
     private int fetchSize = DEFAULT_FETCH_SIZE;
 
@@ -54,11 +56,12 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
      *                        because it is used by the fast loader.
      * @throws DaoException
      */
-    public AbstractSqlDao(DataSource dataSource, TableField [] fields, String sqlScriptPrefix) throws DaoException {
+    public AbstractSqlDao(WpDataSource dataSource, TableField [] fields, String sqlScriptPrefix) throws DaoException {
         Class<?>[] typeArguments = TypeResolver.resolveRawArguments(AbstractSqlDao.class, getClass());
         this.klass = (Class<T>) typeArguments[0];
 
-        ds = dataSource;
+        wpDs = dataSource;
+        ds = wpDs.getDataSource();
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -80,26 +83,29 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         this.sqlScriptPrefix = sqlScriptPrefix;
     }
 
+    public AbstractSqlDao(DataSource dataSource, TableField[] insertFields, String sqlScriptPrefix) throws DaoException {
+        this(new WpDataSource(dataSource), insertFields, sqlScriptPrefix);
+    }
+
     /**
      * Executes a sql resource on the classpath
      * @param name Resource path - e.g. "/db/local-page.schema.sql"
      * @throws DaoException
      */
     public void executeSqlResource(String name) throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            AbstractSqlDao.class.getResource(name)
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        wpDs.executeSqlResource(name);
+    }
+
+    protected DSLContext getJooq() throws DaoException {
+        return wpDs.getJooq();
+    }
+
+    protected void freeJooq(DSLContext context) {
+        wpDs.freeJooq(context);
+    }
+
+    protected Connection getConnection(DSLContext context) {
+        return wpDs.getConnection(context);
     }
 
     @Override

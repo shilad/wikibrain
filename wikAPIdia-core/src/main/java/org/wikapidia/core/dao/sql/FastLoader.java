@@ -9,8 +9,10 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -64,6 +66,12 @@ public class FastLoader {
      */
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     public void load(Object [] values) throws DaoException {
+        // Hack convert dates to Timestamps
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] instanceof Date && !(values[i] instanceof Timestamp)) {
+                values[i] = new Timestamp(((Date)values[i]).getTime());
+            }
+        }
         if (inserter == null) {
             throw new IllegalStateException("inserter thread exited!");
         }

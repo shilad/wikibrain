@@ -8,9 +8,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
-import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.MetaInfoDao;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.dao.sql.RawPageSqlDao;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
@@ -36,18 +34,19 @@ public class RedirectLoader {
     private final MetaInfoDao metaDao;
 
     private TIntIntHashMap redirectIdsToPageIds;
-    private final RawPageSqlDao rawPages;
-    private final LocalPageSqlDao localPages;
-    private final RedirectSqlDao redirects;
+    private final RawPageDao rawPages;
+    private final LocalPageDao localPages;
+    private final RedirectDao redirects;
 
-    public RedirectLoader(DataSource ds, MetaInfoDao metaDao) throws DaoException{
-        this.rawPages = new RawPageSqlDao(ds);
-        this.localPages = new LocalPageSqlDao(ds,false);
-        this.redirects = new RedirectSqlDao(ds);
+    public RedirectLoader(RawPageDao rpdao, LocalPageDao lpdao, RedirectDao rdao, MetaInfoDao metaDao) throws DaoException{
+        this.rawPages = rpdao;
+        this.localPages = lpdao;
+        lpdao.setFollowRedirects(false);
+        this.redirects = rdao;
         this.metaDao = metaDao;
     }
 
-    public RedirectSqlDao getDao() {
+    public RedirectDao getDao() {
         return redirects;
     }
 
@@ -121,10 +120,14 @@ public class RedirectLoader {
         Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
-        DataSource dataSource = conf.get(DataSource.class);
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
-        RedirectLoader redirectLoader = new RedirectLoader(dataSource, metaDao);
+        RedirectLoader redirectLoader = new RedirectLoader(
+                conf.get(RawPageDao.class),
+                conf.get(LocalPageDao.class),
+                conf.get(RedirectDao.class),
+                metaDao
+        );
         if (cmd.hasOption("d")){
             LOG.info("Clearing data provider: ");
             redirectLoader.getDao().clear();

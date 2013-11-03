@@ -4,10 +4,7 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.dao.sql.LocalCategoryMemberSqlDao;
-import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
-import org.wikapidia.core.dao.sql.LocalPageSqlDao;
-import org.wikapidia.core.dao.sql.MetaInfoSqlDao;
+import org.wikapidia.core.dao.sql.*;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.parser.wiki.*;
 import org.wikapidia.core.model.RawPage;
@@ -74,9 +71,10 @@ public class TestWikiTextDumpParser {
         ds.setJdbcUrl("jdbc:h2:"+"db/h2");
         ds.setUsername("sa");
         ds.setPassword("");
+        WpDataSource wpDs = new WpDataSource(ds);
         LocalLinkDao linkDao = new LocalLinkSqlDao(ds);
-        LocalPageDao pageDao = new LocalPageSqlDao(ds);
-        LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(ds);
+        LocalPageDao pageDao = new LocalPageSqlDao(null);
+        LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(ds, new LocalCategorySqlDao(wpDs), new LocalArticleSqlDao(wpDs));
         MetaInfoDao metaDao = new MetaInfoSqlDao(ds);
 
         linkDao.beginLoad();
