@@ -68,7 +68,13 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
 
-
+    /**
+     *
+     * @param language the language of the category
+     * @param categoryId the category's ID
+     * @return a collection of the ids of all members in the given category
+     * @throws DaoException
+     */
     public Collection<Integer> getCategoryMemberIds(Language language, int categoryId) throws DaoException {
         String http = new String("http://");
         String host = new String(".wikipedia.org");
@@ -81,22 +87,49 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
         return categoryMemberIdsList;
     }
 
+    /**
+     *
+     * @param localCategory the category
+     * @return  a collection of the ids of all members in the given category
+     * @throws DaoException
+     */
+
     public Collection<Integer> getCategoryMemberIds(LocalCategory localCategory) throws DaoException {
         return getCategoryMemberIds(localCategory.getLanguage(), localCategory.getLocalId());
     }
 
+    /**
+     *
+     * @param language the language of the category
+     * @param categoryId the category's ID
+     * @return a map contains the LocalArticleIDs and the LocalArticle of all members in the given category
+     * @throws DaoException
+     */
     public Map<Integer, LocalArticle> getCategoryMembers(Language language, int categoryId) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(language, categoryId);
         LocalArticleLiveDao dao = new LocalArticleLiveDao();
         return dao.getByIds(language, articleIds);
     }
 
+    /**
+     *
+     * @param localCategory the category to find
+     * @return a map contains the LocalArticleIDs and the LocalArticle of all members in the given category
+     * @throws DaoException
+     */
     public Map<Integer, LocalArticle> getCategoryMembers(LocalCategory localCategory) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(localCategory);
         LocalArticleLiveDao dao = new LocalArticleLiveDao();
         return dao.getByIds(localCategory.getLanguage(), articleIds);
     }
 
+    /**
+     *
+     * @param language the language of the article
+     * @param articleId the articles's ID
+     * @return a collection of categoryids of all the categories this article belongs to
+     * @throws DaoException
+     */
     public Collection<Integer> getCategoryIds(Language language, int articleId) throws DaoException {
         String http = new String("http://");
         String host = new String(".wikipedia.org");
@@ -109,11 +142,24 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
         return categoryIdsList;
     }
 
+    /**
+     *
+     * @param localArticle the article
+     * @return a collection of categoryids of all the categories this article belongs to
+     * @throws DaoException
+     */
     @Override
     public Collection<Integer> getCategoryIds(LocalArticle localArticle) throws DaoException {
         return getCategoryIds(localArticle.getLanguage(), localArticle.getLocalId());
     }
 
+    /**
+     *
+     * @param language the language of the article
+     * @param articleId the article's ID
+     * @return a map contains the LocalCategoryIDs and the LocalCategories of all the categories this article belongs to
+     * @throws DaoException
+     */
     @Override
     public Map<Integer, LocalCategory> getCategories(Language language, int articleId) throws DaoException {
         Collection<Integer> categoryIds = getCategoryIds(language, articleId);
@@ -121,6 +167,12 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
         return dao.getByIds(language, categoryIds);
     }
 
+    /**
+     *
+     * @param localArticle the article to find
+     * @return a map contains the LocalCategoryIDs and the LocalCategories of all the categories this article belongs to
+     * @throws DaoException
+     */
     @Override
     public Map<Integer, LocalCategory> getCategories(LocalArticle localArticle) throws DaoException {
         Collection<Integer> categoryIds = getCategoryIds(localArticle);
