@@ -1,1 +1,1 @@
-CREATE INDEX IF NOT EXISTS raw_page_idx_page_id ON raw_page(lang_id, page_id);
+CREATE INDEX IF NOT EXISTS RAW_PAGE_IDX_PAGE_ID ON RAW_PAGE(LANG_ID, PAGE_ID);

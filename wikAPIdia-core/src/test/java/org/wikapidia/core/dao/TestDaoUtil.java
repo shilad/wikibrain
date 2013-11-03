@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao;
 
 import com.jolbox.bonecp.BoneCPDataSource;
+import org.wikapidia.core.dao.sql.WpDataSource;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -22,5 +23,9 @@ public class TestDaoUtil {
         ds.setUsername("sa");
         ds.setPassword("");
         return ds;
+    }
+
+    public static WpDataSource getWpDataSource() throws IOException, ClassNotFoundException, DaoException {
+        return new WpDataSource(getDataSource());
     }
 }

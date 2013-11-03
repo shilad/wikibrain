@@ -5,9 +5,11 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.RawPageSqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -16,20 +18,12 @@ import java.util.Date;
 public class TestRawPageDao {
     @Test
     public void test() throws ClassNotFoundException, IOException, SQLException, DaoException {
-        Class.forName("org.h2.Driver");
-        File tmpDir = File.createTempFile("wikapidia-h2", null);
-        tmpDir.delete();
-        tmpDir.deleteOnExit();
-        tmpDir.mkdirs();
-
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
-        ds.setUsername("sa");
-        ds.setPassword("");
+        WpDataSource wpDs = TestDaoUtil.getWpDataSource();
+        DataSource ds = wpDs.getDataSource();
 
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        LocalArticleSqlDao lpDao = new LocalArticleSqlDao(ds);
-        RawPageDao rpDao = new RawPageSqlDao(ds);
+        LocalArticleSqlDao lpDao = new LocalArticleSqlDao(wpDs);
+        RawPageDao rpDao = new RawPageSqlDao(wpDs);
         lpDao.beginLoad();
         rpDao.beginLoad();
 

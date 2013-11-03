@@ -1,2 +1,2 @@
-CREATE INDEX IF NOT EXISTS local_page_idx_page_id ON local_page(lang_id, page_id);
-CREATE INDEX IF NOT EXISTS local_page_idx_page_title ON local_page(lang_id, title, name_space);
+CREATE INDEX IF NOT EXISTS LOCAL_PAGE_IDX_PAGE_ID ON LOCAL_PAGE(LANG_ID, PAGE_ID);
+CREATE INDEX IF NOT EXISTS LOCAL_PAGE_IDX_PAGE_TITLE ON LOCAL_PAGE(LANG_ID, TITLE, NAME_SPACE);

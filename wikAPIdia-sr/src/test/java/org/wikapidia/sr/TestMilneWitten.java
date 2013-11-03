@@ -6,6 +6,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
@@ -55,10 +56,11 @@ public class TestMilneWitten {
         ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
         ds.setUsername("sa");
         ds.setPassword("");
+        WpDataSource wpDs = new WpDataSource(ds);
 
         LanguageInfo lang = LanguageInfo.getByLangCode("simple");
-        LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
-        LocalLinkSqlDao linkDao = new LocalLinkSqlDao(ds);
+        LocalArticleSqlDao dao = new LocalArticleSqlDao(wpDs);
+        LocalLinkSqlDao linkDao = new LocalLinkSqlDao(wpDs);
         ExplanationFormatter expf = new ExplanationFormatter(dao);
 
         dao.beginLoad();

@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao.sql;
 
 import org.jooq.Cursor;
+import org.jooq.DSLContext;
 import org.jooq.Record;
 
 import java.sql.Connection;
@@ -13,6 +14,10 @@ import java.sql.Connection;
  * elements E and input records.
  */
 public abstract class SimpleSqlDaoIterable<E> extends SqlDaoIterable<E, Record> {
+
+    public SimpleSqlDaoIterable(Cursor<Record> result, DSLContext context) {
+        super(result, result.iterator(), context);
+    }
 
     public SimpleSqlDaoIterable(Cursor<Record> result, Connection conn) {
         super(result, result.iterator(), conn);

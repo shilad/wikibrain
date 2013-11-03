@@ -3,6 +3,7 @@ package org.wikapidia.core.dao;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalLink;
 
@@ -12,16 +13,7 @@ import java.io.IOException;
 public class TestLocalLinkDao {
     @Test
     public void testLink() throws ClassNotFoundException, IOException, DaoException {
-        Class.forName("org.h2.Driver");
-        File tmpDir = File.createTempFile("wikapidia-h2", null);
-        tmpDir.delete();
-        tmpDir.deleteOnExit();
-        tmpDir.mkdir();
-
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
-        ds.setUsername("sa");
-        ds.setPassword("");
+        WpDataSource ds = TestDaoUtil.getWpDataSource();
 
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
         LocalLinkSqlDao dao = new LocalLinkSqlDao(ds);

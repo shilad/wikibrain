@@ -16,19 +16,12 @@ import java.sql.SQLException;
 public class TestSqlCache {
     @Test
     public void test() throws ClassNotFoundException, IOException, SQLException, DaoException, InterruptedException {
-        Class.forName("org.h2.Driver");
         File tmpDir = File.createTempFile("wikapidia-h2", null);
         tmpDir.delete();
         tmpDir.deleteOnExit();
         tmpDir.mkdirs();
 
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
-        ds.setUsername("sa");
-        ds.setPassword("");
-
-        LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        SqlCache cache = new SqlCache(ds, tmpDir);
+        SqlCache cache = new SqlCache(TestDaoUtil.getWpDataSource(), tmpDir);
         cache.makeLastModifiedDb();
         TLongIntMap map = new TLongIntHashMap(10, .5f, -1, -1);
         map.put(0, 1);

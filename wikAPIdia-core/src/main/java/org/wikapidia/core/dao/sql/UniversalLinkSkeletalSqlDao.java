@@ -39,7 +39,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     private File path;
     private ObjectDb<byte[]> objectDb;
 
-    public UniversalLinkSkeletalSqlDao(DataSource dataSource) throws DaoException {
+    public UniversalLinkSkeletalSqlDao(WpDataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-skeletal-link");
     }
 
@@ -101,10 +101,8 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
 
     @Override
     public Iterable<UniversalLink> get(DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getNameSpaceIds() != null) {
                 conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.in(daoFilter.getSourceIds()));
@@ -119,25 +117,23 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
                     .where(conditions)
                     .fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<UniversalLink>(result, conn) {
+            return new SimpleSqlDaoIterable<UniversalLink>(result, context) {
 
                 @Override
                 public UniversalLink transform(Record item) throws DaoException {
                     return buildUniversalLink(item);
                 }
             };
-        } catch (SQLException e) {
-            quietlyCloseConn(conn);
-            throw new DaoException(e);
+        } catch (RuntimeException e) {
+            freeJooq(context);
+            throw e;
         }
     }
 
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getNameSpaceIds() != null) {
                 conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.in(daoFilter.getSourceIds()));
@@ -152,57 +148,45 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
                     .where(conditions)
                     .fetchCount();
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public UniversalLinkGroup getOutlinks(int sourceId, int algorithmId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Result<Record> result = context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
                     .where(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.eq(sourceId))
                     .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId))
                     .fetch();
             return buildUniversalLinkGroup(result, true);
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public UniversalLinkGroup getInlinks(int destId, int algorithmId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Result<Record> result = context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
                     .where(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.eq(destId))
                     .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId))
                     .fetch();
             return buildUniversalLinkGroup(result, false);
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public TIntSet getOutlinkIds(int sourceId, int algorithmId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> result = context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
                     .where(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.eq(sourceId))
@@ -213,19 +197,15 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                 ids.add(record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID));
             }
             return ids;
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public TIntSet getInlinkIds(int destId, int algorithmId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Cursor<Record> result = context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
                     .where(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.eq(destId))
@@ -236,19 +216,15 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                 ids.add(record.getValue(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID));
             }
             return ids;
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public UniversalLink getUniversalLink(int sourceId, int destId, int algorithmId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Record record = context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
                     .where(Tables.UNIVERSAL_SKELETAL_LINK.SOURCE_ID.eq(sourceId))
@@ -256,10 +232,8 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                     .and(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId))
                     .fetchOne();
             return buildUniversalLink(record);
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
     private UniversalLinkGroup buildUniversalLinkGroup(Result<Record> result, boolean outlinks) throws DaoException {
@@ -332,7 +306,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
             try {
                 return new UniversalLinkSkeletalSqlDao(
                         getConfigurator().get(
-                                DataSource.class,
+                                WpDataSource.class,
                                 config.getString("dataSource"))
                 );
             } catch (DaoException e) {

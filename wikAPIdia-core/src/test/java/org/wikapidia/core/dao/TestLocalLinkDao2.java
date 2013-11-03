@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 
 import org.wikapidia.core.dao.matrix.MatrixLocalLinkDao;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
 
@@ -21,16 +22,7 @@ public class TestLocalLinkDao2 {
 
     @Test
     public void testLink() throws ClassNotFoundException, IOException, DaoException {
-        Class.forName("org.h2.Driver");
-        File tmpDir = File.createTempFile("wikapidia-h2", null);
-        tmpDir.delete();
-        tmpDir.deleteOnExit();
-        tmpDir.mkdir();
-
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
-        ds.setUsername("sa");
-        ds.setPassword("");
+        WpDataSource ds = TestDaoUtil.getWpDataSource();
 
         Language lang = Language.getByLangCode("simple");
         LocalLinkSqlDao sqlDao = new LocalLinkSqlDao(ds);

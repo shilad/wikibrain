@@ -5,6 +5,7 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.set.TIntSet;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
@@ -21,11 +22,12 @@ import java.sql.SQLException;
 public class TestRedirectDao {
     @Test
     public void  test() throws ClassNotFoundException, IOException, SQLException, DaoException{
-        DataSource ds = TestDaoUtil.getDataSource();
+        WpDataSource wpDs = TestDaoUtil.getWpDataSource();
+        DataSource ds = wpDs.getDataSource();
 
         LanguageInfo langInfo = LanguageInfo.getByLangCode("en");
         Language lang = langInfo.getLanguage();
-        RedirectSqlDao redirectDao = new RedirectSqlDao(ds);
+        RedirectSqlDao redirectDao = new RedirectSqlDao(wpDs);
         redirectDao.beginLoad();
         redirectDao.save(lang, 0, 5);
         redirectDao.save(lang, 1, 5);

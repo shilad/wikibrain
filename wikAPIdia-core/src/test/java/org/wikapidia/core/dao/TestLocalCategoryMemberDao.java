@@ -2,14 +2,12 @@ package org.wikapidia.core.dao;
 
 import org.junit.Test;
 import org.wikapidia.core.WikapidiaException;
-import org.wikapidia.core.dao.sql.LocalCategoryMemberSqlDao;
-import org.wikapidia.core.dao.sql.LocalPageSqlDao;
+import org.wikapidia.core.dao.sql.*;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalCategory;
 import org.wikapidia.core.model.Title;
 
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +21,13 @@ public class TestLocalCategoryMemberDao {
 
     @Test
     public void testMembership() throws ClassNotFoundException, IOException, DaoException, WikapidiaException {
-        DataSource ds = TestDaoUtil.getDataSource();
+        WpDataSource ds = TestDaoUtil.getWpDataSource();
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
 
-        LocalCategoryMemberSqlDao dao = new LocalCategoryMemberSqlDao(ds);
+        LocalCategoryMemberSqlDao dao = new LocalCategoryMemberSqlDao(
+                ds,
+                new LocalCategorySqlDao(ds),
+                new LocalArticleSqlDao(ds));
         LocalPageSqlDao pageDao = new LocalPageSqlDao(ds);
 
         dao.beginLoad();

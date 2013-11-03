@@ -2,7 +2,6 @@ package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -13,8 +12,6 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +23,7 @@ import java.util.Date;
  */
 public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao {
 
-    public RawPageSqlDao(DataSource dataSource) throws DaoException {
+    public RawPageSqlDao(WpDataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/raw-page");
     }
 
@@ -61,23 +58,21 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
 
     @Override
     public Iterable<RawPage> get(DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
-            Collection<Condition> conditions = getConditions(daoFilter);
-            Cursor<Record> result = context.selectFrom(Tables.RAW_PAGE)
-                    .where(conditions)
-                    .fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<RawPage>(result, conn) {
+        Collection<Condition> conditions = getConditions(daoFilter);
+        Cursor<Record> result = context.selectFrom(Tables.RAW_PAGE)
+                .where(conditions)
+                .fetchLazy(getFetchSize());
+            return new SimpleSqlDaoIterable<RawPage>(result, context) {
                 @Override
                 public RawPage transform(Record r) {
                     return buildRawPage(r);
                 }
             };
-        } catch (SQLException e) {
-            quietlyCloseConn(conn);
-            throw new DaoException(e);
+        } catch (RuntimeException e) {
+            freeJooq(context);
+            throw e;
         }
     }
 
@@ -100,47 +95,37 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
 
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException{
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = getConditions(daoFilter);
             return context.selectCount().
                     from(Tables.RAW_PAGE).
                     where(conditions).
                     fetchOne().value1();
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public RawPage getById(Language language, int rawLocalPageId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             return buildRawPage(context.
                     select().
                     from(Tables.RAW_PAGE).
                     where(Tables.RAW_PAGE.PAGE_ID.eq(rawLocalPageId)).
                     and(Tables.RAW_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne());
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public String getBody(Language language, int rawLocalPageId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             return context.
                 select().
                 from(Tables.RAW_PAGE).
@@ -148,10 +133,8 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
                 and(Tables.RAW_PAGE.LANG_ID.eq(language.getId())).
                 fetchOne().
                 getValue(Tables.RAW_PAGE.BODY);
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
@@ -193,7 +176,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
             try {
                 return new RawPageSqlDao(
                         getConfigurator().get(
-                                DataSource.class,
+                                WpDataSource.class,
                                 config.getString("dataSource"))
                         );
             } catch (DaoException e) {
