@@ -8,10 +8,12 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategory;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -37,7 +39,7 @@ public class LocalCategoryLiveDao extends LocalPageLiveDao<LocalCategory> implem
      */
 
     public LocalCategory getByTitle(Language language, Title title) throws DaoException{
-        return super.getByTitle(language, title, NameSpace.CATEGORY);
+        return new LocalCategory(super.getByTitle(language, title, NameSpace.CATEGORY));
     }
 
     /**

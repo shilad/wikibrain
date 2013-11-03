@@ -128,7 +128,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
         Map<Title, T> pageMap = new HashMap<Title, T>();
         for(Title title : titles){
             LocalPageQueryReply info = new LocalPageQueryReply(getInfoByQuery(getQueryByTitle(title, language)));
-            pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
+            pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), ns, info.isRedirect(), info.isDisambig()));
         }
         return pageMap;
     }

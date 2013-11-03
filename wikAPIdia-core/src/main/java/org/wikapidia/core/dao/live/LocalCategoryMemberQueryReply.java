@@ -28,37 +28,35 @@ public class LocalCategoryMemberQueryReply extends QueryReply {
 
     public List<LocalCategoryMember> memberList = new ArrayList<LocalCategoryMember>();
 
-    public LocalCategoryMemberQueryReply(String text, Integer localCategoryId){
+    public LocalCategoryMemberQueryReply(String text, Integer localCategoryId, Language language){
         Gson gson = new Gson();
         JsonParser jp = new JsonParser();
-        JsonObject test = jp.parse(text).getAsJsonObject();
-        Set<Map.Entry<String, JsonElement>> pageSet = jp.parse(text).getAsJsonObject().get("query").getAsJsonObject().get("pages").getAsJsonObject().entrySet();
+        //JsonObject test = jp.parse(text).getAsJsonObject();
 
-        for (Map.Entry<String, JsonElement> entry: pageSet)
-        {
-            Long pageId = entry.getValue().getAsJsonObject().get("pageid").getAsLong();
-            String title = entry.getValue().getAsJsonObject().get("title").getAsString();
-            String pageLanguage = entry.getValue().getAsJsonObject().get("pagelanguage").getAsString();
-            Long nameSpace = entry.getValue().getAsJsonObject().get("ns").getAsLong();
-            for(JsonElement elem: entry.getValue().getAsJsonObject().get("categorymembers").getAsJsonArray()){
-
-                try{
-                    memberList.add(new LocalCategoryMember(localCategoryId, elem.getAsJsonObject().get("pageid").getAsInt(), Language.getByLangCode(pageLanguage)));
-                }
-                catch(Exception e){
-
-                }
+        for(JsonElement elem: jp.parse(text).getAsJsonObject().get("query").getAsJsonObject().get("categorymembers").getAsJsonArray()){
+            try{
+                memberList.add(new LocalCategoryMember(localCategoryId, elem.getAsJsonObject().get("pageid").getAsInt(), language));
+            }
+            catch(Exception e){
+                System.out.println("error in inspecting localcategorymember");
+                System.out.println(elem.getAsJsonObject().get("pageid").getAsInt());
 
             }
+
+        }
             this.pageId = pageId;
             this.title = title;
             this.pageLanguage = pageLanguage;
             this.nameSpace = nameSpace;
 
-        }
-
     }
 
+
+
+    /**
+     *
+     * @return the list of category members
+     */
     public List<LocalCategoryMember> getLocalCategoryMemberList(){
         return memberList;
     }

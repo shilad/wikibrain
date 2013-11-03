@@ -24,7 +24,7 @@ import java.util.Set;
 public class LocalCategoryListQueryReply extends QueryReply {
     public List<LocalCategory> categoryList = new ArrayList<LocalCategory>();
 
-    public LocalCategoryListQueryReply(String text){
+    public LocalCategoryListQueryReply(String text, Language language){
         Gson gson = new Gson();
         JsonParser jp = new JsonParser();
         JsonObject test = jp.parse(text).getAsJsonObject();
@@ -34,13 +34,13 @@ public class LocalCategoryListQueryReply extends QueryReply {
         {
             Long pageId = entry.getValue().getAsJsonObject().get("pageid").getAsLong();
             String title = entry.getValue().getAsJsonObject().get("title").getAsString();
-            String pageLanguage = entry.getValue().getAsJsonObject().get("pagelanguage").getAsString();
+
             Long nameSpace = entry.getValue().getAsJsonObject().get("ns").getAsLong();
             for(JsonElement elem: entry.getValue().getAsJsonObject().get("categories").getAsJsonArray()){
 
                 try{
-                    Title categoryTitle = new LocalCategoryLiveDao().getById(Language.getByLangCode(pageLanguage), elem.getAsJsonObject().get("pageid").getAsInt()).getTitle();
-                    categoryList.add(new LocalCategory(Language.getByLangCode(pageLanguage), elem.getAsJsonObject().get("pageid").getAsInt(), categoryTitle));
+                    Title categoryTitle = new Title( elem.getAsJsonObject().get("title").getAsString(), language);
+                    categoryList.add(new LocalCategory(language, new LocalCategoryLiveDao().getIdByTitle(categoryTitle), categoryTitle));
                 }
                 catch(Exception e){
 
@@ -56,7 +56,11 @@ public class LocalCategoryListQueryReply extends QueryReply {
 
     }
 
-    public List<LocalCategory> geCategoryList(){
+    /**
+     *
+     * @return a list of categories that an article belongs to
+     */
+    public List<LocalCategory> getCategoryList(){
         return categoryList;
     }
 
