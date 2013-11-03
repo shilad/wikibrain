@@ -37,7 +37,7 @@ public class Benchmark {
         WpDataSource wpDs = new WpDataSource(ds);
 
         if (shouldBuildLastModified){
-            (new SqlCache(ds, new File("."))).makeLastModifiedDb();
+            (new SqlCache(wpDs, new File("."))).makeLastModifiedDb();
         }
         LocalArticleSqlDao ad = new LocalArticleSqlDao(wpDs);
         ad.useCache(new File("."));

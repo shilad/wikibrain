@@ -25,7 +25,7 @@ public class TestLocalCategoryMemberDao {
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
 
         LocalCategoryMemberSqlDao dao = new LocalCategoryMemberSqlDao(
-                ds.getDataSource(),
+                ds,
                 new LocalCategorySqlDao(ds),
                 new LocalArticleSqlDao(ds));
         LocalPageSqlDao pageDao = new LocalPageSqlDao(ds);

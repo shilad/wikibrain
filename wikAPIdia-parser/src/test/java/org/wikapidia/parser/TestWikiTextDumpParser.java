@@ -72,10 +72,11 @@ public class TestWikiTextDumpParser {
         ds.setUsername("sa");
         ds.setPassword("");
         WpDataSource wpDs = new WpDataSource(ds);
-        LocalLinkDao linkDao = new LocalLinkSqlDao(ds);
-        LocalPageDao pageDao = new LocalPageSqlDao(null);
-        LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(ds, new LocalCategorySqlDao(wpDs), new LocalArticleSqlDao(wpDs));
-        MetaInfoDao metaDao = new MetaInfoSqlDao(ds);
+        LocalLinkDao linkDao = new LocalLinkSqlDao(wpDs);
+        LocalPageDao pageDao = new LocalPageSqlDao(wpDs);
+        LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(
+                wpDs, new LocalCategorySqlDao(wpDs), new LocalArticleSqlDao(wpDs));
+        MetaInfoDao metaDao = new MetaInfoSqlDao(wpDs);
 
         linkDao.beginLoad();
         catMemDao.beginLoad();

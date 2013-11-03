@@ -64,7 +64,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
         Cursor<Record> result = context.selectFrom(Tables.RAW_PAGE)
                 .where(conditions)
                 .fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<RawPage>(result, getConnection(context)) {
+            return new SimpleSqlDaoIterable<RawPage>(result, context) {
                 @Override
                 public RawPage transform(Record r) {
                     return buildRawPage(r);

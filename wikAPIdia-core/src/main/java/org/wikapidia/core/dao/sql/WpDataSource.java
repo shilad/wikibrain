@@ -3,12 +3,10 @@ package org.wikapidia.core.dao.sql;
 import com.jolbox.bonecp.BoneCPDataSource;
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
-import org.jooq.ConnectionProvider;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultConnectionProvider;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -41,21 +39,12 @@ public class WpDataSource {
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            closeQuietly(conn);
         }
     }
 
     public DataSource getDataSource() {
         return dataSource;
-    }
-
-    public Connection getConnection(DSLContext context) {
-        ConnectionProvider provider = context.configuration().connectionProvider();
-        if (provider instanceof DefaultConnectionProvider) {
-            return ((DefaultConnectionProvider) provider).acquire();
-        } else {
-            return null;
-        }
     }
 
     public DSLContext getJooq() throws DaoException {
@@ -67,10 +56,9 @@ public class WpDataSource {
     }
 
     public void freeJooq(DSLContext context) {
-        ConnectionProvider provider = context.configuration().connectionProvider();
-        if (provider instanceof DefaultConnectionProvider) {
-            Connection conn = ((DefaultConnectionProvider) provider).acquire();
-            quietlyCloseConn(conn);
+        Connection conn = JooqUtils.getConnection(context);
+        if (conn != null) {
+            closeQuietly(conn);
         }
     }
 
@@ -92,7 +80,7 @@ public class WpDataSource {
         } catch (SQLException e){
             throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            closeQuietly(conn);
         }
     }
 
@@ -105,7 +93,7 @@ public class WpDataSource {
         return script;
     }
 
-    public static void quietlyCloseConn(Connection conn) {
+    public static void closeQuietly(Connection conn) {
         if (conn != null) {
             try {
                 conn.close();

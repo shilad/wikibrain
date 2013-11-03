@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao.sql;
 
-import org.apache.commons.io.IOUtils;
 import org.jodah.typetools.TypeResolver;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -9,7 +8,6 @@ import org.wikapidia.core.dao.Dao;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.model.MetaInfo;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -77,7 +75,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         if (this instanceof MetaInfoDao) {
             this.metaDao = (MetaInfoSqlDao) this;
         } else {
-            this.metaDao = new MetaInfoSqlDao(ds);
+            this.metaDao = new MetaInfoSqlDao(wpDs);
         }
         this.fields = fields;
         this.sqlScriptPrefix = sqlScriptPrefix;
@@ -102,10 +100,6 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
 
     protected void freeJooq(DSLContext context) {
         wpDs.freeJooq(context);
-    }
-
-    protected Connection getConnection(DSLContext context) {
-        return wpDs.getConnection(context);
     }
 
     @Override
@@ -157,7 +151,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     }
 
     public void useCache(File dir) throws DaoException{
-        cache = new SqlCache(ds, dir);
+        cache = new SqlCache(wpDs, dir);
     }
 
     /**

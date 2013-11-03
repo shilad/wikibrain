@@ -39,7 +39,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     private final LocalCategoryDao localCategoryDao;
     private final LocalArticleDao localArticleDao;
 
-    public LocalCategoryMemberSqlDao(DataSource dataSource, LocalCategoryDao localCategoryDao, LocalArticleDao localArticleDao) throws DaoException {
+    public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalCategoryDao localCategoryDao, LocalArticleDao localArticleDao) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/category-members");
         this.localCategoryDao = localCategoryDao;
         this.localArticleDao = localArticleDao;
@@ -68,10 +68,8 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
      */
     @Override
     public Iterable<LocalCategoryMember> get(DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.CATEGORY_MEMBERS.LANG_ID.in(daoFilter.getLangIds()));
@@ -80,15 +78,15 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                     from(Tables.CATEGORY_MEMBERS).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<LocalCategoryMember>(result, conn) {
+            return new SimpleSqlDaoIterable<LocalCategoryMember>(result, context) {
                 @Override
                 public LocalCategoryMember transform(Record r) {
                     return buildLocalCategoryMember(r);
                 }
             };
-        } catch (SQLException e) {
-            quietlyCloseConn(conn);
-            throw new DaoException(e);
+        } catch (RuntimeException e) {
+            freeJooq(context);
+            throw e;
         }
     }
 
@@ -230,7 +228,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             try {
                 return new LocalCategoryMemberSqlDao(
                         getConfigurator().get(
-                                DataSource.class,
+                                WpDataSource.class,
                                 config.getString("dataSource")),
                         getConfigurator().get(LocalCategoryDao.class),
                         getConfigurator().get(LocalArticleDao.class)

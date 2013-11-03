@@ -40,7 +40,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     public LocalPageSqlDao(WpDataSource dataSource, boolean followRedirects) throws DaoException{
         super(dataSource, INSERT_FIELDS, "/db/local-page");
         if (followRedirects){
-            redirectSqlDao = new RedirectSqlDao(ds);
+            redirectSqlDao = new RedirectSqlDao(wpDs);
         }
     }
 
@@ -88,7 +88,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<T>(result, getConnection(context)) {
+            return new SimpleSqlDaoIterable<T>(result, context) {
                 @Override
                 public T transform(Record r) {
                     try {
@@ -150,7 +150,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     @Override
     public void setFollowRedirects(boolean followRedirects) throws DaoException {
         if (followRedirects){
-            redirectSqlDao = new RedirectSqlDao(ds);
+            redirectSqlDao = new RedirectSqlDao(wpDs);
         } else {
             redirectSqlDao = null;
         }
