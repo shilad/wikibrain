@@ -16,7 +16,7 @@ import java.sql.Connection;
 public abstract class SimpleSqlDaoIterable<E> extends SqlDaoIterable<E, Record> {
 
     public SimpleSqlDaoIterable(Cursor<Record> result, DSLContext context) {
-        this(result, JooqUtils.getConnection(context));
+        super(result, result.iterator(), context);
     }
 
     public SimpleSqlDaoIterable(Cursor<Record> result, Connection conn) {

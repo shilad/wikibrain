@@ -81,10 +81,6 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         this.sqlScriptPrefix = sqlScriptPrefix;
     }
 
-    public AbstractSqlDao(DataSource dataSource, TableField[] insertFields, String sqlScriptPrefix) throws DaoException {
-        this(new WpDataSource(dataSource), insertFields, sqlScriptPrefix);
-    }
-
     /**
      * Executes a sql resource on the classpath
      * @param name Resource path - e.g. "/db/local-page.schema.sql"

@@ -42,7 +42,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Tables.UNIVERSAL_PAGE.ALGORITHM_ID
     };
 
-    public UniversalPageSqlDao(DataSource dataSource) throws DaoException {
+    public UniversalPageSqlDao(WpDataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-page");
     }
 
@@ -64,10 +64,8 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
 
     @Override
     public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getNameSpaceIds() != null) {
                 conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
@@ -85,25 +83,23 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                         record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
                         record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
             }
-            return new SqlDaoIterable<T, int[]>(result, pages.iterator(), conn) {
+            return new SqlDaoIterable<T, int[]>(result, pages.iterator(), context) {
 
                 @Override
                 public T transform(int[] item) throws DaoException {
                     return getById(item[0], item[1]);
                 }
             };
-        } catch (SQLException e) {
-            quietlyCloseConn(conn);
-            throw new DaoException(e);
+        } catch (RuntimeException e) {
+            freeJooq(context);
+            throw e;
         }
     }
 
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException{
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getNameSpaceIds() != null) {
                 conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
@@ -115,29 +111,23 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(conditions)
                     .fetchCount();
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public T getById(int univId, int algorithmId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Result<Record> result = context.select()
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(univId))
                     .and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
                     .fetch();
             return (T)buildUniversalPage(result);
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
@@ -155,10 +145,8 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
 
     @Override
     public int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Record record = context.select()
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(Tables.UNIVERSAL_PAGE.LANG_ID.eq(language.getId()))
@@ -171,10 +159,8 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             } else {
                 return record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID);
             }
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
@@ -185,10 +171,8 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
 
     @Override
     public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(int algorithmId, LanguageSet ls) throws DaoException {
-        Connection conn = null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,dialect);
+        DSLContext context = getJooq();
+        try {
             Map<Language, TIntIntMap> map = new HashMap<Language, TIntIntMap>();
             for (Language l : ls) {
                 Cursor<Record> cursor = context.select()
@@ -207,10 +191,8 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 map.put(l, ids);
             }
             return map;
-        } catch (SQLException e){
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
@@ -264,7 +246,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             try {
                 return new UniversalPageSqlDao(
                         getConfigurator().get(
-                                DataSource.class,
+                                WpDataSource.class,
                                 config.getString("dataSource"))
                 );
             } catch (DaoException e) {
