@@ -37,7 +37,7 @@ public class LocalArticleLiveDao extends LocalPageLiveDao<LocalArticle> implemen
      * @throws DaoException
      */
     public LocalArticle getByTitle(Language language, Title title) throws DaoException {
-        return new LocalArticle(super.getByTitle(language, title, NameSpace.ARTICLE));
+        return new LocalArticle(super.getByTitle(title, NameSpace.ARTICLE));
     }
 
     /**
