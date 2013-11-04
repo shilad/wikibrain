@@ -10,12 +10,10 @@ import org.wikapidia.core.model.*;
 import java.io.IOException;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 10/26/13
- * Time: 9:05 PM
- * To change this template use File | Settings | File Templates.
+ * An Example shows how LocalPageLiveDao works
+ * @author Toby "Jiajun" Li
  */
+
 public class LocalPageLiveDaoExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
        String string = new String();

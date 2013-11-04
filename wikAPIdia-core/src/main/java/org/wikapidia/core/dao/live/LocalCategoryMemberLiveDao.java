@@ -22,11 +22,8 @@ import org.wikapidia.core.dao.live.LiveUtils;
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 11/3/13
- * Time: 12:33 AM
- * To change this template use File | Settings | File Templates.
+ * A Live Wiki API Implementation of LocalCategoryMemberDao
+ * @author Toby "Jiajun" Li
  */
 public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
 

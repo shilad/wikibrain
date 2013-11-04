@@ -10,13 +10,9 @@ import org.wikapidia.core.model.Title;
 import java.util.Map;
 import java.util.Set;
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 10/27/13
- * Time: 9:13 PM
- * To change this template use File | Settings | File Templates.
+ * An abstract class used to handle json objects we got from live wiki API
+ * @author Toby "Jiajun" Li
  */
-
 
 public abstract class QueryReply {
 

@@ -1,12 +1,10 @@
 package org.wikapidia.core.dao.live;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 11/3/13
- * Time: 1:15 AM
- * To change this template use File | Settings | File Templates.
+ * A QueryReply class to handle json objects we got from live wiki API for a LocalArticle object
+ * @author Toby "Jiajun" Li
  */
+
 public class LocalArticleQueryReply extends LocalPageQueryReply {
     public LocalArticleQueryReply(String text){
         super(text);

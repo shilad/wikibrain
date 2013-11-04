@@ -15,11 +15,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 11/3/13
- * Time: 1:16 AM
- * To change this template use File | Settings | File Templates.
+ * A QueryReply class to handle json objects we got from live wiki API for a list of categories
+ * @author Toby "Jiajun" Li
  */
 public class LocalCategoryListQueryReply extends QueryReply {
     public List<LocalCategory> categoryList = new ArrayList<LocalCategory>();

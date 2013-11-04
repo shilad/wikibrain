@@ -17,11 +17,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 11/3/13
- * Time: 1:17 AM
- * To change this template use File | Settings | File Templates.
+ * A Live Wiki API Implementation of LocalArticleDao
+ * @author Toby "Jiajun" Li
  */
 public class LocalArticleLiveDao extends LocalPageLiveDao<LocalArticle> implements LocalArticleDao {
 

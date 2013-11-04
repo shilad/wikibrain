@@ -15,13 +15,10 @@ import java.util.Map;
 
 import org.wikapidia.core.dao.live.*;
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 11/3/13
- * Time: 12:56 PM
- * To change this template use File | Settings | File Templates.
+ * An Example shows how LocalCategoryMemberLiveDao works
+ * @author Toby "Jiajun" Li
  */
-public class LiveDaosExample {
+public class LocalCategoryMemberLiveDaoExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         LocalPageDao localPageDao = new Configurator(new Configuration()).get(LocalPageDao.class, "live");
         LocalArticleDao localArticleDao = new Configurator(new Configuration()).get(LocalArticleDao.class, "live");
