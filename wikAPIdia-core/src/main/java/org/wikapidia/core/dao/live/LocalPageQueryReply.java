@@ -1,16 +1,15 @@
 package org.wikapidia.core.dao.live;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
+import org.wikapidia.core.dao.live.QueryReply;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
-
 /**
  * Created with IntelliJ IDEA.
  * User: Toby "Jiajun" Li
@@ -19,18 +18,15 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class LocalPageQueryReply extends QueryReply {
-
-
     public boolean isRedirect;
     public boolean isDisambig;
-
 
     /**Constructor: Construct a LocalPageQueryReply from the reply from wiki server
      *
      * @param text Query reply from wiki server
      */
-
     public LocalPageQueryReply(String text){
+
         Gson gson = new Gson();
         JsonParser jp = new JsonParser();
         JsonObject test = jp.parse(text).getAsJsonObject();
@@ -74,8 +70,10 @@ public class LocalPageQueryReply extends QueryReply {
     /**
      *
      * @return the namespace of this page
+
      */
     public NameSpace getNameSpace(){
         return NameSpace.getNameSpaceByArbitraryId(nameSpace.intValue());
     }
+
 }

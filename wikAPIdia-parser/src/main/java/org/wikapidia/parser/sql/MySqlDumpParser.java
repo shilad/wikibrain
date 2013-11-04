@@ -160,7 +160,6 @@ public class MySqlDumpParser {
                     throw new RuntimeException(e);
                 } catch (StandardException e) {
                     LOG.log(Level.SEVERE, "error parsing line "  + line + " of " + path + ":", e);
-                    System.exit(1);
                 }
                 line++;
             }

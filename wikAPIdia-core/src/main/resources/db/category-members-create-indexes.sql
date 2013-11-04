@@ -1,2 +1,2 @@
-CREATE INDEX IF NOT EXISTS local_category_member_idx_article_id ON category_members(article_id, lang_id);
-CREATE INDEX IF NOT EXISTS local_category_member_idx_category_id ON category_members(category_id, lang_id);
+CREATE INDEX IF NOT EXISTS LOCAL_CATEGORY_MEMBER_IDX_ARTICLE_ID ON CATEGORY_MEMBERS(ARTICLE_ID, LANG_ID);
+CREATE INDEX IF NOT EXISTS LOCAL_CATEGORY_MEMBER_IDX_CATEGORY_ID ON CATEGORY_MEMBERS(CATEGORY_ID, LANG_ID);

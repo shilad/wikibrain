@@ -13,7 +13,6 @@ import org.wikapidia.core.model.*;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -33,7 +32,7 @@ public class RedirectIT {
 
     @Test
     public void testRedirect() throws DaoException {
-        LocalPage page = dao.getByTitle(Language.getByLangCode("simple"), new Title("Obama", Language.getByLangCode("simple")), NameSpace.ARTICLE);
+        LocalPage page = dao.getByTitle(new Title("Obama", Language.getByLangCode("simple")), NameSpace.ARTICLE);
         assertEquals("Barack Obama", page.getTitle().getCanonicalTitle());
     }
 

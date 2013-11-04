@@ -21,6 +21,8 @@ public class ParserVisitor {
      */
     public void link(ParsedLink link) throws WikapidiaException {}
 
+    public void parseError(RawPage rp, Exception e) {}
+
     /**
      * TODO: fixme
      * @param redirect

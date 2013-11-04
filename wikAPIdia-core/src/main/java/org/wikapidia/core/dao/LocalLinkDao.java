@@ -15,7 +15,9 @@ public interface LocalLinkDao extends Dao<LocalLink> {
      * @param destId the ID of the destination page
      * @return a single unique LocalLink
      * @throws DaoException
+     *
      */
+
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException;
 
     /**

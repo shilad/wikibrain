@@ -31,7 +31,7 @@ public class RedirectLoaderIT {
     @Test
     public void testRedirects() throws DaoException, ConfigurationException {
         RedirectLoader.main(TestUtils.getArgs("-d"));
-        LocalPage page = dao.getByTitle(Language.getByLangCode("simple"), new Title("Obama", Language.getByLangCode("simple")), NameSpace.ARTICLE);
+        LocalPage page = dao.getByTitle(new Title("Obama", Language.getByLangCode("simple")), NameSpace.ARTICLE);
         assertEquals("Barack Obama", page.getTitle().getCanonicalTitle());
     }
 }

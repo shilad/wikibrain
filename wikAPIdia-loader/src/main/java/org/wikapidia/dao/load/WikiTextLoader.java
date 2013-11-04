@@ -128,7 +128,11 @@ public class WikiTextLoader {
         llDao.endLoad();
         lcmDao.endLoad();
         metaDao.endLoad();
+
+        System.out.println("encountered " + metaDao.getInfo(LocalLink.class).getNumErrors() + " parse errors");
+
+        // Why is this necessary???
+        // It seems like things die without it :(
+        System.exit(0);
     }
-
-
 }

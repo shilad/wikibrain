@@ -1,14 +1,13 @@
 package org.wikapidia.core.dao.sql;
 
-import org.apache.commons.io.IOUtils;
 import org.jodah.typetools.TypeResolver;
+import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.TableField;
 import org.wikapidia.core.dao.Dao;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.model.MetaInfo;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -37,6 +36,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     private final Class<T> klass;
     private final MetaInfoSqlDao metaDao;
     protected DataSource ds;
+    protected WpDataSource wpDs;
     protected SqlCache cache;
     private int fetchSize = DEFAULT_FETCH_SIZE;
 
@@ -54,11 +54,12 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
      *                        because it is used by the fast loader.
      * @throws DaoException
      */
-    public AbstractSqlDao(DataSource dataSource, TableField [] fields, String sqlScriptPrefix) throws DaoException {
+    public AbstractSqlDao(WpDataSource dataSource, TableField [] fields, String sqlScriptPrefix) throws DaoException {
         Class<?>[] typeArguments = TypeResolver.resolveRawArguments(AbstractSqlDao.class, getClass());
         this.klass = (Class<T>) typeArguments[0];
 
-        ds = dataSource;
+        wpDs = dataSource;
+        ds = wpDs.getDataSource();
         Connection conn = null;
         try {
             conn = ds.getConnection();
@@ -74,7 +75,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         if (this instanceof MetaInfoDao) {
             this.metaDao = (MetaInfoSqlDao) this;
         } else {
-            this.metaDao = new MetaInfoSqlDao(ds);
+            this.metaDao = new MetaInfoSqlDao(wpDs);
         }
         this.fields = fields;
         this.sqlScriptPrefix = sqlScriptPrefix;
@@ -86,20 +87,15 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
      * @throws DaoException
      */
     public void executeSqlResource(String name) throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            AbstractSqlDao.class.getResource(name)
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            quietlyCloseConn(conn);
-        }
+        wpDs.executeSqlResource(name);
+    }
+
+    protected DSLContext getJooq() throws DaoException {
+        return wpDs.getJooq();
+    }
+
+    protected void freeJooq(DSLContext context) {
+        wpDs.freeJooq(context);
     }
 
     @Override
@@ -151,7 +147,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     }
 
     public void useCache(File dir) throws DaoException{
-        cache = new SqlCache(ds, dir);
+        cache = new SqlCache(wpDs, dir);
     }
 
     /**

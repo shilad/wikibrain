@@ -4,6 +4,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
@@ -20,7 +22,8 @@ import static org.junit.Assert.*;
  */
 public class CompareLocalLinkDaos {
     public static void main(String args[]) throws ConfigurationException, DaoException {
-        Configurator configurator = new Configurator(new Configuration());
+        Env env = new EnvBuilder().build();
+        Configurator configurator = env.getConfigurator();
         LocalLinkDao sqlDao = configurator.get(LocalLinkDao.class, "sql");
         LocalLinkDao matrixDao = configurator.get(LocalLinkDao.class, "matrix");
 

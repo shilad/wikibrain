@@ -7,9 +7,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
-import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.LocalCategoryMemberDao;
-import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategoryMember;
@@ -33,20 +31,22 @@ import java.util.Map;
 public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMember> implements LocalCategoryMemberDao {
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
-            Tables.CATEGORY_MEMBERS.ID,
             Tables.CATEGORY_MEMBERS.LANG_ID,
             Tables.CATEGORY_MEMBERS.CATEGORY_ID,
             Tables.CATEGORY_MEMBERS.ARTICLE_ID,
     };
+    private final LocalCategoryDao localCategoryDao;
+    private final LocalArticleDao localArticleDao;
 
-    public LocalCategoryMemberSqlDao(DataSource dataSource) throws DaoException {
+    public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalCategoryDao localCategoryDao, LocalArticleDao localArticleDao) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/category-members");
+        this.localCategoryDao = localCategoryDao;
+        this.localArticleDao = localArticleDao;
     }
 
     @Override
     public void save(LocalCategoryMember member) throws DaoException {
         insert(
-                null,
                 member.getLanguage().getId(),
                 member.getCategoryId(),
                 member.getArticleId()
@@ -66,10 +66,8 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
      */
     @Override
     public Iterable<LocalCategoryMember> get(DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.CATEGORY_MEMBERS.LANG_ID.in(daoFilter.getLangIds()));
@@ -78,15 +76,15 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                     from(Tables.CATEGORY_MEMBERS).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<LocalCategoryMember>(result, conn) {
+            return new SimpleSqlDaoIterable<LocalCategoryMember>(result, context) {
                 @Override
                 public LocalCategoryMember transform(Record r) {
                     return buildLocalCategoryMember(r);
                 }
             };
-        } catch (SQLException e) {
-            quietlyCloseConn(conn);
-            throw new DaoException(e);
+        } catch (RuntimeException e) {
+            freeJooq(context);
+            throw e;
         }
     }
 
@@ -138,15 +136,13 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     @Override
     public Map<Integer, LocalArticle> getCategoryMembers(Language language, int categoryId) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(language, categoryId);
-        LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
-        return dao.getByIds(language, articleIds);
+        return localArticleDao.getByIds(language, articleIds);
     }
 
     @Override
     public Map<Integer, LocalArticle> getCategoryMembers(LocalCategory localCategory) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(localCategory);
-        LocalArticleSqlDao dao = new LocalArticleSqlDao(ds);
-        return dao.getByIds(localCategory.getLanguage(), articleIds);
+        return localArticleDao.getByIds(localCategory.getLanguage(), articleIds);
     }
 
     @Override
@@ -176,15 +172,13 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     @Override
     public Map<Integer, LocalCategory> getCategories(Language language, int articleId) throws DaoException {
         Collection<Integer> categoryIds = getCategoryIds(language, articleId);
-        LocalCategorySqlDao dao = new LocalCategorySqlDao(ds);
-        return dao.getByIds(language, categoryIds);
+        return localCategoryDao.getByIds(language, categoryIds);
     }
 
     @Override
     public Map<Integer, LocalCategory> getCategories(LocalArticle localArticle) throws DaoException {
         Collection<Integer> categoryIds = getCategoryIds(localArticle);
-        LocalCategorySqlDao dao = new LocalCategorySqlDao(ds);
-        return dao.getByIds(localArticle.getLanguage(), categoryIds);
+        return localCategoryDao.getByIds(localArticle.getLanguage(), categoryIds);
     }
 
     private Collection<Integer> extractIds(Result<Record> result, boolean categoryIds) {
@@ -232,8 +226,10 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             try {
                 return new LocalCategoryMemberSqlDao(
                         getConfigurator().get(
-                                DataSource.class,
-                                config.getString("dataSource"))
+                                WpDataSource.class,
+                                config.getString("dataSource")),
+                        getConfigurator().get(LocalCategoryDao.class),
+                        getConfigurator().get(LocalArticleDao.class)
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);

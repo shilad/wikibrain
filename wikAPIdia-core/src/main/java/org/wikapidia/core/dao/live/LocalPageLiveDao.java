@@ -84,7 +84,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
     public T getByTitle(Language language, Title title, NameSpace ns) throws DaoException{
-        LocalPageQueryReply info = new LocalPageQueryReply(getInfoByQuery(getQueryByTitle(title, language)));
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title, language)));
         return (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }
 
@@ -96,7 +96,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
     public T getById(Language language, int pageId) throws DaoException{
-        LocalPageQueryReply info = new LocalPageQueryReply(getInfoByQuery(getQueryByID(pageId, language)));
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByID(pageId, language)));
         return (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }
 
@@ -110,7 +110,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException{
         Map<Integer,T> pageMap = new HashMap<Integer, T>();
         for(Integer pageId : pageIds){
-            LocalPageQueryReply info = new LocalPageQueryReply(getInfoByQuery(getQueryByID(pageId, language)));
+            QueryReply info = new QueryReply(getInfoByQuery(getQueryByID(pageId, language)));
             pageMap.put(pageId, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
         }
         return pageMap;
@@ -127,8 +127,8 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException{
         Map<Title, T> pageMap = new HashMap<Title, T>();
         for(Title title : titles){
-            LocalPageQueryReply info = new LocalPageQueryReply(getInfoByQuery(getQueryByTitle(title, language)));
-            pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), ns, info.isRedirect(), info.isDisambig()));
+            QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title, language)));
+            pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
         }
         return pageMap;
     }
@@ -142,7 +142,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return
      */
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException{
-        QueryReply info = new LocalPageQueryReply(getInfoByQuery(getQueryByTitle(new Title(title, language), language)));
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(new Title(title, language), language)));
         return info.getId();
     }
 
@@ -152,7 +152,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return
      */
     public int getIdByTitle(Title title) throws DaoException{
-        QueryReply info = new LocalPageQueryReply(getInfoByQuery(getQueryByTitle(title)));
+        QueryReply info = new QueryReply(getInfoByQuery(getQueryByTitle(title)));
         return info.getId();
     }
 
