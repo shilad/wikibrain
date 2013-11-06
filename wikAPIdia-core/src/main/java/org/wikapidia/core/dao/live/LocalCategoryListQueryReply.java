@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.dao.LocalCategoryDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategory;
 import org.wikapidia.core.model.LocalCategoryMember;
@@ -21,8 +25,9 @@ import java.util.Set;
 public class LocalCategoryListQueryReply extends QueryReply {
     public List<LocalCategory> categoryList = new ArrayList<LocalCategory>();
 
-    public LocalCategoryListQueryReply(String text, Language language){
+    public LocalCategoryListQueryReply(String text, Language language) throws ConfigurationException {
         Gson gson = new Gson();
+        LocalCategoryDao localCategoryDao = new Configurator(new Configuration()).get(LocalCategoryDao.class, "live");
         JsonParser jp = new JsonParser();
         JsonObject test = jp.parse(text).getAsJsonObject();
         Set<Map.Entry<String, JsonElement>> pageSet = jp.parse(text).getAsJsonObject().get("query").getAsJsonObject().get("pages").getAsJsonObject().entrySet();
@@ -37,7 +42,7 @@ public class LocalCategoryListQueryReply extends QueryReply {
 
                 try{
                     Title categoryTitle = new Title( elem.getAsJsonObject().get("title").getAsString(), language);
-                    categoryList.add(new LocalCategory(language, new LocalCategoryLiveDao().getIdByTitle(categoryTitle), categoryTitle));
+                    categoryList.add(localCategoryDao.getByTitle(language, categoryTitle));
                 }
                 catch(Exception e){
 

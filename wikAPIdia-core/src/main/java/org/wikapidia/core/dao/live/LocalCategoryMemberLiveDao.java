@@ -124,10 +124,15 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
         String http = new String("http://");
         String host = new String(".wikipedia.org");
         String query = new String("/w/api.php?action=query&prop=categories&format=json&pageids=");
-        List<LocalCategory> categoryList = new LocalCategoryListQueryReply(LiveUtils.getInfoByQuery(http + language.getLangCode() + host + query + new Integer(articleId).toString() + "&cmlimit=" + new Integer(Integer.MAX_VALUE).toString()), language).getCategoryList();
         List<Integer> categoryIdsList = new ArrayList<Integer>();
-        for(LocalCategory m: categoryList){
-            categoryIdsList.add(m.getLocalId());
+        try{
+            List<LocalCategory> categoryList = new LocalCategoryListQueryReply(LiveUtils.getInfoByQuery(http + language.getLangCode() + host + query + new Integer(articleId).toString() + "&cmlimit=" + new Integer(Integer.MAX_VALUE).toString()), language).getCategoryList();
+            for(LocalCategory m: categoryList){
+                categoryIdsList.add(m.getLocalId());
+            }
+        }
+        catch(ConfigurationException e){
+            throw new DaoException("Failed to parse categories list");
         }
         return categoryIdsList;
     }

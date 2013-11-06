@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalCategory;
@@ -25,7 +26,7 @@ public class LocalCategoryMemberQueryReply extends QueryReply {
 
     public List<LocalCategoryMember> memberList = new ArrayList<LocalCategoryMember>();
 
-    public LocalCategoryMemberQueryReply(String text, Integer localCategoryId, Language language){
+    public LocalCategoryMemberQueryReply(String text, Integer localCategoryId, Language language) throws DaoException{
         Gson gson = new Gson();
         JsonParser jp = new JsonParser();
         //JsonObject test = jp.parse(text).getAsJsonObject();
@@ -34,11 +35,10 @@ public class LocalCategoryMemberQueryReply extends QueryReply {
             try{
                 memberList.add(new LocalCategoryMember(localCategoryId, elem.getAsJsonObject().get("pageid").getAsInt(), language));
             }
-            catch(Exception e){
-                System.out.println("error in inspecting localcategorymember");
-                System.out.println(elem.getAsJsonObject().get("pageid").getAsInt());
-
+            catch (Exception e){
+                throw new DaoException("Failed to parse category members list");
             }
+
 
         }
             this.pageId = pageId;
