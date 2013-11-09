@@ -37,14 +37,9 @@ public class TestLangStorage {
 
     @Test
     public void test() {
-        System.out.println(TOTAL_LANGUAGES);
-
         LanguageSet languages = new LanguageSet(new Configuration().get().getStringList("languages.big-economies.langCodes"));
-        System.out.println(languages);
         byte[] bits = toByteArray(languages);
-        System.out.println(Arrays.toString(bits));
         LanguageSet output = getLanguageSet(bits);
-        System.out.println(output);
         assert languages.equals(output);
 
         System.out.println();
@@ -55,11 +50,8 @@ public class TestLangStorage {
                 langs.add(Language.getById(new Random().nextInt(TOTAL_LANGUAGES) + 1));
             }
             languages = new LanguageSet(langs);
-            System.out.println(languages);
             bits = toByteArray(languages);
-            System.out.println(Arrays.toString(bits));
             output = getLanguageSet(bits);
-            System.out.println(output);
             assert languages.equals(output);
         }
     }
