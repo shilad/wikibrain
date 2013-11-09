@@ -54,10 +54,14 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     }
     
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
-        Iterable<LocalLink> links = LocalLinkLiveUtils.parseLinks(getLinkJson(language, sourceId, true), language, sourceId, true);
-        for (LocalLink link : links) {
-            if (link.getDestId() == destId) {
-                return link;
+        String queryArgs = "&generator=links&pageids=" + sourceId;
+        JsonObject queryReply = LiveUtils.parseQueryObject(LiveUtils.getQueryJson(language, queryArgs));
+        List<String> linkAnchorTexts = LiveUtils.getValuesFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, "pages"), "title");
+        List<String> linkPageIds = LiveUtils.getValuesFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, "pages"), "pageid");
+        for (int i = 0; i < linkPageIds.size(); i++) {
+            int pageId = Integer.parseInt(linkPageIds.get(i));
+            if (pageId == destId) {
+                return new LocalLink(language, linkAnchorTexts.get(i), sourceId, pageId, true, -1, true, null);
             }
         }
         throw new DaoException("No link with given sourceId and destId found");
@@ -70,25 +74,31 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     }
 
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException {
-        return LocalLinkLiveUtils.parseLinks(getLinkJson(language, localId, outlinks), language, localId, outlinks);
-    }
+        List<LocalLink> links = new ArrayList<LocalLink>();
+        List<String> linkAnchorTexts = new ArrayList<String>();
+        List<String> linkPageIds = new ArrayList<String>();
+        String queryArgs = outlinks ? "&generator=links&pageids=" + localId : "&list=backlinks&blpageid=" + localId;
+        String linkType = outlinks ? "pages" : "backlinks";
+        JsonObject queryReply = LiveUtils.parseQueryObject(LiveUtils.getQueryJson(language, queryArgs));
 
-    /**
-     * Query the wikipedia server for links from or to a specific page, specified by sourceId
-     * Returns JSON results of the query
-     * @param language
-     * @param sourceId
-     * @param outlinks
-     * @return
-     * @throws DaoException
-     */
-    private String getLinkJson(Language language, int sourceId, boolean outlinks) throws DaoException {
-        String http = "http://";
-        String host = ".wikipedia.org";
-        String prop = outlinks ? "generator=links" : "list=backlinks";
-        String pageIdRequest = outlinks ? "pageids=" + sourceId : "blpageid=" + sourceId;
-        String query = http + language.getLangCode() + host + "/w/api.php?action=query&" + prop + "&format=json&" + pageIdRequest;
-        return LiveUtils.getInfoByQuery(query);
+        if (outlinks) {
+            linkAnchorTexts = LiveUtils.getValuesFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, linkType), "title");
+            linkPageIds = LiveUtils.getValuesFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, linkType), "pageid");
+        }
+
+        else {
+            linkAnchorTexts = LiveUtils.getValuesFromJsonArray(LiveUtils.getJsonArrayFromQueryObject(queryReply, linkType), "title");
+            linkPageIds = LiveUtils.getValuesFromJsonArray(LiveUtils.getJsonArrayFromQueryObject(queryReply, linkType), "pageid");
+        }
+
+        for (int i = 0; i < linkAnchorTexts.size(); i++) {
+            String anchorText = linkAnchorTexts.get(i);
+            Integer pageId = Integer.parseInt(linkPageIds.get(i));
+            LocalLink link = new LocalLink(language, anchorText, localId, pageId, outlinks, -1, true, null);
+            links.add(link);
+        }
+
+        return links;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalLinkDao> {
