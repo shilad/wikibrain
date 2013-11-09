@@ -272,7 +272,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         try {
             Cursor<Record> cursor = context.select().
                     from(Tables.LOCAL_PAGE).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             TLongIntHashMap map = new TLongIntHashMap(
                     Constants.DEFAULT_CAPACITY,
                     Constants.DEFAULT_LOAD_FACTOR,

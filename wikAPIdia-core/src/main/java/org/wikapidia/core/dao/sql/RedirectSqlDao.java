@@ -156,7 +156,7 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
             Cursor<Record> cursor = context.select().
                     from(Tables.REDIRECT).
                     where(Tables.REDIRECT.LANG_ID.equal(lang.getId())).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             TIntIntMap ids = new TIntIntHashMap(
                     gnu.trove.impl.Constants.DEFAULT_CAPACITY,
                     gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
