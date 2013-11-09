@@ -1,39 +1,29 @@
 package org.wikapidia.core.dao.live;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
+import org.wikapidia.core.dao.live.QueryReply;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 10/27/13
- * Time: 9:13 PM
- * To change this template use File | Settings | File Templates.
+ * A QueryReply class to handle json objects we got from live wiki API for a LocalPage object
+ * @author Toby "Jiajun" Li
  */
+public class LocalPageQueryReply extends QueryReply {
+    public boolean isRedirect;
+    public boolean isDisambig;
 
-
-public class LocalPageQueryReply {
-
-
-
-    private Long pageId;
-    private String title;
-    private String pageLanguage;
-    private Long nameSpace;
-    private boolean isRedirect;
-    private boolean isDisambig;
-
-    /** Construct a LocalPageQueryReply (A object used to describe a local page we fetched from wiki server) from a JSON object
-     * @param text A JSON object we got from wiki server
+    /**Constructor: Construct a LocalPageQueryReply from the reply from wiki server
+     *
+     * @param text Query reply from wiki server
      */
-    LocalPageQueryReply(String text){
+    public LocalPageQueryReply(String text){
+
         Gson gson = new Gson();
         JsonParser jp = new JsonParser();
         JsonObject test = jp.parse(text).getAsJsonObject();
@@ -54,44 +44,33 @@ public class LocalPageQueryReply {
             this.isDisambig = isDisambig;
         }
     }
-    /**
-     *
-     * @return An Integer: the pageId of this page
-     */
-    public int getId(){
-        return pageId.intValue();
+
+    public LocalPageQueryReply(){
+
     }
     /**
      *
-     * @return A Title: the title of this page
-     */
-    public Title getTitle(){
-        return new Title(title, Language.getByLangCode(pageLanguage));
-    }
-    /**
-     *
-     * @return A NameSpace: the namespace of this page
-     */
-    public NameSpace getNameSpace(){
-        return NameSpace.getNameSpaceByArbitraryId(nameSpace.intValue());
-    }
-    /**
-     *
-     * @return A boolean: whether this page is redirect
+     * @return a boolean: Whether this page is a redirect page
      */
     public boolean isRedirect(){
         return isRedirect;
     }
+
     /**
      *
-     * @return A boolean: whether this page is disambiguous
+     * @return a boolean: Whether this page is a disambiguous page
      */
     public boolean isDisambig(){
         return isDisambig;
     }
 
+    /**
+     *
+     * @return the namespace of this page
 
-
-
+     */
+    public NameSpace getNameSpace(){
+        return NameSpace.getNameSpaceByArbitraryId(nameSpace.intValue());
+    }
 
 }

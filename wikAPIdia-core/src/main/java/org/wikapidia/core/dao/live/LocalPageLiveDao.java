@@ -20,15 +20,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
-
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 10/26/13
- * Time: 6:12 PM
- * To change this template use File | Settings | File Templates.
+ * A Live Wiki API Implementation of LocalPageDao
+ * @author Toby "Jiajun" Li
  */
-
 
 /**
  * Fetch a LocalPage object from Wikipedia Server
@@ -82,6 +77,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return the requested LocalPage
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
+
     public T getByTitle(Title title, NameSpace ns) throws DaoException{
         LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByTitle(title)));
         return (T)new LocalPage(title.getLanguage(), info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
@@ -89,13 +85,21 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
 
     /**
      * Get a single page by its title
-     * @param language the page's language
+     * @param lang the page's language
      * @param pageId the page's id
      * @return the requested LocalPage
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
+
+    public T getByTitle(Language lang, Integer pageId)throws DaoException{
+        LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByID(pageId, lang)));
+        return (T)new LocalPage(lang, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
+    }
+
     public T getById(Language language, int pageId) throws DaoException{
+
         LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByID(pageId, language)));
+
         return (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
     }
 
@@ -127,7 +131,8 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
         Map<Title, T> pageMap = new HashMap<Title, T>();
         for(Title title : titles){
             LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByTitle(title)));
-            pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
+            pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), ns, info.isRedirect(), info.isDisambig()));
+
         }
         return pageMap;
     }
