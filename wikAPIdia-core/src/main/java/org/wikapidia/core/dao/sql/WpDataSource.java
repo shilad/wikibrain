@@ -51,7 +51,11 @@ public class WpDataSource {
 
     public Connection getConnection() throws SQLException {
         Connection conn = dataSource.getConnection();
-        conn.setAutoCommit(false);
+        if (conn.getAutoCommit()) {
+            conn.setAutoCommit(false);
+            // Since we're bulk loading, dirty reads are fine. I think....
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        }
         return conn;
     }
 
@@ -75,15 +79,9 @@ public class WpDataSource {
         }
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
     public DSLContext getJooq() throws DaoException {
         try {
-            Connection cnx = dataSource.getConnection();
-            cnx.setAutoCommit(false);
-            return DSL.using(cnx, dialect, settings);
+            return DSL.using(getConnection(), dialect, settings);
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -116,8 +114,8 @@ public class WpDataSource {
             conn.createStatement().execute(script);
             conn.commit();
         } catch (SQLException e){
-            LOG.warning("error executing: " + script);
             rollbackQuietly(conn);
+            LOG.warning("error executing: " + script);
         } finally {
             closeQuietly(conn);
         }

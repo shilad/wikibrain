@@ -27,20 +27,7 @@ public class SqlCache {
     }
 
     public void makeLastModifiedDb () throws DaoException {
-        Connection conn=null;
-        try {
-            conn = ds.getDataSource().getConnection();
-            conn.createStatement().execute(
-                    IOUtils.toString(
-                            LocalPageSqlDao.class.getResource("/db/table-modified-create-tables.sql")
-                    ));
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (SQLException e){
-            throw new DaoException(e);
-        } finally {
-            AbstractSqlDao.quietlyCloseConn(conn);
-        }
+        ds.executeSqlResource("/db/table-modified-create-tables.sql");
     }
 
     /**

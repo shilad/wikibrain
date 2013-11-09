@@ -82,6 +82,13 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                     .where(Tables.META_INFO.COMPONENT.eq(component.getSimpleName()))
                     .and(Tables.META_INFO.LANG_ID.eq(lang.getId()))
                     .execute();
+            JooqUtils.commit(context);
+        } catch (RuntimeException e) {
+            JooqUtils.rollbackQuietly(context);
+            throw e;
+        } catch (DaoException e) {
+            JooqUtils.rollbackQuietly(context);
+            throw e;
         } finally {
             freeJooq(context);
         }
@@ -269,7 +276,6 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         synchronized (info) {
             DSLContext context = getJooq();
             try {
-
                 Condition langCondition = (info.getLanguage() == null)
                         ? Tables.META_INFO.LANG_ID.isNull()
                         : Tables.META_INFO.LANG_ID.eq(info.getLanguage().getId());

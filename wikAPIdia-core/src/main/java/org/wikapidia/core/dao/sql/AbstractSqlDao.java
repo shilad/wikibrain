@@ -60,7 +60,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         wpDs = dataSource;
         Connection conn = null;
         try {
-            conn = wpDs.getDataSource().getConnection();
+            conn = wpDs.getConnection();
             this.dialect = JooqUtils.dialect(conn);
         } catch (SQLException e) {
             throw new DaoException(e);
