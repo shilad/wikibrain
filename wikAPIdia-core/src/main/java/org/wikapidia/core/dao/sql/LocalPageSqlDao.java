@@ -120,10 +120,10 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
             if (daoFilter.isDisambig() != null) {
                 conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
             }
-            return context.select().
+            return context.selectCount().
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
-                    fetchCount();
+                    fetchOne().value1();
         } finally {
             freeJooq(context);
         }

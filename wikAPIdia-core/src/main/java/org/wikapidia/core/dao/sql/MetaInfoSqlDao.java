@@ -293,6 +293,10 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                             .execute();
                 }
                 info.markAsWritten();
+                JooqUtils.commit(context);
+            } catch (RuntimeException e) {
+                JooqUtils.rollbackQuietly(context);
+                throw e;
             } finally {
                 freeJooq(context);
             }

@@ -60,6 +60,10 @@ public class SqlCache {
                     .values(tableName, now)
                     .execute();
             }
+            JooqUtils.commit(context);
+        } catch (RuntimeException e) {
+            JooqUtils.rollbackQuietly(context);
+            throw e;
         } finally {
             ds.freeJooq(context);
         }
