@@ -56,10 +56,10 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
         String queryArgs = "&generator=links&pageids=" + sourceId;
         JsonObject queryReply = LiveUtils.parseQueryObject(LiveUtils.getQueryJson(language, queryArgs));
-        List<String> linkAnchorTexts = LiveUtils.getValuesFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, "pages"), "title");
-        List<String> linkPageIds = LiveUtils.getValuesFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, "pages"), "pageid");
+        List<String> linkAnchorTexts = LiveUtils.getStringsFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, "pages"), "title");
+        List<Integer> linkPageIds = LiveUtils.getIntsFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, "pages"), "pageid");
         for (int i = 0; i < linkPageIds.size(); i++) {
-            int pageId = Integer.parseInt(linkPageIds.get(i));
+            int pageId = linkPageIds.get(i);
             if (pageId == destId) {
                 return new LocalLink(language, linkAnchorTexts.get(i), sourceId, pageId, true, -1, true, null);
             }
@@ -76,24 +76,24 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException {
         List<LocalLink> links = new ArrayList<LocalLink>();
         List<String> linkAnchorTexts = new ArrayList<String>();
-        List<String> linkPageIds = new ArrayList<String>();
+        List<Integer> linkPageIds = new ArrayList<Integer>();
         String queryArgs = outlinks ? "&generator=links&pageids=" + localId : "&list=backlinks&blpageid=" + localId;
         String linkType = outlinks ? "pages" : "backlinks";
         JsonObject queryReply = LiveUtils.parseQueryObject(LiveUtils.getQueryJson(language, queryArgs));
 
         if (outlinks) {
-            linkAnchorTexts = LiveUtils.getValuesFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, linkType), "title");
-            linkPageIds = LiveUtils.getValuesFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, linkType), "pageid");
+            linkAnchorTexts = LiveUtils.getStringsFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, linkType), "title");
+            linkPageIds = LiveUtils.getIntsFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, linkType), "pageid");
         }
 
         else {
-            linkAnchorTexts = LiveUtils.getValuesFromJsonArray(LiveUtils.getJsonArrayFromQueryObject(queryReply, linkType), "title");
-            linkPageIds = LiveUtils.getValuesFromJsonArray(LiveUtils.getJsonArrayFromQueryObject(queryReply, linkType), "pageid");
+            linkAnchorTexts = LiveUtils.getStringsFromJsonArray(LiveUtils.getJsonArrayFromQueryObject(queryReply, linkType), "title");
+            linkPageIds = LiveUtils.getIntsFromJsonArray(LiveUtils.getJsonArrayFromQueryObject(queryReply, linkType), "pageid");
         }
 
         for (int i = 0; i < linkAnchorTexts.size(); i++) {
             String anchorText = linkAnchorTexts.get(i);
-            Integer pageId = Integer.parseInt(linkPageIds.get(i));
+            Integer pageId = linkPageIds.get(i);
             LocalLink link = new LocalLink(language, anchorText, localId, pageId, outlinks, -1, true, null);
             links.add(link);
         }

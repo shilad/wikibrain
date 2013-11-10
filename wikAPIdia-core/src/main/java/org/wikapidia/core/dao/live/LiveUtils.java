@@ -89,7 +89,7 @@ public class LiveUtils {
         }
     }
 
-    public static List<String> getValuesFromJsonObject(JsonObject jo, String valueType) {
+    public static List<String> getStringsFromJsonObject(JsonObject jo, String valueType) {
         List<String> values = new ArrayList<String>();
         Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
 
@@ -100,11 +100,33 @@ public class LiveUtils {
         return values;
     }
 
-    public static List<String> getValuesFromJsonArray(JsonArray ja, String valueType) {
+    public static List<String> getStringsFromJsonArray(JsonArray ja, String valueType) {
         List<String> values = new ArrayList<String>();
 
         for (JsonElement elem : ja) {
             String value = elem.getAsJsonObject().get(valueType).getAsString();
+            values.add(value);
+        }
+
+        return values;
+    }
+
+    public static List<Integer> getIntsFromJsonObject(JsonObject jo, String valueType) {
+        List<Integer> values = new ArrayList<Integer>();
+        Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
+
+        for (Map.Entry<String, JsonElement> entry: valueSet) {
+            Integer value = entry.getValue().getAsJsonObject().get(valueType).getAsInt();
+            values.add(value);
+        }
+        return values;
+    }
+
+    public static List<Integer> getIntsFromJsonArray(JsonArray ja, String valueType) {
+        List<Integer> values = new ArrayList<Integer>();
+
+        for (JsonElement elem : ja) {
+            Integer value = elem.getAsJsonObject().get(valueType).getAsInt();
             values.add(value);
         }
 
