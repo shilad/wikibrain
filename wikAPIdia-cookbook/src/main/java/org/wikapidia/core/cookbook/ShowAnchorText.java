@@ -25,6 +25,7 @@ public class ShowAnchorText {
         LocalPageDao lpDao = configurator.get(LocalPageDao.class);
         LocalLinkDao sqlDao = configurator.get(LocalLinkDao.class, "sql");
         Language simple = Language.getByLangCode("simple");
+        int id = lpDao.getIdByTitle(new Title("List of Soundgarden band members", simple));
         LocalPage page = lpDao.getByTitle(new Title("List of Soundgarden band members", simple), NameSpace.ARTICLE);
         System.out.println("page is " + page);
         DaoFilter filter = new DaoFilter().setSourceIds(page.getLocalId()).setLanguages(simple);

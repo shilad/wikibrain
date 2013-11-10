@@ -4,7 +4,6 @@ import com.typesafe.config.Config;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TLongIntHashMap;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -18,9 +17,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -259,15 +256,14 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
             return;
         }
         if (cache!=null) {
-            String [] dependsOn = (redirectSqlDao == null)
-                    ? new String[] { Tables.LOCAL_PAGE.getName() }
-                    : new String[] { Tables.LOCAL_PAGE.getName(), Tables.REDIRECT.getName() };
-            TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", dependsOn);
+            TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", LocalPage.class);
             if (map!=null){
                 titlesToIds = map;
                 return;
             }
         }
+        LOG.info("Building title to id cache. This will only happen once!");
+        int n = getCount(new DaoFilter());
         DSLContext context = getJooq();
         try {
             Cursor<Record> cursor = context.select().
@@ -297,10 +293,13 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                 else{
                     map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
                 }
+                if (map.size() % 50000 == 0) {
+                    LOG.info("built title cache entry " + map.size() + " of " + n);
+                }
             }
             LOG.info("resolved " + numResolved + " of " + numRedirects + " redirects.");
             if (cache!=null){
-                cache.saveToCache("titlesToIds", map);
+                cache.put("titlesToIds", map);
             }
             titlesToIds = map;
         } finally {
@@ -329,11 +328,18 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                 return null;
             }
             try {
-                return new LocalPageSqlDao(
-                            getConfigurator().get(
-                                WpDataSource.class,
-                                config.getString("dataSource"))
-                );
+                String cachePath = getConfig().get().getString("dao.sqlCachePath");
+                LocalPageSqlDao dao = new LocalPageSqlDao(
+                                    getConfigurator().get(
+                                        WpDataSource.class,
+                                        config.getString("dataSource"))
+                                );
+                File cacheDir = new File(cachePath);
+                if (!cacheDir.isDirectory()) {
+                    cacheDir.mkdirs();
+                }
+                dao.useCache(cacheDir);
+                return dao;
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }

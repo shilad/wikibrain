@@ -1,60 +1,22 @@
 package org.wikapidia.core.dao.sql;
 
-import org.apache.commons.io.IOUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.jooq.Tables;
+import org.wikapidia.core.dao.MetaInfoDao;
+import org.wikapidia.core.model.MetaInfo;
 
-import javax.sql.DataSource;
 import java.io.*;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.util.Date;
 
 public class SqlCache {
-    private final WpDataSource ds;
+    private final MetaInfoDao metaDao;
     private File directory;
 
-    public SqlCache(WpDataSource dataSource, File directory) throws DaoException {
-        this.ds = dataSource;
+    public SqlCache(MetaInfoDao metaDao, File directory) throws DaoException {
+        this.metaDao = metaDao;
         this.directory=directory;
         if (!this.directory.isDirectory()) {
             throw new IllegalArgumentException("" + directory + " is not a valid directory");
         }
-    }
-
-    public void makeLastModifiedDb () throws DaoException {
-        ds.executeSqlResource("/db/table-modified-create-tables.sql");
-    }
-
-    /**
-     * Updates the timestamp in table "table_modified" to the current time
-     */
-    public void updateTableLastModified(String tableName) throws DaoException {
-        DSLContext context = ds.getJooq();
-        try{
-            Timestamp now = new Timestamp(System.currentTimeMillis()/1000*1000);  //rounds to seconds
-            int n = context.update(Tables.TABLE_MODIFIED)
-                    .set(Tables.TABLE_MODIFIED.LAST_MODIFIED, now)
-                    .where(Tables.TABLE_MODIFIED.TABLE_NAME.eq(tableName))
-                    .execute();
-
-            if (n == 0) {
-                context.insertInto(Tables.TABLE_MODIFIED, Tables.TABLE_MODIFIED.TABLE_NAME, Tables.TABLE_MODIFIED.LAST_MODIFIED)
-                    .values(tableName, now)
-                    .execute();
-            }
-            JooqUtils.commit(context);
-        } catch (RuntimeException e) {
-            JooqUtils.rollbackQuietly(context);
-            throw e;
-        } finally {
-            ds.freeJooq(context);
-        }
-
     }
 
     /**
@@ -64,7 +26,7 @@ public class SqlCache {
      * @param object
      * @throws DaoException
      */
-    public void saveToCache(String name, Object object) throws DaoException {
+    public void put(String name, Object object) throws DaoException {
         try {
             FileOutputStream fos = new FileOutputStream(getCacheFile(name));
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -81,25 +43,34 @@ public class SqlCache {
     }
 
     /**
-     * Returns the object if it exists and is up to date, otherwise returns null
-     * @param objectName
-     * @param tableNames List of table names whose data the cache depends on
+     * Returns the object if it exists and is up to date, otherwise returns null.
+     *
+     * @param name Name of the object as passed to "put"
+     * @param dependsOn List of classes the object depends on.
+     *                  The cache is up to date iff for each class k in dependsOn:
+     *                  - The MetaInfoDao knows about k
+     *                  - The cache entry was created after k was last updated.
      * @return
      * @throws DaoException
      */
-    public Object get(String objectName, String ... tableNames) throws DaoException {
-        if (!getCacheFile(objectName).isFile()) {
+    public Object get(String name, Class ... dependsOn) throws DaoException {
+        File cacheFile = getCacheFile(name);
+        if (!cacheFile.isFile()) {
             return null;
         }
-        Timestamp cacheTstamp = new Timestamp(getCacheFile(objectName).lastModified());
-        for (String name : tableNames) {
-            Timestamp tableTstamp = getLastModified(name);
+        Date cacheTstamp = new Date(cacheFile.lastModified());
+        for (Class klass : dependsOn) {
+            MetaInfo info = metaDao.getInfo(klass);
+            if (info == null) {
+                throw new DaoException("when looking for " + name + ", no info about class " + klass);
+            }
+            Date tableTstamp = info.getLastUpdated();
             if (tableTstamp == null || tableTstamp.after(cacheTstamp)) {
                 return null;
             }
         }
         try {
-            FileInputStream fis = new FileInputStream(getCacheFile(objectName));
+            FileInputStream fis = new FileInputStream(getCacheFile(name));
             ObjectInputStream ois = new ObjectInputStream(fis);
             Object object = ois.readObject();
             ois.close();
@@ -110,21 +81,4 @@ public class SqlCache {
             throw new DaoException(e);
         }
     }
-
-     public Timestamp getLastModified(String tableName) throws DaoException {
-         DSLContext context = ds.getJooq();
-         try {
-             Record record = context.select()
-                     .from(Tables.TABLE_MODIFIED)
-                     .where(Tables.TABLE_MODIFIED.TABLE_NAME.equal(tableName))
-                     .fetchOne();
-             if (record == null) {
-                 return null;
-             } else {
-                return record.getValue(Tables.TABLE_MODIFIED.LAST_MODIFIED);
-             }
-         } finally {
-             ds.freeJooq(context);
-         }
-     }
 }

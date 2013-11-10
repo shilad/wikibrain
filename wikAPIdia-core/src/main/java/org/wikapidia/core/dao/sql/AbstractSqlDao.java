@@ -145,7 +145,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     }
 
     public void useCache(File dir) throws DaoException{
-        cache = new SqlCache(wpDs, dir);
+        cache = new SqlCache(metaDao, dir);
     }
 
     /**

@@ -5,11 +5,8 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.sql.AbstractSqlDao;
-import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
-import org.wikapidia.core.model.LocalLink;
 
 /**
  * This program experiments with different settings for fetch size.
