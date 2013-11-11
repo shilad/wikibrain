@@ -5,8 +5,6 @@ import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
-import org.jooq.conf.MappedSchema;
-import org.jooq.conf.RenderMapping;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
@@ -47,25 +45,43 @@ public class WpDataSource {
         }
         // Postgres uses a lowercase "public" main schema
         if (this.dialect == SQLDialect.POSTGRES) {
-
             settings.setRenderNameStyle(RenderNameStyle.LOWER);
-//            DSLContext ctx = DSL.using(c, dialect, settings);
-//            settings = new Settings()
-//                .withRenderMapping(new RenderMapping()
-//                        .withSchemata(
-//                                new MappedSchema().withInput("PUBLIC")
-//                                        .withOutput("public")));
-
         }
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
+    public Connection getConnection() throws SQLException {
+        Connection conn = dataSource.getConnection();
+        if (conn.getAutoCommit()) {
+            conn.setAutoCommit(false);
+            // Since we're bulk loading, dirty reads are fine. I think....
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        }
+        return conn;
+    }
+
+    /**
+     * Rollback the current transaction.
+     * If a SQLException occurs while rolling back, it logs the error and returns false,
+     * but does not rethrow the exception.
+     *
+     * @param conn
+     */
+    public static boolean rollbackQuietly(Connection conn) {
+        if (conn == null) {
+            return false;
+        }
+        try {
+            conn.rollback();
+            return true;
+        } catch (SQLException e) {
+            LOG.log(Level.SEVERE    , "rollback failed: ", e);
+            return false;
+        }
     }
 
     public DSLContext getJooq() throws DaoException {
         try {
-            return DSL.using(dataSource.getConnection(), dialect, settings);
+            return DSL.using(getConnection(), dialect, settings);
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -94,11 +110,12 @@ public class WpDataSource {
         script = translateSqlScript(script);
         Connection conn=null;
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             conn.createStatement().execute(script);
+            conn.commit();
         } catch (SQLException e){
+            rollbackQuietly(conn);
             LOG.warning("error executing: " + script);
-            throw new DaoException(e);
         } finally {
             closeQuietly(conn);
         }

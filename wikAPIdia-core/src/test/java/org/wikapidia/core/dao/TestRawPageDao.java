@@ -19,8 +19,6 @@ public class TestRawPageDao {
     @Test
     public void test() throws ClassNotFoundException, IOException, SQLException, DaoException {
         WpDataSource wpDs = TestDaoUtil.getWpDataSource();
-        DataSource ds = wpDs.getDataSource();
-
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
         LocalArticleSqlDao lpDao = new LocalArticleSqlDao(wpDs);
         RawPageDao rpDao = new RawPageSqlDao(wpDs);

@@ -22,9 +22,11 @@ import java.util.Date;
  * Wraps a LocalPageDao to build a full RawPage.
  */
 public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao {
+    public static final int DEFAULT_FETCH_SIZE = 100;
 
     public RawPageSqlDao(WpDataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/raw-page");
+        setFetchSize(DEFAULT_FETCH_SIZE);
     }
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {

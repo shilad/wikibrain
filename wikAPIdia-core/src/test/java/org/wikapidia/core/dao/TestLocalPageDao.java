@@ -21,8 +21,6 @@ public class TestLocalPageDao {
     @Test
     public void testArticle() throws ClassNotFoundException, IOException, SQLException, DaoException {
         WpDataSource wpDs = TestDaoUtil.getWpDataSource();
-        DataSource ds = wpDs.getDataSource();
-
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
         LocalArticleSqlDao dao = new LocalArticleSqlDao(wpDs);
         dao.beginLoad();

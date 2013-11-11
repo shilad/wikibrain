@@ -4,6 +4,7 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.io.FileUtils;
 import org.jooq.TableField;
 import org.wikapidia.core.dao.sql.FastLoader;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.jooq.Tables;
 
 import java.io.File;
@@ -62,7 +63,7 @@ public class BenchmarkFastLoader {
 
         ds.getConnection().createStatement().execute(schema);
 
-        FastLoader loader = new FastLoader(ds, INSERT_FIELDS);
+        FastLoader loader = new FastLoader(new WpDataSource(ds), INSERT_FIELDS);
 
         long t1 = System.currentTimeMillis();
         for (int i = 0; i < NUM_ENTRIES; i++) {

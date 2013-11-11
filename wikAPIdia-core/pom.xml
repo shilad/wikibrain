@@ -22,12 +22,12 @@
       <dependency>
           <groupId>org.jooq</groupId>
           <artifactId>jooq</artifactId>
-          <version>3.0.0</version>
+          <version>3.2.0</version>
       </dependency>
       <dependency>
           <groupId>org.jooq</groupId>
           <artifactId>jooq-codegen-maven</artifactId>
-          <version>3.0.0</version>
+          <version>3.2.0</version>
       </dependency>
       <dependency>
           <groupId>com.h2database</groupId>
@@ -41,18 +41,8 @@
       </dependency>
       <dependency>
           <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
+          <artifactId>slf4j-jdk14</artifactId>
           <version>1.7.5</version>
-      </dependency>
-      <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <version>1.7.5</version>
-      </dependency>
-      <dependency>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-          <version>1.2.17</version>
       </dependency>
       <dependency>
           <groupId>org.postgresql</groupId>
@@ -84,7 +74,6 @@
           <artifactId>typetools</artifactId>
           <version>0.3.0</version>
       </dependency>
-
 
   </dependencies>
 
@@ -144,7 +133,7 @@
             <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
-                <version>3.1.0</version>
+                <version>3.2.0</version>
 
                 <dependencies>
                     <dependency>
