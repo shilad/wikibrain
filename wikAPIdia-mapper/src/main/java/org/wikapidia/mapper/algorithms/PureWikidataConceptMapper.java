@@ -78,21 +78,21 @@ public class PureWikidataConceptMapper extends ConceptMapper {
             Integer univId = (Integer)line[1];
             String strTitle = (String)line[3];
             Title title = new Title(strTitle, lang);
-            LocalPage localPage = localPageDao.getByTitle(title, title.getNamespace());
-            if (localPage == null){
+            int localId = localPageDao.getIdByTitle(title);
+            if (localId <= 0){
                 unknownPages++;
                 continue;
             }
             if (!backend.containsKey(univId)){
                 Multimap<Language, LocalId> mmap = HashMultimap.create();
                 backend.put(univId, mmap);
-                nsBackend.put(univId, localPage.getNameSpace()); // defines the universal page as having the namespace of the first LocalPage encountered
+                nsBackend.put(univId, title.getNamespace()); // defines the universal page as having the namespace of the first LocalPage encountered
                 numLangsCount[0]++;
             }else{
                 numLangsCount[backend.get(univId).size()-1]--;
                 numLangsCount[backend.get(univId).size()]++;
             }
-            backend.get(univId).put(lang, localPage.toLocalId());
+            backend.get(univId).put(lang, new LocalId(lang, localId));
             validLineCounter++;
 
             if (validLineCounter % 1000 == 0){ // do some reporting in the log, necessary for such a large operation (both for debugging and for providing the user with something to watch :-))

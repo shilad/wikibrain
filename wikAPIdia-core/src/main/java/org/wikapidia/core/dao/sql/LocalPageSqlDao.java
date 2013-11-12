@@ -160,6 +160,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     where(Tables.LOCAL_PAGE.TITLE.eq(title.getCanonicalTitle())).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(title.getLanguage().getId())).
                     and(Tables.LOCAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
+                    limit(1).
                     fetchOne();
             LocalPage page = buildLocalPage(record);
             return (T)page;
