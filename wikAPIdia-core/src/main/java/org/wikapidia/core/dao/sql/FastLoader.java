@@ -28,7 +28,7 @@ public class FastLoader {
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
     static final int BATCH_SIZE = 2000;
 
-    private final DataSource ds;
+    private final WpDataSource ds;
     private final Table table;
     private final TableField[] fields;
 
@@ -38,7 +38,7 @@ public class FastLoader {
     private Thread inserter = null;
     volatile private boolean finished = false;
 
-    public FastLoader(DataSource ds, TableField[] fields) throws DaoException {
+    public FastLoader(WpDataSource ds, TableField[] fields) throws DaoException {
         this.ds = ds;
         this.table = fields[0].getTable();
         this.fields = fields;
@@ -118,13 +118,13 @@ public class FastLoader {
                 }
                 try {
                     statement.executeBatch();
+                    cnx.commit();
                 } catch (SQLException e) {
+                    cnx.rollback();
                     LOG.log(Level.SEVERE, "insert batch failed, attempting to continue:", e);
                 }
                 statement.clearBatch();
             }
-            if (!cnx.getAutoCommit())
-                cnx.commit();
         } finally {
             AbstractSqlDao.quietlyCloseConn(cnx);
         }

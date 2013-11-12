@@ -23,8 +23,6 @@ public class TestRedirectDao {
     @Test
     public void  test() throws ClassNotFoundException, IOException, SQLException, DaoException{
         WpDataSource wpDs = TestDaoUtil.getWpDataSource();
-        DataSource ds = wpDs.getDataSource();
-
         LanguageInfo langInfo = LanguageInfo.getByLangCode("en");
         Language lang = langInfo.getLanguage();
         RedirectSqlDao redirectDao = new RedirectSqlDao(wpDs);

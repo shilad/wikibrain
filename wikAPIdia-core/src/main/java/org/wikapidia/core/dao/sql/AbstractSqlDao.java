@@ -35,7 +35,6 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     private final TableField[] fields;
     private final Class<T> klass;
     private final MetaInfoSqlDao metaDao;
-    protected DataSource ds;
     protected WpDataSource wpDs;
     protected SqlCache cache;
     private int fetchSize = DEFAULT_FETCH_SIZE;
@@ -59,10 +58,9 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         this.klass = (Class<T>) typeArguments[0];
 
         wpDs = dataSource;
-        ds = wpDs.getDataSource();
         Connection conn = null;
         try {
-            conn = ds.getConnection();
+            conn = wpDs.getConnection();
             this.dialect = JooqUtils.dialect(conn);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -114,7 +112,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         executeSqlScriptWithSuffix("-drop-indexes.sql");
         executeSqlScriptWithSuffix("-create-tables.sql");
         if (fields != null) {
-            loader = new FastLoader(ds, fields);
+            loader = new FastLoader(wpDs        , fields);
         }
     }
 
@@ -147,7 +145,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
     }
 
     public void useCache(File dir) throws DaoException{
-        cache = new SqlCache(wpDs, dir);
+        cache = new SqlCache(metaDao, dir);
     }
 
     /**

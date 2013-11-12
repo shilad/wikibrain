@@ -90,41 +90,33 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
 
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException{
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.CATEGORY_MEMBERS.LANG_ID.in(daoFilter.getLangIds()));
             }
-            return context.select().
+            return context.selectCount().
                     from(Tables.CATEGORY_MEMBERS).
                     where(conditions).
-                    fetchCount();
-        } catch (SQLException e) {
-            throw new DaoException(e);
+                    fetchOne().value1();
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public Collection<Integer> getCategoryMemberIds(Language language, int categoryId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Result<Record> result = context.select().
                     from(Tables.CATEGORY_MEMBERS).
                     where(Tables.CATEGORY_MEMBERS.CATEGORY_ID.eq(categoryId)).
                     and(Tables.CATEGORY_MEMBERS.LANG_ID.eq(language.getId())).
                     fetch();
             return extractIds(result, false);
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
@@ -147,20 +139,16 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
 
     @Override
     public Collection<Integer> getCategoryIds(Language language, int articleId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Result<Record> result = context.select().
                     from(Tables.CATEGORY_MEMBERS).
                     where(Tables.CATEGORY_MEMBERS.ARTICLE_ID.eq(articleId)).
                     and(Tables.CATEGORY_MEMBERS.LANG_ID.eq(language.getId())).
                     fetch();
             return extractIds(result, true);
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
