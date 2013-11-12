@@ -54,14 +54,17 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     }
     
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
-        String queryArgs = "&generator=links&pageids=" + sourceId;
-        JsonObject queryReply = LiveUtils.parseQueryObject(LiveUtils.getQueryJson(language, queryArgs));
-        List<String> linkAnchorTexts = LiveUtils.getStringsFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, "pages"), "title");
-        List<Integer> linkPageIds = LiveUtils.getIntsFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, "pages"), "pageid");
+        //get list of pageids and titles of all outlinks from sourceId
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("&generator=links&pageids=" + sourceId, language, "pages", false);
+        LiveAPIQuery query = builder.build();
+        List<String> linkTitles = query.getStringsFromQueryResult("title");
+        List<Integer> linkPageIds = query.getIntsFromQueryResult("pageid");
+        
+        //check all outlinks from sourceId to find one that matches destId
         for (int i = 0; i < linkPageIds.size(); i++) {
             int pageId = linkPageIds.get(i);
             if (pageId == destId) {
-                return new LocalLink(language, linkAnchorTexts.get(i), sourceId, pageId, true, -1, true, null);
+                return new LocalLink(language, linkTitles.get(i), sourceId, pageId, true, -1, true, null);
             }
         }
         throw new DaoException("No link with given sourceId and destId found");
@@ -75,24 +78,20 @@ public class LocalLinkLiveDao implements LocalLinkDao {
 
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException {
         List<LocalLink> links = new ArrayList<LocalLink>();
-        List<String> linkAnchorTexts = new ArrayList<String>();
-        List<Integer> linkPageIds = new ArrayList<Integer>();
         String queryArgs = outlinks ? "&generator=links&pageids=" + localId : "&list=backlinks&blpageid=" + localId;
         String linkType = outlinks ? "pages" : "backlinks";
-        JsonObject queryReply = LiveUtils.parseQueryObject(LiveUtils.getQueryJson(language, queryArgs));
+        
+        /*inlink information is returned as an array, but outlink information is returned as a JSON object
+         *so parseArray in LiveAPIQuery is true iff "outlinks" is false*/
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder(queryArgs, language, linkType, !outlinks);
+        LiveAPIQuery query = builder.build();
+        //query for outlinks from local id, return as list of titles and pageids
+        List<String> linkTitles = query.getStringsFromQueryResult("title");
+        List<Integer> linkPageIds = query.getIntsFromQueryResult("pageid");
 
-        if (outlinks) {
-            linkAnchorTexts = LiveUtils.getStringsFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, linkType), "title");
-            linkPageIds = LiveUtils.getIntsFromJsonObject(LiveUtils.getJsonObjectFromQueryObject(queryReply, linkType), "pageid");
-        }
-
-        else {
-            linkAnchorTexts = LiveUtils.getStringsFromJsonArray(LiveUtils.getJsonArrayFromQueryObject(queryReply, linkType), "title");
-            linkPageIds = LiveUtils.getIntsFromJsonArray(LiveUtils.getJsonArrayFromQueryObject(queryReply, linkType), "pageid");
-        }
-
-        for (int i = 0; i < linkAnchorTexts.size(); i++) {
-            String anchorText = linkAnchorTexts.get(i);
+        //create a link for each title and pageid returned from the query
+        for (int i = 0; i < linkTitles.size(); i++) {
+            String anchorText = linkTitles.get(i);
             Integer pageId = linkPageIds.get(i);
             LocalLink link = new LocalLink(language, anchorText, localId, pageId, outlinks, -1, true, null);
             links.add(link);
