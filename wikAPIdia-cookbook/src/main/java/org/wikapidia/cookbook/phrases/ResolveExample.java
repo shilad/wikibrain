@@ -1,4 +1,4 @@
-package org.wikapidia.phrases.cookbook;
+package org.wikapidia.cookbook.phrases;
 
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;

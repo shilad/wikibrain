@@ -1,4 +1,4 @@
-package org.wikapidia.core.cookbook;
+package org.wikapidia.cookbook.core;
 
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.cmd.Env;

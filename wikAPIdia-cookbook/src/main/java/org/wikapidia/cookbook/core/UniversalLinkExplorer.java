@@ -1,4 +1,4 @@
-package org.wikapidia.core.cookbook;
+package org.wikapidia.cookbook.core;
 
 import org.junit.Test;
 import org.wikapidia.conf.Configuration;
