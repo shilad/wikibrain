@@ -1,4 +1,4 @@
-package org.wikapidia.cookbook.translate;
+package org.wikapidia.cookbook.entities;
 
 import org.wikapidia.core.lang.Language;
 
@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Utilities for
+ * Utilities for HW7
  * @author Shilad Sen
  */
 public class Utils {
@@ -14,7 +14,7 @@ public class Utils {
     /**
      * YOU MUST Update this to point to your path
      */
-    public static final String PATH_DB = "..";
+    public static final String PATH_DB = "../";
 
     /**
      * Individual languages installed in the database.

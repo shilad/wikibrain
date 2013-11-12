@@ -1,4 +1,4 @@
-package org.wikapidia.cookbook.translate;
+package org.wikapidia.cookbook.entities;
 
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;

@@ -1,4 +1,4 @@
-package org.wikapidia.cookbook.translate;
+package org.wikapidia.cookbook.entities;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -15,7 +15,6 @@ import org.wikapidia.core.model.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Shilad wrote this wrapper around the WikAPIdia API for COMP 124.
@@ -45,9 +44,11 @@ public class WikAPIdiaWrapper {
     public WikAPIdiaWrapper(String baseDir) {
         try {
             File dbDir = new File(baseDir);
-            if (!FilenameUtils.getBaseName(dbDir.getAbsolutePath()).equals("db")) {
+            String basename = FilenameUtils.getBaseName(dbDir.getAbsolutePath());
+            if (!basename.equals("db")) {
                 dbDir = new File(dbDir, "db");
             }
+            System.out.println("Using wikAPIdia path: " + dbDir.getParentFile().getAbsolutePath());
             if (!dbDir.isDirectory() || !new File(dbDir, "h2.h2.db").isFile()) {
                 System.err.println(
                         "Database directory " + dbDir + " does not exist or is missing h2.h2.db file." +
@@ -57,7 +58,7 @@ public class WikAPIdiaWrapper {
                 System.exit(1);
             }
             env = new EnvBuilder()
-                    .setBaseDir(dbDir.getParent())
+                    .setBaseDir(dbDir.getParentFile().getAbsolutePath())
                     .build();
             this.rpDao = env.getConfigurator().get(RawPageDao.class);
             this.lpDao = env.getConfigurator().get(LocalPageDao.class);
