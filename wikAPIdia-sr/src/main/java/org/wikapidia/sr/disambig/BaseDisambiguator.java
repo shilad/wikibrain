@@ -34,7 +34,7 @@ public abstract class BaseDisambiguator implements Disambiguator{
 
         // Step 0: calculate most frequent candidate senses for each phrase
         Map<LocalString, LinkedHashMap<LocalPage, Float>> candidates = Maps.newHashMap();
-        for (LocalString s : phrases) {
+        for (LocalString s : allPhrases) {
             candidates.put(s, phraseAnalyzer.resolveLocal(s.getLanguage(), s.getString(), numCandidates));
         }
 
