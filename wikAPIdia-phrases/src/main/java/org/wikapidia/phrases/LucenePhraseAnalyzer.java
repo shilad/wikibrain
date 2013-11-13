@@ -51,7 +51,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
         if (wikapidiaScoreDocs.length == 0) {
             // If there is no result from title field query, query the plaintext field.
             wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
-                                        .setPhraseQuery(phrase)
+                                        .setPhraseQuery(new TextFieldElements().addPlainText(), phrase)
                                         .setNumHits(maxPages * DOC_MULTIPLIER)
                                         .search();
         }

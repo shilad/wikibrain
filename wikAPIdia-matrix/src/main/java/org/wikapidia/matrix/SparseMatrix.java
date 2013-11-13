@@ -42,11 +42,10 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
     public SparseMatrix(File path, int maxOpenPages, int maxPageSize) throws IOException {
         this.path = path;
         this.maxPageSize = maxPageSize;
-        try { //If the file doesn't exist, throw an IOException
-            info("initializing sparse matrix with file length " + FileUtils.sizeOf(path));
-        }catch (IllegalArgumentException e){
-            throw new IOException(e);
+        if (!path.isFile()) {
+            throw new IOException("File does not exist: " + path);
         }
+        info("initializing sparse matrix with file length " + FileUtils.sizeOf(path));
         this.channel = (new FileInputStream(path)).getChannel();
         readHeaders();
         rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets, maxOpenPages, maxPageSize);
@@ -60,7 +59,12 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
         }
         this.vconf = new ValueConf(buffer.getFloat(4), buffer.getFloat(8));
         int numRows = buffer.getInt(12);
-        info("reading offsets for " + numRows + " rows");
+        int headerSize = 16 + 12*numRows;
+        if (headerSize > maxPageSize) {
+            info("maxPageSize not large enough for entire header. Resizing to " + headerSize);
+            buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, headerSize);
+        }
+        debug("reading offsets for " + numRows + " rows");
         rowIds = new int[numRows];
         for (int i = 0; i < numRows; i++) {
             int pos = 16 + 12 * i;
@@ -70,7 +74,7 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
 //            debug("adding row index " + rowIndex + " at offset " + rowOffset);
             rowIds[i] = rowIndex;
         }
-        info("read " + numRows + " offsets");
+        debug("read " + numRows + " offsets");
     }
 
 
@@ -151,6 +155,6 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
     }
 
     private void debug(String message) {
-        LOG.log(Level.FINEST, "sparse matrix " + path + ": " + message);
+        LOG.log(Level.FINE, "sparse matrix " + path + ": " + message);
     }
 }

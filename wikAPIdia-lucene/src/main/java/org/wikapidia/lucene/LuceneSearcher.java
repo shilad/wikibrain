@@ -152,11 +152,10 @@ public class LuceneSearcher {
             this.hitCount = hitCount;
             ScoreDoc[] scoreDocs = searchers.get(language).search(query, filter, hitCount).scoreDocs;
             WikapidiaScoreDoc[] wikapidiaScoreDocs = new WikapidiaScoreDoc[scoreDocs.length];
-            int i = 0;
-            for (ScoreDoc scoreDoc : scoreDocs) {
+            for (int i = 0; i < scoreDocs.length; i++) {
+                ScoreDoc scoreDoc = scoreDocs[i];
                 int wpId = resolveWpIds ? getLocalIdFromDocId(scoreDoc.doc, language) : -1;
                 wikapidiaScoreDocs[i] = new WikapidiaScoreDoc(scoreDoc.doc, wpId, scoreDoc.score);
-                i++;
             }
             return wikapidiaScoreDocs;
         } catch (IOException e) {

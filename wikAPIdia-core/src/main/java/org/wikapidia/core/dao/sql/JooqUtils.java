@@ -1,6 +1,11 @@
 package org.wikapidia.core.dao.sql;
 
+import org.apache.log4j.Logger;
+import org.jooq.ConnectionProvider;
+import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.impl.DefaultConnectionProvider;
+import org.wikapidia.core.dao.DaoException;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -13,6 +18,8 @@ import static org.jooq.SQLDialect.*;
  * Drop these and shift to JOOQ's builtins after the first post-3.0.0 release.
  */
 public class JooqUtils {
+
+    private static final Logger LOG = Logger.getLogger(JooqUtils.class);
 
     /**
      * "Guess" the {@link SQLDialect} from a {@link Connection} instance.
@@ -51,14 +58,8 @@ public class JooqUtils {
 
         // The below list might not be accurate or complete. Feel free to
         // contribute fixes related to new / different JDBC driver configuraitons
-        if (url.startsWith("jdbc:jtds:sybase:")) {
-            return ASE;
-        }
-        else if (url.startsWith("jdbc:cubrid:")) {
+        if (url.startsWith("jdbc:cubrid:")) {
             return CUBRID;
-        }
-        else if (url.startsWith("jdbc:db2:")) {
-            return DB2;
         }
         else if (url.startsWith("jdbc:derby:")) {
             return DERBY;
@@ -72,16 +73,9 @@ public class JooqUtils {
         else if (url.startsWith("jdbc:hsqldb:")) {
             return HSQLDB;
         }
-        else if (url.startsWith("jdbc:ingres:")) {
-            return INGRES;
-        }
         else if (url.startsWith("jdbc:mysql:")
                 || url.startsWith("jdbc:google:")) {
             return MYSQL;
-        }
-        else if (url.startsWith("jdbc:oracle:")
-                || url.startsWith("jdbc:oracle:oci")) {
-            return ORACLE;
         }
         else if (url.startsWith("jdbc:postgresql:")) {
             return POSTGRES;
@@ -89,16 +83,43 @@ public class JooqUtils {
         else if (url.startsWith("jdbc:sqlite:")) {
             return SQLITE;
         }
-        else if (url.startsWith("jdbc:sqlserver:")
-                || url.startsWith("jdbc:jtds:sqlserver:")
-                || url.startsWith("jdbc:microsoft:sqlserver:")
-                || url.contains(":mssql")) {
-            return SQLSERVER;
-        }
-        else if (url.startsWith("jdbc:sybase:")) {
-            return SYBASE;
-        }
 
         return SQLDialect.SQL99;
+    }
+
+    /**
+     * Return the SQL connection associated with a DSLContext
+     * @param context
+     * @return the connection, or null.
+     */
+    public static Connection getConnection(DSLContext context) {
+        ConnectionProvider provider = context.configuration().connectionProvider();
+        if (provider instanceof DefaultConnectionProvider) {
+            return ((DefaultConnectionProvider) provider).acquire();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Rollback the current transaction.
+     * If a SQLException occurs while rolling back, it logs the error and returns false,
+     * but does not rethrow the exception.
+     *
+     * @param context
+     */
+    public static boolean rollbackQuietly(DSLContext context) {
+        if (context == null) {
+            return false;
+        }
+        return WpDataSource.rollbackQuietly(getConnection(context));
+    }
+
+    public static void commit(DSLContext context) throws DaoException {
+        try {
+            getConnection(context).commit();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
     }
 }

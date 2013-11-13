@@ -15,7 +15,6 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.lucene.LuceneOptions;
 import org.wikapidia.lucene.LuceneSearcher;
-import org.wikapidia.sr.esa.ESAMetric;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
 import java.io.IOException;
@@ -78,10 +77,10 @@ public class TestESAMetric {
         String string3 = "United States";
         String string4 = "Barack Obama";
 
-        LocalPage page1 = localPageDao.getByTitle(lang, new Title(string1, lang), NameSpace.ARTICLE);
-        LocalPage page2 = localPageDao.getByTitle(lang, new Title(string2, lang), NameSpace.ARTICLE);
-        LocalPage page3 = localPageDao.getByTitle(lang, new Title(string3, lang), NameSpace.ARTICLE);
-        LocalPage page4 = localPageDao.getByTitle(lang, new Title(string4, lang), NameSpace.ARTICLE);
+        LocalPage page1 = localPageDao.getByTitle(new Title(string1, lang), NameSpace.ARTICLE);
+        LocalPage page2 = localPageDao.getByTitle(new Title(string2, lang), NameSpace.ARTICLE);
+        LocalPage page3 = localPageDao.getByTitle(new Title(string3, lang), NameSpace.ARTICLE);
+        LocalPage page4 = localPageDao.getByTitle(new Title(string4, lang), NameSpace.ARTICLE);
 
 //        printResult(esaMetric.similarity(page1, page2, true));
 //        printResult(esaMetric.similarity(string1, string2, lang, true));

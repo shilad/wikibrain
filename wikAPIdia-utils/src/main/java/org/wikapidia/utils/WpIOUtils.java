@@ -111,4 +111,16 @@ public class WpIOUtils {
     public static File createTempDirectory(String name) throws IOException {
         return createTempDirectory(name, true);
     }
+
+    /**
+     * Gets the path relative to a specified directory.
+     * @param base
+     * @param path
+     * @return
+     */
+    public static String getRelativePath(File base, File path) {
+        String cleanedBase = FilenameUtils.normalize(base.toString());
+        String cleanedPath = FilenameUtils.normalize(path.toString());
+        return new File(cleanedBase).toURI().relativize(new File(cleanedPath).toURI()).getPath();
+    }
 }

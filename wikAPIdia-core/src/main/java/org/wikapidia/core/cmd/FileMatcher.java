@@ -121,6 +121,9 @@ public enum FileMatcher {
     FLAGGED_PAGES     (
             "flagged_pages",
             Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-flaggedpages.sql.gz")),
+    WIKIDATA_ITEMS (
+            "wikidata_items",
+            Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-wb_items_per_site.sql.gz")),
     MD5               (
             "md5_checksums",
             Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-md5sums.txt"));
@@ -237,5 +240,4 @@ public enum FileMatcher {
         }
         return result;
     }
-
 }

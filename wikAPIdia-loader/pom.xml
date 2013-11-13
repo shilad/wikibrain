@@ -11,18 +11,13 @@
     <dependencies>
         <dependency>
             <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-phrases</artifactId>
+            <artifactId>wikAPIdia-download</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq-codegen-maven</artifactId>
-            <version>3.0.0</version>
+            <groupId>org.wikapidia</groupId>
+            <artifactId>wikAPIdia-phrases</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

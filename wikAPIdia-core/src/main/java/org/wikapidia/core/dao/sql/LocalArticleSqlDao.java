@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements LocalArticleDao{
 
-    public LocalArticleSqlDao(DataSource dataSource) throws DaoException {
+    public LocalArticleSqlDao(WpDataSource dataSource) throws DaoException {
         super(dataSource);
     }
 
@@ -33,7 +33,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
      * @throws DaoException
      */
     public LocalArticle getByTitle(Language language, Title title) throws DaoException {
-        return super.getByTitle(language, title, NameSpace.ARTICLE);
+        return super.getByTitle(title, NameSpace.ARTICLE);
     }
 
     /**
@@ -93,7 +93,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
             try {
                 return new LocalArticleSqlDao(
                         getConfigurator().get(
-                                DataSource.class,
+                                WpDataSource.class,
                                 config.getString("dataSource"))
                 );
             } catch (DaoException e) {

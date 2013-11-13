@@ -83,32 +83,13 @@ public class Env {
         LOG.info("using tmpDir " + tmpDir);
     }
 
-    public List<File> getInputFiles(List argList, FileMatcher ... matchers) {
-        return getInputFiles(false, argList, matchers);
+    public List<File> getFiles(FileMatcher ... matchers) {
+        return getFiles(getLanguages(), matchers);
     }
 
-    /**
-     * Returns the list of already downloaded files for the input languages that
-     * match the provided file matchers.
-     *
-     * @param useExtraArgs
-     * @param matchers
-     * @return
-     */
-
-
-    public List<File> getInputFiles(boolean useExtraArgs, List argList, FileMatcher ... matchers) {
-        if (useExtraArgs && !argList.isEmpty()) {
-            List<File> results = new ArrayList<File>();
-            for (Object s : argList) {
-                results.add(new File((String)s));
-            }
-            return results;
-        }
-
-        File downloadPath = new File(configuration.get().getString("download.path"));
+    public List<File> getFiles(LanguageSet langs, FileMatcher ... matchers) {
         List<File> matches = new ArrayList<File>();
-        for (Language l : getLanguages()) {
+        for (Language l : langs) {
             for (FileMatcher fm : matchers) {
                 List<File> f = getFiles(l, fm);
                 if (f.isEmpty()) {
@@ -121,11 +102,15 @@ public class Env {
     }
 
     private List<File> getFiles(Language lang, FileMatcher fm) {
+        return getFiles(lang, fm, configuration);
+    }
+
+    public static List<File> getFiles(Language lang, FileMatcher fm, Configuration configuration) {
         File downloadPath = new File(configuration.get().getString("download.path"));
         if (downloadPath == null) {
             throw new IllegalArgumentException("missing configuration for download.path");
         }
-        LOG.info("scanning download path " + downloadPath + " for files");
+        LOG.fine("scanning download path " + downloadPath + " for files");
         List<File> matchingFiles = new ArrayList<File>();
         File langDir = new File(downloadPath, lang.getLangCode());
         if (!langDir.isDirectory()) {

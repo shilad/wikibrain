@@ -9,8 +9,10 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -24,9 +26,9 @@ import java.util.logging.Logger;
  */
 public class FastLoader {
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
-    static final int BATCH_SIZE = 2;
+    static final int BATCH_SIZE = 2000;
 
-    private final DataSource ds;
+    private final WpDataSource ds;
     private final Table table;
     private final TableField[] fields;
 
@@ -36,7 +38,7 @@ public class FastLoader {
     private Thread inserter = null;
     volatile private boolean finished = false;
 
-    public FastLoader(DataSource ds, TableField[] fields) throws DaoException {
+    public FastLoader(WpDataSource ds, TableField[] fields) throws DaoException {
         this.ds = ds;
         this.table = fields[0].getTable();
         this.fields = fields;
@@ -64,8 +66,13 @@ public class FastLoader {
      */
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     public void load(Object [] values) throws DaoException {
+        // Hack convert dates to Timestamps
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] instanceof Date && !(values[i] instanceof Timestamp)) {
+                values[i] = new Timestamp(((Date)values[i]).getTime());
+            }
+        }
         if (inserter == null) {
-            System.exit(1);
             throw new IllegalStateException("inserter thread exited!");
         }
         if (values.length != fields.length) {
@@ -93,7 +100,7 @@ public class FastLoader {
             PreparedStatement statement = cnx.prepareStatement(sql);
 
 
-            while (!rowBuffer.isEmpty() || !finished) {
+            while (!(rowBuffer.isEmpty() && finished)) {
                 // accumulate batch
                 int batchSize = 0;
                 while (batchSize < BATCH_SIZE) {
@@ -111,12 +118,13 @@ public class FastLoader {
                 }
                 try {
                     statement.executeBatch();
+                    cnx.commit();
                 } catch (SQLException e) {
+                    cnx.rollback();
                     LOG.log(Level.SEVERE, "insert batch failed, attempting to continue:", e);
                 }
                 statement.clearBatch();
             }
-            cnx.commit();
         } finally {
             AbstractSqlDao.quietlyCloseConn(cnx);
         }
@@ -126,7 +134,7 @@ public class FastLoader {
         finished = true;
         if (inserter != null) {
             try {
-                inserter.join(10000);
+                inserter.join(60000);
             } catch (InterruptedException e) {
                 throw new DaoException(e);
             }

@@ -4,7 +4,6 @@ import com.typesafe.config.Config;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TLongIntHashMap;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -18,9 +17,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,19 +30,18 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     private volatile TLongIntHashMap titlesToIds = null;
     private RedirectSqlDao redirectSqlDao;
 
-    public LocalPageSqlDao(DataSource dataSource) throws DaoException {
+    public LocalPageSqlDao(WpDataSource dataSource) throws DaoException {
         this(dataSource, true);
     }
 
-    public LocalPageSqlDao(DataSource dataSource, boolean followRedirects) throws DaoException{
+    public LocalPageSqlDao(WpDataSource dataSource, boolean followRedirects) throws DaoException{
         super(dataSource, INSERT_FIELDS, "/db/local-page");
         if (followRedirects){
-            redirectSqlDao = new RedirectSqlDao(ds);
+            redirectSqlDao = new RedirectSqlDao(wpDs);
         }
     }
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
-            Tables.LOCAL_PAGE.ID,
             Tables.LOCAL_PAGE.LANG_ID,
             Tables.LOCAL_PAGE.PAGE_ID,
             Tables.LOCAL_PAGE.TITLE,
@@ -57,7 +53,6 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     @Override
     public void save(LocalPage page) throws DaoException {
         insert(
-                null,
                 page.getLanguage().getId(),
                 page.getLocalId(),
                 page.getTitle().getCanonicalTitle(),
@@ -69,10 +64,8 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
 
     @Override
     public Iterable<T> get(final DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.LOCAL_PAGE.LANG_ID.in(daoFilter.getLangIds()));
@@ -90,7 +83,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<T>(result, conn) {
+            return new SimpleSqlDaoIterable<T>(result, context) {
                 @Override
                 public T transform(Record r) {
                     try {
@@ -101,18 +94,16 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     }
                 }
             };
-        } catch (SQLException e) {
-            quietlyCloseConn(conn);
-            throw new DaoException(e);
+        } catch (RuntimeException e) {
+            freeJooq(context);
+            throw e;
         }
     }
 
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException{
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.LOCAL_PAGE.LANG_ID.in(daoFilter.getLangIds()));
@@ -126,23 +117,19 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
             if (daoFilter.isDisambig() != null) {
                 conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
             }
-            return context.select().
+            return context.selectCount().
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
-                    fetchCount();
-        } catch (SQLException e) {
-            throw new DaoException(e);
+                    fetchOne().value1();
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public T getById(Language language, int pageId) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Record record = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
@@ -150,40 +137,35 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     fetchOne();
             LocalPage page = buildLocalPage(record);
             return (T)page;
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public void setFollowRedirects(boolean followRedirects) throws DaoException {
         if (followRedirects){
-            redirectSqlDao = new RedirectSqlDao(ds);
+            redirectSqlDao = new RedirectSqlDao(wpDs);
         } else {
             redirectSqlDao = null;
         }
     }
 
     @Override
-    public T getByTitle(Language language, Title title, NameSpace nameSpace) throws DaoException {
-        Connection conn = null;
+    public T getByTitle(Title title, NameSpace nameSpace) throws DaoException {
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Record record = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.TITLE.eq(title.getCanonicalTitle())).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(title.getLanguage().getId())).
                     and(Tables.LOCAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
+                    limit(1).
                     fetchOne();
             LocalPage page = buildLocalPage(record);
             return (T)page;
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
@@ -206,7 +188,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         }
         Map<Title, T> map = new HashMap<Title, T>();
         for (Title title : titles){
-            map.put(title, getByTitle(language, title, nameSpace));
+            map.put(title, getByTitle(title, nameSpace));
         }
         return map;
     }
@@ -274,23 +256,20 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         if (titlesToIds != null) {
             return;
         }
-        Connection conn = null;
-        try {
-            if (cache!=null) {
-                String [] dependsOn = (redirectSqlDao == null)
-                        ? new String[] { Tables.LOCAL_PAGE.getName() }
-                        : new String[] { Tables.LOCAL_PAGE.getName(), Tables.REDIRECT.getName() };
-                TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", dependsOn);
-                if (map!=null){
-                    titlesToIds = map;
-                    return;
-                }
+        if (cache!=null) {
+            TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", LocalPage.class);
+            if (map!=null){
+                titlesToIds = map;
+                return;
             }
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
+        }
+        LOG.info("Building title to id cache. This will only happen once!");
+        int n = getCount(new DaoFilter());
+        DSLContext context = getJooq();
+        try {
             Cursor<Record> cursor = context.select().
                     from(Tables.LOCAL_PAGE).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             TLongIntHashMap map = new TLongIntHashMap(
                     Constants.DEFAULT_CAPACITY,
                     Constants.DEFAULT_LOAD_FACTOR,
@@ -315,16 +294,17 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                 else{
                     map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
                 }
+                if (map.size() % 50000 == 0) {
+                    LOG.info("built title cache entry " + map.size() + " of " + n);
+                }
             }
             LOG.info("resolved " + numResolved + " of " + numRedirects + " redirects.");
             if (cache!=null){
-                cache.saveToCache("titlesToIds", map);
+                cache.put("titlesToIds", map);
             }
             titlesToIds = map;
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
@@ -349,11 +329,18 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                 return null;
             }
             try {
-                return new LocalPageSqlDao(
-                            getConfigurator().get(
-                                DataSource.class,
-                                config.getString("dataSource"))
-                );
+                String cachePath = getConfig().get().getString("dao.sqlCachePath");
+                LocalPageSqlDao dao = new LocalPageSqlDao(
+                                    getConfigurator().get(
+                                        WpDataSource.class,
+                                        config.getString("dataSource"))
+                                );
+                File cacheDir = new File(cachePath);
+                if (!cacheDir.isDirectory()) {
+                    cacheDir.mkdirs();
+                }
+                dao.useCache(cacheDir);
+                return dao;
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }

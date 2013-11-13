@@ -1,6 +1,7 @@
 package org.wikapidia.core.dao.sql;
 
 import org.jooq.Cursor;
+import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.wikapidia.core.dao.DaoException;
 
@@ -35,6 +36,11 @@ public abstract class SqlDaoIterable<E, T> implements Iterable<E> {
     protected boolean usedUp = false;
     protected boolean finished = false;
 
+    public SqlDaoIterable(Cursor<Record> result, Iterator<T> iterator, DSLContext context){
+        this(result, iterator, JooqUtils.getConnection(context));
+
+    }
+
     /**
      * Constructs a SqlDaoIterable that generates E objects from result.
      * The iterator must contain items that have a one-to-one correspondence
@@ -63,9 +69,9 @@ public abstract class SqlDaoIterable<E, T> implements Iterable<E> {
     public void close() {
         usedUp = true;
         finished = true;
-        while (iterator.hasNext()) {
-            iterator.next();
-        }
+//        while (iterator.hasNext()) {
+//            iterator.next();
+//        }
         if (!result.isClosed()) {
             result.close();
         }

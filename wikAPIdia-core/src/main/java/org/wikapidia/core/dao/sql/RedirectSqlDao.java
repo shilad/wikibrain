@@ -34,7 +34,7 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
             Tables.REDIRECT.DEST_PAGE_ID,
     };
 
-    public RedirectSqlDao(DataSource dataSource) throws DaoException {
+    public RedirectSqlDao(WpDataSource dataSource) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/redirect");
     }
 
@@ -60,10 +60,8 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
      */
     @Override
     public Iterable<Redirect> get(DaoFilter daoFilter) throws DaoException {
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.REDIRECT.LANG_ID.in(daoFilter.getLangIds()));
@@ -72,24 +70,22 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
                     from(Tables.REDIRECT).
                     where(conditions).
                     fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<Redirect>(result, conn) {
+            return new SimpleSqlDaoIterable<Redirect>(result, context) {
                 @Override
                 public Redirect transform(Record r) {
                     return buildRedirect(r);
                 }
             };
-        } catch (SQLException e) {
-            quietlyCloseConn(conn);
-            throw new DaoException(e);
+        } catch (RuntimeException e) {
+            freeJooq(context);
+            throw e;
         }
     }
 
     @Override
     public int getCount(DaoFilter daoFilter) throws DaoException{
-        Connection conn = null;
+        DSLContext context = getJooq();
         try {
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
             Collection<Condition> conditions = new ArrayList<Condition>();
             if (daoFilter.getLangIds() != null) {
                 conditions.add(Tables.REDIRECT.LANG_ID.in(daoFilter.getLangIds()));
@@ -98,19 +94,15 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
                     from(Tables.REDIRECT).
                     where(conditions).
                     fetchCount();
-        } catch (SQLException e) {
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public Integer resolveRedirect(Language lang, int id) throws DaoException {
-        Connection conn=null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,dialect);
+        DSLContext context = getJooq();
+        try {
             Record record = context.select().from(Tables.REDIRECT)
                     .where(Tables.REDIRECT.SRC_PAGE_ID.equal(id))
                     .and(Tables.REDIRECT.LANG_ID.equal(lang.getId()))
@@ -119,37 +111,29 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
                 return null;
             }
             return record.getValue(Tables.REDIRECT.DEST_PAGE_ID);
-        } catch (SQLException e){
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public boolean isRedirect(Language lang, int id) throws DaoException {
-        Connection conn=null;
-        try{
-        conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,dialect);
+        DSLContext context = getJooq();
+        try {
             Record record = context.select().from(Tables.REDIRECT)
                     .where(Tables.REDIRECT.SRC_PAGE_ID.equal(id))
                     .and(Tables.REDIRECT.LANG_ID.equal(lang.getId()))
                     .fetchOne();
             return (record != null);
-        } catch (SQLException e){
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public TIntSet getRedirects(LocalPage localPage) throws DaoException {
-        Connection conn=null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn, dialect);
+        DSLContext context = getJooq();
+        try {
             Result<Record> result = context.select().
                     from(Tables.REDIRECT).
                     where(Tables.REDIRECT.DEST_PAGE_ID.eq(localPage.getLocalId())).
@@ -160,23 +144,19 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
                 ids.add(record.getValue(Tables.REDIRECT.SRC_PAGE_ID));
             }
             return ids;
-        } catch (SQLException e){
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
     @Override
     public TIntIntMap getAllRedirectIdsToDestIds(Language lang) throws DaoException {
-        Connection conn = null;
-        try{
-            conn = ds.getConnection();
-            DSLContext context = DSL.using(conn,dialect);
+        DSLContext context = getJooq();
+        try {
             Cursor<Record> cursor = context.select().
                     from(Tables.REDIRECT).
                     where(Tables.REDIRECT.LANG_ID.equal(lang.getId())).
-                    fetchLazy();
+                    fetchLazy(getFetchSize());
             TIntIntMap ids = new TIntIntHashMap(
                     gnu.trove.impl.Constants.DEFAULT_CAPACITY,
                     gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
@@ -186,10 +166,8 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
                         record.getValue(Tables.REDIRECT.DEST_PAGE_ID));
             }
             return ids;
-        } catch (SQLException e){
-            throw new DaoException(e);
         } finally {
-            quietlyCloseConn(conn);
+            freeJooq(context);
         }
     }
 
@@ -227,7 +205,7 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
             try {
                 return new RedirectSqlDao(
                         getConfigurator().get(
-                                DataSource.class,
+                                WpDataSource.class,
                                 config.getString("dataSource"))
                 );
             } catch (DaoException e) {

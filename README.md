@@ -26,8 +26,10 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 ```bash
 	cd wikAPIdia
 	cd wikAPIdia-parent
-	./scripts/run-pipeline all -l simple
+	./scripts/runpipeline.sh all -l simple
 ```
+
+(Note: be sure to run code from the folders indicated above)
 
 The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. 
 

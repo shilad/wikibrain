@@ -97,4 +97,18 @@ public class LocalLink {
     public long longHashCode() {
         return ((long)sourceId << 32) | destId + 232421 * language.getId();
     }
+
+    @Override
+    public String toString() {
+        return "LocalLink{" +
+                "language=" + language +
+                ", anchorText='" + anchorText + '\'' +
+                ", sourceId=" + sourceId +
+                ", destId=" + destId +
+                ", isOutlink=" + isOutlink +
+                ", location=" + location +
+                ", isParseable=" + isParseable +
+                ", locType=" + locType +
+                '}';
+    }
 }

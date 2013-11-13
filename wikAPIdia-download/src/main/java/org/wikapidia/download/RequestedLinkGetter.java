@@ -142,6 +142,24 @@ public class RequestedLinkGetter {
         return map;
     }
 
+    private List<String> getLangLinks() throws WikapidiaException, IOException, ParseException {
+        List<String> result = new ArrayList<String>();
+        Map<String, Multimap<FileMatcher, DumpLinkInfo>> dumpLinks = this.getDumps();
+        for (String dumpDate : dumpLinks.keySet()) {
+            for (FileMatcher linkMatcher : dumpLinks.get(dumpDate).keySet()) {
+                for (DumpLinkInfo linkInfo : dumpLinks.get(dumpDate).get(linkMatcher)) {
+                    result.add(linkInfo.getLanguage().getLangCode() + "\t" +
+                            linkInfo.getDate() + "\t" +
+                            linkInfo.getLinkMatcher().getName() + "\t" +
+                            linkInfo.getCounter() + "\t" +
+                            linkInfo.getUrl() + "\t" +
+                            linkInfo.getMd5());
+                }
+            }
+        }
+        return result;
+    }
+
     /**
      * Parse command line and generate .tsv file containing language code, date of dump, name of file type and link url.
      * @param args command line prompt
@@ -173,6 +191,12 @@ public class RequestedLinkGetter {
                         .create("y"));
 
         EnvBuilder.addStandardOptions(options);
+
+        // You MUST specify a language set when downloading files
+        Option o = options.getOption("l");
+        o.setRequired(true);
+        options.addOption(o);
+
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
 
@@ -187,18 +211,19 @@ public class RequestedLinkGetter {
         Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
-        List<FileMatcher> linkMatchers = FileMatcher.getListByNames(conf.getConf().get().getStringList("download.matcher"));
+        List<FileMatcher> linkMatchers;
         if (cmd.hasOption("n")) {
             linkMatchers = new ArrayList<FileMatcher>();
             for (String name : cmd.getOptionValues("n")) {
                 FileMatcher matcher = FileMatcher.getByName(name);
                 if (matcher == null) {
-                    System.err.println("Invalid matcher name: " + name
-                            + "\nValid matcher names: \n" + FileMatcher.getAllNames().toString());
+                    System.err.println("Invalid matcher name: " + name + "\nValid matcher names: \n" + FileMatcher.getAllNames().toString());
                     System.exit(1);
                 }
                 linkMatchers.add(matcher);
             }
+        } else {
+            linkMatchers = FileMatcher.getListByNames(conf.getConf().get().getStringList("download.matcher"));
         }
 
         LanguageSet languages = env.getLanguages();
@@ -222,24 +247,16 @@ public class RequestedLinkGetter {
 
         List<String> result = new ArrayList<String>();
         for (Language language : languages) {
-            RequestedLinkGetter requestedLinkGetter = new RequestedLinkGetter(language, linkMatchers, getDumpByDate);
-            try {
-                Map<String, Multimap<FileMatcher, DumpLinkInfo>> dumpLinks = requestedLinkGetter.getDumps();
-                for (String dumpDate : dumpLinks.keySet()) {
-                    for (FileMatcher linkMatcher : dumpLinks.get(dumpDate).keySet()) {
-                        for (DumpLinkInfo linkInfo : dumpLinks.get(dumpDate).get(linkMatcher)) {
-                            result.add(linkInfo.getLanguage().getLangCode() + "\t" +
-                                    linkInfo.getDate() + "\t" +
-                                    linkInfo.getLinkMatcher().getName() + "\t" +
-                                    linkInfo.getCounter() + "\t" +
-                                    linkInfo.getUrl() + "\t" +
-                                    linkInfo.getMd5());
-                        }
-                    }
-                }
-            } catch (WikapidiaException e) {
-                System.err.println(e);
-            }
+            RequestedLinkGetter getter = new RequestedLinkGetter(
+                    language, linkMatchers, getDumpByDate);
+            result.addAll(getter.getLangLinks());
+        }
+        if (languages.size() >= 2) {
+            RequestedLinkGetter getter = new RequestedLinkGetter(
+                    Language.WIKIDATA,
+                    Arrays.asList(FileMatcher.WIKIDATA_ITEMS),
+                    getDumpByDate);
+            result.addAll(getter.getLangLinks());
         }
 
         if (!result.isEmpty()) {

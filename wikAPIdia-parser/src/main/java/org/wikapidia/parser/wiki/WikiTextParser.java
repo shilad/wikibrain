@@ -13,6 +13,7 @@ import org.wikapidia.core.model.RawPage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -51,20 +52,28 @@ public class WikiTextParser {
      */
     public void parse(RawPage xml) throws WikapidiaException {
         visitBeginPage(xml);
-        ParsedPage pp = jwpl.parse(xml.getBody());
-        if (pp == null) {
-            LOG.warning("invalid page: " + xml.getBody());
-        }
-
         if (xml.isRedirect()) {
             ParsedRedirect pr = new ParsedRedirect();
             pr.location = new ParsedLocation(xml, -1, -1, -1);
             // TODO: calculate redirect text?
             visitRedirect(pr);
-        } else if (xml.getNamespace() == NameSpace.CATEGORY) {
-            parseCategory(xml, pp);
-        } else if (xml.getNamespace() == NameSpace.ARTICLE) {
-            parseArticle(xml, pp);
+        } else {
+            try {
+                ParsedPage pp = jwpl.parse(xml.getBody());
+                if (pp == null) {
+                    LOG.fine("invalid page: " + xml.getBody());
+                }
+
+                if (xml.getNamespace() == NameSpace.CATEGORY) {
+                    parseCategory(xml, pp);
+                } else if (xml.getNamespace() == NameSpace.ARTICLE) {
+                    parseArticle(xml, pp);
+                }
+            } catch (NoSuchElementException e) {
+                visitParseError(xml, e);
+            } catch (NullPointerException e) {
+                visitParseError(xml, e);
+            }
         }
         visitEndPage(xml);
     }
@@ -83,7 +92,7 @@ public class WikiTextParser {
                     // EASY LINKS
                     for (Link curLink : curContent.getLinks()){
                         if (curLink.getTarget().isEmpty()){
-                            LOG.warning("Found link with empty target: \t" + xml + "\t text=" + curLink.getText());
+                            LOG.fine("Found link with empty target: \t" + xml + "\t text=" + curLink.getText());
                             continue;
                         }
                         Title destTitle = link2Title(curLink);
@@ -139,7 +148,10 @@ public class WikiTextParser {
                                         ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
                                         visitLink(location, destTitle, templateLink.getText(), tempSubType);
                                     } else if (type == NameSpace.CATEGORY){
-                                        throw new RuntimeException("Found a category link in a template");
+                                        ParsedCategory pc = new ParsedCategory();
+                                        pc.location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
+                                        pc.category = destTitle;
+                                        visitCategory(pc);
                                     }
                                 }
                             }catch(IndexOutOfBoundsException e){
@@ -264,6 +276,11 @@ public class WikiTextParser {
             } catch (WikapidiaException e) {
                 LOG.log(Level.WARNING, "beginPage failed:", e);
             }
+        }
+    }
+    private void visitParseError(RawPage rp, Exception e) {
+        for (ParserVisitor visitor : visitors) {
+            visitor.parseError(rp, e);
         }
     }
     private void visitIll(ParsedIll ill) {

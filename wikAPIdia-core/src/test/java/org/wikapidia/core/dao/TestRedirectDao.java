@@ -5,12 +5,14 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.set.TIntSet;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -20,25 +22,16 @@ import java.sql.SQLException;
 public class TestRedirectDao {
     @Test
     public void  test() throws ClassNotFoundException, IOException, SQLException, DaoException{
-        Class.forName("org.h2.Driver");
-        File tmpDir = File.createTempFile("wikapidia-h2", null);
-        tmpDir.delete();
-        tmpDir.deleteOnExit();
-        tmpDir.mkdirs();
-
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setJdbcUrl("jdbc:h2:"+new File(tmpDir,"db").getAbsolutePath());
-        ds.setUsername("sa");
-        ds.setPassword("");
-
+        WpDataSource wpDs = TestDaoUtil.getWpDataSource();
         LanguageInfo langInfo = LanguageInfo.getByLangCode("en");
         Language lang = langInfo.getLanguage();
-        RedirectSqlDao redirectDao = new RedirectSqlDao(ds);
+        RedirectSqlDao redirectDao = new RedirectSqlDao(wpDs);
         redirectDao.beginLoad();
         redirectDao.save(lang, 0, 5);
         redirectDao.save(lang, 1, 5);
         redirectDao.save(lang, 2, 6);
         redirectDao.save(LanguageInfo.getByLangCode("la").getLanguage(), 3, 5);
+        redirectDao.endLoad();
 
         assert (redirectDao.isRedirect(lang, 0));
         assert (redirectDao.isRedirect(lang, 1));

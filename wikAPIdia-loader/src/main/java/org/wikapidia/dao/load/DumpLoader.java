@@ -21,6 +21,7 @@ import org.wikapidia.utils.Procedure;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -101,9 +102,21 @@ public class DumpLoader {
             return;
         }
 
-        Env env = new EnvBuilder(cmd).build();
+        EnvBuilder builder = new EnvBuilder(cmd);
+        if (!builder.hasExplicitLanguageSet()) {
+            builder.setUseDownloadedLanguages();
+        }
+        Env env = builder.build();
         Configurator conf = env.getConfigurator();
-        List<File> paths = env.getInputFiles(true, cmd.getArgList(), FileMatcher.ARTICLES);
+        List<File> paths;
+        if (cmd.getArgList().isEmpty()) {
+            paths = env.getFiles(FileMatcher.ARTICLES);
+        } else {
+            paths = new ArrayList<File>();
+            for (Object arg : cmd.getArgList()) {
+                paths.add(new File((String)arg));
+            }
+        }
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);
