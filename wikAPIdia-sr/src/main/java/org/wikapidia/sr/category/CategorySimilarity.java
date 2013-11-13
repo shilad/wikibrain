@@ -23,6 +23,7 @@ import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.SimUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -63,8 +64,36 @@ public class CategorySimilarity extends BaseLocalSRMetric {
     public TIntDoubleMap getVector(int id, Language language) throws DaoException {
         Collection<Integer> cats = categoryMemberDao.getCategoryIds(language, id);
         TIntDoubleMap vector = new TIntDoubleHashMap();
-        for (Integer i : cats){
-            vector.put(i,1);
+        if (cats!=null){
+            ArrayList<Integer> extraCats = new ArrayList<Integer>();
+            while (!cats.isEmpty()){
+                Integer cat = cats.iterator().next();
+                //Get parent categories
+                Collection<Integer> parentCats = categoryMemberDao.getCategoryIds(language,cat);
+                if (parentCats!=null){
+                    for (Integer i: parentCats){
+                        if (!vector.containsKey(i)&&!extraCats.contains(i)){
+                            extraCats.add(i);
+                        }
+                    }
+                }
+                cats.remove(cat);
+                vector.put(cat,1);
+            }
+            while (!extraCats.isEmpty()){
+                Integer cat = extraCats.iterator().next();
+                //Get parent categories
+                Collection<Integer> parentCats = categoryMemberDao.getCategoryIds(language,cat);
+                if (parentCats!=null){
+                    for (Integer i: parentCats){
+                        if (!vector.containsKey(i)&&!extraCats.contains(i)){
+                            extraCats.add(i);
+                        }
+                    }
+                }
+                extraCats.remove(cat);
+                vector.put(cat,.1);
+            }
         }
         return vector;
     }
