@@ -100,6 +100,9 @@ public class LinearEnsemble implements Ensemble{
 
     @Override
     public SRResultList predictMostSimilar(List<SRResultList> scores, int maxResults) {
+        if (2*scores.size()+1!= mostSimilarCoefficients.size()){
+            throw new IllegalStateException();
+        }
         TIntDoubleHashMap scoreMap = new TIntDoubleHashMap();
         int i =1;
         for (SRResultList resultList : scores){

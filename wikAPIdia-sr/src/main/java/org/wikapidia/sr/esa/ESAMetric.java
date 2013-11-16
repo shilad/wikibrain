@@ -98,12 +98,13 @@ public class ESAMetric extends BaseLocalSRMetric {
         List<SRResult> results = new ArrayList<SRResult>();
 
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
-
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.luceneId, language);
             if (validIds==null||validIds.contains(localPageId)){
                 TIntDoubleHashMap comparison = getVector(localPageId, phrase.getLanguage());
-                SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
-                results.add(result);
+                if (comparison != null) {
+                    SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
+                    results.add(result);
+                }
             }
 
         }
@@ -208,7 +209,8 @@ public class ESAMetric extends BaseLocalSRMetric {
     public TIntDoubleHashMap getVector(int id, Language language) throws DaoException {
         int luceneId = searcher.getDocIdFromLocalId(id, language);
         if (luceneId < 0) {
-            throw new DaoException("Unindexed document " + id + " in " + language.getEnLangName());
+            LOG.warning("Unindexed document " + id + " in " + language.getEnLangName());
+            return new TIntDoubleHashMap();
         }
         WikapidiaScoreDoc[] wikapidiaScoreDocs =  getQueryBuilderByLanguage(language)
                                 .setMoreLikeThisQuery(luceneId)
@@ -363,14 +365,12 @@ public class ESAMetric extends BaseLocalSRMetric {
                                     .setMoreLikeThisQuery(luceneId)
                                     .setNumHits(maxResults*POOL_SIZE)
                                     .search();
-        SRResultList srResults = new SRResultList(wikapidiaScoreDocs.length);
-        int i = 0;
         TIntDoubleHashMap vector = getVector(localPage.getId(),localPage.getLanguage());
         List<SRResult> results = new ArrayList<SRResult>();
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.luceneId, language);
-            TIntDoubleHashMap comparison = getVector(localPageId, localPage.getLanguage());
-            if (validIds==null||validIds.contains(localPageId)){
+            if (validIds==null || validIds.contains(localPageId)) {
+                TIntDoubleHashMap comparison = getVector(localPageId, localPage.getLanguage());
                 SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
                 results.add(result);
             }

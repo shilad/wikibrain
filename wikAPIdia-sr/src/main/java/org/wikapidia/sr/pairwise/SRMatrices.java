@@ -149,7 +149,7 @@ public class SRMatrices implements Closeable {
                 return similarity.mostSimilar(this, wpId, numResults, validIds);
             }
         } finally {
-            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
+//            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
         }
     }
 
@@ -165,6 +165,7 @@ public class SRMatrices implements Closeable {
         results.sortDescending();
         return results;
     }
+
 
     public void close() {
         IOUtils.closeQuietly(featureMatrix);
@@ -262,6 +263,9 @@ public class SRMatrices implements Closeable {
             }
         } catch (DaoException e){
             throw new WikapidiaException(e);
+        }
+        if (scores == null || scores.isEmpty()) {
+            return;
         }
         LinkedHashMap<Integer,Float> linkedHashMap = new LinkedHashMap<Integer, Float>();
         for (int i : scores.keys()){

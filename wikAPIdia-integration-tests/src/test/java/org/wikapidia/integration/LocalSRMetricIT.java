@@ -6,9 +6,11 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.sr.Explanation;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
+import org.wikapidia.sr.ensemble.EnsembleMetric;
 import org.wikapidia.sr.evaluation.CrossValidation;
 import org.wikapidia.sr.utils.Dataset;
 import org.wikapidia.sr.utils.DatasetDao;
@@ -53,13 +55,34 @@ public class LocalSRMetricIT {
         testExplain("milnewitten", "President", "Obama");
     }
 
+    @Test
+    public void testEnsembleAccuracy() throws Exception {
+        testAccuracy("ensemble", 0.5, 6, 0);
+//        testExplain("ensemble", "President", "Obama");
+    }
+
+    @Test
+    public void testMostSimilarCosine() throws Exception {
+        LanguageSet lset = new LanguageSet(SIMPLE);
+        Env env = TestUtils.getEnv();
+        String path = env.getConfiguration().get().getString("sr.metric.path");
+//        EnsembleMetric sr = (EnsembleMetric) env.getConfigurator().get(LocalSRMetric.class, "ensemble");
+//        for (LocalSRMetric sr2 : sr.getMetrics()) {
+//            sr2.writeCosimilarity(path, lset, 1000);
+//        }
+        Dataset ds = getDataset(env, "wordsim353.txt");
+//        sr.trainMostSimilar(ds, 500, null);
+//        sr.writeCosimilarity(path, lset, 500);
+//        LocalSRMetric cosSr = env.getConfigurator().get(LocalSRMetric.class, "ensemble");
+
+
+        testAccuracy("mostsimilarcosine", 0.5, 6, 0);
+    }
+
     public void testAccuracy(String srName, double minPearson, double minSpearman, int maxNoPred) throws ConfigurationException, DaoException {
         Env env = TestUtils.getEnv();
         LocalSRMetric sr = env.getConfigurator().get(LocalSRMetric.class, srName);
-        DatasetDao datasetDao = new DatasetDao();
-        String datasetPath = env.getConfiguration().get().getString("sr.dataset.path");
-        datasetPath = datasetPath.replace("integration-tests/", "");
-        Dataset ds = datasetDao.read(SIMPLE, new File(datasetPath, "wordsim353.txt").toString());
+        Dataset ds = getDataset(env, "wordsim353.txt");
         CrossValidation cv = new CrossValidation();
 
         List<Dataset> allTrain = new ArrayList<Dataset>();
@@ -78,6 +101,13 @@ public class LocalSRMetricIT {
         assertTrue(cv.getPearson() >= minPearson);
         assertTrue(cv.getSpearman() >= minSpearman);
         assertTrue(cv.getMissing() + cv.getFailed() <= maxNoPred);
+    }
+
+    public Dataset getDataset(Env env, String name) throws DaoException {
+        DatasetDao datasetDao = new DatasetDao();
+        String datasetPath = env.getConfiguration().get().getString("sr.dataset.path");
+        datasetPath = datasetPath.replace("integration-tests/", "");
+        return datasetDao.read(SIMPLE, new File(datasetPath, name).toString());
     }
 
     public void testExplain(String srName, String phrase1, String phrase2) throws ConfigurationException, DaoException {

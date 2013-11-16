@@ -205,7 +205,9 @@ public interface LocalSRMetric {
     public double[][] cosimilarity(String phrases[], Language language) throws DaoException;
 
     /**
-     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class
+     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
+     * This should be considered a "cache" that speeds up underlying cosimilarity calculations.
+     *
      * @param path the directory to write the matrix in
      * @param languages the set of languages that you would like matrices for
      * @param maxHits the number of document hits you would like returned from the most similar function
