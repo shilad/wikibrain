@@ -25,9 +25,7 @@ import java.util.Collection;
  * - Dest ID collection      (LocalLink, Redirect, UniversalLink) <p>
  * - Parseable flag          (LocalLink, Redirect) <p>
  * - Algorithm ID collection (UniversalPage, UniversalLink) <p>
- *
- * TODO: Integrate limit properly throughout codebase.
- * It should be supported by all get() methods.
+ * - Limit                   (All get() methods, but no getCount() methods<p>
  *
  * Collections are specified as a collection of acceptable entries, while flags are
  * booleans set to true, false, or null. Flags and collections set to null will be
