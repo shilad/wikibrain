@@ -1,4 +1,4 @@
-package org.wikapidia.sr.cookbook;
+package org.wikapidia.cookbook.sr;
 
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.Configurator;

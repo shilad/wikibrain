@@ -1,4 +1,4 @@
-package org.wikapidia.concepts.overlap;
+package org.wikapidia.cookbook.overlap;
 
 import org.wikapidia.core.model.LocalPage;
 

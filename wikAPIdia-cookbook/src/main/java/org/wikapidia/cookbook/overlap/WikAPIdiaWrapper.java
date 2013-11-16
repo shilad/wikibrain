@@ -1,4 +1,4 @@
-package org.wikapidia.concepts.overlap;
+package org.wikapidia.cookbook.overlap;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.wikapidia.conf.ConfigurationException;

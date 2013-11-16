@@ -1,4 +1,4 @@
-package org.wikapidia.phrases.cookbook;
+package org.wikapidia.cookbook.phrases;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
