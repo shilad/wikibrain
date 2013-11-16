@@ -82,6 +82,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_PAGE).
                     where(conditions).
+                    limit(daoFilter.getLimitOrInfinity()).
                     fetchLazy(getFetchSize());
             return new SimpleSqlDaoIterable<T>(result, context) {
                 @Override

@@ -26,6 +26,9 @@ import java.util.Collection;
  * - Parseable flag          (LocalLink, Redirect) <p>
  * - Algorithm ID collection (UniversalPage, UniversalLink) <p>
  *
+ * TODO: Integrate limit properly throughout codebase.
+ * It should be supported by all get() methods.
+ *
  * Collections are specified as a collection of acceptable entries, while flags are
  * booleans set to true, false, or null. Flags and collections set to null will be
  * ignored when the search is executed.
@@ -51,6 +54,7 @@ public class DaoFilter {
     private Collection<Integer> destIds;
     private Boolean isParseable;
     private Collection<Integer> algorithmIds;
+    private Integer limit;
 
 
     public DaoFilter() {
@@ -295,6 +299,29 @@ public class DaoFilter {
      */
     public DaoFilter setAlgorithmIds(int algorithmId) {
         return setAlgorithmIds(Arrays.asList(new Integer[]{algorithmId}));
+    }
+
+    /**
+     * @param limit The maximum number of results returned by queries
+     * @return
+     */
+    public DaoFilter setLimit(int limit) {
+        this.limit = limit;
+        return this;
+    }
+
+    /**
+     * @return Limit, or null
+     */
+    public Integer getLimit() {
+        return limit;
+    }
+
+    /**
+     * @return Limit, or Integer.MAX_VALUE if it is null
+     */
+    public Integer getLimitOrInfinity() {
+        return limit == null ? Integer.MAX_VALUE : limit;
     }
 
     /**

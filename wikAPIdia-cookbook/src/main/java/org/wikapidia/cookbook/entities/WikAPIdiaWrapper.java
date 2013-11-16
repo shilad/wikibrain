@@ -134,6 +134,7 @@ public class WikAPIdiaWrapper {
                 .setLanguages(language)
                 .setRedirect(false)
                 .setDisambig(false)
+                .setLimit(n)
                 .setNameSpaces(NameSpace.ARTICLE);
         try {
             List<String> texts = new ArrayList<String>();
