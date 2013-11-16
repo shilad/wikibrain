@@ -37,26 +37,28 @@ public class WikiTextLoader {
     private final LanguageSet allowedIlls;
     private final RawPageDao rawPageDao;
     private final AtomicInteger availableThreads;
+    private final WikiTextParser.Factory parserFactory;
 
-    public WikiTextLoader(List<ParserVisitor> visitors, LanguageSet allowedIlls, RawPageDao rawPageDao, int maxThreads) {
+    public WikiTextLoader(List<ParserVisitor> visitors, LanguageSet allowedIlls, RawPageDao rawPageDao, int maxThreads, WikiTextParser.Factory parserFactory) {
         this.visitors = visitors;
         this.allowedIlls = allowedIlls;
         this.rawPageDao = rawPageDao;
         this.availableThreads = new AtomicInteger(maxThreads);
+        this.parserFactory = parserFactory;
     }
 
     public RawPageDao getDao() {
         return rawPageDao;
     }
 
-    private void load(LanguageInfo lang) throws DaoException {
+    private void load(Language lang) throws DaoException {
         int numLanguageThreads;
         synchronized (availableThreads) {
             numLanguageThreads = Math.min(availableThreads.get(), maxThreadsPerLang);
             availableThreads.getAndAdd(-numLanguageThreads);
         }
         try {
-            WikiTextDumpParser dumpParser = new WikiTextDumpParser(rawPageDao, lang, allowedIlls);
+            WikiTextDumpParser dumpParser = new WikiTextDumpParser(rawPageDao, lang, parserFactory);
             dumpParser.setMaxThreads(numLanguageThreads);
             dumpParser.parse(visitors);
         } finally {
@@ -96,6 +98,7 @@ public class WikiTextLoader {
         LocalLinkDao llDao = conf.get(LocalLinkDao.class);
         LocalCategoryMemberDao lcmDao = conf.get(LocalCategoryMemberDao.class);
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
+        WikiTextParser.Factory parserFactory = conf.get(WikiTextParser.Factory.class);
 
         ParserVisitor linkVisitor = new LocalLinkVisitor(llDao, lpDao, metaDao);
         ParserVisitor catVisitor = new LocalCategoryVisitor(lpDao, lcmDao, metaDao);
@@ -104,7 +107,7 @@ public class WikiTextLoader {
         visitors.add(linkVisitor);
         visitors.add(catVisitor);
 
-        final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao, env.getMaxThreads());
+        final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao, env.getMaxThreads(), parserFactory);
 
         if(cmd.hasOption("d")) {
             llDao.clear();
@@ -121,7 +124,7 @@ public class WikiTextLoader {
                 new Procedure<Language>() {
                     @Override
                     public void call(Language lang) throws Exception {
-                        loader.load(LanguageInfo.getByLanguage(lang));
+                        loader.load(lang);
                     }
                 });
 

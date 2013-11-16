@@ -3,6 +3,7 @@ package org.wikapidia.parser.wiki;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.RawPageDao;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
@@ -10,39 +11,29 @@ import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpThreadUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  */
-public class
-        WikiTextDumpParser {
+public class WikiTextDumpParser {
     public static final Logger LOG = Logger.getLogger(WikiTextDumpParser.class.getName());
 
     // maximum number of raw pages in the parsing buffer
     public static final int MAX_QUEUE = 1000;
 
-    private final LanguageInfo language;
+    private final Language language;
     private final RawPageDao rawPageDao;
-    private final LanguageSet allowedLanguages;
+    private final WikiTextParser.Factory parserFactory;
     private int maxThreads = WpThreadUtils.getMaxThreads();
 
 
-    public WikiTextDumpParser(RawPageDao rawPageDao, LanguageInfo language) {
-        this(rawPageDao, language, null);
-    }
-
-    public WikiTextDumpParser(RawPageDao rawPageDao, LanguageInfo language, LanguageSet allowedIllLangs) {
+    public WikiTextDumpParser(RawPageDao rawPageDao, Language language, WikiTextParser.Factory parserFactory) {
         this.language = language;
-        this.allowedLanguages = allowedIllLangs;
         this.rawPageDao = rawPageDao;
+        this.parserFactory = parserFactory;
     }
 
     public void setMaxThreads(int maxThreads) {
@@ -51,7 +42,7 @@ public class
 
     /**
      * Parses the input file completely. First splits the file into individual PageXmls via
-     * DumpPageXmlParser, then parses each page via WikiTextParser
+     * DumpPageXmlParser, then parses each page via JwplWikiTextParser
      *
      * @param visitor extracts data from side effects
      */
@@ -61,7 +52,7 @@ public class
 
     public synchronized void parse(List<ParserVisitor> visitors) throws DaoException {
 
-        DaoFilter daoFilter = new DaoFilter().setLanguages(language.getLanguage());
+        DaoFilter daoFilter = new DaoFilter().setLanguages(language);
         ParallelForEach.iterate(
                 rawPageDao.get(daoFilter).iterator(),
                 maxThreads,
@@ -87,12 +78,12 @@ public class
 
             WikiTextParser parser = parserHolder.get();
             if (parser == null) {
-                parser = new WikiTextParser(language, allowedLanguages, visitors);
+                parser = parserFactory.create(language);
                 parserHolder.set(parser);
             }
 
             try {
-                parser.parse(rp);
+                parser.parse(rp, visitors);
             } catch (Exception e) {
                 String title = "unknown";
                 LOG.log(Level.WARNING, "exception while parsing " + title, e);

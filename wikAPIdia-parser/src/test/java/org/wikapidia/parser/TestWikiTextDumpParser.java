@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.dao.sql.*;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.parser.wiki.*;
 import org.wikapidia.core.model.RawPage;
 
@@ -27,7 +28,8 @@ public class TestWikiTextDumpParser {
         allowedIllLangs.add("simple");
 
         // Scans for ILLs in all languages
-        WikiTextDumpParser wtdp = new WikiTextDumpParser(null, null);
+        WikiTextParser.Factory factory = new JwplWikiTextParser.JwplFactory(new LanguageSet(allowedIllLangs));
+        WikiTextDumpParser wtdp = new WikiTextDumpParser(null, null, factory);
 
         // Scans for ILLs in languages specified above only
         //WikiTextDumpParser wtdp = new WikiTextDumpParser(EN_DUMP, EN, allowedIllLangs);
