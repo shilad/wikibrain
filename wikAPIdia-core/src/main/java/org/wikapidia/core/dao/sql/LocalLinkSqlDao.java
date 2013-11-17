@@ -73,6 +73,7 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_LINK).
                     where(conditions).
+                    limit(daoFilter.getLimitOrInfinity()).
                     fetchLazy(getFetchSize());
             return new SimpleSqlDaoIterable<LocalLink>(result, context) {
                 @Override

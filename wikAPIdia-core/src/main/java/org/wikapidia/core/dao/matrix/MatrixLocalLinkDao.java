@@ -232,11 +232,13 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
         // collect link set
         List<LocalLink> links = new ArrayList<LocalLink>();
+        int limit = daoFilter.getLimitOrInfinity();
         if (daoFilter.getSourceIds() != null) {
             for (int langId : daoFilter.getLangIds()) {
                 for (int srcId : daoFilter.getSourceIds()) {
                     for (LocalLink ll : getLinks(Language.getById(langId), srcId, true)) {
                         links.add(ll);
+                        if (links.size() >= limit) break;
                     }
                 }
             }
@@ -245,6 +247,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
                 for (int destId : daoFilter.getDestIds()) {
                     for (LocalLink ll : getLinks(Language.getById(langId), destId, false)) {
                         links.add(ll);
+                        if (links.size() >= limit) break;
                     }
                 }
             }

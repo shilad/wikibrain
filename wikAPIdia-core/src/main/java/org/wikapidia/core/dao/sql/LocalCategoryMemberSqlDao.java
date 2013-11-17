@@ -75,6 +75,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             Cursor<Record> result = context.select().
                     from(Tables.CATEGORY_MEMBERS).
                     where(conditions).
+                    limit(daoFilter.getLimitOrInfinity()).
                     fetchLazy(getFetchSize());
             return new SimpleSqlDaoIterable<LocalCategoryMember>(result, context) {
                 @Override

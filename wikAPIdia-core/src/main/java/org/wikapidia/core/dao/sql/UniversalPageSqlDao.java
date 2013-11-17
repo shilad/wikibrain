@@ -76,6 +76,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Cursor<Record> result = context.select()
                     .from(Tables.UNIVERSAL_PAGE)
                     .where(conditions)
+                    .limit(daoFilter.getLimitOrInfinity())
                     .fetchLazy(getFetchSize());
             Set<int[]> pages = new HashSet<int[]>();
             for (Record record : result) {

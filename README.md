@@ -149,7 +149,7 @@ We could also make these changes directly in Java, without the config file:
 ```java
 Env env = new EnvBuilder()
         .setMaxThreads(8)
-        .setBaseDir('/my/path/to/wikAPIdia')
-        .setProperty('phrases.analyzer.default', 'anchortext')
+        .setBaseDir("/my/path/to/wikAPIdia")
+        .setProperty("phrases.analyzer.default", "anchortext")
         .build();
 ```
