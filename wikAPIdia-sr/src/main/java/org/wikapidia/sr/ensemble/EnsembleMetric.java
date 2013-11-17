@@ -454,12 +454,12 @@ public class EnsembleMetric extends BaseLocalSRMetric{
                 sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("mostsimilarnormalizer")), language);
             }
 
-            try {
-                sr.readCosimilarity(getConfigurator().getConf().get().getString("sr.metric.path"),langs);
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
-            }
+//            try {
+//                sr.readCosimilarity(getConfigurator().getConf().get().getString("sr.metric.path"),langs);
+//            } catch (IOException e) {
+//                System.out.println(e.getMessage());
+//                e.printStackTrace();
+//            }
 
             return sr;
         }
