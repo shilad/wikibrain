@@ -54,10 +54,17 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     }
     
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
-        Iterable<LocalLink> links = LocalLinkLiveUtils.parseLinks(getLinkJson(language, sourceId, true), language, sourceId, true);
-        for (LocalLink link : links) {
-            if (link.getDestId() == destId) {
-                return link;
+        //get list of pageids and titles of all outlinks from sourceId
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("&generator=links&pageids=" + sourceId, language, "pages", false);
+        LiveAPIQuery query = builder.build();
+        List<String> linkTitles = query.getStringsFromQueryResult("title");
+        List<Integer> linkPageIds = query.getIntsFromQueryResult("pageid");
+        
+        //check all outlinks from sourceId to find one that matches destId
+        for (int i = 0; i < linkPageIds.size(); i++) {
+            int pageId = linkPageIds.get(i);
+            if (pageId == destId) {
+                return new LocalLink(language, linkTitles.get(i), sourceId, pageId, true, -1, true, null);
             }
         }
         throw new DaoException("No link with given sourceId and destId found");
@@ -70,25 +77,27 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     }
 
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException {
-        return LocalLinkLiveUtils.parseLinks(getLinkJson(language, localId, outlinks), language, localId, outlinks);
-    }
+        List<LocalLink> links = new ArrayList<LocalLink>();
+        String queryArgs = outlinks ? "&generator=links&pageids=" + localId : "&list=backlinks&blpageid=" + localId;
+        String linkType = outlinks ? "pages" : "backlinks";
+        
+        /*inlink information is returned as an array, but outlink information is returned as a JSON object
+         *so parseArray in LiveAPIQuery is true iff "outlinks" is false*/
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder(queryArgs, language, linkType, !outlinks);
+        LiveAPIQuery query = builder.build();
+        //query for outlinks from local id, return as list of titles and pageids
+        List<String> linkTitles = query.getStringsFromQueryResult("title");
+        List<Integer> linkPageIds = query.getIntsFromQueryResult("pageid");
 
-    /**
-     * Query the wikipedia server for links from or to a specific page, specified by sourceId
-     * Returns JSON results of the query
-     * @param language
-     * @param sourceId
-     * @param outlinks
-     * @return
-     * @throws DaoException
-     */
-    private String getLinkJson(Language language, int sourceId, boolean outlinks) throws DaoException {
-        String http = "http://";
-        String host = ".wikipedia.org";
-        String prop = outlinks ? "generator=links" : "list=backlinks";
-        String pageIdRequest = outlinks ? "pageids=" + sourceId : "blpageid=" + sourceId;
-        String query = http + language.getLangCode() + host + "/w/api.php?action=query&" + prop + "&format=json&" + pageIdRequest;
-        return LiveUtils.getInfoByQuery(query);
+        //create a link for each title and pageid returned from the query
+        for (int i = 0; i < linkTitles.size(); i++) {
+            String anchorText = linkTitles.get(i);
+            Integer pageId = linkPageIds.get(i);
+            LocalLink link = new LocalLink(language, anchorText, localId, pageId, outlinks, -1, true, null);
+            links.add(link);
+        }
+
+        return links;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalLinkDao> {
