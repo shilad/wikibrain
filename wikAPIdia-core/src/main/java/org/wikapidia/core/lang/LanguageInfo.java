@@ -240,6 +240,9 @@ public class LanguageInfo {
 
     private static List<String> csv2List(String csv){
         if (csv.length() > 0){
+            if (csv.charAt(0)=='"'&&csv.charAt(csv.length()-1)=='"'){
+                csv = csv.substring(1,csv.length()-1);
+            }
             return Arrays.asList(csv.split(","));
         }else{
             return new ArrayList<String>();
