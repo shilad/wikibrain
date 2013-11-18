@@ -28,13 +28,21 @@ public class TestSparseMatrix {
         File tmp = File.createTempFile("matrix", null);
         SparseMatrixWriter.write(tmp, srcRows.iterator());
     }
-
     @Test
     public void testReadWrite() throws IOException {
         File tmp = File.createTempFile("matrix", null);
         SparseMatrixWriter.write(tmp, srcRows.iterator());
         Matrix m1 = new SparseMatrix(tmp, Integer.MAX_VALUE, NUM_ROWS*20);
         Matrix m2 = new SparseMatrix(tmp, 1, NUM_ROWS*20);
+    }
+
+    @Test
+    public void testExpandPageForHeader() throws IOException {
+        List<SparseMatrixRow> shortRows = TestUtils.createSparseTestMatrixRows(1000, 100, false);
+        File tmp = File.createTempFile("matrix", null);
+        SparseMatrixWriter.write(tmp, shortRows.iterator());
+        Matrix m1 = new SparseMatrix(tmp, Integer.MAX_VALUE, 200*12);
+        assertEquals(1000, m1.getNumRows());
     }
 
     @Test

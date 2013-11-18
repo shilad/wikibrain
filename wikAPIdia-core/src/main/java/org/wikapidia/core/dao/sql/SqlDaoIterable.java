@@ -69,9 +69,9 @@ public abstract class SqlDaoIterable<E, T> implements Iterable<E> {
     public void close() {
         usedUp = true;
         finished = true;
-        while (iterator.hasNext()) {
-            iterator.next();
-        }
+//        while (iterator.hasNext()) {
+//            iterator.next();
+//        }
         if (!result.isClosed()) {
             result.close();
         }

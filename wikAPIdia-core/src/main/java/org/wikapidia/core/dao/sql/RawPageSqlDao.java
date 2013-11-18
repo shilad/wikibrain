@@ -65,6 +65,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
         Collection<Condition> conditions = getConditions(daoFilter);
         Cursor<Record> result = context.selectFrom(Tables.RAW_PAGE)
                 .where(conditions)
+                .limit(daoFilter.getLimitOrInfinity())
                 .fetchLazy(getFetchSize());
             return new SimpleSqlDaoIterable<RawPage>(result, context) {
                 @Override

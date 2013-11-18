@@ -116,6 +116,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
             Cursor<Record> result = context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
                     .where(conditions)
+                    .limit(daoFilter.getLimitOrInfinity())
                     .fetchLazy(getFetchSize());
             return new SimpleSqlDaoIterable<UniversalLink>(result, context) {
 

@@ -59,6 +59,11 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
         }
         this.vconf = new ValueConf(buffer.getFloat(4), buffer.getFloat(8));
         int numRows = buffer.getInt(12);
+        int headerSize = 16 + 12*numRows;
+        if (headerSize > maxPageSize) {
+            info("maxPageSize not large enough for entire header. Resizing to " + headerSize);
+            buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, headerSize);
+        }
         debug("reading offsets for " + numRows + " rows");
         rowIds = new int[numRows];
         for (int i = 0; i < numRows; i++) {

@@ -236,16 +236,14 @@ public class WikiTextParser {
     }
 
     private void parseCategory(RawPage xml, ParsedPage pp){
-        // handle links
-        for (Link catMem : pp.getCategories()){
-            try {
-                Title destTitle = new Title(catMem.getTarget(), lang);
-                // TODO: ensure title is a category
-                ParsedLocation location = new ParsedLocation(xml, -1, -1, catMem.getSrcSpan().getStart());
-                visitLink(location, destTitle, catMem.getText(), null);
-            } catch (WikapidiaException e) {
-                LOG.log(Level.WARNING, String.format("Could not parse/store link\t%s\t%s", xml, catMem.toString()), e);
-            }
+        // handle categories
+        for (Link cat : pp.getCategories()){
+            Title destTitle = new Title(cat.getTarget(), lang);
+            // TODO: ensure title is a category
+            ParsedCategory pc = new ParsedCategory();
+            pc.location = new ParsedLocation(xml, -1, -1, cat.getSrcSpan().getStart());
+            pc.category = destTitle;
+            visitCategory(pc);
         }
 
         // handle ILLs
