@@ -15,7 +15,9 @@ import org.wikapidia.core.lang.Language;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * utility class used by LiveAPI DAOs to query the wikipedia server and retrieve results in a useful format
@@ -59,7 +61,7 @@ public class LiveAPIQuery {
         }
 
         switch (builder.queryType) {
-            case INFO:
+            case 0: //INFO:
                 this.queryAction = "prop";
                 this.queryType = "info";
                 this.queryPagePrefix = "";
@@ -68,7 +70,7 @@ public class LiveAPIQuery {
                 this.queryResultDataSection = "pages";
                 //this.parser = new ObjectQueryParser();
                 break;
-            case CATEGORYMEMBERS:
+            case 1: //CATEGORYMEMBERS:
                 this.queryAction = "list";
                 this.queryType = "categorymembers";
                 this.queryPagePrefix = "cm";
@@ -77,7 +79,7 @@ public class LiveAPIQuery {
                 this.queryResultDataSection = "categorymembers";
                 //this.parser = new ArrayQueryParser();
                 break;
-            case CATEGORIES:
+            case 2: //CATEGORIES:
                 this.queryAction = "prop";
                 this.queryType = "categories";
                 this.queryPagePrefix = "";
@@ -86,7 +88,7 @@ public class LiveAPIQuery {
                 this.queryResultDataSection = "pages";
                 //this.parser = new ObjectQueryParser();
                 break;
-            case LINKS:
+            case 3: //LINKS:
                 this.queryAction = "generator";
                 this.queryType = "links";
                 this.queryPagePrefix = "";
@@ -95,7 +97,7 @@ public class LiveAPIQuery {
                 this.queryResultDataSection = "pages";
                 //this.parser = new ObjectQueryParser();
                 break;
-            case BACKLINKS:
+            case 4: //BACKLINKS:
                 this.queryAction = "list";
                 this.queryType = "backlinks";
                 this.queryPagePrefix = "bl";
@@ -121,7 +123,7 @@ public class LiveAPIQuery {
         String http = "http://";
         String host = ".wikipedia.org";
         String queryUrl = http + lang.getLangCode() + host + "/w/api.php?action=query&format=" + outputFormat +
-                "&" + queryAction + "=" + queryType + "&" + queryPagePrefix + "limit=500";
+                "&" + queryAction + "=" + queryType + "&" + queryPrefix + "limit=500";
         if (this.title != null) {
             queryUrl += "&" + queryPagePrefix + "title" + (pluralPage ? "s" : "") + "=" + title;
         }
@@ -148,16 +150,14 @@ public class LiveAPIQuery {
      */    
     public List<String> getStringsFromQueryResult(String valueType) throws DaoException {
         List<String> values = new ArrayList<String>();
-        String queryContinue;
+        String queryContinue = "";
         boolean hasContinue;
         do {
-            getRawQueryText();
+            getRawQueryText(queryUrl + queryContinue);
             parser.getQueryReturnValuesAsStrings(queryResult, queryResultDataSection, valueType, values);
             queryContinue = parser.getContinue(queryResult, queryType, queryPrefix);
-            hasContinue = (queryContinue.equals(""));
-            if (hasContinue) {
-                queryUrl += "&" + queryPrefix + "continue=" + queryContinue;
-            }
+            hasContinue = (!queryContinue.equals(""));
+            queryContinue = "&" + queryPrefix + "continue=" + queryContinue;
         }
         while (hasContinue);
         return values;
@@ -171,16 +171,14 @@ public class LiveAPIQuery {
      */
     public List<Integer> getIntsFromQueryResult(String valueType) throws DaoException {
         List<Integer> values = new ArrayList<Integer>();
-        String queryContinue;
+        String queryContinue = "";
         boolean hasContinue;
         do {
-            getRawQueryText();
+            getRawQueryText(queryUrl + queryContinue);
             parser.getQueryReturnValuesAsInts(queryResult, queryResultDataSection, valueType, values);
             queryContinue = parser.getContinue(queryResult, queryType, queryPrefix);
-            hasContinue = (queryContinue.equals(""));
-            if (hasContinue) {
-                queryUrl += "&" + queryPrefix + "continue=" + queryContinue;
-            }
+            hasContinue = (!queryContinue.equals(""));
+            queryContinue = "&" + queryPrefix + "continue=" + queryContinue;
         }
         while (hasContinue);
         return values;
@@ -192,12 +190,12 @@ public class LiveAPIQuery {
      * @return
      * @throws org.wikapidia.core.dao.DaoException
      */
-    private void getRawQueryText() throws DaoException {
+    private void getRawQueryText(String url) throws DaoException {
         String info = new String();
         InputStream inputStr;
 
         try{
-            inputStr = new URL(queryUrl).openStream();
+            inputStr = new URL(url).openStream();
             try {
                 info = IOUtils.toString(inputStr);
             }
@@ -218,16 +216,28 @@ public class LiveAPIQuery {
     //This class uses the builder method in anticipation of increased complexity over time
     public static class LiveAPIQueryBuilder {
         private final Language lang;
-        private final QueryType queryType;
+        //private final QueryType queryType;
+        private final Integer queryType;
         private Boolean redirects;
         private String title;
         private Integer pageid;
         private String filterredir;
         private String from;
+        private Map<String, Integer> queryTypeMap = new HashMap<String, Integer>();
 
-        public LiveAPIQueryBuilder(QueryType queryType, Language lang) {
-            this.queryType = queryType;
+        public LiveAPIQueryBuilder(String queryType, Language lang) {
+            initQueryTypeMap();
+            this.queryType = queryTypeMap.get(queryType);
             this.lang = lang;
+        }
+
+        private void initQueryTypeMap() {
+            queryTypeMap.put("INFO", 0);
+            queryTypeMap.put("CATEGORYMEMBERS", 1);
+            queryTypeMap.put("CATEGORIES", 2);
+            queryTypeMap.put("LINKS", 3);
+            queryTypeMap.put("BACKLINKS", 4);
+            queryTypeMap.put("ALLPAGES", 5);
         }
 
         public LiveAPIQueryBuilder setRedirects(Boolean redirects) {

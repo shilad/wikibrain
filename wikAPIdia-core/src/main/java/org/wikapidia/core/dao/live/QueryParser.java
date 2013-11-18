@@ -72,7 +72,11 @@ public class QueryParser {
      * @return JSON object representing the query result
      */
     public JsonObject parseQueryObject(String text, String value) {
-        return jp.parse(text).getAsJsonObject().get(value).getAsJsonObject();
+        JsonElement elem1 = jp.parse(text);
+        JsonObject obj1 = elem1.getAsJsonObject();
+        JsonElement elem2 = obj1.get(value);
+        JsonObject obj2 = elem2.getAsJsonObject();
+        return obj2;
     }
 
     public JsonArray parseJsonArray(String text) {
@@ -118,30 +122,58 @@ public class QueryParser {
      */
     private void getStringsFromJsonObject(JsonObject jo, String valueType, List<String> values) {
         Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
+        String value;
         for (Map.Entry<String, JsonElement> entry: valueSet) {
-            String value = entry.getValue().getAsJsonObject().get(valueType).getAsString();
+            JsonElement valueElem = entry.getValue().getAsJsonObject().get(valueType);
+            if (valueElem == null) {
+                value = "";
+            }
+            else {
+                value = valueElem.getAsString();
+            }
             values.add(value);
         }
     }
 
     private void getStringsFromJsonArray(JsonArray ja, String valueType, List<String> values) {
+        String value;
         for (JsonElement elem : ja) {
-            String value = elem.getAsJsonObject().get(valueType).getAsString();
+            JsonElement valueElem = elem.getAsJsonObject().get(valueType);
+            if (valueElem == null) {
+                value = "";
+            }
+            else {
+                value = valueElem.getAsString();
+            }
             values.add(value);
         }
     }
 
     private void getIntsFromJsonObject(JsonObject jo, String valueType, List<Integer> values) {
         Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
+        int value;
         for (Map.Entry<String, JsonElement> entry: valueSet) {
-            Integer value = entry.getValue().getAsJsonObject().get(valueType).getAsInt();
+            JsonElement valueElem = entry.getValue().getAsJsonObject().get(valueType);
+            if (valueElem == null) {
+                value = -1;
+            }
+            else {
+                value = valueElem.getAsInt();
+            }
             values.add(value);
         }
     }
 
     private void getIntsFromJsonArray(JsonArray ja, String valueType, List<Integer> values) {
+        int value;
         for (JsonElement elem : ja) {
-            Integer value = elem.getAsJsonObject().get(valueType).getAsInt();
+            JsonElement valueElem = elem.getAsJsonObject().get(valueType);
+            if (valueElem == null) {
+                value = -1;
+            }
+            else {
+                value = valueElem.getAsInt();
+            }
             values.add(value);
         }
     }

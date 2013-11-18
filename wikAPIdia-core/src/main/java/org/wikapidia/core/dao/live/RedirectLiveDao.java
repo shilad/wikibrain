@@ -59,7 +59,8 @@ public class RedirectLiveDao implements RedirectDao {
 
     public Integer resolveRedirect(Language lang, int id) throws DaoException {
         //get pageid of page that id redirects to
-        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("&prop=info&redirects&pageids=" + id, lang, "pages", false);
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang);
+        builder.setPageid(id).setRedirects(true);
         LiveAPIQuery query = builder.build();
         int redirectId = query.getIntsFromQueryResult("pageid").get(0);
         if (redirectId != id) {
@@ -69,7 +70,8 @@ public class RedirectLiveDao implements RedirectDao {
     }
 
     public boolean isRedirect(Language lang, int id) throws DaoException {
-        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("&prop=info&pageids=" + id, lang, "pages", false);
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang);
+        builder.setPageid(id);
         LiveAPIQuery query = builder.build();
         String redirect = query.getStringsFromQueryResult("pageid").get(0);
         if (redirect == null) {
@@ -85,16 +87,16 @@ public class RedirectLiveDao implements RedirectDao {
 
 
     public List<Integer> getRedirectsFromId(Language lang, int localId) throws DaoException {
-        String queryArgs = "&list=backlinks&blfilterredir=redirects&blpageid=" + localId;
-        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder(queryArgs, lang, "backlinks", true);
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("BACKLINKS", lang);
+        builder.setPageid(localId).setFilterredir("redirects");
         LiveAPIQuery query = builder.build();
         return query.getIntsFromQueryResult("pageid");
     }
 
     public TIntIntMap getAllRedirectIdsToDestIds(Language lang) throws DaoException {
         TIntIntMap redirects = new TIntIntHashMap();
-        String queryArgs = "&list=allpages&apfrom=&apfilterredir=redirects";
-        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder(queryArgs, lang, "allpages", true);
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLPAGES", lang);
+        builder.setFilterredir("redirects").setFrom("");
         LiveAPIQuery query = builder.build();
         List<Integer> redirectIds = query.getIntsFromQueryResult("pageid");
 

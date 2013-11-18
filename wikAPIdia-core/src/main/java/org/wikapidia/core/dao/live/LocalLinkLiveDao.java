@@ -1,17 +1,13 @@
 package org.wikapidia.core.dao.live;
 
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+
 import com.typesafe.config.Config;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -55,7 +51,8 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
         //get list of pageids and titles of all outlinks from sourceId
-        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("&generator=links&pageids=" + sourceId, language, "pages", false);
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("LINKS", language);
+        builder.setPageid(sourceId);
         LiveAPIQuery query = builder.build();
         List<String> linkTitles = query.getStringsFromQueryResult("title");
         List<Integer> linkPageIds = query.getIntsFromQueryResult("pageid");
@@ -78,13 +75,16 @@ public class LocalLinkLiveDao implements LocalLinkDao {
 
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException {
         List<LocalLink> links = new ArrayList<LocalLink>();
-        String queryArgs = outlinks ? "&generator=links&pageids=" + localId : "&list=backlinks&blpageid=" + localId;
-        String linkType = outlinks ? "pages" : "backlinks";
-        
-        /*inlink information is returned as an array, but outlink information is returned as a JSON object
-         *so parseArray in LiveAPIQuery is true iff "outlinks" is false*/
-        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder(queryArgs, language, linkType, !outlinks);
+        LiveAPIQuery.LiveAPIQueryBuilder builder;
+        if (outlinks) {
+            builder = new LiveAPIQuery.LiveAPIQueryBuilder("LINKS", language);
+        }
+        else {
+            builder = new LiveAPIQuery.LiveAPIQueryBuilder("BACKLINKS", language);
+        }
+        builder.setPageid(localId);
         LiveAPIQuery query = builder.build();
+
         //query for outlinks from local id, return as list of titles and pageids
         List<String> linkTitles = query.getStringsFromQueryResult("title");
         List<Integer> linkPageIds = query.getIntsFromQueryResult("pageid");
