@@ -8,10 +8,6 @@ package org.wikapidia.core.dao.live;
  * To change this template use File | Settings | File Templates.
  */
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
@@ -20,8 +16,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * utility class used by LiveAPI DAOs to query the wikipedia server and retrieve results in a useful format
@@ -36,8 +30,7 @@ public class LiveAPIQuery {
     private final String queryPrefix;
     private final Boolean pluralPage;
     private final String queryResultDataSection; //section of the query result containing the data of interest
-    private final QueryParser parser;
-    private final boolean parseArray; //if true, the queryResultDataSection is parsed as a JSON array; parsed as a JSON object if false
+    private QueryParser parser = new QueryParser();
     private Boolean redirects;
     private String title;
     private Integer pageid;
@@ -73,7 +66,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "in";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                this.parser = new ObjectQueryParser();
+                //this.parser = new ObjectQueryParser();
                 break;
             case CATEGORYMEMBERS:
                 this.queryAction = "list";
@@ -82,7 +75,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "cm";
                 this.pluralPage = false;
                 this.queryResultDataSection = "categorymembers";
-                this.parser = new ArrayQueryParser();
+                //this.parser = new ArrayQueryParser();
                 break;
             case CATEGORIES:
                 this.queryAction = "prop";
@@ -91,7 +84,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "cl";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                this.parser = new ObjectQueryParser();
+                //this.parser = new ObjectQueryParser();
                 break;
             case LINKS:
                 this.queryAction = "generator";
@@ -100,7 +93,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "gpl";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                this.parser = new ObjectQueryParser();
+                //this.parser = new ObjectQueryParser();
                 break;
             case BACKLINKS:
                 this.queryAction = "list";
@@ -109,7 +102,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "bl";
                 this.pluralPage = false;
                 this.queryResultDataSection = "backlinks";
-                this.parser = new ArrayQueryParser();
+                //this.parser = new ArrayQueryParser();
                 break;
             default:    //allpages
                 this.queryAction = "list";
@@ -118,7 +111,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "ap";
                 this.pluralPage = false;
                 this.queryResultDataSection = "allpages";
-                this.parser = new ArrayQueryParser();
+                //this.parser = new ArrayQueryParser();
                 break;
         }
         constructQueryUrl();
@@ -154,19 +147,20 @@ public class LiveAPIQuery {
      * @throws DaoException
      */    
     public List<String> getStringsFromQueryResult(String valueType) throws DaoException {
-        if (queryResult.equals("")) {
+        List<String> values = new ArrayList<String>();
+        String queryContinue;
+        boolean hasContinue;
+        do {
             getRawQueryText();
+            parser.getQueryReturnValuesAsStrings(queryResult, queryResultDataSection, valueType, values);
+            queryContinue = parser.getContinue(queryResult, queryType, queryPrefix);
+            hasContinue = (queryContinue.equals(""));
+            if (hasContinue) {
+                queryUrl += "&" + queryPrefix + "continue=" + queryContinue;
+            }
         }
-        //get JSON object representing query reply
-        JsonObject queryReplyObject = parseQueryObject(queryResult);
-        
-        //parse desired values from JSON object into string list
-        if (parseArray) {
-            return getStringsFromJsonArray(getJsonArrayFromQueryObject(queryReplyObject, queryResultDataSection), valueType);
-        }
-        else {
-            return getStringsFromJsonObject(getJsonObjectFromQueryObject(queryReplyObject, queryResultDataSection), valueType);
-        }
+        while (hasContinue);
+        return values;
     }
 
     /**
@@ -176,19 +170,20 @@ public class LiveAPIQuery {
      * @throws DaoException
      */
     public List<Integer> getIntsFromQueryResult(String valueType) throws DaoException {
-        if (queryResult.equals("")) {
+        List<Integer> values = new ArrayList<Integer>();
+        String queryContinue;
+        boolean hasContinue;
+        do {
             getRawQueryText();
+            parser.getQueryReturnValuesAsInts(queryResult, queryResultDataSection, valueType, values);
+            queryContinue = parser.getContinue(queryResult, queryType, queryPrefix);
+            hasContinue = (queryContinue.equals(""));
+            if (hasContinue) {
+                queryUrl += "&" + queryPrefix + "continue=" + queryContinue;
+            }
         }
-        //get JSON object representing query reply
-        JsonObject queryReplyObject = parseQueryObject(queryResult);
-        
-        //parse desired values from JSON object into int list
-        if (parseArray) {
-            return getIntsFromJsonArray(getJsonArrayFromQueryObject(queryReplyObject, queryResultDataSection), valueType);
-        }
-        else {
-            return getIntsFromJsonObject(getJsonObjectFromQueryObject(queryReplyObject, queryResultDataSection), valueType);
-        }
+        while (hasContinue);
+        return values;
     }
 
     /**
@@ -218,98 +213,6 @@ public class LiveAPIQuery {
         }
 
         queryResult = info;
-    }
-
-     /**
-     *
-     * @param text raw query output JSON
-     * @return JSON object representing the query result
-     */
-    private JsonObject parseQueryObject(String text) {
-        JsonParser jp = new JsonParser();
-        return jp.parse(text).getAsJsonObject().get("query").getAsJsonObject();
-    }
-
-    /**
-     * utility method used to get a JSON object containing desired query information
-     * @param queryObject
-     * @param newObjectKey text representing the key of the new object to return
-     * @return a new JSON object within the input queryObject
-     * @throws DaoException
-     */
-    private JsonObject getJsonObjectFromQueryObject(JsonObject queryObject, String newObjectKey) throws DaoException {
-        if (queryObject.get(newObjectKey).isJsonObject()) {
-            return queryObject.get(newObjectKey).getAsJsonObject();
-        }
-        else {
-            throw new DaoException("Requested JSON can't be parsed into object");
-        }
-    }
-
-    /**
-     * utility method used to get a JSON array containing desired query information
-     * @param queryObject
-     * @param arrayRoot text representing the name of the array
-     * @return a JSON array within the input queryObject
-     * @throws DaoException
-     */
-    private JsonArray getJsonArrayFromQueryObject(JsonObject queryObject, String arrayRoot) throws DaoException {
-        if (queryObject.get(arrayRoot).isJsonArray()) {
-            return queryObject.get(arrayRoot).getAsJsonArray();
-        }
-        else {
-            throw new DaoException("Requested JSON can't be parsed into array");
-        }
-    }
-
-    /**
-     * The following four methods take either a JSON object (jo) or JSON array (ja) containing the desired information
-     * of the query result. This information is returned as a list of string or int values. The paramater "valueType"
-     * specifies which things in the query result should be returned in the list
-     */
-
-    private List<String> getStringsFromJsonObject(JsonObject jo, String valueType) {
-        List<String> values = new ArrayList<String>();
-        Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
-
-        for (Map.Entry<String, JsonElement> entry: valueSet) {
-            String value = entry.getValue().getAsJsonObject().get(valueType).getAsString();
-            values.add(value);
-        }
-        return values;
-    }
-
-    private List<String> getStringsFromJsonArray(JsonArray ja, String valueType) {
-        List<String> values = new ArrayList<String>();
-
-        for (JsonElement elem : ja) {
-            String value = elem.getAsJsonObject().get(valueType).getAsString();
-            values.add(value);
-        }
-
-        return values;
-    }
-
-    private List<Integer> getIntsFromJsonObject(JsonObject jo, String valueType) {
-        List<Integer> values = new ArrayList<Integer>();
-        Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
-
-        for (Map.Entry<String, JsonElement> entry: valueSet) {
-            Integer value = entry.getValue().getAsJsonObject().get(valueType).getAsInt();
-            values.add(value);
-        }
-        return values;
-    }
-
-    private List<Integer> getIntsFromJsonArray(JsonArray ja, String valueType) {
-        List<Integer> values = new ArrayList<Integer>();
-
-        for (JsonElement elem : ja) {
-            Integer value = elem.getAsJsonObject().get(valueType).getAsInt();
-            values.add(value);
-        }
-
-        return values;
     }
 
     //This class uses the builder method in anticipation of increased complexity over time
