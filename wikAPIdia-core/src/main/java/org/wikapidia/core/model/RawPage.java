@@ -26,6 +26,7 @@ public class RawPage {
     private final boolean isRedirect;
     private final boolean isDisambig;
     private String redirectTitle = null;
+    private String plainText = null;
 
     public RawPage(int localId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace) {
         this.title = new Title(title, LanguageInfo.getByLanguage(lang));
@@ -104,9 +105,14 @@ public class RawPage {
     public String getPlainText() {
         if (body.isEmpty()) {
             return "";
-        } else {
-            return new MediaWikiParserFactory().createParser().parse(body).getText();
+        } else if (this.plainText == null) {
+            this.plainText = new MediaWikiParserFactory().createParser().parse(body).getText();
         }
+        return this.plainText;
+    }
+    
+    public void setPlainText(String plainText) {
+    	this.plainText = plainText;
     }
 
     public String toString(){
