@@ -8,6 +8,15 @@
     <artifactId>wikAPIdia-parser</artifactId>
     <version>0.1-SNAPSHOT</version>
 
+	<repositories>
+		<!-- for new parser -->
+		<repository>
+			<id>WebSAIL-Repo</id>
+			<name>WebSAIL Repository</name>
+			<url>http://chandra.cs.northwestern.edu:8008/artifactory/repo/</url>
+		</repository>
+	</repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.wikapidia</groupId>
@@ -19,6 +28,11 @@
             <artifactId>akiban-sql-parser</artifactId>
             <version>1.0.15</version>
         </dependency>
+		<dependency>
+		    <groupId>WebSAIL</groupId>
+		    <artifactId>WebSAILWikiParser</artifactId>
+		    <version>0.1.0-20131119.002423-1</version>
+		</dependency>
     </dependencies>
 
     <build>
