@@ -15,9 +15,20 @@
 			<name>WebSAIL Repository</name>
 			<url>http://chandra.cs.northwestern.edu:8008/artifactory/repo/</url>
 		</repository>
+		<!-- for Sweble Engine -->
+		<repository>
+			<id>osr-public-releases</id>
+			<name>OSR Public Releases</name>
+			<url>http://mojo.informatik.uni-erlangen.de/nexus/content/repositories/public</url>
+		</repository>
 	</repositories>
 
     <dependencies>
+    	<dependency>
+			<groupId>org.sweble.wikitext</groupId>
+			<artifactId>swc-engine</artifactId>
+			<version>2.0.0-alpha-3-SNAPSHOT</version>
+		</dependency>
         <dependency>
             <groupId>org.wikapidia</groupId>
             <artifactId>wikAPIdia-core</artifactId>
