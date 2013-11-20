@@ -8,10 +8,16 @@ import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.Provider;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.core.model.Title;
+
+import com.typesafe.config.Config;
 
 import edu.northwestern.websail.wikiparser.wikitextparser.model.WikiExtractedPage;
 import edu.northwestern.websail.wikiparser.wikitextparser.model.WikiTitle;
@@ -38,9 +44,11 @@ import edu.northwestern.websail.wikiparser.wikitextparser.sweblewrapper.SwebleWi
 public class WebSAILWikiTextParser implements WikiTextParser {
 	public static final Logger LOG = Logger.getLogger(WebSAILWikiTextParser.class.getName());
 	private SwebleWikiExtractor extractor;
+	private WikiConfig config;
 	private List<ParserVisitor> visitors;
 	public WebSAILWikiTextParser(String langPrefix, WikiConfig config){
 		extractor = new SwebleWikiExtractor(langPrefix, config);
+		this.config = config;
 	}
 	
 	/**
@@ -75,8 +83,20 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 	 */
 	
 	private Title parseTitle(WikiTitle title){
-		Language lang = Language.getByLangCode(title.getRedirectedTitle().getLanguage());
-		Title pTitle = new Title(title.getRedirectedTitle().getTitle(), lang);
+		Language lang = null;
+		try{
+			lang = Language.getByLangCode(title.getLanguage());
+		} catch(IllegalArgumentException e){
+			//LOG.warning("Cannot find a language for " + title.getLanguage());
+			return null;
+		}
+		Title pTitle = null;
+		if(title.getNamesapce() != 0){
+			String namespacePrefix = config.getNamespace(title.getNamesapce()).getName();
+			pTitle = new Title(namespacePrefix+":"+title.getTitle(), lang);
+		}
+		else pTitle = new Title(title.getTitle(), lang);
+		
 		return pTitle;
 	}
 	
@@ -88,9 +108,10 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 	
 	private ParsedRedirect parseRedirect(RawPage xml, WikiTitle currentTitle){
 		if(!currentTitle.isRedirecting()) return null; 
-		Title title = this.parseTitle(currentTitle);
+		Language lang = Language.getByLangCode(currentTitle.getRedirectedTitle().getLanguage());
+		Title pTitle = new Title(currentTitle.getRedirectedTitle().getTitle(), lang);
 		ParsedRedirect pr = new ParsedRedirect();
-		pr.target = title;
+		pr.target = pTitle;
         pr.location = new ParsedLocation(xml, -1, -1, -1);
         return pr;
 	}
@@ -100,6 +121,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 		ParsedLink pl = new ParsedLink();
         pl.location = pLocation;
         pl.target = this.parseTitle(link.getTarget());
+        if(pl.target == null) return null;
         pl.text = link.getSurface();
         //TODO: Change type to have more detail (i.e. overview, main, table, list, ...)
         pl.subarticleType = ParsedLink.SubarticleType.MAIN_INLINE;
@@ -110,6 +132,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 		ParsedCategory pc = new ParsedCategory();
 		pc.location = new ParsedLocation(xml, -1, -1, catLink.getOffset());
 		pc.category = this.parseTitle(catLink.getTarget());
+		if(pc.category == null) return null;
 		return pc;
 	}
 	
@@ -118,6 +141,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 		ParsedIll pl = new ParsedIll();
         pl.location = pLocation;
         pl.title = this.parseTitle(link.getTarget());
+        if(pl.title == null) return null;
         return pl;
 	}
 	
@@ -169,6 +193,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
         }
     }
     private void visitIll(ParsedIll ill) {
+    	if(ill == null) return;
         for (ParserVisitor visitor : visitors) {
             try {
                 visitor.ill(ill);
@@ -178,6 +203,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
         }
     }
     private void visitCategory(ParsedCategory cat) {
+    	if(cat == null) return;
         for (ParserVisitor visitor : visitors) {
             try {
                 visitor.category(cat);
@@ -188,7 +214,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
     }
     
     private void visitLink(ParsedLink pl) {
-
+    	if(pl == null) return;
         for (ParserVisitor visitor : visitors) {
             try {
                 visitor.link(pl);
@@ -222,9 +248,11 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 		
 		@Override
 		public WikiTextParser create(Language language) {
-			String langPrefix = language.getEnLangName();
+			
+			String langPrefix = language.getLangCode();
 			//TODO: Change config for a specific language
 			if(config == null) config = DefaultConfigEnWp.generate();
+			LOG.info("Create parser for " + langPrefix);
 			WebSAILWikiTextParser parser = new WebSAILWikiTextParser(langPrefix, config);
 			return parser;
 		}
@@ -251,4 +279,41 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 		}
 		return -2;
 	}
+	
+	/* -------------------------------------------------------------------------------
+	 * Provider
+	 * -------------------------------------------------------------------------------
+	 */
+	
+	public static class WebSAILProvider extends Provider<WikiTextParser.Factory> {
+        /**
+         * Creates a new provider instance.
+         * Concrete implementations must only use this two-argument constructor.
+         *
+         * @param configurator
+         * @param config
+         */
+        public WebSAILProvider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class<Factory> getType() {
+            return WikiTextParser.Factory.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "parser.wiki";
+        }
+
+        @Override
+        public Factory get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("websail")) {
+                return null;
+            }
+            return new WebSAILParserFactory();
+        }
+    }
+	
 }
