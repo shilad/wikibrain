@@ -3,12 +3,14 @@ package org.wikapidia.lucene;
 import gnu.trove.iterator.TIntIterator;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.dao.RedirectDao;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.parser.wiki.WikiTextParser;
 
 /**
  * This class builds custom Lucene TextFields from pages based on
@@ -21,11 +23,13 @@ public class TextFieldBuilder {
     private final LocalPageDao localPageDao;
     private final RawPageDao rawPageDao;
     private final RedirectDao redirectDao;
+    private final WikiTextParser parser;
 
-    public TextFieldBuilder(LocalPageDao localPageDao, RawPageDao rawPageDao, RedirectDao redirectDao) {
+    public TextFieldBuilder(WikiTextParser parser, LocalPageDao localPageDao, RawPageDao rawPageDao, RedirectDao redirectDao) {
         this.localPageDao = localPageDao;
         this.rawPageDao = rawPageDao;
         this.redirectDao = redirectDao;
+        this.parser = parser;
         try {
             localPageDao.setFollowRedirects(false);
         } catch (DaoException e) {
@@ -81,8 +85,11 @@ public class TextFieldBuilder {
             }
         }
         if (elements.usesPlainText()) {
-            String plainText = rawPage.getPlainText();
-            sb.append(plainText);
+            try {
+                sb.append(parser.getPlainText(rawPage));
+            } catch (WikapidiaException e) {
+                throw new DaoException(e);
+            }
         }
         return new TextField(elements.getTextFieldName(), sb.toString().trim(), Field.Store.YES);
     }

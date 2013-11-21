@@ -98,23 +98,6 @@ public class RawPage {
         return isDisambig;
     }
 
-    /**
-     * Returns a plain text output of the body of this RawPage
-     * @return
-     */
-    public String getPlainText() {
-        if (body.isEmpty()) {
-            return "";
-        } else if (this.plainText == null) {
-            this.plainText = new MediaWikiParserFactory().createParser().parse(body).getText();
-        }
-        return this.plainText;
-    }
-    
-    public void setPlainText(String plainText) {
-    	this.plainText = plainText;
-    }
-
     public String toString(){
         return String.format("%s / %s (%s)", this.getTitle(), this.localId, lang.getLangCode());
     }

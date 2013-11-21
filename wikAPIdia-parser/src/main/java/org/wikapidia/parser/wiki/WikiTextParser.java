@@ -17,6 +17,13 @@ public interface WikiTextParser {
     public void parse(RawPage xml, List<ParserVisitor> visitors) throws WikapidiaException;
 
     /**
+     * Strips the WikiText markup from a page and returns the resulting plain text.
+     * @param xml
+     * @return
+     */
+    public String getPlainText(RawPage xml) throws WikapidiaException;
+
+    /**
      * A factory to create new WikiTextParsers
      */
     public interface Factory {

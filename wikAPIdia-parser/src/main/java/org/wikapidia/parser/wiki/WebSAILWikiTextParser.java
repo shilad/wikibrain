@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.h2.util.StringUtils;
 import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
@@ -46,6 +47,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 	private SwebleWikiExtractor extractor;
 	private WikiConfig config;
 	private List<ParserVisitor> visitors;
+
 	public WebSAILWikiTextParser(String langPrefix, WikiConfig config){
 		extractor = new SwebleWikiExtractor(langPrefix, config);
 		this.config = config;
@@ -71,11 +73,30 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 			LOG.severe("Unexpected error while parsing page " + pageTitleName + " ("+e.getMessage()+")");
 			this.visitParseError(xml, e);
 		}
-		xml.setPlainText(exPage.getPlainText());
 		this.visitBeginPage(xml);
 		this.visit(xml, exPage);
 		this.visitEndPage(xml);
 	}
+
+    /**
+     * @see WikiTextParser#getPlainText(RawPage)
+     */
+    @Override
+    public String getPlainText(RawPage xml) throws WikapidiaException {
+        if (StringUtils.isNullOrEmpty(xml.getBody())) {
+            return "";
+        }
+        int pageLocalId = xml.getLocalId();
+        String pageTitleName = xml.getTitle().getTitleStringWithoutNamespace();
+        String wikiText = xml.getBody();
+        try {
+            return extractor.parse(pageLocalId, pageTitleName, wikiText).getPlainText();
+        } catch (LinkTargetException e) {
+            throw new WikapidiaException(e);
+        } catch (EngineException e) {
+            throw new WikapidiaException(e);
+        }
+    }
 	
 	/* -------------------------------------------------------------------------------
 	 * Adapter methods WebSAILWikiParser's models -> wikAPIdia's models

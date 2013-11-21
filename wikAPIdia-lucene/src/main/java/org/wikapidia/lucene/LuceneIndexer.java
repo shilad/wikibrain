@@ -17,6 +17,7 @@ import org.wikapidia.core.dao.RedirectDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.parser.wiki.WikiTextParser;
 
 import java.io.Closeable;
 import java.io.File;
@@ -26,6 +27,9 @@ import java.util.*;
 /**
  *
  * This class is used to index raw pages during the load process.
+ * TODO:
+ * This class should NOT require a configuration.
+ * Instead, it should explicitly ask for the things it needs.
  *
  * @author Ari Weiland
  *
@@ -71,19 +75,19 @@ public class LuceneIndexer implements Closeable {
             this.options = options;
             this.mainOptions = options[0];
             this.builder = new TextFieldBuilder(
+                    mainOptions.configurator.get(WikiTextParser.class),
                     mainOptions.configurator.get(LocalPageDao.class),
                     mainOptions.configurator.get(RawPageDao.class),
                     mainOptions.configurator.get(RedirectDao.class));
 
-
-                File langRoot = new File(root, language.getLangCode());
-                if (langRoot.exists()) {
-                    FileUtils.deleteQuietly(langRoot);
-                }
-                WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, mainOptions);
-                Directory directory = FSDirectory.open(langRoot);
-                IndexWriterConfig iwc = new IndexWriterConfig(mainOptions.matchVersion, analyzer);
-                writer = new IndexWriter(directory, iwc);
+            File langRoot = new File(root, language.getLangCode());
+            if (langRoot.exists()) {
+                FileUtils.deleteQuietly(langRoot);
+            }
+            WikapidiaAnalyzer analyzer = new WikapidiaAnalyzer(language, mainOptions);
+            Directory directory = FSDirectory.open(langRoot);
+            IndexWriterConfig iwc = new IndexWriterConfig(mainOptions.matchVersion, analyzer);
+            writer = new IndexWriter(directory, iwc);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

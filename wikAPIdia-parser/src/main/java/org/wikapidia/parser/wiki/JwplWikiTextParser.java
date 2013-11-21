@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import de.tudarmstadt.ukp.wikipedia.parser.*;
 import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParser;
 import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParserFactory;
+import org.h2.util.StringUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -83,6 +84,21 @@ public class JwplWikiTextParser implements WikiTextParser {
             }
         }
         visitEndPage(xml);
+    }
+
+    /**
+     * @see WikiTextParser#getPlainText(org.wikapidia.core.model.RawPage)
+     * @param xml
+     * @return
+     */
+    @Override
+    public synchronized String getPlainText(RawPage xml) {
+        String body = xml.getBody();
+        if (StringUtils.isNullOrEmpty(body)) {
+            return "";
+        } else {
+            return jwpl.parse(body).getText();
+        }
     }
 
     private void parseArticle(RawPage xml, ParsedPage pp) {   		// *** LINKS, ANCHOR TEXTS, SECTIONS
