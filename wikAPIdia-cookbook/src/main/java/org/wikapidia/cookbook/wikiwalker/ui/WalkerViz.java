@@ -10,6 +10,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,7 @@ import java.util.List;
 public class WalkerViz extends JComponent implements MouseListener {
     private static final int NODE_SPACING = 170;
     private static final int NODE_DIAMETER = 20;
-    private static final int SUBNODE_DIAMETER = 10;
+    private static final int SUBNODE_DIAMETER = 14;
     private final LocalPage start;
     private final LocalPage end;
 
@@ -50,16 +52,13 @@ public class WalkerViz extends JComponent implements MouseListener {
         int y = insets.bottom + size.height / 2;
 
         for (Node node : path) {
-            int childCenterX = x - NODE_SPACING * 2;
-            int childCenterY = y;
+            Ellipse ellipse = new Ellipse(x-NODE_SPACING, y, NODE_SPACING*3.5, NODE_SPACING*7);
 
             List<Node> children = node.getChildren();
-            for (int i = 0; i < Math.min(children.size(), 30); i++) {
-                int sign = 1 - 2 * (i % 2);
-                int r = (int) (NODE_SPACING * 2.7);
-                double theta = sign * Math.PI/150 * i / 2;
-                int x2 = (int)(childCenterX + r * Math.cos(theta*3));
-                int y2 = (int)(childCenterY + r * Math.sin(theta));
+            List<Point2D> points = ellipse.generatePoints(Math.PI * 0.2, -Math.PI * 0.2, children.size());
+            for (int i = 0; i < children.size(); i++) {
+                int x2 = (int) points.get(i).getX();
+                int y2 = (int) points.get(i).getY();
 
                 LocalPage childPage = children.get(i).getPage();
                 NodeComponent child = new NodeComponent(node.getPage(), childPage,
@@ -126,12 +125,21 @@ public class WalkerViz extends JComponent implements MouseListener {
             NodeComponent nc = getParentComponent(node.getPage());
             int x = nc.getX() + nc.getWidth() / 2;
             int y = nc.getY() + nc.getHeight() / 2;
+            Font orig = g.getFont();
             for (NodeComponent nc2 : getChildComponents(node.getPage())) {
                 int x2 = nc2.getX() + nc2.getWidth()/2;
                 int y2 = nc2.getY() + nc2.getHeight()/2;
                 g.setColor(Color.LIGHT_GRAY);
                 g.drawLine(x, y, x2, y2);
+                if (node == path.get(path.size()-1)) {
+                    int x3 = x2 + (x2-x) / 20;
+                    int y3 = y2 + (y2-y) / 20;
+                    g.setFont(orig.deriveFont(10f));
+                    g.drawString(nc2.getPage().getTitle().toString(), x3, y3);
+
+                }
             }
+            g.setFont(orig);
             g.setColor(Color.BLACK);
             g.drawString(node.getPage().getTitle().toString(), x - NODE_DIAMETER, y - NODE_DIAMETER + yOffset);
             yOffset *= -1;
@@ -187,7 +195,7 @@ public class WalkerViz extends JComponent implements MouseListener {
     public static void main(String args[]) {
         JFrame f = new JFrame("Wiki Walker");
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setSize(1000, 500);
+        f.setSize(1000, 800);
 
         // create a fake path
         List<Node> path = new ArrayList<Node>();
