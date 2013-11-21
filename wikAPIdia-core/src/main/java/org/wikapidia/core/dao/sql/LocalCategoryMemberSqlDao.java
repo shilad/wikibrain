@@ -2,7 +2,6 @@ package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -13,10 +12,8 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalCategory;
+import org.wikapidia.core.model.LocalPage;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -36,12 +33,12 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             Tables.CATEGORY_MEMBERS.ARTICLE_ID,
     };
     private final LocalCategoryDao localCategoryDao;
-    private final LocalArticleDao localArticleDao;
+    private final LocalPageDao localPageDao;
 
-    public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalCategoryDao localCategoryDao, LocalArticleDao localArticleDao) throws DaoException {
+    public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalCategoryDao localCategoryDao, LocalPageDao localArticleDao) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/category-members");
         this.localCategoryDao = localCategoryDao;
-        this.localArticleDao = localArticleDao;
+        this.localPageDao = localArticleDao;
     }
 
     @Override
@@ -54,7 +51,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public void save(LocalCategory category, LocalArticle article) throws DaoException, WikapidiaException {
+    public void save(LocalCategory category, LocalPage article) throws DaoException, WikapidiaException {
         save(new LocalCategoryMember(category, article));
     }
 
@@ -127,15 +124,15 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public Map<Integer, LocalArticle> getCategoryMembers(Language language, int categoryId) throws DaoException {
+    public Map<Integer, LocalPage> getCategoryMembers(Language language, int categoryId) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(language, categoryId);
-        return localArticleDao.getByIds(language, articleIds);
+        return localPageDao.getByIds(language, articleIds);
     }
 
     @Override
-    public Map<Integer, LocalArticle> getCategoryMembers(LocalCategory localCategory) throws DaoException {
+    public Map<Integer, LocalPage> getCategoryMembers(LocalCategory localCategory) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(localCategory);
-        return localArticleDao.getByIds(localCategory.getLanguage(), articleIds);
+        return localPageDao.getByIds(localCategory.getLanguage(), articleIds);
     }
 
     @Override
@@ -154,7 +151,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public Collection<Integer> getCategoryIds(LocalArticle localArticle) throws DaoException {
+    public Collection<Integer> getCategoryIds(LocalPage localArticle) throws DaoException {
         return getCategoryIds(localArticle.getLanguage(), localArticle.getLocalId());
     }
 
@@ -165,7 +162,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public Map<Integer, LocalCategory> getCategories(LocalArticle localArticle) throws DaoException {
+    public Map<Integer, LocalCategory> getCategories(LocalPage localArticle) throws DaoException {
         Collection<Integer> categoryIds = getCategoryIds(localArticle);
         return localCategoryDao.getByIds(localArticle.getLanguage(), categoryIds);
     }

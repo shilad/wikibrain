@@ -10,7 +10,7 @@ public class LocalCategoryMember {
     private final int articleId;
     private final Language language;
 
-    public LocalCategoryMember(LocalCategory localCategory, LocalArticle localArticle) throws WikapidiaException {
+    public LocalCategoryMember(LocalCategory localCategory, LocalPage localArticle) throws WikapidiaException {
         if (!localArticle.getLanguage().equals(localCategory.getLanguage())) {
             throw new WikapidiaException("Language Mismatch");
         }
