@@ -45,7 +45,7 @@ public class CategoryGraph {
         this.language=language;
     }
 
-    public void init() throws DaoException, IOException {
+    public void init() throws DaoException {
         loadCategories();
         buildGraph();
         calculateTopLevelCategories();
@@ -86,14 +86,17 @@ public class CategoryGraph {
         DaoFilter filter = new DaoFilter().setLanguages(language);
         for (LocalPage page : (Iterable<LocalPage>) pageHelper.get(filter)) {
             int catIndex = getCategoryIndex(page.getLocalId());
-            for (LocalCategory cat: catHelper.getCategories(page).values()) {
-                int catIndex2 = getCategoryIndex(cat.getLocalId());
-                if (catIndex >= 0) {
-                    numCatChildren[catIndex2]++;
-                } else {
-                    numCatPages[catIndex2]++;
+            Map<Integer, LocalCategory> cats = catHelper.getCategories(page);
+            if (cats!=null){
+                for (Integer cat: cats.keySet()) {
+                    int catIndex2 = getCategoryIndex(cat);
+                    if (catIndex >= 0 && catIndex2 >= 0) {
+                        numCatChildren[catIndex2]++;
+                    } else if (catIndex2>=0) {
+                        numCatPages[catIndex2]++;
+                    }
+                    totalEdges++;
                 }
-                totalEdges++;
             }
         }
 
@@ -107,18 +110,20 @@ public class CategoryGraph {
         for (LocalPage page : (Iterable<LocalPage>) pageHelper.get(filter)) {
             int catId1 = -1;
             Map<Integer, LocalCategory> cats = catHelper.getCategories(page);
-            if (page.getNameSpace()==NameSpace.CATEGORY) {
-                catId1 = getCategoryIndex(page.getLocalId());
-                catParents[catId1] = new int[cats.size()];
-            }
-            int i=0;
-            for (LocalCategory cat : cats.values()) {
-                int catId2 = getCategoryIndex(cat.getLocalId());
-                if (catId1 >= 0) {
-                    catChildren[catId2][--numCatChildren[catId2]] = catId1;
-                    catParents[catId1][i++] = catId2;
-                } else {
-                    catPages[catId2][--numCatPages[catId2]] = page.getLocalId();
+            if (cats!=null){
+                if (page.getNameSpace()==NameSpace.CATEGORY) {
+                    catId1 = getCategoryIndex(page.getLocalId());
+                    catParents[catId1] = new int[cats.size()];
+                }
+                int i=0;
+                for (Integer cat : cats.keySet()) {
+                    int catId2 = getCategoryIndex(cat);
+                    if (catId1 >= 0 && catId2>=0) {
+                        catChildren[catId2][--numCatChildren[catId2]] = catId1;
+                        catParents[catId1][i++] = catId2;
+                    } else if (catId2>=0){
+                        catPages[catId2][--numCatPages[catId2]] = page.getLocalId();
+                    }
                 }
             }
         }

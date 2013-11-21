@@ -7,6 +7,7 @@ import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalCategory;
 
+import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
@@ -65,9 +66,12 @@ public class CategoryBfs {
         this.categoryMemberDao = categoryMemberDao;
         this.language = language;
         pageDistances.put(startPage, 0.000000);
-        for (int catId : categoryMemberDao.getCategories(language,startCatId).keySet()) {
-            int ci = graph.getCategoryIndex(catId);
-            openCats.add(new CategoryDistance(ci, graph.cats[ci], graph.catCosts[ci], (byte)+1));
+        Map<Integer,LocalCategory> cats = categoryMemberDao.getCategories(language,startCatId);
+        if (cats!=null){
+            for (int catId : categoryMemberDao.getCategories(language,startCatId).keySet()) {
+                int ci = graph.getCategoryIndex(catId);
+                openCats.add(new CategoryDistance(ci, graph.cats[ci], graph.catCosts[ci], (byte)+1));
+            }
         }
     }
 
