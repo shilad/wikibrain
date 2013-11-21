@@ -23,7 +23,6 @@ public class CategoryGraph {
     private static final Logger LOG = Logger.getLogger(CategoryGraph.class.getName());
 
     protected LocalPageDao pageHelper;
-    protected LocalLinkDao linkHelper;
     protected LocalCategoryMemberDao catHelper;
     protected Language language;
 
@@ -40,9 +39,8 @@ public class CategoryGraph {
     /**
      * @throws java.io.IOException
      */
-    public CategoryGraph(LocalPageDao pageHelper, LocalLinkDao linkHelper, LocalCategoryMemberDao catHelper, Language language){
+    public CategoryGraph(LocalPageDao pageHelper, LocalCategoryMemberDao catHelper, Language language){
         this.pageHelper=pageHelper;
-        this.linkHelper=linkHelper;
         this.catHelper=catHelper;
         this.language=language;
     }
