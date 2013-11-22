@@ -34,7 +34,7 @@ public class GraphSearcher {
 
     public int shortestDistance(LocalPage start, LocalPage end) {
         Node last = walk(start, end);
-        return (last == null) ? Integer.MAX_VALUE : last.getDepth();
+        return (last == null) ? -1 : last.getDepth();
     }
     public List<LocalPage> shortestPath(LocalPage start, LocalPage end) {
         Node last = walk(start, end);

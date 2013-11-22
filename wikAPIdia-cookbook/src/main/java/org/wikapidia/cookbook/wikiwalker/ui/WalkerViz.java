@@ -10,33 +10,50 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author Shilad Sen
  */
 public class WalkerViz extends JComponent implements MouseListener {
-    private static final int NODE_SPACING = 170;
+    private static final Color COLOR_SUBNODE = new Color(100, 100, 100);
+    private static final Color COLOR_LINE = new Color(180, 180, 180);
+    private static final Color COLOR_NODE = new Color(50, 50, 50);
+
+    private static final int NODE_SPACING = 120;
     private static final int NODE_DIAMETER = 20;
     private static final int SUBNODE_DIAMETER = 14;
-    private final LocalPage start;
-    private final LocalPage end;
 
+    private LocalPage start;
+    private LocalPage end;
     private List<Node> path;
-
     private GraphSearcher searcher = new GraphSearcher();
 
     public WalkerViz(LocalPage start, LocalPage end) {
         super();
+
+        setLayout(null);
+        setPages(start, end);
+        addMouseListener(this);
+    }
+
+    public void setPages(LocalPage start, LocalPage end) {
+        removeAll();
+
+        // HACK: start and end nodes MUST be marked as interesting
+        for (LocalPage page : Arrays.asList(start, end)) {
+            WikAPIdiaWrapper.getInstance().setInteresting(page.getLanguage(), page.getLocalId(), true);
+        }
+
         this.start = start;
         this.end = end;
         this.path = new ArrayList<Node>();
         this.path.add(new Node(start));
-        setLayout(null);
-        addMouseListener(this);
+        repaint();
     }
 
 
@@ -62,7 +79,7 @@ public class WalkerViz extends JComponent implements MouseListener {
 
                 LocalPage childPage = children.get(i).getPage();
                 NodeComponent child = new NodeComponent(node.getPage(), childPage,
-                        Color.LIGHT_GRAY, SUBNODE_DIAMETER/2);
+                        COLOR_SUBNODE, SUBNODE_DIAMETER/2);
                 child.setBounds(x2- SUBNODE_DIAMETER/2, y2 - SUBNODE_DIAMETER/2,
                         SUBNODE_DIAMETER, SUBNODE_DIAMETER);
                 child.addMouseListener(this);
@@ -85,6 +102,14 @@ public class WalkerViz extends JComponent implements MouseListener {
 
             x += NODE_SPACING;
         }
+
+        // Add the goal
+        x = insets.left + size.width - NODE_SPACING / 2;
+        NodeComponent nc = new NodeComponent(null, end, COLOR_LINE, NODE_DIAMETER/2);
+        nc.setBounds(x - NODE_DIAMETER/2, y-NODE_DIAMETER/2, NODE_DIAMETER, NODE_DIAMETER);
+        nc.addMouseListener(this);
+        add(nc);
+
     }
 
     protected List<NodeComponent> getChildComponents(LocalPage page) {
@@ -121,29 +146,42 @@ public class WalkerViz extends JComponent implements MouseListener {
             layoutNodes();
         }
         int yOffset = 10;
+        paintNode(g, yOffset, end);
         for (Node node : path) {
-            NodeComponent nc = getParentComponent(node.getPage());
-            int x = nc.getX() + nc.getWidth() / 2;
-            int y = nc.getY() + nc.getHeight() / 2;
-            Font orig = g.getFont();
-            for (NodeComponent nc2 : getChildComponents(node.getPage())) {
-                int x2 = nc2.getX() + nc2.getWidth()/2;
-                int y2 = nc2.getY() + nc2.getHeight()/2;
-                g.setColor(Color.LIGHT_GRAY);
-                g.drawLine(x, y, x2, y2);
-                if (node == path.get(path.size()-1)) {
-                    int x3 = x2 + (x2-x) / 20;
-                    int y3 = y2 + (y2-y) / 20;
-                    g.setFont(orig.deriveFont(10f));
-                    g.drawString(nc2.getPage().getTitle().toString(), x3, y3);
-
-                }
-            }
-            g.setFont(orig);
-            g.setColor(Color.BLACK);
-            g.drawString(node.getPage().getTitle().toString(), x - NODE_DIAMETER, y - NODE_DIAMETER + yOffset);
+            paintNode(g, yOffset, node.getPage());
             yOffset *= -1;
         }
+    }
+
+    private void paintNode(Graphics g, int yOffset, LocalPage page) {
+        NodeComponent nc = getParentComponent(page);
+        int x = nc.getX() + nc.getWidth() / 2;
+        int y = nc.getY() + nc.getHeight() / 2;
+        Font orig = g.getFont();
+        if (!page.equals(end)) {
+            for (NodeComponent nc2 : getChildComponents(page)) {
+                int x2 = nc2.getX() + nc2.getWidth()/2;
+                int y2 = nc2.getY() + nc2.getHeight()/2;
+
+                QuadCurve2D q = new QuadCurve2D.Float();
+                q.setCurve(x, y, x + NODE_SPACING / 3, y, x2, y2);
+                g.setColor(COLOR_LINE);
+                ((Graphics2D)g).draw(q);
+
+                // draw labels on the last page
+                if (page.equals(path.get(path.size()-1).getPage())) {
+                    double k = 1.0 * SUBNODE_DIAMETER / nc2.getLocation().distance(nc.getLocation());
+                    int x3 = (int) (x2 + (x2-x) * k);
+                    int y3 = (int) (y2 + (y2-y) * k) + 5;
+                    g.setColor(COLOR_SUBNODE);
+                    g.setFont(orig.deriveFont(10f));
+                    g.drawString(nc2.getPage().getTitle().toString(), x3, y3);
+                }
+            }
+        }
+        g.setFont(orig);
+        g.setColor(COLOR_NODE);
+        g.drawString(page.getTitle().toString(), x - NODE_DIAMETER, y - NODE_DIAMETER + yOffset);
     }
 
     @Override
@@ -180,25 +218,19 @@ public class WalkerViz extends JComponent implements MouseListener {
     }
 
     @Override
-    public void mouseReleased(MouseEvent mouseEvent) {
-    }
+    public void mouseReleased(MouseEvent mouseEvent) {}
 
     @Override
-    public void mouseEntered(MouseEvent mouseEvent) {
-    }
+    public void mouseEntered(MouseEvent mouseEvent) {}
 
     @Override
-    public void mouseExited(MouseEvent mouseEvent) {
-    }
-
+    public void mouseExited(MouseEvent mouseEvent) {}
 
     public static void main(String args[]) {
         JFrame f = new JFrame("Wiki Walker");
+        f.setSize(1000, 1000);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setSize(1000, 800);
 
-        // create a fake path
-        List<Node> path = new ArrayList<Node>();
         WikAPIdiaWrapper wrapper =  new WikAPIdiaWrapper(Utils.PATH_DB);
         LocalPage obama = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "Barack Obama");
         LocalPage minnesota = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "Minnesota");

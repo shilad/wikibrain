@@ -26,11 +26,11 @@ public class Node {
     }
 
     public List<Node> getChildren() {
+        WikAPIdiaWrapper wrapper = WikAPIdiaWrapper.getInstance();
         List<Node> result = new ArrayList<Node>();
-        for (Integer childId : WikAPIdiaWrapper.getInstance().getLinkedIds(language, pageId)) {
-            result.add(new Node(language, childId, depth+1, this));
-            if (result.size() >= 30) {
-                break;
+        for (Integer childId : wrapper.getLinkedIds(language, pageId)) {
+            if (wrapper.isInteresting(language, childId)) {
+                result.add(new Node(language, childId, depth+1, this));
             }
         }
         return result;
