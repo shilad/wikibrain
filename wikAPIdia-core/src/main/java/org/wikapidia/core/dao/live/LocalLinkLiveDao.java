@@ -54,14 +54,13 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("LINKS", language);
         builder.setPageid(sourceId);
         LiveAPIQuery query = builder.build();
-        List<String> linkTitles = query.getStringsFromQueryResult("title");
-        List<Integer> linkPageIds = query.getIntsFromQueryResult("pageid");
-        
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+
         //check all outlinks from sourceId to find one that matches destId
-        for (int i = 0; i < linkPageIds.size(); i++) {
-            int pageId = linkPageIds.get(i);
+        for (QueryReply reply : replyObjects) {
+            int pageId = reply.pageId;
             if (pageId == destId) {
-                return new LocalLink(language, linkTitles.get(i), sourceId, pageId, true, -1, true, null);
+                return reply.getLocalLink(language, sourceId, true);
             }
         }
         throw new DaoException("No link with given sourceId and destId found");
@@ -86,14 +85,9 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         LiveAPIQuery query = builder.build();
 
         //query for outlinks from local id, return as list of titles and pageids
-        List<String> linkTitles = query.getStringsFromQueryResult("title");
-        List<Integer> linkPageIds = query.getIntsFromQueryResult("pageid");
-
-        //create a link for each title and pageid returned from the query
-        for (int i = 0; i < linkTitles.size(); i++) {
-            String anchorText = linkTitles.get(i);
-            Integer pageId = linkPageIds.get(i);
-            LocalLink link = new LocalLink(language, anchorText, localId, pageId, outlinks, -1, true, null);
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+        for (QueryReply reply : replyObjects) {
+            LocalLink link = reply.getLocalLink(language, localId, outlinks);
             links.add(link);
         }
 

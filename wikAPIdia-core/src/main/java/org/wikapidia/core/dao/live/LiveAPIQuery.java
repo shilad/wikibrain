@@ -68,7 +68,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "in";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                //this.parser = new ObjectQueryParser();
+                //this.parser = new InfoQueryParser();
                 break;
             case 1: //CATEGORYMEMBERS:
                 this.queryAction = "list";
@@ -77,16 +77,16 @@ public class LiveAPIQuery {
                 this.queryPrefix = "cm";
                 this.pluralPage = false;
                 this.queryResultDataSection = "categorymembers";
-                //this.parser = new ArrayQueryParser();
+                //this.parser = new CategoryMemberQueryParser();
                 break;
             case 2: //CATEGORIES:
-                this.queryAction = "prop";
+                this.queryAction = "generator";
                 this.queryType = "categories";
                 this.queryPagePrefix = "";
                 this.queryPrefix = "cl";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                //this.parser = new ObjectQueryParser();
+                //this.parser = new CategoryQueryParser();
                 break;
             case 3: //LINKS:
                 this.queryAction = "generator";
@@ -95,7 +95,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "gpl";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                //this.parser = new ObjectQueryParser();
+                //this.parser = new LinkQueryParser();
                 break;
             case 4: //BACKLINKS:
                 this.queryAction = "list";
@@ -104,7 +104,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "bl";
                 this.pluralPage = false;
                 this.queryResultDataSection = "backlinks";
-                //this.parser = new ArrayQueryParser();
+                //this.parser = new BacklinkQueryParser();
                 break;
             default:    //allpages
                 this.queryAction = "list";
@@ -113,7 +113,7 @@ public class LiveAPIQuery {
                 this.queryPrefix = "ap";
                 this.pluralPage = false;
                 this.queryResultDataSection = "allpages";
-                //this.parser = new ArrayQueryParser();
+                //this.parser = new AllpagesQueryParser();
                 break;
         }
         constructQueryUrl();
@@ -130,7 +130,7 @@ public class LiveAPIQuery {
         if (this.pageid != null) {
             queryUrl += "&" + queryPagePrefix + "pageid" + (pluralPage ? "s" : "") + "=" + pageid;
         }
-        if (this.redirects != null) {
+        if ((this.redirects != null) && this.redirects) {
             queryUrl += "&redirects=";
         }
         if (this.filterredir != null) {
@@ -144,38 +144,16 @@ public class LiveAPIQuery {
 
     /**
      * method used by client DAOs to retrieve a list of strings representing the values of interest returned by the query
-     * @param valueType specifies which values from the query result to return (pageids, titles, etc.)
      * @return string list containing the values of interest, which are specified by valueType
      * @throws DaoException
      */    
-    public List<String> getStringsFromQueryResult(String valueType) throws DaoException {
-        List<String> values = new ArrayList<String>();
+    public List<QueryReply> getValuesFromQueryResult() throws DaoException {
+        List<QueryReply> values = new ArrayList<QueryReply>();
         String queryContinue = "";
         boolean hasContinue;
         do {
             getRawQueryText(queryUrl + queryContinue);
-            parser.getQueryReturnValuesAsStrings(queryResult, queryResultDataSection, valueType, values);
-            queryContinue = parser.getContinue(queryResult, queryType, queryPrefix);
-            hasContinue = (!queryContinue.equals(""));
-            queryContinue = "&" + queryPrefix + "continue=" + queryContinue;
-        }
-        while (hasContinue);
-        return values;
-    }
-
-    /**
-     * same as above method, but returns an int list instead of a string list
-     * @param valueType specifies which values from the query result to return (pageids, titles, etc.)
-     * @return string list containing the values of interest, which are specified by valueType
-     * @throws DaoException
-     */
-    public List<Integer> getIntsFromQueryResult(String valueType) throws DaoException {
-        List<Integer> values = new ArrayList<Integer>();
-        String queryContinue = "";
-        boolean hasContinue;
-        do {
-            getRawQueryText(queryUrl + queryContinue);
-            parser.getQueryReturnValuesAsInts(queryResult, queryResultDataSection, valueType, values);
+            parser.getQueryReturnValues(lang, queryResult, queryResultDataSection, values);
             queryContinue = parser.getContinue(queryResult, queryType, queryPrefix);
             hasContinue = (!queryContinue.equals(""));
             queryContinue = "&" + queryPrefix + "continue=" + queryContinue;

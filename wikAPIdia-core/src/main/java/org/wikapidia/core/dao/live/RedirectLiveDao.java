@@ -17,6 +17,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.Redirect;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,7 +63,7 @@ public class RedirectLiveDao implements RedirectDao {
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang);
         builder.setPageid(id).setRedirects(true);
         LiveAPIQuery query = builder.build();
-        int redirectId = query.getIntsFromQueryResult("pageid").get(0);
+        int redirectId = query.getValuesFromQueryResult().get(0).pageId;
         if (redirectId != id) {
             return redirectId;
         }
@@ -73,11 +74,7 @@ public class RedirectLiveDao implements RedirectDao {
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang);
         builder.setPageid(id);
         LiveAPIQuery query = builder.build();
-        String redirect = query.getStringsFromQueryResult("pageid").get(0);
-        if (redirect == null) {
-            return false;
-        }
-        return true;
+        return query.getValuesFromQueryResult().get(0).isRedirect;
     }
 
     public TIntSet getRedirects(LocalPage localPage) throws DaoException {
@@ -87,10 +84,15 @@ public class RedirectLiveDao implements RedirectDao {
 
 
     public List<Integer> getRedirectsFromId(Language lang, int localId) throws DaoException {
+        List<Integer> redirectIds = new ArrayList<Integer>();
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("BACKLINKS", lang);
         builder.setPageid(localId).setFilterredir("redirects");
         LiveAPIQuery query = builder.build();
-        return query.getIntsFromQueryResult("pageid");
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+        for (QueryReply reply : replyObjects) {
+            redirectIds.add(reply.pageId);
+        }
+        return redirectIds;
     }
 
     public TIntIntMap getAllRedirectIdsToDestIds(Language lang) throws DaoException {
@@ -98,11 +100,11 @@ public class RedirectLiveDao implements RedirectDao {
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLPAGES", lang);
         builder.setFilterredir("redirects").setFrom("");
         LiveAPIQuery query = builder.build();
-        List<Integer> redirectIds = query.getIntsFromQueryResult("pageid");
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
 
-        for (int sourceId : redirectIds) {
-            int destId = resolveRedirect(lang, sourceId);
-            redirects.put(sourceId, destId);
+        for (QueryReply reply : replyObjects) {
+            int destId = resolveRedirect(lang, reply.pageId);
+            redirects.put(reply.pageId, destId);
         }
 
         return  redirects;

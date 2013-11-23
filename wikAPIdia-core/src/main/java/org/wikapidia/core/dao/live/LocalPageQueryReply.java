@@ -30,10 +30,10 @@ public class LocalPageQueryReply extends QueryReply {
         Set<Map.Entry<String, JsonElement>> pageSet = jp.parse(text).getAsJsonObject().get("query").getAsJsonObject().get("pages").getAsJsonObject().entrySet();
         for (Map.Entry<String, JsonElement> entry: pageSet)
         {
-            Long pageId = entry.getValue().getAsJsonObject().get("pageid").getAsLong();
+            Integer pageId = entry.getValue().getAsJsonObject().get("pageid").getAsInt();
             String title = entry.getValue().getAsJsonObject().get("title").getAsString();
             String pageLanguage = entry.getValue().getAsJsonObject().get("pagelanguage").getAsString();
-            Long nameSpace = entry.getValue().getAsJsonObject().get("ns").getAsLong();
+            Integer nameSpace = entry.getValue().getAsJsonObject().get("ns").getAsInt();
             Boolean isRedirect = entry.getValue().getAsJsonObject().has("redirect");
             Boolean isDisambig = entry.getValue().getAsJsonObject().get("title").getAsString().contains("(disambiguation)");
             this.pageId = pageId;

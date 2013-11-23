@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.lang.Language;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -31,38 +32,21 @@ public class QueryParser {
         if (continueElem == null) {
             return "";
         }
-        JsonObject continueObject1 = continueElem.getAsJsonObject();
-        JsonObject continueObject2 = continueObject1.get(queryType).getAsJsonObject();
-        return continueObject2.get(continueParam).getAsString();
+        return continueElem.getAsJsonObject().get(queryType).getAsJsonObject().get(continueParam).getAsString();
     }
 
-    public void getQueryReturnValuesAsStrings(String queryResult, String queryResultDataSection, String valueType, List<String> values) throws DaoException {
+    public void getQueryReturnValues(Language lang, String queryResult, String queryResultDataSection, List<QueryReply> values) throws DaoException {
         //get JSON object representing query reply
         JsonObject queryReplyObject = parseQueryObject(queryResult, "query");
         //parse desired values from JSON object into string list
         JsonElement dataSectionElem = queryReplyObject.get(queryResultDataSection);
         if (dataSectionElem.isJsonArray()) {
             JsonArray array = getJsonArrayFromQueryObject(queryReplyObject, queryResultDataSection);
-            getStringsFromJsonArray(array, valueType, values);
+            getValuesFromJsonArray(array, values);
         }
         else {
             JsonObject object = getJsonObjectFromQueryObject(queryReplyObject, queryResultDataSection);
-            getStringsFromJsonObject(object, valueType, values);
-        }
-    }
-
-    public void getQueryReturnValuesAsInts(String queryResult, String queryResultDataSection, String valueType, List<Integer> values) throws DaoException {
-        //get JSON object representing query reply
-        JsonObject queryReplyObject = parseQueryObject(queryResult, "query");
-        //parse desired values from JSON object into string list
-        JsonElement dataSectionElem = queryReplyObject.get(queryResultDataSection);
-        if (dataSectionElem.isJsonArray()) {
-            JsonArray array = getJsonArrayFromQueryObject(queryReplyObject, queryResultDataSection);
-            getIntsFromJsonArray(array, valueType, values);
-        }
-        else {
-            JsonObject object = getJsonObjectFromQueryObject(queryReplyObject, queryResultDataSection);
-            getIntsFromJsonObject(object, valueType, values);
+            getValuesFromJsonObject(object, values);
         }
     }
 
@@ -72,11 +56,7 @@ public class QueryParser {
      * @return JSON object representing the query result
      */
     public JsonObject parseQueryObject(String text, String value) {
-        JsonElement elem1 = jp.parse(text);
-        JsonObject obj1 = elem1.getAsJsonObject();
-        JsonElement elem2 = obj1.get(value);
-        JsonObject obj2 = elem2.getAsJsonObject();
-        return obj2;
+        return jp.parse(text).getAsJsonObject().get(value).getAsJsonObject();
     }
 
     public JsonArray parseJsonArray(String text) {
@@ -120,61 +100,52 @@ public class QueryParser {
      * of the query result. This information is returned as a list of string or int values. The paramater "valueType"
      * specifies which things in the query result should be returned in the list
      */
-    private void getStringsFromJsonObject(JsonObject jo, String valueType, List<String> values) {
+    private void getValuesFromJsonObject(JsonObject jo, List<QueryReply> values) {
         Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
-        String value;
         for (Map.Entry<String, JsonElement> entry: valueSet) {
-            JsonElement valueElem = entry.getValue().getAsJsonObject().get(valueType);
-            if (valueElem == null) {
-                value = "";
-            }
-            else {
-                value = valueElem.getAsString();
-            }
-            values.add(value);
+           QueryReply reply = getQueryReplyFromJsonElement(entry.getValue());
+           values.add(reply);
         }
     }
 
-    private void getStringsFromJsonArray(JsonArray ja, String valueType, List<String> values) {
-        String value;
+    private void getValuesFromJsonArray(JsonArray ja, List<QueryReply> values) {
         for (JsonElement elem : ja) {
-            JsonElement valueElem = elem.getAsJsonObject().get(valueType);
-            if (valueElem == null) {
-                value = "";
-            }
-            else {
-                value = valueElem.getAsString();
-            }
-            values.add(value);
+            QueryReply reply = getQueryReplyFromJsonElement(elem);
+            values.add(reply);
         }
     }
 
-    private void getIntsFromJsonObject(JsonObject jo, String valueType, List<Integer> values) {
-        Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
-        int value;
-        for (Map.Entry<String, JsonElement> entry: valueSet) {
-            JsonElement valueElem = entry.getValue().getAsJsonObject().get(valueType);
-            if (valueElem == null) {
-                value = -1;
-            }
-            else {
-                value = valueElem.getAsInt();
-            }
-            values.add(value);
-        }
-    }
+    private QueryReply getQueryReplyFromJsonElement(JsonElement queryReplyElem) {
+        List<Integer> categories = new ArrayList<Integer>();
+        List<Integer> categorymembers = new ArrayList<Integer>();
 
-    private void getIntsFromJsonArray(JsonArray ja, String valueType, List<Integer> values) {
-        int value;
-        for (JsonElement elem : ja) {
-            JsonElement valueElem = elem.getAsJsonObject().get(valueType);
-            if (valueElem == null) {
-                value = -1;
-            }
-            else {
-                value = valueElem.getAsInt();
-            }
-            values.add(value);
+        JsonObject entryValue = queryReplyElem.getAsJsonObject();
+        JsonElement entryPageid = entryValue.get("pageid");
+        JsonElement entryTitle = entryValue.get("title");
+        JsonElement entryNamespace = entryValue.get("ns");
+        JsonElement entryCategories = entryValue.get("categories");
+        JsonElement entryCategorymembers = entryValue.get("categorymembers");
+        JsonArray arrayCategories = (entryCategories != null ? entryCategories.getAsJsonArray() : new JsonArray());
+        JsonArray arrayCategorymembers = (entryCategorymembers != null ? entryCategorymembers.getAsJsonArray() : new JsonArray());
+
+        boolean isRedirect = entryValue.has("redirect");
+        int pageid = (entryPageid != null ? entryPageid.getAsInt() : -1);
+        String title = (entryTitle != null ? entryTitle.getAsString() : "");
+        boolean isDisambig = title.contains("(disambiguation)");
+        int namespace = (entryNamespace != null ? entryNamespace.getAsInt() : -1);
+
+        for (JsonElement category : arrayCategories) {
+            JsonElement categoryElem = category.getAsJsonObject().get("pageid");
+            int categoryId = (categoryElem != null ? categoryElem.getAsInt() : -1);
+            categories.add(categoryId);
         }
+
+        for (JsonElement member : arrayCategorymembers) {
+            JsonElement memberElem = member.getAsJsonObject().get("pageid");
+            int memberId = (memberElem != null ? memberElem.getAsInt() : -1);
+            categorymembers.add(memberId);
+        }
+
+        return new QueryReply(pageid, title, namespace, isRedirect, isDisambig, categories, categorymembers);
     }
-}
+ }

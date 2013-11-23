@@ -1,6 +1,6 @@
 package org.wikapidia.cookbook.wikiwalker;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
+//import com.sun.javaws.exceptions.InvalidArgumentException;
 import com.sun.tools.corba.se.idl.InvalidArgument;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FilenameUtils;
