@@ -116,17 +116,17 @@ public class QueryParser {
     }
 
     private QueryReply getQueryReplyFromJsonElement(JsonElement queryReplyElem) {
-        List<Integer> categories = new ArrayList<Integer>();
-        List<Integer> categorymembers = new ArrayList<Integer>();
+        //List<Integer> categories = new ArrayList<Integer>();
+        //List<Integer> categorymembers = new ArrayList<Integer>();
 
         JsonObject entryValue = queryReplyElem.getAsJsonObject();
         JsonElement entryPageid = entryValue.get("pageid");
         JsonElement entryTitle = entryValue.get("title");
         JsonElement entryNamespace = entryValue.get("ns");
-        JsonElement entryCategories = entryValue.get("categories");
-        JsonElement entryCategorymembers = entryValue.get("categorymembers");
-        JsonArray arrayCategories = (entryCategories != null ? entryCategories.getAsJsonArray() : new JsonArray());
-        JsonArray arrayCategorymembers = (entryCategorymembers != null ? entryCategorymembers.getAsJsonArray() : new JsonArray());
+        //JsonElement entryCategories = entryValue.get("categories");
+        //JsonElement entryCategorymembers = entryValue.get("categorymembers");
+        //JsonArray arrayCategories = (entryCategories != null ? entryCategories.getAsJsonArray() : new JsonArray());
+        //JsonArray arrayCategorymembers = (entryCategorymembers != null ? entryCategorymembers.getAsJsonArray() : new JsonArray());
 
         boolean isRedirect = entryValue.has("redirect");
         int pageid = (entryPageid != null ? entryPageid.getAsInt() : -1);
@@ -134,18 +134,18 @@ public class QueryParser {
         boolean isDisambig = title.contains("(disambiguation)");
         int namespace = (entryNamespace != null ? entryNamespace.getAsInt() : -1);
 
-        for (JsonElement category : arrayCategories) {
+        /*for (JsonElement category : arrayCategories) {
             JsonElement categoryElem = category.getAsJsonObject().get("pageid");
             int categoryId = (categoryElem != null ? categoryElem.getAsInt() : -1);
             categories.add(categoryId);
-        }
+        }*/
 
-        for (JsonElement member : arrayCategorymembers) {
+        /*for (JsonElement member : arrayCategorymembers) {
             JsonElement memberElem = member.getAsJsonObject().get("pageid");
             int memberId = (memberElem != null ? memberElem.getAsInt() : -1);
             categorymembers.add(memberId);
-        }
+        }*/
 
-        return new QueryReply(pageid, title, namespace, isRedirect, isDisambig, categories, categorymembers);
+        return new QueryReply(pageid, title, namespace, isRedirect, isDisambig);
     }
  }

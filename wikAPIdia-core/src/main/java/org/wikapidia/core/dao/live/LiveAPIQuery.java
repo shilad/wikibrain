@@ -83,7 +83,7 @@ public class LiveAPIQuery {
                 this.queryAction = "generator";
                 this.queryType = "categories";
                 this.queryPagePrefix = "";
-                this.queryPrefix = "cl";
+                this.queryPrefix = "gcl";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
                 //this.parser = new CategoryQueryParser();

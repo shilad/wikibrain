@@ -23,21 +23,19 @@ public class QueryReply {
     public Integer nameSpace;
     public Boolean isRedirect;
     public Boolean isDisambig;
-    public List<Integer> categories;
-    public List<Integer> categoryMembers;
+    //public List<Integer> categories;
+    //public List<Integer> categoryMembers;
 
     public QueryReply() {
 
     }
 
-    public QueryReply(int pageId, String title, int nameSpace, boolean isRedirect, boolean isDisambig, List<Integer> categories, List<Integer> categoryMembers) {
+    public QueryReply(int pageId, String title, int nameSpace, boolean isRedirect, boolean isDisambig) {
         this.pageId = pageId;
         this.title = title;
         this.nameSpace = nameSpace;
         this.isRedirect = isRedirect;
         this.isDisambig = isDisambig;
-        this.categories = categories;
-        this.categoryMembers = categoryMembers;
     }
 
     public LocalLink getLocalLink(Language lang, int sourceId, boolean outlink) {
