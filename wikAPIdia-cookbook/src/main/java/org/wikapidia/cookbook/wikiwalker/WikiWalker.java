@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
+ * The main WikiWalker program.
+ *
  * @author Shilad Sen
  */
 public class WikiWalker extends JFrame implements ActionListener {
@@ -19,6 +21,16 @@ public class WikiWalker extends JFrame implements ActionListener {
     private final JTextField destField;
     private final JLabel errorLabel;
 
+    /**
+     * Creates a WikiWalker window.
+     *
+     * @param searcher
+     * @param wrapper
+     * @param start
+     * @param end
+     * @param width
+     * @param height
+     */
     public WikiWalker(GraphSearcher searcher, WikAPIdiaWrapper wrapper, LocalPage start, LocalPage end, int width, int height) {
         this.searcher = searcher;
         this.wrapper = wrapper;
@@ -29,7 +41,7 @@ public class WikiWalker extends JFrame implements ActionListener {
         setTitle("Comp 124 - Wiki Walker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(width, height);
-        setMinimumSize(getSize());
+        setPreferredSize(getSize());
         this.setLayout(new BorderLayout());
 
         Container buttons = new Container();
@@ -56,16 +68,20 @@ public class WikiWalker extends JFrame implements ActionListener {
         buttons.add(errorLabel);
 
         this.add(buttons, BorderLayout.NORTH);
-        this.viz = new WalkerViz(start, end);
+        this.viz = new WalkerViz(wrapper, start, end);
         getContentPane().add(viz, BorderLayout.CENTER);
 
         //Display the window.
         pack();
     }
 
-
+    /**
+     * Event handler for the wiki walker.
+     * @param actionEvent
+     */
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
+        errorLabel.setForeground(Color.RED);
         errorLabel.setText("");
 
         String srcText = srcField.getText();
@@ -84,26 +100,27 @@ public class WikiWalker extends JFrame implements ActionListener {
             }
             errorLabel.setText(unknown);
         } else {
-            wrapper.setInteresting(Utils.LANG_SIMPLE, src.getLocalId(), true);
-            wrapper.setInteresting(Utils.LANG_SIMPLE, dest.getLocalId(), true);
-            if (searcher.shortestPath(src, dest) == null) {
+            int distance = searcher.shortestDistance(src, dest);
+            if (distance < 0) {
                 errorLabel.setText("No path between " + src.getTitle() + " and " + dest.getTitle());
             } else {
+                errorLabel.setForeground(Color.BLACK);
+                errorLabel.setText("Shortest distance = " + distance);
                 viz.setPages(src, dest);
             }
         }
     }
 
     public static void main(String args[]) {
-        final GraphSearcher searcher = new GraphSearcher();
         final WikAPIdiaWrapper wrapper = new WikAPIdiaWrapper(Utils.PATH_DB);
+        final GraphSearcher searcher = new GraphSearcher(wrapper);
         final LocalPage sax = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "Saxophone");
         final LocalPage bayes = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "Bayes' theorem");
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                WikiWalker ex = new WikiWalker(searcher, wrapper, sax, bayes, 1280, 1024);
+                WikiWalker ex = new WikiWalker(searcher, wrapper, sax, bayes, 1280, 800);
                 ex.setVisible(true);
             }
         });

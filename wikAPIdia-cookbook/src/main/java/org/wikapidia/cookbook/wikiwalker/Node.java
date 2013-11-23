@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * A node in the article link graph.
+ * The children of a node are the pages it links to.
+ *
  * @author Shilad Sen
  */
 public class Node {
@@ -14,32 +17,60 @@ public class Node {
     private final Node parent;
     private final int pageId;
     private final int depth;
+    private final WikAPIdiaWrapper wrapper;
 
-    public Node(LocalPage page) {
-        this(page.getLanguage(), page.getLocalId(), 0, null);
+    /**
+     * Construct a new node for a particular page.
+     * @param wrapper
+     * @param page
+     */
+    public Node(WikAPIdiaWrapper wrapper, LocalPage page) {
+        this(wrapper, page.getLanguage(), page.getLocalId(), 0, null);
     }
-    private Node(Language language, int pageId, int depth, Node parent) {
+
+    /**
+     * This constuctor is only used internally when creating children.
+     * @param wrapper
+     * @param language
+     * @param pageId
+     * @param depth
+     * @param parent
+     */
+    private Node(WikAPIdiaWrapper wrapper, Language language, int pageId, int depth, Node parent) {
+        this.wrapper = wrapper;
         this.language = language;
         this.pageId = pageId;
         this.depth = depth;
         this.parent = parent;
     }
 
+    /**
+     * Returns the nodes linked to by the current node.
+     * @return
+     */
     public List<Node> getChildren() {
-        WikAPIdiaWrapper wrapper = WikAPIdiaWrapper.getInstance();
         List<Node> result = new ArrayList<Node>();
         for (Integer childId : wrapper.getLinkedIds(language, pageId)) {
             if (wrapper.isInteresting(language, childId)) {
-                result.add(new Node(language, childId, depth+1, this));
+                result.add(new Node(wrapper, language, childId, depth+1, this));
             }
         }
         return result;
     }
 
+    /**
+     * Returns the local page associated with the node.
+     * Note that this is relatively slow compared to getChildren(), so it should
+     * only be called after the shortest path is found, not during the search itself.
+     * @return
+     */
     public LocalPage getPage() {
-        return WikAPIdiaWrapper.getInstance().getLocalPageById(language, pageId);
+        return wrapper.getLocalPageById(language, pageId);
     }
 
+    /**
+     * @return A unique id for the page
+     */
     public int getPageId() {
         return pageId;
     }

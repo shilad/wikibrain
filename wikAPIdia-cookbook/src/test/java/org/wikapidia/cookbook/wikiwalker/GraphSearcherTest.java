@@ -19,6 +19,8 @@ public class GraphSearcherTest {
     private static LocalPage mondale;
     private static LocalPage bayes;
     private static LocalPage coltrane;
+    private static LocalPage norse;
+    private static LocalPage loki;
 
     @BeforeClass
     public static void setup() {
@@ -28,34 +30,42 @@ public class GraphSearcherTest {
         mondale = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "Walter Mondale");
         bayes = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "Bayes' theorem");
         coltrane = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "John Coltrane");
-        for (LocalPage page : Arrays.asList(obama, apple, mondale, bayes, coltrane)) {
+        norse = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "Norse mythology");
+        loki = wrapper.getLocalPageByTitle(Utils.LANG_SIMPLE, "Loki");
+        for (LocalPage page : Arrays.asList(obama, apple, mondale, coltrane, norse, loki)) {
             wrapper.setInteresting(Utils.LANG_SIMPLE, page.getLocalId(), true);
         }
     }
 
     @Test
     public void testIdentity() throws Exception {
-        GraphSearcher searcher = new GraphSearcher();
+        GraphSearcher searcher = new GraphSearcher(wrapper);
         assertEquals(0, searcher.shortestDistance(apple, apple));
+        assertEquals(1, searcher.shortestPath(apple, apple).size());
     }
 
     @Test
     public void testDisconnected() throws Exception {
-        GraphSearcher searcher = new GraphSearcher();
+        GraphSearcher searcher = new GraphSearcher(wrapper);
         assertEquals(null, searcher.shortestPath(bayes, coltrane));
     }
 
     @Test
     public void testClose() throws Exception {
-        GraphSearcher searcher = new GraphSearcher();
+        GraphSearcher searcher = new GraphSearcher(wrapper);
 
-        // Mondale -> Senate -> House -> Boehner -> Obama
-        assertEquals(4, searcher.shortestDistance(mondale, obama));
+        // Apple -> norse
+        assertEquals(1, searcher.shortestDistance(apple, norse));
+        assertEquals(2, searcher.shortestPath(apple, norse).size());
+
+        // Apple -> norse -> liki
+        assertEquals(2, searcher.shortestDistance(apple, loki));
+        assertEquals(3, searcher.shortestPath(apple, loki).size());
     }
 
     @Test
     public void testFar() throws Exception {
-        GraphSearcher searcher = new GraphSearcher();
+        GraphSearcher searcher = new GraphSearcher(wrapper);
 
         List<LocalPage> path = searcher.shortestPath(obama, apple);
         assertEquals(path.size(), 5);
