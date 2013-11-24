@@ -63,8 +63,6 @@ import java.util.logging.Logger;
 public class Configurator {
     private static final Logger LOG = Logger.getLogger(Configurator.class.getName());
 
-    public static String PROVIDER_PATH = "providers";
-
     public static final int MAX_FILE_SIZE = 8 * 1024 * 1024;   // 8MB
 
     private final Configuration conf;
@@ -121,6 +119,10 @@ public class Configurator {
         String separator = System.getProperty("path.separator");
         for (String entry : classPath.split(separator)) {
             File file = new File(entry);
+            if (!file.exists()) {
+                LOG.warning("skipping looking for providers in nonexistent file " + file);
+                continue;
+            }
             if (file.length() > MAX_FILE_SIZE) {
                 LOG.fine("skipping looking for providers in large file " + file);
                 continue;

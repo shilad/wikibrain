@@ -20,6 +20,7 @@ public class JvmUtils {
      * @return
      */
     public static String getClassPath() {
+        String separator = System.getProperty("path.separator");
         String classPath = System.getProperty("java.class.path", ".");
 
         // Try to get the URL class loader to make dynamic class loading work for Grails, etc.
@@ -35,7 +36,7 @@ public class JvmUtils {
             for (URL url : ((URLClassLoader)loader).getURLs()) {
                 if (isLocalFile(url)) {
                     try {
-                        classPath += ":" + new File(url.toURI());
+                        classPath += separator + new File(url.toURI());
                     } catch (URISyntaxException e) {
                         LOG.warning("Illegal url: " + url);
                     }
