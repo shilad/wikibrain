@@ -1,7 +1,12 @@
 package org.wikapidia.cookbook.wikiwalker;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
+//import com.sun.javaws.exceptions.InvalidArgumentException;
 import com.sun.tools.corba.se.idl.InvalidArgument;
+import gnu.trove.map.hash.TLongByteHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.set.hash.TLongHashSet;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.wikapidia.conf.ConfigurationException;
@@ -33,6 +38,14 @@ public class WikAPIdiaWrapper {
     private final RawPageDao rpDao;
     private final LocalPageDao lpDao;
     private final LocalLinkDao llDao;
+
+    /**
+     * Local page ids that are "interesting."
+     * This tries to exclude things like lists and categories.
+     */
+    private final TLongByteHashMap idsAreInteresting = new TLongByteHashMap();
+    private static final byte INTERESTING = 'y';
+    private static final byte NOT_INTERESTING = 'n';
 
     /**
      * Creates a new wrapper object with default configuration settings.
@@ -142,6 +155,38 @@ public class WikAPIdiaWrapper {
         } catch (DaoException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Returns the number of links that appear on a particular wiki page
+     * @param lang
+     * @param id
+     * @return
+     */
+    public int getNumOutLinks(Language lang, int id) {
+        try {
+            DaoFilter filter = new DaoFilter()
+                    .setLanguages(lang)
+                    .setNameSpaces(NameSpace.ARTICLE)
+                    .setSourceIds(id)
+                    .setRedirect(false);
+            return llDao.getCount(filter);
+        } catch (DaoException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public synchronized boolean isInteresting(Language lang, int id) {
+        long packed = new LocalId(lang, id).toLong();
+        if (!idsAreInteresting.containsKey(packed)) {
+            setInteresting(lang, id, getNumOutLinks(lang, id) <= 30);
+        }
+        return idsAreInteresting.get(packed) == INTERESTING;
+    }
+
+    public synchronized void setInteresting(Language lang, int id, boolean interesting) {
+        long packed = new LocalId(lang, id).toLong();
+        idsAreInteresting.put(packed, interesting ? INTERESTING : NOT_INTERESTING);
     }
 
     // Hack to make students' life easier

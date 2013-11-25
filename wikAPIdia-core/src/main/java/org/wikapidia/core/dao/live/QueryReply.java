@@ -4,9 +4,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonElement;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
+import org.wikapidia.core.model.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 /**
@@ -14,30 +14,52 @@ import java.util.Set;
  * @author Toby "Jiajun" Li
  */
 
-public abstract class QueryReply {
+public class QueryReply {
 
 
-
-    public Long pageId;
+    public Integer pageId;
     public String title;
     public String pageLanguage;
-    public Long nameSpace;
+    public Integer nameSpace;
+    public Boolean isRedirect;
+    public Boolean isDisambig;
+    //public List<Integer> categories;
+    //public List<Integer> categoryMembers;
 
+    public QueryReply() {
 
-
-    /**
-     *
-     * @return An Integer: the pageId of this page
-     */
-    public int getId(){
-        return pageId.intValue();
     }
+
+    public QueryReply(int pageId, String title, int nameSpace, boolean isRedirect, boolean isDisambig) {
+        this.pageId = pageId;
+        this.title = title;
+        this.nameSpace = nameSpace;
+        this.isRedirect = isRedirect;
+        this.isDisambig = isDisambig;
+    }
+
+    public LocalLink getLocalLink(Language lang, int sourceId, boolean outlink) {
+        return new LocalLink(lang, title, sourceId, pageId, outlink, -1, true, null);
+    }
+
+    public LocalPage getLocalPage(Language lang) {
+        return new LocalPage(lang, pageId, this.getTitle(lang), this.getNameSpace(), isRedirect, isDisambig);
+    }
+
+    public LocalCategoryMember getLocalCategoryMember(int categoryId, Language lang) {
+        return new LocalCategoryMember(categoryId, pageId, lang);
+    }
+
+    public int getId() {
+        return pageId;
+    }
+
     /**
      *
      * @return A Title: the title of this page
      */
-    public Title getTitle(){
-        return new Title(title, Language.getByLangCode(pageLanguage));
+    public Title getTitle(Language lang){
+        return new Title(title, lang);
     }
     /**
      *

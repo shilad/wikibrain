@@ -34,10 +34,10 @@ public class LocalCategoryListQueryReply extends QueryReply {
 
         for (Map.Entry<String, JsonElement> entry: pageSet)
         {
-            Long pageId = entry.getValue().getAsJsonObject().get("pageid").getAsLong();
+            Integer pageId = entry.getValue().getAsJsonObject().get("pageid").getAsInt();
             String title = entry.getValue().getAsJsonObject().get("title").getAsString();
 
-            Long nameSpace = entry.getValue().getAsJsonObject().get("ns").getAsLong();
+            Integer nameSpace = entry.getValue().getAsJsonObject().get("ns").getAsInt();
             for(JsonElement elem: entry.getValue().getAsJsonObject().get("categories").getAsJsonArray()){
 
                 try{
@@ -60,7 +60,7 @@ public class LocalCategoryListQueryReply extends QueryReply {
 
     /**
      *
-     * @return a list of categories that an article belongs to
+     * @return a list of categories that an article beIntegers to
      */
     public List<LocalCategory> getCategoryList(){
         return categoryList;

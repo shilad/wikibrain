@@ -66,15 +66,14 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
      * @throws DaoException
      */
     public Collection<Integer> getCategoryMemberIds(Language language, int categoryId) throws DaoException {
-        String http = new String("http://");
-        String host = new String(".wikipedia.org");
-        String query = new String("/w/api.php?action=query&list=categorymembers&format=json&cmpageid=");
-        List<LocalCategoryMember> categoryList = new LocalCategoryMemberQueryReply(LiveUtils.getInfoByQuery(http + language.getLangCode() + host + query + new Integer(categoryId).toString() + "&cmlimit=" + new Integer(Integer.MAX_VALUE).toString() ), categoryId, language).getLocalCategoryMemberList();
-        List<Integer> categoryMemberIdsList = new ArrayList<Integer>();
-        for(LocalCategoryMember m: categoryList){
-            categoryMemberIdsList.add(m.getArticleId());
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("CATEGORYMEMBERS", language)
+                .setPageid(categoryId);
+        List<QueryReply> replies = builder.build().getValuesFromQueryResult();
+        List<Integer> categoryMemberIds = new ArrayList<Integer>();
+        for (QueryReply reply : replies) {
+            categoryMemberIds.add(reply.pageId);
         }
-        return categoryMemberIdsList;
+        return categoryMemberIds;
     }
 
     /**
@@ -121,20 +120,13 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
      * @throws DaoException
      */
     public Collection<Integer> getCategoryIds(Language language, int articleId) throws DaoException {
-        String http = new String("http://");
-        String host = new String(".wikipedia.org");
-        String query = new String("/w/api.php?action=query&prop=categories&format=json&pageids=");
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("CATEGORIES", language).setPageid(articleId);
         List<Integer> categoryIdsList = new ArrayList<Integer>();
-        try{
-            List<LocalCategory> categoryList = new LocalCategoryListQueryReply(LiveUtils.getInfoByQuery(http + language.getLangCode() + host + query + new Integer(articleId).toString() + "&cmlimit=" + new Integer(Integer.MAX_VALUE).toString()), language).getCategoryList();
-            for(LocalCategory m: categoryList){
-                categoryIdsList.add(m.getLocalId());
-            }
+        List<QueryReply> replies = builder.build().getValuesFromQueryResult();
+        for (QueryReply reply : replies) {
+            categoryIdsList.add(reply.pageId);
         }
-        catch(ConfigurationException e){
-            throw new DaoException("Failed to parse categories list");
-        }
-        return categoryIdsList;
+        return  categoryIdsList;
     }
 
     /**
