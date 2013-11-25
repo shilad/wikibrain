@@ -38,8 +38,12 @@ public class QueryReply {
         this.isDisambig = isDisambig;
     }
 
-    public LocalLink getLocalLink(Language lang, int sourceId, boolean outlink) {
-        return new LocalLink(lang, title, sourceId, pageId, outlink, -1, true, null);
+    public LocalLink getLocalOutLink(Language lang, int sourceId) {
+        return new LocalLink(lang, title, sourceId, pageId, true, -1, true, null);
+    }
+
+    public LocalLink getLocalInLink(Language lang, int destId) {
+        return new LocalLink(lang, title, pageId, destId, false, -1, true, null);
     }
 
     public LocalPage getLocalPage(Language lang) {

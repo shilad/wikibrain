@@ -30,7 +30,7 @@ public class LocalLinkLiveDaoExample {
         Iterable<LocalLink> inlinks = ldao.getLinks(lang, sourceId, false);
         System.out.println("\nLinks into page " + sourceId + ":");
         for (LocalLink inlink : inlinks) {
-            System.out.println("\t" + inlink.getAnchorText() + ", " + inlink.getDestId());
+            System.out.println("\t" + inlink.getAnchorText() + ", " + inlink.getSourceId());
         }
 
         Iterable<LocalLink> outlinks = ldao.getLinks(lang, sourceId, true);

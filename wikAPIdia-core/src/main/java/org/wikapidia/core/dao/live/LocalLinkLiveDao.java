@@ -60,7 +60,7 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         for (QueryReply reply : replyObjects) {
             int pageId = reply.pageId;
             if (pageId == destId) {
-                return reply.getLocalLink(language, sourceId, true);
+                return reply.getLocalOutLink(language, sourceId);
             }
         }
         throw new DaoException("No link with given sourceId and destId found");
@@ -87,7 +87,7 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         //query for outlinks from local id, return as list of titles and pageids
         List<QueryReply> replyObjects = query.getValuesFromQueryResult();
         for (QueryReply reply : replyObjects) {
-            LocalLink link = reply.getLocalLink(language, localId, outlinks);
+            LocalLink link = outlinks ? reply.getLocalOutLink(language, localId) : reply.getLocalInLink(language, localId);
             links.add(link);
         }
 
