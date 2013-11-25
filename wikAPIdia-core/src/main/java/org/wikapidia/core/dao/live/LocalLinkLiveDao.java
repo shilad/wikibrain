@@ -40,10 +40,65 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public int getCount(DaoFilter a)throws DaoException{
-        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
+        if(a.getSourceIds() == null && a.getDestIds() == null)
+            throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
+        else{
+            int sum=0;
+            Iterator<LocalLink> it = get(a).iterator();
+            while (it.hasNext())
+            {
+                it.next();
+                sum++;
+            }
+            return sum;
+        }
     }
     public Iterable<LocalLink> get(DaoFilter a)throws DaoException{
-        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
+        if(a.getSourceIds() == null && a.getDestIds() == null)
+            throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
+        else if (a.getSourceIds() != null && a.getDestIds() == null){
+            Set<LocalLink> set = new HashSet<LocalLink>();
+            for (short langId : a.getLangIds()){
+                for (int srcId : a.getSourceIds()){
+                    for(LocalLink link: getLinks(Language.getById(langId), srcId, false))
+                        set.add(link);
+                }
+            }
+            return set;
+        }
+        else if (a.getSourceIds() == null && a.getDestIds() != null){
+            Set<LocalLink> set = new HashSet<LocalLink>();
+            for (short langId : a.getLangIds()){
+                for (int dstId : a.getDestIds()){
+                    for(LocalLink link: getLinks(Language.getById(langId), dstId, true))
+                        set.add(link);
+                }
+            }
+            return set;
+        }
+        else{
+            Set<LocalLink> inSet = new HashSet<LocalLink>();
+            for (short langId : a.getLangIds()){
+                for (int srcId : a.getSourceIds()){
+                    for(LocalLink link: getLinks(Language.getById(langId), srcId, false))
+                        inSet.add(link);
+                }
+            }
+            Set<LocalLink> outSet = new HashSet<LocalLink>();
+            for (short langId : a.getLangIds()){
+                for (int dstId : a.getDestIds()){
+                    for(LocalLink link: getLinks(Language.getById(langId), dstId, true))
+                        outSet.add(link);
+                }
+            }
+            Set<LocalLink> interSec = new HashSet<LocalLink>();
+            for (LocalLink link: inSet){
+                if (outSet.contains(link))
+                    interSec.add(link);
+            }
+            return interSec;
+        }
+
     }
     public LanguageSet getLoadedLanguages() throws DaoException {
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");

@@ -20,23 +20,24 @@ import java.io.IOException;
 public class LocalLinkLiveDaoExample {
 
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
-        LocalLinkDao ldao = new Configurator(new Configuration()).get(LocalLinkDao.class, "live");
-        Language lang = Language.getByLangCode("en");
-        int sourceId = 5079506;
-        int destId = 454136;
+        LocalLinkDao ldao = new Configurator(new Configuration()).get(LocalLinkDao.class, "live");    //try to change from "live" to "dao"
+        Language lang = Language.getByLangCode("simple");
+        int sourceId = 10983;   //Minnesota
+        int destId = 3009;      //California
         LocalLink link = ldao.getLink(lang, sourceId, destId);
-        System.out.println("Got link \"" + link.getAnchorText() + "\" from " + sourceId + " to " + destId);
+        if(link != null)
+            System.out.println("Got link \"" + link.getAnchorText() + "\" from " + sourceId + " to " + destId);
 
         Iterable<LocalLink> inlinks = ldao.getLinks(lang, sourceId, false);
         System.out.println("\nLinks into page " + sourceId + ":");
         for (LocalLink inlink : inlinks) {
-            System.out.println("\t" + inlink.getAnchorText() + ", " + inlink.getDestId());
+            System.out.println(inlink);
         }
 
         Iterable<LocalLink> outlinks = ldao.getLinks(lang, sourceId, true);
         System.out.println("\nLinks out of page " + sourceId + ":");
         for (LocalLink outlink : outlinks) {
-            System.out.println("\t" + outlink.getAnchorText() + ", " + outlink.getDestId());
+            System.out.println(outlink);
         }
     }
 
