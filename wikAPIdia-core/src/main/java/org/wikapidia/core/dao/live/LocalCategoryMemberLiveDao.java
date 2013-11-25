@@ -190,6 +190,8 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
             return "dao.localCategoryMember";
         }
 
+
+
         @Override
         public LocalCategoryMemberDao get(String name, Config config) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
