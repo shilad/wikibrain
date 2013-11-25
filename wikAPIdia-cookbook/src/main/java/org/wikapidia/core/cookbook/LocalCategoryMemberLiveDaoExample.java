@@ -8,12 +8,8 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.wikapidia.core.dao.live.*;
 /**
  * An Example shows how LocalCategoryMemberLiveDao works
  * @author Toby "Jiajun" Li
@@ -24,6 +20,7 @@ public class LocalCategoryMemberLiveDaoExample {
         LocalArticleDao localArticleDao = new Configurator(new Configuration()).get(LocalArticleDao.class, "live");
         LocalCategoryDao localCategoryDao = new Configurator(new Configuration()).get(LocalCategoryDao.class, "live");
         LocalCategoryMemberDao localCategoryMemberDao = new Configurator(new Configuration()).get(LocalCategoryMemberDao.class, "live");
+
         Language lang = Language.getByLangCode("en");
 
 
@@ -66,4 +63,6 @@ public class LocalCategoryMemberLiveDaoExample {
         }
 
     }
+
+
 }
