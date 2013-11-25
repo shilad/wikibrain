@@ -15,8 +15,8 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.UniversalSRMetric;
-import org.wikapidia.sr.utils.Dataset;
-import org.wikapidia.sr.utils.DatasetDao;
+import org.wikapidia.sr.dataset.Dataset;
+import org.wikapidia.sr.dataset.DatasetDao;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.utils.MathUtils;
 
@@ -335,7 +335,7 @@ public class CrossValidation {
                 for (int i=1; i<k+1; i++){
                     String directory = datasetPath+datasetName+"/";
                     (new File(directory)).mkdirs();
-                    datasets.add(datasetDao.read(lang, new File(directory+i+"of"+k+".txt").getAbsolutePath()));
+                    datasets.add(datasetDao.read(lang, new File(directory+i+"of"+k+".txt")));
                 }
 
             }
@@ -345,7 +345,7 @@ public class CrossValidation {
             for (String dsName : cmd.getOptionValues("g")) {
                 List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+dsName);
                 if (languages.contains(lang.getLangCode())){
-                    datasets.add(datasetDao.read(lang,new File(datasetPath, dsName).getAbsolutePath()));
+                    datasets.add(datasetDao.get(lang, dsName));
                 }
                 datasetNames.add(dsName);
             }
@@ -373,7 +373,7 @@ public class CrossValidation {
                     String directory = datasetPath+saveName+"/";
                     (new File(directory)).mkdirs();
                     String name = directory+(i+1)+"of"+allTest.size()+".txt";
-                    datasetDao.write(allTest.get(i), new File(name).getAbsolutePath());
+                    datasetDao.write(allTest.get(i), new File(name));
                 }
                 String metadata = saveName+"\t"+lang.getLangCode()+"\t"+k*datasets.size()+"\t"+datasetNames.toString();
                 writeMetadata(saveName, metadata, new File(c.getConf().get().getString("sr.dataset.metadata")));

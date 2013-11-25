@@ -25,8 +25,7 @@ import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
-import org.wikapidia.sr.pairwise.SRMatrices;
-import org.wikapidia.sr.utils.Dataset;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.Function;
@@ -172,7 +171,7 @@ public class EnsembleMetric extends BaseLocalSRMetric{
                 }
                 ranks.add(0); //Don't worry about ranks when training similarity
             }
-            ensembleSims.add(new EnsembleSim(scores,ranks,ks));
+            ensembleSims.add(new EnsembleSim(scores, ranks, ks));
         }
         ensemble.trainSimilarity(ensembleSims);
     }
