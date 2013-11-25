@@ -60,7 +60,7 @@ public class LocalLinkLiveDao implements LocalLinkDao {
             Set<LocalLink> set = new HashSet<LocalLink>();
             for (short langId : a.getLangIds()){
                 for (int srcId : a.getSourceIds()){
-                    for(LocalLink link: getLinks(Language.getById(langId), srcId, false))
+                    for(LocalLink link: getLinks(Language.getById(langId), srcId, true))
                         set.add(link);
                 }
             }
@@ -70,7 +70,7 @@ public class LocalLinkLiveDao implements LocalLinkDao {
             Set<LocalLink> set = new HashSet<LocalLink>();
             for (short langId : a.getLangIds()){
                 for (int dstId : a.getDestIds()){
-                    for(LocalLink link: getLinks(Language.getById(langId), dstId, true))
+                    for(LocalLink link: getLinks(Language.getById(langId), dstId, false))
                         set.add(link);
                 }
             }
@@ -80,14 +80,14 @@ public class LocalLinkLiveDao implements LocalLinkDao {
             Set<LocalLink> inSet = new HashSet<LocalLink>();
             for (short langId : a.getLangIds()){
                 for (int srcId : a.getSourceIds()){
-                    for(LocalLink link: getLinks(Language.getById(langId), srcId, false))
+                    for(LocalLink link: getLinks(Language.getById(langId), srcId, true))
                         inSet.add(link);
                 }
             }
             Set<LocalLink> outSet = new HashSet<LocalLink>();
             for (short langId : a.getLangIds()){
                 for (int dstId : a.getDestIds()){
-                    for(LocalLink link: getLinks(Language.getById(langId), dstId, true))
+                    for(LocalLink link: getLinks(Language.getById(langId), dstId, false))
                         outSet.add(link);
                 }
             }

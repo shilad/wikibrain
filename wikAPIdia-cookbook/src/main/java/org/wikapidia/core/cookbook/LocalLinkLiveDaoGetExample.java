@@ -18,15 +18,15 @@ import java.util.Set;
  */
 public class LocalLinkLiveDaoGetExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
-        LocalLinkDao linkDao = new Configurator(new Configuration()).get(LocalLinkDao.class, "sql");
+        LocalLinkDao linkDao = new Configurator(new Configuration()).get(LocalLinkDao.class, "live");
         Set<Language> langSet = new HashSet<Language>();
         langSet.add(Language.getByLangCode("en"));
         langSet.add(Language.getByLangCode("fr"));
-        langSet.add(Language.getByLangCode("simple"));
+        langSet.add(Language.getByLangCode("zh"));
         Set<Integer> idSet = new HashSet<Integer>();
         idSet.add(15000);
         idSet.add(14000);
-        DaoFilter df = new DaoFilter().setLanguages(langSet).setDestIds(idSet);
+        DaoFilter df = new DaoFilter().setLanguages(langSet).setSourceIds(idSet);
         Language lang = Language.getByLangCode("en");
         for(LocalLink link: linkDao.get(df)){
             System.out.println(link);

@@ -40,8 +40,8 @@ public class CompareLocalLinkLiveSqlDao {
         System.out.println("\nLinks into page " + pageId + ":" + "in Live Wiki");
         for (LocalLink inlink : inlinks) {
             liveInCounter++;
-            inLive.add(inlink.getDestId());
-            System.out.println("\t" + inlink.getAnchorText() + ", " + inlink.getDestId());     //TODO: need to fix
+            inLive.add(inlink.getSourceId());
+            System.out.println(inlink);
         }
 
         Iterable<LocalLink> outlinks = ldao.getLinks(lang, pageId, true);
@@ -49,7 +49,7 @@ public class CompareLocalLinkLiveSqlDao {
         for (LocalLink outlink : outlinks) {
             liveOutCounter++;
             outLive.add(outlink.getDestId());
-            System.out.println("\t" + outlink.getAnchorText() + ", " + outlink.getDestId());
+            System.out.println(outlink);
         }
 
         ldao = new Configurator(new Configuration()).get(LocalLinkDao.class, "sql");
@@ -64,7 +64,7 @@ public class CompareLocalLinkLiveSqlDao {
             if(inLive.contains(inlink.getSourceId())){
                 inCommon.add(inlink.getSourceId());
             }
-            System.out.println("\t" + pdao.getById(lang, inlink.getSourceId()).getTitle().toString() + ", " + inlink.getSourceId());
+            System.out.println(inlink);
         }
 
         outlinks = ldao.getLinks(lang, pageId, true);
@@ -74,7 +74,7 @@ public class CompareLocalLinkLiveSqlDao {
             if(outLive.contains(outlink.getDestId())){
                 outCommon.add(outlink.getDestId());
             }
-            System.out.println("\t" + outlink.getAnchorText() + ", " + outlink.getDestId());
+            System.out.println(outlink);
         }
 
         System.out.printf("\nNumber of inlinks in LiveDao: %d\nNumber of inlinks in SQLDao: %d\nNumber of inlinks in common: %d\n\nNumber of outlinks in LiveDao: %d\n" +
