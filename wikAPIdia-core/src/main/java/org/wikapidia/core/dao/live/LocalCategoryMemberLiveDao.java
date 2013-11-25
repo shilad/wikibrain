@@ -1,7 +1,6 @@
 package org.wikapidia.core.dao.live;
 
 import com.typesafe.config.Config;
-import org.apache.commons.io.IOUtils;
 
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -9,15 +8,12 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
-import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
-import org.wikapidia.core.dao.sql.LocalCategorySqlDao;
 
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalCategory;
 import org.wikapidia.core.model.LocalCategoryMember;
-import org.wikapidia.core.dao.live.LiveUtils;
 
 import java.util.*;
 
