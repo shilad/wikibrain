@@ -1,17 +1,12 @@
 package org.wikapidia.core.dao.live;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonElement;
+
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 /**
- * An abstract class used to handle json objects we got from live wiki API
- * @author Toby "Jiajun" Li
+ * An abstract class used to store information of interest for a page of a query result
+ * Also contains methods to construct a wikapidia core object from the information contained here
+ * @author Toby "Jiajun" Li and derian
  */
 
 public class QueryReply {
@@ -19,16 +14,10 @@ public class QueryReply {
 
     public Integer pageId;
     public String title;
-    public String pageLanguage;
     public Integer nameSpace;
     public Boolean isRedirect;
     public Boolean isDisambig;
-    //public List<Integer> categories;
-    //public List<Integer> categoryMembers;
 
-    public QueryReply() {
-
-    }
 
     public QueryReply(int pageId, String title, int nameSpace, boolean isRedirect, boolean isDisambig) {
         this.pageId = pageId;
@@ -50,10 +39,6 @@ public class QueryReply {
         return new LocalPage(lang, pageId, this.getTitle(lang), this.getNameSpace(), isRedirect, isDisambig);
     }
 
-    public LocalCategoryMember getLocalCategoryMember(int categoryId, Language lang) {
-        return new LocalCategoryMember(categoryId, pageId, lang);
-    }
-
     public int getId() {
         return pageId;
     }
@@ -72,10 +57,4 @@ public class QueryReply {
     public NameSpace getNameSpace(){
         return NameSpace.getNameSpaceByArbitraryId(nameSpace.intValue());
     }
-    /**
-     *
-     * @return A boolean: whether this page is redirect
-     */
-
-
 }

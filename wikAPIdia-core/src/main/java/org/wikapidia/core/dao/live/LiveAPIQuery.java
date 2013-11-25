@@ -1,11 +1,8 @@
 package org.wikapidia.core.dao.live;
 
 /**
- * Created with IntelliJ IDEA.
- * User: derian
- * Date: 11/11/13
- * Time: 3:02 PM
- * To change this template use File | Settings | File Templates.
+ * utility class used by LiveAPI DAOs to query the wikipedia server and retrieve results as a list of QueryReply objects
+ * author: derian
  */
 
 import org.apache.commons.io.IOUtils;
@@ -19,18 +16,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * utility class used by LiveAPI DAOs to query the wikipedia server and retrieve results in a useful format
- */
 public class LiveAPIQuery {
 
     private final Language lang;
-    private final String outputFormat = "json"; //only JSON currently supported
+    private final String outputFormat = "json"; //only JSON currently supported    
     private final String queryAction;
     private final String queryType;
-    private final String queryPagePrefix;
-    private final String queryPrefix;
-    private final Boolean pluralPage;
+    private final String queryInfoPrefix; //prefix before params in URL string specifying what info should be returned
+    private final String queryLimitPrefix; //prefix before "limit" and "continue" params in URL string
+                                           //usually the same as queryInfoPrefix, but not in the case of prop and generator queries
+    private final Boolean pluralPage; //if true, query URL string must contain plural version of pageid, title, etc as a param
     private final String queryResultDataSection; //section of the query result containing the data of interest
     private QueryParser parser = new QueryParser();
     private Boolean redirects;
@@ -60,60 +55,55 @@ public class LiveAPIQuery {
             this.from = builder.from;
         }
 
+        // set parameters for the URL string according to the query type
         switch (builder.queryType) {
             case 0: //INFO:
                 this.queryAction = "prop";
                 this.queryType = "info";
-                this.queryPagePrefix = "";
-                this.queryPrefix = "in";
+                this.queryInfoPrefix = "";
+                this.queryLimitPrefix = "in";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                //this.parser = new InfoQueryParser();
                 break;
             case 1: //CATEGORYMEMBERS:
                 this.queryAction = "list";
                 this.queryType = "categorymembers";
-                this.queryPagePrefix = "cm";
-                this.queryPrefix = "cm";
+                this.queryInfoPrefix = "cm";
+                this.queryLimitPrefix = "cm";
                 this.pluralPage = false;
                 this.queryResultDataSection = "categorymembers";
-                //this.parser = new CategoryMemberQueryParser();
                 break;
             case 2: //CATEGORIES:
                 this.queryAction = "generator";
                 this.queryType = "categories";
-                this.queryPagePrefix = "";
-                this.queryPrefix = "gcl";
+                this.queryInfoPrefix = "";
+                this.queryLimitPrefix = "gcl";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                //this.parser = new CategoryQueryParser();
                 break;
             case 3: //LINKS:
                 this.queryAction = "generator";
                 this.queryType = "links";
-                this.queryPagePrefix = "";
-                this.queryPrefix = "gpl";
+                this.queryInfoPrefix = "";
+                this.queryLimitPrefix = "gpl";
                 this.pluralPage = true;
                 this.queryResultDataSection = "pages";
-                //this.parser = new LinkQueryParser();
                 break;
             case 4: //BACKLINKS:
                 this.queryAction = "list";
                 this.queryType = "backlinks";
-                this.queryPagePrefix = "bl";
-                this.queryPrefix = "bl";
+                this.queryInfoPrefix = "bl";
+                this.queryLimitPrefix = "bl";
                 this.pluralPage = false;
                 this.queryResultDataSection = "backlinks";
-                //this.parser = new BacklinkQueryParser();
                 break;
             default:    //allpages
                 this.queryAction = "list";
                 this.queryType = "allpages";
-                this.queryPagePrefix = "ap";
-                this.queryPrefix = "ap";
+                this.queryInfoPrefix = "ap";
+                this.queryLimitPrefix = "ap";
                 this.pluralPage = false;
                 this.queryResultDataSection = "allpages";
-                //this.parser = new AllpagesQueryParser();
                 break;
         }
         constructQueryUrl();
@@ -123,28 +113,31 @@ public class LiveAPIQuery {
         String http = "http://";
         String host = ".wikipedia.org";
         String queryUrl = http + lang.getLangCode() + host + "/w/api.php?action=query&format=" + outputFormat +
-                "&" + queryAction + "=" + queryType + "&" + queryPrefix + "limit=500";
+                "&" + queryAction + "=" + queryType + "&" + queryLimitPrefix + "limit=500";
         if (this.title != null) {
-            queryUrl += "&" + queryPagePrefix + "title" + (pluralPage ? "s" : "") + "=" + title;
+            queryUrl += "&" + queryInfoPrefix + "title" + (pluralPage ? "s" : "") + "=" + title;
         }
         if (this.pageid != null) {
-            queryUrl += "&" + queryPagePrefix + "pageid" + (pluralPage ? "s" : "") + "=" + pageid;
+            queryUrl += "&" + queryInfoPrefix + "pageid" + (pluralPage ? "s" : "") + "=" + pageid;
         }
+        //if redirects is true, resolve redirects in the query result
         if ((this.redirects != null) && this.redirects) {
             queryUrl += "&redirects=";
         }
+        //specify whether to return redirects, non-redirects, or both in the query result
+        //default is both
         if (this.filterredir != null) {
-            queryUrl += "&" + queryPagePrefix + "filterredir" + (pluralPage ? "s" : "") + "=" + filterredir;
+            queryUrl += "&" + queryInfoPrefix + "filterredir" + "=" + filterredir;
         }
         if (this.from != null) {
-            queryUrl += "&" + queryPagePrefix + "from" + (pluralPage ? "s" : "") + "=" + from;
+            queryUrl += "&" + queryInfoPrefix + "from" + "=" + from;
         }
         this.queryUrl = queryUrl;
     }
 
     /**
-     * method used by client DAOs to retrieve a list of strings representing the values of interest returned by the query
-     * @return string list containing the values of interest, which are specified by valueType
+     * method used by client DAOs to retrieve a list of QueryReplies representing the values of interest returned by the query
+     * @return QueryReply list containing the values of interest
      * @throws DaoException
      */    
     public List<QueryReply> getValuesFromQueryResult() throws DaoException {
@@ -152,11 +145,19 @@ public class LiveAPIQuery {
         String queryContinue = "";
         boolean hasContinue;
         do {
+            //make query and set this.queryResult to the resulting text
             getRawQueryText(queryUrl + queryContinue);
+            //parse the queryResult and add the resulting QueryReply objects to values
             parser.getQueryReturnValues(lang, queryResult, queryResultDataSection, values);
-            queryContinue = parser.getContinue(queryResult, queryType, queryPrefix);
+
+            /*
+             * Determine whether or not the query result contained continue info, meaning there were too many
+             * values to return in one query
+             * If so, continue parsing by adding the continue info to the URL string
+             */
+            queryContinue = parser.getContinue(queryResult, queryType, queryLimitPrefix);
             hasContinue = (!queryContinue.equals(""));
-            queryContinue = "&" + queryPrefix + "continue=" + queryContinue;
+            queryContinue = "&" + queryLimitPrefix + "continue=" + queryContinue;
         }
         while (hasContinue);
         return values;
@@ -191,7 +192,7 @@ public class LiveAPIQuery {
         queryResult = info;
     }
 
-    //This class uses the builder method in anticipation of increased complexity over time
+    //Builder used by client DAOs to create instances of LiveAPIQuery
     public static class LiveAPIQueryBuilder {
         private final Language lang;
         //private final QueryType queryType;

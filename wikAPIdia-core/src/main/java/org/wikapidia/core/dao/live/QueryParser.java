@@ -4,41 +4,52 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.io.IOUtils;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
- * User: derian
- * Date: 11/18/13
- * Time: 2:31 AM
- * To change this template use File | Settings | File Templates.
+ * utility class used by LiveAPIQuery to parse QueryReply objects from raw query output JSON
+ * author: derian
  */
+
 public class QueryParser {
 
     JsonParser jp = new JsonParser();
 
-    public String getContinue(String text, String queryType, String prefix) {
+    /**
+     * Retrieves the string necessary to append to a query URL to retrieve pages starting after the last page
+     * retrieved in the previous query. If the last page alphabetically was retrieved in the previous query, there will be 
+     * no continue string.
+     * @param queryResult represents the raw text output of the previous query
+     * @param queryType
+     * @param prefix
+     * @return the query continue string, or "" if no continue string is found
+     */
+    public String getContinue(String queryResult, String queryType, String prefix) {
         String continueParam = prefix + "continue";
-        JsonElement continueElem = jp.parse(text).getAsJsonObject().get("query-continue");
+        JsonElement continueElem = jp.parse(queryResult).getAsJsonObject().get("query-continue");
         if (continueElem == null) {
             return "";
         }
         return continueElem.getAsJsonObject().get(queryType).getAsJsonObject().get(continueParam).getAsString();
     }
 
+    /**
+     * adds QueryReply objects parsed from raw query result text to an input QueryReply list
+     * @param lang
+     * @param queryResult raw text output of query
+     * @param queryResultDataSection //section of queryResult in which values of interest can be found
+     * @param values list to which parsed QueryReply objects should be added
+     * @throws DaoException
+     */
     public void getQueryReturnValues(Language lang, String queryResult, String queryResultDataSection, List<QueryReply> values) throws DaoException {
         //get JSON object representing query reply
         JsonObject queryReplyObject = parseQueryObject(queryResult, "query");
-        //parse desired values from JSON object into string list
+        //parse desired values from JSON object into QueryReplies and add to values
         JsonElement dataSectionElem = queryReplyObject.get(queryResultDataSection);
         if (dataSectionElem.isJsonArray()) {
             JsonArray array = getJsonArrayFromQueryObject(queryReplyObject, queryResultDataSection);
@@ -96,9 +107,9 @@ public class QueryParser {
     }
 
     /**
-     * The following four methods take either a JSON object (jo) or JSON array (ja) containing the desired information
-     * of the query result. This information is returned as a list of string or int values. The paramater "valueType"
-     * specifies which things in the query result should be returned in the list
+     * The following two methods take either a JSON object or JSON array containing desired information
+     * from a query result. Page ID, title, namespace, redirect, and disambiguation information are retrieved from each
+     * page in the result, and used to create a QueryReply which is added to values
      */
     private void getValuesFromJsonObject(JsonObject jo, List<QueryReply> values) {
         Set<Map.Entry<String, JsonElement>> valueSet = jo.entrySet();
@@ -115,36 +126,22 @@ public class QueryParser {
         }
     }
 
-    private QueryReply getQueryReplyFromJsonElement(JsonElement queryReplyElem) {
-        //List<Integer> categories = new ArrayList<Integer>();
-        //List<Integer> categorymembers = new ArrayList<Integer>();
-
-        JsonObject entryValue = queryReplyElem.getAsJsonObject();
+    /**
+     * parses a QueryReply object from a JsonElement representing a page from a query result
+     * @param queryReplyPage JsonElement representing page of query result
+     * @return QueryReply containing useful information about this page
+     */
+    private QueryReply getQueryReplyFromJsonElement(JsonElement queryReplyPage) {
+        JsonObject entryValue = queryReplyPage.getAsJsonObject();
         JsonElement entryPageid = entryValue.get("pageid");
         JsonElement entryTitle = entryValue.get("title");
         JsonElement entryNamespace = entryValue.get("ns");
-        //JsonElement entryCategories = entryValue.get("categories");
-        //JsonElement entryCategorymembers = entryValue.get("categorymembers");
-        //JsonArray arrayCategories = (entryCategories != null ? entryCategories.getAsJsonArray() : new JsonArray());
-        //JsonArray arrayCategorymembers = (entryCategorymembers != null ? entryCategorymembers.getAsJsonArray() : new JsonArray());
 
         boolean isRedirect = entryValue.has("redirect");
         int pageid = (entryPageid != null ? entryPageid.getAsInt() : -1);
         String title = (entryTitle != null ? entryTitle.getAsString() : "");
         boolean isDisambig = title.contains("(disambiguation)");
         int namespace = (entryNamespace != null ? entryNamespace.getAsInt() : -1);
-
-        /*for (JsonElement category : arrayCategories) {
-            JsonElement categoryElem = category.getAsJsonObject().get("pageid");
-            int categoryId = (categoryElem != null ? categoryElem.getAsInt() : -1);
-            categories.add(categoryId);
-        }*/
-
-        /*for (JsonElement member : arrayCategorymembers) {
-            JsonElement memberElem = member.getAsJsonObject().get("pageid");
-            int memberId = (memberElem != null ? memberElem.getAsInt() : -1);
-            categorymembers.add(memberId);
-        }*/
 
         return new QueryReply(pageid, title, namespace, isRedirect, isDisambig);
     }
