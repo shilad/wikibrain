@@ -3,15 +3,14 @@ package org.wikapidia.sr.evaluation;
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.utils.WpIOUtils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,7 +21,7 @@ import java.util.*;
  *
  * @author Shilad Sen
  */
-public class SimilarityEvaluation {
+public class SimilarityEvaluation implements Closeable {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private final Map<String, String> config;
@@ -50,12 +49,17 @@ public class SimilarityEvaluation {
     public SimilarityEvaluation(Date date, Map<String, String> config, File logPath) throws IOException {
         this.startDate = date;
         this.config = config;
-        this.log = WpIOUtils.openWriter(logPath);
-        for (String key : config.keySet()) {
-            log.write("start" + formatDate(new Date()) + "\n");
-            log.write("config" + key + "\t" + config.get(key) + "\n");
+        if (logPath == null) {
+            log = null;
+        } else {
+            log = WpIOUtils.openWriter(logPath);
+            for (String key : config.keySet()) {
+                log.write("start" + formatDate(new Date()) + "\n");
+                log.write("config" + key + "\t" + config.get(key) + "\n");
+            }
+            log.flush();
         }
-        log.flush();
+
     }
 
     public synchronized void recordFailed(KnownSim ks) throws IOException {
@@ -66,6 +70,9 @@ public class SimilarityEvaluation {
     public synchronized void record(KnownSim ks, Double estimate) throws IOException {
         if (Double.isNaN(estimate) || Double.isInfinite(estimate)) {
             missing++;
+        } else {
+            actual.add(ks.similarity);
+            estimates.add(estimate);
         }
         write(ks, estimate.toString());
     }
@@ -124,6 +131,57 @@ public class SimilarityEvaluation {
     }
 
     /**
+     * Writes a summary of the results to the file.
+     * @throws IOException
+     */
+    public void summarize(File path) throws IOException {
+        BufferedWriter writer = WpIOUtils.openWriter(path);
+        try {
+            summarize(writer);
+        } finally {
+            IOUtils.closeQuietly(writer);
+        }
+    }
+
+    /**
+     * Return a textual summary of the evaluation as a map.
+     * The summary includes: the config, date, total, failed, missing, successful, spearman, and pearson
+     * The map is actually a LinkedHashMap, so if the config is ordered, it is preserved.
+     * @return
+     */
+    public Map<String, String> getSummaryAsMap() {
+        Map<String, String> summary = new LinkedHashMap<String, String>();
+        summary.putAll(config);
+        summary.put("date", startDate.toString());
+        summary.put("total", Integer.toString(failed + missing + actual.size()));
+        summary.put("failed", Integer.toString(failed));
+        summary.put("missing", Integer.toString(missing));
+        summary.put("successful", Integer.toString(actual.size()));
+        summary.put("spearman", Double.toString(getSpearmansCorrelation()));
+        summary.put("pearson", Double.toString(getPearsonsCorrelation()));
+        return summary;
+    }
+
+    /**
+     * Writes a summary of the results to stdout.
+     * @throws IOException
+     */
+    public void summarize() throws IOException {
+        summarize(new BufferedWriter(new OutputStreamWriter(System.out)));
+    }
+
+    /**
+     * Writes a summary of the results to the writer.
+     * @param writer
+     * @throws IOException
+     */
+    public void summarize(BufferedWriter writer) throws IOException {
+        for (Map.Entry<String, String> entry : getSummaryAsMap().entrySet()) {
+            writer.write(entry.getKey() + "\t" + entry.getValue());
+        }
+    }
+
+    /**
      * Reads in the similarity evaluation at a particular path.
      *
      * @param path
@@ -160,5 +218,10 @@ public class SimilarityEvaluation {
         }
 
         return eval;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (log != null) log.close();
     }
 }
