@@ -20,29 +20,25 @@ import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Matt Lesicko
  */
 public class CategoryGraphSimilarity extends BaseLocalSRMetric{
-    Map<Language,CategoryGraph> graphs;
+    CategoryGraphHelper graphHelper;
     LocalCategoryMemberDao catHelper;
 
-    public CategoryGraphSimilarity (Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao, LocalPageDao pageDao, LanguageSet languages) {
+    public CategoryGraphSimilarity (Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao, LocalPageDao pageDao, CategoryGraphHelper graphHelper) {
         this.disambiguator=disambiguator;
         this.catHelper=categoryMemberDao;
         this.pageHelper=pageDao;
-        this.graphs = new HashMap<Language, CategoryGraph>();
-        for (Language lang : languages){
-            try {
-                CategoryGraph graph = new CategoryGraph(pageHelper,catHelper,lang);
-                graph.init();
-                graphs.put(lang,graph);
-            }
-            catch (DaoException e){}
+        this.graphHelper = graphHelper;
+        try {
+            this.graphHelper.init();
+        } catch (DaoException e) {
+            //TODO: handle this error
         }
+
     }
 
     @Override
@@ -51,7 +47,7 @@ public class CategoryGraphSimilarity extends BaseLocalSRMetric{
     }
 
     public double distanceToScore(double distance, Language lang) {
-        return distanceToScore(graphs.get(lang), distance);
+        return distanceToScore(graphHelper.graph(lang), distance);
     }
 
     public static double distanceToScore(CategoryGraph graph, double distance) {
@@ -66,11 +62,8 @@ public class CategoryGraphSimilarity extends BaseLocalSRMetric{
     @Override
     public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
         Language lang = page1.getLanguage();
-        if (lang!=page2.getLanguage()||!graphs.containsKey(lang)){
-            throw new IllegalArgumentException();
-        }
-        CategoryBfs bfs1 = new CategoryBfs(graphs.get(lang),page1.getLocalId(),page1.getLanguage(), Integer.MAX_VALUE, null, catHelper);
-        CategoryBfs bfs2 = new CategoryBfs(graphs.get(lang),page2.getLocalId(),page2.getLanguage(), Integer.MAX_VALUE, null, catHelper);
+        CategoryBfs bfs1 = new CategoryBfs(graphHelper.graph(lang),page1.getLocalId(),page1.getLanguage(), Integer.MAX_VALUE, null, catHelper);
+        CategoryBfs bfs2 = new CategoryBfs(graphHelper.graph(lang),page2.getLocalId(),page2.getLanguage(), Integer.MAX_VALUE, null, catHelper);
         bfs1.setAddPages(false);
         bfs1.setExploreChildren(false);
         bfs2.setAddPages(false);
@@ -89,7 +82,7 @@ public class CategoryGraphSimilarity extends BaseLocalSRMetric{
                     if (bfs2.hasCategoryDistance(catId)) {
                         double d = bfs1.getCategoryDistance(catId)
                                 + bfs2.getCategoryDistance(catId)
-                                - graphs.get(lang).catCosts[catId];    // counted twice
+                                - graphHelper.graph(lang).catCosts[catId];    // counted twice
                         shortestDistance = Math.min(d, shortestDistance);
                     }
                 }
@@ -103,7 +96,7 @@ public class CategoryGraphSimilarity extends BaseLocalSRMetric{
                     if (bfs1.hasCategoryDistance(catId)) {
                         double d = bfs1.getCategoryDistance(catId) +
                                 bfs2.getCategoryDistance(catId) + 0
-                                - graphs.get(lang).catCosts[catId];    // counted twice;
+                                - graphHelper.graph(lang).catCosts[catId];    // counted twice;
                         shortestDistance = Math.min(d, shortestDistance);
                     }
                 }
@@ -164,7 +157,7 @@ public class CategoryGraphSimilarity extends BaseLocalSRMetric{
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(LocalCategoryMemberDao.class,config.getString("categoryMemberDao")),
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
-                    getConfigurator().get(LanguageSet.class)
+                    getConfigurator().get(CategoryGraphHelper.class)
             );
             configureBase(getConfigurator(), sr, config);
             return sr;
