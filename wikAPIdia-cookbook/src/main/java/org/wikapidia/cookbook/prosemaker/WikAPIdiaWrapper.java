@@ -79,7 +79,7 @@ public class WikAPIdiaWrapper {
     }
 
     /**
-     * Return the first n page texts in a particular language
+     * Returns text from the first n page texts in a particular language
      * @param language
      * @param n
      * @return
@@ -98,7 +98,7 @@ public class WikAPIdiaWrapper {
                 String cleaned = MarkupStripper.stripEverything(rp.getBody());
                 String buffer = "";
                 for (String line : cleaned.split("\n+")) {
-                    if (isNormal(line) && splitIntoWords(line).size() > 10) {
+                    if (isInterestingParagraph(line)) {
                         if (!buffer.isEmpty()) buffer += "\n\n";
                         buffer += line;
                     }
@@ -116,14 +116,16 @@ public class WikAPIdiaWrapper {
         }
     }
 
-
-    private List<String> splitIntoWords(String sentence) {
-        return Arrays.asList(sentence.split(" +"));
-    }
-
-    private static boolean isNormal(String word) {
+    /**
+     * @param text
+     * @return true if the paragraph contains interesting text.
+     */
+    private boolean isInterestingParagraph(String text) {
+        if (text.split(" +").length < 10) {
+            return false;
+        }
         for (char c : "-{}!?*[]&%$#@()".toCharArray()) {
-            if (word.indexOf(c) >= 0) {
+            if (text.indexOf(c) >= 0) {
                 return false;
             }
         }

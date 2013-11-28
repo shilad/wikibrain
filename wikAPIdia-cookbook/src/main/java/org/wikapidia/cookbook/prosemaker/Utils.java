@@ -32,13 +32,4 @@ public class Utils {
     public static final List<Language> ALL_LANGS = Arrays.asList(
             LANG_WELSH, LANG_SIMPLE, LANG_HINDI,
             LANG_BOSNIAN, LANG_ICELANDIC, LANG_SCOTS);
-
-    /**
-     * Splits a string into a list of words
-     * @param string
-     * @return
-     */
-    public static List<String> splitWords(String string) {
-        return Arrays.asList(string.split("\\s+"));
-    }
 }

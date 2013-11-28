@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 
 /**
+ * A program to generate text.
+ *
  * @author Shilad Sen
  */
 public class TextGenerator {
@@ -12,6 +14,11 @@ public class TextGenerator {
 
     public TextGenerator() {}
 
+    /**
+     * Trains the text generator on a particular set of text.
+     *
+     * @param documents
+     */
     public void train(List<String> documents) {
         for (String document : documents) {
             List<String> words = splitIntoWords(document);
@@ -28,9 +35,12 @@ public class TextGenerator {
                 count(from, to);
             }
         }
-        System.out.println("trained on " + stats.size() + " bigrams");
     }
 
+    /**
+     * Generates a new random text
+     * @return
+     */
     public String generate() {
         List<String> words = new ArrayList<String>();
         while (true) {
@@ -51,6 +61,11 @@ public class TextGenerator {
         return StringUtils.join(words, " ") + ". ";
     }
 
+    /**
+     * Counts a single word.
+     * @param bigram
+     * @param word
+     */
     private void count(String bigram, String word) {
         if (!stats.containsKey(bigram))  {
             stats.put(bigram, new PhraseStats(bigram));
@@ -58,14 +73,28 @@ public class TextGenerator {
         stats.get(bigram).increment(word);
     }
 
-    private List<String> splitIntoWords(String sentence) {
-        return Arrays.asList(sentence.split(" +"));
+    /**
+     * Returns the PhraseStats object associated with a particular phrase.
+     * @param phrase
+     * @return The phrase stats object associated with the phrase, or null if it doesn't exist.
+     */
+    public PhraseStats getPhraseStats(String phrase) {
+        return stats.get(phrase);
+    }
+
+    /**
+     * Splits a text into words.
+     * @param text
+     * @return
+     */
+    private List<String> splitIntoWords(String text) {
+        return Arrays.asList(text.split(" +"));
     }
 
     public static void main(String args[]) {
         WikAPIdiaWrapper wrapper = new WikAPIdiaWrapper(Utils.PATH_DB);
         TextGenerator generator = new TextGenerator();
-        generator.train(wrapper.getPageTexts(Utils.LANG_SIMPLE, 2000));
+        generator.train(wrapper.getPageTexts(Utils.LANG_HINDI, 2000));
         for (int i = 0; i < 3; i++) {
             System.out.println(generator.generate() + "\n\n=====================================\n");
         }
