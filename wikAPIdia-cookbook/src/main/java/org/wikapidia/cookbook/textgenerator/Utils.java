@@ -1,4 +1,4 @@
-package org.wikapidia.cookbook.prosemaker;
+package org.wikapidia.cookbook.textgenerator;
 
 import org.wikapidia.core.lang.Language;
 

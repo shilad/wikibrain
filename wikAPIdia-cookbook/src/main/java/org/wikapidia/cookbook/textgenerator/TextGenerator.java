@@ -1,4 +1,4 @@
-package org.wikapidia.cookbook.prosemaker;
+package org.wikapidia.cookbook.textgenerator;
 
 import org.apache.commons.lang3.StringUtils;
 

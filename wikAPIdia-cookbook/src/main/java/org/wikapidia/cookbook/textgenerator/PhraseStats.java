@@ -1,4 +1,4 @@
-package org.wikapidia.cookbook.prosemaker;
+package org.wikapidia.cookbook.textgenerator;
 
 import java.util.HashMap;
 import java.util.Map;

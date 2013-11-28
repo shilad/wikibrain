@@ -1,6 +1,5 @@
-package org.wikapidia.cookbook.prosemaker;
+package org.wikapidia.cookbook.textgenerator;
 
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.cmd.Env;
@@ -15,7 +14,6 @@ import org.wikapidia.parser.wiki.MarkupStripper;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
