@@ -101,7 +101,7 @@ public class WikiTextLoader {
         ParserVisitor catVisitor = new LocalCategoryVisitor(lpDao, lcmDao, metaDao);
         //TODO: ill visitor
 
-        visitors.add(linkVisitor);
+//        visitors.add(linkVisitor);
         visitors.add(catVisitor);
 
         final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao, env.getMaxThreads());
