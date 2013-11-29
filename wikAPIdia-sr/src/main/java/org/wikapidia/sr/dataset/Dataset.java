@@ -90,4 +90,8 @@ public class Dataset {
         }
         return splitSets;
     }
+
+    public String getName() {
+        return name;
+    }
 }

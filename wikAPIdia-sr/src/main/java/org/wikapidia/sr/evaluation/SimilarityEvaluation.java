@@ -53,8 +53,8 @@ public class SimilarityEvaluation implements Closeable {
             log = null;
         } else {
             log = WpIOUtils.openWriter(logPath);
+            log.write("start\t" + formatDate(new Date()) + "\n");
             for (String key : config.keySet()) {
-                log.write("start" + formatDate(new Date()) + "\n");
                 log.write("config" + key + "\t" + config.get(key) + "\n");
             }
             log.flush();
@@ -98,6 +98,14 @@ public class SimilarityEvaluation implements Closeable {
 
     public int getFailed() {
         return failed;
+    }
+
+    public int getSuccessful() {
+        return estimates.size();
+    }
+
+    public int getTotal() {
+        return missing + failed + estimates.size();
     }
 
     public Map<String, String> getConfig() {
@@ -153,7 +161,7 @@ public class SimilarityEvaluation implements Closeable {
         Map<String, String> summary = new LinkedHashMap<String, String>();
         summary.putAll(config);
         summary.put("date", startDate.toString());
-        summary.put("total", Integer.toString(failed + missing + actual.size()));
+        summary.put("total", Integer.toString(getTotal()));
         summary.put("failed", Integer.toString(failed));
         summary.put("missing", Integer.toString(missing));
         summary.put("successful", Integer.toString(actual.size()));
@@ -167,7 +175,15 @@ public class SimilarityEvaluation implements Closeable {
      * @throws IOException
      */
     public void summarize() throws IOException {
-        summarize(new BufferedWriter(new OutputStreamWriter(System.out)));
+        summarize(System.out);
+    }
+
+    /**
+     * Writes a summary of the results to a printstream (probably System.out or System.in).
+     * @throws IOException
+     */
+    public void summarize(PrintStream printStream) throws IOException {
+        summarize(new BufferedWriter(new OutputStreamWriter(printStream)));
     }
 
     /**

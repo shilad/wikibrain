@@ -238,6 +238,33 @@ public class Configurator {
      * @return The requested component.
      */
     public <T> T get(Class<T> klass, String name, boolean tryCache) throws ConfigurationException {
+        Config config = getConfig(klass, name);
+        Map<String, Object> cache = components.get(klass);
+        synchronized (cache) {
+            if (tryCache && cache.containsKey(name)) {
+                return (T) cache.get(name);
+            } else {
+                Pair<Provider, T> pair = constructInternal(klass, name, config);
+                if (tryCache && pair.getLeft().getScope() == Provider.Scope.SINGLETON) {
+                    cache.put(name, pair.getRight());
+                }
+                return pair.getRight();
+            }
+        }
+    }
+
+    /**
+     * Returns the config object associated with the given class and name.
+     * @param klass The generic interface or superclass, not the specific implementation.
+     * @param name The name of the class as it appears in the config file. If name is null,
+     *             the configurator tries to guess by looking for a "default" entry in
+     *             the config that provides the name for a default implementation or, if
+     *             there is exactly one implementation returning it. Otherwise, if name is
+     *             null it throws an error.
+     * @return The requested config object.
+     * @throws ConfigurationException
+     */
+    public Config getConfig(Class klass, String name) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
@@ -273,20 +300,7 @@ public class Configurator {
         if (!conf.get().hasPath(path)) {
             throw new ConfigurationException("Configuration path " + path + " does not exist");
         }
-        Config config = conf.get().getConfig(path);
-        Map<String, Object> cache = components.get(klass);
-
-        synchronized (cache) {
-            if (tryCache && cache.containsKey(name)) {
-                return (T) cache.get(name);
-            } else {
-                Pair<Provider, T> pair = constructInternal(klass, name, config);
-                if (tryCache && pair.getLeft().getScope() == Provider.Scope.SINGLETON) {
-                    cache.put(name, pair.getRight());
-                }
-                return pair.getRight();
-            }
-        }
+        return conf.get().getConfig(path);
     }
 
     /**
