@@ -283,7 +283,7 @@ public class Evaluator {
             return;
         }
         System.out.println("Similarity evaluation for " + caption);
-        eval.summarize();
+        eval.summarize(System.out);
     }
 
     public List<Split> getSplits() {

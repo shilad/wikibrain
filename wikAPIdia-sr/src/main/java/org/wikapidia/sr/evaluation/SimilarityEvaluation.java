@@ -195,7 +195,6 @@ public class SimilarityEvaluation implements Closeable {
      */
     public void summarize() throws IOException {
         summarize(System.out);
-        System.out.flush();
     }
 
     /**
@@ -215,6 +214,7 @@ public class SimilarityEvaluation implements Closeable {
         for (Map.Entry<String, String> entry : getSummaryAsMap().entrySet()) {
             writer.write(entry.getKey() + "\t" + entry.getValue() + "\n");
         }
+        writer.flush();
     }
 
     public List<SimilarityEvaluation> getChildEvaluations() throws IOException, ParseException {
