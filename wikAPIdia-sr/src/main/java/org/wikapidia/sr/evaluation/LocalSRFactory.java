@@ -11,4 +11,14 @@ public interface LocalSRFactory {
      * @return
      */
     LocalSRMetric create();
+
+    /**
+     * Returns a string describing the disambig config. Used in the results output.
+     */
+    String describeDisambiguator();
+
+    /**
+     * Returns a string describing the sr config. Used in the results output.
+     */
+    String describeMetric();
 }

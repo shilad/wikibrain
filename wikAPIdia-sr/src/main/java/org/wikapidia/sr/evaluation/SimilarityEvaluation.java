@@ -87,6 +87,10 @@ public class SimilarityEvaluation implements Closeable {
         }
     }
 
+    public void setConfig(String field, String value) {
+        this.config.put(field, value);
+    }
+
     public double getPearsonsCorrelation() {
         return new PearsonsCorrelation().correlation(actual.toArray(), estimates.toArray());
     }
@@ -131,9 +135,17 @@ public class SimilarityEvaluation implements Closeable {
      * Merges the accumulated values in eval into
      * @param eval
      */
-    public void merge(SimilarityEvaluation eval) {
+    public void merge(SimilarityEvaluation eval) throws IOException {
+        if (log != null && eval.logPath != null) {
+            log.write("merge\t" + eval.logPath.getAbsolutePath());
+        }
         if (eval.startDate.compareTo(startDate) > 0) {
             this.startDate = eval.startDate;
+        }
+        for (String key : eval.config.keySet()) {
+            if (!config.containsKey(key)) {
+                config.put(key, eval.config.get(key));
+            }
         }
         missing += eval.missing;
         failed += eval.failed;
@@ -172,8 +184,8 @@ public class SimilarityEvaluation implements Closeable {
         summary.put("failed", Integer.toString(failed));
         summary.put("missing", Integer.toString(missing));
         summary.put("successful", Integer.toString(actual.size()));
-        summary.put("spearman", Double.toString(getSpearmansCorrelation()));
-        summary.put("pearson", Double.toString(getPearsonsCorrelation()));
+        summary.put("spearmans", Double.toString(getSpearmansCorrelation()));
+        summary.put("pearsons", Double.toString(getPearsonsCorrelation()));
         return summary;
     }
 
@@ -245,6 +257,8 @@ public class SimilarityEvaluation implements Closeable {
                 start = parseDate(tokens[1]);
             } else if (tokens[0].equals("config")) {
                 config.put(tokens[1], tokens[2]);
+            } else if (tokens[0].equals("merge")) {
+                eval.merge(read(new File(tokens[1])));
             } else if (tokens[0].equals("entry")) {
                 if (eval == null) {
                     eval = new SimilarityEvaluation(start, config, null);

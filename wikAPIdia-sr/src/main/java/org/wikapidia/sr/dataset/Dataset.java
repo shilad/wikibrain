@@ -1,5 +1,6 @@
 package org.wikapidia.sr.dataset;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.utils.KnownSim;
 
@@ -35,12 +36,22 @@ public class Dataset {
      * @param datasets
      */
     public Dataset(List<Dataset> datasets) {
+        this(createJointName(datasets), datasets);
+    }
+
+    /**
+     * Concatenates a list of datasets into a new merged dataset.
+     * @param name
+     * @param datasets
+     */
+    public Dataset(String name, List<Dataset> datasets) {
         if (datasets==null||datasets.isEmpty()) {
             throw new IllegalArgumentException("Attempted to create dataset from an empty list");
         }
         this.language = datasets.get(0).getLanguage();
         this.data = new ArrayList<KnownSim>();
-        for (Dataset dataset:datasets) {
+        this.name = name;
+        for (Dataset dataset : datasets) {
             if (dataset.getLanguage()!=language) {
                 throw new IllegalArgumentException("Dataset language was " + language + " but attempted to add " + dataset.getLanguage());
             }
@@ -93,5 +104,14 @@ public class Dataset {
 
     public String getName() {
         return name;
+    }
+
+    private static String createJointName(List<Dataset> datasets) {
+        List<String> names = new ArrayList<String>();
+        for (Dataset dataset : datasets) {
+            names.add(dataset.getName());
+        }
+        Collections.sort(names);    // makes name order insensitive
+        return StringUtils.join(names, '+');
     }
 }

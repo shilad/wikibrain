@@ -2,6 +2,8 @@ package org.wikapidia.sr.evaluation;
 
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.junit.Test;
@@ -14,6 +16,7 @@ import org.wikapidia.utils.WpIOUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -27,13 +30,22 @@ public class TestEvaluator {
         DatasetDao dsDao = new DatasetDao();
         Language simple = Language.getByLangCode("simple");
         File file = WpIOUtils.createTempDirectory("evaluator");
-        Evaluator evaluator = new Evaluator(file);
 
+        Evaluator evaluator = new Evaluator(file);
+        evaluator.setWriteToStdout(false);
         evaluator.addCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
         evaluator.addCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
 
         TestLocalSR.Factory factory = new TestLocalSR.Factory();
         SimilarityEvaluation eval = evaluator.evaluateSimilarity(factory);
+
+        List<String> lines = FileUtils.readLines(FileUtils.getFile(file, "local", "similarity.tsv"));
+        assertEquals(lines.size(), 4);
+        System.out.println("lines are " + lines);
+        assertFalse(StringUtils.join(lines).contains("null"));
+        assertTrue(StringUtils.join(lines).contains("thisIsTheMetric"));
+        assertTrue(StringUtils.join(lines).contains("thisIsTheDisambiguator"));
+
         assertEquals(14, eval.getChildFiles().size());
 
         TDoubleList actual = new TDoubleArrayList();
@@ -56,6 +68,8 @@ public class TestEvaluator {
             successful += testSr.getSuccessful();
             total += testSr.getTotal();
         }
+        assertEquals("thisIsTheDisambiguator", eval.getSummaryAsMap().get("disambigConfig"));
+        assertEquals("thisIsTheMetric", eval.getSummaryAsMap().get("metricConfig"));
         assertEquals(total, eval.getTotal());
         assertEquals(missing, eval.getMissing());
         assertEquals(failed, eval.getFailed());

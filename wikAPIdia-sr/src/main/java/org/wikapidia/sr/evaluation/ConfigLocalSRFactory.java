@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.util.Map;
 
@@ -59,5 +60,32 @@ public class ConfigLocalSRFactory implements LocalSRFactory {
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String describeDisambiguator() {
+        if (!config.hasPath("disambiguator")){
+            return "none";
+        }
+        String disambigName = config.getString("disambiguator");
+        try {
+            Map dc = configurator.getConfig(Disambiguator.class, disambigName).root().unwrapped();
+            String phraseName = null;
+            if (dc.containsKey("phraseAnalyzer")) {
+                phraseName = (String) dc.get("phraseAnalyzer");
+            }
+            if (phraseName == null || phraseName.equals("default")) {
+                phraseName = configurator.getConf().get().getString("phrases.analyzer.default");
+            }
+            dc.put("phraseAnalyzer", phraseName);
+            return disambigName + "=" + dc.toString();
+        } catch (ConfigurationException e) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    public String describeMetric() {
+        return name + "=" + config.root().unwrapped();
     }
 }

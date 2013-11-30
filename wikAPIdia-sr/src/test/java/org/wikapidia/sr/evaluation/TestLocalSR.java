@@ -231,5 +231,15 @@ public class TestLocalSR implements LocalSRMetric {
             metrics.add(sr);
             return sr;
         }
+
+        @Override
+        public String describeDisambiguator() {
+            return "thisIsTheDisambiguator";
+        }
+
+        @Override
+        public String describeMetric() {
+            return "thisIsTheMetric";
+        }
     }
 }
