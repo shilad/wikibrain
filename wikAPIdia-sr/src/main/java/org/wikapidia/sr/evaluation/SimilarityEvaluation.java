@@ -59,7 +59,7 @@ public class SimilarityEvaluation implements Closeable {
             log = WpIOUtils.openWriter(logPath);
             log.write("start\t" + formatDate(new Date()) + "\n");
             for (String key : config.keySet()) {
-                log.write("config" + key + "\t" + config.get(key) + "\n");
+                log.write("config\t" + key + "\t" + config.get(key) + "\n");
             }
             log.flush();
         }
@@ -195,6 +195,7 @@ public class SimilarityEvaluation implements Closeable {
      */
     public void summarize() throws IOException {
         summarize(System.out);
+        System.out.flush();
     }
 
     /**
@@ -212,7 +213,7 @@ public class SimilarityEvaluation implements Closeable {
      */
     public void summarize(BufferedWriter writer) throws IOException {
         for (Map.Entry<String, String> entry : getSummaryAsMap().entrySet()) {
-            writer.write(entry.getKey() + "\t" + entry.getValue());
+            writer.write(entry.getKey() + "\t" + entry.getValue() + "\n");
         }
     }
 

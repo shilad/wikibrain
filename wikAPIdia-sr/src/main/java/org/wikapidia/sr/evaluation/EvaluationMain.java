@@ -150,17 +150,15 @@ public class EvaluationMain {
 
         Evaluator evaluator = new Evaluator(new File(outputDir));
 
-
-        Dataset all = new Dataset(datasets);
-
         if (mode.equals("none")) {
+            Dataset all = new Dataset(datasets);
             evaluator.addSplit(new Split(all.getName(), all.getName(), all, all));
         } else if (mode.equals("within-dataset")) {
             for (Dataset ds : datasets) {
                 evaluator.addCrossfolds(ds, folds);
             }
         } else if (mode.equals("across-dataset")) {
-            evaluator.addCrossfolds(all, folds);
+            evaluator.addCrossfolds(new Dataset(datasets), folds);
         } else {
             System.err.println("Unknown mode: " + mode);
             System.exit(1);

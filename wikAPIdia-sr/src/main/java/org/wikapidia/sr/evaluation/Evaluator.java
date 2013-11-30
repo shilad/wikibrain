@@ -243,6 +243,7 @@ public class Evaluator {
         BufferedWriter errFile = new BufferedWriter(new FileWriter(err));
 
         metric.trainSimilarity(split.getTrain());
+
         Map<String, String> config = new LinkedHashMap<String, String>();
         config.put("lang", split.getTest().getLanguage().getLangCode());
         config.put("dataset", split.getGroup());
