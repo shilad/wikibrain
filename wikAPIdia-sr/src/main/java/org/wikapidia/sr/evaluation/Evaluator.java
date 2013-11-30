@@ -1,5 +1,6 @@
 package org.wikapidia.sr.evaluation;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -89,6 +90,7 @@ public class Evaluator {
         if (!dirPath.isDirectory()) {
             FileUtils.deleteQuietly(dirPath);
             dirPath.mkdirs();
+            System.out.println("making " + dirPath);
         }
     }
 
@@ -100,6 +102,7 @@ public class Evaluator {
     private int getNextRunNumber() {
         int runNum = 0;
         for (Split split : splits) {
+            ensureIsDirectory(getLocalDir(split));
             for (String filename : getLocalDir(split).list()) {
                 Matcher matcher = MATCH_RUN.matcher(filename);
                 if (matcher.matches()) {
@@ -156,7 +159,7 @@ public class Evaluator {
 
         for (String group : groupEvals.keySet()) {
             SimilarityEvaluation geval = groupEvals.get(group);
-            geval.summarize(groupFiles.get(group));
+            geval.summarize(new File(groupFiles.get(group), "summary.txt"));
             maybeWriteToStdout("Split " + group + ", " + metricName + ", " + runNumber, geval);
             if (writeToStdout) geval.summarize();
         }
@@ -167,7 +170,6 @@ public class Evaluator {
 
     /**
      * Evaluates an sr metric against a single split and writes log, error, and summary files.
-     *
      *
      * @param split
      * @param metric
@@ -221,5 +223,7 @@ public class Evaluator {
         eval.summarize();
     }
 
-
+    public List<Split> getSplits() {
+        return Collections.unmodifiableList(splits);
+    }
 }

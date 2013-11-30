@@ -24,8 +24,11 @@ import java.util.*;
 public class SimilarityEvaluation implements Closeable {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private final List<File> children = new ArrayList<File>();
+
     private final Map<String, String> config;
     private final BufferedWriter log;
+    private final File logPath;
 
     private int missing;
     private int failed;
@@ -49,6 +52,7 @@ public class SimilarityEvaluation implements Closeable {
     public SimilarityEvaluation(Date date, Map<String, String> config, File logPath) throws IOException {
         this.startDate = date;
         this.config = config;
+        this.logPath = logPath;
         if (logPath == null) {
             log = null;
         } else {
@@ -59,7 +63,6 @@ public class SimilarityEvaluation implements Closeable {
             }
             log.flush();
         }
-
     }
 
     public synchronized void recordFailed(KnownSim ks) throws IOException {
@@ -136,6 +139,10 @@ public class SimilarityEvaluation implements Closeable {
         failed += eval.failed;
         actual.addAll(eval.actual);
         estimates.addAll(eval.estimates);
+        if (eval.logPath != null) {
+            children.add(eval.logPath);
+        }
+        children.addAll(eval.children);
     }
 
     /**
@@ -195,6 +202,27 @@ public class SimilarityEvaluation implements Closeable {
         for (Map.Entry<String, String> entry : getSummaryAsMap().entrySet()) {
             writer.write(entry.getKey() + "\t" + entry.getValue());
         }
+    }
+
+    public List<SimilarityEvaluation> getChildEvaluations() throws IOException, ParseException {
+        List<SimilarityEvaluation> evals = new ArrayList<SimilarityEvaluation>();
+        for (File file : children) {
+            evals.add(read(file));
+        }
+        return evals;
+    }
+
+
+    public List<File> getChildFiles() {
+        return children;
+    }
+
+    protected TDoubleList getActual() {
+        return actual;
+    }
+
+    protected TDoubleList getEstimates() {
+        return estimates;
     }
 
     /**
