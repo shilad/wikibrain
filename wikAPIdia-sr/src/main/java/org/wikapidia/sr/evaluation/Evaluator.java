@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.dataset.Dataset;
@@ -278,7 +277,7 @@ public class Evaluator {
         return splitEval;
     }
 
-    private void maybeWriteToStdout(String caption, SimilarityEvaluation eval) throws IOException {
+    private void maybeWriteToStdout(String caption, BaseEvaluation eval) throws IOException {
         if (!writeToStdout) {
             return;
         }

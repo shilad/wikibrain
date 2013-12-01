@@ -3,7 +3,6 @@ package org.wikapidia.sr.evaluation;
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.core.lang.Language;
@@ -12,7 +11,6 @@ import org.wikapidia.utils.WpIOUtils;
 
 import java.io.*;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -21,18 +19,7 @@ import java.util.*;
  *
  * @author Shilad Sen
  */
-public class SimilarityEvaluation implements Closeable {
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    private final List<File> children = new ArrayList<File>();
-
-    private final Map<String, String> config;
-    private final BufferedWriter log;
-    private final File logPath;
-
-    private int missing;
-    private int failed;
-    private Date startDate;
+public class SimilarityEvaluation extends BaseEvaluation {
 
     private final TDoubleList actual = new TDoubleArrayList();
     private final TDoubleList estimates = new TDoubleArrayList();
@@ -50,19 +37,7 @@ public class SimilarityEvaluation implements Closeable {
     }
 
     public SimilarityEvaluation(Date date, Map<String, String> config, File logPath) throws IOException {
-        this.startDate = date;
-        this.config = config;
-        this.logPath = logPath;
-        if (logPath == null) {
-            log = null;
-        } else {
-            log = WpIOUtils.openWriter(logPath);
-            log.write("start\t" + formatDate(new Date()) + "\n");
-            for (String key : config.keySet()) {
-                log.write("config\t" + key + "\t" + config.get(key) + "\n");
-            }
-            log.flush();
-        }
+        super(config, logPath, date);
     }
 
     public synchronized void recordFailed(KnownSim ks) throws IOException {
@@ -76,19 +51,13 @@ public class SimilarityEvaluation implements Closeable {
         } else {
             actual.add(ks.similarity);
             estimates.add(estimate);
+            sucessful++;
         }
         write(ks, estimate.toString());
     }
 
     private synchronized void write(KnownSim ks, String result) throws IOException {
-        if (log != null) {
-            log.write("entry\t" + ks.language + "\t" + ks.phrase1 + "\t" + ks.phrase2 + "\t" + ks.similarity + "\t" + result +"\n");
-            log.flush();
-        }
-    }
-
-    public void setConfig(String field, String value) {
-        this.config.put(field, value);
+        write("entry\t" + ks.language + "\t" + ks.phrase1 + "\t" + ks.phrase2 + "\t" + ks.similarity + "\t" + result +"\n");
     }
 
     public double getPearsonsCorrelation() {
@@ -99,77 +68,6 @@ public class SimilarityEvaluation implements Closeable {
         return new SpearmansCorrelation().correlation(actual.toArray(), estimates.toArray());
     }
 
-    public int getMissing() {
-        return missing;
-    }
-
-    public int getFailed() {
-        return failed;
-    }
-
-    public int getSuccessful() {
-        return estimates.size();
-    }
-
-    public int getTotal() {
-        return missing + failed + estimates.size();
-    }
-
-    public Map<String, String> getConfig() {
-        return config;
-    }
-
-    private static String formatDate(Date d) {
-        synchronized (DATE_FORMAT) {
-            return DATE_FORMAT.format(d);
-        }
-    }
-
-    private static Date parseDate(String s) throws ParseException {
-        synchronized (DATE_FORMAT) {
-            return DATE_FORMAT.parse(s);
-        }
-    }
-
-    /**
-     * Merges the accumulated values in eval into
-     * @param eval
-     */
-    public void merge(SimilarityEvaluation eval) throws IOException {
-        if (log != null && eval.logPath != null) {
-            log.write("merge\t" + eval.logPath.getAbsolutePath());
-        }
-        if (eval.startDate.compareTo(startDate) > 0) {
-            this.startDate = eval.startDate;
-        }
-        for (String key : eval.config.keySet()) {
-            if (!config.containsKey(key)) {
-                config.put(key, eval.config.get(key));
-            }
-        }
-        missing += eval.missing;
-        failed += eval.failed;
-        actual.addAll(eval.actual);
-        estimates.addAll(eval.estimates);
-        if (eval.logPath != null) {
-            children.add(eval.logPath);
-        }
-        children.addAll(eval.children);
-    }
-
-    /**
-     * Writes a summary of the results to the file.
-     * @throws IOException
-     */
-    public void summarize(File path) throws IOException {
-        BufferedWriter writer = WpIOUtils.openWriter(path);
-        try {
-            summarize(writer);
-        } finally {
-            IOUtils.closeQuietly(writer);
-        }
-    }
-
     /**
      * Return a textual summary of the evaluation as a map.
      * The summary includes: the config, date, total, failed, missing, successful, spearman, and pearson
@@ -177,44 +75,10 @@ public class SimilarityEvaluation implements Closeable {
      * @return
      */
     public Map<String, String> getSummaryAsMap() {
-        Map<String, String> summary = new LinkedHashMap<String, String>();
-        summary.putAll(config);
-        summary.put("date", startDate.toString());
-        summary.put("total", Integer.toString(getTotal()));
-        summary.put("failed", Integer.toString(failed));
-        summary.put("missing", Integer.toString(missing));
-        summary.put("successful", Integer.toString(actual.size()));
+        Map<String, String> summary = super.getSummaryAsMap();
         summary.put("spearmans", Double.toString(getSpearmansCorrelation()));
         summary.put("pearsons", Double.toString(getPearsonsCorrelation()));
         return summary;
-    }
-
-    /**
-     * Writes a summary of the results to stdout.
-     * @throws IOException
-     */
-    public void summarize() throws IOException {
-        summarize(System.out);
-    }
-
-    /**
-     * Writes a summary of the results to a printstream (probably System.out or System.in).
-     * @throws IOException
-     */
-    public void summarize(PrintStream printStream) throws IOException {
-        summarize(new BufferedWriter(new OutputStreamWriter(printStream)));
-    }
-
-    /**
-     * Writes a summary of the results to the writer.
-     * @param writer
-     * @throws IOException
-     */
-    public void summarize(BufferedWriter writer) throws IOException {
-        for (Map.Entry<String, String> entry : getSummaryAsMap().entrySet()) {
-            writer.write(entry.getKey() + "\t" + entry.getValue() + "\n");
-        }
-        writer.flush();
     }
 
     public List<SimilarityEvaluation> getChildEvaluations() throws IOException, ParseException {
@@ -226,16 +90,19 @@ public class SimilarityEvaluation implements Closeable {
     }
 
 
-    public List<File> getChildFiles() {
-        return children;
-    }
-
     protected TDoubleList getActual() {
         return actual;
     }
 
     protected TDoubleList getEstimates() {
         return estimates;
+    }
+
+    @Override
+    public void merge(SimilarityEvaluation eval) throws IOException {
+        super.merge(eval);
+        actual.addAll(eval.actual);
+        estimates.addAll(eval.estimates);
     }
 
     /**
@@ -279,8 +146,4 @@ public class SimilarityEvaluation implements Closeable {
         return eval;
     }
 
-    @Override
-    public void close() throws IOException {
-        if (log != null) log.close();
-    }
 }
