@@ -1,19 +1,10 @@
 package org.wikapidia.cookbook.wikiwalker;
 
-//import com.sun.javaws.exceptions.InvalidArgumentException;
-import com.sun.tools.corba.se.idl.InvalidArgument;
 import gnu.trove.map.hash.TLongByteHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TIntHashSet;
-import gnu.trove.set.hash.TLongHashSet;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.dao.sql.SimpleSqlDaoIterable;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
@@ -22,7 +13,6 @@ import org.wikapidia.core.model.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Shilad wrote this wrapper around the WikAPIdia API for COMP 124.

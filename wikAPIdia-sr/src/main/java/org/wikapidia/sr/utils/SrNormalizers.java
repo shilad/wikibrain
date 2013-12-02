@@ -14,6 +14,7 @@ import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.UniversalSRMetric;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;

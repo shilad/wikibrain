@@ -25,10 +25,16 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>org.wikapidia</groupId>
+            <artifactId>wikAPIdia-parser</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.sun.corba</groupId>
             <artifactId>glassfish-corba-idlj</artifactId>
             <version>1.0</version>
         </dependency>
+
     </dependencies>
 
     <properties>

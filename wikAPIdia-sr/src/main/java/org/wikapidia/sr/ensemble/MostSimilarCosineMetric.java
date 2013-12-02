@@ -18,7 +18,7 @@ import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.utils.Dataset;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class MostSimilarCosineMetric extends BaseLocalSRMetric{
                 highScores.add(ks);
             }
         }
-        Dataset highDataset = new Dataset(dataset.getLanguage(),highScores);
+        Dataset highDataset = new Dataset(dataset + "-mostSimilar", dataset.getLanguage(),highScores);
         baseMetric.trainMostSimilar(highDataset,MAX_RESULTS,null);
     }
 
