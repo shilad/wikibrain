@@ -94,6 +94,16 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         normalizers.get(l).setSimilarityNormalizer(n);
     }
 
+    @Override
+    public boolean similarityIsTrained() {
+        return defaultNormalizers.getSimilarityNormalizer().isTrained();
+    }
+
+    @Override
+    public boolean mostSimilarIsTrained() {
+        return defaultNormalizers.getMostSimilarNormalizer().isTrained();
+    }
+
     /**
      * Throws an IllegalStateException if the model has not been mostSimilarTrained.
      */
@@ -191,7 +201,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public void trainDefaultSimilarity(Dataset dataset){
+    public void trainDefaultSimilarity(Dataset dataset) throws DaoException {
         defaultNormalizers.trainSimilarity(this, dataset);
     }
 

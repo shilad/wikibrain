@@ -23,6 +23,8 @@ import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +36,11 @@ public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
 
     private final AtomicInteger counter = new AtomicInteger();
+
+    // If there are a maximum number of articles per language, langCounters will track counts per langauge
+    private Integer maxPerLang = null;
+    private final Map<Language, AtomicInteger> langCounters = new ConcurrentHashMap<Language, AtomicInteger>();
+
     private final LocalPageDao localPageDao;
     private final RawPageDao rawPageDao;
     private final MetaInfoDao metaDao;
@@ -50,6 +57,9 @@ public class DumpLoader {
      */
     public void load(File file) {
         Language lang = FileMatcher.ARTICLES.getLanguage(file.getAbsolutePath());
+        if (!keepProcessingArticles(lang)) {
+            return;
+        }
         DumpPageXmlParser parser = new DumpPageXmlParser(file,
                 LanguageInfo.getByLanguage(lang));
         for (RawPage rp : parser) {
@@ -57,6 +67,33 @@ public class DumpLoader {
                 LOG.info("processing article " + counter.get());
             }
             save(file, rp);
+            incrementLangCount(lang);
+            if (!keepProcessingArticles(lang)) {
+                break;
+            }
+        }
+    }
+
+    private boolean keepProcessingArticles(Language lang) {
+        if (maxPerLang == null) {
+            return true;
+        } else if (!langCounters.containsKey(lang)) {
+            return true;
+        } else {
+            return langCounters.get(lang).get() < maxPerLang;
+        }
+    }
+
+    private void incrementLangCount(Language lang) {
+        if (maxPerLang != null) {
+            if (!langCounters.containsKey(lang)) {
+                synchronized (langCounters) {
+                    if (!langCounters.containsKey(lang)) {
+                        langCounters.put(lang, new AtomicInteger());
+                    }
+                }
+            }
+            langCounters.get(lang).incrementAndGet();
         }
     }
 
@@ -90,6 +127,11 @@ public class DumpLoader {
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("d"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("max-articles")
+                        .withDescription("maximum articles per language")
+                        .create("x"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -123,6 +165,9 @@ public class DumpLoader {
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
         final DumpLoader loader = new DumpLoader(lpDao, rpDao, metaDao);
+        if (cmd.hasOption("x")) {
+            loader.maxPerLang = Integer.valueOf(cmd.getOptionValue("x"));
+        }
 
         if (cmd.hasOption("d")) {
             lpDao.clear();

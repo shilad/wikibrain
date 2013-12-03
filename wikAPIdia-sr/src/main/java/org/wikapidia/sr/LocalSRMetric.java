@@ -138,6 +138,16 @@ public interface LocalSRMetric {
      */
     public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds);
 
+    /**
+     * @return true if similarity() is already trained (or doesn't need training)
+     */
+    public boolean similarityIsTrained();
+
+    /**
+     * @return true if mostSimilar() is already trained (or doesn't need training)
+     */
+    public boolean mostSimilarIsTrained();
+
 
     public void setDefaultMostSimilarNormalizer(Normalizer n);
 

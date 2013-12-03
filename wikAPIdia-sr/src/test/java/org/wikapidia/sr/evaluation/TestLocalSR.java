@@ -119,6 +119,16 @@ public class TestLocalSR implements LocalSRMetric {
     }
 
     @Override
+    public boolean similarityIsTrained() {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public boolean mostSimilarIsTrained() {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     public void setDefaultMostSimilarNormalizer(Normalizer n) {
         //To change body of implemented methods use File | Settings | File Templates.
     }

@@ -45,6 +45,7 @@ public class EvaluationMain {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
+                        .withValueSeparator(',')
                         .withLongOpt("gold")
                         .withDescription("the set of gold standard datasets to train on")
                         .create("g"));
