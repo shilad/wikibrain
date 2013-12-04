@@ -7,7 +7,6 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.sr.utils.KnownSim;
@@ -32,6 +31,7 @@ public class DatasetDao {
     public static final String RESOURCE_DATASET_INFO = "/datasets/info.tsv";
 
     private final Collection<Info> info;
+    private boolean normalize = true; // If true, normalize all scores to [0,1]
 
     /**
      * Information about a particular dataset
@@ -66,6 +66,24 @@ public class DatasetDao {
      */
     public DatasetDao(Collection<Info> info) {
         this.info = info;
+    }
+
+    /**
+     * If true, all datasets will be "normalized" to [0,1] scores.
+     * @param normalize
+     */
+    public void setNormalize(boolean normalize) {
+        this.normalize = normalize;
+    }
+
+    public List<Dataset> getAllInLanguage(Language lang) throws DaoException {
+        List<Dataset> result = new ArrayList<Dataset>();
+        for (Info i : info) {
+            if (i.getLanguages().containsLanguage(lang)) {
+                result.add(get(lang, i.getName()));
+            }
+        }
+        return result;
     }
 
     /**
@@ -178,7 +196,11 @@ public class DatasetDao {
         } catch (IOException e) {
             throw new DaoException(e);
         }
-        return new Dataset(name, language, result);
+        Dataset dataset = new Dataset(name, language, result);
+        if (normalize) {
+            dataset.normalize();
+        }
+        return dataset;
     }
 
     /**
@@ -257,11 +279,15 @@ public class DatasetDao {
 
         @Override
         public DatasetDao get(String name, Config config) throws ConfigurationException {
-            if (config.getString("type").equals("resource")) {
-                return new DatasetDao();
-            } else {
+            if (!config.getString("type").equals("resource")) {
                 return null;
             }
+            DatasetDao dao = new DatasetDao();
+            if (config.hasPath("normalize")) {
+                dao.setNormalize(config.getBoolean("normalize"));
+
+            }
+            return dao;
         }
     }
 }
