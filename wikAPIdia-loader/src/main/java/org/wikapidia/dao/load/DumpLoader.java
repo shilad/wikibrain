@@ -130,6 +130,7 @@ public class DumpLoader {
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("max-articles")
+                        .hasArg()
                         .withDescription("maximum articles per language")
                         .create("x"));
         EnvBuilder.addStandardOptions(options);
