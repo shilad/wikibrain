@@ -1,11 +1,15 @@
 package org.wikapidia.core.cookbook;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.model.NameSpace;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,7 +24,12 @@ public class CompareLocalCategoryMemberLiveSqlDao {
         int liveMemberCounter= 0, liveCategoryCounter = 0, sqlMemberCounter = 0, sqlCategoryCounter = 0, commonMemberCounter = 0, commonCategoryCounter = 0;
         Set<Integer> liveMemberSet= new HashSet<Integer>();
         Set<Integer> liveCategorySet= new HashSet<Integer>();
+        Set<Integer> sqlMemberSet= new HashSet<Integer>();
+        Set<Integer> sqlCategorySet= new HashSet<Integer>();
 
+        File f=new File("../wikAPIdia-cookbook/memberstat.csv");
+        String[] entries = new String[3];
+        CSVWriter csvWriter = new CSVWriter(new FileWriter(f), ',');
 
         LocalCategoryMemberDao localCategoryMemberLiveDao = new Configurator(new Configuration()).get(LocalCategoryMemberDao.class, "live");
         LocalPageDao localPageLiveDao = new Configurator(new Configuration()).get(LocalPageDao.class, "live");
@@ -31,52 +40,92 @@ public class CompareLocalCategoryMemberLiveSqlDao {
         Language lang = Language.getByLangCode("simple");
 
 
-        System.out.println("\n\nLocalCategoryMemberDao.getCategoryMemberIds (Get all Live category members of \"Category:Minnesota\" \n");
+        int categoryId = localPageLiveDao.getIdByTitle("Category:Geography of the United States", lang, NameSpace.getNameSpaceByArbitraryId(14));
+        int pageId = localPageLiveDao.getIdByTitle("USA", lang, NameSpace.getNameSpaceByArbitraryId(0));
+
+
         //Test for LocalCategoryMemberDao.getCategoryMemberIds
-        Collection<Integer> memberList = localCategoryMemberLiveDao.getCategoryMemberIds(lang, 11509);    //Id for Category:Minnesota
+        Collection<Integer> memberList = localCategoryMemberLiveDao.getCategoryMemberIds(lang, categoryId);    //Id for Category:Minnesota
         for(Integer e: memberList){
             liveMemberCounter ++;
-            liveMemberSet.add(localPageLiveDao.getById(lang, e).getLocalId());
-            System.out.println(localPageLiveDao.getById(lang, e));
+            liveMemberSet.add(e);
+
         }
 
-        System.out.println("\n\nLocalCategoryMemberDao.getCategoryIds (Get all Live categories of \"Minnesota\" \n");
+
         //Test for LocalCategoryMemberDao.getCategoryIds
-        Collection<Integer> categoryList = localCategoryMemberLiveDao.getCategoryIds(lang, 10983);  //Id for Minnesota
+        Collection<Integer> categoryList = localCategoryMemberLiveDao.getCategoryIds(lang, pageId);  //Id for Minnesota
         for(Integer e: categoryList){
             liveCategoryCounter ++;
-            liveCategorySet.add(localPageLiveDao.getById(lang, e).getLocalId());
-            System.out.println(localPageLiveDao.getById(lang, e));
+            liveCategorySet.add(e);
+
         }
 
-        System.out.println("\n\nLocalCategoryMemberDao.getCategoryMemberIds (Get all SQL category members of \"Category:Minnesota\" \n");
+
         //Test for LocalCategoryMemberDao.getCategoryMemberIds
-        memberList = localCategoryMemberSqlDao.getCategoryMemberIds(lang, 11509);    //Id for Category:Minnesota
+        memberList = localCategoryMemberSqlDao.getCategoryMemberIds(lang, categoryId);    //Id for Category:Minnesota
         for(Integer e: memberList){
             sqlMemberCounter ++;
-            if(liveMemberSet.contains(localPageSqlDao.getById(lang, e).getLocalId())){
+            sqlMemberSet.add(e);
+            if(liveMemberSet.contains(e)){
                 commonMemberCounter ++;
             }
-            System.out.println(localPageSqlDao.getById(lang, e));
+            else{
+                entries[0] = "LiveDao Failed to get member";
+                entries[1] = localPageSqlDao.getById(lang, e.intValue()).toString();
+                csvWriter.writeNext(entries);
+            }
+
         }
 
-        System.out.println("\n\nLocalCategoryMemberDao.getCategoryIds (Get all SQL categories of \"Minnesota\" \n");
+
         //Test for LocalCategoryMemberDao.getCategoryIds
-        categoryList = localCategoryMemberSqlDao.getCategoryIds(lang, 10983);  //Id for Minnesota
+        categoryList = localCategoryMemberSqlDao.getCategoryIds(lang, pageId);  //Id for Minnesota
         for(Integer e: categoryList){
             sqlCategoryCounter ++;
-            if(liveCategorySet.contains(localPageSqlDao.getById(lang, e).getLocalId())){
+            sqlCategorySet.add(e);
+            if(liveCategorySet.contains(e)){
                 commonCategoryCounter ++;
             }
-            System.out.println(localPageSqlDao.getById(lang, e));
+            else{
+                entries[0] = "LiveDao Failed to get category";
+                entries[1] = localPageSqlDao.getById(lang, e.intValue()).toString();
+                csvWriter.writeNext(entries);
+            }
+
         }
+
+        for (Integer e: liveMemberSet){
+            if(!sqlMemberSet.contains(e)){
+                entries[0] = "SQLDao Failed to get member";
+                entries[1] = localPageLiveDao.getById(lang, e.intValue()).toString();
+                csvWriter.writeNext(entries);
+            }
+        }
+
+        for (Integer e: liveCategorySet){
+            if(!sqlCategorySet.contains(e)){
+                entries[0] = "SQLDao Failed to get category";
+                entries[1] = localPageLiveDao.getById(lang, e.intValue()).toString();
+                csvWriter.writeNext(entries);
+            }
+        }
+
+
 
         System.out.printf("\nNumber of members in LiveDao: %d\nNumber of members in SQLDao: %d\nNumber of members in common: %d\n\nNumber of categories in LiveDao: %d\n" +
                 "Number of categories in SQLDao: %d\n" +
                 "Number of categories in common: %d\n", liveMemberCounter, sqlMemberCounter, commonMemberCounter, liveCategoryCounter, sqlCategoryCounter, commonCategoryCounter);
+        System.out.println("Detailed error information is printed to memberstat.csv at wikAPIdia-cookbook directory");
+        entries = String.format("Number of members in LiveDao: %d#Number of members in SQLDao: %d#Number of members in common: %d", liveMemberCounter, sqlMemberCounter, commonMemberCounter).split("#");
+        csvWriter.writeNext(entries);
+        entries = String.format("Number of categories in LiveDao: %d#Number of categories in SQLDao: %d#Number of categories in common: %d", liveCategoryCounter, sqlCategoryCounter, commonCategoryCounter).split("#");
+        csvWriter.writeNext(entries);
 
+        csvWriter.close();
 
     }
+
 
 
 }

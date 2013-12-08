@@ -10,8 +10,8 @@ import org.wikapidia.sr.Explanation;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.evaluation.CrossValidation;
-import org.wikapidia.sr.utils.Dataset;
-import org.wikapidia.sr.utils.DatasetDao;
+import org.wikapidia.sr.dataset.Dataset;
+import org.wikapidia.sr.dataset.DatasetDao;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
 import java.io.File;
@@ -57,9 +57,7 @@ public class LocalSRMetricIT {
         Env env = TestUtils.getEnv();
         LocalSRMetric sr = env.getConfigurator().get(LocalSRMetric.class, srName);
         DatasetDao datasetDao = new DatasetDao();
-        String datasetPath = env.getConfiguration().get().getString("sr.dataset.path");
-        datasetPath = datasetPath.replace("integration-tests/", "");
-        Dataset ds = datasetDao.read(SIMPLE, new File(datasetPath, "wordsim353.txt").toString());
+        Dataset ds = datasetDao.get(SIMPLE, "wordsim353.txt");
         CrossValidation cv = new CrossValidation();
 
         List<Dataset> allTrain = new ArrayList<Dataset>();
@@ -83,9 +81,7 @@ public class LocalSRMetricIT {
     public void testExplain(String srName, String phrase1, String phrase2) throws ConfigurationException, DaoException {
         Env env = TestUtils.getEnv();
         DatasetDao datasetDao = new DatasetDao();
-        String datasetPath = env.getConfiguration().get().getString("sr.dataset.path");
-        datasetPath = datasetPath.replace("integration-tests/", "");
-        Dataset ds = datasetDao.read(SIMPLE, new File(datasetPath, "wordsim353.txt").toString());
+        Dataset ds = datasetDao.get(SIMPLE, "wordsim353.txt");
         LocalSRMetric sr = env.getConfigurator().get(LocalSRMetric.class, srName);
         sr.trainDefaultSimilarity(ds);
         sr.trainSimilarity(ds);

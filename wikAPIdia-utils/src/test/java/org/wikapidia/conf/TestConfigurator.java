@@ -29,6 +29,23 @@ public class TestConfigurator {
     }
 
     @Test
+    public void testNonExistentJar() throws ConfigurationException {
+        String separator = System.getProperty("path.separator");
+        System.setProperty("java.class.path", System.getProperty("java.class.path") + separator + "foobarbaz.jar");
+
+        // Should pick up configuration in reference.conf
+        Configurator conf = new Configurator(new Configuration());
+        Integer i = conf.get(Integer.class, "foo");
+        assertEquals(i, 42);
+        Integer j = conf.get(Integer.class, "bar");
+        assertEquals(j, 23);
+        Integer k = conf.get(Integer.class, "baz");
+        assertEquals(k, 0);
+        Integer l = conf.get(Integer.class, "biff");
+        assertEquals(l, 1);
+    }
+
+    @Test
     public void testSpecificFile() throws ConfigurationException, IOException {
         File tmp = File.createTempFile("myconf", ".conf", null);
         tmp.deleteOnExit();
