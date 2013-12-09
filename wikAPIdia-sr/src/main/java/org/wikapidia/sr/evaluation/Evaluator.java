@@ -255,7 +255,7 @@ public class Evaluator {
         for (KnownSim ks : split.getTest().getData()) {
             try {
                 SRResult result = metric.similarity(ks.phrase1, ks.phrase2, ks.language, false);
-                splitEval.record(ks, result.getScore());
+                splitEval.record(ks, result);
             } catch (Exception e) {
                 LOG.log(Level.WARNING, "Similarity of " + ks + " failed. Logging error to " + err);
                 splitEval.recordFailed(ks);

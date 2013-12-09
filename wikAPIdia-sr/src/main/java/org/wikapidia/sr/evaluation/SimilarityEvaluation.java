@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.utils.WpIOUtils;
 
@@ -25,18 +26,18 @@ public class SimilarityEvaluation extends BaseEvaluation {
     private final TDoubleList estimates = new TDoubleArrayList();
 
     public SimilarityEvaluation() throws IOException {
-        this(new Date(), new HashMap<String, String>(), null);
+        super();
     }
 
     public SimilarityEvaluation(File logPath) throws IOException {
-        this(new Date(), new HashMap<String, String>(), logPath);
+        super(logPath);
     }
 
     public SimilarityEvaluation(Map<String, String> config, File logPath) throws IOException {
-        this(new Date(), config, logPath);
+        super(config, logPath);
     }
 
-    public SimilarityEvaluation(Date date, Map<String, String> config, File logPath) throws IOException {
+    public SimilarityEvaluation(Map<String, String> config, File logPath, Date date) throws IOException {
         super(config, logPath, date);
     }
 
@@ -45,15 +46,15 @@ public class SimilarityEvaluation extends BaseEvaluation {
         write(ks, "failed");
     }
 
-    public synchronized void record(KnownSim ks, Double estimate) throws IOException {
-        if (Double.isNaN(estimate) || Double.isInfinite(estimate)) {
+    public synchronized void record(KnownSim ks, SRResult estimate) throws IOException {
+        if (estimate == null || Double.isNaN(estimate.getScore()) || Double.isInfinite(estimate.getScore())) {
             missing++;
         } else {
             actual.add(ks.similarity);
-            estimates.add(estimate);
+            estimates.add(estimate.getScore());
             sucessful++;
         }
-        write(ks, estimate.toString());
+        write(ks, estimate == null ? "null" : String.valueOf(estimate.getScore()));
     }
 
     private synchronized void write(KnownSim ks, String result) throws IOException {
@@ -129,14 +130,14 @@ public class SimilarityEvaluation extends BaseEvaluation {
                 eval.merge(read(new File(tokens[1])));
             } else if (tokens[0].equals("entry")) {
                 if (eval == null) {
-                    eval = new SimilarityEvaluation(start, config, null);
+                    eval = new SimilarityEvaluation(config, null, start);
                 }
                 KnownSim ks = new KnownSim(tokens[2], tokens[3], Double.valueOf(tokens[4]), Language.getByLangCode(tokens[1]));
                 String val = tokens[5];
                 if (val.equals("failed")) {
                     eval.recordFailed(ks);
                 } else {
-                    eval.record(ks, Double.valueOf(val));
+                    eval.record(ks, new SRResult(Double.valueOf(val)));
                 }
             } else {
                 throw new IllegalStateException("invalid event in log " + path + ": " + line);

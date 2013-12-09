@@ -16,30 +16,10 @@ import java.util.*;
  * @author Shilad Sen
  */
 public class MostSimilarDataset {
-    private static final double DEFAULT_THRESHOLD = 0.4;
+    private static final double DEFAULT_THRESHOLD = 0.0;
 
     private final Language language;
-    private final Map<String, List<KnownSim>> data;
-
-    /**
-     * Creates a new most similar dataset based on some input datasets.
-     * KnownSims with similarity less than DEFAULT_THRESHOLD are ignored.
-     *
-     * @param datasets
-     */
-    public MostSimilarDataset(Dataset ... datasets) {
-        this(Arrays.asList(datasets));
-    }
-
-    /**
-     * Creates a new most similar dataset based on some input datasets.
-     * KnownSims with similarity less than threshold are ignored.
-     *
-     * @param datasets
-     */
-    public MostSimilarDataset(double threshold, Dataset ... datasets) {
-        this(Arrays.asList(datasets), threshold);
-    }
+    private final Map<String, KnownMostSim> data;
 
     /**
      * Creates a new most similar dataset based on some input datasets.
@@ -48,7 +28,7 @@ public class MostSimilarDataset {
      * @param datasets
      */
     public MostSimilarDataset(List<Dataset> datasets) {
-        this(datasets, 0.5);
+        this(datasets, DEFAULT_THRESHOLD);
     }
 
     /**
@@ -69,28 +49,16 @@ public class MostSimilarDataset {
                 throw new IllegalArgumentException("All datasets must be the same language");
             }
             for (KnownSim ks : ds.getData()) {
-                if (ks.similarity >= threshold) {
-                    addToMap(sims, ks);
-                    addToMap(sims, ks.getReversed());
-                }
+                addToMap(sims, ks);
+                addToMap(sims, ks.getReversed());
             }
         }
-        data = new HashMap<String, List<KnownSim>>();
-        for (String phrase1 : sims.keySet()) {
-            TObjectIntMap<String> counts = new TObjectIntHashMap<String>();
-            TObjectDoubleMap<String> sums = new TObjectDoubleHashMap<String>();
-            for (KnownSim ks : sims.get(phrase1)) {
-                counts.adjustOrPutValue(ks.phrase2, 1, 1);
-                sums.adjustOrPutValue(ks.phrase2, ks.similarity, ks.similarity);
+        data = new HashMap<String, KnownMostSim>();
+        for (String phrase : sims.keySet()) {
+            KnownMostSim mostSim = new KnownMostSim(sims.get(phrase), threshold);
+            if (mostSim.getMostSimilar().size() > 0) {
+                data.put(phrase, mostSim);
             }
-            List<KnownSim> phraseSims = new ArrayList<KnownSim>();
-            for (String phrase2 : counts.keySet()) {
-                double mean = sums.get(phrase2) / counts.get(phrase2);
-                phraseSims.add(new KnownSim(phrase1, phrase2, mean, language));
-            }
-            Collections.sort(phraseSims);
-            Collections.reverse(phraseSims);
-            data.put(phrase1, phraseSims);
         }
     }
 
@@ -98,7 +66,7 @@ public class MostSimilarDataset {
         return data.keySet();
     }
 
-    public List<KnownSim> getSimilarities(String phrase) {
+    public KnownMostSim getSimilarities(String phrase) {
         return data.get(phrase);
     }
 

@@ -20,12 +20,12 @@ public class MostSimilarDatasetExample {
         Env env = new EnvBuilder().build();
         DatasetDao dao = env.getConfigurator().get(DatasetDao.class);
         List<Dataset> allEn = dao.getAllInLanguage(Language.getByLangCode("simple"));
-        for (int i = 0; i < allEn.size(); i++) {
-            if (allEn.get(i).getName().equals("WikiSimi3000.txt")) {
-                allEn.remove(i);
-                break;
-            }
-        }
+//        for (int i = 0; i < allEn.size(); i++) {
+//            if (allEn.get(i).getName().equals("WikiSimi3000.txt")) {
+//                allEn.remove(i);
+//                break;
+//            }
+//        }
         MostSimilarDataset msd = new MostSimilarDataset(allEn);
 
 
@@ -33,7 +33,7 @@ public class MostSimilarDatasetExample {
         int max = 0;
 
         for (String phrase : msd.getPhrases()) {
-            List<KnownSim> sims = msd.getSimilarities(phrase);
+            List<KnownSim> sims = msd.getSimilarities(phrase).getMostSimilar();
             histogram[sims.size()]++;
             max = Math.max(max, sims.size());
             if (sims.size() >= 5) {

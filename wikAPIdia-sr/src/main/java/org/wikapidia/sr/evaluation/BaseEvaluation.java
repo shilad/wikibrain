@@ -23,6 +23,19 @@ public class BaseEvaluation implements Closeable {
     protected int failed;
     protected Date startDate;
 
+
+    public BaseEvaluation() throws IOException {
+        this(new HashMap<String, String>(), null, new Date());
+    }
+
+    public BaseEvaluation(File logPath) throws IOException {
+        this(new HashMap<String, String>(), logPath, new Date());
+    }
+
+    public BaseEvaluation(Map<String, String> config, File logPath) throws IOException {
+        this(config, logPath, new Date());
+    }
+
     public BaseEvaluation(Map<String, String> config, File logPath, Date date) throws IOException {
         this.config = config;
         this.logPath = logPath;
