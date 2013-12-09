@@ -1,10 +1,13 @@
 package org.wikapidia.cookbook.core;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.map.TIntIntMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.dao.live.LocalPageLiveDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.*;
 import java.io.IOException;
@@ -22,7 +25,7 @@ public class LocalPageLiveDaoExample {
 
        //Test GetTextByURL
        System.out.println(string);
-       LocalPageDao testClass = new Configurator(new Configuration()).get(LocalPageDao.class, "live");
+       LocalPageLiveDao testClass = (LocalPageLiveDao) new Configurator(new Configuration()).get(LocalPageDao.class, "live");
        Language lang = Language.getByLangCode("en");
 
        System.out.println(testClass.getByTitle(new Title("Apple", Language.getByLangCode("en")), NameSpace.getNameSpaceByArbitraryId(0)));
@@ -46,7 +49,50 @@ public class LocalPageLiveDaoExample {
 
         System.out.println(testClass.getIdByTitle(new Title("Minnesota", lang)));
 
+        Language simple = Language.getByLangCode("simple");
+        //Test retrieval of all categories in english
+        /*double start = System.currentTimeMillis();
+        try {
+            //following line takes about 11 min
+            //about .62 ms per request
+            TIntList allCategoryPageIds = testClass.getAllPageIdsInNamespace(lang, NameSpace.CATEGORY);
+            double elapsed = (System.currentTimeMillis() - start) / 1000.0;
+            System.out.println("Retrieved all categories in " + lang + " in " + elapsed + " seconds");
+            System.out.println("\nNumber of categories:" + allCategoryPageIds.size());
+            System.out.println("\nFirst 500 categories in language " + lang.getLangCode() + ":");
+            for (int i = 0; i < 500 && i < allCategoryPageIds.size(); i++) {
+                int categoryId = allCategoryPageIds.get(i);
+                LocalPage category = testClass.getById(lang, categoryId);
+                System.out.println("\t" + categoryId + ": " + category.getTitle());
+            }
+        }
+        catch (OutOfMemoryError e) {
+            System.out.println((System.currentTimeMillis() - start) / 1000.0);
+        }*/
 
+        //Test retrieval of all pages in simple
+        double start = System.currentTimeMillis();
+        try {
+            //following line takes about 1.5 min
+            TIntIntMap pages = testClass.getAllPageIdNamespaceMappings(simple);
+            double elapsed = (System.currentTimeMillis() - start) / 1000.0;
+            System.out.println("Retrieved all pages in simple in " + elapsed + " seconds");
+            //about 140 thousand pages returned
+            System.out.println("\nNumber of pages: " + pages.size());
+            System.out.println("\nFirst 500 pages in simple:");
+            int pageCount = 0;
+            for (int pageId : pages.keys()) {
+                if (pageCount >= 500) {
+                    break;
+                }
+                Title pageTitle = testClass.getById(simple, pageId).getTitle();
+                System.out.println("\tPage: " + pageTitle + "; Namespace: " + NameSpace.getNameSpaceByArbitraryId(pages.get(pageId)));
+                pageCount++;
+            }
+        }
+        catch (OutOfMemoryError e) {
+            System.out.println((System.currentTimeMillis() - start) / 1000.0);
+        }
     }
 }
 

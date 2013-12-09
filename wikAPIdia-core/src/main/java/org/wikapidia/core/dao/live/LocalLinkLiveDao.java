@@ -3,6 +3,10 @@ package org.wikapidia.core.dao.live;
 
 
 import com.typesafe.config.Config;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -12,6 +16,7 @@ import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
+import org.wikapidia.core.model.Title;
 
 import java.util.*;
 
@@ -147,6 +152,35 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         }
 
         return links;
+    }
+
+    /**
+     * Gets the local link source id -> dest id mappings for lang = langId
+     * @param lang
+     * @return
+     * @throws DaoException
+     */
+    public TIntObjectMap<List<Integer>> getAllLinks(Language lang) throws DaoException {
+        TIntObjectMap<List<Integer>> links = new TIntObjectHashMap<List<Integer>>();
+        LocalPageLiveDao pdao = new LocalPageLiveDao();
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLLINKS", lang);
+        LiveAPIQuery query = builder.build();
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+
+        for (QueryReply reply : replyObjects) {
+            int sourceId = reply.pageId;
+            int destId = pdao.getIdByTitle(new Title(reply.title, lang));
+            if (!links.containsKey(sourceId)) {
+                links.put(sourceId, Arrays.asList(destId));
+            }
+            else {
+                List<Integer> destIdsFromSource = links.get(sourceId);
+                destIdsFromSource.add(destId);
+                links.put(sourceId, destIdsFromSource);
+            }
+        }
+
+        return  links;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalLinkDao> {

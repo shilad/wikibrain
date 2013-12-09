@@ -50,7 +50,7 @@ public class RedirectLiveDaoExample {
             double elapsed = (System.currentTimeMillis() - start) / 1000.0;
             System.out.println("Retrieved all redirects in " + lang.getLangCode() + " in " + elapsed + " seconds");
             int redirectCount = 0;
-            System.out.println("\n" + redirectMap.size());
+            System.out.println("\nNumber of redirects: " + redirectMap.size());
             System.out.println("\nFirst 500 redirects in language " + lang.getLangCode() + ":");
             for (int sourceId : redirectMap.keys()) {
                 if (redirectCount >= 500) {break;}
