@@ -26,20 +26,20 @@ import static org.junit.Assert.*;
 public class TestEvaluator {
 
     @Test
-    public void testSimple() throws IOException, DaoException, ConfigurationException {
+    public void testSimilarity() throws IOException, DaoException, ConfigurationException {
         DatasetDao dsDao = new DatasetDao();
         Language simple = Language.getByLangCode("simple");
         File file = WpIOUtils.createTempDirectory("evaluator");
 
-        Evaluator evaluator = new Evaluator(file);
+        SimilarityEvaluator evaluator = new SimilarityEvaluator(file);
         evaluator.setWriteToStdout(false);
-        evaluator.addSimilarityCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
-        evaluator.addSimilarityCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
+        evaluator.addCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
+        evaluator.addCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
 
         TestLocalSR.Factory factory = new TestLocalSR.Factory();
-        SimilarityEvaluationResults eval = evaluator.evaluateSimilarity(factory);
+        SimilarityEvaluationResults eval = evaluator.evaluate(factory);
 
-        List<String> lines = FileUtils.readLines(FileUtils.getFile(file, "local", "similarity.tsv"));
+        List<String> lines = FileUtils.readLines(FileUtils.getFile(file, "local-similarity", "summary.tsv"));
         assertEquals(lines.size(), 4);
         System.out.println("lines are " + lines);
         assertFalse(StringUtils.join(lines).contains("null"));
@@ -94,18 +94,27 @@ public class TestEvaluator {
         Language simple = Language.getByLangCode("simple");
         File file = WpIOUtils.createTempDirectory("evaluator");
 
-        Evaluator evaluator = new Evaluator(file);
-        evaluator.setWriteToStdout(false);
-        evaluator.addSimilarityCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
-        evaluator.addSimilarityCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
+        SimilarityEvaluator simEvaluator = new SimilarityEvaluator(file);
+        simEvaluator.setWriteToStdout(false);
+        simEvaluator.addCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
+        simEvaluator.addCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
+
+        MostSimilarEvaluator mostSimEvaluator = new MostSimilarEvaluator(file);
+        mostSimEvaluator.setWriteToStdout(false);
+        mostSimEvaluator.addCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
+        mostSimEvaluator.addCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
 
         TestLocalSR.Factory factory = new TestLocalSR.Factory();
-        SimilarityEvaluationResults eval = evaluator.evaluateSimilarity(factory);
+        BaseEvaluationResults eval = simEvaluator.evaluate(factory);
         assertTrue(eval.getChildFiles().get(0).toString().contains("0-"));
-        eval = evaluator.evaluateSimilarity(factory);
+        eval = simEvaluator.evaluate(factory);
         assertTrue(eval.getChildFiles().get(0).toString().contains("1-"));
-        eval = evaluator.evaluateSimilarity(factory);
+        eval = mostSimEvaluator.evaluate(factory);
         assertTrue(eval.getChildFiles().get(0).toString().contains("2-"));
-
+        eval = mostSimEvaluator.evaluate(factory);
+        System.out.println(eval.getChildFiles().get(0));
+        assertTrue(eval.getChildFiles().get(0).toString().contains("3-"));
+        eval = simEvaluator.evaluate(factory);
+        assertTrue(eval.getChildFiles().get(0).toString().contains("4-"));
     }
 }

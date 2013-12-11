@@ -123,21 +123,6 @@ public class EvaluationMain {
             throw new UnsupportedOperationException();
         }
 
-        Evaluator.Mode predictionMode = Evaluator.Mode.SIMILARITY;
-        if (cmd.hasOption("p")) {
-            if (cmd.getOptionValue("p").equals("similarity")) {
-                predictionMode = Evaluator.Mode.SIMILARITY;
-            } else if (cmd.getOptionValue("p").equals("mostsimilar")) {
-                predictionMode = Evaluator.Mode.MOSTSIMILAR;
-            } else {
-                System.err.println("Invalid prediction mode. usage:");
-                new HelpFormatter().printHelp("MetricTrainer", options);
-                System.exit(1);
-                return; // to appease the compiler
-            }
-        }
-
-
         if (!cmd.hasOption("u") && !cmd.hasOption("m")){
             System.err.println("Must specify a metric to evaluate.");
             new HelpFormatter().printHelp("MetricTrainer", options);
@@ -172,17 +157,27 @@ public class EvaluationMain {
                 ? cmd.getOptionValue("o")
                 : c.getConf().get().getString("sr.dataset.records");
 
-        Evaluator evaluator = new Evaluator(new File(outputDir));
+        Evaluator evaluator;
+        if (!cmd.hasOption("p") || cmd.getOptionValue("p").equals("similarity")) {
+            evaluator = new SimilarityEvaluator(new File(outputDir));
+        } else if (cmd.getOptionValue("p").equals("mostsimilar")) {
+            evaluator = new MostSimilarEvaluator(new File(outputDir));
+        } else {
+            System.err.println("Invalid prediction mode. usage:");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            System.exit(1);
+            return; // to appease the compiler
+        }
 
         if (mode.equals("none")) {
             Dataset all = new Dataset(datasets);
             evaluator.addSplit(new Split(all.getName(), all.getName(), all, all));
         } else if (mode.equals("within-dataset")) {
             for (Dataset ds : datasets) {
-                evaluator.addCrossfolds(predictionMode, ds, folds);
+                evaluator.addCrossfolds(ds, folds);
             }
         } else if (mode.equals("across-dataset")) {
-            evaluator.addCrossfolds(predictionMode, new Dataset(datasets), folds);
+            evaluator.addCrossfolds(new Dataset(datasets), folds);
         } else {
             System.err.println("Unknown mode: " + mode);
             System.exit(1);
@@ -191,7 +186,7 @@ public class EvaluationMain {
         if (cmd.hasOption("m")) {
             LocalSRFactory factory = new ConfigLocalSRFactory(
                     env.getConfigurator(), cmd.getOptionValue("m"));
-            evaluator.evaluate(predictionMode, factory);
+            evaluator.evaluate(factory);
         } else if (cmd.hasOption("u")) {
             throw new UnsupportedOperationException();  // TODO: implement universal metrics
         }

@@ -42,9 +42,6 @@ import java.util.regex.Pattern;
  *              splitname2.err
  *              splitname3.err
  *
- *
- * TODO: Refactor to abstract BaseEvaluator, concrete SimilarityEvaluator and MostSimilarEvaluator.
- *
  * @author Shilad Sen
  */
 public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
@@ -108,7 +105,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
                         String name = runFile.getName();
                         Matcher matcher = MATCH_RUN.matcher(name);
                         if (matcher.matches()) {
-                            runNum = Integer.valueOf(matcher.group(1)) + 1;
+                            runNum = Math.max(runNum, Integer.valueOf(matcher.group(1)) + 1);
                         }
                     }
                 }
@@ -131,7 +128,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
     public abstract T createResults(File path) throws IOException;
     public abstract List<String> getSummaryFields();
 
-    public synchronized void evaluate(LocalSRFactory factory) throws IOException, DaoException {
+    public synchronized T evaluate(LocalSRFactory factory) throws IOException, DaoException {
         T overall = createResults(null);
         overall.setConfig("dataset", "overall");
         int runNumber = getNextRunNumber();
@@ -162,6 +159,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
         }
         maybeWriteToStdout("Overall for run " + runNumber, overall);
         updateOverallTsv(overall);
+        return overall;
     }
 
     private Split getSplitWithGroup(String group) {
@@ -173,34 +171,20 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
         return null;
     }
 
-    private static final List<String> TSV_FIELDS = Arrays.asList(
-            "date",
-            "runNumber",
-            "lang",
-            "metricName",
-            "dataset",
-            "successful",
-            "missing",
-            "failed",
-            "pearsons",
-            "spearmans",
-            "metricConfig",
-            "disambigConfig"
-    );
-
     /**
      * Updates the overall tsv file for a particular group
      * @param eval
      */
     private void updateOverallTsv(BaseEvaluationResults eval) throws IOException {
-        File tsv = FileUtils.getFile(baseDir, "local", "summary.tsv");
+        List<String> fields = getSummaryFields();
+        File tsv = FileUtils.getFile(modeDir, "summary.tsv");
         String toWrite = "";
         if (!tsv.isFile()) {
-            toWrite += StringUtils.join(TSV_FIELDS, "\t") + "\n";
+            toWrite += StringUtils.join(fields, "\t") + "\n";
         }
         Map<String, String> summary = eval.getSummaryAsMap();
-        for (int i = 0; i < TSV_FIELDS.size(); i++) {
-            String field = TSV_FIELDS.get(i);
+        for (int i = 0; i < fields.size(); i++) {
+            String field = fields.get(i);
             String value = summary.get(field);
             if (value == null) value = "";
             if (i > 0) {
