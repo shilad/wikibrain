@@ -1,29 +1,44 @@
 package org.wikapidia.sr.evaluation;
 
 
+import org.apache.commons.io.FileUtils;
+import org.wikapidia.core.lang.Language;
+import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * @author Shilad Sen
  */
-public class MostSimilarEvaluation extends BaseEvaluation {
+public class MostSimilarEvaluation extends BaseEvaluation<MostSimilarEvaluation> {
 
     private final List<MostSimilarGuess> guesses = new ArrayList<MostSimilarGuess>();
+
+    public MostSimilarEvaluation() throws IOException {
+        super();
+    }
+    public MostSimilarEvaluation(File logPath) throws IOException {
+        super(logPath);
+    }
+
+    public MostSimilarEvaluation(Map<String, String> config, File logPath) throws IOException {
+        super(config, logPath);
+    }
 
     public MostSimilarEvaluation(Map<String, String> config, File logPath, Date date) throws IOException {
         super(config, logPath, date);
     }
 
     public synchronized void record(KnownMostSim kms, SRResultList mostSimilar) throws IOException {
-        MostSimilarGuess guess = new MostSimilarGuess(kms, mostSimilar);
+        record(kms, new MostSimilarGuess(kms, mostSimilar));
+    }
+
+    public synchronized void record(KnownMostSim kms, MostSimilarGuess guess) throws IOException {
         write(kms, guess.toString());
         sucessful++;
     }
@@ -31,15 +46,43 @@ public class MostSimilarEvaluation extends BaseEvaluation {
     public double getNDCG() {
         double ndgc = 0.0;
         for (MostSimilarGuess guess : guesses) {
-
+            ndgc += guess.getNDGC();
         }
-        return ndgc;
+        return ndgc / guesses.size();
     }
 
     public synchronized void recordFailed(KnownMostSim kms) throws IOException {
         failed++;
         write(kms, "failed");
     }
+
+    /**
+     * @see org.wikapidia.sr.evaluation.BaseEvaluation#getSummaryAsMap()
+     * @return
+     */
+    public Map<String, String> getSummaryAsMap() {
+        Map<String, String> summary = super.getSummaryAsMap();
+        summary.put("ndgc", Double.toString(getNDCG()));
+        return summary;
+    }
+
+
+    @Override
+    public void merge(MostSimilarEvaluation eval) throws IOException {
+        super.merge(eval);
+        MostSimilarEvaluation mseval = (MostSimilarEvaluation)eval;
+        guesses.addAll(mseval.guesses);
+    }
+
+
+    public List<MostSimilarEvaluation> getChildEvaluations() throws IOException, ParseException {
+        List<MostSimilarEvaluation> evals = new ArrayList<MostSimilarEvaluation>();
+        for (File file : children) {
+            evals.add(read(file));
+        }
+        return evals;
+    }
+
 
     private synchronized void write(KnownMostSim kms, String result) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -67,5 +110,52 @@ public class MostSimilarEvaluation extends BaseEvaluation {
 
     private String cleanPhrase(String phrase) {
         return phrase.replace("|", "").replaceAll("\\s+", " ");
+    }
+
+    static public MostSimilarEvaluation read(File path) throws IOException, ParseException {
+        Date start = null;
+        Map<String, String> config = new HashMap<String, String>();
+        MostSimilarEvaluation eval = null;
+
+        for (String line : FileUtils.readLines(path, "utf-8")) {
+            if (line.endsWith("\n")) {
+                line = line.substring(0, line.length() - 1);
+            }
+            String tokens[] = line.split("\t");
+            if (tokens[0].equals("start")) {
+                start = SimilarityEvaluation.parseDate(tokens[1]);
+            } else if (tokens[0].equals("config")) {
+                config.put(tokens[1], tokens[2]);
+            } else if (tokens[0].equals("merge")) {
+                eval.merge(read(new File(tokens[1])));
+            } else if (tokens[0].equals("entry")) {
+                if (eval == null) {
+                    eval = new MostSimilarEvaluation(config, null, start);
+                }
+                List<KnownSim> sims = new ArrayList<KnownSim>();
+                Language lang = Language.getByLangCode(tokens[1]);
+                String phrase1 = tokens[2];
+                int localId1 = Integer.valueOf(tokens[3]);
+                for (String ksStr : tokens[4].split("[|]")) {
+                    String ksTokens[] = ksStr.split("[@]");
+                    int localId2 = Integer.valueOf(ksTokens[0]);
+                    double sim = Double.valueOf(ksTokens[1]);
+                    String phrase2 = ksTokens[2];
+                    sims.add(new KnownSim(phrase1, phrase2, localId1, localId2, sim, lang));
+                }
+                KnownMostSim ks = new KnownMostSim(sims);
+                String val = tokens[5];
+                if (val.equals("failed")) {
+                    eval.recordFailed(ks);
+                } else {
+                    eval.record(ks, new MostSimilarGuess(ks, val));
+                }
+            } else {
+                throw new IllegalStateException("invalid event in log " + path + ": " + line);
+            }
+        }
+
+        return eval;
+
     }
 }

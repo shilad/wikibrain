@@ -8,7 +8,6 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.utils.KnownSim;
-import org.wikapidia.utils.WpIOUtils;
 
 import java.io.*;
 import java.text.ParseException;
@@ -20,7 +19,7 @@ import java.util.*;
  *
  * @author Shilad Sen
  */
-public class SimilarityEvaluation extends BaseEvaluation {
+public class SimilarityEvaluation extends BaseEvaluation<SimilarityEvaluation> {
 
     private final TDoubleList actual = new TDoubleArrayList();
     private final TDoubleList estimates = new TDoubleArrayList();
@@ -70,9 +69,7 @@ public class SimilarityEvaluation extends BaseEvaluation {
     }
 
     /**
-     * Return a textual summary of the evaluation as a map.
-     * The summary includes: the config, date, total, failed, missing, successful, spearman, and pearson
-     * The map is actually a LinkedHashMap, so if the config is ordered, it is preserved.
+     * @see org.wikapidia.sr.evaluation.BaseEvaluation#getSummaryAsMap()
      * @return
      */
     public Map<String, String> getSummaryAsMap() {
@@ -102,8 +99,9 @@ public class SimilarityEvaluation extends BaseEvaluation {
     @Override
     public void merge(SimilarityEvaluation eval) throws IOException {
         super.merge(eval);
-        actual.addAll(eval.actual);
-        estimates.addAll(eval.estimates);
+        SimilarityEvaluation seval = (SimilarityEvaluation)eval;
+        actual.addAll(seval.actual);
+        estimates.addAll(seval.estimates);
     }
 
     /**

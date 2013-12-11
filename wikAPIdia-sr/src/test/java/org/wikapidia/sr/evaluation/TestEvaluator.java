@@ -33,8 +33,8 @@ public class TestEvaluator {
 
         Evaluator evaluator = new Evaluator(file);
         evaluator.setWriteToStdout(false);
-        evaluator.addCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
-        evaluator.addCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
+        evaluator.addSimilarityCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
+        evaluator.addSimilarityCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
 
         TestLocalSR.Factory factory = new TestLocalSR.Factory();
         SimilarityEvaluation eval = evaluator.evaluateSimilarity(factory);
@@ -86,5 +86,26 @@ public class TestEvaluator {
                 eval.getSpearmansCorrelation(),
                 0.00001
         );
+    }
+
+    @Test
+    public void testRunNumber() throws IOException, DaoException, ConfigurationException {
+        DatasetDao dsDao = new DatasetDao();
+        Language simple = Language.getByLangCode("simple");
+        File file = WpIOUtils.createTempDirectory("evaluator");
+
+        Evaluator evaluator = new Evaluator(file);
+        evaluator.setWriteToStdout(false);
+        evaluator.addSimilarityCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
+        evaluator.addSimilarityCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
+
+        TestLocalSR.Factory factory = new TestLocalSR.Factory();
+        SimilarityEvaluation eval = evaluator.evaluateSimilarity(factory);
+        assertTrue(eval.getChildFiles().get(0).toString().contains("0-"));
+        eval = evaluator.evaluateSimilarity(factory);
+        assertTrue(eval.getChildFiles().get(0).toString().contains("1-"));
+        eval = evaluator.evaluateSimilarity(factory);
+        assertTrue(eval.getChildFiles().get(0).toString().contains("2-"));
+
     }
 }

@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * @author Shilad Sen
  */
-public class BaseEvaluation implements Closeable {
+public abstract class BaseEvaluation  <T extends BaseEvaluation> implements Closeable {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     protected final List<File> children = new ArrayList<File>();
     protected final Map<String, String> config;
@@ -120,16 +120,16 @@ public class BaseEvaluation implements Closeable {
      * Merges the accumulated values in eval into
      * @param eval
      */
-    public void merge(SimilarityEvaluation eval) throws IOException {
+    public void merge(T eval) throws IOException {
         if (log != null && eval.logPath != null) {
             write("merge\t" + eval.logPath.getAbsolutePath());
         }
         if (eval.startDate.compareTo(startDate) > 0) {
             this.startDate = eval.startDate;
         }
-        for (String key : eval.config.keySet()) {
+        for (String key : (Set<String>)eval.config.keySet()) {
             if (!config.containsKey(key)) {
-                config.put(key, eval.config.get(key));
+                config.put(key, (String)eval.config.get(key));
             }
         }
         missing += eval.missing;
@@ -186,8 +186,14 @@ public class BaseEvaluation implements Closeable {
         return children;
     }
 
+    public abstract List<T> getChildEvaluations() throws IOException, ParseException;
+
     @Override
     public void close() throws IOException {
         if (log != null) log.close();
+    }
+
+    public File getLogPath() {
+        return logPath;
     }
 }

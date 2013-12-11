@@ -75,6 +75,9 @@ public class MostSimilarGuess {
      * @return The normalized discounted cummulative gain.
      */
     public double getNDGC() {
+        if (observations.isEmpty()) {
+            return 0.0;
+        }
         TDoubleList scores = new TDoubleArrayList();
         double s = observations.get(0).score;
         for (int i = 1; i < observations.size(); i++) {

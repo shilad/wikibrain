@@ -74,7 +74,7 @@ public class Dataset {
                 pruned.add(ks);
             }
         }
-        return new Dataset(name + "-pruned", language, pruned);
+        return new Dataset(name + "+pruned", language, pruned);
     }
 
     /**
@@ -94,7 +94,7 @@ public class Dataset {
         Collections.shuffle(clone);
         List<Dataset> splitSets = new ArrayList<Dataset>();
         for (int i=0; i<k; i++) {
-            splitSets.add(new Dataset(name + "-" + i, language));
+            splitSets.add(new Dataset(name + "+split-" + i, language));
         }
         for (int i=0; i< clone.size(); i++) {
             splitSets.get(i%k).getData().add(clone.get(i));
