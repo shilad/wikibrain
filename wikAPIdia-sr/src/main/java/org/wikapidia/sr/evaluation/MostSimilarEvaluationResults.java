@@ -3,7 +3,6 @@ package org.wikapidia.sr.evaluation;
 
 import org.apache.commons.io.FileUtils;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.KnownSim;
 
@@ -15,22 +14,22 @@ import java.util.*;
 /**
  * @author Shilad Sen
  */
-public class MostSimilarEvaluation extends BaseEvaluation<MostSimilarEvaluation> {
+public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimilarEvaluationResults> {
 
     private final List<MostSimilarGuess> guesses = new ArrayList<MostSimilarGuess>();
 
-    public MostSimilarEvaluation() throws IOException {
+    public MostSimilarEvaluationResults() throws IOException {
         super();
     }
-    public MostSimilarEvaluation(File logPath) throws IOException {
+    public MostSimilarEvaluationResults(File logPath) throws IOException {
         super(logPath);
     }
 
-    public MostSimilarEvaluation(Map<String, String> config, File logPath) throws IOException {
+    public MostSimilarEvaluationResults(Map<String, String> config, File logPath) throws IOException {
         super(config, logPath);
     }
 
-    public MostSimilarEvaluation(Map<String, String> config, File logPath, Date date) throws IOException {
+    public MostSimilarEvaluationResults(Map<String, String> config, File logPath, Date date) throws IOException {
         super(config, logPath, date);
     }
 
@@ -57,7 +56,7 @@ public class MostSimilarEvaluation extends BaseEvaluation<MostSimilarEvaluation>
     }
 
     /**
-     * @see org.wikapidia.sr.evaluation.BaseEvaluation#getSummaryAsMap()
+     * @see BaseEvaluationResults#getSummaryAsMap()
      * @return
      */
     public Map<String, String> getSummaryAsMap() {
@@ -68,15 +67,15 @@ public class MostSimilarEvaluation extends BaseEvaluation<MostSimilarEvaluation>
 
 
     @Override
-    public void merge(MostSimilarEvaluation eval) throws IOException {
+    public void merge(MostSimilarEvaluationResults eval) throws IOException {
         super.merge(eval);
-        MostSimilarEvaluation mseval = (MostSimilarEvaluation)eval;
+        MostSimilarEvaluationResults mseval = (MostSimilarEvaluationResults)eval;
         guesses.addAll(mseval.guesses);
     }
 
 
-    public List<MostSimilarEvaluation> getChildEvaluations() throws IOException, ParseException {
-        List<MostSimilarEvaluation> evals = new ArrayList<MostSimilarEvaluation>();
+    public List<MostSimilarEvaluationResults> getChildEvaluations() throws IOException, ParseException {
+        List<MostSimilarEvaluationResults> evals = new ArrayList<MostSimilarEvaluationResults>();
         for (File file : children) {
             evals.add(read(file));
         }
@@ -112,10 +111,10 @@ public class MostSimilarEvaluation extends BaseEvaluation<MostSimilarEvaluation>
         return phrase.replace("|", "").replaceAll("\\s+", " ");
     }
 
-    static public MostSimilarEvaluation read(File path) throws IOException, ParseException {
+    static public MostSimilarEvaluationResults read(File path) throws IOException, ParseException {
         Date start = null;
         Map<String, String> config = new HashMap<String, String>();
-        MostSimilarEvaluation eval = null;
+        MostSimilarEvaluationResults eval = null;
 
         for (String line : FileUtils.readLines(path, "utf-8")) {
             if (line.endsWith("\n")) {
@@ -123,14 +122,14 @@ public class MostSimilarEvaluation extends BaseEvaluation<MostSimilarEvaluation>
             }
             String tokens[] = line.split("\t");
             if (tokens[0].equals("start")) {
-                start = SimilarityEvaluation.parseDate(tokens[1]);
+                start = SimilarityEvaluationResults.parseDate(tokens[1]);
             } else if (tokens[0].equals("config")) {
                 config.put(tokens[1], tokens[2]);
             } else if (tokens[0].equals("merge")) {
                 eval.merge(read(new File(tokens[1])));
             } else if (tokens[0].equals("entry")) {
                 if (eval == null) {
-                    eval = new MostSimilarEvaluation(config, null, start);
+                    eval = new MostSimilarEvaluationResults(config, null, start);
                 }
                 List<KnownSim> sims = new ArrayList<KnownSim>();
                 Language lang = Language.getByLangCode(tokens[1]);

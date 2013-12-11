@@ -36,7 +36,7 @@ public class TestSimilarityEvaluation {
         Dataset ds = new DatasetDao().get(simple, "wordsim353.txt");
         File log = File.createTempFile("evaluation", "log");
         log.deleteOnExit();
-        SimilarityEvaluation se = new SimilarityEvaluation(log);
+        SimilarityEvaluationResults se = new SimilarityEvaluationResults(log);
 
         for (int i = 0; i < ds.getData().size(); i++) {
             KnownSim ks = ds.getData().get(i);

@@ -19,24 +19,24 @@ import java.util.*;
  *
  * @author Shilad Sen
  */
-public class SimilarityEvaluation extends BaseEvaluation<SimilarityEvaluation> {
+public class SimilarityEvaluationResults extends BaseEvaluationResults<SimilarityEvaluationResults> {
 
     private final TDoubleList actual = new TDoubleArrayList();
     private final TDoubleList estimates = new TDoubleArrayList();
 
-    public SimilarityEvaluation() throws IOException {
+    public SimilarityEvaluationResults() throws IOException {
         super();
     }
 
-    public SimilarityEvaluation(File logPath) throws IOException {
+    public SimilarityEvaluationResults(File logPath) throws IOException {
         super(logPath);
     }
 
-    public SimilarityEvaluation(Map<String, String> config, File logPath) throws IOException {
+    public SimilarityEvaluationResults(Map<String, String> config, File logPath) throws IOException {
         super(config, logPath);
     }
 
-    public SimilarityEvaluation(Map<String, String> config, File logPath, Date date) throws IOException {
+    public SimilarityEvaluationResults(Map<String, String> config, File logPath, Date date) throws IOException {
         super(config, logPath, date);
     }
 
@@ -69,7 +69,7 @@ public class SimilarityEvaluation extends BaseEvaluation<SimilarityEvaluation> {
     }
 
     /**
-     * @see org.wikapidia.sr.evaluation.BaseEvaluation#getSummaryAsMap()
+     * @see BaseEvaluationResults#getSummaryAsMap()
      * @return
      */
     public Map<String, String> getSummaryAsMap() {
@@ -79,8 +79,8 @@ public class SimilarityEvaluation extends BaseEvaluation<SimilarityEvaluation> {
         return summary;
     }
 
-    public List<SimilarityEvaluation> getChildEvaluations() throws IOException, ParseException {
-        List<SimilarityEvaluation> evals = new ArrayList<SimilarityEvaluation>();
+    public List<SimilarityEvaluationResults> getChildEvaluations() throws IOException, ParseException {
+        List<SimilarityEvaluationResults> evals = new ArrayList<SimilarityEvaluationResults>();
         for (File file : children) {
             evals.add(read(file));
         }
@@ -97,9 +97,9 @@ public class SimilarityEvaluation extends BaseEvaluation<SimilarityEvaluation> {
     }
 
     @Override
-    public void merge(SimilarityEvaluation eval) throws IOException {
+    public void merge(SimilarityEvaluationResults eval) throws IOException {
         super.merge(eval);
-        SimilarityEvaluation seval = (SimilarityEvaluation)eval;
+        SimilarityEvaluationResults seval = (SimilarityEvaluationResults)eval;
         actual.addAll(seval.actual);
         estimates.addAll(seval.estimates);
     }
@@ -110,10 +110,10 @@ public class SimilarityEvaluation extends BaseEvaluation<SimilarityEvaluation> {
      * @param path
      * @return
      */
-    public static SimilarityEvaluation read(File path) throws IOException, ParseException {
+    public static SimilarityEvaluationResults read(File path) throws IOException, ParseException {
         Date start = null;
         Map<String, String> config = new HashMap<String, String>();
-        SimilarityEvaluation eval = null;
+        SimilarityEvaluationResults eval = null;
 
         for (String line : FileUtils.readLines(path, "utf-8")) {
             if (line.endsWith("\n")) {
@@ -128,7 +128,7 @@ public class SimilarityEvaluation extends BaseEvaluation<SimilarityEvaluation> {
                 eval.merge(read(new File(tokens[1])));
             } else if (tokens[0].equals("entry")) {
                 if (eval == null) {
-                    eval = new SimilarityEvaluation(config, null, start);
+                    eval = new SimilarityEvaluationResults(config, null, start);
                 }
                 KnownSim ks = new KnownSim(tokens[2], tokens[3], Double.valueOf(tokens[4]), Language.getByLangCode(tokens[1]));
                 String val = tokens[5];

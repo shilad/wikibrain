@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * @author Shilad Sen
  */
-public abstract class BaseEvaluation  <T extends BaseEvaluation> implements Closeable {
+public abstract class BaseEvaluationResults<T extends BaseEvaluationResults> implements Closeable {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     protected final List<File> children = new ArrayList<File>();
     protected final Map<String, String> config;
@@ -24,19 +24,19 @@ public abstract class BaseEvaluation  <T extends BaseEvaluation> implements Clos
     protected Date startDate;
 
 
-    public BaseEvaluation() throws IOException {
+    public BaseEvaluationResults() throws IOException {
         this(new HashMap<String, String>(), null, new Date());
     }
 
-    public BaseEvaluation(File logPath) throws IOException {
+    public BaseEvaluationResults(File logPath) throws IOException {
         this(new HashMap<String, String>(), logPath, new Date());
     }
 
-    public BaseEvaluation(Map<String, String> config, File logPath) throws IOException {
+    public BaseEvaluationResults(Map<String, String> config, File logPath) throws IOException {
         this(config, logPath, new Date());
     }
 
-    public BaseEvaluation(Map<String, String> config, File logPath, Date date) throws IOException {
+    public BaseEvaluationResults(Map<String, String> config, File logPath, Date date) throws IOException {
         this.config = config;
         this.logPath = logPath;
         this.startDate = date;
