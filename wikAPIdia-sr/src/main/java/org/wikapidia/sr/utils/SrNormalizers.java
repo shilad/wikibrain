@@ -174,7 +174,7 @@ public class SrNormalizers {
                     localStrings.add(new LocalString(ks.language, ks.phrase1));
                     localStrings.add(new LocalString(ks.language, ks.phrase2));
                     List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
-                    if (ids != null && ids.size() == 2) {
+                    if (ids != null && ids.size() == 2 && ids.get(0) != null && ids.get(1) != null) {
                         LocalId lid1 = ids.get(0);
                         LocalId lid2 = ids.get(1);
                         LocalPage page = new LocalPage(lid1.getLanguage(), lid1.getId(), null, NameSpace.ARTICLE);

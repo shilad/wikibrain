@@ -88,4 +88,9 @@ public class ConfigLocalSRFactory implements LocalSRFactory {
     public String describeMetric() {
         return name + "=" + config.root().unwrapped();
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }

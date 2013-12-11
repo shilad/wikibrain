@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * @author Shilad Sen
  */
-public class BaseEvaluation implements Closeable {
+public abstract class BaseEvaluationResults<T extends BaseEvaluationResults> implements Closeable {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     protected final List<File> children = new ArrayList<File>();
     protected final Map<String, String> config;
@@ -23,7 +23,20 @@ public class BaseEvaluation implements Closeable {
     protected int failed;
     protected Date startDate;
 
-    public BaseEvaluation(Map<String, String> config, File logPath, Date date) throws IOException {
+
+    public BaseEvaluationResults() throws IOException {
+        this(new HashMap<String, String>(), null, new Date());
+    }
+
+    public BaseEvaluationResults(File logPath) throws IOException {
+        this(new HashMap<String, String>(), logPath, new Date());
+    }
+
+    public BaseEvaluationResults(Map<String, String> config, File logPath) throws IOException {
+        this(config, logPath, new Date());
+    }
+
+    public BaseEvaluationResults(Map<String, String> config, File logPath, Date date) throws IOException {
         this.config = config;
         this.logPath = logPath;
         this.startDate = date;
@@ -107,16 +120,16 @@ public class BaseEvaluation implements Closeable {
      * Merges the accumulated values in eval into
      * @param eval
      */
-    public void merge(SimilarityEvaluation eval) throws IOException {
+    public void merge(T eval) throws IOException {
         if (log != null && eval.logPath != null) {
             write("merge\t" + eval.logPath.getAbsolutePath());
         }
         if (eval.startDate.compareTo(startDate) > 0) {
             this.startDate = eval.startDate;
         }
-        for (String key : eval.config.keySet()) {
+        for (String key : (Set<String>)eval.config.keySet()) {
             if (!config.containsKey(key)) {
-                config.put(key, eval.config.get(key));
+                config.put(key, (String)eval.config.get(key));
             }
         }
         missing += eval.missing;
@@ -173,8 +186,14 @@ public class BaseEvaluation implements Closeable {
         return children;
     }
 
+    public abstract List<T> getChildEvaluations() throws IOException, ParseException;
+
     @Override
     public void close() throws IOException {
         if (log != null) log.close();
+    }
+
+    public File getLogPath() {
+        return logPath;
     }
 }
