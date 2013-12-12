@@ -78,4 +78,37 @@ public class TestMostSimilarGuess {
         assertEquals(0, guess3.getObservations().size());
         assertEquals(3435, guess3.getLength());
     }
+
+    @Test
+    public void testNdgc() {
+        double ndgc = (
+                (0.80 + 0.00 / Math.log(2+1) + 0.95 / Math.log(4+1) + 0.91 / Math.log(7+1))
+                        / (0.95 + 0.91 / Math.log(2+1) + 0.80 / Math.log(4+1) + 0.00 / Math.log(7+1)));
+        assertEquals(ndgc, guess.getNDGC(), 0.001);
+    }
+
+    @Test
+    public void testPenalizedNdgc() {
+        int unobservedRank = guess.getLength() * 3;
+        int unobservedCount = 2;
+        double unobservedSim = 0.60 / 2;
+
+        double s = (
+                0.80 +
+                0.00 / Math.log(2+1) +
+                0.95 / Math.log(4+1) +
+                0.91 / Math.log(7+1) +
+                unobservedCount * unobservedSim / Math.log(unobservedRank + 1)
+        );
+        double t = (
+                0.95 +
+                0.91 / Math.log(2+1) +
+                0.80 / Math.log(4+1) +
+                0.60 / Math.log(7+1) +
+                0.50 / Math.log(unobservedRank + 1) +
+                0.0 / Math.log(unobservedRank + 1)
+        );
+
+        assertEquals(s / t, guess.getPenalizedNDGC(), 0.001);
+    }
 }

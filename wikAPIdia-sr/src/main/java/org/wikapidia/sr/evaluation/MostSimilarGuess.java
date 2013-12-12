@@ -1,14 +1,20 @@
 package org.wikapidia.sr.evaluation;
 
 import gnu.trove.list.TDoubleList;
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.lang3.ArrayUtils;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,13 +23,17 @@ import java.util.List;
 public class MostSimilarGuess {
     private final KnownMostSim known;
     private final int length;             // length of most similar guess list
+    private final double minScore;
+    private final double maxScore;
     private final List<Observation> observations = new ArrayList<Observation>();
 
     public MostSimilarGuess(KnownMostSim known, String str) {
         this.known = known;
         String tokens[] = str.split("[|]");
         length = Integer.valueOf(tokens[0]);
-        for (int i = 1; i < tokens.length; i++) {
+        minScore = Double.valueOf(tokens[1]);
+        maxScore = Double.valueOf(tokens[2]);
+        for (int i = 3; i < tokens.length; i++) {
             String tuple[] = tokens[i].split("[@]");
             observations.add(new Observation(Integer.valueOf(tuple[0]), Integer.valueOf(tuple[1]), Double.valueOf(tuple[2])));
         }
@@ -32,6 +42,8 @@ public class MostSimilarGuess {
     public MostSimilarGuess(KnownMostSim known, SRResultList guess) {
         this.known = known;
         length = guess.numDocs();
+        minScore = guess.minScore();
+        maxScore = guess.maxScore();
         TIntSet knownIds = new TIntHashSet();
         for (KnownSim ks : known.getMostSimilar()) {
             knownIds.add(ks.wpId2);
@@ -47,6 +59,10 @@ public class MostSimilarGuess {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(length);
+        sb.append("|");
+        sb.append(minScore);
+        sb.append("|");
+        sb.append(maxScore);
         for (Observation observation : observations) {
             sb.append("|")
                 .append(observation.rank)
@@ -72,25 +88,82 @@ public class MostSimilarGuess {
 
     /**
      * @see https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG
-     * @return The normalized discounted cummulative gain.
+     * @return The normalized discounted cummulative gain. Results with no known
+     * entry are totally ignored.
      */
     public double getNDGC() {
         if (observations.isEmpty()) {
             return 0.0;
         }
-        TDoubleList scores = new TDoubleArrayList();
-        double s = observations.get(0).score;
-        for (int i = 1; i < observations.size(); i++) {
+        TIntDoubleMap actual = new TIntDoubleHashMap();
+        for (KnownSim ks : known.getMostSimilar()) {
+            actual.put(ks.wpId2, ks.similarity);
+        }
+        int ranks[] = new int[observations.size()];
+        double scores[] = new double[observations.size()];
+        double s = 0.0;
+        for (int i = 0; i < observations.size(); i++) {
             Observation o = observations.get(i);
-            s += o.score / Math.log(i + 1);
-            scores.add(o.score);
+            double k = (o.rank == 1) ? 1 : Math.log(o.rank + 1);
+            s += actual.get(o.id) / k;
+            scores[i] = actual.get(o.id);
+            ranks[i] = o.rank;
         }
-        scores.sort();
-        scores.reverse();
-        double t = scores.get(0);
-        for (int i = 1; i < scores.size(); i++) {
-            t += scores.get(i) / Math.log(i + 1);
+        Arrays.sort(ranks);
+        Arrays.sort(scores);
+        ArrayUtils.reverse(scores);
+        double t = 0;
+        for (int i = 0; i < scores.length; i++) {
+            double k = (ranks[i] == 1) ? 1 : Math.log(ranks[i] + 1);
+            t += scores[i] / k;
         }
+        return s / t;
+    }
+
+    /**
+     * @see https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG
+     * @return The normalized discounted cummulative gain, but assumes unobserved
+     * KnownSim entries lie somewhere below the observed list.
+     */
+    public double getPenalizedNDGC() {
+        if (observations.isEmpty()) {
+            return 0.0;
+        }
+        TIntDoubleMap actual = new TIntDoubleHashMap();
+        for (KnownSim ks : known.getMostSimilar()) {
+            actual.put(ks.wpId2, ks.similarity);
+        }
+        double s = 0.0;
+        int ranks[] = new int[observations.size()];
+        for (int i = 0; i < observations.size(); i++) {
+            Observation o = observations.get(i);
+            double k = (o.rank == 1) ? 1 : Math.log(o.rank + 1);
+            s += actual.get(o.id) / k;
+            ranks[i] = o.rank;
+        }
+        Arrays.sort(ranks);
+
+        // there are known.size() - observations.size() unobserved items.
+        // calculate the expected rank and score of them
+        // unobserved rank is 3 * length of the list (totally random!)
+        // unobserved similarity is the mean between the minimum score and 0
+        int unobservedCount = (known.getMostSimilar().size() - observations.size());
+        int unobservedRank = 3 * length;
+        double unobservedScore = minScore / 2;
+        s += unobservedCount * unobservedScore / Math.log(unobservedRank + 1);
+
+        // Calculate maximum over ALL entries - not just observed ones.
+        double t = 0;
+        for (int i = 0; i < known.getMostSimilar().size(); i++) {
+            double k;
+            if (i < ranks.length) {
+                k = (ranks[i] == 1) ? 1 : Math.log(ranks[i] + 1);
+            } else {
+                k = Math.log(unobservedRank + 1);
+            }
+            t += known.getMostSimilar().get(i).similarity / k;
+        }
+
         return s / t;
     }
 
