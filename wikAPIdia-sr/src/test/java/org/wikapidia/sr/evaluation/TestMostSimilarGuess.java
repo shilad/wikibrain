@@ -111,4 +111,18 @@ public class TestMostSimilarGuess {
 
         assertEquals(s / t, guess.getPenalizedNDGC(), 0.001);
     }
+
+    @Test
+    public void testPrecisionRecall() {
+        PrecisionRecallAccumulator pr = guess.getPrecisionRecall(1, 0.7);
+        assertEquals(pr.getN(), 1);
+        assertEquals(1.0, pr.getPrecision(), 0.001);
+        assertEquals(0.333333, pr.getRecall(), 0.001);
+        pr = guess.getPrecisionRecall(2, 0.7);
+        assertEquals(0.5, pr.getPrecision(), 0.001);
+        assertEquals(0.333333, pr.getRecall(), 0.001);
+        pr = guess.getPrecisionRecall(5, 0.7);
+        assertEquals(0.6666, pr.getPrecision(), 0.001);
+        assertEquals(0.6666, pr.getRecall(), 0.001);
+    }
 }

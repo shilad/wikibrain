@@ -50,6 +50,14 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
         return ndgc / guesses.size();
     }
 
+    public PrecisionRecallAccumulator getPrecisionRecall(int n, double threshold) {
+        PrecisionRecallAccumulator pr = new PrecisionRecallAccumulator(n, threshold);
+        for (MostSimilarGuess guess : guesses) {
+            pr.merge(guess.getPrecisionRecall(n, threshold));
+        }
+        return pr;
+    }
+
     public synchronized void recordFailed(KnownMostSim kms) throws IOException {
         failed++;
         write(kms, "failed");

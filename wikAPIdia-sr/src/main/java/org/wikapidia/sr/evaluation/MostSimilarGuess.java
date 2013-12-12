@@ -1,9 +1,5 @@
 package org.wikapidia.sr.evaluation;
 
-import gnu.trove.list.TDoubleList;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
@@ -18,8 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
-* @author Shilad Sen
-*/
+ * A most generated similar list that can be evaluated against a known human-labeled gold-standard.
+ * @author Shilad Sen
+ */
 public class MostSimilarGuess {
     private final KnownMostSim known;
     private final int length;             // length of most similar guess list
@@ -165,6 +162,22 @@ public class MostSimilarGuess {
         }
 
         return s / t;
+    }
+
+    public PrecisionRecallAccumulator getPrecisionRecall(int n, double threshold) {
+        PrecisionRecallAccumulator pr = new PrecisionRecallAccumulator(n, threshold);
+        TIntDoubleMap actual = new TIntDoubleHashMap();
+        for (KnownSim ks : known.getMostSimilar()) {
+            pr.observe(ks.similarity);
+            actual.put(ks.wpId2, ks.similarity);
+        }
+        for (Observation o : observations) {
+            if (o.rank > n) {
+                break;
+            }
+            pr.observeRetrieved(actual.get(o.id));
+        }
+        return pr;
     }
 
     /**
