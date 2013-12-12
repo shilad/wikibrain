@@ -39,6 +39,9 @@ import edu.northwestern.websail.wikiparser.wikitextparser.sweblewrapper.SwebleWi
  * Note that Sweble Engine itself is still in Alpha state (https://github.com/sweble/sweble-wikitext), 
  * and so does SwebleWikiExtractor.
  * 
+ * WebSAILWikiParser wraps Sweble Engine to generate plaintext and collect other information
+ * the source code can be found at https://bitbucket.org/websail/websailwikiparser
+ * 
  * @author NorThanapon
  * 
  */
@@ -61,11 +64,14 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 			throws WikapidiaException {
 		this.visitors = visitors;
 		int pageLocalId = xml.getLocalId();
-		String pageTitleName = xml.getTitle().getTitleStringWithoutNamespace();
+		String pageTitleName = xml.getTitle().getCanonicalTitle();
 		String wikiText = xml.getBody();
 		WikiExtractedPage exPage = null;
 		try {
 			exPage = extractor.parse(pageLocalId, pageTitleName, wikiText);
+			this.visitBeginPage(xml);
+			this.visit(xml, exPage);
+			this.visitEndPage(xml);
 		} catch (LinkTargetException e) {
 			LOG.severe("Could not process link (" +e.getMessage()+")");
 			this.visitParseError(xml, e);
@@ -73,9 +79,6 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 			LOG.severe("Unexpected error while parsing page " + pageTitleName + " ("+e.getMessage()+")");
 			this.visitParseError(xml, e);
 		}
-		this.visitBeginPage(xml);
-		this.visit(xml, exPage);
-		this.visitEndPage(xml);
 	}
 
     /**
@@ -87,7 +90,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
             return "";
         }
         int pageLocalId = xml.getLocalId();
-        String pageTitleName = xml.getTitle().getTitleStringWithoutNamespace();
+        String pageTitleName = xml.getTitle().getCanonicalTitle();
         String wikiText = xml.getBody();
         try {
             return extractor.parse(pageLocalId, pageTitleName, wikiText).getPlainText();
@@ -145,6 +148,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
         if(pl.target == null) return null;
         pl.text = link.getSurface();
         //TODO: Change type to have more detail (i.e. overview, main, table, list, ...)
+        //TODO: See also and template not available
         pl.subarticleType = ParsedLink.SubarticleType.MAIN_INLINE;
         return pl;
 	}
@@ -308,11 +312,7 @@ public class WebSAILWikiTextParser implements WikiTextParser {
 	
 	public static class WebSAILProvider extends Provider<WikiTextParser.Factory> {
         /**
-         * Creates a new provider instance.
-         * Concrete implementations must only use this two-argument constructor.
-         *
-         * @param configurator
-         * @param config
+         * @see Provider<T>
          */
         public WebSAILProvider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
