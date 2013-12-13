@@ -109,4 +109,12 @@ public class SRResult implements Comparable<SRResult>{
     public int compareTo(SRResult result) {
         return ((Double)this.score).compareTo(result.getScore());
     }
+
+    @Override
+    public String toString() {
+        return "SRResult{" +
+                "id=" + id +
+                ", score=" + score +
+                '}';
+    }
 }

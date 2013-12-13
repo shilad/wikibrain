@@ -8,6 +8,7 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.sr.LocalSRMetric;
@@ -128,7 +129,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
     public abstract T createResults(File path) throws IOException;
     public abstract List<String> getSummaryFields();
 
-    public synchronized T evaluate(LocalSRFactory factory) throws IOException, DaoException {
+    public synchronized T evaluate(LocalSRFactory factory) throws IOException, DaoException, WikapidiaException {
         T overall = createResults(null);
         overall.setConfig("dataset", "overall");
         int runNumber = getNextRunNumber();
@@ -208,7 +209,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
      * @throws IOException
      * @throws DaoException
      */
-    private T evaluateSplitInternal(LocalSRFactory factory, Split split, int runNumber) throws IOException, DaoException {
+    private T evaluateSplitInternal(LocalSRFactory factory, Split split, int runNumber) throws IOException, DaoException, WikapidiaException {
         File dir = getLocalDir(split, runNumber, factory.getName());
         ensureIsDirectory(dir);
         File log = new File(dir, split.getName() + ".log");
@@ -232,7 +233,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
         return splitEval;
     }
 
-    protected abstract T evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> conf) throws DaoException, IOException;
+    protected abstract T evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> conf) throws DaoException, IOException, WikapidiaException;
 
     private void maybeWriteToStdout(String caption, BaseEvaluationResults eval) throws IOException {
         if (!writeToStdout) {

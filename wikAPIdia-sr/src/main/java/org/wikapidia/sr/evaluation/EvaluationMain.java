@@ -4,6 +4,7 @@ import org.apache.commons.cli.*;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
@@ -22,7 +23,7 @@ import java.util.List;
 public class EvaluationMain {
     private static final int DEFAULT_FOLDS = 7;
 
-    public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, IOException, WikapidiaException {
 
         Options options = new Options();
         //Specify whether you have the split datasets
@@ -144,7 +145,6 @@ public class EvaluationMain {
             System.exit(1);
             return;
         }
-
 
         Language lang = env.getLanguages().getDefaultLanguage();
         List<Dataset> datasets = new ArrayList<Dataset>();
