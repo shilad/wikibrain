@@ -8,13 +8,16 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
+import org.wikapidia.utils.WpIOUtils;
 
 import java.io.*;
 import java.util.*;
@@ -31,9 +34,15 @@ import java.util.regex.Pattern;
 public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults> {
     private static final Logger LOG = Logger.getLogger(MostSimilarEvaluator.class.getName());
 
+    private boolean buildCosimilarityMatrix = false;
+
     // These arguments will be passed to calls to mostSimilar()
     private int numMostSimilarResults = 500;
     private TIntHashSet mostSimilarIds = null;
+
+    // These arguments are passed to the MostSimilarEvaluationResults
+    private double relevanceThreshold = 0.6;
+    private int precisionRecallRanks[] = new int[] {1, 5, 10, 20, 50, 100, 500, 1000 };
 
 
     public MostSimilarEvaluator(File outputDir) {
@@ -61,12 +70,15 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
 
     @Override
     public MostSimilarEvaluationResults createResults(File path) throws IOException {
-        return new MostSimilarEvaluationResults(path);
+        MostSimilarEvaluationResults results = new MostSimilarEvaluationResults(path);
+        results.setPrecisionRecallRanks(precisionRecallRanks);
+        results.setRelevanceThreshold(relevanceThreshold);
+        return results;
     }
 
     @Override
     public List<String> getSummaryFields() {
-        return Arrays.asList(
+        List<String> fields = new ArrayList<String>(Arrays.asList(
                 "date",
                 "runNumber",
                 "lang",
@@ -77,9 +89,24 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
                 "failed",
                 "pearsons",
                 "spearmans",
-                "metricConfig",
-                "disambigConfig"
-        );
+                "ndgc",
+                "penalizedNdgc"
+        ));
+        for (int i : precisionRecallRanks) {
+            fields.add("num-" + i);
+        }
+        for (int i : precisionRecallRanks) {
+            fields.add("mean-" + i);
+        }
+        for (int i : precisionRecallRanks) {
+            fields.add("precision-" + i);
+        }
+        for (int i : precisionRecallRanks) {
+            fields.add("recall-" + i);
+        }
+        fields.add("metricConfig");
+        fields.add("disambigConfig");
+        return fields;
     }
 
 
@@ -95,8 +122,13 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
      * @throws org.wikapidia.core.dao.DaoException
      */
     @Override
-    protected MostSimilarEvaluationResults evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> config) throws IOException, DaoException {
+    protected MostSimilarEvaluationResults evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> config) throws IOException, DaoException, WikapidiaException {
         LocalSRMetric metric = factory.create();
+        File cosimDir = null;
+        if (buildCosimilarityMatrix) {
+            cosimDir = WpIOUtils.createTempDirectory(factory.getName());
+            metric.writeCosimilarity(cosimDir.getAbsolutePath(), new LanguageSet(split.getTest().getLanguage()), numMostSimilarResults);
+        }
         metric.trainMostSimilar(split.getTrain(), numMostSimilarResults, mostSimilarIds);
         MostSimilarEvaluationResults splitEval = new MostSimilarEvaluationResults(config, log);
         BufferedWriter errFile = new BufferedWriter(new FileWriter(err));
@@ -120,6 +152,7 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
         }
         IOUtils.closeQuietly(splitEval);
         IOUtils.closeQuietly(errFile);
+        if (cosimDir != null) FileUtils.forceDelete(cosimDir);
         return splitEval;
     }
 
@@ -129,5 +162,9 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
 
     public void setNumMostSimilarResults(int numMostSimilarResults) {
         this.numMostSimilarResults = numMostSimilarResults;
+    }
+
+    public void setPrecisionRecallRanks(int[] precisionRecallRanks) {
+        this.precisionRecallRanks = precisionRecallRanks;
     }
 }

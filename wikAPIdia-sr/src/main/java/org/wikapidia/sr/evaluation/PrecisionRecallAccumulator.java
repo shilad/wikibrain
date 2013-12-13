@@ -10,6 +10,7 @@ public class PrecisionRecallAccumulator {
     private int retrievedIrrelevant;  // number of known irrelevant phrases in returned results
     private int totalRelevant;        // total number of relevant pairs
     private int totalIrrelevant;      // total number of irrelevant pairs
+    private double relevanceSum;
 
     public PrecisionRecallAccumulator(int n, double threshold) {
         this.n = n;
@@ -17,6 +18,7 @@ public class PrecisionRecallAccumulator {
     }
 
     public void observeRetrieved(double relevance) {
+        relevanceSum += relevance;
         if (relevance >= threshold) {
             retrievedRelevant++;
         } else {
@@ -37,6 +39,7 @@ public class PrecisionRecallAccumulator {
         this.retrievedRelevant += pr.retrievedRelevant;
         this.totalIrrelevant += pr.totalIrrelevant;
         this.totalRelevant += pr.totalRelevant;
+        this.relevanceSum += pr.relevanceSum;
     }
 
     public double getPrecision() {
@@ -69,5 +72,9 @@ public class PrecisionRecallAccumulator {
 
     public int getTotalIrrelevant() {
         return totalIrrelevant;
+    }
+
+    public double getMeanRelevance() {
+        return relevanceSum / (retrievedRelevant + retrievedIrrelevant);
     }
 }

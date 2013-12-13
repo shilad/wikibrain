@@ -1,7 +1,11 @@
 package org.wikapidia.sr.evaluation;
 
 
+import gnu.trove.list.TDoubleList;
+import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.KnownSim;
@@ -17,6 +21,16 @@ import java.util.*;
 public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimilarEvaluationResults> {
 
     private final List<MostSimilarGuess> guesses = new ArrayList<MostSimilarGuess>();
+
+    /**
+     * Precision and recall is measured at these ranks
+     */
+    private int[] precisionRecallRanks = {1, 5, 10, 20, 50, 100, 500, 1000};
+
+    /**
+     * The threshold under which items are not considered relevant.
+     */
+    private double relevanceThreshold = 0.6;
 
     public MostSimilarEvaluationResults() throws IOException {
         super();
@@ -40,12 +54,20 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
     public synchronized void record(KnownMostSim kms, MostSimilarGuess guess) throws IOException {
         write(kms, guess.toString());
         sucessful++;
+        guesses.add(guess);
     }
 
     public double getNDCG() {
         double ndgc = 0.0;
         for (MostSimilarGuess guess : guesses) {
             ndgc += guess.getNDGC();
+        }
+        return ndgc / guesses.size();
+    }
+    public double getPenalizedNDCG() {
+        double ndgc = 0.0;
+        for (MostSimilarGuess guess : guesses) {
+            ndgc += guess.getPenalizedNDGC();
         }
         return ndgc / guesses.size();
     }
@@ -69,7 +91,17 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
      */
     public Map<String, String> getSummaryAsMap() {
         Map<String, String> summary = super.getSummaryAsMap();
+        summary.put("pearsons", Double.toString(getPearsonsCorrelation()));
+        summary.put("spearmans", Double.toString(getSpearmansCorrelation()));
         summary.put("ndgc", Double.toString(getNDCG()));
+        summary.put("penalizedNdgc", Double.toString(getPenalizedNDCG()));
+        for (int n : precisionRecallRanks) {
+            PrecisionRecallAccumulator pr = getPrecisionRecall(n, relevanceThreshold);
+            summary.put("num-"+n, Integer.toString(pr.getRetrievedIrrelevant() + pr.getRetrievedRelevant()));
+            summary.put("mean-"+n, Double.toString(pr.getMeanRelevance()));
+            summary.put("precision-"+n, Double.toString(pr.getPrecision()));
+            summary.put("recall-"+n, Double.toString(pr.getRecall()));
+        }
         return summary;
     }
 
@@ -90,6 +122,30 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
         return evals;
     }
 
+    public double getSpearmansCorrelation() {
+        TDoubleList actual = new TDoubleArrayList();
+        TDoubleList expected = new TDoubleArrayList();
+        for (MostSimilarGuess msg : guesses) {
+            for (MostSimilarGuess.Observation o : msg.getObservations()) {
+                actual.add(o.actual);
+                expected.add(o.estimate);
+            }
+        }
+        return new SpearmansCorrelation().correlation(actual.toArray(), expected.toArray());
+    }
+
+    public double getPearsonsCorrelation() {
+        TDoubleList actual = new TDoubleArrayList();
+        TDoubleList expected = new TDoubleArrayList();
+        for (MostSimilarGuess msg : guesses) {
+            for (MostSimilarGuess.Observation o : msg.getObservations()) {
+                actual.add(o.actual);
+                expected.add(o.estimate);
+            }
+        }
+        return new PearsonsCorrelation().correlation(actual.toArray(), expected.toArray());
+    }
+
 
     private synchronized void write(KnownMostSim kms, String result) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -98,7 +154,8 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
             .append("\t")
             .append(cleanPhrase(kms.getPhrase()))
             .append("\t")
-            .append(kms.getPageId());
+            .append(kms.getPageId())
+            .append("\t");
 
         int rank = 0;
         for (KnownSim ks : kms.getMostSimilar()) {
@@ -111,7 +168,7 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
             rank++;
         }
 
-        sb.append("\t").append(result).append("\n");
+        sb.append("\t").append(result);
         write(sb.toString());
     }
 
@@ -163,6 +220,13 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
         }
 
         return eval;
+    }
 
+    public void setPrecisionRecallRanks(int[] precisionRecallRanks) {
+        this.precisionRecallRanks = precisionRecallRanks;
+    }
+
+    public void setRelevanceThreshold(double relevanceThreshold) {
+        this.relevanceThreshold = relevanceThreshold;
     }
 }

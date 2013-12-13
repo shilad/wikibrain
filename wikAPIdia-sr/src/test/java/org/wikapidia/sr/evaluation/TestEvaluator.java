@@ -8,6 +8,7 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.junit.Test;
 import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.dataset.Dataset;
@@ -26,7 +27,7 @@ import static org.junit.Assert.*;
 public class TestEvaluator {
 
     @Test
-    public void testSimilarity() throws IOException, DaoException, ConfigurationException {
+    public void testSimilarity() throws IOException, DaoException, ConfigurationException, WikapidiaException {
         DatasetDao dsDao = new DatasetDao();
         Language simple = Language.getByLangCode("simple");
         File file = WpIOUtils.createTempDirectory("evaluator");
@@ -89,7 +90,7 @@ public class TestEvaluator {
     }
 
     @Test
-    public void testRunNumber() throws IOException, DaoException, ConfigurationException {
+    public void testRunNumber() throws IOException, DaoException, ConfigurationException, WikapidiaException {
         DatasetDao dsDao = new DatasetDao();
         Language simple = Language.getByLangCode("simple");
         File file = WpIOUtils.createTempDirectory("evaluator");

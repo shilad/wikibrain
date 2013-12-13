@@ -149,7 +149,7 @@ public class SRMatrices implements Closeable {
                 return similarity.mostSimilar(this, wpId, numResults, validIds);
             }
         } finally {
-            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
+//            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
         }
     }
 

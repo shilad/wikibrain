@@ -26,13 +26,22 @@ public class MostSimilarGuess {
 
     public MostSimilarGuess(KnownMostSim known, String str) {
         this.known = known;
+        TIntDoubleMap actual = new TIntDoubleHashMap();
+        for (KnownSim ks : known.getMostSimilar()) {
+            actual.put(ks.wpId2, ks.similarity);
+        }
         String tokens[] = str.split("[|]");
         length = Integer.valueOf(tokens[0]);
         minScore = Double.valueOf(tokens[1]);
         maxScore = Double.valueOf(tokens[2]);
         for (int i = 3; i < tokens.length; i++) {
             String tuple[] = tokens[i].split("[@]");
-            observations.add(new Observation(Integer.valueOf(tuple[0]), Integer.valueOf(tuple[1]), Double.valueOf(tuple[2])));
+            int id = Integer.valueOf(tuple[1]);
+            observations.add(new Observation(
+                        Integer.valueOf(tuple[0]),
+                        id,
+                        Double.valueOf(tuple[2]),
+                        actual.get(id)));
         }
     }
 
@@ -41,14 +50,14 @@ public class MostSimilarGuess {
         length = guess.numDocs();
         minScore = guess.minScore();
         maxScore = guess.maxScore();
-        TIntSet knownIds = new TIntHashSet();
+        TIntDoubleMap actual = new TIntDoubleHashMap();
         for (KnownSim ks : known.getMostSimilar()) {
-            knownIds.add(ks.wpId2);
+            actual.put(ks.wpId2, ks.similarity);
         }
         for (int i = 0; i < guess.numDocs(); i++) {
             SRResult sr = guess.get(i);
-            if (knownIds.contains(sr.getId())) {
-                observations.add(new Observation(i+1, sr.getId(), sr.getScore()));
+            if (actual.containsKey(sr.getId())) {
+                observations.add(new Observation(i+1, sr.getId(), sr.getScore(), actual.get(sr.getId())));
             }
         }
     }
@@ -66,7 +75,7 @@ public class MostSimilarGuess {
                 .append("@")
                 .append(observation.id)
                 .append("@")
-                .append(observation.score);
+                .append(observation.estimate);
         }
         return sb.toString();
     }
@@ -184,14 +193,16 @@ public class MostSimilarGuess {
      * Represents an entry in the most similar result list with known similarity.
      */
     public static class Observation {
-        public int rank;        // rank in result list (range is [1...length of list])
-        public int id;          // wp local page id
-        public double score;    // similarity score
+        public int rank;            // rank in result list (range is [1...length of list])
+        public int id;              // wp local page id
+        public double estimate;     // estimated relatedness
+        public double actual;       // actual human score
 
-        public Observation(int rank, int id, double score) {
+        public Observation(int rank, int id, double estimate, double actual) {
             this.rank = rank;
             this.id = id;
-            this.score = score;
+            this.estimate = estimate;
+            this.actual = actual;
         }
 
         @Override
@@ -199,7 +210,8 @@ public class MostSimilarGuess {
             return "Observation{" +
                     "rank=" + rank +
                     ", id=" + id +
-                    ", score=" + score +
+                    ", estimate=" + estimate +
+                    ", actual=" + actual +
                     '}';
         }
     }

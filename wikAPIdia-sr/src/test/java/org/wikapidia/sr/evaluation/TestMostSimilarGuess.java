@@ -50,11 +50,11 @@ public class TestMostSimilarGuess {
 
         assertEquals(1, obs.get(0).rank);
         assertEquals(2, obs.get(0).id);
-        assertEquals(0.83, obs.get(0).score, 0.001);
+        assertEquals(0.83, obs.get(0).estimate, 0.001);
 
         assertEquals(7, obs.get(3).rank);
         assertEquals(3, obs.get(3).id);
-        assertEquals(0.60, obs.get(3).score, 0.001);
+        assertEquals(0.60, obs.get(3).estimate, 0.001);
     }
 
     @Test
@@ -68,11 +68,11 @@ public class TestMostSimilarGuess {
 
         assertEquals(1, obs.get(0).rank);
         assertEquals(2, obs.get(0).id);
-        assertEquals(0.83, obs.get(0).score, 0.001);
+        assertEquals(0.83, obs.get(0).estimate, 0.001);
 
         assertEquals(7, obs.get(3).rank);
         assertEquals(3, obs.get(3).id);
-        assertEquals(0.60, obs.get(3).score, 0.001);
+        assertEquals(0.60, obs.get(3).estimate, 0.001);
 
         MostSimilarGuess guess3 = new MostSimilarGuess(guess2.getKnown(), "3435|");
         assertEquals(0, guess3.getObservations().size());

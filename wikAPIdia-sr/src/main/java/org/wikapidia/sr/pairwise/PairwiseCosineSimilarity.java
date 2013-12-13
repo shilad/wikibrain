@@ -88,7 +88,9 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
             leaderboard.tallyScore(id, sim);
         }
 
-        return leaderboard.getTop();
+        SRResultList result = leaderboard.getTop();
+        result.sortDescending();
+        return result;
     }
 
 
