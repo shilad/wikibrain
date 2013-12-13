@@ -74,7 +74,7 @@ public class TestMostSimilarGuess {
         assertEquals(3, obs.get(3).id);
         assertEquals(0.60, obs.get(3).estimate, 0.001);
 
-        MostSimilarGuess guess3 = new MostSimilarGuess(guess2.getKnown(), "3435|");
+        MostSimilarGuess guess3 = new MostSimilarGuess(guess2.getKnown(), "3435|0.9|0.5");
         assertEquals(0, guess3.getObservations().size());
         assertEquals(3435, guess3.getLength());
     }
