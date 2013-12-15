@@ -31,17 +31,27 @@ public class PageViewIterator implements Iterator {
     private DateTime currentDate;
     private DateTime endDate;
     private Language lang;
-    private File tempFolder;
     private static String BASE_URL = "http://dumps.wikimedia.your.org/other/pagecounts-raw/";
     private PageViewDataStruct nextData;
 
-    public PageViewIterator(Language lang, String tempFolderName, int startYear, int startMonth, int startDay, int startHour,
+    /**
+     * constructs a PageViewIterator and parses a PageViewDataStruct from the first hour input in the constructor,
+     * setting nextData to the value of this PageViewDataStruct
+     * @param lang
+     * @param startYear
+     * @param startMonth
+     * @param startDay
+     * @param startHour
+     * @param endYear
+     * @param endMonth
+     * @param endDay
+     * @param endHour
+     * @throws WikapidiaException
+     * @throws DaoException
+     */
+    public PageViewIterator(Language lang, int startYear, int startMonth, int startDay, int startHour,
                             int endYear, int endMonth, int endDay, int endHour) throws WikapidiaException, DaoException {
         this.lang = lang;
-        this.tempFolder = new File(tempFolderName);
-        if (!tempFolder.exists()){
-            tempFolder.mkdir();
-        }
         this.currentDate = new DateTime(startYear, startMonth, startDay, startHour, 0);
         if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
             throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
@@ -54,6 +64,11 @@ public class PageViewIterator implements Iterator {
         throw new UnsupportedOperationException("Remove not supported for PageViewIterator");
     }
 
+    /**
+     * @return the value of nextData if it exists
+     * parses another PageViewDataStruct for the next hour and stores this as the new value for nextData
+     * this new value will be returned next time next() is called
+     */
     public PageViewDataStruct next() {
         if (nextData == null) {
             throw new NoSuchElementException();
@@ -77,9 +92,22 @@ public class PageViewIterator implements Iterator {
          return (nextData != null);
     }
 
+    /**
+     * gets a PageViewDataStruct containing page view info for one hour beginning with current date
+     * then increments currentDate by an hour so that this method will get page view info for the next hour next time it's called
+     * @return PageViewDataStruct for the current hour, or null if currentDate isn't more recent than endDate
+     * @throws WikapidiaException
+     * @throws DaoException
+     */
     private PageViewDataStruct getPageViewData() throws WikapidiaException, DaoException {
-        if (currentDate.getMillis() > endDate.getMillis()) {
+        if (currentDate.getMillis() >= endDate.getMillis()) {
             return null;
+        }
+
+        //set up temp folder where page view data file will be stored
+        File tempFolder = new File("page_view_data");
+        if (!tempFolder.exists()){
+            tempFolder.mkdir();
         }
 
         // build up the file name for the page view data file from the current date

@@ -76,6 +76,7 @@ public class LocalLinkLiveDaoExample {
                 }
             }
         }
+        // 1578 continues in 530 sec, bad=Body and Soul Records
         catch (DaoException e) {
             System.out.println("Number of continues: " + e.getMessage());
             System.out.println("Time elapsed: " + (System.currentTimeMillis() - start) / 1000.0);

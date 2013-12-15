@@ -102,9 +102,12 @@ public class RedirectLiveDao implements RedirectDao {
         LiveAPIQuery query = builder.build();
         List<QueryReply> replyObjects = query.getValuesFromQueryResult();
 
+        int count = 0; //DEBUG
         for (QueryReply reply : replyObjects) {
             int destId = resolveRedirect(lang, reply.pageId);
             redirects.put(reply.pageId, destId);
+            System.out.println(count);
+            count++;
         }
 
         return  redirects;
