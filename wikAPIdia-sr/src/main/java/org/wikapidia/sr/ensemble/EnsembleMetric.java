@@ -151,7 +151,10 @@ public class EnsembleMetric extends BaseLocalSRMetric{
     }
 
     @Override
-    public void trainSimilarity(Dataset dataset) {
+    public void trainSimilarity(Dataset dataset) throws DaoException {
+        for (LocalSRMetric metric : metrics) {
+            metric.trainSimilarity(dataset);
+        }
         List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
         for (KnownSim ks : dataset.getData()){
             List<Double> scores = new ArrayList<Double>();
@@ -177,7 +180,10 @@ public class EnsembleMetric extends BaseLocalSRMetric{
     }
 
     @Override
-    public void trainDefaultSimilarity(Dataset dataset) {
+    public void trainDefaultSimilarity(Dataset dataset) throws DaoException {
+        for (LocalSRMetric metric : metrics) {
+            metric.trainDefaultSimilarity(dataset);
+        }
         List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
         for (KnownSim ks : dataset.getData()){
             List<Double> scores = new ArrayList<Double>();
@@ -290,7 +296,7 @@ public class EnsembleMetric extends BaseLocalSRMetric{
         ParallelForEach.loop(rowIds, WpThreadUtils.getMaxThreads(), new Procedure<Integer>() {
             @Override
             public void call(Integer id) throws Exception {
-                writeVector(writer,id,language, maxHits);
+                writeVector(writer, id, language, maxHits);
             }
         }, 10000);
         try {

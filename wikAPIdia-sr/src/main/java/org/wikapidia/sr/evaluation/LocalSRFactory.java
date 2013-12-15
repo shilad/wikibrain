@@ -21,4 +21,10 @@ public interface LocalSRFactory {
      * Returns a string describing the sr config. Used in the results output.
      */
     String describeMetric();
+
+    /**
+     * Returns the name of the generated metric.
+     * @return
+     */
+    String getName();
 }

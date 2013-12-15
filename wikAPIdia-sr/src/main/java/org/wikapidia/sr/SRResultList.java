@@ -23,6 +23,14 @@ public class SRResultList implements  Iterable<SRResult>{
         numDocs = maxNumDocs;
     }
 
+    public double minScore() {
+        return (numDocs == 0) ? 0.0 : this.results[numDocs-1].getScore();
+    }
+
+    public double maxScore() {
+        return (numDocs == 0) ? 0.0 : this.results[0].getScore();
+    }
+
     /**
      * Returns the specified number of docs in this list.
      * Unless a call to truncate has been made, this will be

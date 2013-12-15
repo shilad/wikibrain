@@ -85,7 +85,9 @@ public class TestLocalSR implements LocalSRMetric {
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        SRResultList result = new SRResultList(10);
+        // TODO: figure out what this should return and test it.
+        return result;
     }
 
     @Override
@@ -116,6 +118,16 @@ public class TestLocalSR implements LocalSRMetric {
     @Override
     public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public boolean similarityIsTrained() {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public boolean mostSimilarIsTrained() {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -240,6 +252,11 @@ public class TestLocalSR implements LocalSRMetric {
         @Override
         public String describeMetric() {
             return "thisIsTheMetric";
+        }
+
+        @Override
+        public String getName() {
+            return "testMetric";
         }
     }
 }

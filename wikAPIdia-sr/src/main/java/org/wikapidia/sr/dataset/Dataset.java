@@ -74,7 +74,7 @@ public class Dataset {
                 pruned.add(ks);
             }
         }
-        return new Dataset(name + "-pruned", language, pruned);
+        return new Dataset(name + "+pruned", language, pruned);
     }
 
     /**
@@ -94,7 +94,7 @@ public class Dataset {
         Collections.shuffle(clone);
         List<Dataset> splitSets = new ArrayList<Dataset>();
         for (int i=0; i<k; i++) {
-            splitSets.add(new Dataset(name + "-" + i, language));
+            splitSets.add(new Dataset(name + "+split-" + i, language));
         }
         for (int i=0; i< clone.size(); i++) {
             splitSets.get(i%k).getData().add(clone.get(i));
@@ -113,5 +113,25 @@ public class Dataset {
         }
         Collections.sort(names);    // makes name order insensitive
         return StringUtils.join(names, '+');
+    }
+
+    /**
+     * Normalizes the range of scores to [0,1]
+     */
+    public void normalize() {
+        double min = Double.POSITIVE_INFINITY;
+        double max = Double.NEGATIVE_INFINITY;
+        for (KnownSim ks : data) {
+            if (!Double.isNaN(ks.similarity)) {
+                min = Math.min(ks.similarity, min);
+                max = Math.max(ks.similarity, max);
+            }
+        }
+        if (max == min) {
+            throw new IllegalStateException();
+        }
+        for (KnownSim ks : data) {
+            ks.similarity = (ks.similarity - min) / (max-min);
+        }
     }
 }

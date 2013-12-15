@@ -9,6 +9,7 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.dataset.DatasetDao;
 import org.wikapidia.sr.utils.KnownSim;
@@ -35,19 +36,19 @@ public class TestSimilarityEvaluation {
         Dataset ds = new DatasetDao().get(simple, "wordsim353.txt");
         File log = File.createTempFile("evaluation", "log");
         log.deleteOnExit();
-        SimilarityEvaluation se = new SimilarityEvaluation(log);
+        SimilarityEvaluationResults se = new SimilarityEvaluationResults(log);
 
         for (int i = 0; i < ds.getData().size(); i++) {
             KnownSim ks = ds.getData().get(i);
             if (i % 20 == 0) {
                 se.recordFailed(ks);
             } else if (i % 20 == 1) {
-                se.record(ks, Double.NaN);
+                se.record(ks, new SRResult(Double.NaN));
             } else if (i % 20 == 2) {
-                se.record(ks, Double.POSITIVE_INFINITY);
+                se.record(ks, new SRResult(Double.POSITIVE_INFINITY));
             } else {
                 double v = rand.nextDouble();
-                se.record(ks, v);
+                se.record(ks, new SRResult(v));
                 actual.add(ks.similarity);
                 estimated.add(v);
             }
