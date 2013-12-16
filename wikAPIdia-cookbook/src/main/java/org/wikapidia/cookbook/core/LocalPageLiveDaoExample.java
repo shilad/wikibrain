@@ -50,11 +50,9 @@ public class LocalPageLiveDaoExample {
         System.out.println(testClass.getIdByTitle(new Title("Minnesota", lang)));
 
         Language simple = Language.getByLangCode("simple");
-        //Test retrieval of all categories in english
-        /*double start = System.currentTimeMillis();
+        //Test retrieval of all categories in simple
+        double start = System.currentTimeMillis();
         try {
-            //following line takes about 11 min
-            //about .62 ms per request
             TIntList allCategoryPageIds = testClass.getAllPageIdsInNamespace(lang, NameSpace.CATEGORY);
             double elapsed = (System.currentTimeMillis() - start) / 1000.0;
             System.out.println("Retrieved all categories in " + lang + " in " + elapsed + " seconds");
@@ -68,10 +66,10 @@ public class LocalPageLiveDaoExample {
         }
         catch (OutOfMemoryError e) {
             System.out.println((System.currentTimeMillis() - start) / 1000.0);
-        }*/
+        }
 
         //Test retrieval of all pages in simple
-        double start = System.currentTimeMillis();
+        start = System.currentTimeMillis();
         try {
             //following line takes about 1.5 min
             TIntIntMap pages = testClass.getAllPageIdNamespaceMappings(simple);

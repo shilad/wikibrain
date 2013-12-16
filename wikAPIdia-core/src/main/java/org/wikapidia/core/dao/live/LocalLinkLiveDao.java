@@ -154,35 +154,6 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         return links;
     }
 
-    /**
-     * Gets the local link source id -> dest id mappings for lang = langId
-     * @param lang
-     * @return
-     * @throws DaoException
-     */
-    public TIntObjectMap<List<Integer>> getAllLinks(Language lang) throws DaoException {
-        TIntObjectMap<List<Integer>> links = new TIntObjectHashMap<List<Integer>>();
-        LocalPageLiveDao pdao = new LocalPageLiveDao();
-        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLLINKS", lang);
-        LiveAPIQuery query = builder.build();
-        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
-
-        for (QueryReply reply : replyObjects) {
-            int sourceId = reply.pageId;
-            int destId = pdao.getIdByTitle(new Title(reply.title, lang));
-            if (!links.containsKey(sourceId)) {
-                links.put(sourceId, Arrays.asList(destId));
-            }
-            else {
-                List<Integer> destIdsFromSource = links.get(sourceId);
-                destIdsFromSource.add(destId);
-                links.put(sourceId, destIdsFromSource);
-            }
-        }
-
-        return  links;
-    }
-
     public static class Provider extends org.wikapidia.conf.Provider<LocalLinkDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
