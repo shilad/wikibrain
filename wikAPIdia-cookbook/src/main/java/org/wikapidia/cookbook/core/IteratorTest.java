@@ -1,4 +1,4 @@
-package org.wikapidia.pageview;
+package org.wikapidia.cookbook.core;
 
 import gnu.trove.map.TIntIntMap;
 import org.wikapidia.core.WikapidiaException;
@@ -6,6 +6,8 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.live.LocalPageLiveDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.Title;
+import org.wikapidia.pageview.PageViewDataStruct;
+import org.wikapidia.pageview.PageViewIterator;
 
 /**
  * Created with IntelliJ IDEA.
