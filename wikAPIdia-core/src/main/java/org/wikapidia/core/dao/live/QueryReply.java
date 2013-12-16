@@ -5,7 +5,7 @@ import org.wikapidia.core.model.*;
 
 /**
  * An abstract class used to store information of interest for a page of a query result
- * Also contains methods to construct a wikapidia core object from the information contained here
+ * Also contains methods to construct a wikAPIdia core object from the information contained here
  * @author Toby "Jiajun" Li and derian
  */
 
@@ -55,6 +55,6 @@ public class QueryReply {
      * @return A NameSpace: the namespace of this page
      */
     public NameSpace getNameSpace(){
-        return NameSpace.getNameSpaceByArbitraryId(nameSpace.intValue());
+        return NameSpace.getNameSpaceByValue(nameSpace.intValue());
     }
 }
