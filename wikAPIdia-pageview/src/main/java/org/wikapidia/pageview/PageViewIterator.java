@@ -62,35 +62,24 @@ public class PageViewIterator implements Iterator {
     }
 
     /**
+     * calls hasNext to set the value of nextData to the next hour's PageViewDataStruct
+     * @throws NoSuchElementException if hasNext returns false, will occur when the PageViewDataStruct for the last hour in
+     * the iterator's range has already been returned
      * @return the value of nextData if it exists
-     * parses another PageViewDataStruct for the next hour and stores this as the new value for nextData
-     * this new value will be returned next time next() is called
      */
     public PageViewDataStruct next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
         return nextData;
-        /*if (nextData == null) {
-            throw new NoSuchElementException();
-        }
-        PageViewDataStruct currentData = nextData;
-
-        try {
-            nextData = getPageViewData();
-        }
-        catch (WikapidiaException wE) {
-            wE.printStackTrace();
-        }
-        catch (DaoException dE) {
-            dE.printStackTrace();
-        }
-
-        return currentData;*/
     }
 
+    /**
+     * sets nextData to the PageViewDataStruct of the next hour in this iterator's range
+     * called by next() to set the value of next data
+     * @return false if nextData is null, true otherwise
+     */
     public boolean hasNext() {
-         //return (nextData != null);
         try {
             nextData = getPageViewData();
         }
@@ -101,7 +90,7 @@ public class PageViewIterator implements Iterator {
             dE.printStackTrace();
         }
 
-        return nextData == null;
+        return !(nextData == null);
     }
 
     /**
