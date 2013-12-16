@@ -12,7 +12,10 @@ public class LocalLink {
     private final int destId;
     private final boolean isOutlink;
     private final int location;
+
+    //should allow null for Live DAO impl, which can't distinguish between parseable and unparseable
     private final boolean isParseable;
+
     private final LocationType locType;
 
     public static enum LocationType {FIRST_PARA, FIRST_SEC, NONE}
