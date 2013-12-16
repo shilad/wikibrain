@@ -7,9 +7,11 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
+import org.wikapidia.core.lang.LocalString;
+import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.utils.WpIOUtils;
 
@@ -17,6 +19,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Reads and writes datasets.
@@ -28,10 +31,15 @@ import java.util.List;
  * @author Ben Hillmann
  */
 public class DatasetDao {
+    private static final Logger LOG = Logger.getLogger(Dataset.class.getName());
+
     public static final String RESOURCE_DATSET = "/datasets";
     public static final String RESOURCE_DATASET_INFO = "/datasets/info.tsv";
 
     private final Collection<Info> info;
+    private boolean normalize = true; // If true, normalize all scores to [0,1]
+    private boolean resolvePhrases = false;
+    private Disambiguator disambiguator = null;
 
     /**
      * Information about a particular dataset
@@ -66,6 +74,24 @@ public class DatasetDao {
      */
     public DatasetDao(Collection<Info> info) {
         this.info = info;
+    }
+
+    /**
+     * If true, all datasets will be "normalized" to [0,1] scores.
+     * @param normalize
+     */
+    public void setNormalize(boolean normalize) {
+        this.normalize = normalize;
+    }
+
+    public List<Dataset> getAllInLanguage(Language lang) throws DaoException {
+        List<Dataset> result = new ArrayList<Dataset>();
+        for (Info i : info) {
+            if (i.getLanguages().containsLanguage(lang)) {
+                result.add(get(lang, i.getName()));
+            }
+        }
+        return result;
     }
 
     /**
@@ -142,6 +168,26 @@ public class DatasetDao {
     }
 
     /**
+     * Sets the internal disambiguator AND marks resolve phrases to true.
+     * @param dab
+     */
+    public void setDisambiguator(Disambiguator dab) {
+        this.disambiguator = dab;
+        this.resolvePhrases = true;
+    }
+
+    /**
+     * @param resolvePhrases If true, phrases are resolved to local page ids
+     *                   The disambiguator MUST be set as well.
+     */
+    public void setResolvePhrases(boolean resolvePhrases) {
+        this.resolvePhrases = resolvePhrases;
+        if (resolvePhrases && disambiguator == null) {
+            throw new IllegalStateException("resolve phrases et to true, but no disambiguator specified.");
+        }
+    }
+
+    /**
      * Reads a dataset from a buffered reader.
      * @param name Name of the dataset, must end with csv for comma separated files.
      * @param language Language of the dataset.
@@ -162,12 +208,19 @@ public class DatasetDao {
                     break;
                 String tokens[] = line.split(delim);
                 if (tokens.length == 3) {
-                    result.add(new KnownSim(
-                            tokens[0],
-                            tokens[1],
-                            Double.valueOf(tokens[2]),
-                            language
-                    ));
+                    KnownSim ks = new KnownSim(
+                                            tokens[0],
+                                            tokens[1],
+                                            Double.valueOf(tokens[2]),
+                                            language
+                                    );
+                    if (resolvePhrases) {
+                        LocalId id1 = disambiguator.disambiguate(new LocalString(language, ks.phrase1), null);
+                        LocalId id2 = disambiguator.disambiguate(new LocalString(language, ks.phrase2), null);
+                        if (id1 != null) { ks.wpId1 = id1.getId(); }
+                        if (id2 != null) { ks.wpId2 = id2.getId(); }
+                    }
+                    result.add(ks);
                 } else {
                     throw new DaoException("Invalid line in dataset file " + name + ": " +
                             "'" + StringEscapeUtils.escapeJava(line) + "'");
@@ -178,7 +231,11 @@ public class DatasetDao {
         } catch (IOException e) {
             throw new DaoException(e);
         }
-        return new Dataset(name, language, result);
+        Dataset dataset = new Dataset(name, language, result);
+        if (normalize) {
+            dataset.normalize();
+        }
+        return dataset;
     }
 
     /**
@@ -257,11 +314,22 @@ public class DatasetDao {
 
         @Override
         public DatasetDao get(String name, Config config) throws ConfigurationException {
-            if (config.getString("type").equals("resource")) {
-                return new DatasetDao();
-            } else {
+            if (!config.getString("type").equals("resource")) {
                 return null;
             }
+            DatasetDao dao = new DatasetDao();
+            if (config.hasPath("normalize")) {
+                dao.setNormalize(config.getBoolean("normalize"));
+            }
+            if (config.hasPath("disambig")) {
+                dao.setDisambiguator(
+                        getConfigurator().get(Disambiguator.class, config.getString("disambig")));
+            }
+            if (config.hasPath("resolvePhrases")) {
+                dao.setResolvePhrases(config.getBoolean("resolvePhrases"));
+            }
+
+            return dao;
         }
     }
 }

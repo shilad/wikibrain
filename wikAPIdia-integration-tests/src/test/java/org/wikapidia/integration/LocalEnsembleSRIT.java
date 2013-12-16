@@ -9,7 +9,6 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.Explanation;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
-import org.wikapidia.sr.evaluation.CrossValidation;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.dataset.DatasetDao;
 import org.wikapidia.sr.utils.ExplanationFormatter;
@@ -58,6 +57,8 @@ public class LocalEnsembleSRIT {
         LocalSRMetric sr = env.getConfigurator().get(LocalSRMetric.class, srName);
         DatasetDao datasetDao = new DatasetDao();
         Dataset ds = datasetDao.get(SIMPLE, "wordsim353.txt");
+
+        /*
         CrossValidation cv = new CrossValidation();
 
         List<Dataset> allTrain = new ArrayList<Dataset>();
@@ -76,6 +77,7 @@ public class LocalEnsembleSRIT {
         assertTrue(cv.getPearson() >= minPearson);
         assertTrue(cv.getSpearman() >= minSpearman);
         assertTrue(cv.getMissing() + cv.getFailed() <= maxNoPred);
+        */
     }
 
     public void testExplain(String srName, String phrase1, String phrase2) throws ConfigurationException, DaoException {

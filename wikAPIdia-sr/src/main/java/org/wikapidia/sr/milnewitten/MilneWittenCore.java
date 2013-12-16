@@ -35,12 +35,18 @@ public class MilneWittenCore {
         if (i.isEmpty()){
             return new SRResult(0.0);
         }
-        SRResult result = new SRResult(1.0-(
-                (Math.log(Math.max(links1.size(),links2.size()))-Math.log(i.size()))
-                / (Math.log(numPages) - Math.log(Math.min(links1.size(),links2.size())))));
+
+        double a = Math.log(links1.size()) ;
+        double b = Math.log(links2.size()) ;
+        double ab = Math.log(i.size()) ;
+        double m = Math.log(numPages);
+
+        SRResult result = new SRResult(
+                1.0 - (Math.max(a, b) -ab) / (m - Math.min(a, b)));
+
         if (explanations) {
             for (int id: i.toArray()) {
-                List<Integer> formatPages = new ArrayList();
+                List<Integer> formatPages = new ArrayList<Integer>();
                 formatPages.add(id);
                 result.addExplanation(new Explanation("?",formatPages));
             }

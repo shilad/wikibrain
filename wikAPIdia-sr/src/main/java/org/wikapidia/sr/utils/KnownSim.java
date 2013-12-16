@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * Wikipedia article titles (not random phrases), and the titles have been mapped
  * to Wikipedia ids.
  */
-public class KnownSim {
+public class KnownSim implements Comparable<KnownSim> {
     public String phrase1;
     public String phrase2;
     public int wpId1 = -1;
@@ -65,4 +65,25 @@ public class KnownSim {
         }
     }
 
+    public KnownSim getReversed() {
+        return new KnownSim(phrase2, phrase1, wpId2, wpId1, similarity, language);
+    }
+
+    /**
+     * Sort by low to high similarity
+     * @param knownSim
+     * @return
+     */
+    @Override
+    public int compareTo(KnownSim knownSim) {
+        if (similarity < knownSim.similarity) {
+            return -1;
+        } else if (similarity > knownSim.similarity) {
+            return 1;
+        } else if (phrase1.compareTo(knownSim.phrase1) != 0){
+            return phrase1.compareTo(knownSim.phrase1);
+        } else {
+            return phrase2.compareTo(knownSim.phrase2);
+        }
+    }
 }

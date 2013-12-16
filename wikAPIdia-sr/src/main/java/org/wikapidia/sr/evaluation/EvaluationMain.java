@@ -4,6 +4,7 @@ import org.apache.commons.cli.*;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
@@ -22,7 +23,7 @@ import java.util.List;
 public class EvaluationMain {
     private static final int DEFAULT_FOLDS = 7;
 
-    public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, IOException, WikapidiaException {
 
         Options options = new Options();
         //Specify whether you have the split datasets
@@ -45,6 +46,7 @@ public class EvaluationMain {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
+                        .withValueSeparator(',')
                         .withLongOpt("gold")
                         .withDescription("the set of gold standard datasets to train on")
                         .create("g"));
@@ -81,6 +83,13 @@ public class EvaluationMain {
                         .withDescription("Set cross validation mode (none, within-dataset, between-dataset)")
                         .create("x"));
 
+        // Prediction mode
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("prediction-mode")
+                        .withDescription("Set prediction mode (similarity, mostsimilar)")
+                        .create("p"));
         //Specify the Folds
         options.addOption(
                 new DefaultOptionBuilder()
@@ -114,6 +123,7 @@ public class EvaluationMain {
         if (cmd.hasOption("u")) { // TODO: support universal evaluations
             throw new UnsupportedOperationException();
         }
+
         if (!cmd.hasOption("u") && !cmd.hasOption("m")){
             System.err.println("Must specify a metric to evaluate.");
             new HelpFormatter().printHelp("MetricTrainer", options);
@@ -136,7 +146,6 @@ public class EvaluationMain {
             return;
         }
 
-
         Language lang = env.getLanguages().getDefaultLanguage();
         List<Dataset> datasets = new ArrayList<Dataset>();
         String mode = cmd.hasOption("x") ? cmd.getOptionValue("x") : "within-dataset";
@@ -148,7 +157,17 @@ public class EvaluationMain {
                 ? cmd.getOptionValue("o")
                 : c.getConf().get().getString("sr.dataset.records");
 
-        Evaluator evaluator = new Evaluator(new File(outputDir));
+        Evaluator evaluator;
+        if (!cmd.hasOption("p") || cmd.getOptionValue("p").equals("similarity")) {
+            evaluator = new SimilarityEvaluator(new File(outputDir));
+        } else if (cmd.getOptionValue("p").equals("mostsimilar")) {
+            evaluator = new MostSimilarEvaluator(new File(outputDir));
+        } else {
+            System.err.println("Invalid prediction mode. usage:");
+            new HelpFormatter().printHelp("MetricTrainer", options);
+            System.exit(1);
+            return; // to appease the compiler
+        }
 
         if (mode.equals("none")) {
             Dataset all = new Dataset(datasets);
@@ -167,7 +186,7 @@ public class EvaluationMain {
         if (cmd.hasOption("m")) {
             LocalSRFactory factory = new ConfigLocalSRFactory(
                     env.getConfigurator(), cmd.getOptionValue("m"));
-            evaluator.evaluateSimilarity(factory);
+            evaluator.evaluate(factory);
         } else if (cmd.hasOption("u")) {
             throw new UnsupportedOperationException();  // TODO: implement universal metrics
         }

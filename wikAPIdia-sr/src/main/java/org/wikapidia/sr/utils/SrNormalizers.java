@@ -109,6 +109,9 @@ public class SrNormalizers {
      * @param dataset
      */
     public void trainSimilarity(final LocalSRMetric metric, Dataset dataset) {
+        if (similarityNormalizer instanceof  IdentityNormalizer) {
+            return;
+        }
         final Normalizer trainee = similarityNormalizer;
         similarityNormalizer = new IdentityNormalizer();
         try {
@@ -133,6 +136,9 @@ public class SrNormalizers {
      * @param dataset
      */
     public void trainSimilarity(final UniversalSRMetric metric, Dataset dataset) {
+        if (similarityNormalizer instanceof  IdentityNormalizer) {
+            return;
+        }
         final Normalizer trainee = similarityNormalizer;
         similarityNormalizer = new IdentityNormalizer();
         try {
@@ -163,6 +169,9 @@ public class SrNormalizers {
      * @param maxResults
      */
     public void trainMostSimilar(final LocalSRMetric metric, final Disambiguator disambiguator, Dataset dataset, final TIntSet validIds, final int maxResults) {
+        if (similarityNormalizer instanceof  IdentityNormalizer) {
+            return;
+        }
         final Normalizer trainee = mostSimilarNormalizer;
         mostSimilarNormalizer = new IdentityNormalizer();
         try {
@@ -174,7 +183,7 @@ public class SrNormalizers {
                     localStrings.add(new LocalString(ks.language, ks.phrase1));
                     localStrings.add(new LocalString(ks.language, ks.phrase2));
                     List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
-                    if (ids != null && ids.size() == 2) {
+                    if (ids != null && ids.size() == 2 && ids.get(0) != null && ids.get(1) != null) {
                         LocalId lid1 = ids.get(0);
                         LocalId lid2 = ids.get(1);
                         LocalPage page = new LocalPage(lid1.getLanguage(), lid1.getId(), null, NameSpace.ARTICLE);
@@ -201,6 +210,9 @@ public class SrNormalizers {
      * @param maxResults
      */
     public void trainMostSimilar(final UniversalSRMetric metric, final Disambiguator disambiguator, final UniversalPageDao dao, final int algorithmId, Dataset dataset, final TIntSet validIds, final int maxResults) {
+        if (similarityNormalizer instanceof  IdentityNormalizer) {
+            return;
+        }
         final Normalizer trainee = mostSimilarNormalizer;
         mostSimilarNormalizer = new IdentityNormalizer();
         try {
