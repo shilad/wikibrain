@@ -49,38 +49,6 @@ public class LocalLinkLiveDaoExample {
             System.out.println(outlink);
         }
 
-        //Test retrieval of all links in simple
-        Language simple = Language.getByLangCode("simple");
-        double start = System.currentTimeMillis();
-        try {
-            LocalPageDao pdao = new Configurator(new Configuration()).get(LocalPageDao.class, "live");
-            TIntObjectMap<List<Integer>> links = ldao.getAllLinks(simple);
-            double elapsed = (System.currentTimeMillis() - start) / 1000.0;
-            System.out.println("Retrieved all links in simple in " + elapsed + " seconds");
-            System.out.println("\nNumber of links: " + links.size());
-            System.out.println("\nFirst 500 links in simple:");
-            int linkCount = 0;
-            for (int sourceLinkId : links.keys()) {
-                if (linkCount >= 500) {
-                    break;
-                }
-                Title source = pdao.getById(simple, sourceLinkId).getTitle();
-                System.out.println("\tLinks from source " + source + ":");
-                for (int destLinkId : links.get(sourceLinkId)) {
-                    if (linkCount >= 500) {
-                        break;
-                    }
-                    Title dest = pdao.getById(simple, destLinkId).getTitle();
-                    System.out.println("\t\t" + dest);
-                    linkCount++;
-                }
-            }
-        }
-        // 1578 continues in 530 sec, bad=Body and Soul Records
-        catch (DaoException e) {
-            System.out.println("Number of continues: " + e.getMessage());
-            System.out.println("Time elapsed: " + (System.currentTimeMillis() - start) / 1000.0);
-        }
     }
 
 }
