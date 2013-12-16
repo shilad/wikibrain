@@ -13,9 +13,7 @@ import org.wikapidia.core.model.Title;
 import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 
@@ -57,7 +55,6 @@ public class PageViewIterator implements Iterator {
             throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
         }
         this.endDate = new DateTime(endYear, endMonth, endDay, endHour, 0);
-        nextData = getPageViewData();
     }
 
     public void remove() {
@@ -70,7 +67,11 @@ public class PageViewIterator implements Iterator {
      * this new value will be returned next time next() is called
      */
     public PageViewDataStruct next() {
-        if (nextData == null) {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+        return nextData;
+        /*if (nextData == null) {
             throw new NoSuchElementException();
         }
         PageViewDataStruct currentData = nextData;
@@ -85,11 +86,22 @@ public class PageViewIterator implements Iterator {
             dE.printStackTrace();
         }
 
-        return currentData;
+        return currentData;*/
     }
 
     public boolean hasNext() {
-         return (nextData != null);
+         //return (nextData != null);
+        try {
+            nextData = getPageViewData();
+        }
+        catch (WikapidiaException wE) {
+            wE.printStackTrace();
+        }
+        catch (DaoException dE) {
+            dE.printStackTrace();
+        }
+
+        return nextData == null;
     }
 
     /**
@@ -128,13 +140,17 @@ public class PageViewIterator implements Iterator {
                 String secondsString = twoDigIntStr(seconds);
                 fileName += minutesString + secondsString + fileNameSuffix;
                 pageViewDataFile = downloadFile(homeFolder, fileName, tempFolder);
+                seconds++;
             }
+            minutes++;
         }
 
         TIntIntMap pageViewCounts = parsePageViewDataFromFile(lang, pageViewDataFile);
         DateTime nextDate = currentDate.plusHours(1);
         PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
 
+        pageViewDataFile.delete();
+        tempFolder.delete();
 
         currentDate = nextDate;
         return pageViewData;
@@ -179,7 +195,9 @@ public class PageViewIterator implements Iterator {
             LocalPageLiveDao pdao = new LocalPageLiveDao();
             BufferedReader br =  new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             String curLine;
-            while ((curLine = br.readLine().trim()) != null){
+            System.out.println("Beginning to parse file");
+            double start = System.currentTimeMillis();
+            while ((curLine = br.readLine()) != null){
                 String[] cols = curLine.split(" ");
                     if (cols[0].equals(lang.getLangCode())){
                             try{
@@ -189,8 +207,11 @@ public class PageViewIterator implements Iterator {
                                 data.adjustOrPutValue(pageId, numPageViews, numPageViews);
                             }
                             catch(IllegalArgumentException e){
-                                //log.error("Encoding error examining this line: " + curLine);
-                                throw new WikapidiaException("Encoding error examining this line: " + curLine, e);
+                                System.out.println("Decoding error examining this line: " + curLine);
+                            }
+                            catch(DaoException de) {
+                                System.out.println("Error using page DAO to get page ID for line:\n\t" + curLine);
+                                System.out.println(de.getMessage());
                             }
                         }
                 }

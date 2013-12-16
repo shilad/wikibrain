@@ -164,22 +164,10 @@ public class LiveAPIQuery {
     public List<QueryReply> getValuesFromQueryResult() throws DaoException {
         List<QueryReply> values = new ArrayList<QueryReply>();
         String queryContinue = "";
-        String prevContinue = ""; //DEBUG
-        Integer continues = 0; //DEBUG
         boolean hasContinue;
-        double start = System.currentTimeMillis(); //DEBUG
         do {
             //make query and set this.queryResult to the resulting text
             getRawQueryText(queryUrl + queryContinue);
-
-            //DEBUG
-            if (queryResult.contains("albadcontinue")) {
-                System.out.println("Num continues: " + continues);
-                System.out.println("Time: " + (System.currentTimeMillis() - start) / 1000);
-                System.out.println("Previous continue: " + prevContinue);
-                System.out.println("Current (bad) continue: " + queryContinue);
-                throw new DaoException(continues.toString());
-            }
 
             //parse the queryResult and add the resulting QueryReply objects to values
             parser.getQueryReturnValues(lang, queryResult, queryResultDataSection, values);
@@ -189,8 +177,6 @@ public class LiveAPIQuery {
              * values to return in one query
              * If so, continue parsing by adding the continue info to the URL string
              */
-            continues++; //DEBUG
-            prevContinue = queryContinue; //DEBUG
             queryContinue = parser.getContinue(queryResult, queryType, queryLimitPrefix);
             hasContinue = (!queryContinue.equals(""));
             queryContinue = "&" + queryLimitPrefix + "continue=" + queryContinue;

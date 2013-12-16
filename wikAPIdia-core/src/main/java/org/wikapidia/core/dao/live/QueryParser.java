@@ -51,6 +51,10 @@ public class QueryParser {
         JsonObject queryReplyObject = parseQueryObject(queryResult, "query");
         //parse desired values from JSON object into QueryReplies and add to values
         JsonElement dataSectionElem = queryReplyObject.get(queryResultDataSection);
+        if (dataSectionElem == null) {
+            throw new DaoException("No section \"" + queryResultDataSection + "\" found in reply text:" +
+                    "\n" + queryResult);
+        }
         if (dataSectionElem.isJsonArray()) {
             JsonArray array = getJsonArrayFromQueryObject(queryReplyObject, queryResultDataSection);
             getValuesFromJsonArray(array, values);
