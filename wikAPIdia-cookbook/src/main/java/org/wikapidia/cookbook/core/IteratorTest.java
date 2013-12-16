@@ -22,7 +22,7 @@ public class IteratorTest {
     public static void main(String[] args) throws WikapidiaException, DaoException {
         Language lang = Language.getByLangCode("simple");
         LocalPageLiveDao pdao = new LocalPageLiveDao();
-        PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 2);
+        PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 3);
 
         int i = 0;
         while (i < 2) {
@@ -36,6 +36,7 @@ public class IteratorTest {
                 Title page = pdao.getById(lang, pageId).getTitle();
                 System.out.println("\tPage: " + page + "; Views: " + stats.get(pageId));
             }
+            i++;
         }
 
     }
