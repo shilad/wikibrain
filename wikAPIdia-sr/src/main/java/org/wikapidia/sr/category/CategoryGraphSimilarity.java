@@ -20,6 +20,7 @@ import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author Matt Lesicko
@@ -148,7 +149,7 @@ public class CategoryGraphSimilarity extends BaseLocalSRMetric{
         }
 
         @Override
-        public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+        public LocalSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("categorygraphsimilarity")) {
                 return null;
             }

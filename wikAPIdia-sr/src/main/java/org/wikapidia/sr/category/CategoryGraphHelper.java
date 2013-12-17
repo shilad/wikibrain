@@ -328,7 +328,7 @@ public class CategoryGraphHelper {
         }
 
         @Override
-        public CategoryGraphHelper get(String name, Config config) throws ConfigurationException {
+        public CategoryGraphHelper get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             LanguageSet languages = getConfigurator().get(LanguageSet.class);
             LocalPageDao pageDao = getConfigurator().get(LocalPageDao.class);
             LocalCategoryMemberDao memberDao = getConfigurator().get(LocalCategoryMemberDao.class);

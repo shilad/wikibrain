@@ -14,6 +14,7 @@ import org.wikapidia.sr.LocalSRMetric;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SimilarityDisambiguator extends BaseDisambiguator{
     SimilarityDisambiguator(PhraseAnalyzer phraseAnalyzer, LocalSRMetric srMetric) {
@@ -64,7 +65,7 @@ public class SimilarityDisambiguator extends BaseDisambiguator{
             HashMap<String, String> map = new HashMap<String,String>();
             String srName = config.getString("metric");
             map.put("disambiguator","topResult");
-            Config newConfig = getConfig().get().getConfig("sr.metric.local." + srName).withValue("disambiguator",ConfigValueFactory.fromAnyRef("topResult"));
+            Config newConfig = getConfig().get().getConfig("sr.metric.local." + srName).withValue("disambiguator", ConfigValueFactory.fromAnyRef("topResult"));
             LocalSRMetric sr = getConfigurator().construct(LocalSRMetric.class,srName,newConfig,null);
 
 
