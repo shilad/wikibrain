@@ -9,7 +9,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.matrix.*;
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.sr.utils.Leaderboard;
@@ -43,16 +43,16 @@ public class SRMatrices implements Closeable {
 
     private final File dir;
 
-    private LocalSRMetric localSr;
+    private MonolingualSRMetric monoSr;
     private UniversalSRMetric universalSr;
 
     private SparseMatrix featureMatrix = null;
     private SparseMatrix featureTransposeMatrix = null;
     private SparseMatrix cosimilarityMatrix = null;
 
-    public SRMatrices(LocalSRMetric metric, Language language, PairwiseSimilarity similarity, File dir) {
-        this.localSr = metric;
-        this.language = language;
+    public SRMatrices(MonolingualSRMetric metric, PairwiseSimilarity similarity, File dir) {
+        this.monoSr = metric;
+        this.language = metric.getLanguage();
         this.similarity = similarity;
         this.dir = dir;
         if (!this.dir.isDirectory()) {
@@ -253,8 +253,8 @@ public class SRMatrices implements Closeable {
     private void writeFeatureVector(SparseMatrixWriter writer, Integer id) throws WikapidiaException {
         TIntDoubleMap scores;
         try {
-            if (localSr!=null){
-                scores = localSr.getVector(id, language);
+            if (monoSr !=null){
+                scores = monoSr.getVector(id);
             } else if (universalSr!=null){
                 scores = universalSr.getVector(id);
             } else {
