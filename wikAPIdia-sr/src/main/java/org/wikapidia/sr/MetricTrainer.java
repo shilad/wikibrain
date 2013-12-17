@@ -1,8 +1,6 @@
 package org.wikapidia.sr;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -118,11 +116,12 @@ public class MetricTrainer {
         }
         LanguageSet languageSet = new LanguageSet(languages);
 
-        LocalSRMetric sr=null;
+        MonolingualSRMetric sr=null;
         UniversalSRMetric usr=null;
         if (cmd.hasOption("m")){
+            Language language = languageSet.getDefaultLanguage();
             FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("m")+"/"+"normalizer/"));
-            sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
+            sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
         }
         if (cmd.hasOption("u")){
             FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("u")+"/"+"normalizer/"));
@@ -137,8 +136,6 @@ public class MetricTrainer {
                 usr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
             }
             if (sr!=null){
-                sr.trainDefaultSimilarity(dataset);
-                sr.trainDefaultMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
                 sr.trainSimilarity(dataset);
                 sr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
             }

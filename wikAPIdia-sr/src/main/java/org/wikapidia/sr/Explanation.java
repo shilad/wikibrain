@@ -1,9 +1,5 @@
 package org.wikapidia.sr;
 
-import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.core.model.LocalPage;
-
 import java.util.List;
 
 public class Explanation {

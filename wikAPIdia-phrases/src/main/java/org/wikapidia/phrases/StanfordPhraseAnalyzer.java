@@ -15,10 +15,7 @@ import org.wikapidia.utils.WpIOUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -189,7 +186,7 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
         }
 
         @Override
-        public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
+        public PhraseAnalyzer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("stanford")) {
                 return null;
             }
@@ -197,9 +194,9 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
             LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             File path = new File(config.getString("path"));
             PrunedCounts.Pruner<String> phrasePruner = getConfigurator().construct(
-                    PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"));
+                    PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"), null);
             PrunedCounts.Pruner<Integer> pagePruner = getConfigurator().construct(
-                    PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"));
+                    PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"), null);
             return new StanfordPhraseAnalyzer(paDao, lpDao, phrasePruner, pagePruner, path);
         }
     }

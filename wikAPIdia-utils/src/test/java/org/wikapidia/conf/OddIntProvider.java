@@ -2,6 +2,8 @@ package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
 
+import java.util.Map;
+
 public class OddIntProvider extends Provider<Integer> {
     private int count = 1;
 
@@ -27,12 +29,12 @@ public class OddIntProvider extends Provider<Integer> {
     }
 
     @Override
-    public Integer get(String name, Config config) throws ConfigurationException {
+    public Integer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
         if (!config.getString("type").equals("odd")) {
             return null;
         }
         int result = count;
         count += 2;
-        return result;
+        return new Integer(result);
     }
 }

@@ -7,7 +7,6 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.utils.MathUtils;
 
 import java.util.*;
@@ -15,12 +14,10 @@ import java.util.*;
 public abstract class BaseDisambiguator implements Disambiguator{
     public static final int DEFAULT_NUM_CANDIDATES = 5;
     protected final PhraseAnalyzer phraseAnalyzer;
-    protected final LocalSRMetric srMetric;
     private int numCandidates = DEFAULT_NUM_CANDIDATES;
 
-    BaseDisambiguator(PhraseAnalyzer phraseAnalyzer, LocalSRMetric srMetric){
+    BaseDisambiguator(PhraseAnalyzer phraseAnalyzer){
         this.phraseAnalyzer = phraseAnalyzer;
-        this.srMetric = srMetric;
     }
 
     @Override

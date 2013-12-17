@@ -6,10 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.lang.LocalId;
-import org.wikapidia.core.lang.LocalString;
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.utils.ParallelForEach;
@@ -17,8 +14,14 @@ import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpThreadUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -119,12 +122,12 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
      * @throws org.wikapidia.core.dao.DaoException
      */
     @Override
-    protected MostSimilarEvaluationLog evaluateSplit(LocalSRFactory factory, Split split, File log, final File err, Map<String, String> config) throws IOException, DaoException, WikapidiaException {
-        final LocalSRMetric metric = factory.create();
+    protected MostSimilarEvaluationLog evaluateSplit(MonolingualSRFactory factory, Split split, File log, final File err, Map<String, String> config) throws IOException, DaoException, WikapidiaException {
+        final MonolingualSRMetric metric = factory.create();
         File cosimDir = null;
         if (buildCosimilarityMatrix) {
             cosimDir = WpIOUtils.createTempDirectory(factory.getName());
-            metric.writeCosimilarity(cosimDir.getAbsolutePath(), new LanguageSet(split.getTest().getLanguage()), numMostSimilarResults);
+            metric.writeCosimilarity(cosimDir.getAbsolutePath(), numMostSimilarResults);
         }
         metric.trainMostSimilar(split.getTrain(), numMostSimilarResults, mostSimilarIds);
         final MostSimilarEvaluationLog splitEval = new MostSimilarEvaluationLog(config, log);
@@ -138,9 +141,9 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
                 try {
                     SRResultList result;
                     if (shouldResolvePhrases()) {
-                        result = metric.mostSimilar(new LocalId(msd.getLanguage(), kms.getPageId()).asLocalPage(), numMostSimilarResults, mostSimilarIds);
+                        result = metric.mostSimilar(kms.getPageId(), numMostSimilarResults, mostSimilarIds);
                     } else {
-                        result = metric.mostSimilar(new LocalString(msd.getLanguage(), phrase), numMostSimilarResults, mostSimilarIds);
+                        result = metric.mostSimilar(phrase, numMostSimilarResults, mostSimilarIds);
                     }
                     splitEval.record(kms, result);
                 } catch (Exception e) {

@@ -9,7 +9,8 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.utils.KnownSim;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 

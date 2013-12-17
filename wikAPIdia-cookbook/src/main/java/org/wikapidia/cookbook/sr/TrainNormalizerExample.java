@@ -6,7 +6,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.dataset.DatasetDao;
@@ -21,7 +21,7 @@ public class TrainNormalizerExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException, WikapidiaException, InterruptedException {
 
         Configurator c = new Configurator(new Configuration());
-        LocalSRMetric sr = c.get(LocalSRMetric.class);
+        MonolingualSRMetric sr = c.get(MonolingualSRMetric.class, "default", "language", "simple");
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
 
         String path = "../dat/";
@@ -33,7 +33,7 @@ public class TrainNormalizerExample {
         DatasetDao datasetDao = new DatasetDao();
         Dataset dataset = datasetDao.get(l, "atlasify240.txt");
 
-        sr.trainDefaultSimilarity(dataset);
+        sr.trainSimilarity(dataset);
         usr.trainSimilarity(dataset);
 
         sr.write(path + "/sr/");

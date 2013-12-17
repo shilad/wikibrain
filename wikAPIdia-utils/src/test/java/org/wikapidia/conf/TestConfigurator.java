@@ -119,4 +119,33 @@ public class TestConfigurator {
 
         tmp.delete();
     }
+
+    @Test
+    public void testRuntimeParams() throws ConfigurationException, IOException {
+        // Should pick up configuration in reference.conf
+        Configurator conf = new Configurator(new Configuration());
+
+        Integer i1 = conf.get(Integer.class, "foo");
+        assertEquals(i1, 42);
+
+        Integer i2 = conf.get(Integer.class, "foo");
+        assertEquals(i1, i2);
+
+        Map<String, String> args3 = new HashMap<String, String>();
+        args3.put("overrideConstant", "423523524");
+        Integer i3 = conf.get(Integer.class, "foo", args3);
+        assertEquals(i3, 423523524);
+
+        Map<String, String> args4 = new HashMap<String, String>();
+        args4.put("overrideConstant", "423523236");
+        Integer i4 = conf.get(Integer.class, "foo", args4);
+        assertEquals(i4, 423523236);
+
+        assertEquals(new Integer(423523524), i3);
+        assertNotSame(new Integer(423523524), i3);
+
+        Integer i5 = conf.get(Integer.class, "foo", args3);
+        assertEquals(i3, i5);
+        assertSame(i3, i5);
+    }
 }

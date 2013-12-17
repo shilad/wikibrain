@@ -19,6 +19,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -313,7 +314,7 @@ public class DatasetDao {
         }
 
         @Override
-        public DatasetDao get(String name, Config config) throws ConfigurationException {
+        public DatasetDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("resource")) {
                 return null;
             }

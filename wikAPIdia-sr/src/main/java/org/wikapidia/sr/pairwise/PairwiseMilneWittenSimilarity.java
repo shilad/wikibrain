@@ -4,8 +4,8 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.matrix.MatrixRow;
-import org.wikapidia.sr.milnewitten.MilneWittenCore;
 import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.milnewitten.MilneWittenCore;
 import org.wikapidia.sr.utils.Leaderboard;
 
 import java.io.IOException;

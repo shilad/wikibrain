@@ -3,7 +3,6 @@ package org.wikapidia.core.lang;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigObject;
 import gnu.trove.set.TByteSet;
 import gnu.trove.set.hash.TByteHashSet;
 import org.apache.commons.lang3.ArrayUtils;
@@ -11,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.conf.Provider;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.FileMatcher;
@@ -231,7 +229,7 @@ public class LanguageSet implements Iterable<Language> {
         }
 
         @Override
-        public LanguageSet get(String name, Config config) throws ConfigurationException {
+        public LanguageSet get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             try {
                 String type = config.getString("type");
                 if (type.equals("loaded")) {

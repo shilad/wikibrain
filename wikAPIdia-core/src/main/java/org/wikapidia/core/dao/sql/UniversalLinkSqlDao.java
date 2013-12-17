@@ -6,7 +6,6 @@ import com.typesafe.config.Config;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.*;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
@@ -19,9 +18,6 @@ import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -298,7 +294,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
         }
 
         @Override
-        public UniversalLinkDao get(String name, Config config) throws ConfigurationException {
+        public UniversalLinkDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

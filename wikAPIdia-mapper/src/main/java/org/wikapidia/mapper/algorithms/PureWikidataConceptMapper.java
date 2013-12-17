@@ -14,7 +14,6 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
-import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
@@ -136,7 +135,7 @@ public class PureWikidataConceptMapper extends ConceptMapper {
         }
 
         @Override
-        public ConceptMapper get(String name, Config config) throws ConfigurationException {
+        public ConceptMapper get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("purewikidata")) {
                 return null;
             }

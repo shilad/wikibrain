@@ -17,12 +17,12 @@ import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.matrix.*;
 import org.wikapidia.utils.ObjectDb;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -347,7 +347,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         }
 
         @Override
-        public MatrixLocalLinkDao get(String name, Config config) throws ConfigurationException {
+        public MatrixLocalLinkDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("matrix")) {
                 return null;
             }

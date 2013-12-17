@@ -1,16 +1,16 @@
 package org.wikapidia.sr.evaluation;
 
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 
 /**
  * @author Shilad Sen
  */
-public interface LocalSRFactory {
+public interface MonolingualSRFactory {
     /**
      * Creates a new, uninitialized SR metric.
      * @return
      */
-    LocalSRMetric create();
+    MonolingualSRMetric create();
 
     /**
      * Returns a string describing the disambig config. Used in the results output.

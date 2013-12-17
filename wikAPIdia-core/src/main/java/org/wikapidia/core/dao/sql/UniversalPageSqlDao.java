@@ -6,7 +6,6 @@ import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -19,9 +18,6 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -240,7 +236,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         }
 
         @Override
-        public UniversalPageDao get(String name, Config config) throws ConfigurationException {
+        public UniversalPageDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

@@ -14,6 +14,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.utils.MathUtils;
 
 import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -224,7 +225,7 @@ public class LoessNormalizer extends BaseNormalizer {
         }
 
         @Override
-        public LoessNormalizer get(String name, Config config) throws ConfigurationException {
+        public LoessNormalizer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("loess")) {
                 return null;
             }
