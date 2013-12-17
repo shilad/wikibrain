@@ -9,6 +9,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.File;
@@ -63,11 +64,12 @@ public class MatrixBuilder {
         String path = c.getConf().get().getString("sr.metric.path");
         int maxResults = cmd.hasOption("r")? Integer.parseInt(cmd.getOptionValue("r")) : c.getConf().get().getInt("sr.normalizer.defaultmaxresults");
 
-        LocalSRMetric sr=null;
+        MonolingualSRMetric sr=null;
         UniversalSRMetric usr=null;
         if (cmd.hasOption("m")){
-            sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
-            sr.writeCosimilarity(path,languages,maxResults);
+            Language language = languages.getDefaultLanguage();
+            sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
+            sr.writeCosimilarity(path, maxResults);
         }
         if (cmd.hasOption("u")){
             usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));

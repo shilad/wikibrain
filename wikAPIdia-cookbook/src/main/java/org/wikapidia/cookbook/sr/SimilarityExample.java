@@ -72,7 +72,7 @@ public class SimilarityExample {
         Language lang = Language.getByLangCode("simple");
         Configurator c = new Configurator(new Configuration());
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-        LocalSRMetric sr = c.get(LocalSRMetric.class, "default", "language", "simple");
+        MonolingualSRMetric sr = c.get(MonolingualSRMetric.class, "default", "language", "simple");
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
@@ -124,7 +124,7 @@ public class SimilarityExample {
 //
 //        Most Similar pages
         System.out.println("Most similar to United States:");
-        SRResultList resultList = sr.mostSimilar(page2, 5);
+        SRResultList resultList = sr.mostSimilar(page2.getLocalId(), 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao, expf);
@@ -137,7 +137,7 @@ public class SimilarityExample {
 //        }
 
         System.out.println("Most similar to natural language processing:");
-        resultList = sr.mostSimilar(new LocalString(lang, "natural language processing"), 5);
+        resultList = sr.mostSimilar("natural language processing", 5);
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
             localPrintResult(resultList.get(i),lang,localPageDao, expf);
