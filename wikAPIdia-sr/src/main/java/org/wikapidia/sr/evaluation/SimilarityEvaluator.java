@@ -1,18 +1,12 @@
 package org.wikapidia.sr.evaluation;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.lang.LocalString;
+import org.wikapidia.core.lang.LocalId;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.SRResult;
-import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 
@@ -20,14 +14,12 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @see Evaluator
  * @author Shilad Sen
  */
-public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationResults> {
+public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationLog> {
     private static final Logger LOG = Logger.getLogger(SimilarityEvaluator.class.getName());
 
     public SimilarityEvaluator(File outputDir) {
@@ -52,8 +44,8 @@ public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationResults> 
     }
 
     @Override
-    public SimilarityEvaluationResults createResults(File path) throws IOException {
-        return new SimilarityEvaluationResults(path);
+    public SimilarityEvaluationLog createResults(File path) throws IOException {
+        return new SimilarityEvaluationLog(path);
     }
 
     @Override
@@ -69,20 +61,28 @@ public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationResults> 
                 "failed",
                 "pearsons",
                 "spearmans",
+                "resolvePhrases",
                 "metricConfig",
                 "disambigConfig"
         );
     }
 
     @Override
-    protected SimilarityEvaluationResults evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> config) throws DaoException, IOException {
+    protected SimilarityEvaluationLog evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> config) throws DaoException, IOException {
         LocalSRMetric metric = factory.create();
         metric.trainSimilarity(split.getTrain());
-        SimilarityEvaluationResults splitEval = new SimilarityEvaluationResults(config, log);
+        SimilarityEvaluationLog splitEval = new SimilarityEvaluationLog(config, log);
         BufferedWriter errFile = new BufferedWriter(new FileWriter(err));
         for (KnownSim ks : split.getTest().getData()) {
             try {
-                SRResult result = metric.similarity(ks.phrase1, ks.phrase2, ks.language, false);
+                SRResult result;
+                if (shouldResolvePhrases()) {
+                    LocalPage p1 = new LocalId(ks.language, ks.wpId1).asLocalPage();
+                    LocalPage p2 = new LocalId(ks.language, ks.wpId2).asLocalPage();
+                    result = metric.similarity(p1, p2, false);
+                } else {
+                    result = metric.similarity(ks.phrase1, ks.phrase2, ks.language, false);
+                }
                 splitEval.record(ks, result);
             } catch (Exception e) {
                 LOG.log(Level.WARNING, "Similarity of " + ks + " failed. Logging error to " + err);
