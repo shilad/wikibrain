@@ -13,7 +13,6 @@ import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.model.LocalCategory;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.BaseLocalSRMetric;
 import org.wikapidia.sr.LocalSRMetric;
@@ -25,6 +24,7 @@ import org.wikapidia.sr.utils.SimUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Matt Lesicko
@@ -124,7 +124,7 @@ public class CategorySimilarity extends BaseLocalSRMetric {
         }
 
         @Override
-        public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+        public LocalSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("categorysimilarity")) {
                 return null;
             }

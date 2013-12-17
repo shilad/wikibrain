@@ -205,7 +205,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         }
 
         @Override
-        public LocalCategoryMemberDao get(String name, Config config) throws ConfigurationException {
+        public LocalCategoryMemberDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

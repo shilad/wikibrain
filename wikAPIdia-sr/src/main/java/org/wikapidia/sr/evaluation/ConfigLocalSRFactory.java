@@ -56,7 +56,7 @@ public class ConfigLocalSRFactory implements LocalSRFactory {
     @Override
     public LocalSRMetric create() {
         try {
-            return configurator.construct(LocalSRMetric.class, name, config);
+            return configurator.construct(LocalSRMetric.class, name, config, null);
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }

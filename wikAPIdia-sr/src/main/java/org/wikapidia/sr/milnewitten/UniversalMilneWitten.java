@@ -13,7 +13,6 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.*;
 import org.wikapidia.sr.*;
@@ -287,7 +286,7 @@ public class UniversalMilneWitten extends BaseUniversalSRMetric {
         }
 
         @Override
-        public UniversalSRMetric get(String name, Config config) throws ConfigurationException {
+        public UniversalSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("UniversalMilneWitten")) {
                 return null;
             }

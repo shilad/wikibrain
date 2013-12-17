@@ -12,6 +12,8 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.sr.Explanation;
 
+import java.util.Map;
+
 /**
  * @author Matt Lesicko
  */
@@ -65,7 +67,7 @@ public class ExplanationFormatter {
         }
 
         @Override
-        public ExplanationFormatter get(String name, Config config) throws ConfigurationException {
+        public ExplanationFormatter get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             return new ExplanationFormatter(
                     getConfigurator().get(
                             LocalPageDao.class,

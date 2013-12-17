@@ -29,7 +29,7 @@ import java.util.*;
  * @author Matt Lesicko
  */
 
-public class LocalMilneWitten extends BaseLocalSRMetric {
+public class MonolingualMilneWitten extends BaseLocalSRMetric {
     LocalLinkDao linkHelper;
     //False is standard Milne Witten with in links, true is with out links
     private boolean outLinks;
@@ -38,11 +38,11 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
     private Map<Language,Integer> numPages = new HashMap<Language, Integer>();
 
 
-    public LocalMilneWitten(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
+    public MonolingualMilneWitten(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper) {
         this(disambiguator,linkHelper,pageHelper,false);
     }
 
-    public LocalMilneWitten(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper, boolean outLinks) {
+    public MonolingualMilneWitten(Disambiguator disambiguator, LocalLinkDao linkHelper, LocalPageDao pageHelper, boolean outLinks) {
         this.disambiguator = disambiguator;
         this.linkHelper = linkHelper;
         this.pageHelper = pageHelper;
@@ -155,7 +155,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
      * @param maxResults
      * @param worthChecking the only IDs that will be checked. These should be generated from a list of ids known to be similar.
      * @return
-     * @throws DaoException
+     * @throws org.wikapidia.core.dao.DaoException
      */
     private SRResultList mostSimilarFromKnown(LocalPage page, int maxResults, TIntIntMap worthChecking) throws DaoException {
         if (worthChecking==null){
@@ -291,7 +291,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
                 return null;
             }
 
-            LocalMilneWitten sr = new LocalMilneWitten(
+            MonolingualMilneWitten sr = new MonolingualMilneWitten(
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(LocalLinkDao.class,config.getString("linkDao")),
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),

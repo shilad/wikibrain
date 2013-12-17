@@ -55,7 +55,7 @@ public class SimilarityDisambiguator extends BaseDisambiguator{
         }
 
         @Override
-        public Disambiguator get(String name, Config config) throws ConfigurationException{
+        public Disambiguator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException{
             if (!config.getString("type").equals("similarity")){
                 return null;
             }
@@ -65,7 +65,7 @@ public class SimilarityDisambiguator extends BaseDisambiguator{
             String srName = config.getString("metric");
             map.put("disambiguator","topResult");
             Config newConfig = getConfig().get().getConfig("sr.metric.local." + srName).withValue("disambiguator",ConfigValueFactory.fromAnyRef("topResult"));
-            LocalSRMetric sr = getConfigurator().construct(LocalSRMetric.class,srName,newConfig);
+            LocalSRMetric sr = getConfigurator().construct(LocalSRMetric.class,srName,newConfig,null);
 
 
             return new SimilarityDisambiguator(pa,sr);

@@ -353,7 +353,7 @@ public class EnsembleMetric extends BaseLocalSRMetric{
         }
 
         @Override
-        public LocalSRMetric get(String name, Config config) throws ConfigurationException{
+        public LocalSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException{
             if (!config.getString("type").equals("ensemble")) {
                 return null;
             }

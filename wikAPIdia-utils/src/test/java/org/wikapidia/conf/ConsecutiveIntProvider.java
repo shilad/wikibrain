@@ -2,6 +2,8 @@ package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
 
+import java.util.Map;
+
 public class ConsecutiveIntProvider extends Provider<Integer> {
     private int count = 0;
 
@@ -27,10 +29,10 @@ public class ConsecutiveIntProvider extends Provider<Integer> {
     }
 
     @Override
-    public Integer get(String name, Config config) throws ConfigurationException {
+    public Integer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
         if (!config.getString("type").equals("consecutive")) {
             return null;
         }
-        return count++;
+        return new Integer(count++);
     }
 }

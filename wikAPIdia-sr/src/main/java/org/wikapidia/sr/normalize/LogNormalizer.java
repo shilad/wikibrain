@@ -7,6 +7,8 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 
+import java.util.Map;
+
 /**
  * A simple normalizer that returns log(1 + min-score).
  * In the case that an x is observed that is less than min-score, it returns 0.
@@ -91,7 +93,7 @@ public class LogNormalizer implements Normalizer{
         }
 
         @Override
-        public LogNormalizer get(String name, Config config) throws ConfigurationException {
+        public LogNormalizer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("log")) {
                 return null;
             }

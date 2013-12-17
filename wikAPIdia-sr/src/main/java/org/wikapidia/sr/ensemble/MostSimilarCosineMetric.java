@@ -24,6 +24,7 @@ import org.wikapidia.sr.utils.KnownSim;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *@author Matt Lesicko
@@ -118,7 +119,7 @@ public class MostSimilarCosineMetric extends BaseLocalSRMetric{
         }
 
         @Override
-        public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+        public LocalSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("mostsimilarcosine")) {
                 return null;
             }
