@@ -10,6 +10,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.sr.SRResultList;
 
 import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class RankAndScoreNormalizer extends BaseNormalizer {
@@ -122,7 +123,7 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
         }
 
         @Override
-        public RankAndScoreNormalizer get(String name, Config config) throws ConfigurationException {
+        public RankAndScoreNormalizer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("rank")) {
                 return null;
             }

@@ -1,22 +1,18 @@
 package org.wikapidia.phrases;
 
-import com.sleepycat.je.DatabaseException;
 import com.typesafe.config.Config;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.phrases.PhraseAnalyzerDao;
-import org.wikapidia.phrases.PrunedCounts;
 import org.wikapidia.utils.ObjectDb;
 import org.wikapidia.utils.WpStringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Persists information about phrases to page relationships using an object database.
@@ -159,7 +155,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
         }
 
         @Override
-        public PhraseAnalyzerDao get(String name, Config config) throws ConfigurationException {
+        public PhraseAnalyzerDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("objectdb")) {
                 return null;
             }

@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -170,7 +171,7 @@ public class WpDataSource {
         }
 
         @Override
-        public WpDataSource get(String name, Config config) throws ConfigurationException {
+        public WpDataSource get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             try {
                 Class.forName(config.getString("driver"));
                 BoneCPDataSource ds = new BoneCPDataSource();

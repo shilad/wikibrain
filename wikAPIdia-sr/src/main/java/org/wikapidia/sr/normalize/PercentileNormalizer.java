@@ -12,6 +12,7 @@ import org.wikapidia.utils.MathUtils;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Map;
 
 
 /**
@@ -106,7 +107,7 @@ public class PercentileNormalizer extends BaseNormalizer {
         }
 
         @Override
-        public PercentileNormalizer get(String name, Config config) throws ConfigurationException {
+        public PercentileNormalizer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("percentile")) {
                 return null;
             }

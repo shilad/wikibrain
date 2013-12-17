@@ -8,8 +8,10 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
+import org.wikapidia.sr.dataset.Dataset;
+import org.wikapidia.sr.dataset.DatasetDao;
 import org.wikapidia.sr.ensemble.EnsembleMetric;
 import org.wikapidia.sr.evaluation.CrossValidation;
 import org.wikapidia.sr.utils.Dataset;
@@ -108,6 +110,27 @@ public class LocalSRMetricIT {
         String datasetPath = env.getConfiguration().get().getString("sr.dataset.path");
         datasetPath = datasetPath.replace("integration-tests/", "");
         return datasetDao.read(SIMPLE, new File(datasetPath, name).toString());
+        MonolingualSRMetric sr = env.getConfigurator().get(MonolingualSRMetric.class, srName, "language", "simple");
+        DatasetDao datasetDao = new DatasetDao();
+        Dataset ds = datasetDao.get(SIMPLE, "wordsim353.txt");
+//        CrossValidation cv = new CrossValidation();
+//
+//        List<Dataset> allTrain = new ArrayList<Dataset>();
+//        List<Dataset> allTest = new ArrayList<Dataset>();
+//        CrossValidation.makeFolds(ds.split(7), allTrain, allTest);
+//        for (int i = 0; i < allTrain.size(); i++) {
+//            sr.trainDefaultSimilarity(allTrain.get(i));
+//            sr.trainSimilarity(allTrain.get(i));
+//            cv.evaluate(sr, allTest.get(i));
+//        }
+//        System.out.println("results for " + srName);
+//        System.out.println("\tpearson: " + cv.getPearson());
+//        System.out.println("\tspearman: " + cv.getSpearman());
+//        System.out.println("\tmissing: " + cv.getMissing());
+//        System.out.println("\tfailed: " + cv.getFailed());
+//        assertTrue(cv.getPearson() >= minPearson);
+//        assertTrue(cv.getSpearman() >= minSpearman);
+//        assertTrue(cv.getMissing() + cv.getFailed() <= maxNoPred);
     }
 
     public void testExplain(String srName, String phrase1, String phrase2) throws ConfigurationException, DaoException {

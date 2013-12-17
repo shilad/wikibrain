@@ -1,8 +1,6 @@
 package org.wikapidia.sr;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -13,8 +11,8 @@ import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.sr.utils.Dataset;
-import org.wikapidia.sr.utils.DatasetDao;
+import org.wikapidia.sr.dataset.Dataset;
+import org.wikapidia.sr.dataset.DatasetDao;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,7 +87,6 @@ public class MetricTrainer {
 
 
 
-        String datasetPath = c.getConf().get().getString("sr.dataset.path");
         String path = c.getConf().get().getString("sr.metric.path");
         LanguageSet validLanguages = env.getLanguages();
 
@@ -107,7 +104,7 @@ public class MetricTrainer {
             for (String langCode : languages){
                 Language language = Language.getByLangCode(langCode);
                 if (validLanguages==null||validLanguages.containsLanguage(language)){
-                    datasets.add(datasetDao.read(language,datasetPath+name));
+                    datasets.add(datasetDao.get(language, name));
                 }
             }
         }
@@ -119,11 +116,12 @@ public class MetricTrainer {
         }
         LanguageSet languageSet = new LanguageSet(languages);
 
-        LocalSRMetric sr=null;
+        MonolingualSRMetric sr=null;
         UniversalSRMetric usr=null;
         if (cmd.hasOption("m")){
+            Language language = languageSet.getDefaultLanguage();
             FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("m")+"/"+"normalizer/"));
-            sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
+            sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
         }
         if (cmd.hasOption("u")){
             FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("u")+"/"+"normalizer/"));
@@ -138,8 +136,6 @@ public class MetricTrainer {
                 usr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
             }
             if (sr!=null){
-                sr.trainDefaultSimilarity(dataset);
-                sr.trainDefaultMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
                 sr.trainSimilarity(dataset);
                 sr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
             }

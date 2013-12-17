@@ -325,7 +325,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         }
 
         @Override
-        public LocalPageDao get(String name, Config config) throws ConfigurationException {
+        public LocalPageDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

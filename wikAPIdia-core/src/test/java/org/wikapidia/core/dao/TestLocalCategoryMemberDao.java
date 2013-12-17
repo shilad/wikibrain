@@ -6,6 +6,7 @@ import org.wikapidia.core.dao.sql.*;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalCategory;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.Title;
 
 import java.io.IOException;
@@ -66,7 +67,7 @@ public class TestLocalCategoryMemberDao {
         dao.endLoad();
         pageDao.endLoad();
 
-        Map<Integer, LocalArticle> map = dao.getCategoryMembers(lang.getLanguage(), 5);
+        Map<Integer, LocalPage> map = dao.getCategoryMembers(lang.getLanguage(), 5);
         assertEquals(20, map.size());
         map = dao.getCategoryMembers(lang.getLanguage(), 7);
         assertEquals(100/7, map.size());

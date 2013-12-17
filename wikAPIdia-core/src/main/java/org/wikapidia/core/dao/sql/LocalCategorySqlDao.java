@@ -12,7 +12,6 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.*;
 
-import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.Map;
 
@@ -86,7 +85,7 @@ public class LocalCategorySqlDao extends LocalPageSqlDao<LocalCategory> implemen
         }
 
         @Override
-        public LocalCategoryDao get(String name, Config config) throws ConfigurationException {
+        public LocalCategoryDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

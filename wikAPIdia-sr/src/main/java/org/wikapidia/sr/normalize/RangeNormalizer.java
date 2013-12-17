@@ -5,6 +5,8 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 
+import java.util.Map;
+
 /**
  * Normalizes values to fall within a particular range.
  */
@@ -68,7 +70,7 @@ public class RangeNormalizer extends BaseNormalizer {
         }
 
         @Override
-        public RangeNormalizer get(String name, Config config) throws ConfigurationException {
+        public RangeNormalizer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("range")) {
                 return null;
             }

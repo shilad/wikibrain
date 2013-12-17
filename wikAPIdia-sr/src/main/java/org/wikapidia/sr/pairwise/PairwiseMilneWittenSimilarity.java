@@ -4,8 +4,8 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.matrix.MatrixRow;
-import org.wikapidia.sr.milnewitten.MilneWittenCore;
 import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.milnewitten.MilneWittenCore;
 import org.wikapidia.sr.utils.Leaderboard;
 
 import java.io.IOException;
@@ -84,7 +84,9 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
                 leaderboard.tallyScore(id, similarity);
             }
         }
-        return leaderboard.getTop();
+        SRResultList result = leaderboard.getTop();
+        result.sortDescending();
+        return result;
     }
 
     private double milneWittenSimilarity(TIntFloatHashMap map1, TIntFloatHashMap map2) {

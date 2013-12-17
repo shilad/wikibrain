@@ -14,6 +14,7 @@ import org.wikapidia.lucene.*;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -107,7 +108,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
             return "phrases.analyzer";
         }
         @Override
-        public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
+        public PhraseAnalyzer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("lucene")) {
                 return null;
             }

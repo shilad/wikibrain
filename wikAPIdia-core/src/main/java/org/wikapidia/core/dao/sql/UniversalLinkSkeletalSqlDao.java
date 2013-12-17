@@ -6,7 +6,6 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
@@ -19,11 +18,8 @@ import org.wikapidia.core.model.UniversalLink;
 import org.wikapidia.core.model.UniversalLinkGroup;
 import org.wikapidia.utils.ObjectDb;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -300,7 +296,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
         }
 
         @Override
-        public UniversalLinkDao get(String name, Config config) throws ConfigurationException {
+        public UniversalLinkDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("skeletal-sql")) {
                 return null;
             }

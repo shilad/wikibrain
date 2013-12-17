@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Shilad Sen
@@ -121,7 +122,7 @@ public class CascadingAnalyzer implements PhraseAnalyzer {
             return "phrases.analyzer";
         }
         @Override
-        public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
+        public PhraseAnalyzer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("cascading")) {
                 return null;
             }

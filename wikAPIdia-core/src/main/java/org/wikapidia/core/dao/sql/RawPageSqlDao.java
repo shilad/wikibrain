@@ -11,11 +11,11 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.RawPage;
 
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Retrieves and stores page text.
@@ -172,7 +172,7 @@ public class RawPageSqlDao extends AbstractSqlDao<RawPage> implements RawPageDao
         }
 
         @Override
-        public RawPageDao get(String name, Config config) throws ConfigurationException {
+        public RawPageDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

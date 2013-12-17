@@ -2,6 +2,8 @@ package org.wikapidia.conf;
 
 import com.typesafe.config.Config;
 
+import java.util.Map;
+
 public class ConstantIntProvider extends Provider<Integer> {
     /**
      * Creates a new provider instance.
@@ -25,10 +27,14 @@ public class ConstantIntProvider extends Provider<Integer> {
     }
 
     @Override
-    public Integer get(String name, Config config) throws ConfigurationException {
+    public Integer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
         if (!config.getString("type").equals("constant")) {
             return null;
         }
-        return config.getInt("value");
+        if (runtimeParams != null && runtimeParams.containsKey("overrideConstant")) {
+            return new Integer(Integer.valueOf(runtimeParams.get("overrideConstant")));
+        } else {
+            return new Integer(config.getInt("value"));
+        }
     }
 }

@@ -13,12 +13,13 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.UniversalSRMetric;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,25 +31,20 @@ public class CosimilarityMatrixExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, WikapidiaException, InterruptedException, IOException {
         //Set-up
         Configurator c = new Configurator(new Configuration());
-        LocalSRMetric sr = c.get(LocalSRMetric.class);
+        MonolingualSRMetric sr = c.get(MonolingualSRMetric.class, "default", "language", "simple");
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         String path = c.getConf().get().getString("sr.metric.path");
 
         Language language = Language.getByLangCode("simple");
-        LanguageSet languages = new LanguageSet("simple");
-        sr.writeCosimilarity(path,languages, 100);
+        sr.writeCosimilarity(path,100);
 //        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
 //        usr.writeCosimilarity(path,100);
 
-        List<LocalString> phrases = new ArrayList<LocalString>();
-        phrases.add(new LocalString(language, "United States"));
-        phrases.add(new LocalString(language, "Barack Obama"));
-        phrases.add(new LocalString(language, "brain"));
-        phrases.add(new LocalString(language, "natural language processing"));
+        List<String> phrases = Arrays.asList("United States", "Barack Obama", "brain", "natural language processing");
 
-        for (LocalString phrase : phrases){
-            System.out.println("\nMost similar to "+phrase.getString()+":");
+        for (String phrase : phrases){
+            System.out.println("\nMost similar to "+phrase+":");
             SRResultList results = sr.mostSimilar(phrase, 5);
             for (int i=0; i<results.numDocs(); i++){
                 LocalPage page = localPageDao.getById(language,results.get(i).getId());

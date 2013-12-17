@@ -11,9 +11,9 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -116,7 +116,7 @@ public class AnchorTextPhraseAnalyzer extends BasePhraseAnalyzer {
         }
 
         @Override
-        public PhraseAnalyzer get(String name, Config config) throws ConfigurationException {
+        public PhraseAnalyzer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("anchortext")) {
                 return null;
             }
@@ -124,9 +124,9 @@ public class AnchorTextPhraseAnalyzer extends BasePhraseAnalyzer {
             LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             LocalLinkDao llDao = getConfigurator().get(LocalLinkDao.class, config.getString("localLinkDao"));
             PrunedCounts.Pruner<String> phrasePruner = getConfigurator().construct(
-                    PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"));
+                    PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"), null);
             PrunedCounts.Pruner<Integer> pagePruner = getConfigurator().construct(
-                    PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"));
+                    PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"), null);
 
             return new AnchorTextPhraseAnalyzer(paDao, lpDao, llDao, phrasePruner, pagePruner);
         }

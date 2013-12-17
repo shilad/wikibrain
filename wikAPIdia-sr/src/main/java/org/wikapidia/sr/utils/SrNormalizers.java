@@ -7,13 +7,12 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.UniversalSRMetric;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
@@ -107,7 +106,13 @@ public class SrNormalizers {
      * @param metric
      * @param dataset
      */
-    public void trainSimilarity(final LocalSRMetric metric, Dataset dataset) {
+    public void trainSimilarity(final MonolingualSRMetric metric, Dataset dataset) {
+        if (similarityNormalizer instanceof  IdentityNormalizer) {
+            return;
+        }
+        if (!dataset.getLanguage().equals(metric.getLanguage())) {
+            throw new IllegalArgumentException("SR metric has language " + metric.getLanguage() + " but dataset has language " + dataset.getLanguage());
+        }
         final Normalizer trainee = similarityNormalizer;
         similarityNormalizer = new IdentityNormalizer();
         try {
@@ -115,7 +120,7 @@ public class SrNormalizers {
             ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
                 public void call(KnownSim ks) throws IOException, DaoException {
                     ks.maybeSwap();
-                    SRResult sim = metric.similarity(ks.phrase1, ks.phrase2, ks.language, false);
+                    SRResult sim = metric.similarity(ks.phrase1, ks.phrase2, false);
                     trainee.observe(sim.getScore(), ks.similarity);
                 }
             }, 100);
@@ -132,6 +137,9 @@ public class SrNormalizers {
      * @param dataset
      */
     public void trainSimilarity(final UniversalSRMetric metric, Dataset dataset) {
+        if (similarityNormalizer instanceof  IdentityNormalizer) {
+            return;
+        }
         final Normalizer trainee = similarityNormalizer;
         similarityNormalizer = new IdentityNormalizer();
         try {
@@ -161,7 +169,14 @@ public class SrNormalizers {
      * @param validIds
      * @param maxResults
      */
-    public void trainMostSimilar(final LocalSRMetric metric, final Disambiguator disambiguator, Dataset dataset, final TIntSet validIds, final int maxResults) {
+    public void trainMostSimilar(final MonolingualSRMetric metric, final Disambiguator disambiguator, Dataset dataset, final TIntSet validIds, final int maxResults) {
+        if (similarityNormalizer instanceof  IdentityNormalizer) {
+            return;
+        }
+        if (!dataset.getLanguage().equals(metric.getLanguage())) {
+            throw new IllegalArgumentException("SR metric has language " + metric.getLanguage() + " but dataset has language " + dataset.getLanguage());
+        }
+
         final Normalizer trainee = mostSimilarNormalizer;
         mostSimilarNormalizer = new IdentityNormalizer();
         try {
@@ -173,11 +188,10 @@ public class SrNormalizers {
                     localStrings.add(new LocalString(ks.language, ks.phrase1));
                     localStrings.add(new LocalString(ks.language, ks.phrase2));
                     List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
-                    if (ids != null && ids.size() == 2) {
+                    if (ids != null && ids.size() == 2 && ids.get(0) != null && ids.get(1) != null) {
                         LocalId lid1 = ids.get(0);
                         LocalId lid2 = ids.get(1);
-                        LocalPage page = new LocalPage(lid1.getLanguage(), lid1.getId(), null, NameSpace.ARTICLE);
-                        SRResultList dsl = metric.mostSimilar(page, maxResults, validIds);
+                        SRResultList dsl = metric.mostSimilar(lid1.getId(), maxResults, validIds);
                         if (dsl != null) {
                             trainee.observe(dsl, dsl.getIndexForId(lid2.getId()), ks.similarity);
                         }
@@ -200,6 +214,9 @@ public class SrNormalizers {
      * @param maxResults
      */
     public void trainMostSimilar(final UniversalSRMetric metric, final Disambiguator disambiguator, final UniversalPageDao dao, final int algorithmId, Dataset dataset, final TIntSet validIds, final int maxResults) {
+        if (similarityNormalizer instanceof  IdentityNormalizer) {
+            return;
+        }
         final Normalizer trainee = mostSimilarNormalizer;
         mostSimilarNormalizer = new IdentityNormalizer();
         try {

@@ -8,12 +8,7 @@ import org.clapper.util.classutil.*;
 import org.wikapidia.utils.JvmUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -210,10 +205,8 @@ public class Configurator {
         }
     }
 
-
     /**
-     * @see #get(Class, String, boolean)
-     *
+     * @see #get(Class, String, java.util.Map)
      * @param klass
      * @param name
      * @param <T>
@@ -221,8 +214,26 @@ public class Configurator {
      * @throws ConfigurationException
      */
     public <T> T get(Class<T> klass, String name) throws ConfigurationException {
-        return get(klass, name, true);
+        return get(klass, name, null);
     }
+
+    /**
+     * Get a component with a single runtime parameter
+     * @see #get(Class, String, java.util.Map)
+     * @param klass
+     * @param name
+     * @param runtimeKey
+     * @param runtimeValue
+     * @param <T>
+     * @return
+     * @throws ConfigurationException
+     */
+    public <T> T get(Class<T> klass, String name, String runtimeKey, String runtimeValue) throws ConfigurationException {
+        Map<String, String> runtimeParams = new HashMap<String, String>();
+        runtimeParams.put(runtimeKey, runtimeValue);
+        return get(klass, name, runtimeParams);
+    }
+
 
     /**
      * Get a specific named instance of the component with the specified class.
@@ -233,16 +244,65 @@ public class Configurator {
      *             the config that provides the name for a default implementation or, if
      *             there is exactly one implementation returning it. Otherwise, if name is
      *             null it throws an error.
-     * @param tryCache If true, and the provider scope is singleton will query / populate the
-     *                 cache for the named object.
+     * @param runtimeParams Parameters to be passed to the provider that affect component creation.
+     *                      The identity of a component includes the runtime parameters, so
+     *                      two components with the same klass and name, but different runtimeParams
+     *                      will be cached independently.
      * @return The requested component.
      */
-    public <T> T get(Class<T> klass, String name, boolean tryCache) throws ConfigurationException {
+    public <T> T get(Class<T> klass, String name, Map<String, String> runtimeParams) throws ConfigurationException {
+        name = resolveComponentName(klass, name);
+        Config config = getConfig(klass, name);
+        Map<String, Object> cache = components.get(klass);
+        String key = makeCacheKey(name, runtimeParams);
+        synchronized (cache) {
+            if (cache.containsKey(key)) {
+                return (T) cache.get(key);
+            } else {
+                Pair<Provider, T> pair = constructInternal(klass, name, config, runtimeParams);
+                if (pair.getLeft().getScope() == Provider.Scope.SINGLETON) {
+                    cache.put(key, pair.getRight());
+                }
+                return pair.getRight();
+            }
+        }
+    }
+
+    /**
+     * Returns a unique string for the name and params
+     * @param name
+     * @param runtimeParams
+     * @return
+     */
+    private String makeCacheKey(String name, Map<String, String> runtimeParams) {
+        String key = name;
+        if (runtimeParams != null) {
+            List<String> runtimeKeys = new ArrayList<String>(runtimeParams.keySet());
+            Collections.sort(runtimeKeys);
+            StringBuffer buffer = new StringBuffer();
+            for (String k : runtimeKeys) {
+                buffer.append("|");
+                buffer.append(k);
+                buffer.append("=");
+                buffer.append(runtimeParams.get(k));
+            }
+            key += buffer.toString();
+        }
+        return key;
+    }
+
+    /**
+     * If the component name is "default" or null, return the name of the default implementation of the compoenent.
+     * Otherwise, return the specified name.
+     * @param klass
+     * @param name
+     * @return
+     */
+    public String resolveComponentName(Class klass, String name) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
         ProviderSet pset = providers.get(klass);
-
         // If name is "default", treat it as null for default option
         if (name != null && name.equalsIgnoreCase("default")) {
             name = null;
@@ -268,48 +328,56 @@ public class Configurator {
                 );
             }
         }
+        return name;
+    }
+
+    /**
+     * Returns the config object associated with the given class and name.
+     * @param klass The generic interface or superclass, not the specific implementation.
+     * @param name The name of the class as it appears in the config file. If name is null,
+     *             the configurator tries to guess by looking for a "default" entry in
+     *             the config that provides the name for a default implementation or, if
+     *             there is exactly one implementation returning it. Otherwise, if name is
+     *             null it throws an error.
+     * @return The requested config object.
+     * @throws ConfigurationException
+     */
+    public Config getConfig(Class klass, String name) throws ConfigurationException {
+        if (!providers.containsKey(klass)) {
+            throw new ConfigurationException("No registered providers for components with class " + klass);
+        }
+        ProviderSet pset = providers.get(klass);
+        name = resolveComponentName(klass, name);
 
         String path = pset.path + "." + name;
         if (!conf.get().hasPath(path)) {
             throw new ConfigurationException("Configuration path " + path + " does not exist");
         }
-        Config config = conf.get().getConfig(path);
-        Map<String, Object> cache = components.get(klass);
-
-        synchronized (cache) {
-            if (tryCache && cache.containsKey(name)) {
-                return (T) cache.get(name);
-            } else {
-                Pair<Provider, T> pair = constructInternal(klass, name, config);
-                if (tryCache && pair.getLeft().getScope() == Provider.Scope.SINGLETON) {
-                    cache.put(name, pair.getRight());
-                }
-                return pair.getRight();
-            }
-        }
+        return conf.get().getConfig(path);
     }
 
     /**
      * Constructs an instance of the specified class with the passed
      * in config. This bypasses the cache and the configuration object.
      *
+     *
      * @param klass The class being created.
      * @param name  An arbitrary name for the object. Can be null.
      * @param conf The configuration for the object.
-     * @param <T>
+     * @param runtimeParams
      * @return The object
      */
-    public <T> T construct(Class<T> klass, String name, Config conf) throws ConfigurationException {
-        return constructInternal(klass, name, conf).getRight();
+    public <T> T construct(Class<T> klass, String name, Config conf, Map<String, String> runtimeParams) throws ConfigurationException {
+        return constructInternal(klass, name, conf, runtimeParams).getRight();
     }
 
-    private <T> Pair<Provider, T> constructInternal(Class<T> klass, String name, Config conf) throws ConfigurationException {
+    private <T> Pair<Provider, T> constructInternal(Class<T> klass, String name, Config conf, Map<String, String> runtimeParams) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
         List<Provider> pset = providers.get(klass).providers;
         for (Provider p : pset) {
-            Object o = p.get(name, conf);
+            Object o = p.get(name, conf, runtimeParams);
             if (o != null) {
                 return Pair.of(p, (T) o);
             }
