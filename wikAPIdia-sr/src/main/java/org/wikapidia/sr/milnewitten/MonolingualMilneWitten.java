@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 
+ *
  * @author Matt Lesicko
  */
 
@@ -264,7 +264,7 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
 
         @Override
         public Class getType() {
-            return LocalSRMetric.class;
+            return MonolingualSRMetric.class;
         }
 
         @Override

@@ -22,58 +22,55 @@ import java.util.logging.Logger;
 /**
  * Builds and stores a directed graph among categories and pages.
  */
-public class CategoryGraphHelper {
+public class MonolingualCategoryGraphHelper {
 
-    private static final Logger LOG = Logger.getLogger(CategoryGraphHelper.class.getName());
+    private static final Logger LOG = Logger.getLogger(MonolingualCategoryGraphHelper.class.getName());
 
-    protected LocalPageDao pageHelper;
-    protected LocalCategoryMemberDao catHelper;
-    protected LanguageSet languages;
-    protected Map<Language,CategoryGraph> graphs;
-    protected SqlCache sqlCache;
+    private Language language;
+    private LocalPageDao pageHelper;
+    private LocalCategoryMemberDao catHelper;
+    private CategoryGraph graph;
+    private SqlCache sqlCache;
 
     /**
-     * @throws java.io.IOException
      */
-    public CategoryGraphHelper(LocalPageDao pageHelper, LocalCategoryMemberDao catHelper, SqlCache sqlCache, LanguageSet languages){
+    public MonolingualCategoryGraphHelper(Language language, LocalPageDao pageHelper, LocalCategoryMemberDao catHelper, SqlCache sqlCache){
+        this.language=language;
         this.pageHelper=pageHelper;
         this.catHelper=catHelper;
-        this.languages=languages;
         this.sqlCache=sqlCache;
-        this.graphs = new HashMap<Language,CategoryGraph>();
+        this.graph = null;
     }
 
-    public CategoryGraph graph(Language language){
-        return graphs.get(language);
+    public CategoryGraph graph(){
+        return graph;
     }
 
     public void init() throws DaoException {
-        for (Language language: languages){
-            try {
-                if (sqlCache!=null){
-                    CategoryGraph graph = (CategoryGraph)sqlCache.get(language.getLangCode()+"-CategoryGraph",LocalCategoryMember.class);
-                    if (graph==null){
-                        throw new DaoException();
-                    }
-                    graphs.put(language,graph);
-                } else {
-                    manualInit(language);
+        try {
+            if (sqlCache!=null){
+                CategoryGraph graph = (CategoryGraph)sqlCache.get(language.getLangCode()+"-CategoryGraph",LocalCategoryMember.class);
+                if (graph==null){
+                    throw new DaoException();
                 }
-            } catch (DaoException e){
-                manualInit(language);
-                sqlCache.put(language.getLangCode()+"-CategoryGraph",graphs.get(language));
+                this.graph=graph;
+            } else {
+                manualInit();
             }
+        } catch (DaoException e){
+            manualInit();
+            sqlCache.put(language.getLangCode()+"-CategoryGraph",graph);
         }
     }
 
-    private void manualInit(Language language) throws DaoException{
-        loadCategories(language);
-        buildGraph(language);
-        calculateTopLevelCategories(language);
-        computePageRanks(language);
+    private void manualInit() throws DaoException{
+        loadCategories();
+        buildGraph();
+        calculateTopLevelCategories();
+        computePageRanks();
     }
 
-    private void loadCategories(Language language) throws DaoException {
+    private void loadCategories() throws DaoException {
         LOG.info("loading categories...");
         CategoryGraph graph = new CategoryGraph();
         graph.catIndexes = new HashMap<Integer, Integer>();
@@ -87,13 +84,13 @@ public class CategoryGraphHelper {
             graph.catIndexes.put (cat.getLocalId(),graph.catIndexes.size());
         }
         graph.cats = catList.toArray(new String[0]);
-        graphs.put(language,graph);
+        this.graph=graph;
         LOG.info("finished loading " + graph.cats.length + " categories");
     }
 
-    private void buildGraph(Language language) throws DaoException {
+    private void buildGraph() throws DaoException {
         LOG.info("building category graph");
-        CategoryGraph graph = graphs.get(language);
+        CategoryGraph graph = this.graph;
         graph.catPages = new int[graph.catIndexes.size()][];
         graph.catParents = new int[graph.catIndexes.size()][];
         graph.catChildren = new int[graph.catIndexes.size()][];
@@ -153,7 +150,7 @@ public class CategoryGraphHelper {
         }
         for (int n : numCatChildren) { assert(n == 0); }
         for (int n : numCatPages) { assert(n == 0); }
-        graphs.put(language,graph);
+        this.graph=graph;
         LOG.info("loaded " + totalEdges + " edges in category graph");
 //        for (int i = 0; i < catChildren.length; i+= 10000) {
 //            System.err.println("info for cat " + i + " " + cats[i]);
@@ -163,9 +160,8 @@ public class CategoryGraphHelper {
 //        }
     }
 
-    public void computePageRanks(Language language) {
+    public void computePageRanks() {
         LOG.info("computing category page ranks...");
-        CategoryGraph graph = graphs.get(language);
 
         // initialize page rank
         long sumCredits = graph.catPages.length;    // each category gets 1 credit to start
@@ -207,14 +203,12 @@ public class CategoryGraphHelper {
             b.append(", ");
         }
         graph.minCost = graph.catCosts[sortedIndexes[sortedIndexes.length - 1]];
-        graphs.put(language,graph);
 
         LOG.info("Min cat cost: " + graph.minCost);
         LOG.info("Top cat costs: " + b.toString());
     }
 
-    public void dump(BufferedWriter writer, Language language) throws IOException {
-        CategoryGraph graph = graphs.get(language);
+    public void dump(BufferedWriter writer) throws IOException {
 
         writer.write("\n\nNon-orphaned category hierarchy:\n");
         for (int i = 0; i < graph.cats.length; i++) {
@@ -280,9 +274,8 @@ public class CategoryGraphHelper {
         }*/
     }
 
-    private void calculateTopLevelCategories(Language language) throws DaoException {
+    private void calculateTopLevelCategories() throws DaoException {
         LOG.info("marking top level categories off-limits.");
-        CategoryGraph graph = graphs.get(language);
         int numSecondLevel = 0;
         graph.topLevelCategories = new HashSet<Integer>();
         for (String name : TOP_LEVEL_CATS) {
@@ -296,7 +289,6 @@ public class CategoryGraphHelper {
                 }
             }
         }
-        graphs.put(language,graph);
         LOG.log(Level.INFO, "marked {0} top-level and {1} second-level categories.",
                 new Object[] {TOP_LEVEL_CATS.length, numSecondLevel} );
     }
@@ -312,14 +304,14 @@ public class CategoryGraphHelper {
 
 
 
-    public static class Provider extends org.wikapidia.conf.Provider<CategoryGraphHelper> {
+    public static class Provider extends org.wikapidia.conf.Provider<MonolingualCategoryGraphHelper> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return CategoryGraphHelper.class;
+            return MonolingualCategoryGraphHelper.class;
         }
 
         @Override
@@ -328,8 +320,13 @@ public class CategoryGraphHelper {
         }
 
         @Override
-        public CategoryGraphHelper get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            LanguageSet languages = getConfigurator().get(LanguageSet.class);
+        public MonolingualCategoryGraphHelper get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+            if (runtimeParams==null || !runtimeParams.containsKey("language")){
+                throw new IllegalArgumentException("MonolingualCategoryGraphHelper requires 'language' runtime parameter.");
+            }
+
+            Language language = Language.getByLangCode(runtimeParams.get("language"));
+
             LocalPageDao pageDao = getConfigurator().get(LocalPageDao.class);
             LocalCategoryMemberDao memberDao = getConfigurator().get(LocalCategoryMemberDao.class);
             SqlCache sqlCache = null;
@@ -339,7 +336,7 @@ public class CategoryGraphHelper {
                 File cacheDir = new File(cachePath);
                 sqlCache = new SqlCache(metaInfoDao,cacheDir);
             } catch (DaoException e){}
-            CategoryGraphHelper graphHelper = new CategoryGraphHelper(pageDao,memberDao,sqlCache,languages);
+            MonolingualCategoryGraphHelper graphHelper = new MonolingualCategoryGraphHelper(language,pageDao,memberDao,sqlCache);
 
 
 

@@ -13,7 +13,6 @@ import java.util.Set;
 public class CategoryGraph implements Serializable{
     protected Map<Integer,Integer> catIndexes;
     protected Set<Integer> topLevelCategories;
-    protected Language language;
 
     protected double[] catCosts;  // the cost of travelling through each category
     protected int[][] catParents;
@@ -22,8 +21,7 @@ public class CategoryGraph implements Serializable{
     protected String[] cats;
     protected double minCost = -1;
 
-    public CategoryGraph(Language language){
-        this.language=language;
+    public CategoryGraph(){
     }
 
     public int getCategoryIndex(int catId) {
