@@ -54,7 +54,7 @@ public class ConfigMonolingualSRFactory implements MonolingualSRFactory {
         if (configOverrides != null) {
             config = config.withFallback(ConfigFactory.parseMap(configOverrides));
         }
-        config = config.withFallback(configurator.getConfig(LocalSRMetric.class, name));
+        config = config.withFallback(configurator.getConfig(MonolingualSRMetric.class, name));
         this.configurator = configurator;
         this.name = name;
         this.language = language;
