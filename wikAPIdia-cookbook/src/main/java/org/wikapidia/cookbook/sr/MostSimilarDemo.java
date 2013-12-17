@@ -74,7 +74,7 @@ public class MostSimilarDemo {
         Env env = new EnvBuilder(cmd)
                 .build();
         Configurator c = env.getConfigurator();
-        LocalSRMetric sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"), false);
+        LocalSRMetric sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
         LocalPageDao lpd = c.get(LocalPageDao.class);
 
         String[] pa = cmd.getOptionValues('p');

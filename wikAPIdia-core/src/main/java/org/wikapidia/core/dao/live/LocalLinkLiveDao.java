@@ -1,17 +1,12 @@
 package org.wikapidia.core.dao.live;
 
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.typesafe.config.Config;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
@@ -107,7 +102,7 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         }
 
         @Override
-        public LocalLinkDao get(String name, Config config) throws ConfigurationException {
+        public LocalLinkDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
                 return null;
             }

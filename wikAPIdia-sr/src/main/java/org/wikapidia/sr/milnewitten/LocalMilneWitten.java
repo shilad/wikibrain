@@ -19,9 +19,7 @@ import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
-import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 
 import java.io.IOException;
 import java.util.*;
@@ -288,7 +286,7 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
         }
 
         @Override
-        public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+        public LocalSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("milnewitten")) {
                 return null;
             }

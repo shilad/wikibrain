@@ -10,10 +10,7 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Matt Lesicko
@@ -82,7 +79,7 @@ public class TopResultConsensusDisambiguator implements Disambiguator {
         }
 
         @Override
-        public Disambiguator get(String name, Config config) throws  ConfigurationException{
+        public Disambiguator get(String name, Config config, Map<String, String> runtimeParams) throws  ConfigurationException{
             if (!config.getString("type").equals("topResultConsensus")){
                 return null;
             }

@@ -2,7 +2,6 @@ package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -14,9 +13,6 @@ import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.LocalCategory;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -208,7 +204,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         }
 
         @Override
-        public LocalCategoryMemberDao get(String name, Config config) throws ConfigurationException {
+        public LocalCategoryMemberDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

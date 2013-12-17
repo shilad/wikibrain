@@ -489,7 +489,7 @@ public class ESAMetric extends BaseLocalSRMetric {
         }
 
         @Override
-        public LocalSRMetric get(String name, Config config) throws ConfigurationException {
+        public LocalSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("ESA")) {
                 return null;
             }

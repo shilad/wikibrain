@@ -14,7 +14,6 @@ import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
-import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.Map;
 
@@ -86,7 +85,7 @@ public class LocalArticleSqlDao extends LocalPageSqlDao<LocalArticle> implements
         }
 
         @Override
-        public LocalArticleDao get(String name, Config config) throws ConfigurationException {
+        public LocalArticleDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

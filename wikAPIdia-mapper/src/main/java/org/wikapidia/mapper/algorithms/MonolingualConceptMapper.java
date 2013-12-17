@@ -16,6 +16,7 @@ import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.mapper.ConceptMapper;
 import org.wikapidia.mapper.MapperIterator;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -81,7 +82,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
         }
 
         @Override
-        public ConceptMapper get(String name, Config config) throws ConfigurationException {
+        public ConceptMapper get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("monolingual")) {
                 return null;
             }

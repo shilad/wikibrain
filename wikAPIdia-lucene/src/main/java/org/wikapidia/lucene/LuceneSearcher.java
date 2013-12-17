@@ -16,7 +16,6 @@ import org.wikapidia.core.lang.LanguageSet;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -235,7 +234,7 @@ public class LuceneSearcher {
         }
 
         @Override
-        public LuceneSearcher get(String name, Config config) throws ConfigurationException {
+        public LuceneSearcher get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             return new LuceneSearcher(
                     getConfigurator().get(LanguageSet.class),
                     getConfigurator().get(LuceneOptions.class, config.getString("options"))
