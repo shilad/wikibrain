@@ -1,6 +1,5 @@
 package org.wikapidia.sr.evaluation;
 
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.MonolingualSRMetric;
 
 /**

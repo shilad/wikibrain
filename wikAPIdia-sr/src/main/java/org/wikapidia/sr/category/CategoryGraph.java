@@ -1,7 +1,5 @@
 package org.wikapidia.sr.category;
 
-import org.wikapidia.core.lang.Language;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;

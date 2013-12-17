@@ -1,15 +1,13 @@
 package org.wikapidia.sr.utils;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  *

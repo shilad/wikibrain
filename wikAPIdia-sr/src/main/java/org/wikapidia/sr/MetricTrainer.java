@@ -1,8 +1,6 @@
 package org.wikapidia.sr;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;

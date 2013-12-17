@@ -5,13 +5,11 @@ import com.typesafe.config.ConfigValueFactory;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.MonolingualSRMetric;
 
 import java.util.HashMap;

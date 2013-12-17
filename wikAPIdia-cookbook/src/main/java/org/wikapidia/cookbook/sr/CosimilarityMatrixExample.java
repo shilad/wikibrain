@@ -13,7 +13,6 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.UniversalSRMetric;

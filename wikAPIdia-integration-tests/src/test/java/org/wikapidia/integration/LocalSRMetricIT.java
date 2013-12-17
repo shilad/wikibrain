@@ -7,7 +7,6 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.dataset.Dataset;

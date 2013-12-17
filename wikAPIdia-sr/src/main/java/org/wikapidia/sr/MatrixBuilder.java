@@ -1,7 +1,6 @@
 package org.wikapidia.sr;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -12,7 +11,6 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
-import java.io.File;
 import java.io.IOException;
 
 /**

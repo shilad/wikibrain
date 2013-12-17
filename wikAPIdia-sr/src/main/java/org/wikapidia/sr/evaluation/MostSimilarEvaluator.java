@@ -6,10 +6,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.lang.LocalId;
-import org.wikapidia.core.lang.LocalString;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
@@ -18,8 +14,14 @@ import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpThreadUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

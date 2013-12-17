@@ -6,8 +6,8 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.dataset.Dataset;
+import org.wikapidia.sr.normalize.Normalizer;
 
 import java.io.IOException;
 

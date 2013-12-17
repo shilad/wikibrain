@@ -27,7 +27,9 @@ import org.wikapidia.utils.WpThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {

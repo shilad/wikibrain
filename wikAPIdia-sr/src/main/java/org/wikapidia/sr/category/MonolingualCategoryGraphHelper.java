@@ -9,7 +9,6 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.dao.sql.SqlCache;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.*;
 
 import java.io.BufferedWriter;

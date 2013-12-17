@@ -7,8 +7,6 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
-import org.wikapidia.sr.LocalSRMetric;
-import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.utils.MathUtils;
 
 import java.util.*;

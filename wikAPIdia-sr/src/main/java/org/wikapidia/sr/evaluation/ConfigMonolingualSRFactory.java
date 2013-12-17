@@ -5,7 +5,6 @@ import com.typesafe.config.ConfigFactory;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.disambig.Disambiguator;
 

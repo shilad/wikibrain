@@ -13,7 +13,6 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
@@ -22,10 +21,13 @@ import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.matrix.SparseMatrixWriter;
 import org.wikapidia.matrix.ValueConf;
-import org.wikapidia.sr.*;
+import org.wikapidia.sr.BaseMonolingualSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
+import org.wikapidia.sr.SRResult;
+import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
-import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.Function;
@@ -33,8 +35,12 @@ import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpThreadUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Matt Lesicko
@@ -137,7 +143,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults) throws  DaoException{
-        return mostSimilar(phrase,maxResults,null);
+        return mostSimilar(phrase, maxResults, null);
     }
 
     @Override
