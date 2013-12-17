@@ -110,24 +110,6 @@ public interface MonolingualSRMetric {
      *
      * @param dataset A gold standard dataset
      */
-    public void trainDefaultSimilarity(Dataset dataset) throws DaoException;
-
-    /**
-     * Train the mostSimilar() function
-     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
-     *
-     * @param dataset A gold standard dataset.
-     * @param numResults The maximum number of similar articles computed per phrase.
-     * @param validIds The Wikipedia ids that should be considered in result sets. Null means all ids.
-     */
-    public void trainDefaultMostSimilar(Dataset dataset, int numResults, TIntSet validIds);
-
-    /**
-     * Train the similarity() function.
-     * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
-     *
-     * @param dataset A gold standard dataset
-     */
     public void trainSimilarity(Dataset dataset) throws DaoException;
 
     /**
