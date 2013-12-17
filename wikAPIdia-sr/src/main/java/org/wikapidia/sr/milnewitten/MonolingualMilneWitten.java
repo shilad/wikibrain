@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @author Ben Hillmann
+ * 
  * @author Matt Lesicko
  */
 
