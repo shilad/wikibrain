@@ -218,6 +218,24 @@ public class Configurator {
     }
 
     /**
+     * Get a component with a single runtime parameter
+     * @see #get(Class, String, java.util.Map)
+     * @param klass
+     * @param name
+     * @param runtimeKey
+     * @param runtimeValue
+     * @param <T>
+     * @return
+     * @throws ConfigurationException
+     */
+    public <T> T get(Class<T> klass, String name, String runtimeKey, String runtimeValue) throws ConfigurationException {
+        Map<String, String> runtimeParams = new HashMap<String, String>();
+        runtimeParams.put(runtimeKey, runtimeValue);
+        return get(klass, name, runtimeParams);
+    }
+
+
+    /**
      * Get a specific named instance of the component with the specified class.
      *
      * @param klass The generic interface or superclass, not the specific implementation.
@@ -250,6 +268,12 @@ public class Configurator {
         }
     }
 
+    /**
+     * Returns a unique string for the name and params
+     * @param name
+     * @param runtimeParams
+     * @return
+     */
     private String makeCacheKey(String name, Map<String, String> runtimeParams) {
         String key = name;
         if (runtimeParams != null) {
