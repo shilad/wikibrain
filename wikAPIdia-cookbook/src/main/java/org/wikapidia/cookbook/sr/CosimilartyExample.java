@@ -11,6 +11,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 
 import java.util.ArrayList;
@@ -23,9 +24,8 @@ import java.util.List;
 public class CosimilartyExample {
 
     public static void main (String args[]) throws ConfigurationException, DaoException {
-        Language language = Language.getByLangCode("simple");
         Configurator c = new Configurator(new Configuration());
-        LocalSRMetric sr = c.get(LocalSRMetric.class,"ESA");
+        MonolingualSRMetric sr = c.get(MonolingualSRMetric.class,"ESA", "language", "simple");
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
         
         int numpages = 1000;
@@ -43,16 +43,16 @@ public class CosimilartyExample {
            }
         }
         long start = System.currentTimeMillis();
-        sr.cosimilarity(ids,ids,language);
+        sr.cosimilarity(ids,ids);
         System.out.println(System.currentTimeMillis()-start);
         start = System.currentTimeMillis();
-        sr.cosimilarity(ids,language);
+        sr.cosimilarity(ids);
         System.out.println(System.currentTimeMillis()-start);
         start = System.currentTimeMillis();
-        sr.cosimilarity(names,names,language);
+        sr.cosimilarity(names,names);
         System.out.println(System.currentTimeMillis()-start);
         start = System.currentTimeMillis();
-        sr.cosimilarity(names,language);
+        sr.cosimilarity(names);
         System.out.println(System.currentTimeMillis()-start);
 
     }

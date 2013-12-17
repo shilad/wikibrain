@@ -72,7 +72,7 @@ public class SimilarityExample {
         Language lang = Language.getByLangCode("simple");
         Configurator c = new Configurator(new Configuration());
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
-        LocalSRMetric sr = c.get(LocalSRMetric.class);
+        LocalSRMetric sr = c.get(LocalSRMetric.class, "default", "language", "simple");
         UniversalSRMetric usr = c.get(UniversalSRMetric.class);
         UniversalPageDao universalPageDao = c.get(UniversalPageDao.class);
         ExplanationFormatter expf = new ExplanationFormatter(localPageDao);
