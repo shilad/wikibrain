@@ -17,13 +17,11 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.utils.Dataset;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.pairwise.SRMatrices;
-import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpThreadUtils;
@@ -94,6 +92,16 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
             normalizers.put(l, new SrNormalizers());
         }
         normalizers.get(l).setSimilarityNormalizer(n);
+    }
+
+    @Override
+    public boolean similarityIsTrained() {
+        return defaultNormalizers.getSimilarityNormalizer().isTrained();
+    }
+
+    @Override
+    public boolean mostSimilarIsTrained() {
+        return defaultNormalizers.getMostSimilarNormalizer().isTrained();
     }
 
     /**
@@ -193,13 +201,13 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     @Override
-    public void trainDefaultSimilarity(Dataset dataset){
+    public void trainDefaultSimilarity(Dataset dataset) throws DaoException {
         defaultNormalizers.trainSimilarity(this, dataset);
     }
 
     @Override
     public void trainSimilarity(Dataset dataset) throws DaoException {
-        if (!normalizers.containsKey(dataset.language)) {
+        if (!normalizers.containsKey(dataset.getLanguage())) {
             normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
         normalizers.get(dataset.getLanguage()).trainSimilarity(this, dataset);
@@ -212,7 +220,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
     @Override
     public synchronized void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds){
-        if (!normalizers.containsKey(dataset.language)) {
+        if (!normalizers.containsKey(dataset.getLanguage())) {
             normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
         normalizers.get(dataset.getLanguage())

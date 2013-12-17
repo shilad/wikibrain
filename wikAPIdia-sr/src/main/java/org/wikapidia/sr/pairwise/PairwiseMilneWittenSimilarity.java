@@ -84,7 +84,9 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
                 leaderboard.tallyScore(id, similarity);
             }
         }
-        return leaderboard.getTop();
+        SRResultList result = leaderboard.getTop();
+        result.sortDescending();
+        return result;
     }
 
     private double milneWittenSimilarity(TIntFloatHashMap map1, TIntFloatHashMap map2) {

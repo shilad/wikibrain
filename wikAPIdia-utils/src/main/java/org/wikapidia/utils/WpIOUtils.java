@@ -55,6 +55,17 @@ public class WpIOUtils {
     }
 
     /**
+     * Opens a resource in the classpath as a buffered reader.
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static BufferedReader openResource(String path) throws IOException {
+        InputStream is = WpIOUtils.class.getResourceAsStream(path);
+        return new BufferedReader(new InputStreamReader(is, "utf-8"));
+    }
+
+    /**
      * Open a possibly compressed file and return a reader for it.
      * UTF-8 encoding is used.
      * @param path

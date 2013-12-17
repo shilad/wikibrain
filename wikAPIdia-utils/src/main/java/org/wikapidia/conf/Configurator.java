@@ -63,8 +63,6 @@ import java.util.logging.Logger;
 public class Configurator {
     private static final Logger LOG = Logger.getLogger(Configurator.class.getName());
 
-    public static String PROVIDER_PATH = "providers";
-
     public static final int MAX_FILE_SIZE = 8 * 1024 * 1024;   // 8MB
 
     private final Configuration conf;
@@ -121,6 +119,10 @@ public class Configurator {
         String separator = System.getProperty("path.separator");
         for (String entry : classPath.split(separator)) {
             File file = new File(entry);
+            if (!file.exists()) {
+                LOG.warning("skipping looking for providers in nonexistent file " + file);
+                continue;
+            }
             if (file.length() > MAX_FILE_SIZE) {
                 LOG.fine("skipping looking for providers in large file " + file);
                 continue;
@@ -236,11 +238,34 @@ public class Configurator {
      * @return The requested component.
      */
     public <T> T get(Class<T> klass, String name, boolean tryCache) throws ConfigurationException {
+        name = resolveComponentName(klass, name);
+        Config config = getConfig(klass, name);
+        Map<String, Object> cache = components.get(klass);
+        synchronized (cache) {
+            if (tryCache && cache.containsKey(name)) {
+                return (T) cache.get(name);
+            } else {
+                Pair<Provider, T> pair = constructInternal(klass, name, config);
+                if (tryCache && pair.getLeft().getScope() == Provider.Scope.SINGLETON) {
+                    cache.put(name, pair.getRight());
+                }
+                return pair.getRight();
+            }
+        }
+    }
+
+    /**
+     * If the component name is "default" or null, return the name of the default implementation of the compoenent.
+     * Otherwise, return the specified name.
+     * @param klass
+     * @param name
+     * @return
+     */
+    public String resolveComponentName(Class klass, String name) throws ConfigurationException {
         if (!providers.containsKey(klass)) {
             throw new ConfigurationException("No registered providers for components with class " + klass);
         }
         ProviderSet pset = providers.get(klass);
-
         // If name is "default", treat it as null for default option
         if (name != null && name.equalsIgnoreCase("default")) {
             name = null;
@@ -266,25 +291,32 @@ public class Configurator {
                 );
             }
         }
+        return name;
+    }
+
+    /**
+     * Returns the config object associated with the given class and name.
+     * @param klass The generic interface or superclass, not the specific implementation.
+     * @param name The name of the class as it appears in the config file. If name is null,
+     *             the configurator tries to guess by looking for a "default" entry in
+     *             the config that provides the name for a default implementation or, if
+     *             there is exactly one implementation returning it. Otherwise, if name is
+     *             null it throws an error.
+     * @return The requested config object.
+     * @throws ConfigurationException
+     */
+    public Config getConfig(Class klass, String name) throws ConfigurationException {
+        if (!providers.containsKey(klass)) {
+            throw new ConfigurationException("No registered providers for components with class " + klass);
+        }
+        ProviderSet pset = providers.get(klass);
+        name = resolveComponentName(klass, name);
 
         String path = pset.path + "." + name;
         if (!conf.get().hasPath(path)) {
             throw new ConfigurationException("Configuration path " + path + " does not exist");
         }
-        Config config = conf.get().getConfig(path);
-        Map<String, Object> cache = components.get(klass);
-
-        synchronized (cache) {
-            if (tryCache && cache.containsKey(name)) {
-                return (T) cache.get(name);
-            } else {
-                Pair<Provider, T> pair = constructInternal(klass, name, config);
-                if (tryCache && pair.getLeft().getScope() == Provider.Scope.SINGLETON) {
-                    cache.put(name, pair.getRight());
-                }
-                return pair.getRight();
-            }
-        }
+        return conf.get().getConfig(path);
     }
 
     /**

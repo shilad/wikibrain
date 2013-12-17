@@ -13,8 +13,8 @@ import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.sr.utils.Dataset;
-import org.wikapidia.sr.utils.DatasetDao;
+import org.wikapidia.sr.dataset.Dataset;
+import org.wikapidia.sr.dataset.DatasetDao;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,7 +89,6 @@ public class MetricTrainer {
 
 
 
-        String datasetPath = c.getConf().get().getString("sr.dataset.path");
         String path = c.getConf().get().getString("sr.metric.path");
         LanguageSet validLanguages = env.getLanguages();
 
@@ -107,7 +106,7 @@ public class MetricTrainer {
             for (String langCode : languages){
                 Language language = Language.getByLangCode(langCode);
                 if (validLanguages==null||validLanguages.containsLanguage(language)){
-                    datasets.add(datasetDao.read(language,datasetPath+name));
+                    datasets.add(datasetDao.get(language, name));
                 }
             }
         }

@@ -190,7 +190,6 @@ public class LocalMilneWitten extends BaseLocalSRMetric {
 
         SRResultList  resultList = new SRResultList(maxResults);
         for (int i=0; i<maxResults&&i<results.size(); i++){
-
             resultList.set(i,results.get(i));
         }
 

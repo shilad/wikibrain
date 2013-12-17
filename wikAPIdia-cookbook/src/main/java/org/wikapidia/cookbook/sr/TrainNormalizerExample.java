@@ -6,14 +6,11 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.sr.UniversalSRMetric;
-import org.wikapidia.sr.utils.Dataset;
-import org.wikapidia.sr.utils.DatasetDao;
+import org.wikapidia.sr.dataset.Dataset;
+import org.wikapidia.sr.dataset.DatasetDao;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -34,7 +31,7 @@ public class TrainNormalizerExample {
 //        sr.writeCosimilarity("../dat/sr", new LanguageSet(l), 500);
 
         DatasetDao datasetDao = new DatasetDao();
-        Dataset dataset = datasetDao.read(l, path + "gold/cleaned/atlasify240.txt");
+        Dataset dataset = datasetDao.get(l, "atlasify240.txt");
 
         sr.trainDefaultSimilarity(dataset);
         usr.trainSimilarity(dataset);
