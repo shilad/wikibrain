@@ -202,7 +202,7 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
     @Override
     public void trainDefaultSimilarity(Dataset dataset) throws DaoException {
-        defaultNormalizers.trainSimilarity(this, dataset);
+//        defaultNormalizers.trainSimilarity(this, dataset);
     }
 
     @Override
@@ -210,12 +210,12 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         if (!normalizers.containsKey(dataset.getLanguage())) {
             normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
-        normalizers.get(dataset.getLanguage()).trainSimilarity(this, dataset);
+//        normalizers.get(dataset.getLanguage()).trainSimilarity(this, dataset);
     }
 
     @Override
     public synchronized void trainDefaultMostSimilar(Dataset dataset, int numResults, TIntSet validIds){
-        defaultNormalizers.trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
+//        defaultNormalizers.trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
     }
 
     @Override
@@ -223,8 +223,8 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
         if (!normalizers.containsKey(dataset.getLanguage())) {
             normalizers.put(dataset.getLanguage(), new SrNormalizers());
         }
-        normalizers.get(dataset.getLanguage())
-                .trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
+//        normalizers.get(dataset.getLanguage())
+//                .trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
     }
 
     @Override
@@ -337,29 +337,25 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
     }
 
     protected void writeCosimilarity(String parentDir, LanguageSet languages, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
-        try {
-            for (Language language: languages) {
-                // Get all page ids
-                DaoFilter pageFilter = new DaoFilter()
-                        .setLanguages(language)
-                        .setNameSpaces(NameSpace.ARTICLE) // TODO: should this come from conf?
-                        .setDisambig(false)
-                        .setRedirect(false);
-                Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
-                TIntSet pageIds = new TIntHashSet();
-                for (LocalPage page : localPages) {
-                    if (page != null) {
-                        pageIds.add(page.getLocalId());
-                    }
+        for (Language language: languages) {
+            // Get all page ids
+            DaoFilter pageFilter = new DaoFilter()
+                    .setLanguages(language)
+                    .setNameSpaces(NameSpace.ARTICLE) // TODO: should this come from conf?
+                    .setDisambig(false)
+                    .setRedirect(false);
+            Iterable<LocalPage> localPages = pageHelper.get(pageFilter);
+            TIntSet pageIds = new TIntHashSet();
+            for (LocalPage page : localPages) {
+                if (page != null) {
+                    pageIds.add(page.getLocalId());
                 }
-
-                File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
-                SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
-                srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
-                mostSimilarMatrices.put(language, srm);
             }
-        } catch (InterruptedException e){
-            throw new RuntimeException(e);
+
+            File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
+//                SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
+//                srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
+//                mostSimilarMatrices.put(language, srm);
         }
     }
 
@@ -371,11 +367,11 @@ public abstract class BaseLocalSRMetric implements LocalSRMetric {
 
         for (Language language: languages) {
             File dir = FileUtils.getFile(parentDir, getName(), language.getLangCode());
-            SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
-            if (srm.hasReadableMatrices()) {
-                srm.readMatrices();
-                mostSimilarMatrices.put(language, srm);
-            }
+//            SRMatrices srm = new SRMatrices(this, language, pairwise, dir);
+//            if (srm.hasReadableMatrices()) {
+//                srm.readMatrices();
+//                mostSimilarMatrices.put(language, srm);
+//            }
         }
     }
 

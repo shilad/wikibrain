@@ -4,9 +4,12 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.disambig.Disambiguator;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,9 +17,10 @@ import java.util.Map;
  *
  * @author Shilad Sen
  */
-public class ConfigLocalSRFactory implements LocalSRFactory {
+public class ConfigMonolingualSRFactory implements MonolingualSRFactory {
     private final Configurator configurator;
     private final String name;
+    private final Language language;
     private Config config;
     /**
      * Constructs a new factory that creates an sr metric with a particular name from the config
@@ -24,12 +28,13 @@ public class ConfigLocalSRFactory implements LocalSRFactory {
      * the innermost configuration block for an SR metric (i.e. the nested dictionary with key
      * the name of the metric).
      *
+     * @param language
      * @param configurator
      * @param name Name of metric from configuration file
      * @throws ConfigurationException
      */
-    public ConfigLocalSRFactory(Configurator configurator, String name) throws ConfigurationException {
-        this(configurator, name, null);
+    public ConfigMonolingualSRFactory(Language language, Configurator configurator, String name) throws ConfigurationException {
+        this(language, configurator, name, null);
     }
 
     /**
@@ -38,12 +43,13 @@ public class ConfigLocalSRFactory implements LocalSRFactory {
      * the innermost configuration block for an SR metric (i.e. the nested dictionary with key
      * the name of the metric).
      *
+     * @param language
      * @param configurator
      * @param name Name of metric from configuration file
      * @param configOverrides Optional configuration overrides, or null.
      * @throws ConfigurationException
      */
-    public ConfigLocalSRFactory(Configurator configurator, String name, Map<String, Object> configOverrides) throws ConfigurationException {
+    public ConfigMonolingualSRFactory(Language language, Configurator configurator, String name, Map<String, Object> configOverrides) throws ConfigurationException {
         this.config = ConfigFactory.empty();
         if (configOverrides != null) {
             config = config.withFallback(ConfigFactory.parseMap(configOverrides));
@@ -51,12 +57,15 @@ public class ConfigLocalSRFactory implements LocalSRFactory {
         config = config.withFallback(configurator.getConfig(LocalSRMetric.class, name));
         this.configurator = configurator;
         this.name = name;
+        this.language = language;
     }
 
     @Override
-    public LocalSRMetric create() {
+    public MonolingualSRMetric create() {
         try {
-            return configurator.construct(LocalSRMetric.class, name, config, null);
+            Map<String, String> runtimeParams = new HashMap<String, String>();
+            runtimeParams.put("language", language.getLangCode());
+            return configurator.construct(MonolingualSRMetric.class, name, config, runtimeParams);
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }

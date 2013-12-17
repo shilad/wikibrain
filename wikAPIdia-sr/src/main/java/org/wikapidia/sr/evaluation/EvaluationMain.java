@@ -207,8 +207,8 @@ public class EvaluationMain {
         }
 
         if (cmd.hasOption("m")) {
-            LocalSRFactory factory = new ConfigLocalSRFactory(
-                    env.getConfigurator(), cmd.getOptionValue("m"));
+            MonolingualSRFactory factory = new ConfigMonolingualSRFactory(
+                    lang, env.getConfigurator(), cmd.getOptionValue("m"));
             evaluator.evaluate(factory);
         } else if (cmd.hasOption("u")) {
             throw new UnsupportedOperationException();  // TODO: implement universal metrics

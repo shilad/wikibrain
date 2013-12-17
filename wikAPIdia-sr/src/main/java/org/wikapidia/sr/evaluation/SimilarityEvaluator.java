@@ -6,6 +6,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.utils.KnownSim;
@@ -68,8 +69,8 @@ public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationLog> {
     }
 
     @Override
-    protected SimilarityEvaluationLog evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> config) throws DaoException, IOException {
-        LocalSRMetric metric = factory.create();
+    protected SimilarityEvaluationLog evaluateSplit(MonolingualSRFactory factory, Split split, File log, File err, Map<String, String> config) throws DaoException, IOException {
+        MonolingualSRMetric metric = factory.create();
         metric.trainSimilarity(split.getTrain());
         SimilarityEvaluationLog splitEval = new SimilarityEvaluationLog(config, log);
         BufferedWriter errFile = new BufferedWriter(new FileWriter(err));
@@ -77,11 +78,9 @@ public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationLog> {
             try {
                 SRResult result;
                 if (shouldResolvePhrases()) {
-                    LocalPage p1 = new LocalId(ks.language, ks.wpId1).asLocalPage();
-                    LocalPage p2 = new LocalId(ks.language, ks.wpId2).asLocalPage();
-                    result = metric.similarity(p1, p2, false);
+                    result = metric.similarity(ks.wpId1, ks.wpId2, false);
                 } else {
-                    result = metric.similarity(ks.phrase1, ks.phrase2, ks.language, false);
+                    result = metric.similarity(ks.phrase1, ks.phrase2, false);
                 }
                 splitEval.record(ks, result);
             } catch (Exception e) {

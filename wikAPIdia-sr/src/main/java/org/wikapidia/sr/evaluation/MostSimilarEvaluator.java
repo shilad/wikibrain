@@ -10,6 +10,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.utils.ParallelForEach;
@@ -119,12 +120,12 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
      * @throws org.wikapidia.core.dao.DaoException
      */
     @Override
-    protected MostSimilarEvaluationLog evaluateSplit(LocalSRFactory factory, Split split, File log, final File err, Map<String, String> config) throws IOException, DaoException, WikapidiaException {
-        final LocalSRMetric metric = factory.create();
+    protected MostSimilarEvaluationLog evaluateSplit(MonolingualSRFactory factory, Split split, File log, final File err, Map<String, String> config) throws IOException, DaoException, WikapidiaException {
+        final MonolingualSRMetric metric = factory.create();
         File cosimDir = null;
         if (buildCosimilarityMatrix) {
             cosimDir = WpIOUtils.createTempDirectory(factory.getName());
-            metric.writeCosimilarity(cosimDir.getAbsolutePath(), new LanguageSet(split.getTest().getLanguage()), numMostSimilarResults);
+            metric.writeCosimilarity(cosimDir.getAbsolutePath(), numMostSimilarResults);
         }
         metric.trainMostSimilar(split.getTrain(), numMostSimilarResults, mostSimilarIds);
         final MostSimilarEvaluationLog splitEval = new MostSimilarEvaluationLog(config, log);
@@ -138,9 +139,9 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
                 try {
                     SRResultList result;
                     if (shouldResolvePhrases()) {
-                        result = metric.mostSimilar(new LocalId(msd.getLanguage(), kms.getPageId()).asLocalPage(), numMostSimilarResults, mostSimilarIds);
+                        result = metric.mostSimilar(kms.getPageId(), numMostSimilarResults, mostSimilarIds);
                     } else {
-                        result = metric.mostSimilar(new LocalString(msd.getLanguage(), phrase), numMostSimilarResults, mostSimilarIds);
+                        result = metric.mostSimilar(phrase, numMostSimilarResults, mostSimilarIds);
                     }
                     splitEval.record(kms, result);
                 } catch (Exception e) {

@@ -125,7 +125,7 @@ public abstract class Evaluator <T extends BaseEvaluationLog<T>> {
     public abstract T createResults(File path) throws IOException;
     public abstract List<String> getSummaryFields();
 
-    public synchronized T evaluate(LocalSRFactory factory) throws IOException, DaoException, WikapidiaException {
+    public synchronized T evaluate(MonolingualSRFactory factory) throws IOException, DaoException, WikapidiaException {
         T overall = createResults(null);
         overall.setConfig("dataset", "overall");
         int runNumber = getNextRunNumber();
@@ -205,7 +205,7 @@ public abstract class Evaluator <T extends BaseEvaluationLog<T>> {
      * @throws IOException
      * @throws DaoException
      */
-    private T evaluateSplitInternal(LocalSRFactory factory, Split split, int runNumber) throws IOException, DaoException, WikapidiaException {
+    private T evaluateSplitInternal(MonolingualSRFactory factory, Split split, int runNumber) throws IOException, DaoException, WikapidiaException {
         File dir = getLocalDir(split, runNumber, factory.getName());
         ensureIsDirectory(dir);
         File log = new File(dir, split.getName() + ".log");
@@ -230,7 +230,7 @@ public abstract class Evaluator <T extends BaseEvaluationLog<T>> {
         return splitEval;
     }
 
-    protected abstract T evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> conf) throws DaoException, IOException, WikapidiaException;
+    protected abstract T evaluateSplit(MonolingualSRFactory factory, Split split, File log, File err, Map<String, String> conf) throws DaoException, IOException, WikapidiaException;
 
     private void maybeWriteToStdout(String caption, BaseEvaluationLog eval) throws IOException {
         if (!writeToStdout) {
