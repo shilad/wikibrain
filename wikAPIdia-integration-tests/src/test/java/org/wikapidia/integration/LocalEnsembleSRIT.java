@@ -8,6 +8,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.Explanation;
 import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.dataset.DatasetDao;
@@ -54,7 +55,7 @@ public class LocalEnsembleSRIT {
 
     public void testAccuracy(String srName, double minPearson, double minSpearman, int maxNoPred) throws ConfigurationException, DaoException {
         Env env = TestUtils.getEnv();
-        LocalSRMetric sr = env.getConfigurator().get(LocalSRMetric.class, srName);
+        MonolingualSRMetric sr = env.getConfigurator().get(MonolingualSRMetric.class, srName, "language", "simple");
         DatasetDao datasetDao = new DatasetDao();
         Dataset ds = datasetDao.get(SIMPLE, "wordsim353.txt");
 
@@ -84,11 +85,10 @@ public class LocalEnsembleSRIT {
         Env env = TestUtils.getEnv();
         DatasetDao datasetDao = new DatasetDao();
         Dataset ds = datasetDao.get(SIMPLE, "wordsim353.txt");
-        LocalSRMetric sr = env.getConfigurator().get(LocalSRMetric.class, srName);
-        sr.trainDefaultSimilarity(ds);
+        MonolingualSRMetric sr = env.getConfigurator().get(MonolingualSRMetric.class, srName, "language", "simple");
         sr.trainSimilarity(ds);
         ExplanationFormatter formatter = env.getConfigurator().get(ExplanationFormatter.class);
-        SRResult result = sr.similarity(phrase1, phrase2, SIMPLE, true);
+        SRResult result = sr.similarity(phrase1, phrase2, true);
         System.out.println(srName + " explanation for " + phrase1 + ", " + phrase2 + " is:");
         assertNotNull(result.getExplanations());
         for (Explanation ex : result.getExplanations()) {

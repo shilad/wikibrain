@@ -10,10 +10,7 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.LocalSRMetric;
-import org.wikapidia.sr.SRResult;
-import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.*;
 import org.wikapidia.sr.utils.ExplanationFormatter;
 
 /**
@@ -74,7 +71,7 @@ public class MostSimilarDemo {
         Env env = new EnvBuilder(cmd)
                 .build();
         Configurator c = env.getConfigurator();
-        LocalSRMetric sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
+        MonolingualSRMetric sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", "simple");
         LocalPageDao lpd = c.get(LocalPageDao.class);
 
         String[] pa = cmd.getOptionValues('p');
@@ -91,7 +88,7 @@ public class MostSimilarDemo {
 
 
 
-        SRResultList resultList = sr.mostSimilar(new LocalString(lang, phrase), 5);
+        SRResultList resultList = sr.mostSimilar(phrase, 5);
         System.out.println("Most similar to "+phrase+":");
         for (int i=0; i<resultList.numDocs(); i++){
             System.out.println("#" + (i + 1));
