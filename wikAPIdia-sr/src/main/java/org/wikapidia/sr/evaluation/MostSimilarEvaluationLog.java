@@ -144,7 +144,11 @@ public class MostSimilarEvaluationLog extends BaseEvaluationLog<MostSimilarEvalu
                 }
             }
         }
-        return new SpearmansCorrelation().correlation(actual.toArray(), expected.toArray());
+        if (actual.size() < 2) {
+            return Double.NaN;
+        } else {
+            return new SpearmansCorrelation().correlation(actual.toArray(), expected.toArray());
+        }
     }
 
     public double getPearsonsCorrelation() {
@@ -158,7 +162,11 @@ public class MostSimilarEvaluationLog extends BaseEvaluationLog<MostSimilarEvalu
                 }
             }
         }
-        return new PearsonsCorrelation().correlation(actual.toArray(), expected.toArray());
+        if (actual.size() < 2) {
+            return Double.NaN;
+        } else {
+            return new PearsonsCorrelation().correlation(actual.toArray(), expected.toArray());
+        }
     }
 
 
