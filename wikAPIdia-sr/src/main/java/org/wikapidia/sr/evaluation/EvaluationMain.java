@@ -98,6 +98,22 @@ public class EvaluationMain {
                         .withDescription("set the number of folds to evaluate on")
                         .create("k"));
 
+        //Resolve phrases to ids
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("resolve")
+                        .withDescription("resolve phrases to ids")
+                        .create("v"));
+
+        //Resolve phrases to ids
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("buildCosimilarityMatrix")
+                        .withDescription("build cosimilarity matrices")
+                        .create("z"));
+
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -162,11 +178,18 @@ public class EvaluationMain {
             evaluator = new SimilarityEvaluator(new File(outputDir));
         } else if (cmd.getOptionValue("p").equals("mostsimilar")) {
             evaluator = new MostSimilarEvaluator(new File(outputDir));
+            if (cmd.hasOption("z")) {
+                ((MostSimilarEvaluator)evaluator).setBuildCosimilarityMatrix(Boolean.valueOf(cmd.getOptionValue("c")));
+            }
         } else {
             System.err.println("Invalid prediction mode. usage:");
             new HelpFormatter().printHelp("MetricTrainer", options);
             System.exit(1);
             return; // to appease the compiler
+        }
+
+        if (cmd.hasOption("v")) {
+            evaluator.setResolvePhrases(Boolean.valueOf(cmd.getOptionValue("v")));
         }
 
         if (mode.equals("none")) {

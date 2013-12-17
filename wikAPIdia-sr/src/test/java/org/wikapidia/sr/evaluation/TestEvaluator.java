@@ -38,7 +38,7 @@ public class TestEvaluator {
         evaluator.addCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
 
         TestLocalSR.Factory factory = new TestLocalSR.Factory();
-        SimilarityEvaluationResults eval = evaluator.evaluate(factory);
+        SimilarityEvaluationLog eval = evaluator.evaluate(factory);
 
         List<String> lines = FileUtils.readLines(FileUtils.getFile(file, "local-similarity", "summary.tsv"));
         assertEquals(lines.size(), 4);
@@ -106,7 +106,7 @@ public class TestEvaluator {
         mostSimEvaluator.addCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
 
         TestLocalSR.Factory factory = new TestLocalSR.Factory();
-        BaseEvaluationResults eval = simEvaluator.evaluate(factory);
+        BaseEvaluationLog eval = simEvaluator.evaluate(factory);
         assertTrue(eval.getChildFiles().get(0).toString().contains("0-"));
         eval = simEvaluator.evaluate(factory);
         assertTrue(eval.getChildFiles().get(0).toString().contains("1-"));

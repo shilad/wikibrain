@@ -1,37 +1,33 @@
 package org.wikapidia.sr.evaluation;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.sr.LocalSRMetric;
-import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
-import org.wikapidia.sr.utils.KnownSim;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpIOUtils;
+import org.wikapidia.utils.WpThreadUtils;
 
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @see Evaluator
  *
  * @author Shilad Sen
  */
-public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults> {
+public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
     private static final Logger LOG = Logger.getLogger(MostSimilarEvaluator.class.getName());
 
     private boolean buildCosimilarityMatrix = false;
@@ -40,7 +36,7 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
     private int numMostSimilarResults = 500;
     private TIntHashSet mostSimilarIds = null;
 
-    // These arguments are passed to the MostSimilarEvaluationResults
+    // These arguments are passed to the MostSimilarEvaluationLog
     private double relevanceThreshold = 0.6;
     private int precisionRecallRanks[] = new int[] {1, 5, 10, 20, 50, 100, 500, 1000 };
 
@@ -69,8 +65,8 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
     }
 
     @Override
-    public MostSimilarEvaluationResults createResults(File path) throws IOException {
-        MostSimilarEvaluationResults results = new MostSimilarEvaluationResults(path);
+    public MostSimilarEvaluationLog createResults(File path) throws IOException {
+        MostSimilarEvaluationLog results = new MostSimilarEvaluationLog(path);
         results.setPrecisionRecallRanks(precisionRecallRanks);
         results.setRelevanceThreshold(relevanceThreshold);
         return results;
@@ -87,6 +83,7 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
                 "successful",
                 "missing",
                 "failed",
+                "resolvePhrases",
                 "pearsons",
                 "spearmans",
                 "ndgc",
@@ -122,34 +119,46 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
      * @throws org.wikapidia.core.dao.DaoException
      */
     @Override
-    protected MostSimilarEvaluationResults evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> config) throws IOException, DaoException, WikapidiaException {
-        LocalSRMetric metric = factory.create();
+    protected MostSimilarEvaluationLog evaluateSplit(LocalSRFactory factory, Split split, File log, final File err, Map<String, String> config) throws IOException, DaoException, WikapidiaException {
+        final LocalSRMetric metric = factory.create();
         File cosimDir = null;
         if (buildCosimilarityMatrix) {
             cosimDir = WpIOUtils.createTempDirectory(factory.getName());
             metric.writeCosimilarity(cosimDir.getAbsolutePath(), new LanguageSet(split.getTest().getLanguage()), numMostSimilarResults);
         }
         metric.trainMostSimilar(split.getTrain(), numMostSimilarResults, mostSimilarIds);
-        MostSimilarEvaluationResults splitEval = new MostSimilarEvaluationResults(config, log);
-        BufferedWriter errFile = new BufferedWriter(new FileWriter(err));
-        MostSimilarDataset msd = new MostSimilarDataset(split.getTest());
-        for (String phrase : msd.getPhrases()) {
-            KnownMostSim kms = msd.getSimilarities(phrase);
-            try {
-                SRResultList result = metric.mostSimilar(new LocalString(msd.getLanguage(), phrase), numMostSimilarResults, mostSimilarIds);
-                splitEval.record(kms, result);
-            } catch (Exception e) {
-                LOG.log(Level.WARNING, "Similarity of " + phrase + " failed. Logging error to " + err);
-                splitEval.recordFailed(kms);
-                errFile.write("KnownSim failed: " + phrase + "\n");
-                errFile.write("\t" + e.getMessage() + "\n");
-                for (String frame : ExceptionUtils.getStackFrames(e)) {
-                    errFile.write("\t" + frame + "\n");
+        final MostSimilarEvaluationLog splitEval = new MostSimilarEvaluationLog(config, log);
+        final BufferedWriter errFile = new BufferedWriter(new FileWriter(err));
+        final MostSimilarDataset msd = new MostSimilarDataset(split.getTest());
+        ParallelForEach.iterate(msd.getPhrases().iterator(), WpThreadUtils.getMaxThreads(), 1000,  new Procedure<String>() {
+            @Override
+            public void call(String phrase) throws Exception {
+
+                KnownMostSim kms = msd.getSimilarities(phrase);
+                try {
+                    SRResultList result;
+                    if (shouldResolvePhrases()) {
+                        result = metric.mostSimilar(new LocalId(msd.getLanguage(), kms.getPageId()).asLocalPage(), numMostSimilarResults, mostSimilarIds);
+                    } else {
+                        result = metric.mostSimilar(new LocalString(msd.getLanguage(), phrase), numMostSimilarResults, mostSimilarIds);
+                    }
+                    splitEval.record(kms, result);
+                } catch (Exception e) {
+                    LOG.log(Level.WARNING, "Similarity of " + kms.getPhrase() + ", id=" + kms.getPageId() + " failed. Logging error to " + err);
+                    splitEval.recordFailed(kms);
+                    synchronized (errFile) {
+                        errFile.write("KnownSim failed: " + phrase + "\n");
+                        errFile.write("\t" + e.getMessage() + "\n");
+                        for (String frame : ExceptionUtils.getStackFrames(e)) {
+                            errFile.write("\t" + frame + "\n");
+                        }
+                        errFile.write("\n");
+                        errFile.flush();
+                    }
                 }
-                errFile.write("\n");
-                errFile.flush();
             }
-        }
+        }, 100);
+
         IOUtils.closeQuietly(splitEval);
         IOUtils.closeQuietly(errFile);
         if (cosimDir != null) FileUtils.forceDelete(cosimDir);
@@ -166,5 +175,9 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationResults
 
     public void setPrecisionRecallRanks(int[] precisionRecallRanks) {
         this.precisionRecallRanks = precisionRecallRanks;
+    }
+
+    public void setBuildCosimilarityMatrix(boolean buildCosimilarityMatrix) {
+        this.buildCosimilarityMatrix = buildCosimilarityMatrix;
     }
 }

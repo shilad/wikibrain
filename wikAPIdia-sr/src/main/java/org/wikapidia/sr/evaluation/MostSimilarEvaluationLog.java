@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * @author Shilad Sen
  */
-public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimilarEvaluationResults> {
+public class MostSimilarEvaluationLog extends BaseEvaluationLog<MostSimilarEvaluationLog> {
 
     private final List<MostSimilarGuess> guesses = new ArrayList<MostSimilarGuess>();
 
@@ -32,18 +32,18 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
      */
     private double relevanceThreshold = 0.6;
 
-    public MostSimilarEvaluationResults() throws IOException {
+    public MostSimilarEvaluationLog() throws IOException {
         super();
     }
-    public MostSimilarEvaluationResults(File logPath) throws IOException {
+    public MostSimilarEvaluationLog(File logPath) throws IOException {
         super(logPath);
     }
 
-    public MostSimilarEvaluationResults(Map<String, String> config, File logPath) throws IOException {
+    public MostSimilarEvaluationLog(Map<String, String> config, File logPath) throws IOException {
         super(config, logPath);
     }
 
-    public MostSimilarEvaluationResults(Map<String, String> config, File logPath, Date date) throws IOException {
+    public MostSimilarEvaluationLog(Map<String, String> config, File logPath, Date date) throws IOException {
         super(config, logPath, date);
     }
 
@@ -58,18 +58,30 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
     }
 
     public double getNDCG() {
+        double sumWeights = 0.0;
         double ndgc = 0.0;
         for (MostSimilarGuess guess : guesses) {
-            ndgc += guess.getNDGC();
+            double w = guess.getObservations().size() - 1;
+            double v = guess.getNDGC();
+            if (w >= 0.99 && !Double.isNaN(v) && !Double.isInfinite(v)) {
+                ndgc += w * v;
+                sumWeights += w;
+            }
         }
-        return ndgc / guesses.size();
+        return ndgc / sumWeights;
     }
     public double getPenalizedNDCG() {
+        double sumWeights = 0.0;
         double ndgc = 0.0;
         for (MostSimilarGuess guess : guesses) {
-            ndgc += guess.getPenalizedNDGC();
+            double w = guess.getKnown().getMostSimilar().size() - 1;
+            double v = guess.getPenalizedNDGC();
+            if (w >= 0.99 && !Double.isNaN(v) && !Double.isInfinite(v)) {
+                ndgc += w * v;
+                sumWeights += w;
+            }
         }
-        return ndgc / guesses.size();
+        return ndgc / sumWeights;
     }
 
     public PrecisionRecallAccumulator getPrecisionRecall(int n, double threshold) {
@@ -86,7 +98,7 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
     }
 
     /**
-     * @see BaseEvaluationResults#getSummaryAsMap()
+     * @see BaseEvaluationLog#getSummaryAsMap()
      * @return
      */
     public Map<String, String> getSummaryAsMap() {
@@ -107,15 +119,14 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
 
 
     @Override
-    public void merge(MostSimilarEvaluationResults eval) throws IOException {
+    public void merge(MostSimilarEvaluationLog eval) throws IOException {
         super.merge(eval);
-        MostSimilarEvaluationResults mseval = (MostSimilarEvaluationResults)eval;
-        guesses.addAll(mseval.guesses);
+        guesses.addAll(eval.guesses);
     }
 
 
-    public List<MostSimilarEvaluationResults> getChildEvaluations() throws IOException, ParseException {
-        List<MostSimilarEvaluationResults> evals = new ArrayList<MostSimilarEvaluationResults>();
+    public List<MostSimilarEvaluationLog> getChildEvaluations() throws IOException, ParseException {
+        List<MostSimilarEvaluationLog> evals = new ArrayList<MostSimilarEvaluationLog>();
         for (File file : children) {
             evals.add(read(file));
         }
@@ -127,11 +138,17 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
         TDoubleList expected = new TDoubleArrayList();
         for (MostSimilarGuess msg : guesses) {
             for (MostSimilarGuess.Observation o : msg.getObservations()) {
-                actual.add(o.actual);
-                expected.add(o.estimate);
+                if (!Double.isInfinite(o.estimate) && !Double.isNaN(o.estimate)) {
+                    actual.add(o.actual);
+                    expected.add(o.estimate);
+                }
             }
         }
-        return new SpearmansCorrelation().correlation(actual.toArray(), expected.toArray());
+        if (actual.size() < 2) {
+            return Double.NaN;
+        } else {
+            return new SpearmansCorrelation().correlation(actual.toArray(), expected.toArray());
+        }
     }
 
     public double getPearsonsCorrelation() {
@@ -139,11 +156,17 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
         TDoubleList expected = new TDoubleArrayList();
         for (MostSimilarGuess msg : guesses) {
             for (MostSimilarGuess.Observation o : msg.getObservations()) {
-                actual.add(o.actual);
-                expected.add(o.estimate);
+                if (!Double.isInfinite(o.estimate) && !Double.isNaN(o.estimate)) {
+                    actual.add(o.actual);
+                    expected.add(o.estimate);
+                }
             }
         }
-        return new PearsonsCorrelation().correlation(actual.toArray(), expected.toArray());
+        if (actual.size() < 2) {
+            return Double.NaN;
+        } else {
+            return new PearsonsCorrelation().correlation(actual.toArray(), expected.toArray());
+        }
     }
 
 
@@ -176,10 +199,10 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
         return phrase.replace("|", "").replaceAll("\\s+", " ");
     }
 
-    static public MostSimilarEvaluationResults read(File path) throws IOException, ParseException {
+    static public MostSimilarEvaluationLog read(File path) throws IOException, ParseException {
         Date start = null;
         Map<String, String> config = new HashMap<String, String>();
-        MostSimilarEvaluationResults eval = null;
+        MostSimilarEvaluationLog eval = null;
 
         for (String line : FileUtils.readLines(path, "utf-8")) {
             if (line.endsWith("\n")) {
@@ -187,14 +210,14 @@ public class MostSimilarEvaluationResults extends BaseEvaluationResults<MostSimi
             }
             String tokens[] = line.split("\t");
             if (tokens[0].equals("start")) {
-                start = SimilarityEvaluationResults.parseDate(tokens[1]);
+                start = SimilarityEvaluationLog.parseDate(tokens[1]);
             } else if (tokens[0].equals("config")) {
                 config.put(tokens[1], tokens[2]);
             } else if (tokens[0].equals("merge")) {
                 eval.merge(read(new File(tokens[1])));
             } else if (tokens[0].equals("entry")) {
                 if (eval == null) {
-                    eval = new MostSimilarEvaluationResults(config, null, start);
+                    eval = new MostSimilarEvaluationLog(config, null, start);
                 }
                 List<KnownSim> sims = new ArrayList<KnownSim>();
                 Language lang = Language.getByLangCode(tokens[1]);
