@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigValueFactory;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
@@ -13,7 +14,6 @@ import org.wikapidia.sr.LocalSRMetric;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SimilarityDisambiguator extends BaseDisambiguator{
     SimilarityDisambiguator(PhraseAnalyzer phraseAnalyzer, LocalSRMetric srMetric) {
@@ -64,8 +64,8 @@ public class SimilarityDisambiguator extends BaseDisambiguator{
             HashMap<String, String> map = new HashMap<String,String>();
             String srName = config.getString("metric");
             map.put("disambiguator","topResult");
-            Config newConfig = getConfig().get().getConfig("sr.metric.local." + srName).withFallback(ConfigValueFactory.fromMap(map));
-            LocalSRMetric sr = getConfigurator().construct(LocalSRMetric.class,srName,newConfig, null);
+            Config newConfig = getConfig().get().getConfig("sr.metric.local." + srName).withValue("disambiguator",ConfigValueFactory.fromAnyRef("topResult"));
+            LocalSRMetric sr = getConfigurator().construct(LocalSRMetric.class,srName,newConfig,null);
 
 
             return new SimilarityDisambiguator(pa,sr);
