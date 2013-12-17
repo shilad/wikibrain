@@ -300,7 +300,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             }
 
             File dir = FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
-            SRMatrices srm = new SRMatrices(this, getLanguage(), pairwise, dir);
+            SRMatrices srm = new SRMatrices(this, pairwise, dir);
             srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
             mostSimilarMatrices = srm;
         } catch (InterruptedException e){
@@ -312,7 +312,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         IOUtils.closeQuietly(mostSimilarMatrices);
 
         File dir = FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
-        SRMatrices srm = new SRMatrices(this, getLanguage(), pairwise, dir);
+        SRMatrices srm = new SRMatrices(this, pairwise, dir);
         if (srm.hasReadableMatrices()) {
             srm.readMatrices();
             mostSimilarMatrices = srm;
