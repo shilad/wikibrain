@@ -70,10 +70,9 @@ public class SimilarityDisambiguator extends BaseDisambiguator{
             PhraseAnalyzer pa = getConfigurator().get(PhraseAnalyzer.class,config.getString("phraseAnalyzer"));
 
             // Create override config for metric.
-            HashMap<String, String> map = new HashMap<String,String>();
             String srName = config.getString("metric");
-            map.put("disambiguator","topResult");
-            Config newConfig = getConfig().get().getConfig("sr.metric.local." + srName).withValue("disambiguator", ConfigValueFactory.fromAnyRef("topResult"));
+            Config newConfig = getConfig().get().getConfig("sr.metric.local." + srName)
+                    .withValue("disambiguator", ConfigValueFactory.fromAnyRef("topResult"));
 
             // Load all metrics
             Map<Language, MonolingualSRMetric> metrics = new HashMap<Language, MonolingualSRMetric>();

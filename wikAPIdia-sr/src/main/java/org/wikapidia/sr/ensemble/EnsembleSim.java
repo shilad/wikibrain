@@ -45,4 +45,8 @@ public class EnsembleSim {
         scores.add(score);
         ranks.add(rank);
     }
+
+    public void setKnownSim(KnownSim knownSim) {
+        this.knownSim = knownSim;
+    }
 }

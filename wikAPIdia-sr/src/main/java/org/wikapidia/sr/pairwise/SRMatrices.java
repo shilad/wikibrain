@@ -168,7 +168,6 @@ public class SRMatrices implements Closeable {
         return results;
     }
 
-
     public void close() {
         IOUtils.closeQuietly(featureMatrix);
         IOUtils.closeQuietly(featureTransposeMatrix);
