@@ -13,12 +13,6 @@ public class EnsembleSim {
     List<Integer> ranks;
     KnownSim knownSim;
 
-    public EnsembleSim(List<Double> scores, List<Integer> ranks, KnownSim knownSim){
-        this.scores=scores;
-        this.ranks=ranks;
-        this.knownSim=knownSim;
-    }
-
     public EnsembleSim(KnownSim knownSim) {
         this.scores = new ArrayList<Double>();
         this.ranks = new ArrayList<Integer>();
@@ -27,6 +21,16 @@ public class EnsembleSim {
 
     public List<Double> getScores() {
         return scores;
+    }
+
+    public int getNumMetricsWithScore() {
+        int n = 0;
+        for (Double s : scores) {
+            if (!Double.isNaN(s) && !Double.isInfinite(s)) {
+                n++;
+            }
+        }
+        return n;
     }
 
     public List<Integer> getRanks(){
@@ -44,9 +48,5 @@ public class EnsembleSim {
     public void add(double score, int rank) {
         scores.add(score);
         ranks.add(rank);
-    }
-
-    public void setKnownSim(KnownSim knownSim) {
-        this.knownSim = knownSim;
     }
 }

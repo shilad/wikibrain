@@ -179,19 +179,23 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             }
             ensembleSims.add(es);
         }
-        estimateInterpolatedValues(ensembleSims);
-        interpolateValues(ensembleSims);
         ensemble.trainSimilarity(ensembleSims);
     }
 
+    /**
+     * TODO: adapt this to a MostSimilarDataset
+     * @param dataset
+     * @param numResults
+     * @param validIds
+     */
     @Override
     public void trainMostSimilar(Dataset dataset, final int numResults, final TIntSet validIds){
         mostSimilarMatrices = null;
         for (MonolingualSRMetric metric : metrics){
             metric.trainMostSimilar(dataset,numResults,validIds);
         }
-        List<EnsembleSim> ensembleSims = ParallelForEach.loop(dataset.getData(), new Function<KnownSim,EnsembleSim>() {
-            public EnsembleSim call(KnownSim ks) throws DaoException{
+        List<EnsembleSim> ensembleSims = ParallelForEach.loop(dataset.getData(), new Function<KnownSim, EnsembleSim>() {
+            public EnsembleSim call(KnownSim ks) throws DaoException {
                 List<LocalString> localStrings = Arrays.asList(
                         new LocalString(ks.language, ks.phrase1),
                         new LocalString(ks.language, ks.phrase2)
@@ -206,12 +210,12 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
                     double score = Double.NaN;
                     int rank = -1;
                     try {
-                        SRResultList dsl = metric.mostSimilar(pageId, numResults*EXTRA_SEARCH_DEPTH, validIds);
-                        if (dsl!=null&&dsl.getIndexForId(ids.get(1).getId())>1){
+                        SRResultList dsl = metric.mostSimilar(pageId, numResults * EXTRA_SEARCH_DEPTH, validIds);
+                        if (dsl != null && dsl.getIndexForId(ids.get(1).getId()) >= 0) {
                             score = dsl.getScore(dsl.getIndexForId(ids.get(1).getId()));
                             rank = dsl.getIndexForId(ids.get(1).getId());
                         }
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         LOG.log(Level.WARNING, "Local sr metric " + metric.getName() + " failed for " + pageId, e);
                     } finally {
                         es.add(score, rank);
@@ -219,49 +223,8 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
                 }
                 return es;
             }
-        },100);
-        estimateInterpolatedValues(ensembleSims);
-        interpolateValues(ensembleSims);
+        }, 100);
         ensemble.trainMostSimilar(ensembleSims);
-    }
-
-    /**
-     * calculate interpolated values for missing ranks and scores
-     * @param examples
-     */
-    private void estimateInterpolatedValues(List<EnsembleSim> examples) {
-        for (int i = 0; i < metrics.size(); i++) {
-            int maxMissingRanks = -1;
-            int numMissingScores = 0;
-            double sumMissingScores = 0.0;
-            for (EnsembleSim es : examples) {
-                double v = es.getScores().get(i);
-                if (Double.isNaN(v) || Double.isInfinite(v)) {
-                    sumMissingScores += es.getKnownSim().similarity;
-                    numMissingScores++;
-                }
-                maxMissingRanks = Math.max(maxMissingRanks, es.getRanks().get(i));
-            }
-            missingRanks[i] = Math.max(100, maxMissingRanks * 2);
-            missingScores[i] = numMissingScores > 0 ? (sumMissingScores / numMissingScores) : 0.0;
-            LOG.info("for metric " + metrics.get(i).getName() + ", " +
-                    " estimated missing rank " + missingRanks[i] +
-                    " and missing score " + missingScores[i]);
-        }
-    }
-
-    private void interpolateValues(List<EnsembleSim> examples) {
-        for (int i = 0; i < metrics.size(); i++) {
-            for (EnsembleSim es : examples) {
-                double v = es.getScores().get(i);
-                if (Double.isNaN(v) || Double.isInfinite(v)) {
-                    es.getScores().set(i, missingScores[i]);
-                }
-                if (es.getRanks().get(i) < 0) {
-                    es.getRanks().set(i, missingRanks[i]);
-                }
-            }
-        }
     }
 
     @Override
