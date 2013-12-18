@@ -1,8 +1,14 @@
 package org.wikapidia.cookbook.pageview;
 
 import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.live.LocalPageLiveDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.Title;
@@ -19,9 +25,11 @@ import org.wikapidia.pageview.PageViewIterator;
 public class IteratorTest {
 
     //get page view stats for simple for two hours, one hour at a time
-    public static void main(String[] args) throws WikapidiaException, DaoException {
+    public static void main(String[] args) throws WikapidiaException, DaoException, ConfigurationException {
         Language lang = Language.getByLangCode("simple");
-        LocalPageLiveDao pdao = new LocalPageLiveDao();
+        Env env = new EnvBuilder().build();
+        Configurator configurator = env.getConfigurator();
+        LocalPageDao pdao = configurator.get(LocalPageDao.class, "sql");
         PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 3);
 
         int i = 0;
