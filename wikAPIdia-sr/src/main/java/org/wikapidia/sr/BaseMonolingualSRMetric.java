@@ -98,7 +98,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
      */
     protected void ensureSimilarityTrained() {
         if (!similarityIsTrained()) {
-            throw new IllegalStateException("Model default similarity has not been trained.");
+            throw new IllegalStateException("Model similarity has not been trained.");
         }
     }
 
@@ -107,7 +107,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
      */
     protected void ensureMostSimilarTrained() {
         if (!mostSimilarIsTrained()) {
-            throw new IllegalStateException("Model default mostSimilar has not been trained.");
+            throw new IllegalStateException("Model mostSimilar has not been trained.");
         }
     }
 

@@ -18,6 +18,7 @@ import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.utils.KnownSim;
+import org.wikapidia.sr.utils.SimUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,8 +29,8 @@ import java.util.Map;
  *@author Matt Lesicko
  **/
 public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
-    final double TRAINING_SCORE_CUTOFF = -1;
-    final int MAX_RESULTS = 100;
+    final double TRAINING_SCORE_CUTOFF = 0.7;
+    final int MAX_RESULTS = 500;
     MonolingualSRMetric baseMetric;
 
     public MostSimilarCosineMetric(Language language, Disambiguator disambiguator, LocalPageDao pageHelper, MonolingualSRMetric baseMetric){
@@ -46,21 +47,7 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
     public SRResult similarity(int page1, int page2, boolean explanations) throws DaoException {
         SRResultList mostSimilar1 = baseMetric.mostSimilar(page1,MAX_RESULTS);
         SRResultList mostSimilar2 = baseMetric.mostSimilar(page2,MAX_RESULTS);
-        TIntDoubleMap vector1 = new TIntDoubleHashMap();
-        double dot = 0;
-        double lena = 0;
-        double lenb = 0;
-        for (SRResult result : mostSimilar1){
-            lena+=(result.getScore()*result.getScore());
-            vector1.put(result.getId(),result.getScore());
-        }
-        for (SRResult result: mostSimilar2){
-            lenb+=(result.getScore()*result.getScore());
-            if (vector1.containsKey(result.getId())){
-                dot+=result.getScore()*vector1.get(result.getId());
-            }
-        }
-        return new SRResult(dot/(Math.sqrt(lena)*Math.sqrt(lenb)));
+        return new SRResult(SimUtils.cosineSimilarity(mostSimilar1.asTroveMap(), mostSimilar2.asTroveMap()));
     }
 
     @Override

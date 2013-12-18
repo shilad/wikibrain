@@ -102,10 +102,11 @@ public class ESAMetric extends BaseMonolingualSRMetric {
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.luceneId, language);
             if (validIds==null||validIds.contains(localPageId)){
                 TIntDoubleHashMap comparison = getVector(localPageId);
-                SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
-                results.add(result);
+                if (comparison != null) {
+                    SRResult result = new SRResult(localPageId, SimUtils.cosineSimilarity(vector,comparison));
+                    results.add(result);
+                }
             }
-
         }
         Collections.sort(results);
         Collections.reverse(results);
@@ -205,7 +206,8 @@ public class ESAMetric extends BaseMonolingualSRMetric {
     public TIntDoubleHashMap getVector(int id) throws DaoException {
         int luceneId = searcher.getDocIdFromLocalId(id, getLanguage());
         if (luceneId < 0) {
-            throw new DaoException("Unindexed document " + id + " in " + getLanguage().getEnLangName());
+            LOG.warning("Unindexed document " + id + " in " + getLanguage().getEnLangName());
+            return new TIntDoubleHashMap();
         }
         WikapidiaScoreDoc[] wikapidiaScoreDocs =  getQueryBuilder()
                                 .setMoreLikeThisQuery(luceneId)

@@ -2,6 +2,7 @@ package org.wikapidia.sr.ensemble;
 
 import org.wikapidia.sr.utils.KnownSim;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,14 +13,24 @@ public class EnsembleSim {
     List<Integer> ranks;
     KnownSim knownSim;
 
-    public EnsembleSim(List<Double> scores, List<Integer> ranks, KnownSim knownSim){
-        this.scores=scores;
-        this.ranks=ranks;
-        this.knownSim=knownSim;
+    public EnsembleSim(KnownSim knownSim) {
+        this.scores = new ArrayList<Double>();
+        this.ranks = new ArrayList<Integer>();
+        this.knownSim = knownSim;
     }
 
     public List<Double> getScores() {
         return scores;
+    }
+
+    public int getNumMetricsWithScore() {
+        int n = 0;
+        for (Double s : scores) {
+            if (!Double.isNaN(s) && !Double.isInfinite(s)) {
+                n++;
+            }
+        }
+        return n;
     }
 
     public List<Integer> getRanks(){
@@ -34,7 +45,8 @@ public class EnsembleSim {
         return knownSim;
     }
 
-    public void setKnownSim(KnownSim knownSim) {
-        this.knownSim = knownSim;
+    public void add(double score, int rank) {
+        scores.add(score);
+        ranks.add(rank);
     }
 }

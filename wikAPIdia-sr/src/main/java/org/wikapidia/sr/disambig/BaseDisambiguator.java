@@ -27,7 +27,8 @@ public abstract class BaseDisambiguator implements Disambiguator{
 
     @Override
     public List<LocalId> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
-        List<LocalString> allPhrases = new ArrayList<LocalString>(CollectionUtils.union(phrases, context));
+        List<LocalString> allPhrases = new ArrayList<LocalString>(
+                (context == null) ? phrases : CollectionUtils.union(phrases, context));
 
         // Step 0: calculate most frequent candidate senses for each phrase
         Map<LocalString, LinkedHashMap<LocalPage, Float>> candidates = Maps.newHashMap();

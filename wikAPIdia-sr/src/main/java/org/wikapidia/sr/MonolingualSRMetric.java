@@ -185,7 +185,9 @@ public interface MonolingualSRMetric {
     public double[][] cosimilarity(String phrases[]) throws DaoException;
 
     /**
-     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class
+     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
+     * This should be considered a "cache" that speeds up underlying cosimilarity calculations.
+     *
      * @param path the directory to write the matrix in
      * @param maxHits the number of document hits you would like returned from the most similar function
      */

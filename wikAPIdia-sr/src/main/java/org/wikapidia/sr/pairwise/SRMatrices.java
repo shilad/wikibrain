@@ -265,6 +265,9 @@ public class SRMatrices implements Closeable {
         } catch (DaoException e){
             throw new WikapidiaException(e);
         }
+        if (scores == null || scores.isEmpty()) {
+            return;
+        }
         LinkedHashMap<Integer,Float> linkedHashMap = new LinkedHashMap<Integer, Float>();
         for (int i : scores.keys()){
             linkedHashMap.put(i,(float)scores.get(i));

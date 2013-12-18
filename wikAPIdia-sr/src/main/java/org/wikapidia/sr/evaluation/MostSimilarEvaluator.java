@@ -36,7 +36,7 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
     private boolean buildCosimilarityMatrix = false;
 
     // These arguments will be passed to calls to mostSimilar()
-    private int numMostSimilarResults = 500;
+    private int numMostSimilarResults = 2000;
     private TIntHashSet mostSimilarIds = null;
 
     // These arguments are passed to the MostSimilarEvaluationLog
