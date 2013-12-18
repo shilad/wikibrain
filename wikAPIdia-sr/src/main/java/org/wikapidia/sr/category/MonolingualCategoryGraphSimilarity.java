@@ -22,6 +22,7 @@ import java.util.Map;
 
 /**
  * @author Matt Lesicko
+ * @author Shilad Sen
  */
 public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     MonolingualCategoryGraphHelper graphHelper;
@@ -106,12 +107,24 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
-        throw new UnsupportedOperationException();
+        return mostSimilar(pageId, maxResults, null);
     }
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        throw new UnsupportedOperationException();
+        if (hasCachedMostSimilarLocal(pageId)) {
+            return getCachedMostSimilarLocal(pageId, maxResults, validIds);
+        }
+        CategoryBfs bfs = new CategoryBfs(graphHelper.graph(),pageId,getLanguage(), maxResults, validIds, catHelper);
+        while (bfs.hasMoreResults()) {
+            bfs.step();
+        }
+        SRResultList results = new SRResultList(bfs.getPageDistances().size());
+        int i = 0;
+        for (int pageId2: bfs.getPageDistances().keys()) {
+            results.set(i++, pageId2, distanceToScore(bfs.getPageDistances().get(pageId2)));
+        }
+        return normalize(results);
     }
 
     @Override

@@ -14,6 +14,9 @@ import java.util.PriorityQueue;
  * Conducts Dijkstra on the category hierarchy from a starting document.
  * Pages attached to visited categories are recorded, and iterations stop
  * when a certain number of unique pages have been discovered.
+
+ * @author Shilad Sen
+ * @author Matt Lesicko
  */
 public class CategoryBfs {
     private CategoryGraph graph;

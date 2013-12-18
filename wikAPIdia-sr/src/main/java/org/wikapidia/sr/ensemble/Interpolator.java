@@ -1,7 +1,5 @@
 package org.wikapidia.sr.ensemble;
 
-import org.wikapidia.sr.MonolingualSRMetric;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
