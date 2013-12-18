@@ -1,5 +1,7 @@
 package org.wikapidia.sr;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -10,7 +12,10 @@ import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.utils.WpIOUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -37,6 +42,18 @@ public class MatrixBuilder {
                         .withLongOpt("max-results")
                         .withDescription("maximum number of results")
                         .create("r"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("rowids")
+                        .withDescription("page ids for rows")
+                        .create("p"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("colids")
+                        .withDescription("page ids for columns")
+                        .create("q"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -58,6 +75,16 @@ public class MatrixBuilder {
             return;
         }
 
+        TIntSet rowIds = null;
+        TIntSet colIds = null;
+
+        if (cmd.hasOption("p")) {
+            rowIds = readIds(cmd.getOptionValue("p"));
+        }
+        if (cmd.hasOption("q")) {
+            colIds = readIds(cmd.getOptionValue("q"));
+        }
+
         LanguageSet languages = env.getLanguages();
         String path = c.getConf().get().getString("sr.metric.path");
         int maxResults = cmd.hasOption("r")? Integer.parseInt(cmd.getOptionValue("r")) : c.getConf().get().getInt("sr.normalizer.defaultmaxresults");
@@ -66,12 +93,29 @@ public class MatrixBuilder {
         UniversalSRMetric usr=null;
         if (cmd.hasOption("m")){
             Language language = languages.getDefaultLanguage();
+            System.out.println("here 1");
             sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
-            sr.writeCosimilarity(path, maxResults);
+            System.out.println("here 2");
+            sr.writeCosimilarity(path, maxResults, rowIds, colIds);
+            System.out.println("here 3");
         }
         if (cmd.hasOption("u")){
             usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
             usr.writeCosimilarity(path,maxResults);
         }
+    }
+
+    private static TIntSet readIds(String path) throws IOException {
+        TIntSet ids = new TIntHashSet();
+        BufferedReader reader = WpIOUtils.openBufferedReader(new File(path));
+        while (true) {
+            String line = reader.readLine();
+            if (line == null) {
+                break;
+            }
+            ids.add(Integer.valueOf(line.trim()));
+        }
+        reader.close();
+        return ids;
     }
 }

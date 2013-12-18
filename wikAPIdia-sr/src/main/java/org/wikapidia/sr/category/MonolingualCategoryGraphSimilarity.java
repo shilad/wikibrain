@@ -133,8 +133,8 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     }
 
     @Override
-    public void writeCosimilarity(String path,int maxHits) throws IOException, DaoException, WikapidiaException {
-        //TODO: implement me
+    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
+        super.writeCosimilarity(path, maxHits, null, rowIds, colIds);
     }
 
     @Override

@@ -78,7 +78,7 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException {
+    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
         throw new UnsupportedOperationException();
     }
 

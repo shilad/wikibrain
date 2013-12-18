@@ -340,9 +340,8 @@ public class ESAMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException, WikapidiaException {
-        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
-        super.writeCosimilarity(path, maxHits,pairwiseSimilarity);
+    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
+        super.writeCosimilarity(path, maxHits, new PairwiseCosineSimilarity(), rowIds, colIds);
     }
 
     @Override

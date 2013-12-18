@@ -163,6 +163,11 @@ public class TestLocalSR implements MonolingualSRMetric {
     }
 
     @Override
+    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     public void readCosimilarity(String path) throws IOException {
         //To change body of implemented methods use File | Settings | File Templates.
     }

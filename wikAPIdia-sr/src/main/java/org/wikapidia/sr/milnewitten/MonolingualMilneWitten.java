@@ -250,8 +250,8 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException{
-        super.writeCosimilarity(path, maxHits, new PairwiseMilneWittenSimilarity());
+    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
+        super.writeCosimilarity(path, maxHits, new PairwiseMilneWittenSimilarity(), rowIds, colIds);
     }
 
 

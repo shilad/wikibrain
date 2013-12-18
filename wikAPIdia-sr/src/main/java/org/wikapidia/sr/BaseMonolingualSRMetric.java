@@ -285,25 +285,35 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         return cosimilarity(ids);
     }
 
-    protected void writeCosimilarity(String parentDir, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
+    @Override
+    public void writeCosimilarity(String parentDir, int maxHits) throws IOException, DaoException, WikapidiaException {
+        writeCosimilarity(parentDir, maxHits, null, null);
+    }
+
+    protected void writeCosimilarity(String parentDir, int maxHits, PairwiseSimilarity pairwise, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
         try {
+            TIntSet allPageIds = null;
             // Get all page ids
-            DaoFilter pageFilter = new DaoFilter()
-                    .setLanguages(getLanguage())
-                    .setNameSpaces(NameSpace.ARTICLE) // TODO: should this come from conf?
-                    .setDisambig(false)
-                    .setRedirect(false);
-            Iterable<LocalPage> localPages = localPageDao.get(pageFilter);
-            TIntSet pageIds = new TIntHashSet();
-            for (LocalPage page : localPages) {
-                if (page != null) {
-                    pageIds.add(page.getLocalId());
+            if (rowIds == null || colIds == null) {
+                DaoFilter pageFilter = new DaoFilter()
+                        .setLanguages(getLanguage())
+                        .setNameSpaces(NameSpace.ARTICLE)
+                        .setDisambig(false)
+                        .setRedirect(false);
+                Iterable<LocalPage> localPages = localPageDao.get(pageFilter);
+                allPageIds = new TIntHashSet();
+                for (LocalPage page : localPages) {
+                    if (page != null) {
+                        allPageIds.add(page.getLocalId());
+                    }
                 }
             }
+            if (rowIds == null) rowIds = allPageIds;
+            if (colIds == null) colIds = allPageIds;
 
             File dir = FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
             SRMatrices srm = new SRMatrices(this, pairwise, dir);
-            srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
+            srm.write(colIds.toArray(), rowIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
             mostSimilarMatrices = srm;
         } catch (InterruptedException e){
             throw new RuntimeException(e);
@@ -339,6 +349,16 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     public SrNormalizers getNormalizers() {
         return normalizers;
+    }
+
+    @Override
+    public Normalizer getMostSimilarNormalizer() {
+        return normalizers.getMostSimilarNormalizer();
+    }
+
+    @Override
+    public Normalizer getSimilarityNormalizer() {
+        return normalizers.getSimilarityNormalizer();
     }
 
     public SRMatrices getMostSimilarMatrices() {

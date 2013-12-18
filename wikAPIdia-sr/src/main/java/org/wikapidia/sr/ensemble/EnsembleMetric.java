@@ -259,7 +259,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException {
+    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
         DaoFilter pageFilter = new DaoFilter()
             .setLanguages(getLanguage())
                 .setNameSpaces(NameSpace.ARTICLE)

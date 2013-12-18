@@ -4,6 +4,7 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.matrix.MatrixRow;
+import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.milnewitten.MilneWittenCore;
 import org.wikapidia.sr.utils.Leaderboard;
@@ -28,19 +29,22 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
     public double similarity(SRMatrices matrices, int wpID1, int wpId2) throws IOException {
         double sim = 0;
         MatrixRow row1 = matrices.getFeatureMatrix().getRow(wpID1);
-        if (row1 != null) {
-            MatrixRow row2 = matrices.getFeatureMatrix().getRow(wpId2);
-            if (row2 != null) {
-                sim = milneWittenSimilarity(row1.asTroveMap(), row2.asTroveMap());
-            }
+        MatrixRow row2 = matrices.getFeatureMatrix().getRow(wpId2);
+        if (row1 != null && row2 != null) {
+            sim = milneWittenSimilarity(row1.asTroveMap(), row2.asTroveMap());
         }
         return sim;
     }
 
     @Override
     public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
+        SparseMatrixRow row = matrices.getFeatureMatrix().getRow(wpId);
+        if (row == null) {
+            return new SRResultList(0);
+        }
+
         Leaderboard leaderboard = new Leaderboard(maxResults);
-        TIntFloatHashMap rowA = matrices.getFeatureMatrix().getRow(wpId).asTroveMap();
+        TIntFloatHashMap rowA = row.asTroveMap();
         int sizeA = 0;
         TIntSet linkIds = new TIntHashSet();
         for (int i : rowA.keys()){
@@ -60,13 +64,11 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
             }
         }
 
-        if (validIds==null){
-            validIds=possibleIds;
-        } else {
-            validIds.retainAll(possibleIds);
+        if (validIds != null) {
+            possibleIds.retainAll(validIds);
         }
 
-        for (int id: validIds.toArray()) {
+        for (int id: possibleIds.toArray()) {
             TIntFloatHashMap rowB = matrices.getFeatureMatrix().getRow(id).asTroveMap();
             if (rowB != null){
                 int sizeB = 0;
