@@ -130,7 +130,7 @@ public class PageViewIterator implements Iterator {
         String fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString;
         String fileNameSuffix = ".gz";
 
-        String homeFolder = BASE_URL + String.format("%s/%s-%s/", yearString, yearString, monthString);     //issue unable to handle cross-month pageview data
+        String homeFolder = BASE_URL + String.format("%s/%s-%s/", yearString, yearString, monthString);
         File pageViewDataFile = null;
         int minutes = 0;
         while (pageViewDataFile == null && minutes < 60) {
