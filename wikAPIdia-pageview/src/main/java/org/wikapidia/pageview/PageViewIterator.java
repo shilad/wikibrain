@@ -117,7 +117,7 @@ public class PageViewIterator implements Iterator {
         }
 
         //set up temp folder where page view data file will be stored
-        File tempFolder = new File("page_view_data");
+        File tempFolder = new File("../download/" + lang.getLangCode() + "_page_view_data");
         if (!tempFolder.exists()){
             tempFolder.mkdir();
         }
@@ -130,7 +130,7 @@ public class PageViewIterator implements Iterator {
         String fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString;
         String fileNameSuffix = ".gz";
 
-        String homeFolder = BASE_URL + String.format("%s/%s-%s/", yearString, yearString, monthString);
+        String homeFolder = BASE_URL + String.format("%s/%s-%s/", yearString, yearString, monthString);     //issue unable to handle cross-month pageview data
         File pageViewDataFile = null;
         int minutes = 0;
         while (pageViewDataFile == null && minutes < 60) {
