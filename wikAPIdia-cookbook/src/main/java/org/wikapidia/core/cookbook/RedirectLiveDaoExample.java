@@ -25,8 +25,9 @@ public class RedirectLiveDaoExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         RedirectDao rdao = new Configurator(new Configuration()).get(RedirectDao.class, "live");
         LocalPageDao pdao = new Configurator(new Configuration()).get(LocalPageDao.class, "live");
-        Language lang = Language.getByLangCode("en");
-        int redirectId = 621375; //Shaq
+        pdao.setFollowRedirects(false);
+        Language lang = Language.getByLangCode("simple");
+        int redirectId = 217416; //621375; //Shaq
         int destId = rdao.resolveRedirect(lang, redirectId);
 
         assert(rdao.isRedirect(lang, redirectId));
@@ -40,16 +41,27 @@ public class RedirectLiveDaoExample {
             System.out.println("\t" + redirPage.getTitle());
         }
 
-        TIntIntMap redirectMap = rdao.getAllRedirectIdsToDestIds(lang);
-        int redirectCount = 0;
-        System.out.println("\n" + redirectMap.size());
-        System.out.println("\nFirst 500 redirects in language " + lang.getLangCode() + ":");
-        for (int sourceId : redirectMap.keys()) {
-            if (redirectCount >= 500) {break;}
-            LocalPage sourcePage = pdao.getById(lang, sourceId);
-            LocalPage destPage = pdao.getById(lang, redirectMap.get(sourceId));
-            System.out.println("\tFrom \"" + sourcePage.getTitle() + "\" to \"" + destPage.getTitle() + "\"");
-            redirectCount++;
+        double start = System.currentTimeMillis();
+        try {
+            //following line takes 164.3 min (2 hours 44 min) for simple
+            //takes about 43 min to throw OutOfMemory error for english
+            TIntIntMap allRedirectIdsToDestIds = rdao.getAllRedirectIdsToDestIds(lang);
+            TIntIntMap redirectMap = allRedirectIdsToDestIds;
+            double elapsed = (System.currentTimeMillis() - start) / 1000.0;
+            System.out.println("Retrieved all redirects in " + lang.getLangCode() + " in " + elapsed + " seconds");
+            int redirectCount = 0;
+            System.out.println("\nNumber of redirects: " + redirectMap.size());
+            System.out.println("\nFirst 500 redirects in language " + lang.getLangCode() + ":");
+            for (int sourceId : redirectMap.keys()) {
+                if (redirectCount >= 500) {break;}
+                LocalPage sourcePage = pdao.getById(lang, sourceId);
+                LocalPage destPage = pdao.getById(lang, redirectMap.get(sourceId));
+                System.out.println("\tFrom \"" + sourcePage.getTitle() + "\" to \"" + destPage.getTitle() + "\"");
+                redirectCount++;
+            }
+        }
+        catch (OutOfMemoryError e) {
+            System.out.println((System.currentTimeMillis() - start) / 1000.0);
         }
     }
 }

@@ -6,6 +6,7 @@ package org.wikapidia.core.dao.live;
  */
 
 import org.apache.commons.io.IOUtils;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 
@@ -33,6 +34,8 @@ public class LiveAPIQuery {
     private Integer pageid;
     private String filterredir;
     private String from;
+    private Integer namespace;
+    private String prop = null; //only used in all-links queries, ensures that ids and titles of links will be returned
 
     private String queryUrl;
     private String queryResult = ""; //text representing the raw output of the query
@@ -53,6 +56,9 @@ public class LiveAPIQuery {
         }
         if (builder.from != null) {
             this.from = builder.from;
+        }
+        if (builder.namespace != null) {
+            this.namespace = builder.namespace;
         }
 
         // set parameters for the URL string according to the query type
@@ -97,13 +103,22 @@ public class LiveAPIQuery {
                 this.pluralPage = false;
                 this.queryResultDataSection = "backlinks";
                 break;
-            default:    //allpages
+            case 5:    //ALLPAGES
                 this.queryAction = "list";
                 this.queryType = "allpages";
                 this.queryInfoPrefix = "ap";
                 this.queryLimitPrefix = "ap";
                 this.pluralPage = false;
                 this.queryResultDataSection = "allpages";
+                break;
+            default:    //ALLLINKS
+                this.queryAction = "list";
+                this.queryType = "alllinks";
+                this.queryInfoPrefix = "al";
+                this.queryLimitPrefix = "al";
+                this.pluralPage = false;
+                this.queryResultDataSection = "alllinks";
+                this.prop = "ids|title";
                 break;
         }
         constructQueryUrl();
@@ -132,6 +147,12 @@ public class LiveAPIQuery {
         if (this.from != null) {
             queryUrl += "&" + queryInfoPrefix + "from" + "=" + from;
         }
+        if (this.namespace != null) {
+            queryUrl += "&" + queryInfoPrefix + "namespace" + "=" + namespace;
+        }
+        if (this.prop != null) {
+            queryUrl += "&" + queryInfoPrefix + "prop" + "=" + prop;
+        }
         this.queryUrl = queryUrl;
     }
 
@@ -147,6 +168,7 @@ public class LiveAPIQuery {
         do {
             //make query and set this.queryResult to the resulting text
             getRawQueryText(queryUrl + queryContinue);
+
             //parse the queryResult and add the resulting QueryReply objects to values
             parser.getQueryReturnValues(lang, queryResult, queryResultDataSection, values);
 
@@ -202,6 +224,7 @@ public class LiveAPIQuery {
         private Integer pageid;
         private String filterredir;
         private String from;
+        private Integer namespace;
         private Map<String, Integer> queryTypeMap = new HashMap<String, Integer>();
 
         public LiveAPIQueryBuilder(String queryType, Language lang) {
@@ -217,6 +240,7 @@ public class LiveAPIQuery {
             queryTypeMap.put("LINKS", 3);
             queryTypeMap.put("BACKLINKS", 4);
             queryTypeMap.put("ALLPAGES", 5);
+            queryTypeMap.put("ALLLINKS", 6);
         }
 
         public LiveAPIQueryBuilder setRedirects(Boolean redirects) {
@@ -241,6 +265,11 @@ public class LiveAPIQuery {
 
         public LiveAPIQueryBuilder setFrom(String from) {
             this.from = from;
+            return this;
+        }
+
+        public LiveAPIQueryBuilder setNamespace(int namespace) {
+            this.namespace = namespace;
             return this;
         }
 

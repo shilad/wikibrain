@@ -1,6 +1,12 @@
 package org.wikapidia.core.dao.live;
 
 import com.typesafe.config.Config;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -156,6 +162,45 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
                 .setTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return info.getId();
+    }
+
+    /**
+     * Gets the list of all local page ids for lang = langId and a given namespace
+     * @param lang
+     * @return
+     * @throws DaoException
+     */
+    public TIntList getAllPageIdsInNamespace(Language lang, NameSpace ns) throws DaoException {
+        TIntList pages = new TIntArrayList();
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLPAGES", lang);
+        builder.setNamespace(ns.getValue());
+        LiveAPIQuery query = builder.build();
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+
+        for (QueryReply reply : replyObjects) {
+            pages.add(reply.getId());
+        }
+
+        return  pages;
+    }
+
+    /**
+     * Gets the local page id -> namespace mappings for lang = langId
+     * @param lang
+     * @return
+     * @throws DaoException
+     */
+    public TIntIntMap getAllPageIdNamespaceMappings(Language lang) throws DaoException {
+        TIntIntMap pages = new TIntIntHashMap();
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLPAGES", lang);
+        LiveAPIQuery query = builder.build();
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+
+        for (QueryReply reply : replyObjects) {
+            pages.put(reply.pageId, reply.nameSpace);
+        }
+
+        return  pages;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalPageDao> {

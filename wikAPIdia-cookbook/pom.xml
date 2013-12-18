@@ -30,6 +30,11 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>org.wikapidia</groupId>
+            <artifactId>wikAPIdia-pageview</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.sun.corba</groupId>
             <artifactId>glassfish-corba-idlj</artifactId>
             <version>1.0</version>
@@ -37,6 +42,11 @@
         <dependency>
             <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>
+            <version>2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
             <version>2.3</version>
         </dependency>
 

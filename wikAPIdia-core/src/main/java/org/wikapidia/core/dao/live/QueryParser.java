@@ -51,6 +51,10 @@ public class QueryParser {
         JsonObject queryReplyObject = parseQueryObject(queryResult, "query");
         //parse desired values from JSON object into QueryReplies and add to values
         JsonElement dataSectionElem = queryReplyObject.get(queryResultDataSection);
+        if (dataSectionElem == null) {
+            throw new DaoException("No section \"" + queryResultDataSection + "\" found in reply text:" +
+                    "\n" + queryResult);
+        }
         if (dataSectionElem.isJsonArray()) {
             JsonArray array = getJsonArrayFromQueryObject(queryReplyObject, queryResultDataSection);
             getValuesFromJsonArray(array, values);
@@ -67,7 +71,14 @@ public class QueryParser {
      * @return JSON object representing the query result
      */
     public JsonObject parseQueryObject(String text, String value) {
+        try {
         return jp.parse(text).getAsJsonObject().get(value).getAsJsonObject();
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Input text: \n" + text);
+            return null;
+        }
     }
 
     public JsonArray parseJsonArray(String text) {
@@ -133,7 +144,8 @@ public class QueryParser {
      */
     private QueryReply getQueryReplyFromJsonElement(JsonElement queryReplyPage) {
         JsonObject entryValue = queryReplyPage.getAsJsonObject();
-        JsonElement entryPageid = entryValue.get("pageid");
+        //fromid field used instead of pageid for all-links query
+        JsonElement entryPageid = entryValue.get("pageid") != null ? entryValue.get("pageid") : entryValue.get("fromid");
         JsonElement entryTitle = entryValue.get("title");
         JsonElement entryNamespace = entryValue.get("ns");
 

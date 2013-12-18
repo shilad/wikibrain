@@ -3,6 +3,10 @@ package org.wikapidia.core.dao.live;
 
 
 import com.typesafe.config.Config;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -12,6 +16,7 @@ import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
+import org.wikapidia.core.model.Title;
 
 import java.util.*;
 
