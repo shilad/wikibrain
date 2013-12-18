@@ -30,10 +30,10 @@ public class IteratorTest {
         Env env = new EnvBuilder().build();
         Configurator configurator = env.getConfigurator();
         LocalPageDao pdao = configurator.get(LocalPageDao.class, "sql");
-        PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 3);
+        PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 4);
 
         int i = 0;
-        while (i < 2) {
+        while (i < 4) {
             //see how long it takes to get page view stats for one hour
             double start = System.currentTimeMillis();
             PageViewDataStruct data = it.next();
@@ -41,8 +41,13 @@ public class IteratorTest {
             System.out.println("Took " + elapsed + " seconds to parse page view data for hour " + i);
             TIntIntMap stats = data.getPageViewStats();
             for (int pageId : stats.keys()) {
-                Title page = pdao.getById(lang, pageId).getTitle();
-                System.out.println("\tPage: " + page + "; Views: " + stats.get(pageId));
+                try{
+                    Title page = pdao.getById(lang, pageId).getTitle();
+                    System.out.println("\tPage: " + page + "; Views: " + stats.get(pageId));
+                }
+                catch(NullPointerException e){
+                    continue;
+                }
             }
             i++;
         }

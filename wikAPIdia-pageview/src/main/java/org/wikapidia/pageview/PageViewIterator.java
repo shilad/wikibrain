@@ -149,8 +149,8 @@ public class PageViewIterator implements Iterator {
         DateTime nextDate = currentDate.plusHours(1);
         PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
 
-        pageViewDataFile.delete();
-        tempFolder.delete();
+        //pageViewDataFile.delete();
+        //tempFolder.delete();
 
         currentDate = nextDate;
         return pageViewData;
@@ -171,9 +171,17 @@ public class PageViewIterator implements Iterator {
             URL url = new URL(folderUrl + fileName);
             String localPath = localFolder.getAbsolutePath() + "/" + fileName;
             File dest = new File(localPath);
-            FileUtils.copyURLToFile(url, dest, 60000, 60000);
+            if(!dest.exists()){
+                System.out.println("File not exist. Downloading...");
+                FileUtils.copyURLToFile(url, dest, 60000, 60000);
+            }
+            else{
+                System.out.println("File existed. Skip...");
+            }
             File ungzipDest = new File(localPath.split("\\.")[0] + ".txt");
-            ungzip(dest,ungzipDest);
+            if(!ungzipDest.exists()){
+                ungzip(dest,ungzipDest);
+            }
             System.out.println("Finished Downloading Pageview File");
             return ungzipDest;
         }catch(IOException e){
