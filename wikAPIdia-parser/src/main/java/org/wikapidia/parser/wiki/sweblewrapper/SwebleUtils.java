@@ -21,20 +21,21 @@ public class SwebleUtils {
 	}
 	
 	public static String cleanWikiText(String wikiText) {
-		return wikiText.replaceAll("(?i)[<](/)?img[^>]*[>]", "")
-						.replaceAll("(?i)[<]caption[^/>]*[>]", "|+")
-						.replaceAll("(?i)</caption>", "")
-						.replaceAll("(?i)[<]table[^/>]*class=\"wikitable\"[^/>]*[>]", "{| class=\"wikitable\"")
-						.replaceAll("(?i)[<]table[^/>]*[>]", "{|")
-						.replaceAll("(?i)[<]tr[^/>]*[>]", "\n|-")
-						.replaceAll("(?i)[<]td[^/>]*[>]", "\n|")
-						.replaceAll("(?i)[<]th[^/>]*[>]", "\n!")
-						.replaceAll("(?i)</table>", "\n|}")
-						.replaceAll("(?i)</tr>", "\n")
-						.replaceAll("(?i)</td>", "\n")
-						.replaceAll("(?i)</th>", "\n")
-						.replaceAll("(?i)(<gallery>)[^(</gallery>)]*(</gallery>)", "")
-						.replaceAll("(?i)[<](/)?[\\w]+[^>\n<]*[>]", "")
+		return wikiText.replaceAll("(?i)[<](/)?img[^>]*[>]", " ")
+				.replaceAll("(?i)[<]caption[^/>]*[>]", "|+")
+				.replaceAll("(?i)</caption>", " ")
+				.replaceAll("(?i)[<]table[^/>]*class=\"wikitable\"[^/>]*[>]", "{| class=\"wikitable\"")
+				.replaceAll("(?i)[<]table[^/>]*[>]", "{|")
+				.replaceAll("(?i)[<]tr[^/>]*[>]", "\n|-")
+				.replaceAll("(?i)[<]td[^/>]*[>]", "\n|")
+				.replaceAll("(?i)[<]th[^/>]*[>]", "\n!")
+				.replaceAll("(?i)</table>", "\n|}")
+				.replaceAll("(?i)</tr>", "\n")
+				.replaceAll("(?i)</td>", "\n")
+				.replaceAll("(?i)</th>", "\n")
+				.replaceAll("(?i)(<gallery>)[^(</gallery>)]*(</gallery>)", " ")
+				.replaceAll("(?i)(<ref>)[^(</ref>)]*(</ref>)", " ")
+				.replaceAll("(?i)[<](/)?[\\w]+[^>\n<]*[>]", " ")
 						;
 	}
 	

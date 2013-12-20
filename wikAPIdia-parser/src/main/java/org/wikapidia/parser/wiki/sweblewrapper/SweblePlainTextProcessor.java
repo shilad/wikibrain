@@ -252,9 +252,10 @@ public class SweblePlainTextProcessor extends AstVisitor<WtNode> implements
 			else{
 				iterate(link.getTitle());
 			}
-			print(link.getPostfix());
 		}
 		int end = sbText.length();
+
+		print(link.getPostfix());
 		String surface = sbText.substring(start, end);
 		if(isCategory){
 			if(link.hasTitle()) {
