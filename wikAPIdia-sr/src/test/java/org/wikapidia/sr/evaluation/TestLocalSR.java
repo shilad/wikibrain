@@ -172,6 +172,16 @@ public class TestLocalSR implements MonolingualSRMetric {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
+    public Normalizer getMostSimilarNormalizer() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public Normalizer getSimilarityNormalizer() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
 
     public TDoubleList getActual(List<KnownSim> gold) {
         TDoubleList actual = new TDoubleArrayList();

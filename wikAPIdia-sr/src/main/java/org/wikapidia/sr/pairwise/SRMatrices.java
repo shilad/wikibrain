@@ -64,14 +64,7 @@ public class SRMatrices implements Closeable {
      * @param dir
      */
     public SRMatrices(MonolingualSRMetric metric, File dir) {
-        this.monoSr = metric;
-        this.language = metric.getLanguage();
-        this.similarity = null;
-        this.dir = dir;
-        if (!this.dir.isDirectory()) {
-            FileUtils.deleteQuietly(dir);
-            dir.mkdirs();
-        }
+        this(metric, null, dir);
     }
 
     public SRMatrices(MonolingualSRMetric metric, PairwiseSimilarity similarity, File dir) {
@@ -138,6 +131,8 @@ public class SRMatrices implements Closeable {
             featureMatrix = null;
             featureTransposeMatrix = null;
             cosimilarityMatrix = readMatrix(COSIMILARITY_MATRIX);
+        } else {
+            throw new IOException("No readable matrices");
         }
     }
 
@@ -165,7 +160,7 @@ public class SRMatrices implements Closeable {
         return cosimilarityMatrix;
     }
 
-    public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException, DaoException {
         long l = System.currentTimeMillis();
         try {
             MatrixRow row = cosimilarityMatrix.getRow(wpId);
@@ -175,8 +170,10 @@ public class SRMatrices implements Closeable {
             }
             if (results != null && results.numDocs() >= numResults) {
                 return results;
-            } else {
+            } else if (similarity != null) {
                 return similarity.mostSimilar(this, wpId, numResults, validIds);
+            } else {
+                return null;
             }
         } finally {
 //            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));

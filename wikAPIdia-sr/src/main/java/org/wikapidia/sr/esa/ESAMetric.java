@@ -226,16 +226,6 @@ public class ESAMetric extends BaseMonolingualSRMetric {
         return builder;
     }
 
-    private QueryBuilder getQueryBuilderByLanguage(Language language, TIntSet wpIds) {
-        QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
-        builder.setResolveWikipediaIds(false);
-        WpIdFilter filter = conceptFilter.get(language);
-        if (filter != null) {
-            builder.addFilter(filter);
-        }
-        return builder;
-    }
-
     /**
      * Put data in a scoreDoc into a TIntDoubleHashMap
      *

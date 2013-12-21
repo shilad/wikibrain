@@ -28,16 +28,11 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     MonolingualCategoryGraphHelper graphHelper;
     LocalCategoryMemberDao catHelper;
 
-    public MonolingualCategoryGraphSimilarity(Language language, LocalPageDao pageDao, Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao, MonolingualCategoryGraphHelper graphHelper) {
+    public MonolingualCategoryGraphSimilarity(Language language, LocalPageDao pageDao, Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao, MonolingualCategoryGraphHelper graphHelper) throws DaoException {
         super(language,pageDao,disambiguator);
         this.catHelper=categoryMemberDao;
         this.graphHelper = graphHelper;
-        try {
-            this.graphHelper.init();
-        } catch (DaoException e) {
-            //TODO: handle this error
-        }
-
+        this.graphHelper.init();
     }
 
     @Override
@@ -139,7 +134,7 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
 
     @Override
     public void readCosimilarity(String path) throws IOException {
-        //TODO: implement me
+        super.readCosimilarity(path, null);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {
@@ -169,13 +164,18 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
 
             Language language = Language.getByLangCode(runtimeParams.get("language"));
 
-            MonolingualCategoryGraphSimilarity sr = new MonolingualCategoryGraphSimilarity(
-                    language,
-                    getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
-                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
-                    getConfigurator().get(LocalCategoryMemberDao.class,config.getString("categoryMemberDao")),
-                    getConfigurator().get(MonolingualCategoryGraphHelper.class, "categorygraphsimilarity", "language", language.getLangCode())
-            );
+            MonolingualCategoryGraphSimilarity sr = null;
+            try {
+                sr = new MonolingualCategoryGraphSimilarity(
+                        language,
+                        getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
+                        getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
+                        getConfigurator().get(LocalCategoryMemberDao.class,config.getString("categoryMemberDao")),
+                        getConfigurator().get(MonolingualCategoryGraphHelper.class, "categorygraphsimilarity", "language", language.getLangCode())
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
             configureBase(getConfigurator(), sr, config);
             return sr;
         }

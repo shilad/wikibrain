@@ -1,6 +1,9 @@
 package org.wikapidia.sr;
 
 import com.typesafe.config.Config;
+
+import java.util.*;
+
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
@@ -27,9 +30,6 @@ import org.wikapidia.utils.WpThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
@@ -62,7 +62,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         }
     }
 
-    public SRResultList getCachedMostSimilarLocal(int wpId, int numResults, TIntSet validIds) {
+    public SRResultList getCachedMostSimilarLocal(int wpId, int numResults, TIntSet validIds) throws DaoException {
         if (!hasCachedMostSimilarLocal(wpId)){
             return null;
         }
@@ -185,12 +185,12 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     @Override
     public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
         Language language = getLanguage();
-        HashSet<LocalString> context = new HashSet<LocalString>();
-        context.add(new LocalString(language,phrase2));
-        LocalId similar1 = disambiguator.disambiguate(new LocalString(language, phrase1), context);
-        context.clear();
-        context.add(new LocalString(language,phrase1));
-        LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
+        List<LocalString> phrases = Arrays.asList(
+                new LocalString(language, phrase1),
+                new LocalString(language, phrase2));
+        List<LocalId> resolution = disambiguator.disambiguateTop(phrases, null);
+        LocalId similar1 = resolution.get(0);
+        LocalId similar2 = resolution.get(1);
         if (similar1==null||similar2==null){
             return new SRResult();
         }
@@ -205,7 +205,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults) throws DaoException {
-        LocalId similar = disambiguator.disambiguate(new LocalString(getLanguage(), phrase),null);
+        LocalId similar = disambiguator.disambiguateTop(new LocalString(getLanguage(), phrase), null);
         if (similar==null){
             SRResultList resultList = new SRResultList(1);
             resultList.set(0, new SRResult());
@@ -216,7 +216,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
-        LocalId similar = disambiguator.disambiguate(new LocalString(getLanguage(), phrase),null);
+        LocalId similar = disambiguator.disambiguateTop(new LocalString(getLanguage(), phrase), null);
         if (similar==null){
             SRResultList resultList = new SRResultList(1);
             resultList.set(0, new SRResult());
@@ -278,7 +278,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         for (String phrase : phrases){
             localStringList.add(new LocalString(getLanguage(), phrase));
         }
-        List<LocalId> localIds = disambiguator.disambiguate(localStringList, null);
+        List<LocalId> localIds = disambiguator.disambiguateTop(localStringList, null);
         for (int i=0; i<phrases.length; i++){
             ids[i] = localIds.get(i).getId();
         }

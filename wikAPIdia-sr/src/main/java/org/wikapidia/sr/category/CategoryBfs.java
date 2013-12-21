@@ -73,7 +73,9 @@ public class CategoryBfs {
         if (cats!=null){
             for (int catId : categoryMemberDao.getCategories(language,startCatId).keySet()) {
                 int ci = graph.getCategoryIndex(catId);
-                openCats.add(new CategoryDistance(ci, graph.cats[ci], graph.catCosts[ci], (byte)+1));
+                if (ci >= 0) {
+                    openCats.add(new CategoryDistance(ci, graph.cats[ci], graph.catCosts[ci], (byte)+1));
+                }
             }
         }
     }

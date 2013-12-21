@@ -8,10 +8,11 @@ import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.utils.MathUtils;
+import org.wikapidia.utils.WpCollectionUtils;
 
 import java.util.*;
 
-public abstract class BaseDisambiguator implements Disambiguator{
+public abstract class BaseDisambiguator extends Disambiguator{
     public static final int DEFAULT_NUM_CANDIDATES = 5;
     protected final PhraseAnalyzer phraseAnalyzer;
     private int numCandidates = DEFAULT_NUM_CANDIDATES;
@@ -20,13 +21,9 @@ public abstract class BaseDisambiguator implements Disambiguator{
         this.phraseAnalyzer = phraseAnalyzer;
     }
 
-    @Override
-    public LocalId disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException {
-        return disambiguate(Arrays.asList(phrase), context).get(0);
-    }
 
     @Override
-    public List<LocalId> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
+    public List<LinkedHashMap<LocalId, Double>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
         List<LocalString> allPhrases = new ArrayList<LocalString>(
                 (context == null) ? phrases : CollectionUtils.union(phrases, context));
 
@@ -57,20 +54,26 @@ public abstract class BaseDisambiguator implements Disambiguator{
         }
 
         // Step 3: multiply background probability by sim sums, choose best product
-        List<LocalId> result = new ArrayList<LocalId>();
+        List<LinkedHashMap<LocalId, Double>> result = new ArrayList<LinkedHashMap<LocalId, Double>>();
         for (LocalString ls : phrases) {
-            double bestScore = -1.0;
-            LocalPage bestPage = null;
-
-            for (Map.Entry<LocalPage, Float> entry : candidates.get(ls).entrySet()) {
-                LocalPage lp = entry.getKey();
-                double score = entry.getValue() * pageSums.get(lp);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestPage = lp;
-                }
+            Map<LocalPage, Float> phraseCands = candidates.get(ls);
+            if (phraseCands == null || phraseCands.isEmpty()) {
+                result.add(null);
+                continue;
             }
-            result.add((bestPage == null) ? null : bestPage.toLocalId());
+            double sum = 0.0;
+            for (LocalPage lp : phraseCands.keySet()) {
+                float score = (float) (phraseCands.get(lp) * pageSums.get(lp));
+                phraseCands.put(lp, score);
+                sum += score;
+            }
+//            System.out.println("results for " + ls.getString());
+            LinkedHashMap<LocalId, Double> pageResult = new LinkedHashMap<LocalId, Double>();
+            for (LocalPage key : WpCollectionUtils.sortMapKeys(phraseCands, true)) {
+//                System.out.println("\t" + key.getTitle() + ": " + phraseCands.get(key));
+                pageResult.put(key.toLocalId(), phraseCands.get(key) / sum);
+            }
+            result.add(pageResult);
         }
         return result;
     }
