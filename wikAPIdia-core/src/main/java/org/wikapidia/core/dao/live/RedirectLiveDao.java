@@ -18,7 +18,9 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.Redirect;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -61,7 +63,7 @@ public class RedirectLiveDao implements RedirectDao {
     public Integer resolveRedirect(Language lang, int id) throws DaoException {
         //get pageid of page that id redirects to
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang);
-        builder.setPageid(id).setRedirects(true);
+        builder.addPageid(id).setRedirects(true);
         LiveAPIQuery query = builder.build();
         int redirectId = query.getValuesFromQueryResult().get(0).pageId;
         if (redirectId != id) {
@@ -72,7 +74,7 @@ public class RedirectLiveDao implements RedirectDao {
 
     public boolean isRedirect(Language lang, int id) throws DaoException {
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang);
-        builder.setPageid(id);
+        builder.addPageid(id);
         LiveAPIQuery query = builder.build();
         return query.getValuesFromQueryResult().get(0).isRedirect;
     }
@@ -86,7 +88,7 @@ public class RedirectLiveDao implements RedirectDao {
     public List<Integer> getRedirectsFromId(Language lang, int localId) throws DaoException {
         List<Integer> redirectIds = new ArrayList<Integer>();
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("BACKLINKS", lang);
-        builder.setPageid(localId).setFilterredir("redirects");
+        builder.addPageid(localId).setFilterredir("redirects");
         LiveAPIQuery query = builder.build();
         List<QueryReply> replyObjects = query.getValuesFromQueryResult();
         for (QueryReply reply : replyObjects) {
@@ -96,18 +98,43 @@ public class RedirectLiveDao implements RedirectDao {
     }
 
     public TIntIntMap getAllRedirectIdsToDestIds(Language lang) throws DaoException {
-        TIntIntMap redirects = new TIntIntHashMap();
+        TIntIntMap redirectToDestIds = new TIntIntHashMap();
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLPAGES", lang);
         builder.setFilterredir("redirects").setFrom("");
         LiveAPIQuery query = builder.build();
         List<QueryReply> replyObjects = query.getValuesFromQueryResult();
 
-        for (QueryReply reply : replyObjects) {
-            int destId = resolveRedirect(lang, reply.pageId);
-            redirects.put(reply.pageId, destId);
+        int i = 0;
+        int numReplies = replyObjects.size();
+        while (i < numReplies) {
+            int batchEndPosn = ((numReplies - i) > 500) ? i+=500 : numReplies;
+            List<QueryReply> batchReplies = replyObjects.subList(i, batchEndPosn);
+            List<Integer> redirectIds = new ArrayList<Integer>();
+            for (QueryReply reply : batchReplies) {
+                redirectIds.add(reply.getId());
+            }
+            Map<Integer, Integer> batch =resolveRedirects(lang, redirectIds);
+            for (int redirectId : batch.keySet()) {
+                redirectToDestIds.put(redirectId, batch.get(redirectId));
+            }
         }
-
-        return  redirects;
+        return  redirectToDestIds;
+    }
+    
+    private Map<Integer, Integer> resolveRedirects(Language lang, List<Integer> redirects) throws DaoException {
+        Map<Integer, Integer> redirectToDestIdMap = new HashMap<Integer, Integer>();        
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang);
+        builder.setPageids(redirects).setRedirects(true);
+        LiveAPIQuery query = builder.build();
+        List<QueryReply> dests = query.getValuesFromQueryResult();
+        if (dests.size() != redirects.size()) {
+            throw new DaoException("Expected dest list of size " + redirects.size() +
+                    ", but was instead of size " + dests.size());
+        }
+        for (int i = 0; i < redirects.size(); i++) {
+            redirectToDestIdMap.put(redirects.get(i), dests.get(i).getId());
+        }
+        return redirectToDestIdMap;  
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<RedirectDao> {
