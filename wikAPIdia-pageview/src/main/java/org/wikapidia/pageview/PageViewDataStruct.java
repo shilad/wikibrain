@@ -29,6 +29,7 @@ public class PageViewDataStruct {
         this.stats = stats;
     }
 
+
     public Language getLang() {
         return lang;
     }

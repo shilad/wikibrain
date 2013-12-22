@@ -38,6 +38,7 @@ public class PageViewIterator implements Iterator {
     private Language lang;
     private static String BASE_URL = "http://dumps.wikimedia.your.org/other/pagecounts-raw/";
     private PageViewDataStruct nextData;
+    private PageViewDataStruct currentData;
 
     /**
      * constructs a PageViewIterator and parses a PageViewDataStruct from the first hour input in the constructor,
@@ -81,12 +82,15 @@ public class PageViewIterator implements Iterator {
         return nextData;
     }
 
+
+
     /**
      * sets nextData to the PageViewDataStruct of the next hour in this iterator's range
      * called by next() to set the value of next data
      * @return false if nextData is null, true otherwise
      */
     public boolean hasNext() {
+
         try {
             nextData = getPageViewData();
         }

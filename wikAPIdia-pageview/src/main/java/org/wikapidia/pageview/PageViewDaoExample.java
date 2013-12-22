@@ -25,10 +25,14 @@ public class PageViewDaoExample {
         Configurator configurator = env.getConfigurator();
         LocalPageDao pdao = configurator.get(LocalPageDao.class, "sql");
         PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 3);
+        PageViewDataStruct data;
+        //int i = 0;
         while(it.hasNext()){
-            PageViewDataStruct data = it.next();
-            System.out.println(data.getStartDate());
+            data = it.next();
+            pageViewDao.addData(data);
+
         }
+        System.out.println(pageViewDao.getPageView(25578, new DateTime(2013, 12, 8, 2, 0)));
 
 
     }
