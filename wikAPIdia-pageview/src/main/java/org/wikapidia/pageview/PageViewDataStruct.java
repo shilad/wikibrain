@@ -20,6 +20,8 @@ public class PageViewDataStruct {
     // represents page views for the time period specified by start and end
     // maps page IDs to the number of views that page has had in the specified time
     // will represent one hour for the first iteration
+
+    //a int-int map, key is page id, value is number of page views
     private final TIntIntMap stats;
 
     public PageViewDataStruct(Language lang, DateTime start, DateTime end, TIntIntMap stats) {

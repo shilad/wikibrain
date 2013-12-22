@@ -13,7 +13,9 @@ import java.util.Map;
 /**
  * @author Toby "Jiajun" Li
  */
-public class PageViewDao {
+public class PageViewMapDao {
+
+    //key is time (in hours), value is a map whose key is pageId, value is number of page views
 
     Map<Integer, TLongIntMap> idViewMap = new HashMap<Integer, TLongIntMap>();
 
