@@ -112,7 +112,7 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
         //get list of pageids and titles of all outlinks from sourceId
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("LINKS", language);
-        builder.setPageid(sourceId);
+        builder.addPageid(sourceId);
         LiveAPIQuery query = builder.build();
         List<QueryReply> replyObjects = query.getValuesFromQueryResult();
 
@@ -141,7 +141,7 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         else {
             builder = new LiveAPIQuery.LiveAPIQueryBuilder("BACKLINKS", language);
         }
-        builder.setPageid(localId);
+        builder.addPageid(localId);
         LiveAPIQuery query = builder.build();
 
         //query for outlinks from local id, return as list of titles and pageids

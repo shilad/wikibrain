@@ -63,7 +63,7 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
      */
     public Collection<Integer> getCategoryMemberIds(Language language, int categoryId) throws DaoException {
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("CATEGORYMEMBERS", language)
-                .setPageid(categoryId);
+                .addPageid(categoryId);
         List<QueryReply> replies = builder.build().getValuesFromQueryResult();
         List<Integer> categoryMemberIds = new ArrayList<Integer>();
         for (QueryReply reply : replies) {
@@ -116,7 +116,7 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
      * @throws DaoException
      */
     public Collection<Integer> getCategoryIds(Language language, int articleId) throws DaoException {
-        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("CATEGORIES", language).setPageid(articleId);
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("CATEGORIES", language).addPageid(articleId);
         List<Integer> categoryIdsList = new ArrayList<Integer>();
         List<QueryReply> replies = builder.build().getValuesFromQueryResult();
         for (QueryReply reply : replies) {

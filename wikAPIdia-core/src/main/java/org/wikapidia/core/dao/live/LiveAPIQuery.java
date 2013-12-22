@@ -30,8 +30,8 @@ public class LiveAPIQuery {
     private final String queryResultDataSection; //section of the query result containing the data of interest
     private QueryParser parser = new QueryParser();
     private Boolean redirects;
-    private String title;
-    private Integer pageid;
+    private List<String> titles;
+    private List<Integer> pageids;
     private String filterredir;
     private String from;
     private Integer namespace;
@@ -45,11 +45,11 @@ public class LiveAPIQuery {
         if (builder.redirects != null) {
             this.redirects = builder.redirects;
         }
-        if (builder.title != null) {
-            this.title = builder.title;
+        if (builder.titles != null) {
+            this.titles = builder.titles;
         }
-        if (builder.pageid != null) {
-            this.pageid = builder.pageid;
+        if (builder.pageids != null) {
+            this.pageids = builder.pageids;
         }
         if (builder.filterredir != null) {
             this.filterredir = builder.filterredir;
@@ -129,11 +129,17 @@ public class LiveAPIQuery {
         String host = ".wikipedia.org";
         String queryUrl = http + lang.getLangCode() + host + "/w/api.php?action=query&format=" + outputFormat +
                 "&" + queryAction + "=" + queryType + "&" + queryLimitPrefix + "limit=500";
-        if (this.title != null) {
-            queryUrl += "&" + queryInfoPrefix + "title" + (pluralPage ? "s" : "") + "=" + title;
+        if (!this.titles.isEmpty()) {
+            queryUrl += "&" + queryInfoPrefix + "title" + (pluralPage ? "s" : "") + "=" + titles.get(0);
+            for (int i = 1; i < titles.size(); i++) {
+                queryUrl += "|" + titles.get(i);
+            }
         }
-        if (this.pageid != null) {
-            queryUrl += "&" + queryInfoPrefix + "pageid" + (pluralPage ? "s" : "") + "=" + pageid;
+        if (!this.pageids.isEmpty()) {
+            queryUrl += "&" + queryInfoPrefix + "pageid" + (pluralPage ? "s" : "") + "=" + pageids.get(0);
+            for (int i = 1; i < pageids.size(); i++) {
+                queryUrl += "|" + pageids.get(i);
+            }
         }
         //if redirects is true, resolve redirects in the query result
         if ((this.redirects != null) && this.redirects) {
@@ -220,8 +226,8 @@ public class LiveAPIQuery {
         //private final QueryType queryType;
         private final Integer queryType;
         private Boolean redirects;
-        private String title;
-        private Integer pageid;
+        private List<String> titles = new ArrayList<String>();
+        private List<Integer> pageids = new ArrayList<Integer>();
         private String filterredir;
         private String from;
         private Integer namespace;
@@ -248,13 +254,23 @@ public class LiveAPIQuery {
             return this;
         }
 
-        public LiveAPIQueryBuilder setTitle(String title) {
-            this.title = title;
+        public LiveAPIQueryBuilder setTitles(List<String> titles) {
+            this.titles = titles;
             return this;
         }
 
-        public LiveAPIQueryBuilder setPageid(Integer pageid) {
-            this.pageid = pageid;
+        public LiveAPIQueryBuilder setPageids(List<Integer> pageids) {
+            this.pageids = pageids;
+            return this;
+        }
+
+        public LiveAPIQueryBuilder addTitle(String title) {
+            this.titles.add(title);
+            return this;
+        }
+
+        public LiveAPIQueryBuilder addPageid(int pageid) {
+            this.pageids.add(pageid);
             return this;
         }
 

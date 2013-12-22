@@ -46,6 +46,8 @@ public class IteratorTest {
                     System.out.println("\tPage: " + page + "; Views: " + stats.get(pageId));
                 }
                 catch(NullPointerException e){
+                    System.out.println("Message: " + e.getMessage());
+                    e.printStackTrace();
                     continue;
                 }
             }

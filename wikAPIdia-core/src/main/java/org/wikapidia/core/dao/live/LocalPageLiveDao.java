@@ -87,7 +87,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     public T getByTitle(Title title, NameSpace ns) throws DaoException{
         Language lang = title.getLanguage();
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang)
-                .setTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
+                .addTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return (T)info.getLocalPage(lang);
     }
@@ -95,7 +95,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
 
     public T getById(Language language, int pageId) throws DaoException{
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
-                .setPageid(pageId).setRedirects(followRedirects);
+                .addPageid(pageId).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return (T)info.getLocalPage(language);
     }
@@ -111,7 +111,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
         Map<Integer,T> pageMap = new HashMap<Integer, T>();
         for(Integer pageId : pageIds){
             LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
-                    .setPageid(pageId).setRedirects(followRedirects);
+                    .addPageid(pageId).setRedirects(followRedirects);
             QueryReply info = builder.build().getValuesFromQueryResult().get(0);
             pageMap.put(pageId, (T)info.getLocalPage(language));
         }
@@ -130,7 +130,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
         Map<Title, T> pageMap = new HashMap<Title, T>();
         for(Title title : titles){
             LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
-                    .setTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
+                    .addTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
             QueryReply info = builder.build().getValuesFromQueryResult().get(0);
             pageMap.put(title, (T)info.getLocalPage(language));
         }
@@ -147,7 +147,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      */
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException{
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
-                .setTitle(title).setRedirects(followRedirects);
+                .addTitle(title).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return info.getId();
     }
@@ -159,7 +159,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      */
     public int getIdByTitle(Title title) throws DaoException{
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", title.getLanguage())
-                .setTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
+                .addTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return info.getId();
     }

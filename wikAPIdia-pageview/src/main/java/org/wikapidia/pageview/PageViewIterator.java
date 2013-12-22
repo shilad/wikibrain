@@ -127,7 +127,6 @@ public class PageViewIterator implements Iterator {
         String monthString = twoDigIntStr(currentDate.getMonthOfYear());
         String dayString = twoDigIntStr(currentDate.getDayOfMonth());
         String hourString = twoDigIntStr(currentDate.getHourOfDay());
-        String fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString;
         String fileNameSuffix = ".gz";
 
         String homeFolder = BASE_URL + String.format("%s/%s-%s/", yearString, yearString, monthString);
@@ -138,7 +137,7 @@ public class PageViewIterator implements Iterator {
             while (pageViewDataFile == null && seconds < 60) {
                 String minutesString = twoDigIntStr(minutes);
                 String secondsString = twoDigIntStr(seconds);
-                fileName += minutesString + secondsString + fileNameSuffix;
+                String fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString + minutesString + secondsString + fileNameSuffix;
                 pageViewDataFile = downloadFile(homeFolder, fileName, tempFolder);
                 seconds++;
             }
@@ -184,8 +183,8 @@ public class PageViewIterator implements Iterator {
             }
             System.out.println("Finished Downloading Pageview File");
             return ungzipDest;
-        }catch(IOException e){
-            e.printStackTrace();
+        } catch(IOException e) {
+            System.out.println("File name " + fileName + " couldn't be found online");
             return null;
         }
 
@@ -209,7 +208,6 @@ public class PageViewIterator implements Iterator {
             BufferedReader br =  new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             String curLine;
             System.out.println("Beginning to parse file");
-            double start = System.currentTimeMillis();
             while ((curLine = br.readLine()) != null){
                 String[] cols = curLine.split(" ");
                     if (cols[0].equals(lang.getLangCode())){
