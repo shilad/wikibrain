@@ -1,7 +1,10 @@
 package org.wikapidia.sr.esa;
 
 import com.typesafe.config.Config;
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
@@ -22,6 +25,7 @@ import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
+import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.SimUtils;
 
 import java.io.File;
@@ -95,8 +99,17 @@ public class ESAMetric extends BaseMonolingualSRMetric {
                                             .search();
 
         TIntDoubleHashMap vector = getVector(phrase);
-        List<SRResult> results = new ArrayList<SRResult>();
+        if (hasCachedFeatureVectors()) {
+            SRResultList mostSimilar= getCachedMostSimilarLocal(doubleMapToFloatMap(vector), maxResults, validIds);
+            if (mostSimilar != null) {
+                if (mostSimilar.numDocs()>maxResults){
+                    mostSimilar.truncate(maxResults);
+                }
+                return mostSimilar;
+            }
+        }
 
+        List<SRResult> results = new ArrayList<SRResult>();
         for (WikapidiaScoreDoc wikapidiaScoreDoc : wikapidiaScoreDocs) {
 
             int localPageId = searcher.getLocalIdFromDocId(wikapidiaScoreDoc.luceneId, language);
@@ -117,6 +130,13 @@ public class ESAMetric extends BaseMonolingualSRMetric {
         return resultList;
     }
 
+    public TIntFloatMap doubleMapToFloatMap(TIntDoubleMap dmap) {
+        TIntFloatMap fmap = new TIntFloatHashMap(dmap.size());
+        for (int id : dmap.keys()) {
+            fmap.put(id, (float) dmap.get(id));
+        }
+        return fmap;
+    }
 
 
     /**
@@ -331,7 +351,7 @@ public class ESAMetric extends BaseMonolingualSRMetric {
 
     @Override
     public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
-        super.writeCosimilarity(path, maxHits, new PairwiseCosineSimilarity(), rowIds, colIds);
+        super.writeCosimilarity(SRMatrices.Mode.FEATURE_AND_TRANSPOSE, path, maxHits, new PairwiseCosineSimilarity(), rowIds, colIds);
     }
 
     @Override

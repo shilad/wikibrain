@@ -48,8 +48,8 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
                 new LocalString(getLanguage(), phrase2));
 
         List<LinkedHashMap<LocalId,Double>> resolution = getDisambiguator().disambiguate(phrases, null);
-        TIntDoubleMap vector1 = createWeightedVector(phrase1, expand(phrase1, resolution.get(0), 3, 3));
-        TIntDoubleMap vector2 = createWeightedVector(phrase2, expand(phrase2, resolution.get(1), 3, 3));
+        TIntDoubleMap vector1 = createWeightedVector(phrase1, expand(phrase1, resolution.get(0), 10, 1));
+        TIntDoubleMap vector2 = createWeightedVector(phrase2, expand(phrase2, resolution.get(1), 10, 1));
         if (vector1 == null || vector2 == null) {
             return null;
         } else {

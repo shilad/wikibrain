@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 
 import java.util.*;
 
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
@@ -59,6 +60,21 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             return mostSimilarMatrices.getCosimilarityMatrix().getRow(wpId) != null;
         } catch (IOException e) {
             throw new RuntimeException(e);  // should not happen
+        }
+    }
+
+    public boolean hasCachedFeatureVectors() {
+        return mostSimilarMatrices.hasCachedMostSimilarVectors();
+    }
+
+    public SRResultList getCachedMostSimilarLocal(TIntFloatMap vector, int numResults, TIntSet validIds) throws DaoException {
+        if (!mostSimilarMatrices.hasCachedMostSimilarVectors()) {
+            return null;
+        }
+        try {
+            return mostSimilarMatrices.mostSimilar(vector, numResults, validIds);
+        } catch (IOException e){
+            return null;
         }
     }
 
@@ -140,7 +156,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public void write(String path) throws IOException {
-        File dir = new File(path, getName());
+        File dir = getDataDir(path);
         WpIOUtils.mkdirsQuietly(dir);
         normalizers.write(dir);
     }
@@ -151,7 +167,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public void read(String path) throws IOException {
-        File dir = new File(path, getName());
+        File dir = getDataDir(path);
         if (!dir.isDirectory()) {
             LOG.warning("directory " + dir + " does not exist; cannot read files");
             return;
@@ -290,7 +306,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         writeCosimilarity(parentDir, maxHits, null, null);
     }
 
-    protected void writeCosimilarity(String parentDir, int maxHits, PairwiseSimilarity pairwise, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
+    protected void writeCosimilarity(SRMatrices.Mode mode, String parentDir, int maxHits, PairwiseSimilarity pairwise, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
         try {
             TIntSet allPageIds = null;
             // Get all page ids
@@ -311,9 +327,8 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             if (rowIds == null) rowIds = allPageIds;
             if (colIds == null) colIds = allPageIds;
 
-            File dir = FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
-            SRMatrices srm = new SRMatrices(this, pairwise, dir);
-            srm.write(colIds.toArray(), rowIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
+            SRMatrices srm = new SRMatrices(this, pairwise, getDataDir(parentDir));
+            srm.write(mode, colIds.toArray(), rowIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
             mostSimilarMatrices = srm;
         } catch (InterruptedException e){
             throw new RuntimeException(e);
@@ -322,13 +337,15 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     protected void readCosimilarity(String parentDir, PairwiseSimilarity pairwise) throws IOException {
         IOUtils.closeQuietly(mostSimilarMatrices);
-
-        File dir = FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
-        SRMatrices srm = new SRMatrices(this, pairwise, dir);
+        SRMatrices srm = new SRMatrices(this, pairwise, getDataDir(parentDir));
         if (srm.hasReadableMatrices()) {
             srm.readMatrices();
             mostSimilarMatrices = srm;
         }
+    }
+
+    protected File getDataDir(String parentDir) {
+        return FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
     }
 
     public Language getLanguage() {

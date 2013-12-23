@@ -21,6 +21,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
+import org.wikapidia.sr.pairwise.SRMatrices;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -251,7 +252,7 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
 
     @Override
     public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
-        super.writeCosimilarity(path, maxHits, new PairwiseMilneWittenSimilarity(), rowIds, colIds);
+        super.writeCosimilarity(SRMatrices.Mode.COSIMILARITY, path, maxHits, new PairwiseMilneWittenSimilarity(), rowIds, colIds);
     }
 
 

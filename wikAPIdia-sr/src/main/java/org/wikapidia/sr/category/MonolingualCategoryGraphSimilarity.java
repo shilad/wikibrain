@@ -16,6 +16,7 @@ import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.pairwise.SRMatrices;
 
 import java.io.IOException;
 import java.util.Map;
@@ -129,7 +130,7 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
 
     @Override
     public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
-        super.writeCosimilarity(path, maxHits, null, rowIds, colIds);
+        super.writeCosimilarity(SRMatrices.Mode.COSIMILARITY, path, maxHits, null, rowIds, colIds);
     }
 
     @Override

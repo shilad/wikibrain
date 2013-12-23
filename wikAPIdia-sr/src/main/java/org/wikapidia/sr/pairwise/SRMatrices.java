@@ -1,6 +1,7 @@
 package org.wikapidia.sr.pairwise;
 
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
@@ -41,6 +42,11 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class SRMatrices implements Closeable {
+    public enum Mode {
+        FEATURE_AND_TRANSPOSE,  // only the feature and transpose are used
+        COSIMILARITY,           // all
+        ALL
+    };
     private static final Logger LOG = Logger.getLogger(SRMatrices.class.getName());
 
     public static final String COSIMILARITY_MATRIX = "cosimilarityMatrix";
@@ -78,6 +84,13 @@ public class SRMatrices implements Closeable {
         }
     }
 
+    public boolean hasCachedMostSimilarVectors() {
+        return (featureMatrix != null &&
+                featureMatrix.getNumRows() > 0 &&
+                featureTransposeMatrix != null &&
+                featureTransposeMatrix.getNumRows() > 0);
+    }
+
     public SRMatrices(UniversalSRMetric metric, PairwiseSimilarity similarity, File dir) {
         this.universalSr = metric;
         this.language = null;
@@ -108,11 +121,15 @@ public class SRMatrices implements Closeable {
      * @return True if readable files exist for all three matrices.
      */
     public boolean hasReadableMatrices() {
-        return hasAllReadableMatrices() || hasJustReadableCosimilarity();
+        return hasAllReadableMatrices() || hasJustReadableCosimilarity() || hasJustReadableFeatureAndTranspose();
     }
 
     private boolean hasAllReadableMatrices() {
         return  (hasChildFile(FEATURE_MATRIX) && hasChildFile(FEATURE_TRANSPOSE_MATRIX) && hasChildFile(COSIMILARITY_MATRIX));
+    }
+
+    private boolean hasJustReadableFeatureAndTranspose() {
+        return (hasChildFile(FEATURE_MATRIX) && hasChildFile(FEATURE_TRANSPOSE_MATRIX) && !hasChildFile(COSIMILARITY_MATRIX));
     }
 
     private boolean hasJustReadableCosimilarity() {
@@ -131,6 +148,10 @@ public class SRMatrices implements Closeable {
             featureMatrix = null;
             featureTransposeMatrix = null;
             cosimilarityMatrix = readMatrix(COSIMILARITY_MATRIX);
+        } else if (hasJustReadableFeatureAndTranspose()) {
+            featureMatrix = readMatrix(FEATURE_MATRIX);
+            featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
+            cosimilarityMatrix = null;
         } else {
             throw new IOException("No readable matrices");
         }
@@ -163,10 +184,12 @@ public class SRMatrices implements Closeable {
     public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException, DaoException {
         long l = System.currentTimeMillis();
         try {
-            MatrixRow row = cosimilarityMatrix.getRow(wpId);
             SRResultList results = null;
-            if (row != null && row.getNumCols() >= numResults ) {
-                results = rowToResultList(row, numResults, validIds);
+            if (cosimilarityMatrix != null) {
+                MatrixRow row = cosimilarityMatrix.getRow(wpId);
+                if (row != null && row.getNumCols() >= numResults ) {
+                    results = rowToResultList(row, numResults, validIds);
+                }
             }
             if (results != null && results.numDocs() >= numResults) {
                 return results;
@@ -175,6 +198,15 @@ public class SRMatrices implements Closeable {
             } else {
                 return null;
             }
+        } finally {
+//            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
+        }
+    }
+
+    public SRResultList mostSimilar(TIntFloatMap vector, int numResults, TIntSet validIds) throws IOException, DaoException {
+        long l = System.currentTimeMillis();
+        try {
+            return similarity.mostSimilar(this, vector, numResults, validIds);
         } finally {
 //            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
         }
@@ -199,15 +231,20 @@ public class SRMatrices implements Closeable {
         IOUtils.closeQuietly(cosimilarityMatrix);
     }
 
-    public void write(int rowIds[], int colIds[], int maxSimsPerDoc, int threads) throws IOException, InterruptedException, WikapidiaException {
+    public void write(Mode mode, int rowIds[], int colIds[], int maxSimsPerDoc, int threads) throws IOException, InterruptedException, WikapidiaException {
+        if (similarity == null && (mode == Mode.ALL || mode == Mode.FEATURE_AND_TRANSPOSE)) {
+            throw new IllegalArgumentException("mode " + mode + " requires similarity but it was null");
+        }
         for (File f : new File[] {getFeatureMatrixPath(), getCosimilarityMatrixPath(), getFeatureTransposeMatrixPath()}) {
             if (f.exists()) { FileUtils.deleteQuietly(f); }
         }
-        if (similarity != null) {
+        if (mode == Mode.ALL || mode == Mode.FEATURE_AND_TRANSPOSE) {
             writeFeatureMatrix(rowIds, threads);
             writeTranspose();
         }
-        writeCosimilarity(rowIds, colIds, maxSimsPerDoc, threads);
+        if (mode == Mode.ALL || mode == Mode.COSIMILARITY) {
+            writeCosimilarity(rowIds, colIds, maxSimsPerDoc, threads);
+        }
     }
     public void writeFeatureMatrix(final int rowIds[], final int threads) throws WikapidiaException, InterruptedException, IOException {
         List<Integer> wpIds2 = new ArrayList<Integer>();

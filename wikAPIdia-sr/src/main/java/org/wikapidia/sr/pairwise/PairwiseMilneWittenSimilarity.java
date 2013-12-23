@@ -1,5 +1,6 @@
 package org.wikapidia.sr.pairwise;
 
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -21,30 +22,12 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
 
     private static final Logger LOG = Logger.getLogger(PairwiseCosineSimilarity.class.getName());
 
-    MilneWittenCore milneWittenCore = new MilneWittenCore();
-
     public PairwiseMilneWittenSimilarity() {
     }
 
-    public double similarity(SRMatrices matrices, int wpID1, int wpId2) throws IOException {
-        double sim = 0;
-        MatrixRow row1 = matrices.getFeatureMatrix().getRow(wpID1);
-        MatrixRow row2 = matrices.getFeatureMatrix().getRow(wpId2);
-        if (row1 != null && row2 != null) {
-            sim = milneWittenSimilarity(row1.asTroveMap(), row2.asTroveMap());
-        }
-        return sim;
-    }
-
     @Override
-    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
-        SparseMatrixRow row = matrices.getFeatureMatrix().getRow(wpId);
-        if (row == null) {
-            return new SRResultList(0);
-        }
-
+    public SRResultList mostSimilar(SRMatrices matrices, TIntFloatMap rowA, int maxResults, TIntSet validIds) throws IOException {
         Leaderboard leaderboard = new Leaderboard(maxResults);
-        TIntFloatHashMap rowA = row.asTroveMap();
         int sizeA = 0;
         TIntSet linkIds = new TIntHashSet();
         for (int i : rowA.keys()){
@@ -91,20 +74,13 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
         return result;
     }
 
-    private double milneWittenSimilarity(TIntFloatHashMap map1, TIntFloatHashMap map2) {
-        TIntSet a = new TIntHashSet();
-        TIntSet b = new TIntHashSet();
-
-        for(int key: map1.keys()) {
-            if (map1.get(key) == 1) {
-                a.add(key);
-            }
-            if (map2.get(key) == 1) {
-                b.add(key);
-            }
+    @Override
+    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
+        SparseMatrixRow row = matrices.getFeatureMatrix().getRow(wpId);
+        if (row == null) {
+            return new SRResultList(0);
         }
-
-        return milneWittenCore.similarity(a, b, map1.size(), false).getScore();
+        return mostSimilar(matrices, row.asTroveMap(), maxResults, validIds);
     }
 
     @Override

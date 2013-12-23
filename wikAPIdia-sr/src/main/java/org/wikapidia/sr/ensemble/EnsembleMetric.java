@@ -17,6 +17,7 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.*;
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
 public class EnsembleMetric extends BaseMonolingualSRMetric {
     private static final Logger LOG = Logger.getLogger(EnsembleMetric.class.getName());
 
-    private final int EXTRA_SEARCH_DEPTH = 2;
+    public static final int EXTRA_SEARCH_DEPTH = 2;
     private List<MonolingualSRMetric> metrics;
     private Ensemble ensemble;
     private boolean resolvePhrases = true;
@@ -118,7 +119,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
-        return mostSimilar(pageId,maxResults,null);
+        return mostSimilar(pageId, maxResults, null);
     }
 
     @Override
@@ -150,6 +151,11 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
         return ensemble.predictMostSimilar(scores,maxResults);
     }
 
+    /**
+     * Training cascades to base metrics.
+     * @param dataset
+     * @throws DaoException
+     */
     @Override
     public void trainSimilarity(Dataset dataset) throws DaoException {
         for (MonolingualSRMetric metric : metrics) {
@@ -175,6 +181,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     }
 
     /**
+     * Training cascades to base metrics.
      * TODO: adapt this to a MostSimilarDataset
      * @param dataset
      * @param numResults
@@ -242,7 +249,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
 
     @Override
     public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
-        super.writeCosimilarity(path, maxHits, null, rowIds, colIds);
+        super.writeCosimilarity(SRMatrices.Mode.COSIMILARITY, path, maxHits, null, rowIds, colIds);
     }
 
     @Override
@@ -294,7 +301,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             LocalPageDao pagehelper = getConfigurator().get(LocalPageDao.class,config.getString("pageDao"));
             sr = new EnsembleMetric(language, metrics,ensemble,disambiguator,pagehelper);
             if (config.hasPath("resolvephrases")) {
-                sr.resolvePhrases = config.getBoolean("resolvephrases");
+                sr.setResolvePhrases(config.getBoolean("resolvephrases"));
             }
 
             BaseMonolingualSRMetric.configureBase(getConfigurator(), sr, config);

@@ -1,5 +1,6 @@
 package org.wikapidia.sr.pairwise;
 
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
@@ -40,30 +41,10 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
         }
     }
 
-    public double similarity(SRMatrices matrices, int wpId1, int wpId2) throws IOException {
-        double sim = 0;
-        MatrixRow row1 = matrices.getFeatureMatrix().getRow(wpId1);
-        if (row1 != null) {
-            MatrixRow row2 = matrices.getFeatureMatrix().getRow(wpId2);
-            if (row2 != null) {
-                    sim = cosineSimilarity(row1.asTroveMap(), row2.asTroveMap());
-            }
-        }
-        return sim;
-    }
-
     @Override
-    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
-        MatrixRow row = matrices.getFeatureMatrix().getRow(wpId);
-        if (row == null) {
-            LOG.info("unknown wpId: " + wpId);
-            return new SRResultList(0);
-        }
+    public SRResultList mostSimilar(SRMatrices matrices, TIntFloatMap vector, int maxResults, TIntSet validIds) throws IOException {
         initIfNeeded(matrices);
-
-        TIntFloatHashMap vector = row.asTroveMap();
         TIntDoubleHashMap dots = new TIntDoubleHashMap();
-
         for (int id : vector.keys()) {
             float val1 = vector.get(id);
             MatrixRow row2 = matrices.getFeatureTransposeMatrix().getRow(id);
@@ -93,23 +74,17 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
         return result;
     }
 
-
-    private double cosineSimilarity(TIntFloatHashMap map1, TIntFloatHashMap map2) {
-        double xDotX = 0.0;
-        double yDotY = 0.0;
-        double xDotY = 0.0;
-
-        for (float x: map1.values()) { xDotX += x * x; }
-        for (float y: map2.values()) { yDotY += y * y; }
-        for (int id : map1.keys()) {
-            if (map2.containsKey(id)) {
-                xDotY += map1.get(id) * map2.get(id);
-            }
+    @Override
+    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
+        MatrixRow row = matrices.getFeatureMatrix().getRow(wpId);
+        if (row == null) {
+            LOG.info("unknown wpId: " + wpId);
+            return new SRResultList(0);
         }
-        return xDotY / Math.sqrt(xDotX * yDotY);
+        return mostSimilar(matrices, row.asTroveMap(), maxResults, validIds);
     }
 
-    private double norm(TIntFloatHashMap vector) {
+    private double norm(TIntFloatMap vector) {
         double length = 0;
         for (float x : vector.values()) {
             length += x * x;
