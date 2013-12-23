@@ -33,7 +33,7 @@ public class IteratorTest {
         PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 4);
 
         int i = 0;
-        while (i < 4) {
+        while (i < 3) {
             //see how long it takes to get page view stats for one hour
             double start = System.currentTimeMillis();
             PageViewDataStruct data = it.next();
@@ -47,7 +47,7 @@ public class IteratorTest {
                 }
                 catch(NullPointerException e){
                     System.out.println("Message: " + e.getMessage());
-                    e.printStackTrace();
+                    System.out.println("Stacktrace: " + e.getStackTrace());
                     continue;
                 }
             }
