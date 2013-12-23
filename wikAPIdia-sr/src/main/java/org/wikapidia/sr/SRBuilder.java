@@ -200,6 +200,7 @@ public class SRBuilder {
 
     public static void main(String args[]) throws ConfigurationException, IOException, WikapidiaException, DaoException {
         Options options = new Options();
+
         //Number of Max Results(otherwise take from config)
         options.addOption(
                 new DefaultOptionBuilder()
@@ -248,13 +249,16 @@ public class SRBuilder {
                         .withDescription("build cosimilarity matrices")
                         .create("s"));
 
+        EnvBuilder.addStandardOptions(options);
+
+
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.err.println("Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("MetricTrainer", options);
+            new HelpFormatter().printHelp("SRBuilder", options);
             return;
         }
 
