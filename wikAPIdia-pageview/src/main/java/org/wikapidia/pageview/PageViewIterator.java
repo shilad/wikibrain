@@ -38,6 +38,7 @@ public class PageViewIterator implements Iterator {
     private Language lang;
     private static String BASE_URL = "http://dumps.wikimedia.your.org/other/pagecounts-raw/";
     private PageViewDataStruct nextData;
+    private PageViewDataStruct currentData;
 
     /**
      * constructs a PageViewIterator and parses a PageViewDataStruct from the first hour input in the constructor,
@@ -64,6 +65,19 @@ public class PageViewIterator implements Iterator {
         this.endDate = new DateTime(endYear, endMonth, endDay, endHour, 0);
     }
 
+
+    public  PageViewIterator(Language lang, DateTime currentDate, DateTime endDate){
+        this.lang = lang;
+        this.currentDate = currentDate;
+        this.endDate = endDate;
+    }
+
+    public PageViewIterator(Language lang, DateTime currentDate){
+        this.lang = lang;
+        this.currentDate = currentDate;
+        this.endDate = currentDate.plusHours(1);
+    }
+
     public void remove() {
         throw new UnsupportedOperationException("Remove not supported for PageViewIterator");
     }
@@ -78,15 +92,6 @@ public class PageViewIterator implements Iterator {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        return nextData;
-    }
-
-    /**
-     * sets nextData to the PageViewDataStruct of the next hour in this iterator's range
-     * called by next() to set the value of next data
-     * @return false if nextData is null, true otherwise
-     */
-    public boolean hasNext() {
         try {
             nextData = getPageViewData();
         }
@@ -99,9 +104,19 @@ public class PageViewIterator implements Iterator {
         catch (DaoException dE) {
             dE.printStackTrace();
         }
+        return nextData;
+    }
 
 
-        return !(nextData == null);
+
+    /**
+     * sets nextData to the PageViewDataStruct of the next hour in this iterator's range
+     * called by next() to set the value of next data
+     * @return false if nextData is null, true otherwise
+     */
+    public boolean hasNext() {
+
+        return !(currentDate.getMillis() >= endDate.getMillis());
     }
 
     /**
@@ -134,16 +149,24 @@ public class PageViewIterator implements Iterator {
         int minutes = 0;
         while (pageViewDataFile == null && minutes < 60) {
             int seconds = 0;
+            boolean flag = false;
             while (pageViewDataFile == null && seconds < 60) {
                 String minutesString = twoDigIntStr(minutes);
                 String secondsString = twoDigIntStr(seconds);
                 String fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString + minutesString + secondsString + fileNameSuffix;
                 pageViewDataFile = downloadFile(homeFolder, fileName, tempFolder);
+                if(pageViewDataFile != null){
+                    flag = true;
+                    break;
+                }
                 seconds++;
             }
+            if(flag)
+                break;
             minutes++;
         }
-
+        if(pageViewDataFile == null)
+            throw new WikapidiaException("null pageViewDataFile");
         TIntIntMap pageViewCounts = parsePageViewDataFromFile(lang, pageViewDataFile);
         DateTime nextDate = currentDate.plusHours(1);
         PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
@@ -177,7 +200,7 @@ public class PageViewIterator implements Iterator {
             else{
                 System.out.println("File existed. Skip...");
             }
-            File ungzipDest = new File(localPath.split("\\.")[0] + ".txt");
+            File ungzipDest = new File(localPath + ".txt");
             if(!ungzipDest.exists()){
                 ungzip(dest,ungzipDest);
             }

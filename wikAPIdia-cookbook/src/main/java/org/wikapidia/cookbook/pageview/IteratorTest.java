@@ -30,10 +30,10 @@ public class IteratorTest {
         Env env = new EnvBuilder().build();
         Configurator configurator = env.getConfigurator();
         LocalPageDao pdao = configurator.get(LocalPageDao.class, "sql");
-        PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 4);
+        PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 5);
 
         int i = 0;
-        while (i < 3) {
+        while (it.hasNext()) {
             //see how long it takes to get page view stats for one hour
             double start = System.currentTimeMillis();
             PageViewDataStruct data = it.next();

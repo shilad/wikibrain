@@ -1,8 +1,11 @@
 package org.wikapidia.pageview;
 
 import gnu.trove.map.TIntIntMap;
+import gnu.trove.procedure.TIntIntProcedure;
 import org.joda.time.DateTime;
 import org.wikapidia.core.lang.Language;
+
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,14 +16,17 @@ import org.wikapidia.core.lang.Language;
  */
 public class PageViewDataStruct {
 
-    private final Language lang;
-    private final DateTime start;
-    private final DateTime end;
+    Language lang;
+    DateTime start;
+    DateTime end;
+
 
     // represents page views for the time period specified by start and end
     // maps page IDs to the number of views that page has had in the specified time
     // will represent one hour for the first iteration
-    private final TIntIntMap stats;
+
+    //a int-int map, key is page id, value is number of page views
+    TIntIntMap stats;
 
     public PageViewDataStruct(Language lang, DateTime start, DateTime end, TIntIntMap stats) {
         this.lang = lang;
@@ -28,6 +34,7 @@ public class PageViewDataStruct {
         this.end = end;
         this.stats = stats;
     }
+
 
     public Language getLang() {
         return lang;
@@ -44,4 +51,11 @@ public class PageViewDataStruct {
     public TIntIntMap getPageViewStats() {
         return stats;
     }
+
+
+
+
+
+
+
 }
