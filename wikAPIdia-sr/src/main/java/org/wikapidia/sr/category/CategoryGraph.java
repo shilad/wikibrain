@@ -1,5 +1,8 @@
 package org.wikapidia.sr.category;
 
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.set.TIntSet;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
@@ -9,8 +12,7 @@ import java.util.Set;
  * @author Matt Lesicko
  */
 public class CategoryGraph implements Serializable{
-    protected Map<Integer,Integer> catIndexes;
-    protected Set<Integer> topLevelCategories;
+    protected TIntIntMap catIndexes;
 
     protected double[] catCosts;  // the cost of travelling through each category
     protected int[][] catParents;
