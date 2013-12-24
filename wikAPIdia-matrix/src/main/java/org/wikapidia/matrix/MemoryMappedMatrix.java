@@ -44,10 +44,11 @@ public class MemoryMappedMatrix {
     }
 
     public void close() throws IOException {
-        channel.close();
         for (MappedBufferWrapper buffer : buffers) {
             buffer.close();
         }
+        System.gc();    // try to garbage collect any freed buffers
+        channel.close();
     }
 
     private void pageInRows() throws IOException {
