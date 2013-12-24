@@ -269,10 +269,11 @@ public class SRMatrices implements Closeable {
     }
 
     public void writeTranspose() throws IOException {
+        int totalMbs = (int) (Runtime.getRuntime().maxMemory() / (1024*1024));
+        int bufferSize = Math.min(1000, totalMbs / 5);  // min of 1GB or 1/5 of total memory
         SparseMatrixTransposer transposer = new SparseMatrixTransposer(
                 new SparseMatrix(getFeatureMatrixPath()),
-                getFeatureTransposeMatrixPath(),
-                1024*1024*500); //500mb buffer
+                getFeatureTransposeMatrixPath(), bufferSize);
         transposer.transpose();
         featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
     }
