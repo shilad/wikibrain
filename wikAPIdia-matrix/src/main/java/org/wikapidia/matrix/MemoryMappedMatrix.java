@@ -6,9 +6,13 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -133,6 +137,24 @@ public class MemoryMappedMatrix {
             return buffer.slice();
         }
         public synchronized void close() {
+            // code is adapted from lucene MMap Directory
+            try {
+                AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                    public Object run() throws Exception {
+                        final Method getCleanerMethod = buffer.getClass()
+                                .getMethod("cleaner");
+                        getCleanerMethod.setAccessible(true);
+                        final Object cleaner = getCleanerMethod.invoke(buffer);
+                        if (cleaner != null) {
+                            cleaner.getClass().getMethod("clean")
+                                    .invoke(cleaner);
+                        }
+                        return null;
+                    }
+                });
+            } catch (PrivilegedActionException e) {
+                LOG.log(Level.WARNING, "unable to unmap the mapped buffer", e);
+            }
             buffer = null;
         }
     }
