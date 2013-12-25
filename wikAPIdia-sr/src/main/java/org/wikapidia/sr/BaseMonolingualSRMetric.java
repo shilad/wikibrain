@@ -1,6 +1,10 @@
 package org.wikapidia.sr;
 
 import com.typesafe.config.Config;
+
+import java.util.*;
+
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
@@ -27,9 +31,6 @@ import org.wikapidia.utils.WpThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
@@ -62,7 +63,22 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         }
     }
 
-    public SRResultList getCachedMostSimilarLocal(int wpId, int numResults, TIntSet validIds) {
+    public boolean hasCachedFeatureVectors() {
+        return mostSimilarMatrices.hasCachedMostSimilarVectors();
+    }
+
+    public SRResultList getCachedMostSimilarLocal(TIntFloatMap vector, int numResults, TIntSet validIds) throws DaoException {
+        if (!mostSimilarMatrices.hasCachedMostSimilarVectors()) {
+            return null;
+        }
+        try {
+            return mostSimilarMatrices.mostSimilar(vector, numResults, validIds);
+        } catch (IOException e){
+            return null;
+        }
+    }
+
+    public SRResultList getCachedMostSimilarLocal(int wpId, int numResults, TIntSet validIds) throws DaoException {
         if (!hasCachedMostSimilarLocal(wpId)){
             return null;
         }
@@ -140,7 +156,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public void write(String path) throws IOException {
-        File dir = new File(path, getName());
+        File dir = getDataDir(path);
         WpIOUtils.mkdirsQuietly(dir);
         normalizers.write(dir);
     }
@@ -151,7 +167,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public void read(String path) throws IOException {
-        File dir = new File(path, getName());
+        File dir = getDataDir(path);
         if (!dir.isDirectory()) {
             LOG.warning("directory " + dir + " does not exist; cannot read files");
             return;
@@ -185,12 +201,12 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     @Override
     public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
         Language language = getLanguage();
-        HashSet<LocalString> context = new HashSet<LocalString>();
-        context.add(new LocalString(language,phrase2));
-        LocalId similar1 = disambiguator.disambiguate(new LocalString(language, phrase1), context);
-        context.clear();
-        context.add(new LocalString(language,phrase1));
-        LocalId similar2 = disambiguator.disambiguate(new LocalString(language,phrase2),context);
+        List<LocalString> phrases = Arrays.asList(
+                new LocalString(language, phrase1),
+                new LocalString(language, phrase2));
+        List<LocalId> resolution = disambiguator.disambiguateTop(phrases, null);
+        LocalId similar1 = resolution.get(0);
+        LocalId similar2 = resolution.get(1);
         if (similar1==null||similar2==null){
             return new SRResult();
         }
@@ -205,7 +221,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults) throws DaoException {
-        LocalId similar = disambiguator.disambiguate(new LocalString(getLanguage(), phrase),null);
+        LocalId similar = disambiguator.disambiguateTop(new LocalString(getLanguage(), phrase), null);
         if (similar==null){
             SRResultList resultList = new SRResultList(1);
             resultList.set(0, new SRResult());
@@ -216,7 +232,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
-        LocalId similar = disambiguator.disambiguate(new LocalString(getLanguage(), phrase),null);
+        LocalId similar = disambiguator.disambiguateTop(new LocalString(getLanguage(), phrase), null);
         if (similar==null){
             SRResultList resultList = new SRResultList(1);
             resultList.set(0, new SRResult());
@@ -278,32 +294,41 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         for (String phrase : phrases){
             localStringList.add(new LocalString(getLanguage(), phrase));
         }
-        List<LocalId> localIds = disambiguator.disambiguate(localStringList, null);
+        List<LocalId> localIds = disambiguator.disambiguateTop(localStringList, null);
         for (int i=0; i<phrases.length; i++){
             ids[i] = localIds.get(i).getId();
         }
         return cosimilarity(ids);
     }
 
-    protected void writeCosimilarity(String parentDir, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
+    @Override
+    public void writeCosimilarity(String parentDir, int maxHits) throws IOException, DaoException, WikapidiaException {
+        writeCosimilarity(parentDir, maxHits, null, null);
+    }
+
+    protected void writeCosimilarity(SRMatrices.Mode mode, String parentDir, int maxHits, PairwiseSimilarity pairwise, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
         try {
+            TIntSet allPageIds = null;
             // Get all page ids
-            DaoFilter pageFilter = new DaoFilter()
-                    .setLanguages(getLanguage())
-                    .setNameSpaces(NameSpace.ARTICLE) // TODO: should this come from conf?
-                    .setDisambig(false)
-                    .setRedirect(false);
-            Iterable<LocalPage> localPages = localPageDao.get(pageFilter);
-            TIntSet pageIds = new TIntHashSet();
-            for (LocalPage page : localPages) {
-                if (page != null) {
-                    pageIds.add(page.getLocalId());
+            if (rowIds == null || colIds == null) {
+                DaoFilter pageFilter = new DaoFilter()
+                        .setLanguages(getLanguage())
+                        .setNameSpaces(NameSpace.ARTICLE)
+                        .setDisambig(false)
+                        .setRedirect(false);
+                Iterable<LocalPage> localPages = localPageDao.get(pageFilter);
+                allPageIds = new TIntHashSet();
+                for (LocalPage page : localPages) {
+                    if (page != null) {
+                        allPageIds.add(page.getLocalId());
+                    }
                 }
             }
+            if (rowIds == null) rowIds = allPageIds;
+            if (colIds == null) colIds = allPageIds;
 
-            File dir = FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
-            SRMatrices srm = new SRMatrices(this, pairwise, dir);
-            srm.write(pageIds.toArray(), null, WpThreadUtils.getMaxThreads());
+            SRMatrices srm = new SRMatrices(this, pairwise, getDataDir(parentDir));
+            srm.write(mode, colIds.toArray(), rowIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
             mostSimilarMatrices = srm;
         } catch (InterruptedException e){
             throw new RuntimeException(e);
@@ -312,13 +337,15 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     protected void readCosimilarity(String parentDir, PairwiseSimilarity pairwise) throws IOException {
         IOUtils.closeQuietly(mostSimilarMatrices);
-
-        File dir = FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
-        SRMatrices srm = new SRMatrices(this, pairwise, dir);
+        SRMatrices srm = new SRMatrices(this, pairwise, getDataDir(parentDir));
         if (srm.hasReadableMatrices()) {
             srm.readMatrices();
             mostSimilarMatrices = srm;
         }
+    }
+
+    protected File getDataDir(String parentDir) {
+        return FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
     }
 
     public Language getLanguage() {
@@ -339,6 +366,16 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     public SrNormalizers getNormalizers() {
         return normalizers;
+    }
+
+    @Override
+    public Normalizer getMostSimilarNormalizer() {
+        return normalizers.getMostSimilarNormalizer();
+    }
+
+    @Override
+    public Normalizer getSimilarityNormalizer() {
+        return normalizers.getSimilarityNormalizer();
     }
 
     public SRMatrices getMostSimilarMatrices() {

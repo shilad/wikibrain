@@ -1,6 +1,7 @@
 package org.wikapidia.sr.pairwise;
 
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
@@ -12,7 +13,10 @@ import org.wikapidia.matrix.*;
 import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.UniversalSRMetric;
+import org.wikapidia.sr.normalize.IdentityNormalizer;
+import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Leaderboard;
+import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -32,9 +36,17 @@ import java.util.logging.Logger;
  * 2. The transpose of the feature matrix
  * 3. The cosimilarity matrix.
  *
+ * Some metrics don't support the feature and transpose metrics.
+ * In this case, they'll only have the cosimilarity matrix.
+ *
  * @author Shilad Sen
  */
 public class SRMatrices implements Closeable {
+    public enum Mode {
+        FEATURE_AND_TRANSPOSE,  // only the feature and transpose are used
+        COSIMILARITY,           // all
+        ALL
+    };
     private static final Logger LOG = Logger.getLogger(SRMatrices.class.getName());
 
     public static final String COSIMILARITY_MATRIX = "cosimilarityMatrix";
@@ -52,6 +64,15 @@ public class SRMatrices implements Closeable {
     private SparseMatrix featureTransposeMatrix = null;
     private SparseMatrix cosimilarityMatrix = null;
 
+    /**
+     *
+     * @param metric
+     * @param dir
+     */
+    public SRMatrices(MonolingualSRMetric metric, File dir) {
+        this(metric, null, dir);
+    }
+
     public SRMatrices(MonolingualSRMetric metric, PairwiseSimilarity similarity, File dir) {
         this.monoSr = metric;
         this.language = metric.getLanguage();
@@ -63,6 +84,13 @@ public class SRMatrices implements Closeable {
         }
     }
 
+    public boolean hasCachedMostSimilarVectors() {
+        return (featureMatrix != null &&
+                featureMatrix.getNumRows() > 0 &&
+                featureTransposeMatrix != null &&
+                featureTransposeMatrix.getNumRows() > 0);
+    }
+
     public SRMatrices(UniversalSRMetric metric, PairwiseSimilarity similarity, File dir) {
         this.universalSr = metric;
         this.language = null;
@@ -72,12 +100,6 @@ public class SRMatrices implements Closeable {
             FileUtils.deleteQuietly(dir);
             dir.mkdirs();
         }
-    }
-
-    public void setMatrices(SparseMatrix featureMatrix, SparseMatrix featureTransposeMatrix, SparseMatrix cosimilarityMatrix) {
-        this.featureMatrix = featureMatrix;
-        this.featureTransposeMatrix = featureTransposeMatrix;
-        this.cosimilarityMatrix = cosimilarityMatrix;
     }
 
     public void clear() {
@@ -99,18 +121,40 @@ public class SRMatrices implements Closeable {
      * @return True if readable files exist for all three matrices.
      */
     public boolean hasReadableMatrices() {
-        return getChildFile(FEATURE_MATRIX).isFile()
-        &&     getChildFile(FEATURE_TRANSPOSE_MATRIX).isFile()
-        &&     getChildFile(COSIMILARITY_MATRIX).isFile();
+        return hasAllReadableMatrices() || hasJustReadableCosimilarity() || hasJustReadableFeatureAndTranspose();
+    }
+
+    private boolean hasAllReadableMatrices() {
+        return  (hasChildFile(FEATURE_MATRIX) && hasChildFile(FEATURE_TRANSPOSE_MATRIX) && hasChildFile(COSIMILARITY_MATRIX));
+    }
+
+    private boolean hasJustReadableFeatureAndTranspose() {
+        return (hasChildFile(FEATURE_MATRIX) && hasChildFile(FEATURE_TRANSPOSE_MATRIX) && !hasChildFile(COSIMILARITY_MATRIX));
+    }
+
+    private boolean hasJustReadableCosimilarity() {
+        return (!hasChildFile(FEATURE_MATRIX) && !hasChildFile(FEATURE_TRANSPOSE_MATRIX) && hasChildFile(COSIMILARITY_MATRIX));
     }
 
     /**
      * TODO: specify parameters for num pages and page size
      */
     public void readMatrices() throws IOException {
-        featureMatrix = readMatrix(FEATURE_MATRIX);
-        featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
-        cosimilarityMatrix = readMatrix(COSIMILARITY_MATRIX);
+        if (hasAllReadableMatrices()) {
+            featureMatrix = readMatrix(FEATURE_MATRIX);
+            featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
+            cosimilarityMatrix = readMatrix(COSIMILARITY_MATRIX);
+        } else if (hasJustReadableCosimilarity()) {
+            featureMatrix = null;
+            featureTransposeMatrix = null;
+            cosimilarityMatrix = readMatrix(COSIMILARITY_MATRIX);
+        } else if (hasJustReadableFeatureAndTranspose()) {
+            featureMatrix = readMatrix(FEATURE_MATRIX);
+            featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
+            cosimilarityMatrix = null;
+        } else {
+            throw new IOException("No readable matrices");
+        }
     }
 
     public File getFeatureMatrixPath() {
@@ -137,19 +181,32 @@ public class SRMatrices implements Closeable {
         return cosimilarityMatrix;
     }
 
-    public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException, DaoException {
         long l = System.currentTimeMillis();
         try {
-            MatrixRow row = cosimilarityMatrix.getRow(wpId);
             SRResultList results = null;
-            if (row != null && row.getNumCols() >= numResults ) {
-                results = rowToResultList(row, numResults, validIds);
+            if (cosimilarityMatrix != null) {
+                MatrixRow row = cosimilarityMatrix.getRow(wpId);
+                if (row != null && row.getNumCols() >= numResults ) {
+                    results = rowToResultList(row, numResults, validIds);
+                }
             }
             if (results != null && results.numDocs() >= numResults) {
                 return results;
-            } else {
+            } else if (similarity != null) {
                 return similarity.mostSimilar(this, wpId, numResults, validIds);
+            } else {
+                return null;
             }
+        } finally {
+//            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
+        }
+    }
+
+    public SRResultList mostSimilar(TIntFloatMap vector, int numResults, TIntSet validIds) throws IOException, DaoException {
+        long l = System.currentTimeMillis();
+        try {
+            return similarity.mostSimilar(this, vector, numResults, validIds);
         } finally {
 //            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
         }
@@ -174,13 +231,20 @@ public class SRMatrices implements Closeable {
         IOUtils.closeQuietly(cosimilarityMatrix);
     }
 
-    public void write(int rowIds[], int colIds[], int threads) throws IOException, InterruptedException, WikapidiaException {
+    public void write(Mode mode, int rowIds[], int colIds[], int maxSimsPerDoc, int threads) throws IOException, InterruptedException, WikapidiaException {
+        if (similarity == null && (mode == Mode.ALL || mode == Mode.FEATURE_AND_TRANSPOSE)) {
+            throw new IllegalArgumentException("mode " + mode + " requires similarity but it was null");
+        }
         for (File f : new File[] {getFeatureMatrixPath(), getCosimilarityMatrixPath(), getFeatureTransposeMatrixPath()}) {
             if (f.exists()) { FileUtils.deleteQuietly(f); }
         }
-        writeFeatureMatrix(rowIds, threads);
-        writeTranspose();
-        writeCosimilarity(rowIds, colIds, threads);
+        if (mode == Mode.ALL || mode == Mode.FEATURE_AND_TRANSPOSE) {
+            writeFeatureMatrix(rowIds, threads);
+            writeTranspose();
+        }
+        if (mode == Mode.ALL || mode == Mode.COSIMILARITY) {
+            writeCosimilarity(rowIds, colIds, maxSimsPerDoc, threads);
+        }
     }
     public void writeFeatureMatrix(final int rowIds[], final int threads) throws WikapidiaException, InterruptedException, IOException {
         List<Integer> wpIds2 = new ArrayList<Integer>();
@@ -205,31 +269,46 @@ public class SRMatrices implements Closeable {
     }
 
     public void writeTranspose() throws IOException {
+        int totalMbs = (int) (Runtime.getRuntime().maxMemory() / (1024*1024));
+        int bufferSize = Math.min(1000, totalMbs / 5);  // min of 1GB or 1/5 of total memory
         SparseMatrixTransposer transposer = new SparseMatrixTransposer(
                 new SparseMatrix(getFeatureMatrixPath()),
-                getFeatureTransposeMatrixPath(),
-                1024*1024*500); //500mb buffer
+                getFeatureTransposeMatrixPath(), bufferSize);
         transposer.transpose();
         featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
     }
 
-    public void writeCosimilarity(final int rowIds[], final int colIds[], final int maxSimsPerDoc) throws IOException, InterruptedException {
+    public void writeCosimilarity(final int rowIds[], final int colIds[], final int maxSimsPerDoc, int maxThreads) throws IOException, InterruptedException {
         List<Integer> wpIds2 = new ArrayList<Integer>();
         for (int id : rowIds) { wpIds2.add(id); }
-        writeCosimilarity(wpIds2, colIds, maxSimsPerDoc);
+        writeCosimilarity(wpIds2, colIds, maxSimsPerDoc, maxThreads);
     }
 
-    public void writeCosimilarity(List<Integer> rowIds, final int colIds[], final int maxSimsPerDoc) throws IOException {
+    public void writeCosimilarity(List<Integer> rowIds, final int colIds[], final int maxSimsPerDoc, int maxThreads) throws IOException {
         final AtomicInteger idCounter = new AtomicInteger();
         final AtomicLong cellCounter = new AtomicLong();
-        ValueConf vconf = new ValueConf((float)similarity.getMinValue(), (float)similarity.getMaxValue());
+        ValueConf vconf;
+        if (similarity == null) {
+            vconf = new ValueConf();    // TODO: fixme
+        } else {
+            vconf = new ValueConf((float)similarity.getMinValue(), (float)similarity.getMaxValue());
+        }
         final SparseMatrixWriter writer = new SparseMatrixWriter(getCosimilarityMatrixPath(), vconf);
         final TIntSet colIdSet = colIds == null ? null : new TIntHashSet(colIds);
-        ParallelForEach.loop(rowIds, new Procedure<Integer>() {
-            public void call(Integer wpId) throws IOException {
-                writeSim(writer, wpId, colIdSet, maxSimsPerDoc, idCounter, cellCounter);
-            }
-        }, Integer.MAX_VALUE);
+        Normalizer simNormalizer = monoSr.getSimilarityNormalizer();
+        Normalizer mostSimNormalizer = monoSr.getMostSimilarNormalizer();
+        monoSr.setMostSimilarNormalizer(new IdentityNormalizer());
+        monoSr.setSimilarityNormalizer(new IdentityNormalizer());
+        try {
+            ParallelForEach.loop(rowIds, maxThreads, new Procedure<Integer>() {
+                public void call(Integer wpId) throws IOException, DaoException {
+                    writeSim(writer, wpId, colIdSet, maxSimsPerDoc, idCounter, cellCounter);
+                }
+            }, Integer.MAX_VALUE);
+        } finally {
+            monoSr.setSimilarityNormalizer(simNormalizer);
+            monoSr.setMostSimilarNormalizer(mostSimNormalizer);
+        }
 
         LOG.info("wrote " + cellCounter.get() + " non-zero similarity cells");
         writer.finish();
@@ -240,11 +319,16 @@ public class SRMatrices implements Closeable {
         return new SparseMatrix(getChildFile(name));
     }
 
-    private void writeSim(SparseMatrixWriter writer, Integer wpId, TIntSet colIds, int maxSimsPerDoc, AtomicInteger idCounter, AtomicLong cellCounter) throws IOException {
+    private void writeSim(SparseMatrixWriter writer, Integer wpId, TIntSet colIds, int maxSimsPerDoc, AtomicInteger idCounter, AtomicLong cellCounter) throws IOException, DaoException {
         if (idCounter.incrementAndGet() % 10000 == 0) {
-            LOG.info("finding matches for luceneId " + idCounter.get());
+            LOG.info("finding matches for page " + idCounter.get());
         }
-        SRResultList scores = similarity.mostSimilar(this, wpId, maxSimsPerDoc, colIds);
+        SRResultList scores;
+        if (similarity != null) {
+            scores = similarity.mostSimilar(this, wpId, maxSimsPerDoc, colIds);
+        } else {
+            scores = monoSr.mostSimilar(wpId, maxSimsPerDoc, colIds);
+        }
         if (scores != null) {
             int ids[] = scores.getIds();
             cellCounter.getAndIncrement();

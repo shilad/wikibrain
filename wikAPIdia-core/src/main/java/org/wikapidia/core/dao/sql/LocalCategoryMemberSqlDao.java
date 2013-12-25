@@ -9,11 +9,9 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.*;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.LocalCategoryMember;
-import org.wikapidia.core.model.LocalArticle;
-import org.wikapidia.core.model.LocalCategory;
-import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -167,6 +165,21 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         return localCategoryDao.getByIds(localArticle.getLanguage(), categoryIds);
     }
 
+    @Override
+    public CategoryGraph getGraph(Language language) throws DaoException {
+        String key = "cat-graph-" + language.getLangCode();
+        if (cache != null) {
+            CategoryGraph graph = (CategoryGraph) cache.get(key, LocalPage.class, LocalCategoryMember.class);
+            if (graph != null) {
+                return graph;
+            }
+        }
+        LocalCategoryGraphBuilder builder = new LocalCategoryGraphBuilder();
+        CategoryGraph graph =  builder.build(language, localPageDao, this);
+        cache.put(key, graph);
+        return graph;
+    }
+
     private Collection<Integer> extractIds(Result<Record> result, boolean categoryIds) {
         if (result.isEmpty()) {
             return null;
@@ -210,13 +223,20 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                 return null;
             }
             try {
-                return new LocalCategoryMemberSqlDao(
+                LocalCategoryMemberSqlDao dao = new LocalCategoryMemberSqlDao(
                         getConfigurator().get(
                                 WpDataSource.class,
                                 config.getString("dataSource")),
                         getConfigurator().get(LocalCategoryDao.class),
-                        getConfigurator().get(LocalArticleDao.class)
+                        getConfigurator().get(LocalPageDao.class)
                 );
+                String cachePath = getConfig().get().getString("dao.sqlCachePath");
+                File cacheDir = new File(cachePath);
+                if (!cacheDir.isDirectory()) {
+                    cacheDir.mkdirs();
+                }
+                dao.useCache(cacheDir);
+                return dao;
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }

@@ -2,6 +2,7 @@ package org.wikapidia.core.dao;
 
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.model.CategoryGraph;
 import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.LocalCategory;
 import org.wikapidia.core.model.LocalPage;
@@ -99,5 +100,14 @@ public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
      * @throws DaoException if there was an error retrieving the pages
      */
     public Map<Integer, LocalCategory> getCategories(LocalPage localArticle) throws DaoException;
+
+    /**
+     * Returns a compact representation of the category graph.
+     * The return value of this object is shared and cached, so caller must not change it.
+     * TODO: make CategoryGraph immutable.
+     * @param language
+     * @return
+     */
+    public CategoryGraph getGraph(Language language) throws DaoException;
 
 }

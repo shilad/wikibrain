@@ -4,6 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
@@ -128,8 +129,10 @@ public class LinearEnsemble implements Ensemble{
         }
         TIntSet allIds = new TIntHashSet();    // ids returned by at least one metric
         for (SRResultList resultList : scores){
-            for (SRResult result : resultList){
-                allIds.add(result.getId());
+            if (resultList != null) {
+                for (SRResult result : resultList){
+                    allIds.add(result.getId());
+                }
             }
         }
 
@@ -142,11 +145,13 @@ public class LinearEnsemble implements Ensemble{
             TIntSet unknownIds = new TIntHashSet(allIds);
             double c1 = mostSimilarCoefficients.get(i);     // score coeff
             double c2 = mostSimilarCoefficients.get(i+1);   // rank coefficient
-            for (int j = 0; j < resultList.numDocs(); j++) {
-                SRResult result = resultList.get(j);
-                unknownIds.remove(result.getId());
-                double value = c1 * result.getScore() + c2 * Math.log(j+1);
-                scoreMap.adjustValue(result.getId(), value);
+            if (resultList != null) {
+                for (int j = 0; j < resultList.numDocs(); j++) {
+                    SRResult result = resultList.get(j);
+                    unknownIds.remove(result.getId());
+                    double value = c1 * result.getScore() + c2 * Math.log(j+1);
+                    scoreMap.adjustValue(result.getId(), value);
+                }
             }
 
             // interpolate scores for unknown ids
@@ -173,16 +178,26 @@ public class LinearEnsemble implements Ensemble{
 
     @Override
     public void read(String path) throws IOException {
+        File dir = FileUtils.getFile(path, "ensemble", getName());
+        if (!dir.isDirectory()) {
+            return;
+        }
         try {
             ObjectInputStream oip = new ObjectInputStream(
-                    new FileInputStream(path+"/ensemble/"+getName()+"/similarityCoefficients")
-            );
+                    new FileInputStream(new File(dir, "similarityCoefficients")));
             this.simlarityCoefficients = (TDoubleArrayList)oip.readObject();
             oip.close();
             oip = new ObjectInputStream(
-                    new FileInputStream(path+"/ensemble/"+getName()+"/mostSimilarCoefficients")
-            );
+                    new FileInputStream(new File(dir, "mostSimilarCoefficients")));
             this.mostSimilarCoefficients = (TDoubleArrayList)oip.readObject();
+            oip.close();
+            oip = new ObjectInputStream(
+                    new FileInputStream(new File(dir, "similarityInterpolator")));
+            this.similarityInterpolator = (Interpolator) oip.readObject();
+            oip.close();
+            oip = new ObjectInputStream(
+                    new FileInputStream(new File(dir, "mostSimilarInterpolator")));
+            this.mostSimilarInterpolator = (Interpolator) oip.readObject();
             oip.close();
         } catch (ClassNotFoundException e){
             throw new IOException("Malformed coefficient file(s)",e);
@@ -191,17 +206,31 @@ public class LinearEnsemble implements Ensemble{
 
     @Override
     public void write(String path) throws IOException{
+        File dir = FileUtils.getFile(path, "ensemble", getName());
+        if (!dir.isDirectory()) {
+            dir.mkdirs();
+        }
         ObjectOutputStream oop = new ObjectOutputStream(
-                new FileOutputStream(path +"/ensemble/"+getName()+ "/similarityCoefficients")
-        );
+                new FileOutputStream(new File(dir, "similarityCoefficients")));
         oop.writeObject(simlarityCoefficients);
         oop.flush();
         oop.close();
 
         oop = new ObjectOutputStream(
-                new FileOutputStream(path +"/ensemble/"+getName()+ "/mostSimilarCoefficients")
-        );
+                new FileOutputStream(new File(dir, "mostSimilarCoefficients")));
         oop.writeObject(mostSimilarCoefficients);
+        oop.flush();
+        oop.close();
+
+        oop = new ObjectOutputStream(
+                new FileOutputStream(new File(dir, "similarityInterpolator")));
+        oop.writeObject(similarityInterpolator);
+        oop.flush();
+        oop.close();
+
+        oop = new ObjectOutputStream(
+                new FileOutputStream(new File(dir, "mostSimilarInterpolator")));
+        oop.writeObject(mostSimilarInterpolator);
         oop.flush();
         oop.close();
     }

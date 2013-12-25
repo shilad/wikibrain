@@ -6,9 +6,13 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -20,6 +24,10 @@ import java.util.logging.Logger;
 /**
  * A wrapper around a file channel that contains a matrix in row major order.
  * Returns rows at a particular offset in the form of ByteBuffers backed by a memory mapped file.
+ *
+ * TODO: There appears to be a bug related to closing and opening byte buffers.
+ * The only way they can truly be closed is by closing the underlying channel,
+ * which we can't do. For now, we ignore maxOpenPages...
  */
 public class MemoryMappedMatrix {
     public static final Logger LOG = Logger.getLogger(MemoryMappedMatrix.class.getName());
@@ -39,15 +47,17 @@ public class MemoryMappedMatrix {
         this.channel = channel;
         this.rowOffsets = rowOffsets;
         this.maxOpenPages = maxOpenPages;
+        this.maxOpenPages = Integer.MAX_VALUE;  // So comment above
         this.maxPageSize = maxPageSize;
         pageInRows();
     }
 
     public void close() throws IOException {
-        channel.close();
         for (MappedBufferWrapper buffer : buffers) {
             buffer.close();
         }
+        System.gc();    // try to garbage collect any freed buffers
+        channel.close();
     }
 
     private void pageInRows() throws IOException {

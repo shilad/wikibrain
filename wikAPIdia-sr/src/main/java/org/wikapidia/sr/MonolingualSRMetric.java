@@ -193,5 +193,20 @@ public interface MonolingualSRMetric {
      */
     public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException;
 
+    /**
+     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
+     * This should be considered a "cache" that speeds up underlying cosimilarity calculations.
+     *
+     * @param path the directory to write the matrix in
+     * @param maxHits the number of document hits you would like returned from the most similar function
+     * @param rowIds The page ids that will be cached
+     * @param colIds The page ids that can be returned in the resulting similarity lists
+     */
+    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException;
+
     public void readCosimilarity(String path) throws IOException;
+
+    Normalizer getMostSimilarNormalizer();
+
+    Normalizer getSimilarityNormalizer();
 }

@@ -1,5 +1,6 @@
 package org.wikapidia.sr.ensemble;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -7,7 +8,7 @@ import java.util.logging.Logger;
 /**
  * @author Shilad Sen
  */
-public class Interpolator {
+public class Interpolator implements Serializable {
     private static final Logger LOG = Logger.getLogger(Interpolator.class.getName());
     private final int numMetrics;
     private int[] missingRanks;

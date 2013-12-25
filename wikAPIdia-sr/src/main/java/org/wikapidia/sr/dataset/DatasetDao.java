@@ -216,8 +216,8 @@ public class DatasetDao {
                                             language
                                     );
                     if (resolvePhrases) {
-                        LocalId id1 = disambiguator.disambiguate(new LocalString(language, ks.phrase1), null);
-                        LocalId id2 = disambiguator.disambiguate(new LocalString(language, ks.phrase2), null);
+                        LocalId id1 = disambiguator.disambiguateTop(new LocalString(language, ks.phrase1), null);
+                        LocalId id2 = disambiguator.disambiguateTop(new LocalString(language, ks.phrase2), null);
                         if (id1 != null) { ks.wpId1 = id1.getId(); }
                         if (id2 != null) { ks.wpId2 = id2.getId(); }
                     }

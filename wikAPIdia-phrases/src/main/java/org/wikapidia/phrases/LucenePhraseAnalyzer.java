@@ -44,11 +44,13 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
 
-        // If there is no result from the delegate, query the title field for the phrase.
+        // query the title field for the phrase.
         WikapidiaScoreDoc[] wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
                                     .setPhraseQuery(new TextFieldElements().addTitle(), phrase)
                                     .setNumHits(maxPages * DOC_MULTIPLIER)
                                     .search();
+
+
         if (wikapidiaScoreDocs.length == 0) {
             // If there is no result from title field query, query the plaintext field.
             wikapidiaScoreDocs = searcher.getQueryBuilderByLanguage(language)
@@ -56,6 +58,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
                                         .setNumHits(maxPages * DOC_MULTIPLIER)
                                         .search();
         }
+
         // When the phrase does not get an result from title or plaintext, this section
         // creates a search query of substrings with at least 3 characters and concatenate
         // them with space. This aims at phrases like "bioarchaeology" of which part

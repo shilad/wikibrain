@@ -3,29 +3,21 @@ package org.wikapidia.sr.ensemble;
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.matrix.SparseMatrix;
 import org.wikapidia.matrix.SparseMatrixRow;
-import org.wikapidia.matrix.SparseMatrixWriter;
-import org.wikapidia.matrix.ValueConf;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.*;
@@ -42,11 +34,10 @@ import java.util.logging.Logger;
 public class EnsembleMetric extends BaseMonolingualSRMetric {
     private static final Logger LOG = Logger.getLogger(EnsembleMetric.class.getName());
 
-    private final int EXTRA_SEARCH_DEPTH = 2;
-    private double missingScores[];
-    private int missingRanks[];
+    public static final int EXTRA_SEARCH_DEPTH = 2;
     private List<MonolingualSRMetric> metrics;
-    Ensemble ensemble;
+    private Ensemble ensemble;
+    private boolean resolvePhrases = true;
 
     private SparseMatrix mostSimilarMatrices = null;
 
@@ -54,10 +45,6 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
         super(language, pageHelper, disambiguator);
         this.metrics=metrics;
         this.ensemble=ensemble;
-        this.missingScores = new double[metrics.size()];
-        this.missingRanks = new int[metrics.size()];
-        Arrays.fill(missingScores, 0);
-        Arrays.fill(missingRanks, 1000);
     }
 
     @Override
@@ -67,6 +54,10 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
 
     public List<MonolingualSRMetric> getMetrics() {
         return metrics;
+    }
+
+    public void setResolvePhrases(boolean resolvePhrases) {
+        this.resolvePhrases = resolvePhrases;
     }
 
     @Override
@@ -116,6 +107,9 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
+        if (resolvePhrases) {
+            return super.similarity(phrase1,phrase2,explanations);
+        }
         List<SRResult> scores = new ArrayList<SRResult>();
         for (MonolingualSRMetric metric : metrics){
             scores.add(metric.similarity(phrase1,phrase2,explanations));
@@ -125,7 +119,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
-        return mostSimilar(pageId,maxResults,null);
+        return mostSimilar(pageId, maxResults, null);
     }
 
     @Override
@@ -146,12 +140,10 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public SRResultList mostSimilar(String phrase, int maxResults) throws  DaoException{
-        return mostSimilar(phrase, maxResults, null);
-    }
-
-    @Override
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
+        if (resolvePhrases) {
+            return super.mostSimilar(phrase, maxResults, validIds);
+        }
         List<SRResultList> scores = new ArrayList<SRResultList>();
         for (MonolingualSRMetric metric : metrics){
             scores.add(metric.mostSimilar(phrase,maxResults*EXTRA_SEARCH_DEPTH,validIds));
@@ -159,6 +151,11 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
         return ensemble.predictMostSimilar(scores,maxResults);
     }
 
+    /**
+     * Training cascades to base metrics.
+     * @param dataset
+     * @throws DaoException
+     */
     @Override
     public void trainSimilarity(Dataset dataset) throws DaoException {
         for (MonolingualSRMetric metric : metrics) {
@@ -180,9 +177,11 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             ensembleSims.add(es);
         }
         ensemble.trainSimilarity(ensembleSims);
+        super.trainSimilarity(dataset);
     }
 
     /**
+     * Training cascades to base metrics.
      * TODO: adapt this to a MostSimilarDataset
      * @param dataset
      * @param numResults
@@ -200,7 +199,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
                         new LocalString(ks.language, ks.phrase1),
                         new LocalString(ks.language, ks.phrase2)
                 );
-                List<LocalId> ids = getDisambiguator().disambiguate(localStrings, null);
+                List<LocalId> ids = getDisambiguator().disambiguateTop(localStrings, null);
                 if (ids.isEmpty() || ids.get(0).getId() <= 0) {
                     return null;
                 }
@@ -225,30 +224,20 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             }
         }, 100);
         ensemble.trainMostSimilar(ensembleSims);
+        super.trainMostSimilar(dataset, numResults, validIds);
     }
 
     @Override
     public void write(String path) throws  IOException {
+        super.write(path);
         File dir = new File(path);
-        if (!dir.isDirectory()) {
-            dir.mkdirs();
-        }
         ensemble.write(new File(dir, "ensemble").getAbsolutePath());
-        FileUtils.writeByteArrayToFile(new File(dir, "missingScores"), WpIOUtils.objectToBytes(missingScores));
-        FileUtils.writeByteArrayToFile(new File(dir, "missingRanks"), WpIOUtils.objectToBytes(missingRanks));
     }
 
     @Override
     public void read(String path) throws IOException{
+        super.read(path);
         File dir = new File(path);
-        try {
-            missingScores = (double[]) WpIOUtils.bytesToObject(
-                    FileUtils.readFileToByteArray(new File(dir, "missingScores")));
-            missingRanks = (int[]) WpIOUtils.bytesToObject(
-                    FileUtils.readFileToByteArray(new File(dir, "missingRanks")));
-        } catch (ClassNotFoundException e) {
-            throw new IOException(e);
-        }
         ensemble.read(new File(dir, "ensemble").getAbsolutePath());
     }
 
@@ -259,76 +248,13 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException {
-        DaoFilter pageFilter = new DaoFilter()
-            .setLanguages(getLanguage())
-                .setNameSpaces(NameSpace.ARTICLE)
-                .setDisambig(false)
-                .setRedirect(false);
-        Iterable<LocalPage> localPages = getLocalPageDao().get(pageFilter);
-        TIntSet pageIds = new TIntHashSet();
-        for (LocalPage page: localPages){
-            if (page != null){
-                pageIds.add(page.getLocalId());
-            }
-        }
-        List<Integer> idList = new ArrayList<Integer>();
-        for (int id : pageIds.toArray()){
-            idList.add(id);
-        }
-        File file = FileUtils.getFile(path, getName(), getLanguage().getLangCode());
-        if (!file.getParentFile().isDirectory()) {
-            file.getParentFile().mkdirs();
-        }
-        writeMatrix(idList,file,maxHits);
-        readCosimilarity(path);
-    }
-
-
-
-     private void writeMatrix(List<Integer> rowIds, File path, final int maxHits) throws IOException, WikapidiaException {
-        ValueConf vconf = new ValueConf();
-        final SparseMatrixWriter writer = new SparseMatrixWriter(path, vconf);
-        ParallelForEach.loop(rowIds, WpThreadUtils.getMaxThreads(), new Procedure<Integer>() {
-            @Override
-            public void call(Integer id) throws Exception {
-                writeVector(writer, id, maxHits);
-            }
-        }, 10000);
-        try {
-            writer.finish();
-        } catch (IOException e){
-            throw new WikapidiaException(e);
-        }
-    }
-
-    private void writeVector(SparseMatrixWriter writer,int id,int maxHits) throws WikapidiaException {
-        SRResultList scores;
-        try {
-            scores = mostSimilar(id,maxHits);
-        } catch (DaoException e){
-            throw new WikapidiaException(e);
-        }
-        LinkedHashMap<Integer,Float> linkedHashMap = new LinkedHashMap<Integer, Float>();
-        for (SRResult score : scores){
-            linkedHashMap.put(score.getId(),(float)score.getScore());
-        }
-        try {
-            writer.writeRow(new SparseMatrixRow(writer.getValueConf(), id, linkedHashMap));
-        } catch (IOException e){
-            throw new WikapidiaException(e);
-        }
+    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
+        super.writeCosimilarity(SRMatrices.Mode.COSIMILARITY, path, maxHits, null, rowIds, colIds);
     }
 
     @Override
     public void readCosimilarity(String dir) throws IOException {
-        IOUtils.closeQuietly(mostSimilarMatrices);
-        mostSimilarMatrices = null;
-        File file = FileUtils.getFile(dir, getName(), getLanguage().getLangCode());
-        SparseMatrix matrix = new SparseMatrix(file);
-        if (matrix!=null){
-            mostSimilarMatrices = matrix;
-        }
+        super.readCosimilarity(dir, null);
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric>{
@@ -351,7 +277,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             if (!config.getString("type").equals("ensemble")) {
                 return null;
             }
-            if (!runtimeParams.containsKey("language")) {
+            if (runtimeParams == null || !runtimeParams.containsKey("language")) {
                 throw new IllegalArgumentException("Monolingual SR Metric requires 'language' runtime parameter");
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));
@@ -374,29 +300,11 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             Disambiguator disambiguator = getConfigurator().get(Disambiguator.class,config.getString("disambiguator"));
             LocalPageDao pagehelper = getConfigurator().get(LocalPageDao.class,config.getString("pageDao"));
             sr = new EnsembleMetric(language, metrics,ensemble,disambiguator,pagehelper);
-
-            try {
-                sr.read(getConfigurator().getConf().get().getString("sr.metric.path")+sr.getName());
-            } catch (IOException e){
-                System.out.println(e.getMessage());
-                e.printStackTrace();
-            }
-            sr.setSimilarityNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")));
-            sr.setMostSimilarNormalizer(getConfigurator().get(Normalizer.class, config.getString("similaritynormalizer")));
-            try {
-                sr.readCosimilarity(getConfigurator().getConf().get().getString("sr.metric.path"));
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
+            if (config.hasPath("resolvephrases")) {
+                sr.setResolvePhrases(config.getBoolean("resolvephrases"));
             }
 
-//            try {
-//                sr.readCosimilarity(getConfigurator().getConf().get().getString("sr.metric.path"),langs);
-//            } catch (IOException e) {
-//                System.out.println(e.getMessage());
-//                e.printStackTrace();
-//            }
-
+            BaseMonolingualSRMetric.configureBase(getConfigurator(), sr, config);
             return sr;
         }
     }

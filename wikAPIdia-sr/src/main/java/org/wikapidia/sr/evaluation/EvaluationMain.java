@@ -9,6 +9,7 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.dataset.DatasetDao;
 
@@ -50,6 +51,13 @@ public class EvaluationMain {
                         .withLongOpt("gold")
                         .withDescription("the set of gold standard datasets to train on")
                         .create("g"));
+
+        // Use an existing pre-trained metric.
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("pretrained")
+                        .withDescription("use an existing pretrained metric")
+                        .create("a"));
 
         //Specify the Metrics
         options.addOption(
@@ -128,7 +136,7 @@ public class EvaluationMain {
         }
 
         Env env = new EnvBuilder(cmd)
-                .setProperty("sr.metric.training", true)
+                .setProperty("sr.metric.training", !cmd.hasOption("a"))
                 .build();
         Configurator c = env.getConfigurator();
         DatasetDao dsDao = c.get(DatasetDao.class);
@@ -162,6 +170,9 @@ public class EvaluationMain {
             return;
         }
 
+        if (cmd.hasOption("u")) {
+            throw new UnsupportedOperationException();  // TODO: implement universal metrics
+        }
         Language lang = env.getLanguages().getDefaultLanguage();
         List<Dataset> datasets = new ArrayList<Dataset>();
         String mode = cmd.hasOption("x") ? cmd.getOptionValue("x") : "within-dataset";
@@ -206,12 +217,20 @@ public class EvaluationMain {
             System.exit(1);
         }
 
-        if (cmd.hasOption("m")) {
-            MonolingualSRFactory factory = new ConfigMonolingualSRFactory(
+        MonolingualSRFactory factory;
+        if (cmd.hasOption("a")) {
+            MonolingualSRMetric sr = env.getConfigurator().get(
+                                        MonolingualSRMetric.class,
+                                        cmd.getOptionValue("m"),
+                                        "language",
+                                        lang.getLangCode()
+                                    );
+            factory = new PretrainedSRFactory(sr);
+        } else {
+            factory = new ConfigMonolingualSRFactory(
                     lang, env.getConfigurator(), cmd.getOptionValue("m"));
-            evaluator.evaluate(factory);
-        } else if (cmd.hasOption("u")) {
-            throw new UnsupportedOperationException();  // TODO: implement universal metrics
+
         }
+        evaluator.evaluate(factory);
     }
 }
