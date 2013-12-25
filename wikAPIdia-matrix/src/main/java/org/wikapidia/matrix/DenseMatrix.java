@@ -33,6 +33,9 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
     MemoryMappedMatrix rowBuffers;
     private ValueConf vconf;
 
+    // default header page size is 100MB, will be expanded if necessary
+    public static final int DEFAULT_HEADER_SIZE = 100 * 1024 * 1024;
+
     /**
      * Create a dense matrix based on the data in a particular file.
      * @param path Path to the matrix data file.
@@ -48,8 +51,7 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
 
     private void readHeaders() throws IOException {
         int pos = 0;
-        int maxPageSize = 1024*1024*1024;   // 1GB
-        long size = Math.min(channel.size(), maxPageSize);
+        long size = Math.min(channel.size(), DEFAULT_HEADER_SIZE);
         MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);
 
         // read header
