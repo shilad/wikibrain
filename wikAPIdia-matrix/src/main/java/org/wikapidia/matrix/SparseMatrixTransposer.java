@@ -24,6 +24,10 @@ public class SparseMatrixTransposer {
     private int numColsTransposed = 0;
 
 
+    public SparseMatrixTransposer(SparseMatrix m, File f) throws IOException {
+        this(m, f, defaultBufferSizeInMbs());
+    }
+
     public SparseMatrixTransposer(SparseMatrix m, File f, int bufferMb) throws IOException {
         this.matrix = m;
         this.writer = new SparseMatrixWriter(f, m.getValueConf());
@@ -132,16 +136,36 @@ public class SparseMatrixTransposer {
         int size() { return this.colIds.size(); }
     }
 
+    /**
+     * Calculates a reasonable buffer size for transposing the matrix.
+     * If the heapsize < 1000, returns 1/3 of the heapsize.
+     * Otherwise return (heapsize/5), but truncated to the range [350MB, 5000MB].
+     * @return The default heapsize, in MBs.
+     */
+    private static int defaultBufferSizeInMbs() {
+        int totalMem = (int) (Runtime.getRuntime().maxMemory() / (1024*1024));
+        if (totalMem < 1000) {
+            return totalMem / 3;
+        } else {
+            int size = totalMem / 5;
+            if (size < 350) size = 350;
+            if (size > 5000) size = 5000;
+            return size;
+        }
+    }
+
     public static void main(String args[]) throws IOException {
-        if (args.length != 3) {
-            System.err.println("usage: java " + SparseMatrixTransposer.class.getName() + " input_path output_path buffer_in_MBs");
+        int bufferMbs = 0;
+        if (args.length == 2) {
+            bufferMbs = defaultBufferSizeInMbs();
+        } else if (args.length == 3) {
+            bufferMbs = Integer.valueOf(args[2]);
+        } else {
+            System.err.println("usage: java " + SparseMatrixTransposer.class.getName() + " input_path output_path {buffer_in_MBs}");
             System.exit(1);
         }
         SparseMatrix matrix = new SparseMatrix(new File(args[0]));
-        SparseMatrixTransposer transposer = new SparseMatrixTransposer(
-                        matrix,
-                        new File(args[1]),
-                        Integer.valueOf(args[2]));
+        SparseMatrixTransposer transposer = new SparseMatrixTransposer(matrix, new File(args[1]), bufferMbs);
         transposer.transpose();
     }
 }

@@ -156,9 +156,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
             LOG.info("writing transpose of adjacency matrix");
 
-            int totalMbs = (int) (Runtime.getRuntime().maxMemory() / (1024*1024));
-            int bufferSize = Math.min(4000, totalMbs / 5);  // min of 1GB or 1/5 of total memory
-            SparseMatrixTransposer transposer = new SparseMatrixTransposer(matrix, getTransposeFile(), bufferSize);
+            SparseMatrixTransposer transposer = new SparseMatrixTransposer(matrix, getTransposeFile());
             transposer.transpose();
 
             LOG.info("loading transpose of adjacency matrix");
