@@ -8,3 +8,4 @@ install:
   - mvn -B -f ./wikAPIdia-parent/pom.xml clean install -DskipTests
 script:
   - mvn -B -f ./wikAPIdia-parent/pom.xml test
+
