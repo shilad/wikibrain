@@ -39,16 +39,12 @@ public class MemoryMappedMatrix {
     private File path;
 
     private LruQueue<MappedBufferWrapper> queue = new LruQueue<MappedBufferWrapper>();
-    private int maxOpenPages;
 
-    public MemoryMappedMatrix(File path, FileChannel channel,TIntLongHashMap rowOffsets,
-                              int maxOpenPages, int maxPageSize) throws IOException {
+    public MemoryMappedMatrix(File path, FileChannel channel,TIntLongHashMap rowOffsets) throws IOException {
         this.path = path;
         this.channel = channel;
         this.rowOffsets = rowOffsets;
-        this.maxOpenPages = maxOpenPages;
-        this.maxOpenPages = Integer.MAX_VALUE;  // So comment above
-        this.maxPageSize = maxPageSize;
+        this.maxPageSize = 1024*1024*1024;  // 1GB
         pageInRows();
     }
 
@@ -104,23 +100,7 @@ public class MemoryMappedMatrix {
         if (row == null) {
             throw new IllegalArgumentException("did not find row " + rowId + " with offset " + targetOffset);
         }
-        // free queued pages if necessary
-        if (rowOffsets.size() > maxOpenPages) {
-            synchronized (queue) {
-                queue.enqueue(row);
-                while (queue.size() > maxOpenPages) {
-                    MappedBufferWrapper last = queue.dequeue();
-//                    info("closing " + last.start);
-                    last.close();
-                }
-//                info("opening " + row.start);
-                // buffer allocation must happen in the synchronized block
-                // so other calls do not simultaneously free the buffer
-                return row.get(targetOffset);
-            }
-        } else {
-            return row.get(targetOffset);
-        }
+        return row.get(targetOffset);
     }
 
     static class MappedBufferWrapper {

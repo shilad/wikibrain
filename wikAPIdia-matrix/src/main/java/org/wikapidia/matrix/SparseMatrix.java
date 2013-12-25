@@ -27,7 +27,6 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
 
     MemoryMappedMatrix rowBuffers;
 
-    public int maxPageSize = DEFAULT_MAX_PAGE_SIZE;
     private TIntLongHashMap rowOffsets = new TIntLongHashMap();
     private int rowIds[];
     private FileChannel channel;
@@ -36,22 +35,18 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
     private ValueConf vconf;
 
     public SparseMatrix(File path) throws IOException {
-        this(path, Integer.MAX_VALUE, DEFAULT_MAX_PAGE_SIZE);
-    }
-
-    public SparseMatrix(File path, int maxOpenPages, int maxPageSize) throws IOException {
         this.path = path;
-        this.maxPageSize = maxPageSize;
         if (!path.isFile()) {
             throw new IOException("File does not exist: " + path);
         }
         info("initializing sparse matrix with file length " + FileUtils.sizeOf(path));
         this.channel = (new FileInputStream(path)).getChannel();
         readHeaders();
-        rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets, maxOpenPages, maxPageSize);
+        rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets);
     }
 
     private void readHeaders() throws IOException {
+        int maxPageSize = 1024*1024*1024;
         long size = Math.min(channel.size(), maxPageSize);
         MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);
         if (buffer.getInt(0) != FILE_HEADER) {
