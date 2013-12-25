@@ -22,11 +22,8 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
 
     public static final Logger LOG = Logger.getLogger(DenseMatrix.class.getName());
 
-    public static int DEFAULT_MAX_PAGE_SIZE = Integer.MAX_VALUE;
-
     public static final int FILE_HEADER = 0xabccba;
 
-    public int maxPageSize = DEFAULT_MAX_PAGE_SIZE;
     private TIntLongHashMap rowOffsets = new TIntLongHashMap();
     private int rowIds[];
     private int colIds[];
@@ -36,32 +33,25 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
     MemoryMappedMatrix rowBuffers;
     private ValueConf vconf;
 
-    public DenseMatrix(File path) throws IOException {
-        this(path, Integer.MAX_VALUE, DEFAULT_MAX_PAGE_SIZE);
-    }
+    // default header page size is 100MB, will be expanded if necessary
+    public static final int DEFAULT_HEADER_SIZE = 100 * 1024 * 1024;
 
     /**
      * Create a dense matrix based on the data in a particular file.
      * @param path Path to the matrix data file.
-     * @param maxOpenPages The maximum number of memory mapped pages that can be open at once.
-     * @param maxPageSize The maximum size of a memory mapped page.
      * @throws java.io.IOException
      */
-    public DenseMatrix(File path, int maxOpenPages, int maxPageSize) throws IOException {
-        if (maxOpenPages <= 0) {
-            throw new IllegalArgumentException("maxOpenPages must be at least 1");
-        }
+    public DenseMatrix(File path) throws IOException {
         this.path = path;
-        this.maxPageSize = maxPageSize;
         info("initializing sparse matrix with file length " + FileUtils.sizeOf(path));
         this.channel = (new FileInputStream(path)).getChannel();
         readHeaders();
-        rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets, maxOpenPages, maxPageSize);
+        rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets);
     }
 
     private void readHeaders() throws IOException {
         int pos = 0;
-        long size = Math.min(channel.size(), maxPageSize);
+        long size = Math.min(channel.size(), DEFAULT_HEADER_SIZE);
         MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);
 
         // read header

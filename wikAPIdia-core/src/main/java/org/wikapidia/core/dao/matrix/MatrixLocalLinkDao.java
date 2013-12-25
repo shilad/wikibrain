@@ -44,8 +44,6 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     private static final Logger LOG = Logger.getLogger(MatrixLocalLinkDao.class.getName());
 
     private final File dir;
-    private final int maxPageSize;
-    private final int maxOpenPages;
     private LocalLinkDao delegate;
     private SparseMatrix matrix = null;
     private SparseMatrix transpose = null;
@@ -54,15 +52,10 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     private File objectDbPath = null;
     private ObjectDb<int[]> objectDb = null;
 
-    public MatrixLocalLinkDao(LocalLinkDao delegate, File dir) throws DaoException {
-        this(delegate, dir, 10, 100*1024*1024);     // 5 pages, 100MB each, for both matrix and transpose
-    }
 
-    public MatrixLocalLinkDao(LocalLinkDao delegate, File dir, int maxOpenPages, int maxPageSize) throws DaoException {
+    public MatrixLocalLinkDao(LocalLinkDao delegate, File dir) throws DaoException {
         this.delegate = delegate;
         this.dir = dir;
-        this.maxOpenPages = maxOpenPages;
-        this.maxPageSize = maxPageSize;
         dir.mkdirs();
         try {
             load();
@@ -77,8 +70,8 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         } else if (!getTransposeFile().isFile()) {
             LOG.warning("Matrix" + getTransposeFile()+ " missing, disabling fast lookups.");
         } else {
-            matrix = new SparseMatrix(getMatrixFile(), maxOpenPages, maxPageSize);
-            transpose = new SparseMatrix(getTransposeFile(), maxOpenPages, maxPageSize);
+            matrix = new SparseMatrix(getMatrixFile());
+            transpose = new SparseMatrix(getTransposeFile());
         }
     }
 
@@ -159,14 +152,15 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             writer.finish();
 
             LOG.info("finalizing adjacency matrix");
-            matrix = new SparseMatrix(getMatrixFile(), maxOpenPages, maxPageSize);
+            matrix = new SparseMatrix(getMatrixFile());
 
             LOG.info("writing transpose of adjacency matrix");
-            SparseMatrixTransposer transposer = new SparseMatrixTransposer(matrix, getTransposeFile(), maxOpenPages * maxPageSize);
+
+            SparseMatrixTransposer transposer = new SparseMatrixTransposer(matrix, getTransposeFile());
             transposer.transpose();
 
             LOG.info("loading transpose of adjacency matrix");
-            transpose = new SparseMatrix(getTransposeFile(), maxOpenPages, maxPageSize);
+            transpose = new SparseMatrix(getTransposeFile());
         } catch (IOException e) {
             throw new DaoException(e);
         }
@@ -356,9 +350,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
                         getConfigurator().get(
                                 LocalLinkDao.class,
                                 config.getString("delegate")),
-                        new File(config.getString("path")),
-                        config.getInt("maxOpenPages"),
-                        config.getBytes("maxPageSize").intValue()
+                        new File(config.getString("path"))
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
