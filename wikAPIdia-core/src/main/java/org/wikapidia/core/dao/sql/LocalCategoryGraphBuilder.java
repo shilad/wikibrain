@@ -1,96 +1,63 @@
-package org.wikapidia.sr.category;
+package org.wikapidia.core.dao.sql;
 
 import com.typesafe.config.Config;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.*;
-import org.wikapidia.core.dao.sql.SqlCache;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.*;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Builds and stores a directed graph among categories and pages.
+ * Builds a directed graph among categories and pages using daos.
+ * Also calculates page rank among pages.
  */
-public class MonolingualCategoryGraphHelper {
+public class LocalCategoryGraphBuilder {
 
-    private static final Logger LOG = Logger.getLogger(MonolingualCategoryGraphHelper.class.getName());
-
-    private Language language;
-    private LocalPageDao pageHelper;
-    private LocalCategoryMemberDao catHelper;
-    private CategoryGraph graph;
-    private SqlCache sqlCache;
+    private static final Logger LOG = Logger.getLogger(LocalCategoryGraphBuilder.class.getName());
 
     /**
+     *
+     * @param language
+     * @param lpDao
+     * @param lcmDao
+     * @return
+     * @throws DaoException
      */
-    public MonolingualCategoryGraphHelper(Language language, LocalPageDao pageHelper, LocalCategoryMemberDao catHelper, SqlCache sqlCache){
-        this.language=language;
-        this.pageHelper=pageHelper;
-        this.catHelper=catHelper;
-        this.sqlCache=sqlCache;
-        this.graph = null;
-    }
-
-    public CategoryGraph graph(){
+    public CategoryGraph build(Language language, LocalPageDao lpDao, LocalCategoryMemberDao lcmDao) throws DaoException {
+        CategoryGraph graph = new CategoryGraph(language);
+        loadCategories(graph, lpDao);
+        buildGraph(graph, lcmDao);
+        computePageRanks(graph);
         return graph;
     }
 
-    public void init() throws DaoException {
-        try {
-            if (sqlCache!=null){
-                CategoryGraph graph = (CategoryGraph)sqlCache.get(language.getLangCode()+"-CategoryGraph",LocalCategoryMember.class);
-                if (graph==null){
-                    throw new DaoException();
-                }
-                this.graph=graph;
-            } else {
-                manualInit();
-            }
-        } catch (DaoException e){
-            manualInit();
-            sqlCache.put(language.getLangCode()+"-CategoryGraph",graph);
-        }
-    }
-
-    private void manualInit() throws DaoException{
-        loadCategories();
-        buildGraph();
-        computePageRanks();
-    }
-
-    private void loadCategories() throws DaoException {
+    private void loadCategories(CategoryGraph graph, LocalPageDao lpDao) throws DaoException {
         LOG.info("loading categories...");
-        CategoryGraph graph = new CategoryGraph();
         graph.catIndexes = new TIntIntHashMap();
         List<String> catList = new ArrayList<String>();
-        Iterable<LocalPage> catIter = pageHelper.get(new DaoFilter()
+        Iterable<LocalPage> catIter = lpDao.get(new DaoFilter()
                 .setNameSpaces(NameSpace.CATEGORY)
-                .setLanguages(language)
+                .setLanguages(graph.language)
         );
-        for (LocalPage cat : catIter){
-            catList.add(cat.getTitle().getCanonicalTitle());
-            graph.catIndexes.put (cat.getLocalId(),graph.catIndexes.size());
+        for (LocalPage cat : catIter) {
+            if (cat != null) {
+                catList.add(cat.getTitle().getCanonicalTitle());
+                graph.catIndexes.put (cat.getLocalId(),graph.catIndexes.size());
+            }
         }
         graph.cats = catList.toArray(new String[0]);
-        this.graph=graph;
         LOG.info("finished loading " + graph.cats.length + " categories");
     }
 
-    private void buildGraph() throws DaoException {
+    private void buildGraph(CategoryGraph graph, LocalCategoryMemberDao lcmDao) throws DaoException {
         LOG.info("building category graph");
-        CategoryGraph graph = this.graph;
         graph.catPages = new int[graph.catIndexes.size()][];
         graph.catParents = new int[graph.catIndexes.size()][];
         graph.catChildren = new int[graph.catIndexes.size()][];
@@ -106,8 +73,8 @@ public class MonolingualCategoryGraphHelper {
         int numCatParents[] = new int[graph.catIndexes.size()];
         int numCatPages[] = new int[graph.catIndexes.size()];
 
-        DaoFilter filter = new DaoFilter().setLanguages(language);
-        for (LocalCategoryMember lcm : catHelper.get(filter)) {
+        DaoFilter filter = new DaoFilter().setLanguages(graph.language);
+        for (LocalCategoryMember lcm : lcmDao.get(filter)) {
             int catIndex1 = graph.getCategoryIndex(lcm.getArticleId());     // cat index for page (probably -1)
             int catIndex2 = graph.getCategoryIndex(lcm.getCategoryId());    // cat index for cat
             if (catIndex1 >= 0 && catIndex2 >= 0) {
@@ -127,7 +94,7 @@ public class MonolingualCategoryGraphHelper {
         }
 
         // fill it
-        for (LocalCategoryMember lcm : catHelper.get(filter)) {
+        for (LocalCategoryMember lcm : lcmDao.get(filter)) {
             int catIndex1 = graph.getCategoryIndex(lcm.getArticleId());     // cat index for page (probably -1)
             int catIndex2 = graph.getCategoryIndex(lcm.getCategoryId());    // cat index for cat
             if (catIndex1 >= 0 && catIndex2 >= 0) {
@@ -141,11 +108,10 @@ public class MonolingualCategoryGraphHelper {
         for (int n : numCatChildren) { assert(n == 0); }
         for (int n : numCatPages) { assert(n == 0); }
         for (int n : numCatParents) { assert(n == 0); }
-        this.graph=graph;
         LOG.info("loaded " + totalEdges + " edges in category graph");
     }
 
-    public void computePageRanks() {
+    public void computePageRanks(CategoryGraph graph) {
         LOG.info("computing category page ranks...");
 
         // initialize page rank
@@ -159,7 +125,7 @@ public class MonolingualCategoryGraphHelper {
 
         for (int i = 0; i < 20; i++) {
             LOG.log(Level.INFO, "performing page ranks iteration {0}.", i);
-            double error = graph.onePageRankIteration();
+            double error = onePageRankIteration(graph);
             LOG.log(Level.INFO, "Error for iteration is {0}.", error);
             if (error == 0) {
                 break;
@@ -181,7 +147,7 @@ public class MonolingualCategoryGraphHelper {
             }
         });
 
-        StringBuffer b = new StringBuffer();
+        StringBuilder b = new StringBuilder();
         for (int i = 0; i < 20; i++) {
             int j = sortedIndexes[i];
             b.append("" + i + ". " + graph.cats[j] + "=" + graph.catCosts[j]);
@@ -193,44 +159,23 @@ public class MonolingualCategoryGraphHelper {
         LOG.info("Top cat costs: " + b.toString());
     }
 
-
-    public static class Provider extends org.wikapidia.conf.Provider<MonolingualCategoryGraphHelper> {
-        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
-            super(configurator, config);
-        }
-
-        @Override
-        public Class getType() {
-            return MonolingualCategoryGraphHelper.class;
-        }
-
-        @Override
-        public String getPath() {
-            return "sr.metric.local";
-        }
-
-        @Override
-        public MonolingualCategoryGraphHelper get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (runtimeParams==null || !runtimeParams.containsKey("language")){
-                throw new IllegalArgumentException("MonolingualCategoryGraphHelper requires 'language' runtime parameter.");
+    private static final double DAMPING_FACTOR = 0.85;
+    public double onePageRankIteration(CategoryGraph graph) {
+        double nextRanks [] = new double[graph.catCosts.length];
+        Arrays.fill(nextRanks, (1.0 - DAMPING_FACTOR) / graph.catCosts.length);
+        for (int i = 0; i < graph.catParents.length; i++) {
+            int d = graph.catParents[i].length;   // degree
+            double pr = graph.catCosts[i];    // current page-rank
+            for (int j : graph.catParents[i]) {
+                nextRanks[j] += DAMPING_FACTOR * pr / d;
             }
-
-            Language language = Language.getByLangCode(runtimeParams.get("language"));
-
-            LocalPageDao pageDao = getConfigurator().get(LocalPageDao.class);
-            LocalCategoryMemberDao memberDao = getConfigurator().get(LocalCategoryMemberDao.class);
-            SqlCache sqlCache = null;
-            try {
-                MetaInfoDao metaInfoDao = getConfigurator().get(MetaInfoDao.class);
-                String cachePath = getConfig().get().getString("dao.sqlCachePath");
-                File cacheDir = new File(cachePath);
-                sqlCache = new SqlCache(metaInfoDao,cacheDir);
-            } catch (DaoException e){}
-            MonolingualCategoryGraphHelper graphHelper = new MonolingualCategoryGraphHelper(language,pageDao,memberDao,sqlCache);
-
-
-
-            return graphHelper;
         }
+        double diff = 0.0;
+        for (int i = 0; i < graph.catParents.length; i++) {
+            diff += Math.abs(graph.catCosts[i] - nextRanks[i]);
+        }
+        graph.catCosts = nextRanks;
+        return diff;
     }
+
 }

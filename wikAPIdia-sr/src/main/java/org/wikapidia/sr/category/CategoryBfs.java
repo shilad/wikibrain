@@ -5,6 +5,7 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.model.CategoryGraph;
 import org.wikapidia.core.model.LocalCategory;
 
 import java.util.Map;
