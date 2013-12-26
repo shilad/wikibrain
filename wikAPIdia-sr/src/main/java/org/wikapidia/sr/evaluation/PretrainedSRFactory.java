@@ -159,9 +159,9 @@ public class PretrainedSRFactory implements MonolingualSRFactory {
         }
 
         @Override
-        public void writeCosimilarity(int maxHits) throws IOException, DaoException, WikapidiaException {}
+        public void writeCacheMatrices(int maxHits) throws IOException, DaoException, WikapidiaException {}
         @Override
-        public void writeCosimilarity(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {}
+        public void writeCacheMatrices(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {}
         @Override
         public void write() throws IOException {}
         @Override

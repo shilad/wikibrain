@@ -190,13 +190,18 @@ public interface MonolingualSRMetric {
     public double[][] cosimilarity(String phrases[]) throws DaoException;
 
     /**
-     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
+     * Writes up to three matrices used as a cache to speed up calls to mostSimilar:
+     * - Feature matrix: For each article, the feature vector as returned by getVector()
+     * - Feature transpose matrix: Transpose of feature matrix
+     * -
+     *
+     * a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
      * This should be considered a "cache" that speeds up underlying cosimilarity calculations.
      * The cosimilarity matrix will be written to a file in the data directory.
      *
      * @param maxHits the number of document hits you would like returned from the most similar function
      */
-    public void writeCosimilarity(int maxHits) throws IOException, DaoException, WikapidiaException;
+    public void writeCacheMatrices(int maxHits) throws IOException, DaoException, WikapidiaException;
 
     /**
      * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
@@ -207,7 +212,7 @@ public interface MonolingualSRMetric {
      * @param rowIds The page ids that will be cached
      * @param colIds The page ids that can be returned in the resulting similarity lists
      */
-    public void writeCosimilarity(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException;
+    public void writeCacheMatrices(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException;
 
     /**
      * @return the most similar normalizer.

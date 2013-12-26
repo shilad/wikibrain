@@ -358,12 +358,12 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(int maxHits) throws IOException, DaoException, WikapidiaException {
-        writeCosimilarity(maxHits, null, null);
+    public void writeCacheMatrices(int maxHits) throws IOException, DaoException, WikapidiaException {
+        writeCacheMatrices(maxHits, null, null);
     }
 
     @Override
-    public void writeCosimilarity(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
+    public void writeCacheMatrices(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
         MetricConfig  config = getMetricConfig();
 
         if (!config.buildCosimilarityMatrix && !config.supportsFeatureVectors) {

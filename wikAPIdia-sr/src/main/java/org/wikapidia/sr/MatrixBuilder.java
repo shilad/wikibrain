@@ -93,11 +93,11 @@ public class MatrixBuilder {
         if (cmd.hasOption("m")){
             Language language = languages.getDefaultLanguage();
             sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
-            sr.writeCosimilarity(maxResults, rowIds, colIds);
+            sr.writeCacheMatrices(maxResults, rowIds, colIds);
         }
         if (cmd.hasOption("u")){
             usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
-//            usr.writeCosimilarity(path,maxResults);
+//            usr.writeCacheMatrices(path,maxResults);
         }
     }
 

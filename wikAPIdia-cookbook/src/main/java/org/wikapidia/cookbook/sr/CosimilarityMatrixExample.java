@@ -8,17 +8,11 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.lang.LocalId;
-import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResultList;
-import org.wikapidia.sr.UniversalSRMetric;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,9 +31,9 @@ public class CosimilarityMatrixExample {
         String path = c.getConf().get().getString("sr.metric.path");
 
         Language language = Language.getByLangCode("simple");
-        sr.writeCosimilarity(path,100);
+        sr.writeCacheMatrices(100);
 //        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
-//        usr.writeCosimilarity(path,100);
+//        usr.writeCacheMatrices(path,100);
 
         List<String> phrases = Arrays.asList("United States", "Barack Obama", "brain", "natural language processing");
 

@@ -127,7 +127,7 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
         File cosimDir = null;
         if (buildCosimilarityMatrix) {
             cosimDir = WpIOUtils.createTempDirectory(factory.getName());
-            metric.writeCosimilarity(numMostSimilarResults);
+            metric.writeCacheMatrices(numMostSimilarResults);
         }
         metric.trainMostSimilar(split.getTrain(), numMostSimilarResults, mostSimilarIds);
         final MostSimilarEvaluationLog splitEval = new MostSimilarEvaluationLog(config, log);
