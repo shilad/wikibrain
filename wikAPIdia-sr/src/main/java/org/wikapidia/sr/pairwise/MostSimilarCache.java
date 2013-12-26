@@ -46,7 +46,6 @@ public class MostSimilarCache implements Closeable {
     public static final String COSIMILARITY_MATRIX = "cosimilarityMatrix";
     public static final String FEATURE_TRANSPOSE_MATRIX = "featureTransposeMatrix";
     public static final String FEATURE_MATRIX = "featureMatrix";
-    private final Language language;
     private final PairwiseSimilarity similarity;
 
     private final File dir;
@@ -59,17 +58,22 @@ public class MostSimilarCache implements Closeable {
     private SparseMatrix cosimilarityMatrix = null;
 
     /**
-     *
-     * @param metric
-     * @param dir
+     * @see #MostSimilarCache(org.wikapidia.sr.MonolingualSRMetric, PairwiseSimilarity, java.io.File)
      */
     public MostSimilarCache(MonolingualSRMetric metric, File dir) {
         this(metric, null, dir);
     }
 
+    /**
+     * Creates a new most similar cache.
+     * If similarity is null, feature matrix and transpose will not be used.
+     *
+     * @param metric
+     * @param similarity
+     * @param dir
+     */
     public MostSimilarCache(MonolingualSRMetric metric, PairwiseSimilarity similarity, File dir) {
         this.monoSr = metric;
-        this.language = metric.getLanguage();
         this.similarity = similarity;
         this.dir = dir;
         if (!this.dir.isDirectory()) {
@@ -79,14 +83,7 @@ public class MostSimilarCache implements Closeable {
     }
 
     public MostSimilarCache(UniversalSRMetric metric, PairwiseSimilarity similarity, File dir) {
-        this.universalSr = metric;
-        this.language = null;
-        this.similarity = similarity;
-        this.dir = dir;
-        if (!this.dir.isDirectory()) {
-            FileUtils.deleteQuietly(dir);
-            dir.mkdirs();
-        }
+        throw new UnsupportedOperationException();
     }
 
     public boolean hasCachedMostSimilarVectors() {
@@ -100,9 +97,7 @@ public class MostSimilarCache implements Closeable {
      * Closes existing matrices.
      */
     public void clear() {
-        IOUtils.closeQuietly(getFeatureMatrix());
-        IOUtils.closeQuietly(getFeatureTransposeMatrix());
-        IOUtils.closeQuietly(getCosimilarityMatrix());
+        close();
         FileUtils.deleteQuietly(getFeatureMatrixPath());
         FileUtils.deleteQuietly(getFeatureTransposeMatrixPath());
         FileUtils.deleteQuietly(getCosimilarityMatrixPath());
@@ -130,7 +125,10 @@ public class MostSimilarCache implements Closeable {
         }
     }
 
-
+    /**
+     * @return True if it seems like matrixes exist and read() can be safely called.
+     * If any of the matrices are corrupt, read may still fail.
+     */
     public boolean hasReadableMatrices() {
         return hasAllReadableMatrices() || hasJustReadableCosimilarity() || hasJustReadableFeatureAndTranspose();
     }
@@ -179,89 +177,115 @@ public class MostSimilarCache implements Closeable {
         return cosimilarityMatrix;
     }
 
+    /**
+     * Returns the SRResult list associated with the requested page and constraints, or null
+     * if the cache cannot answer the request.
+     *
+     * @param wpId Id whose most similar result is being queried.
+     * @param numResults The number of requested results.
+     * @param validIds Ids that may be included in the result list.
+     * @return
+     * @throws IOException
+     * @throws DaoException
+     */
     public SRResultList mostSimilar(int wpId, int numResults, TIntSet validIds) throws IOException, DaoException {
         long l = System.currentTimeMillis();
         try {
-            SRResultList results = null;
+            // First see if we have the results directly cached
             if (cosimilarityMatrix != null) {
                 MatrixRow row = cosimilarityMatrix.getRow(wpId);
                 if (row != null && row.getNumCols() >= numResults ) {
-                    results = rowToResultList(row, numResults, validIds);
+                    SRResultList results = rowToResultList(row, numResults, validIds);
+                    if (results != null && results.numDocs() >= numResults) {
+                        return normalize(results);
+                    }
                 }
             }
-            if (results != null && results.numDocs() >= numResults) {
-                return results;
-            } else if (similarity != null) {
-                return similarity.mostSimilar(this, wpId, numResults, validIds);
-            } else {
-                return null;
+
+            // Next try to recompute them from the feature and transpose matrices
+            if (similarity != null && featureMatrix != null && featureTransposeMatrix != null) {
+                return normalize(similarity.mostSimilar(this, wpId, numResults, validIds));
             }
+
+            // We cannot complete the request
+            return null;
         } finally {
 //            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
         }
     }
 
+    /**
+     * Returns the SRResult list associated with the requested page and constraints, or null
+     * if the cache cannot answer the request.
+     *
+     * @param vector The query vector.
+     * @param numResults The number of requested results.
+     * @param validIds Ids that may be included in the result list.
+     * @return
+     * @throws IOException
+     * @throws DaoException
+     */
     public SRResultList mostSimilar(TIntFloatMap vector, int numResults, TIntSet validIds) throws IOException, DaoException {
-        long l = System.currentTimeMillis();
-        try {
-            return similarity.mostSimilar(this, vector, numResults, validIds);
-        } finally {
-//            System.err.println("ellapsed millis is " + (System.currentTimeMillis() - l));
+        if (similarity != null && featureMatrix != null && featureTransposeMatrix != null) {
+            return normalize(similarity.mostSimilar(this, vector, numResults, validIds));
+        } else {
+            return null;
         }
     }
 
-    public static SRResultList rowToResultList(MatrixRow row, int maxResults, TIntSet validIds) {
-        Leaderboard leaderboard = new Leaderboard(maxResults);
-        for (int i=0; i<row.getNumCols() ; i++){
-            int wpId2 = row.getColIndex(i);
-            if (validIds == null || validIds.contains(wpId2)){
-                leaderboard.tallyScore(wpId2, row.getColValue(i));
-            }
-        }
-        SRResultList results = leaderboard.getTop();
-        results.sortDescending();
-        return results;
-    }
-
+    /**
+     * Closes any open cache matrices.
+     */
     public void close() {
         IOUtils.closeQuietly(featureMatrix);
         IOUtils.closeQuietly(featureTransposeMatrix);
         IOUtils.closeQuietly(cosimilarityMatrix);
+        featureMatrix = null;
+        featureTransposeMatrix = null;
+        cosimilarityMatrix = null;
     }
 
-    public void writeFeatureAndTransposeMatrix(final int rowIds[], final int threads) throws WikapidiaException, InterruptedException, IOException {
-        if (!dir.isDirectory()) {
-            dir.mkdirs();
-        }
-        List<Integer> rowIds2 = new ArrayList<Integer>();
-        for (int id : rowIds) { rowIds2.add(id); }
+    /**
+     * Writes the feature and transpose matrices. And loads them into memory.
+     * @param rowIds The article ids whose features should be calculated.
+     * @param maxThreads Maximum number of threads to use
+     */
+    public void writeFeatureAndTransposeMatrix(final int rowIds[], final int maxThreads) throws WikapidiaException, InterruptedException, IOException {
+        ensureDataDirectoryExists();
 
+        // Write the feature matrix
         ValueConf vconf = new ValueConf();
         final SparseMatrixWriter writer = new SparseMatrixWriter(getFeatureMatrixPath(), vconf);
-        ParallelForEach.loop(rowIds2, threads, new Procedure<Integer>() {
-            public void call(Integer wpId) throws IOException, DaoException, WikapidiaException {
-                writeFeatureVector(writer, wpId);
-            }
-        }, 10000);
-        try {
-            writer.finish();
-        } catch (IOException e){
-            throw new WikapidiaException(e);
-        }
-        IOUtils.closeQuietly(featureMatrix);
-        featureMatrix = readMatrix(FEATURE_MATRIX);
+        ParallelForEach.loop(intArrayToList(rowIds), maxThreads,
+                new Procedure<Integer>() {
+                    public void call(Integer wpId) throws IOException, DaoException, WikapidiaException {
+                        writeFeatureVector(writer, wpId);
+                    }
+                }, 10000);
+        writer.finish();
 
+        // Write the transpose
         SparseMatrixTransposer transposer = new SparseMatrixTransposer(
                 new SparseMatrix(getFeatureMatrixPath()),
                 getFeatureTransposeMatrixPath());
         transposer.transpose();
+
+        // Reload existing matrices
+        IOUtils.closeQuietly(featureMatrix);
         IOUtils.closeQuietly(featureTransposeMatrix);
+        featureMatrix = readMatrix(FEATURE_MATRIX);
         featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
     }
 
+    /**
+     * Writes the feature and transpose matrices. And loads them into memory.
+     * @param rowIds The article ids whose most similar lists should be cached.
+     * @param colIds The article ids that may appear in the similar result lists.
+     * @param maxSimsPerDoc The maximum size of a most simlar result list.
+     * @param maxThreads Maximum number of threads to use
+     */
     public void writeCosimilarity(final int rowIds[], final int colIds[], final int maxSimsPerDoc, int maxThreads) throws IOException, InterruptedException {
-        List<Integer> rowIds2 = new ArrayList<Integer>();
-        for (int id : rowIds) { rowIds2.add(id); }
+        ensureDataDirectoryExists();
 
         final AtomicInteger idCounter = new AtomicInteger();
         final AtomicLong cellCounter = new AtomicLong();
@@ -278,11 +302,12 @@ public class MostSimilarCache implements Closeable {
         monoSr.setMostSimilarNormalizer(new IdentityNormalizer());
         monoSr.setSimilarityNormalizer(new IdentityNormalizer());
         try {
-            ParallelForEach.loop(rowIds2, maxThreads, new Procedure<Integer>() {
-                public void call(Integer wpId) throws IOException, DaoException {
-                    writeSim(writer, wpId, colIdSet, maxSimsPerDoc, idCounter, cellCounter);
-                }
-            }, Integer.MAX_VALUE);
+            ParallelForEach.loop(intArrayToList(rowIds), maxThreads,
+                    new Procedure<Integer>() {
+                        public void call(Integer wpId) throws IOException, DaoException {
+                            writeSim(writer, wpId, colIdSet, maxSimsPerDoc, idCounter, cellCounter);
+                        }
+                    }, Integer.MAX_VALUE);
         } finally {
             monoSr.setSimilarityNormalizer(simNormalizer);
             monoSr.setMostSimilarNormalizer(mostSimNormalizer);
@@ -338,6 +363,37 @@ public class MostSimilarCache implements Closeable {
             writer.writeRow(new SparseMatrixRow(writer.getValueConf(), id, linkedHashMap));
         } catch (IOException e){
             throw new WikapidiaException(e);
+        }
+    }
+
+    private SRResultList rowToResultList(MatrixRow row, int maxResults, TIntSet validIds) {
+        Leaderboard leaderboard = new Leaderboard(maxResults);
+        for (int i=0; i<row.getNumCols() ; i++){
+            int wpId2 = row.getColIndex(i);
+            if (validIds == null || validIds.contains(wpId2)){
+                leaderboard.tallyScore(wpId2, row.getColValue(i));
+            }
+        }
+        SRResultList results = leaderboard.getTop();
+        results.sortDescending();
+        return results;
+    }
+
+    private List<Integer> intArrayToList(int[] ints) {
+        List<Integer> result = new ArrayList<Integer>();
+        for (int id : ints) { result.add(id); }
+        return result;
+    }
+
+    private void ensureDataDirectoryExists() {
+        if (!dir.isDirectory()) { dir.mkdirs(); }
+    }
+
+    private SRResultList normalize(SRResultList list) {
+        if (list == null) {
+            return null;
+        } else {
+            return monoSr.getMostSimilarNormalizer().normalize(list);
         }
     }
 }
