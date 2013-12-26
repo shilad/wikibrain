@@ -31,15 +31,10 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     private final CategoryGraph graph;
     LocalCategoryMemberDao catHelper;
 
-    public MonolingualCategoryGraphSimilarity(Language language, LocalPageDao pageDao, Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao) throws DaoException {
-        super(language,pageDao,disambiguator);
+    public MonolingualCategoryGraphSimilarity(String name, Language language, LocalPageDao pageDao, Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao) throws DaoException {
+        super(name, language,pageDao,disambiguator);
         this.catHelper=categoryMemberDao;
         this.graph = categoryMemberDao.getGraph(language);
-    }
-
-    @Override
-    public String getName() {
-        return "categorygraphsimilarity";
     }
 
     public double distanceToScore(double distance) {
@@ -53,6 +48,13 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
             return 0.0;
         }
         return  (Math.log(distance) / Math.log(graph.minCost));
+    }
+
+    @Override
+    public MetricConfig getMetricConfig() {
+        MetricConfig mc = new MetricConfig();
+        mc.supportsFeatureVectors = false;
+        return mc;
     }
 
     @Override
@@ -129,16 +131,6 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
-        super.writeCosimilarity(SRMatrices.Mode.COSIMILARITY, path, maxHits, null, rowIds, colIds);
-    }
-
-    @Override
-    public void readCosimilarity(String path) throws IOException {
-        super.readCosimilarity(path, null);
-    }
-
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -169,6 +161,7 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
             MonolingualCategoryGraphSimilarity sr = null;
             try {
                 sr = new MonolingualCategoryGraphSimilarity(
+                        name,
                         language,
                         getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
                         getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),

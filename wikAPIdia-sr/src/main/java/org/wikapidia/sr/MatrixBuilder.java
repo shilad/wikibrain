@@ -86,7 +86,6 @@ public class MatrixBuilder {
         }
 
         LanguageSet languages = env.getLanguages();
-        String path = c.getConf().get().getString("sr.metric.path");
         int maxResults = cmd.hasOption("r")? Integer.parseInt(cmd.getOptionValue("r")) : c.getConf().get().getInt("sr.normalizer.defaultmaxresults");
 
         MonolingualSRMetric sr=null;
@@ -94,11 +93,11 @@ public class MatrixBuilder {
         if (cmd.hasOption("m")){
             Language language = languages.getDefaultLanguage();
             sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
-            sr.writeCosimilarity(path, maxResults, rowIds, colIds);
+            sr.writeCosimilarity(maxResults, rowIds, colIds);
         }
         if (cmd.hasOption("u")){
             usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
-            usr.writeCosimilarity(path,maxResults);
+//            usr.writeCosimilarity(path,maxResults);
         }
     }
 

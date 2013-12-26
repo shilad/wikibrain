@@ -140,8 +140,8 @@ public class MetricTrainer {
         if (sr!=null){
             sr.trainMostSimilar(dataset, maxResults, null);
             sr.trainSimilarity(dataset);
-            sr.write(path);
-            sr.read(path);
+            sr.write();
+            sr.read();
         }
     }
 }

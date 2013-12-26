@@ -31,14 +31,16 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
     private final int MAX_RESULTS = 500;
     private MonolingualSRMetric baseMetric;
 
-    public MostSimilarCosineMetric(Language language, Disambiguator disambiguator, LocalPageDao pageHelper, MonolingualSRMetric baseMetric){
-        super(language, pageHelper, disambiguator);
+    public MostSimilarCosineMetric(String name, Language language, Disambiguator disambiguator, LocalPageDao pageHelper, MonolingualSRMetric baseMetric){
+        super(name, language, pageHelper, disambiguator);
         this.baseMetric=baseMetric;
     }
 
     @Override
-    public String getName() {
-        return "MostSimilarCosine";
+    public MetricConfig getMetricConfig() {
+        MetricConfig mc = new MetricConfig();
+        mc.supportsFeatureVectors = false;  // should come from cosimilarity matrix of children
+        return mc;
     }
 
     @Override
@@ -78,10 +80,10 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
                 }
             }
         }
-        System.out.println("for " + phrase + ": ");
-        for (LocalId lid : expanded.keySet()) {
-            System.out.println("\t" + getTitle(lid.getId()) + ": " + expanded.get(lid));
-        }
+//        System.out.println("for " + phrase + ": ");
+//        for (LocalId lid : expanded.keySet()) {
+//            System.out.println("\t" + getTitle(lid.getId()) + ": " + expanded.get(lid));
+//        }
         return expanded;
     }
 
@@ -119,17 +121,6 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public void trainSimilarity(Dataset dataset) throws DaoException {
-        super.trainSimilarity(dataset);
-//        baseMetric.trainMostSimilar(highDataset,MAX_RESULTS, null);
-    }
-
-    @Override
-    public SRResultList mostSimilar(int page, int maxResults) throws DaoException {
-        return mostSimilar(page, maxResults,null);
-    }
-
-    @Override
     public SRResultList mostSimilar(int page, int maxResults, TIntSet validIds) throws DaoException {
         return baseMetric.mostSimilar(page, maxResults, validIds);
     }
@@ -137,16 +128,6 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
     @Override
     public TIntDoubleMap getVector(int id) throws DaoException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
-        return;
-    }
-
-    @Override
-    public void readCosimilarity(String path) throws IOException {
-        return;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {
@@ -175,6 +156,7 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));
             MostSimilarCosineMetric sr = new MostSimilarCosineMetric(
+                    name,
                     language,
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),

@@ -129,8 +129,8 @@ public class TestMilneWitten {
 
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
-        BaseMonolingualSRMetric srIn = new MonolingualMilneWitten(SIMPLE, dao, disambiguator,linkDao);
-        BaseMonolingualSRMetric srOut =  new MonolingualMilneWitten(SIMPLE, dao, disambiguator,linkDao,true);
+        BaseMonolingualSRMetric srIn = new MonolingualMilneWitten("srIn", SIMPLE, dao, disambiguator,linkDao);
+        BaseMonolingualSRMetric srOut =  new MonolingualMilneWitten("srOut", SIMPLE, dao, disambiguator,linkDao,true);
 
         double rIn = srIn.similarity(page1.getLocalId(), page2.getLocalId(), true).getScore();
         assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==rIn);

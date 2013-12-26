@@ -23,6 +23,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
 import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.SrNormalizers;
@@ -33,10 +34,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+/**
+ * This abstract class provides many useful building blocks for Monolingual SR Metrics.
+ */
 public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     private static Logger LOG = Logger.getLogger(BaseMonolingualSRMetric.class.getName());
 
-    private Language language;
+    private final String name;
+    private final Language language;
+
+    private File dataDir;
     private Disambiguator disambiguator;
     private LocalPageDao localPageDao;
 
@@ -45,11 +52,54 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     private SRMatrices mostSimilarMatrices = null;
 
-    public BaseMonolingualSRMetric(Language language, LocalPageDao dao, Disambiguator disambig) {
+    public BaseMonolingualSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig) {
+        this.name = name;
         this.language = language;
         this.disambiguator = disambig;
         this.localPageDao = dao;
         this.normalizers =  new SrNormalizers();
+    }
+
+    public static class MetricConfig {
+        /**
+         * Whether or not the metric supports feature vectors.
+         * Defaults to true.
+         */
+        public boolean supportsFeatureVectors = true;
+
+        /**
+         * Measure of similarity between vectors
+         * Defaults to PairwiseCosineSimilarity.
+         */
+        public PairwiseSimilarity vectorSimilarity = new PairwiseCosineSimilarity();
+
+        /**
+         * Whether or not the metric should build a cosimilarity matrix
+         * Deafaults to true.
+         */
+        public boolean buildCosimilarityMatrix = true;
+    };
+
+    /**
+     * The base class uses this method to support its featureset.
+     *
+     * @return
+     */
+    public abstract MetricConfig getMetricConfig();
+
+    @Override
+    public File getDataDir() {
+        return dataDir;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setDataDir(File dir) {
+        this.dataDir= dir;
     }
 
     public boolean hasCachedMostSimilarLocal(int wpId) {
@@ -155,10 +205,9 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     }
 
     @Override
-    public void write(String path) throws IOException {
-        File dir = getDataDir(path);
-        WpIOUtils.mkdirsQuietly(dir);
-        normalizers.write(dir);
+    public void write() throws IOException {
+        WpIOUtils.mkdirsQuietly(dataDir);
+        normalizers.write(dataDir);
     }
 
     public void setReadNormalizers(boolean shouldRead) {
@@ -166,21 +215,26 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     }
 
     @Override
-    public void read(String path) throws IOException {
-        File dir = getDataDir(path);
-        if (!dir.isDirectory()) {
-            LOG.warning("directory " + dir + " does not exist; cannot read files");
+    public void read() throws IOException {
+        MetricConfig  config = getMetricConfig();
+
+        if (!dataDir.isDirectory()) {
+            LOG.warning("directory " + dataDir + " does not exist; cannot read files");
             return;
         }
-        if (shouldReadNormalizers) {
-            if (normalizers.hasReadableNormalizers(dir)) {
-                normalizers.read(dir);
-            }
+        if (shouldReadNormalizers && normalizers.hasReadableNormalizers(dataDir)) {
+            normalizers.read(dataDir);
+        }
+        IOUtils.closeQuietly(mostSimilarMatrices);
+        SRMatrices srm = new SRMatrices(this, config.vectorSimilarity, dataDir);
+        if (srm.hasReadableMatrices()) {
+            srm.readMatrices();
+            mostSimilarMatrices = srm;
         }
     }
 
     @Override
-    public void trainSimilarity(Dataset dataset) throws DaoException {
+    public synchronized void trainSimilarity(Dataset dataset) throws DaoException {
         if (!dataset.getLanguage().equals(getLanguage())) {
             throw new IllegalArgumentException("SR metric has language " + getLanguage() + " but dataset has language " + dataset.getLanguage());
         }
@@ -214,7 +268,9 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     }
 
     @Override
-    public abstract SRResultList mostSimilar(int pageId, int maxResults) throws DaoException;
+    public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
+        return mostSimilar(pageId, maxResults, null);
+    }
 
     @Override
     public abstract SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException;
@@ -302,11 +358,20 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(String parentDir, int maxHits) throws IOException, DaoException, WikapidiaException {
-        writeCosimilarity(parentDir, maxHits, null, null);
+    public void writeCosimilarity(int maxHits) throws IOException, DaoException, WikapidiaException {
+        writeCosimilarity(maxHits, null, null);
     }
 
-    protected void writeCosimilarity(SRMatrices.Mode mode, String parentDir, int maxHits, PairwiseSimilarity pairwise, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
+    @Override
+    public void writeCosimilarity(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
+        MetricConfig  config = getMetricConfig();
+
+        if (!config.buildCosimilarityMatrix && !config.supportsFeatureVectors) {
+            IOUtils.closeQuietly(mostSimilarMatrices);
+            mostSimilarMatrices = null;
+            return;
+        }
+
         try {
             TIntSet allPageIds = null;
             // Get all page ids
@@ -327,25 +392,22 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             if (rowIds == null) rowIds = allPageIds;
             if (colIds == null) colIds = allPageIds;
 
-            SRMatrices srm = new SRMatrices(this, pairwise, getDataDir(parentDir));
+            SRMatrices.Mode mode;
+            if (config.buildCosimilarityMatrix && config.supportsFeatureVectors) {
+                mode = SRMatrices.Mode.ALL;
+            } else if (config.buildCosimilarityMatrix) {
+                mode = SRMatrices.Mode.COSIMILARITY;
+            } else if (config.supportsFeatureVectors) {
+                mode = SRMatrices.Mode.FEATURE_AND_TRANSPOSE;
+            } else {
+                throw new IllegalStateException();
+            }
+            SRMatrices srm = new SRMatrices(this, config.vectorSimilarity, dataDir);
             srm.write(mode, colIds.toArray(), rowIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
             mostSimilarMatrices = srm;
         } catch (InterruptedException e){
             throw new RuntimeException(e);
         }
-    }
-
-    protected void readCosimilarity(String parentDir, PairwiseSimilarity pairwise) throws IOException {
-        IOUtils.closeQuietly(mostSimilarMatrices);
-        SRMatrices srm = new SRMatrices(this, pairwise, getDataDir(parentDir));
-        if (srm.hasReadableMatrices()) {
-            srm.readMatrices();
-            mostSimilarMatrices = srm;
-        }
-    }
-
-    protected File getDataDir(String parentDir) {
-        return FileUtils.getFile(parentDir, getName(), getLanguage().getLangCode());
     }
 
     public Language getLanguage() {
@@ -358,14 +420,6 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     public LocalPageDao getLocalPageDao() {
         return localPageDao;
-    }
-
-    public boolean isShouldReadNormalizers() {
-        return shouldReadNormalizers;
-    }
-
-    public SrNormalizers getNormalizers() {
-        return normalizers;
     }
 
     @Override
@@ -384,26 +438,22 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     protected static void configureBase(Configurator configurator, BaseMonolingualSRMetric sr, Config config) throws ConfigurationException {
         Config rootConfig = configurator.getConf().get();
+
         File path = new File(rootConfig.getString("sr.metric.path"));
-        boolean isTraining = rootConfig.getBoolean("sr.metric.training");
+        sr.setDataDir(FileUtils.getFile(path, sr.getName(), sr.getLanguage().getLangCode()));
 
         // initialize normalizers
         sr.setSimilarityNormalizer(configurator.get(Normalizer.class, config.getString("similaritynormalizer")));
         sr.setMostSimilarNormalizer(configurator.get(Normalizer.class, config.getString("mostsimilarnormalizer")));
 
+        boolean isTraining = rootConfig.getBoolean("sr.metric.training");
         if (isTraining) {
             sr.setReadNormalizers(false);
         }
 
         try {
-            sr.read(path.getAbsolutePath());
+            sr.read();
         } catch (IOException e){
-            throw new ConfigurationException(e);
-        }
-
-        try {
-            sr.readCosimilarity(path.getAbsolutePath());
-        } catch (IOException e) {
             throw new ConfigurationException(e);
         }
     }

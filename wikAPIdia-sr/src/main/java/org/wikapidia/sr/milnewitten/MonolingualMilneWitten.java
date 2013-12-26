@@ -36,19 +36,21 @@ import java.util.Map;
 
 public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
     LocalLinkDao linkHelper;
+
     //False is standard Milne Witten with in links, true is with out links
     private boolean outLinks;
+
     private MilneWittenCore core;
-    private String name = "localmilnewitten";
+
     private Integer numPages;
 
 
-    public MonolingualMilneWitten(Language language, LocalPageDao pageHelper, Disambiguator disambiguator, LocalLinkDao linkHelper) {
-        this(language, pageHelper, disambiguator,linkHelper, false);
+    public MonolingualMilneWitten(String name, Language language, LocalPageDao pageHelper, Disambiguator disambiguator, LocalLinkDao linkHelper) {
+        this(name, language, pageHelper, disambiguator,linkHelper, false);
     }
 
-    public MonolingualMilneWitten(Language language, LocalPageDao pageHelper, Disambiguator disambiguator, LocalLinkDao linkHelper, boolean outLinks) {
-        super(language,pageHelper,disambiguator);
+    public MonolingualMilneWitten(String name, Language language, LocalPageDao pageHelper, Disambiguator disambiguator, LocalLinkDao linkHelper, boolean outLinks) {
+        super(name, language,pageHelper,disambiguator);
         this.linkHelper = linkHelper;
         this.outLinks = outLinks;
         this.core = new MilneWittenCore();
@@ -63,14 +65,6 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
         this.outLinks = outLinks;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     @Override
     public TIntDoubleMap getVector(int id) throws DaoException {
         TIntDoubleMap vector = new TIntDoubleHashMap();
@@ -83,6 +77,16 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
     }
 
 
+    @Override
+    public MetricConfig getMetricConfig() {
+        MetricConfig config = new MetricConfig();
+        config.vectorSimilarity = new PairwiseMilneWittenSimilarity();
+
+        // no point because this would be redundant with matrixlocallinkdao
+        config.supportsFeatureVectors = false;
+
+        return config;
+    }
 
     //TODO: Add a normalizer
     //TODO: similarity -> relatedness
@@ -105,11 +109,6 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
         }
 
         return normalize(result);
-    }
-
-    @Override
-    public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
-        return mostSimilar(pageId,maxResults,null);
     }
 
     @Override
@@ -237,28 +236,12 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
 
     private int getNumLinks(int id, boolean outLinks) throws DaoException {
         DaoFilter daoFilter = new DaoFilter().setLanguages(getLanguage());
-//        if (outLinks){
-//            daoFilter.setDestIds(id.getId());
-//        } else {
-//            daoFilter.setSourceIds(id.getId());
-//        }
         if (outLinks){
             daoFilter.setSourceIds(id);
         } else {
             daoFilter.setDestIds(id);
         }
         return linkHelper.getCount(daoFilter);
-    }
-
-    @Override
-    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
-        super.writeCosimilarity(SRMatrices.Mode.COSIMILARITY, path, maxHits, new PairwiseMilneWittenSimilarity(), rowIds, colIds);
-    }
-
-
-    @Override
-    public void readCosimilarity(String path) throws IOException {
-        super.readCosimilarity(path, new PairwiseMilneWittenSimilarity());
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {
@@ -288,11 +271,11 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
             Language language = Language.getByLangCode(runtimeParams.get("language"));
 
             MonolingualMilneWitten sr = new MonolingualMilneWitten(
+                    name,
                     language, getConfigurator().get(LocalPageDao.class,config.getString("pageDao")), getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     getConfigurator().get(LocalLinkDao.class,config.getString("linkDao")),
                     config.getBoolean("outLinks")
             );
-            sr.setName(name);
             configureBase(getConfigurator(), sr, config);
             return sr;
         }

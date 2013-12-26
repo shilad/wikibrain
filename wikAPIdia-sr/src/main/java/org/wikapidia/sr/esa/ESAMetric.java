@@ -50,8 +50,8 @@ public class ESAMetric extends BaseMonolingualSRMetric {
 
     private Map<Language, WpIdFilter> conceptFilter = new HashMap<Language, WpIdFilter>();
 
-    public ESAMetric(Language language, LuceneSearcher searcher, LocalPageDao pageHelper, Disambiguator disambiguator, boolean resolvePhrases) {
-        super(language, pageHelper, disambiguator);
+    public ESAMetric(String name, Language language, LuceneSearcher searcher, LocalPageDao pageHelper, Disambiguator disambiguator, boolean resolvePhrases) {
+        super(name, language, pageHelper, disambiguator);
         this.searcher = searcher;
         this.resolvePhrases = resolvePhrases;
     }
@@ -82,11 +82,6 @@ public class ESAMetric extends BaseMonolingualSRMetric {
      * @return SRResulList
      * @throws DaoException
      */
-    @Override
-    public SRResultList mostSimilar(String phrase, int maxResults) throws DaoException {
-        return mostSimilar(phrase, maxResults,null);
-    }
-
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
         if (resolvePhrases){
@@ -260,6 +255,13 @@ public class ESAMetric extends BaseMonolingualSRMetric {
         return expanded;
     }
 
+    @Override
+    public MetricConfig getMetricConfig() {
+        MetricConfig mc = new MetricConfig();
+        mc.buildCosimilarityMatrix = false;     // should generally use phrases
+        return mc;
+    }
+
     /**
      * @see MonolingualSRMetric#similarity(int, int, boolean)
      * @param pageId1
@@ -315,17 +317,6 @@ public class ESAMetric extends BaseMonolingualSRMetric {
     }
 
     /**
-     * @see MonolingualSRMetric#mostSimilar(int, int)
-     * @param pageId
-     * @param maxResults
-     * @return
-     */
-    @Override
-    public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
-        return mostSimilar(pageId, maxResults, null);
-    }
-
-    /**
      * @see MonolingualSRMetric#mostSimilar(int, int, gnu.trove.set.TIntSet)
      * @param pageId
      * @param maxResults
@@ -343,21 +334,6 @@ public class ESAMetric extends BaseMonolingualSRMetric {
         }
         SRResultList srResults = baseMostSimilar(pageId,maxResults,validIds);
         return normalize(srResults);
-    }
-
-    public String getName() {
-        return "ESA";
-    }
-
-    @Override
-    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
-        super.writeCosimilarity(SRMatrices.Mode.FEATURE_AND_TRANSPOSE, path, maxHits, new PairwiseCosineSimilarity(), rowIds, colIds);
-    }
-
-    @Override
-    public void readCosimilarity(String path) throws IOException {
-        PairwiseSimilarity pairwiseSimilarity = new PairwiseCosineSimilarity();
-        super.readCosimilarity(path, pairwiseSimilarity);
     }
 
     /**
@@ -513,6 +489,7 @@ public class ESAMetric extends BaseMonolingualSRMetric {
             Language language = Language.getByLangCode(runtimeParams.get("language"));
 
             ESAMetric sr = new ESAMetric(
+                        name,
                         language,
                         getConfigurator().get(LuceneSearcher.class, config.getString("luceneSearcher")),
                         getConfigurator().get(LocalPageDao.class, config.getString("pageDao")),

@@ -14,6 +14,7 @@ import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.KnownSim;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,16 @@ public class TestLocalSR implements MonolingualSRMetric {
     @Override
     public Language getLanguage() {
         return Language.getByLangCode("simple");
+    }
+
+    @Override
+    public File getDataDir() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void setDataDir(File dir) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -92,12 +103,12 @@ public class TestLocalSR implements MonolingualSRMetric {
     }
 
     @Override
-    public void write(String path) throws IOException {
+    public void write() throws IOException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void read(String path) throws IOException {
+    public void read() throws IOException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -158,17 +169,12 @@ public class TestLocalSR implements MonolingualSRMetric {
     }
 
     @Override
-    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException {
+    public void writeCosimilarity(int maxHits) throws IOException, DaoException, WikapidiaException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void readCosimilarity(String path) throws IOException {
+    public void writeCosimilarity(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

@@ -11,6 +11,7 @@ import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.normalize.Normalizer;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -60,6 +61,16 @@ public class PretrainedSRFactory implements MonolingualSRFactory {
         @Override
         public Language getLanguage() {
             return delegate.getLanguage();
+        }
+
+        @Override
+        public File getDataDir() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void setDataDir(File dir) {
+            //To change body of implemented methods use File | Settings | File Templates.
         }
 
         @Override
@@ -148,15 +159,13 @@ public class PretrainedSRFactory implements MonolingualSRFactory {
         }
 
         @Override
-        public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException {}
+        public void writeCosimilarity(int maxHits) throws IOException, DaoException, WikapidiaException {}
         @Override
-        public void writeCosimilarity(String path, int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {}
+        public void writeCosimilarity(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {}
         @Override
-        public void readCosimilarity(String path) throws IOException {}
+        public void write() throws IOException {}
         @Override
-        public void write(String path) throws IOException {}
-        @Override
-        public void read(String path) throws IOException {}
+        public void read() throws IOException {}
         @Override
         public void trainSimilarity(Dataset dataset) throws DaoException {}
         @Override

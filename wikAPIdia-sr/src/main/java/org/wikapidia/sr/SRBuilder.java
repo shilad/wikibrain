@@ -43,7 +43,6 @@ public class SRBuilder {
     // If null, corresponds to the configured default metric.
     private String metricName = null;
     private MonolingualSRMetric metric = null;
-    private String metricDir = null;
     private boolean deleteExistingModels = true;
 
     // The maximum number of results
@@ -66,7 +65,6 @@ public class SRBuilder {
         // Properly resolve the default metric name.
         this.metricName = env.getConfigurator().resolveComponentName(MonolingualSRMetric.class, metricName);
         this.metric = env.getConfigurator().get(MonolingualSRMetric.class, this.metricName, "language", language.getLangCode());
-        this.metricDir = config.get().getString("sr.metric.path");
     }
 
     public void build() throws ConfigurationException, DaoException, IOException, WikapidiaException {
@@ -97,11 +95,11 @@ public class SRBuilder {
     public void buildSimpleMetric() throws ConfigurationException, DaoException, WikapidiaException, IOException {
         Dataset ds = getDataset();
         if (buildCosimilarity) {
-            metric.writeCosimilarity(metricDir, maxResults, rowIds, colIds);
+            metric.writeCosimilarity(maxResults, rowIds, colIds);
         }
         metric.trainSimilarity(ds);
         metric.trainMostSimilar(ds,maxResults,null);
-        metric.write(metricDir);
+        metric.write();
     }
 
     public Dataset getDataset() throws ConfigurationException, DaoException {
@@ -117,9 +115,9 @@ public class SRBuilder {
         EnsembleMetric ensemble = (EnsembleMetric)metric;
         if (buildCosimilarity) {
             for (MonolingualSRMetric m : ensemble.getMetrics()) {
-                m.writeCosimilarity(metricDir, maxResults*EnsembleMetric.EXTRA_SEARCH_DEPTH, rowIds, colIds);
+                m.writeCosimilarity(maxResults*EnsembleMetric.EXTRA_SEARCH_DEPTH, rowIds, colIds);
             }
-            metric.writeCosimilarity(metricDir, maxResults*EnsembleMetric.EXTRA_SEARCH_DEPTH, rowIds, colIds);
+            metric.writeCosimilarity(maxResults*EnsembleMetric.EXTRA_SEARCH_DEPTH, rowIds, colIds);
         }
         Dataset ds = getDataset();
 
@@ -127,13 +125,13 @@ public class SRBuilder {
         metric.trainSimilarity(ds);
         metric.trainMostSimilar(ds,maxResults,null);
         for (MonolingualSRMetric m : ensemble.getMetrics()) {
-            m.write(metricDir);
+            m.write();
         }
-        metric.write(metricDir);
+        metric.write();
     }
 
     public void deleteMetricDir(String name) {
-        FileUtils.deleteQuietly(FileUtils.getFile(metricDir, name, language.getLangCode()));
+        FileUtils.deleteQuietly(FileUtils.getFile(name, language.getLangCode()));
     }
 
     public void buildCosineSim() {
@@ -166,10 +164,6 @@ public class SRBuilder {
 
     public void setMaxResults(int maxResults) {
         this.maxResults = maxResults;
-    }
-
-    public void setMetricDir(String metricDir) {
-        this.metricDir = metricDir;
     }
 
     public void setRowIds(TIntSet rowIds) {
