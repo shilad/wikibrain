@@ -16,7 +16,6 @@ import org.wikapidia.sr.UniversalSRMetric;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Leaderboard;
-import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
 
@@ -41,13 +40,8 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class SRMatrices implements Closeable {
-    public enum Mode {
-        FEATURE_AND_TRANSPOSE,  // only the feature and transpose are used
-        COSIMILARITY,           // all
-        ALL
-    };
-    private static final Logger LOG = Logger.getLogger(SRMatrices.class.getName());
+public class MostSimilarCache implements Closeable {
+    private static final Logger LOG = Logger.getLogger(MostSimilarCache.class.getName());
 
     public static final String COSIMILARITY_MATRIX = "cosimilarityMatrix";
     public static final String FEATURE_TRANSPOSE_MATRIX = "featureTransposeMatrix";
@@ -69,13 +63,24 @@ public class SRMatrices implements Closeable {
      * @param metric
      * @param dir
      */
-    public SRMatrices(MonolingualSRMetric metric, File dir) {
+    public MostSimilarCache(MonolingualSRMetric metric, File dir) {
         this(metric, null, dir);
     }
 
-    public SRMatrices(MonolingualSRMetric metric, PairwiseSimilarity similarity, File dir) {
+    public MostSimilarCache(MonolingualSRMetric metric, PairwiseSimilarity similarity, File dir) {
         this.monoSr = metric;
         this.language = metric.getLanguage();
+        this.similarity = similarity;
+        this.dir = dir;
+        if (!this.dir.isDirectory()) {
+            FileUtils.deleteQuietly(dir);
+            dir.mkdirs();
+        }
+    }
+
+    public MostSimilarCache(UniversalSRMetric metric, PairwiseSimilarity similarity, File dir) {
+        this.universalSr = metric;
+        this.language = null;
         this.similarity = similarity;
         this.dir = dir;
         if (!this.dir.isDirectory()) {
@@ -91,55 +96,23 @@ public class SRMatrices implements Closeable {
                 featureTransposeMatrix.getNumRows() > 0);
     }
 
-    public SRMatrices(UniversalSRMetric metric, PairwiseSimilarity similarity, File dir) {
-        this.universalSr = metric;
-        this.language = null;
-        this.similarity = similarity;
-        this.dir = dir;
-        if (!this.dir.isDirectory()) {
-            FileUtils.deleteQuietly(dir);
-            dir.mkdirs();
-        }
-    }
-
+    /**
+     * Closes existing matrices.
+     */
     public void clear() {
-        FileUtils.deleteQuietly(getChildFile(FEATURE_MATRIX));
-        FileUtils.deleteQuietly(getChildFile(FEATURE_TRANSPOSE_MATRIX));
-        FileUtils.deleteQuietly(getChildFile(COSIMILARITY_MATRIX));
-    }
-
-    private File getChildFile(String name) {
-        return new File(dir, name);
-    }
-
-    private boolean hasChildFile(String name) {
-        return getChildFile(name).isFile();
+        IOUtils.closeQuietly(getFeatureMatrix());
+        IOUtils.closeQuietly(getFeatureTransposeMatrix());
+        IOUtils.closeQuietly(getCosimilarityMatrix());
+        FileUtils.deleteQuietly(getFeatureMatrixPath());
+        FileUtils.deleteQuietly(getFeatureTransposeMatrixPath());
+        FileUtils.deleteQuietly(getCosimilarityMatrixPath());
     }
 
     /**
-     * TODO: make sure matrices are actually readable.
-     * @return True if readable files exist for all three matrices.
+     * Reads in available matrices.
+     * Throws an IOException if matrices are invalid.
      */
-    public boolean hasReadableMatrices() {
-        return hasAllReadableMatrices() || hasJustReadableCosimilarity() || hasJustReadableFeatureAndTranspose();
-    }
-
-    private boolean hasAllReadableMatrices() {
-        return  (hasChildFile(FEATURE_MATRIX) && hasChildFile(FEATURE_TRANSPOSE_MATRIX) && hasChildFile(COSIMILARITY_MATRIX));
-    }
-
-    private boolean hasJustReadableFeatureAndTranspose() {
-        return (hasChildFile(FEATURE_MATRIX) && hasChildFile(FEATURE_TRANSPOSE_MATRIX) && !hasChildFile(COSIMILARITY_MATRIX));
-    }
-
-    private boolean hasJustReadableCosimilarity() {
-        return (!hasChildFile(FEATURE_MATRIX) && !hasChildFile(FEATURE_TRANSPOSE_MATRIX) && hasChildFile(COSIMILARITY_MATRIX));
-    }
-
-    /**
-     * TODO: specify parameters for num pages and page size
-     */
-    public void readMatrices() throws IOException {
+    public void read() throws IOException {
         if (hasAllReadableMatrices()) {
             featureMatrix = readMatrix(FEATURE_MATRIX);
             featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
@@ -157,15 +130,40 @@ public class SRMatrices implements Closeable {
         }
     }
 
-    public File getFeatureMatrixPath() {
+
+    public boolean hasReadableMatrices() {
+        return hasAllReadableMatrices() || hasJustReadableCosimilarity() || hasJustReadableFeatureAndTranspose();
+    }
+
+    protected File getChildFile(String name) {
+        return new File(dir, name);
+    }
+
+    protected boolean hasChildFile(String name) {
+        return getChildFile(name).isFile();
+    }
+
+    protected boolean hasAllReadableMatrices() {
+        return  (hasChildFile(FEATURE_MATRIX) && hasChildFile(FEATURE_TRANSPOSE_MATRIX) && hasChildFile(COSIMILARITY_MATRIX));
+    }
+
+    protected boolean hasJustReadableFeatureAndTranspose() {
+        return (hasChildFile(FEATURE_MATRIX) && hasChildFile(FEATURE_TRANSPOSE_MATRIX) && !hasChildFile(COSIMILARITY_MATRIX));
+    }
+
+    protected boolean hasJustReadableCosimilarity() {
+        return (!hasChildFile(FEATURE_MATRIX) && !hasChildFile(FEATURE_TRANSPOSE_MATRIX) && hasChildFile(COSIMILARITY_MATRIX));
+    }
+
+    protected File getFeatureMatrixPath() {
         return getChildFile(FEATURE_MATRIX);
     }
 
-    public File getFeatureTransposeMatrixPath() {
+    protected File getFeatureTransposeMatrixPath() {
         return getChildFile(FEATURE_TRANSPOSE_MATRIX);
     }
 
-    public File getCosimilarityMatrixPath() {
+    protected File getCosimilarityMatrixPath() {
         return getChildFile(COSIMILARITY_MATRIX);
     }
 
@@ -231,31 +229,16 @@ public class SRMatrices implements Closeable {
         IOUtils.closeQuietly(cosimilarityMatrix);
     }
 
-    public void write(Mode mode, int rowIds[], int colIds[], int maxSimsPerDoc, int threads) throws IOException, InterruptedException, WikapidiaException {
-        if (similarity == null && (mode == Mode.ALL || mode == Mode.FEATURE_AND_TRANSPOSE)) {
-            throw new IllegalArgumentException("mode " + mode + " requires similarity but it was null");
+    public void writeFeatureAndTransposeMatrix(final int rowIds[], final int threads) throws WikapidiaException, InterruptedException, IOException {
+        if (!dir.isDirectory()) {
+            dir.mkdirs();
         }
-        for (File f : new File[] {getFeatureMatrixPath(), getCosimilarityMatrixPath(), getFeatureTransposeMatrixPath()}) {
-            if (f.exists()) { FileUtils.deleteQuietly(f); }
-        }
-        if (mode == Mode.ALL || mode == Mode.FEATURE_AND_TRANSPOSE) {
-            writeFeatureMatrix(rowIds, threads);
-            writeTranspose();
-        }
-        if (mode == Mode.ALL || mode == Mode.COSIMILARITY) {
-            writeCosimilarity(rowIds, colIds, maxSimsPerDoc, threads);
-        }
-    }
-    public void writeFeatureMatrix(final int rowIds[], final int threads) throws WikapidiaException, InterruptedException, IOException {
-        List<Integer> wpIds2 = new ArrayList<Integer>();
-        for (int id : rowIds) { wpIds2.add(id); }
-        writeFeatureMatrix(wpIds2, threads);
-    }
+        List<Integer> rowIds2 = new ArrayList<Integer>();
+        for (int id : rowIds) { rowIds2.add(id); }
 
-    public void writeFeatureMatrix(List<Integer> rowIds, int threads) throws WikapidiaException, InterruptedException, IOException {
         ValueConf vconf = new ValueConf();
         final SparseMatrixWriter writer = new SparseMatrixWriter(getFeatureMatrixPath(), vconf);
-        ParallelForEach.loop(rowIds, threads, new Procedure<Integer>() {
+        ParallelForEach.loop(rowIds2, threads, new Procedure<Integer>() {
             public void call(Integer wpId) throws IOException, DaoException, WikapidiaException {
                 writeFeatureVector(writer, wpId);
             }
@@ -265,24 +248,21 @@ public class SRMatrices implements Closeable {
         } catch (IOException e){
             throw new WikapidiaException(e);
         }
+        IOUtils.closeQuietly(featureMatrix);
         featureMatrix = readMatrix(FEATURE_MATRIX);
-    }
 
-    public void writeTranspose() throws IOException {
         SparseMatrixTransposer transposer = new SparseMatrixTransposer(
                 new SparseMatrix(getFeatureMatrixPath()),
                 getFeatureTransposeMatrixPath());
         transposer.transpose();
+        IOUtils.closeQuietly(featureTransposeMatrix);
         featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
     }
 
     public void writeCosimilarity(final int rowIds[], final int colIds[], final int maxSimsPerDoc, int maxThreads) throws IOException, InterruptedException {
-        List<Integer> wpIds2 = new ArrayList<Integer>();
-        for (int id : rowIds) { wpIds2.add(id); }
-        writeCosimilarity(wpIds2, colIds, maxSimsPerDoc, maxThreads);
-    }
+        List<Integer> rowIds2 = new ArrayList<Integer>();
+        for (int id : rowIds) { rowIds2.add(id); }
 
-    public void writeCosimilarity(List<Integer> rowIds, final int colIds[], final int maxSimsPerDoc, int maxThreads) throws IOException {
         final AtomicInteger idCounter = new AtomicInteger();
         final AtomicLong cellCounter = new AtomicLong();
         ValueConf vconf;
@@ -298,7 +278,7 @@ public class SRMatrices implements Closeable {
         monoSr.setMostSimilarNormalizer(new IdentityNormalizer());
         monoSr.setSimilarityNormalizer(new IdentityNormalizer());
         try {
-            ParallelForEach.loop(rowIds, maxThreads, new Procedure<Integer>() {
+            ParallelForEach.loop(rowIds2, maxThreads, new Procedure<Integer>() {
                 public void call(Integer wpId) throws IOException, DaoException {
                     writeSim(writer, wpId, colIdSet, maxSimsPerDoc, idCounter, cellCounter);
                 }

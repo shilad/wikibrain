@@ -10,7 +10,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
@@ -21,9 +20,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.pairwise.PairwiseMilneWittenSimilarity;
-import org.wikapidia.sr.pairwise.SRMatrices;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

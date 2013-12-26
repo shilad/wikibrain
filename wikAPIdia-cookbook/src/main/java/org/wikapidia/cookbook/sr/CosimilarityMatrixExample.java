@@ -31,9 +31,9 @@ public class CosimilarityMatrixExample {
         String path = c.getConf().get().getString("sr.metric.path");
 
         Language language = Language.getByLangCode("simple");
-        sr.writeCacheMatrices(100);
+        sr.writeMostSimilarCache(100);
 //        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
-//        usr.writeCacheMatrices(path,100);
+//        usr.writeMostSimilarCache(path,100);
 
         List<String> phrases = Arrays.asList("United States", "Barack Obama", "brain", "natural language processing");
 

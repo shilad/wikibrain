@@ -12,7 +12,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
@@ -23,9 +22,6 @@ import org.wikapidia.lucene.WikapidiaScoreDoc;
 import org.wikapidia.lucene.WpIdFilter;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
-import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.SimUtils;
 
 import java.io.File;

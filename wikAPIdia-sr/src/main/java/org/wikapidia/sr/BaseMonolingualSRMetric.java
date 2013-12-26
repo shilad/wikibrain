@@ -23,9 +23,9 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.MostSimilarCache;
 import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpThreadUtils;
@@ -50,7 +50,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     private boolean shouldReadNormalizers = true;
     private SrNormalizers normalizers;
 
-    private SRMatrices mostSimilarMatrices = null;
+    private MostSimilarCache mostSimilarMatrices = null;
 
     public BaseMonolingualSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig) {
         this.name = name;
@@ -226,9 +226,9 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             normalizers.read(dataDir);
         }
         IOUtils.closeQuietly(mostSimilarMatrices);
-        SRMatrices srm = new SRMatrices(this, config.vectorSimilarity, dataDir);
+        MostSimilarCache srm = new MostSimilarCache(this, config.vectorSimilarity, dataDir);
         if (srm.hasReadableMatrices()) {
-            srm.readMatrices();
+            srm.read();
             mostSimilarMatrices = srm;
         }
     }
@@ -358,12 +358,12 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     }
 
     @Override
-    public void writeCacheMatrices(int maxHits) throws IOException, DaoException, WikapidiaException {
-        writeCacheMatrices(maxHits, null, null);
+    public void writeMostSimilarCache(int maxHits) throws IOException, DaoException, WikapidiaException {
+        writeMostSimilarCache(maxHits, null, null);
     }
 
     @Override
-    public void writeCacheMatrices(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
+    public void writeMostSimilarCache(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
         MetricConfig  config = getMetricConfig();
 
         if (!config.buildCosimilarityMatrix && !config.supportsFeatureVectors) {
@@ -372,38 +372,34 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             return;
         }
 
-        try {
-            TIntSet allPageIds = null;
-            // Get all page ids
-            if (rowIds == null || colIds == null) {
-                DaoFilter pageFilter = new DaoFilter()
-                        .setLanguages(getLanguage())
-                        .setNameSpaces(NameSpace.ARTICLE)
-                        .setDisambig(false)
-                        .setRedirect(false);
-                Iterable<LocalPage> localPages = localPageDao.get(pageFilter);
-                allPageIds = new TIntHashSet();
-                for (LocalPage page : localPages) {
-                    if (page != null) {
-                        allPageIds.add(page.getLocalId());
-                    }
+        TIntSet allPageIds = null;
+        // Get all page ids
+        if (rowIds == null || colIds == null) {
+            DaoFilter pageFilter = new DaoFilter()
+                    .setLanguages(getLanguage())
+                    .setNameSpaces(NameSpace.ARTICLE)
+                    .setDisambig(false)
+                    .setRedirect(false);
+            Iterable<LocalPage> localPages = localPageDao.get(pageFilter);
+            allPageIds = new TIntHashSet();
+            for (LocalPage page : localPages) {
+                if (page != null) {
+                    allPageIds.add(page.getLocalId());
                 }
             }
-            if (rowIds == null) rowIds = allPageIds;
-            if (colIds == null) colIds = allPageIds;
+        }
+        if (rowIds == null) rowIds = allPageIds;
+        if (colIds == null) colIds = allPageIds;
 
-            SRMatrices.Mode mode;
-            if (config.buildCosimilarityMatrix && config.supportsFeatureVectors) {
-                mode = SRMatrices.Mode.ALL;
-            } else if (config.buildCosimilarityMatrix) {
-                mode = SRMatrices.Mode.COSIMILARITY;
-            } else if (config.supportsFeatureVectors) {
-                mode = SRMatrices.Mode.FEATURE_AND_TRANSPOSE;
-            } else {
-                throw new IllegalStateException();
+        MostSimilarCache srm = new MostSimilarCache(this, config.vectorSimilarity, dataDir);
+        try {
+            if (config.supportsFeatureVectors) {
+                srm.writeFeatureAndTransposeMatrix(rowIds.toArray(), WpThreadUtils.getMaxThreads());
             }
-            SRMatrices srm = new SRMatrices(this, config.vectorSimilarity, dataDir);
-            srm.write(mode, colIds.toArray(), rowIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
+            if (config.buildCosimilarityMatrix) {
+                srm.writeCosimilarity(rowIds.toArray(), colIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
+            }
+            IOUtils.closeQuietly(mostSimilarMatrices);
             mostSimilarMatrices = srm;
         } catch (InterruptedException e){
             throw new RuntimeException(e);
@@ -432,7 +428,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         return normalizers.getSimilarityNormalizer();
     }
 
-    public SRMatrices getMostSimilarMatrices() {
+    public MostSimilarCache getMostSimilarMatrices() {
         return mostSimilarMatrices;
     }
 

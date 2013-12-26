@@ -201,7 +201,7 @@ public interface MonolingualSRMetric {
      *
      * @param maxHits the number of document hits you would like returned from the most similar function
      */
-    public void writeCacheMatrices(int maxHits) throws IOException, DaoException, WikapidiaException;
+    public void writeMostSimilarCache(int maxHits) throws IOException, DaoException, WikapidiaException;
 
     /**
      * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
@@ -212,7 +212,7 @@ public interface MonolingualSRMetric {
      * @param rowIds The page ids that will be cached
      * @param colIds The page ids that can be returned in the resulting similarity lists
      */
-    public void writeCacheMatrices(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException;
+    public void writeMostSimilarCache(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException;
 
     /**
      * @return the most similar normalizer.

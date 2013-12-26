@@ -169,12 +169,12 @@ public class TestLocalSR implements MonolingualSRMetric {
     }
 
     @Override
-    public void writeCacheMatrices(int maxHits) throws IOException, DaoException, WikapidiaException {
+    public void writeMostSimilarCache(int maxHits) throws IOException, DaoException, WikapidiaException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void writeCacheMatrices(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
+    public void writeMostSimilarCache(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

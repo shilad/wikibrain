@@ -28,7 +28,7 @@ public class TrainNormalizerExample {
         Language l = Language.getByLangCode("simple");
 
         // This needs to happen at least once...
-//        sr.writeCacheMatrices("../dat/sr", new LanguageSet(l), 500);
+//        sr.writeMostSimilarCache("../dat/sr", new LanguageSet(l), 500);
 
         DatasetDao datasetDao = new DatasetDao();
         Dataset dataset = datasetDao.get(l, "atlasify240.txt");

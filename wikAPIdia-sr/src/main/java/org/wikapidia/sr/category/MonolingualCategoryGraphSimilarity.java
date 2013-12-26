@@ -6,11 +6,9 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.sql.LocalCategoryGraphBuilder;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.CategoryGraph;
 import org.wikapidia.sr.BaseMonolingualSRMetric;
@@ -18,9 +16,7 @@ import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.pairwise.SRMatrices;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**

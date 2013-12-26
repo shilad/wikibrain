@@ -67,11 +67,11 @@
 //        String path = env.getConfiguration().get().getString("sr.metric.path");
 ////        EnsembleMetric sr = (EnsembleMetric) env.getConfigurator().get(LocalSRMetric.class, "ensemble");
 ////        for (LocalSRMetric sr2 : sr.getMetrics()) {
-////            sr2.writeCacheMatrices(path, lset, 1000);
+////            sr2.writeMostSimilarCache(path, lset, 1000);
 ////        }
 //        Dataset ds = getDataset(env, "wordsim353.txt");
 ////        sr.trainMostSimilar(ds, 500, null);
-////        sr.writeCacheMatrices(path, lset, 500);
+////        sr.writeMostSimilarCache(path, lset, 500);
 ////        LocalSRMetric cosSr = env.getConfigurator().get(LocalSRMetric.class, "ensemble");
 //
 //
