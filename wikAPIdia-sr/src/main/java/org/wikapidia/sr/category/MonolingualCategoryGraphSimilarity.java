@@ -107,14 +107,16 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        if (hasCachedMostSimilarLocal(pageId)) {
-            return getCachedMostSimilarLocal(pageId, maxResults, validIds);
+
+        SRResultList results = getCachedMostSimilar(pageId, maxResults, validIds);
+        if (results != null) {
+            return results;
         }
         CategoryBfs bfs = new CategoryBfs(graph,pageId,getLanguage(), maxResults, validIds, catHelper);
         while (bfs.hasMoreResults()) {
             bfs.step();
         }
-        SRResultList results = new SRResultList(bfs.getPageDistances().size());
+        results = new SRResultList(bfs.getPageDistances().size());
         int i = 0;
         for (int pageId2: bfs.getPageDistances().keys()) {
             results.set(i++, pageId2, distanceToScore(bfs.getPageDistances().get(pageId2)));

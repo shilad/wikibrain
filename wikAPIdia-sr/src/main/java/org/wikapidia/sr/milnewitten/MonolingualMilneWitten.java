@@ -110,32 +110,28 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        if (hasCachedMostSimilarLocal(pageId)){
-            SRResultList mostSimilar= getCachedMostSimilarLocal( pageId, maxResults, validIds);
-            if (mostSimilar.numDocs()>maxResults){
-                mostSimilar.truncate(maxResults);
-            }
+        SRResultList mostSimilar= getCachedMostSimilar(pageId, maxResults, validIds);
+        if (mostSimilar != null) {
             return mostSimilar;
-        } else {
-            //Only check pages that share at least one inlink/outlink.
-            TIntSet linkPages = getLinks(pageId,outLinks);
-            TIntIntMap worthChecking = new TIntIntHashMap();
-            for (int id : linkPages.toArray()){
-                TIntSet links = getLinks(id, !outLinks);
-                for (int link: links.toArray()){
-                    if (validIds==null||validIds.contains(link)){
-                        worthChecking.adjustOrPutValue(link,1,1);
-                    }
+        }
+        //Only check pages that share at least one inlink/outlink.
+        TIntSet linkPages = getLinks(pageId,outLinks);
+        TIntIntMap worthChecking = new TIntIntHashMap();
+        for (int id : linkPages.toArray()){
+            TIntSet links = getLinks(id, !outLinks);
+            for (int link: links.toArray()){
+                if (validIds==null||validIds.contains(link)){
+                    worthChecking.adjustOrPutValue(link,1,1);
                 }
             }
-
-            //Don't try to check red links.
-            if (worthChecking.containsKey(-1)){
-                worthChecking.remove(-1);
-            }
-
-            return mostSimilarFromKnown(pageId, maxResults,worthChecking);
         }
+
+        //Don't try to check red links.
+        if (worthChecking.containsKey(-1)){
+            worthChecking.remove(-1);
+        }
+
+        return mostSimilarFromKnown(pageId, maxResults,worthChecking);
     }
 
     /**
@@ -149,7 +145,7 @@ public class MonolingualMilneWitten extends BaseMonolingualSRMetric {
      */
     private SRResultList mostSimilarFromKnown(int pageId, int maxResults, TIntIntMap worthChecking) throws DaoException {
         if (worthChecking==null){
-            return new SRResultList(maxResults);
+            return new SRResultList(0);
         }
 
         int pageLinks = getNumLinks(pageId,outLinks);

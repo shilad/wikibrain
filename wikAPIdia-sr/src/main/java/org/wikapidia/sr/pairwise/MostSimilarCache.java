@@ -197,14 +197,14 @@ public class MostSimilarCache implements Closeable {
                 if (row != null && row.getNumCols() >= numResults ) {
                     SRResultList results = rowToResultList(row, numResults, validIds);
                     if (results != null && results.numDocs() >= numResults) {
-                        return normalize(results);
+                        return normalize(results, numResults);
                     }
                 }
             }
 
             // Next try to recompute them from the feature and transpose matrices
             if (similarity != null && featureMatrix != null && featureTransposeMatrix != null) {
-                return normalize(similarity.mostSimilar(this, wpId, numResults, validIds));
+                return normalize(similarity.mostSimilar(this, wpId, numResults, validIds), numResults);
             }
 
             // We cannot complete the request
@@ -227,7 +227,7 @@ public class MostSimilarCache implements Closeable {
      */
     public SRResultList mostSimilar(TIntFloatMap vector, int numResults, TIntSet validIds) throws IOException, DaoException {
         if (similarity != null && featureMatrix != null && featureTransposeMatrix != null) {
-            return normalize(similarity.mostSimilar(this, vector, numResults, validIds));
+            return normalize(similarity.mostSimilar(this, vector, numResults, validIds), numResults);
         } else {
             return null;
         }
@@ -264,16 +264,18 @@ public class MostSimilarCache implements Closeable {
                 }, 10000);
         writer.finish();
 
+        // Reload the feature
+        IOUtils.closeQuietly(featureMatrix);
+        featureMatrix = readMatrix(FEATURE_MATRIX);
+
         // Write the transpose
         SparseMatrixTransposer transposer = new SparseMatrixTransposer(
-                new SparseMatrix(getFeatureMatrixPath()),
+                featureMatrix,
                 getFeatureTransposeMatrixPath());
         transposer.transpose();
 
-        // Reload existing matrices
-        IOUtils.closeQuietly(featureMatrix);
+        // Reload the transpose
         IOUtils.closeQuietly(featureTransposeMatrix);
-        featureMatrix = readMatrix(FEATURE_MATRIX);
         featureTransposeMatrix = readMatrix(FEATURE_TRANSPOSE_MATRIX);
     }
 
@@ -389,11 +391,16 @@ public class MostSimilarCache implements Closeable {
         if (!dir.isDirectory()) { dir.mkdirs(); }
     }
 
-    private SRResultList normalize(SRResultList list) {
+    private SRResultList normalize(SRResultList list, int maxResults) {
         if (list == null) {
             return null;
         } else {
-            return monoSr.getMostSimilarNormalizer().normalize(list);
+            list.sortDescending();
+            SRResultList list2 = monoSr.getMostSimilarNormalizer().normalize(list);
+            if (list2.numDocs() > maxResults) {
+                list2.truncate(maxResults);
+            }
+            return list2;
         }
     }
 }

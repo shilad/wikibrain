@@ -90,14 +90,9 @@ public class ESAMetric extends BaseMonolingualSRMetric {
                                             .search();
 
         TIntDoubleHashMap vector = getVector(phrase);
-        if (hasCachedFeatureVectors()) {
-            SRResultList mostSimilar= getCachedMostSimilarLocal(doubleMapToFloatMap(vector), maxResults, validIds);
-            if (mostSimilar != null) {
-                if (mostSimilar.numDocs()>maxResults){
-                    mostSimilar.truncate(maxResults);
-                }
-                return mostSimilar;
-            }
+        SRResultList resultList= getCachedMostSimilar(doubleMapToFloatMap(vector), maxResults, validIds);
+        if (resultList != null) {
+            return resultList;
         }
 
         List<SRResult> results = new ArrayList<SRResult>();
@@ -114,7 +109,7 @@ public class ESAMetric extends BaseMonolingualSRMetric {
         }
         Collections.sort(results);
         Collections.reverse(results);
-        SRResultList resultList = new SRResultList(maxResults);
+        resultList = new SRResultList(maxResults);
         for (int j = 0; j < maxResults && j < results.size(); j++){
             resultList.set(j, results.get(j));
         }
@@ -321,14 +316,10 @@ public class ESAMetric extends BaseMonolingualSRMetric {
      * @throws DaoException
      */
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        if (hasCachedMostSimilarLocal(pageId)) {
-            SRResultList mostSimilar= getCachedMostSimilarLocal(pageId, maxResults, validIds);
-            if (mostSimilar.numDocs()>maxResults){
-                mostSimilar.truncate(maxResults);
-            }
-            return mostSimilar;
+        SRResultList srResults= getCachedMostSimilar(pageId, maxResults, validIds);
+        if (srResults == null) {
+            srResults = baseMostSimilar(pageId,maxResults,validIds);
         }
-        SRResultList srResults = baseMostSimilar(pageId,maxResults,validIds);
         return normalize(srResults);
     }
 

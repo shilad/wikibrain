@@ -50,7 +50,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     private boolean shouldReadNormalizers = true;
     private SrNormalizers normalizers;
 
-    private MostSimilarCache mostSimilarMatrices = null;
+    private MostSimilarCache mostSimilarCache = null;
 
     public BaseMonolingualSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig) {
         this.name = name;
@@ -102,40 +102,25 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         this.dataDir= dir;
     }
 
-    public boolean hasCachedMostSimilarLocal(int wpId) {
-        if (mostSimilarMatrices == null) {
-            return false;
-        }
-        try {
-            return mostSimilarMatrices.getCosimilarityMatrix().getRow(wpId) != null;
-        } catch (IOException e) {
-            throw new RuntimeException(e);  // should not happen
-        }
-    }
-
-    public boolean hasCachedFeatureVectors() {
-        return mostSimilarMatrices.hasCachedMostSimilarVectors();
-    }
-
-    public SRResultList getCachedMostSimilarLocal(TIntFloatMap vector, int numResults, TIntSet validIds) throws DaoException {
-        if (!mostSimilarMatrices.hasCachedMostSimilarVectors()) {
+    public SRResultList getCachedMostSimilar(TIntFloatMap vector, int numResults, TIntSet validIds) throws DaoException {
+        if (mostSimilarCache == null) {
             return null;
         }
         try {
-            return mostSimilarMatrices.mostSimilar(vector, numResults, validIds);
+            return mostSimilarCache.mostSimilar(vector, numResults, validIds);
         } catch (IOException e){
-            return null;
+            throw new DaoException(e);
         }
     }
 
-    public SRResultList getCachedMostSimilarLocal(int wpId, int numResults, TIntSet validIds) throws DaoException {
-        if (!hasCachedMostSimilarLocal(wpId)){
+    public SRResultList getCachedMostSimilar(int wpId, int numResults, TIntSet validIds) throws DaoException {
+        if (mostSimilarCache == null) {
             return null;
         }
         try {
-            return mostSimilarMatrices.mostSimilar(wpId, numResults, validIds);
+            return mostSimilarCache.mostSimilar(wpId, numResults, validIds);
         } catch (IOException e){
-            return null;
+            throw new DaoException(e);
         }
     }
 
@@ -225,11 +210,11 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         if (shouldReadNormalizers && normalizers.hasReadableNormalizers(dataDir)) {
             normalizers.read(dataDir);
         }
-        IOUtils.closeQuietly(mostSimilarMatrices);
+        IOUtils.closeQuietly(mostSimilarCache);
         MostSimilarCache srm = new MostSimilarCache(this, config.vectorSimilarity, dataDir);
         if (srm.hasReadableMatrices()) {
             srm.read();
-            mostSimilarMatrices = srm;
+            mostSimilarCache = srm;
         }
     }
 
@@ -367,8 +352,8 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         MetricConfig  config = getMetricConfig();
 
         if (!config.buildCosimilarityMatrix && !config.supportsFeatureVectors) {
-            IOUtils.closeQuietly(mostSimilarMatrices);
-            mostSimilarMatrices = null;
+            IOUtils.closeQuietly(mostSimilarCache);
+            mostSimilarCache = null;
             return;
         }
 
@@ -399,8 +384,8 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             if (config.buildCosimilarityMatrix) {
                 srm.writeCosimilarity(rowIds.toArray(), colIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
             }
-            IOUtils.closeQuietly(mostSimilarMatrices);
-            mostSimilarMatrices = srm;
+            IOUtils.closeQuietly(mostSimilarCache);
+            mostSimilarCache = srm;
         } catch (InterruptedException e){
             throw new RuntimeException(e);
         }
@@ -428,8 +413,8 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         return normalizers.getSimilarityNormalizer();
     }
 
-    public MostSimilarCache getMostSimilarMatrices() {
-        return mostSimilarMatrices;
+    public MostSimilarCache getMostSimilarCache() {
+        return mostSimilarCache;
     }
 
     protected static void configureBase(Configurator configurator, BaseMonolingualSRMetric sr, Config config) throws ConfigurationException {
