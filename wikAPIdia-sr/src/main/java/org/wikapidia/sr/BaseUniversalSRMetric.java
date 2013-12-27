@@ -15,8 +15,8 @@ import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.MostSimilarCache;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.WpIOUtils;
@@ -35,7 +35,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     private SrNormalizers normalizers = new SrNormalizers();
 
-    private SRMatrices mostSimilarMatrices = null;
+    private MostSimilarCache mostSimilarMatrices = null;
 
     public BaseUniversalSRMetric(Disambiguator disambiguator, UniversalPageDao universalPageDao, int algorithmId){
         this.universalPageDao = universalPageDao;
@@ -264,7 +264,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     protected void writeCosimilarity(String parentDir, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
         try {
 
-            SRMatrices srm = new SRMatrices(this, pairwise, new File(parentDir, getName()));
+            MostSimilarCache srm = new MostSimilarCache(this, pairwise, new File(parentDir, getName()));
 //            path = path + getName()+"/matrix/" + algorithmId;
 //            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
             DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
@@ -292,9 +292,9 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
             IOUtils.closeQuietly(mostSimilarMatrices);
             mostSimilarMatrices = null;
         }
-        SRMatrices srm = new SRMatrices(this, similarity, new File(parentDir, getName()));
+        MostSimilarCache srm = new MostSimilarCache(this, similarity, new File(parentDir, getName()));
         if (srm.hasReadableMatrices()) {
-            srm.readMatrices();
+            srm.read();
         }
         mostSimilarMatrices = srm;
     }

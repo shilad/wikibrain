@@ -80,10 +80,6 @@ public class MostSimilarCosineMetric extends BaseMonolingualSRMetric {
                 }
             }
         }
-//        System.out.println("for " + phrase + ": ");
-//        for (LocalId lid : expanded.keySet()) {
-//            System.out.println("\t" + getTitle(lid.getId()) + ": " + expanded.get(lid));
-//        }
         return expanded;
     }
 

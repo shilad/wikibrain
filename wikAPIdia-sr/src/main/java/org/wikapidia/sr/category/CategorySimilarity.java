@@ -99,7 +99,7 @@
 //    }
 //
 //    @Override
-//    public void writeCacheMatrices(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
+//    public void writeMostSimilarCache(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
 //        //To change body of implemented methods use File | Settings | File Templates.
 //    }
 //

@@ -29,7 +29,7 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
     public PairwiseCosineSimilarity() {
     }
 
-    public synchronized void initIfNeeded(SRMatrices matrices) {
+    public synchronized void initIfNeeded(MostSimilarCache matrices) {
         if (lengths == null) {
             LOG.info("building cached matrix information");
             lengths = new TIntFloatHashMap();
@@ -42,7 +42,7 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
     }
 
     @Override
-    public SRResultList mostSimilar(SRMatrices matrices, TIntFloatMap vector, int maxResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(MostSimilarCache matrices, TIntFloatMap vector, int maxResults, TIntSet validIds) throws IOException {
         initIfNeeded(matrices);
         TIntDoubleHashMap dots = new TIntDoubleHashMap();
         for (int id : vector.keys()) {
@@ -75,7 +75,7 @@ public class PairwiseCosineSimilarity implements PairwiseSimilarity {
     }
 
     @Override
-    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(MostSimilarCache matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
         MatrixRow row = matrices.getFeatureMatrix().getRow(wpId);
         if (row == null) {
             LOG.info("unknown wpId: " + wpId);

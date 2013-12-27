@@ -6,20 +6,15 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
-import org.wikapidia.matrix.SparseMatrix;
-import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.*;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.pairwise.SRMatrices;
 import org.wikapidia.sr.utils.KnownSim;
-import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.utils.*;
 
 import java.io.*;
@@ -39,7 +34,6 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     private Ensemble ensemble;
     private boolean resolvePhrases = true;
 
-    private SparseMatrix mostSimilarMatrices = null;
 
     public EnsembleMetric(String name, Language language, List<MonolingualSRMetric> metrics, Ensemble ensemble, Disambiguator disambiguator, LocalPageDao pageHelper){
         super(name, language, pageHelper, disambiguator);
@@ -63,47 +57,11 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public boolean hasCachedMostSimilarLocal(int wpId){
-        if (mostSimilarMatrices == null) {
-            return false;
-        }
-        try {
-            return mostSimilarMatrices.getRow(wpId)!=null;
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public SRResultList getCachedMostSimilarLocal(int wpId, int numResults, TIntSet validIds){
-        if (!hasCachedMostSimilarLocal(wpId)){
-            return null;
-        }
-        SparseMatrixRow row;
-        try{
-            row = mostSimilarMatrices.getRow(wpId);
-        } catch (IOException e){
-            return null;
-        }
-        Leaderboard leaderboard = new Leaderboard(numResults);
-        for (int i=0; i<row.getNumCols() ; i++){
-            int wpId2 = row.getColIndex(i);
-            float value = row.getColValue(i);
-            if (validIds == null || validIds.contains(wpId2)){
-                leaderboard.tallyScore(wpId2,value);
-            }
-        }
-        SRResultList results = leaderboard.getTop();
-        results.sortDescending();
-        return results;
-    }
-
-    @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
         List<SRResult> scores = new ArrayList<SRResult>();
         for (MonolingualSRMetric metric : metrics){
             scores.add(metric.similarity(pageId1,pageId2,explanations));
-            }
+        }
         return ensemble.predictSimilarity(scores);
     }
 
@@ -121,19 +79,15 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        if (hasCachedMostSimilarLocal(pageId)){
-            SRResultList mostSimilar= getCachedMostSimilarLocal(pageId, maxResults, validIds);
-            if (mostSimilar.numDocs()>maxResults){
-                mostSimilar.truncate(maxResults);
-            }
+        SRResultList mostSimilar= getCachedMostSimilar(pageId, maxResults, validIds);
+        if (mostSimilar != null) {
             return mostSimilar;
-        } else {
-            List<SRResultList> scores = new ArrayList<SRResultList>();
-            for (MonolingualSRMetric metric : metrics){
-                scores.add(metric.mostSimilar(pageId,maxResults*EXTRA_SEARCH_DEPTH,validIds));
-            }
-            return ensemble.predictMostSimilar(scores, maxResults);
         }
+        List<SRResultList> scores = new ArrayList<SRResultList>();
+        for (MonolingualSRMetric metric : metrics){
+            scores.add(metric.mostSimilar(pageId,maxResults*EXTRA_SEARCH_DEPTH,validIds));
+        }
+        return ensemble.predictMostSimilar(scores, maxResults);
     }
 
     @Override
@@ -186,7 +140,9 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
      */
     @Override
     public void trainMostSimilar(Dataset dataset, final int numResults, final TIntSet validIds){
-        mostSimilarMatrices = null;
+        if (getMostSimilarCache() != null) {
+            getMostSimilarCache().clear();
+        }
         for (MonolingualSRMetric metric : metrics){
             metric.trainMostSimilar(dataset,numResults,validIds);
         }

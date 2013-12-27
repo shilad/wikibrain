@@ -4,10 +4,8 @@ import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.wikapidia.matrix.MatrixRow;
 import org.wikapidia.matrix.SparseMatrixRow;
 import org.wikapidia.sr.SRResultList;
-import org.wikapidia.sr.milnewitten.MilneWittenCore;
 import org.wikapidia.sr.utils.Leaderboard;
 
 import java.io.IOException;
@@ -26,7 +24,7 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
     }
 
     @Override
-    public SRResultList mostSimilar(SRMatrices matrices, TIntFloatMap rowA, int maxResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(MostSimilarCache matrices, TIntFloatMap rowA, int maxResults, TIntSet validIds) throws IOException {
         Leaderboard leaderboard = new Leaderboard(maxResults);
         int sizeA = 0;
         TIntSet linkIds = new TIntHashSet();
@@ -75,7 +73,7 @@ public class PairwiseMilneWittenSimilarity implements PairwiseSimilarity {
     }
 
     @Override
-    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
+    public SRResultList mostSimilar(MostSimilarCache matrices, int wpId, int maxResults, TIntSet validIds) throws IOException {
         SparseMatrixRow row = matrices.getFeatureMatrix().getRow(wpId);
         if (row == null) {
             return new SRResultList(0);

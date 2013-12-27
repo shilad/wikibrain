@@ -6,11 +6,9 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.sql.LocalCategoryGraphBuilder;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.CategoryGraph;
 import org.wikapidia.sr.BaseMonolingualSRMetric;
@@ -18,9 +16,7 @@ import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.disambig.Disambiguator;
-import org.wikapidia.sr.pairwise.SRMatrices;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -111,14 +107,16 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        if (hasCachedMostSimilarLocal(pageId)) {
-            return getCachedMostSimilarLocal(pageId, maxResults, validIds);
+
+        SRResultList results = getCachedMostSimilar(pageId, maxResults, validIds);
+        if (results != null) {
+            return results;
         }
         CategoryBfs bfs = new CategoryBfs(graph,pageId,getLanguage(), maxResults, validIds, catHelper);
         while (bfs.hasMoreResults()) {
             bfs.step();
         }
-        SRResultList results = new SRResultList(bfs.getPageDistances().size());
+        results = new SRResultList(bfs.getPageDistances().size());
         int i = 0;
         for (int pageId2: bfs.getPageDistances().keys()) {
             results.set(i++, pageId2, distanceToScore(bfs.getPageDistances().get(pageId2)));
