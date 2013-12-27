@@ -1,7 +1,5 @@
 package org.wikapidia.pageview;
 
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.procedure.TIntIntProcedure;
 import org.joda.time.DateTime;
 import org.mapdb.DB;
@@ -122,7 +120,7 @@ public class PageViewDbDao {
         for(Integer id: ids){
             if(db.exists(Integer.toString(id)) == false){
                 result.put(id, 0);
-                break;
+                break; //continue?
             }
             Map<Long, Integer> hourViewMap = db.getTreeMap(Integer.toString(id));
             int sum = 0;

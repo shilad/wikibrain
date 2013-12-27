@@ -10,10 +10,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.live.LocalPageLiveDao;
-import org.wikapidia.core.dao.sql.LocalPageSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.Title;
 
@@ -166,13 +163,13 @@ public class PageViewIterator implements Iterator {
             minutes++;
         }
         if(pageViewDataFile == null)
-            throw new WikapidiaException("null pageViewDataFile");
+            throw new WikapidiaException("null pageViewDataFile for date " + currentDate);
         TIntIntMap pageViewCounts = parsePageViewDataFromFile(lang, pageViewDataFile);
         DateTime nextDate = currentDate.plusHours(1);
         PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
 
-        //pageViewDataFile.delete();
-        //tempFolder.delete();
+        pageViewDataFile.delete();
+        tempFolder.delete();
 
         currentDate = nextDate;
         return pageViewData;
