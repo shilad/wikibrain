@@ -215,6 +215,11 @@ public interface MonolingualSRMetric {
     public void writeMostSimilarCache(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException;
 
     /**
+     * @return True if the metric supports a most similar cache and it is already built.
+     */
+    public boolean hasMostSimilarCache();
+
+    /**
      * @return the most similar normalizer.
      */
     public Normalizer getMostSimilarNormalizer();

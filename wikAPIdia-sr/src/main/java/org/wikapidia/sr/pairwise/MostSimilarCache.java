@@ -288,6 +288,8 @@ public class MostSimilarCache implements Closeable {
      */
     public void writeCosimilarity(final int rowIds[], final int colIds[], final int maxSimsPerDoc, int maxThreads) throws IOException, InterruptedException {
         ensureDataDirectoryExists();
+        IOUtils.closeQuietly(cosimilarityMatrix);
+        cosimilarityMatrix = null;
 
         final AtomicInteger idCounter = new AtomicInteger();
         final AtomicLong cellCounter = new AtomicLong();
@@ -329,7 +331,7 @@ public class MostSimilarCache implements Closeable {
             LOG.info("finding matches for page " + idCounter.get());
         }
         SRResultList scores;
-        if (similarity != null) {
+        if (similarity != null && featureMatrix != null && featureTransposeMatrix != null) {
             scores = similarity.mostSimilar(this, wpId, maxSimsPerDoc, colIds);
         } else {
             scores = monoSr.mostSimilar(wpId, maxSimsPerDoc, colIds);
@@ -402,5 +404,14 @@ public class MostSimilarCache implements Closeable {
             }
             return list2;
         }
+    }
+
+    public boolean hasFeatureAndTransposeMatrices() {
+        return featureMatrix != null && featureMatrix.getNumRows() > 0 &&
+               featureTransposeMatrix != null && featureTransposeMatrix.getNumRows() > 0;
+    }
+
+    public boolean hasCosimilarityMatrix() {
+        return cosimilarityMatrix != null && cosimilarityMatrix.getNumRows() > 0;
     }
 }

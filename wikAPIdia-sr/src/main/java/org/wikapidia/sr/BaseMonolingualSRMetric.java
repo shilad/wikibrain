@@ -417,6 +417,25 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         return mostSimilarCache;
     }
 
+    @Override
+    public boolean hasMostSimilarCache() {
+        MetricConfig  config = getMetricConfig();
+
+        if (mostSimilarCache == null) {
+            return false;
+        }
+        if (!mostSimilarCache.hasFeatureAndTransposeMatrices() && !mostSimilarCache.hasCosimilarityMatrix()) {
+            return false;
+        }
+        if (config.buildCosimilarityMatrix && !mostSimilarCache.hasCosimilarityMatrix()) {
+            return false;
+        }
+        if (config.supportsFeatureVectors && !mostSimilarCache.hasFeatureAndTransposeMatrices()) {
+            return false;
+        }
+        return true;
+    }
+
     protected static void configureBase(Configurator configurator, BaseMonolingualSRMetric sr, Config config) throws ConfigurationException {
         Config rootConfig = configurator.getConf().get();
 
@@ -437,5 +456,6 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         } catch (IOException e){
             throw new ConfigurationException(e);
         }
+        LOG.info("finished base configuration of metric " + sr.getName());
     }
 }

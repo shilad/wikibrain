@@ -179,6 +179,11 @@ public class TestLocalSR implements MonolingualSRMetric {
     }
 
     @Override
+    public boolean hasMostSimilarCache() {
+        return false;
+    }
+
+    @Override
     public Normalizer getMostSimilarNormalizer() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }

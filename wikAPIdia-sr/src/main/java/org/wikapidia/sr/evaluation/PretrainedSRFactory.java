@@ -162,6 +162,12 @@ public class PretrainedSRFactory implements MonolingualSRFactory {
         public void writeMostSimilarCache(int maxHits) throws IOException, DaoException, WikapidiaException {}
         @Override
         public void writeMostSimilarCache(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {}
+
+        @Override
+        public boolean hasMostSimilarCache() {
+            return false;
+        }
+
         @Override
         public void write() throws IOException {}
         @Override

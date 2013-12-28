@@ -27,7 +27,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * A "script" to build the semantic relatedness models
+ * A "script" to build the semantic relatedness models.
+ * This script takes care to not load the metric in build() until after data directories are deleted.
  *
  * @author Shilad Sen
  */
@@ -38,6 +39,7 @@ public class SRBuilder {
     private final Env env;
     private final Configuration config;
     private final Language language;
+    private final File srDir;
 
     // The name of the metric we will use.
     // If null, corresponds to the configured default metric.
@@ -56,15 +58,29 @@ public class SRBuilder {
     // List of datasets that will be used
     private List<String> datasetNames;
 
+    // If false, existing submetrics for ensemble and pairwsise sim that
+    // are already built will not be rebuilt.
+    private boolean rebuildSubmetrics = true;
+
     public SRBuilder(Env env, String metricName) throws ConfigurationException {
         this.env = env;
         this.language = env.getLanguages().getDefaultLanguage();
         this.config = env.getConfiguration();
+        this.srDir = new File(config.get().getString("sr.metric.path"));
         datasetNames = config.get().getStringList("sr.dataset.defaultsets");
 
         // Properly resolve the default metric name.
         this.metricName = env.getConfigurator().resolveComponentName(MonolingualSRMetric.class, metricName);
-        this.metric = env.getConfigurator().get(MonolingualSRMetric.class, this.metricName, "language", language.getLangCode());
+        if (!srDir.isDirectory()) {
+            srDir.mkdirs();
+        }
+    }
+
+    public synchronized MonolingualSRMetric getMetric() throws ConfigurationException {
+        if (metric == null) {
+            this.metric = env.getConfigurator().get(MonolingualSRMetric.class, this.metricName, "language", language.getLangCode());
+        }
+        return metric;
     }
 
     public void build() throws ConfigurationException, DaoException, IOException, WikapidiaException {
@@ -82,24 +98,29 @@ public class SRBuilder {
         }
     }
 
+    /**
+     * This method takes care to not load the metric itself, and just deal in names.
+     * Once the metric is loaded, it has already accessed its data files.
+     * @throws ConfigurationException
+     */
     public void deleteExisting() throws ConfigurationException {
-        deleteMetricDir(metric.getName());
+        deleteMetricDir(metricName);
         if (getMetricType().equals("ensemble")) {
-            EnsembleMetric ensemble = (EnsembleMetric)metric;
-            for (MonolingualSRMetric m : ensemble.getMetrics()) {
-                deleteMetricDir(m.getName());
+            for (String name : getMetricConfig().getStringList("metrics")) {
+                deleteMetricDir(name);
             }
         }
+        LOG.info("ALL DATA DIRECTORIES DELETED!");
     }
 
     public void buildSimpleMetric() throws ConfigurationException, DaoException, WikapidiaException, IOException {
         Dataset ds = getDataset();
         if (buildCosimilarity) {
-            metric.writeMostSimilarCache(maxResults, rowIds, colIds);
+            getMetric().writeMostSimilarCache(maxResults, rowIds, colIds);
         }
-        metric.trainSimilarity(ds);
-        metric.trainMostSimilar(ds,maxResults,null);
-        metric.write();
+        getMetric().trainSimilarity(ds);
+        getMetric().trainMostSimilar(ds, maxResults, null);
+        getMetric().write();
     }
 
     public Dataset getDataset() throws ConfigurationException, DaoException {
@@ -112,26 +133,34 @@ public class SRBuilder {
     }
 
     public void buildEnsemble() throws ConfigurationException, DaoException, WikapidiaException, IOException {
-        EnsembleMetric ensemble = (EnsembleMetric)metric;
-        if (buildCosimilarity) {
-            for (MonolingualSRMetric m : ensemble.getMetrics()) {
+        EnsembleMetric ensemble = (EnsembleMetric) getMetric();
+        Dataset ds = getDataset();
+        ensemble.setTrainSubmetrics(false);         // Do it by hand
+
+        // build up submetrics
+        for (MonolingualSRMetric m : ensemble.getMetrics()) {
+            if (buildCosimilarity && (rebuildSubmetrics || !m.hasMostSimilarCache())) {
                 m.writeMostSimilarCache(maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, rowIds, colIds);
             }
-            metric.writeMostSimilarCache(maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, rowIds, colIds);
-        }
-        Dataset ds = getDataset();
-
-        // Train cascades to base metrics
-        metric.trainSimilarity(ds);
-        metric.trainMostSimilar(ds,maxResults,null);
-        for (MonolingualSRMetric m : ensemble.getMetrics()) {
+            if (rebuildSubmetrics || !m.mostSimilarIsTrained()) {
+                m.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, null);
+            }
+            if (rebuildSubmetrics || !m.similarityIsTrained()) {
+                m.trainSimilarity(ds);
+            }
             m.write();
         }
-        metric.write();
+
+        // Train can cascade to base metrics
+        getMetric().trainSimilarity(ds);
+        getMetric().trainMostSimilar(ds, maxResults, null);
+        getMetric().writeMostSimilarCache(maxResults, rowIds, colIds);
+        getMetric().write();
     }
 
     public void deleteMetricDir(String name) {
-        FileUtils.deleteQuietly(FileUtils.getFile(name, language.getLangCode()));
+        File dir = FileUtils.getFile(srDir, name, language.getLangCode());
+        FileUtils.deleteQuietly(dir);
     }
 
     public void buildCosineSim() {
@@ -151,7 +180,7 @@ public class SRBuilder {
     }
 
     public void setColIdsFromFile(String path) throws IOException {
-        rowIds = readIds(path);
+        colIds = readIds(path);
     }
 
     public void setDatasetNames(List<String> datasetNames) {
@@ -176,6 +205,10 @@ public class SRBuilder {
 
     public void setDeleteExistingModels(boolean deleteExistingModels) {
         this.deleteExistingModels = deleteExistingModels;
+    }
+
+    public void setRebuildSubmetrics(boolean rebuildSubmetrics) {
+        this.rebuildSubmetrics = rebuildSubmetrics;
     }
 
     private static TIntSet readIds(String path) throws IOException {
@@ -225,6 +258,8 @@ public class SRBuilder {
                         .withLongOpt("metric")
                         .withDescription("set a local metric")
                         .create("m"));
+
+        // Row and column ids for most similar caches
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
@@ -237,11 +272,20 @@ public class SRBuilder {
                         .withLongOpt("colids")
                         .withDescription("page ids for columns of cosimilarity matrices (implies -s)")
                         .create("q"));
+
+        // build the cosimilarity matrix
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("cosimilarity")
                         .withDescription("build cosimilarity matrices")
                         .create("s"));
+
+        // when building pairwise cosine and ensembles, don't rebuild already built sub-metrics.
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("skip-submetrics")
+                        .withDescription("For ensemble and pairwise cosine, don't build already built submetrics (implies -d false)")
+                        .create("k"));
 
         EnvBuilder.addStandardOptions(options);
 
@@ -272,6 +316,10 @@ public class SRBuilder {
         }
         if (cmd.hasOption("s")) {
             builder.setBuildCosimilarity(true);
+        }
+        if (cmd.hasOption("k")) {
+            builder.setRebuildSubmetrics(false);
+            builder.setDeleteExistingModels(false);
         }
         if (cmd.hasOption("d")) {
             builder.setDeleteExistingModels(Boolean.valueOf(cmd.getOptionValue("d")));

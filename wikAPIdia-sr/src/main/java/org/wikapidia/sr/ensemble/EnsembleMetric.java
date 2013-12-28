@@ -33,6 +33,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     private List<MonolingualSRMetric> metrics;
     private Ensemble ensemble;
     private boolean resolvePhrases = true;
+    private boolean trainSubmetrics = true;
 
 
     public EnsembleMetric(String name, Language language, List<MonolingualSRMetric> metrics, Ensemble ensemble, Disambiguator disambiguator, LocalPageDao pageHelper){
@@ -109,8 +110,10 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
      */
     @Override
     public void trainSimilarity(Dataset dataset) throws DaoException {
-        for (MonolingualSRMetric metric : metrics) {
-            metric.trainSimilarity(dataset);
+        if (trainSubmetrics) {
+            for (MonolingualSRMetric metric : metrics) {
+                metric.trainSimilarity(dataset);
+            }
         }
         List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
 
@@ -143,8 +146,10 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
         if (getMostSimilarCache() != null) {
             getMostSimilarCache().clear();
         }
-        for (MonolingualSRMetric metric : metrics){
-            metric.trainMostSimilar(dataset,numResults,validIds);
+        if (trainSubmetrics) {
+            for (MonolingualSRMetric metric : metrics){
+                metric.trainMostSimilar(dataset,numResults,validIds);
+            }
         }
         List<EnsembleSim> ensembleSims = ParallelForEach.loop(dataset.getData(), new Function<KnownSim, EnsembleSim>() {
             public EnsembleSim call(KnownSim ks) throws DaoException {
@@ -178,6 +183,10 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
         }, 100);
         ensemble.trainMostSimilar(ensembleSims);
         super.trainMostSimilar(dataset, numResults, validIds);
+    }
+
+    public void setTrainSubmetrics(boolean trainSubmetrics) {
+        this.trainSubmetrics = trainSubmetrics;
     }
 
     @Override

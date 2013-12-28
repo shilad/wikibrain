@@ -39,8 +39,7 @@ public class Interpolator implements Serializable {
             }
             missingScores[i] = (numMissingScores > 0) ? (sumMissingScores / numMissingScores) : 0.0;
             LOG.info("for metric " + i + ", " +
-                    " estimated missing rank " + missingRanks[i] +
-                    " and missing score " + missingScores[i]);
+                    " estimated missing score " + missingScores[i]);
         }
     }
 
