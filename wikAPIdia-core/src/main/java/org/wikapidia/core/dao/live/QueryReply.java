@@ -28,11 +28,11 @@ public class QueryReply {
     }
 
     public LocalLink getLocalOutLink(Language lang, int sourceId) {
-        return new LocalLink(lang, title, sourceId, pageId, true, -1, null, null);
+        return new LocalLink(lang, null, sourceId, pageId, true, -1, null, null);
     }
 
     public LocalLink getLocalInLink(Language lang, int destId) {
-        return new LocalLink(lang, title, pageId, destId, false, -1, null, null);
+        return new LocalLink(lang, null, pageId, destId, false, -1, null, null);
     }
 
     public LocalPage getLocalPage(Language lang) {
