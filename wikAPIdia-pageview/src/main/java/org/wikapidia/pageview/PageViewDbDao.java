@@ -39,9 +39,7 @@ public class PageViewDbDao {
      * @param data The PageViewDataStruct being added
      */
     void addData(PageViewDataStruct data){
-        final DateTime startTime = data.getStartDate();
         final Long dateId =  dateTimeToHour(data.getStartDate());
-
 
         data.getPageViewStats().forEachEntry(new TIntIntProcedure() {
             @Override
@@ -70,7 +68,6 @@ public class PageViewDbDao {
      * @param time The hour we are getting page view in
      * @return The number of page views
      */
-
     int getPageView(int id, DateTime time)throws ConfigurationException, DaoException, WikapidiaException{
         if(db.exists(Integer.toString(id)) == false || !parsedHourSet.contains(dateTimeToHour(time))){
             parse(time);
