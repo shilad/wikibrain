@@ -80,7 +80,7 @@ public interface MonolingualSRMetric {
      * @param validIds The local page ids to be considered.  Null means all ids in the language.
      * @return
      */
-    public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException;
+    public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException, IOException;
 
     /**
      * Find the most similar local pages to a phrase.
@@ -99,7 +99,7 @@ public interface MonolingualSRMetric {
      * @param validIds The local page ids to be considered.  Null means all ids in the language
      * @return
      */
-    public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException;
+    public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException, IOException;
 
     /**
      * Writes the metric to the current data directory.

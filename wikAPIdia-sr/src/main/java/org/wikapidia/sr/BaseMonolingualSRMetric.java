@@ -272,7 +272,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     }
 
     @Override
-    public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
+    public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException, IOException {
         LocalId similar = disambiguator.disambiguateTop(new LocalString(getLanguage(), phrase), null);
         if (similar==null){
             SRResultList resultList = new SRResultList(1);

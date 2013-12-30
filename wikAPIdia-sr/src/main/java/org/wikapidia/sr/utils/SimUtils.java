@@ -4,6 +4,7 @@ import gnu.trove.iterator.TIntDoubleIterator;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntFloatHashMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.wikapidia.lucene.WikapidiaScoreDoc;
 
@@ -55,7 +56,7 @@ public class SimUtils {
      * @param X
      * @return
      */
-    public static TIntDoubleHashMap normalizeVector(TIntDoubleHashMap X) {
+    public static TIntDoubleMap normalizeVector(TIntDoubleMap X) {
         TIntDoubleHashMap Y = new TIntDoubleHashMap();
         double sumSquares = 0.0;
         for (double x : X.values()) {
@@ -65,6 +66,26 @@ public class SimUtils {
             double norm = Math.sqrt(sumSquares);
             for (int id : X.keys()) {
                 Y.put(id, X.get(id) / norm);
+            }
+            return Y;
+        }
+        return X;
+    }
+    /**
+     * Normalize a vector to unit length.
+     * @param X
+     * @return
+     */
+    public static TIntFloatMap normalizeVector(TIntFloatMap X) {
+        TIntFloatHashMap Y = new TIntFloatHashMap();
+        double sumSquares = 0.0;
+        for (double x : X.values()) {
+            sumSquares += x * x;
+        }
+        if (sumSquares != 0.0) {
+            double norm = Math.sqrt(sumSquares);
+            for (int id : X.keys()) {
+                Y.put(id, (float) (X.get(id) / norm));
             }
             return Y;
         }

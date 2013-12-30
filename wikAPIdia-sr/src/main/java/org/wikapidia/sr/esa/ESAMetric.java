@@ -195,7 +195,7 @@ public class ESAMetric extends BaseMonolingualSRMetric {
         if (builder.hasQuery()) {
             WikapidiaScoreDoc[] scoreDocs = builder.search();
             scoreDocs = SimUtils.pruneSimilar(scoreDocs);
-            return SimUtils.normalizeVector(expandScores(scoreDocs));
+            return (TIntDoubleHashMap) SimUtils.normalizeVector(expandScores(scoreDocs));
         } else {
             LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query. "+phrase);
             return null;
@@ -219,7 +219,7 @@ public class ESAMetric extends BaseMonolingualSRMetric {
                                 .setMoreLikeThisQuery(luceneId)
                                 .search();
         wikapidiaScoreDocs = SimUtils.pruneSimilar(wikapidiaScoreDocs);
-        return SimUtils.normalizeVector(expandScores(wikapidiaScoreDocs));
+        return (TIntDoubleHashMap) SimUtils.normalizeVector(expandScores(wikapidiaScoreDocs));
     }
 
     private QueryBuilder getQueryBuilder() {

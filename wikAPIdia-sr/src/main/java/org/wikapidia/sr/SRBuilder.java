@@ -45,7 +45,7 @@ public class SRBuilder {
     // If null, corresponds to the configured default metric.
     private String metricName = null;
     private MonolingualSRMetric metric = null;
-    private boolean deleteExistingModels = true;
+    private boolean deleteExistingData = true;
 
     // The maximum number of results
     private int maxResults = 500;
@@ -83,9 +83,16 @@ public class SRBuilder {
         return metric;
     }
 
+    /**
+     * First deletes models if deleteExistingData is true, then builds the appropriate metrics.
+     * @throws ConfigurationException
+     * @throws DaoException
+     * @throws IOException
+     * @throws WikapidiaException
+     */
     public void build() throws ConfigurationException, DaoException, IOException, WikapidiaException {
-        if (deleteExistingModels) {
-            deleteExisting();
+        if (deleteExistingData) {
+            deleteDataDirectories();
         }
         LOG.info("building metric " + metricName);
         String type = getMetricType();
@@ -103,14 +110,39 @@ public class SRBuilder {
      * Once the metric is loaded, it has already accessed its data files.
      * @throws ConfigurationException
      */
-    public void deleteExisting() throws ConfigurationException {
-        deleteMetricDir(metricName);
-        if (getMetricType().equals("ensemble")) {
-            for (String name : getMetricConfig().getStringList("metrics")) {
-                deleteMetricDir(name);
+    public void deleteDataDirectories() throws ConfigurationException {
+        for (String name : getSubmetrics(metricName)) {
+            File dir = FileUtils.getFile(srDir, name, language.getLangCode());
+            if (dir.exists()) {
+                LOG.info("deleting metric directory " + dir);
+                FileUtils.deleteQuietly(dir);
             }
         }
-        LOG.info("ALL DATA DIRECTORIES DELETED!");
+    }
+
+    /**
+     * Returns a list of metric names (including the passed in name) that are a submetric
+     * of the specified metric. The metrics are topologically sorted by dependency, so the
+     * parent metric will appear last.
+     *
+     * @param parentName
+     * @return
+     * @throws ConfigurationException
+     */
+    public List<String> getSubmetrics(String parentName) throws ConfigurationException {
+        List<String> results = new ArrayList<String>();
+        String type = getMetricType(parentName);
+        Config config = getMetricConfig(parentName);
+        if (type.equals("ensemble")) {
+            for (String child : config.getStringList("metrics")) {
+                results.addAll(getSubmetrics(child));
+                results.add(child);
+            }
+        } else if (type.equals("mostsimilarcosine")) {
+            results.addAll(getSubmetrics(config.getString("basemetric")));
+        }
+        results.add(parentName);
+        return results;
     }
 
     public void buildSimpleMetric() throws ConfigurationException, DaoException, WikapidiaException, IOException {
@@ -158,11 +190,6 @@ public class SRBuilder {
         getMetric().write();
     }
 
-    public void deleteMetricDir(String name) {
-        File dir = FileUtils.getFile(srDir, name, language.getLangCode());
-        FileUtils.deleteQuietly(dir);
-    }
-
     public void buildCosineSim() {
         throw new UnsupportedOperationException();
     }
@@ -171,8 +198,16 @@ public class SRBuilder {
         return getMetricConfig().getString("type");
     }
 
+    public String getMetricType(String name) throws ConfigurationException {
+        return getMetricConfig(name).getString("type");
+    }
+
     public Config getMetricConfig() throws ConfigurationException {
-        return env.getConfigurator().getConfig(MonolingualSRMetric.class, metricName);
+        return getMetricConfig(metricName);
+    }
+
+    public Config getMetricConfig(String name) throws ConfigurationException {
+        return env.getConfigurator().getConfig(MonolingualSRMetric.class, name);
     }
 
     public void setRowIdsFromFile(String path) throws IOException {
@@ -203,8 +238,8 @@ public class SRBuilder {
         this.colIds = colIds;
     }
 
-    public void setDeleteExistingModels(boolean deleteExistingModels) {
-        this.deleteExistingModels = deleteExistingModels;
+    public void setDeleteExistingData(boolean deleteExistingData) {
+        this.deleteExistingData = deleteExistingData;
     }
 
     public void setRebuildSubmetrics(boolean rebuildSubmetrics) {
@@ -248,7 +283,7 @@ public class SRBuilder {
                 new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("delete")
-                        .withDescription("delete existing models (true or false, default is true)")
+                        .withDescription("delete all existing SR data for the metric and its submetrics (true or false, default is true)")
                         .create("d"));
 
         //Specify the Metrics
@@ -319,10 +354,10 @@ public class SRBuilder {
         }
         if (cmd.hasOption("k")) {
             builder.setRebuildSubmetrics(false);
-            builder.setDeleteExistingModels(false);
+            builder.setDeleteExistingData(false);
         }
         if (cmd.hasOption("d")) {
-            builder.setDeleteExistingModels(Boolean.valueOf(cmd.getOptionValue("d")));
+            builder.setDeleteExistingData(Boolean.valueOf(cmd.getOptionValue("d")));
         }
 
         builder.build();
