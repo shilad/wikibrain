@@ -9,13 +9,13 @@ import java.util.Set;
 /**
  * Created by Brent Hecht on 12/29/13.
  */
-public interface SpatialContainmentDao {
+public interface SpatialContainmentDao extends SpatialDao<Iterable<Integer>>{
 
     public static enum ContainmentOperationType {CONTAINMENT, INTERSECTION};
 
-    public Set<Integer> getContainedGeomIds(Integer geomId, String refSysName,
+    public Iterable<Integer> getContainedGeomIds(Integer geomId, String refSysName,
                                             Set<SpatialLayer> subLayers, ContainmentOperationType opType) throws DaoException;
-    public Set<Integer> getContainedGeomIds(Geometry g, String refSysName,
+    public Iterable<Integer> getContainedGeomIds(Geometry g, String refSysName,
                                             Set<SpatialLayer> subLayers) throws DaoException;
 
 

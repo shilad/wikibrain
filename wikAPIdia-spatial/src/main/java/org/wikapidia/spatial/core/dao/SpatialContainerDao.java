@@ -15,17 +15,17 @@ import java.util.Set;
  */
 public interface SpatialContainerDao extends SpatialDao<SpatialContainer> {
 
-    public Collection<Integer> getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException;
+    public Iterable<Integer> getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException;
 
-    public Collection<Integer> getAllGeomIdsInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
+    public Iterable<Integer> getAllGeomIdsInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
 
-    public Set<Integer> getAllGeomIdsInLayer(String layerName, String refSysName) throws DaoException;
+    public Iterable<Integer> getAllGeomIdsInLayer(String layerName, String refSysName) throws DaoException;
 
-    public Set<Integer> getAllGeomIdsInReferenceSystem(String refSysName) throws DaoException;
+    public Iterable<Integer> getAllGeomIdsInReferenceSystem(String refSysName) throws DaoException;
 
-    public Collection<SpatialReferenceSystem> getAllSpatialReferenceSystems() throws DaoException;
+    public Iterable<SpatialReferenceSystem> getAllSpatialReferenceSystems() throws DaoException;
 
-    public Collection<SpatialLayer> getAllSpatialLayersInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
+    public Iterable<SpatialLayer> getAllSpatialLayersInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
 
     public SpatialReferenceSystem getSpatialReferenceSystem(String rsName) throws DaoException;
 
