@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by Brent Hecht on 12/29/13.
  */
-public interface SpatialContainmentDao extends SpatialDao<Iterable<Integer>>{
+public interface SpatialContainmentDao {
 
     public static enum ContainmentOperationType {CONTAINMENT, INTERSECTION};
 

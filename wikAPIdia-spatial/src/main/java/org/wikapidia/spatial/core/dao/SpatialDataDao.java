@@ -1,5 +1,6 @@
 package org.wikapidia.spatial.core.dao;
 
+import com.vividsolutions.jts.geom.Geometry;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.spatial.core.SpatialContainer;
 import org.wikapidia.spatial.core.SpatialContainerMetadata;
@@ -13,7 +14,7 @@ import java.util.Set;
 /**
  * Created by Brent Hecht on 12/29/13.
  */
-public interface SpatialContainerDao extends SpatialDao<SpatialContainer> {
+public interface SpatialDataDao {
 
     public Iterable<Integer> getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException;
 
@@ -27,7 +28,10 @@ public interface SpatialContainerDao extends SpatialDao<SpatialContainer> {
 
     public Iterable<SpatialLayer> getAllSpatialLayersInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
 
-    public SpatialReferenceSystem getSpatialReferenceSystem(String rsName) throws DaoException;
+    public Map<Integer, Geometry> getGeometriesForGeomIds(Collection<Integer> geomIds) throws DaoException;
 
-    public SpatialLayer getSpatialLayer(String layerName, String rsName) throws DaoException;
+    public Integer getMaximumGeomId() throws DaoException;
+
+    public void saveGeometry(Integer geomId, String layerName, String refSysName, Geometry g) throws DaoException;
+
 }
