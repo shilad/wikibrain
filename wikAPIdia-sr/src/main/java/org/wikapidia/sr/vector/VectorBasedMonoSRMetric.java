@@ -64,6 +64,47 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         return normalize(result);
     }
 
+
+    @Override
+    public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
+        TIntFloatMap vector1 = null;
+        TIntFloatMap vector2 = null;
+        try {
+            vector1 = getPageVector(pageId1);
+            vector2 = getPageVector(pageId2);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+        if (vector1 == null || vector2 == null) {
+            return null;
+        }
+        SRResult result = new SRResult(similarity.similarity(vector1, vector2));
+        if (explanations) {
+            similarity.addExplanations(vector1, vector2, result);
+        }
+        return normalize(result);
+    }
+
+    @Override
+    public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException, IOException {
+        try {
+            TIntFloatMap vector = generator.getVector(phrase);
+            return similarity.mostSimilar(vector, maxResults, validIds);    // Base resolved to a page id
+        } catch (UnsupportedOperationException e) {
+            return super.mostSimilar(phrase, maxResults, validIds);
+        }
+    }
+
+    @Override
+    public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
+        try {
+            TIntFloatMap vector = getPageVector(pageId);
+            if (vector == null) return null;
+            return similarity.mostSimilar(vector, maxResults, validIds);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+    }
     /**
      * Train the similarity() function.
      * The KnownSims may already be associated with Wikipedia ids (check wpId1 and wpId2).
@@ -193,47 +234,6 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
 
     public void setTrainingChangesVectors(boolean trainingChangesVectors) {
         this.trainingChangesVectors = trainingChangesVectors;
-    }
-
-    @Override
-    public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
-        TIntFloatMap vector1 = null;
-        TIntFloatMap vector2 = null;
-        try {
-            vector1 = getPageVector(pageId1);
-            vector2 = getPageVector(pageId2);
-        } catch (IOException e) {
-            throw new DaoException(e);
-        }
-        if (vector1 == null || vector2 == null) {
-            return null;
-        }
-        SRResult result = new SRResult(similarity.similarity(vector1, vector2));
-        if (explanations) {
-            similarity.addExplanations(vector1, vector2, result);
-        }
-        return normalize(result);
-    }
-
-    @Override
-    public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException, IOException {
-        try {
-            TIntFloatMap vector = generator.getVector(phrase);
-            return similarity.mostSimilar(vector, maxResults, validIds);    // Base resolved to a page id
-        } catch (UnsupportedOperationException e) {
-            return super.mostSimilar(phrase, maxResults, validIds);
-        }
-    }
-
-    @Override
-    public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        try {
-            TIntFloatMap vector = getPageVector(pageId);
-            if (vector == null) return null;
-            return similarity.mostSimilar(vector, maxResults, validIds);
-        } catch (IOException e) {
-            throw new DaoException(e);
-        }
     }
 
     @Override

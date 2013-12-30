@@ -29,8 +29,8 @@ public class FastLoader {
     static final int BATCH_SIZE = 2000;
 
     private final WpDataSource ds;
-    private final Table table;
-    private final TableField[] fields;
+    private final String table;
+    private final String[] fields;
 
     private BlockingQueue<Object[]> rowBuffer =
             new ArrayBlockingQueue<Object[]>(BATCH_SIZE * 2);
@@ -39,8 +39,12 @@ public class FastLoader {
     volatile private boolean finished = false;
 
     public FastLoader(WpDataSource ds, TableField[] fields) throws DaoException {
+        this(ds, fields[0].getName(), getFieldNames(fields));
+    }
+
+    public FastLoader(WpDataSource ds, String table, String[] fields) throws DaoException {
         this.ds = ds;
-        this.table = fields[0].getTable();
+        this.table = table;
         this.fields = fields;
 
         inserter = new Thread(new Runnable() {
@@ -59,6 +63,15 @@ public class FastLoader {
         });
         inserter.start();
     }
+
+    private static String[] getFieldNames(TableField[] fields) {
+        String names[] = new String[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            names[i] = fields[i].getName();
+        }
+        return names;
+    }
+
     /**
      * Saves a value to the datastore.
      * @param values
@@ -91,11 +104,11 @@ public class FastLoader {
             String [] names = new String[fields.length];
             String [] questions = new String[fields.length];
             for (int i = 0; i < fields.length; i++) {
-                names[i] = fields[i].getName();
+                names[i] = fields[i];
                 questions[i] = "?";
             }
             String sql = "INSERT INTO " +
-                    table.getName() + "(" + StringUtils.join(names, ",") + ") " +
+                    table + "(" + StringUtils.join(names, ",") + ") " +
                     "VALUES (" + StringUtils.join(questions, ",") + ");";
             PreparedStatement statement = cnx.prepareStatement(sql);
 
