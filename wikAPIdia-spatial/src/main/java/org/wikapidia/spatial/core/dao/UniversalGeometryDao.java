@@ -2,6 +2,7 @@ package org.wikapidia.spatial.core.dao;
 
 import com.vividsolutions.jts.geom.Geometry;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.model.UniversalArticle;
 import org.wikapidia.core.model.UniversalPage;
 
 import java.util.Collection;
@@ -11,8 +12,8 @@ import java.util.Collection;
  */
 public interface UniversalGeometryDao {
 
-    public Geometry getGeometryForPage(UniversalPage page) throws DaoException;
+    public Geometry getGeometryForPage(UniversalArticle page) throws DaoException;
 
-    public Geometry getGeometryForPages(Collection<UniversalPage> pages) throws DaoException;
+    public Geometry getGeometryForPages(Collection<UniversalArticle> pages) throws DaoException;
 
 }
