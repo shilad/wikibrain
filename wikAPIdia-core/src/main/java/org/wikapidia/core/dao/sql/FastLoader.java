@@ -59,6 +59,8 @@ public class FastLoader {
                     LOG.log(Level.SEVERE, "inserter interrupted", e);
                 }
                 inserter = null;
+                rowBuffer.clear();  // allow any existing puts to go through
+                rowBuffer = null;
             }
         });
         inserter.start();
