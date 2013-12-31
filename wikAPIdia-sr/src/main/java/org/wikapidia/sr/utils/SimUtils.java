@@ -51,6 +51,11 @@ public class SimUtils {
         return xDotX * yDotY != 0 ? xDotY / Math.sqrt(xDotX * yDotY): 0.0;
     }
 
+    public static double googleSimilarity(int sizeA, int sizeB, int intersection, int numTotal) {
+        return 1.0 - (Math.log(Math.max(sizeA,sizeB))-Math.log(intersection))
+                        / (Math.log(numTotal)-Math.log(Math.min(sizeA,sizeB)));
+    }
+
     /**
      * Normalize a vector to unit length.
      * @param X

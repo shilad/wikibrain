@@ -12,7 +12,6 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
@@ -36,17 +35,13 @@ public class ESAGenerator implements VectorGenerator {
     private static final Logger LOG = Logger.getLogger(ESAGenerator.class.getName());
 
     private final LuceneSearcher searcher;
-    private final LocalPageDao pageDao;
     private final Language language;
-    private boolean resolvePhrases;
 
     private Map<Language, WpIdFilter> conceptFilter = new HashMap<Language, WpIdFilter>();
 
-    public ESAGenerator(Language language, LuceneSearcher searcher, LocalPageDao pageDao, boolean resolvePhrases) {
+    public ESAGenerator(Language language, LuceneSearcher searcher) {
         this.language = language;
         this.searcher = searcher;
-        this.resolvePhrases = resolvePhrases;
-        this.pageDao = pageDao;
     }
 
 
@@ -67,9 +62,6 @@ public class ESAGenerator implements VectorGenerator {
 
     @Override
     public TIntFloatMap getVector(String phrase) {
-        if (!resolvePhrases) {
-            throw new UnsupportedOperationException();
-        }
         QueryBuilder builder = getQueryBuilder().setPhraseQuery(phrase);
         if (builder.hasQuery()) {
             WikapidiaScoreDoc[] scoreDocs = builder.search();
@@ -106,16 +98,6 @@ public class ESAGenerator implements VectorGenerator {
             builder.addFilter(filter);
         }
         return builder;
-    }
-
-    @Override
-    public SparseMatrix getFeatureMatrix() {
-        return null;
-    }
-
-    @Override
-    public SparseMatrix getFeatureTransposeMatrix() {
-        return null;
     }
 
     /**
@@ -172,7 +154,7 @@ public class ESAGenerator implements VectorGenerator {
 
         @Override
         public VectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("ESA")) {
+            if (!config.getString("type").equals("esa")) {
                 return null;
             }
             if (!runtimeParams.containsKey("language")) {
@@ -181,9 +163,7 @@ public class ESAGenerator implements VectorGenerator {
             Language language = Language.getByLangCode(runtimeParams.get("language"));
             ESAGenerator generator = new ESAGenerator(
                     language,
-                    getConfigurator().get(LuceneSearcher.class, config.getString("luceneSearcher")),
-                    getConfigurator().get(LocalPageDao.class, config.getString("pageDao")),
-                    config.getBoolean("resolvephrases")
+                    getConfigurator().get(LuceneSearcher.class, config.getString("luceneSearcher"))
             );
             if (config.hasPath("concepts")) {
                 try {

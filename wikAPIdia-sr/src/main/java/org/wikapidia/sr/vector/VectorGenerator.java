@@ -24,20 +24,4 @@ public interface VectorGenerator {
      * @throws UnsupportedOperationException if it cannot generate a feature vector for a phrase.
      */
     public TIntFloatMap getVector(String phrase);
-
-    /**
-     * Some vector implementations may already have a feature matrix available.
-     * Otherwise, clients can create one manually.
-     *
-     * @return
-     */
-    public SparseMatrix getFeatureMatrix();
-
-    /**
-     * Some vector implementations may already have a feature transpose matrix available.
-     * If there is not one, the Vector metric will need to create one.
-     *
-     * @return
-     */
-    public SparseMatrix getFeatureTransposeMatrix();
 }
