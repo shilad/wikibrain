@@ -36,6 +36,10 @@ public class SpatialLayer extends SpatialContainer{
         return layerName + "_" + refSysName;
     }
 
+    public String getLayerName(){return layerName;}
+
+    public String getRefSysName() {return refSysName;}
+
 
 
 }
