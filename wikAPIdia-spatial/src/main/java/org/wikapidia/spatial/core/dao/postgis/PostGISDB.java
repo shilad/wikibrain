@@ -1,12 +1,19 @@
 package org.wikapidia.spatial.core.dao.postgis;
 
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalArticleDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 
 import java.sql.*;
+import java.util.Map;
 import java.util.Properties;
 
 /**
- * Created by bjhecht on 12/30/13.
+ * Created by Brent Hecht on 12/30/13.
  */
 public class PostGISDB {
 
@@ -118,6 +125,32 @@ public class PostGISDB {
             throw new DaoException(e);
         }
 
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<PostGISDB> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return PostGISDB.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "spatial.dao.postgis";
+        }
+
+        @Override
+        public PostGISDB get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+
+            try {
+                return new PostGISDB(config.getString("host"), config.getString("db"), config.getString("user"), config.getString("password"));
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
     }
 
 

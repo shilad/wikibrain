@@ -6,14 +6,21 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.WKTReader;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.data.shapefile.shp.ShapefileException;
 import org.geotools.data.shapefile.shp.ShapefileReader;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalArticleDao;
@@ -28,9 +35,8 @@ import org.wikapidia.spatial.core.dao.SpatioTagDao;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,11 +54,11 @@ public class SpatialDataLoader {
     private final float phraseProbabilityThreshold;
     private final SpatialDataDao spatialDataDao;
     private final SpatioTagDao spatioTagDao;
-    private final String[] refSysNamesToLoad; // (if null, will load all in folder)
+    private final Collection<String> refSysNamesToLoad; // (if null, will load all in folder)
     private final File spatialDataFolder;
 
     public SpatialDataLoader(PhraseAnalyzer phraseAnalyzer, float phraseProbabilityThreshold, SpatialDataDao spatialDataDao,
-                             SpatioTagDao spatioTagDao, String[] refSysNamesToLoad, File spatialDataFolder) {
+                             SpatioTagDao spatioTagDao, Collection<String> refSysNamesToLoad, File spatialDataFolder) {
         this.phraseAnalyzer = phraseAnalyzer;
         this.phraseProbabilityThreshold = phraseProbabilityThreshold;
         this.spatialDataDao = spatialDataDao;
@@ -201,7 +207,7 @@ public class SpatialDataLoader {
         LinkedHashMap<LocalPage, Float> candidate = phraseAnalyzer.resolveLocal(lang, toponym, 1);
         if (candidate.size() == 0) return null;
         LocalPage lp = candidate.keySet().iterator().next();
-        if (candidate.get(lp) > phraseProbabilityThreshold){
+        if (candidate.get(lp) >= phraseProbabilityThreshold){
             return lp;
         }else{
             return null;
@@ -302,6 +308,92 @@ public class SpatialDataLoader {
         public File getDataFile(){
             return dataFile;
         }
+
+    }
+
+    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/bjhecht/Dropbox/spatial_data";
+
+    public static void main(String args[]) throws ConfigurationException, WikapidiaException {
+
+        Options options = new Options();
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("ref-sys")
+                        .withDescription("the reference systems to load (separated by commas) (defaults to 'earth'), can put 'all' for all in spatial data folder")
+                        .withValueSeparator(',')
+                        .create("r"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("phrase-analyzer")
+                        .withDescription("the PhraseAnalyzer to use to map toponyms to Wikipedia pages (defaults to 'titleandredirect')")
+                        .create("p"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("prob-thresh")
+                        .withDescription("the minimum probability for toponym to be matched to a Wikipedia page (defaults to 1.0)")
+                        .create("t"));
+        EnvBuilder.addStandardOptions(options);
+
+        CommandLineParser parser = new PosixParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println( "Invalid option usage: " + e.getMessage());
+            new HelpFormatter().printHelp("ConceptLoader", options);
+            return;
+        }
+
+        Env env = new EnvBuilder(cmd).build();
+        Configurator conf = env.getConfigurator();
+
+        String refSysList = cmd.getOptionValue("r","earth");
+        String phraseAnalyzerName = cmd.getOptionValue("p","titleandredirect");
+        String propThreshStr = cmd.getOptionValue("t","1.0");
+
+        File spatialDataFolder = new File(TEMP_SPATIAL_DATA_FOLDER);
+
+        Collection<String> refSysNameCollection = getRsNameCol(spatialDataFolder,refSysList);
+        PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
+        float propThresh = Float.parseFloat(propThreshStr);
+        SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
+        SpatioTagDao spatioTagDao = conf.get(SpatioTagDao.class);
+
+        SpatialDataLoader loader = new SpatialDataLoader(phraseAnalyzer, propThresh, spatialDataDao, spatioTagDao,
+                refSysNameCollection, spatialDataFolder);
+
+        loader.load();
+
+    }
+
+    private static Collection<String> getRsNameCol (File folder, String refSysList) throws WikapidiaException{
+
+        boolean useAll = refSysList.equals("all");
+
+        Set<String> validRsNames = Sets.newHashSet();
+        if (!useAll){
+            String[] refSysListArr = refSysList.split(",");
+            for(String t : refSysListArr){
+                validRsNames.add(t.trim());
+            }
+        }
+
+        List<String> rVal = new ArrayList<String>();
+
+        for(File f : folder.listFiles()){
+            if (f.isDirectory()){
+                if (useAll || validRsNames.contains(f.getName())){
+                    rVal.add(f.getName());
+                    validRsNames.remove(f.getName());
+                }
+            }
+        }
+
+        if (!useAll && validRsNames.size() > 0){
+            throw new WikapidiaException("Illegal reference system names found: " + StringUtils.join(validRsNames));
+        }
+
+        return rVal;
 
     }
 
