@@ -1,5 +1,9 @@
 package org.wikapidia.phrases;
 
+import com.typesafe.config.Config;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.RedirectDao;
@@ -12,6 +16,7 @@ import org.wikapidia.core.model.UniversalPage;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Implements a deterministic phrase analyzer that returns either a single Wikipedia entity or nothing
@@ -71,5 +76,32 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
     @Override
     public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
         throw new UnsupportedOperationException();
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<PhraseAnalyzer> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return PhraseAnalyzer.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "phrases.analyzer";
+        }
+
+        @Override
+        public PhraseAnalyzer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+            if (!config.getString("type").equals("titleandredirect")) {
+                return null;
+            }
+            LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
+            RedirectDao redirectDao = getConfigurator().get(RedirectDao.class, config.getString("redirectDao"));
+            Boolean useRedirects = Boolean.parseBoolean(config.getString("useRedirects"));
+            return new TitleRedirectPhraseAnalyzer(useRedirects, lpDao, redirectDao);
+        }
     }
 }
