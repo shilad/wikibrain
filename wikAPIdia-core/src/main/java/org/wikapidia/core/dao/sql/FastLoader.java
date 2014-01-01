@@ -39,7 +39,7 @@ public class FastLoader {
     volatile private boolean finished = false;
 
     public FastLoader(WpDataSource ds, TableField[] fields) throws DaoException {
-        this(ds, fields[0].getName(), getFieldNames(fields));
+        this(ds, fields[0].getTable().getName(), getFieldNames(fields));
     }
 
     public FastLoader(WpDataSource ds, String table, String[] fields) throws DaoException {
