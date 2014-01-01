@@ -303,6 +303,14 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         return delegate.getLoadedLanguages();
     }
 
+    public SparseMatrix getMatrix() {
+        return matrix;
+    }
+
+    public SparseMatrix getTranspose() {
+        return transpose;
+    }
+
     private List<Integer> getPackedIds(DaoFilter filter) {
         if (filter.getSourceIds() != null && filter.getDestIds() != null) {
             throw new IllegalArgumentException();
