@@ -147,9 +147,6 @@ public class SRBuilder {
 
     public void buildSimpleMetric() throws ConfigurationException, DaoException, WikapidiaException, IOException {
         Dataset ds = getDataset();
-        if (buildCosimilarity) {
-            getMetric().writeMostSimilarCache(maxResults, rowIds, colIds);
-        }
         getMetric().trainSimilarity(ds);
         getMetric().trainMostSimilar(ds, maxResults, null);
         getMetric().write();
@@ -171,9 +168,6 @@ public class SRBuilder {
 
         // build up submetrics
         for (MonolingualSRMetric m : ensemble.getMetrics()) {
-            if (buildCosimilarity && (rebuildSubmetrics || !m.hasMostSimilarCache())) {
-                m.writeMostSimilarCache(maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, rowIds, colIds);
-            }
             if (rebuildSubmetrics || !m.mostSimilarIsTrained()) {
                 m.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, null);
             }
@@ -186,7 +180,6 @@ public class SRBuilder {
         // Train can cascade to base metrics
         getMetric().trainSimilarity(ds);
         getMetric().trainMostSimilar(ds, maxResults, null);
-        getMetric().writeMostSimilarCache(maxResults, rowIds, colIds);
         getMetric().write();
     }
 

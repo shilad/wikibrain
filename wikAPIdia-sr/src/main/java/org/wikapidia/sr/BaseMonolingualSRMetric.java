@@ -4,11 +4,11 @@ import com.typesafe.config.Config;
 
 import java.util.*;
 
-import gnu.trove.map.TIntFloatMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
@@ -20,18 +20,23 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
+import org.wikapidia.matrix.*;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
-import org.wikapidia.sr.pairwise.MostSimilarCache;
-import org.wikapidia.sr.pairwise.PairwiseCosineSimilarity;
-import org.wikapidia.sr.pairwise.PairwiseSimilarity;
+import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.sr.utils.SrNormalizers;
+import org.wikapidia.utils.ParallelForEach;
+import org.wikapidia.utils.Procedure;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -50,7 +55,17 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     private boolean shouldReadNormalizers = true;
     private SrNormalizers normalizers;
 
-    private MostSimilarCache mostSimilarCache = null;
+    private boolean buildMostSimilarCache = true;
+    private SparseMatrix mostSimilarCache = null;
+
+    /**
+     * Returns properties about the metric.
+     */
+    public static class SRConfig {
+        // minimum and maximum scores BEFORE normalization
+        public float minScore = -1.1f;
+        public float maxScore = +1.1f;
+    }
 
     public BaseMonolingualSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig) {
         this.name = name;
@@ -60,32 +75,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         this.normalizers =  new SrNormalizers();
     }
 
-    public static class MetricConfig {
-        /**
-         * Whether or not the metric supports feature vectors.
-         * Defaults to true.
-         */
-        public boolean supportsFeatureVectors = true;
-
-        /**
-         * Measure of similarity between vectors
-         * Defaults to PairwiseCosineSimilarity.
-         */
-        public PairwiseSimilarity vectorSimilarity = new PairwiseCosineSimilarity();
-
-        /**
-         * Whether or not the metric should build a cosimilarity matrix
-         * Deafaults to true.
-         */
-        public boolean buildCosimilarityMatrix = true;
-    };
-
-    /**
-     * The base class uses this method to support its featureset.
-     *
-     * @return
-     */
-    public abstract MetricConfig getMetricConfig();
+    public abstract SRConfig getConfig();
 
     @Override
     public File getDataDir() {
@@ -100,28 +90,6 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     @Override
     public void setDataDir(File dir) {
         this.dataDir= dir;
-    }
-
-    public SRResultList getCachedMostSimilar(TIntFloatMap vector, int numResults, TIntSet validIds) throws DaoException {
-        if (mostSimilarCache == null) {
-            return null;
-        }
-        try {
-            return mostSimilarCache.mostSimilar(vector, numResults, validIds);
-        } catch (IOException e){
-            throw new DaoException(e);
-        }
-    }
-
-    public SRResultList getCachedMostSimilar(int wpId, int numResults, TIntSet validIds) throws DaoException {
-        if (mostSimilarCache == null) {
-            return null;
-        }
-        try {
-            return mostSimilarCache.mostSimilar(wpId, numResults, validIds);
-        } catch (IOException e){
-            throw new DaoException(e);
-        }
     }
 
     @Override
@@ -201,8 +169,6 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     @Override
     public void read() throws IOException {
-        MetricConfig  config = getMetricConfig();
-
         if (!dataDir.isDirectory()) {
             LOG.warning("directory " + dataDir + " does not exist; cannot read files");
             return;
@@ -211,10 +177,8 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             normalizers.read(dataDir);
         }
         IOUtils.closeQuietly(mostSimilarCache);
-        MostSimilarCache srm = new MostSimilarCache(this, config.vectorSimilarity, dataDir);
-        if (srm.hasReadableMatrices()) {
-            srm.read();
-            mostSimilarCache = srm;
+        if (getMostSimilarMatrixPath().isFile()) {
+            mostSimilarCache = new SparseMatrix(getMostSimilarMatrixPath());
         }
     }
 
@@ -232,6 +196,13 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             throw new IllegalArgumentException("SR metric has language " + getLanguage() + " but dataset has language " + dataset.getLanguage());
         }
         normalizers.trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
+        try {
+            if (buildMostSimilarCache) {
+                writeMostSimilarCache(numResults, null, validIds);
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "writing most similar cache failed:", e);
+        }
     }
 
     @Override
@@ -342,20 +313,58 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         return cosimilarity(ids);
     }
 
-    @Override
+    /**
+     * If the cache exists, and contains at least numResults valid ids for the requested id, return it.
+     * Otherwise, return null.
+     *
+     * @param wpId
+     * @param numResults
+     * @param validIds
+     * @return
+     * @throws DaoException
+     */
+    protected SRResultList getCachedMostSimilar(int wpId, int numResults, TIntSet validIds) throws DaoException {
+        if (mostSimilarCache == null) {
+            return null;
+        }
+        MatrixRow row = null;
+        try {
+            row = mostSimilarCache.getRow(wpId);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+        if (row == null || row.getNumCols() < numResults ) {
+            return null;
+        }
+        Leaderboard leaderboard = new Leaderboard(numResults);
+        for (int i=0; i<row.getNumCols() ; i++){
+            int wpId2 = row.getColIndex(i);
+            if (validIds == null || validIds.contains(wpId2)){
+                leaderboard.tallyScore(wpId2, row.getColValue(i));
+            }
+        }
+        SRResultList results = leaderboard.getTop();
+        if (results.numDocs() < numResults) {
+            return null;
+        }
+        results.sortDescending();
+        return results;
+    }
+
     public void writeMostSimilarCache(int maxHits) throws IOException, DaoException, WikapidiaException {
         writeMostSimilarCache(maxHits, null, null);
     }
 
-    @Override
-    public void writeMostSimilarCache(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
-        MetricConfig  config = getMetricConfig();
-
-        if (!config.buildCosimilarityMatrix && !config.supportsFeatureVectors) {
-            IOUtils.closeQuietly(mostSimilarCache);
-            mostSimilarCache = null;
-            return;
-        }
+    /**
+     * Creates and writes a sparse matrix that records the top-k results for every page.
+     * @param maxHits
+     * @param rowIds
+     * @param colIds
+     * @throws IOException
+     * @throws DaoException
+     * @throws WikapidiaException
+     */
+    public void writeMostSimilarCache(final int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException{
 
         TIntSet allPageIds = null;
         // Get all page ids
@@ -376,18 +385,56 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         if (rowIds == null) rowIds = allPageIds;
         if (colIds == null) colIds = allPageIds;
 
-        MostSimilarCache srm = new MostSimilarCache(this, config.vectorSimilarity, dataDir);
+        getDataDir().mkdirs();
+        IOUtils.closeQuietly(mostSimilarCache);
+
+
+        SRConfig config = getConfig();
+        final AtomicInteger idCounter = new AtomicInteger();
+        final AtomicLong cellCounter = new AtomicLong();
+        ValueConf vconf = new ValueConf(config.minScore, config.maxScore);
+
+        final SparseMatrixWriter writer = new SparseMatrixWriter(getMostSimilarMatrixPath(), vconf);
+        final TIntSet colIdSet = colIds == null ? null : new TIntHashSet(colIds);
+
+
+        Normalizer simNormalizer = getSimilarityNormalizer();
+        Normalizer mostSimNormalizer = getMostSimilarNormalizer();
+        setMostSimilarNormalizer(new IdentityNormalizer());
+        setSimilarityNormalizer(new IdentityNormalizer());
         try {
-            if (config.supportsFeatureVectors) {
-                srm.writeFeatureAndTransposeMatrix(rowIds.toArray(), WpThreadUtils.getMaxThreads());
-            }
-            if (config.buildCosimilarityMatrix) {
-                srm.writeCosimilarity(rowIds.toArray(), colIds.toArray(), maxHits, WpThreadUtils.getMaxThreads());
-            }
-            IOUtils.closeQuietly(mostSimilarCache);
-            mostSimilarCache = srm;
-        } catch (InterruptedException e){
-            throw new RuntimeException(e);
+            ParallelForEach.loop(
+                    Arrays.asList(ArrayUtils.toObject(rowIds.toArray())),
+                    WpThreadUtils.getMaxThreads(),
+                    new Procedure<Integer>() {
+                        public void call(Integer wpId) throws IOException, DaoException {
+                            writeSim(writer, wpId, colIdSet, maxHits, idCounter, cellCounter);
+                        }
+                    }, Integer.MAX_VALUE);
+        } finally {
+            setSimilarityNormalizer(simNormalizer);
+            setMostSimilarNormalizer(mostSimNormalizer);
+        }
+
+        LOG.info("wrote " + cellCounter.get() + " non-zero similarity cells");
+        writer.finish();
+        mostSimilarCache = new SparseMatrix(getMostSimilarMatrixPath());
+    }
+
+    protected File getMostSimilarMatrixPath() {
+        return new File(getDataDir(), "mostSimilar.matrix");
+    }
+
+
+    private void writeSim(SparseMatrixWriter writer, Integer wpId, TIntSet colIds, int maxSimsPerDoc, AtomicInteger idCounter, AtomicLong cellCounter) throws IOException, DaoException {
+        if (idCounter.incrementAndGet() % 10000 == 0) {
+            LOG.info("finding matches for page " + idCounter.get());
+        }
+        SRResultList scores = mostSimilar(wpId, maxSimsPerDoc, colIds);
+        if (scores != null) {
+            int ids[] = scores.getIds();
+            cellCounter.getAndIncrement();
+            writer.writeRow(new SparseMatrixRow(writer.getValueConf(), wpId, ids, scores.getScoresAsFloat()));
         }
     }
 
@@ -413,27 +460,18 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         return normalizers.getSimilarityNormalizer();
     }
 
-    public MostSimilarCache getMostSimilarCache() {
+    public SparseMatrix getMostSimilarCache() {
         return mostSimilarCache;
     }
 
-    @Override
-    public boolean hasMostSimilarCache() {
-        MetricConfig  config = getMetricConfig();
+    public void clearMostSimilarCache() {
+        IOUtils.closeQuietly(mostSimilarCache);
+        FileUtils.deleteQuietly(getMostSimilarMatrixPath());
+        mostSimilarCache = null;
+    }
 
-        if (mostSimilarCache == null) {
-            return false;
-        }
-        if (!mostSimilarCache.hasFeatureAndTransposeMatrices() && !mostSimilarCache.hasCosimilarityMatrix()) {
-            return false;
-        }
-        if (config.buildCosimilarityMatrix && !mostSimilarCache.hasCosimilarityMatrix()) {
-            return false;
-        }
-        if (config.supportsFeatureVectors && !mostSimilarCache.hasFeatureAndTransposeMatrices()) {
-            return false;
-        }
-        return true;
+    public void setBuildMostSimilarCache(boolean buildMostSimilarCache) {
+        this.buildMostSimilarCache = buildMostSimilarCache;
     }
 
     protected static void configureBase(Configurator configurator, BaseMonolingualSRMetric sr, Config config) throws ConfigurationException {
@@ -449,6 +487,9 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         boolean isTraining = rootConfig.getBoolean("sr.metric.training");
         if (isTraining) {
             sr.setReadNormalizers(false);
+        }
+        if (config.hasPath("buildMostSimilarCache")) {
+            sr.setBuildMostSimilarCache(config.getBoolean("buildMostSimilarCache"));
         }
 
         try {

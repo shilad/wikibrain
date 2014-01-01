@@ -42,15 +42,6 @@ public interface VectorSimilarity {
     public SRResultList mostSimilar(TIntFloatMap query, int maxResults, TIntSet validIds) throws IOException;
 
     /**
-     * Adds the explanation for a particular SRResult if it is supported.
-     * @param vector1
-     * @param vector2
-     * @param result
-     * @return
-     */
-    public SRResult addExplanations(TIntFloatMap vector1, TIntFloatMap vector2, SRResult result);
-
-    /**
      * @return The minimum possible score for the metric.
      */
     public double getMinValue();

@@ -113,12 +113,6 @@ public class GoogleSimilarity implements VectorSimilarity {
     }
 
     @Override
-    public SRResult addExplanations(TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) {
-        // TODO: implement me
-        return result;
-    }
-
-    @Override
     public double getMinValue() {
         return -1.0;
     }

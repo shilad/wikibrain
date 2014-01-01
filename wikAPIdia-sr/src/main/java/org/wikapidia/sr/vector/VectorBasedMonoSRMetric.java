@@ -12,6 +12,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -63,19 +64,20 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
     private static final Logger LOG = Logger.getLogger(VectorBasedMonoSRMetric.class.getName());
     private final VectorGenerator generator;
     private final VectorSimilarity similarity;
-    private final MetricConfig config;
+    private final SRConfig config;
 
     private SparseMatrix featureMatrix;
     private SparseMatrix transposeMatrix;
 
     private boolean resolvePhrases = false;
-    private boolean trainingChangesVectors = false;
 
     public VectorBasedMonoSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity) {
         super(name, language, dao, disambig);
         this.generator = generator;
         this.similarity = similarity;
-        this.config = new MetricConfig();
+        this.config = new SRConfig();
+        this.config.minScore = (float) similarity.getMinValue();
+        this.config.maxScore = (float) similarity.getMaxValue();
     }
 
 
@@ -92,11 +94,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         } catch (UnsupportedOperationException e) {
             return super.similarity(phrase1, phrase2, explanations);    // disambiguates to ids
         }
-        SRResult result = new SRResult(similarity.similarity(vector1, vector2));
-        if (explanations) {
-            similarity.addExplanations(vector1, vector2, result);
-        }
-        return normalize(result);
+        return normalize(new SRResult(similarity.similarity(vector1, vector2)));
     }
 
 
@@ -113,11 +111,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         if (vector1 == null || vector2 == null) {
             return null;
         }
-        SRResult result = new SRResult(similarity.similarity(vector1, vector2));
-        if (explanations) {
-            similarity.addExplanations(vector1, vector2, result);
-        }
-        return normalize(result);
+        return normalize(new SRResult(similarity.similarity(vector1, vector2)));
     }
 
     @Override
@@ -162,13 +156,8 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
     @Override
     public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) {
         try {
-            if (trainingChangesVectors) {
-                super.trainMostSimilar(dataset, numResults, validIds);
-                buildFeatureAndTransposeMatrices(validIds);
-            } else {
-                buildFeatureAndTransposeMatrices(validIds);
-                super.trainMostSimilar(dataset, numResults, validIds);
-        }
+            buildFeatureAndTransposeMatrices(validIds);
+            super.trainMostSimilar(dataset, numResults, validIds);
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "training failed", e);
             throw new RuntimeException(e);  // somewhat unexpected...
@@ -185,6 +174,16 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         return cosimilarity(phrases, phrases);
     }
 
+    /**
+     * Calculates the cosimilarity matrix between phrases.
+     * First tries to use generator to get phrase vectors directly, but some generators will not support this.
+     * Falls back on disambiguating phrase vectors to page ids.
+     *
+     * @param rowPhrases
+     * @param colPhrases
+     * @return
+     * @throws DaoException
+     */
     @Override
     public double[][] cosimilarity(String rowPhrases[], String colPhrases[]) throws DaoException {
         try {
@@ -230,9 +229,16 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         }
     }
 
+    /**
+     * Computes the cosimilarity matrix between pages.
+     * @param rowIds
+     * @param colIds
+     * @return
+     * @throws DaoException
+     */
     @Override
     public double[][] cosimilarity(int rowIds[], int colIds[]) throws DaoException {
-        // Build all vectors
+        // Build up vectors for unique pages
         Map<Integer, TIntFloatMap> vectors = new HashMap<Integer, TIntFloatMap>();
         for (int pageId : ArrayUtils.addAll(colIds, rowIds)) {
             if (!vectors.containsKey(pageId)) {
@@ -254,6 +260,12 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         return cosimilarity(rowVectors, colVectors);
     }
 
+    /**
+     * Computes the cosimilarity between a set of vectors.
+     * @param rowVectors
+     * @param colVectors
+     * @return
+     */
     protected double[][] cosimilarity(List<TIntFloatMap> rowVectors, List<TIntFloatMap> colVectors) {
         double results[][] = new double[rowVectors.size()][colVectors.size()];
         for (int i = 0; i < rowVectors.size(); i++) {
@@ -376,12 +388,8 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
 
 
     @Override
-    public MetricConfig getMetricConfig() {
+    public SRConfig getConfig() {
         return config;
-    }
-
-    public void setTrainingChangesVectors(boolean trainingChangesVectors) {
-        this.trainingChangesVectors = trainingChangesVectors;
     }
 
     public void setResolvePhrases(boolean resolve) {
@@ -431,9 +439,6 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                     generator,
                     similarity
             );
-            if (config.hasPath("trainingChangesVectors")) {
-                sr.setTrainingChangesVectors(config.getBoolean("trainingChangesVectors"));
-            }
             if (config.hasPath("resolvePhrases")) {
                 sr.setResolvePhrases(config.getBoolean("resolvePhrases"));
             }

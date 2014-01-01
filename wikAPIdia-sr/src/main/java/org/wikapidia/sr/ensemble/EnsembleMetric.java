@@ -51,10 +51,8 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public MetricConfig getMetricConfig() {
-        MetricConfig mc = new MetricConfig();
-        mc.supportsFeatureVectors = false;
-        return mc;
+    public SRConfig getConfig() {
+        return new SRConfig();
     }
 
     @Override
@@ -144,7 +142,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     @Override
     public void trainMostSimilar(Dataset dataset, final int numResults, final TIntSet validIds){
         if (getMostSimilarCache() != null) {
-            getMostSimilarCache().clear();
+            clearMostSimilarCache();
         }
         if (trainSubmetrics) {
             for (MonolingualSRMetric metric : metrics){

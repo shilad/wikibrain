@@ -12,18 +12,23 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.lucene.LuceneSearcher;
 import org.wikapidia.lucene.QueryBuilder;
 import org.wikapidia.lucene.WikapidiaScoreDoc;
 import org.wikapidia.lucene.WpIdFilter;
 import org.wikapidia.matrix.SparseMatrix;
+import org.wikapidia.sr.Explanation;
+import org.wikapidia.sr.SRResult;
+import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.sr.utils.SimUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,11 +41,13 @@ public class ESAGenerator implements VectorGenerator {
 
     private final LuceneSearcher searcher;
     private final Language language;
+    private final LocalPageDao pageDao;
 
     private Map<Language, WpIdFilter> conceptFilter = new HashMap<Language, WpIdFilter>();
 
-    public ESAGenerator(Language language, LuceneSearcher searcher) {
+    public ESAGenerator(Language language, LocalPageDao pageDao, LuceneSearcher searcher) {
         this.language = language;
+        this.pageDao = pageDao;
         this.searcher = searcher;
     }
 
@@ -88,6 +95,30 @@ public class ESAGenerator implements VectorGenerator {
             conceptFilter.put(Language.getByLangCode(langCode), new WpIdFilter(ids.toArray()));
             LOG.warning("installed " + ids.size() + " concepts for " + langCode);
         }
+    }
+
+    @Override
+    public List<Explanation> getExplanations(LocalPage page1, LocalPage page2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+        Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
+        for (int id : vector1.keys()) {
+            if (vector2.containsKey(id)) {
+                lb.insert(id, vector1.get(id) * vector2.get(id));
+            }
+        }
+        SRResultList top = lb.getTop();
+        if (top.numDocs() == 0) {
+            return Arrays.asList(new Explanation("? and ? share no links", page1, page2));
+        }
+        top.sortDescending();
+
+        List<Explanation> explanations = new ArrayList<Explanation>();
+        for (int i = 0; i < top.numDocs(); i++) {
+            LocalPage p = pageDao.getById(language, top.getId(i));
+            if (p != null) {
+                explanations.add(new Explanation("Both ? and ? have similar text to ?", page1, page2, p));
+            }
+        }
+        return explanations;
     }
 
     private QueryBuilder getQueryBuilder() {
@@ -163,6 +194,7 @@ public class ESAGenerator implements VectorGenerator {
             Language language = Language.getByLangCode(runtimeParams.get("language"));
             ESAGenerator generator = new ESAGenerator(
                     language,
+                    getConfigurator().get(LocalPageDao.class),
                     getConfigurator().get(LuceneSearcher.class, config.getString("luceneSearcher"))
             );
             if (config.hasPath("concepts")) {
