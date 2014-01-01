@@ -1,4 +1,4 @@
-package org.wikapidia.sr.pairwise;
+package org.wikapidia.sr.vector;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntFloatMap;
@@ -17,7 +17,6 @@ import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.utils.Leaderboard;
-import org.wikapidia.sr.vector.VectorGenerator;
 
 import java.io.File;
 import java.io.IOException;
@@ -159,7 +158,7 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
 
         @Override
         public VectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("esa")) {
+            if (!config.getString("type").equals("mostsimilarconcepts")) {
                 return null;
             }
             if (!runtimeParams.containsKey("language")) {
@@ -179,7 +178,9 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
             );
             if (config.hasPath("concepts")) {
                 try {
-                    generator.setConcepts(FileUtils.getFile(config.getString("concepts"), language.getEnLangName()));
+                    generator.setConcepts(FileUtils.getFile(
+                            config.getString("concepts"),
+                            language.getLangCode() + ".txt"));
                 } catch (IOException e) {
                     throw new ConfigurationException(e);
                 }

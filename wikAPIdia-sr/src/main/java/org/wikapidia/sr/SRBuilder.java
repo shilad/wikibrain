@@ -44,7 +44,6 @@ public class SRBuilder {
     // The name of the metric we will use.
     // If null, corresponds to the configured default metric.
     private String metricName = null;
-    private MonolingualSRMetric metric = null;
     private boolean deleteExistingData = true;
 
     // The maximum number of results
@@ -60,7 +59,16 @@ public class SRBuilder {
 
     // If false, existing submetrics for ensemble and pairwsise sim that
     // are already built will not be rebuilt.
-    private boolean rebuildSubmetrics = true;
+    private boolean skipBuiltMetrics = false;
+
+    public static enum Mode {
+        SIMILARITY,
+        MOSTSIMILAR,
+        BOTH
+    }
+
+    private Mode mode = Mode.BOTH;
+
 
     public SRBuilder(Env env, String metricName) throws ConfigurationException {
         this.env = env;
@@ -76,11 +84,12 @@ public class SRBuilder {
         }
     }
 
-    public synchronized MonolingualSRMetric getMetric() throws ConfigurationException {
-        if (metric == null) {
-            this.metric = env.getConfigurator().get(MonolingualSRMetric.class, this.metricName, "language", language.getLangCode());
-        }
-        return metric;
+    public synchronized  MonolingualSRMetric getMetric() throws ConfigurationException {
+        return getMetric(metricName);
+    }
+
+    public synchronized MonolingualSRMetric getMetric(String name) throws ConfigurationException {
+            return env.getConfigurator().get(MonolingualSRMetric.class, name, "language", language.getLangCode());
     }
 
     /**
@@ -97,11 +106,14 @@ public class SRBuilder {
         LOG.info("building metric " + metricName);
         String type = getMetricType();
         if (type.equals("ensemble")) {
-            buildEnsemble();
+            initEnsemble();
         } else if (type.equals("pairwisecosinesim")) {
-            buildCosineSim();
+            initCosineSim();
         } else {
-            buildSimpleMetric();
+            initSimpleMetric();
+        }
+        for (String name : getSubmetrics(metricName)) {
+            buildMetric(name);
         }
     }
 
@@ -138,18 +150,43 @@ public class SRBuilder {
                 results.addAll(getSubmetrics(child));
                 results.add(child);
             }
-        } else if (type.equals("mostsimilarcosine")) {
-            results.addAll(getSubmetrics(config.getString("basemetric")));
+        } else if (type.equals("vector") && config.getString("generator.type").equals("mostsimilarconcepts")) {
+            results.addAll(getSubmetrics(config.getString("generator.basemetric")));
         }
         results.add(parentName);
         return results;
     }
 
-    public void buildSimpleMetric() throws ConfigurationException, DaoException, WikapidiaException, IOException {
+    public void initSimpleMetric() throws ConfigurationException, DaoException, WikapidiaException, IOException {
+        // nothing necessary
+    }
+
+    public void initEnsemble() throws ConfigurationException, DaoException, WikapidiaException, IOException {
+        EnsembleMetric ensemble = (EnsembleMetric) getMetric();
+        ensemble.setTrainSubmetrics(false);         // Do it by hand
+    }
+
+    public void initCosineSim() {
+        // nothing, for now.
+    }
+
+    public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
+        LOG.info("building component metric " + name);
         Dataset ds = getDataset();
-        getMetric().trainSimilarity(ds);
-        getMetric().trainMostSimilar(ds, maxResults, null);
-        getMetric().write();
+        MonolingualSRMetric metric = getMetric(name);
+        if (metric instanceof BaseMonolingualSRMetric) {
+            ((BaseMonolingualSRMetric)metric).setBuildMostSimilarCache(buildCosimilarity);
+        }
+        if ((mode == Mode.SIMILARITY || mode == Mode.BOTH)
+        &&  (!skipBuiltMetrics || !metric.similarityIsTrained())) {
+            metric.trainSimilarity(ds);
+        }
+
+        if ((mode == Mode.MOSTSIMILAR || mode == Mode.BOTH)
+        &&  (!skipBuiltMetrics || !metric.mostSimilarIsTrained())) {
+            metric.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, null);
+        }
+        metric.write();
     }
 
     public Dataset getDataset() throws ConfigurationException, DaoException {
@@ -161,31 +198,6 @@ public class SRBuilder {
         return new Dataset(datasets);   // merge all datasets together into one.
     }
 
-    public void buildEnsemble() throws ConfigurationException, DaoException, WikapidiaException, IOException {
-        EnsembleMetric ensemble = (EnsembleMetric) getMetric();
-        Dataset ds = getDataset();
-        ensemble.setTrainSubmetrics(false);         // Do it by hand
-
-        // build up submetrics
-        for (MonolingualSRMetric m : ensemble.getMetrics()) {
-            if (rebuildSubmetrics || !m.mostSimilarIsTrained()) {
-                m.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, null);
-            }
-            if (rebuildSubmetrics || !m.similarityIsTrained()) {
-                m.trainSimilarity(ds);
-            }
-            m.write();
-        }
-
-        // Train can cascade to base metrics
-        getMetric().trainSimilarity(ds);
-        getMetric().trainMostSimilar(ds, maxResults, null);
-        getMetric().write();
-    }
-
-    public void buildCosineSim() {
-        throw new UnsupportedOperationException();
-    }
 
     public String getMetricType() throws ConfigurationException {
         return getMetricConfig().getString("type");
@@ -231,12 +243,15 @@ public class SRBuilder {
         this.colIds = colIds;
     }
 
+    public void setMode(Mode mode) {
+        this.mode = mode;
+    }
     public void setDeleteExistingData(boolean deleteExistingData) {
         this.deleteExistingData = deleteExistingData;
     }
 
-    public void setRebuildSubmetrics(boolean rebuildSubmetrics) {
-        this.rebuildSubmetrics = rebuildSubmetrics;
+    public void setSkipBuiltMetrics(boolean skipBuiltMetrics) {
+        this.skipBuiltMetrics = skipBuiltMetrics;
     }
 
     private static TIntSet readIds(String path) throws IOException {
@@ -308,6 +323,13 @@ public class SRBuilder {
                         .withDescription("build cosimilarity matrices")
                         .create("s"));
 
+        // build the cosimilarity matrix
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("mode")
+                        .withDescription("mode: similarity, mostsimilar, or both")
+                        .create("p"));
+
         // when building pairwise cosine and ensembles, don't rebuild already built sub-metrics.
         options.addOption(
                 new DefaultOptionBuilder()
@@ -346,11 +368,14 @@ public class SRBuilder {
             builder.setBuildCosimilarity(true);
         }
         if (cmd.hasOption("k")) {
-            builder.setRebuildSubmetrics(false);
+            builder.setSkipBuiltMetrics(true);
             builder.setDeleteExistingData(false);
         }
         if (cmd.hasOption("d")) {
             builder.setDeleteExistingData(Boolean.valueOf(cmd.getOptionValue("d")));
+        }
+        if (cmd.hasOption("p")) {
+            builder.setMode(Mode.valueOf(cmd.getOptionValue("p").toUpperCase()));
         }
 
         builder.build();

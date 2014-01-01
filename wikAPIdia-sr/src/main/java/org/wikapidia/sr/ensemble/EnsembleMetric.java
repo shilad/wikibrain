@@ -120,7 +120,10 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             for (MonolingualSRMetric metric : metrics){
                 double score = Double.NaN;
                 try {
-                    score = metric.similarity(ks.phrase1,ks.phrase2,false).getScore();
+                    SRResult result = metric.similarity(ks.phrase1,ks.phrase2,false);
+                    if (result != null) {
+                        score = result.getScore();
+                    }
                 } catch (Exception e){
                     LOG.log(Level.WARNING, "Local sr metric " + metric.getName() + " failed for " + ks, e);
                 }

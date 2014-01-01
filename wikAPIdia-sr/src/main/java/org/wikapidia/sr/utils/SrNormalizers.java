@@ -121,7 +121,7 @@ public class SrNormalizers {
                 public void call(KnownSim ks) throws IOException, DaoException {
                     ks.maybeSwap();
                     SRResult sim = metric.similarity(ks.phrase1, ks.phrase2, false);
-                    trainee.observe(sim.getScore(), ks.similarity);
+                    trainee.observe(sim == null ? Double.NaN : sim.getScore(), ks.similarity);
                 }
             }, 100);
             trainee.observationsFinished();

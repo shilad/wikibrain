@@ -112,7 +112,7 @@ public class LinearEnsemble implements Ensemble{
         }
         double weightedScore = simlarityCoefficients.get(0);
         for (int i=0; i<scores.size(); i++){
-            double s = scores.get(i).getScore();
+            double s = scores.get(i) == null ? Double.NaN : scores.get(i).getScore();
             if (Double.isNaN(s) || Double.isInfinite(s)) {
                 s = similarityInterpolator.getInterpolatedScore(i);
             }

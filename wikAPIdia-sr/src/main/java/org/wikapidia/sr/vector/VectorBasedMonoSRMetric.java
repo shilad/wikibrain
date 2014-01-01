@@ -12,7 +12,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -352,11 +351,12 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
     @Override
     public void read() throws IOException {
         super.read();
-        if (getFeatureMatrixPath().isFile()) {
+        if (getFeatureMatrixPath().isFile() && getTransposeMatrixPath().isFile()) {
+            IOUtils.closeQuietly(featureMatrix);
+            IOUtils.closeQuietly(transposeMatrix);
             featureMatrix = new SparseMatrix(getFeatureMatrixPath());
-        }
-        if (getTransposeMatrixPath().isFile()) {
-            featureMatrix = new SparseMatrix(getTransposeMatrixPath());
+            transposeMatrix = new SparseMatrix(getTransposeMatrixPath());
+            similarity.setMatrices(featureMatrix, transposeMatrix);
         }
     }
 

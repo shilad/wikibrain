@@ -55,8 +55,9 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     private boolean shouldReadNormalizers = true;
     private SrNormalizers normalizers;
 
-    private boolean buildMostSimilarCache = true;
+    private boolean buildMostSimilarCache = false;
     private SparseMatrix mostSimilarCache = null;
+    private TIntSet mostSimilarCacheRowIds = null;
 
     /**
      * Returns properties about the metric.
@@ -198,7 +199,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         normalizers.trainMostSimilar(this, disambiguator, dataset, validIds, numResults);
         try {
             if (buildMostSimilarCache) {
-                writeMostSimilarCache(numResults, null, validIds);
+                writeMostSimilarCache(numResults, mostSimilarCacheRowIds, validIds);
             }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "writing most similar cache failed:", e);
@@ -472,6 +473,10 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
 
     public void setBuildMostSimilarCache(boolean buildMostSimilarCache) {
         this.buildMostSimilarCache = buildMostSimilarCache;
+    }
+
+    public void setMostSimilarCacheRowIds(TIntSet rowIds) {
+        this.mostSimilarCacheRowIds = rowIds;
     }
 
     protected static void configureBase(Configurator configurator, BaseMonolingualSRMetric sr, Config config) throws ConfigurationException {
