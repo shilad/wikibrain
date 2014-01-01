@@ -31,7 +31,7 @@ public class CosimilarityMatrixExample {
         String path = c.getConf().get().getString("sr.metric.path");
 
         Language language = Language.getByLangCode("simple");
-        sr.writeMostSimilarCache(100);
+//        sr.writeMostSimilarCache(100);
 //        UniversalSRMetric usr = c.get(UniversalSRMetric.class);
 //        usr.writeMostSimilarCache(path,100);
 
