@@ -23,7 +23,7 @@ public class PageViewMapDaoExample {
         Env env = new EnvBuilder().build();
         Configurator configurator = env.getConfigurator();
         LocalPageDao pdao = configurator.get(LocalPageDao.class, "sql");
-        PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 2013, 12, 8, 12);
+        PageViewIterator it = new PageViewIterator(lang, 2013, 12, 8, 1, 11);
         PageViewDataStruct data;
         //int i = 0;
         while(it.hasNext()){

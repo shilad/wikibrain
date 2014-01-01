@@ -44,28 +44,18 @@ public class PageViewIterator implements Iterator {
      * @param startMonth
      * @param startDay
      * @param startHour
-     * @param endYear
-     * @param endMonth
-     * @param endDay
-     * @param endHour
+     * @param numHours number of hours from date specified by above parameters for which to parse page view files
      * @throws WikapidiaException
      * @throws DaoException
      */
-    public PageViewIterator(Language lang, int startYear, int startMonth, int startDay, int startHour,
-                            int endYear, int endMonth, int endDay, int endHour) throws WikapidiaException, DaoException {
+    public PageViewIterator(Language lang, int startYear, int startMonth, int startDay, int startHour, int numHours)
+            throws WikapidiaException, DaoException {
         this.lang = lang;
         this.currentDate = new DateTime(startYear, startMonth, startDay, startHour, 0);
         if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
             throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
         }
-        this.endDate = new DateTime(endYear, endMonth, endDay, endHour, 0);
-    }
-
-
-    public  PageViewIterator(Language lang, DateTime currentDate, DateTime endDate){
-        this.lang = lang;
-        this.currentDate = currentDate;
-        this.endDate = endDate;
+        this.endDate = this.currentDate.plusHours(numHours);
     }
 
     public PageViewIterator(Language lang, DateTime currentDate){
