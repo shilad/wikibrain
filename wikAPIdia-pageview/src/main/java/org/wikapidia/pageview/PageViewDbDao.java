@@ -73,7 +73,7 @@ public class PageViewDbDao {
      */
     int getPageView(int id, int year, int month, int day, int hour)throws ConfigurationException, DaoException, WikapidiaException{
         DateTime time = new DateTime(year, month, day, hour, 0);
-        if(db.exists(Integer.toString(id)) == false || !parsedHourSet.contains(time.getMillis())){
+        if(!parsedHourSet.contains(time.getMillis())){
             parse(time);
         }
         if(db.exists(Integer.toString(id)) == false)
@@ -104,7 +104,7 @@ public class PageViewDbDao {
         int sum = 0;
         DateTime startTime = new DateTime(startYear, startMonth, startDay, startHour, 0);
         DateTime endTime = startTime.plusHours(numHours);
-        if(db.exists(Integer.toString(id)) == false || !checkExist(startTime, endTime))
+        if(!checkExist(startTime, endTime))
             parse(startTime, numHours);
         if(db.exists(Integer.toString(id)) == false)
             return 0;
@@ -154,7 +154,7 @@ public class PageViewDbDao {
     void parse(DateTime startTime, int numHours)throws ConfigurationException, DaoException, WikapidiaException {
         PageViewIterator it = new PageViewIterator(lang, startTime.getYear(), startTime.getMonthOfYear(),
                 startTime.getDayOfMonth(), startTime.getHourOfDay(), numHours);
-        PageViewDataStruct data;      //int i = 0;
+        PageViewDataStruct data;
         while(it.hasNext()){
             data = it.next();
             addData(data);
@@ -172,7 +172,7 @@ public class PageViewDbDao {
      */
     void parse(DateTime time)throws ConfigurationException, DaoException, WikapidiaException {
         PageViewIterator it = new PageViewIterator(lang, time);
-        PageViewDataStruct data;      //int i = 0;
+        PageViewDataStruct data;
         while(it.hasNext()){
             data = it.next();
             addData(data);
