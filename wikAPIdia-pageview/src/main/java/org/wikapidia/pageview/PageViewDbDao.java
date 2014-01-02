@@ -38,7 +38,7 @@ public class PageViewDbDao {
      *  Adds a PageViewDataStruct record to database
      * @param data The PageViewDataStruct being added
      */
-    void addData(PageViewDataStruct data){
+    public void addData(PageViewDataStruct data){
         final Long dateId =  data.getStartDate().getMillis();
 
         data.getPageViewStats().forEachEntry(new TIntIntProcedure() {
@@ -71,7 +71,7 @@ public class PageViewDbDao {
      * @param hour The hour we are getting page view in
      * @return The number of page views
      */
-    int getPageView(int id, int year, int month, int day, int hour)throws ConfigurationException, DaoException, WikapidiaException{
+    public int getPageView(int id, int year, int month, int day, int hour)throws ConfigurationException, DaoException, WikapidiaException{
         DateTime time = new DateTime(year, month, day, hour, 0);
         if(!parsedHourSet.contains(time.getMillis())){
             parse(time);
@@ -100,7 +100,7 @@ public class PageViewDbDao {
      */
 
     //hourly
-    int getPageView(int id, int startYear, int startMonth, int startDay, int startHour, int numHours) throws ConfigurationException, DaoException, WikapidiaException{
+    public int getPageView(int id, int startYear, int startMonth, int startDay, int startHour, int numHours) throws ConfigurationException, DaoException, WikapidiaException{
         int sum = 0;
         DateTime startTime = new DateTime(startYear, startMonth, startDay, startHour, 0);
         DateTime endTime = startTime.plusHours(numHours);
@@ -119,7 +119,7 @@ public class PageViewDbDao {
 
     }
 
-    Map<Integer, Integer> getPageView(Iterable<Integer> ids, int startYear, int startMonth, int startDay, int startHour,
+    public Map<Integer, Integer> getPageView(Iterable<Integer> ids, int startYear, int startMonth, int startDay, int startHour,
                                       int numHours) throws ConfigurationException, DaoException, WikapidiaException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         DateTime startTime = new DateTime(startYear, startMonth, startDay, startHour, 0);
