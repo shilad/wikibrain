@@ -205,6 +205,7 @@ public class RequestedLinkGetter {
         } catch (org.apache.commons.cli.ParseException e) {
             System.err.println("Invalid option usage: " + e.getMessage());
             new HelpFormatter().printHelp("RequestedLinkGetter", options);
+            System.exit(1);
             return;
         }
 
