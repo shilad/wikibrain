@@ -47,10 +47,15 @@ public abstract class BaseDisambiguator extends Disambiguator{
             double sum = 0.0;
             for (int j = 0; j < pages.size(); j++) {
                 if (i != j && MathUtils.isReal(cosim[i][j])) {
+                    double c = cosim[i][j];
+                    if (Double.isInfinite(c) && Double.isNaN(c)) {
+                        cosim[i][j] = 0.0;      // hack!
+                    }
                     sum += cosim[i][j];
                 }
             }
-            pageSums.put(pages.get(i), sum);
+            // add 0.0001 to give every candidate a tiny chance and avoid divide by zero errors when there are no good options
+            pageSums.put(pages.get(i), sum + 0.0001);
         }
 
         // Step 3: multiply background probability by sim sums, choose best product
@@ -67,10 +72,8 @@ public abstract class BaseDisambiguator extends Disambiguator{
                 phraseCands.put(lp, score);
                 sum += score;
             }
-//            System.out.println("results for " + ls.getString());
             LinkedHashMap<LocalId, Double> pageResult = new LinkedHashMap<LocalId, Double>();
             for (LocalPage key : WpCollectionUtils.sortMapKeys(phraseCands, true)) {
-//                System.out.println("\t" + key.getTitle() + ": " + phraseCands.get(key));
                 pageResult.put(key.toLocalId(), phraseCands.get(key) / sum);
             }
             result.add(pageResult);

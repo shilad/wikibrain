@@ -133,9 +133,9 @@ public class TestMilneWitten {
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
         VectorGenerator generator = new MilneWittenGenerator(SIMPLE, linkDao, dao, false);
-        BaseMonolingualSRMetric srIn = new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6));;
+        BaseMonolingualSRMetric srIn = new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
         generator = new MilneWittenGenerator(SIMPLE, linkDao, dao, true);
-        BaseMonolingualSRMetric srOut =  new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6));;
+        BaseMonolingualSRMetric srOut =  new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
 
         double rIn = srIn.similarity(page1.getLocalId(), page2.getLocalId(), true).getScore();
         assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==rIn);
