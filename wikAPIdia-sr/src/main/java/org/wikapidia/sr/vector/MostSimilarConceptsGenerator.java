@@ -61,50 +61,6 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
         throw new UnsupportedOperationException();
     }
 
-    /*
-    private LinkedHashMap<LocalId, Double> expand(String phrase, LinkedHashMap<LocalId, Double> candidates, int numCands, int numPerCand) throws DaoException {
-        if (candidates.isEmpty()) {
-            return null;
-        }
-        LinkedHashMap<LocalId, Double> expanded = new LinkedHashMap<LocalId, Double>();
-        int i = 0;
-        for (LocalId id1 : candidates.keySet()) {
-            SRResultList sr = baseMetric.mostSimilar(id1.getId(), numCands*2);
-            if (sr != null) {
-                for (int j = 0; j < numPerCand; j++) {
-                    expanded.put(new LocalId(getLanguage(), sr.getId(j)), sr.getScore(i) * candidates.get(id1));
-                }
-                if (i++ >= numCands) {
-                    break;
-                }
-            }
-        }
-        return expanded;
-    }
-
-    private TIntDoubleMap createWeightedVector(String phrase, LinkedHashMap<LocalId, Double> candidates) throws DaoException {
-        TIntDoubleMap vector = new TIntDoubleHashMap();
-        int j = 0;
-        for (Map.Entry<LocalId, Double> entry : candidates.entrySet()) {
-            SRResultList sr = baseMetric.mostSimilar(entry.getKey().getId(), MAX_RESULTS);
-            if (sr != null) {
-                for (int i = 0; i < sr.numDocs(); i++) {
-                    double w = Math.sqrt(entry.getValue());
-                    vector.adjustOrPutValue(sr.getId(i), w * sr.getScore(i), w * sr.getScore(i));
-                }
-                if (j++ >= 10) {
-                    break;
-                }
-            }
-        }
-        if (vector.isEmpty()) {
-            return null;
-        } else {
-            return vector;
-        }
-    }   */
-
-
     public void setConcepts(File file) throws IOException {
         conceptIds = new TIntHashSet();
         if (!file.isFile()) {

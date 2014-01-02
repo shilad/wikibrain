@@ -1,5 +1,6 @@
 package org.wikapidia.sr.evaluation;
 
+import com.typesafe.config.Config;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -109,7 +110,6 @@ public class EvaluationMain {
         //Resolve phrases to ids
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
                         .withLongOpt("resolve")
                         .withDescription("resolve phrases to ids")
                         .create("v"));
@@ -117,9 +117,8 @@ public class EvaluationMain {
         //Resolve phrases to ids
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("buildCosimilarityMatrix")
-                        .withDescription("build cosimilarity matrices")
+                        .withLongOpt("buildMostSimilarCache")
+                        .withDescription("build most similar cache matrices")
                         .create("z"));
 
         EnvBuilder.addStandardOptions(options);
@@ -177,7 +176,14 @@ public class EvaluationMain {
         List<Dataset> datasets = new ArrayList<Dataset>();
         String mode = cmd.hasOption("x") ? cmd.getOptionValue("x") : "within-dataset";
         for (String dsName : cmd.getOptionValues("g")) {
-            datasets.add(dsDao.get(lang, dsName));
+            Config config = env.getConfiguration().get();
+            if (config.hasPath("sr.dataset.groups." + dsName)) {
+                for (String dsName2 : config.getStringList("sr.dataset.groups." + dsName)) {
+                    datasets.add(dsDao.get(lang, dsName2));
+                }
+            } else {
+                datasets.add(dsDao.get(lang, dsName));
+            }
         }
 
         String outputDir = cmd.hasOption("o")
@@ -190,7 +196,7 @@ public class EvaluationMain {
         } else if (cmd.getOptionValue("p").equals("mostsimilar")) {
             evaluator = new MostSimilarEvaluator(new File(outputDir));
             if (cmd.hasOption("z")) {
-                ((MostSimilarEvaluator)evaluator).setBuildCosimilarityMatrix(Boolean.valueOf(cmd.getOptionValue("c")));
+                ((MostSimilarEvaluator)evaluator).setBuildCosimilarityMatrix(true);
             }
         } else {
             System.err.println("Invalid prediction mode. usage:");
@@ -200,7 +206,7 @@ public class EvaluationMain {
         }
 
         if (cmd.hasOption("v")) {
-            evaluator.setResolvePhrases(Boolean.valueOf(cmd.getOptionValue("v")));
+            evaluator.setResolvePhrases(true);
         }
 
         if (mode.equals("none")) {

@@ -59,6 +59,8 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     private SparseMatrix mostSimilarCache = null;
     private TIntSet mostSimilarCacheRowIds = null;
 
+    private int numDisambiguations = 4;
+
     /**
      * Returns properties about the metric.
      */
@@ -215,13 +217,37 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         List<LocalString> phrases = Arrays.asList(
                 new LocalString(language, phrase1),
                 new LocalString(language, phrase2));
-        List<LocalId> resolution = disambiguator.disambiguateTop(phrases, null);
-        LocalId similar1 = resolution.get(0);
-        LocalId similar2 = resolution.get(1);
-        if (similar1==null||similar2==null){
+        List<LinkedHashMap<LocalId, Double>> resolutions = disambiguator.disambiguate(phrases, null);
+        if (resolutions.get(0) == null || resolutions.get(0).isEmpty()
+        ||  resolutions.get(1) == null || resolutions.get(1).isEmpty()) {
             return new SRResult();
         }
-        return similarity(similar1.getId(), similar2.getId(), explanations);
+
+        double weightSum = 0.0;
+        double prodSum = 0.0;
+        int i = 0;
+        for (LocalId lid1 : resolutions.get(0).keySet()) {
+            if (i++ >= numDisambiguations) {
+                break;
+            }
+            int j = 0;
+            for (LocalId lid2: resolutions.get(1).keySet()) {
+                if (j++ >= numDisambiguations) {
+                    break;
+                }
+                double w = resolutions.get(0).get(lid1) * resolutions.get(1).get(lid2);
+                SRResult r = similarity(lid1.getId(), lid2.getId(), explanations);
+                if (r != null && r.isValid()) {
+                    weightSum += w;
+                    prodSum += w * r.getScore();
+                }
+            }
+        }
+        if (weightSum == 0) {
+            return new SRResult(Double.NaN);
+        } else {
+            return new SRResult(prodSum / weightSum);
+        }
     }
 
     @Override

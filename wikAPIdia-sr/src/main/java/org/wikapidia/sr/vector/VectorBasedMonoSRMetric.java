@@ -5,6 +5,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.IOUtils;
@@ -64,36 +65,54 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
     private final VectorGenerator generator;
     private final VectorSimilarity similarity;
     private final SRConfig config;
+    private final PhraseVectorCreator phraseVectorCreator;
 
     private SparseMatrix featureMatrix;
     private SparseMatrix transposeMatrix;
 
     private boolean resolvePhrases = false;
 
-    public VectorBasedMonoSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity) {
+    public VectorBasedMonoSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity, PhraseVectorCreator creator) {
         super(name, language, dao, disambig);
         this.generator = generator;
         this.similarity = similarity;
+
         this.config = new SRConfig();
         this.config.minScore = (float) similarity.getMinValue();
         this.config.maxScore = (float) similarity.getMaxValue();
-    }
 
+        this.phraseVectorCreator = creator;
+        if (creator != null) {
+            creator.setMetric(this);
+        }
+    }
 
     @Override
     public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
-        if (resolvePhrases) {
-            return super.similarity(phrase1, phrase2, explanations);
-        }
         TIntFloatMap vector1 = null;
         TIntFloatMap vector2 = null;
-        try {
-            vector1 = generator.getVector(phrase1);
-            vector2 = generator.getVector(phrase2);
-        } catch (UnsupportedOperationException e) {
-            return super.similarity(phrase1, phrase2, explanations);    // disambiguates to ids
+        // try using phrases directly
+        if (!resolvePhrases) {
+            try {
+                vector1 = generator.getVector(phrase1);
+                vector2 = generator.getVector(phrase2);
+            } catch (UnsupportedOperationException e) {
+                // try using other methods
+            }
         }
-        return normalize(new SRResult(similarity.similarity(vector1, vector2)));
+        if (phraseVectorCreator != null && (vector1 == null || vector2 == null)) {
+            TIntFloatMap vectors[] = phraseVectorCreator.getPhraseVectors(phrase1, phrase2);
+            if (vectors != null) {
+                vector1 = vectors[0];
+                vector2 = vectors[1];
+            }
+        }
+        if (vector1 == null || vector2 == null) {
+            // fallback on parent's phrase resolution algorithm
+            return super.similarity(phrase1, phrase2, explanations);
+        } else {
+            return normalize(new SRResult(similarity.similarity(vector1, vector2)));
+        }
     }
 
 
@@ -115,16 +134,26 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
-        if (resolvePhrases) {
-            return super.mostSimilar(phrase, maxResults, validIds);
+        TIntFloatMap vector = null;
+        if (!resolvePhrases) {
+            try {
+                vector = generator.getVector(phrase);
+            } catch (UnsupportedOperationException e) {
+                // we'll try an alternate method below
+            }
         }
-        try {
-            TIntFloatMap vector = generator.getVector(phrase);
-            return similarity.mostSimilar(vector, maxResults, validIds);    // Base resolved to a page id
-        } catch (UnsupportedOperationException e) {
+        if (vector == null && phraseVectorCreator != null) {
+            vector = phraseVectorCreator.getPhraseVector(phrase);
+        }
+        if (vector == null) {
+            // fall back on parent's phrase resolution algorithm
             return super.mostSimilar(phrase, maxResults, validIds);
-        } catch (IOException e) {
-            throw new DaoException(e);
+        } else {
+            try {
+                return similarity.mostSimilar(vector, maxResults, validIds);
+            } catch (IOException e) {
+                throw new DaoException(e);
+            }
         }
     }
 
@@ -185,6 +214,11 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
      */
     @Override
     public double[][] cosimilarity(String rowPhrases[], String colPhrases[]) throws DaoException {
+        if (rowPhrases.length == 0 || colPhrases.length == 0) {
+            return new double[rowPhrases.length][colPhrases.length];
+        }
+        List<TIntFloatMap> rowVectors = new ArrayList<TIntFloatMap>();
+        List<TIntFloatMap> colVectors = new ArrayList<TIntFloatMap>();
         try {
             // Try to use strings directly, but generator may not support them, so fall back on disambiguation
             Map<String, TIntFloatMap> vectors = new HashMap<String, TIntFloatMap>();
@@ -193,39 +227,36 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                     vectors.put(s, generator.getVector(s));
                 }
             }
-            List<TIntFloatMap> rowVectors = new ArrayList<TIntFloatMap>();
             for (String s : rowPhrases) {
                 rowVectors.add(vectors.get(s));
             }
-            List<TIntFloatMap> colVectors = new ArrayList<TIntFloatMap>();
             for (String s : colPhrases) {
                 colVectors.add(vectors.get(s));
             }
-            return cosimilarity(rowVectors, colVectors);
         } catch (UnsupportedOperationException e) {
-            // Disambiguate phrases to ids, use these to call the id version of cosimilarity
-            List<LocalString> unique = new ArrayList<LocalString>();
+        }
+
+        // If direct phrase vectors failed, try to disambiguate
+        if (rowVectors.isEmpty() || colVectors.isEmpty()) {
+            List<String> unique = new ArrayList<String>();
             for (String s : ArrayUtils.addAll(rowPhrases, colPhrases)) {
-                LocalString ls = new LocalString(getLanguage(), s);
-                if (!unique.contains(ls)) {
-                    unique.add(ls);
+                if (!unique.contains(s)) {
+                    unique.add(s);
                 }
             }
-            List<LocalId> pageIds = getDisambiguator().disambiguateTop(unique, null);
-            TIntList rowIds = new TIntArrayList();
+            TIntFloatMap[] vectors = phraseVectorCreator.getPhraseVectors(unique.toArray(new String[0]));
             for (String s : rowPhrases) {
-                int i = unique.indexOf(new LocalString(getLanguage(), s));
-                if (i < 0) { throw new IllegalStateException(); }
-                rowIds.add(pageIds.get(i) == null ? -1 : pageIds.get(i).getId());
+                int i = unique.indexOf(s);
+                if (i < 0) throw new IllegalStateException();
+                rowVectors.add(vectors[i]);
             }
-            TIntList colIds = new TIntArrayList();
             for (String s : colPhrases) {
-                int i = unique.indexOf(new LocalString(getLanguage(), s));
-                if (i < 0) { throw new IllegalStateException(); }
-                colIds.add(pageIds.get(i) == null ? -1 : pageIds.get(i).getId());
+                int i = unique.indexOf(s);
+                if (i < 0) throw new IllegalStateException();
+                colVectors.add(vectors[i]);
             }
-            return cosimilarity(rowIds.toArray(), colIds.toArray());
         }
+        return cosimilarity(rowVectors, colVectors);
     }
 
     /**
@@ -386,6 +417,13 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         return transposeMatrix != null && transposeMatrix.getNumRows() > 0;
     }
 
+    public VectorGenerator getGenerator() {
+        return generator;
+    }
+
+    public VectorSimilarity getSimilarity() {
+        return similarity;
+    }
 
     @Override
     public SRConfig getConfig() {
@@ -400,6 +438,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
     public TIntDoubleMap getVector(int id) throws DaoException {
         throw new UnsupportedOperationException();  // TODO: remove me
     }
+
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -431,18 +470,25 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                     VectorGenerator.class, null, config.getConfig("generator"), params);
             VectorSimilarity similarity = getConfigurator().construct(
                     VectorSimilarity.class,  null, config.getConfig("similarity"), params);
+            PhraseVectorCreator phraseVectorCreator = null;
+            if (config.hasPath("phrases")) {
+                phraseVectorCreator = getConfigurator().construct(
+                        PhraseVectorCreator.class, null, config.getConfig("phrases"), null);
+            }
             VectorBasedMonoSRMetric sr = new VectorBasedMonoSRMetric(
                     name,
                     language,
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
                     generator,
-                    similarity
+                    similarity,
+                    phraseVectorCreator
             );
-            if (config.hasPath("resolvePhrases")) {
-                sr.setResolvePhrases(config.getBoolean("resolvePhrases"));
+            if (config.hasPath("resolvephrases")) {
+                sr.setResolvePhrases(config.getBoolean("resolvephrases"));
             }
             configureBase(getConfigurator(), sr, config);
+            if (phraseVectorCreator != null) phraseVectorCreator.setMetric(sr);
             return sr;
         }
 
