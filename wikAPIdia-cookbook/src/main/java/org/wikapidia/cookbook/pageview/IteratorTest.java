@@ -47,7 +47,7 @@ public class IteratorTest {
                 }
                 catch(NullPointerException e){
                     System.out.println("Message: " + e.getMessage());
-                    e.printStackTrace();
+                    System.out.println("Stacktrace: " + e.getStackTrace());
                     continue;
                 }
             }

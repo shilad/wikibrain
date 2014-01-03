@@ -1,7 +1,5 @@
 package org.wikapidia.pageview;
 
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.procedure.TIntIntProcedure;
 import org.joda.time.DateTime;
 import org.mapdb.DB;
@@ -41,9 +39,7 @@ public class PageViewDbDao {
      * @param data The PageViewDataStruct being added
      */
     void addData(PageViewDataStruct data){
-        final DateTime startTime = data.getStartDate();
-        final Long dateId =  dateTimeToHour(data.getStartDate());
-
+        final Long dateId =  data.getStartDate().getMillis();
 
         data.getPageViewStats().forEachEntry(new TIntIntProcedure() {
             @Override
@@ -69,22 +65,25 @@ public class PageViewDbDao {
     /**
      * Get the number of page views for a id in an hour
      * @param id Page id
-     * @param time The hour we are getting page view in
+     * @param year The year we are getting page view in
+     * @param month The month we are getting page view in
+     * @param day The day we are getting page view in
+     * @param hour The hour we are getting page view in
      * @return The number of page views
      */
-
-    int getPageView(int id, DateTime time)throws ConfigurationException, DaoException, WikapidiaException{
-        if(db.exists(Integer.toString(id)) == false || !parsedHourSet.contains(dateTimeToHour(time))){
+    int getPageView(int id, int year, int month, int day, int hour)throws ConfigurationException, DaoException, WikapidiaException{
+        DateTime time = new DateTime(year, month, day, hour, 0);
+        if(!parsedHourSet.contains(time.getMillis())){
             parse(time);
         }
         if(db.exists(Integer.toString(id)) == false)
             return 0;
         Map<Long, Integer> hourViewMap = db.getTreeMap(Integer.toString(id));
-        if(hourViewMap.containsKey(dateTimeToHour(time)) == false)
+        if(hourViewMap.containsKey(time.getMillis()) == false)
             return 0;
         else{
 
-            return hourViewMap.get(dateTimeToHour(time));
+            return hourViewMap.get(time.getMillis());
         }
 
     }
@@ -92,33 +91,41 @@ public class PageViewDbDao {
     /**
      * Get the number of page views for a id in a given period
      * @param id Page id
-     * @param startTime Start time in hour
-     * @param endTime End time in hour
+     * @param startYear
+     * @param startMonth
+     * @param startDay
+     * @param startHour
+     * @param numHours Number of hours from the start date specified by the above parameters; defines the time period
      * @return The number of page views
      */
 
     //hourly
-    int getPageView(int id, DateTime startTime, DateTime endTime)throws ConfigurationException, DaoException, WikapidiaException{
+    int getPageView(int id, int startYear, int startMonth, int startDay, int startHour, int numHours) throws ConfigurationException, DaoException, WikapidiaException{
         int sum = 0;
-        if(db.exists(Integer.toString(id)) == false || !checkExist(startTime, endTime))
-            parse(startTime, endTime);
+        DateTime startTime = new DateTime(startYear, startMonth, startDay, startHour, 0);
+        DateTime endTime = startTime.plusHours(numHours);
+        if(!checkExist(startTime, endTime))
+            parse(startTime, numHours);
         if(db.exists(Integer.toString(id)) == false)
             return 0;
         Map<Long, Integer> hourViewMap = db.getTreeMap(Integer.toString(id));
-        for(long hrTime = dateTimeToHour(startTime); hrTime < dateTimeToHour(endTime); hrTime += 1){
-            if(hourViewMap.containsKey(hrTime) == false)
+        for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime.plusHours(1)){
+            if(hourViewMap.containsKey(hrTime.getMillis()) == false)
                 continue;
-            sum += hourViewMap.get(hrTime);
+            sum += hourViewMap.get(hrTime.getMillis());
         }
 
         return sum;
 
     }
 
-    Map<Integer, Integer> getPageView(Iterable<Integer> ids, DateTime startTime, DateTime endTime)throws ConfigurationException, DaoException, WikapidiaException{
+    Map<Integer, Integer> getPageView(Iterable<Integer> ids, int startYear, int startMonth, int startDay, int startHour,
+                                      int numHours) throws ConfigurationException, DaoException, WikapidiaException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+        DateTime startTime = new DateTime(startYear, startMonth, startDay, startHour, 0);
+        DateTime endTime = startTime.plusHours(numHours);
         if(!checkExist(startTime, endTime))
-            parse(startTime, endTime);
+            parse(startTime, numHours);
         for(Integer id: ids){
             if(db.exists(Integer.toString(id)) == false){
                 result.put(id, 0);
@@ -126,41 +133,31 @@ public class PageViewDbDao {
             }
             Map<Long, Integer> hourViewMap = db.getTreeMap(Integer.toString(id));
             int sum = 0;
-            for(long hrTime = dateTimeToHour(startTime); hrTime < dateTimeToHour(endTime); hrTime += 1){
-                if(hourViewMap.containsKey(hrTime) == false)
+            for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime.plusHours(1)){
+                if(hourViewMap.containsKey(hrTime.getMillis()) == false)
                     continue;
-                sum += hourViewMap.get(hrTime);
+                sum += hourViewMap.get(hrTime.getMillis());
             }
             result.put(id, sum);
         }
         return result;
     }
 
-
     /**
-     * Util function which gives the hour value of a given DateTime since 1970-1-1
-     * @param time The DateTime object
-     * @return The number of hours has passed since 2007-12-9 18:00
-     */
-    long dateTimeToHour(DateTime time){
-        return (time.toDate().getTime() - new DateTime(2007, 12, 9, 18, 0).toDate().getTime())/3600000;
-    }
-
-    /**
-     * Util function created iterator to parse page view file from startTime to endTime
+     * Util function created iterator to parse page view file from startTime through a given number of hours
      * @param startTime the specified start time
-     * @param endTime  the specified end time
+     * @param numHours  the specified number of hours from startTime for which to parse page view files
      * @throws ConfigurationException
      * @throws DaoException
      * @throws WikapidiaException
      */
-    void parse(DateTime startTime, DateTime endTime)throws ConfigurationException, DaoException, WikapidiaException {
-        PageViewIterator it = new PageViewIterator(lang, startTime, endTime);
-        PageViewDataStruct data;      //int i = 0;
+    void parse(DateTime startTime, int numHours)throws ConfigurationException, DaoException, WikapidiaException {
+        PageViewIterator it = new PageViewIterator(lang, startTime.getYear(), startTime.getMonthOfYear(),
+                startTime.getDayOfMonth(), startTime.getHourOfDay(), numHours);
+        PageViewDataStruct data;
         while(it.hasNext()){
             data = it.next();
             addData(data);
-
         }
 
 
@@ -175,11 +172,10 @@ public class PageViewDbDao {
      */
     void parse(DateTime time)throws ConfigurationException, DaoException, WikapidiaException {
         PageViewIterator it = new PageViewIterator(lang, time);
-        PageViewDataStruct data;      //int i = 0;
+        PageViewDataStruct data;
         while(it.hasNext()){
             data = it.next();
             addData(data);
-
         }
 
 
@@ -192,8 +188,8 @@ public class PageViewDbDao {
      * @return
      */
     boolean checkExist(DateTime startTime, DateTime endTime){
-        for(long hrTime = dateTimeToHour(startTime); hrTime < dateTimeToHour(endTime); hrTime += 1){
-            if(!parsedHourSet.contains(hrTime))
+        for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime.plusHours(1)){
+            if(!parsedHourSet.contains(hrTime.getMillis()))
                 return false;
         }
         return true;
