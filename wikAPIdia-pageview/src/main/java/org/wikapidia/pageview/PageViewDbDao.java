@@ -122,7 +122,7 @@ public class PageViewDbDao {
         for(Integer id: ids){
             if(db.exists(Integer.toString(id)) == false){
                 result.put(id, 0);
-                break;
+                continue;
             }
             Map<Long, Integer> hourViewMap = db.getTreeMap(Integer.toString(id));
             int sum = 0;
