@@ -109,7 +109,7 @@ public class PageViewDbDao {
         if(db.exists(Integer.toString(id)) == false)
             return 0;
         Map<Long, Integer> hourViewMap = db.getTreeMap(Integer.toString(id));
-        for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime.plusHours(1)){
+        for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime = hrTime.plusHours(1)){
             if(hourViewMap.containsKey(hrTime.getMillis()) == false)
                 continue;
             sum += hourViewMap.get(hrTime.getMillis());
@@ -133,7 +133,7 @@ public class PageViewDbDao {
             }
             Map<Long, Integer> hourViewMap = db.getTreeMap(Integer.toString(id));
             int sum = 0;
-            for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime.plusHours(1)){
+            for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime = hrTime.plusHours(1)){
                 if(hourViewMap.containsKey(hrTime.getMillis()) == false)
                     continue;
                 sum += hourViewMap.get(hrTime.getMillis());
@@ -188,7 +188,7 @@ public class PageViewDbDao {
      * @return
      */
     boolean checkExist(DateTime startTime, DateTime endTime){
-        for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime.plusHours(1)){
+        for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime = hrTime.plusHours(1)){
             if(!parsedHourSet.contains(hrTime.getMillis()))
                 return false;
         }
