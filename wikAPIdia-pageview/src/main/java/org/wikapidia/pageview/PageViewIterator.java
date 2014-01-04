@@ -12,6 +12,7 @@ import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.Title;
 
 import java.io.*;
@@ -56,6 +57,16 @@ public class PageViewIterator implements Iterator {
             throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
         }
         this.endDate = this.currentDate.plusHours(numHours);
+    }
+
+    public PageViewIterator(Language lang, DateTime startDate, DateTime endDate)
+            throws WikapidiaException, DaoException {
+        this.lang = lang;
+        this.currentDate = startDate;
+        if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
+            throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
+        }
+        this.endDate = endDate;
     }
 
     public PageViewIterator(Language lang, DateTime currentDate){
@@ -219,8 +230,10 @@ public class PageViewIterator implements Iterator {
             System.out.println("Beginning to parse file");
             while ((curLine = br.readLine()) != null){
                 String[] cols = curLine.split(" ");
-                    if (cols[0].equals(lang.getLangCode())){
+                    // if (langs.getLangCodes().contains(cols[0])){
+                    if (cols[0].equals(lang.getLangCode())) {
                             try{
+                                //Language lang = Language.getByLangCode(cols[0]);
                                 String title = URLDecoder.decode(cols[1], "UTF-8");
                                 int pageId = pdao.getIdByTitle(new Title(title, lang));
                                 int numPageViews = Integer.parseInt(cols[2]);

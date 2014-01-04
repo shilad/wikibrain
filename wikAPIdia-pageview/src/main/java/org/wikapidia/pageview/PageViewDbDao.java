@@ -35,18 +35,14 @@ public class PageViewDbDao {
      * method to access a PageViewIterator via the DAO, can be used by clients to keep track of each of the PageViewDataStructs
      * retrieved by the iterator
      * @param lang
-     * @param startYear
-     * @param startMonth
-     * @param startDay
-     * @param startHour
-     * @param numHours
+     * @param startDate
+     * @param endDate
      * @return
      * @throws WikapidiaException
      * @throws DaoException
      */
-    public PageViewIterator getPageViewIterator(Language lang, int startYear, int startMonth, int startDay, int startHour,
-                                                int numHours) throws WikapidiaException, DaoException {
-        return new PageViewIterator(lang, startYear, startMonth, startDay, startHour, numHours);
+    public PageViewIterator getPageViewIterator(Language lang, DateTime startDate, DateTime endDate) throws WikapidiaException, DaoException {
+        return new PageViewIterator(lang, startDate, endDate);
     }
 
 
