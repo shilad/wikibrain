@@ -29,7 +29,10 @@ WP_LIB="$(pwd)/lib"
 
 
 # Specify classpath
-WP_CLASSPATH="${CLASSPATH}:${WP_LIB}/*"
+WP_CLASSPATH="${WP_LIB}/*"
+if [ -n "${CLASSPATH}" ]; then
+    WP_CLASSPATH="${CLASSPATH}:${WP_CLASSPATH}"
+fi
 
 # Java executable
 JAVA_BIN=java
