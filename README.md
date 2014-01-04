@@ -25,14 +25,14 @@ Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
 Run the unit tests to make sure they pass and everything is installed correctly. For developers, this also auto-generates some Java source files.
 
 ```bash
-        cd wikAPIdia
-        mvn -f wikAPIdia-parent/pom.xml test
+cd wikAPIdia
+mvn -f wikAPIdia-parent/pom.xml test
 ```
 
 Install our `wp-run.sh` helper bash script that makes it easier to compile and run java programs. This is not necessary, but easier than using `mvn exec:exec`, and these directions presume you installed it. If you are using an IDE, you can also just run the ResourceInstaller program from the IDE with no arguments. 
 
 ```bash
-        mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
+mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
 ```
 
 ###Importing data
@@ -40,13 +40,13 @@ Install our `wp-run.sh` helper bash script that makes it easier to compile and r
 Set reasonable java options defaults. The following uses a 64-bit JVM with 8GB memory and server optimizations. You may want to save these defaults in a shell script so you can easily source it in the future.
 
 ```bash
-	export JAVA_OPTS="-d64 -Xmx8000M -server"
+export JAVA_OPTS="-d64 -Xmx8000M -server"
 ```
 
 Download and process the dataset:
 
 ```bash
-	./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l simple
+./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l simple
 ```
 
 
@@ -55,7 +55,7 @@ The last command downloads, installs, and analyzes the latest database files for
 You can customize WikAPIdia's importing procedure, but the Pipeline should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
-	./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
+./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
 ``` 
 (beware that this is a lot of data and takes many hours!).
 
