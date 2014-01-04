@@ -84,8 +84,8 @@ echo "Using maven pom ${pom}" >&2
 
 # Compile the project and build the classpath files
 rm -rf "${WP_LIB}/*.jar"
-mvn -f "${pom}" ${WP_MVN_TARGETS} || die "compilation failed"
-mvn -f "${pom}" dependency:copy-dependencies -DoutputDirectory="${WP_LIB}" || die "copying dependencies failed"
+mvn -f "${pom}" -q ${WP_MVN_TARGETS} || die "compilation failed"
+mvn -f "${pom}" -q dependency:copy-dependencies -DoutputDirectory="${WP_LIB}" || die "copying dependencies failed"
 
 # Update classpath with latest version of jars, etc.
 for srcdir in $(find "${WP_DIR}" -type d -print | grep 'target/classes$'); do
