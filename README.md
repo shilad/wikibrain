@@ -20,15 +20,16 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 
 ###Installing WikAPIdia
 
-* Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
-* Run the unit tests to make sure they pass and everything is installed correctly. For developers, this also creates some auto-generated files.
+Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
+
+Run the unit tests to make sure they pass and everything is installed correctly. For developers, this also auto-generates some Java source files.
 
 ```bash
         cd wikAPIdia
         mvn -f wikAPIdia-parent/pom.xml test
 ```
 
-* Install our wp-run.sh helper bash script that makes it easier to compile and run java programs. This is not necessary, but easier than using mvn exec:exec, and these directions presume it is installed. If you are using an IDE, you can also just run the ResourceInstaller program from the IDE with no arguments. 
+Install our `wp-run.sh` helper bash script that makes it easier to compile and run java programs. This is not necessary, but easier than using `mvn exec:exec`, and these directions presume you installed it. If you are using an IDE, you can also just run the ResourceInstaller program from the IDE with no arguments. 
 
 ```bash
         mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
@@ -36,13 +37,13 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 
 ###Importing data
 
-* Set reasonable java options defaults. The following uses a 64-bit JVM with 8GB memory and server optimizations:
+Set reasonable java options defaults. The following uses a 64-bit JVM with 8GB memory and server optimizations. You may want to save these defaults in a shell script so you can easily source it in the future.
 
 ```bash
 	export JAVA_OPTS="-d64 -Xmx8000M -server"
 ```
 
-* Download and process the dataset:
+Download and process the dataset:
 
 ```bash
 	./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l simple
