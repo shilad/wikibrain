@@ -9,34 +9,44 @@
 #
 
 # Configuration parameters.
-# These can be overriden by changing wp-conf.sh
+# These can be overriden by setting your environment
 
-# Maven pom
-POM=pom.xml
+# Base Wikapidia directory. Should be the parent project directory in multi-maven projects
+WP_DIR="${WP_DIR:-.}"
 
 # Java options
-JAVA_OPTS="$JAVA_OPTS -server -ea"
+WP_JAVA_OPTS="${WP_JAVA_OPTS:-${JAVA_OPTS} -server -ea}"
 
 # Directories to search for the wp-conf.sh file
-CONF_SEARCH_DIRS="
-`dirname $0`
-.
-..
+WP_CONF_PATHS="
+${WP_CONF}
+`dirname $0`/wp-conf.sh
+./wp-conf.sh
+${WP_DIR}/wp-conf.sh
+"
+
+# Search path for maven pom
+WP_POM_PATHS="
+${WP_POM}
+${WP_DIR}/pom.xml
+${WP_DIR}/wikAPIdia-parent/pom.xml
 "
 
 # Destination of compiled jars and dependencies
-WP_LIB="$(pwd)/lib"
+WP_LIB="${WP_LIB:-${WP_DIR}/lib}"
 
-
-# Specify classpath
-WP_CLASSPATH="${WP_LIB}/*"
-if [ -n "${CLASSPATH}" ]; then
-    WP_CLASSPATH="${CLASSPATH}:${WP_CLASSPATH}"
-fi
+# Specify default classpath. This will be updated later, and CLASSPATH will be prepended to it.
+WP_CLASSPATH="${WP_CLASSPATH:-${WP_LIB}/*}"
 
 # Java executable
-JAVA_BIN=java
+WP_JAVA_BIN="${WP_JAVA_BIN:-java}"
 
+# Standard maven targets. Clean will be prepended to it if it is the first argument
+WP_MVN_TARGETS="${WP_MVN_TARGETS:-compile}"
+
+echo -e "Wikapidia environment settings follow. WP_CLASSPATH is updated again later\n" >&2
+(set -o posix ; set) | grep WP_ | sed -e 's/^/    /' >&2
+echo "" >&2
 
 # Displays an error message and exits
 function die() {
@@ -44,50 +54,50 @@ function die() {
     exit 1
 }
 
-if [ -z "$1" ]; then
-    die "usage: $0 package.and.Class arg1 arg2 ...."
+# Select the first existing file among several choices
+function select_first_file() {
+    for file in $@; do
+        if [ -f "${file}" ]; then
+            echo "${file}"
+        fi
+    done
+}
+
+
+# Process initial arguments and make sure they are valid.
+if [ "$1" == "clean" ]; then
+    WP_MVN_TARGETS="clean ${WP_MVN_TARGETS}"
+    shift
 fi
-
-
-# check to see if a configuration file exists and source it if so.
-confFile=""
-for dir in ${CONF_SEARCH_DIRS}; do
-    echo "checking dir ${dir}"
-    f="${dir}/wp-conf.sh"
-    if [ -f ${f} ]; then
-        confFile="${f}"
-        break;
-    fi
-done
-if [ -z "$confFile" ]; then
-    echo "Configuration file wp-conf.sh doesn't exist in search path ${CONF_SEARCH_DIRS}. using default configuration." >&2
-else
-    echo "Sourcing configuration file ${confFile}" >&2
-    source ${confFile}
+if [ -z "$1" ]; then
+    die "usage: $0 [clean] package.and.Class arg1 arg2 ...."
 fi
 
 
 # Find the maven pom
-if [ -f ${POM} ]; then
-    true # keep existing value
-elif [ -f "wikAPIdia-parent/pom.xml" ]; then
-    POM=wikAPIdia-parent/pom.xml
-else
-    die "Maven pom.xml file ${POM} does not exist"
+pom="$(select_first_file ${WP_POM_PATHS})"
+if [ -z "${pom}" ]; then
+    die "Maven pom.xml file not found in ${WP_POM_PATHS}"
 fi
-echo "Using maven pom ${POM}" >&2
+echo "Using maven pom ${pom}" >&2
 
 
 # Compile the project and build the classpath files
 rm -rf "${WP_LIB}/*.jar"
-mvn -f "${POM}" clean compile package install -DskipTests || die "compilation failed"
-mvn -f "${POM}" dependency:copy-dependencies -DoutputDirectory="${WP_LIB}" || die "copying dependencies failed"
+mvn -f "${pom}" ${WP_MVN_TARGETS} || die "compilation failed"
+mvn -f "${pom}" dependency:copy-dependencies -DoutputDirectory="${WP_LIB}" || die "copying dependencies failed"
 
-# Grab the latest compiled version of source jars
-cp -p */target/*.jar target/*.jar "${WP_LIB}"
+# Update classpath with latest version of jars, etc.
+for srcdir in $(find "${WP_DIR}" -type d -print | grep 'target/classes$'); do
+    WP_CLASSPATH="${srcdir}:${WP_CLASSPATH}"
+done
+if [ -n "${CLASSPATH}" ]; then
+    WP_CLASSPATH="${CLASSPATH}:${WP_CLASSPATH}"
+fi
 
 
-# Run the
-echo "executing ${JAVA_BIN} -cp \"${WP_CLASSPATH}\" $JAVA_OPTS $class $@"
 
-${JAVA_BIN} -cp "${WP_CLASSPATH}" $JAVA_OPTS $class $@
+# Run the command
+echo "executing \"${WP_JAVA_BIN}\" -cp \"${WP_CLASSPATH}\" $WP_JAVA_OPTS $@"
+
+exec "${WP_JAVA_BIN}" -cp "${WP_CLASSPATH}" ${WP_JAVA_OPTS} $@

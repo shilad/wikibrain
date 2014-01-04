@@ -13,7 +13,6 @@ import java.io.InputStream;
 public class ResourceInstaller {
     public static String DEFAULT_RESOURCES[] = new String[] {
             "/wp-run.sh",
-            "/wp-conf.sh",
     };
     public static String DEFAULT_DIR = ".";
 
@@ -49,18 +48,16 @@ public class ResourceInstaller {
                 return;
             }
             if (dest.isFile()) {
-                for (int i = 1; i < 10000; i++) {
-                    File backup = new File(dest + ".backup." + i);
-                    if (!backup.exists()) {
-                        FileUtils.moveFile(dest, backup);
-                        System.err.println("backing up " + dest + " to " + backup);
-                        break;
-                    }
-                }
+                File backup = new File(dest + ".backup");
+                System.err.println("backing up " + dest + " to " + backup);
+                FileUtils.moveFile(dest, backup);
             }
             FileUtils.copyInputStreamToFile(is, dest);
             System.err.println("creating file " + dest + " from resources");
             is.close();
+            if (dest.getName().toLowerCase().endsWith(".sh")) {
+                dest.setExecutable(true);
+            }
         }
     }
 }

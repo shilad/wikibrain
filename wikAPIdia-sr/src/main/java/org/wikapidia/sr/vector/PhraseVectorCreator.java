@@ -37,7 +37,7 @@ public class PhraseVectorCreator {
     private int numSrCands = 0;
     private int numPerSrCand = 0;
 
-    private double textWeight = 0.5;
+    private double textWeight = 0.4;
     private int numTextCands = 50;
 
     private int numUsedCands = 20;
