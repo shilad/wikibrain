@@ -118,6 +118,7 @@ public class PipelineLoader {
                 keeperArgs.add(args[i]);
             }
         }
+        LOG.info("pipeline keeping args: " + keeperArgs);
 
         Env env = new EnvBuilder(cmd).build();
         Config config = env.getConfiguration().get();
