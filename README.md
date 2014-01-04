@@ -21,7 +21,7 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 ###Importing data
 
 * Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
-* Install our maven helper bash script (not necessary, but helpful):
+* Install our wp-run.sh helper bash script (not necessary, but helpful, and these directions presume it is installed):
 
 ```bash
         cd wikAPIdia
