@@ -50,6 +50,7 @@ public class ResourceInstaller {
             if (dest.isFile()) {
                 File backup = new File(dest + ".backup");
                 System.err.println("backing up " + dest + " to " + backup);
+                FileUtils.deleteQuietly(backup);
                 FileUtils.moveFile(dest, backup);
             }
             FileUtils.copyInputStreamToFile(is, dest);
