@@ -53,7 +53,7 @@ public class ResourceInstaller {
                 FileUtils.moveFile(dest, backup);
             }
             FileUtils.copyInputStreamToFile(is, dest);
-            System.err.println("creating file " + dest + " from resources");
+            System.err.println("creating file " + dest.getAbsolutePath() + " from resources");
             is.close();
             if (dest.getName().toLowerCase().endsWith(".sh")) {
                 dest.setExecutable(true);
