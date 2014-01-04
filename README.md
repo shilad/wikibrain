@@ -18,7 +18,7 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
   * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
   * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
-###Importing data
+###Installing WikAPIdia
 
 * Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
 * Run the unit tests to make sure they pass and everything is installed correctly. For developers, this also creates some auto-generated files.
@@ -33,6 +33,8 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 ```bash
         mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
 ```
+
+###Importing data
 
 * Set reasonable java options defaults. The following uses a 64-bit JVM with 8GB memory and server optimizations:
 
