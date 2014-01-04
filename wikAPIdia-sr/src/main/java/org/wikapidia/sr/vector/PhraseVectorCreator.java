@@ -33,14 +33,14 @@ public class PhraseVectorCreator {
 
     private double dabWeight = 1.0;
 
-    private double srWeight = 0.5;
+    private double srWeight = 1.0;
     private int numSrCands = 0;
     private int numPerSrCand = 0;
 
     private double textWeight = 0.5;
-    private int numTextCands = 0;
+    private int numTextCands = 50;
 
-    private int numUsedCands = 5;
+    private int numUsedCands = 20;
 
     public PhraseVectorCreator(LuceneSearcher searcher) {
         this.searcher = searcher;
@@ -174,7 +174,7 @@ public class PhraseVectorCreator {
             SRResultList sr = metric.mostSimilar(id1.getId(), numCands * 2);
             if (sr != null && sr.numDocs() > 0) {
                 for (int j = 0; j < numPerCand && j < sr.numDocs(); j++) {
-                    expanded.put(new LocalId(language, sr.getId(j)), sr.getScore(i) * candidates.get(id1));
+                    expanded.put(new LocalId(language, sr.getId(j)), sr.getScore(j) * candidates.get(id1));
                 }
                 if (i++ >= numCands) {
                     break;
