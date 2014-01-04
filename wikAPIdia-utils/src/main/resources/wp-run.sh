@@ -77,7 +77,7 @@ echo "Using maven pom ${POM}" >&2
 
 # Compile the project and build the classpath files
 rm -rf "${WP_LIB}/*.jar"
-mvn -f "${POM}" clean compile package -DskipTests || die "compilation failed"
+mvn -f "${POM}" clean compile package install -DskipTests || die "compilation failed"
 mvn -f "${POM}" dependency:copy-dependencies -DoutputDirectory="${WP_LIB}" || die "copying dependencies failed"
 
 # Grab the latest compiled version of source jars
