@@ -21,13 +21,18 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 ###Importing data
 
 * Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
-* Install our wp-run.sh helper bash script (not necessary, but helpful, and these directions presume it is installed):
+* Install our wp-run.sh helper bash script that makes it easier to compile and run java programs. This is not necessary, but easier than using mvn exec:exec, and these directions presume it is installed. If you are using an IDE, you can also just run the ResourceInstaller program from the IDE with no arguments. After this command finishes, you'll have a wp-run.sh bash script in your working directory. 
 
 ```bash
         cd wikAPIdia
-        mvn -f wikAPIdia-utils/pom.xml exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
+        mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
 ```
-  You should now see wp-run.sh and wp-conf.sh
+
+* Set reasonable java options defaults. The following uses a 64-bit JVM with 8GB memory and server optimizations:
+```bash
+	export JAVA_OPTS="-d64 -Xmx8000M -server"
+```
+
 * Download and process the dataset:
 
 ```bash
@@ -37,7 +42,7 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 
 The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. 
 
-You can customize WikAPIdia's importing procedure, but the existing-pipeline-sh script should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
+You can customize WikAPIdia's importing procedure, but the Pipeline should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
 	./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
