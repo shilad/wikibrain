@@ -82,4 +82,11 @@ public class JvmUtils {
         return ((url.getProtocol().equals("file"))
         &&      (url.getHost() == null || url.getHost().equals("")));
     }
+
+    /**
+     * @return The maximum JVM heap size in Mbs, rounded down.
+     */
+    private static int maxMemoryInMbs() {
+        return (int) (Runtime.getRuntime().maxMemory() / (1024*1024));
+    }
 }

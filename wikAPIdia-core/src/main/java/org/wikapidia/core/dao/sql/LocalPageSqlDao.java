@@ -325,17 +325,17 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         }
 
         @Override
-        public LocalPageDao get(String name, Config config) throws ConfigurationException {
+        public LocalPageDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }
             try {
-                String cachePath = getConfig().get().getString("dao.sqlCachePath");
                 LocalPageSqlDao dao = new LocalPageSqlDao(
                                     getConfigurator().get(
                                         WpDataSource.class,
                                         config.getString("dataSource"))
                                 );
+                String cachePath = getConfig().get().getString("dao.sqlCachePath");
                 File cacheDir = new File(cachePath);
                 if (!cacheDir.isDirectory()) {
                     cacheDir.mkdirs();

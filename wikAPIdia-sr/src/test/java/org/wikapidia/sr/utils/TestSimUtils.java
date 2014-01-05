@@ -1,15 +1,14 @@
 package org.wikapidia.sr.utils;
 
+import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -54,9 +53,9 @@ public class TestSimUtils {
         TIntDoubleHashMap zeroVector1 = zeroVector(keyList1);
         TIntDoubleHashMap testVector1 = testVector(keyList2, 0);
         TIntDoubleHashMap testVector2 = testVector(keyList2, 1);
-        TIntDoubleHashMap zeroVector1Normalized = SimUtils.normalizeVector(zeroVector1);
-        TIntDoubleHashMap testVector1Normalized = SimUtils.normalizeVector(testVector1);
-        TIntDoubleHashMap testVector2Normalized = SimUtils.normalizeVector(testVector2);
+        TIntDoubleMap zeroVector1Normalized = SimUtils.normalizeVector(zeroVector1);
+        TIntDoubleMap testVector1Normalized = SimUtils.normalizeVector(testVector1);
+        TIntDoubleMap testVector2Normalized = SimUtils.normalizeVector(testVector2);
         // Normalize a zero vector returns the original zero vector
         for (int keyNum : zeroVector1.keys()) {
             assertEquals("Every score in the zero vector remains the same after normalization",

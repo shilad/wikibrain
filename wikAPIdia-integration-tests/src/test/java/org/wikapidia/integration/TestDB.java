@@ -7,6 +7,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.AbstractSqlDao;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.dao.load.DumpLoader;
 import org.wikapidia.dao.load.LuceneLoader;
 import org.wikapidia.dao.load.RedirectLoader;
@@ -35,13 +36,13 @@ public class TestDB {
     private static final Logger LOG = Logger.getLogger(TestDB.class.getName());
 
     private Env env;
-    private DataSource ds;
+    private WpDataSource ds;
     private final File dir;
 
 
     public TestDB(Env env) throws ConfigurationException {
         this.env = env;
-        this.ds = env.getConfigurator().get(DataSource.class);
+        this.ds = env.getConfigurator().get(WpDataSource.class);
         this.dir = new File(env.getConfiguration().get().getString("integration.dir"));
     }
 
@@ -179,7 +180,7 @@ public class TestDB {
         }
         // Reset the environment because the database is no longer available.
         env = TestUtils.getEnv();
-        ds = env.getConfigurator().get(DataSource.class);
+        ds = env.getConfigurator().get(WpDataSource.class);
     }
 
     public Env getEnv() {

@@ -9,7 +9,7 @@ import org.wikapidia.sr.utils.KnownSim;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Shilad Sen

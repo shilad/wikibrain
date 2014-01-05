@@ -12,6 +12,7 @@ import org.wikapidia.sr.SRResultList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Matt Lesicko
@@ -86,7 +87,7 @@ public class EvenEnsemble implements Ensemble{
         }
 
         @Override
-        public Ensemble get(String name, Config config) throws ConfigurationException{
+        public Ensemble get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException{
             if (!config.getString("type").equals("even")){
                 return null;
             }

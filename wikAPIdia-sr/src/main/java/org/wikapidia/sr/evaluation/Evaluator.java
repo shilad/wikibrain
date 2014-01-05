@@ -1,25 +1,18 @@
 package org.wikapidia.sr.evaluation;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.lang.LocalString;
-import org.wikapidia.sr.LocalSRMetric;
-import org.wikapidia.sr.SRResult;
-import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
-import org.wikapidia.sr.utils.KnownSim;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,11 +38,16 @@ import java.util.regex.Pattern;
  *
  * @author Shilad Sen
  */
-public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
+public abstract class Evaluator <T extends BaseEvaluationLog<T>> {
+
     private static final Logger LOG = Logger.getLogger(Evaluator.class.getName());
     private final File baseDir;
     private final String modeName;
     private final File modeDir;
+
+    // if true, the id-based similarity and mostSimilar methods should be used.
+    private boolean resolvePhrases = false;
+
     private boolean writeToStdout = true;
 
     private List<Split> splits = new ArrayList<Split>();
@@ -129,7 +127,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
     public abstract T createResults(File path) throws IOException;
     public abstract List<String> getSummaryFields();
 
-    public synchronized T evaluate(LocalSRFactory factory) throws IOException, DaoException, WikapidiaException {
+    public synchronized T evaluate(MonolingualSRFactory factory) throws IOException, DaoException, WikapidiaException {
         T overall = createResults(null);
         overall.setConfig("dataset", "overall");
         int runNumber = getNextRunNumber();
@@ -151,7 +149,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
         for (String group : groupEvals.keySet()) {
             Split gsplit = getSplitWithGroup(group);
             File gfile = getLocalDir(gsplit, runNumber, metricName);
-            BaseEvaluationResults geval = groupEvals.get(group);
+            BaseEvaluationLog geval = groupEvals.get(group);
             geval.summarize(new File(gfile, "overall.summary"));
             maybeWriteToStdout("Split " + group + ", " + metricName + ", " + runNumber, geval);
             if (writeToStdout) geval.summarize();
@@ -176,7 +174,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
      * Updates the overall tsv file for a particular group
      * @param eval
      */
-    private void updateOverallTsv(BaseEvaluationResults eval) throws IOException {
+    private void updateOverallTsv(BaseEvaluationLog eval) throws IOException {
         List<String> fields = getSummaryFields();
         File tsv = FileUtils.getFile(modeDir, "summary.tsv");
         String toWrite = "";
@@ -209,7 +207,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
      * @throws IOException
      * @throws DaoException
      */
-    private T evaluateSplitInternal(LocalSRFactory factory, Split split, int runNumber) throws IOException, DaoException, WikapidiaException {
+    private T evaluateSplitInternal(MonolingualSRFactory factory, Split split, int runNumber) throws IOException, DaoException, WikapidiaException {
         File dir = getLocalDir(split, runNumber, factory.getName());
         ensureIsDirectory(dir);
         File log = new File(dir, split.getName() + ".log");
@@ -224,6 +222,7 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
         config.put("runNumber", "" + runNumber);
         config.put("metricConfig", factory.describeMetric());
         config.put("disambigConfig", factory.describeDisambiguator());
+        config.put("resolvePhrases", String.valueOf(resolvePhrases));
 
         T splitEval = evaluateSplit(factory, split, log, err, config);
         splitEval.summarize(summary);
@@ -233,9 +232,9 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
         return splitEval;
     }
 
-    protected abstract T evaluateSplit(LocalSRFactory factory, Split split, File log, File err, Map<String, String> conf) throws DaoException, IOException, WikapidiaException;
+    protected abstract T evaluateSplit(MonolingualSRFactory factory, Split split, File log, File err, Map<String, String> conf) throws DaoException, IOException, WikapidiaException;
 
-    private void maybeWriteToStdout(String caption, BaseEvaluationResults eval) throws IOException {
+    private void maybeWriteToStdout(String caption, BaseEvaluationLog eval) throws IOException {
         if (!writeToStdout) {
             return;
         }
@@ -245,5 +244,13 @@ public abstract class Evaluator <T extends BaseEvaluationResults<T>> {
 
     public List<Split> getSplits() {
         return Collections.unmodifiableList(splits);
+    }
+
+    public void setResolvePhrases(boolean resolvePhrases) {
+        this.resolvePhrases = resolvePhrases;
+    }
+
+    public boolean shouldResolvePhrases() {
+        return resolvePhrases;
     }
 }

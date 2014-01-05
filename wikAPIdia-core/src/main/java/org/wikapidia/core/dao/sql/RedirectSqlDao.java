@@ -6,7 +6,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -18,11 +17,9 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.Redirect;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  */
@@ -199,7 +196,7 @@ public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements Redirect
         }
 
         @Override
-        public RedirectSqlDao get(String name, Config config) throws ConfigurationException {
+        public RedirectSqlDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")){
                 return null;
             }

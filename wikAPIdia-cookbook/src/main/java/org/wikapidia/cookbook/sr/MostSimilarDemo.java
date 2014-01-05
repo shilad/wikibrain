@@ -10,11 +10,11 @@ import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.sr.Explanation;
-import org.wikapidia.sr.LocalSRMetric;
-import org.wikapidia.sr.SRResult;
-import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.*;
 import org.wikapidia.sr.utils.ExplanationFormatter;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 /**
  * @author Matt Lesicko
@@ -38,11 +38,7 @@ public class MostSimilarDemo {
                 }
             }
         }
-
     }
-
-
-
 
     public static void main(String[] args) throws Exception{
         Options options = new Options();
@@ -52,12 +48,6 @@ public class MostSimilarDemo {
                         .withLongOpt("metric")
                         .withDescription("set a local metric")
                         .create("m"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                    .hasArgs()
-                    .withLongOpt("phrase")
-                    .withDescription("phrase")
-                    .create("p"));
 
         EnvBuilder.addStandardOptions(options);
 
@@ -74,29 +64,25 @@ public class MostSimilarDemo {
         Env env = new EnvBuilder(cmd)
                 .build();
         Configurator c = env.getConfigurator();
-        LocalSRMetric sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"), false);
+        MonolingualSRMetric sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", "simple");
         LocalPageDao lpd = c.get(LocalPageDao.class);
 
-        String[] pa = cmd.getOptionValues('p');
+        InputStreamReader in=new InputStreamReader(System.in);
+        BufferedReader br=new BufferedReader(in);
+        while (true) {
+            String phrase = br.readLine();
+            if (phrase == null || phrase.trim().equals("")) {
+                break;
+            }
+            Language lang = Language.getByLangCode("simple");
+            ExplanationFormatter expf = new ExplanationFormatter(lpd);
 
-        String phrase = "";
-        for (String s : pa){
-            phrase+=s+" ";
+            SRResultList resultList = sr.mostSimilar(phrase, 200);
+            System.out.println("Most similar to "+phrase+":");
+            for (int i=0; i<resultList.numDocs(); i++){
+                System.out.println("#" + (i + 1));
+                localPrintResult(resultList.get(i),lang,lpd, expf);
+            }
         }
-
-
-
-        Language lang = Language.getByLangCode("simple");
-        ExplanationFormatter expf = new ExplanationFormatter(lpd);
-
-
-
-        SRResultList resultList = sr.mostSimilar(new LocalString(lang, phrase), 5);
-        System.out.println("Most similar to "+phrase+":");
-        for (int i=0; i<resultList.numDocs(); i++){
-            System.out.println("#" + (i + 1));
-            localPrintResult(resultList.get(i),lang,lpd, expf);
-        }
-
     }
 }

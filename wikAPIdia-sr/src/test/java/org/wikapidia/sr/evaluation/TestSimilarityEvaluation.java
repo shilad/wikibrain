@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Shilad Sen
@@ -36,7 +37,7 @@ public class TestSimilarityEvaluation {
         Dataset ds = new DatasetDao().get(simple, "wordsim353.txt");
         File log = File.createTempFile("evaluation", "log");
         log.deleteOnExit();
-        SimilarityEvaluationResults se = new SimilarityEvaluationResults(log);
+        SimilarityEvaluationLog se = new SimilarityEvaluationLog(log);
 
         for (int i = 0; i < ds.getData().size(); i++) {
             KnownSim ks = ds.getData().get(i);

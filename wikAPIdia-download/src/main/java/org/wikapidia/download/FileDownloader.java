@@ -202,7 +202,13 @@ public class FileDownloader {
                     long now = System.currentTimeMillis();
                     if (now > last + DISPLAY_INFO) {
                         last = now;
-                        LOG.log(Level.INFO, String.format("%s %d %%", info.getSource(), info.getCount() * 100 / info.getLength()));
+                        LOG.log(Level.INFO,
+                                String.format("%s %.1f of %.1f MB (%.1f%%)",
+                                        info.getSource(),
+                                        info.getCount() / (1024*1024.0),
+                                        info.getLength() / (1024*1024.0),
+                                        info.getCount() * 100.0 / info.getLength())
+                                );
                     }
                     break;
                 default:

@@ -6,7 +6,8 @@ import org.wikapidia.sr.utils.KnownSim;
 
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Shilad Sen

@@ -5,6 +5,8 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 
+import java.util.Map;
+
 public class IdentityNormalizer extends BaseNormalizer{
     @Override
     public double normalize(double x) { return x; }
@@ -44,7 +46,7 @@ public class IdentityNormalizer extends BaseNormalizer{
         }
 
         @Override
-        public IdentityNormalizer get(String name, Config config) throws ConfigurationException {
+        public IdentityNormalizer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("identity")) {
                 return null;
             }

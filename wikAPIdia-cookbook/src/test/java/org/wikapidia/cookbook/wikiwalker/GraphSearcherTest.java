@@ -1,6 +1,7 @@
 package org.wikapidia.cookbook.wikiwalker;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikapidia.core.model.LocalPage;
 
@@ -12,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Shilad Sen
  */
+@Ignore
 public class GraphSearcherTest {
     private static WikAPIdiaWrapper wrapper;
     private static LocalPage obama;
@@ -21,6 +23,7 @@ public class GraphSearcherTest {
     private static LocalPage coltrane;
     private static LocalPage norse;
     private static LocalPage loki;
+
 
     @BeforeClass
     public static void setup() {

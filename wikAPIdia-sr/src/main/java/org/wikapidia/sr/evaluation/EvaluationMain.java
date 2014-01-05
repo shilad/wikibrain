@@ -1,5 +1,6 @@
 package org.wikapidia.sr.evaluation;
 
+import com.typesafe.config.Config;
 import org.apache.commons.cli.*;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -9,6 +10,7 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.dataset.DatasetDao;
 
@@ -50,6 +52,13 @@ public class EvaluationMain {
                         .withLongOpt("gold")
                         .withDescription("the set of gold standard datasets to train on")
                         .create("g"));
+
+        // Use an existing pre-trained metric.
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("pretrained")
+                        .withDescription("use an existing pretrained metric")
+                        .create("a"));
 
         //Specify the Metrics
         options.addOption(
@@ -98,6 +107,20 @@ public class EvaluationMain {
                         .withDescription("set the number of folds to evaluate on")
                         .create("k"));
 
+        //Resolve phrases to ids
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("resolve")
+                        .withDescription("resolve phrases to ids")
+                        .create("v"));
+
+        //Resolve phrases to ids
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("buildMostSimilarCache")
+                        .withDescription("build most similar cache matrices")
+                        .create("z"));
+
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -112,7 +135,7 @@ public class EvaluationMain {
         }
 
         Env env = new EnvBuilder(cmd)
-                .setProperty("sr.metric.training", true)
+                .setProperty("sr.metric.training", !cmd.hasOption("a"))
                 .build();
         Configurator c = env.getConfigurator();
         DatasetDao dsDao = c.get(DatasetDao.class);
@@ -146,11 +169,21 @@ public class EvaluationMain {
             return;
         }
 
+        if (cmd.hasOption("u")) {
+            throw new UnsupportedOperationException();  // TODO: implement universal metrics
+        }
         Language lang = env.getLanguages().getDefaultLanguage();
         List<Dataset> datasets = new ArrayList<Dataset>();
         String mode = cmd.hasOption("x") ? cmd.getOptionValue("x") : "within-dataset";
         for (String dsName : cmd.getOptionValues("g")) {
-            datasets.add(dsDao.get(lang, dsName));
+            Config config = env.getConfiguration().get();
+            if (config.hasPath("sr.dataset.groups." + dsName)) {
+                for (String dsName2 : config.getStringList("sr.dataset.groups." + dsName)) {
+                    datasets.add(dsDao.get(lang, dsName2));
+                }
+            } else {
+                datasets.add(dsDao.get(lang, dsName));
+            }
         }
 
         String outputDir = cmd.hasOption("o")
@@ -162,11 +195,18 @@ public class EvaluationMain {
             evaluator = new SimilarityEvaluator(new File(outputDir));
         } else if (cmd.getOptionValue("p").equals("mostsimilar")) {
             evaluator = new MostSimilarEvaluator(new File(outputDir));
+            if (cmd.hasOption("z")) {
+                ((MostSimilarEvaluator)evaluator).setBuildCosimilarityMatrix(true);
+            }
         } else {
             System.err.println("Invalid prediction mode. usage:");
             new HelpFormatter().printHelp("MetricTrainer", options);
             System.exit(1);
             return; // to appease the compiler
+        }
+
+        if (cmd.hasOption("v")) {
+            evaluator.setResolvePhrases(true);
         }
 
         if (mode.equals("none")) {
@@ -183,12 +223,20 @@ public class EvaluationMain {
             System.exit(1);
         }
 
-        if (cmd.hasOption("m")) {
-            LocalSRFactory factory = new ConfigLocalSRFactory(
-                    env.getConfigurator(), cmd.getOptionValue("m"));
-            evaluator.evaluate(factory);
-        } else if (cmd.hasOption("u")) {
-            throw new UnsupportedOperationException();  // TODO: implement universal metrics
+        MonolingualSRFactory factory;
+        if (cmd.hasOption("a")) {
+            MonolingualSRMetric sr = env.getConfigurator().get(
+                                        MonolingualSRMetric.class,
+                                        cmd.getOptionValue("m"),
+                                        "language",
+                                        lang.getLangCode()
+                                    );
+            factory = new PretrainedSRFactory(sr);
+        } else {
+            factory = new ConfigMonolingualSRFactory(
+                    lang, env.getConfigurator(), cmd.getOptionValue("m"));
+
         }
+        evaluator.evaluate(factory);
     }
 }

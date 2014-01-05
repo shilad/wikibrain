@@ -17,13 +17,9 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.LocalPage;
-import org.apache.commons.io.IOUtils;
 
 import org.wikapidia.core.model.Title;
 
-import java.io.InputStream;
-
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -219,7 +215,7 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
         }
 
         @Override
-        public LocalPageDao get(String name, Config config) throws ConfigurationException {
+        public LocalPageDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
                 return null;
             }

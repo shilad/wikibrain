@@ -4,11 +4,7 @@ import com.typesafe.config.Config;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -77,7 +73,7 @@ public class SimplePruner<K> implements PrunedCounts.Pruner<K> {
         }
 
         @Override
-        public PrunedCounts.Pruner get(String name, Config config) throws ConfigurationException {
+        public PrunedCounts.Pruner get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("simple")) {
                 return null;
             }

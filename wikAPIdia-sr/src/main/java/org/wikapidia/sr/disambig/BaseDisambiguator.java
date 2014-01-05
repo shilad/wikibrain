@@ -7,30 +7,25 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
-import org.wikapidia.sr.LocalSRMetric;
 import org.wikapidia.utils.MathUtils;
+import org.wikapidia.utils.WpCollectionUtils;
 
 import java.util.*;
 
-public abstract class BaseDisambiguator implements Disambiguator{
+public abstract class BaseDisambiguator extends Disambiguator{
     public static final int DEFAULT_NUM_CANDIDATES = 5;
     protected final PhraseAnalyzer phraseAnalyzer;
-    protected final LocalSRMetric srMetric;
     private int numCandidates = DEFAULT_NUM_CANDIDATES;
 
-    BaseDisambiguator(PhraseAnalyzer phraseAnalyzer, LocalSRMetric srMetric){
+    BaseDisambiguator(PhraseAnalyzer phraseAnalyzer){
         this.phraseAnalyzer = phraseAnalyzer;
-        this.srMetric = srMetric;
     }
 
-    @Override
-    public LocalId disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException {
-        return disambiguate(Arrays.asList(phrase), context).get(0);
-    }
 
     @Override
-    public List<LocalId> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
-        List<LocalString> allPhrases = new ArrayList<LocalString>(CollectionUtils.union(phrases, context));
+    public List<LinkedHashMap<LocalId, Double>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
+        List<LocalString> allPhrases = new ArrayList<LocalString>(
+                (context == null) ? phrases : CollectionUtils.union(phrases, context));
 
         // Step 0: calculate most frequent candidate senses for each phrase
         Map<LocalString, LinkedHashMap<LocalPage, Float>> candidates = Maps.newHashMap();
@@ -52,27 +47,36 @@ public abstract class BaseDisambiguator implements Disambiguator{
             double sum = 0.0;
             for (int j = 0; j < pages.size(); j++) {
                 if (i != j && MathUtils.isReal(cosim[i][j])) {
+                    double c = cosim[i][j];
+                    if (Double.isInfinite(c) && Double.isNaN(c)) {
+                        cosim[i][j] = 0.0;      // hack!
+                    }
                     sum += cosim[i][j];
                 }
             }
-            pageSums.put(pages.get(i), sum);
+            // add 0.0001 to give every candidate a tiny chance and avoid divide by zero errors when there are no good options
+            pageSums.put(pages.get(i), sum + 0.0001);
         }
 
         // Step 3: multiply background probability by sim sums, choose best product
-        List<LocalId> result = new ArrayList<LocalId>();
+        List<LinkedHashMap<LocalId, Double>> result = new ArrayList<LinkedHashMap<LocalId, Double>>();
         for (LocalString ls : phrases) {
-            double bestScore = -1.0;
-            LocalPage bestPage = null;
-
-            for (Map.Entry<LocalPage, Float> entry : candidates.get(ls).entrySet()) {
-                LocalPage lp = entry.getKey();
-                double score = entry.getValue() * pageSums.get(lp);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestPage = lp;
-                }
+            Map<LocalPage, Float> phraseCands = candidates.get(ls);
+            if (phraseCands == null || phraseCands.isEmpty()) {
+                result.add(null);
+                continue;
             }
-            result.add((bestPage == null) ? null : bestPage.toLocalId());
+            double sum = 0.0;
+            for (LocalPage lp : phraseCands.keySet()) {
+                float score = (float) (phraseCands.get(lp) * pageSums.get(lp));
+                phraseCands.put(lp, score);
+                sum += score;
+            }
+            LinkedHashMap<LocalId, Double> pageResult = new LinkedHashMap<LocalId, Double>();
+            for (LocalPage key : WpCollectionUtils.sortMapKeys(phraseCands, true)) {
+                pageResult.put(key.toLocalId(), phraseCands.get(key) / sum);
+            }
+            result.add(pageResult);
         }
         return result;
     }

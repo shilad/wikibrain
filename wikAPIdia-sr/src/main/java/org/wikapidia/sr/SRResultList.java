@@ -13,6 +13,7 @@ public class SRResultList implements  Iterable<SRResult>{
     private SRResult[] results;
     private int numDocs;
     private double missingScore;    // score for missing documents.
+    private int missingRank;
     private float[] scores;         // performance optimization
 
     public SRResultList(int maxNumDocs) {
@@ -237,6 +238,10 @@ public class SRResultList implements  Iterable<SRResult>{
      */
     public void setMissingScore(double missingScore) {
         this.missingScore = missingScore;
+    }
+
+    public void setMissingRank(int missingRank) {
+        this.missingRank = missingRank;
     }
 
     @Override

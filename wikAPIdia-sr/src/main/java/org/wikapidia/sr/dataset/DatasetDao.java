@@ -16,9 +16,7 @@ import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -37,6 +35,7 @@ public class DatasetDao {
     public static final String RESOURCE_DATASET_INFO = "/datasets/info.tsv";
 
     private final Collection<Info> info;
+    private Map<String, List<String>> groups = new HashMap<String, List<String>>();
     private boolean normalize = true; // If true, normalize all scores to [0,1]
     private boolean resolvePhrases = false;
     private Disambiguator disambiguator = null;
@@ -215,8 +214,8 @@ public class DatasetDao {
                                             language
                                     );
                     if (resolvePhrases) {
-                        LocalId id1 = disambiguator.disambiguate(new LocalString(language, ks.phrase1), null);
-                        LocalId id2 = disambiguator.disambiguate(new LocalString(language, ks.phrase2), null);
+                        LocalId id1 = disambiguator.disambiguateTop(new LocalString(language, ks.phrase1), null);
+                        LocalId id2 = disambiguator.disambiguateTop(new LocalString(language, ks.phrase2), null);
                         if (id1 != null) { ks.wpId1 = id1.getId(); }
                         if (id2 != null) { ks.wpId2 = id2.getId(); }
                     }
@@ -313,7 +312,7 @@ public class DatasetDao {
         }
 
         @Override
-        public DatasetDao get(String name, Config config) throws ConfigurationException {
+        public DatasetDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("resource")) {
                 return null;
             }

@@ -1,31 +1,32 @@
 package org.wikapidia.sr.disambig;
 
 import com.typesafe.config.Config;
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.phrases.PhraseAnalyzer;
+import org.wikapidia.utils.WpCollectionUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Matt Lesicko
  */
-public class TopResultConsensusDisambiguator implements Disambiguator {
+public class TopResultConsensusDisambiguator extends Disambiguator {
     private List<PhraseAnalyzer> phraseAnalyzers;
 
     public TopResultConsensusDisambiguator(List<PhraseAnalyzer> phraseAnalyzers){
         this.phraseAnalyzers=phraseAnalyzers;
     }
 
-    public LocalId disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException{
+    public LocalId disambiguateTop(LocalString phrase, Set<LocalString> context) throws DaoException{
         LinkedHashMap<LocalId, Integer> results = new LinkedHashMap<LocalId, Integer>();
         for (PhraseAnalyzer phraseAnalyzer : phraseAnalyzers){
             LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolveLocal(phrase.getLanguage(),phrase.getString(),1);
@@ -57,12 +58,41 @@ public class TopResultConsensusDisambiguator implements Disambiguator {
         }
     }
 
-    public List<LocalId> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException{
+    public List<LocalId> disambiguateTop(List<LocalString> phrases, Set<LocalString> context) throws DaoException{
         List<LocalId> ids = new ArrayList<LocalId>();
         for (LocalString phrase : phrases){
-            ids.add(disambiguate(phrase, context));
+            ids.add(disambiguateTop(phrase, context));
         }
         return ids;
+    }
+
+    @Override
+    public List<LinkedHashMap<LocalId, Double>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
+        if (phrases.isEmpty()) {
+            return new ArrayList<LinkedHashMap<LocalId, Double>>();
+        }
+        Language lang = phrases.get(0).getLanguage();
+        List<LinkedHashMap<LocalId, Double>> results = new ArrayList<LinkedHashMap<LocalId, Double>>();
+        for (LocalString phrase : phrases) {
+            Map<Integer, Double> pageSums = new HashMap<Integer, Double>();
+            for (PhraseAnalyzer pa : phraseAnalyzers) {
+                LinkedHashMap<LocalPage, Float> probs = pa.resolveLocal(phrase.getLanguage(), phrase.getString(), 20);
+                for (Map.Entry<LocalPage, Float> entry : probs.entrySet()) {
+                    int id = entry.getKey().getLocalId();
+                    if (pageSums.containsKey(id)) {
+                        pageSums.put(id, pageSums.get(id) + entry.getValue());
+                    } else {
+                        pageSums.put(id, (double)entry.getValue());
+                    }
+                }
+            }
+            LinkedHashMap<LocalId, Double> pageResult = new LinkedHashMap<LocalId, Double>();
+            for (Integer key : WpCollectionUtils.sortMapKeys(pageSums, true)) {
+                pageResult.put(new LocalId(lang, key), pageSums.get(key));
+            }
+            results.add(pageResult);
+        }
+        return results;
     }
 
 
@@ -82,7 +112,7 @@ public class TopResultConsensusDisambiguator implements Disambiguator {
         }
 
         @Override
-        public Disambiguator get(String name, Config config) throws  ConfigurationException{
+        public Disambiguator get(String name, Config config, Map<String, String> runtimeParams) throws  ConfigurationException{
             if (!config.getString("type").equals("topResultConsensus")){
                 return null;
             }

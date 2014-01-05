@@ -52,7 +52,7 @@ public class WpIdFilter extends Filter {
         if (allowedLuceneIds.containsKey(reader)) {
             return allowedLuceneIds.get(reader);
         }
-        LOG.info("building WpId filter for " + wpIds.length + " ids with hash " + Arrays.hashCode(wpIds));
+        LOG.fine("building WpId filter for " + wpIds.length + " ids with hash " + Arrays.hashCode(wpIds));
         TIntSet wpIdSet = new TIntHashSet(wpIds);
         TIntSet luceneIdSet = new TIntHashSet();
         Set<String> fields = new HashSet<String>(Arrays.asList(LuceneOptions.LOCAL_ID_FIELD_NAME));
@@ -64,7 +64,7 @@ public class WpIdFilter extends Filter {
             }
         }
         int luceneIds[] = luceneIdSet.toArray();
-        LOG.info("WpId filter matched " + luceneIds.length + " ids.");
+        LOG.fine("WpId filter matched " + luceneIds.length + " ids.");
         allowedLuceneIds.put(reader, luceneIds);
         return luceneIds;
     }
