@@ -1,12 +1,16 @@
 package org.wikapidia.pageview;
 
+import com.typesafe.config.Config;
 import gnu.trove.procedure.TIntIntProcedure;
 import org.joda.time.DateTime;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.lang.Language;
 
 import java.io.File;
@@ -205,6 +209,31 @@ public class PageViewDbDao {
                 return false;
         }
         return true;
+    }
+
+    public static class Provider extends org.wikapidia.conf.Provider<PageViewDbDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return PageViewDbDao.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "dao.pageView";
+        }
+
+        @Override
+        public PageViewDbDao get(String name, Config config) throws ConfigurationException {
+            if (!config.getString("type").equals("db")) {
+                return null;
+            }
+            //TODO: make PageViewDbDao language agnostic
+            return new PageViewDbDao(Language.getByLangCode("simple"));
+        }
     }
 
 }
