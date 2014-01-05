@@ -2,8 +2,6 @@ package org.wikapidia.sr.evaluation;
 
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;

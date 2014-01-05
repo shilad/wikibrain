@@ -2,7 +2,6 @@ package org.wikapidia.sr.ensemble;
 
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
-import org.wikapidia.sr.utils.KnownSim;
 
 import java.io.IOException;
 import java.util.List;

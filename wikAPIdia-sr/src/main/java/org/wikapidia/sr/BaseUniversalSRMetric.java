@@ -12,16 +12,17 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.lang.LocalString;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.matrix.SparseMatrixRow;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.normalize.Normalizer;
+import org.wikapidia.sr.pairwise.MostSimilarCache;
 import org.wikapidia.sr.pairwise.PairwiseSimilarity;
-import org.wikapidia.sr.pairwise.SRMatrices;
-import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.utils.Leaderboard;
 import org.wikapidia.sr.utils.SrNormalizers;
 import org.wikapidia.utils.WpIOUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
@@ -34,7 +35,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     private SrNormalizers normalizers = new SrNormalizers();
 
-    private SRMatrices mostSimilarMatrices = null;
+    private MostSimilarCache mostSimilarMatrices = null;
 
     public BaseUniversalSRMetric(Disambiguator disambiguator, UniversalPageDao universalPageDao, int algorithmId){
         this.universalPageDao = universalPageDao;
@@ -80,10 +81,10 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     public SRResult similarity(LocalString phrase1, LocalString phrase2, boolean explanations) throws DaoException {
         HashSet<LocalString> context = new HashSet<LocalString>();
         context.add(phrase2);
-        LocalId similar1 = disambiguator.disambiguate(phrase1, context);
+        LocalId similar1 = disambiguator.disambiguateTop(phrase1, context);
         context.clear();
         context.add(phrase1);
-        LocalId similar2 = disambiguator.disambiguate(phrase2, context);
+        LocalId similar2 = disambiguator.disambiguateTop(phrase2, context);
         if (similar1==null|| similar2==null){
             return new SRResult();
         }
@@ -103,7 +104,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException {
-        LocalId localId = disambiguator.disambiguate(phrase,null);
+        LocalId localId = disambiguator.disambiguateTop(phrase, null);
         if (localId == null){
             SRResultList resultList = new SRResultList(1);
             resultList.set(0, new SRResult());
@@ -116,7 +117,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
 
     @Override
     public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
-        LocalId localId = disambiguator.disambiguate(phrase,null);
+        LocalId localId = disambiguator.disambiguateTop(phrase, null);
         if (localId == null){
             SRResultList resultList = new SRResultList(1);
             resultList.set(0, new SRResult());
@@ -212,8 +213,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     public double[][] cosimilarity(LocalString[] rowPhrases, LocalString[] colPhrases) throws IOException, DaoException {
         int rowIds[] = new int[rowPhrases.length];
         int colIds[] = new int[colPhrases.length];
-        List<LocalId> rowLocalIds = disambiguator.disambiguate(Arrays.asList(rowPhrases),new HashSet<LocalString>(Arrays.asList(colPhrases)));
-        List<LocalId> colLocalIds = disambiguator.disambiguate(Arrays.asList(colPhrases),new HashSet<LocalString>(Arrays.asList(rowPhrases)));
+        List<LocalId> rowLocalIds = disambiguator.disambiguateTop(Arrays.asList(rowPhrases), new HashSet<LocalString>(Arrays.asList(colPhrases)));
+        List<LocalId> colLocalIds = disambiguator.disambiguateTop(Arrays.asList(colPhrases), new HashSet<LocalString>(Arrays.asList(rowPhrases)));
         for (int i=0; i<rowIds.length; i++){
             rowIds[i] = universalPageDao.getUnivPageId(rowLocalIds.get(i).asLocalPage(),algorithmId);
         }
@@ -248,7 +249,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     @Override
     public double[][] cosimilarity(LocalString[] phrases) throws IOException, DaoException {
         int ids[] = new int[phrases.length];
-        List<LocalId> localIds = disambiguator.disambiguate(Arrays.asList(phrases), null);
+        List<LocalId> localIds = disambiguator.disambiguateTop(Arrays.asList(phrases), null);
         for (int i=0; i<phrases.length; i++){
             ids[i] = universalPageDao.getUnivPageId(localIds.get(i).asLocalPage(),algorithmId);
         }
@@ -263,7 +264,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
     protected void writeCosimilarity(String parentDir, int maxHits, PairwiseSimilarity pairwise) throws IOException, DaoException, WikapidiaException{
         try {
 
-            SRMatrices srm = new SRMatrices(this, pairwise, new File(parentDir, getName()));
+            MostSimilarCache srm = new MostSimilarCache(this, pairwise, new File(parentDir, getName()));
 //            path = path + getName()+"/matrix/" + algorithmId;
 //            SRFeatureMatrixWriter featureMatrixWriter = new SRFeatureMatrixWriter(path, this);
             DaoFilter pageFilter = new DaoFilter().setAlgorithmIds(algorithmId);
@@ -291,9 +292,9 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
             IOUtils.closeQuietly(mostSimilarMatrices);
             mostSimilarMatrices = null;
         }
-        SRMatrices srm = new SRMatrices(this, similarity, new File(parentDir, getName()));
+        MostSimilarCache srm = new MostSimilarCache(this, similarity, new File(parentDir, getName()));
         if (srm.hasReadableMatrices()) {
-            srm.readMatrices();
+            srm.read();
         }
         mostSimilarMatrices = srm;
     }

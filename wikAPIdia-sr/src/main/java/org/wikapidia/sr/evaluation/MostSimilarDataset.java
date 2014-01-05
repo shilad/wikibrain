@@ -1,9 +1,5 @@
 package org.wikapidia.sr.evaluation;
 
-import gnu.trove.map.TObjectDoubleMap;
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectDoubleHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.dataset.Dataset;

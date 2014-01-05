@@ -209,7 +209,7 @@ public enum FileMatcher {
                 return Language.getByLangCode(m.group(1));
             }
         }
-        throw new IllegalStateException();
+        throw new IllegalStateException("No language detected for " + link);
     }
 
     public String getName() {

@@ -7,15 +7,19 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.LocalArticleSqlDao;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
 import org.wikapidia.core.dao.sql.WpDataSource;
-import org.wikapidia.core.model.LocalLink;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
+import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
-import org.wikapidia.sr.milnewitten.LocalMilneWitten;
 import org.wikapidia.sr.utils.ExplanationFormatter;
+import org.wikapidia.sr.vector.GoogleSimilarity;
+import org.wikapidia.sr.vector.MilneWittenGenerator;
+import org.wikapidia.sr.vector.VectorBasedMonoSRMetric;
+import org.wikapidia.sr.vector.VectorGenerator;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.File;
@@ -30,6 +34,7 @@ import java.sql.SQLException;
  * To change this template use File | Settings | File Templates.
  */
 public class TestMilneWitten {
+    private static final Language SIMPLE = Language.getByLangCode("simple");
 
     private static void printResult(SRResult result, ExplanationFormatter expf) throws DaoException {
         if (result == null){
@@ -127,17 +132,19 @@ public class TestMilneWitten {
 
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
-        BaseLocalSRMetric srIn = new LocalMilneWitten(disambiguator,linkDao,dao);
-        BaseLocalSRMetric srOut =  new LocalMilneWitten(disambiguator,linkDao,dao,true);
+        VectorGenerator generator = new MilneWittenGenerator(SIMPLE, linkDao, dao, false);
+        BaseMonolingualSRMetric srIn = new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
+        generator = new MilneWittenGenerator(SIMPLE, linkDao, dao, true);
+        BaseMonolingualSRMetric srOut =  new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
 
-        double rIn = srIn.similarity(page1, page2, true).getScore();
+        double rIn = srIn.similarity(page1.getLocalId(), page2.getLocalId(), true).getScore();
         assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==rIn);
-        assert(srIn.similarity(page1,page1,true).getScore()==1);
+        assert(srIn.similarity(page1.getLocalId(),page1.getLocalId(),true).getScore()==1);
 
-        double rOut = srOut.similarity(page3,page4,true).getScore();
+        double rOut = srOut.similarity(page3.getLocalId(),page4.getLocalId(),true).getScore();
         assert((1-((Math.log(2)-Math.log(1)) / (Math.log(6) - Math.log(1))))==rOut);
-        assert(srOut.similarity(page3,page3,true).getScore()==1);
+        assert(srOut.similarity(page3.getLocalId(),page3.getLocalId(),true).getScore()==1);
     }
 
 
-    }
+}

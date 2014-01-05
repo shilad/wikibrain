@@ -18,27 +18,46 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
   * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
   * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
-###Importing data
+###Installing WikAPIdia
 
-* Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
-* Download and process the dataset:
+Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
+
+Run the unit tests to make sure they pass and everything is installed correctly. For developers, this also auto-generates some Java source files.
 
 ```bash
-	cd wikAPIdia
-	cd wikAPIdia-parent
-	./scripts/runpipeline.sh all -l simple
+cd wikAPIdia
+mvn -f wikAPIdia-parent/pom.xml test
 ```
 
-(Note: be sure to run code from the folders indicated above)
+Install our `wp-run.sh` helper bash script that makes it easier to compile and run java programs. This is not necessary, but easier than using `mvn exec:exec`, and these directions presume you installed it. If you are using an IDE, you can also just run the ResourceInstaller program from the IDE with no arguments. 
+
+```bash
+mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
+```
+
+###Importing data
+
+Set reasonable java options defaults. The following uses a 64-bit JVM with 8GB memory and server optimizations. You may want to save these defaults in a shell script so you can easily source it in the future.
+
+```bash
+export JAVA_OPTS="-d64 -Xmx8000M -server"
+```
+
+Download and process the dataset:
+
+```bash
+./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l simple
+```
+
 
 The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. 
 
-You can customize WikAPIdia's importing procedure, but the run-pipeline-sh script should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
+You can customize WikAPIdia's importing procedure, but the Pipeline should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
-./scripts/run-pipeline all -l en,fr
+./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
 ``` 
-(beware that this is a lot of data!).
+(beware that this is a lot of data and takes many hours!).
 
 
 ###An example program

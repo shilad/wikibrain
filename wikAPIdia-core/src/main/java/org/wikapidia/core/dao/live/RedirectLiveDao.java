@@ -18,6 +18,7 @@ import org.wikapidia.core.model.Redirect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -125,7 +126,7 @@ public class RedirectLiveDao implements RedirectDao {
         }
 
         @Override
-        public RedirectDao get(String name, Config config) throws ConfigurationException {
+        public RedirectDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
                 return null;
             }

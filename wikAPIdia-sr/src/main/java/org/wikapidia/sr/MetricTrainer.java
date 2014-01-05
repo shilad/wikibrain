@@ -1,8 +1,7 @@
 package org.wikapidia.sr;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.PosixParser;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -20,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public class MetricTrainer {
                         .withLongOpt("max-results")
                         .withDescription("maximum number of results")
                         .create("r"));
-        //Specify the Dataset
+        //Specify the Datasets
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArgs()
@@ -82,18 +82,12 @@ public class MetricTrainer {
             new HelpFormatter().printHelp("MetricTrainer", options);
             return;
         }
-
-
-
         int maxResults = cmd.hasOption("r")? Integer.parseInt(cmd.getOptionValue("r")) : c.getConf().get().getInt("sr.normalizer.defaultmaxresults");
 
-
-
         String path = c.getConf().get().getString("sr.metric.path");
-        LanguageSet validLanguages = env.getLanguages();
+        LanguageSet allLangs = env.getLanguages();
 
-        List<Dataset> datasets = new ArrayList<Dataset>();
-        DatasetDao datasetDao = new DatasetDao();
+        DatasetDao datasetDao = env.getConfigurator().get(DatasetDao.class);
 
         List<String> datasetNames;
         if (cmd.hasOption("g")){
@@ -101,61 +95,53 @@ public class MetricTrainer {
         } else {
             datasetNames = c.getConf().get().getStringList("sr.dataset.defaultsets");
         }
-        for (String name : datasetNames){
-            List<String> languages = c.getConf().get().getStringList("sr.dataset.sets."+name);
-            for (String langCode : languages){
-                Language language = Language.getByLangCode(langCode);
-                if (validLanguages==null||validLanguages.containsLanguage(language)){
-                    datasets.add(datasetDao.get(language, name));
-                }
+
+        List<Dataset> datasets = new ArrayList<Dataset>();
+        for (String name : datasetNames) {
+            DatasetDao.Info info = datasetDao.getInfo(name);
+            Collection<Language> possibleLang = CollectionUtils.intersection(
+                                                        info.getLanguages().getLanguages(),
+                                                        allLangs.getLanguages());
+            if (possibleLang.isEmpty()) {
+                System.err.println("dataset " + name + " is a language other than " + allLangs);
+                System.exit(1);
             }
+            if (possibleLang.size() > 1) {
+                System.err.println("dataset " + name + " supports more than one language of " + allLangs + " please specify");
+                System.exit(1);
+            }
+            Language lang = possibleLang.iterator().next();
+            if (datasets.size() > 0 && !lang.equals(datasets.get(0).getLanguage())) {
+                System.err.println("Language mismatch in datasets " + name + " and " + datasets.get(0).getName());
+                System.exit(1);
+            }
+            datasets.add(datasetDao.get(lang, name));
         }
 
-
-        List<Language> languages = new ArrayList<Language>();
-        for (Dataset dataset : datasets){
-            languages.add(dataset.getLanguage());
-        }
-        LanguageSet languageSet = new LanguageSet(languages);
-
-        LocalSRMetric sr=null;
+        MonolingualSRMetric sr=null;
         UniversalSRMetric usr=null;
         if (cmd.hasOption("m")){
+            Language language = datasets.get(0).getLanguage();
             FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("m")+"/"+"normalizer/"));
-            sr = c.get(LocalSRMetric.class,cmd.getOptionValue("m"));
+            sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
         }
         if (cmd.hasOption("u")){
             FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("u")+"/"+"normalizer/"));
             usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
         }
 
-        double mostSimilarThreshold = c.getConf().get().getDouble("sr.dataset.mostSimilarThreshold");
-
-        for (Dataset dataset: datasets) {
-            if (usr!=null){
-                usr.trainSimilarity(dataset);
-                usr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
-            }
-            if (sr!=null){
-                sr.trainDefaultSimilarity(dataset);
-                sr.trainDefaultMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
-                sr.trainSimilarity(dataset);
-                sr.trainMostSimilar(dataset.prune(mostSimilarThreshold, 1.1),maxResults,null);
-            }
-        }
-
+        Dataset dataset = new Dataset(datasets);
         if (usr!=null){
-            (new File(path + cmd.getOptionValue("u") + "/" + "normalizer/")).mkdirs();
+            usr.trainSimilarity(dataset);
+            usr.trainMostSimilar(dataset,maxResults,null);
             usr.write(path);
             usr.read(path);
         }
         if (sr!=null){
-            (new File(path + cmd.getOptionValue("m") + "/" + "normalizer/")).mkdirs();
-            sr.write(path);
-            sr.read(path);
+            sr.trainMostSimilar(dataset, maxResults, null);
+            sr.trainSimilarity(dataset);
+            sr.write();
+            sr.read();
         }
-
-
-
     }
 }

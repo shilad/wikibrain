@@ -17,12 +17,12 @@ import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.matrix.*;
 import org.wikapidia.utils.ObjectDb;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -44,8 +44,6 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     private static final Logger LOG = Logger.getLogger(MatrixLocalLinkDao.class.getName());
 
     private final File dir;
-    private final int maxPageSize;
-    private final int maxOpenPages;
     private LocalLinkDao delegate;
     private SparseMatrix matrix = null;
     private SparseMatrix transpose = null;
@@ -54,15 +52,10 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     private File objectDbPath = null;
     private ObjectDb<int[]> objectDb = null;
 
-    public MatrixLocalLinkDao(LocalLinkDao delegate, File dir) throws DaoException {
-        this(delegate, dir, 10, 100*1024*1024);     // 5 pages, 100MB each, for both matrix and transpose
-    }
 
-    public MatrixLocalLinkDao(LocalLinkDao delegate, File dir, int maxOpenPages, int maxPageSize) throws DaoException {
+    public MatrixLocalLinkDao(LocalLinkDao delegate, File dir) throws DaoException {
         this.delegate = delegate;
         this.dir = dir;
-        this.maxOpenPages = maxOpenPages;
-        this.maxPageSize = maxPageSize;
         dir.mkdirs();
         try {
             load();
@@ -77,8 +70,8 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         } else if (!getTransposeFile().isFile()) {
             LOG.warning("Matrix" + getTransposeFile()+ " missing, disabling fast lookups.");
         } else {
-            matrix = new SparseMatrix(getMatrixFile(), maxOpenPages, maxPageSize);
-            transpose = new SparseMatrix(getTransposeFile(), maxOpenPages, maxPageSize);
+            matrix = new SparseMatrix(getMatrixFile());
+            transpose = new SparseMatrix(getTransposeFile());
         }
     }
 
@@ -94,6 +87,17 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             objectDbPath = File.createTempFile("local-links", "odb");
             FileUtils.forceDeleteOnExit(objectDbPath);
             objectDb = new ObjectDb<int[]>(objectDbPath, true);
+
+            // Initialize object database with existing links
+            if (matrix != null) {
+                for (SparseMatrixRow row : matrix) {
+                    int dests[] = new int[row.getNumCols()];
+                    for (int i = 0; i < row.getNumCols(); i++) {
+                        dests[i] = row.getColIndex(i);
+                    }
+                    objectDb.put(("" + row.getRowIndex()), dests);
+                }
+            }
         } catch (IOException e) {
             throw new DaoException(e);
         }
@@ -101,7 +105,6 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     @Override
     public void save(LocalLink item) throws DaoException {
         delegate.save(item);
-
         // skip red links
         if (item.getDestId() < 0 || item.getSourceId() < 0) {
             return;
@@ -159,14 +162,15 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             writer.finish();
 
             LOG.info("finalizing adjacency matrix");
-            matrix = new SparseMatrix(getMatrixFile(), maxOpenPages, maxPageSize);
+            matrix = new SparseMatrix(getMatrixFile());
 
             LOG.info("writing transpose of adjacency matrix");
-            SparseMatrixTransposer transposer = new SparseMatrixTransposer(matrix, getTransposeFile(), maxOpenPages * maxPageSize);
+
+            SparseMatrixTransposer transposer = new SparseMatrixTransposer(matrix, getTransposeFile());
             transposer.transpose();
 
             LOG.info("loading transpose of adjacency matrix");
-            transpose = new SparseMatrix(getTransposeFile(), maxOpenPages, maxPageSize);
+            transpose = new SparseMatrix(getTransposeFile());
         } catch (IOException e) {
             throw new DaoException(e);
         }
@@ -309,6 +313,14 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         return delegate.getLoadedLanguages();
     }
 
+    public SparseMatrix getMatrix() {
+        return matrix;
+    }
+
+    public SparseMatrix getTranspose() {
+        return transpose;
+    }
+
     private List<Integer> getPackedIds(DaoFilter filter) {
         if (filter.getSourceIds() != null && filter.getDestIds() != null) {
             throw new IllegalArgumentException();
@@ -347,7 +359,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         }
 
         @Override
-        public MatrixLocalLinkDao get(String name, Config config) throws ConfigurationException {
+        public MatrixLocalLinkDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("matrix")) {
                 return null;
             }
@@ -356,9 +368,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
                         getConfigurator().get(
                                 LocalLinkDao.class,
                                 config.getString("delegate")),
-                        new File(config.getString("path")),
-                        config.getInt("maxOpenPages"),
-                        config.getBytes("maxPageSize").intValue()
+                        new File(config.getString("path"))
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);

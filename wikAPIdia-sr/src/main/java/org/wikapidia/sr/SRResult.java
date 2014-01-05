@@ -76,7 +76,7 @@ public class SRResult implements Comparable<SRResult>{
      * @return false if and only if score is Double.NaN
      */
     public boolean isValid() {
-        return !Double.isNaN(score);
+        return !Double.isNaN(score) && !Double.isInfinite(score);
     }
 
     public void setScore(double score) {

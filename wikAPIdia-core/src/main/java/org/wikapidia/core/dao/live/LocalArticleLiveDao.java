@@ -65,7 +65,7 @@ public class LocalArticleLiveDao extends LocalPageLiveDao<LocalArticle> implemen
         }
 
         @Override
-        public LocalArticleDao get(String name, Config config) throws ConfigurationException {
+        public LocalArticleDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
                 return null;
             }

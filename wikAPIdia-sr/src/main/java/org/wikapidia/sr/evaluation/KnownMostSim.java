@@ -60,13 +60,15 @@ public class KnownMostSim {
 
         // set the most common local page id
         int maxIdCount = 0;
-        int maxId = 0;
+        int maxId = -1;
         TIntIntMap idCounts = new TIntIntHashMap();
         for (KnownSim ks : mostSim) {
-            int n = idCounts.adjustOrPutValue(ks.wpId1, 1, 1);
-            if (n > maxIdCount) {
-                maxIdCount = n;
-                maxId = ks.wpId1;
+            if (ks.wpId1 >= 0) {
+                int n = idCounts.adjustOrPutValue(ks.wpId1, 1, 1);
+                if (n > maxIdCount) {
+                    maxIdCount = n;
+                    maxId = ks.wpId1;
+                }
             }
         }
         this.pageId = maxId;

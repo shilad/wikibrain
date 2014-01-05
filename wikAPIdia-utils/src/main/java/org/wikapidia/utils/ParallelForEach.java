@@ -121,6 +121,7 @@ public class ParallelForEach {
                             R r = fn.call(obj);
                             result.set(finalI, r);
                         } catch (Exception e) {
+                            e.printStackTrace();
                             LOG.log(Level.SEVERE, "error processing list element " + obj, e);
                             LOG.log(Level.SEVERE, "stacktrace: " + ExceptionUtils.getStackTrace(e).replaceAll("\n", " ").replaceAll("\\s+", " "));
                         } finally {
@@ -147,22 +148,23 @@ public class ParallelForEach {
 
         final ExecutorService exec = new ThreadPoolErrors(numThreads);
         BoundedExecutor boundedExec = new BoundedExecutor(exec, queueSize);
+        final AtomicInteger counter = new AtomicInteger(0);
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicInteger elemsToGo = new AtomicInteger(0);
 
-        int i = 0;
         try {
             // create a copy so that modifications to original list are safe
             elemsToGo.incrementAndGet();
             while (iterator.hasNext()) {
-                if (i++ % logModulo == 0) {
-                    LOG.info("processing iterable " + i);
-                }
                 final T obj = iterator.next();
                 elemsToGo.incrementAndGet();
                 boundedExec.submitTask(new Runnable() {
                     public void run() {
                         try {
+                            int i = counter.incrementAndGet();
+                            if (i % logModulo == 0) {
+                                LOG.info("processing iterable " + i);
+                            }
                             fn.call(obj);
                         } catch (Exception e) {
                             LOG.log(Level.SEVERE, "error processing list element " + obj, e);

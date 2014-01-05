@@ -1,15 +1,6 @@
 package org.wikapidia.sr.utils;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.wikapidia.core.lang.Language;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * A single human labeled entry from the gold standard dataset.

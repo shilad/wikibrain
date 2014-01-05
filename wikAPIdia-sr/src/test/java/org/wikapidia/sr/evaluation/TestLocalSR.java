@@ -4,21 +4,17 @@ import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.lang.LocalString;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.sr.LocalSRMetric;
+import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.KnownSim;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Shilad Sen
  */
-public class TestLocalSR implements LocalSRMetric {
+public class TestLocalSR implements MonolingualSRMetric {
     private Random random = new Random();
 
     // -1 values indicates failures
@@ -41,12 +37,27 @@ public class TestLocalSR implements LocalSRMetric {
     }
 
     @Override
-    public SRResult similarity(LocalPage page1, LocalPage page2, boolean explanations) throws DaoException {
-        return null;
+    public Language getLanguage() {
+        return Language.getByLangCode("simple");
     }
 
     @Override
-    public SRResult similarity(String phrase1, String phrase2, Language language, boolean explanations) throws DaoException {
+    public File getDataDir() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void setDataDir(File dir) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
         Double val;
         if (random.nextDouble() < 0.05) {
             val = -1.0;
@@ -69,46 +80,38 @@ public class TestLocalSR implements LocalSRMetric {
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults) throws DaoException {
+    public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public SRResultList mostSimilar(LocalPage page, int maxResults, TIntSet validIds) throws DaoException {
+    public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults) throws DaoException {
+    public SRResultList mostSimilar(String phrase, int maxResults) throws DaoException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+
     @Override
-    public SRResultList mostSimilar(LocalString phrase, int maxResults, TIntSet validIds) throws DaoException {
+    public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
         SRResultList result = new SRResultList(10);
         // TODO: figure out what this should return and test it.
         return result;
     }
 
     @Override
-    public void write(String path) throws IOException {
+    public void write() throws IOException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void read(String path) throws IOException {
+    public void read() throws IOException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
-    public void trainDefaultSimilarity(Dataset dataset) throws DaoException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void trainDefaultMostSimilar(Dataset dataset, int numResults, TIntSet validIds) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
 
     @Override
     public void trainSimilarity(Dataset dataset) throws DaoException {
@@ -131,59 +134,50 @@ public class TestLocalSR implements LocalSRMetric {
     }
 
     @Override
-    public void setDefaultMostSimilarNormalizer(Normalizer n) {
+    public void setMostSimilarNormalizer(Normalizer n) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void setDefaultSimilarityNormalizer(Normalizer defaultSimilarityNormalizer) {
+    public void setSimilarityNormalizer(Normalizer defaultSimilarityNormalizer) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void setMostSimilarNormalizer(Normalizer n, Language l) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void setSimilarityNormalizer(Normalizer n, Language l) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public TIntDoubleMap getVector(int id, Language language) throws DaoException {
+    public TIntDoubleMap getVector(int id) throws DaoException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds, Language language) throws DaoException {
+    public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds) throws DaoException {
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public double[][] cosimilarity(String[] rowPhrases, String[] colPhrases, Language language) throws DaoException {
+    public double[][] cosimilarity(String[] rowPhrases, String[] colPhrases) throws DaoException {
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public double[][] cosimilarity(int[] ids, Language language) throws DaoException {
+    public double[][] cosimilarity(int[] ids) throws DaoException {
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public double[][] cosimilarity(String[] phrases, Language language) throws DaoException {
+    public double[][] cosimilarity(String[] phrases) throws DaoException {
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void writeCosimilarity(String path, LanguageSet languages, int maxHits) throws IOException, DaoException, WikapidiaException {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public Normalizer getMostSimilarNormalizer() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void readCosimilarity(String path, LanguageSet languages) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public Normalizer getSimilarityNormalizer() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
+
 
     public TDoubleList getActual(List<KnownSim> gold) {
         TDoubleList actual = new TDoubleArrayList();
@@ -235,10 +229,10 @@ public class TestLocalSR implements LocalSRMetric {
         return estimates.size();
     }
 
-    public static class Factory implements LocalSRFactory {
+    public static class Factory implements MonolingualSRFactory {
         public List<TestLocalSR> metrics = new ArrayList<TestLocalSR>();
         @Override
-        public LocalSRMetric create() {
+        public MonolingualSRMetric create() {
             TestLocalSR sr = new TestLocalSR();
             metrics.add(sr);
             return sr;

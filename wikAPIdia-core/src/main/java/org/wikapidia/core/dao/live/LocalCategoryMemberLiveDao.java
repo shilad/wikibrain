@@ -11,9 +11,7 @@ import org.wikapidia.core.dao.LocalCategoryMemberDao;
 
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.model.LocalArticle;
-import org.wikapidia.core.model.LocalCategory;
-import org.wikapidia.core.model.LocalCategoryMember;
+import org.wikapidia.core.model.*;
 
 import java.util.*;
 
@@ -41,6 +39,9 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
     public void save(LocalCategory a, LocalArticle b)throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
+    public void save(LocalCategory a, LocalPage b) throws DaoException{
+        throw new DaoException("Can't use this method for remote wiki server");
+    }
     public void save(LocalCategoryMember member) throws DaoException {
         throw new DaoException("Can't use this method for remote wiki server!");
     }
@@ -51,6 +52,11 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
     public LanguageSet getLoadedLanguages() throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+
+    //TODO: Implement getGraph
+    public CategoryGraph getGraph(Language language) throws DaoException {
         throw new DaoException("Can't use this method for remote wiki server!");
     }
 
@@ -90,9 +96,9 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
      * @return a map contains the LocalArticleIDs and the LocalArticle of all members in the given category
      * @throws DaoException
      */
-    public Map<Integer, LocalArticle> getCategoryMembers(Language language, int categoryId) throws DaoException {
+    public Map<Integer, LocalPage> getCategoryMembers(Language language, int categoryId) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(language, categoryId);
-        LocalArticleLiveDao dao = new LocalArticleLiveDao();
+        LocalPageLiveDao dao = new LocalPageLiveDao();
         return dao.getByIds(language, articleIds);
     }
 
@@ -102,9 +108,9 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
      * @return a map contains the LocalArticleIDs and the LocalArticle of all members in the given category
      * @throws DaoException
      */
-    public Map<Integer, LocalArticle> getCategoryMembers(LocalCategory localCategory) throws DaoException {
+    public Map<Integer, LocalPage> getCategoryMembers(LocalCategory localCategory) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(localCategory);
-        LocalArticleLiveDao dao = new LocalArticleLiveDao();
+        LocalPageLiveDao dao = new LocalPageLiveDao();
         return dao.getByIds(localCategory.getLanguage(), articleIds);
     }
 
@@ -127,12 +133,12 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
 
     /**
      *
-     * @param localArticle the article
+     * @param localPage the page
      * @return a collection of categoryids of all the categories this article belongs to
      * @throws DaoException
      */
     @Override
-    public Collection<Integer> getCategoryIds(LocalArticle localArticle) throws DaoException {
+    public Collection<Integer> getCategoryIds(LocalPage localArticle) throws DaoException {
         return getCategoryIds(localArticle.getLanguage(), localArticle.getLocalId());
     }
 
@@ -157,7 +163,7 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
      * @throws DaoException
      */
     @Override
-    public Map<Integer, LocalCategory> getCategories(LocalArticle localArticle) throws DaoException {
+    public Map<Integer, LocalCategory> getCategories(LocalPage localArticle) throws DaoException {
         Collection<Integer> categoryIds = getCategoryIds(localArticle);
         LocalCategoryLiveDao dao = new LocalCategoryLiveDao();
         return dao.getByIds(localArticle.getLanguage(), categoryIds);
@@ -181,7 +187,7 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
 
 
         @Override
-        public LocalCategoryMemberDao get(String name, Config config) throws ConfigurationException {
+        public LocalCategoryMemberDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
                 return null;
             }

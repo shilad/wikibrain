@@ -21,13 +21,13 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
 
     public static final Logger LOG = Logger.getLogger(SparseMatrix.class.getName());
 
-    public static int DEFAULT_MAX_PAGE_SIZE = Integer.MAX_VALUE;
+    // default header page size is 100MB, will be expanded if necessary
+    public static final int DEFAULT_HEADER_SIZE = 100 * 1024 * 1024;
 
     public static final int FILE_HEADER = 0xabcdef;
 
     MemoryMappedMatrix rowBuffers;
 
-    public int maxPageSize = DEFAULT_MAX_PAGE_SIZE;
     private TIntLongHashMap rowOffsets = new TIntLongHashMap();
     private int rowIds[];
     private FileChannel channel;
@@ -35,24 +35,21 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
 
     private ValueConf vconf;
 
-    public SparseMatrix(File path) throws IOException {
-        this(path, Integer.MAX_VALUE, DEFAULT_MAX_PAGE_SIZE);
-    }
 
-    public SparseMatrix(File path, int maxOpenPages, int maxPageSize) throws IOException {
+
+    public SparseMatrix(File path) throws IOException {
         this.path = path;
-        this.maxPageSize = maxPageSize;
         if (!path.isFile()) {
             throw new IOException("File does not exist: " + path);
         }
         info("initializing sparse matrix with file length " + FileUtils.sizeOf(path));
         this.channel = (new FileInputStream(path)).getChannel();
         readHeaders();
-        rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets, maxOpenPages, maxPageSize);
+        rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets);
     }
 
     private void readHeaders() throws IOException {
-        long size = Math.min(channel.size(), maxPageSize);
+        long size = Math.min(channel.size(), DEFAULT_HEADER_SIZE);
         MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);
         if (buffer.getInt(0) != FILE_HEADER) {
             throw new IOException("invalid file header: " + buffer.getInt(0));
@@ -60,7 +57,7 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
         this.vconf = new ValueConf(buffer.getFloat(4), buffer.getFloat(8));
         int numRows = buffer.getInt(12);
         int headerSize = 16 + 12*numRows;
-        if (headerSize > maxPageSize) {
+        if (headerSize > DEFAULT_HEADER_SIZE) {
             info("maxPageSize not large enough for entire header. Resizing to " + headerSize);
             buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, headerSize);
         }

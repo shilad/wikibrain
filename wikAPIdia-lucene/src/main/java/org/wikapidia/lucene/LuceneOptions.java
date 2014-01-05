@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -109,7 +110,7 @@ public class LuceneOptions {
         }
 
         @Override
-        public LuceneOptions get(String name, Config config) throws ConfigurationException {
+        public LuceneOptions get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!name.equalsIgnoreCase(config.getString("type"))) {
                 throw new ConfigurationException("Could not find configuration " + name);
             }

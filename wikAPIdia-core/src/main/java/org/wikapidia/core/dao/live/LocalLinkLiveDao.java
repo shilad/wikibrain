@@ -1,7 +1,6 @@
 package org.wikapidia.core.dao.live;
 
 
-
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
@@ -170,7 +169,7 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         }
 
         @Override
-        public LocalLinkDao get(String name, Config config) throws ConfigurationException {
+        public LocalLinkDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
                 return null;
             }

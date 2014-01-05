@@ -78,6 +78,7 @@ public class Env {
         if (pathConfs.length > 0) {
             LOG.info("using override configuration files " + Arrays.toString(pathConfs));
         }
+        LOG.info("using max vm heapsize of " + (Runtime.getRuntime().maxMemory() / (1024*1024)) + "MB");
         LOG.info("using languages " + getLanguages());
         LOG.info("using maxThreads " + WpThreadUtils.getMaxThreads());
         LOG.info("using tmpDir " + tmpDir);

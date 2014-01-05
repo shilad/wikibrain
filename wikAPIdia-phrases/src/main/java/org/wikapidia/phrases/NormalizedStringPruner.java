@@ -57,7 +57,7 @@ public class NormalizedStringPruner extends SimplePruner<String> {
         }
 
         @Override
-        public PrunedCounts.Pruner get(String name, Config config) throws ConfigurationException {
+        public PrunedCounts.Pruner get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("string")) {
                 return null;
             }
