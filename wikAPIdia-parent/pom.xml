@@ -18,6 +18,7 @@
         <module>../wikAPIdia-mapper</module>
         <module>../wikAPIdia-matrix</module>
         <module>../wikAPIdia-parser</module>
+        <module>../wikAPIdia-pageview</module>
         <module>../wikAPIdia-phrases</module>
         <module>../wikAPIdia-sr</module>
         <module>../wikAPIdia-utils</module>
