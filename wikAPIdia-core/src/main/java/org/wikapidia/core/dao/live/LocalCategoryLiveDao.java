@@ -69,7 +69,7 @@ public class LocalCategoryLiveDao extends LocalPageLiveDao<LocalCategory> implem
         }
 
         @Override
-        public LocalCategoryDao get(String name, Config config) throws ConfigurationException {
+        public LocalCategoryDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
                 return null;
             }

@@ -153,7 +153,7 @@ public class RedirectLiveDao implements RedirectDao {
         }
 
         @Override
-        public RedirectDao get(String name, Config config) throws ConfigurationException {
+        public RedirectDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("live")) {
                 return null;
             }
