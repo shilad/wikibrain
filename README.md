@@ -32,22 +32,16 @@ mvn -f wikAPIdia-parent/pom.xml test
 
 **From an IDE** If you are using an IDE such as Eclipse or IntelliJ, and your project is integrated with maven you can run these commands directly through your IDE.
 
-
-**From the command line** Install our `wp-java.sh` helper bash script that makes it easier to compile and run java programs. `mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller`. You can use `wp-java.sh` in place of `java` in all the commands below.
+**From the command line** Install our `wp-java.sh` helper bash script that makes it easier to compile and run java programs. `mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller`.
 
 **JVM options** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. You can set these defaults in your IDE's run dialog, or if you are using `wp-java.sh`, run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
 
 ###Importing data
 
-
-```bash
-
-```
-
 Download and process the dataset:
 
 ```bash
-java org.wikapidia.dao.load.PipelineLoader -l simple
+wp-java.sh org.wikapidia.dao.load.PipelineLoader -l simple
 ```
 
 
@@ -56,7 +50,7 @@ The last command downloads, installs, and analyzes the latest database files for
 You can customize WikAPIdia's importing procedure, but the Pipeline should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
-java org.wikapidia.dao.load.PipelineLoader -l en,fr
+wp-java.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
 ``` 
 (beware that this is a lot of data and takes many hours!).
 
