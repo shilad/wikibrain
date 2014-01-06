@@ -1,14 +1,15 @@
 package org.wikapidia.pageview;
 
 import com.typesafe.config.Config;
+import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.map.TIntIntMap;
-import org.jooq.Cursor;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.TableField;
+import gnu.trove.map.hash.TIntIntHashMap;
+import org.joda.time.DateTime;
+import org.jooq.*;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -19,6 +20,11 @@ import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LocalId;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -54,21 +60,82 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
     }
 
     /**
-     * Shilad says: Would these be cleaner using Dates for start and end?
+     * method to access a PageViewIterator via the DAO, can be used by clients to keep track of each of the PageViewDataStructs
+     * retrieved by the iterator
+     * @param lang
+     * @param startDate
+     * @param endDate
+     * @return
+     * @throws org.wikapidia.core.WikapidiaException
+     * @throws DaoException
      */
-    public TIntIntMap getAllViews(Language language, int startYear, int startMonth, int startDay, int startHour, int numHours) {
-        // TODO: implement me using JOOQ queries. See MetaInfoSqlDao for some more complex JOOQ queries.
-        return null;
+    public PageViewIterator getPageViewIterator(Language lang, DateTime startDate, DateTime endDate) throws WikapidiaException, DaoException {
+        return new PageViewIterator(lang, startDate, endDate);
     }
 
-    public int getNumViews(int id, int startYear, int startMonth, int day, int hour) {
-        // TODO: implement me using JOOQ queries. See MetaInfoSqlDao for some more complex JOOQ queries.
-        return 0;
+    /**
+     * adds all the page view entries in an input PageViewDataStruct to the SQL database
+     * @param data
+     * @throws DaoException
+     */
+    public void addData(PageViewDataStruct data) throws DaoException {
+        TIntIntIterator it = data.stats.iterator();
+        while (it.hasNext()) {
+            it.advance();
+            LocalId pageId = new LocalId(data.lang, it.key());
+            Date hour = new Date(data.start.getMillis());
+            PageView view = new PageView(pageId, hour, it.value());
+            save(view);
+        }
     }
 
-    public int getNumViews(int id, int startYear, int startMonth, int startDay, int startHour, int numHours) {
-        // TODO: implement me using JOOQ queries. See MetaInfoSqlDao for some more complex JOOQ queries.
-        return 0;
+    public TIntIntMap getAllViews(Language language, DateTime startDate, DateTime endDate) throws DaoException {
+        DSLContext context = getJooq();
+        Timestamp startTime = new Timestamp(startDate.getMillis());
+        Timestamp endTime = new Timestamp(endDate.getMillis());
+        try {
+            Cursor<Record> result = context.select().
+                    from(Tables.PAGEVIEW).
+                    where(Tables.PAGEVIEW.LANG_ID.eq(language.getId())).
+                    and(Tables.PAGEVIEW.TSTAMP.between(startTime, endTime)).
+                    fetchLazy(getFetchSize());
+            TIntIntMap views = new TIntIntHashMap(
+                    gnu.trove.impl.Constants.DEFAULT_CAPACITY,
+                    gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
+                    -1, -1);
+            for (Record record : result){
+                views.put(record.getValue(Tables.PAGEVIEW.PAGE_ID),
+                        record.getValue(Tables.PAGEVIEW.NUM_VIEWS));
+            }
+            return views;
+        } finally {
+            freeJooq(context);
+        }
+    }
+
+    public int getNumViews(Language language, int id, DateTime startDate) throws DaoException {
+        return getNumViews(language, id, startDate, startDate.plusHours(1));
+    }
+
+    public int getNumViews(Language language, int id, DateTime startDate, DateTime endDate) throws DaoException {
+        DSLContext context = getJooq();
+        Timestamp startTime = new Timestamp(startDate.getMillis());
+        Timestamp endTime = new Timestamp(endDate.getMillis());
+        try {
+            Cursor<Record> result = context.select().
+                    from(Tables.PAGEVIEW).
+                    where(Tables.PAGEVIEW.LANG_ID.eq(language.getId())).
+                    and(Tables.PAGEVIEW.TSTAMP.between(startTime, endTime)).
+                    and(Tables.PAGEVIEW.PAGE_ID.eq(id)).
+                    fetchLazy(getFetchSize());
+            int numViews = 0;
+            for (Record record : result){
+                numViews += record.getValue(Tables.PAGEVIEW.NUM_VIEWS);
+            }
+            return numViews;
+        } finally {
+            freeJooq(context);
+        }
     }
 
     /**
@@ -153,7 +220,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
 
         @Override
-        public PageViewSqlDao get(String name, Config config) throws ConfigurationException {
+        public PageViewSqlDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }
