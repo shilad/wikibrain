@@ -227,7 +227,7 @@ public class PageViewDbDao {
         }
 
         @Override
-        public PageViewDbDao get(String name, Config config) throws ConfigurationException {
+        public PageViewDbDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("db")) {
                 return null;
             }
