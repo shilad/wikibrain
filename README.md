@@ -155,8 +155,8 @@ WikAPIdia provides several state-of-the-art semantic relatedness algorithms (*SR
 * `similarity(page1, page2)` returns the relatedness score between two pages.
 * `mostSimilar(phrase)` returns the most similar phrases to a particular target phrase.
 * `mostSimilar(page)` returns the most similar pages to a particular target page.
-* `cosimilarity(rowPhrases[], colPhrases[])` computes a cosimilarity matrix with phrases corresponding to the specified rows and columns.
-* `cosimilarity(rowPages[], colPages[])` computes a cosimilarity matrix with pages corresponding to the specified rows and columns.
+* `cosimilarity(rowPhrases[], colPhrases[])` computes a cosimilarity matrix for the specified row and column phrases.
+* `cosimilarity(rowPages[], colPages[])` computes a cosimilarity matrix for the specified rows and column pages.
 
 To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
 
