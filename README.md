@@ -148,6 +148,22 @@ To get one of these components, use the Configurator.get() method:
 * **MonolingualSRMetric** returns the strength of relationship between two Wikipedia pages or phrases in a particular language, and the most closely related pages to a particular phrase or page.
 * **UniversalSRMetric** (not yet tested) returns the same information as the MonolingualSRMetric, but for universal concepts that span multiple languages.
 
+
+###Semantic relatedness algorithms
+WikAPIdia provides several state-of-the-art semantic relatedness algorithms (*SR metrics*). These algorithms estimate the strength of semantic relationships between concepts. In particular, they provide four functions:
+* `similarity(phrase1, phrase2)` returns the relatedness score between two phrases.
+* `similarity(page1, page2)` returns the relatedness score between two pages.
+* `mostSimilar(phrase)` returns the most similar phrases to a particular target phrase.
+* `mostSimilar(page)` returns the most similar pages to a particular target page.
+
+To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
+
+```bash
+./wp-java.sh org.wikapidia.sr.SRBuilder -m inlink
+```
+
+The inlink metric is a fast but relatively inaccurate SR metric. You can also build the "ensemble" metric that provides a linear combination of four other metrics. Beware that training the ensemble is costly. It takes about 10 minutes on Simple English Wikipedia, and a little over a day on the full Wikipedia. Most of the model-building time supports the *mostSimilar()* call, so you can speed up model building if you only need *similarity()*. TODO: explain how to do this.
+
 ###Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
 The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
