@@ -46,7 +46,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
      * @throws org.wikapidia.core.dao.DaoException
      */
     public PageViewSqlDao(WpDataSource dataSource) throws DaoException {
-        super(dataSource, INSERT_FIELDS, "db/pageview");
+        super(dataSource, INSERT_FIELDS, "/db/pageview");
     }
 
     @Override
@@ -211,7 +211,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
 
         @Override
         public Class getType() {
-            return LocalPageDao.class;
+            return PageViewSqlDao.class;
         }
 
         @Override
