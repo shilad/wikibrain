@@ -339,8 +339,8 @@ public class SRBuilder {
         // when building pairwise cosine and ensembles, don't rebuild already built sub-metrics.
         options.addOption(
                 new DefaultOptionBuilder()
-                        .withLongOpt("skip-submetrics")
-                        .withDescription("For ensemble and pairwise cosine, don't build already built submetrics (implies -d false)")
+                        .withLongOpt("skip-built")
+                        .withDescription("Don't rebuild already built bmetrics (implies -d false)")
                         .create("k"));
 
         EnvBuilder.addStandardOptions(options);
