@@ -107,30 +107,35 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
      * @throws DaoException
      */
     @Override
-    public void trainSimilarity(Dataset dataset) throws DaoException {
+    public void trainSimilarity(final Dataset dataset) throws DaoException {
         if (trainSubmetrics) {
             for (MonolingualSRMetric metric : metrics) {
                 metric.trainSimilarity(dataset);
             }
         }
-        List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
-
-        for (KnownSim ks : dataset.getData()){
-            EnsembleSim es = new EnsembleSim(ks);
-            for (MonolingualSRMetric metric : metrics){
-                double score = Double.NaN;
-                try {
-                    SRResult result = metric.similarity(ks.phrase1,ks.phrase2,false);
-                    if (result != null) {
-                        score = result.getScore();
+        final List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
+        ParallelForEach.loop(
+                dataset.getData(),
+                new Procedure<KnownSim>() {
+                    @Override
+                    public void call(KnownSim ks) throws Exception {
+                        EnsembleSim es = new EnsembleSim(ks);
+                        for (MonolingualSRMetric metric : metrics){
+                            double score = Double.NaN;
+                            try {
+                                SRResult result = metric.similarity(ks.phrase1,ks.phrase2,false);
+                                if (result != null) {
+                                    score = result.getScore();
+                                }
+                            } catch (Exception e){
+                                LOG.log(Level.WARNING, "Local sr metric " + metric.getName() + " failed for " + ks, e);
+                            }
+                            es.add(score, 0);
+                        }
+                        ensembleSims.add(es);
                     }
-                } catch (Exception e){
-                    LOG.log(Level.WARNING, "Local sr metric " + metric.getName() + " failed for " + ks, e);
-                }
-                es.add(score, 0);
-            }
-            ensembleSims.add(es);
-        }
+                },
+                100);
         ensemble.trainSimilarity(ensembleSims);
         super.trainSimilarity(dataset);
     }
