@@ -3,6 +3,8 @@ package org.wikapidia.cookbook.sr;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.cmd.Env;
+import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -23,7 +25,8 @@ import java.util.List;
 public class CosimilartyExample {
 
     public static void main (String args[]) throws ConfigurationException, DaoException {
-        Configurator c = new Configurator(new Configuration());
+        Env env = new EnvBuilder().build();
+        Configurator c = env.getConfigurator();
         MonolingualSRMetric sr = c.get(MonolingualSRMetric.class,"ESA", "language", "simple");
         LocalPageDao localPageDao = c.get(LocalPageDao.class);
         
