@@ -202,6 +202,7 @@ public class PageViewIterator implements Iterator {
                 ungzip(dest,ungzipDest);
             }
             System.out.println("Finished Downloading Pageview File");
+            dest.delete();
             return ungzipDest;
         } catch(IOException e) {
             System.out.println("File name " + fileName + " couldn't be found online");
