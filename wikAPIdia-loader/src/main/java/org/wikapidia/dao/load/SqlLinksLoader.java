@@ -98,6 +98,7 @@ public class SqlLinksLoader {
                 LocalLink ll = new LocalLink(language, "", srcPageId, destId,
                         true, -1, false, LocalLink.LocationType.NONE);
                 if (!existing.contains(ll.longHashCode())) {
+                    existing.add(ll.longHashCode());
                     newLinks++;
                     dao.save(ll);
                 }
