@@ -11,42 +11,43 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 * Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
 ###System Requirements
-* Maven (required)
-* Bash (required)
-* A clone of this repository
+* Maven, Bash, a clone of this repository (instructions in next section).
 * Hardware varies depending on the languages you want to import:
   * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
   * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
 ###Installing WikAPIdia
 
-Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
-
-Run the unit tests to make sure they pass and everything is installed correctly. For developers, this also auto-generates some Java source files.
+1. If necessary, download and install Sun's JDK 6 or higher.
+2. If necessary, download and install [Maven](http://maven.apache.org/download.cgi). tl;dr: 1) unzip the maven download, 2) set the `M2_HOME` environment variable to point to the unzipped directory, 3) make sure the mvn script in `$M2_HOME` is on your `PATH`. You can test your install by making sure that `mvn --version` works properly
+3. Clone this repository and run the unit tests to make sure your environment is setup properly:
 
 ```bash
 cd wikAPIdia
+git-clone https://github.com/shilad/wikAPIdia.git
 mvn -f wikAPIdia-parent/pom.xml test
 ```
 
-Install our `wp-run.sh` helper bash script that makes it easier to compile and run java programs. This is not necessary, but easier than using `mvn exec:exec`, and these directions presume you installed it. If you are using an IDE, you can also just run the ResourceInstaller program from the IDE with no arguments. 
+###Running WikAPIdia programs
 
-```bash
-mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
-```
+**From an IDE** If you are using an IDE such as Eclipse or IntelliJ, and your project is integrated with maven you can run these commands directly through your IDE.
+
+
+**From the command line** Install our `wp-java.sh` helper bash script that makes it easier to compile and run java programs. `mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller`. You can use `wp-java.sh` in place of `java` in all the commands below.
+
+**JVM options** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. You can set these defaults in your IDE's run dialog, or if you are using `wp-java.sh`, run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
 
 ###Importing data
 
-Set reasonable java options defaults. The following uses a 64-bit JVM with 8GB memory and server optimizations. You may want to save these defaults in a shell script so you can easily source it in the future.
 
 ```bash
-export JAVA_OPTS="-d64 -Xmx8000M -server"
+
 ```
 
 Download and process the dataset:
 
 ```bash
-./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l simple
+java org.wikapidia.dao.load.PipelineLoader -l simple
 ```
 
 
@@ -55,7 +56,7 @@ The last command downloads, installs, and analyzes the latest database files for
 You can customize WikAPIdia's importing procedure, but the Pipeline should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
-./wp-run.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
+java org.wikapidia.dao.load.PipelineLoader -l en,fr
 ``` 
 (beware that this is a lot of data and takes many hours!).
 
