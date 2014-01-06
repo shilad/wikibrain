@@ -177,14 +177,20 @@ public class SRBuilder {
         if (metric instanceof BaseMonolingualSRMetric) {
             ((BaseMonolingualSRMetric)metric).setBuildMostSimilarCache(buildCosimilarity);
         }
-        if ((mode == Mode.SIMILARITY || mode == Mode.BOTH)
-        &&  (!skipBuiltMetrics || !metric.similarityIsTrained())) {
-            metric.trainSimilarity(ds);
+        if (mode == Mode.SIMILARITY || mode == Mode.BOTH) {
+            if (skipBuiltMetrics && metric.similarityIsTrained()) {
+                LOG.info("metric " + name + " similarity() is already trained... skipping");
+            } else {
+                metric.trainSimilarity(ds);
+            }
         }
 
-        if ((mode == Mode.MOSTSIMILAR || mode == Mode.BOTH)
-        &&  (!skipBuiltMetrics || !metric.mostSimilarIsTrained())) {
-            metric.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, null);
+        if (mode == Mode.MOSTSIMILAR || mode == Mode.BOTH) {
+            if (skipBuiltMetrics && metric.mostSimilarIsTrained()) {
+                LOG.info("metric " + name + " mostSimilar() is already trained... skipping");
+            } else {
+                metric.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, null);
+            }
         }
         metric.write();
     }
