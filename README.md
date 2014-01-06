@@ -45,9 +45,7 @@ wp-java.sh org.wikapidia.dao.load.PipelineLoader -l simple
 ```
 
 
-The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. 
-
-You can customize WikAPIdia's importing procedure, but the Pipeline should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
+The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. It imports the data into an embedded h2 database. You can customize WikAPIdia's importing procedure, (see Configuration, below) but the default should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
 wp-java.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
