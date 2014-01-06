@@ -151,6 +151,8 @@ To get one of these components, use the Configurator.get() method:
 
 ###Semantic relatedness algorithms
 WikAPIdia provides several state-of-the-art semantic relatedness algorithms (*SR metrics*). These algorithms estimate the strength of semantic relationships between concepts. 
+These algorithms are designed to be fast, with performance of 10-100 milliseconds and caching and multi-threaded support built in.
+WikAPIdia SR metrics support six major functions:
 
 * `similarity(phrase1, phrase2)` returns the relatedness score between two phrases.
 * `similarity(page1, page2)` returns the relatedness score between two pages.
@@ -158,8 +160,6 @@ WikAPIdia provides several state-of-the-art semantic relatedness algorithms (*SR
 * `mostSimilar(page)` returns the most similar pages to a particular target page.
 * `cosimilarity(rowPhrases[], colPhrases[])` computes a cosimilarity matrix for the specified row and column phrases.
 * `cosimilarity(rowPages[], colPages[])` computes a cosimilarity matrix for the specified rows and column pages.
-
-These algorithms are designed to be fast, with performance of 10-100 milliseconds and caching and multi-threaded support built in.
 
 To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
 
