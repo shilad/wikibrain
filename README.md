@@ -155,6 +155,8 @@ WikAPIdia provides several state-of-the-art semantic relatedness algorithms (*SR
 * `similarity(page1, page2)` returns the relatedness score between two pages.
 * `mostSimilar(phrase)` returns the most similar phrases to a particular target phrase.
 * `mostSimilar(page)` returns the most similar pages to a particular target page.
+* `cosimilarity(rowPhrases[], colPhrases[])` computes a cosimilarity matrix with phrases corresponding to the specified rows and columns.
+* `cosimilarity(rowPages[], colPages[])` computes a cosimilarity matrix with pages corresponding to the specified rows and columns.
 
 To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
 
@@ -191,10 +193,34 @@ for (String phrase : Arrays.asList("Barack Obama", "US", "Canada", "vim")) {
 ```
 This code (on Simple english) displays:
 ```
-'Barack Obama' is similar to 1) Barack Obama, 2) Hillary Rodham Clinton, 3) Mitt Romney
-'US' is similar to 1) United States, 2) Federal government of the United States, 3) United States Constitution
-'Canada' is similar to 1) Canada, 2) Quebec, 3) Australia
-'vim' is similar to 1) Vim, 2) Text editor, 3) GNU Emacs
+*Barack Obama* is similar to 1) Barack Obama, 2) Hillary Rodham Clinton, 3) Mitt Romney
+*US* is similar to 1) United States, 2) Federal government of the United States, 3) United States Constitution
+*Canada* is similar to 1) Canada, 2) Quebec, 3) Australia
+*vim* is similar to 1) Vim, 2) Text editor, 3) GNU Emacs
+```
+You can also calculate a relatedness score between any two pages or phrases using the same MonolingualSRMetric:
+```java
+//Similarity between strings 
+String pairs[][] = new String[][] {
+        { "cat", "kitty" },
+        { "obama", "president" },
+        { "tires", "car" },
+        { "java", "computer" },
+        { "dog", "computer" },
+};      
+
+for (String pair[] : pairs) {
+    SRResult s = sr.similarity(pair[0], pair[1], false); 
+    System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'"); 
+}    
+```
+This code (on Simple english) displays:
+```
+0.7652857508808703: 'cat', 'kitty'
+0.6816860201660842: 'obama', 'president'
+0.7058954876236786: 'tires', 'car'
+0.5905978329192705: 'java', 'computer'
+0.42989849626985877: 'dog', 'computer'
 ```
 
 ###Configuration
