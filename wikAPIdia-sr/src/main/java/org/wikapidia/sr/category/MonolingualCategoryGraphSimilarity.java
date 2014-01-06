@@ -105,25 +105,6 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     }
 
     @Override
-    public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) {
-        super.trainMostSimilar(dataset, numResults, validIds);
-        try {
-            super.writeMostSimilarCache(numResults, null, validIds);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (DaoException e) {
-            throw new RuntimeException(e);
-        } catch (WikapidiaException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
-        return mostSimilar(pageId, maxResults, null);
-    }
-
-    @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
 
         SRResultList results = getCachedMostSimilar(pageId, maxResults, validIds);
