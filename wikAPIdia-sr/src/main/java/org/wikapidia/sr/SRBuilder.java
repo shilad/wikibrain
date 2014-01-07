@@ -201,7 +201,7 @@ public class SRBuilder {
 
     private void buildConceptsIfNecessary(String name) throws IOException, ConfigurationException, DaoException {
         String type = getMetricType(name);
-        if (!type.equals("ESA") && !type.equals("vector.mostsimilarconcepts")) {
+        if (!type.equals("vector.esa") && !type.equals("vector.mostsimilarconcepts")) {
             return;
         }
         File path = FileUtils.getFile(
