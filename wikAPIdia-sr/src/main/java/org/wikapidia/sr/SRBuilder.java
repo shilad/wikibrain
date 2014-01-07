@@ -106,6 +106,7 @@ public class SRBuilder {
         if (deleteExistingData) {
             deleteDataDirectories();
         }
+        buildConceptsIfNecessary();
         LOG.info("building metric " + metricName);
         String type = getMetricType();
         if (type.equals("ensemble")) {
@@ -175,7 +176,6 @@ public class SRBuilder {
 
     public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
         LOG.info("building component metric " + name);
-        buildConceptsIfNecessary(name);
         Dataset ds = getDataset();
         MonolingualSRMetric metric = getMetric(name);
         if (metric instanceof BaseMonolingualSRMetric) {
@@ -199,9 +199,15 @@ public class SRBuilder {
         metric.write();
     }
 
-    private void buildConceptsIfNecessary(String name) throws IOException, ConfigurationException, DaoException {
-        String type = getMetricType(name);
-        if (!type.equals("vector.esa") && !type.equals("vector.mostsimilarconcepts")) {
+    private void buildConceptsIfNecessary() throws IOException, ConfigurationException, DaoException {
+        boolean needsConcepts = false;
+        for (String name : getSubmetrics(metricName)) {
+            String type = getMetricType(name);
+            if (type.equals("vector.esa") || type.equals("vector.mostsimilarconcepts")) {
+                needsConcepts = true;
+            }
+        }
+        if (!needsConcepts) {
             return;
         }
         File path = FileUtils.getFile(
@@ -215,7 +221,7 @@ public class SRBuilder {
             return;
         }
 
-        LOG.info("building concept file " + path.getAbsolutePath() + " for " + name);
+        LOG.info("building concept file " + path.getAbsolutePath() + " for " + metricName);
         SRConceptSpaceGenerator gen = new SRConceptSpaceGenerator(language,
                 env.getConfigurator().get(LocalLinkDao.class),
                 env.getConfigurator().get(LocalPageDao.class));
