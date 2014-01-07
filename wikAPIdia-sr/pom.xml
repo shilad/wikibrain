@@ -11,7 +11,12 @@
     <dependencies>
         <dependency>
             <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-phrases</artifactId>
+            <artifactId>wikAPIdia-utils</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikapidia</groupId>
+            <artifactId>wikAPIdia-core</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -21,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>org.wikapidia</groupId>
-            <artifactId>wikAPIdia-utils</artifactId>
+            <artifactId>wikAPIdia-phrases</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

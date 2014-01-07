@@ -57,7 +57,42 @@ public class CosineSimilarity implements VectorSimilarity {
 
     @Override
     public SRResultList mostSimilar(TIntFloatMap query, int maxResults, TIntSet validIds) throws IOException {
-        TIntDoubleHashMap dots = new TIntDoubleHashMap();
+        if (validIds != null && validIds.size() < 10000) {
+            return mostSimilarWithRegularIndex(query, maxResults, validIds);
+        } else {
+            return mostSimilarWithInvertedIndex(query, maxResults, validIds);
+        }
+    }
+
+    private SRResultList mostSimilarWithRegularIndex(TIntFloatMap query, int maxResults, TIntSet validIds) throws IOException {
+        final Leaderboard leaderboard = new Leaderboard(maxResults);
+        double rowNorm = norm(query);
+
+        for (int id : validIds.toArray()) {
+            MatrixRow row2 = features.getRow(id);
+            if (row2 != null) {
+                double dot = 0.0;
+                for (int i = 0; i < row2.getNumCols(); i++) {
+                    int id2 = row2.getColIndex(i);
+                    float val2 = query.get(id2);
+                    if (val2 > 0) {
+                        dot += val2 + row2.getColValue(i);
+                    }
+                }
+                double l1 = lengths.get(id);
+                double l2 = rowNorm;
+                double sim = dot / (l1 * l2);
+                leaderboard.tallyScore(id, sim);
+            }
+        }
+
+        SRResultList result = leaderboard.getTop();
+        result.sortDescending();
+        return result;
+    }
+
+    private SRResultList mostSimilarWithInvertedIndex(TIntFloatMap query, int maxResults, TIntSet validIds) throws IOException {
+        TIntDoubleHashMap dots = new TIntDoubleHashMap(maxResults * 5);
         for (int id : query.keys()) {
             float val1 = query.get(id);
             MatrixRow row2 = transpose.getRow(id);
