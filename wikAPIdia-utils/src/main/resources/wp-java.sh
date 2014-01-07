@@ -42,7 +42,7 @@ WP_CLASSPATH="${WP_CLASSPATH:-${WP_LIB}/*}"
 WP_JAVA_BIN="${WP_JAVA_BIN:-java}"
 
 # Standard maven targets. Clean will be prepended to it if it is the first argument
-WP_MVN_TARGETS="${WP_MVN_TARGETS:-compile}"
+WP_MVN_TARGETS="${WP_MVN_TARGETS:-compile install}"
 
 echo -e "Wikapidia environment settings follow. WP_CLASSPATH is updated again later\n" >&2
 (set -o posix ; set) | grep WP_ | sed -e 's/^/    /' >&2
@@ -84,7 +84,7 @@ echo "Using maven pom ${pom}" >&2
 
 # Compile the project and build the classpath files
 rm -rf "${WP_LIB}/*.jar"
-mvn -f "${pom}" -q ${WP_MVN_TARGETS} || die "compilation failed"
+mvn -f "${pom}" -q -DskipTests ${WP_MVN_TARGETS} || die "compilation failed"
 mvn -f "${pom}" -q dependency:copy-dependencies -DoutputDirectory="${WP_LIB}" || die "copying dependencies failed"
 
 # Update classpath with latest version of jars, etc.

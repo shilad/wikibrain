@@ -132,7 +132,10 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
                     baseMetric,
                     config.hasPath("numConcepts") ? config.getInt("numConcepts") : 500
             );
+            System.err.println("here 1");
             if (config.hasPath("concepts")) {
+
+                System.err.println("here 2");
                 try {
                     generator.setConcepts(FileUtils.getFile(
                             config.getString("concepts"),
