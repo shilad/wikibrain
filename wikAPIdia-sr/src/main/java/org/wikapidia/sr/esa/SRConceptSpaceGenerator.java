@@ -23,36 +23,41 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
  * @author Shilad Sen
  */
-public class ESAConceptPruner {
-    private static final int DEFAULT_MAX_CONCEPTS = 50000;
+public class SRConceptSpaceGenerator {
+    private static final Logger LOG = Logger.getLogger(SRConceptSpaceGenerator.class.getName());
 
-    private Language lang;
-    private LocalLinkDao linkDao;
-    private LocalPageDao pageDao;
+    private final Language lang;
+    private final LocalLinkDao linkDao;
+    private final LocalPageDao pageDao;
+    private final int numArticles;
+    private int maxConcepts = -1;
 
-    public ESAConceptPruner(Language lang, LocalLinkDao linkDao, LocalPageDao pageDao) {
+    public SRConceptSpaceGenerator(Language lang, LocalLinkDao linkDao, LocalPageDao pageDao) throws DaoException {
         this.lang = lang;
         this.linkDao = linkDao;
         this.pageDao = pageDao;
+        this.numArticles = pageDao.getCount(getFilter());
     }
 
-    public TIntSet prune(int maxConcepts) throws DaoException {
-        DaoFilter filter = new DaoFilter()
+    public DaoFilter getFilter() {
+        return new DaoFilter()
                 .setNameSpaces(NameSpace.ARTICLE)
                 .setLanguages(lang)
                 .setRedirect(false)
                 .setDisambig(false);
+    }
 
-        int numArticles = pageDao.getCount(filter);
-        int numStopArticles =getNumStopConcepts(numArticles);
-        Leaderboard mostLinked = new Leaderboard(maxConcepts + numStopArticles);
+    public TIntSet getConcepts() throws DaoException {
+        int numStopArticles =getNumStopConcepts();
+        Leaderboard mostLinked = new Leaderboard(getMaxConcepts() + numStopArticles);
 
-        for (LocalPage lp : (Iterable<LocalPage>)pageDao.get(filter)) {
+        for (LocalPage lp : (Iterable<LocalPage>)pageDao.get(getFilter())) {
             if (lp == null) {
                 continue;
             }
@@ -75,17 +80,25 @@ public class ESAConceptPruner {
         sorted.sortDescending();
         TIntSet result = new TIntHashSet();
         for (int i = 0; i < sorted.numDocs(); i++) {
-            int id = sorted.getId(i);
-            double nlinks = sorted.getScore(i);
             if (i < numStopArticles) {
-                System.out.println("skipping highly linked 'stop' page " +
-                        pageDao.getById(lang, id) +
-                        " (" + nlinks + " links)");
+//                int id = sorted.getId(i);
+//                double nlinks = sorted.getScore(i);
+//                System.out.println("skipping highly linked 'stop' page " +
+//                        pageDao.getById(lang, id) +
+//                        " (" + nlinks + " links)");
             } else {
                 result.add(sorted.getId(i));
             }
         }
         return result;
+    }
+
+    public void writeConcepts(File path) throws DaoException, IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        for (int wpId : getConcepts().toArray()) {
+            writer.write(wpId + "\n");
+        }
+        writer.close();
     }
 
     /**
@@ -127,13 +140,29 @@ public class ESAConceptPruner {
      * Ridiculous heuristic: number of stop concepts = 2 * cubed-root-of(num-articles)
      * For simple english (175K articles), this is about 100
      * For english (4M articles), this is about 300
-     * @param numArticles
      * @return
      */
-    public int getNumStopConcepts(int numArticles) {
+    public int getNumStopConcepts() {
         return (int) (Math.pow(numArticles, 0.33333) * 2);
     }
 
+    /**
+     * Simple heuristic for number of max concepts.
+     * For simple english (175K articles) default is about 55K
+     * For english (4M articles), default is about 158K
+     * @return
+     */
+    public int getMaxConcepts() {
+        if (maxConcepts < 0) {
+            return (int) (Math.pow(numArticles, 0.33333) * 1000);
+        } else {
+            return maxConcepts;
+        }
+    }
+
+    public void setMaxConcepts(int maxConcepts) {
+        this.maxConcepts = maxConcepts;
+    }
 
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         Options options = new Options();
@@ -141,7 +170,6 @@ public class ESAConceptPruner {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .isRequired()
                         .withLongOpt("output-dir")
                         .withDescription("directory to output concept mapping to")
                         .create("d"));
@@ -161,13 +189,10 @@ public class ESAConceptPruner {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.err.println("Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("ESAConceptPruner", options);
+            new HelpFormatter().printHelp("SRConceptSpaceGenerator", options);
             return;
         }
 
-        int maxConcepts = cmd.hasOption("x")
-                ? Integer.valueOf(cmd.getOptionValue("x"))
-                : DEFAULT_MAX_CONCEPTS;
 
         Env env = new EnvBuilder(cmd).build();
         Configurator c = env.getConfigurator();
@@ -175,19 +200,22 @@ public class ESAConceptPruner {
         LocalLinkDao linkDao = c.get(LocalLinkDao.class);
         LocalPageDao pageDao = c.get(LocalPageDao.class);
 
-        File parentDir = new File(cmd.getOptionValue("d"));
+
+        File parentDir = new File(env.getConfiguration().get().getString("sr.concepts.path"));
+        if (cmd.hasOption("d")) {
+            parentDir = new File(cmd.getOptionValue("d"));
+        }
         if (!parentDir.isDirectory()) {
             FileUtils.deleteQuietly(parentDir);
             parentDir.mkdirs();
         }
         for (Language lang : env.getLanguages()) {
-            ESAConceptPruner pruner = new ESAConceptPruner(lang, linkDao, pageDao);
-            File path = new File(parentDir, lang.getLangCode() + ".txt");
-            BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-            for (int wpId : pruner.prune(maxConcepts).toArray()) {
-                writer.write(wpId + "\n");
+            SRConceptSpaceGenerator pruner = new SRConceptSpaceGenerator(lang, linkDao, pageDao);
+            if (cmd.hasOption("x")) {
+                pruner.setMaxConcepts(Integer.valueOf(cmd.getOptionValue("x")));
             }
-            writer.close();
+            File path = new File(parentDir, lang.getLangCode() + ".txt");
+            pruner.writeConcepts(path);
         }
     }
 }

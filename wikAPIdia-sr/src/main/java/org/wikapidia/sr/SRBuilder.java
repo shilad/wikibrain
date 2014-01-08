@@ -12,10 +12,13 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalLinkDao;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.dataset.DatasetDao;
 import org.wikapidia.sr.ensemble.EnsembleMetric;
+import org.wikapidia.sr.esa.SRConceptSpaceGenerator;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.BufferedReader;
@@ -103,6 +106,7 @@ public class SRBuilder {
         if (deleteExistingData) {
             deleteDataDirectories();
         }
+        buildConceptsIfNecessary();
         LOG.info("building metric " + metricName);
         String type = getMetricType();
         if (type.equals("ensemble")) {
@@ -150,7 +154,7 @@ public class SRBuilder {
                 results.addAll(getSubmetrics(child));
                 results.add(child);
             }
-        } else if (type.equals("vector") && config.getString("generator.type").equals("mostsimilarconcepts")) {
+        } else if (type.equals("vector.mostsimilarconcepts")) {
             results.addAll(getSubmetrics(config.getString("generator.basemetric")));
         }
         results.add(parentName);
@@ -195,6 +199,37 @@ public class SRBuilder {
         metric.write();
     }
 
+    private void buildConceptsIfNecessary() throws IOException, ConfigurationException, DaoException {
+        boolean needsConcepts = false;
+        for (String name : getSubmetrics(metricName)) {
+            String type = getMetricType(name);
+            if (type.equals("vector.esa") || type.equals("vector.mostsimilarconcepts")) {
+                needsConcepts = true;
+            }
+        }
+        if (!needsConcepts) {
+            return;
+        }
+        File path = FileUtils.getFile(
+                    env.getConfiguration().get().getString("sr.concepts.path"),
+                    language.getLangCode() + ".txt"
+               );
+        path.getParentFile().mkdirs();
+
+        // Check to see if concepts are already built
+        if (path.isFile() && FileUtils.readLines(path).size() > 1) {
+            return;
+        }
+
+        LOG.info("building concept file " + path.getAbsolutePath() + " for " + metricName);
+        SRConceptSpaceGenerator gen = new SRConceptSpaceGenerator(language,
+                env.getConfigurator().get(LocalLinkDao.class),
+                env.getConfigurator().get(LocalPageDao.class));
+        gen.writeConcepts(path);
+        LOG.info("finished creating concept file " + path.getAbsolutePath() +
+                " with " + FileUtils.readLines(path).size() + " lines");
+    }
+
     public Dataset getDataset() throws ConfigurationException, DaoException {
         DatasetDao dao = env.getConfigurator().get(DatasetDao.class);
         List<Dataset> datasets = new ArrayList<Dataset>();
@@ -206,11 +241,16 @@ public class SRBuilder {
 
 
     public String getMetricType() throws ConfigurationException {
-        return getMetricConfig().getString("type");
+        return getMetricType(metricName);
     }
 
     public String getMetricType(String name) throws ConfigurationException {
-        return getMetricConfig(name).getString("type");
+        Config config = getMetricConfig(name);
+        String type = config.getString("type");
+        if (type.equals("vector")) {
+            type += "." + config.getString("generator.type");
+        }
+        return type;
     }
 
     public Config getMetricConfig() throws ConfigurationException {

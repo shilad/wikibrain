@@ -43,7 +43,7 @@ public class ESAGenerator implements VectorGenerator {
     private final Language language;
     private final LocalPageDao pageDao;
 
-    private Map<Language, WpIdFilter> conceptFilter = new HashMap<Language, WpIdFilter>();
+    private WpIdFilter conceptFilter = null;
 
     public ESAGenerator(Language language, LocalPageDao pageDao, LuceneSearcher searcher) {
         this.language = language;
@@ -80,21 +80,18 @@ public class ESAGenerator implements VectorGenerator {
         }
     }
 
-    public void setConcepts(File dir) throws IOException {
-        conceptFilter.clear();
-        if (!dir.isDirectory()) {
-            LOG.warning("concept path " + dir + " not a directory; defaulting to all concepts");
+    public void setConcepts(File file) throws IOException {
+        conceptFilter = null;
+        if (!file.isFile()) {
+            LOG.warning("concept path " + file + " not a file; defaulting to all concepts");
             return;
         }
-        for (String file : dir.list()) {
-            String langCode = FilenameUtils.getBaseName(file);
-            TIntSet ids = new TIntHashSet();
-            for (String wpId : FileUtils.readLines(new File(dir, file))) {
-                ids.add(Integer.valueOf(wpId));
-            }
-            conceptFilter.put(Language.getByLangCode(langCode), new WpIdFilter(ids.toArray()));
-            LOG.warning("installed " + ids.size() + " concepts for " + langCode);
+        TIntSet ids = new TIntHashSet();
+        for (String wpId : FileUtils.readLines(file)) {
+            ids.add(Integer.valueOf(wpId));
         }
+        conceptFilter = new WpIdFilter(ids.toArray());
+        LOG.warning("installed " + ids.size() + " concepts for " + language);
     }
 
     @Override
@@ -124,9 +121,8 @@ public class ESAGenerator implements VectorGenerator {
     private QueryBuilder getQueryBuilder() {
         QueryBuilder builder = searcher.getQueryBuilderByLanguage(language);
         builder.setResolveWikipediaIds(false);
-        WpIdFilter filter = conceptFilter.get(language);
-        if (filter != null) {
-            builder.addFilter(filter);
+        if (conceptFilter != null) {
+            builder.addFilter(conceptFilter);
         }
         return builder;
     }
@@ -199,7 +195,9 @@ public class ESAGenerator implements VectorGenerator {
             );
             if (config.hasPath("concepts")) {
                 try {
-                    generator.setConcepts(new File(config.getString("concepts")));
+                    generator.setConcepts(FileUtils.getFile(
+                            config.getString("concepts"),
+                            language.getLangCode() + ".txt"));
                 } catch (IOException e) {
                     throw new ConfigurationException(e);
                 }
