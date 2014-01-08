@@ -59,6 +59,7 @@ function select_first_file() {
     for file in $@; do
         if [ -f "${file}" ]; then
             echo "${file}"
+			break
         fi
     done
 }
