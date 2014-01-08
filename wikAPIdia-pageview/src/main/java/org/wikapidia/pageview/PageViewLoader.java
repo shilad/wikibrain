@@ -4,6 +4,7 @@ import org.apache.commons.cli.*;
 import org.joda.time.DateTime;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
@@ -56,9 +57,26 @@ public class PageViewLoader {
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
-        /*Options options = new Options();
-        options.addOption("s", true, "start time");
-        options.addOption("e", true, "end time");
+        Options options = new Options();
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("drop-tables")
+                        .withDescription("drop and recreate all tables")
+                        .create("d"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("start-date")
+                        .withDescription("date at which to start loading page view files")
+                        .isRequired()
+                        .hasArg()
+                        .create("s"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("end-date")
+                        .withDescription("date at which to stop loading page view files")
+                        .isRequired()
+                        .hasArg()
+                        .create("e"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -72,22 +90,22 @@ public class PageViewLoader {
         }
 
         String startTime = cmd.getOptionValue("s", null);
-        String endTime = cmd.getOptionValue("e", null);*/
+        String endTime = cmd.getOptionValue("e", null);
 
         try {
-            DateTime startDate = parseDate(args[1]);
-            DateTime endDate = parseDate(args[2]);
+            DateTime startDate = parseDate(startTime);
+            DateTime endDate = parseDate(endTime);
 
-            Env env = new EnvBuilder().setLanguages(args[0]).build();
-            // Env env = new EnvBuilder(cmd).build();
+            // Env env = new EnvBuilder().setLanguages(args[0]).build();
+            Env env = new EnvBuilder(cmd).build();
             Configurator conf = env.getConfigurator();
             PageViewSqlDao dao = conf.get(PageViewSqlDao.class);
             final PageViewLoader loader = new PageViewLoader(env.getLanguages(), dao);
 
-            /*if (cmd.hasOption("d")) {
+            if (cmd.hasOption("d")) {
                 LOG.log(Level.INFO, "Clearing data");
                 dao.clear();
-            }*/
+            }
             LOG.log(Level.INFO, "Begin Load");
             dao.beginLoad();
 
@@ -98,7 +116,7 @@ public class PageViewLoader {
             LOG.log(Level.INFO, "DONE");
         } catch (WikapidiaException wE) {
             System.err.println("Invalid option usage:" + wE.getMessage());
-            //new HelpFormatter().printHelp("PageViewLoader", options);
+            new HelpFormatter().printHelp("PageViewLoader", options);
             return;
         }
     }
