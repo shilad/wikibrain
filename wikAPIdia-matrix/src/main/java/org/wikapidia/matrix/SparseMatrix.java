@@ -63,6 +63,7 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
         }
         debug("reading offsets for " + numRows + " rows");
         rowIds = new int[numRows];
+        rowOffsets.ensureCapacity(numRows);
         for (int i = 0; i < numRows; i++) {
             int pos = 16 + 12 * i;
             int rowIndex = buffer.getInt(pos);

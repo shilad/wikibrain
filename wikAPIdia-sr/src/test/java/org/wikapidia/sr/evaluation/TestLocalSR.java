@@ -144,11 +144,6 @@ public class TestLocalSR implements MonolingualSRMetric {
     }
 
     @Override
-    public TIntDoubleMap getVector(int id) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds) throws DaoException {
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }

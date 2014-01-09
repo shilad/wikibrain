@@ -207,12 +207,6 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
         ensemble.read(new File(getDataDir(), "ensemble").getAbsolutePath());
     }
 
-    @Override
-    public TIntDoubleMap getVector(int id) throws DaoException {
-        //TODO: implement me
-        throw new UnsupportedOperationException();
-    }
-
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric>{
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);

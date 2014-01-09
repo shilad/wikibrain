@@ -3,6 +3,7 @@ package org.wikapidia.utils;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.zip.GZIPInputStream;
@@ -13,6 +14,24 @@ public class WpIOUtils {
         if (!dir.isDirectory()) {
             FileUtils.deleteQuietly(dir);
             dir.mkdirs();
+        }
+    }
+
+    public static void writeObjectToFile(File file, Object o) throws IOException {
+        ObjectOutputStream oop = new ObjectOutputStream(new FileOutputStream(file));
+        oop.writeObject(o);
+        oop.close();
+    }
+
+    public static Object readObjectFromFile(File file) throws IOException {
+        ObjectInputStream oip = null;
+        try {
+            oip = new ObjectInputStream(new FileInputStream(file));
+            return oip.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException(e);
+        } finally {
+            if (oip != null) IOUtils.closeQuietly(oip);
         }
     }
 

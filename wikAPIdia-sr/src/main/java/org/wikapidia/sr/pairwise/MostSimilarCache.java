@@ -347,7 +347,7 @@ public class MostSimilarCache implements Closeable {
         TIntDoubleMap scores;
         try {
             if (monoSr !=null){
-                scores = monoSr.getVector(id);
+                throw new UnsupportedOperationException();
             } else if (universalSr!=null){
                 scores = universalSr.getVector(id);
             } else {
