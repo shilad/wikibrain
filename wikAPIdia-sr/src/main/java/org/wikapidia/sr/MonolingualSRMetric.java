@@ -8,6 +8,7 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.normalize.Normalizer;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -27,6 +28,20 @@ public interface MonolingualSRMetric {
      * @return The language associated with this metric.
      */
     public Language getLanguage();
+
+    /**
+     * Returns the directory containing all data for the metric.
+     * @return
+     */
+    public File getDataDir();
+
+    /**
+     * Sets the data directory associated with the model.
+     * This will apply to all future reads and writes.
+     *
+     * @param dir
+     */
+    public void setDataDir(File dir);
 
     /**
      * Determine the similarity between two local pages.
@@ -87,22 +102,16 @@ public interface MonolingualSRMetric {
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException;
 
     /**
-     * Writes the metric to a directory.
+     * Writes the metric to the current data directory.
      *
-     * @param path A directory data will be written to.
-     *                  Any existing data in the directory may be destroyed.
      * @throws java.io.IOException
      */
-    public void write(String path) throws IOException;
+    public void write() throws IOException;
 
     /**
-     * Reads the metric from a directory.
-     *
-     * @param path A directory data will be read from.
-     *                  The directory previously will have been written to by write().
-     * @throws java.io.IOException if the file is not found or is unusable
+     * Reads the metric from the current data directory.
      */
-    public void read(String path) throws IOException;
+    public void read() throws IOException;
 
     /**
      * Train the similarity() function.
@@ -131,19 +140,6 @@ public interface MonolingualSRMetric {
      * @return true if mostSimilar() is already trained (or doesn't need training)
      */
     public boolean mostSimilarIsTrained();
-
-
-    public void setMostSimilarNormalizer(Normalizer n);
-
-    public void setSimilarityNormalizer(Normalizer defaultSimilarityNormalizer);
-
-    /**
-     * Return a vector representation of a LocalPage
-     * @param id Local id of the page to be described.
-     * @return A vector of a page's scores versus all other pages
-     */
-    public TIntDoubleMap getVector(int id) throws DaoException;
-
 
     /**
      * Construct a cosimilarity matrix of Wikipedia ids in a given language.
@@ -185,13 +181,25 @@ public interface MonolingualSRMetric {
     public double[][] cosimilarity(String phrases[]) throws DaoException;
 
     /**
-     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
-     * This should be considered a "cache" that speeds up underlying cosimilarity calculations.
-     *
-     * @param path the directory to write the matrix in
-     * @param maxHits the number of document hits you would like returned from the most similar function
+     * @return the most similar normalizer.
      */
-    public void writeCosimilarity(String path, int maxHits) throws IOException, DaoException, WikapidiaException;
+    public Normalizer getMostSimilarNormalizer();
 
-    public void readCosimilarity(String path) throws IOException;
+    /**
+     * Sets the most similar normalizer
+     * @param n
+     */
+    public void setMostSimilarNormalizer(Normalizer n);
+
+    /**
+     *
+     * @return the similarity normalizer.
+     */
+    public Normalizer getSimilarityNormalizer();
+
+    /**
+     * Sets the similarity normalizer.
+     * @param n
+     */
+    public void setSimilarityNormalizer(Normalizer n);
 }

@@ -121,7 +121,7 @@ public class SrNormalizers {
                 public void call(KnownSim ks) throws IOException, DaoException {
                     ks.maybeSwap();
                     SRResult sim = metric.similarity(ks.phrase1, ks.phrase2, false);
-                    trainee.observe(sim.getScore(), ks.similarity);
+                    trainee.observe(sim == null ? Double.NaN : sim.getScore(), ks.similarity);
                 }
             }, 100);
             trainee.observationsFinished();
@@ -187,7 +187,7 @@ public class SrNormalizers {
                     List<LocalString> localStrings = new ArrayList<LocalString>();
                     localStrings.add(new LocalString(ks.language, ks.phrase1));
                     localStrings.add(new LocalString(ks.language, ks.phrase2));
-                    List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
+                    List<LocalId> ids = disambiguator.disambiguateTop(localStrings, null);
                     if (ids != null && ids.size() == 2 && ids.get(0) != null && ids.get(1) != null) {
                         LocalId lid1 = ids.get(0);
                         LocalId lid2 = ids.get(1);
@@ -227,7 +227,7 @@ public class SrNormalizers {
                     List<LocalString> localStrings = new ArrayList<LocalString>();
                     localStrings.add(new LocalString(ks.language, ks.phrase1));
                     localStrings.add(new LocalString(ks.language, ks.phrase2));
-                    List<LocalId> ids = disambiguator.disambiguate(localStrings, null);
+                    List<LocalId> ids = disambiguator.disambiguateTop(localStrings, null);
                     if (ids != null && ids.size() == 2) {
                         int pageId1 = dao.getUnivPageId(ids.get(0).asLocalPage(), algorithmId);
                         int pageId2 = dao.getUnivPageId(ids.get(1).asLocalPage(),algorithmId);

@@ -1,5 +1,6 @@
 package org.wikapidia.sr.pairwise;
 
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.set.TIntSet;
 import org.wikapidia.sr.SRResultList;
 
@@ -14,5 +15,6 @@ import java.io.IOException;
 public interface PairwiseSimilarity {
     public double getMinValue();
     public double getMaxValue();
-    public SRResultList mostSimilar(SRMatrices matrices, int wpId, int maxResults, TIntSet validIds) throws IOException;
+    public SRResultList mostSimilar(MostSimilarCache matrices, TIntFloatMap vector, int maxResults, TIntSet validIds) throws IOException;
+    public SRResultList mostSimilar(MostSimilarCache matrices, int wpId, int maxResults, TIntSet validIds) throws IOException;
 }

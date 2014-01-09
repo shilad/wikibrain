@@ -1,5 +1,6 @@
 package org.wikapidia.matrix;
 
+import gnu.trove.map.TIntFloatMap;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
@@ -46,6 +47,10 @@ public final class SparseMatrixRow extends BaseMatrixRow implements MatrixRow {
      */
     private ShortBuffer valBuffer;
     private ValueConf vconf;
+
+    public SparseMatrixRow(ValueConf vconf, int rowIndex, TIntFloatMap row) {
+        this(vconf, rowIndex, row.keys(), row.values());
+    }
 
     public SparseMatrixRow(ValueConf vconf, int rowIndex, LinkedHashMap<Integer, Float> row) {
         this(vconf, rowIndex,

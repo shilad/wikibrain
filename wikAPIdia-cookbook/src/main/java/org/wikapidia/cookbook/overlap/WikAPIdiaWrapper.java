@@ -113,7 +113,7 @@ public class WikAPIdiaWrapper {
      * THIS MUST BE CALLED BEFORE AN INSTANCE OF WIKIPADIA WRAPPER IS CREATED!
      * @param langCodes comma separated list of langcodes - ie "simple,la"
      */
-    public static void loadLanguages(String langCodes) throws IOException, InterruptedException {
+    public static void loadLanguages(String langCodes) throws IOException, InterruptedException, ClassNotFoundException, ConfigurationException {
         PipelineLoader.main(new String[]{"-l", langCodes});
     }
 }

@@ -16,38 +16,29 @@ import java.util.*;
  * Resolves disambiguations by naively choosing the most common
  * meaning of a phrase without regards to its context.
  */
-public class TopResultDisambiguator implements Disambiguator{
+public class TopResultDisambiguator extends Disambiguator{
     private final PhraseAnalyzer phraseAnalyzer;
 
     public TopResultDisambiguator(PhraseAnalyzer phraseAnalyzer){
         this.phraseAnalyzer=phraseAnalyzer;
     }
 
-
     @Override
-    public LocalId disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException {
-        LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolveLocal(phrase.getLanguage(), phrase.getString(), 1);
-        if (localMap==null){
-            return null;
+    public List<LinkedHashMap<LocalId, Double>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
+        List<LinkedHashMap<LocalId, Double>> results = new ArrayList<LinkedHashMap<LocalId, Double>>();
+        for (LocalString phrase : phrases) {
+            LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolveLocal(phrase.getLanguage(), phrase.getString(), 10);
+            if (localMap==null){
+                results.add(null);
+            } else {
+                LinkedHashMap<LocalId, Double> phraseResult = new LinkedHashMap<LocalId, Double>();
+                for (LocalPage page : localMap.keySet()) {
+                    phraseResult.put(page.toLocalId(), (double)localMap.get(page));
+                }
+                results.add(phraseResult);
+            }
         }
-        Iterator<LocalPage> pageIterator = localMap.keySet().iterator();
-        if (pageIterator.hasNext()){
-            LocalPage localPage = pageIterator.next();
-//            System.err.println("returinging " + localPage + " for " + phrase);
-            return new LocalId(localPage.getLanguage(),localPage.getLocalId());
-        }
-        else {
-            return null;
-        }
-    }
-
-    @Override
-    public List<LocalId> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
-        List<LocalId> ids = new ArrayList<LocalId>();
-        for (LocalString phrase : phrases){
-            ids.add(disambiguate(phrase,context));
-        }
-        return ids;
+        return results;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<Disambiguator>{

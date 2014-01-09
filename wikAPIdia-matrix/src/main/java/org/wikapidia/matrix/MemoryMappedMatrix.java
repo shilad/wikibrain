@@ -6,9 +6,13 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -24,30 +28,26 @@ import java.util.logging.Logger;
 public class MemoryMappedMatrix {
     public static final Logger LOG = Logger.getLogger(MemoryMappedMatrix.class.getName());
 
-    private int maxPageSize;
+    public static final int PAGE_SIZE = 1024 * 1024 * 1024;     // 1GB
+
     private TIntLongHashMap rowOffsets = new TIntLongHashMap();
     private FileChannel channel;
     protected List<MappedBufferWrapper> buffers = new ArrayList<MappedBufferWrapper>();
     private File path;
 
-    private LruQueue<MappedBufferWrapper> queue = new LruQueue<MappedBufferWrapper>();
-    private int maxOpenPages;
-
-    public MemoryMappedMatrix(File path, FileChannel channel,TIntLongHashMap rowOffsets,
-                              int maxOpenPages, int maxPageSize) throws IOException {
+    public MemoryMappedMatrix(File path, FileChannel channel,TIntLongHashMap rowOffsets) throws IOException {
         this.path = path;
         this.channel = channel;
         this.rowOffsets = rowOffsets;
-        this.maxOpenPages = maxOpenPages;
-        this.maxPageSize = maxPageSize;
         pageInRows();
     }
 
     public void close() throws IOException {
-        channel.close();
         for (MappedBufferWrapper buffer : buffers) {
             buffer.close();
         }
+        System.gc();    // try to garbage collect any freed buffers
+        channel.close();
     }
 
     private void pageInRows() throws IOException {
@@ -62,7 +62,7 @@ public class MemoryMappedMatrix {
 
         for (int i = 1; i < rowIds.length; i++) {
             long pos = rowOffsets.get(rowIds[i]);
-            if (pos - startPos > maxPageSize) {
+            if (pos - startPos > PAGE_SIZE) {
                 assert(lastPos != startPos);
                 addBuffer(startPos, lastPos);
                 startPos = lastPos;
@@ -85,6 +85,7 @@ public class MemoryMappedMatrix {
         }
         long targetOffset = rowOffsets.get(rowId);
         MappedBufferWrapper row = null;
+        // TODO: binary search
         for (int i = 0; i < buffers.size(); i++) {
             MappedBufferWrapper wrapper = buffers.get(i);
             if (wrapper.start <= targetOffset && targetOffset < wrapper.end) {
@@ -94,23 +95,7 @@ public class MemoryMappedMatrix {
         if (row == null) {
             throw new IllegalArgumentException("did not find row " + rowId + " with offset " + targetOffset);
         }
-        // free queued pages if necessary
-        if (rowOffsets.size() > maxOpenPages) {
-            synchronized (queue) {
-                queue.enqueue(row);
-                while (queue.size() > maxOpenPages) {
-                    MappedBufferWrapper last = queue.dequeue();
-//                    info("closing " + last.start);
-                    last.close();
-                }
-//                info("opening " + row.start);
-                // buffer allocation must happen in the synchronized block
-                // so other calls do not simultaneously free the buffer
-                return row.get(targetOffset);
-            }
-        } else {
-            return row.get(targetOffset);
-        }
+        return row.get(targetOffset);
     }
 
     static class MappedBufferWrapper {
@@ -152,24 +137,6 @@ public class MemoryMappedMatrix {
     }
     private void debug(String message) {
         LOG.log(Level.FINEST, "sparse matrix " + path + ": " + message);
-    }
-
-    static class LruQueue<T> {
-        private LinkedMap lruMap = new LinkedMap();
-
-        public void enqueue(T elem) {
-            lruMap.put(elem, null);
-        }
-
-        public T dequeue() {
-            T first = (T) lruMap.firstKey();
-            lruMap.remove(first);
-            return first;
-        }
-
-        public int size() {
-            return lruMap.size();
-        }
     }
 
 }

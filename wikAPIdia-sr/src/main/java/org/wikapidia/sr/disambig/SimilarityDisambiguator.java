@@ -32,7 +32,7 @@ public class SimilarityDisambiguator extends BaseDisambiguator{
     @Override
     protected double[][] getCosimilarity(List<LocalPage> pages) throws DaoException {
         if (pages==null || pages.isEmpty()){
-            throw new DaoException();
+            return new double[0][0];
         }
         Language language = pages.get(0).getLanguage();
         if (!metrics.containsKey(language)) {

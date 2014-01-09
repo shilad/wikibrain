@@ -124,11 +124,6 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
     @Override
     protected MostSimilarEvaluationLog evaluateSplit(MonolingualSRFactory factory, Split split, File log, final File err, Map<String, String> config) throws IOException, DaoException, WikapidiaException {
         final MonolingualSRMetric metric = factory.create();
-        File cosimDir = null;
-        if (buildCosimilarityMatrix) {
-            cosimDir = WpIOUtils.createTempDirectory(factory.getName());
-            metric.writeCosimilarity(cosimDir.getAbsolutePath(), numMostSimilarResults);
-        }
         metric.trainMostSimilar(split.getTrain(), numMostSimilarResults, mostSimilarIds);
         final MostSimilarEvaluationLog splitEval = new MostSimilarEvaluationLog(config, log);
         final BufferedWriter errFile = new BufferedWriter(new FileWriter(err));
@@ -164,7 +159,6 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
 
         IOUtils.closeQuietly(splitEval);
         IOUtils.closeQuietly(errFile);
-        if (cosimDir != null) FileUtils.forceDelete(cosimDir);
         return splitEval;
     }
 

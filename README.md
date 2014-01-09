@@ -11,34 +11,46 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 * Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
 ###System Requirements
-* Maven (required)
-* Bash (required)
-* A clone of this repository
+* Maven, Bash, a clone of this repository (instructions in next section).
 * Hardware varies depending on the languages you want to import:
   * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
   * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
-###Importing data
+###Installing WikAPIdia
 
-* Clone this repository ```git-clone https://github.com/shilad/wikAPIdia.git```
-* Download and process the dataset:
+1. If necessary, download and install Sun's JDK 6 or higher.
+2. If necessary, download and install [Maven](http://maven.apache.org/download.cgi). tl;dr: 1) unzip the maven download, 2) set the `M2_HOME` environment variable to point to the unzipped directory, 3) make sure the mvn script in `$M2_HOME` is on your `PATH`. You can test your install by making sure that `mvn --version` works properly
+3. Clone this repository and run the unit tests to make sure your environment is setup properly:
 
 ```bash
-	cd wikAPIdia
-	cd wikAPIdia-parent
-	./scripts/runpipeline.sh all -l simple
+cd wikAPIdia
+git-clone https://github.com/shilad/wikAPIdia.git
+mvn -f wikAPIdia-parent/pom.xml test
 ```
 
-(Note: be sure to run code from the folders indicated above)
+###Running WikAPIdia programs
 
-The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. 
+**From an IDE:** If you are using an IDE such as Eclipse or IntelliJ, and your project is integrated with maven you can run these commands directly through your IDE.
 
-You can customize WikAPIdia's importing procedure, but the run-pipeline-sh script should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
+**From the command line:** Install our `wp-java.sh` helper bash script that makes it easier to compile and run java programs. `mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller`
+
+**JVM options:** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. You can set these defaults in your IDE's run dialog, or if you are using `wp-java.sh`, run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
+
+###Importing data
+
+Download and process the dataset:
 
 ```bash
-./scripts/run-pipeline all -l en,fr
+wp-java.sh org.wikapidia.dao.load.PipelineLoader -l simple
+```
+
+
+The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. It imports the data into an embedded h2 database. You can customize WikAPIdia's importing procedure, (see Configuration, below) but the default should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
+
+```bash
+wp-java.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
 ``` 
-(beware that this is a lot of data!).
+(beware that this is a lot of data and takes many hours!).
 
 
 ###An example program
@@ -123,8 +135,96 @@ resolution of apple
 
 ###Main components
 The WikAPIdia Configurator offers a set of components that you can use as building blocks in your application.
-To get one of these components, use the Configurator.get() method.
-TODO: List and one-sentence description of most important components
+To get one of these components, use the Configurator.get() method:
+* **RawPageDao** provides detailed information about an article, include the raw WIkiMarkup pagetext.
+* **LocalPageDao** provides basic metadata about an article, including title, namespace, and Wikipedia id.
+* **LocalLinkDao** provides access to the Wikilink structure between pages.
+* **LocalCategoryMemberDao** provides access to Wikipedia's category graph.
+* **UniversalArticleDao** provides access to the multilingual concept mapping.
+* **UniversalLinkDao** exposes the link structure imposed by the multilingual mapping.
+* **LuceneSearcher** searches arbitrary fields (e.g. title or plain text) in an arbitrary language.
+* **SparseMatrix** represents a sparse matrix of ints (ids) to floats (values) that is persisted using memory mapping to disk.
+* **PhraseAnalyzer** returns the most likely Wikipedia articles for a textual phrase, and the most common textual phrases that represent a particular Wikipedia article.
+* **MonolingualSRMetric** returns the strength of relationship between two Wikipedia pages or phrases in a particular language, and the most closely related pages to a particular phrase or page.
+* **UniversalSRMetric** (not yet tested) returns the same information as the MonolingualSRMetric, but for universal concepts that span multiple languages.
+
+
+###Semantic relatedness algorithms
+WikAPIdia provides several state-of-the-art semantic relatedness algorithms (*SR metrics*). These algorithms estimate the strength of semantic relationships between concepts. 
+These algorithms are designed to be fast, with performance of 10-100 milliseconds and caching and multi-threaded support built in.
+WikAPIdia SR metrics support six major functions:
+
+* `similarity(phrase1, phrase2)` returns the relatedness score between two phrases.
+* `similarity(page1, page2)` returns the relatedness score between two pages.
+* `mostSimilar(phrase)` returns the most similar phrases to a particular target phrase.
+* `mostSimilar(page)` returns the most similar pages to a particular target page.
+* `cosimilarity(rowPhrases[], colPhrases[])` computes a cosimilarity matrix for the specified row and column phrases.
+* `cosimilarity(rowPages[], colPages[])` computes a cosimilarity matrix for the specified rows and column pages.
+
+To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
+
+```bash
+./wp-java.sh org.wikapidia.sr.SRBuilder -m inlink
+```
+
+The inlink metric is a fast but relatively inaccurate SR metric. You can also build the "ensemble" metric that provides a linear combination of four other metrics. Beware that training the ensemble is costly. It takes about 10 minutes on Simple English Wikipedia, and a little over a day on the full Wikipedia. Most of the model-building time supports the *mostSimilar()* call, so you can speed up model building if you only need *similarity()*. TODO: explain how to do this.
+
+After you build the model for an SR metric, you can use it in your Java application. For example, to use the `mostSimilar()` method for phrases, do the following:
+
+```java    
+// Initialize the WikAPIdia environment and get the local page dao
+Env env = new EnvBuilder().build();
+Configurator conf = env.getConfigurator();
+LocalPageDao lpDao = conf.get(LocalPageDao.class);
+Language simple = Language.getByLangCode("simple");
+
+// Retrieve the "ensemble" sr metric for simple english 
+MonolingualSRMetric sr = conf.get(
+        MonolingualSRMetric.class, "ensemble",
+        "language", simple.getLangCode());
+
+//Similarity between strings 
+for (String phrase : Arrays.asList("Barack Obama", "US", "Canada", "vim")) {
+    SRResultList similar = sr.mostSimilar(phrase, 3);
+    List<String> pages = new ArrayList<String>();
+    for (int i = 0; i < similar.numDocs(); i++) {
+        LocalPage page = lpDao.getById(simple, similar.getId(i));
+        pages.add((i+1) + ") " + page.getTitle());
+    }       
+    System.out.println("'" + phrase + "' is similar to " + StringUtils.join(pages, ", ")); 
+}  
+```
+This code (on Simple english) displays:
+```
+*Barack Obama* is similar to 1) Barack Obama, 2) Hillary Rodham Clinton, 3) Mitt Romney
+*US* is similar to 1) United States, 2) Federal government of the United States, 3) United States Constitution
+*Canada* is similar to 1) Canada, 2) Quebec, 3) Australia
+*vim* is similar to 1) Vim, 2) Text editor, 3) GNU Emacs
+```
+You can also calculate a relatedness score between any two pages or phrases using the same MonolingualSRMetric:
+```java
+//Similarity between strings 
+String pairs[][] = new String[][] {
+        { "cat", "kitty" },
+        { "obama", "president" },
+        { "tires", "car" },
+        { "java", "computer" },
+        { "dog", "computer" },
+};      
+
+for (String pair[] : pairs) {
+    SRResult s = sr.similarity(pair[0], pair[1], false); 
+    System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'"); 
+}    
+```
+This code (on Simple english) displays:
+```
+0.7652857508808703: 'cat', 'kitty'
+0.6816860201660842: 'obama', 'president'
+0.7058954876236786: 'tires', 'car'
+0.5905978329192705: 'java', 'computer'
+0.42989849626985877: 'dog', 'computer'
+```
 
 ###Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.

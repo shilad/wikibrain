@@ -138,7 +138,7 @@ public class Configurator {
 
             for (ClassInfo classInfo : foundClasses) {
                 if (registered.containsKey(classInfo.getClassName())) {
-                    LOG.warning("class " + classInfo.getClassName() +
+                    LOG.fine("class " + classInfo.getClassName() +
                             " found in " + file +
                             " but previously found in " + registered.get(classInfo.getClassName()) +
                             ". Skipping!");

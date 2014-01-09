@@ -11,10 +11,12 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.model.CategoryGraph;
 import org.wikapidia.sr.BaseMonolingualSRMetric;
 import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 
 import java.io.IOException;
@@ -25,28 +27,17 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
-    MonolingualCategoryGraphHelper graphHelper;
+    private final CategoryGraph graph;
     LocalCategoryMemberDao catHelper;
 
-    public MonolingualCategoryGraphSimilarity(Language language, LocalPageDao pageDao, Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao, MonolingualCategoryGraphHelper graphHelper) {
-        super(language,pageDao,disambiguator);
+    public MonolingualCategoryGraphSimilarity(String name, Language language, LocalPageDao pageDao, Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao) throws DaoException {
+        super(name, language,pageDao,disambiguator);
         this.catHelper=categoryMemberDao;
-        this.graphHelper = graphHelper;
-        try {
-            this.graphHelper.init();
-        } catch (DaoException e) {
-            //TODO: handle this error
-        }
-
-    }
-
-    @Override
-    public String getName() {
-        return "categorygraphsimilarity";
+        this.graph = categoryMemberDao.getGraph(language);
     }
 
     public double distanceToScore(double distance) {
-        return distanceToScore(graphHelper.graph(), distance);
+        return distanceToScore(graph, distance);
     }
 
     public static double distanceToScore(CategoryGraph graph, double distance) {
@@ -59,9 +50,17 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     }
 
     @Override
+    public SRConfig getConfig() {
+        SRConfig config = new SRConfig();
+        config.minScore = -1.0f;
+        config.maxScore = +1.0f;
+        return config;
+    }
+
+    @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
-        CategoryBfs bfs1 = new CategoryBfs(graphHelper.graph(),pageId1,getLanguage(), Integer.MAX_VALUE, null, catHelper);
-        CategoryBfs bfs2 = new CategoryBfs(graphHelper.graph(),pageId2,getLanguage(), Integer.MAX_VALUE, null, catHelper);
+        CategoryBfs bfs1 = new CategoryBfs(graph,pageId1,getLanguage(), Integer.MAX_VALUE, null, catHelper);
+        CategoryBfs bfs2 = new CategoryBfs(graph,pageId2,getLanguage(), Integer.MAX_VALUE, null, catHelper);
         bfs1.setAddPages(false);
         bfs1.setExploreChildren(false);
         bfs2.setAddPages(false);
@@ -80,7 +79,7 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
                     if (bfs2.hasCategoryDistance(catId)) {
                         double d = bfs1.getCategoryDistance(catId)
                                 + bfs2.getCategoryDistance(catId)
-                                - graphHelper.graph().catCosts[catId];    // counted twice
+                                - graph.catCosts[catId];    // counted twice
                         shortestDistance = Math.min(d, shortestDistance);
                     }
                 }
@@ -94,7 +93,7 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
                     if (bfs1.hasCategoryDistance(catId)) {
                         double d = bfs1.getCategoryDistance(catId) +
                                 bfs2.getCategoryDistance(catId) + 0
-                                - graphHelper.graph().catCosts[catId];    // counted twice;
+                                - graph.catCosts[catId];    // counted twice;
                         shortestDistance = Math.min(d, shortestDistance);
                     }
                 }
@@ -106,40 +105,22 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     }
 
     @Override
-    public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
-        return mostSimilar(pageId, maxResults, null);
-    }
-
-    @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        if (hasCachedMostSimilarLocal(pageId)) {
-            return getCachedMostSimilarLocal(pageId, maxResults, validIds);
+
+        SRResultList results = getCachedMostSimilar(pageId, maxResults, validIds);
+        if (results != null) {
+            return results;
         }
-        CategoryBfs bfs = new CategoryBfs(graphHelper.graph(),pageId,getLanguage(), maxResults, validIds, catHelper);
+        CategoryBfs bfs = new CategoryBfs(graph,pageId,getLanguage(), maxResults, validIds, catHelper);
         while (bfs.hasMoreResults()) {
             bfs.step();
         }
-        SRResultList results = new SRResultList(bfs.getPageDistances().size());
+        results = new SRResultList(bfs.getPageDistances().size());
         int i = 0;
         for (int pageId2: bfs.getPageDistances().keys()) {
             results.set(i++, pageId2, distanceToScore(bfs.getPageDistances().get(pageId2)));
         }
         return normalize(results);
-    }
-
-    @Override
-    public TIntDoubleMap getVector(int id) throws DaoException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void writeCosimilarity(String path,int maxHits) throws IOException, DaoException, WikapidiaException {
-        //TODO: implement me
-    }
-
-    @Override
-    public void readCosimilarity(String path) throws IOException {
-        //TODO: implement me
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {
@@ -164,18 +145,23 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
             }
 
             if (!runtimeParams.containsKey("language")){
-                throw new IllegalArgumentException("MonolingualCategoryGraphHelper requires 'language' runtime parameter.");
+                throw new IllegalArgumentException("LocalCategoryGraphBuilder requires 'language' runtime parameter.");
             }
 
             Language language = Language.getByLangCode(runtimeParams.get("language"));
 
-            MonolingualCategoryGraphSimilarity sr = new MonolingualCategoryGraphSimilarity(
-                    language,
-                    getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
-                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
-                    getConfigurator().get(LocalCategoryMemberDao.class,config.getString("categoryMemberDao")),
-                    getConfigurator().get(MonolingualCategoryGraphHelper.class, "categorygraphsimilarity", "language", language.getLangCode())
-            );
+            MonolingualCategoryGraphSimilarity sr = null;
+            try {
+                sr = new MonolingualCategoryGraphSimilarity(
+                        name,
+                        language,
+                        getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
+                        getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
+                        getConfigurator().get(LocalCategoryMemberDao.class,config.getString("categoryMemberDao"))
+                );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
             configureBase(getConfigurator(), sr, config);
             return sr;
         }
