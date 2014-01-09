@@ -78,6 +78,8 @@ public class Env {
         if (pathConfs.length > 0) {
             LOG.info("using override configuration files " + Arrays.toString(pathConfs));
         }
+        File baseDir = new File(configuration.get().getString("baseDir"));
+        LOG.info("using baseDir " + baseDir.getAbsolutePath());
         LOG.info("using max vm heapsize of " + (Runtime.getRuntime().maxMemory() / (1024*1024)) + "MB");
         LOG.info("using languages " + getLanguages());
         LOG.info("using maxThreads " + WpThreadUtils.getMaxThreads());

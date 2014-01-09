@@ -79,6 +79,12 @@ public class WpDataSource {
             return false;
         }
     }
+    public static boolean rollbackQuietly(DSLContext context) {
+        if (context == null) {
+            return false;
+        }
+        return JooqUtils.rollbackQuietly(context);
+    }
 
     public DSLContext getJooq() throws DaoException {
         try {

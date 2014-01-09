@@ -15,8 +15,11 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.sr.disambig.Disambiguator;
 import org.wikapidia.sr.disambig.TopResultDisambiguator;
-import org.wikapidia.sr.milnewitten.MonolingualMilneWitten;
 import org.wikapidia.sr.utils.ExplanationFormatter;
+import org.wikapidia.sr.vector.GoogleSimilarity;
+import org.wikapidia.sr.vector.MilneWittenGenerator;
+import org.wikapidia.sr.vector.VectorBasedMonoSRMetric;
+import org.wikapidia.sr.vector.VectorGenerator;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.File;
@@ -129,8 +132,10 @@ public class TestMilneWitten {
 
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
-        BaseMonolingualSRMetric srIn = new MonolingualMilneWitten("srIn", SIMPLE, dao, disambiguator,linkDao);
-        BaseMonolingualSRMetric srOut =  new MonolingualMilneWitten("srOut", SIMPLE, dao, disambiguator,linkDao,true);
+        VectorGenerator generator = new MilneWittenGenerator(SIMPLE, linkDao, dao, false);
+        BaseMonolingualSRMetric srIn = new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
+        generator = new MilneWittenGenerator(SIMPLE, linkDao, dao, true);
+        BaseMonolingualSRMetric srOut =  new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
 
         double rIn = srIn.similarity(page1.getLocalId(), page2.getLocalId(), true).getScore();
         assert((1-((Math.log(4)-Math.log(3)) / (Math.log(6) - Math.log(3))))==rIn);
@@ -142,4 +147,4 @@ public class TestMilneWitten {
     }
 
 
-    }
+}

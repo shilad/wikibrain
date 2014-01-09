@@ -141,15 +141,6 @@ public interface MonolingualSRMetric {
      */
     public boolean mostSimilarIsTrained();
 
-
-    /**
-     * Return a vector representation of a LocalPage
-     * @param id Local id of the page to be described.
-     * @return A vector of a page's scores in some feature space
-     */
-    public TIntDoubleMap getVector(int id) throws DaoException;
-
-
     /**
      * Construct a cosimilarity matrix of Wikipedia ids in a given language.
      *
@@ -188,36 +179,6 @@ public interface MonolingualSRMetric {
      * @throws java.io.IOException
      */
     public double[][] cosimilarity(String phrases[]) throws DaoException;
-
-    /**
-     * Writes up to three matrices used as a cache to speed up calls to mostSimilar:
-     * - Feature matrix: For each article, the feature vector as returned by getVector()
-     * - Feature transpose matrix: Transpose of feature matrix
-     * -
-     *
-     * a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
-     * This should be considered a "cache" that speeds up underlying cosimilarity calculations.
-     * The cosimilarity matrix will be written to a file in the data directory.
-     *
-     * @param maxHits the number of document hits you would like returned from the most similar function
-     */
-    public void writeMostSimilarCache(int maxHits) throws IOException, DaoException, WikapidiaException;
-
-    /**
-     * Writes a cosimilarity matrix to file based off of the getVector function and pairwise cosine similarity class.
-     * This should be considered a "cache" that speeds up underlying cosimilarity calculations.
-     * The cosimilarity matrix will be written to a file in the data directory.
-     *
-     * @param maxHits the number of document hits you would like returned from the most similar function
-     * @param rowIds The page ids that will be cached
-     * @param colIds The page ids that can be returned in the resulting similarity lists
-     */
-    public void writeMostSimilarCache(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException;
-
-    /**
-     * @return True if the metric supports a most similar cache and it is already built.
-     */
-    public boolean hasMostSimilarCache();
 
     /**
      * @return the most similar normalizer.

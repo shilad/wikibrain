@@ -87,6 +87,17 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             objectDbPath = File.createTempFile("local-links", "odb");
             FileUtils.forceDeleteOnExit(objectDbPath);
             objectDb = new ObjectDb<int[]>(objectDbPath, true);
+
+            // Initialize object database with existing links
+            if (matrix != null) {
+                for (SparseMatrixRow row : matrix) {
+                    int dests[] = new int[row.getNumCols()];
+                    for (int i = 0; i < row.getNumCols(); i++) {
+                        dests[i] = row.getColIndex(i);
+                    }
+                    objectDb.put(("" + row.getRowIndex()), dests);
+                }
+            }
         } catch (IOException e) {
             throw new DaoException(e);
         }
@@ -94,7 +105,6 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     @Override
     public void save(LocalLink item) throws DaoException {
         delegate.save(item);
-
         // skip red links
         if (item.getDestId() < 0 || item.getSourceId() < 0) {
             return;
@@ -301,6 +311,14 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     @Override
     public LanguageSet getLoadedLanguages() throws DaoException {
         return delegate.getLoadedLanguages();
+    }
+
+    public SparseMatrix getMatrix() {
+        return matrix;
+    }
+
+    public SparseMatrix getTranspose() {
+        return transpose;
     }
 
     private List<Integer> getPackedIds(DaoFilter filter) {

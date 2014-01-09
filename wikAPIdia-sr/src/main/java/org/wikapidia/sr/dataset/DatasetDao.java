@@ -16,10 +16,7 @@ import org.wikapidia.sr.utils.KnownSim;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -38,6 +35,7 @@ public class DatasetDao {
     public static final String RESOURCE_DATASET_INFO = "/datasets/info.tsv";
 
     private final Collection<Info> info;
+    private Map<String, List<String>> groups = new HashMap<String, List<String>>();
     private boolean normalize = true; // If true, normalize all scores to [0,1]
     private boolean resolvePhrases = false;
     private Disambiguator disambiguator = null;

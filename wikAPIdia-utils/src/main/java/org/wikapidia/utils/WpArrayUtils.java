@@ -1,5 +1,10 @@
 package org.wikapidia.utils;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.Arrays;
+import java.util.List;
+
 /**
  */
 public class WpArrayUtils {
@@ -13,5 +18,9 @@ public class WpArrayUtils {
         String B[] = new String[A.length + amount];
         System.arraycopy(A, 0, B, 0, A.length);
         return B;
+    }
+
+    static public List<Integer> toList(int A[]) {
+        return Arrays.asList(ArrayUtils.toObject(A));
     }
 }

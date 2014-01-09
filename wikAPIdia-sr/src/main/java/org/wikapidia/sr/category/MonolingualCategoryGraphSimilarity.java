@@ -6,6 +6,7 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalCategoryMemberDao;
 import org.wikapidia.core.dao.LocalPageDao;
@@ -15,8 +16,10 @@ import org.wikapidia.sr.BaseMonolingualSRMetric;
 import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.sr.SRResultList;
+import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -47,10 +50,11 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     }
 
     @Override
-    public MetricConfig getMetricConfig() {
-        MetricConfig mc = new MetricConfig();
-        mc.supportsFeatureVectors = false;
-        return mc;
+    public SRConfig getConfig() {
+        SRConfig config = new SRConfig();
+        config.minScore = -1.0f;
+        config.maxScore = +1.0f;
+        return config;
     }
 
     @Override
@@ -101,11 +105,6 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
     }
 
     @Override
-    public SRResultList mostSimilar(int pageId, int maxResults) throws DaoException {
-        return mostSimilar(pageId, maxResults, null);
-    }
-
-    @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
 
         SRResultList results = getCachedMostSimilar(pageId, maxResults, validIds);
@@ -122,11 +121,6 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
             results.set(i++, pageId2, distanceToScore(bfs.getPageDistances().get(pageId2)));
         }
         return normalize(results);
-    }
-
-    @Override
-    public TIntDoubleMap getVector(int id) throws DaoException {
-        throw new UnsupportedOperationException();
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {

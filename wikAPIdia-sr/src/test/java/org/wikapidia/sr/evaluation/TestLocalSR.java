@@ -144,11 +144,6 @@ public class TestLocalSR implements MonolingualSRMetric {
     }
 
     @Override
-    public TIntDoubleMap getVector(int id) throws DaoException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds) throws DaoException {
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -166,21 +161,6 @@ public class TestLocalSR implements MonolingualSRMetric {
     @Override
     public double[][] cosimilarity(String[] phrases) throws DaoException {
         return new double[0][];  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void writeMostSimilarCache(int maxHits) throws IOException, DaoException, WikapidiaException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void writeMostSimilarCache(int maxHits, TIntSet rowIds, TIntSet colIds) throws IOException, DaoException, WikapidiaException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public boolean hasMostSimilarCache() {
-        return false;
     }
 
     @Override

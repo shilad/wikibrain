@@ -51,10 +51,8 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     }
 
     @Override
-    public MetricConfig getMetricConfig() {
-        MetricConfig mc = new MetricConfig();
-        mc.supportsFeatureVectors = false;
-        return mc;
+    public SRConfig getConfig() {
+        return new SRConfig();
     }
 
     @Override
@@ -109,27 +107,35 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
      * @throws DaoException
      */
     @Override
-    public void trainSimilarity(Dataset dataset) throws DaoException {
+    public void trainSimilarity(final Dataset dataset) throws DaoException {
         if (trainSubmetrics) {
             for (MonolingualSRMetric metric : metrics) {
                 metric.trainSimilarity(dataset);
             }
         }
-        List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
-
-        for (KnownSim ks : dataset.getData()){
-            EnsembleSim es = new EnsembleSim(ks);
-            for (MonolingualSRMetric metric : metrics){
-                double score = Double.NaN;
-                try {
-                    score = metric.similarity(ks.phrase1,ks.phrase2,false).getScore();
-                } catch (Exception e){
-                    LOG.log(Level.WARNING, "Local sr metric " + metric.getName() + " failed for " + ks, e);
-                }
-                es.add(score, 0);
-            }
-            ensembleSims.add(es);
-        }
+        final List<EnsembleSim> ensembleSims = new ArrayList<EnsembleSim>();
+        ParallelForEach.loop(
+                dataset.getData(),
+                new Procedure<KnownSim>() {
+                    @Override
+                    public void call(KnownSim ks) throws Exception {
+                        EnsembleSim es = new EnsembleSim(ks);
+                        for (MonolingualSRMetric metric : metrics){
+                            double score = Double.NaN;
+                            try {
+                                SRResult result = metric.similarity(ks.phrase1,ks.phrase2,false);
+                                if (result != null) {
+                                    score = result.getScore();
+                                }
+                            } catch (Exception e){
+                                LOG.log(Level.WARNING, "Local sr metric " + metric.getName() + " failed for " + ks, e);
+                            }
+                            es.add(score, 0);
+                        }
+                        ensembleSims.add(es);
+                    }
+                },
+                100);
         ensemble.trainSimilarity(ensembleSims);
         super.trainSimilarity(dataset);
     }
@@ -144,7 +150,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     @Override
     public void trainMostSimilar(Dataset dataset, final int numResults, final TIntSet validIds){
         if (getMostSimilarCache() != null) {
-            getMostSimilarCache().clear();
+            clearMostSimilarCache();
         }
         if (trainSubmetrics) {
             for (MonolingualSRMetric metric : metrics){
@@ -199,12 +205,6 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     public void read() throws IOException{
         super.read();
         ensemble.read(new File(getDataDir(), "ensemble").getAbsolutePath());
-    }
-
-    @Override
-    public TIntDoubleMap getVector(int id) throws DaoException {
-        //TODO: implement me
-        throw new UnsupportedOperationException();
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric>{
