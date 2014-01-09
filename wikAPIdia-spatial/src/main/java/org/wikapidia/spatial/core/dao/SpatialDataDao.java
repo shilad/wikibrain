@@ -1,6 +1,8 @@
 package org.wikapidia.spatial.core.dao;
 
 import com.vividsolutions.jts.geom.Geometry;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.spatial.core.SpatialContainer;
 import org.wikapidia.spatial.core.SpatialContainerMetadata;
@@ -16,19 +18,19 @@ import java.util.Set;
  */
 public interface SpatialDataDao {
 
-    public Iterable<Integer> getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException;
+    public TIntSet getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException;
 
-    public Iterable<Integer> getAllGeomIdsInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
+    public TIntSet getAllGeomIdsInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
 
-    public Iterable<Integer> getAllGeomIdsInLayer(String layerName, String refSysName) throws DaoException;
+    public TIntSet getAllGeomIdsInLayer(String layerName, String refSysName) throws DaoException;
 
-    public Iterable<Integer> getAllGeomIdsInReferenceSystem(String refSysName) throws DaoException;
+    public TIntSet getAllGeomIdsInReferenceSystem(String refSysName) throws DaoException;
 
     public Iterable<SpatialReferenceSystem> getAllSpatialReferenceSystems() throws DaoException;
 
     public Iterable<SpatialLayer> getAllSpatialLayersInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
 
-    public Map<Integer, Geometry> getGeometriesForGeomIds(Collection<Integer> geomIds) throws DaoException;
+    public TIntObjectHashMap<Geometry> getGeometriesForGeomIds(Collection<Integer> geomIds) throws DaoException;
 
     public Integer getMaximumGeomId() throws DaoException;
 

@@ -1,6 +1,8 @@
 package org.wikapidia.spatial.core.dao;
 
 import com.vividsolutions.jts.geom.Geometry;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.spatial.core.SpatialLayer;
 
@@ -13,9 +15,9 @@ public interface SpatialContainmentDao {
 
     public static enum ContainmentOperationType {CONTAINMENT, INTERSECTION};
 
-    public Iterable<Integer> getContainedGeomIds(Integer geomId, String refSysName,
+    public TIntSet getContainedGeomIds(Integer geomId, String refSysName,
                                             Set<SpatialLayer> subLayers, ContainmentOperationType opType) throws DaoException;
-    public Iterable<Integer> getContainedGeomIds(Geometry g, String refSysName,
+    public TIntSet getContainedGeomIds(Geometry g, String refSysName,
                                             Set<SpatialLayer> subLayers) throws DaoException;
 
 
