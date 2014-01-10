@@ -16,6 +16,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>./wikAPIdia-parent</module>
         <module>./wikAPIdia-utils</module>
         <module>./wikAPIdia-matrix</module>
         <module>./wikAPIdia-core</module>
