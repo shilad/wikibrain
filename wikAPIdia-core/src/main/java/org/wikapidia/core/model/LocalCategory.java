@@ -11,4 +11,9 @@ public class LocalCategory extends LocalPage {
     public LocalCategory(Language language, int localId, Title title, boolean redirect) {
         super(language, localId, title, NameSpace.CATEGORY, redirect, false);
     }
+
+    public LocalCategory(LocalPage page){
+        super(page.getLanguage(), page.getLocalId(), page.getTitle(), NameSpace.CATEGORY);
+    }
+
 }

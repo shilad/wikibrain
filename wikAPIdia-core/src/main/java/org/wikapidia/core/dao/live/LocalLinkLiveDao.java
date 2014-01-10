@@ -2,6 +2,10 @@ package org.wikapidia.core.dao.live;
 
 
 import com.typesafe.config.Config;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -11,6 +15,7 @@ import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalLink;
+import org.wikapidia.core.model.Title;
 
 import java.util.*;
 
@@ -39,20 +44,82 @@ public class LocalLinkLiveDao implements LocalLinkDao {
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public int getCount(DaoFilter a)throws DaoException{
-        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
+        if(a.getSourceIds() == null && a.getDestIds() == null)
+            throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
+        else{
+            int sum=0;
+            Iterator<LocalLink> it = get(a).iterator();
+            while (it.hasNext())
+            {
+                it.next();
+                sum++;
+            }
+            return sum;
+        }
     }
     public Iterable<LocalLink> get(DaoFilter a)throws DaoException{
-        throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
+        if(a.getSourceIds() == null && a.getDestIds() == null)
+            throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
+        else if (a.getSourceIds() != null && a.getDestIds() == null){
+            Set<LocalLink> set = new HashSet<LocalLink>();
+            for (short langId : a.getLangIds()){
+                for (int srcId : a.getSourceIds()){
+                    for(LocalLink link: getLinks(Language.getById(langId), srcId, true))
+                        set.add(link);
+                }
+            }
+            return set;
+        }
+        else if (a.getSourceIds() == null && a.getDestIds() != null){
+            Set<LocalLink> set = new HashSet<LocalLink>();
+            for (short langId : a.getLangIds()){
+                for (int dstId : a.getDestIds()){
+                    for(LocalLink link: getLinks(Language.getById(langId), dstId, false))
+                        set.add(link);
+                }
+            }
+            return set;
+        }
+        else{
+            Set<LocalLink> inSet = new HashSet<LocalLink>();
+            for (short langId : a.getLangIds()){
+                for (int srcId : a.getSourceIds()){
+                    for(LocalLink link: getLinks(Language.getById(langId), srcId, true))
+                        inSet.add(link);
+                }
+            }
+            Set<LocalLink> outSet = new HashSet<LocalLink>();
+            for (short langId : a.getLangIds()){
+                for (int dstId : a.getDestIds()){
+                    for(LocalLink link: getLinks(Language.getById(langId), dstId, false))
+                        outSet.add(link);
+                }
+            }
+            Set<LocalLink> interSec = new HashSet<LocalLink>();
+            for (LocalLink link: inSet){
+                if (outSet.contains(link))
+                    interSec.add(link);
+            }
+            return interSec;
+        }
+
     }
     public LanguageSet getLoadedLanguages() throws DaoException {
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException {
-        Iterable<LocalLink> links = LocalLinkLiveUtils.parseLinks(getLinkJson(language, sourceId, true), language, sourceId, true);
-        for (LocalLink link : links) {
-            if (link.getDestId() == destId) {
-                return link;
+        //get list of pageids and titles of all outlinks from sourceId
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("LINKS", language);
+        builder.addPageid(sourceId);
+        LiveAPIQuery query = builder.build();
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+
+        //check all outlinks from sourceId to find one that matches destId
+        for (QueryReply reply : replyObjects) {
+            int pageId = reply.pageId;
+            if (pageId == destId) {
+                return reply.getLocalOutLink(language, sourceId);
             }
         }
         throw new DaoException("No link with given sourceId and destId found");
@@ -65,25 +132,25 @@ public class LocalLinkLiveDao implements LocalLinkDao {
     }
 
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException {
-        return LocalLinkLiveUtils.parseLinks(getLinkJson(language, localId, outlinks), language, localId, outlinks);
-    }
+        List<LocalLink> links = new ArrayList<LocalLink>();
+        LiveAPIQuery.LiveAPIQueryBuilder builder;
+        if (outlinks) {
+            builder = new LiveAPIQuery.LiveAPIQueryBuilder("LINKS", language);
+        }
+        else {
+            builder = new LiveAPIQuery.LiveAPIQueryBuilder("BACKLINKS", language);
+        }
+        builder.addPageid(localId);
+        LiveAPIQuery query = builder.build();
 
-    /**
-     * Query the wikipedia server for links from or to a specific page, specified by sourceId
-     * Returns JSON results of the query
-     * @param language
-     * @param sourceId
-     * @param outlinks
-     * @return
-     * @throws DaoException
-     */
-    private String getLinkJson(Language language, int sourceId, boolean outlinks) throws DaoException {
-        String http = "http://";
-        String host = ".wikipedia.org";
-        String prop = outlinks ? "generator=links" : "list=backlinks";
-        String pageIdRequest = outlinks ? "pageids=" + sourceId : "blpageid=" + sourceId;
-        String query = http + language.getLangCode() + host + "/w/api.php?action=query&" + prop + "&format=json&" + pageIdRequest;
-        return LiveUtils.getInfoByQuery(query);
+        //query for outlinks from local id, return as list of titles and pageids
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+        for (QueryReply reply : replyObjects) {
+            LocalLink link = outlinks ? reply.getLocalOutLink(language, localId) : reply.getLocalInLink(language, localId);
+            links.add(link);
+        }
+
+        return links;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalLinkDao> {
