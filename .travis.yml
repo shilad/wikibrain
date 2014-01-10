@@ -5,7 +5,7 @@ branches:
 jdk:
   - oraclejdk7
 install:
-  - mvn -B -f ./wikAPIdia-parent/pom.xml clean install -DskipTests
+  - mvn -B clean install -DskipTests
 script:
-  - mvn -B -f ./wikAPIdia-parent/pom.xml test
+  - mvn -B test
 
