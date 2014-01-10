@@ -4,7 +4,7 @@ CREATE TABLE geometries (
   ref_sys_name VARCHAR(63) NOT NULL,
   layer_name VARCHAR(63) NOT NULL,
   shape_type SMALLINT NOT NULL,
-  geom_id INTEGER NOT NULL PRIMARY KEY);
+  geom_id SERIAL PRIMARY KEY);
 SELECT AddGeometryColumn('public','geometries','geometry',-1,'GEOMETRY',2);
 
 /* Add indices to geometries table */

@@ -1,131 +1,63 @@
 package org.wikapidia.spatial.core.dao.postgis;
 
 import com.typesafe.config.Config;
+import com.vividsolutions.jts.geom.Geometry;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalArticleDao;
+import org.wikapidia.core.dao.sql.FastLoader;
 import org.wikapidia.core.dao.sql.WpDataSource;
+import org.wikapidia.spatial.core.SpatialLayer;
+import org.wikapidia.spatial.core.SpatialReferenceSystem;
+import org.wikapidia.spatial.core.dao.SpatialDataDao;
 
 import java.sql.*;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 
 /**
  * Created by Brent Hecht on 12/30/13.
  */
-public class PostGISDB {
+public class PostGISDB{
 
-    private Connection c;
+    private WpDataSource wpDataSource;
+    private FastLoader geometryFastLoader = null;
+    private FastLoader spatiotagFastLoader = null;
 
-    public PostGISDB(String host, String databaseName, String userName, String password) throws DaoException {
-        this.c = getConnection(host, databaseName, userName, password);
-        if (needsToBeInitialized()) initializeDatabase();
+    public PostGISDB(WpDataSource wpDataSource) throws DaoException {
+
+        this.wpDataSource = wpDataSource;
+        if (needsToBeInitialized()) wpDataSource.executeSqlResource("db/postgis-db.schema.sql");
     }
 
-    private Connection getConnection(String host, String databaseName, String userName, String password) throws DaoException{
-
-        try {
-
-            Class.forName("org.postgresql.Driver").newInstance();
-            String url = "jdbc:postgresql://" + host + "/"+ databaseName;
-            Properties props = new Properties();
-            props.setProperty("user", userName);
-            props.setProperty("password", password);
-
-            Connection rVal;
-            try{
-                rVal = (Connection) DriverManager.getConnection(url, props);
-            }catch (SQLException e){ // if it doesn't work at 5432, do 5433
-                url = "jdbc:postgresql://" + host + ":5432/"+ databaseName;
-                rVal = (Connection) DriverManager.getConnection(url, props);
-            }
-            ((org.postgresql.PGConnection)rVal).addDataType("geometry", org.postgis.PGgeometry.class);
-            return rVal;
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            //e.printStackTrace();
-            throw new DaoException("There was an error initializing the connection with the PostGIS database.", e);
-        }
-    }
-
-    public Statement advanced_getStatement() throws DaoException{
-
-        try{
-            return c.createStatement();
-        }catch(SQLException e){
-            throw new DaoException(e);
-        }
-
-    }
-
-    public PreparedStatement advanced_prepareStatement(String psSql) throws DaoException{
-        return advanced_prepareStatement(psSql, false);
-    }
-
-
-    public PreparedStatement advanced_prepareStatement(String psSql, boolean scrollable) throws DaoException{
-
-        try{
-            if (scrollable){
-                return c.prepareStatement(psSql,ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            }else{
-                return c.prepareStatement(psSql);
-            }
-        }catch(SQLException e){
-            throw new DaoException(e);
-        }
-
+    public WpDataSource getDataSource(){
+        return wpDataSource;
     }
 
     private boolean needsToBeInitialized() throws DaoException{
 
         try{
-            DatabaseMetaData md = c.getMetaData();
-            ResultSet rs = md.getTables(null, null, "wapi_geometries", null);
+
+            Connection c = wpDataSource.getConnection();
+            DatabaseMetaData md = wpDataSource.getConnection().getMetaData();
+            ResultSet rs = md.getTables(null, null, "geometries", null);
             rs.first();
-            return (rs.getRow() < 1);
-        }catch(SQLException e){
-            throw new DaoException(e);
-        }
-
-    }
-
-    public static final String layerNameType = "VARCHAR(63) NOT NULL";
-    public static final String refSysNameType = "VARCHAR(63) NOT NULL";
-    public static final String geomIdType = "INTEGER NOT NULL";
-    public static final String shapeTypeType = "SMALLINT NOT NULL";
-
-    private void initializeDatabase() throws DaoException{
-
-        try{
-
-            Statement s = advanced_getStatement();
-
-            // geometries
-            String spatialObjectsSql = "CREATE TABLE geometries (ref_sys_name "+refSysNameType+" NOT NULL," +
-                    " layer_name "+layerNameType+" NOT NULL, " +
-                    " shape_type "+shapeTypeType+"," +
-                    " geom_id "+geomIdType+" PRIMARY KEY)";
-            System.out.println(spatialObjectsSql);
-            s.execute(spatialObjectsSql);
-            s.execute("CREATE INDEX rs_layer_type ON geometries (ref_sys_name, layer_name, shape_type)");
-            s.execute("SELECT AddGeometryColumn('public','geometries','geometry',-1,'GEOMETRY',2)");
-            s.execute("CREATE INDEX geometry_index ON geometries USING GIST ( geometry )");
-
-            // spatiotags
-            String spatiotagsSqlF = "CREATE TABLE spatiotags (local_id INTEGER NOT NULL, lang_id SMALLINT NOT NULL, geom_id + " + geomIdType + " PRIMARY KEY)";
-            s.execute(spatiotagsSqlF);
-            s.execute("CREATE INDEX geom_lookup ON spatiotags (local_id, lang_id)");
-
-            s.close();
+            boolean rVal = (rs.getRow() < 1);
+            c.close();
+            return rVal;
 
         }catch(SQLException e){
             throw new DaoException(e);
         }
 
     }
+
+
 
     public static class Provider extends org.wikapidia.conf.Provider<PostGISDB> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
@@ -146,7 +78,10 @@ public class PostGISDB {
         public PostGISDB get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
 
             try {
-                return new PostGISDB(config.getString("host"), config.getString("db"), config.getString("user"), config.getString("password"));
+                WpDataSource wpDataSource = getConfigurator().get(
+                        WpDataSource.class,
+                        config.getString("pgisdatasource"));
+                return new PostGISDB(wpDataSource);
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }

@@ -34,6 +34,10 @@ public interface SpatialDataDao {
 
     public Integer getMaximumGeomId() throws DaoException;
 
+    public void beginSaveGeometries() throws DaoException;
+
     public void saveGeometry(Integer geomId, String layerName, String refSysName, Geometry g) throws DaoException;
+
+    public void endSaveGeometries() throws DaoException;
 
 }

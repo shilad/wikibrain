@@ -2,10 +2,14 @@ package org.wikapidia.spatial.core.dao.postgis;
 
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Geometry;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.sql.FastLoader;
 import org.wikapidia.spatial.core.SpatialLayer;
 import org.wikapidia.spatial.core.SpatialReferenceSystem;
+import org.wikapidia.spatial.core.SpatialUtils;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
 
 import java.sql.PreparedStatement;
@@ -22,54 +26,32 @@ import java.util.Set;
 public class PostGISSpatialDataDao implements SpatialDataDao {
 
     private final PostGISDB db;
-    private final PreparedStatement geomIdsInLayerPs;
+    private FastLoader fastLoader;
 
     public PostGISSpatialDataDao(PostGISDB db) throws DaoException{
 
         this.db = db;
-        geomIdsInLayerPs = db.advanced_prepareStatement("SELECT geom_id FROM geometries WHERE layer_name = ? and ref_sys_name = ?");
-
 
     }
 
-    @Override
-    public Iterable<Integer> getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException {
-
-        try{
-
-            Statement s = db.advanced_getStatement();
-            geomIdsInLayerPs.setString(1, sLayer.getLayerName());
-            geomIdsInLayerPs.setString(2, sLayer.getRefSysName());
-
-            Set<Integer> rVal = Sets.newHashSet();
-            ResultSet r = geomIdsInLayerPs.executeQuery();
-            while (r.next()){
-                rVal.add(r.getInt(1));
-            }
-
-            return rVal;
-
-
-        }catch(SQLException e){
-
-            throw new DaoException(e);
-
-        }
-
-    }
 
     @Override
-    public Iterable<Integer> getAllGeomIdsInReferenceSystem(SpatialReferenceSystem srs) throws DaoException {
+    public TIntSet getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException {
         return null;
     }
 
     @Override
-    public Iterable<Integer> getAllGeomIdsInLayer(String layerName, String refSysName) throws DaoException {
+    public TIntSet getAllGeomIdsInReferenceSystem(SpatialReferenceSystem srs) throws DaoException {
         return null;
     }
 
     @Override
-    public Iterable<Integer> getAllGeomIdsInReferenceSystem(String refSysName) throws DaoException {
+    public TIntSet getAllGeomIdsInLayer(String layerName, String refSysName) throws DaoException {
+        return null;
+    }
+
+    @Override
+    public TIntSet getAllGeomIdsInReferenceSystem(String refSysName) throws DaoException {
         return null;
     }
 
@@ -84,7 +66,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     }
 
     @Override
-    public Map<Integer, Geometry> getGeometriesForGeomIds(Collection<Integer> geomIds) throws DaoException {
+    public TIntObjectHashMap<Geometry> getGeometriesForGeomIds(Collection<Integer> geomIds) throws DaoException {
         return null;
     }
 
@@ -94,7 +76,36 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     }
 
     @Override
+    public void beginSaveGeometries() throws DaoException {
+
+        fastLoader = new FastLoader(db.getDataSource(), "geometries", new String[]{"ref_sys_name","layer_name","shape_type","geometry"});
+
+    }
+
+    @Override
     public void saveGeometry(Integer geomId, String layerName, String refSysName, Geometry g) throws DaoException {
+
+        try{
+            Object[] arr = new Object[]{
+                refSysName,
+                layerName,
+                SpatialUtils.getShapeType(g),
+                g.toText()};
+            fastLoader.load(arr);
+        }catch(WikapidiaException e){
+            throw new DaoException(e);
+        }
+
+
+
+    }
+
+    @Override
+    public void endSaveGeometries() throws DaoException {
+
+        fastLoader.endLoad();
+        fastLoader.close();
+        fastLoader = null;
 
     }
 }
