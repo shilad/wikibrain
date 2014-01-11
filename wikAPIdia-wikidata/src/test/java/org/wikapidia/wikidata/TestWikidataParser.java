@@ -9,8 +9,7 @@ import org.wikapidia.parser.WpParseException;
 import org.wikapidia.parser.xml.PageXmlParser;
 import org.wikapidia.utils.WpIOUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 import static org.junit.Assert.*;
 
@@ -33,11 +32,14 @@ public class TestWikidataParser {
 
     @Test
     public void testDump() throws IOException, WpParseException {
-        String dump = WpIOUtils.resourceToString("/testDump.xml");
-        File tmp = File.createTempFile("wikapidia", "dump.xml");
+        File tmp = File.createTempFile("wikapidia", "dump.xml.bz2");
         try {
             tmp.deleteOnExit();
-            FileUtils.write(tmp, dump);
+            InputStream in = TestWikidataParser.class.getResourceAsStream("/testDump.xml.bz2");
+            OutputStream out = new FileOutputStream(tmp);
+            IOUtils.copy(in, out);
+            IOUtils.closeQuietly(in);
+            IOUtils.closeQuietly(out);
             WikidataDumpParser parser = new WikidataDumpParser(tmp);
             int i = 0;
             for (WikidataRawRecord record : parser) {

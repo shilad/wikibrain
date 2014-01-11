@@ -93,7 +93,7 @@ public class WpIOUtils {
     public static String resourceToString(String path) throws IOException {
         InputStream is = WpIOUtils.class.getResourceAsStream(path);
         try {
-            return IOUtils.toString(is);
+            return IOUtils.toString(is, "utf-8");
         } finally {
             is.close();
         }
