@@ -85,6 +85,21 @@ public class WpIOUtils {
     }
 
     /**
+     * Reads a resource on the classpath into a string and returns it.
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static String resourceToString(String path) throws IOException {
+        InputStream is = WpIOUtils.class.getResourceAsStream(path);
+        try {
+            return IOUtils.toString(is);
+        } finally {
+            is.close();
+        }
+    }
+
+    /**
      * Open a possibly compressed file and return a reader for it.
      * UTF-8 encoding is used.
      * @param path

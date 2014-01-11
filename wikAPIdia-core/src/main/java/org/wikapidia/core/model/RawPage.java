@@ -27,6 +27,10 @@ public class RawPage {
     private final boolean isDisambig;
     private String redirectTitle = null;
 
+    // Wikidata assigns these two fields
+    private String model = null;
+    private String format = null;
+
     public RawPage(int localId, int revisionId, String title, String body, Date lastEdit, Language lang, NameSpace namespace) {
         this.title = new Title(title, LanguageInfo.getByLanguage(lang));
         this.body = body;
@@ -95,6 +99,22 @@ public class RawPage {
 
     public boolean isDisambig() {
         return isDisambig;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
     }
 
     /**

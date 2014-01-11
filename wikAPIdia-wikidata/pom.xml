@@ -4,22 +4,36 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>wikAPIdia-wikidata</groupId>
+    <parent>
+        <groupId>com.github.shilad.wikapidia</groupId>
+        <artifactId>wikAPIdia-parent</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath>../wikAPIdia-parent</relativePath>
+    </parent>
+
     <artifactId>wikAPIdia-wikidata</artifactId>
-    <version>0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
-            <groupId>org.wikapidia</groupId>
+            <groupId>com.github.shilad.wikapidia</groupId>
             <artifactId>wikAPIdia-core</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.wikapidia</groupId>
+            <groupId>com.github.shilad.wikapidia</groupId>
             <artifactId>wikAPIdia-utils</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.shilad.wikapidia</groupId>
+            <artifactId>wikAPIdia-parser</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.2.4</version>
+        </dependency>
     </dependencies>
-
 
 </project>
