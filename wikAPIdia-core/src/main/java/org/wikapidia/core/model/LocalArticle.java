@@ -25,4 +25,8 @@ public class LocalArticle extends LocalPage {
     public LocalArticle(Language language, int localId, Title title, boolean redirect, boolean disambig){
         super(language, localId, title, NameSpace.ARTICLE, redirect, disambig);
     }
+
+    public LocalArticle(LocalPage page){
+        super(page.getLanguage(), page.getLocalId(), page.getTitle(), NameSpace.ARTICLE);
+    }
 }

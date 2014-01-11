@@ -1,96 +1,60 @@
 package org.wikapidia.core.dao.live;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonElement;
+
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.model.NameSpace;
-import org.wikapidia.core.model.Title;
+import org.wikapidia.core.model.*;
 
-import java.util.Map;
-import java.util.Set;
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 10/27/13
- * Time: 9:13 PM
- * To change this template use File | Settings | File Templates.
+ * An abstract class used to store information of interest for a page of a query result
+ * Also contains methods to construct a wikAPIdia core object from the information contained here
+ * @author Toby "Jiajun" Li and derian
  */
-
 
 public class QueryReply {
 
 
+    public Integer pageId;
+    public String title;
+    public Integer nameSpace;
+    public Boolean isRedirect;
+    public Boolean isDisambig;
 
-    private Long pageId;
-    private String title;
-    private String pageLanguage;
-    private Long nameSpace;
-    private boolean isRedirect;
-    private boolean isDisambig;
 
-    /** Construct a QueryReply (A object used to describe a local page we fetched from wiki server) from a JSON object
-     * @param text A JSON object we got from wiki server
-     */
-    QueryReply(String text){
-        Gson gson = new Gson();
-        JsonParser jp = new JsonParser();
-        JsonObject test = jp.parse(text).getAsJsonObject();
-        Set<Map.Entry<String, JsonElement>> pageSet = jp.parse(text).getAsJsonObject().get("query").getAsJsonObject().get("pages").getAsJsonObject().entrySet();
-        for (Map.Entry<String, JsonElement> entry: pageSet)
-        {
-            Long pageId = entry.getValue().getAsJsonObject().get("pageid").getAsLong();
-            String title = entry.getValue().getAsJsonObject().get("title").getAsString();
-            String pageLanguage = entry.getValue().getAsJsonObject().get("pagelanguage").getAsString();
-            Long nameSpace = entry.getValue().getAsJsonObject().get("ns").getAsLong();
-            Boolean isRedirect = entry.getValue().getAsJsonObject().has("redirect");
-            Boolean isDisambig = entry.getValue().getAsJsonObject().get("title").getAsString().contains("(disambiguation)");
-            this.pageId = pageId;
-            this.title = title;
-            this.pageLanguage = pageLanguage;
-            this.nameSpace = nameSpace;
-            this.isRedirect = isRedirect;
-            this.isDisambig = isDisambig;
-        }
+    public QueryReply(int pageId, String title, int nameSpace, boolean isRedirect, boolean isDisambig) {
+        this.pageId = pageId;
+        this.title = title;
+        this.nameSpace = nameSpace;
+        this.isRedirect = isRedirect;
+        this.isDisambig = isDisambig;
     }
-    /**
-     *
-     * @return An Integer: the pageId of this page
-     */
-    public int getId(){
-        return pageId.intValue();
+
+    public LocalLink getLocalOutLink(Language lang, int sourceId) {
+        return new LocalLink(lang, null, sourceId, pageId, true, -1, null, null);
     }
+
+    public LocalLink getLocalInLink(Language lang, int destId) {
+        return new LocalLink(lang, null, pageId, destId, false, -1, null, null);
+    }
+
+    public LocalPage getLocalPage(Language lang) {
+        return new LocalPage(lang, pageId, this.getTitle(lang), this.getNameSpace(), isRedirect, isDisambig);
+    }
+
+    public int getId() {
+        return pageId;
+    }
+
     /**
      *
      * @return A Title: the title of this page
      */
-    public Title getTitle(){
-        return new Title(title, Language.getByLangCode(pageLanguage));
+    public Title getTitle(Language lang){
+        return new Title(title, lang);
     }
     /**
      *
      * @return A NameSpace: the namespace of this page
      */
     public NameSpace getNameSpace(){
-        return NameSpace.getNameSpaceByArbitraryId(nameSpace.intValue());
+        return NameSpace.getNameSpaceByValue(nameSpace.intValue());
     }
-    /**
-     *
-     * @return A boolean: whether this page is redirect
-     */
-    public boolean isRedirect(){
-        return isRedirect;
-    }
-    /**
-     *
-     * @return A boolean: whether this page is disambiguous
-     */
-    public boolean isDisambig(){
-        return isDisambig;
-    }
-
-
-
-
-
 }
