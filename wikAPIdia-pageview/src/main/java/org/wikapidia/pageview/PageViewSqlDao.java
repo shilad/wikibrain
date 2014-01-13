@@ -139,21 +139,45 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
     }
 
     /**
-     * Returns all pageviews, for now.
+     * Returns all pageviews that meet the filter criteria specified by an input PageViewDaoFilter
      *
-     * TODO: implement standard queries. This is tricky, because they are very pageview specific and don't fit into the existing structure.
      * @see org.wikapidia.pageview.PageViewSqlDao#get(org.wikapidia.core.dao.DaoFilter) for a typical example
      *
      * @param daoFilter a set of filters to limit the search
+     *                  must be a PageViewDaoFilter or DaoException will be thrown
      * @return
      * @throws DaoException
      */
     @Override
     public Iterable<PageView> get(final DaoFilter daoFilter) throws DaoException {
+        if (!(daoFilter instanceof PageViewDaoFilter)) {
+            throw new DaoException("Need to input PageViewDaoFilter for PageViewSqlDao get method");
+        }
+        PageViewDaoFilter pDaoFilter = (PageViewDaoFilter) daoFilter;
         DSLContext context = getJooq();
         try {
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (pDaoFilter.getLangIds() != null) {
+                conditions.add(Tables.PAGEVIEW.LANG_ID.in(pDaoFilter.getLangIds()));
+            }
+            if (pDaoFilter.getPageIds() != null) {
+                conditions.add(Tables.PAGEVIEW.PAGE_ID.in(pDaoFilter.getPageIds()));
+            }
+            if (pDaoFilter.getMinNumViews() != null) {
+                conditions.add(Tables.PAGEVIEW.NUM_VIEWS.greaterOrEqual(pDaoFilter.getMinNumViews()));
+            }
+            if (pDaoFilter.getMaxNumViews() != null) {
+                conditions.add(Tables.PAGEVIEW.NUM_VIEWS.lessOrEqual(pDaoFilter.getMaxNumViews()));
+            }
+            if (pDaoFilter.getStartDate() != null) {
+                conditions.add(Tables.PAGEVIEW.TSTAMP.greaterOrEqual(new Timestamp(pDaoFilter.getStartDate().getMillis())));
+            }
+            if (pDaoFilter.getEndDate() != null) {
+                conditions.add(Tables.PAGEVIEW.TSTAMP.lessOrEqual(new Timestamp(pDaoFilter.getEndDate().getMillis())));
+            }
             Cursor<Record> result = context.select().
-                    from(Tables.LOCAL_PAGE).
+                    from(Tables.PAGEVIEW).
+                    where(conditions).
                     limit(daoFilter.getLimitOrInfinity()).
                     fetchLazy(getFetchSize());
             return new SimpleSqlDaoIterable<PageView>(result, context) {
