@@ -25,12 +25,4 @@
         <module>../wikAPIdia-cookbook</module>
     </modules>
 
-	<properties>
-		<maven.compiler.source>5.0</maven.compiler.source>
-		<maven.compiler.target>5.0</maven.compiler.target>
-	</properties>
-
-    <build>
-    </build>
-
 </project>
