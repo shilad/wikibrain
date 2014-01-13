@@ -39,6 +39,7 @@ public class PageViewLoader {
     }
 
     public void load(DateTime startDate, DateTime endDate) throws ConfigurationException, WikapidiaException {
+        double start = System.currentTimeMillis();
         try {
             LOG.log(Level.INFO, "Loading Page Views");
             PageViewIterator iterator = dao.getPageViewIterator(languageSet.getDefaultLanguage(), startDate, endDate);
@@ -47,17 +48,26 @@ public class PageViewLoader {
                 dao.addData(iterator.next());
                 i++;
                 if (i % 24 == 0) {
-                    LOG.log(Level.INFO, "Loaded " + (i/24) + " days worth of Page View files");
+                    double elapsed = (System.currentTimeMillis() - start) / 60000;
+                    LOG.log(Level.INFO, "Loaded " + (i/24) + " days worth of Page View files in " + elapsed + " minutes");
+                }
+                if (i % 744 == 0) {
+                    double elapsed = (System.currentTimeMillis() - start) / 60000;
+                    LOG.log(Level.INFO, "Loaded " + (i/744) + "months worth of Page View files in " + elapsed + " minutes");
                 }
             }
+            double elapsed = (System.currentTimeMillis() - start) / 60000;
+            System.out.println("Loading took " + elapsed + " minutes");
             LOG.log(Level.INFO, "All Page View files loaded: " + i);
         } catch (DaoException e) {
+            double elapsed = (System.currentTimeMillis() - start) / 60000;
+            System.out.println(elapsed + " minutes passed before exception thrown");
             throw new WikapidiaException(e);
         }
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
-        Options options = new Options();
+        /*Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
@@ -87,25 +97,32 @@ public class PageViewLoader {
             System.err.println( "Invalid option usage: " + e.getMessage());
             new HelpFormatter().printHelp("PageViewLoader", options);
             return;
-        }
+        }*/
 
-        String startTime = cmd.getOptionValue("s", null);
-        String endTime = cmd.getOptionValue("e", null);
+        //String startTime = cmd.getOptionValue("s", null);
+        //String endTime = cmd.getOptionValue("e", null);
+
+        String startTime = args[1];
+        String endTime = args[2];
 
         try {
             DateTime startDate = parseDate(startTime);
             DateTime endDate = parseDate(endTime);
 
-            // Env env = new EnvBuilder().setLanguages(args[0]).build();
-            Env env = new EnvBuilder(cmd).build();
+            Env env = new EnvBuilder().setLanguages(args[0]).build();
+            //Env env = new EnvBuilder(cmd).build();
             Configurator conf = env.getConfigurator();
             PageViewSqlDao dao = conf.get(PageViewSqlDao.class);
             final PageViewLoader loader = new PageViewLoader(env.getLanguages(), dao);
 
-            if (cmd.hasOption("d")) {
+            /*if (cmd.hasOption("d")) {
                 LOG.log(Level.INFO, "Clearing data");
                 dao.clear();
-            }
+            } */
+
+            LOG.log(Level.INFO, "Clearing data");
+            dao.clear();
+
             LOG.log(Level.INFO, "Begin Load");
             dao.beginLoad();
 
@@ -116,7 +133,7 @@ public class PageViewLoader {
             LOG.log(Level.INFO, "DONE");
         } catch (WikapidiaException wE) {
             System.err.println("Invalid option usage:" + wE.getMessage());
-            new HelpFormatter().printHelp("PageViewLoader", options);
+            //new HelpFormatter().printHelp("PageViewLoader", options);
             return;
         }
     }

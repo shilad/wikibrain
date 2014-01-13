@@ -162,8 +162,11 @@ public class PageViewIterator implements Iterator {
                 break;
             minutes++;
         }
-        if(pageViewDataFile == null)
-            throw new WikapidiaException("null pageViewDataFile for date " + currentDate);
+        if(pageViewDataFile == null) {
+            DateTime tempDate = currentDate;
+            currentDate = currentDate.plusHours(1);
+            throw new WikapidiaException("null pageViewDataFile for date " + tempDate);
+        }
         TIntIntMap pageViewCounts = parsePageViewDataFromFile(lang, pageViewDataFile);
         DateTime nextDate = currentDate.plusHours(1);
         PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
@@ -192,7 +195,7 @@ public class PageViewIterator implements Iterator {
             File dest = new File(localPath);
             if(!dest.exists()){
                 System.out.println("File not exist. Downloading...");
-                FileUtils.copyURLToFile(url, dest, 60000, 60000);
+                FileUtils.copyURLToFile(url, dest, 60000, 120000);
             }
             else{
                 System.out.println("File existed. Skip...");
@@ -205,7 +208,8 @@ public class PageViewIterator implements Iterator {
             dest.delete();
             return ungzipDest;
         } catch(IOException e) {
-            System.out.println("File name " + fileName + " couldn't be found online");
+            System.out.println("\nFile name " + fileName + " couldn't be found online");
+            System.out.println(e.getMessage() + "\n");
             return null;
         }
 
