@@ -2,6 +2,7 @@ package org.wikapidia.wikidata;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.RawPage;
@@ -10,6 +11,8 @@ import org.wikapidia.parser.xml.PageXmlParser;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.*;
+import java.text.ParseException;
+import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -40,14 +43,21 @@ public class TestWikidataParser {
             IOUtils.copy(in, out);
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(out);
+
             WikidataDumpParser parser = new WikidataDumpParser(tmp);
             int i = 0;
             for (WikidataRawRecord record : parser) {
                 i++;
             }
-            System.out.println("I is " + i);
+            assertEquals(414, i);
         } finally {
             tmp.delete();
         }
+    }
+
+    @Test
+    public void testDateParser() throws ParseException {
+        String s = "+00000001996-12-20T00:00:00Z";
+        Date d = DateUtils.parseDate(s, "'+0000000'yyyy-MM-dd'T'HH:mm:ss'Z'");
     }
 }

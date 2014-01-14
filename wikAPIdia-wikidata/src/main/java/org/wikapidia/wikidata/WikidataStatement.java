@@ -7,6 +7,7 @@ public class WikidataStatement {
 
     public static enum Rank {DEPRECATED, NORMAL, PREFERRED};
 
+    private String uuid;
     private WikidataItem item;
     private WikidataProperty property;
     private WikidataValue value;

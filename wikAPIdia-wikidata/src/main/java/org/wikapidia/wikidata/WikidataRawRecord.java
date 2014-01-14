@@ -2,6 +2,7 @@ package org.wikapidia.wikidata;
 
 import org.wikapidia.core.model.RawPage;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,10 +11,16 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class WikidataRawRecord {
+    public class Claim {
+        String propertyType;
+        int propertyId;
+
+    }
     private RawPage rawPage;
     private Map<String, String> labels = new LinkedHashMap<String, String>();
     private Map<String, String> descriptions = new LinkedHashMap<String, String>();
     private Map<String, List<String>> aliases = new LinkedHashMap<String, List<String>>();
+    private List<WikidataStatement> statements = new ArrayList<WikidataStatement>();
 
     // TODO: handle links
 
@@ -54,5 +61,9 @@ public class WikidataRawRecord {
 
     public void setEntityId(int entityId) {
         this.entityId = entityId;
+    }
+
+    public List<WikidataStatement> getStatements() {
+        return statements;
     }
 }
