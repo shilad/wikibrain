@@ -106,9 +106,12 @@ public class WikidataParser {
 
         String uuid = obj.has("g") ? obj.get("g").getAsString() : null;
 
+        // TODO: handle REFS in the 'refs' field
 
+        // TODO: handle modifiers in the 'q' field
 
-        // TODO: handle REFS
+        WikidataItem item = new WikidataItem("Q" + record.getEntityId());
+
 
         return null;
     }

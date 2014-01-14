@@ -11,11 +11,6 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class WikidataRawRecord {
-    public class Claim {
-        String propertyType;
-        int propertyId;
-
-    }
     private RawPage rawPage;
     private Map<String, String> labels = new LinkedHashMap<String, String>();
     private Map<String, String> descriptions = new LinkedHashMap<String, String>();
