@@ -7,6 +7,7 @@ import org.wikapidia.parser.WpParseException;
 import org.wikapidia.parser.xml.PageXmlParser;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,10 +65,14 @@ public class WikidataDumpParser implements Iterable<WikidataRawRecord> {
                     RawPage rp = xmlParser.parse(iterImpl.next());
                     if (rp.getModel() != null && rp.getModel().equals("wikibase-item")) {
                         buff = wdParser.parse(rp);
-                    } else {
+                    } else if (Arrays.asList("wikitext", "css").contains(rp.getModel())) {
                         buff = new WikidataRawRecord(rp);
+                    } else {
+                        LOG.warning("unknown model: " + rp.getModel() + " in page " + rp.getTitle());
                     }
                 } catch (WpParseException e) {
+                    LOG.log(Level.WARNING, "parsing of " + impl.getPath() + " failed:", e);
+                } catch (IllegalStateException e) {
                     LOG.log(Level.WARNING, "parsing of " + impl.getPath() + " failed:", e);
                 }
             }

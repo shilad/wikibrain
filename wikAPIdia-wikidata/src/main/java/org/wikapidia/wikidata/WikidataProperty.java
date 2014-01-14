@@ -42,6 +42,10 @@ public class WikidataProperty {
         return description;
     }
 
+    public int getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "WikidataProperty{" +

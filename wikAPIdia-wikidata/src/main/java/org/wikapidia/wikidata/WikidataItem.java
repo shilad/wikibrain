@@ -5,11 +5,13 @@ package org.wikapidia.wikidata;
  */
 public class WikidataItem {
 
-    private String id;
+    private int id;
 
-    public WikidataItem(String id) {
+    public WikidataItem(int id) {
         this.id = id;
     }
 
-
+    public int getId() {
+        return id;
+    }
 }

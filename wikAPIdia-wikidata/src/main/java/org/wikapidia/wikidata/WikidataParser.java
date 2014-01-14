@@ -110,16 +110,34 @@ public class WikidataParser {
 
         // TODO: handle modifiers in the 'q' field
 
-        WikidataItem item = new WikidataItem("Q" + record.getEntityId());
+        WikidataItem item = new WikidataItem(record.getEntityId());
 
-
-        return null;
+        return new WikidataStatement(uuid, item, prop, value, rank);
     }
 
     private void parseEntity(WikidataRawRecord record, JsonElement value) throws WpParseException {
-        JsonArray array = value.getAsJsonArray();
-        record.setEntityType(array.get(0).getAsString());
-        record.setEntityId(array.get(1).getAsInt());
+        String entityType = null;
+        int entityId = -1;
+        if (value.isJsonArray()) {
+            JsonArray array = value.getAsJsonArray();
+            record.setEntityType(array.get(0).getAsString());
+            record.setEntityId(array.get(1).getAsInt());
+        } else if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()) {
+            String id = value.getAsString().toLowerCase();
+            if (id.startsWith("q")) {
+                entityType = "item";
+                entityId = Integer.valueOf(id.substring(1));
+            } else if (id.startsWith("p")) {
+                entityType = "property";
+                entityId = Integer.valueOf(id.substring(1));
+            } else {
+                throw new WpParseException("Invalid entity id: " + id);
+            }
+        } else {
+            throw new WpParseException("in parseEntity expected array, found " + value);
+        }
+        record.setEntityType(entityType);
+        record.setEntityId(entityId);
     }
 
     private void parseAliases(WikidataRawRecord record, JsonElement value) throws WpParseException {
