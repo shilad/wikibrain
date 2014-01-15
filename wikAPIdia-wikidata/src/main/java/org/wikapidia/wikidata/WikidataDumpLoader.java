@@ -116,7 +116,7 @@ public class WikidataDumpLoader {
         final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, lpDao, metaDao);
 
         if (cmd.hasOption("d")) {
-            lpDao.clear();
+            wdDao.clear();
             metaDao.clear(WikidataStatement.class);
         }
         wdDao.beginLoad();
