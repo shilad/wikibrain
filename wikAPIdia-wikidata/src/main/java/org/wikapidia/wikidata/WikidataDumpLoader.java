@@ -54,7 +54,7 @@ public class WikidataDumpLoader {
      */
     public void load(File file) {
         WikidataDumpParser parser = new WikidataDumpParser(file);
-        for (WikidataRawRecord rp : parser) {
+        for (WikidataEntity rp : parser) {
             if (counter.incrementAndGet() % 10000 == 0) {
                 LOG.info("processing article " + counter.get());
             }
@@ -62,7 +62,7 @@ public class WikidataDumpLoader {
         }
     }
 
-    private void save(File file, WikidataRawRecord rp) {
+    private void save(File file, WikidataEntity rp) {
         for (WikidataStatement st : rp.getStatements()) {
             try {
                 wikidataDao.save(st);

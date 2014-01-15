@@ -9,13 +9,13 @@ public class WikidataStatement {
     public static enum Rank {DEPRECATED, NORMAL, PREFERRED};
 
     private String id;
-    private WikidataItem item;
-    private WikidataProperty property;
+    private WikidataEntity item;
+    private WikidataEntity property;
     private WikidataValue value;
     private Rank rank;
 
 
-    public WikidataStatement(String id, WikidataItem item, WikidataProperty property, WikidataValue value, Rank rank) {
+    public WikidataStatement(String id, WikidataEntity item, WikidataEntity property, WikidataValue value, Rank rank) {
         this.id = id;
         this.item = item;
         this.property = property;
@@ -27,11 +27,11 @@ public class WikidataStatement {
         return id;
     }
 
-    public WikidataItem getItem() {
+    public WikidataEntity getItem() {
         return item;
     }
 
-    public WikidataProperty getProperty() {
+    public WikidataEntity getProperty() {
         return property;
     }
 

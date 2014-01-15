@@ -30,7 +30,7 @@ public class TestWikidataParser {
         assertEquals("wikibase-item", rawPage.getModel());
 
         WikidataParser parser2 = new WikidataParser();
-        WikidataRawRecord record = parser2.parse(rawPage);
+        WikidataEntity record = parser2.parse(rawPage);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class TestWikidataParser {
 
             WikidataDumpParser parser = new WikidataDumpParser(tmp);
             int i = 0;
-            for (WikidataRawRecord record : parser) {
+            for (WikidataEntity record : parser) {
                 i++;
             }
             assertEquals(414, i);

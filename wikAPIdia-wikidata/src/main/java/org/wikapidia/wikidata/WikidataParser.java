@@ -2,6 +2,8 @@ package org.wikapidia.wikidata;
 
 import com.google.gson.*;
 import org.apache.commons.lang3.time.DateUtils;
+import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.parser.WpParseException;
 
@@ -18,9 +20,17 @@ import java.util.logging.Logger;
  */
 public class WikidataParser {
     private static final Logger LOG = Logger.getLogger(WikidataParser.class.getName());
+    private final LanguageSet langs;
 
-    public WikidataRawRecord parse(RawPage rawPage) throws WpParseException {
-        WikidataRawRecord record = new WikidataRawRecord(rawPage);
+    public WikidataParser() {
+        this(LanguageSet.ALL);
+    }
+
+    public WikidataParser(LanguageSet langs) {
+        this.langs = langs;
+    }
+
+    public WikidataEntity parse(RawPage rawPage) throws WpParseException {
         JsonParser parser = new JsonParser();
 
         JsonObject obj;
@@ -31,8 +41,12 @@ public class WikidataParser {
             throw new WpParseException(e);
         }
 
-        for (Map.Entry<String, JsonElement> fields : obj.entrySet()) {
+        if (!obj.has("entity")) {
+            throw new WpParseException("Page " + obj + " missing entity field");
+        }
+        WikidataEntity record = parseEntity(obj.get("entity"));
 
+        for (Map.Entry<String, JsonElement> fields : obj.entrySet()) {
             String name = fields.getKey();
             if (name.equals("label")) {
                 parseLabels(record, fields.getValue());
@@ -43,7 +57,7 @@ public class WikidataParser {
             } else if (name.equals("links")) {
                 // do nothing for now
             } else if (name.equals("entity")) {
-                parseEntity(record, fields.getValue());
+                // already handled
             } else if (name.equals("claims")) {
                 parseClaims(record, fields.getValue());
             } else {
@@ -54,7 +68,7 @@ public class WikidataParser {
         return record;
     }
 
-    private void parseClaims(WikidataRawRecord record, JsonElement value) throws WpParseException {
+    private void parseClaims(WikidataEntity record, JsonElement value) throws WpParseException {
         JsonArray array = value.getAsJsonArray();
         for (int i = 0; i < array.size(); i++) {
             try {
@@ -66,7 +80,7 @@ public class WikidataParser {
         }
     }
 
-    private WikidataStatement parseOneClaim(WikidataRawRecord record, JsonElement jsonClaim) throws WpParseException {
+    private WikidataStatement parseOneClaim(WikidataEntity item, JsonElement jsonClaim) throws WpParseException {
         JsonObject obj = jsonClaim.getAsJsonObject();
 
         if (!obj.has("m")) {
@@ -76,7 +90,7 @@ public class WikidataParser {
 
         JsonArray jsonVal = obj.get("m").getAsJsonArray();
 
-        WikidataProperty prop = new WikidataProperty(jsonVal.get(1).getAsInt());
+        WikidataEntity prop = new WikidataEntity(WikidataEntity.Type.PROPERTY, jsonVal.get(1).getAsInt());
         String valTypeStr = jsonVal.get(0).getAsString();
         WikidataValue value = null;
         if (valTypeStr.equals("value")) {
@@ -110,25 +124,30 @@ public class WikidataParser {
 
         // TODO: handle modifiers in the 'q' field
 
-        WikidataItem item = new WikidataItem(record.getEntityId());
-
         return new WikidataStatement(uuid, item, prop, value, rank);
     }
 
-    private void parseEntity(WikidataRawRecord record, JsonElement value) throws WpParseException {
-        String entityType = null;
+    private WikidataEntity parseEntity(JsonElement value) throws WpParseException {
+        WikidataEntity.Type entityType = null;
         int entityId = -1;
         if (value.isJsonArray()) {
             JsonArray array = value.getAsJsonArray();
-            record.setEntityType(array.get(0).getAsString());
-            record.setEntityId(array.get(1).getAsInt());
+            String s = array.get(0).getAsString();
+            if (s.equals("item")) {
+                entityType = WikidataEntity.Type.ITEM;
+            } else if (s.equals("property")) {
+                entityType = WikidataEntity.Type.PROPERTY;
+            } else {
+                throw new WpParseException("in parseEntity expected item or property, found " + value);
+            }
+            entityId = array.get(1).getAsInt();
         } else if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()) {
             String id = value.getAsString().toLowerCase();
             if (id.startsWith("q")) {
-                entityType = "item";
+                entityType = WikidataEntity.Type.ITEM;
                 entityId = Integer.valueOf(id.substring(1));
             } else if (id.startsWith("p")) {
-                entityType = "property";
+                entityType = WikidataEntity.Type.PROPERTY;
                 entityId = Integer.valueOf(id.substring(1));
             } else {
                 throw new WpParseException("Invalid entity id: " + id);
@@ -136,44 +155,61 @@ public class WikidataParser {
         } else {
             throw new WpParseException("in parseEntity expected array, found " + value);
         }
-        record.setEntityType(entityType);
-        record.setEntityId(entityId);
+        return new WikidataEntity(entityType, entityId);
     }
 
-    private void parseAliases(WikidataRawRecord record, JsonElement value) throws WpParseException {
+    private void parseAliases(WikidataEntity record, JsonElement value) throws WpParseException {
         if (value.isJsonArray() && value.getAsJsonArray().size() == 0) {
             return;
         }
         for (Map.Entry<String, JsonElement> entry : value.getAsJsonObject().entrySet()) {
             if (entry.getValue().isJsonArray()) {
-                JsonArray jsonVal = entry.getValue().getAsJsonArray();
-                List<String> values = new ArrayList<String>();
-                for (JsonElement obj : jsonVal) {
-                    values.add(obj.getAsString());
+                if (validLanguage(entry.getKey())) {
+                    JsonArray jsonVal = entry.getValue().getAsJsonArray();
+                    List<String> values = new ArrayList<String>();
+                    for (JsonElement obj : jsonVal) {
+                        values.add(obj.getAsString());
+                    }
+                    record.getAliases().put(Language.getByLangCode(entry.getKey()), values);
                 }
-                record.getAliases().put(entry.getKey(), values);
             } else if (entry.getValue().isJsonObject()) {
-                JsonObject jsonVal = entry.getValue().getAsJsonObject();
-                List<String> values = new ArrayList<String>();
-                for (Map.Entry<String, JsonElement> entry2 : jsonVal.entrySet()) {
-                    values.add(entry2.getValue().getAsString());
+                if (validLanguage(entry.getKey())) {
+                    JsonObject jsonVal = entry.getValue().getAsJsonObject();
+                    List<String> values = new ArrayList<String>();
+                    for (Map.Entry<String, JsonElement> entry2 : jsonVal.entrySet()) {
+                        values.add(entry2.getValue().getAsString());
+                    }
+                    record.getAliases().put(Language.getByLangCode(entry.getKey()), values);
                 }
-                record.getAliases().put(entry.getKey(), values);
             } else {
-                LOG.severe("invalid alias for " + record.getRawPage().getTitle() + ": " + entry.getValue());
+                LOG.severe("invalid alias: " + entry.getValue());
             }
         }
     }
 
-    private void parseDescription(WikidataRawRecord record, JsonElement value) {
+    private void parseDescription(WikidataEntity record, JsonElement value) {
+        if (value.isJsonArray() && value.getAsJsonArray().size() == 0) {
+            return;
+        }
         for (Map.Entry<String, JsonElement> entry : value.getAsJsonObject().entrySet()) {
-            record.getDescriptions().put(entry.getKey(), entry.getValue().getAsString());
+            if (validLanguage(entry.getKey())) {
+                record.getDescriptions().put(
+                        Language.getByLangCode(entry.getKey()),
+                        entry.getValue().getAsString());
+            }
         }
     }
 
-    private void parseLabels(WikidataRawRecord record, JsonElement value) {
+    private void parseLabels(WikidataEntity record, JsonElement value) {
+        if (value.isJsonArray() && value.getAsJsonArray().size() == 0) {
+            return;
+        }
         for (Map.Entry<String, JsonElement> entry : value.getAsJsonObject().entrySet()) {
-            record.getLabels().put(entry.getKey(), entry.getValue().getAsString());
+            if (validLanguage(entry.getKey())) {
+                record.getLabels().put(
+                        Language.getByLangCode(entry.getKey()),
+                        entry.getValue().getAsString());
+            }
         }
     }
 
@@ -212,5 +248,9 @@ public class WikidataParser {
         } else {
             throw new WpParseException("unknown wikidata type: " + type);
         }
+    }
+
+    private boolean validLanguage(String langCode) {
+        return Language.hasLangCode(langCode) && langs.containsLanguage(langCode);
     }
 }
