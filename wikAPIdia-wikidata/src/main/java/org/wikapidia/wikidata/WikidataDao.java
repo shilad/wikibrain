@@ -1,7 +1,10 @@
 package org.wikapidia.wikidata;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.typesafe.config.Config;
+import org.jooq.Record;
 import org.jooq.TableField;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
@@ -11,8 +14,12 @@ import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.sql.AbstractSqlDao;
 import org.wikapidia.core.dao.sql.FastLoader;
 import org.wikapidia.core.dao.sql.WpDataSource;
+import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.parser.WpParseException;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +46,7 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
     private FastLoader labelLoader = null;
     private FastLoader descLoader = null;
     private FastLoader aliasLoader = null;
+    private Map<Integer, WikidataEntity> properties;
 
     /**
      * @param dataSource      Data source for jdbc connections
@@ -49,8 +57,15 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
     }
 
     @Override
+    public void useCache(File file) throws DaoException {
+        super.useCache(file);
+        properties = (Map<Integer, WikidataEntity>) cache.get("wikidata-properties", WikidataStatement.class);
+        LOG.info("loaded properties with size " + ((properties == null) ? 0 : properties.size()));
+    }
+
+    @Override
     public void beginLoad() throws DaoException {
-        if (labelLoader != null) {
+        if (labelLoader == null) {
             labelLoader = new FastLoader(wpDs, new TableField[] {
                                         WIKIDATA_ENTITY_LABELS.ENTITY_TYPE,
                                         WIKIDATA_ENTITY_LABELS.ENTITY_ID,
@@ -58,7 +73,7 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
                                         WIKIDATA_ENTITY_LABELS.LABEL,
                                     });
         }
-        if (descLoader != null) {
+        if (descLoader == null) {
             descLoader = new FastLoader(wpDs, new TableField[] {
                                         WIKIDATA_ENTITY_DESCRIPTIONS.ENTITY_TYPE,
                                         WIKIDATA_ENTITY_DESCRIPTIONS.ENTITY_ID,
@@ -66,7 +81,7 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
                                         WIKIDATA_ENTITY_DESCRIPTIONS.DESCRIPTION,
                                     });
         }
-        if (aliasLoader != null) {
+        if (aliasLoader == null) {
             aliasLoader = new FastLoader(wpDs, new TableField[] {
                                         WIKIDATA_ENTITY_ALIASES.ENTITY_TYPE,
                                         WIKIDATA_ENTITY_ALIASES.ENTITY_ID,
@@ -74,6 +89,7 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
                                         WIKIDATA_ENTITY_ALIASES.ALIAS
                                     });
         }
+        properties = new HashMap<Integer, WikidataEntity>();
         super.beginLoad();
     }
 
@@ -91,6 +107,11 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
         }
         for (WikidataStatement stmt : entity.getStatements()) {
             save(stmt);
+        }
+        if (entity.getType() == WikidataEntity.Type.PROPERTY) {
+            synchronized (properties) {
+                properties.put(entity.getId(), entity);
+            }
         }
     }
 
@@ -115,20 +136,58 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
         labelLoader = null;
         descLoader = null;
         aliasLoader = null;
-
         super.endLoad();
+        if (cache != null) {
+            cache.put("wikidata-properties", properties);
+        }
     }
 
-
-    @Override
-    public Iterable<WikidataStatement> get(DaoFilter daoFilter) throws DaoException {
+    public Iterable<WikidataStatement> get(WikidataFilter filter) throws DaoException {
         return null;
     }
 
     @Override
-    public int getCount(DaoFilter daoFilter) throws DaoException {
-        return 0;
+    public Iterable<WikidataStatement> get(DaoFilter daoFilter) throws DaoException {
+        throw new UnsupportedOperationException();
     }
+
+    @Override
+    public int getCount(DaoFilter daoFilter) throws DaoException {
+        throw new UnsupportedOperationException();
+    }
+
+    protected WikidataStatement buildStatement(Record record) throws DaoException {
+        if (record == null) {
+            return null;
+        }
+        WikidataEntity item = new WikidataEntity(
+                WikidataEntity.Type.valueOf(record.getValue(Tables.WIKIDATA_STATEMENT.ENTITY_TYPE)),
+                record.getValue(Tables.WIKIDATA_STATEMENT.ENTITY_ID)
+        );
+        WikidataEntity prop = new WikidataEntity(
+                WikidataEntity.Type.PROPERTY,
+                record.getValue(Tables.WIKIDATA_STATEMENT.PROP_ID)
+        );
+        Short rankOrdinal = record.getValue(Tables.WIKIDATA_STATEMENT.RANK);
+
+        JsonElement json = new JsonParser().parse(record.getValue(Tables.WIKIDATA_STATEMENT.VAL_STR));
+        WikidataValue val;
+        try {
+            val = JsonUtils.jsonToValue( record.getValue(Tables.WIKIDATA_STATEMENT.VAL_TYPE), json);
+        } catch (WpParseException e) {
+            throw new DaoException(e);
+        }
+
+        WikidataStatement stmt = new WikidataStatement(
+                record.getValue(Tables.WIKIDATA_STATEMENT.ID),
+                item,
+                prop,
+                val,
+                WikidataStatement.Rank.values()[rankOrdinal]
+        );
+        return stmt;
+    }
+
     public static class Provider extends org.wikapidia.conf.Provider<WikidataDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -150,11 +209,18 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
                 return null;
             }
             try {
-                return new WikidataDao(
+                WikidataDao dao = new WikidataDao(
                         getConfigurator().get(
                                 WpDataSource.class,
-                                config.getString("dataSource"))
-                );
+                                config.getString("dataSource")));
+
+                String cachePath = getConfig().get().getString("dao.sqlCachePath");
+                File cacheDir = new File(cachePath);
+                if (!cacheDir.isDirectory()) {
+                    cacheDir.mkdirs();
+                }
+                dao.useCache(cacheDir);
+                return dao;
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }

@@ -1,10 +1,12 @@
 package org.wikapidia.wikidata;
 
+import java.io.Serializable;
+
 /**
  * @author Shilad Sen
  * TODO: add refs, modifiers
  */
-public class WikidataStatement {
+public class WikidataStatement implements Serializable {
 
     public static enum Rank {DEPRECATED, NORMAL, PREFERRED};
 

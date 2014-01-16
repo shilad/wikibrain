@@ -63,14 +63,12 @@ public class WikidataDumpLoader {
     }
 
     private void save(File file, WikidataEntity rp) {
-        for (WikidataStatement st : rp.getStatements()) {
-            try {
-                wikidataDao.save(st);
-                metaDao.incrementRecords(st.getClass());
-            } catch (DaoException e) {
-                LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
-                metaDao.incrementErrorsQuietly(st.getClass());
-            }
+        try {
+            wikidataDao.save(rp);
+            metaDao.incrementRecords(rp.getClass());
+        } catch (DaoException e) {
+            LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
+            metaDao.incrementErrorsQuietly(rp.getClass());
         }
     }
 

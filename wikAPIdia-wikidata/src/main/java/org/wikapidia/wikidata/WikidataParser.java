@@ -1,7 +1,6 @@
 package org.wikapidia.wikidata;
 
 import com.google.gson.*;
-import org.apache.commons.lang3.time.DateUtils;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
@@ -9,7 +8,6 @@ import org.wikapidia.parser.WpParseException;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -80,29 +78,23 @@ public class WikidataParser {
         }
     }
 
-    private WikidataStatement parseOneClaim(WikidataEntity item, JsonElement jsonClaim) throws WpParseException {
-        JsonObject obj = jsonClaim.getAsJsonObject();
-
+    private WikidataStatement parseOneClaim(WikidataEntity item, JsonElement element) throws WpParseException {
+        JsonObject obj = element.getAsJsonObject();
         if (!obj.has("m")) {
-            throw new WpParseException("claim " + jsonClaim + " has no property m");
+            throw new WpParseException("claim " + element + " has no property m");
         }
 
+        JsonArray jsonClaim = obj.get("m").getAsJsonArray();
 
-        JsonArray jsonVal = obj.get("m").getAsJsonArray();
+        WikidataEntity prop = new WikidataEntity(WikidataEntity.Type.PROPERTY, jsonClaim.get(1).getAsInt());
+        String valTypeStr = jsonClaim.get(0).getAsString();
+        JsonElement jsonVal = null;
 
-        WikidataEntity prop = new WikidataEntity(WikidataEntity.Type.PROPERTY, jsonVal.get(1).getAsInt());
-        String valTypeStr = jsonVal.get(0).getAsString();
-        WikidataValue value = null;
-        if (valTypeStr.equals("value")) {
-            value = parseValue(jsonVal.get(2).getAsString(), jsonVal.get(3));
-        } else if (valTypeStr.equals("novalue")) {
-            value = new WikidataValue(WikidataValue.Type.NOVALUE, null);
-        } else if (valTypeStr.equals("somevalue")) {
-            value = new WikidataValue(WikidataValue.Type.SOMEVALUE, null);
-        } else {
-            throw new WpParseException("claim " + jsonClaim + " has unknown value");
+        if (valTypeStr.equals("value")) { // more specific type available
+            valTypeStr = jsonClaim.get(2).getAsString();
+            jsonVal = jsonClaim.get(3);
         }
-
+        WikidataValue value = JsonUtils.jsonToValue(valTypeStr, jsonVal);
 
         WikidataStatement.Rank rank = null;
         if (obj.has("rank")) {
@@ -114,7 +106,7 @@ public class WikidataParser {
             } else if (i == 2) {
                 rank = WikidataStatement.Rank.PREFERRED;
             } else {
-                throw new WpParseException("unknown rank: " + i + " in " + jsonClaim);
+                throw new WpParseException("unknown rank: " + i + " in " + obj);
             }
         }
 
@@ -210,43 +202,6 @@ public class WikidataParser {
                         Language.getByLangCode(entry.getKey()),
                         entry.getValue().getAsString());
             }
-        }
-    }
-
-    private WikidataValue parseValue(String type, JsonElement element) throws WpParseException {
-        if (type.equals("string")) {
-            return new WikidataValue(WikidataValue.Type.STRING, element.getAsString());
-        } else if (type.equals("time")) {
-            // format is "+00000001997-11-27T00:00:00Z"
-            String time = element.getAsJsonObject().get("time").getAsString();
-            if (time.startsWith("+")) {
-                time = time.substring(1) + "AD";
-            } else if (time.startsWith("-")) {
-                time = time.substring(1) + "BC";
-            } else {
-                throw new WpParseException("Invalid date: " + element);
-            }
-            try {
-                return new WikidataValue(
-                        WikidataValue.Type.TIME,
-                        DateUtils.parseDate(time, "yyyyyyyyyyy-MM-dd'T'HH:mm:ss'Z'G")
-                );
-            } catch (ParseException e) {
-                throw new WpParseException("Invalid date: " + element);
-            }
-        } else if (type.equals("wikibase-entityid")) {
-            String entityType = element.getAsJsonObject().get("entity-type").getAsString();
-            if (!entityType.equals("item")) {
-                throw new WpParseException("unknown entity type: " + entityType + " in " + element);
-            }
-            return new WikidataValue(
-                    WikidataValue.Type.ITEM,
-                    element.getAsJsonObject().get("numeric-id").getAsInt()
-            );
-        } else if (Arrays.asList("globecoordinate").contains(type)) {
-            return new WikidataValue(WikidataValue.Type.OTHER, type, element.toString());
-        } else {
-            throw new WpParseException("unknown wikidata type: " + type);
         }
     }
 

@@ -2,6 +2,7 @@ package org.wikapidia.wikidata;
 
 import org.wikapidia.core.lang.Language;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Map;
 /**
  * @author Shilad Sen
  */
-public class WikidataEntity {
+public class WikidataEntity implements Serializable {
     public static enum Type {
         ITEM('Q'), PROPERTY('P');
 
