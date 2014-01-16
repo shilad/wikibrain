@@ -123,11 +123,6 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
         return normalize(results);
     }
 
-    @Override
-    public TIntDoubleMap getVector(int id) throws DaoException {
-        throw new UnsupportedOperationException();
-    }
-
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);

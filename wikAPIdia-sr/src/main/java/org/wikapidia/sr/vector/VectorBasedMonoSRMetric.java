@@ -409,6 +409,20 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         }
     }
 
+    /**
+     * Returns the vector associated with a particular phrase
+     * @param phrase
+     * @return
+     * @throws DaoException
+     */
+    public TIntFloatMap getPhraseVector(String phrase) throws DaoException {
+        try {
+            return generator.getVector(phrase);
+        } catch (UnsupportedOperationException e) {
+            return phraseVectorCreator.getPhraseVector(phrase);
+        }
+    }
+
     protected boolean hasFeatureMatrix() {
         return featureMatrix != null && featureMatrix.getNumRows() > 0;
     }
@@ -432,11 +446,6 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
 
     public void setResolvePhrases(boolean resolve) {
         this.resolvePhrases = resolve;
-    }
-
-    @Override
-    public TIntDoubleMap getVector(int id) throws DaoException {
-        throw new UnsupportedOperationException();  // TODO: remove me
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {

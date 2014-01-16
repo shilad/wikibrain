@@ -133,7 +133,7 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao{
 
     /**
      *
-     * @param localArticle the page
+     * @param localPage the page
      * @return a collection of categoryids of all the categories this article belongs to
      * @throws DaoException
      */

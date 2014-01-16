@@ -141,15 +141,6 @@ public interface MonolingualSRMetric {
      */
     public boolean mostSimilarIsTrained();
 
-
-    /**
-     * Return a vector representation of a LocalPage
-     * @param id Local id of the page to be described.
-     * @return A vector of a page's scores in some feature space
-     */
-    public TIntDoubleMap getVector(int id) throws DaoException;
-
-
     /**
      * Construct a cosimilarity matrix of Wikipedia ids in a given language.
      *

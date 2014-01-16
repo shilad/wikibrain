@@ -124,11 +124,6 @@ public class PretrainedSRFactory implements MonolingualSRFactory {
         }
 
         @Override
-        public TIntDoubleMap getVector(int id) throws DaoException {
-            return delegate.getVector(id);
-        }
-
-        @Override
         public double[][] cosimilarity(int[] wpRowIds, int[] wpColIds) throws DaoException {
             return delegate.cosimilarity(wpRowIds, wpColIds);
         }

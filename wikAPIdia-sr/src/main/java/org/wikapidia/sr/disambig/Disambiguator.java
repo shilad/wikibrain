@@ -46,7 +46,7 @@ public abstract class Disambiguator {
      */
     public LocalId disambiguateTop(LocalString phrase, Set<LocalString> context) throws DaoException {
         LinkedHashMap<LocalId, Double> result = disambiguate(phrase, context);
-        if (result.isEmpty()) {
+        if (result == null || result.isEmpty()) {
             return null;
         } else {
             return result.keySet().iterator().next();
