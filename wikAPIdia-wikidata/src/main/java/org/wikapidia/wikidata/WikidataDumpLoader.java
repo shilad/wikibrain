@@ -1,9 +1,12 @@
 package org.wikapidia.wikidata;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
+import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.cmd.FileMatcher;
@@ -15,16 +18,18 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.RawPage;
+import org.wikapidia.download.FileDownloader;
+import org.wikapidia.download.RequestedLinkGetter;
 import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
+import org.wikapidia.utils.WpIOUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -70,7 +75,9 @@ public class WikidataDumpLoader {
         }
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException {
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException, WikapidiaException, java.text.ParseException, InterruptedException {
+
+
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -97,7 +104,28 @@ public class WikidataDumpLoader {
         Configurator conf = env.getConfigurator();
         List<File> paths;
         if (cmd.getArgList().isEmpty()) {
-            paths = env.getFiles(FileMatcher.ARTICLES);
+            File dumpFile = File.createTempFile("wikiapidia", "dumplinks");
+            dumpFile.deleteOnExit();
+
+            // Write a file with the links that the need to be fetched
+            RequestedLinkGetter getter = new RequestedLinkGetter(
+                    Language.WIKIDATA,
+                    Arrays.asList(FileMatcher.ARTICLES),
+                    new Date()
+            );
+            FileUtils.writeLines(dumpFile, getter.getLangLinks());
+
+            // Fetch the file (if necessary) to the standard path
+            String filePath = conf.getConf().get().getString("download.path");
+            FileDownloader downloader = new FileDownloader(new File(filePath));
+            downloader.downloadFrom(dumpFile);
+
+            paths = new ArrayList<File>();
+            for (File f : env.getFiles(FileMatcher.ARTICLES)) {
+                if (f.getName().contains("wikidata")) {
+                    paths.add(f);
+                }
+            }
         } else {
             paths = new ArrayList<File>();
             for (Object arg : cmd.getArgList()) {

@@ -21,6 +21,11 @@
         </dependency>
         <dependency>
             <groupId>com.github.shilad.wikapidia</groupId>
+            <artifactId>wikAPIdia-download</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.shilad.wikapidia</groupId>
             <artifactId>wikAPIdia-utils</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
