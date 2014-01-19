@@ -124,7 +124,7 @@ public class WikidataDumpLoader {
             }
         }
 
-        WikidataSqlDao wdDao = conf.get(WikidataSqlDao.class);
+        WikidataDao wdDao = conf.get(WikidataDao.class);
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
         final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao);
