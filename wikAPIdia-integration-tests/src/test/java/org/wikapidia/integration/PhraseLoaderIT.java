@@ -42,7 +42,7 @@ public class PhraseLoaderIT {
     }
 
     @Test
-    public void testLoader() throws ClassNotFoundException, SQLException, WikapidiaException, DaoException, ConfigurationException, IOException {
+    public void testLoader() throws ClassNotFoundException, SQLException, WikapidiaException, DaoException, ConfigurationException, IOException, InterruptedException {
         PhraseLoader.main(TestUtils.getArgs("-p", "lucene")); // lucene requires no loading!
         Env env = TestUtils.getEnv();
 

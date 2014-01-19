@@ -1,13 +1,12 @@
 package org.wikapidia.core.dao;
 
-import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
+import org.wikapidia.core.dao.sql.TestDaoUtil;
 import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.model.LocalLink;
 
-import java.io.File;
 import java.io.IOException;
 
 public class TestLocalLinkDao {

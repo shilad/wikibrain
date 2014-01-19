@@ -8,6 +8,7 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 * Tools that load downloaded Wikipedia datasets into **databases** for analysis.
 * Tools that identify **multi-lingual concepts** and the pages in each language edition that link to those concepts.
 * **Semantic-relatedness algorithms** that measure the relationship between two concepts such as "racecar" and "engine."
+* Support for structured [Wikidata](http://meta.wikimedia.org/wiki/Wikidata) "facts" about articles.
 * Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
 ###System Requirements
@@ -142,6 +143,7 @@ To get one of these components, use the Configurator.get() method:
 * **LocalCategoryMemberDao** provides access to Wikipedia's category graph.
 * **UniversalArticleDao** provides access to the multilingual concept mapping.
 * **UniversalLinkDao** exposes the link structure imposed by the multilingual mapping.
+* **WikidataDao** stores factual statements, aliases, and descriptions about to multilingual concepts.
 * **LuceneSearcher** searches arbitrary fields (e.g. title or plain text) in an arbitrary language.
 * **SparseMatrix** represents a sparse matrix of ints (ids) to floats (values) that is persisted using memory mapping to disk.
 * **PhraseAnalyzer** returns the most likely Wikipedia articles for a textual phrase, and the most common textual phrases that represent a particular Wikipedia article.
@@ -225,8 +227,48 @@ This code (on Simple english) displays:
 0.5905978329192705: 'java', 'computer'
 0.42989849626985877: 'dog', 'computer'
 ```
+###Wikidata
+Wikipedia's Wikidata initiative "aims to create a free knowledge base about the world that can be read and edited by humans and machines alike." In short, the initiative shifts the "facts" that support Wikipedia articles (Minneapolis is in Minnesota) into a structured universal repository that can be accessed in any language.
 
-###Configuration
+The WikAPIdia library includes support for Wikidata. To use it, you must first import the Wikidata archive. This is a relatively large dataset (~10GB uncompressed), so it is not loaded by default during the regular pipeline. 
+
+To explicitly load wikidata, AFTER you've loaded the default data, run:
+
+```
+./wp-java.sh org.wikapidia.dao.load.PipelineLoader -f -s wikidata:on
+```
+
+You can then get statements about a particular page:
+
+```java
+Env env = new EnvBuilder().build();
+Configurator conf = env.getConfigurator();
+LocalPageDao lpDao = conf.get(LocalPageDao.class);
+WikidataDao wdDao = conf.get(WikidataDao.class);
+Language simple = Language.getByLangCode("simple");
+
+// Get Barack Obama's page and its factual statements
+Title title = new Title("Barack Obama", simple);
+LocalPage obama = lpDao.getByTitle(title, NameSpace.ARTICLE);
+Map<String, List<LocalWikidataStatement>> statements = wdDao.getLocalStatements(obama);
+
+// Display the properties
+System.out.println("Properties for " + title); 
+for (String property : statements.keySet()) {
+    System.out.println("values for property " + property + " are:"); 
+    for (LocalWikidataStatement lws : statements.get(property)) {
+        System.out.println("\t" + lws.getFullStatement());
+    }       
+}   
+```
+
+This program would output:
+
+```
+```
+
+
+###Advanced Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
 The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
 The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).

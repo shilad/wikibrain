@@ -1,6 +1,7 @@
 package org.wikapidia.phrases;
 
 import com.typesafe.config.Config;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.wikapidia.conf.Configuration;
@@ -10,11 +11,14 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.download.FileDownloader;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -167,6 +171,20 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
                 }
             }
             return 0;
+        }
+    }
+
+    public static void downloadDictionaryIfNecessary(Configuration conf) throws IOException, InterruptedException {
+        String path = conf.get().getString("phrases.analyzer.stanford.path");
+        String url = conf.get().getString("phrases.analyzer.stanford.url");
+        File file = new File(path);
+        File completed = new File(path + ".completed");
+
+        if (!completed.isFile()) {
+            LOG.info("downloading stanford dictionary...");
+            FileDownloader downloader = new FileDownloader();
+            downloader.download(new URL(url), file);
+            FileUtils.touch(completed);
         }
     }
 

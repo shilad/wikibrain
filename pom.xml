@@ -26,6 +26,7 @@
         <module>./wikAPIdia-mapper</module>
         <module>./wikAPIdia-parser</module>
         <module>./wikAPIdia-phrases</module>
+        <module>./wikAPIdia-wikidata</module>
         <module>./wikAPIdia-sr</module>
         <module>./wikAPIdia-integration-tests</module>
         <module>./wikAPIdia-cookbook</module>

@@ -2,9 +2,9 @@ package org.wikapidia.core.dao;
 
 import org.jooq.DSLContext;
 import org.junit.Test;
+import org.wikapidia.core.dao.sql.TestDaoUtil;
 import org.wikapidia.core.dao.sql.WpDataSource;
 
-import javax.sql.DataSource;
 import java.io.IOException;
 
 /**

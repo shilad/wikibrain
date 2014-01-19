@@ -1,8 +1,10 @@
 package org.wikapidia.core.dao.sql;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.Table;
 import org.jooq.TableField;
+import org.jooq.tools.jdbc.JDBCUtils;
 import org.wikapidia.core.dao.DaoException;
 
 import javax.sql.DataSource;
@@ -25,6 +27,8 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class FastLoader {
+    private static final Object POSION_PILL = new Object();
+
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
     static final int BATCH_SIZE = 2000;
 
@@ -35,8 +39,15 @@ public class FastLoader {
     private BlockingQueue<Object[]> rowBuffer =
             new ArrayBlockingQueue<Object[]>(BATCH_SIZE * 2);
 
+    static enum InserterState {
+        RUNNING,            // In normal working mode
+        FAILED,             // Loader failed, it cannot be used anymore
+        SHUTTING_DOWN,      // Parent thread triggered a shutdown
+        SHUTDOWN            // Already shutdown
+    }
+
     private Thread inserter = null;
-    volatile private boolean finished = false;
+    private volatile InserterState inserterState = null;
 
     public FastLoader(WpDataSource ds, TableField[] fields) throws DaoException {
         this(ds, fields[0].getTable().getName(), getFieldNames(fields));
@@ -53,17 +64,19 @@ public class FastLoader {
                     insertBatches();
                 } catch (DaoException e) {
                     LOG.log(Level.SEVERE, "inserter failed", e);
+                    inserterState = InserterState.FAILED;
                 } catch (SQLException e) {
                     LOG.log(Level.SEVERE, "inserter failed", e);
+                    inserterState = InserterState.FAILED;
                 } catch (InterruptedException e) {
                     LOG.log(Level.SEVERE, "inserter interrupted", e);
+                    inserterState = InserterState.FAILED;
                 }
-                inserter = null;
                 rowBuffer.clear();  // allow any existing puts to go through
-                rowBuffer = null;
             }
         });
         inserter.start();
+        inserterState = InserterState.RUNNING;
     }
 
     private static String[] getFieldNames(TableField[] fields) {
@@ -80,15 +93,15 @@ public class FastLoader {
      * @throws DaoException
      */
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-    public void load(Object [] values) throws DaoException {
+    public void load(Object ... values) throws DaoException {
+        if (inserter == null || inserterState != InserterState.RUNNING) {
+            throw new IllegalStateException("inserter thread in state " + inserterState);
+        }
         // Hack convert dates to Timestamps
         for (int i = 0; i < values.length; i++) {
             if (values[i] instanceof Date && !(values[i] instanceof Timestamp)) {
                 values[i] = new Timestamp(((Date)values[i]).getTime());
             }
-        }
-        if (inserter == null) {
-            throw new IllegalStateException("inserter thread exited!");
         }
         if (values.length != fields.length) {
             throw new IllegalArgumentException();
@@ -101,7 +114,9 @@ public class FastLoader {
     }
 
     private void insertBatches() throws DaoException, SQLException, InterruptedException {
+        boolean finished = false;
         Connection cnx = ds.getConnection();
+        PreparedStatement statement = null;
         try {
             String [] names = new String[fields.length];
             String [] questions = new String[fields.length];
@@ -112,18 +127,19 @@ public class FastLoader {
             String sql = "INSERT INTO " +
                     table + "(" + StringUtils.join(names, ",") + ") " +
                     "VALUES (" + StringUtils.join(questions, ",") + ");";
-            PreparedStatement statement = cnx.prepareStatement(sql);
+            statement = cnx.prepareStatement(sql);
 
 
-            while (!(rowBuffer.isEmpty() && finished)) {
+            while (!finished) {
                 // accumulate batch
                 int batchSize = 0;
-                while (batchSize < BATCH_SIZE) {
+                while (!finished && batchSize < BATCH_SIZE) {
                     Object row[] = rowBuffer.poll(100, TimeUnit.MILLISECONDS);
-                    if (row == null && finished) {
-                        break;
-                    }
-                    if (row != null) {
+                    if (row == null) {
+                        // do nothing
+                    } else if (row[0] == POSION_PILL) {
+                        finished = true;
+                    } else {
                         batchSize++;
                         for (int i = 0; i < row.length; i++) {
                             statement.setObject(i + 1, row[i]);
@@ -141,12 +157,22 @@ public class FastLoader {
                 statement.clearBatch();
             }
         } finally {
+            if (statement != null) {
+                JDBCUtils.safeClose(statement);
+            }
             AbstractSqlDao.quietlyCloseConn(cnx);
         }
     }
 
     public void endLoad() throws DaoException {
-        finished = true;
+        try {
+            if (inserterState == InserterState.RUNNING) {
+                rowBuffer.put(new Object[]{POSION_PILL});
+            }
+            inserterState = InserterState.SHUTTING_DOWN;
+        } catch (InterruptedException e) {
+            throw new DaoException(e);
+        }
         if (inserter != null) {
             try {
                 inserter.join(60000);
@@ -154,6 +180,7 @@ public class FastLoader {
                 throw new DaoException(e);
             }
         }
+        inserterState = InserterState.SHUTDOWN;
     }
 
     public void close() throws  DaoException {

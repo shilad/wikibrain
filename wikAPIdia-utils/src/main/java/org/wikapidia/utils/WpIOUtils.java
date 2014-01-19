@@ -1,6 +1,7 @@
 package org.wikapidia.utils;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -85,6 +86,21 @@ public class WpIOUtils {
     }
 
     /**
+     * Reads a resource on the classpath into a string and returns it.
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static String resourceToString(String path) throws IOException {
+        InputStream is = WpIOUtils.class.getResourceAsStream(path);
+        try {
+            return IOUtils.toString(is, "utf-8");
+        } finally {
+            is.close();
+        }
+    }
+
+    /**
      * Open a possibly compressed file and return a reader for it.
      * UTF-8 encoding is used.
      * @param path
@@ -110,6 +126,12 @@ public class WpIOUtils {
      */
     public static BufferedWriter openWriter(File path) throws IOException {
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8"));
+    }
+
+    public static BufferedWriter openBZ2Writer(File path) throws IOException {
+        return new BufferedWriter(new OutputStreamWriter(
+                new BZip2CompressorOutputStream(new FileOutputStream(path)),
+               "UTF-8"));
     }
 
     /**

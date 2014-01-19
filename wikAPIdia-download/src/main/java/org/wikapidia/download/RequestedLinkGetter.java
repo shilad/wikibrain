@@ -142,7 +142,7 @@ public class RequestedLinkGetter {
         return map;
     }
 
-    private List<String> getLangLinks() throws WikapidiaException, IOException, ParseException {
+    public List<String> getLangLinks() throws WikapidiaException, IOException, ParseException {
         List<String> result = new ArrayList<String>();
         Map<String, Multimap<FileMatcher, DumpLinkInfo>> dumpLinks = this.getDumps();
         for (String dumpDate : dumpLinks.keySet()) {

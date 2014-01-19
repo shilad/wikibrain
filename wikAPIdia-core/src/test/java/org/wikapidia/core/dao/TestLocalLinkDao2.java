@@ -1,6 +1,5 @@
 package org.wikapidia.core.dao;
 
-import com.jolbox.bonecp.BoneCPDataSource;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Test;
@@ -9,6 +8,7 @@ import static org.junit.Assert.*;
 
 import org.wikapidia.core.dao.matrix.MatrixLocalLinkDao;
 import org.wikapidia.core.dao.sql.LocalLinkSqlDao;
+import org.wikapidia.core.dao.sql.TestDaoUtil;
 import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalLink;
