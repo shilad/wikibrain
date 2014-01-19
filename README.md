@@ -230,9 +230,15 @@ This code (on Simple english) displays:
 ###Wikidata
 Wikipedia's Wikidata initiative "aims to create a free knowledge base about the world that can be read and edited by humans and machines alike." In short, the initiative shifts the "facts" that support Wikipedia articles (Minneapolis is in Minnesota) into a structured universal repository that can be accessed in any language.
 
-The WikAPIdia library includes support for Wikidata. To use it, you must first import the Wikidata archive. This is a relatively large dataset (~10GB uncompressed), so it is not loaded by default during the regular pipeline. 
+The WikAPIdia library includes support for Wikidata. To use it, you must first import the Wikidata archive. This is a relatively large dataset (~10GB uncompressed), so it is not loaded by default during the regular pipeline. **AFTER running the regular pipeline** you need to do the following two steps.
 
-To explicitly load wikidata, AFTER you've loaded the default data, run:
+First, Wikidata requires the "purewikidata" concept mapper. If you only installed one language (say *en* or *simple*, but not both) this will not have been installed. You will need to run:
+
+```
+./wp-java.sh org.wikapidia.dao.load.ConceptLoader -n purewikidata -d 
+```
+
+Next, load the wikidata:
 
 ```
 ./wp-java.sh org.wikapidia.dao.load.PipelineLoader -f -s wikidata:on
