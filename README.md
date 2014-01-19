@@ -8,6 +8,7 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 * Tools that load downloaded Wikipedia datasets into **databases** for analysis.
 * Tools that identify **multi-lingual concepts** and the pages in each language edition that link to those concepts.
 * **Semantic-relatedness algorithms** that measure the relationship between two concepts such as "racecar" and "engine."
+* Support for structured [Wikidata](http://meta.wikimedia.org/wiki/Wikidata) "facts" about articles.
 * Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
 ###System Requirements
@@ -142,6 +143,7 @@ To get one of these components, use the Configurator.get() method:
 * **LocalCategoryMemberDao** provides access to Wikipedia's category graph.
 * **UniversalArticleDao** provides access to the multilingual concept mapping.
 * **UniversalLinkDao** exposes the link structure imposed by the multilingual mapping.
+* **WikidataDao** stores factual statements, aliases, and descriptions about to multilingual concepts.
 * **LuceneSearcher** searches arbitrary fields (e.g. title or plain text) in an arbitrary language.
 * **SparseMatrix** represents a sparse matrix of ints (ids) to floats (values) that is persisted using memory mapping to disk.
 * **PhraseAnalyzer** returns the most likely Wikipedia articles for a textual phrase, and the most common textual phrases that represent a particular Wikipedia article.
