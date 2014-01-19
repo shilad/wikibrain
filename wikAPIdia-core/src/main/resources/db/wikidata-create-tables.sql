@@ -36,5 +36,5 @@ CREATE TABLE IF NOT EXISTS WIKIDATA_STATEMENT (
   VAL_STR TEXT NOT NULL,
 
   -- Property rank: 0 = deprecated, 1 = normal, 2 = preferred
-  RANK SMALLINT NOT NULL,
+  RANK SMALLINT NOT NULL
 );
