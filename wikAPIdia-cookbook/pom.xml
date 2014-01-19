@@ -26,6 +26,11 @@
         </dependency>
         <dependency>
             <groupId>com.github.shilad.wikapidia</groupId>
+            <artifactId>wikAPIdia-wikidata</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.shilad.wikapidia</groupId>
             <artifactId>wikAPIdia-loader</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
