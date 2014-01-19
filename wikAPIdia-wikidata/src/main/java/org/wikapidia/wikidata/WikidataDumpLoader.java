@@ -13,6 +13,7 @@ import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.download.FileDownloader;
 import org.wikapidia.download.RequestedLinkGetter;
 import org.wikapidia.utils.ParallelForEach;
@@ -112,7 +113,7 @@ public class WikidataDumpLoader {
             downloader.downloadFrom(dumpFile);
 
             paths = new ArrayList<File>();
-            for (File f : env.getFiles(FileMatcher.ARTICLES)) {
+            for (File f : env.getFiles(new LanguageSet(Language.WIKIDATA), FileMatcher.ARTICLES)) {
                 if (f.getName().contains("wikidata")) {
                     paths.add(f);
                 }
