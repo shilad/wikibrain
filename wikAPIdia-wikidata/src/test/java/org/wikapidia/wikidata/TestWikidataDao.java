@@ -44,7 +44,7 @@ public class TestWikidataDao {
         MetaInfoDao md = new MetaInfoSqlDao(ds);
         md.beginLoad();
 
-        WikidataSqlDao wd = new WikidataSqlDao(ds);
+        WikidataSqlDao wd = new WikidataSqlDao(ds, null, null);
         wd.beginLoad();
 
         WikidataDumpLoader loader = new WikidataDumpLoader(wd, md);
@@ -64,7 +64,7 @@ public class TestWikidataDao {
     @Test
     public void testProps() throws DaoException, IOException, ClassNotFoundException {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
-        WikidataDao wd = new WikidataSqlDao(ds);
+        WikidataDao wd = new WikidataSqlDao(ds, null, null);
 
         Map<Integer, WikidataEntity> props = wd.getProperties();
         assertEquals(props.size(), 836);
@@ -86,7 +86,7 @@ public class TestWikidataDao {
     @Test
     public void testItem() throws DaoException, IOException, ClassNotFoundException {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
-        WikidataDao wd = new WikidataSqlDao(ds);
+        WikidataDao wd = new WikidataSqlDao(ds, null, null);
 
         WikidataEntity entity = wd.getItem(157);
         assertEquals(157, entity.getId());
@@ -114,7 +114,7 @@ public class TestWikidataDao {
     @Test
     public void testLocalStatements() throws DaoException, IOException, ClassNotFoundException {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
-        WikidataDao wd = new WikidataSqlDao(ds);
+        WikidataDao wd = new WikidataSqlDao(ds, null, null);
         Map<String, List<LocalWikidataStatement>> statements = wd.getLocalStatements(EN, WikidataEntity.Type.ITEM, 157);
         assertEquals(25, statements.keySet().size());
 
