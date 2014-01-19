@@ -117,7 +117,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     }
 
     @Override
-    public List<WikidataStatement> getStatementsForPage(LocalPage page) throws DaoException {
+    public List<WikidataStatement> getStatements(LocalPage page) throws DaoException {
         int conceptId = upDao.getUnivPageId(page, 1);
         if (conceptId < 0) {
             return new ArrayList<WikidataStatement>();
@@ -131,7 +131,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     }
 
     @Override
-    public Map<String, List<LocalWikidataStatement>> getLocalStatementsForPage(LocalPage page) throws DaoException {
+    public Map<String, List<LocalWikidataStatement>> getLocalStatements(LocalPage page) throws DaoException {
         int conceptId = upDao.getUnivPageId(page, 1);
         if (conceptId < 0) {
             return new HashMap<String, List<LocalWikidataStatement>>();

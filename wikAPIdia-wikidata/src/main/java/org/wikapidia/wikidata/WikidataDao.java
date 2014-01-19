@@ -43,7 +43,14 @@ public interface WikidataDao extends Dao<WikidataStatement> {
      * @return
      * @throws DaoException
      */
-    List<WikidataStatement> getStatementsForPage(LocalPage page) throws DaoException;
+    List<WikidataStatement> getStatements(LocalPage page) throws DaoException;
+
+    /**
+     * Saves the specified entity
+     * @param entity
+     * @throws DaoException
+     */
+    public void save(WikidataEntity entity) throws DaoException;
 
     /**
      * Returns human-understandable interpretations of statements for a particular page.
@@ -52,14 +59,7 @@ public interface WikidataDao extends Dao<WikidataStatement> {
      * @return
      * @throws DaoException
      */
-    Map<String, List<LocalWikidataStatement>> getLocalStatementsForPage(LocalPage page) throws DaoException;
-
-    /**
-     * Saves the specified entity
-     * @param entity
-     * @throws DaoException
-     */
-    public void save(WikidataEntity entity) throws DaoException;
+    Map<String, List<LocalWikidataStatement>> getLocalStatements(LocalPage page) throws DaoException;
 
     /**
      * Returns all statements for the specified concept id.
