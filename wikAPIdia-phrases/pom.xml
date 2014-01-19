@@ -21,6 +21,11 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.github.shilad.wikapidia</groupId>
+            <artifactId>wikAPIdia-download</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.externalsortinginjava</groupId>
             <artifactId>externalsortinginjava</artifactId>
             <version>0.1.7</version>
