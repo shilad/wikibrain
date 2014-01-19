@@ -136,7 +136,15 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         if (conceptId < 0) {
             return new HashMap<String, List<LocalWikidataStatement>>();
         }
-        return getLocalStatements(page.getLanguage(), WikidataEntity.Type.ITEM, conceptId);
+        return getLocalStatements(getRealLang(page.getLanguage()), WikidataEntity.Type.ITEM, conceptId);
+    }
+
+    private Language getRealLang(Language lang) {
+        if (lang.getLangCode().equals("simple")) {
+            return Language.getByLangCode("en");
+        } else {
+            return lang;
+        }
     }
 
     private WikidataEntity getEntityWithoutCache(WikidataEntity.Type type, int id) throws DaoException {
@@ -268,6 +276,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
 
     @Override
     public Map<String, List<LocalWikidataStatement>> getLocalStatements(Language lang, WikidataEntity.Type type, int id) throws DaoException {
+        lang = getRealLang(lang);
         WikidataFilter filter = new WikidataFilter.Builder()
                 .withEntityType(type)
                 .withEntityId(id)
@@ -285,6 +294,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
 
     @Override
     public LocalWikidataStatement getLocalStatement(Language language, WikidataStatement statement) throws DaoException {
+        language = getRealLang(language );
         String item = getLocalName(language, statement.getItem().getType(), statement.getItem().getId());
         String prop = getLocalName(language, statement.getProperty().getType(), statement.getProperty().getId());
         String value = null;
@@ -300,7 +310,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         return new LocalWikidataStatement(language, statement, full, item, prop, value);
     }
 
-    public String getLocalName(Language language, WikidataEntity.Type type, int id) throws DaoException {
+    private String getLocalName(Language language, WikidataEntity.Type type, int id) throws DaoException {
         if (type == WikidataEntity.Type.PROPERTY) {
             WikidataEntity prop = getProperty(id);  // should be cached, fast
             if (prop.getLabels().isEmpty()) {
@@ -451,7 +461,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                                 WpDataSource.class,
                                 config.getString("dataSource")),
                         getConfigurator().get(LocalPageDao.class),
-                        getConfigurator().get(UniversalPageDao.class, "purewikidata")
+                        getConfigurator().get(UniversalPageDao.class)
                 );
 
                 String cachePath = getConfig().get().getString("dao.sqlCachePath");
