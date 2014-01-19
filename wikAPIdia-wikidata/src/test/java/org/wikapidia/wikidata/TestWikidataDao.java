@@ -3,7 +3,6 @@ package org.wikapidia.wikidata;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
-import org.jooq.tools.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,7 +44,7 @@ public class TestWikidataDao {
         MetaInfoDao md = new MetaInfoSqlDao(ds);
         md.beginLoad();
 
-        WikidataDao wd = new WikidataDao(ds);
+        WikidataSqlDao wd = new WikidataSqlDao(ds);
         wd.beginLoad();
 
         WikidataDumpLoader loader = new WikidataDumpLoader(wd, md);
@@ -65,7 +64,7 @@ public class TestWikidataDao {
     @Test
     public void testProps() throws DaoException, IOException, ClassNotFoundException {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
-        WikidataDao wd = new WikidataDao(ds);
+        WikidataDao wd = new WikidataSqlDao(ds);
 
         Map<Integer, WikidataEntity> props = wd.getProperties();
         assertEquals(props.size(), 836);
@@ -87,7 +86,7 @@ public class TestWikidataDao {
     @Test
     public void testItem() throws DaoException, IOException, ClassNotFoundException {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
-        WikidataDao wd = new WikidataDao(ds);
+        WikidataDao wd = new WikidataSqlDao(ds);
 
         WikidataEntity entity = wd.getItem(157);
         assertEquals(157, entity.getId());
@@ -115,7 +114,7 @@ public class TestWikidataDao {
     @Test
     public void testLocalStatements() throws DaoException, IOException, ClassNotFoundException {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
-        WikidataDao wd = new WikidataDao(ds);
+        WikidataDao wd = new WikidataSqlDao(ds);
         Map<String, List<LocalWikidataStatement>> statements = wd.getLocalStatements(EN, WikidataEntity.Type.ITEM, 157);
         assertEquals(25, statements.keySet().size());
 

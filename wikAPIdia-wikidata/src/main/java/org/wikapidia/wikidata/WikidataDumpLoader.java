@@ -11,26 +11,17 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.MetaInfoDao;
-import org.wikapidia.core.dao.RawPageDao;
 import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageInfo;
-import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.RawPage;
 import org.wikapidia.download.FileDownloader;
 import org.wikapidia.download.RequestedLinkGetter;
-import org.wikapidia.parser.xml.DumpPageXmlParser;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
-import org.wikapidia.utils.WpIOUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -133,7 +124,7 @@ public class WikidataDumpLoader {
             }
         }
 
-        WikidataDao wdDao = conf.get(WikidataDao.class);
+        WikidataSqlDao wdDao = conf.get(WikidataSqlDao.class);
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
         final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao);
