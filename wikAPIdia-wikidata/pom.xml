@@ -11,7 +11,7 @@
         <relativePath>../wikAPIdia-parent</relativePath>
     </parent>
 
-    <artifactId>wikAPIdia-integration-tests</artifactId>
+    <artifactId>wikAPIdia-wikidata</artifactId>
 
     <dependencies>
         <dependency>
@@ -21,41 +21,24 @@
         </dependency>
         <dependency>
             <groupId>com.github.shilad.wikapidia</groupId>
-            <artifactId>wikAPIdia-sr</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.shilad.wikapidia</groupId>
-            <artifactId>wikAPIdia-lucene</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.shilad.wikapidia</groupId>
             <artifactId>wikAPIdia-download</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.github.shilad.wikapidia</groupId>
-            <artifactId>wikAPIdia-loader</artifactId>
+            <artifactId>wikAPIdia-utils</artifactId>
             <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.shilad.wikapidia</groupId>
+            <artifactId>wikAPIdia-parser</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.2.4</version>
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.16</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

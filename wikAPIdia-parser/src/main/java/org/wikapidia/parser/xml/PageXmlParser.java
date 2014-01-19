@@ -19,12 +19,15 @@ import java.util.regex.Pattern;
  */
 public class PageXmlParser {
     private static final Logger LOG =Logger.getLogger(PageXmlParser.class.getName());
-    private static final Pattern titlePattern = Pattern.compile("<title>(.*?)</title>");
-    private static final Pattern idPattern = Pattern.compile("<id>(.*?)</id>");
-    private static final Pattern timestampPattern = Pattern.compile("<timestamp>(.*?)</timestamp>");
-    private static final Pattern contentPattern = Pattern.compile("<text xml:space=\"preserve\">(.*?)</text>", Pattern.DOTALL);
-    private static final Pattern selfClosingContentPattern = Pattern.compile("<text xml:space=\"preserve\"\\s*/>", Pattern.DOTALL);
-    private static final Pattern redirectPattern = Pattern.compile("<redirect title=\"(.*?)\" />");
+    private static final Pattern TITLE_PATTERN = Pattern.compile("<title>(.*?)</title>");
+    private static final Pattern ID_PATTERN = Pattern.compile("<id>(.*?)</id>");
+    private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("<timestamp>(.*?)</timestamp>");
+    private static final Pattern CONTENT_PATTERN = Pattern.compile("<text xml:space=\"preserve\">(.*?)</text>", Pattern.DOTALL);
+    private static final Pattern SELF_CLOSING_CONTENT_PATTERN = Pattern.compile("<text xml:space=\"preserve\"\\s*/>", Pattern.DOTALL);
+    private static final Pattern REDIRECT_PATTERN = Pattern.compile("<redirect title=\"(.*?)\" />");
+
+    private static final Pattern MODEL_PATTERN = Pattern.compile("<model>(.*?)</model>");
+    private static final Pattern FORMAT_PATTERN = Pattern.compile("<format>(.*?)</format>");
 
     // xmlDumpDateFormat is not static because it isn't threadsafe. BOOO!!
     private final SimpleDateFormat xmlDumpDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -48,10 +51,12 @@ public class PageXmlParser {
      */
     public RawPage parse(String rawXml, long startByte, long stopByte) throws WpParseException {
         rawXml = StringEscapeUtils.unescapeHtml4(rawXml);
-        String title = extractSingleString(titlePattern, rawXml, 1);
-        String idString = extractSingleString(idPattern, rawXml, 1);
-        String timestampString = extractSingleString(timestampPattern, rawXml, 1);
-        String revisionIdString = extractSingleString(idPattern, rawXml, 2);
+        String title = extractSingleString(TITLE_PATTERN, rawXml, 1);
+        String idString = extractSingleString(ID_PATTERN, rawXml, 1);
+        String timestampString = extractSingleString(TIMESTAMP_PATTERN, rawXml, 1);
+        String revisionIdString = extractSingleString(ID_PATTERN, rawXml, 2);
+        String formatString = extractSingleString(FORMAT_PATTERN, rawXml, 1);
+        String modelString = extractSingleString(MODEL_PATTERN, rawXml, 1);
 
         if (title == null) {
             throw new WpParseException("no title for article");
@@ -63,8 +68,8 @@ public class PageXmlParser {
             throw new WpParseException("no revision id for article");
         }
 
-        String body = extractSingleString(contentPattern, rawXml, 1);
-        if (body == null && selfClosingContentPattern.matcher(rawXml).find()) {
+        String body = extractSingleString(CONTENT_PATTERN, rawXml, 1);
+        if (body == null && SELF_CLOSING_CONTENT_PATTERN.matcher(rawXml).find()) {
             body = "";
         }
         if (body == null) {
@@ -79,7 +84,7 @@ public class PageXmlParser {
         }
         title = title.trim();
         String redirectTitle = getRedirect(rawXml);
-        return new RawPage(
+        RawPage rp = new RawPage(
                 Integer.valueOf(idString),
                 Integer.valueOf(revisionIdString),
                 title,
@@ -91,6 +96,13 @@ public class PageXmlParser {
                 false,   // TODO: FIXME by properly parsing disambigs!
                 redirectTitle
         );
+        if (formatString != null) {
+            rp.setFormat(formatString);
+        }
+        if (modelString != null) {
+            rp.setModel(modelString);
+        }
+        return rp;
     }
 
     // TODO: does this method need to be like this, or can it just return "type"
@@ -99,7 +111,7 @@ public class PageXmlParser {
     }
 
     private String getRedirect(String rawXml) {
-        return extractSingleString(redirectPattern, rawXml, 1);
+        return extractSingleString(REDIRECT_PATTERN, rawXml, 1);
     }
 
     private static String extractSingleString(Pattern patternToMatch, String body, int matchNum){

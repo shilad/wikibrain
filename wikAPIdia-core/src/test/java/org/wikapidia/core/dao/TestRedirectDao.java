@@ -1,10 +1,10 @@
 package org.wikapidia.core.dao;
 
-import com.jolbox.bonecp.BoneCPDataSource;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.set.TIntSet;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.RedirectSqlDao;
+import org.wikapidia.core.dao.sql.TestDaoUtil;
 import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
@@ -12,8 +12,6 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 
-import javax.sql.DataSource;
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
