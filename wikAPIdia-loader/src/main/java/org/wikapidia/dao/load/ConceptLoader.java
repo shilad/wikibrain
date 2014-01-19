@@ -1,21 +1,31 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
+import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
+import org.wikapidia.core.cmd.FileMatcher;
 import org.wikapidia.core.dao.DaoException;
 
 import org.wikapidia.core.dao.UniversalPageDao;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.download.DumpFileDownloader;
+import org.wikapidia.download.RequestedLinkGetter;
 import org.wikapidia.mapper.ConceptMapper;
+import org.wikapidia.mapper.algorithms.PureWikidataConceptMapper;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,7 +67,27 @@ public class ConceptLoader {
         }
     }
 
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
+    public static void downloadWikidataLinks(Configuration conf) throws IOException, WikapidiaException, java.text.ParseException, InterruptedException {
+        List<File> paths = Env.getFiles(Language.WIKIDATA, FileMatcher.WIKIDATA_ITEMS, conf);
+        if (paths.isEmpty()) {
+            File dumpFile = File.createTempFile("wikiapidia", "items");
+            dumpFile.deleteOnExit();
+            LOG.info("downloading wikidata items file");
+            RequestedLinkGetter getter = new RequestedLinkGetter(
+                    Language.WIKIDATA,
+                    Arrays.asList(FileMatcher.WIKIDATA_ITEMS),
+                    new Date()
+            );
+            FileUtils.writeLines(dumpFile, getter.getLangLinks());
+
+            // Fetch the file (if necessary) to the standard path
+            String filePath = conf.get().getString("download.path");
+            DumpFileDownloader downloader = new DumpFileDownloader(new File(filePath));
+            downloader.downloadFrom(dumpFile);
+        }
+    }
+
+    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException, java.text.ParseException, InterruptedException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
@@ -84,6 +114,12 @@ public class ConceptLoader {
         if (algorithm == null) {
             algorithm = (env.getLanguages().size() <= 1) ? "monolingual" : "purewikidata";
         }
+
+        // TODO: handle checking of purewikidata more robustly
+        if (algorithm.equals("purewikidata")) {
+            downloadWikidataLinks(env.getConfiguration());
+        }
+
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
         final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao);
 

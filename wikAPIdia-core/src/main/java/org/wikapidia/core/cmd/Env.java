@@ -104,7 +104,7 @@ public class Env {
         return matches;
     }
 
-    private List<File> getFiles(Language lang, FileMatcher fm) {
+    public List<File> getFiles(Language lang, FileMatcher fm) {
         return getFiles(lang, fm, configuration);
     }
 

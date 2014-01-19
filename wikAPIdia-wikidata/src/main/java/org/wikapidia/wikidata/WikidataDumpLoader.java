@@ -14,7 +14,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.download.FileDownloader;
+import org.wikapidia.download.DumpFileDownloader;
 import org.wikapidia.download.RequestedLinkGetter;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
@@ -51,7 +51,7 @@ public class WikidataDumpLoader {
         WikidataDumpParser parser = new WikidataDumpParser(file);
         for (WikidataEntity rp : parser) {
             if (counter.incrementAndGet() % 10000 == 0) {
-                LOG.info("processing article " + counter.get());
+                LOG.info("processing wikidata entity " + counter.get());
             }
             save(file, rp);
         }
@@ -109,7 +109,7 @@ public class WikidataDumpLoader {
 
             // Fetch the file (if necessary) to the standard path
             String filePath = conf.getConf().get().getString("download.path");
-            FileDownloader downloader = new FileDownloader(new File(filePath));
+            DumpFileDownloader downloader = new DumpFileDownloader(new File(filePath));
             downloader.downloadFrom(dumpFile);
 
             paths = new ArrayList<File>();
