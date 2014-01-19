@@ -128,7 +128,8 @@ public class WpDataSource {
             conn.commit();
         } catch (SQLException e){
             rollbackQuietly(conn);
-            LOG.warning("error executing: " + script);
+            LOG.log(Level.SEVERE, "error executing: " + script, e);
+            throw new DaoException(e);
         } finally {
             closeQuietly(conn);
         }
