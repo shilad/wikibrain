@@ -3,10 +3,7 @@ package org.wikapidia.wikidata;
 import org.wikapidia.core.lang.Language;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Shilad Sen
@@ -17,6 +14,16 @@ public class WikidataEntity implements Serializable {
 
         public char code;
         Type(char code) { this.code = code; }
+
+        public static Type getByCode(char code) {
+            code = Character.toUpperCase(code);
+            for (Type type : values()) {
+                if (type.code == code) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("Unknown type code: " + code);
+        }
     }
 
     private Type type;
@@ -58,5 +65,55 @@ public class WikidataEntity implements Serializable {
 
     public List<WikidataStatement> getStatements() {
         return statements;
+    }
+
+    public Map<String, List<WikidataStatement>> getStatementsInLanguage(Language language) {
+        Map<String, List<WikidataStatement>> inLang = new HashMap<String, List<WikidataStatement>>();
+        for (WikidataStatement s : statements) {
+            String label = s.getProperty().getLabels().get(language);
+            if (label != null) {
+                if (!inLang.containsKey(label)) {
+                    inLang.put(label, new ArrayList<WikidataStatement>());
+                }
+                inLang.get(label).add(s);
+            }
+        }
+        return inLang;
+    }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode() + 37 * id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WikidataEntity that = (WikidataEntity) o;
+
+        if (id != that.id) return false;
+        if (type != that.type) return false;
+
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        String name;
+        Language en = Language.getByLangCode("en");
+        if (labels.containsKey(en)) {
+            name = labels.get(en);
+        } else if (labels.isEmpty()) {
+            name = "unknown";
+        } else {
+            name = labels.values().iterator().next();
+        }
+        return "WikidataEntity{" +
+                "type=" + type +
+                ", id=" + id +
+                ", name=" + name +
+                '}';
     }
 }

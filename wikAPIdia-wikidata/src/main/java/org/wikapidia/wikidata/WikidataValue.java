@@ -91,4 +91,12 @@ public class WikidataValue implements Serializable {
     public JsonElement getJsonValue() {
         return jsonValue;
     }
+
+    @Override
+    public String toString() {
+        return "WikidataValue{" +
+                "typeName='" + typeName + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }

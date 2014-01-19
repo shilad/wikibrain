@@ -31,6 +31,7 @@ public class TestWikidataParser {
 
         WikidataParser parser2 = new WikidataParser();
         WikidataEntity record = parser2.parse(rawPage);
+
     }
 
     @Test
@@ -45,11 +46,17 @@ public class TestWikidataParser {
             IOUtils.closeQuietly(out);
 
             WikidataDumpParser parser = new WikidataDumpParser(tmp);
-            int i = 0;
+            int numItems = 0;
+            int numProperties = 0;
             for (WikidataEntity record : parser) {
-                i++;
+                if (record.getType() == WikidataEntity.Type.ITEM) {
+                    numItems++;
+                } else if (record.getType() == WikidataEntity.Type.PROPERTY) {
+                    numProperties++;
+                }
             }
-            assertEquals(414, i);
+            assertEquals(400, numItems);
+            assertEquals(836, numProperties);
         } finally {
             tmp.delete();
         }

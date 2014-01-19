@@ -38,13 +38,11 @@ public class WikidataDumpLoader {
 
     private final AtomicInteger counter = new AtomicInteger();
 
-    private final LocalPageDao localPageDao;
     private final MetaInfoDao metaDao;
     private final WikidataDao wikidataDao;
 
-    public WikidataDumpLoader(WikidataDao wikidataDao, LocalPageDao localPageDao, MetaInfoDao metaDao) {
+    public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao) {
         this.wikidataDao = wikidataDao;
-        this.localPageDao = localPageDao;
         this.metaDao = metaDao;
     }
 
@@ -108,10 +106,9 @@ public class WikidataDumpLoader {
         }
 
         WikidataDao wdDao = conf.get(WikidataDao.class);
-        LocalPageDao lpDao = conf.get(LocalPageDao.class);
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
-        final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, lpDao, metaDao);
+        final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao);
 
         if (cmd.hasOption("d")) {
             wdDao.clear();

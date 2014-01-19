@@ -4,6 +4,8 @@ import org.wikapidia.core.lang.Language;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Shilad Sen
@@ -26,9 +28,32 @@ public class WikidataFilter {
         return langs;
     }
 
-    public Collection<WikidataEntity.Type> getEntityType() {
+    public Collection<Short> getLangIds() {
+        if (langs == null) {
+            return null;
+        }
+        Set<Short> ids = new HashSet<Short>();
+        for (Language lang : langs) {
+            ids.add(lang.getId());
+        }
+        return ids;
+    }
+
+    public Collection<WikidataEntity.Type> getEntityTypes() {
         return entityTypes;
     }
+
+    public Collection<String> getEntityTypeCodes() {
+        if (entityTypes == null) {
+            return null;
+        }
+        Set<String> typeCodes = new HashSet<String>();
+        for (WikidataEntity.Type type : entityTypes) {
+            typeCodes.add(Character.toString(type.code));
+        }
+        return typeCodes;
+    }
+
 
     public Collection<Integer> getEntityIds() {
         return entityIds;
@@ -40,6 +65,17 @@ public class WikidataFilter {
 
     public Collection<WikidataStatement.Rank> getRanks() {
         return ranks;
+    }
+
+    public Collection<Short> getRankOrdinals() {
+        if (ranks == null) {
+            return null;
+        }
+        Set<Short> ordinals = new HashSet<Short>();
+        for (WikidataStatement.Rank rank : ranks) {
+            ordinals.add((short)rank.ordinal());
+        }
+        return ordinals;
     }
 
     /**

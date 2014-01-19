@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,7 +119,12 @@ public class WpDataSource {
         Connection conn=null;
         try {
             conn = getConnection();
-            conn.createStatement().execute(script);
+            for (String s : script.split(";")) {
+                LOG.fine("executing:\n" + s + "\n=========================================\n");
+                Statement st = conn.createStatement();
+                st.execute(s + ";");
+                st.close();
+            }
             conn.commit();
         } catch (SQLException e){
             rollbackQuietly(conn);

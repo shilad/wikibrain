@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.typesafe.config.Config;
-import org.jooq.Record;
-import org.jooq.TableField;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.collections.IteratorUtils;
+import org.jooq.*;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -13,15 +15,16 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.sql.AbstractSqlDao;
 import org.wikapidia.core.dao.sql.FastLoader;
+import org.wikapidia.core.dao.sql.SimpleSqlDaoIterable;
 import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.parser.WpParseException;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 import static org.wikapidia.core.jooq.tables.WikidataEntityAliases.*;
 import static org.wikapidia.core.jooq.tables.WikidataEntityLabels.*;
@@ -32,6 +35,8 @@ import static org.wikapidia.core.jooq.tables.WikidataStatement.*;
  * @author Shilad Sen
  */
 public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
+    private static Language FALLBACK_LANGUAGE = Language.getByLangCode("en");
+
     private static TableField[] FIELDS = new TableField[] {
             WIKIDATA_STATEMENT.ID,
             WIKIDATA_STATEMENT.ENTITY_TYPE,
@@ -56,15 +61,101 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
         super(dataSource, FIELDS, "/db/wikidata");
     }
 
-    @Override
-    public void useCache(File file) throws DaoException {
-        super.useCache(file);
-        properties = (Map<Integer, WikidataEntity>) cache.get("wikidata-properties", WikidataStatement.class);
+    public WikidataEntity getProperty(int id) throws DaoException {
+        Map<Integer, WikidataEntity> properties = getProperties();  // should be cached!
+        if (properties == null || properties.size() == 0) {
+            return getEntityWithoutCache(WikidataEntity.Type.PROPERTY, id);
+        } else {
+            return properties.get(id);
+        }
+    }
+
+    public WikidataEntity getItem(int id) throws DaoException {
+        return getEntityWithoutCache(WikidataEntity.Type.ITEM, id);
+    }
+
+    public synchronized Map<Integer, WikidataEntity> getProperties() throws DaoException {
+        if (properties != null) {
+            return properties;
+        }
+        if (cache != null) {
+            properties = (Map<Integer, WikidataEntity>) cache.get("wikidata-properties", WikidataStatement.class);
+        }
+        if (properties == null || properties.size() == 0) {
+            properties = new ConcurrentHashMap<Integer, WikidataEntity>();
+            LOG.info("creating wikidata properties cache. This only happens once...");
+            DSLContext context = getJooq();
+            try {
+                Result<Record1<Integer>> result = context
+                        .select(Tables.WIKIDATA_ENTITY_LABELS.ENTITY_ID)
+                        .from(Tables.WIKIDATA_ENTITY_LABELS)
+                        .where(Tables.WIKIDATA_ENTITY_LABELS.ENTITY_TYPE.eq("" + WikidataEntity.Type.PROPERTY.code))
+                        .fetch();
+                TIntSet propIds = new TIntHashSet();
+                for (Record1<Integer> record : result) {
+                    propIds.add(record.value1());
+                }
+                for (int id : propIds.toArray()) {
+                    properties.put(id, getEntityWithoutCache(WikidataEntity.Type.PROPERTY, id));
+                }
+            } finally {
+                freeJooq(context);
+            }
+        }
         LOG.info("loaded properties with size " + ((properties == null) ? 0 : properties.size()));
+        return properties;
+    }
+
+    private WikidataEntity getEntityWithoutCache(WikidataEntity.Type type, int id) throws DaoException {
+        WikidataEntity entity = new WikidataEntity(type, id);
+        DSLContext jooq = getJooq();
+        try {
+            Result<Record2<Short, String>> result = jooq
+                    .select(Tables.WIKIDATA_ENTITY_LABELS.LANG_ID, Tables.WIKIDATA_ENTITY_LABELS.LABEL)
+                    .from(Tables.WIKIDATA_ENTITY_LABELS)
+                    .where(Tables.WIKIDATA_ENTITY_LABELS.ENTITY_TYPE.eq(type.code + ""))
+                    .and(Tables.WIKIDATA_ENTITY_LABELS.ENTITY_ID.eq(id))
+                    .fetch();
+            for (Record2<Short, String> record : result) {
+                entity.getLabels().put(Language.getById(record.value1()), record.value2());
+            }
+            Result<Record2<Short, String>> result2 = jooq
+                    .select(Tables.WIKIDATA_ENTITY_DESCRIPTIONS.LANG_ID, Tables.WIKIDATA_ENTITY_DESCRIPTIONS.DESCRIPTION)
+                    .from(Tables.WIKIDATA_ENTITY_DESCRIPTIONS)
+                    .where(Tables.WIKIDATA_ENTITY_DESCRIPTIONS.ENTITY_TYPE.eq(type.code + ""))
+                    .and(Tables.WIKIDATA_ENTITY_DESCRIPTIONS.ENTITY_ID.eq(id))
+                    .fetch();
+            for (Record2<Short, String> record : result2) {
+                entity.getDescriptions().put(Language.getById(record.value1()), record.value2());
+            }
+            Result<Record2<Short, String>> result3 = jooq
+                    .select(Tables.WIKIDATA_ENTITY_ALIASES.LANG_ID, Tables.WIKIDATA_ENTITY_ALIASES.ALIAS)
+                    .from(Tables.WIKIDATA_ENTITY_ALIASES)
+                    .where(Tables.WIKIDATA_ENTITY_ALIASES.ENTITY_TYPE.eq(type.code + ""))
+                    .and(Tables.WIKIDATA_ENTITY_ALIASES.ENTITY_ID.eq(id))
+                    .fetch();
+            Map<Language, List<String>> aliases = entity.getAliases();
+            for (Record2<Short, String> record : result3) {
+                Language lang = Language.getById(record.value1());
+                if (!aliases.containsKey(lang)) {
+                    aliases.put(lang, new ArrayList<String>());
+                }
+                aliases.get(lang).add(record.value2());
+            }
+            WikidataFilter filter = new WikidataFilter.Builder()
+                    .withEntityType(type)
+                    .withEntityId(id)
+                    .build();
+            entity.getStatements().addAll(IteratorUtils.toList(get(filter).iterator()));
+            return entity;
+        } finally {
+            freeJooq(jooq);
+        }
     }
 
     @Override
     public void beginLoad() throws DaoException {
+        super.beginLoad();
         if (labelLoader == null) {
             labelLoader = new FastLoader(wpDs, new TableField[] {
                                         WIKIDATA_ENTITY_LABELS.ENTITY_TYPE,
@@ -90,7 +181,6 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
                                     });
         }
         properties = new HashMap<Integer, WikidataEntity>();
-        super.beginLoad();
     }
 
     public void save(WikidataEntity entity) throws DaoException {
@@ -122,8 +212,8 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
                 item.getItem().getType().code,
                 item.getItem().getId(),
                 item.getProperty().getId(),
-                item.getValue().getType().ordinal(),
-                gson.toJson(item.getValue()),
+                item.getValue().getType().toString().toLowerCase(),
+                gson.toJson(item.getValue().getJsonValue()),
                 item.getRank().ordinal()
         );
     }
@@ -142,8 +232,121 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
         }
     }
 
+    public Map<String, List<LocalWikidataStatement>> getLocalStatements(Language lang, WikidataEntity.Type type, int id) throws DaoException {
+        WikidataFilter filter = new WikidataFilter.Builder()
+                .withEntityType(type)
+                .withEntityId(id)
+                .build();
+        Map<String, List<LocalWikidataStatement>> local = new HashMap<String, List<LocalWikidataStatement>>();
+        for (WikidataStatement st : get(filter)) {
+            LocalWikidataStatement lws = getLocalStatement(lang, st);
+            if (!local.containsKey(lws.getProperty())) {
+                local.put(lws.getProperty(), new ArrayList<LocalWikidataStatement>());
+            }
+            local.get(lws.getProperty()).add(lws);
+        }
+        return local;
+    }
+
+    public LocalWikidataStatement getLocalStatement(Language language, WikidataStatement statement) throws DaoException {
+        String item = getLocalName(language, statement.getItem().getType(), statement.getItem().getId());
+        String prop = getLocalName(language, statement.getProperty().getType(), statement.getProperty().getId());
+        String value = null;
+        WikidataValue wdv = statement.getValue();
+        if (wdv.getType() == WikidataValue.Type.ITEM) {
+            value = getLocalName(language, WikidataEntity.Type.ITEM, wdv.getItemValue());
+        } else if (wdv == null) {
+            value = "unknown";
+        } else {
+            value = wdv.getValue().toString();
+        }
+        String full = item + " " + prop + " " + value;
+        return new LocalWikidataStatement(language, statement, full, item, prop, value);
+    }
+
+    public String getLocalName(Language language, WikidataEntity.Type type, int id) throws DaoException {
+        if (type == WikidataEntity.Type.PROPERTY) {
+            WikidataEntity prop = getProperty(id);  // should be cached, fast
+            if (prop.getLabels().isEmpty()) {
+                LOG.warning("no labels for property " + id);
+                return "unknown";
+            }
+            if (prop.getLabels().containsKey(language)) {
+                return prop.getLabels().get(language);
+            } else if (prop.getLabels().containsKey(FALLBACK_LANGUAGE)) {
+                return prop.getLabels().get(FALLBACK_LANGUAGE);
+            } else {
+                return prop.getLabels().values().iterator().next();
+            }
+        } else if (type == WikidataEntity.Type.ITEM) {
+            DSLContext jooq = getJooq();
+            try {
+                for (Language l : Arrays.asList(language, FALLBACK_LANGUAGE)) {
+                    Result<Record1<String>> result = jooq.select(Tables.WIKIDATA_ENTITY_LABELS.LABEL)
+                            .from(Tables.WIKIDATA_ENTITY_LABELS)
+                            .where(Tables.WIKIDATA_ENTITY_LABELS.ENTITY_TYPE.eq(""+type.code))
+                            .and(WIKIDATA_ENTITY_LABELS.ENTITY_ID.eq(id))
+                            .and(WIKIDATA_ENTITY_LABELS.LANG_ID.eq(l.getId()))
+                            .fetch();
+                    if (result.size() >= 1) {
+                        return result.get(0).value1();
+                    }
+                }
+                Result<Record1<String>> result = jooq.select(Tables.WIKIDATA_ENTITY_LABELS.LABEL)
+                        .from(Tables.WIKIDATA_ENTITY_LABELS)
+                        .where(Tables.WIKIDATA_ENTITY_LABELS.ENTITY_TYPE.eq(""+type.code))
+                        .and(WIKIDATA_ENTITY_LABELS.ENTITY_ID.eq(id))
+                        .limit(1)
+                        .fetch();
+                if (result.size() >= 1) {
+                    return result.get(0).value1();
+                } else {
+                    LOG.warning("no labels for item " + id);
+                    return "unknown";
+                }
+            } finally {
+                freeJooq(jooq);
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown entity type: " + type);
+        }
+    }
+
     public Iterable<WikidataStatement> get(WikidataFilter filter) throws DaoException {
-        return null;
+        List<Condition> conditions = new ArrayList<Condition>();
+        if (filter.getLangIds() != null) {
+            throw new UnsupportedOperationException("Filter doesn't support lang ids yet");
+        }
+        if (filter.getEntityTypes() != null) {
+            conditions.add(WIKIDATA_STATEMENT.ENTITY_TYPE.in(filter.getEntityTypeCodes()));
+        }
+        if (filter.getEntityIds() != null) {
+            conditions.add(WIKIDATA_STATEMENT.ENTITY_ID.in(filter.getEntityIds()));
+        }
+        if (filter.getRanks() != null) {
+            conditions.add(WIKIDATA_STATEMENT.RANK.in(filter.getRankOrdinals()));
+        }
+        DSLContext jooq = getJooq();
+        try {
+            Cursor<Record> result = jooq.select().
+                    from(Tables.WIKIDATA_STATEMENT).
+                    where(conditions).
+                    fetchLazy(getFetchSize());
+
+            return new SimpleSqlDaoIterable<WikidataStatement>(result, jooq) {
+                @Override
+                public WikidataStatement transform(Record r) {
+                    try {
+                        return buildStatement(r);
+                    } catch (DaoException e) {
+                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        return null;
+                    }
+                }
+            };
+        } finally {
+            freeJooq(jooq);
+        }
     }
 
     @Override
@@ -161,13 +364,10 @@ public class WikidataDao extends AbstractSqlDao<WikidataStatement> {
             return null;
         }
         WikidataEntity item = new WikidataEntity(
-                WikidataEntity.Type.valueOf(record.getValue(Tables.WIKIDATA_STATEMENT.ENTITY_TYPE)),
+                WikidataEntity.Type.getByCode(record.getValue(Tables.WIKIDATA_STATEMENT.ENTITY_TYPE).charAt(0)),
                 record.getValue(Tables.WIKIDATA_STATEMENT.ENTITY_ID)
         );
-        WikidataEntity prop = new WikidataEntity(
-                WikidataEntity.Type.PROPERTY,
-                record.getValue(Tables.WIKIDATA_STATEMENT.PROP_ID)
-        );
+        WikidataEntity prop = getProperty(record.getValue(Tables.WIKIDATA_STATEMENT.PROP_ID));
         Short rankOrdinal = record.getValue(Tables.WIKIDATA_STATEMENT.RANK);
 
         JsonElement json = new JsonParser().parse(record.getValue(Tables.WIKIDATA_STATEMENT.VAL_STR));

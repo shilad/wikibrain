@@ -44,4 +44,15 @@ public class WikidataStatement implements Serializable {
     public Rank getRank() {
         return rank;
     }
+
+    @Override
+    public String toString() {
+        return "WikidataStatement{" +
+                "id='" + id + '\'' +
+                ", item=" + item +
+                ", property=" + property +
+                ", value=" + value +
+                ", rank=" + rank +
+                '}';
+    }
 }

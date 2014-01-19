@@ -6,7 +6,6 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.parser.WpParseException;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +57,9 @@ public class WikidataParser {
                 // already handled
             } else if (name.equals("claims")) {
                 parseClaims(record, fields.getValue());
+            } else if (name.equals("datatype")) {
+                String value = fields.getValue().getAsString();
+                // no idea what to do with this now...
             } else {
                 LOG.log(Level.WARNING, "unexpected field '" + name + "' when parsing " + rawPage.getTitle());
             }

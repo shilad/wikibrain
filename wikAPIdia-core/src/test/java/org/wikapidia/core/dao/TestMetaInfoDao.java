@@ -1,15 +1,13 @@
 package org.wikapidia.core.dao;
 
-import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.MetaInfoSqlDao;
+import org.wikapidia.core.dao.sql.TestDaoUtil;
 import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
-import javax.sql.DataSource;
-import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
