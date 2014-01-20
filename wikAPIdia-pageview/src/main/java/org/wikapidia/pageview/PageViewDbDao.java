@@ -12,9 +12,11 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,15 +40,15 @@ public class PageViewDbDao {
     /**
      * method to access a PageViewIterator via the DAO, can be used by clients to keep track of each of the PageViewDataStructs
      * retrieved by the iterator
-     * @param lang
+     * @param langs
      * @param startDate
      * @param endDate
      * @return
      * @throws WikapidiaException
      * @throws DaoException
      */
-    public PageViewIterator getPageViewIterator(Language lang, DateTime startDate, DateTime endDate) throws WikapidiaException, DaoException {
-        return new PageViewIterator(lang, startDate, endDate);
+    public PageViewIterator getPageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate) throws WikapidiaException, DaoException {
+        return new PageViewIterator(langs, startDate, endDate);
     }
 
 
@@ -168,12 +170,14 @@ public class PageViewDbDao {
      * @throws WikapidiaException
      */
     void parse(DateTime startTime, int numHours)throws ConfigurationException, DaoException, WikapidiaException {
-        PageViewIterator it = new PageViewIterator(lang, startTime.getYear(), startTime.getMonthOfYear(),
+        PageViewIterator it = new PageViewIterator(new LanguageSet(lang), startTime.getYear(), startTime.getMonthOfYear(),
                 startTime.getDayOfMonth(), startTime.getHourOfDay(), numHours);
-        PageViewDataStruct data;
+        List<PageViewDataStruct> data;
         while(it.hasNext()){
             data = it.next();
-            addData(data);
+            for (PageViewDataStruct struct : data) {
+                addData(struct);
+            }
         }
 
 
@@ -187,11 +191,13 @@ public class PageViewDbDao {
      * @throws WikapidiaException
      */
     void parse(DateTime time)throws ConfigurationException, DaoException, WikapidiaException {
-        PageViewIterator it = new PageViewIterator(lang, time);
-        PageViewDataStruct data;
+        PageViewIterator it = new PageViewIterator(new LanguageSet(lang), time);
+        List<PageViewDataStruct> data;
         while(it.hasNext()){
             data = it.next();
-            addData(data);
+            for (PageViewDataStruct struct : data) {
+                addData(struct);
+            }
         }
 
 

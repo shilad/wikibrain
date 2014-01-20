@@ -18,6 +18,7 @@ import org.wikapidia.core.dao.sql.SimpleSqlDaoIterable;
 import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 
 import java.sql.Timestamp;
@@ -62,15 +63,15 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
     /**
      * method to access a PageViewIterator via the DAO, can be used by clients to keep track of each of the PageViewDataStructs
      * retrieved by the iterator
-     * @param lang
+     * @param langs
      * @param startDate
      * @param endDate
      * @return
      * @throws org.wikapidia.core.WikapidiaException
      * @throws DaoException
      */
-    public PageViewIterator getPageViewIterator(Language lang, DateTime startDate, DateTime endDate) throws WikapidiaException, DaoException {
-        return new PageViewIterator(lang, startDate, endDate);
+    public PageViewIterator getPageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate) throws WikapidiaException, DaoException {
+        return new PageViewIterator(langs, startDate, endDate);
     }
 
     /**

@@ -18,7 +18,9 @@ import org.wikapidia.core.model.Title;
 import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 
@@ -33,14 +35,14 @@ public class PageViewIterator implements Iterator {
 
     private DateTime currentDate;
     private DateTime endDate;
-    private Language lang;
+    private LanguageSet langs;
     private static String BASE_URL = "http://dumps.wikimedia.your.org/other/pagecounts-raw/";
-    private PageViewDataStruct nextData;
+    private List<PageViewDataStruct> nextData;
 
     /**
      * constructs a PageViewIterator and parses a PageViewDataStruct from the first hour input in the constructor,
      * setting nextData to the value of this PageViewDataStruct
-     * @param lang
+     * @param langs
      * @param startYear
      * @param startMonth
      * @param startDay
@@ -49,9 +51,9 @@ public class PageViewIterator implements Iterator {
      * @throws WikapidiaException
      * @throws DaoException
      */
-    public PageViewIterator(Language lang, int startYear, int startMonth, int startDay, int startHour, int numHours)
+    public PageViewIterator(LanguageSet langs, int startYear, int startMonth, int startDay, int startHour, int numHours)
             throws WikapidiaException, DaoException {
-        this.lang = lang;
+        this.langs = langs;
         this.currentDate = new DateTime(startYear, startMonth, startDay, startHour, 0);
         if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
             throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
@@ -59,9 +61,9 @@ public class PageViewIterator implements Iterator {
         this.endDate = this.currentDate.plusHours(numHours);
     }
 
-    public PageViewIterator(Language lang, DateTime startDate, DateTime endDate)
+    public PageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate)
             throws WikapidiaException, DaoException {
-        this.lang = lang;
+        this.langs = langs;
         this.currentDate = startDate;
         if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
             throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
@@ -69,8 +71,8 @@ public class PageViewIterator implements Iterator {
         this.endDate = endDate;
     }
 
-    public PageViewIterator(Language lang, DateTime currentDate){
-        this.lang = lang;
+    public PageViewIterator(LanguageSet langs, DateTime currentDate){
+        this.langs = langs;
         this.currentDate = currentDate;
         this.endDate = currentDate.plusHours(1);
     }
@@ -85,7 +87,7 @@ public class PageViewIterator implements Iterator {
      * the iterator's range has already been returned
      * @return the value of nextData if it exists
      */
-    public PageViewDataStruct next() {
+    public List<PageViewDataStruct> next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
@@ -123,13 +125,13 @@ public class PageViewIterator implements Iterator {
      * @throws WikapidiaException
      * @throws DaoException
      */
-    private PageViewDataStruct getPageViewData() throws WikapidiaException, DaoException, ConfigurationException {
+    private List<PageViewDataStruct> getPageViewData() throws WikapidiaException, DaoException, ConfigurationException {
         if (currentDate.getMillis() >= endDate.getMillis()) {
             return null;
         }
 
         //set up temp folder where page view data file will be stored
-        File tempFolder = new File("../download/" + lang.getLangCode() + "_page_view_data");
+        File tempFolder = new File("../download/" + "_page_view_data");
         if (!tempFolder.exists()){
             tempFolder.mkdir();
         }
@@ -167,15 +169,20 @@ public class PageViewIterator implements Iterator {
             currentDate = currentDate.plusHours(1);
             throw new WikapidiaException("null pageViewDataFile for date " + tempDate);
         }
-        TIntIntMap pageViewCounts = parsePageViewDataFromFile(lang, pageViewDataFile);
+
+        List<PageViewDataStruct> dataStructs = new ArrayList<PageViewDataStruct>();
         DateTime nextDate = currentDate.plusHours(1);
-        PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
+        for (Language lang : langs) {
+            TIntIntMap pageViewCounts = parsePageViewDataFromFile(lang, pageViewDataFile);
+            PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
+            dataStructs.add(pageViewData);
+        }
 
         pageViewDataFile.delete();
         tempFolder.delete();
 
         currentDate = nextDate;
-        return pageViewData;
+        return dataStructs;
     }
 
     private static String twoDigIntStr(int time){

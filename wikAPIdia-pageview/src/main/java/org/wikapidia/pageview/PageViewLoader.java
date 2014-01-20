@@ -14,6 +14,7 @@ import org.wikapidia.core.lang.LanguageSet;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,10 +43,13 @@ public class PageViewLoader {
         double start = System.currentTimeMillis();
         try {
             LOG.log(Level.INFO, "Loading Page Views");
-            PageViewIterator iterator = dao.getPageViewIterator(languageSet.getDefaultLanguage(), startDate, endDate);
+            PageViewIterator iterator = dao.getPageViewIterator(languageSet, startDate, endDate);
             int i = 0;
             while (iterator.hasNext()) {
-                dao.addData(iterator.next());
+                List<PageViewDataStruct> dataStructs = iterator.next();
+                for (PageViewDataStruct data : dataStructs) {
+                    dao.addData(data);
+                }
                 i++;
                 if (i % 24 == 0) {
                     double elapsed = (System.currentTimeMillis() - start) / 60000;
