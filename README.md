@@ -254,7 +254,7 @@ WikidataDao wdDao = conf.get(WikidataDao.class);
 Language simple = Language.getByLangCode("simple");
 
 // Get Barack Obama's page and its factual statements
-Title title = new Title("Barack Obama", simple);
+Title title = new Title("Minneapolis", simple);
 LocalPage obama = lpDao.getByTitle(title, NameSpace.ARTICLE);
 Map<String, List<LocalWikidataStatement>> statements = wdDao.getLocalStatements(obama);
 
@@ -268,11 +268,34 @@ for (String property : statements.keySet()) {
 }   
 ```
 
-This program would output:
+As of January 2014, this program outputs 43 statements related to 22 properties of Minneapolis:
 
 ```
+Properties for Minneapolis:
+        located next to body of water: Mississippi
+        topic's main category: Category:Minneapolis
+        is in the administrative unit: Hennepin County,Minnesota
+        flag image: Flag of Minneapolis, Minnesota.svg
+        instance of: county seat,city
+        coat of arms image: Minneapolis seal.gif
+        coordinate location: {precision=0, longitude=-93, latitude=44, globe=http://www.wikidata.org/entity/Q2}
+        legislative body: Minneapolis City Council
+        official website: http://www.minneapolismn.gov/
+        shares border with: Lauderdale,Roseville,St. Anthony,Columbia Heights,Fridley,Brooklyn Center,Robbinsdale,Golden Valley,St. Louis Park,Edina,Richfield,Fort Snelling,Saint Paul
+        twin city: Santiago,Kuopio,Ibaraki,Novosibirsk,Tours,Harbin,Eldoret,Cuernavaca
+        country: United States of America
+        Freebase identifier: /m/0fpzwf
+        type of administrative division: city of the United States
+        flag: Flag of Minneapolis
+        head of government: R. T. Rybak
+        MusicBrainz area ID: 3e80aaa7-9b71-450f-8147-0ecf101d8f1a
+        dmoz: Regional/North_America/United_States/Minnesota/Localities/M/Minneapolis/
+        seal description: Seal of Minneapolis
+        seal image: Minneapolis seal.gif
+        Commons category: Minneapolis, Minnesota
+        Wikivoyage banner: Minneapolis Stone Arch Bridge banner.jpg
 ```
-
+Note that these relationships are *structured*, not just textual. For example, the string "R. T. Rybak" is linked to the multilingual concept "R. T. Rybak," and the lat/long coordinates are accessible as a geographic data structure.
 
 ###Advanced Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
