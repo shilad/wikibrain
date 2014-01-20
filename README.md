@@ -295,7 +295,7 @@ Properties for Minneapolis:
         Commons category: Minneapolis, Minnesota
         Wikivoyage banner: Minneapolis Stone Arch Bridge banner.jpg
 ```
-
+Note that these relationships are *structured*, not just textual. For example, the string "R. T. Rybak" is linked to the multilingual concept "R. T. Rybak," and the lat/long coordinates are accessible as a geographic data structure.
 
 ###Advanced Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
