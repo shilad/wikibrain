@@ -22,6 +22,25 @@ import org.wikapidia.utils.WpCollectionUtils;
 import java.util.*;
 
 /**
+ * Config looks like:
+ *
+ * {
+ *     weights: {
+ *         dab : 1.0
+ *         sr : 1.0
+ *         text : 1.0
+ *     }
+ *
+ *      numCandidates : {
+ *           sr : 10
+ *           perSr : 2
+ *           text : 50
+ *           used : 20
+ *     }
+ * }
+ *
+ * A detailed description appears in the reference.conf
+ *
  * @author Shilad Sen
  */
 public class PhraseVectorCreator {
@@ -32,6 +51,7 @@ public class PhraseVectorCreator {
     private VectorGenerator generator;
 
     private double dabWeight = 1.0;
+    private int numDabCands = 1;
 
     private double srWeight = 1.0;
     private int numSrCands = 0;
@@ -44,6 +64,38 @@ public class PhraseVectorCreator {
 
     public PhraseVectorCreator(LuceneSearcher searcher) {
         this.searcher = searcher;
+    }
+
+    public void setDabWeight(double dabWeight) {
+        this.dabWeight = dabWeight;
+    }
+
+    public void setSrWeight(double srWeight) {
+        this.srWeight = srWeight;
+    }
+
+    public void setNumSrCands(int numSrCands) {
+        this.numSrCands = numSrCands;
+    }
+
+    public void setNumPerSrCand(int numPerSrCand) {
+        this.numPerSrCand = numPerSrCand;
+    }
+
+    public void setTextWeight(double textWeight) {
+        this.textWeight = textWeight;
+    }
+
+    public void setNumTextCands(int numTextCands) {
+        this.numTextCands = numTextCands;
+    }
+
+    public void setNumUsedCands(int numUsedCands) {
+        this.numUsedCands = numUsedCands;
+    }
+
+    public void setNumDabCands(int numDabCands) {
+        this.numDabCands = numDabCands;
     }
 
     /**
@@ -89,7 +141,9 @@ public class PhraseVectorCreator {
 //        StringBuffer buff = new StringBuffer("for phrase " + phrase + "\n");
         TIntDoubleMap merged = new TIntDoubleHashMap();
         double total = 0.0;
+        int i = 0;
         for (Map.Entry<LocalId, Double> entry : dabCandidates.entrySet()) {
+            if (i++ > numDabCands) { break; }
 //            buff.append("\tdab: " + getTitle(entry.getKey()) + ": " + entry.getValue() + " * 1.0\n");
             double v = entry.getValue() * dabWeight;
             merged.adjustOrPutValue(entry.getKey().getId(), v, v);
@@ -111,7 +165,7 @@ public class PhraseVectorCreator {
 
         int ids[] = WpCollectionUtils.sortMapKeys(merged, true);
         TIntFloatMap vector = new TIntFloatHashMap();
-        for (int i = 0; i < numUsedCands && i < ids.length; i++) {
+        for (i = 0; i < numUsedCands && i < ids.length; i++) {
             TIntFloatMap candidateVector = generator.getVector(ids[i]);
             if (candidateVector != null) {
                 for (int id : candidateVector.keys()) {
@@ -202,7 +256,32 @@ public class PhraseVectorCreator {
         @Override
         public PhraseVectorCreator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             LuceneSearcher searcher = getConfigurator().get(LuceneSearcher.class, config.getString("lucene"));
-            return new PhraseVectorCreator(searcher);
+            PhraseVectorCreator creator = new PhraseVectorCreator(searcher);
+            if (config.hasPath("weights.dab")) {
+                creator.setDabWeight(config.getDouble("weights.dab"));
+            }
+            if (config.hasPath("weights.sr")) {
+                creator.setSrWeight(config.getDouble("weights.sr"));
+            }
+            if (config.hasPath("weights.text")) {
+                creator.setTextWeight(config.getDouble("weights.text"));
+            }
+            if (config.hasPath("numCandidates.used")) {
+                creator.setNumUsedCands(config.getInt("numCandidates.used"));
+            }
+            if (config.hasPath("numCandidates.dab")) {
+                creator.setNumDabCands(config.getInt("numCandidates.dab"));
+            }
+            if (config.hasPath("numCandidates.text")) {
+                creator.setNumTextCands(config.getInt("numCandidates.text"));
+            }
+            if (config.hasPath("numCandidates.sr")) {
+                creator.setNumSrCands(config.getInt("numCandidates.sr"));
+            }
+            if (config.hasPath("numCandidates.perSr")) {
+                creator.setNumPerSrCand(config.getInt("numCandidates.perSr"));
+            }
+            return creator;
         }
     }
 }
