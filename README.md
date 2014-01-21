@@ -253,19 +253,20 @@ LocalPageDao lpDao = conf.get(LocalPageDao.class);
 WikidataDao wdDao = conf.get(WikidataDao.class);
 Language simple = Language.getByLangCode("simple");
 
-// Get Barack Obama's page and its factual statements
+// Minneapolis's page and its factual statements
 Title title = new Title("Minneapolis", simple);
-LocalPage obama = lpDao.getByTitle(title, NameSpace.ARTICLE);
-Map<String, List<LocalWikidataStatement>> statements = wdDao.getLocalStatements(obama);
+LocalPage mpls = lpDao.getByTitle(title, NameSpace.ARTICLE);
+Map<String, List<LocalWikidataStatement>> statements = wdDao.getLocalStatements(mpls);
 
 // Display the properties
 System.out.println("Properties for " + title); 
 for (String property : statements.keySet()) {
-    System.out.println("values for property " + property + " are:"); 
+    List<String> values = new ArrayList<String>();
     for (LocalWikidataStatement lws : statements.get(property)) {
-        System.out.println("\t" + lws.getFullStatement());
+        values.add(lws.getValue());
     }       
-}   
+    System.out.println("\t" + property + ": " + StringUtils.join(values, ","));
+} 
 ```
 
 As of January 2014, this program outputs 43 statements related to 22 properties of Minneapolis:
