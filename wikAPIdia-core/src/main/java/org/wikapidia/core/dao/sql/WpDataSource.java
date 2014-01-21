@@ -120,6 +120,9 @@ public class WpDataSource {
         try {
             conn = getConnection();
             for (String s : script.split(";")) {
+                if (s.replaceAll(";", "").trim().isEmpty()) {
+                    continue;
+                }
                 LOG.fine("executing:\n" + s + "\n=========================================\n");
                 Statement st = conn.createStatement();
                 st.execute(s + ";");
