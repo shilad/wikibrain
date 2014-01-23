@@ -154,6 +154,8 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     protected void loadFromFile(RecordType ltype, File input, PrunedCounts.Pruner pruner) throws IOException, DaoException {
         BufferedReader reader = WpIOUtils.openBufferedReader(input);
         String lastKey = null;
+
+        int maxBufferSize = 100;
         List<Entry> buffer = new ArrayList<Entry>();
 
         while (true) {
@@ -183,6 +185,10 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
                     new Integer(tokens[3])
             );
             buffer.add(e);
+            if (buffer.size() > maxBufferSize * 3 / 2) {
+                LOG.warning("large buffer observed: " + buffer.size() + " for string " + lastKey);
+                maxBufferSize = buffer.size();
+            }
             lastKey = tokens[0];
         }
         if (ltype == RecordType.PAGES) {
