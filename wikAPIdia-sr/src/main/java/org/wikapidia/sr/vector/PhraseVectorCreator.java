@@ -115,7 +115,7 @@ public class PhraseVectorCreator {
             local.add(new LocalString(language, p));
         }
 
-        List<LinkedHashMap<LocalId, Double>> candidates = disambig.disambiguate(local, null);
+        List<LinkedHashMap<LocalId, Float>> candidates = disambig.disambiguate(local, null);
         if (candidates.size() != phrases.length) throw new IllegalStateException();
 
         TIntFloatMap results[] = new TIntFloatMap[phrases.length];
@@ -127,35 +127,35 @@ public class PhraseVectorCreator {
 
     public TIntFloatMap getPhraseVector(String phrase) throws DaoException {
         LocalString ls = new LocalString(language, phrase);
-        LinkedHashMap<LocalId, Double> candidates = disambig.disambiguate(ls, null);
+        LinkedHashMap<LocalId, Float> candidates = disambig.disambiguate(ls, null);
         return getPhraseVector(phrase, candidates);
     }
 
-    private TIntFloatMap getPhraseVector(String phrase, LinkedHashMap<LocalId, Double> dabCandidates) throws DaoException {
+    private TIntFloatMap getPhraseVector(String phrase, LinkedHashMap<LocalId, Float> dabCandidates) throws DaoException {
         if (dabCandidates == null || dabCandidates.isEmpty()) {
             return null;
         }
-        LinkedHashMap<LocalId, Double> textCandidates = resolveTextual(phrase, numTextCands);
-        LinkedHashMap<LocalId, Double> srCandidates = expandSR(phrase, dabCandidates, numSrCands, numPerSrCand);
+        LinkedHashMap<LocalId, Float> textCandidates = resolveTextual(phrase, numTextCands);
+        LinkedHashMap<LocalId, Float> srCandidates = expandSR(phrase, dabCandidates, numSrCands, numPerSrCand);
 
 //        StringBuffer buff = new StringBuffer("for phrase " + phrase + "\n");
         TIntDoubleMap merged = new TIntDoubleHashMap();
         double total = 0.0;
         int i = 0;
-        for (Map.Entry<LocalId, Double> entry : dabCandidates.entrySet()) {
+        for (Map.Entry<LocalId, Float> entry : dabCandidates.entrySet()) {
             if (i++ > numDabCands) { break; }
 //            buff.append("\tdab: " + getTitle(entry.getKey()) + ": " + entry.getValue() + " * 1.0\n");
             double v = entry.getValue() * dabWeight;
             merged.adjustOrPutValue(entry.getKey().getId(), v, v);
             total += v;
         }
-        for (Map.Entry<LocalId, Double> entry : textCandidates.entrySet()) {
+        for (Map.Entry<LocalId, Float> entry : textCandidates.entrySet()) {
 //            buff.append("\ttext: " + getTitle(entry.getKey()) + ": " + entry.getValue() + " * 1.0\n");
             double v = entry.getValue() * textWeight;
             merged.adjustOrPutValue(entry.getKey().getId(), v, v);
             total += v;
         }
-        for (Map.Entry<LocalId, Double> entry : srCandidates.entrySet()) {
+        for (Map.Entry<LocalId, Float> entry : srCandidates.entrySet()) {
 //            buff.append("\tsr: " + getTitle(entry.getKey()) + ": " + entry.getValue() + " * 1.0\n");
             double v = entry.getValue() * srWeight;
             merged.adjustOrPutValue(entry.getKey().getId(), v, v);
@@ -187,9 +187,9 @@ public class PhraseVectorCreator {
     }
 
 
-    private LinkedHashMap<LocalId, Double> resolveTextual(String phrase, int n) {
+    private LinkedHashMap<LocalId, Float> resolveTextual(String phrase, int n) {
         if (n == 0) {
-            return new LinkedHashMap<LocalId, Double>();
+            return new LinkedHashMap<LocalId, Float>();
         }
         WikapidiaScoreDoc results[] = searcher.getQueryBuilderByLanguage(language)
                                             .setPhraseQuery(new TextFieldElements().addPlainText(), phrase)
@@ -199,9 +199,9 @@ public class PhraseVectorCreator {
         for (WikapidiaScoreDoc doc : results) {
             total += doc.score;
         }
-        LinkedHashMap<LocalId, Double> expanded = new LinkedHashMap<LocalId, Double>();
+        LinkedHashMap<LocalId, Float> expanded = new LinkedHashMap<LocalId, Float>();
         for (int i = 0; i < n && i < results.length; i++) {
-            expanded.put(new LocalId(language, results[i].wpId), results[i].score / total);
+            expanded.put(new LocalId(language, results[i].wpId), (float)(results[i].score / total));
         }
         return expanded;
     }
@@ -215,20 +215,20 @@ public class PhraseVectorCreator {
      * @return
      * @throws DaoException
      */
-    private LinkedHashMap<LocalId, Double> expandSR(String phrase, LinkedHashMap<LocalId, Double> candidates, int numCands, int numPerCand) throws DaoException {
+    private LinkedHashMap<LocalId, Float> expandSR(String phrase, LinkedHashMap<LocalId, Float> candidates, int numCands, int numPerCand) throws DaoException {
         if (candidates == null || candidates.isEmpty()) {
             return null;
         }
         if (numCands == 0 || numPerCand == 0) {
-            return new LinkedHashMap<LocalId, Double>();
+            return new LinkedHashMap<LocalId, Float>();
         }
-        LinkedHashMap<LocalId, Double> expanded = new LinkedHashMap<LocalId, Double>();
+        LinkedHashMap<LocalId, Float> expanded = new LinkedHashMap<LocalId, Float>();
         int i = 0;
         for (LocalId id1 : candidates.keySet()) {
             SRResultList sr = metric.mostSimilar(id1.getId(), numCands * 2);
             if (sr != null && sr.numDocs() > 0) {
                 for (int j = 0; j < numPerCand && j < sr.numDocs(); j++) {
-                    expanded.put(new LocalId(language, sr.getId(j)), sr.getScore(j) * candidates.get(id1));
+                    expanded.put(new LocalId(language, sr.getId(j)), (float)(sr.getScore(j) * candidates.get(id1)));
                 }
                 if (i++ >= numCands) {
                     break;

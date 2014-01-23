@@ -67,12 +67,12 @@ public class TopResultConsensusDisambiguator extends Disambiguator {
     }
 
     @Override
-    public List<LinkedHashMap<LocalId, Double>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
+    public List<LinkedHashMap<LocalId, Float>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
         if (phrases.isEmpty()) {
-            return new ArrayList<LinkedHashMap<LocalId, Double>>();
+            return new ArrayList<LinkedHashMap<LocalId, Float>>();
         }
         Language lang = phrases.get(0).getLanguage();
-        List<LinkedHashMap<LocalId, Double>> results = new ArrayList<LinkedHashMap<LocalId, Double>>();
+        List<LinkedHashMap<LocalId, Float>> results = new ArrayList<LinkedHashMap<LocalId, Float>>();
         for (LocalString phrase : phrases) {
             Map<Integer, Double> pageSums = new HashMap<Integer, Double>();
             for (PhraseAnalyzer pa : phraseAnalyzers) {
@@ -86,9 +86,9 @@ public class TopResultConsensusDisambiguator extends Disambiguator {
                     }
                 }
             }
-            LinkedHashMap<LocalId, Double> pageResult = new LinkedHashMap<LocalId, Double>();
+            LinkedHashMap<LocalId, Float> pageResult = new LinkedHashMap<LocalId, Float>();
             for (Integer key : WpCollectionUtils.sortMapKeys(pageSums, true)) {
-                pageResult.put(new LocalId(lang, key), pageSums.get(key));
+                pageResult.put(new LocalId(lang, key), pageSums.get(key).floatValue());
             }
             results.add(pageResult);
         }

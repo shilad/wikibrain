@@ -24,16 +24,16 @@ public class TopResultDisambiguator extends Disambiguator{
     }
 
     @Override
-    public List<LinkedHashMap<LocalId, Double>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
-        List<LinkedHashMap<LocalId, Double>> results = new ArrayList<LinkedHashMap<LocalId, Double>>();
+    public List<LinkedHashMap<LocalId, Float>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
+        List<LinkedHashMap<LocalId, Float>> results = new ArrayList<LinkedHashMap<LocalId, Float>>();
         for (LocalString phrase : phrases) {
             LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolveLocal(phrase.getLanguage(), phrase.getString(), 10);
             if (localMap==null){
                 results.add(null);
             } else {
-                LinkedHashMap<LocalId, Double> phraseResult = new LinkedHashMap<LocalId, Double>();
+                LinkedHashMap<LocalId, Float> phraseResult = new LinkedHashMap<LocalId, Float>();
                 for (LocalPage page : localMap.keySet()) {
-                    phraseResult.put(page.toLocalId(), (double)localMap.get(page));
+                    phraseResult.put(page.toLocalId(), localMap.get(page));
                 }
                 results.add(phraseResult);
             }
