@@ -122,7 +122,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             e.phrase = e.phrase.replace("\n", " ").replace("\t", " ");
             // phrase is last because it may contain tabs.
             String line = e.language.getLangCode() + "\t" + e.localId + "\t" + e.count + "\t" + e.phrase + "\n";
-            byPhrase.write(e.language.getLangCode() + ":" + normalizer.normalize(e.language, e.phrase) + "\t" + line);
+            byPhrase.write(e.language.getLangCode() + ":" + normalize(e.language, e.phrase) + "\t" + line);
             byWpId.write(e.language.getLangCode() + ":" + e.localId + "\t" + line);
         }
         byWpId.close();
@@ -135,6 +135,16 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         loadFromFile(RecordType.PHRASES, byPhraseFile, pagePruner);
 
         phraseDao.close();
+    }
+
+    /**
+     * Uses the string's normalizer, but replaces adjacent whitespace white a single space
+     * @param lang
+     * @param text
+     * @return
+     */
+    private String normalize(Language lang, String text) {
+        return normalizer.normalize(lang, text).replaceAll("\\s+", " ");
     }
 
     private static enum RecordType {
@@ -209,10 +219,10 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             return;
         }
         Language lang = pageCounts.get(0).language;
-        String phrase = normalizer.normalize(lang, pageCounts.get(0).phrase);
+        String phrase = normalize(lang, pageCounts.get(0).phrase);
         Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
         for (Entry e : pageCounts) {
-            if (!normalizer.normalize(lang, e.phrase).equals(phrase)) {
+            if (!normalize(lang, e.phrase).equals(phrase)) {
                 LOG.warning("disagreement between phrases " + phrase + " and " + e.phrase);
             }
             if (e.language != lang) {
