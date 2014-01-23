@@ -5,6 +5,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.StringNormalizer;
 import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
@@ -26,6 +27,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
     private final PrunedCounts.Pruner<String> phrasePruner;
     private final PrunedCounts.Pruner<Integer> pagePruner;
+    private final StringNormalizer normalizer;
 
     /**
      * An entry in the phrase corpus.
@@ -57,11 +59,12 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     protected PhraseAnalyzerDao phraseDao;
     protected LocalPageDao pageDao;
 
-    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao,  PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner) {
+    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, StringNormalizer normalizer) {
         this.phrasePruner = phrasePruner;
         this.pagePruner = pagePruner;
         this.phraseDao = phraseDao;
         this.pageDao = pageDao;
+        this.normalizer = normalizer;
     }
 
     /**
@@ -118,7 +121,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             e.phrase = e.phrase.replace("\n", " ").replace("\t", " ");
             // phrase is last because it may contain tabs.
             String line = e.language.getLangCode() + "\t" + e.localId + "\t" + e.count + "\t" + e.phrase + "\n";
-            byPhrase.write(e.language.getLangCode() + ":" + WpStringUtils.normalize(e.phrase) + "\t" + line);
+            byPhrase.write(e.language.getLangCode() + ":" + normalizer.normalize(e.language, e.phrase) + "\t" + line);
             byWpId.write(e.language.getLangCode() + ":" + e.localId + "\t" + line);
         }
         byWpId.close();
@@ -205,10 +208,10 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             return;
         }
         Language lang = pageCounts.get(0).language;
-        String phrase = WpStringUtils.normalize(pageCounts.get(0).phrase);
+        String phrase = normalizer.normalize(lang, pageCounts.get(0).phrase);
         Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
         for (Entry e : pageCounts) {
-            if (!WpStringUtils.normalize(e.phrase).equals(phrase)) {
+            if (!normalizer.normalize(lang, e.phrase).equals(phrase)) {
                 LOG.warning("disagreement between phrases " + phrase + " and " + e.phrase);
             }
             if (e.language != lang) {

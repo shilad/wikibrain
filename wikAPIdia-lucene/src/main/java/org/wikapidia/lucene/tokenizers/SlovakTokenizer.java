@@ -29,7 +29,7 @@ public class SlovakTokenizer extends LanguageTokenizer {
     @Override
     public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
         if (stopWords == null){
-            stopWords = getStopWordsForNonLuceneLangFromFile(Language.getByLangCode("sk"));
+            stopWords = getStopWordsForNonLuceneLangFromFile(matchVersion, Language.getByLangCode("sk"));
         }
         TokenStream stream = tokenizer;
         if (useStopWords)

@@ -18,6 +18,12 @@ public class TokenizerOptions {
         useStem = false;
     }
 
+    public TokenizerOptions(boolean caseInsensitive, boolean useStopWords, boolean useStem) {
+        this.caseInsensitive = caseInsensitive;
+        this.useStopWords = useStopWords;
+        this.useStem = useStem;
+    }
+
     /**
      * Sets the option to filter out case.
      * @return
