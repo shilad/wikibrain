@@ -10,6 +10,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
+import org.wikapidia.utils.JvmUtils;
 import org.wikapidia.utils.WpIOUtils;
 import org.wikapidia.utils.WpStringUtils;
 
@@ -230,11 +231,15 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     }
 
     private void sortInPlace(File file) throws IOException {
+        int maxFiles = Math.max(100, (int) (file.length() / (Runtime.getRuntime().maxMemory() / 20)));
+        LOG.info("sorting " + file + " using max of " + maxFiles);
         Comparator<String> comparator = new Comparator<String>() {
             public int compare(String r1, String r2){
                 return r1.compareTo(r2);}};
-        List<File> l = ExternalSort.sortInBatch(file, comparator, 1024, Charset.forName("utf-8"), null, false);
+        List<File> l = ExternalSort.sortInBatch(file, comparator, maxFiles, Charset.forName("utf-8"), null, false);
+        LOG.info("merging " + file);
         ExternalSort.mergeSortedFiles(l, file, comparator, Charset.forName("utf-8"));
+        LOG.info("finished sorting" + file);
     }
 
 
