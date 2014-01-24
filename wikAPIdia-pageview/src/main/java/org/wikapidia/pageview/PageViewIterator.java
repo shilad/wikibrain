@@ -43,27 +43,24 @@ public class PageViewIterator implements Iterator {
      * constructs a PageViewIterator and parses a PageViewDataStruct from the first hour input in the constructor,
      * setting nextData to the value of this PageViewDataStruct
      * @param langs
-     * @param startYear
-     * @param startMonth
-     * @param startDay
-     * @param startHour
-     * @param numHours number of hours from date specified by above parameters for which to parse page view files
+     * @param startDate
+     * @param endDate
      * @throws WikapidiaException
      * @throws DaoException
      */
-    public PageViewIterator(LanguageSet langs, int startYear, int startMonth, int startDay, int startHour, int numHours)
-            throws WikapidiaException, DaoException {
-        this.langs = langs;
-        this.currentDate = new DateTime(startYear, startMonth, startDay, startHour, 0);
-        if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
-            throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
-        }
-        this.endDate = this.currentDate.plusHours(numHours);
-    }
-
     public PageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate)
             throws WikapidiaException, DaoException {
         this.langs = langs;
+        this.currentDate = startDate;
+        if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
+            throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");
+        }
+        this.endDate = endDate;
+    }
+
+    public PageViewIterator(Language lang, DateTime startDate, DateTime endDate)
+            throws WikapidiaException, DaoException {
+        this.langs = new LanguageSet(lang);
         this.currentDate = startDate;
         if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
             throw new WikapidiaException("No page view data supported before 6 PM on 12/09/2007");

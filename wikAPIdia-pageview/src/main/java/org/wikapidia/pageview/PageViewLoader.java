@@ -2,6 +2,7 @@ package org.wikapidia.pageview;
 
 import org.apache.commons.cli.*;
 import org.joda.time.DateTime;
+import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -9,6 +10,8 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalCategoryMemberDao;
+import org.wikapidia.core.dao.sql.LocalCategoryMemberSqlDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 
@@ -104,8 +107,6 @@ public class PageViewLoader {
         }*/
 
         //String startTime = cmd.getOptionValue("s", null);
-        //String endTime = cmd.getOptionValue("e", null);
-
         String startTime = args[1];
         String endTime = args[2];
 

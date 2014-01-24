@@ -22,10 +22,7 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -34,6 +31,8 @@ import java.util.logging.Level;
  * @author Shilad Sen
  */
 public class PageViewSqlDao extends AbstractSqlDao<PageView> {
+
+    Map<Integer, Set<Long>> loadedHours = new HashMap<Integer, Set<Long>>();
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
             Tables.PAGEVIEW.LANG_ID,
@@ -87,10 +86,19 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
             Date hour = new Date(data.start.getMillis());
             PageView view = new PageView(pageId, hour, it.value());
             save(view);
+            recordLoadedHours(view);
         }
     }
 
+    protected void recordLoadedHours(PageView view) {
+        int langId = view.getPageId().getLanguage().getId();
+        Set<Long> hours = (loadedHours.get(langId) != null) ? loadedHours.get(langId) : new HashSet<Long>();
+        hours.add(view.getHour().getTime());
+        loadedHours.put(langId, hours);
+    }
+
     public TIntIntMap getAllViews(Language language, DateTime startDate, DateTime endDate) throws DaoException {
+        checkLoaded(language, startDate, endDate);
         DSLContext context = getJooq();
         Timestamp startTime = new Timestamp(startDate.getMillis());
         Timestamp endTime = new Timestamp(endDate.getMillis());
@@ -119,6 +127,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
     }
 
     public int getNumViews(Language language, int id, DateTime startDate, DateTime endDate) throws DaoException {
+        checkLoaded(language, startDate, endDate);
         DSLContext context = getJooq();
         Timestamp startTime = new Timestamp(startDate.getMillis());
         Timestamp endTime = new Timestamp(endDate.getMillis());
@@ -212,6 +221,36 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         throw new UnsupportedOperationException();
     }
 
+    protected void checkLoaded(Language lang, DateTime startDate, DateTime endDate) {
+        List<DateTime> datesNotLoaded = new ArrayList<DateTime>();
+        Set<Long> loadedHourSet = (loadedHours.get(lang.getId()) != null) ? loadedHours.get(lang.getId()) : new HashSet<Long>();
+        for (DateTime currentDate = startDate; currentDate.getMillis() < endDate.getMillis(); currentDate = currentDate.plusHours(1)) {
+            if (!loadedHourSet.contains(currentDate.getMillis())) {
+                datesNotLoaded.add(currentDate);
+            }
+        }
+        load(lang, datesNotLoaded);
+    }
+
+    protected void load(Language lang, List<DateTime> dates) {
+        PageViewLoader loader = new PageViewLoader(new LanguageSet(lang), this);
+        int i = 0;
+        while (i < dates.size()) {
+            DateTime startDate = dates.get(i++);
+            DateTime endDate = startDate.plusHours(1);
+            while (dates.get(i).equals(endDate)) {
+                endDate = endDate.plusHours(1);
+                i++;
+            }
+            try {
+                loader.load(startDate, endDate);
+            } catch (ConfigurationException cE) {
+                System.out.println(cE.getMessage());
+            } catch (WikapidiaException wE) {
+                System.out.println(wE.getMessage());
+            }
+        }
+    }
 
     protected PageView buildPageView(Record record) throws DaoException {
         if (record == null) {

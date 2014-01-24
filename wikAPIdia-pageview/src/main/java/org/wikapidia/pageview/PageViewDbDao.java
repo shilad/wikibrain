@@ -170,8 +170,8 @@ public class PageViewDbDao {
      * @throws WikapidiaException
      */
     void parse(DateTime startTime, int numHours)throws ConfigurationException, DaoException, WikapidiaException {
-        PageViewIterator it = new PageViewIterator(new LanguageSet(lang), startTime.getYear(), startTime.getMonthOfYear(),
-                startTime.getDayOfMonth(), startTime.getHourOfDay(), numHours);
+        DateTime endTime = startTime.plusHours(numHours);
+        PageViewIterator it = new PageViewIterator(new LanguageSet(lang), startTime, endTime);
         List<PageViewDataStruct> data;
         while(it.hasNext()){
             data = it.next();
