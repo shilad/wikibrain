@@ -111,6 +111,9 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             if (!langs.containsLanguage(e.language)) {
                 continue;
             }
+            if (e.phrase == null || e.phrase.trim().isEmpty()) {
+                continue;
+            }
             if (e.title != null && e.localId < 0) {
                 int localId = pageDao.getIdByTitle(new Title(e.title, e.language));
                 e.localId = (localId <= 0) ? -1 : localId;
@@ -155,7 +158,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         BufferedReader reader = WpIOUtils.openBufferedReader(input);
         String lastKey = null;
 
-        int maxBufferSize = 100;
+        int maxBufferSize = 1000;
         List<Entry> buffer = new ArrayList<Entry>();
 
         while (true) {
