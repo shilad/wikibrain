@@ -61,6 +61,10 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
         }
     }
 
+    @Override
+    public StringNormalizer getStringNormalizer() {
+        return normalizer;
+    }
 
     /**
      * Gets pages related to a phrase.

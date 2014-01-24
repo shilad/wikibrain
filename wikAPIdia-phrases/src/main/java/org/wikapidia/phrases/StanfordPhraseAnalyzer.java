@@ -18,7 +18,6 @@ import org.wikapidia.utils.WpIOUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
@@ -42,8 +41,8 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
     private final File path;
     private LanguageSet languages;
 
-    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao,  PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, File path, StringNormalizer normalizer) {
-        super(phraseDao, pageDao, phrasePruner, pagePruner, normalizer);
+    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, File path) {
+        super(phraseDao, pageDao, phrasePruner, pagePruner);
         this.path = path;
     }
 
@@ -216,8 +215,7 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
                     PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"), null);
             PrunedCounts.Pruner<Integer> pagePruner = getConfigurator().construct(
                     PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"), null);
-            StringNormalizer normalizer = getConfigurator().get(StringNormalizer.class, config.getString("normalizer"));
-            return new StanfordPhraseAnalyzer(paDao, lpDao, phrasePruner, pagePruner, path, normalizer);
+            return new StanfordPhraseAnalyzer(paDao, lpDao, phrasePruner, pagePruner, path);
         }
     }
 }

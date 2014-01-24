@@ -25,8 +25,8 @@ public class AnchorTextPhraseAnalyzer extends BasePhraseAnalyzer {
 
     private LocalLinkDao linkDao;
 
-    public AnchorTextPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, LocalLinkDao linkDao, PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, StringNormalizer normalizer) {
-        super(phraseDao, pageDao, phrasePruner, pagePruner, normalizer);
+    public AnchorTextPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, LocalLinkDao linkDao, PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner) {
+        super(phraseDao, pageDao, phrasePruner, pagePruner);
         this.linkDao = linkDao;
     }
 
@@ -128,8 +128,7 @@ public class AnchorTextPhraseAnalyzer extends BasePhraseAnalyzer {
                     PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"), null);
             PrunedCounts.Pruner<Integer> pagePruner = getConfigurator().construct(
                     PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"), null);
-            StringNormalizer normalizer = getConfigurator().get(StringNormalizer.class, config.getString("normalizer"));
-            return new AnchorTextPhraseAnalyzer(paDao, lpDao, llDao, phrasePruner, pagePruner, normalizer);
+            return new AnchorTextPhraseAnalyzer(paDao, lpDao, llDao, phrasePruner, pagePruner);
         }
     }
 }

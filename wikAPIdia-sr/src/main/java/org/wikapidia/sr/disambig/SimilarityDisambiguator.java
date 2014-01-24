@@ -56,7 +56,7 @@ public class SimilarityDisambiguator extends Disambiguator {
         // Step 0: calculate most frequent candidate senses for each phrase
         Map<LocalString, LinkedHashMap<LocalPage, Float>> candidates = Maps.newHashMap();
         for (LocalString s : allPhrases) {
-            candidates.put(s, phraseAnalyzer.resolveLocal(s.getLanguage(), s.getString(), numCandidates));
+            candidates.put(s, phraseAnalyzer.resolve(s.getLanguage(), s.getString(), numCandidates));
         }
 
         // Skip using the sr metric at all!

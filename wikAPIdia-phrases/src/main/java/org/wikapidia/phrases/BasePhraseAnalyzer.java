@@ -7,12 +7,8 @@ import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.StringNormalizer;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.utils.JvmUtils;
 import org.wikapidia.utils.WpIOUtils;
-import org.wikapidia.utils.WpStringUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -26,9 +22,6 @@ import java.util.logging.Logger;
  */
 public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
-    private final PrunedCounts.Pruner<String> phrasePruner;
-    private final PrunedCounts.Pruner<Integer> pagePruner;
-    private final StringNormalizer normalizer;
 
     /**
      * An entry in the phrase corpus.
@@ -57,15 +50,18 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         }
     }
 
-    protected PhraseAnalyzerDao phraseDao;
-    protected LocalPageDao pageDao;
+    private final PrunedCounts.Pruner<String> phrasePruner;
+    private final PrunedCounts.Pruner<Integer> pagePruner;
+    private final StringNormalizer normalizer;
+    protected final PhraseAnalyzerDao phraseDao;
+    protected final LocalPageDao pageDao;
 
-    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, StringNormalizer normalizer) {
+    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner) {
         this.phrasePruner = phrasePruner;
         this.pagePruner = pagePruner;
         this.phraseDao = phraseDao;
         this.pageDao = pageDao;
-        this.normalizer = normalizer;
+        this.normalizer = phraseDao.getStringNormalizer();
     }
 
     /**
@@ -263,7 +259,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
 
 
     @Override
-    public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {
+    public LinkedHashMap<String, Float> describe(Language language, LocalPage page, int maxPhrases) throws DaoException {
         LinkedHashMap<String, Float> result = new LinkedHashMap<String, Float>();
         PrunedCounts<String> counts = phraseDao.getPageCounts(language, page.getLocalId(), maxPhrases);
         System.out.println(counts);
@@ -280,7 +276,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
+    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
         PrunedCounts<Integer> counts = phraseDao.getPhraseCounts(language, phrase, maxPages);
         if (counts == null) {
@@ -296,13 +292,4 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         return result;
     }
 
-    @Override
-    public LinkedHashMap<String, Float> describeUniversal(Language language, UniversalPage page, int maxPhrases) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
-        throw new UnsupportedOperationException();
-    }
 }

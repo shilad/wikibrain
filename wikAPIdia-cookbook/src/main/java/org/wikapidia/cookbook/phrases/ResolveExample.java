@@ -31,7 +31,7 @@ public class ResolveExample {
 
         // get the most common phrases in simple
         Language simple = Language.getByLangCode("la");   // simple english
-        LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(simple, "apple", 20);
+        LinkedHashMap<LocalPage, Float> resolution = pa.resolve(simple, "apple", 20);
 
         // show the closest pages
         System.out.println("resolution of apple");

@@ -27,7 +27,7 @@ public class TopResultDisambiguator extends Disambiguator{
     public List<LinkedHashMap<LocalId, Float>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
         List<LinkedHashMap<LocalId, Float>> results = new ArrayList<LinkedHashMap<LocalId, Float>>();
         for (LocalString phrase : phrases) {
-            LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolveLocal(phrase.getLanguage(), phrase.getString(), 10);
+            LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolve(phrase.getLanguage(), phrase.getString(), 10);
             if (localMap==null){
                 results.add(null);
             } else {
