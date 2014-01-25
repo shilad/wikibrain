@@ -142,18 +142,26 @@ public class SRBuilder {
      * @throws ConfigurationException
      */
     public List<String> getSubmetrics(String parentName) throws ConfigurationException {
-        List<String> results = new ArrayList<String>();
         String type = getMetricType(parentName);
         Config config = getMetricConfig(parentName);
+        List<String> toAdd = new ArrayList<String>();
         if (type.equals("ensemble")) {
             for (String child : config.getStringList("metrics")) {
-                results.addAll(getSubmetrics(child));
-                results.add(child);
+                toAdd.addAll(getSubmetrics(child));
+                toAdd.add(child);
             }
         } else if (type.equals("vector.mostsimilarconcepts")) {
-            results.addAll(getSubmetrics(config.getString("generator.basemetric")));
+            toAdd.addAll(getSubmetrics(config.getString("generator.basemetric")));
         }
-        results.add(parentName);
+        toAdd.add(parentName);
+        List<String> results = new ArrayList<String>();
+
+        // Make sure things only appear once. We save the FIRST time they appear to preserve dependencies.
+        for (String name : toAdd) {
+            if (!results.contains(name)) {
+                results.add(name);
+            }
+        }
         return results;
     }
 
