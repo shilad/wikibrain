@@ -35,12 +35,14 @@ public class FileDownloader {
     }
 
     public File download(URL url, File file) throws InterruptedException {
+        LOG.info("beginning download of " + url + " to " + file);
         for (int i=1; i <= maxAttempts; i++) {
             try {
                 AtomicBoolean stop = new AtomicBoolean(false);
                 DownloadInfo info = new DownloadInfo(url);
                 DownloadMonitor monitor = new DownloadMonitor(info);
                 info.extract(stop, monitor);
+                file.getParentFile().mkdirs();
                 new WGet(info, file).download(stop, monitor);
                 LOG.log(Level.INFO, "Download complete: " + file.getName());
                 Thread.sleep(sleepTime);

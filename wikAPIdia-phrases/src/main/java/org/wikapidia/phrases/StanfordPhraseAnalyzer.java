@@ -11,13 +11,13 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.StringNormalizer;
 import org.wikapidia.download.FileDownloader;
 import org.wikapidia.utils.WpIOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
@@ -41,7 +41,7 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
     private final File path;
     private LanguageSet languages;
 
-    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao,  PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, File path) {
+    public StanfordPhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner, File path) {
         super(phraseDao, pageDao, phrasePruner, pagePruner);
         this.path = path;
     }

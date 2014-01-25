@@ -150,6 +150,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         } else {
             redirectSqlDao = null;
         }
+        titlesToIds = null;
     }
 
     @Override
@@ -257,8 +258,12 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         if (titlesToIds != null) {
             return;
         }
+        String key = "titlesToIds";
+        if (redirectSqlDao == null) {
+            key += ".noRedirect";
+        }
         if (cache!=null) {
-            TLongIntHashMap map = (TLongIntHashMap)cache.get("titlesToIds", LocalPage.class);
+            TLongIntHashMap map = (TLongIntHashMap)cache.get(key, LocalPage.class);
             if (map!=null){
                 titlesToIds = map;
                 return;
@@ -301,7 +306,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
             }
             LOG.info("resolved " + numResolved + " of " + numRedirects + " redirects.");
             if (cache!=null){
-                cache.put("titlesToIds", map);
+                cache.put(key, map);
             }
             titlesToIds = map;
         } finally {

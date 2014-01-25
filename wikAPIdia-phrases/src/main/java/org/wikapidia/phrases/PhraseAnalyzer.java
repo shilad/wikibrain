@@ -30,17 +30,7 @@ public interface PhraseAnalyzer {
      * @return An map from phrase to score, ordered by decreasing probability.
      * The scores can be considered probabilities that sum to 1.0 across all possibilities.
      */
-    public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException;
-
-    /**
-     * Returns the most descriptive phrases for a universal page.
-     * @param language The language for the returned phrases.
-     * @param page The page to be described.
-     * @param maxPhrases The maximum number of phrases to be returned.
-     * @return An map from phrase to score, ordered by decreasing probability.
-     * The scores can be considered probabilities that sum to 1.0 across all possibilities.
-     */
-    public LinkedHashMap<String, Float> describeUniversal(Language language, UniversalPage page, int maxPhrases);
+    public LinkedHashMap<String, Float> describe(Language language, LocalPage page, int maxPhrases) throws DaoException;
 
     /**
      * Returns the most likely wikipedia pages for a phrase.
@@ -50,16 +40,6 @@ public interface PhraseAnalyzer {
      * @return An map from page to score, ordered by decreasing probability.
      * The scores can be considered probabilities that sum to 1.0 across all possibilities.
      */
-    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException;
-
-    /**
-     * Returns the most likely universal pages for a phrase.
-     * @param language The language for the phrase.
-     * @param phrase The phrase to be resolved.
-     * @param maxPages The maximum number of pages to be returned.
-     * @return An map from page to score, ordered by decreasing probability.
-     * The scores can be considered probabilities that sum to 1.0 across all possibilities.
-     */
-    public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages);
+    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException;
 
 }

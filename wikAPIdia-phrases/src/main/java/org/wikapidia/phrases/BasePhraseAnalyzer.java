@@ -5,12 +5,10 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.StringNormalizer;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
-import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.utils.WpIOUtils;
-import org.wikapidia.utils.WpStringUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -24,8 +22,6 @@ import java.util.logging.Logger;
  */
 public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
-    private final PrunedCounts.Pruner<String> phrasePruner;
-    private final PrunedCounts.Pruner<Integer> pagePruner;
 
     /**
      * An entry in the phrase corpus.
@@ -54,14 +50,18 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         }
     }
 
-    protected PhraseAnalyzerDao phraseDao;
-    protected LocalPageDao pageDao;
+    private final PrunedCounts.Pruner<String> phrasePruner;
+    private final PrunedCounts.Pruner<Integer> pagePruner;
+    private final StringNormalizer normalizer;
+    protected final PhraseAnalyzerDao phraseDao;
+    protected final LocalPageDao pageDao;
 
-    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao,  PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner) {
+    public BasePhraseAnalyzer(PhraseAnalyzerDao phraseDao, LocalPageDao pageDao, PrunedCounts.Pruner<String> phrasePruner, PrunedCounts.Pruner<Integer> pagePruner) {
         this.phrasePruner = phrasePruner;
         this.pagePruner = pagePruner;
         this.phraseDao = phraseDao;
         this.pageDao = pageDao;
+        this.normalizer = phraseDao.getStringNormalizer();
     }
 
     /**
@@ -107,6 +107,9 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             if (!langs.containsLanguage(e.language)) {
                 continue;
             }
+            if (e.phrase == null || e.phrase.trim().isEmpty()) {
+                continue;
+            }
             if (e.title != null && e.localId < 0) {
                 int localId = pageDao.getIdByTitle(new Title(e.title, e.language));
                 e.localId = (localId <= 0) ? -1 : localId;
@@ -118,7 +121,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             e.phrase = e.phrase.replace("\n", " ").replace("\t", " ");
             // phrase is last because it may contain tabs.
             String line = e.language.getLangCode() + "\t" + e.localId + "\t" + e.count + "\t" + e.phrase + "\n";
-            byPhrase.write(e.language.getLangCode() + ":" + WpStringUtils.normalize(e.phrase) + "\t" + line);
+            byPhrase.write(e.language.getLangCode() + ":" + normalize(e.language, e.phrase) + "\t" + line);
             byWpId.write(e.language.getLangCode() + ":" + e.localId + "\t" + line);
         }
         byWpId.close();
@@ -133,6 +136,16 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         phraseDao.close();
     }
 
+    /**
+     * Uses the string's normalizer, but replaces adjacent whitespace white a single space
+     * @param lang
+     * @param text
+     * @return
+     */
+    private String normalize(Language lang, String text) {
+        return normalizer.normalize(lang, text).replaceAll("\\s+", " ");
+    }
+
     private static enum RecordType {
         PAGES, PHRASES
     }
@@ -140,6 +153,8 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     protected void loadFromFile(RecordType ltype, File input, PrunedCounts.Pruner pruner) throws IOException, DaoException {
         BufferedReader reader = WpIOUtils.openBufferedReader(input);
         String lastKey = null;
+
+        int maxBufferSize = 1000;
         List<Entry> buffer = new ArrayList<Entry>();
 
         while (true) {
@@ -169,6 +184,10 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
                     new Integer(tokens[3])
             );
             buffer.add(e);
+            if (buffer.size() > maxBufferSize * 3 / 2) {
+                LOG.warning("large buffer observed: " + buffer.size() + " for string " + lastKey);
+                maxBufferSize = buffer.size();
+            }
             lastKey = tokens[0];
         }
         if (ltype == RecordType.PAGES) {
@@ -205,10 +224,10 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             return;
         }
         Language lang = pageCounts.get(0).language;
-        String phrase = WpStringUtils.normalize(pageCounts.get(0).phrase);
+        String phrase = normalize(lang, pageCounts.get(0).phrase);
         Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
         for (Entry e : pageCounts) {
-            if (!WpStringUtils.normalize(e.phrase).equals(phrase)) {
+            if (!normalize(lang, e.phrase).equals(phrase)) {
                 LOG.warning("disagreement between phrases " + phrase + " and " + e.phrase);
             }
             if (e.language != lang) {
@@ -227,16 +246,20 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     }
 
     private void sortInPlace(File file) throws IOException {
+        int maxFiles = Math.max(100, (int) (file.length() / (Runtime.getRuntime().maxMemory() / 20)));
+        LOG.info("sorting " + file + " using max of " + maxFiles);
         Comparator<String> comparator = new Comparator<String>() {
             public int compare(String r1, String r2){
                 return r1.compareTo(r2);}};
-        List<File> l = ExternalSort.sortInBatch(file, comparator, 1024, Charset.forName("utf-8"), null, false);
+        List<File> l = ExternalSort.sortInBatch(file, comparator, maxFiles, Charset.forName("utf-8"), null, false);
+        LOG.info("merging " + file);
         ExternalSort.mergeSortedFiles(l, file, comparator, Charset.forName("utf-8"));
+        LOG.info("finished sorting" + file);
     }
 
 
     @Override
-    public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {
+    public LinkedHashMap<String, Float> describe(Language language, LocalPage page, int maxPhrases) throws DaoException {
         LinkedHashMap<String, Float> result = new LinkedHashMap<String, Float>();
         PrunedCounts<String> counts = phraseDao.getPageCounts(language, page.getLocalId(), maxPhrases);
         System.out.println(counts);
@@ -253,7 +276,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
+    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
         PrunedCounts<Integer> counts = phraseDao.getPhraseCounts(language, phrase, maxPages);
         if (counts == null) {
@@ -269,13 +292,4 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         return result;
     }
 
-    @Override
-    public LinkedHashMap<String, Float> describeUniversal(Language language, UniversalPage page, int maxPhrases) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
-        throw new UnsupportedOperationException();
-    }
 }

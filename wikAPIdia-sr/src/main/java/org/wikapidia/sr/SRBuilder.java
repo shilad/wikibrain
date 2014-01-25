@@ -374,7 +374,7 @@ public class SRBuilder {
                 new DefaultOptionBuilder()
                         .withLongOpt("mode")
                         .withDescription("mode: similarity, mostsimilar, or both")
-                        .create("p"));
+                        .create("o"));
 
         // when building pairwise cosine and ensembles, don't rebuild already built sub-metrics.
         options.addOption(

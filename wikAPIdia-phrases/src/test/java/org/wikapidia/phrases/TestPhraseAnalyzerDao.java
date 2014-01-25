@@ -1,9 +1,14 @@
 package org.wikapidia.phrases;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.lucene.util.Version;
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.lang.IdentityStringNormalizer;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.StringNormalizer;
+import org.wikapidia.lucene.LuceneStringNormalizer;
+import org.wikapidia.lucene.TokenizerOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,7 +80,8 @@ public class TestPhraseAnalyzerDao {
         tmp.delete();
         FileUtils.forceDeleteOnExit(tmp);
 
-        PhraseAnalyzerDao dao = new PhraseAnalyzerObjectDbDao(tmp, true);
+        StringNormalizer normalizer = new LuceneStringNormalizer(new TokenizerOptions(true, false, false), Version.LUCENE_43);
+        PhraseAnalyzerDao dao = new PhraseAnalyzerObjectDbDao(normalizer, tmp, true);
         Language en = Language.getByLangCode("en");
 
         PrunedCounts<Integer> c1 = new PrunedCounts<Integer>(12);

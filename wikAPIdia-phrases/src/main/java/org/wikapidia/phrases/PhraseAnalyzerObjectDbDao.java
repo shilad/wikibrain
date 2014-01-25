@@ -7,6 +7,7 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.StringNormalizer;
 import org.wikapidia.utils.ObjectDb;
 import org.wikapidia.utils.WpStringUtils;
 
@@ -18,6 +19,7 @@ import java.util.Map;
  * Persists information about phrases to page relationships using an object database.
  */
 public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
+    private final StringNormalizer normalizer;
     private ObjectDb<PrunedCounts<String>> describeDb;
     private ObjectDb<PrunedCounts<Integer>> resolveDb;
 
@@ -27,7 +29,8 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      * @param isNew If true, delete any information contained in the directory.
      * @throws DaoException
      */
-    public PhraseAnalyzerObjectDbDao(File path, boolean isNew) throws DaoException {
+    public PhraseAnalyzerObjectDbDao(StringNormalizer normalizer, File path, boolean isNew) throws DaoException {
+        this.normalizer = normalizer;
         if (isNew) {
             if (path.exists()) FileUtils.deleteQuietly(path);
             path.mkdirs();
@@ -50,7 +53,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
 
     @Override
     public void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException {
-        phrase = normalize(phrase);
+        phrase = normalizer.normalize(lang, phrase);
         try {
             resolveDb.put(lang.getLangCode() + ":" + phrase, counts);
         } catch (IOException e) {
@@ -58,6 +61,10 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
         }
     }
 
+    @Override
+    public StringNormalizer getStringNormalizer() {
+        return normalizer;
+    }
 
     /**
      * Gets pages related to a phrase.
@@ -71,7 +78,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      */
     @Override
     public PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase, int maxPages) throws DaoException {
-        phrase = normalize(phrase);
+        phrase = normalizer.normalize(lang, phrase);
         try {
             PrunedCounts<Integer> counts = resolveDb.get(lang.getLangCode() + ":" + phrase);
             if (counts == null || counts.size() <= maxPages) {
@@ -91,17 +98,6 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
             throw new DaoException(e);
         }
     }
-
-    /**
-     * Normalizes a phrase by folding case and removing non alphanumeric characters.
-     * This is scary for non-English languages!
-     * @param phrase
-     * @return
-     */
-    public String normalize(String phrase) {
-        return WpStringUtils.normalize(phrase);
-    }
-
 
     /**
      * Gets phrases related to a page.
@@ -145,7 +141,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
         }
 
         @Override
-        public Class getType() {
+        public Class<PhraseAnalyzerDao> getType() {
             return PhraseAnalyzerDao.class;
         }
 
@@ -161,8 +157,10 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
             }
             boolean isNew = config.getBoolean("isNew");
             File path = new File(config.getString("path"));
+            StringNormalizer normalizer = getConfigurator().get(StringNormalizer.class, config.getString("normalizer"));
+
             try {
-                return new PhraseAnalyzerObjectDbDao(path, isNew);
+                return new PhraseAnalyzerObjectDbDao(normalizer, path, isNew);
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }

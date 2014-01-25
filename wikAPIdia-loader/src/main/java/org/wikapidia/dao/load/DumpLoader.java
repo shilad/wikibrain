@@ -1,6 +1,7 @@
 package org.wikapidia.dao.load;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.comparator.SizeFileComparator;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -21,9 +22,7 @@ import org.wikapidia.utils.Procedure;
 
 import java.io.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -160,6 +159,9 @@ public class DumpLoader {
                 paths.add(new File((String)arg));
             }
         }
+
+        // Schedule the biggest files first to improve parallel performance
+        Collections.sort(paths, SizeFileComparator.SIZE_REVERSE);
 
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         RawPageDao rpDao = conf.get(RawPageDao.class);

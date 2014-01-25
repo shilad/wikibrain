@@ -28,13 +28,6 @@ public class EvaluationMain {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException, WikapidiaException {
 
         Options options = new Options();
-        //Specify whether you have the split datasets
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("datasets" )
-                        .withDescription("drop and create the split datasets with given name" )
-                        .create("d" ));
 
         //Specify for universal metric
         options.addOption(

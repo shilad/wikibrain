@@ -23,6 +23,7 @@ import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.matrix.*;
 import org.wikapidia.sr.dataset.Dataset;
 import org.wikapidia.sr.disambig.Disambiguator;
+import org.wikapidia.sr.disambig.SimilarityDisambiguator;
 import org.wikapidia.sr.normalize.IdentityNormalizer;
 import org.wikapidia.sr.normalize.Normalizer;
 import org.wikapidia.sr.utils.Leaderboard;
@@ -59,7 +60,9 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
     private SparseMatrix mostSimilarCache = null;
     private TIntSet mostSimilarCacheRowIds = null;
 
-    private int numDisambiguations = 4;
+
+    // the number of senses to consider for each phrase
+    private int numSenses = 5;
 
     /**
      * Returns properties about the metric.
@@ -217,37 +220,40 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         List<LocalString> phrases = Arrays.asList(
                 new LocalString(language, phrase1),
                 new LocalString(language, phrase2));
-        List<LinkedHashMap<LocalId, Double>> resolutions = disambiguator.disambiguate(phrases, null);
-        if (resolutions.get(0) == null || resolutions.get(0).isEmpty()
-        ||  resolutions.get(1) == null || resolutions.get(1).isEmpty()) {
+//        debugSimilarityDisambiguator(phrases);
+        List<LocalId> resolutions =  disambiguator.disambiguateTop(phrases, null);
+        if (resolutions.get(0) == null || resolutions.get(1) == null) {
             return new SRResult();
         }
+        return similarity(resolutions.get(0).getId(), resolutions.get(1).getId(), explanations);
+    }
 
-        double weightSum = 0.0;
-        double prodSum = 0.0;
-        int i = 0;
-        for (LocalId lid1 : resolutions.get(0).keySet()) {
-            if (i++ >= numDisambiguations) {
-                break;
+    private void debugSimilarityDisambiguator(List<LocalString> phrases) throws DaoException {
+        String last = null;
+        boolean same = true;
+        StringBuffer b = new StringBuffer("results for " + phrases.get(0).getString() + ", " + phrases.get(1).getString() + "\n");
+        for (SimilarityDisambiguator.Criteria c : SimilarityDisambiguator.Criteria.values()) {
+            if (c == SimilarityDisambiguator.Criteria.SIMILARITY) {
+                continue;   // weird, so skip for now.
             }
-            int j = 0;
-            for (LocalId lid2: resolutions.get(1).keySet()) {
-                if (j++ >= numDisambiguations) {
-                    break;
-                }
-                double w = resolutions.get(0).get(lid1) * resolutions.get(1).get(lid2);
-                SRResult r = similarity(lid1.getId(), lid2.getId(), explanations);
-                if (r != null && r.isValid()) {
-                    weightSum += w;
-                    prodSum += w * r.getScore();
-                }
+            List<LocalId> resolutions;
+            synchronized (disambiguator) {
+                ((SimilarityDisambiguator)disambiguator).setCritera(c);
+                resolutions = disambiguator.disambiguateTop(phrases, null);
+            }
+            String page1 = resolutions.get(0) == null ? "null" : localPageDao.getById(language, resolutions.get(0).getId()).toString();
+            String page2 = resolutions.get(1) == null ? "null" : localPageDao.getById(language, resolutions.get(1).getId()).toString();
+            b.append("\t" + c + ": " + page1 + ",  " + page2 + "\n");
+            if (last == null)
+                last = page1+page2;
+            if (!last.equals(page1+page2)) {
+                same = false;
             }
         }
-        if (weightSum == 0) {
-            return new SRResult(Double.NaN);
-        } else {
-            return new SRResult(prodSum / weightSum);
+        if (!same) {
+            System.out.println(b.toString());
         }
+
     }
 
     @Override

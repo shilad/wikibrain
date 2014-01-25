@@ -64,9 +64,14 @@ public class MilneWittenGenerator implements VectorGenerator {
     @Override
     public TIntFloatMap getVector(int pageId) throws DaoException {
         TIntFloatMap vector = new TIntFloatHashMap();
+        if (pageId <= 0) {
+            throw new IllegalArgumentException("Invalid page id: " + pageId);
+        }
         for (LocalLink link : linkDao.getLinks(language, pageId, outLinks)) {
             int columnId = outLinks ? link.getDestId() : link.getSourceId();
-            vector.put(columnId, 1);
+            if (columnId >= 0) {
+                vector.put(columnId, 1);
+            }
         }
         return vector;
     }
