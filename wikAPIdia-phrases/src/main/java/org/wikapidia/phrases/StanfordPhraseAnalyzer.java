@@ -11,7 +11,6 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.lang.StringNormalizer;
 import org.wikapidia.download.FileDownloader;
 import org.wikapidia.utils.WpIOUtils;
 

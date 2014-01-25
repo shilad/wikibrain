@@ -108,10 +108,10 @@ public class SRConceptSpaceGenerator {
      */
     private static final Pattern[] TITLE_BLACKLIST = new Pattern[] {
             // articles starting with a year
-            Pattern.compile("^[0-9]{4}.*"),
+            Pattern.compile("^[0-9]{4} .*"),
 
             // articles starting with a month
-            Pattern.compile("^(January|February|March|April|May|June|July|August|September|October|November|December)"),
+            Pattern.compile("^(January|February|March|April|May|June|July|August|September|October|November|December).*"),
 
             // articles that are just digits
             Pattern.compile("^[0-9]+$"),
