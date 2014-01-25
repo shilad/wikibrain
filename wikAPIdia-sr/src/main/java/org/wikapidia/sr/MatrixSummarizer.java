@@ -75,7 +75,7 @@ public class MatrixSummarizer {
             }
         });
         System.out.println("top counts:");
-        for (int i = 0; i < Math.min(1000, ids.length); i++) {
+        for (int i = 0; i < Math.min(200, ids.length); i++) {
             System.out.println(
                     "" + (i+1) +
                     ". " + describePage(language, ids[i]) +
@@ -95,12 +95,12 @@ public class MatrixSummarizer {
             }
         });
         System.out.println("top sums:");
-        for (int i = 0; i < Math.min(1000, ids.length); i++) {
+        for (int i = 0; i < Math.min(200, ids.length); i++) {
             System.out.println(
                     "" + (i+1) +
                     ". " + describePage(language, ids[i]) +
                     "(id=" + ids[i] + ")" +
-                    " count = " + sums.get(ids[i]));
+                    " sum = " + sums.get(ids[i]));
         }
     }
 
