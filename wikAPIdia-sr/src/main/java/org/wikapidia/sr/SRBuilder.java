@@ -108,14 +108,10 @@ public class SRBuilder {
         }
         buildConceptsIfNecessary();
         LOG.info("building metric " + metricName);
-        String type = getMetricType();
-        if (type.equals("ensemble")) {
-            initEnsemble();
-        } else if (type.equals("pairwisecosinesim")) {
-            initCosineSim();
-        } else {
-            initSimpleMetric();
+        for (String name : getSubmetrics(metricName)) {
+            initMetric(name);
         }
+
         for (String name : getSubmetrics(metricName)) {
             buildMetric(name);
         }
@@ -161,17 +157,19 @@ public class SRBuilder {
         return results;
     }
 
-    public void initSimpleMetric() throws ConfigurationException, DaoException, WikapidiaException, IOException {
-        // nothing necessary
-    }
-
-    public void initEnsemble() throws ConfigurationException, DaoException, WikapidiaException, IOException {
-        EnsembleMetric ensemble = (EnsembleMetric) getMetric();
-        ensemble.setTrainSubmetrics(false);         // Do it by hand
-    }
-
-    public void initCosineSim() {
-        // nothing, for now.
+    public void initMetric(String name) throws ConfigurationException {
+       String type = getMetricType(name);
+        if (type.equals("ensemble")) {
+            EnsembleMetric ensemble = (EnsembleMetric) getMetric(name);
+            ensemble.setTrainSubmetrics(false);         // Do it by hand
+        } else if (type.equals("pairwisecosinesim")) {
+            if (mode == Mode.SIMILARITY) {
+                LOG.warning("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
+                mode = Mode.BOTH;
+            }
+        } else {
+            // simple; nothing needed!
+        }
     }
 
     public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
@@ -234,7 +232,7 @@ public class SRBuilder {
         DatasetDao dao = env.getConfigurator().get(DatasetDao.class);
         List<Dataset> datasets = new ArrayList<Dataset>();
         for (String name : datasetNames) {
-            datasets.add(dao.get(language, name));  // throws a DaoException if language is incorrect.
+            datasets.addAll(dao.getDatasetOrGroup(language, name));  // throws a DaoException if language is incorrect.
         }
         return new Dataset(datasets);   // merge all datasets together into one.
     }

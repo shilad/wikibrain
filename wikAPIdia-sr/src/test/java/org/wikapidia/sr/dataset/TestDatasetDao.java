@@ -2,6 +2,7 @@ package org.wikapidia.sr.dataset;
 
 import org.junit.Test;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.lang.Language;
 import org.wikapidia.sr.utils.KnownSim;
 
 import java.util.Collection;
@@ -23,7 +24,7 @@ public class TestDatasetDao {
     @Test
     public void testDaoRead() throws DaoException {
         DatasetDao dao = new DatasetDao();
-        Dataset ds = dao.get("wordsim353.txt");
+        Dataset ds = dao.get(Language.getByLangCode("en"), "wordsim353.txt");
         assertEquals(351, ds.getData().size());
         assertEquals("en", ds.getLanguage().getLangCode());
         double sim = Double.NaN;
