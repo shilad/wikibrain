@@ -301,7 +301,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         WikidataValue wdv = statement.getValue();
         if (wdv.getType() == WikidataValue.Type.ITEM) {
             value = getLocalName(language, WikidataEntity.Type.ITEM, wdv.getItemValue());
-        } else if (wdv == null) {
+        } else if (wdv.getValue() == null) {
             value = "unknown";
         } else {
             value = wdv.getValue().toString();
