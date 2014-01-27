@@ -25,7 +25,7 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
 
 ```bash
 cd wikAPIdia
-git-clone https://github.com/shilad/wikAPIdia.git
+git clone https://github.com/shilad/wikAPIdia.git
 mvn -f wikAPIdia-parent/pom.xml test
 ```
 
