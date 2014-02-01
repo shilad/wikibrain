@@ -73,6 +73,18 @@ public class PageViewLoader {
         }
     }
 
+    /**
+     * first arg: comma-separated lang codes
+     * start date and end date (second and third args) must be in UTC time
+     * dates must be entered as <four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23>
+     * @param args
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws IOException
+     * @throws ConfigurationException
+     * @throws WikapidiaException
+     * @throws DaoException
+     */
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikapidiaException, DaoException {
         /*Options options = new Options();
         options.addOption(
@@ -156,7 +168,7 @@ public class PageViewLoader {
             return new DateTime(year, month, day, hour, 0);
         } catch (Exception e) {
             throw new WikapidiaException("Start and end dates must be entered in the following format (hypen-delimited):\n" +
-                    "<four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23");
+                    "<four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23>");
         }
     }
 }
