@@ -237,25 +237,26 @@ public class PageViewIterator implements Iterator {
             BufferedReader br =  new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             String curLine;
             System.out.println("Beginning to parse file");
-            while ((curLine = br.readLine()) != null){
+            while ((curLine = br.readLine()) != null) {
                 String[] cols = curLine.split(" ");
-                    // if (langs.getLangCodes().contains(cols[0])){
-                    if (cols[0].equals(lang.getLangCode())) {
-                            try{
-                                //Language lang = Language.getByLangCode(cols[0]);
-                                String title = URLDecoder.decode(cols[1], "UTF-8");
-                                int pageId = pdao.getIdByTitle(new Title(title, lang));
-                                int numPageViews = Integer.parseInt(cols[2]);
-                                data.adjustOrPutValue(pageId, numPageViews, numPageViews);
-                            }
-                            catch(IllegalArgumentException e){
-                                System.out.println("Decoding error examining this line: " + curLine);
-                            }
-                            catch(DaoException de) {
-                                System.out.println("Error using page DAO to get page ID for line:\n\t" + curLine);
-                                System.out.println(de.getMessage());
-                            }
+                if (cols.length < 3) {
+                    continue;
+                }
+                if (cols[0].equals(lang.getLangCode())) {
+                        try{
+                            String title = URLDecoder.decode(cols[1], "UTF-8");
+                            int pageId = pdao.getIdByTitle(new Title(title, lang));
+                            int numPageViews = Integer.parseInt(cols[2]);
+                            data.adjustOrPutValue(pageId, numPageViews, numPageViews);
                         }
+                        catch(IllegalArgumentException e){
+                            System.out.println("Decoding error examining this line: " + curLine);
+                        }
+                        catch(DaoException de) {
+                            System.out.println("Error using page DAO to get page ID for line:\n\t" + curLine);
+                            System.out.println(de.getMessage());
+                        }
+                    }
                 }
             br.close();
 
