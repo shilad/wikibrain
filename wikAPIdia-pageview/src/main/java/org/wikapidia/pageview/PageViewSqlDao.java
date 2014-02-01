@@ -12,7 +12,6 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.DaoFilter;
-import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.sql.AbstractSqlDao;
 import org.wikapidia.core.dao.sql.SimpleSqlDaoIterable;
 import org.wikapidia.core.dao.sql.WpDataSource;
