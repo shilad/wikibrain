@@ -8,11 +8,20 @@
 # TODO: Make this script work with maven
 #
 
+# utility: resolve a (possilble) relative path to a full path
+# from http://stackoverflow.com/a/7126780/141245
+#
+full_path() {
+    cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
+    echo "`pwd -P`" # output full, link-resolved path
+}
+
 # Configuration parameters.
 # These can be overriden by setting your environment
 
+
 # Base Wikapidia directory. Should be the parent project directory in multi-maven projects
-WP_DIR="${WP_DIR:-.}"
+WP_DIR=$(full_path "${WP_DIR:-.}")
 
 # Java options
 WP_JAVA_OPTS="${WP_JAVA_OPTS:-${JAVA_OPTS} -server -ea}"
@@ -33,7 +42,7 @@ ${WP_DIR}/wikAPIdia-parent/pom.xml
 "
 
 # Destination of compiled jars and dependencies
-WP_LIB="${WP_LIB:-${WP_DIR}/lib}"
+WP_LIB=$(full_path "${WP_LIB:-${WP_DIR}/lib}")
 
 # Specify default classpath. This will be updated later, and CLASSPATH will be prepended to it.
 WP_CLASSPATH="${WP_CLASSPATH:-${WP_LIB}/*}"
@@ -95,6 +104,8 @@ done
 if [ -n "${CLASSPATH}" ]; then
     WP_CLASSPATH="${CLASSPATH}:${WP_CLASSPATH}"
 fi
+
+echo "final WP_CLASSPATH is $WP_CLASSPATH" >&2
 
 
 
