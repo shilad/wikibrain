@@ -243,21 +243,21 @@ public class PageViewIterator implements Iterator {
                     continue;
                 }
                 if (cols[0].equals(lang.getLangCode())) {
-                        try{
-                            String title = URLDecoder.decode(cols[1], "UTF-8");
-                            int pageId = pdao.getIdByTitle(new Title(title, lang));
-                            int numPageViews = Integer.parseInt(cols[2]);
-                            data.adjustOrPutValue(pageId, numPageViews, numPageViews);
-                        }
-                        catch(IllegalArgumentException e){
-                            System.out.println("Decoding error examining this line: " + curLine);
-                        }
-                        catch(DaoException de) {
-                            System.out.println("Error using page DAO to get page ID for line:\n\t" + curLine);
-                            System.out.println(de.getMessage());
-                        }
+                    try{
+                        String title = URLDecoder.decode(cols[1], "UTF-8");
+                        int pageId = pdao.getIdByTitle(new Title(title, lang));
+                        int numPageViews = Integer.parseInt(cols[2]);
+                        data.adjustOrPutValue(pageId, numPageViews, numPageViews);
+                    }
+                    catch(IllegalArgumentException e){
+                        System.out.println("Decoding error examining this line: " + curLine);
+                    }
+                    catch(DaoException de) {
+                        System.out.println("Error using page DAO to get page ID for line:\n\t" + curLine);
+                        System.out.println(de.getMessage());
                     }
                 }
+            }
             br.close();
 
             return data;
