@@ -220,9 +220,10 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         throw new UnsupportedOperationException();
     }
 
-    protected void checkLoaded(Language lang, DateTime startDate, DateTime endDate) {
+    protected void checkLoaded(Language lang, DateTime startDate, DateTime endDate) throws DaoException {
         List<DateTime> datesNotLoaded = new ArrayList<DateTime>();
-        Set<Long> loadedHourSet = (loadedHours.get(lang.getId()) != null) ? loadedHours.get(lang.getId()) : new HashSet<Long>();
+        int langId = lang.getId();
+        Set<Long> loadedHourSet = (loadedHours.containsKey(langId)) ? loadedHours.get(langId) : new HashSet<Long>();
         for (DateTime currentDate = startDate; currentDate.getMillis() < endDate.getMillis(); currentDate = currentDate.plusHours(1)) {
             if (!loadedHourSet.contains(currentDate.getMillis())) {
                 datesNotLoaded.add(currentDate);
@@ -231,13 +232,14 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         load(lang, datesNotLoaded);
     }
 
-    protected void load(Language lang, List<DateTime> dates) {
+    protected void load(Language lang, List<DateTime> dates) throws DaoException {
+        beginLoad();
         PageViewLoader loader = new PageViewLoader(new LanguageSet(lang), this);
         int i = 0;
         while (i < dates.size()) {
             DateTime startDate = dates.get(i++);
             DateTime endDate = startDate.plusHours(1);
-            while (dates.get(i).equals(endDate)) {
+            while ((i < dates.size()) && (dates.get(i).equals(endDate))) {
                 endDate = endDate.plusHours(1);
                 i++;
             }
@@ -249,6 +251,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
                 System.out.println(wE.getMessage());
             }
         }
+        endLoad();
     }
 
     protected PageView buildPageView(Record record) throws DaoException {
@@ -265,7 +268,6 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
                 record.getValue(Tables.PAGEVIEW.NUM_VIEWS)
         );
     }
-
 
     public static class Provider extends org.wikapidia.conf.Provider<PageViewSqlDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
