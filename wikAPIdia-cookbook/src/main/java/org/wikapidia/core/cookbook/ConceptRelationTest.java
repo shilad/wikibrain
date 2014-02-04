@@ -17,17 +17,19 @@ import org.wikapidia.core.model.NameSpace;
 /** An example shows the usage of ConceptRelation class
  * @author Toby "Jiajun" Li
  */
+
+
 public class ConceptRelationTest{
 
-
+//"getRelationSR" requires the initialization of SR matrix, "getWikidataRelation" requires the installation of wikidata.
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         ConceptRelation cr = new ConceptRelation(Language.getByLangCode("simple"));
 
-        System.out.println(cr.getRelationSR("Minnesota", "Algorithm"));
-        System.out.println(cr.getRelationBidirectional("Minnesota", "Peanut milk"));
+        System.out.println(cr.getRelationSR("World War II", "American Civil War")); //Also support the usage "getRelationSR(pageId, pageId)
+        System.out.println(cr.getRelationBidirectional("Minnesota", "Algorithm")); //Also support the usage getRelationBidirectional(pageId, pageId)
         Integer srcId = 1527;
         Integer dstId = 43788;
-        //System.out.println(cr.getWikidataRelation(srcId, dstId));
+        System.out.println(cr.getWikidataRelation(srcId, dstId));
 
     }
 

@@ -114,6 +114,8 @@ public class ConceptRelation {
     public int getRelation (String srcTitle, String dstTitle) throws DaoException{
         Integer srcId = pDao.getIdByTitle(srcTitle, lang, NameSpace.ARTICLE);                  //Get page id by page title
         Integer dstId = pDao.getIdByTitle(dstTitle, lang, NameSpace.ARTICLE);
+        if(srcId == -1 || dstId == -1)
+            throw new DaoException("Page not found");
         return getRelation(srcId, dstId);
     }
 
@@ -183,7 +185,6 @@ public class ConceptRelation {
                     continue;
                 if(vectorSet.contains(outlink.getDestId()))
                     continue;
-
                 effectiveBFSCounter ++;
                 father.put(outlink.getDestId(), nowPageId);
                 vectorSet.add(outlink.getDestId());
@@ -204,6 +205,8 @@ public class ConceptRelation {
     public int getRelationSR (String srcTitle, String dstTitle) throws DaoException, ConfigurationException{
         Integer srcId = pDao.getIdByTitle(srcTitle, lang, NameSpace.ARTICLE);
         Integer dstId = pDao.getIdByTitle(dstTitle, lang, NameSpace.ARTICLE);
+        if(srcId == -1 || dstId == -1)
+            throw new DaoException("Page not found");
         return getRelationSR(srcId, dstId);
     }
 
@@ -337,6 +340,8 @@ public class ConceptRelation {
     public int getRelationBidirectional (String srcTitle, String dstTitle) throws DaoException, ConfigurationException{
         Integer srcId = pDao.getIdByTitle(srcTitle, lang, NameSpace.ARTICLE);
         Integer dstId = pDao.getIdByTitle(dstTitle, lang, NameSpace.ARTICLE);
+        if(srcId == -1 || dstId == -1)
+            throw new DaoException("Page not found");
         return getRelationBidirectional(srcId, dstId);
     }
 
