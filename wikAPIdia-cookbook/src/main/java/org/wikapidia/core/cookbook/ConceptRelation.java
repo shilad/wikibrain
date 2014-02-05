@@ -20,6 +20,7 @@ import org.wikapidia.wikidata.WikidataStatement;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author Toby "Jiajun" Li
@@ -75,8 +76,8 @@ public class ConceptRelation {
                 while(true){
                     if(father.get(nowPageId) == -1){
                         System.out.println(pDao.getById(lang, nowPageId).getTitle().toString());
-                        System.out.printf("BFS counter is %d\n", globalBFSCounter);
-                        System.out.printf("Node visited is %d\n", effectiveBFSCounter);
+                        System.out.printf("Number of links BFS went through %d\n", globalBFSCounter);
+                        System.out.printf("Number of nodes added to the queue %d\n", effectiveBFSCounter);
                         return counter;
                     }
                     System.out.print(pDao.getById(lang, nowPageId).getTitle().toString());            //Get page title by page ID
@@ -160,16 +161,19 @@ public class ConceptRelation {
         father.put(srcId, -1);
         Integer globalBFSCounter = 0;
         Integer effectiveBFSCounter = 0;
+        Integer actualNodesChecked = 0;
         while(!queue.isEmpty()){
             Integer nowPageId = queue.poll();
+            actualNodesChecked ++;
             closedSet.add(nowPageId);
             if(nowPageId == dstId){
                 int counter = 0;
                 while(true){
                     if(father.get(nowPageId) == -1){
                         System.out.println(pDao.getById(lang, nowPageId).getTitle().toString());
-                        System.out.printf("BFS counter is %d\n", globalBFSCounter);
-                        System.out.printf("Node visited is %d\n", effectiveBFSCounter);
+                        System.out.printf("Number of links BFS went through %d\n", globalBFSCounter);
+                        System.out.printf("Number of nodes added to the queue is %d\n", effectiveBFSCounter);
+                        System.out.printf("Actual number of nodes checked is %d\n", actualNodesChecked);
                         return counter;
                     }
                     System.out.print(pDao.getById(lang, nowPageId).getTitle().toString());
@@ -265,8 +269,8 @@ public class ConceptRelation {
                                         System.out.print(" -> ");
                                 }
                                 System.out.print("\n");
-                                System.out.printf("BFS counter is %d\n", globalBFSCounter);
-                                System.out.printf("Node visited is %d\n", effectiveBFSCounter);
+                                System.out.printf("Number of links BFS went through %d\n", globalBFSCounter);
+                                System.out.printf("Number of Nodes added to the queue is %d\n", effectiveBFSCounter);
                                 return counter + 1;
                             }
                             nowPageId = srcFather.get(nowPageId);
@@ -308,8 +312,8 @@ public class ConceptRelation {
                                         System.out.print(" -> ");
                                 }
                                 System.out.print("\n");
-                                System.out.printf("BFS counter is %d\n", globalBFSCounter);
-                                System.out.printf("Node visited is %d\n", effectiveBFSCounter);
+                                System.out.printf("Number of links BFS went through is %d\n", globalBFSCounter);
+                                System.out.printf("Number of nodes added to the queue %d\n", effectiveBFSCounter);
                                 return counter + 1;
                             }
                             nowPageId = dstFather.get(nowPageId);
@@ -378,8 +382,8 @@ public class ConceptRelation {
                 while(true){
                     if(QFather.get(nowEntity.getId()) == -1){
                         System.out.println(getName(nowEntity.toString()));
-                        System.out.printf("BFS counter is %d\n", globalBFSCounter);
-                        System.out.printf("Node visited is %d\n", effectiveBFSCounter);
+                        System.out.printf("Number of links BFS went through %d\n", globalBFSCounter);
+                        System.out.printf("Number of nodes added to the queue %d\n", effectiveBFSCounter);
                         return counter;
                     }
                     System.out.print(getName(nowEntity.toString()));
