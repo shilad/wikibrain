@@ -16,12 +16,23 @@
 log/
 target/
 
-# Dumps!
+# Dumps
+download/
 *.bz2
+*.gz
+*.csv
 
 # tmp
 */tmp/
 .tmp/
+tmp/
 dat/
+db/
 
-/db/
+# lib
+*/lib/
+
+# misc
+wp-java.sh
+
+
