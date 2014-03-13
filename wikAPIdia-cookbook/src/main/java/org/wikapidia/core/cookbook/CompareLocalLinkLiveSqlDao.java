@@ -38,7 +38,7 @@ public class CompareLocalLinkLiveSqlDao {
         Language lang = Language.getByLangCode("simple");
         int pageId = pdao.getIdByTitle("Minnesota", lang, NameSpace.getNameSpaceByArbitraryId(0));
 
-        File f=new File("../wikAPIdia-cookbook/linkstat.csv");
+        File f=new File("./wikAPIdia-cookbook/linkstat.csv");
         String[] entries = new String[3];
         CSVWriter csvWriter = new CSVWriter(new FileWriter(f), ',');
 

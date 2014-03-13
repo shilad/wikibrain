@@ -27,7 +27,7 @@ public class CompareLocalCategoryMemberLiveSqlDao {
         Set<Integer> sqlMemberSet= new HashSet<Integer>();
         Set<Integer> sqlCategorySet= new HashSet<Integer>();
 
-        File f=new File("../wikAPIdia-cookbook/memberstat.csv");
+        File f=new File("./wikAPIdia-cookbook/memberstat.csv");
         String[] entries = new String[3];
         CSVWriter csvWriter = new CSVWriter(new FileWriter(f), ',');
 

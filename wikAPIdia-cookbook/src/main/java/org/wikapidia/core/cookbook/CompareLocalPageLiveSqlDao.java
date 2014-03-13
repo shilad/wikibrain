@@ -23,7 +23,7 @@ public class CompareLocalPageLiveSqlDao  {
         LocalPageDao localPageSqlDao = new Configurator(new Configuration()).get(LocalPageDao.class, "sql");
         Language lang = Language.getByLangCode("simple");
         LocalPage livePage, sqlPage;
-        File f=new File("../wikAPIdia-cookbook/pagestat.csv");
+        File f=new File("./wikAPIdia-cookbook/pagestat.csv");
         String[] entries = new String[3];
         CSVWriter csvWriter = new CSVWriter(new FileWriter(f), ',');
 
