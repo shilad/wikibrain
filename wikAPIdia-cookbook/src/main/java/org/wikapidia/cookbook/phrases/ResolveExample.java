@@ -19,19 +19,15 @@ import java.util.LinkedHashMap;
 public class ResolveExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
 
-        // Prepare the environment; set the root to the current directory (".").
-        Env env = new EnvBuilder()
-                .setBaseDir(".")
-                .setLanguages(new LanguageSet("la,lad"))
-                .build();
+        Env env = new EnvBuilder().build();
 
         // Get the configurator that creates components and a phraze analyzer from it
         Configurator configurator = env.getConfigurator();
         PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "anchortext");
 
         // get the most common phrases in simple
-        Language simple = Language.getByLangCode("la");   // simple english
-        LinkedHashMap<LocalPage, Float> resolution = pa.resolve(simple, "apple", 20);
+        Language simple = Language.getByLangCode("simple");   // simple english
+        LinkedHashMap<LocalPage, Float> resolution = pa.resolve(simple, "Apple", 20);
 
         // show the closest pages
         System.out.println("resolution of apple");
@@ -44,3 +40,16 @@ public class ResolveExample {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -36,6 +36,8 @@ public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {
      */
     public Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException;
 
+    UniversalPage getByLocalPage(LocalPage localPage, int algorithmId) throws DaoException;
+
     /**
      * Returns the universal ID of a local page specified by a language and
      * an ID, within the scope of the specified algorithm
