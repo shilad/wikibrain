@@ -64,6 +64,8 @@ public class SRBuilder {
     // are already built will not be rebuilt.
     private boolean skipBuiltMetrics = false;
 
+    private TIntSet validMostSimilarIds = null;
+
     public static enum Mode {
         SIMILARITY,
         MOSTSIMILAR,
@@ -199,10 +201,20 @@ public class SRBuilder {
             if (skipBuiltMetrics && metric.mostSimilarIsTrained()) {
                 LOG.info("metric " + name + " mostSimilar() is already trained... skipping");
             } else {
-                metric.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, null);
+                metric.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, validMostSimilarIds);
             }
         }
         metric.write();
+    }
+
+
+    private void setValidMostSimilarIdsFromFile(String file) throws IOException {
+        setValidMostSimilarIds(readIds(file));
+
+    }
+
+    public void setValidMostSimilarIds(TIntSet validMostSimilarIds) {
+        this.validMostSimilarIds = validMostSimilarIds;
     }
 
     private void buildConceptsIfNecessary() throws IOException, ConfigurationException, DaoException {
@@ -375,12 +387,19 @@ public class SRBuilder {
                         .withDescription("build cosimilarity matrices")
                         .create("s"));
 
-        // build the cosimilarity matrix
+        // sets the mode
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("mode")
                         .withDescription("mode: similarity, mostsimilar, or both")
                         .create("o"));
+
+        // add option for valid most similar ids
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("validMostSimilarIds")
+                        .withDescription("Set valid most similar ids")
+                        .create("y"));
 
         // when building pairwise cosine and ensembles, don't rebuild already built sub-metrics.
         options.addOption(
@@ -416,6 +435,9 @@ public class SRBuilder {
             builder.setColIdsFromFile(cmd.getOptionValue("q"));
             builder.setBuildCosimilarity(true);
         }
+        if (cmd.hasOption("y")) {
+            builder.setValidMostSimilarIdsFromFile(cmd.getOptionValue("y"));
+        }
         if (cmd.hasOption("s")) {
             builder.setBuildCosimilarity(true);
         }
@@ -426,7 +448,7 @@ public class SRBuilder {
         if (cmd.hasOption("d")) {
             builder.setDeleteExistingData(Boolean.valueOf(cmd.getOptionValue("d")));
         }
-        if (cmd.hasOption("p")) {
+        if (cmd.hasOption("o")) {
             builder.setMode(Mode.valueOf(cmd.getOptionValue("p").toUpperCase()));
         }
 
