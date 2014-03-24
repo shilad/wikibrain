@@ -58,6 +58,8 @@ public enum NameSpace {
 
     /**
      * Returns a namespace based on the arbitrary ID determined by the getArbitraryId method
+     * You probably don't want to use this. Use getNameSpaceByValue instead.
+     *
      * @param id the arbitrary ID of the namespace
      * @return the namespace
      */

@@ -141,6 +141,15 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
+    public UniversalPage getByLocalPage(LocalPage localPage, int algorithmId) throws DaoException {
+        int conceptId = getUnivPageId(localPage, algorithmId);
+        if (conceptId < 0) {
+            return null;
+        }
+        return getById(conceptId, algorithmId);
+    }
+
+    @Override
     public int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException {
         DSLContext context = getJooq();
         try {

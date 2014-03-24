@@ -2,6 +2,7 @@ package org.wikapidia.core.dao.matrix;
 
 import com.typesafe.config.Config;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.wikapidia.conf.Configuration;
@@ -146,6 +147,11 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         objectDb.flush();
 
         try {
+            // close the old matrix and transpose
+            LOG.info("closing existing matrix and transpose.");
+            if (matrix != null) IOUtils.closeQuietly(matrix);
+            if (transpose != null) IOUtils.closeQuietly(transpose);
+
             LOG.info("writing adjacency matrix rows");
             ValueConf vconf = new ValueConf();   // unused because there are no values.
             SparseMatrixWriter writer = new SparseMatrixWriter(getMatrixFile(), vconf);
@@ -161,11 +167,10 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             LOG.info("finalizing adjacency matrix");
             writer.finish();
 
-            LOG.info("finalizing adjacency matrix");
+            LOG.info("loading adjacency matrix");
             matrix = new SparseMatrix(getMatrixFile());
 
             LOG.info("writing transpose of adjacency matrix");
-
             SparseMatrixTransposer transposer = new SparseMatrixTransposer(matrix, getTransposeFile());
             transposer.transpose();
 
