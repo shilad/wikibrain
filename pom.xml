@@ -31,6 +31,7 @@
         <module>./wikAPIdia-integration-tests</module>
         <module>./wikAPIdia-cookbook</module>
         <module>./wikAPIdia-spatial</module>
+        <module>./wikAPIdia-pageview</module>
     </modules>
 
     <build>
