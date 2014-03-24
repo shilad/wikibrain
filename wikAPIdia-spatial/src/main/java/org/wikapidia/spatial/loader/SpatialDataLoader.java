@@ -15,6 +15,7 @@ import org.geotools.data.shapefile.dbf.DbaseFileReader;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.data.shapefile.shp.ShapefileException;
 import org.geotools.data.shapefile.shp.ShapefileReader;
+import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -351,7 +352,10 @@ public class SpatialDataLoader {
         String phraseAnalyzerName = cmd.getOptionValue("p","titleandredirect");
         String propThreshStr = cmd.getOptionValue("t","1.0");
 
-        File spatialDataFolder = new File(TEMP_SPATIAL_DATA_FOLDER);
+        String spatialDataFolderPath = env.getConfiguration().get().getString("spatial.spatialdatafolder");
+        System.out.println(spatialDataFolderPath);
+        File spatialDataFolder = new File(spatialDataFolderPath);
+        System.out.println(spatialDataFolder.getAbsolutePath());
 
         Collection<String> refSysNameCollection = getRsNameCol(spatialDataFolder,refSysList);
         PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);

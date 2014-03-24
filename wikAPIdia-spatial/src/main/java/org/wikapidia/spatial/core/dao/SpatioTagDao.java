@@ -27,8 +27,11 @@ public interface SpatioTagDao {
 
     public TIntIntMap getGeomIdsForUniversalArticles(Collection<UniversalArticle> universalArticles) throws DaoException;
 
+    public void beginSaveSpatioTags() throws DaoException;
+
     public void saveSpatioTag(SpatioTagStruct struct) throws DaoException;
 
+    public void endSaveSpatioTags() throws DaoException;
 
     public static class SpatioTagStruct{
 
@@ -39,7 +42,9 @@ public interface SpatioTagDao {
             this.localId = localId;
             this.geomId = geomId;
         }
+
     }
+
 
 
 }
