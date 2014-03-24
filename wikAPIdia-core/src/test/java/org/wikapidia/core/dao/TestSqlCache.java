@@ -5,6 +5,7 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import org.junit.Test;
 import org.wikapidia.core.dao.sql.MetaInfoSqlDao;
 import org.wikapidia.core.dao.sql.SqlCache;
+import org.wikapidia.core.dao.sql.TestDaoUtil;
 import org.wikapidia.core.dao.sql.WpDataSource;
 
 import java.io.File;

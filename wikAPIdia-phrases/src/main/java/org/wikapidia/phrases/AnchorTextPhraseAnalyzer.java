@@ -9,6 +9,7 @@ import org.wikapidia.core.dao.DaoFilter;
 import org.wikapidia.core.dao.LocalLinkDao;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.lang.StringNormalizer;
 import org.wikapidia.core.model.LocalLink;
 
 import java.io.IOException;
@@ -127,7 +128,6 @@ public class AnchorTextPhraseAnalyzer extends BasePhraseAnalyzer {
                     PrunedCounts.Pruner.class, null, config.getConfig("phrasePruner"), null);
             PrunedCounts.Pruner<Integer> pagePruner = getConfigurator().construct(
                     PrunedCounts.Pruner.class, null, config.getConfig("pagePruner"), null);
-
             return new AnchorTextPhraseAnalyzer(paDao, lpDao, llDao, phrasePruner, pagePruner);
         }
     }

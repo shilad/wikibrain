@@ -31,7 +31,7 @@ public abstract class Disambiguator {
      *                 aid disambiguation.
      * @return
      */
-    public LinkedHashMap<LocalId, Double> disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException {
+    public LinkedHashMap<LocalId, Float> disambiguate(LocalString phrase, Set<LocalString> context) throws DaoException {
         return disambiguate(Arrays.asList(phrase), context).get(0);
     }
 
@@ -45,7 +45,7 @@ public abstract class Disambiguator {
      * @return
      */
     public LocalId disambiguateTop(LocalString phrase, Set<LocalString> context) throws DaoException {
-        LinkedHashMap<LocalId, Double> result = disambiguate(phrase, context);
+        LinkedHashMap<LocalId, Float> result = disambiguate(phrase, context);
         if (result == null || result.isEmpty()) {
             return null;
         } else {
@@ -64,7 +64,7 @@ public abstract class Disambiguator {
      */
     public List<LocalId> disambiguateTop(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
         List<LocalId> result = new ArrayList<LocalId>();
-        for (LinkedHashMap<LocalId, Double> dab : disambiguate(phrases, context)) {
+        for (LinkedHashMap<LocalId, Float> dab : disambiguate(phrases, context)) {
             if (dab.isEmpty()) {
                 result.add(null);
             } else {
@@ -85,5 +85,5 @@ public abstract class Disambiguator {
      *                 aid disambiguation.
      * @return          The disambiguated pages. The order matches phrases.
      */
-    public abstract List<LinkedHashMap<LocalId, Double>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException;
+    public abstract List<LinkedHashMap<LocalId, Float>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException;
 }

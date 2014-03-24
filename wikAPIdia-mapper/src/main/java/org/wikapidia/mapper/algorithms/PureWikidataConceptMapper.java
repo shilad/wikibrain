@@ -94,7 +94,7 @@ public class PureWikidataConceptMapper extends ConceptMapper {
             backend.get(univId).put(lang, new LocalId(lang, localId));
             validLineCounter++;
 
-            if (validLineCounter % 1000 == 0){ // do some reporting in the log, necessary for such a large operation (both for debugging and for providing the user with something to watch :-))
+            if (validLineCounter % 10000 == 0){ // do some reporting in the log, necessary for such a large operation (both for debugging and for providing the user with something to watch :-))
                 LOG.info("Found " + validLineCounter + " local pages in input language set");
                 StringBuilder langDistLine = new StringBuilder();
                 langDistLine.append("distribution of pages per # languages: ");

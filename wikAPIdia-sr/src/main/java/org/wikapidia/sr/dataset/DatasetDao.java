@@ -1,6 +1,7 @@
 package org.wikapidia.sr.dataset;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.wikapidia.conf.Configuration;
@@ -113,6 +114,7 @@ public class DatasetDao {
     /**
      * Reads a dataset from the classpath with a particular name.
      * Some datasets support multiple languages (i.e. simple and en).
+     * The dataset name can also be a group name (e.g. en-major)
      *
      * @param language The desired language
      * @param name The name of the dataset.
@@ -120,6 +122,13 @@ public class DatasetDao {
      * @throws DaoException
      */
     public Dataset get(Language language, String name) throws DaoException {
+        if (groups.containsKey(name)) {
+            List<Dataset> members = new ArrayList<Dataset>();
+            for (String n : groups.get(name)) {
+                members.add(get(language, n));
+            }
+            return new Dataset(name, members);
+        }
         if (name.contains("/") || name.contains("\\")) {
             throw new DaoException("get() reads a dataset by name for a jar. Try read() instead?");
         }
@@ -138,19 +147,35 @@ public class DatasetDao {
     }
 
     /**
-     * Reads a dataset from the classpath with a particular name.
-     * Some datasets support multiple languages (i.e. simple and en), this uses the default configuration.
-     *
-     * @param name The name of the dataset.
-     * @return The dataset
+     * Returns true if the name is the name of a group of datasets
+     * @param name
+     * @return
+     */
+    public boolean isGroup(String name) {
+        return groups.containsKey(name);
+    }
+
+    /**
+     * Return all the member datasets in the specified group.
+     * @param language
+     * @param name
+     * @return
      * @throws DaoException
      */
-    public Dataset get(String name) throws DaoException {
-        Info info = getInfo(name);
-        if (info == null) {
-            throw new DaoException("no dataset with name '" + name + "'");
+    public List<Dataset> getGroup(Language language, String name) throws DaoException {
+        List<Dataset> members = new ArrayList<Dataset>();
+        for (String n : groups.get(name)) {
+            members.add(get(language, n));
         }
-        return get(info.languages.getDefaultLanguage(), name);
+        return members;
+    }
+
+    public List<Dataset> getDatasetOrGroup(Language language, String name) throws DaoException {
+        if (isGroup(name)) {
+            return getGroup(language, name);
+        } else {
+            return Arrays.asList(get(language, name));
+        }
     }
 
     /**
@@ -184,6 +209,10 @@ public class DatasetDao {
         if (resolvePhrases && disambiguator == null) {
             throw new IllegalStateException("resolve phrases et to true, but no disambiguator specified.");
         }
+    }
+
+    public void setGroups(Map<String, List<String>> groups) {
+        this.groups = groups;
     }
 
     /**
@@ -327,6 +356,12 @@ public class DatasetDao {
             if (config.hasPath("resolvePhrases")) {
                 dao.setResolvePhrases(config.getBoolean("resolvePhrases"));
             }
+            Map<String, List<String>> groups = new HashMap<String, List<String>>();
+            Config groupConfig = getConfig().get().getConfig("sr.dataset.groups");
+            for (Map.Entry<String, ConfigValue> entry  : groupConfig.entrySet()) {
+                groups.put(entry.getKey(), (List<String>)entry.getValue().unwrapped());
+            }
+            dao.setGroups(groups);
 
             return dao;
         }

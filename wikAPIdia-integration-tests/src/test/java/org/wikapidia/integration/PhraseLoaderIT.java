@@ -7,14 +7,9 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalPageDao;
-import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.dao.load.LuceneLoader;
 import org.wikapidia.dao.load.PhraseLoader;
-import org.wikapidia.lucene.LuceneSearcher;
-import org.wikapidia.lucene.WikapidiaScoreDoc;
 import org.wikapidia.phrases.PhraseAnalyzer;
 
 import java.io.IOException;
@@ -42,7 +37,7 @@ public class PhraseLoaderIT {
     }
 
     @Test
-    public void testLoader() throws ClassNotFoundException, SQLException, WikapidiaException, DaoException, ConfigurationException, IOException {
+    public void testLoader() throws ClassNotFoundException, SQLException, WikapidiaException, DaoException, ConfigurationException, IOException, InterruptedException {
         PhraseLoader.main(TestUtils.getArgs("-p", "lucene")); // lucene requires no loading!
         Env env = TestUtils.getEnv();
 
@@ -51,7 +46,7 @@ public class PhraseLoaderIT {
         PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "lucene");
 
         // get the most common phrases in simple
-        LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(SIMPLE, "apple", 20);
+        LinkedHashMap<LocalPage, Float> resolution = pa.resolve(SIMPLE, "apple", 20);
 
         // get page ranks
         int fruitRank = Integer.MAX_VALUE;

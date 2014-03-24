@@ -61,6 +61,13 @@ import java.util.logging.Logger;
  * @see org.wikapidia.sr.vector.VectorSimilarity
  */
 public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
+    private static enum PhraseMode {
+        GENERATOR,  // try to get phrase vectors from the generator directly
+        CREATOR,    // try to get phrase vectors form the phrase vector creator
+        BOTH,       // first try the generator, then the creator
+        NONE        // don't resolve phrases at all.
+    }
+
     private static final Logger LOG = Logger.getLogger(VectorBasedMonoSRMetric.class.getName());
     private final VectorGenerator generator;
     private final VectorSimilarity similarity;
@@ -70,7 +77,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
     private SparseMatrix featureMatrix;
     private SparseMatrix transposeMatrix;
 
-    private boolean resolvePhrases = false;
+    private PhraseMode phraseMode = PhraseMode.BOTH;
 
     public VectorBasedMonoSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity, PhraseVectorCreator creator) {
         super(name, language, dao, disambig);
@@ -89,10 +96,13 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
+        if (phraseMode == PhraseMode.NONE) {
+            return super.similarity(phrase1, phrase2, explanations);
+        }
         TIntFloatMap vector1 = null;
         TIntFloatMap vector2 = null;
         // try using phrases directly
-        if (!resolvePhrases) {
+        if (phraseMode == PhraseMode.BOTH || phraseMode == PhraseMode.GENERATOR) {
             try {
                 vector1 = generator.getVector(phrase1);
                 vector2 = generator.getVector(phrase2);
@@ -100,7 +110,11 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                 // try using other methods
             }
         }
-        if (phraseVectorCreator != null && (vector1 == null || vector2 == null)) {
+        if ((vector1 == null || vector2 == null)
+        &&  (phraseMode == PhraseMode.BOTH || phraseMode == PhraseMode.CREATOR)) {
+            if (phraseVectorCreator == null) {
+                throw new IllegalStateException("phraseMode is " + phraseMode + " but phraseVectorCreator is null");
+            }
             TIntFloatMap vectors[] = phraseVectorCreator.getPhraseVectors(phrase1, phrase2);
             if (vectors != null) {
                 vector1 = vectors[0];
@@ -134,15 +148,22 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
+        if (phraseMode == PhraseMode.NONE) {
+            return super.mostSimilar(phrase, maxResults, validIds);
+        }
         TIntFloatMap vector = null;
-        if (!resolvePhrases) {
+        // try using phrases directly
+        if (phraseMode == PhraseMode.BOTH || phraseMode == PhraseMode.GENERATOR) {
             try {
                 vector = generator.getVector(phrase);
             } catch (UnsupportedOperationException e) {
-                // we'll try an alternate method below
+                // try using other methods
             }
         }
-        if (vector == null && phraseVectorCreator != null) {
+        if (vector == null &&  (phraseMode == PhraseMode.BOTH || phraseMode == PhraseMode.CREATOR)) {
+            if (phraseVectorCreator == null) {
+                throw new IllegalStateException("phraseMode is " + phraseMode + " but phraseVectorCreator is null");
+            }
             vector = phraseVectorCreator.getPhraseVector(phrase);
         }
         if (vector == null) {
@@ -444,8 +465,8 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         return config;
     }
 
-    public void setResolvePhrases(boolean resolve) {
-        this.resolvePhrases = resolve;
+    public void setPhraseMode(PhraseMode mode) {
+        this.phraseMode = mode;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<MonolingualSRMetric> {
@@ -493,8 +514,8 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                     similarity,
                     phraseVectorCreator
             );
-            if (config.hasPath("resolvephrases")) {
-                sr.setResolvePhrases(config.getBoolean("resolvephrases"));
+            if (config.hasPath("phraseMode")) {
+                sr.setPhraseMode(PhraseMode.valueOf(config.getString("phraseMode").toUpperCase()));
             }
             configureBase(getConfigurator(), sr, config);
             if (phraseVectorCreator != null) phraseVectorCreator.setMetric(sr);

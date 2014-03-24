@@ -29,7 +29,7 @@ public class HebrewTokenizer extends LanguageTokenizer {
     @Override
     public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
         if (stopWords == null){
-            stopWords = LanguageTokenizer.getStopWordsForNonLuceneLangFromFile(Language.getByLangCode("he"));
+            stopWords = LanguageTokenizer.getStopWordsForNonLuceneLangFromFile(matchVersion, Language.getByLangCode("he"));
         }
         TokenStream stream = tokenizer;
         if (useStopWords)

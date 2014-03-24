@@ -1,192 +1,74 @@
 package org.wikapidia.download;
 
+import com.github.axet.wget.WGet;
+import com.github.axet.wget.info.DownloadInfo;
+import com.github.axet.wget.info.ex.DownloadIOCodeError;
+
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.github.axet.wget.WGet;
-import com.github.axet.wget.info.DownloadInfo;
-import com.github.axet.wget.info.ex.DownloadIOCodeError;
-import com.google.common.collect.Multimap;
-import org.apache.commons.cli.*;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
-import org.wikapidia.conf.DefaultOptionBuilder;
-import org.wikapidia.core.WikapidiaException;
-import org.wikapidia.core.cmd.Env;
-import org.wikapidia.core.cmd.EnvBuilder;
-import org.wikapidia.core.cmd.FileMatcher;
-import org.wikapidia.core.lang.Language;
-import org.wikapidia.utils.WpIOUtils;
-
 /**
+ * A utility class to download files from urls.
+ * Prints useful logging messages and retries upon failure with exponential backoffs.
  *
- * Downloads dumps from a specified tsv file containing lines of dump links.
- *
- * @author Ari Weiland
- *
+ * @author Shilad Sen
  */
-
 public class FileDownloader {
+    public static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
 
-    private static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
-    private static final int SLEEP_TIME = 10000;    // getDump takes a break from downloading
-    private static final int MAX_ATTEMPT = 30;      // number of attempts before getDump gives up downloading the dump
+    private static final int SLEEP_TIME = 500;     // getOneFile takes a break from downloading
+    private static final int MAX_ATTEMPT = 10;      // number of attempts before getOneFile gives up downloading the dump
     private static final int DISPLAY_INFO = 10000;  // amount of time between displaying download progress
+    private static final int BACKOFF_TIME = 20000;
 
-    private final File tmp;
-    private final File output;
 
-    private DownloadInfo info;
+    private int sleepTime = SLEEP_TIME;
+    private int maxAttempts = MAX_ATTEMPT;
+    private int displayInfo = DISPLAY_INFO;
+    private int backoffTime = BACKOFF_TIME;
 
-    public FileDownloader(File output) {
-        this.output = output;
-        try {
-            tmp = WpIOUtils.createTempDirectory("download");
-        } catch (IOException e) {
-            throw new RuntimeException(e);  // shouldn't happen.
-        }
+
+    public FileDownloader() {
     }
 
-    /**
-     * Attempts to download the specified file. Returns the success of the download.
-     * @param link
-     * @return true if successful, else false
-     * @throws InterruptedException
-     */
-    public File getDump(DumpLinkInfo link) throws InterruptedException, IOException {
-        for (int i=0; i < MAX_ATTEMPT; i++) {
+    public File download(URL url, File file) throws InterruptedException {
+        LOG.info("beginning download of " + url + " to " + file);
+        for (int i=1; i <= maxAttempts; i++) {
             try {
                 AtomicBoolean stop = new AtomicBoolean(false);
-                File download = new File(tmp, link.getFileName());
-                info = new DownloadInfo(link.getUrl());
-                info.extract(stop, notify);
-                new WGet(info, download).download(stop, notify);
-                LOG.log(Level.INFO, "Download complete: " + download.getName());
-                Thread.sleep(SLEEP_TIME);
-                return download;
+                DownloadInfo info = new DownloadInfo(url);
+                DownloadMonitor monitor = new DownloadMonitor(info);
+                info.extract(stop, monitor);
+                file.getParentFile().mkdirs();
+                new WGet(info, file).download(stop, monitor);
+                LOG.log(Level.INFO, "Download complete: " + file.getName());
+                Thread.sleep(sleepTime);
+                return file;
             } catch (DownloadIOCodeError e) {
-                if (i+1 < MAX_ATTEMPT) {
-                    LOG.log(Level.INFO, "Failed to download " + link.getFileName() +
-                            ". Reconnecting in " + ((i+1) * (SLEEP_TIME/1000)) +
-                            " seconds (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
-                    Thread.sleep(SLEEP_TIME * (i+1));
+                if (i < maxAttempts) {
+                    LOG.log(Level.INFO, "Failed to download " + url +
+                            ". Reconnecting in " + (i * backoffTime / 1000) +
+                            " seconds (HTTP " + e.getCode() + "-Error " + url + ")");
+                    Thread.sleep(backoffTime * i);
                 } else {
-                    LOG.log(Level.WARNING, "Failed to download " + link.getFileName() +
-                            " (HTTP " + e.getCode() + "-Error " + link.getUrl() + ")");
+                    LOG.log(Level.WARNING, "Failed to download " + file +
+                            " (HTTP " + e.getCode() + "-Error " + url + ")");
                 }
             }
         }
         return null;
     }
 
-    /**
-     * Processes a tsv file containing dump link info and initiates the download process
-     * on that info. Files are downloaded one language at a time, then one type at a time.
-     * Within each language, all of one type is downloaded before moving the files
-     * to the destination directory.
-     * @param file the tsv file containing the dump link info
-     * @throws InterruptedException
-     */
-    public void downloadFrom(File file) throws InterruptedException, WikapidiaException, IOException {
-        if (tmp.isDirectory()) {
-            if (tmp.listFiles().length != 0) {
-                for (File f : tmp.listFiles()) {
-                    f.delete();
-                }
-            }
-        } else {
-            tmp.mkdirs();
+    class DownloadMonitor implements Runnable {
+        private final DownloadInfo info;
+        private long last;
+
+        DownloadMonitor(DownloadInfo info) {
+            this.info = info;
         }
-        DumpLinkCluster linkCluster = DumpLinkInfo.parseFile(file);
-        int numTotalFiles = linkCluster.size();
-        LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
-        int success = 0;
-        for (Language language : linkCluster) {
-            Multimap<FileMatcher, DumpLinkInfo> map = linkCluster.get(language);
-            for (FileMatcher linkMatcher : map.keySet()) {
-                for (DumpLinkInfo link : map.get(linkMatcher)) {
-                    File download = new File(output, link.getLocalPath()+"/"+link.getFileName());
-                    if (download.exists()) {
-                        success++;
-                        LOG.log(Level.INFO, "File already downloaded: " + link.getFileName());
-                    } else {
-                        download = getDump(link);
-                        if (download == null) {
-                            throw new WikapidiaException("Download malfunction! Download timed out!");
-                        }
-                        success++;
-                        LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
-                    }
-                    String md5 = DigestUtils.md5Hex(FileUtils.openInputStream(download));
-                    if (!link.getMd5().equalsIgnoreCase(md5)) {
-                        throw new WikapidiaException("Download malfunction! MD5 strings do not match!");
-                    }
-                }
-                for (DumpLinkInfo link : map.get(linkMatcher)) {
-                    File download = new File(tmp, link.getFileName());
-                    File target = new File(output, link.getLocalPath());
-                    if (!target.exists()) target.mkdirs();
-                    download.renameTo(new File(target, download.getName()));
-                }
-            }
-        }
-        LOG.log(Level.INFO, success + " files downloaded out of " + numTotalFiles + " files.");
-        tmp.delete();
-    }
-
-    public static void main(String[] args) throws ConfigurationException, WikapidiaException, IOException, InterruptedException {
-
-        Options options = new Options();
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("output")
-                        .withDescription("Path to output file.")
-                        .create("o"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("input")
-                        .withDescription("Path to input tsv file.")
-                        .create("i"));
-
-        EnvBuilder.addStandardOptions(options);
-        CommandLineParser parser = new PosixParser();
-        CommandLine cmd;
-
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.err.println("Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("FileDownloader", options);
-            return;
-        }
-
-        Env env = new EnvBuilder(cmd).build();
-        Configurator conf = env.getConfigurator();
-
-        List argList = Arrays.asList(conf.getConf().get().getString("download.listFile"));
-        String filePath = cmd.getOptionValue('o', conf.getConf().get().getString("download.path"));
-        if (cmd.hasOption("i")) {
-            argList = Arrays.asList(cmd.getOptionValues("i"));
-        }
-
-        FileDownloader downloader = new FileDownloader(new File(filePath));
-        for (Object path : argList) {
-            downloader.downloadFrom(new File((String) path));
-        }
-    }
-
-    private Runnable notify = new Runnable() {
-        long last;
-
         @Override
         public void run() {
             switch (info.getState()) {
@@ -200,7 +82,7 @@ public class FileDownloader {
                     break;
                 case DOWNLOADING:
                     long now = System.currentTimeMillis();
-                    if (now > last + DISPLAY_INFO) {
+                    if (now > last + displayInfo) {
                         last = now;
                         LOG.log(Level.INFO,
                                 String.format("%s %.1f of %.1f MB (%.1f%%)",
@@ -208,12 +90,29 @@ public class FileDownloader {
                                         info.getCount() / (1024*1024.0),
                                         info.getLength() / (1024*1024.0),
                                         info.getCount() * 100.0 / info.getLength())
-                                );
+                        );
                     }
                     break;
                 default:
                     break;
             }
         }
-    };
+    }
+
+
+    public void setSleepTime(int sleepTime) {
+        this.sleepTime = sleepTime;
+    }
+
+    public void setMaxAttempts(int maxAttempts) {
+        this.maxAttempts = maxAttempts;
+    }
+
+    public void setDisplayInfo(int displayInfo) {
+        this.displayInfo = displayInfo;
+    }
+
+    public void setBackoffTime(int backoffTime) {
+        this.backoffTime = backoffTime;
+    }
 }

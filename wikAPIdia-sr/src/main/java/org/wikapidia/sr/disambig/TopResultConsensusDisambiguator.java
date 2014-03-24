@@ -1,8 +1,6 @@
 package org.wikapidia.sr.disambig;
 
 import com.typesafe.config.Config;
-import gnu.trove.map.TIntDoubleMap;
-import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -29,7 +27,7 @@ public class TopResultConsensusDisambiguator extends Disambiguator {
     public LocalId disambiguateTop(LocalString phrase, Set<LocalString> context) throws DaoException{
         LinkedHashMap<LocalId, Integer> results = new LinkedHashMap<LocalId, Integer>();
         for (PhraseAnalyzer phraseAnalyzer : phraseAnalyzers){
-            LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolveLocal(phrase.getLanguage(),phrase.getString(),1);
+            LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolve(phrase.getLanguage(), phrase.getString(), 1);
             if (localMap==null||localMap.isEmpty()){
                 continue;
             }
@@ -67,16 +65,16 @@ public class TopResultConsensusDisambiguator extends Disambiguator {
     }
 
     @Override
-    public List<LinkedHashMap<LocalId, Double>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
+    public List<LinkedHashMap<LocalId, Float>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
         if (phrases.isEmpty()) {
-            return new ArrayList<LinkedHashMap<LocalId, Double>>();
+            return new ArrayList<LinkedHashMap<LocalId, Float>>();
         }
         Language lang = phrases.get(0).getLanguage();
-        List<LinkedHashMap<LocalId, Double>> results = new ArrayList<LinkedHashMap<LocalId, Double>>();
+        List<LinkedHashMap<LocalId, Float>> results = new ArrayList<LinkedHashMap<LocalId, Float>>();
         for (LocalString phrase : phrases) {
             Map<Integer, Double> pageSums = new HashMap<Integer, Double>();
             for (PhraseAnalyzer pa : phraseAnalyzers) {
-                LinkedHashMap<LocalPage, Float> probs = pa.resolveLocal(phrase.getLanguage(), phrase.getString(), 20);
+                LinkedHashMap<LocalPage, Float> probs = pa.resolve(phrase.getLanguage(), phrase.getString(), 20);
                 for (Map.Entry<LocalPage, Float> entry : probs.entrySet()) {
                     int id = entry.getKey().getLocalId();
                     if (pageSums.containsKey(id)) {
@@ -86,9 +84,9 @@ public class TopResultConsensusDisambiguator extends Disambiguator {
                     }
                 }
             }
-            LinkedHashMap<LocalId, Double> pageResult = new LinkedHashMap<LocalId, Double>();
+            LinkedHashMap<LocalId, Float> pageResult = new LinkedHashMap<LocalId, Float>();
             for (Integer key : WpCollectionUtils.sortMapKeys(pageSums, true)) {
-                pageResult.put(new LocalId(lang, key), pageSums.get(key));
+                pageResult.put(new LocalId(lang, key), pageSums.get(key).floatValue());
             }
             results.add(pageResult);
         }

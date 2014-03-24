@@ -121,6 +121,10 @@ public class LanguageSet implements Iterable<Language> {
         return langs.contains(language);
     }
 
+    public boolean containsLanguage(String langCode){
+        return langs.contains(Language.getByLangCode(langCode));
+    }
+
     public String getLangCodeString() {
         List<String> output = Lists.newArrayList();
         for (Language lang : langs) {

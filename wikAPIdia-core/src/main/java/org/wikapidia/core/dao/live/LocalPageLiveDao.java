@@ -1,6 +1,12 @@
 package org.wikapidia.core.dao.live;
 
 import com.typesafe.config.Config;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
@@ -16,15 +22,10 @@ import org.wikapidia.core.model.Title;
 
 import java.util.*;
 
-
 /**
- * Created with IntelliJ IDEA.
- * User: Toby "Jiajun" Li
- * Date: 10/26/13
- * Time: 6:12 PM
- * To change this template use File | Settings | File Templates.
+ * A Live Wiki API Implementation of LocalPageDao
+ * @author Toby "Jiajun" Li
  */
-
 
 /**
  * Fetch a LocalPage object from Wikipedia Server
@@ -78,21 +79,21 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return the requested LocalPage
      * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
      */
+
     public T getByTitle(Title title, NameSpace ns) throws DaoException{
-        LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByTitle(title)));
-        return (T)new LocalPage(title.getLanguage(), info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
+        Language lang = title.getLanguage();
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang)
+                .addTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
+        QueryReply info = builder.build().getValuesFromQueryResult().get(0);
+        return (T)info.getLocalPage(lang);
     }
 
-    /**
-     * Get a single page by its title
-     * @param language the page's language
-     * @param pageId the page's id
-     * @return the requested LocalPage
-     * @throws org.wikapidia.core.dao.DaoException if there was an error retrieving the page
-     */
+
     public T getById(Language language, int pageId) throws DaoException{
-        LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByID(pageId, language)));
-        return (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig());
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
+                .addPageid(pageId).setRedirects(followRedirects);
+        QueryReply info = builder.build().getValuesFromQueryResult().get(0);
+        return (T)info.getLocalPage(language);
     }
 
     /**
@@ -105,8 +106,10 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException{
         Map<Integer,T> pageMap = new HashMap<Integer, T>();
         for(Integer pageId : pageIds){
-            LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByID(pageId, language)));
-            pageMap.put(pageId, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
+            LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
+                    .addPageid(pageId).setRedirects(followRedirects);
+            QueryReply info = builder.build().getValuesFromQueryResult().get(0);
+            pageMap.put(pageId, (T)info.getLocalPage(language));
         }
         return pageMap;
     }
@@ -122,8 +125,10 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException{
         Map<Title, T> pageMap = new HashMap<Title, T>();
         for(Title title : titles){
-            LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByTitle(title)));
-            pageMap.put(title, (T)new LocalPage(language, info.getId(), info.getTitle(), info.getNameSpace(), info.isRedirect(), info.isDisambig()));
+            LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
+                    .addTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
+            QueryReply info = builder.build().getValuesFromQueryResult().get(0);
+            pageMap.put(title, (T)info.getLocalPage(language));
         }
         return pageMap;
     }
@@ -137,7 +142,9 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return
      */
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException{
-        LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByTitle(new Title(title, language))));
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
+                .addTitle(title).setRedirects(followRedirects);
+        QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return info.getId();
     }
 
@@ -147,30 +154,49 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return
      */
     public int getIdByTitle(Title title) throws DaoException{
-        LocalPageQueryReply info = new LocalPageQueryReply(LiveUtils.getInfoByQuery(getQueryByTitle(title)));
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", title.getLanguage())
+                .addTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
+        QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return info.getId();
     }
 
-    private String getQueryByTitle(Title title){
-        Language language = title.getLanguage();
-        String http = new String("http://");
-        String host = new String(".wikipedia.org");
-        String query = new String("/w/api.php?action=query&prop=info&format=json&titles=");
-        if(followRedirects)
-            return http + language.getLangCode() + host + query + title.getCanonicalTitle().replaceAll(" ", "_") + "&redirects=";
-        else
-            return http + language.getLangCode() + host + query + title.getCanonicalTitle().replaceAll(" ", "_");
+    /**
+     * Gets the list of all local page ids for lang = langId and a given namespace
+     * @param lang
+     * @return
+     * @throws DaoException
+     */
+    public TIntList getAllPageIdsInNamespace(Language lang, NameSpace ns) throws DaoException {
+        TIntList pages = new TIntArrayList();
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLPAGES", lang);
+        builder.setNamespace(ns.getValue());
+        LiveAPIQuery query = builder.build();
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
 
+        for (QueryReply reply : replyObjects) {
+            pages.add(reply.getId());
+        }
+
+        return  pages;
     }
 
-    private String getQueryByID(Integer pageId, Language language){
-        String http = new String("http://");
-        String host = new String(".wikipedia.org");
-        String query = new String("/w/api.php?action=query&prop=info&format=json&pageids=");
-        if(followRedirects)
-            return http + language.getLangCode() + host + query + pageId.toString();
-        else
-            return http + language.getLangCode() + host + query + pageId.toString() + "&redirects=";
+    /**
+     * Gets the local page id -> namespace mappings for lang = langId
+     * @param lang
+     * @return
+     * @throws DaoException
+     */
+    public TIntIntMap getAllPageIdNamespaceMappings(Language lang) throws DaoException {
+        TIntIntMap pages = new TIntIntHashMap();
+        LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("ALLPAGES", lang);
+        LiveAPIQuery query = builder.build();
+        List<QueryReply> replyObjects = query.getValuesFromQueryResult();
+
+        for (QueryReply reply : replyObjects) {
+            pages.put(reply.pageId, reply.nameSpace);
+        }
+
+        return  pages;
     }
 
     public static class Provider extends org.wikapidia.conf.Provider<LocalPageDao> {

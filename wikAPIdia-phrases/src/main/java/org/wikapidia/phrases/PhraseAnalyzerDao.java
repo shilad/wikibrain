@@ -2,6 +2,7 @@ package org.wikapidia.phrases;
 
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.StringNormalizer;
 import org.wikapidia.phrases.PrunedCounts;
 
 /**
@@ -18,7 +19,7 @@ public interface PhraseAnalyzerDao {
      * @param counts
      * @throws org.wikapidia.core.dao.DaoException
      */
-    void savePageCounts(Language lang, int wpId, PrunedCounts<String> counts) throws DaoException;
+    public void savePageCounts(Language lang, int wpId, PrunedCounts<String> counts) throws DaoException;
 
     /**
      * Adds information mapping a phrase to pages.
@@ -30,7 +31,12 @@ public interface PhraseAnalyzerDao {
      * @param counts
      * @throws org.wikapidia.core.dao.DaoException
      */
-    void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException;
+    public void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException;
+
+    /**
+     * @return The string normalizer used to determine canonical string representations.
+     */
+    public StringNormalizer getStringNormalizer();
 
     /**
      * Gets pages related to a phrase. Phrases are normalized before looking them up.
@@ -40,7 +46,7 @@ public interface PhraseAnalyzerDao {
      * ordered by decreasing count.
      * @throws DaoException
      */
-    PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase, int maxPages) throws DaoException;
+    public PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase, int maxPages) throws DaoException;
 
     /**
      * Gets phrases related to a page.
@@ -50,7 +56,7 @@ public interface PhraseAnalyzerDao {
      * ordered by decreasing count.
      * @throws DaoException
      */
-    PrunedCounts<String> getPageCounts(Language lang, int wpId, int maxPhrases) throws DaoException;
+    public PrunedCounts<String> getPageCounts(Language lang, int wpId, int maxPhrases) throws DaoException;
 
     /**
      * Closes the dao and flushes any unwritten data to disk.

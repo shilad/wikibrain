@@ -28,13 +28,6 @@ public class EvaluationMain {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException, WikapidiaException {
 
         Options options = new Options();
-        //Specify whether you have the split datasets
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("datasets" )
-                        .withDescription("drop and create the split datasets with given name" )
-                        .create("d" ));
 
         //Specify for universal metric
         options.addOption(
@@ -176,14 +169,7 @@ public class EvaluationMain {
         List<Dataset> datasets = new ArrayList<Dataset>();
         String mode = cmd.hasOption("x") ? cmd.getOptionValue("x") : "within-dataset";
         for (String dsName : cmd.getOptionValues("g")) {
-            Config config = env.getConfiguration().get();
-            if (config.hasPath("sr.dataset.groups." + dsName)) {
-                for (String dsName2 : config.getStringList("sr.dataset.groups." + dsName)) {
-                    datasets.add(dsDao.get(lang, dsName2));
-                }
-            } else {
-                datasets.add(dsDao.get(lang, dsName));
-            }
+            datasets.addAll(dsDao.getDatasetOrGroup(lang, dsName));
         }
 
         String outputDir = cmd.hasOption("o")

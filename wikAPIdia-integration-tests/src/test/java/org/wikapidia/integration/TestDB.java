@@ -12,11 +12,10 @@ import org.wikapidia.dao.load.DumpLoader;
 import org.wikapidia.dao.load.LuceneLoader;
 import org.wikapidia.dao.load.RedirectLoader;
 import org.wikapidia.dao.load.WikiTextLoader;
-import org.wikapidia.download.FileDownloader;
+import org.wikapidia.download.DumpFileDownloader;
 import org.wikapidia.download.RequestedLinkGetter;
 import org.wikapidia.utils.ZipDir;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -79,7 +78,7 @@ public class TestDB {
         FileUtils.deleteQuietly(pathDownload);
 
         RequestedLinkGetter.main(TestUtils.getArgs());
-        FileDownloader.main(TestUtils.getArgs());
+        DumpFileDownloader.main(TestUtils.getArgs());
 
         FileUtils.copyFile(pathList, new File(dir, "downloadList.tsv"));
         FileUtils.copyDirectory(pathDownload, new File(dir, "download"));

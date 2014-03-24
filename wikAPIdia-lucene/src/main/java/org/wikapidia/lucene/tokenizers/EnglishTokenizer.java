@@ -26,10 +26,12 @@ public class EnglishTokenizer extends LanguageTokenizer {
     @Override
     public TokenStream getTokenStream(Tokenizer tokenizer, CharArraySet stemExclusionSet) {
         TokenStream stream = new StandardFilter(matchVersion, tokenizer);
-        if (caseInsensitive)
+        if (caseInsensitive) {
             stream = new LowerCaseFilter(matchVersion, stream);
-        if (useStopWords)
+        }
+        if (useStopWords) {
             stream = new StopFilter(matchVersion, stream, EnglishAnalyzer.getDefaultStopSet());
+        }
         if (useStem) {
             if (!stemExclusionSet.isEmpty())
                 stream = new SetKeywordMarkerFilter(stream, stemExclusionSet);

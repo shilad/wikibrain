@@ -1,6 +1,5 @@
 package org.wikapidia.cookbook.phrases;
 
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.cmd.Env;
@@ -29,7 +28,7 @@ public class DescribeExample {
         LocalPageDao pageDao = c.get(LocalPageDao.class);
         LocalPage page = pageDao.getByTitle(new Title("Obama", lang), NameSpace.ARTICLE);
         System.out.println("description of " + page + ":"); // should resolve redirect to Barack Obama
-        LinkedHashMap<String, Float> description = pa.describeLocal(lang, page, 20);
+        LinkedHashMap<String, Float> description = pa.describe(lang, page, 20);
         if (description == null) {
             System.out.println("\tno description!");
         } else {

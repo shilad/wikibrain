@@ -8,7 +8,6 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.LocalPage;
-import org.wikapidia.core.model.UniversalPage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,11 +40,11 @@ public class CascadingAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {
+    public LinkedHashMap<String, Float> describe(Language language, LocalPage page, int maxPhrases) throws DaoException {
         LinkedHashMap<String, Float> result = new LinkedHashMap<String, Float>();
         for (PhraseAnalyzer d : delegates) {
             try {
-                result = d.describeLocal(language, page, maxPhrases);
+                result = d.describe(language, page, maxPhrases);
                 if (result != null && !result.isEmpty()) {
                     break;
                 }
@@ -57,43 +56,11 @@ public class CascadingAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<String, Float> describeUniversal(Language language, UniversalPage page, int maxPhrases) {
-        LinkedHashMap<String, Float> result = new LinkedHashMap<String, Float>();
-        for (PhraseAnalyzer d : delegates) {
-            try {
-                result = d.describeUniversal(language, page, maxPhrases);
-                if (result != null && !result.isEmpty()) {
-                    break;
-                }
-            } catch (UnsupportedOperationException e) {
-                // continue to next delegate
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
+    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
         for (PhraseAnalyzer d : delegates) {
             try {
-                result = d.resolveLocal(language, phrase, maxPages);
-                if (result != null && !result.isEmpty()) {
-                    break;
-                }
-            } catch (UnsupportedOperationException e) {
-                // continue to next delegate
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
-        LinkedHashMap<UniversalPage, Float> result = new LinkedHashMap<UniversalPage, Float>();
-        for (PhraseAnalyzer d : delegates) {
-            try {
-                result = d.resolveUniversal(language, phrase, algorithmId, maxPages);
+                result = d.resolve(language, phrase, maxPages);
                 if (result != null && !result.isEmpty()) {
                     break;
                 }

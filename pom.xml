@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.github.shilad.wikapidia</groupId>
+        <artifactId>wikAPIdia-parent</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath>wikAPIdia-parent</relativePath>
+    </parent>
+
+    <artifactId>wikAPIdia-all</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>./wikAPIdia-parent</module>
+        <module>./wikAPIdia-utils</module>
+        <module>./wikAPIdia-matrix</module>
+        <module>./wikAPIdia-core</module>
+        <module>./wikAPIdia-download</module>
+        <module>./wikAPIdia-loader</module>
+        <module>./wikAPIdia-lucene</module>
+        <module>./wikAPIdia-mapper</module>
+        <module>./wikAPIdia-parser</module>
+        <module>./wikAPIdia-phrases</module>
+        <module>./wikAPIdia-wikidata</module>
+        <module>./wikAPIdia-sr</module>
+        <module>./wikAPIdia-integration-tests</module>
+        <module>./wikAPIdia-cookbook</module>
+    </modules>
+
+    <build>
+    </build>
+
+</project>

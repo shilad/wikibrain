@@ -38,8 +38,6 @@ public abstract class LanguageTokenizer {
     private static final String STOP_WORDS = "src/main/resources/stopwords/";
     private static Map<Language, Class> tokenizerClasses;
 
-    protected static LuceneOptions opts;
-
     protected final Version matchVersion;
     protected final boolean caseInsensitive;
     protected final boolean useStopWords;
@@ -68,6 +66,10 @@ public abstract class LanguageTokenizer {
         return new StandardTokenizer(matchVersion, r);
     }
 
+    public TokenStream getTokenStream(Reader r) {
+        return getTokenStream(makeTokenizer(r), CharArraySet.EMPTY_SET);
+    }
+
     public TokenizerOptions getTokenizerOptions() {
         TokenizerOptions options = new TokenizerOptions();
         if (caseInsensitive) options.caseInsensitive();
@@ -90,8 +92,6 @@ public abstract class LanguageTokenizer {
      */
     public static LanguageTokenizer getLanguageTokenizer(Language language, LuceneOptions opts) {
         try {
-            LanguageTokenizer.opts = opts;
-            mapTokenizers();
             if (language.equals(Language.getByLangCode("simple"))) language = Language.getByLangCode("en"); // simple english
             if (tokenizerClasses.containsKey(language)) {                                                   // is just english
                 return (LanguageTokenizer) tokenizerClasses.get(language)
@@ -114,7 +114,39 @@ public abstract class LanguageTokenizer {
         }
     }
 
-    private static void mapTokenizers() {
+    /**
+     * Returns an instance of a LanguageTokenizer for the specified language
+     * with the filters specified by opts.
+     *
+     * @param language the language of the tokenizer to be retrieved
+     * @param opts the LuceneOptions object
+     * @return a LanguageTokenizer for language configured by opts
+     */
+    public static LanguageTokenizer getLanguageTokenizer(Language language, TokenizerOptions opts, Version version) {
+        try {
+            if (language.equals(Language.getByLangCode("simple"))) language = Language.getByLangCode("en"); // simple english
+            if (tokenizerClasses.containsKey(language)) {                                                   // is just english
+                return (LanguageTokenizer) tokenizerClasses.get(language)
+                        .getDeclaredConstructor(
+                                Version.class,
+                                TokenizerOptions.class,
+                                Language.class)
+                        .newInstance(
+                                version,
+                                opts,
+                                language);
+            } else {
+                return new DefaultTokenizer(
+                        version,
+                        opts,
+                        language);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e); // These exceptions are based on hard code and should never get thrown
+        }
+    }
+
+    static {
         tokenizerClasses = new HashMap<Language, Class>();
 
         // These 26 tokenizers are functionally identical to Brent's code,
@@ -164,13 +196,13 @@ public abstract class LanguageTokenizer {
 
     }
 
-    protected static CharArraySet getStopWordsForNonLuceneLangFromFile(Language language) {
+    protected static CharArraySet getStopWordsForNonLuceneLangFromFile(Version version, Language language) {
         try{
             String langCode = language.getLangCode();
             String fileName = STOP_WORDS + langCode + ".txt";
             InputStream stream = FileUtils.openInputStream(new File(fileName));
             List<String> stopWords = org.apache.commons.io.IOUtils.readLines(stream);
-            CharArraySet charArraySet = new CharArraySet(opts.matchVersion, 0, false);
+            CharArraySet charArraySet = new CharArraySet(version, 0, false);
             for (String stopWord : stopWords) {
                 charArraySet.add(stopWord);
             }
