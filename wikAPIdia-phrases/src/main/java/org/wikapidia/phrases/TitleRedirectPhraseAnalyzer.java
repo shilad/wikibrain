@@ -45,17 +45,17 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<String, Float> describeLocal(Language language, LocalPage page, int maxPhrases) throws DaoException {
+    public LinkedHashMap<String, Float> describe(Language language, LocalPage page, int maxPhrases) throws DaoException {
         throw new UnsupportedOperationException("TitleRedirectPhraseAnalyzer is for resolving only");
     }
 
-    @Override
+    //@Override
     public LinkedHashMap<String, Float> describeUniversal(Language language, UniversalPage page, int maxPhrases) {
         throw new UnsupportedOperationException("TitleRedirectPhraseAnalyzer is for resolving only");
     }
 
     @Override
-    public LinkedHashMap<LocalPage, Float> resolveLocal(Language language, String phrase, int maxPages) throws DaoException {
+    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
 
         LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
 
@@ -73,7 +73,7 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
 
     }
 
-    @Override
+    //@Override
     public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
         throw new UnsupportedOperationException();
     }
