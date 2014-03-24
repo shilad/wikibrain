@@ -25,11 +25,12 @@ public class ConceptRelationTest{
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         ConceptRelation cr = new ConceptRelation(Language.getByLangCode("simple"));
 
-        System.out.printf("Number of degree %d\n\n", cr.getRelationSR("Minnesota", "Database")); //Also support the usage "getRelationSR(pageId, pageId)
-        System.out.printf("Number of degree %d\n", cr.getRelationBidirectional("Minnesota", "Database")); //Also support the usage getRelationBidirectional(pageId, pageId)
+        System.out.printf("Number of degree %d\n\n", cr.getRelationSR("Minnesota", "Peanut milk")); //Also support the usage "getRelationSR(pageId, pageId)
+        System.out.printf("Number of degree %d\n", cr.getRelationBidirectional("Minnesota", "Peanut milk")); //Also support the usage getRelationBidirectional(pageId, pageId)
+        //System.out.printf("Number of degree %d\n", cr.getRelation("New York", "Peanut milk"));
         Integer srcId = 1527;
         Integer dstId = 43788;
-        System.out.println(cr.getWikidataRelation(srcId, dstId));
+        //System.out.println(cr.getWikidataRelation(srcId, dstId));
 
     }
 

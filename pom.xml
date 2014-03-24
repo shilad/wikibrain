@@ -30,6 +30,7 @@
         <module>./wikAPIdia-sr</module>
         <module>./wikAPIdia-integration-tests</module>
         <module>./wikAPIdia-cookbook</module>
+        <module>./wikAPIdia-spatial</module>
     </modules>
 
     <build>
