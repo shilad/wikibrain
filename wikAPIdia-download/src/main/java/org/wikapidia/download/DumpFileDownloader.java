@@ -1,6 +1,7 @@
 package org.wikapidia.download;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +12,7 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.cli.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -105,16 +107,21 @@ public class DumpFileDownloader {
                     success++;
                     LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
                 }
-                String md5 = DigestUtils.md5Hex(FileUtils.openInputStream(download));
-                if (!link.getMd5().equalsIgnoreCase(md5)) {
-                    throw new WikapidiaException("Download malfunction! MD5 strings do not match!");
+                FileInputStream fis = FileUtils.openInputStream(download);
+                try {
+                    String md5 = DigestUtils.md5Hex(fis);
+                    if (!link.getMd5().equalsIgnoreCase(md5)) {
+                        throw new WikapidiaException("Download malfunction! MD5 strings do not match!");
+                    }
+                } finally {
+                    IOUtils.closeQuietly(fis);
                 }
             }
             for (DumpLinkInfo link : map.get(linkMatcher)) {
                 File download = new File(tmpDir, link.getFileName());
-                File target = new File(outputDir, link.getLocalPath());
-                if (!target.exists()) target.mkdirs();
-                download.renameTo(new File(target, download.getName()));
+                File target = FileUtils.getFile(outputDir, link.getLocalPath(), download.getName());
+                if (!target.getParentFile().exists()) target.getParentFile().mkdirs();
+                FileUtils.moveFile(download, target);   // thros an exception on failure.
             }
         }
         return success;
