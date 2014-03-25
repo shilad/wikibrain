@@ -13,9 +13,9 @@ CREATE INDEX geometry_index ON geometries USING GIST ( geometry );
 
 /* Create spatiotag table */
 CREATE TABLE spatiotags (
-  local_id INTEGER NOT NULL,
-  lang_id SMALLINT NOT NULL,
-  geom_id INTEGER NOT NULL PRIMARY KEY);
+  local_id INTEGER NOT NULL PRIMARY KEY,
+  lang_id SMALLINT NOT NULL PRIMARY KEY,
+  geom_id INTEGER NOT NULL);
 
 /*Add indices to spatio tag table*/
 CREATE INDEX geom_lookup ON spatiotags (local_id, lang_id);

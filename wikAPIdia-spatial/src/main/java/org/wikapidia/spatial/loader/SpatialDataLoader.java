@@ -205,7 +205,7 @@ public class SpatialDataLoader {
     }
 
     private LocalPage getLocalPageFromToponymUsingPhraseAnalyzer(String toponym, Language lang) throws DaoException{
-        LinkedHashMap<LocalPage, Float> candidate = phraseAnalyzer.resolveLocal(lang, toponym, 1);
+        LinkedHashMap<LocalPage, Float> candidate = phraseAnalyzer.resolve(lang, toponym, 1);
         if (candidate.size() == 0) return null;
         LocalPage lp = candidate.keySet().iterator().next();
         if (candidate.get(lp) >= phraseProbabilityThreshold){

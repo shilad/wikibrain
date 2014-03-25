@@ -123,12 +123,12 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
 
         @Override
         public Class getType() {
-            return LocalCategoryDao.class;
+            return SpatialDataDao.class;
         }
 
         @Override
         public String getPath() {
-            return "spatial.dao.pgisdatasource";
+            return "spatial.dao.spatialdata";
         }
 
         @Override

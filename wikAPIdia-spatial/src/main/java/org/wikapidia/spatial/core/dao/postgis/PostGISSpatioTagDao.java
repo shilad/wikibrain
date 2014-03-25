@@ -1,15 +1,21 @@
 package org.wikapidia.spatial.core.dao.postgis;
 
+import com.typesafe.config.Config;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
+import org.wikapidia.conf.Configuration;
+import org.wikapidia.conf.ConfigurationException;
+import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.sql.FastLoader;
 import org.wikapidia.core.model.LocalArticle;
 import org.wikapidia.core.model.UniversalArticle;
+import org.wikapidia.spatial.core.dao.SpatialDataDao;
 import org.wikapidia.spatial.core.dao.SpatioTagDao;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * SpatioTagDao backed by PostGISDB
@@ -64,4 +70,35 @@ public class PostGISSpatioTagDao implements SpatioTagDao{
         Object[] loadArr = new Object[]{struct.localId.getId(), struct.localId.getLanguage().getId(), struct.geomId};
         fastLoader.load(loadArr);
     }
+
+    public static class Provider extends org.wikapidia.conf.Provider<PostGISSpatioTagDao> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class getType() {
+            return SpatioTagDao.class;
+        }
+
+        @Override
+
+
+
+        public String getPath() {
+            return "spatial.dao.spatiotag";
+        }
+
+        @Override
+        public PostGISSpatioTagDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+
+            if (!config.getString("type").equals("sql"))
+                return null;
+
+            return new PostGISSpatioTagDao(getConfigurator().get(PostGISDB.class));
+
+        }
+    }
+
+
 }
