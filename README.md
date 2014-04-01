@@ -300,7 +300,7 @@ Note that these relationships are *structured*, not just textual. For example, t
 
 ###Advanced Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
-The default WikAPIdia configuration is determined by the main [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
+The default WikAPIdia configuration is determined by the default [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
 The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
 To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
 
@@ -329,7 +329,7 @@ Env env = new EnvBuilder()
 ###Using external databases
 By default, wikAPIdia uses an embedded [h2 database](http://www.h2database.com/html/main.html). While this is convenient, it does not scale well. For language editions with more than 1M articles, Postgres is recommended.
 
-You can configure the project to use postgresql by adjusting the configuration as stated above. The relevant section of the reference.conf default configuration is:
+You can configure the project to use postgresql by adjusting the configuration as stated above. The relevant section of the [default reference.conf](wikAPIdia-core/src/main/resources/reference.conf) is:
 
 ```
 dao : {
@@ -351,7 +351,7 @@ dao : {
 }
 ```
 
-You could override these by creating an external configuration file (i.e. `override.conf`) with:
+You could override these by creating an external override configuration file (i.e. `override.conf`) with:
 
 ```
 	dao.dataSource.default : psql
