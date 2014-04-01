@@ -325,3 +325,56 @@ Env env = new EnvBuilder()
         .setProperty("phrases.analyzer.default", "anchortext")
         .build();
 ```
+
+###Using external databases
+By default, wikAPIdia uses an embedded [h2 database](http://www.h2database.com/html/main.html). While this is convenient, it does not scale well. For language editions with more than 1M articles, Postgres is recommended.
+
+You can configure the project to use postgresql by adjusting the configuration as stated above. The relevant section of the reference.conf default configuration is:
+
+```
+dao : {
+    dataSource : {
+        default : h2
+        h2 : {
+           driver : org.h2.Driver
+           url: "jdbc:h2:"${baseDir}"/db/h2"
+           username : sa
+           password : ""
+        }
+        psql : {
+           driver : org.h2.Driver
+           url: "jdbc:postgresql://localhost/wikAPIdia"
+           username : grails
+           password : ""
+        }
+    }
+}
+```
+
+You could override these by creating an external configuration file (i.e. `override.conf`) with:
+
+```
+	dao.dataSource.default : psql
+	dao.dataSource.psql.username : foo
+	dao.dataSource.psql.password : bar
+	dao.dataSource.psql.url : "jdbc:postgresql://localhost/my_database_name"
+```
+
+You could then load the altered configuration using:
+
+```
+	Env env = new EnvBuilder()
+	        .setConfigFile("./path/to/override.conf")
+	        .build();
+```
+Alternately, you could pass the configuration settings directly to the builder:
+
+```
+
+	Env env = new EnvBuilder()
+	        .setProperty("dao.dataSource.default", "psql")
+	        .setProperty("dao.dataSource.psql.username", "foo")
+	        .setProperty("dao.dataSource.psql.password", "bar")
+	        .setProperty("dao.dataSource.psql.url", "jdbc:postgresql://localhost/my_database_name")
+	        .build();
+```
