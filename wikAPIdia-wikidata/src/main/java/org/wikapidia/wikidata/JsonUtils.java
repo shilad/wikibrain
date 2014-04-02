@@ -19,6 +19,8 @@ public class JsonUtils {
             return new WikidataValue(WikidataValue.Type.SOMEVALUE, null, JsonNull.INSTANCE);
         } else if (type.equals("novalue")) {
             return new WikidataValue(WikidataValue.Type.NOVALUE, null, JsonNull.INSTANCE);
+        } else if (type.equals("quantity")) {
+            return new WikidataValue(WikidataValue.Type.SOMEVALUE, null, JsonNull.INSTANCE);
         } else if (type.equals("int")) {
             return new WikidataValue(WikidataValue.Type.INT, element.getAsJsonPrimitive().getAsInt(), element);
         } else if (type.equals("time")) {

@@ -95,7 +95,7 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
 
         @Override
         public PhraseAnalyzer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("titleandredirect")) {
+            if (!config.getString("type").equals("titleredirect")) {
                 return null;
             }
             LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));

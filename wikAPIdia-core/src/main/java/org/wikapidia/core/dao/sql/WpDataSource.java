@@ -195,7 +195,7 @@ public class WpDataSource {
                 ds.setUsername(config.getString("username"));
                 ds.setPassword(config.getString("password"));
                 ds.setPartitionCount(Runtime.getRuntime().availableProcessors());
-                ds.setMaxConnectionsPerPartition(3);
+                ds.setMaxConnectionsPerPartition(50);
                 return new WpDataSource(ds);
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException(e);

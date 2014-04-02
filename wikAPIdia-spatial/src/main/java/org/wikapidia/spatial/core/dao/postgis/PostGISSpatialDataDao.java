@@ -184,16 +184,27 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
 
         @Override
         public String getPath() {
+
             return "spatial.dao.spatialdata";
         }
 
         @Override
         public PostGISSpatialDataDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("sql")) {
+            if (!config.getString("type").equals("postgis")) {
                 return null;
             }
             try {
-                return new PostGISSpatialDataDao(getConfigurator().get(PostGISDB.class));
+
+                /*
+                return new LocalLinkSqlDao(
+                        getConfigurator().get(
+                                WpDataSource.class,
+                                config.getString("dataSource"))
+                 */
+
+                WpDataSource wpDataSource = getConfigurator().get(WpDataSource.class,
+                        "psql");
+                return new PostGISSpatialDataDao(new PostGISDB(wpDataSource));
 
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
