@@ -19,6 +19,7 @@ import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
 import org.wikapidia.wikidata.WikidataDao;
@@ -48,6 +49,7 @@ public class SpatialDataLoader {
         this.analyzer = analyzer;
     }
 
+    //TODO: this should probably be adapted to the PipelineLoader structure
     public void load() throws WikapidiaException {
 
 
@@ -62,7 +64,7 @@ public class SpatialDataLoader {
             }
 
             // do wikidata
-            parseWikidataSpatialData();
+//            parseWikidataSpatialData();
 
     }
 

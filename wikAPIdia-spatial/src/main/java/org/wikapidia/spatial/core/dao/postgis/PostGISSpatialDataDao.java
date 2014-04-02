@@ -103,6 +103,11 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     }
 
     @Override
+    public Iterable<Integer> getAllItemsInLayer(String layerName, String refSysName) throws DaoException {
+        return null;
+    }
+
+    @Override
     public Iterable<String> getAllRefSysNames() throws DaoException {
 
         try {
