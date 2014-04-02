@@ -111,6 +111,7 @@ public class WpDataSource {
     public void executeSqlResource(String name) throws DaoException {
         String script = null;
         try {
+            System.out.println(name);
             script = IOUtils.toString(AbstractSqlDao.class.getResource(name));
         } catch (IOException e) {
             throw new DaoException(e);

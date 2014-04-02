@@ -116,7 +116,7 @@ public class SpatialDataLoader {
             int numDbfFields = dbfReader.getHeader().getNumFields();
 
             List<IDAttributeHandler> attrHandlers = Lists.newArrayList();
-            for (int i = 1; i < numDbfFields; i++){
+            for (int i = 0; i < numDbfFields; i++){
                 attrHandlers.add(IDAttributeHandler.getHandlerByFieldName(dbfReader.getHeader().getFieldName(i), wdDao, analyzer));
             }
 
@@ -125,12 +125,12 @@ public class SpatialDataLoader {
                 curGeometry = (Geometry)shpReader.nextRecord().shape();
                 dbfReader.read();
 
-                int i = 1;
+                int i = 0;
                 int foundGeomCount = 0;
                 int missedGeomCount = 0;
                 boolean found = false;
                 while(i < numDbfFields && !found){
-                    IDAttributeHandler attrHandler = attrHandlers.get(i-1);
+                    IDAttributeHandler attrHandler = attrHandlers.get(i);
                     Integer itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
                     if (itemId != null){
                         spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
