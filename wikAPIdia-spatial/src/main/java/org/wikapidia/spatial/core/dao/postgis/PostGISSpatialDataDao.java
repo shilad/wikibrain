@@ -44,6 +44,8 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     public PostGISSpatialDataDao(PostGISDB db) throws DaoException{
 
         this.db = db;
+        //FastLoader(WpDataSource ds, String table, String[] fields)
+        fastLoader = new FastLoader(db.getDataSource(), "geometries", new String[]{"item_id", "ref_sys_name","layer_name","geometry"});
 
     }
 

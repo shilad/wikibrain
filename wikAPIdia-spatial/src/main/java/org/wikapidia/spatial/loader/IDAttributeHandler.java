@@ -30,7 +30,8 @@ public abstract class IDAttributeHandler {
 
     public static IDAttributeHandler getHandlerByFieldName(String name, WikidataDao wdDao, PhraseAnalyzer analyzer) throws WikapidiaException{
 
-        if (name.startsWith("Title")){
+        String lcAttrName = name.toLowerCase();
+        if (lcAttrName.startsWith("title")){
             return new TitleAttributeHandler(name, analyzer, wdDao);
         }else if(name.matches("P\\d+")){
             throw new WikapidiaException("Property-based spatiotagging is not currently supported");
@@ -56,7 +57,9 @@ public abstract class IDAttributeHandler {
             super(wdDao);
 
             String[] parts = attrName.split("_");
+            if (parts[1].toLowerCase().equals("en")) parts[1] = "simple"; // TEMPORARY HACK
             myLang = Language.getByLangCode(parts[1]);
+
             this.analyzer = analyzer;
 
         }
