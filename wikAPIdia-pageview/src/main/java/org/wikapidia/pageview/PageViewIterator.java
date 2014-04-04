@@ -128,7 +128,7 @@ public class PageViewIterator implements Iterator {
         }
 
         //set up temp folder where page view data file will be stored
-        File tempFolder = new File("../download/" + "_page_view_data");
+        File tempFolder = new File("./download/" + "_page_view_data");
         if (!tempFolder.exists()){
             tempFolder.mkdir();
         }

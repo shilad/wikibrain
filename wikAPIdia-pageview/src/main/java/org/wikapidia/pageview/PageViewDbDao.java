@@ -30,7 +30,8 @@ public class PageViewDbDao {
     Set<Long> parsedHourSet;
     PageViewDbDao(Language lang){
         this.lang = lang;
-        this.db = DBMaker.newFileDB(new File("../db/" + lang.getLangCode() + "_page_view_db")).closeOnJvmShutdown().make();
+        //TODO: Find a new way to deal with the path issue...
+        this.db = DBMaker.newFileDB(new File("./db/" + lang.getLangCode() + "_page_view_db")).closeOnJvmShutdown().make();
         if(db.exists("parsedHourSet"))
             this.parsedHourSet = db.getTreeSet("parsedHourSet");
         else
