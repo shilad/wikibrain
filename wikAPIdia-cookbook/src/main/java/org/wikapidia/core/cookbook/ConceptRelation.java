@@ -26,22 +26,37 @@ import java.util.concurrent.SynchronousQueue;
  * @author Toby "Jiajun" Li
  *
  * ConceptRelation is a class used to find link connections between two Wikipedia articles or Wikidata items
+ * This class serves as an well-documented example of how to use the wikAPIdia library to complete a "less trival" task
+ * Check the cookbook examples or definations for each separate class for more detailed demostration of usage for each class
  */
 
+//"getRelationSR" requires the initialization of SR matrix, "getWikidataRelation" requires the initialization of wikidata. (see README)
 
 public class ConceptRelation {
 
     /**
      *
-     * @param lang The language edition of Wikipedia to use
+     * @param lang The language edition of Wikipedia to use. Check the "Language" class for details
      * @throws ConfigurationException
      * @throws DaoException
      * @throws IOException
      */
     public ConceptRelation(Language lang)throws ConfigurationException, DaoException, IOException{
+        //Get a default environment. Different parameters can be added to set up the environment (check the EnvBuilder class)
         Env env = new EnvBuilder().build();
+        //Get the configuration from the environment. Default configuration be found at wikAPIdia-core/src/main/resources/reference.conf
         Configurator conf = env.getConfigurator();
-        this.pDao = conf.get(LocalPageDao.class, "sql");   //Get DAOs from default environment & configuration
+        /*
+         *   Get an SQL implement of LocalPageDao from the configuration. In WikAPIdia, multiple implementations of the same interface
+         *   are often provided (like for the LocalPageDao, we currently have a LocalPageSqlDao which fetch data from local database, which
+         *   requires parsing Wikipedia dump file in advance and also a LocalPageLiveDao which fetch data from online Wikipedia web API)
+         *
+         *   You may get different implementation of the same interface by changing the second parameter in the "get" method. Check the conf
+         *   file for a list of available implementations
+         *
+         *   In WikAPIdia, we use the DAO (Data Access Object) pattern for data accessing
+         */
+        this.pDao = conf.get(LocalPageDao.class, "sql");
         this.lDao = conf.get(LocalLinkDao.class, "sql");
         this.wDao = conf.get(WikidataDao.class);
         this.lang = lang;
@@ -53,7 +68,7 @@ public class ConceptRelation {
     WikidataDao wDao;
 
     /**
-     * Find the shortest chain between two articles (using naive uni-directional BFS, much slower than the bi-directional version)
+     * Find the shortest link chain from the src page to the dst page (using a naive uni-directional BFS, much slower than the bi-directional version)
      * Prints out the chain, the number of links visited and the number of nodes visited
      * @param srcId The page ID of source article
      * @param dstId The page ID of destination article
@@ -80,15 +95,24 @@ public class ConceptRelation {
                         System.out.printf("Number of nodes added to the queue %d\n", effectiveBFSCounter);
                         return counter;
                     }
-                    System.out.print(pDao.getById(lang, nowPageId).getTitle().toString());            //Get page title by page ID
+                    //Get page title by page ID using LocalPageDao
+                    System.out.print(pDao.getById(lang, nowPageId).getTitle().toString());
                     System.out.print(" <- ");
                     nowPageId = father.get(nowPageId);
                     counter++;
                 }
             }
+
+            //Get a list of outbound links using LocalLinkDao
             Iterable<LocalLink> outlinks = lDao.getLinks(lang, nowPageId, true);
             for(LocalLink outlink : outlinks){
                 globalBFSCounter ++;
+                /*
+                 * Parseable links are those can be extracted by paring the Wiki markup for any given Wiki page.
+                 * Parseable links are generally inserted by a human Wiki editor contributing to the content.
+                 * Unparseable links are hidden behind templates and are not directly accessible via the Wiki markup of a page
+                 *
+                 */
                 if(outlink.isParseable() == false)
                     continue;
                 if(vectorSet.contains(outlink.getDestId()))
@@ -113,7 +137,8 @@ public class ConceptRelation {
      */
 
     public int getRelation (String srcTitle, String dstTitle) throws DaoException{
-        Integer srcId = pDao.getIdByTitle(srcTitle, lang, NameSpace.ARTICLE);                  //Get page id by page title
+        //Get page id by page title using LocalPageDao
+        Integer srcId = pDao.getIdByTitle(srcTitle, lang, NameSpace.ARTICLE);
         Integer dstId = pDao.getIdByTitle(dstTitle, lang, NameSpace.ARTICLE);
         if(srcId == -1 || dstId == -1)
             throw new DaoException("Page not found");
@@ -129,6 +154,11 @@ public class ConceptRelation {
      * @throws DaoException
      */
     public int getRelationSR (int srcId, int dstId) throws DaoException, ConfigurationException {
+        /*
+         * Two implementations "ensemble" and "inlink" are currently provided for the MonolingualSRMetric
+         * Check org.wikapidia.cookbook.sr for detailed examples in using the semantic relatedness module
+         *
+         */
         final MonolingualSRMetric sr = new Configurator(new Configuration()).get(
                 MonolingualSRMetric.class, "ensemble",      //can be change to "inlink" for another SR implementation
                 "language", lang.getLangCode());            //initialize a SR resolver
@@ -215,6 +245,76 @@ public class ConceptRelation {
     }
 
     /**
+     * Find a shortest chain between two Wikidata items using the uni-directional BFS
+     * Prints out the chain, the number of links visited and the number of nodes visited
+     * @param srcId The item ID of the source item
+     * @param dstId The item ID of the destination item
+     * @return The number of degree of the chain found
+     * @throws DaoException
+     */
+
+    public int getWikidataRelation (int srcId, int dstId) throws DaoException {
+        /*
+         * Example of doing search on WikiData entities and statements
+         * Check org.wikapidia.cookbook.wikidata for detailed examples in using the wikidata module
+         */
+        WikidataEntity srcEntity = wDao.getItem(srcId);
+        WikidataEntity dstEntity = wDao.getItem(dstId);
+        Queue<WikidataEntity> queue = new LinkedList<WikidataEntity>();
+        Set<Integer> vectorSet = new HashSet<Integer>();
+        Map<Integer, Integer> QFather = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> PFather = new HashMap<Integer, Integer>();
+        queue.add(srcEntity);
+        vectorSet.add(srcEntity.getId());
+        QFather.put(srcEntity.getId(), -1);
+        Integer globalBFSCounter = 0;
+        Integer effectiveBFSCounter = 0;
+        while(!queue.isEmpty()){
+            WikidataEntity nowEntity = queue.poll();
+            if(nowEntity.getId() == dstId){
+                /*found*/
+                int counter = 0;
+                while(true){
+                    if(QFather.get(nowEntity.getId()) == -1){
+                        System.out.println(getName(nowEntity.toString()));
+                        System.out.printf("Number of links BFS went through %d\n", globalBFSCounter);
+                        System.out.printf("Number of nodes added to the queue %d\n", effectiveBFSCounter);
+                        return counter;
+                    }
+                    System.out.print(getName(nowEntity.toString()));
+                    System.out.print(" <-(");
+                    System.out.print(getName(wDao.getProperty(PFather.get(nowEntity.getId())).toString()));      //Get the name of an item by wikidataDao
+                    System.out.print(")- ");
+                    nowEntity = wDao.getItem(QFather.get(nowEntity.getId()));
+                    counter++;
+                }
+            }
+
+            Map<String, List<LocalWikidataStatement>> statementsMap = wDao.getLocalStatements(lang, nowEntity.getType(), nowEntity.getId());
+            Map<WikidataEntity, Integer> sons = new HashMap<WikidataEntity, Integer>();
+            for(String s : statementsMap.keySet()){
+                for(LocalWikidataStatement l : statementsMap.get(s)){
+                    if(l.getStatement().getValue().getTypeName() != "ITEM")
+                        continue;
+                    sons.put(wDao.getItem(l.getStatement().getValue().getIntValue()), l.getStatement().getProperty().getId());   //Get the item by wikidataDao
+                }
+            }
+            for(WikidataEntity son : sons.keySet()){
+                globalBFSCounter ++;
+                if(vectorSet.contains(son.getId()))
+                    continue;
+                effectiveBFSCounter ++;
+                QFather.put(son.getId(), nowEntity.getId());
+                PFather.put(son.getId(), sons.get(son));
+                vectorSet.add(son.getId());
+                queue.add(son);
+            }
+        }
+        return -1;
+
+    }
+
+    /**
      * Find a shortest chain between two articles using the Bi-directional BFS
      * Prints out the chain, the number of links visited and the number of nodes visited
      * @param srcId The page ID of source article
@@ -222,6 +322,9 @@ public class ConceptRelation {
      * @return The number of degree of the chain found
      * @throws DaoException
      */
+
+
+    //P.S. This method does not use any new features in WikAPIdia. It's just an algorithmic improvment to the "getRelation" method
 
     public int getRelationBidirectional (int srcId, int dstId) throws DaoException {
         Queue<Integer> srcQueue = new LinkedList<Integer>();
@@ -353,70 +456,6 @@ public class ConceptRelation {
         return statement.substring(statement.indexOf("name=")+5, statement.indexOf("}"));
     }
 
-    /**
-     * Find a shortest chain between two Wikidata items using the uni-directional BFS
-     * Prints out the chain, the number of links visited and the number of nodes visited
-     * @param srcId The item ID of the source item
-     * @param dstId The item ID of the destination item
-     * @return The number of degree of the chain found
-     * @throws DaoException
-     */
 
-    public int getWikidataRelation (int srcId, int dstId) throws DaoException {
-        WikidataEntity srcEntity = wDao.getItem(srcId);
-        WikidataEntity dstEntity = wDao.getItem(dstId);
-        Queue<WikidataEntity> queue = new LinkedList<WikidataEntity>();
-        Set<Integer> vectorSet = new HashSet<Integer>();
-        Map<Integer, Integer> QFather = new HashMap<Integer, Integer>();
-        Map<Integer, Integer> PFather = new HashMap<Integer, Integer>();
-        queue.add(srcEntity);
-        vectorSet.add(srcEntity.getId());
-        QFather.put(srcEntity.getId(), -1);
-        Integer globalBFSCounter = 0;
-        Integer effectiveBFSCounter = 0;
-        while(!queue.isEmpty()){
-            WikidataEntity nowEntity = queue.poll();
-            if(nowEntity.getId() == dstId){
-                /*found*/
-                int counter = 0;
-                while(true){
-                    if(QFather.get(nowEntity.getId()) == -1){
-                        System.out.println(getName(nowEntity.toString()));
-                        System.out.printf("Number of links BFS went through %d\n", globalBFSCounter);
-                        System.out.printf("Number of nodes added to the queue %d\n", effectiveBFSCounter);
-                        return counter;
-                    }
-                    System.out.print(getName(nowEntity.toString()));
-                    System.out.print(" <-(");
-                    System.out.print(getName(wDao.getProperty(PFather.get(nowEntity.getId())).toString()));      //Get the name of an item by wikidataDao
-                    System.out.print(")- ");
-                    nowEntity = wDao.getItem(QFather.get(nowEntity.getId()));
-                    counter++;
-                }
-            }
-
-            Map<String, List<LocalWikidataStatement>> statementsMap = wDao.getLocalStatements(lang, nowEntity.getType(), nowEntity.getId());
-            Map<WikidataEntity, Integer> sons = new HashMap<WikidataEntity, Integer>();
-            for(String s : statementsMap.keySet()){
-                for(LocalWikidataStatement l : statementsMap.get(s)){
-                    if(l.getStatement().getValue().getTypeName() != "ITEM")
-                        continue;
-                    sons.put(wDao.getItem(l.getStatement().getValue().getIntValue()), l.getStatement().getProperty().getId());   //Get the item by wikidataDao
-                }
-            }
-            for(WikidataEntity son : sons.keySet()){
-                globalBFSCounter ++;
-                if(vectorSet.contains(son.getId()))
-                    continue;
-                effectiveBFSCounter ++;
-                QFather.put(son.getId(), nowEntity.getId());
-                PFather.put(son.getId(), sons.get(son));
-                vectorSet.add(son.getId());
-                queue.add(son);
-            }
-        }
-        return -1;
-
-    }
 
 }

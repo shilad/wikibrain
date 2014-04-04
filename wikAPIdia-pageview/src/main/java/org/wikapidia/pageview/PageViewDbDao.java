@@ -30,7 +30,7 @@ public class PageViewDbDao {
     Set<Long> parsedHourSet;
     PageViewDbDao(Language lang){
         this.lang = lang;
-        //TODO: Find a new way to deal with the path issue...
+        //TODO: Find a new way to deal with the path issue...It is probably not a great idea to hard code the path
         this.db = DBMaker.newFileDB(new File("./db/" + lang.getLangCode() + "_page_view_db")).closeOnJvmShutdown().make();
         if(db.exists("parsedHourSet"))
             this.parsedHourSet = db.getTreeSet("parsedHourSet");
@@ -239,6 +239,7 @@ public class PageViewDbDao {
                 return null;
             }
             //TODO: make PageViewDbDao language agnostic
+            //Toby: That will make it much slower parsing the dump file...as we'll have to store the number of pageviews for pages of all languages
             return new PageViewDbDao(Language.getByLangCode("simple"));
         }
     }

@@ -28,7 +28,7 @@ public class PageViewDbDaoCookbook {
         Collection<Integer> memberList = localCategoryMemberSqlDao.getCategoryMemberIds(lang, categoryId);
         PageViewDbDao pageViewDbDao = new PageViewDbDao(lang);
         //get pageview in 24hrs for pages in memberlist starting from 2013-12-08 0:00
-        Map<Integer, Integer> pageViewMap = pageViewDbDao.getPageView(memberList, 2013, 12, 8, 0, 24);
+        Map<Integer, Integer> pageViewMap = pageViewDbDao.getPageView(memberList, 2014, 4, 1, 0, 24);
         for(Integer member : pageViewMap.keySet()){
             System.out.print(localPageSqlDao.getById(lang, member).getTitle().getCanonicalTitle());
             System.out.printf(" %d\n", pageViewMap.get(member));

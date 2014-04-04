@@ -174,9 +174,9 @@ public class PageViewIterator implements Iterator {
             PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
             dataStructs.add(pageViewData);
         }
-
-        pageViewDataFile.delete();
-        tempFolder.delete();
+        //TODO: Not deleting the dump files now for debugging purpose
+        //pageViewDataFile.delete();
+        //tempFolder.delete();
 
         currentDate = nextDate;
         return dataStructs;
