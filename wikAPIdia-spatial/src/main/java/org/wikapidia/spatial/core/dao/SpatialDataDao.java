@@ -18,7 +18,30 @@ import java.util.Set;
  */
 public interface SpatialDataDao {
 
-    public TIntSet getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException;
+
+    public Geometry getGeometry(int itemId, String layerName, String refSysName) throws DaoException;
+
+    public Iterable<Geometry> getGeometries(int itemId) throws DaoException;
+
+    public Iterable<Integer> getAllItemsInLayer(String layerName, String refSysName) throws DaoException;
+
+    public Iterable<String> getAllRefSysNames() throws DaoException;
+
+    public Iterable<String> getAllLayerNames(String refSysName) throws DaoException;
+
+    public SpatialContainerMetadata getReferenceSystemMetadata(String refSysName) throws DaoException;
+
+    public SpatialContainerMetadata getLayerMetadata(String layerName, String refSysName) throws DaoException;
+
+    public void beginSaveGeometries() throws DaoException;
+
+    public void endSaveGeometries() throws DaoException;
+
+    public void saveGeometry(int itemId, String layerName, String refSysName, Geometry g) throws DaoException;
+
+
+
+    /*public TIntSet getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException;
 
     public TIntSet getAllGeomIdsInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;
 
@@ -38,6 +61,6 @@ public interface SpatialDataDao {
 
     public void saveGeometry(Integer geomId, String layerName, String refSysName, Geometry g) throws DaoException;
 
-    public void endSaveGeometries() throws DaoException;
+    public void endSaveGeometries() throws DaoException;*/
 
 }

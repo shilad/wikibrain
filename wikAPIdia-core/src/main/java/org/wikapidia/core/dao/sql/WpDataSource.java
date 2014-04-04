@@ -111,6 +111,7 @@ public class WpDataSource {
     public void executeSqlResource(String name) throws DaoException {
         String script = null;
         try {
+            System.out.println(name);
             script = IOUtils.toString(AbstractSqlDao.class.getResource(name));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -195,7 +196,7 @@ public class WpDataSource {
                 ds.setUsername(config.getString("username"));
                 ds.setPassword(config.getString("password"));
                 ds.setPartitionCount(Runtime.getRuntime().availableProcessors());
-                ds.setMaxConnectionsPerPartition(3);
+                ds.setMaxConnectionsPerPartition(50);
                 return new WpDataSource(ds);
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException(e);

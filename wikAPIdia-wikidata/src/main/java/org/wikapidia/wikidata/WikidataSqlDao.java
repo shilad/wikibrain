@@ -39,6 +39,7 @@ import static org.wikapidia.core.jooq.tables.WikidataStatement.*;
  */
 public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements WikidataDao {
     private static Language FALLBACK_LANGUAGE = Language.getByLangCode("en");
+    private static int WIKIDATA_ALGORITHM_ID = 1;
 
     private static TableField[] FIELDS = new TableField[] {
             WIKIDATA_STATEMENT.ID,
@@ -117,8 +118,13 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     }
 
     @Override
+    public Integer getItemId(LocalPage page) throws DaoException{
+        return upDao.getUnivPageId(page, WIKIDATA_ALGORITHM_ID);
+    }
+
+    @Override
     public List<WikidataStatement> getStatements(LocalPage page) throws DaoException {
-        int conceptId = upDao.getUnivPageId(page, 1);
+        int conceptId = upDao.getUnivPageId(page, getItemId(page));
         if (conceptId < 0) {
             return new ArrayList<WikidataStatement>();
         }
@@ -132,7 +138,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
 
     @Override
     public Map<String, List<LocalWikidataStatement>> getLocalStatements(LocalPage page) throws DaoException {
-        int conceptId = upDao.getUnivPageId(page, 1);
+        int conceptId = getItemId(page);
         if (conceptId < 0) {
             return new HashMap<String, List<LocalWikidataStatement>>();
         }

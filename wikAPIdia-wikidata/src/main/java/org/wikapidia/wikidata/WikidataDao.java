@@ -45,6 +45,15 @@ public interface WikidataDao extends Dao<WikidataStatement> {
      */
     List<WikidataStatement> getStatements(LocalPage page) throws DaoException;
 
+
+    /**
+     * Gets the item id for a given LocalPage (the number after "Q")
+     * @param page
+     * @return
+     * @throws DaoException
+     */
+    Integer getItemId(LocalPage page) throws DaoException;
+
     /**
      * Saves the specified entity
      * @param entity

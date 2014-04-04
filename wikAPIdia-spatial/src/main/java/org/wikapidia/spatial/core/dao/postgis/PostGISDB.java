@@ -1,24 +1,10 @@
 package org.wikapidia.spatial.core.dao.postgis;
 
-import com.typesafe.config.Config;
-import com.vividsolutions.jts.geom.Geometry;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.conf.ConfigurationException;
-import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalArticleDao;
 import org.wikapidia.core.dao.sql.FastLoader;
 import org.wikapidia.core.dao.sql.WpDataSource;
-import org.wikapidia.spatial.core.SpatialLayer;
-import org.wikapidia.spatial.core.SpatialReferenceSystem;
-import org.wikapidia.spatial.core.dao.SpatialDataDao;
 
 import java.sql.*;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * Created by Brent Hecht on 12/30/13.
@@ -30,9 +16,23 @@ public class PostGISDB{
     private FastLoader spatiotagFastLoader = null;
 
     public PostGISDB(WpDataSource wpDataSource) throws DaoException {
-
         this.wpDataSource = wpDataSource;
-        if (needsToBeInitialized()) wpDataSource.executeSqlResource("db/postgis-db.schema.sql");
+        if (needsToBeInitialized()) {
+            wpDataSource.executeSqlResource("/db/postgis-db.nonspatial.sql");
+
+            try {
+                Connection c = wpDataSource.getConnection();
+                Statement s = c.createStatement();
+                s.execute("SELECT AddGeometryColumn('geometries','geometry',-1,'GEOMETRY',2)"); //TODO: This should be in one of the .sql files, but the PostGIS functions couldn't find the 'public' schema for some reason
+                s.execute("CREATE INDEX geometry_index ON geometries USING GIST ( geometry )");
+                c.commit();
+                s.close();
+                c.close();
+            }catch(SQLException e){
+                throw new DaoException(e);
+            }
+
+        }
     }
 
     public WpDataSource getDataSource(){
@@ -48,7 +48,7 @@ public class PostGISDB{
             ResultSet rs = md.getTables(null, null, "geometries", null);
             rs.first();
             boolean rVal = (rs.getRow() < 1);
-            c.close();
+//            c.close();
             return rVal;
 
         }catch(SQLException e){
@@ -58,35 +58,35 @@ public class PostGISDB{
     }
 
 
-
-    public static class Provider extends org.wikapidia.conf.Provider<PostGISDB> {
-        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
-            super(configurator, config);
-        }
-
-        @Override
-        public Class getType() {
-            return PostGISDB.class;
-        }
-
-        @Override
-        public String getPath() {
-            return "spatial.dao.postgis";
-        }
-
-        @Override
-        public PostGISDB get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-
-            try {
-                WpDataSource wpDataSource = getConfigurator().get(
-                        WpDataSource.class,
-                        config.getString("pgisdatasource"));
-                return new PostGISDB(wpDataSource);
-            } catch (DaoException e) {
-                throw new ConfigurationException(e);
-            }
-        }
-    }
-
+//
+//    public static class Provider extends org.wikapidia.conf.Provider<PostGISDB> {
+//        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+//            super(configurator, config);
+//        }
+//
+//        @Override
+//        public Class getType() {
+//            return PostGISDB.class;
+//        }
+//
+//        @Override
+//        public String getPath() {
+//            return "dao.dataSource.postgis";
+//        }
+//
+//        @Override
+//        public PostGISDB get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+//
+//            try {
+//                WpDataSource wpDataSource = getConfigurator().get(
+//                        WpDataSource.class,
+//                        config.getString("pgisdatasource"));
+//                return new PostGISDB(wpDataSource);
+//            } catch (DaoException e) {
+//                throw new ConfigurationException(e);
+//            }
+//        }
+//    }
+//
 
 }
