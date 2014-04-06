@@ -190,6 +190,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
             return "spatial.dao.spatialdata";
         }
 
+        private static int numInstances = 0;
         @Override
         public PostGISSpatialDataDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("postgis")) {
@@ -204,8 +205,10 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
                                 config.getString("dataSource"))
                  */
 
+                System.out.println("GETTING DAO " + numInstances);
+                numInstances++;
                 WpDataSource wpDataSource = getConfigurator().get(WpDataSource.class,
-                        "psql");
+                        "postgis");
                 return new PostGISSpatialDataDao(new PostGISDB(wpDataSource));
 
             } catch (DaoException e) {

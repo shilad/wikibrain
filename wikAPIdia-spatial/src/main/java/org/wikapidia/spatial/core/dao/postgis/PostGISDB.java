@@ -18,16 +18,21 @@ public class PostGISDB{
     public PostGISDB(WpDataSource wpDataSource) throws DaoException {
         this.wpDataSource = wpDataSource;
         if (needsToBeInitialized()) {
-            wpDataSource.executeSqlResource("/db/postgis-db.nonspatial.sql");
 
-            try {
+            wpDataSource.executeSqlResource("/db/postgis-create-tables.sql");
+            wpDataSource.executeSqlResource("/db/postgis-create-indexes.sql");
+
+            try{
+                // This is totally klugy, but gets around the weird issues with the Postgres search space
+                // and PostGIS functions.
+                // TODO: Incorporate this SQL into the .sql files above (or add'l ones)
                 Connection c = wpDataSource.getConnection();
                 Statement s = c.createStatement();
-                s.execute("SELECT AddGeometryColumn('geometries','geometry',-1,'GEOMETRY',2)"); //TODO: This should be in one of the .sql files, but the PostGIS functions couldn't find the 'public' schema for some reason
-                s.execute("CREATE INDEX geometry_index ON geometries USING GIST ( geometry )");
+                s.execute("SELECT AddGeometryColumn('public','geometries','geometry',-1,'GEOMETRY',2);");
+                c.commit();;
+                s.execute("CREATE INDEX geometry_index ON geometries USING GIST ( geometry );");
                 c.commit();
-                s.close();
-                c.close();
+
             }catch(SQLException e){
                 throw new DaoException(e);
             }

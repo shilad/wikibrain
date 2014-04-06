@@ -17,6 +17,7 @@ import org.wikapidia.core.dao.DaoException;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
@@ -125,7 +126,14 @@ public class WpDataSource {
                     continue;
                 }
                 LOG.fine("executing:\n" + s + "\n=========================================\n");
+
+
+
                 Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery("SHOW search_path");
+                rs.next();
+                System.out.println(rs.getString(1));
+                System.out.println(s);
                 st.execute(s + ";");
                 st.close();
             }
@@ -196,7 +204,7 @@ public class WpDataSource {
                 ds.setUsername(config.getString("username"));
                 ds.setPassword(config.getString("password"));
                 ds.setPartitionCount(Runtime.getRuntime().availableProcessors());
-                ds.setMaxConnectionsPerPartition(50);
+                ds.setMaxConnectionsPerPartition(2);
                 return new WpDataSource(ds);
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException(e);

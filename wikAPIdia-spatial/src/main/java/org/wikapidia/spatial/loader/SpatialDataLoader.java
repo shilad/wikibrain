@@ -120,14 +120,16 @@ public class SpatialDataLoader {
                 attrHandlers.add(IDAttributeHandler.getHandlerByFieldName(dbfReader.getHeader().getFieldName(i), wdDao, analyzer));
             }
 
+            int foundGeomCount = 0;
+            int missedGeomCount = 0;
+
             while(shpReader.hasNext()){
 
                 curGeometry = (Geometry)shpReader.nextRecord().shape();
                 dbfReader.read();
 
                 int i = 0;
-                int foundGeomCount = 0;
-                int missedGeomCount = 0;
+
                 boolean found = false;
                 while(i < numDbfFields && !found){
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
@@ -137,7 +139,7 @@ public class SpatialDataLoader {
                         found = true;
                         foundGeomCount++;
                         if (foundGeomCount % 10 == 0){
-                            LOG.log(Level.INFO, "Matched " + foundGeomCount + " geometries in layer '" + struct.getLayerName() + "'" + struct.getLayerName() + "'");
+                            LOG.log(Level.INFO, "Matched " + foundGeomCount + " geometries in layer '" + struct.getLayerName() + "' (" + struct.getRefSysName() + ")");
                         }
                     }
                     i++;
@@ -145,10 +147,10 @@ public class SpatialDataLoader {
 
                 if (!found) missedGeomCount++;
 
-                double matchRate = ((double)foundGeomCount)/(foundGeomCount + missedGeomCount);
-                LOG.log(Level.INFO, "Finished layer '" + struct.getLayerName() + "': Match rate = " + matchRate);
-
             }
+
+            double matchRate = ((double)foundGeomCount)/(foundGeomCount + missedGeomCount);
+            LOG.log(Level.INFO, "Finished layer '" + struct.getLayerName() + "': Match rate = " + matchRate);
  
             dbfReader.close();
             shpReader.close();
