@@ -128,7 +128,7 @@ public class PageViewIterator implements Iterator {
         }
 
         //set up temp folder where page view data file will be stored
-        File tempFolder = new File("../download/" + "_page_view_data");
+        File tempFolder = new File("./download/" + "_page_view_data");
         if (!tempFolder.exists()){
             tempFolder.mkdir();
         }
@@ -174,9 +174,9 @@ public class PageViewIterator implements Iterator {
             PageViewDataStruct pageViewData = new PageViewDataStruct(lang, currentDate, nextDate, pageViewCounts);
             dataStructs.add(pageViewData);
         }
-
-        pageViewDataFile.delete();
-        tempFolder.delete();
+        //TODO: Not deleting the dump files now for debugging purpose
+        //pageViewDataFile.delete();
+        //tempFolder.delete();
 
         currentDate = nextDate;
         return dataStructs;
