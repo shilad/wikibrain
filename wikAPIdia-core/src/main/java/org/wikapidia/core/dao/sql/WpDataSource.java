@@ -42,7 +42,7 @@ public class WpDataSource {
             conn = dataSource.getConnection();
             this.dialect = JooqUtils.dialect(conn);
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("SQL Dao Failed. Check if the table exists / if the desired information has been parsed and stored in the database\n" + e.toString());
         } finally {
             closeQuietly(conn);
         }
@@ -92,7 +92,7 @@ public class WpDataSource {
         try {
             return DSL.using(getConnection(), dialect, settings);
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("SQL Dao Failed. Check if the table exists / if the desired information has been parsed and stored in the database\n" + e.toString());
         }
     }
 
@@ -141,7 +141,7 @@ public class WpDataSource {
         } catch (SQLException e){
             rollbackQuietly(conn);
             LOG.log(Level.SEVERE, "error executing: " + script, e);
-            throw new DaoException(e);
+            throw new DaoException("SQL Dao Failed. Check if the table exists / if the desired information has been parsed and stored in the database\n" + e.toString());
         } finally {
             closeQuietly(conn);
         }

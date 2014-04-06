@@ -205,7 +205,11 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 langs.add(Language.getById(record.value1()));
             }
             return new LanguageSet(langs);
-        } finally {
+        }
+        catch (Exception e) {
+            throw new DaoException("Error when getting loaded languages, check if the database exists / has been initialized\n" + e.toString());
+        }
+        finally {
             freeJooq(context);
         }
     }
