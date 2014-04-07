@@ -22,6 +22,7 @@ import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.parser.WpParseException;
 
 import java.io.File;
@@ -123,6 +124,12 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     }
 
     @Override
+    public UniversalPage getUniversalPage(int itemId) throws DaoException {
+        UniversalPage uPage = upDao.getById(itemId, WIKIDATA_ALGORITHM_ID);
+        return uPage;
+    }
+
+    @Override
     public List<WikidataStatement> getStatements(LocalPage page) throws DaoException {
         int conceptId = upDao.getUnivPageId(page, getItemId(page));
         if (conceptId < 0) {
@@ -135,6 +142,8 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                 .build();
         return IteratorUtils.toList(get(filter).iterator());
     }
+
+
 
     @Override
     public Map<String, List<LocalWikidataStatement>> getLocalStatements(LocalPage page) throws DaoException {
