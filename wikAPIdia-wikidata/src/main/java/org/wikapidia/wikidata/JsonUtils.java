@@ -67,7 +67,7 @@ public class JsonUtils {
             } else if (prim.isBoolean()) {
                 return prim.getAsBoolean();
             } else if (prim.isNumber()) {
-                return prim.getAsInt();
+                return prim.getAsNumber();
             } else {
                 throw new IllegalArgumentException("Unknown Gson primitive: " + prim);
             }
