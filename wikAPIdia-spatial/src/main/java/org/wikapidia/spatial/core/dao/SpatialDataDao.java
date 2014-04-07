@@ -41,6 +41,8 @@ public interface SpatialDataDao {
 
 
 
+
+
     /*public TIntSet getAllGeomIdsInLayer(SpatialLayer sLayer) throws DaoException;
 
     public TIntSet getAllGeomIdsInReferenceSystem(SpatialReferenceSystem srs) throws DaoException;

@@ -9,8 +9,10 @@ import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.filter.text.cql2.CQL;
+import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 import org.wikapidia.conf.Configuration;
@@ -34,7 +36,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     // for writing data
     private List<SimpleFeature> curFeaturesToStore = null;
     private SimpleFeatureBuilder simpleFeatureBuilder = null;
-    private static final Integer BUFFER_SIZE = 10;
+    private static final Integer BUFFER_SIZE = 200;
 
 
     public PostGISSpatialDataDao(PostGISDB postGisDb){
@@ -53,7 +55,9 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
 
             if (collection.size() == 0) return null;
 
-            return ((Geometry)collection.features().next().getProperty(db.getGeometryAttributeName()));
+            FeatureIterator iterator = collection.features();
+            Feature feature = iterator.next();
+            return ((Geometry)feature.getDefaultGeometryProperty().getValue());
 
 
         }catch(Exception e){

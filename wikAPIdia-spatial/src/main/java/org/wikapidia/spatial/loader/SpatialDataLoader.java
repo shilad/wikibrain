@@ -51,7 +51,7 @@ public class SpatialDataLoader {
     }
 
     //TODO: this should probably be adapted to the PipelineLoader structure
-    public void load() throws WikapidiaException{
+    private void loadExogenousData() throws WikapidiaException{
 
 
         try {
@@ -78,6 +78,8 @@ public class SpatialDataLoader {
 //            parseWikidataSpatialData();
 
     }
+
+
 
     private List<LayerStruct> getLayerStructs(){
 
@@ -176,18 +178,28 @@ public class SpatialDataLoader {
 
     }
 
-    private void parseWikidataSpatialData() throws WikapidiaException{
+    private void loadWikidataData() throws WikapidiaException{
 
 
-        // this should eventually be moved into a config file or parameters of the parse
-//        List<WikidataLayerLoader> layerLoaders = Lists.newArrayList();
-//        layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
+        try {
+
+            spatialDataDao.beginSaveGeometries();
+
+            // this should eventually be moved into a config file or parameters of the parse
+            List<WikidataLayerLoader> layerLoaders = Lists.newArrayList();
+            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
 //        layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
-//
-//        for (WikidataLayerLoader layerLoader : layerLoaders){
-//            LOG.log(Level.INFO, "Loading Wikidata layer(s): " + layerLoader.getClass().getName());
-//            layerLoader.loadData();
-//        }
+
+            for (WikidataLayerLoader layerLoader : layerLoaders) {
+                LOG.log(Level.INFO, "Loading Wikidata layer(s): " + layerLoader.getClass().getName());
+                layerLoader.loadData();
+            }
+
+            spatialDataDao.endSaveGeometries();
+
+        }catch(DaoException e){
+            throw new WikapidiaException(e);
+        }
 
     }
 
@@ -342,8 +354,10 @@ public class SpatialDataLoader {
 
         //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
         SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder);
+        loader.loadWikidataData();
+//        loader.loadExogenousData();
 
-        loader.load();
+
 
     }
 
