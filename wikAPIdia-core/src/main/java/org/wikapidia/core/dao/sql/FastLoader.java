@@ -25,10 +25,12 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class FastLoader {
+
     private static final Object POSION_PILL = new Object();
+    private boolean isPostGisLoader = false;
 
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
-    static final int BATCH_SIZE = 2000;
+    static final int BATCH_SIZE = 5;
 
     private final WpDataSource ds;
     private final String table;
@@ -49,6 +51,11 @@ public class FastLoader {
 
     public FastLoader(WpDataSource ds, TableField[] fields) throws DaoException {
         this(ds, fields[0].getTable().getName(), getFieldNames(fields));
+    }
+
+    public FastLoader(WpDataSource ds, String table, String[] fields, boolean isPostGisLoader) throws DaoException {
+        this(ds,table, fields);
+        this.isPostGisLoader = isPostGisLoader;
     }
 
     public FastLoader(WpDataSource ds, String table, String[] fields) throws DaoException {
@@ -113,7 +120,19 @@ public class FastLoader {
 
     private void insertBatches() throws DaoException, SQLException, InterruptedException {
         boolean finished = false;
+
         Connection cnx = ds.getConnection();
+        if (isPostGisLoader){
+            try {
+
+                ((org.postgresql.PGConnection) cnx).addDataType("geometry", Class.forName("org.postgis.PGgeometry"));
+//                ((org.postgresql.PGConnection) cnx).addDataType("geometry", Class.forName("org.postgis.Multipolygon"));
+
+            }catch(ClassNotFoundException e){
+                throw new DaoException("Could not find PostGIS geometry type. Is the PostGIS library in the class path?: " + e.getMessage());
+            }
+        }
+
         PreparedStatement statement = null;
         try {
             String [] names = new String[fields.length];

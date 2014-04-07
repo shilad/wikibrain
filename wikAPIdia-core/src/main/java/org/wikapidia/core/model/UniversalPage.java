@@ -1,6 +1,7 @@
 package org.wikapidia.core.model;
 
 import com.google.common.collect.Multimap;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
@@ -38,6 +39,7 @@ public class UniversalPage extends AbstractUniversalEntity<LocalId> {
         this.nameSpace = nameSpace;
     }
 
+
     public int getUnivId(){
         return univId;
     }
@@ -64,4 +66,5 @@ public class UniversalPage extends AbstractUniversalEntity<LocalId> {
             return false;
         }
     }
+
 }
