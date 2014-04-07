@@ -120,8 +120,10 @@ public class DumpFileDownloader {
             for (DumpLinkInfo link : map.get(linkMatcher)) {
                 File download = new File(tmpDir, link.getFileName());
                 File target = FileUtils.getFile(outputDir, link.getLocalPath(), download.getName());
-                if (!target.getParentFile().exists()) target.getParentFile().mkdirs();
-                FileUtils.moveFile(download, target);   // thros an exception on failure.
+                if (!target.exists()) {
+                    if (!target.getParentFile().exists()) target.getParentFile().mkdirs();
+                    FileUtils.moveFile(download, target);   // thros an exception on failure.
+                }
             }
         }
         return success;
