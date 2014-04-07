@@ -188,6 +188,21 @@ public class LanguageSet implements Iterable<Language> {
         return new LanguageSet(languages);
     }
 
+    /**
+     * Returns English if English is in the set, else returns Simple. If Simple is not in the
+     * set, throws an exception.
+     * @return
+     */
+    public Language getBestAvailableEnglishLang() throws WikapidiaException {
+        if (this.containsLanguage(Language.getByLangCode("en"))){
+            return Language.getByLangCode("en");
+        }else if (this.containsLanguage(Language.getByLangCode("simple"))){
+            return Language.getByLangCode("simple");
+        }else{
+            throw new WikapidiaException("No English language loaded");
+        }
+    }
+
     private static Collection<Language> getLangsFromCodes(Collection<String> langCodes) {
         Collection<Language> languages = new ArrayList<Language>();
         for (String langCode : langCodes) {
