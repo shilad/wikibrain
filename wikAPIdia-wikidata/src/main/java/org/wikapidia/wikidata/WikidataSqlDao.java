@@ -376,6 +376,9 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         if (filter.getEntityIds() != null) {
             conditions.add(WIKIDATA_STATEMENT.ENTITY_ID.in(filter.getEntityIds()));
         }
+        if (filter.getPropertyIds() != null) {
+            conditions.add(WIKIDATA_STATEMENT.PROP_ID.in(filter.getPropertyIds()));
+        }
         if (filter.getRanks() != null) {
             conditions.add(WIKIDATA_STATEMENT.RANK.in(filter.getRankOrdinals()));
         }
@@ -383,8 +386,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         try {
             Cursor<Record> result = jooq.select().
                     from(Tables.WIKIDATA_STATEMENT).
-                    where(conditions).
-                    fetchLazy(getFetchSize());
+                    where(conditions).fetchLazy(getFetchSize());
 
             return new SimpleSqlDaoIterable<WikidataStatement>(result, jooq) {
                 @Override
