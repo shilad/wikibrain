@@ -1,17 +1,8 @@
 package org.wikapidia.spatial.core.dao;
 
 import com.vividsolutions.jts.geom.Geometry;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.spatial.core.SpatialContainer;
 import org.wikapidia.spatial.core.SpatialContainerMetadata;
-import org.wikapidia.spatial.core.SpatialLayer;
-import org.wikapidia.spatial.core.SpatialReferenceSystem;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Brent Hecht on 12/29/13.
