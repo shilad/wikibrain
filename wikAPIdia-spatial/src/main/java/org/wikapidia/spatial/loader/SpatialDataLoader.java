@@ -22,6 +22,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
+import org.wikapidia.spatial.core.dao.postgis.PostGISDB;
 import org.wikapidia.wikidata.WikidataDao;
 
 import java.io.*;
@@ -50,18 +51,28 @@ public class SpatialDataLoader {
     }
 
     //TODO: this should probably be adapted to the PipelineLoader structure
-    public void load() throws WikapidiaException {
+    public void load() throws WikapidiaException{
 
 
-            // do exogenous data
+        try {
 
+            // *** DO EXOGENOUS SHAPEFILES ***
+
+            spatialDataDao.beginSaveGeometries();
             List<LayerStruct> layerStructs = getLayerStructs();
-            for (LayerStruct layerStruct : layerStructs){
+            for (LayerStruct layerStruct : layerStructs) {
 
-                if (layerStruct.fileType.equals(FileType.SHP)){
+                if (layerStruct.fileType.equals(FileType.SHP)) {
                     parseShapefile(layerStruct);
                 }
             }
+            spatialDataDao.endSaveGeometries();
+
+
+        }catch(DaoException e){
+            throw new WikapidiaException(e);
+        }
+
 
             // do wikidata
 //            parseWikidataSpatialData();
@@ -169,14 +180,14 @@ public class SpatialDataLoader {
 
 
         // this should eventually be moved into a config file or parameters of the parse
-        List<WikidataLayerLoader> layerLoaders = Lists.newArrayList();
-        layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
-        layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
-
-        for (WikidataLayerLoader layerLoader : layerLoaders){
-            LOG.log(Level.INFO, "Loading Wikidata layer(s): " + layerLoader.getClass().getName());
-            layerLoader.loadData();
-        }
+//        List<WikidataLayerLoader> layerLoaders = Lists.newArrayList();
+//        layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
+//        layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
+//
+//        for (WikidataLayerLoader layerLoader : layerLoaders){
+//            LOG.log(Level.INFO, "Loading Wikidata layer(s): " + layerLoader.getClass().getName());
+//            layerLoader.loadData();
+//        }
 
     }
 
@@ -281,6 +292,14 @@ public class SpatialDataLoader {
     private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/bjhecht/Dropbox/spatial_data";
 
     public static void main(String args[]) throws ConfigurationException, WikapidiaException {
+
+        //public PostGISDB(String host, Integer port, String schema, String db, String user, String pwd,
+       // int maxConnections) throws DaoException{
+//        try {
+//            PostGISDB db = new PostGISDB("localhost",5432,"public","wikapidia_new","bjhecht","",15);
+//        } catch (DaoException e) {
+//            e.printStackTrace();
+//        }
 
         Options options = new Options();
         options.addOption(

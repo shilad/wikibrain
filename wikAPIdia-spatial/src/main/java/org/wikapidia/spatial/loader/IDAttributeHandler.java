@@ -58,6 +58,7 @@ public abstract class IDAttributeHandler {
 
             String[] parts = attrName.split("_");
             if (parts[1].toLowerCase().equals("en")) parts[1] = "simple"; // TEMPORARY HACK
+
             myLang = Language.getByLangCode(parts[1]);
 
             this.analyzer = analyzer;

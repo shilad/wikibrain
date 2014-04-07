@@ -1,107 +1,71 @@
 package org.wikapidia.spatial.core.dao.postgis;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
-import org.apache.commons.lang.NotImplementedException;
+import org.geotools.data.FeatureSource;
+import org.geotools.data.collection.ListFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.filter.text.cql2.CQL;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.filter.Filter;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
-import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.LocalCategoryDao;
-import org.wikapidia.core.dao.sql.FastLoader;
-import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.spatial.core.SpatialContainerMetadata;
-import org.wikapidia.spatial.core.SpatialLayer;
-import org.wikapidia.spatial.core.SpatialReferenceSystem;
-import org.wikapidia.spatial.core.SpatialUtils;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collection;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * Created by bjhecht on 12/30/13.
+ * Created by bjhecht on 4/7/14.
  */
 public class PostGISSpatialDataDao implements SpatialDataDao {
 
     private final PostGISDB db;
-    private FastLoader fastLoader;
+
+    // for writing data
+    private List<SimpleFeature> curFeaturesToStore = null;
+    private SimpleFeatureBuilder simpleFeatureBuilder = null;
+    private static final Integer BUFFER_SIZE = 10;
 
 
-    public PostGISSpatialDataDao(PostGISDB db) throws DaoException{
-
-        this.db = db;
-        //FastLoader(WpDataSource ds, String table, String[] fields)
-        fastLoader = new FastLoader(db.getDataSource(), "geometries", new String[]{"item_id", "ref_sys_name","layer_name","geometry"});
-
+    public PostGISSpatialDataDao(PostGISDB postGisDb){
+        this.db = postGisDb;
     }
 
-
-    /*
-    Note: all implemented w/o prepared statements for thread safety reasons
-     */
     @Override
     public Geometry getGeometry(int itemId, String layerName, String refSysName) throws DaoException {
 
         try {
 
-            Statement s = this.db.getDataSource().getConnection().createStatement();
-            String query = String.format("SELECT ST_AsBinary(geom) AS geom_bin" +
-                    "FROM geometries WHERE item_id = %d AND layer_name = %s AND ref_sys_name = %s", itemId, layerName, refSysName);
-            ResultSet r = s.executeQuery(query);
-            List<Geometry> geoms = getBinaryGeometriesFromResultSet(r, "geom_bin");
-            if (geoms.size() == 0) return null;
-            return geoms.get(0);
+            FeatureSource contents = db.getFeatureSource();
+            String cqlQuery = String.format("item_id = %d AND layer_name = '%s' AND ref_sys_name = '%s'", itemId, layerName, refSysName);
+            Filter f = CQL.toFilter(cqlQuery);
+            FeatureCollection collection = contents.getFeatures(f);
+
+            if (collection.size() == 0) return null;
+
+            return ((Geometry)collection.features().next().getProperty(db.getGeometryAttributeName()));
+
 
         }catch(Exception e){
             throw new DaoException(e);
         }
 
-    }
-
-    private List<Geometry> getBinaryGeometriesFromResultSet(ResultSet r, String colName) throws SQLException, ParseException {
-
-        List<Geometry> rVal = Lists.newArrayList();
-        WKBReader wkbReader = new WKBReader();
-
-        while(r.next()){
-            byte[] wkb = r.getBytes(colName);
-            Geometry g = wkbReader.read(wkb);
-            rVal.add(g);
-        }
-
-        return rVal;
 
     }
 
     @Override
     public Iterable<Geometry> getGeometries(int itemId) throws DaoException {
-
-        try {
-
-            Statement s = this.db.getDataSource().getConnection().createStatement();
-            String query = String.format("SELECT ST_AsBinary(geom) AS geom_bin" +
-                    "FROM geometries WHERE item_id = %d", itemId);
-            ResultSet r = s.executeQuery(query);
-            return getBinaryGeometriesFromResultSet(r, "geom_bin");
-
-        }catch(Exception e){
-            throw new DaoException(e);
-        }
-
+        return null;
     }
 
     @Override
@@ -111,28 +75,12 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
 
     @Override
     public Iterable<String> getAllRefSysNames() throws DaoException {
-
-        try {
-
-            Statement s = this.db.getDataSource().getConnection().createStatement();
-            String query = String.format("SELECT DISTINCT ref_sys_name FROM geometries");
-            ResultSet r = s.executeQuery(query);
-            List<String> rVal = Lists.newArrayList();
-            while(r.next()){
-                rVal.add(r.getString("ref_sys_name"));
-            }
-            return rVal;
-
-
-        }catch(SQLException e){
-            throw new DaoException(e);
-        }
-
+        return null;
     }
 
     @Override
     public Iterable<String> getAllLayerNames(String refSysName) throws DaoException {
-        throw new DaoException(new NotImplementedException());
+        return null;
     }
 
     @Override
@@ -146,33 +94,53 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     }
 
     @Override
-    public void saveGeometry(int itemId, String layerName, String refSysName, Geometry g) throws DaoException {
-
-        Object[] arr = new Object[]{
-                itemId,
-                layerName,
-                refSysName,
-                String.format("ST_GeomAsText(%s)", g.toText())};
-        fastLoader.load(arr);
-
-    }
-
-
-    @Override
     public void beginSaveGeometries() throws DaoException {
-
-        fastLoader = new FastLoader(db.getDataSource(), "geometries", new String[]{"item_id, layer_name, ref_sys_name, geom"});
-
+        try {
+            simpleFeatureBuilder = new SimpleFeatureBuilder(db.getSchema());
+        }catch(Exception e){
+            throw new DaoException(e);
+        }
     }
 
     @Override
     public void endSaveGeometries() throws DaoException {
+        flushFeatureBuffer();
+    }
 
-        fastLoader.endLoad();
-        fastLoader.close();
-        fastLoader = null;
+    private void flushFeatureBuffer() throws DaoException{
+
+        try {
+            SimpleFeatureCollection featuresToStore = new ListFeatureCollection(db.getSchema(), curFeaturesToStore);
+            ((SimpleFeatureStore) db.getFeatureSource()).addFeatures(featuresToStore); // GeoTools can be so weird sometimes
+            curFeaturesToStore.clear();
+        }catch(IOException e){
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
+    public void saveGeometry(int itemId, String layerName, String refSysName, Geometry g) throws DaoException {
+
+        try {
+
+            if (curFeaturesToStore == null) {
+                curFeaturesToStore = Lists.newArrayList();
+            }
+
+            SimpleFeature curFeature = simpleFeatureBuilder.buildFeature("n/a", new Object[]{new Integer(itemId), layerName, refSysName, g});
+            curFeaturesToStore.add(curFeature);
+
+            if (curFeaturesToStore.size() % BUFFER_SIZE == 0){
+                flushFeatureBuffer();
+            }
+
+
+        }catch(Exception e){
+            throw new DaoException(e);
+        }
 
     }
+
 
     public static class Provider extends org.wikapidia.conf.Provider<PostGISSpatialDataDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
@@ -186,34 +154,14 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
 
         @Override
         public String getPath() {
-
-            return "spatial.dao.spatialdata";
+            return "spatial.dao.spatialData";
         }
 
-        private static int numInstances = 0;
         @Override
         public PostGISSpatialDataDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("postgis")) {
-                return null;
-            }
-            try {
 
-                /*
-                return new LocalLinkSqlDao(
-                        getConfigurator().get(
-                                WpDataSource.class,
-                                config.getString("dataSource"))
-                 */
-
-                System.out.println("GETTING DAO " + numInstances);
-                numInstances++;
-                WpDataSource wpDataSource = getConfigurator().get(WpDataSource.class,
-                        "postgis");
-                return new PostGISSpatialDataDao(new PostGISDB(wpDataSource));
-
-            } catch (DaoException e) {
-                throw new ConfigurationException(e);
-            }
+            return new PostGISSpatialDataDao( getConfigurator().get(PostGISDB.class, config.getString("dataSource")));
         }
     }
+
 }
