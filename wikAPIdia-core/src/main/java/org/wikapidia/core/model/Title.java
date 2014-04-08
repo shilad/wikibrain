@@ -103,7 +103,7 @@ public class Title implements Externalizable {
 	
 	@Override
 	public String toString(){
-		return canonicalTitle;
+		return canonicalTitle + " (" + getLanguage().getLangCode() + ")";
 	}
 	
 	@Override

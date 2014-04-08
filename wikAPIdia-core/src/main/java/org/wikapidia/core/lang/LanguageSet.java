@@ -190,16 +190,21 @@ public class LanguageSet implements Iterable<Language> {
 
     /**
      * Returns English if English is in the set, else returns Simple. If Simple is not in the
-     * set, throws an exception.
+     * set, will return the default language or throws an exception, depending on the value of returnDefaultLangIfEnglishNotAvailable
+     * @param
      * @return
+     * @throws WikapidiaException
      */
-    public Language getBestAvailableEnglishLang() throws WikapidiaException {
+    public Language getBestAvailableEnglishLang(boolean returnDefaultLangIfEnglishNotAvailable) throws WikapidiaException {
         if (this.containsLanguage(Language.getByLangCode("en"))){
             return Language.getByLangCode("en");
         }else if (this.containsLanguage(Language.getByLangCode("simple"))){
             return Language.getByLangCode("simple");
         }else{
-            throw new WikapidiaException("No English language loaded");
+            if (returnDefaultLangIfEnglishNotAvailable){
+                return this.getDefaultLanguage();
+            }
+            throw new WikapidiaException("No English language available");
         }
     }
 
