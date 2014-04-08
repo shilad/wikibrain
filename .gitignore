@@ -28,6 +28,7 @@ download/
 tmp/
 dat/
 db/
+lib/
 
 # lib
 */lib/
@@ -36,3 +37,5 @@ db/
 wp-java.sh
 
 
+
+*.jar
