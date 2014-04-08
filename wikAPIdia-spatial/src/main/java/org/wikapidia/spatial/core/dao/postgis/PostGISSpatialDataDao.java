@@ -46,24 +46,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     @Override
     public Geometry getGeometry(int itemId, String layerName, String refSysName) throws DaoException {
 
-        try {
-
-            FeatureSource contents = db.getFeatureSource();
-            String cqlQuery = String.format("item_id = %d AND layer_name = '%s' AND ref_sys_name = '%s'", itemId, layerName, refSysName);
-            Filter f = CQL.toFilter(cqlQuery);
-            FeatureCollection collection = contents.getFeatures(f);
-
-            if (collection.size() == 0) return null;
-
-            FeatureIterator iterator = collection.features();
-            Feature feature = iterator.next();
-            return ((Geometry)feature.getDefaultGeometryProperty().getValue());
-
-
-        }catch(Exception e){
-            throw new DaoException(e);
-        }
-
+        return db.getGeometry(itemId, layerName, refSysName);
 
     }
 
@@ -165,6 +148,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
         public PostGISSpatialDataDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
 
             return new PostGISSpatialDataDao( getConfigurator().get(PostGISDB.class, config.getString("dataSource")));
+
         }
     }
 

@@ -1,37 +1,25 @@
 package org.wikapidia.spatial.core.dao.postgis;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import com.vividsolutions.jts.geom.Geometry;
 import org.geotools.data.*;
-import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureStore;
-import org.geotools.data.store.ContentDataStore;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.filter.text.cql2.CQL;
-import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.jdbc.Index;
 import org.geotools.jdbc.JDBCDataStore;
-import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
-import org.wikapidia.core.dao.sql.FastLoader;
-import org.wikapidia.core.dao.sql.WpDataSource;
-import org.wikapidia.spatial.core.SpatialContainerMetadata;
-import org.wikapidia.spatial.core.dao.SpatialDataDao;
 
 import java.io.IOException;
-import java.sql.*;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,9 +33,15 @@ public class PostGISDB {
     private static final Logger LOG = Logger.getLogger(PostGISDB.class.getName());
 
     private static final String SPATIAL_DB_NAME = "geometries";
-    private static final String GEOM_PROPERTY = "geometry";
+    private static final String GEOM_FIELD_NAME = "geometry";
+    private static final String LAYER_FIELD_NAME = "layer_name";
+    private static final String REF_SYS_FIELD_NAME = "ref_sys_name";
+    private static final String ITEM_ID_FIELD_NAME = "item_id";
+
 
     private JDBCDataStore store;
+
+    protected static PostGISDB instance; // singleton instance to avoid having multiple JDBCDataStores, as recommended in GeoTools documentation
 
 
 //    private Transaction curSaveTransaction;
@@ -68,6 +62,27 @@ public class PostGISDB {
 
     }
 
+    public Geometry getGeometry(int itemId, String layerName, String refSysName) throws DaoException{
+
+        try {
+
+            FeatureSource contents = getFeatureSource();
+            String cqlQuery = String.format("item_id = %d AND layer_name = '%s' AND ref_sys_name = '%s'", itemId, layerName, refSysName);
+            Filter f = CQL.toFilter(cqlQuery);
+            FeatureCollection collection = contents.getFeatures(f);
+
+            if (collection.size() == 0) return null;
+
+            FeatureIterator iterator = collection.features();
+            Feature feature = iterator.next();
+            return ((Geometry)feature.getDefaultGeometryProperty().getValue());
+
+
+        }catch(Exception e){
+            throw new DaoException(e);
+        }
+    }
+
     private void initialize(Map<String, Object> manualParameters) throws DaoException {
 
         try {
@@ -83,16 +98,16 @@ public class PostGISDB {
                     SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
 
                     builder.setName(SPATIAL_DB_NAME);
-                    builder.add("item_id", Integer.class);
-                    builder.add("layer_name", String.class);
-                    builder.add("ref_sys_name", String.class);
-                    builder.add(GEOM_PROPERTY, Geometry.class);
+                    builder.add(ITEM_ID_FIELD_NAME, Integer.class);
+                    builder.add(LAYER_FIELD_NAME, String.class);
+                    builder.add(REF_SYS_FIELD_NAME, String.class);
+                    builder.add(GEOM_FIELD_NAME, Geometry.class);
 
                     SimpleFeatureType featureType = builder.buildFeatureType();
                     store.createSchema(featureType);
 
                     // note: gist index is created automatically above
-                    Index regIndex = new Index(SPATIAL_DB_NAME, "rs_layer_type", true, "item_id","layer_name","ref_sys_name");
+                    Index regIndex = new Index(SPATIAL_DB_NAME, "rs_layer_type", true, ITEM_ID_FIELD_NAME,LAYER_FIELD_NAME,REF_SYS_FIELD_NAME);
 
                 }catch(Exception e){
                     throw new DaoException(e);
@@ -135,8 +150,14 @@ public class PostGISDB {
     }
 
     public String getGeometryAttributeName(){
-        return GEOM_PROPERTY;
+        return GEOM_FIELD_NAME;
     }
+
+    public String getLayerAttributeName(){return LAYER_FIELD_NAME;}
+
+    public String getRefSysAttributeName() {return REF_SYS_FIELD_NAME;}
+
+    public String getItemIdAttributeName() {return ITEM_ID_FIELD_NAME;}
 
 
     private boolean needsToBeInitialized() throws DaoException{
@@ -177,18 +198,23 @@ public class PostGISDB {
 
             try {
 
-                // This loads the parameters directly into a map that can be used by JDBCDataStores in Geotools
-                // The format in the conf file must match the the JDBCDataStore format
-                // http://docs.geotools.org/stable/userguide/library/jdbc/datastore.html
 
-                Map<String, Object> params = Maps.newHashMap();
-                ConfigObject cObject = config.root();
-                for (String key : cObject.keySet()){
-                    params.put(key, cObject.get(key).unwrapped());
+                if (PostGISDB.instance != null) {
+
+                    // This loads the parameters directly into a map that can be used by JDBCDataStores in Geotools
+                    // The format in the conf file must match the the JDBCDataStore format
+                    // http://docs.geotools.org/stable/userguide/library/jdbc/datastore.html
+
+                    Map<String, Object> params = Maps.newHashMap();
+                    ConfigObject cObject = config.root();
+                    for (String key : cObject.keySet()) {
+                        params.put(key, cObject.get(key).unwrapped());
+                    }
+
+                    PostGISDB.instance = new PostGISDB(params);
                 }
 
-                return new PostGISDB(params);
-
+                return PostGISDB.instance;
 
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
