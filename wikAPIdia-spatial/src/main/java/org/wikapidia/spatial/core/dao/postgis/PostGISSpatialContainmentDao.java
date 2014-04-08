@@ -49,7 +49,8 @@ public class PostGISSpatialContainmentDao implements SpatialContainmentDao {
 
     }
 
-    private TIntSet getContainedItemIds(Geometry g, String refSysName, Set<String> subLayers, ContainmentOperationType opType) throws DaoException {
+    @Override
+    public TIntSet getContainedItemIds(Geometry g, String refSysName, Set<String> subLayers, ContainmentOperationType opType) throws DaoException {
 
         if (subLayers.size() == 0) throw new DaoException("Cannot get containment without any layers");
 
@@ -126,12 +127,12 @@ public class PostGISSpatialContainmentDao implements SpatialContainmentDao {
 
         @Override
         public Class getType() {
-            return SpatialDataDao.class;
+            return SpatialContainmentDao.class;
         }
 
         @Override
         public String getPath() {
-            return "spatial.dao.spatialData";
+            return "spatial.dao.spatialContainment";
         }
 
         @Override

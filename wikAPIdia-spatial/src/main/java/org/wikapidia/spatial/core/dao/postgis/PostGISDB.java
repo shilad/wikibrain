@@ -199,7 +199,7 @@ public class PostGISDB {
             try {
 
 
-                if (PostGISDB.instance != null) {
+                if (PostGISDB.instance == null) {
 
                     // This loads the parameters directly into a map that can be used by JDBCDataStores in Geotools
                     // The format in the conf file must match the the JDBCDataStore format
