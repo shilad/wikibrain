@@ -46,7 +46,7 @@ public class CalculateGeographicDistanceBetweenPages {
 
             // Find the Wikidata item IDs for the local pages corresponding to the page names
             for (String pageName : pageNames){
-                LocalPage localPage = lpDao.getByTitle(new Title(pageName, loadedLangs.getBestAvailableEnglishLang()), NameSpace.ARTICLE);
+                LocalPage localPage = lpDao.getByTitle(new Title(pageName, loadedLangs.getBestAvailableEnglishLang(true)), NameSpace.ARTICLE);
                 Integer itemId = wdDao.getItemId(localPage);
 
                 itemIds.add(itemId);

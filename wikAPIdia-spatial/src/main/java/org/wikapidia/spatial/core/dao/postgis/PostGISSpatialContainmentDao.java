@@ -76,10 +76,10 @@ public class PostGISSpatialContainmentDao implements SpatialContainmentDao {
         Filter geomFilter = null;
         switch(opType){
             case CONTAINMENT:
-                geomFilter = ff.contains(geomProperty, ff.literal(g));
+                geomFilter = ff.contains(ff.literal(g), geomProperty);
                 break;
             case INTERSECTION:
-                geomFilter = ff.intersects(geomProperty, ff.literal(g));
+                geomFilter = ff.intersects(ff.literal(g), geomProperty);
                 break;
             default:
                 throw new DaoException("Illegal containment operation type (not supported): " + opType);
