@@ -20,11 +20,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 /**
+ * All cookbook examples should include comments. Replace this with a real one.
+ *
  * @author Shilad Sen
  */
 public class ShowAnchorText {
 
     public static void main(String args[]) throws ConfigurationException, DaoException {
+        // The following ten-line dance to get an env is awkward and repeated over and over.
+        // Figure out a good way to consolidate it.
         Options options = new Options();
         EnvBuilder.addStandardOptions(options);
 
@@ -37,8 +41,8 @@ public class ShowAnchorText {
             new HelpFormatter().printHelp("DumpLoader", options);
             return;
         }
-
         Env env = new EnvBuilder(cmd).build();
+
         Configurator configurator = env.getConfigurator();
         LocalPageDao lpDao = configurator.get(LocalPageDao.class);
         LocalLinkDao sqlDao = configurator.get(LocalLinkDao.class, "sql");
