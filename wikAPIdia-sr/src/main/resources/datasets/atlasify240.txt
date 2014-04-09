@@ -1,233 +1,240 @@
-lion	love	0.2
-lion	loyalty	0.475
-islam	ronald reagan	0.375
-marie curie	mathematics	0.525
-united states	wine	0.55
-computer science	hawk	0.05
-internet	truth	0.625
-morning	sunrise	1.0
-bridge	river	0.975
-green	happiness	0.275
-barack obama	blue	0.675
-autumn	bald eagle	0.275
-biology	charles darwin	1.0
-ethics	evil	0.975
-carnivore	mammal	0.825
-beer	computer science	0.275
-bear	panda	1.0
-alan turing	biology	0.5
-australia	hinduism	0.225
-computer science	leonhard euler	0.625
-art	bald eagle	0.275
-chemistry	mathematics	0.85
-australia	christopher columbus	0.175
-australia	bread	0.35
-buddhism	south america	0.2
-summer	twitter	0.1
-community	myspace	0.975
-charles darwin	deviantart	0.025
-facebook	google	0.925
-happiness	yellow	0.55
-humpback whale	morning	0.125
-abba	country music	0.35
-biology	marie curie	0.425
-peace	yasser arafat	0.825
-buddhism	north america	0.35
-lion	mouse	0.775
-marie curie	physics	0.8
-happiness	red	0.375
-newspaper	truth	0.775
-bald eagle	brazil	0.275
-ireland	wine	0.475
-privacy	skype	0.675
-charles darwin	mathematics	0.425
-bill clinton	yellow	0.075
-antarctica	christianity	0.15
-chocolate	united states	0.425
-buddhism	winter	0.225
-art	flickr	0.925
-chemistry	gregor mendel	0.65
-biology	leonhard euler	0.5
-banker	giant panda	0.05
-radio	technology	0.925
-hands	lion	0.1
-privacy	world of warcraft	0.475
-evil	science	0.475
-envy	yellow	0.275
-art	deviantart	0.95
-dove	skype	0.025
-dog	peace	0.225
-blue	fear	0.175
-islam	south america	0.275
-beer	brazil	0.425
-hinduism	south america	0.25
-beer	led zeppelin	0.35
-hinduism	spring (season)	0.25
-france	wine	0.975
-community	flickr	0.8
-george w. bush	war	1.0
-community	twitter	0.925
-4chan	abba	0.075
-islam	terrorism	0.875
-antarctica	communism	0.05
-dove	peace	0.975
-barack obama	recession	0.9
-albert einstein	chemistry	0.775
-community	world of warcraft	0.9
-isaac newton	physics	1.0
-canada	morning	0.1
-newspaper	technology	0.725
-architect	architecture	1.0
-beer	england	0.75
-australia	somatosensory system	0.075
-anger	yellow	0.175
-community	deviantart	0.825
-news	radio	0.925
-carnivore	carnivore	1.0
-eagle	war	0.675
-australia	love	0.325
-blue	happiness	0.525
-happiness	sahara desert	0.05
-autumn	winter	1.0
-computer science	galileo galilei	0.375
-computer science	marie curie	0.225
-news	switzerland	0.35
-apple inc.	microsoft	0.9625
-love	yellow	0.25
-4chan	architect	0.05
-cat	mouse	1.0
-lion	war	0.725
-television	truth	0.625
-biology	galileo galilei	0.425
-brick	corn	0.075
-community	skype	0.825
-charles darwin	chemistry	0.5
-democracy	religion	0.625
-red	south america	0.225
-mathematics	physics	1.0
-4chan	buddhism	0.125
-courage	eagle	0.775
-bread	italy	0.775
-dog	love	0.7
-philosophy	science	0.925
-california condor	islam	0.025
-cheese	france	0.9125
-buddhism	russia	0.25
-isaac newton	mathematics	0.95
-country music	elvis presley	0.675
-genghis khan	red	0.35
-isaac newton	rock music	0.0
-hawk	loyalty	0.3
-alan turing	atilla the hun	0.05
-australia	chocolate	0.275
-isaac newton	war	0.15
-fear	yellow	0.6
-antarctica	buddhism	0.075
-christianity	europe	0.925
-middle east	peace	0.95
-africa	islam	0.775
-hawk	love	0.2
-abba	rock music	0.7
-aol instant messenger	community	0.8
-architect	democratic republic of the congo	0.075
-judaism	napoleon	0.3
-galileo galilei	physics	1.0
-fear	newspaper	0.5
-art	world of warcraft	0.4
-facebook	literature	0.375
-britney spears	indonesia	0.1
-dove	war	0.7
-pop music	queen (band)	0.875
-country music	queen (band)	0.375
-facebook	microsoft	0.725
-abortion	morality	0.85
-asia	islam	0.875
-dove	loyalty	0.325
-spring (season)	winter	1.0
-architect	dog	0.05
-art	twitter	0.25
-cat	dog	1.0
-courage	dove	0.35
-astronaut	flamingo	0.0625
-lobster	switzerland	0.15
-beer	france	0.425
-jesse jackson	yasser arafat	0.175
-michael jackson	pop music	1.0
-beer	italy	0.5
-autumn	spring (season)	0.975
-switzerland	deviantart	0.15
-antarctica	islam	0.05
-alaska	rainforest	0.225
-deception	television	0.6
-leonhard euler	television	0.175
-cheese	facebook	0.0
-religion	united states constitution	0.75
-community	youtube	0.8
-europe	hinduism	0.4
-spring (season)	summer	1.0
-islam	north america	0.65
-mexico	privacy	0.275
-autumn	summer	1.0
-bald eagle	fear	0.225
-chocolate	privacy	0.1
-alexander the great	california condor	0.05
-hinduism	ireland	0.125
-bald eagle	radio	0.05
-leonhard euler	mathematics	1.0
-barack obama	red	0.275
-green	knife	0.05
-summer	winter	0.975
-dove	love	0.725
-lion	sweden	0.35
-abba	politician	0.125
-israel	war	0.975
-cat	loyalty	0.325
-dog	loyalty	1.0
-privacy	deviantart	0.375
-art	fear	0.325
-google	internet	1.0
-julius caesar	summer	0.25
-australia	cheese	0.425
-art	skype	0.175
-art	youtube	0.625
-gregor mendel	winter	0.125
-beer	dance	0.55
-england	wine	0.525
-led zeppelin	pop music	0.7
-architect	the beatles	0.05
-4chan	art	0.325
-hawk	war	0.825
-beer	ireland	0.975
-leonhard euler	physics	0.7
-charles darwin	physics	0.45
-eagle	loyalty	0.5
-computer science	isaac newton	0.475
-envy	green	1.0
-cheese	england	0.625
-blue	sadness	1.0
-pop music	the beatles	0.975
-chocolate	england	0.475
-alan turing	computer science	0.85
-albert einstein	taste	0.05
-blue	love	0.4
-flickr	wine	0.075
-barack obama	christianity	0.65
-grain	wheat	1.0
-cheese	germany	0.525
-banker	galileo galilei	0.125
-anger	blue	0.225
-communism	moss	0.0
-california condor	peru	0.275
-genghis khan	google	0.15
-galileo galilei	kitchen	0.0
-michael jackson	sponge	0.05
-bread	france	0.95
-albert einstein	computer science	0.575
-spoon	united states	0.075
-harp seal	war	0.1
-bald eagle	physics	0.025
-alligator	crocodile	1.0
-deception	radio	0.4
-soap	deviantart	0.075
-apple inc.	google	0.925
-christianity	democracy	0.525
+Isaac Newton	War	0.6
+Radio	Technology	3.7
+Australia	Hinduism	0.9
+Television	Truth	2.5
+Courage	Dove	1.4
+YouTube	Art	2.5
+Antarctica	Communism	0.2
+Radio	News	3.7
+Loyalty	Lion	1.9
+England	Chocolate	1.9
+Yellow	Bill Clinton	0.3
+Happiness	Sahara Desert	0.2
+Genghis Khan	Google	0.6
+South America	Hinduism	1.0
+Cat	Mouse	4.0
+Flickr	Community	3.2
+Envy	Yellow	1.1
+Beer	Led Zeppelin	1.4
+Europe	Hinduism	1.6
+Morning	Sunrise	4.0
+Autumn	Winter	4.0
+Lion	Mouse	3.1
+Australia	Bread	1.4
+Summer	Julius Caesar	1.0
+Somatosensory system	Australia	0.3
+Alan Turing	Biology	2.0
+Fear	Yellow	2.4
+England	Wine	2.1
+Switzerland	deviantArt	0.6
+Radio	Deception	1.6
+Leonhard Euler	Computer Science	2.5
+Italy	Beer	2.0
+France	Bread	3.8
+Ireland	Hinduism	0.5
+Antarctica	Buddhism	0.3
+4Chan	Art	1.3
+Architect	4Chan	0.2
+Cat	Loyalty	1.3
+deviantArt	Charles Darwin	0.1
+Queen (band)	Country music	1.5
+Isaac Newton	Physics	4.0
+Soap	deviantArt	0.3
+Newspaper	Fear	2.0
+Morning	Humpback Whale	0.5
+Microsoft	Apple Inc.	3.9
+Religion	Democracy	2.5
+Astronaut	Flamingo	0.2
+Dove	Skype	0.1
+Beer	Computer Science	1.0
+Marie Curie	Mathematics	2.1
+Love	Dog	2.8
+Bald Eagle	Autumn	1.1
+Loyalty	Eagle	2.0
+Buddhism	Winter	0.9
+Switzerland	News	1.4
+France	Cheese	3.6
+South America	Islam	1.1
+Australia	Love	1.3
+Genghis Khan	Red	1.4
+North America	Buddhism	1.4
+Switzerland	Lobster	0.6
+Giant Panda	Banker	0.2
+Barack Obama	Blue	2.7
+Galileo Galilei	Biology	1.7
+Anger	Yellow	0.7
+George W. Bush	War	4.0
+Queen (band)	Pop music	3.5
+Skype	Art	0.7
+Facebook	Cheese	0.0
+World of Warcraft	Community	3.6
+Isaac Newton	Computer Science	1.9
+England	Beer	3.0
+Antarctica	Christianity	0.6
+Hinduism	Spring (season)	1.0
+Fear	Blue	0.7
+Alligator	Crocodile	4.0
+Galileo Galilei	Banker	0.5
+Love	Blue	1.6
+Australia	Chocolate	1.1
+Carnivore	Mammal	3.3
+Summer	Autumn	4.0
+France	Wine	3.9
+Rock music	Isaac Newton	0.0
+deviantArt	Privacy	1.5
+Marie Curie	Physics	3.2
+Loyalty	Dove	1.3
+Anger	Blue	0.9
+Cheese	France	3.7
+ABBA	Country music	1.4
+Albert Einstein	Chemistry	3.1
+AOL Instant Messenger	Community	3.2
+Happiness	Red	1.5
+Cat	Dog	4.0
+Bridge	River	3.9
+Peace	Dog	0.9
+Skype	Privacy	2.7
+Alaska	Rainforest	0.9
+Loyalty	Dog	4.0
+Russia	Buddhism	1.0
+Winter	Summer	3.9
+Isaac Newton	Mathematics	3.8
+Ronald Reagan	Islam	1.5
+Canada	Morning	0.4
+Alan Turing	Atilla the Hun	0.2
+World of Warcraft	Privacy	1.9
+Charles Darwin	Physics	1.8
+Sponge	Michael Jackson	0.2
+Italy	Bread	3.1
+Love	Dove	2.9
+Love	Lion	0.8
+YouTube	Community	3.2
+Twitter	Art	1.0
+Flamingo	Astronaut	0.3
+Wheat	Grain	4.0
+Love	Hawk	0.8
+deviantArt	Community	3.3
+Israel	War	3.9
+Barack Obama	Red	1.1
+War	Hawk	3.3
+Bear	Panda	4.0
+Hawk	Computer Science	0.2
+Marie Curie	Biology	1.7
+Fear	Bald Eagle	0.9
+Twitter	Summer	0.4
+Moss	Communism	0.0
+Lion	Hands	0.4
+Newspaper	Technology	2.9
+Radio	Bald Eagle	0.2
+Google	Facebook	3.8
+4Chan	ABBA	0.3
+Morality	Abortion	3.4
+Architect	Architecture	4.0
+Apple Inc.	Google	3.7
+Chemistry	Mathematics	3.4
+Television	Deception	2.4
+United States	Spoon	0.3
+Evil	Science	1.9
+Winter	Spring (season)	4.0
+Happiness	Blue	2.1
+Barack Obama	Christianity	2.6
+Privacy	Chocolate	0.4
+Philosophy	Science	3.7
+Antarctica	Islam	0.2
+Flickr	Art	3.7
+Dog	Architect	0.2
+Winter	Autumn	4.0
+Literature	Facebook	1.5
+War	Harp Seal	0.4
+Mexico	Privacy	1.1
+Newspaper	Truth	3.1
+Charles Darwin	Biology	4.0
+Leonhard Euler	Biology	2.0
+Alan Turing	Computer Science	3.4
+Physics	Mathematics	4.0
+Carnivore	Carnivore	4.0
+Ireland	Wine	1.9
+The Beatles	Architect	0.2
+Middle East	Peace	3.8
+Computer Science	Beer	1.2
+Elvis Presley	Country music	2.7
+California Condor	Peru	1.1
+Bald Eagle	Physics	0.1
+Envy	Green	4.0
+The Beatles	Pop music	3.9
+Charles Darwin	Chemistry	2.0
+Napoleon	Judaism	1.2
+Asia	Islam	3.5
+Religion	United States Constitution	3.0
+MySpace	Community	3.9
+Happiness	Green	1.1
+Brazil	Beer	1.7
+Google	Internet	4.0
+Michael Jackson	Pop music	4.0
+Leonhard Euler	Television	0.7
+England	Cheese	2.5
+Microsoft	Facebook	2.9
+Albert Einstein	Computer Science	2.3
+Corn	Brick	0.3
+Grain	Wheat	4.0
+Africa	Islam	3.1
+United States	Chocolate	1.7
+Islam	Terrorism	3.5
+Buddhism	4Chan	0.5
+Green	Knife	0.2
+Art	Fear	1.3
+Australia	Cheese	1.7
+Architect	Democratic Republic of the Congo	0.3
+World of Warcraft	Art	1.6
+Gregor Mendel	Chemistry	2.6
+Peace	Dove	3.9
+Spring (season)	Summer	4.0
+ABBA	Rock music	2.8
+Galileo Galilei	Physics	4.0
+Britney Spears	Indonesia	0.4
+Galileo Galilei	Computer Science	1.5
+Led Zeppelin	Pop music	2.8
+Happiness	Yellow	2.2
+Evil	Ethics	3.9
+Facebook	Google	3.6
+Albert Einstein	Taste	0.2
+War	Dove	2.8
+Lion	Sweden	1.4
+War	Eagle	2.7
+Yasser Arafat	Peace	3.3
+South America	Red	0.9
+Ireland	Beer	3.9
+Christopher Columbus	Australia	0.7
+Leonhard Euler	Mathematics	4.0
+deviantArt	Art	3.8
+France	Beer	1.7
+Loyalty	Hawk	1.2
+Wine	Flickr	0.3
+Dance	Beer	2.2
+ABBA	Politician	0.5
+United States	Wine	2.2
+Autumn	Spring (season)	3.9
+Marie Curie	Computer Science	0.9
+Yasser Arafat	Jesse Jackson	0.7
+Bald Eagle	Brazil	1.1
+Bald Eagle	Art	1.1
+Yellow	Love	1.0
+Twitter	Community	3.7
+Barack Obama	Recession	3.6
+Skype	Community	3.3
+South America	Buddhism	0.8
+Sadness	Blue	4.0
+Courage	Eagle	3.1
+Internet	Truth	2.5
+Christianity	Democracy	2.1
+Charles Darwin	Mathematics	1.7
+California Condor	Islam	0.1
+Leonhard Euler	Physics	2.8
+Gregor Mendel	Winter	0.5
+Europe	Christianity	3.7
+North America	Islam	2.6
+Galileo Galilei	Kitchen	0.0
+War	Lion	2.9
+California Condor	Alexander the Great	0.2
+Germany	Cheese	2.1
+Apple Inc.	Microsoft	3.8

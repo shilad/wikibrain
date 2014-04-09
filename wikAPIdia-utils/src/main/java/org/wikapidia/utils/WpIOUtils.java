@@ -108,13 +108,26 @@ public class WpIOUtils {
      * @throws java.io.IOException
      */
     public static Reader openReader(File path) throws IOException {
+        InputStream input = openInputStream(path);
+        return new InputStreamReader(input, "UTF-8");
+    }
+
+    /**
+     * Opens a possibly compressed input stream.
+     * The underlying input stream is, in fact buffered even though
+     * the returned object isn't.
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static InputStream openInputStream(File path) throws IOException {
         InputStream input = new BufferedInputStream(new FileInputStream(path));
         if (FilenameUtils.getExtension(path.toString()).toLowerCase().startsWith("bz2")) {
             input = new BZip2CompressorInputStream(input, true);
         } else if (FilenameUtils.getExtension(path.toString()).equalsIgnoreCase("gz")) {
             input = new GZIPInputStream(input);
         }
-        return new InputStreamReader(input, "UTF-8");
+        return input;
     }
 
     /**

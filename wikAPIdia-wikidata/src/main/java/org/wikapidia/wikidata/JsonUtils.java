@@ -50,7 +50,7 @@ public class JsonUtils {
                     element.getAsJsonObject().get("numeric-id").getAsInt(),
                     element
             );
-        } else if (Arrays.asList("globecoordinate", "other").contains(type)) {
+        } else if (Arrays.asList("globecoordinate", "other", "quantity").contains(type)) {
             return new WikidataValue(type, gsonToPrimitive(element), element);
         } else {
             throw new WpParseException("unknown wikidata type: " + type);
