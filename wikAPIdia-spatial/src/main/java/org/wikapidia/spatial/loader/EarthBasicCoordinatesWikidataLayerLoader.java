@@ -42,9 +42,16 @@ public class EarthBasicCoordinatesWikidataLayerLoader extends WikidataLayerLoade
 
             Double latitude = json.get("latitude").getAsDouble();
             Double longitude = json.get("longitude").getAsDouble();
-            String globe = json.get("globe").getAsString();
+            String globe = null;
+            try{
+                globe = json.get("globe").getAsString();
+            }
+            catch(Exception e){
+                //do nothing....default for "null" globe is earth
+            }
 
-            if (globe != null && (!globe.endsWith(EARTH_ITEM_ID) || !globe.endsWith("earth"))) {
+
+            if (globe != null && !(globe.endsWith(EARTH_ITEM_ID) || globe.endsWith("earth"))) {
                 LOG.log(Level.INFO, "Found non-Earth coordinate location: " + json);
                 return null; // check to make sure these refer to the Earth
             }
