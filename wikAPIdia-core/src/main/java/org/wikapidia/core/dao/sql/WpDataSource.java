@@ -130,12 +130,13 @@ public class WpDataSource {
 
 
                 Statement st = conn.createStatement();
-                ResultSet rs = st.executeQuery("SHOW search_path");
-                rs.next();
-                System.out.println(rs.getString(1));
+                //ResultSet rs = st.executeQuery("SHOW search_path");
+                //rs.next();
+                //System.out.println(rs.getString(1));
                 System.out.println(s);
                 st.execute(s + ";");
                 st.close();
+
             }
             conn.commit();
         } catch (SQLException e){
