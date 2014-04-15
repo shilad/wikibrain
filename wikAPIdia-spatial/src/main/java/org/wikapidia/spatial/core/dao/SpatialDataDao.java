@@ -4,6 +4,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.spatial.core.SpatialContainerMetadata;
 
+import java.util.Map;
+
 /**
  * Created by Brent Hecht on 12/29/13.
  */
@@ -11,6 +13,8 @@ public interface SpatialDataDao {
 
 
     public Geometry getGeometry(int itemId, String layerName, String refSysName) throws DaoException;
+
+    public Map<Integer, Geometry> getAllGeometries(String layerName, String refSysName) throws DaoException;
 
     public Iterable<Geometry> getGeometries(int itemId) throws DaoException;
 
