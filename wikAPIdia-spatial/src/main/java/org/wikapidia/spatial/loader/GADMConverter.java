@@ -10,7 +10,9 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.FileUtils;
+import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
+import org.geotools.data.shapefile.dbf.DbaseFileWriter;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.data.shapefile.shp.ShapefileException;
 import org.geotools.data.shapefile.shp.ShapefileReader;
@@ -30,6 +32,7 @@ import org.wikapidia.wikidata.WikidataDao;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.logging.Level;
@@ -74,6 +77,33 @@ public class GADMConverter {
         } catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    //TODO: parse the GADM shape file
+    public void parseShpFile(ShpFiles shpFile) {
+        DbaseFileReader dbfReader;
+        DbaseFileWriter dbfWriter;
+        DbaseFileHeader dbfHeader;
+        Object[] entry, newEntry = new Object[2];
+        try {
+            dbfReader = new DbaseFileReader(shpFile, false, Charset.forName("UTF-8"));
+            dbfHeader = new DbaseFileHeader();
+            WritableByteChannel out = new FileOutputStream("thefile.dbf").getChannel();
+            dbfWriter = new DbaseFileWriter(dbfHeader,out);
+            dbfHeader.addColumn("TITLE1_EN",'c',254,0);
+            dbfHeader.addColumn("TITLE2_EN",'c',254,0);
+            while (dbfReader.hasNext()) {
+                entry = dbfReader.readEntry();
+                newEntry[0] = (String)entry[4];
+                newEntry[1] = (String)entry[4] + ", " + (String)entry[2];
+                dbfWriter.write(newEntry);
+            }
+            dbfWriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
