@@ -301,7 +301,7 @@ public class SpatialDataLoader {
 
     }
 
-    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/bjhecht/Dropbox/spatial_data";
+    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data";
 
     public static void main(String args[]) throws ConfigurationException, WikapidiaException {
 
@@ -342,8 +342,9 @@ public class SpatialDataLoader {
         String phraseAnalyzerName = cmd.getOptionValue("p","titleredirect"); // add to docs that this has to be
         PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
 
-        String spatialDataFolderPath = cmd.getOptionValue('f');
-        File spatialDataFolder = new File("/Users/bjhecht/Dropbox/spatial_data_temp");
+        //String spatialDataFolderPath = cmd.getOptionValue('f');
+        File spatialDataFolder = new File("/Users/toby/Dropbox/spatial_data_temp");
+        String spatialDataFolderPath = new String("/Users/toby/Dropbox/spatial_data_temp");
         //File spatialDataFolder = new File(spatialDataFolderPath); //TODO: fixme
 
         WikidataDao wdDao = conf.get(WikidataDao.class);
@@ -354,8 +355,8 @@ public class SpatialDataLoader {
 
         //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
         SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder);
-//        loader.loadWikidataData();
-        loader.loadExogenousData();
+        loader.loadWikidataData();
+        //loader.loadExogenousData();
 
 
 

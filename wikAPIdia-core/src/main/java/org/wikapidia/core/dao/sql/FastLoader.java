@@ -30,7 +30,7 @@ public class FastLoader {
     private boolean isPostGisLoader = false;
 
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
-    static final int BATCH_SIZE = 5;
+    static final int BATCH_SIZE = 2000;
 
     private final WpDataSource ds;
     private final String table;

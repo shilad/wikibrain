@@ -128,6 +128,7 @@ public class CompareLocalLinkLiveSqlDao {
         entries = String.format("Number of outlinks in LiveDao: %d#Number of outlinks in SQLDao: %d#Number of outlinks in common: %d", liveOutCounter, sqlOutCounter, commonOutCounter).split("#");
         csvWriter.writeNext(entries);
         csvWriter.close();
+
     }
 
 }
