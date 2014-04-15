@@ -77,7 +77,7 @@ public class WikidataValue implements Serializable {
     }
 
     public String getStringValue() {
-        return (String)value;
+        return value.toString();
     }
 
     public int getItemValue() {

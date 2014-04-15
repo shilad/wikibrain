@@ -71,6 +71,9 @@ public class Title implements Externalizable {
 	}
 	
 	private static String getNamespaceString(String text){
+        if (text.equals(":")) {
+            return null;
+        }
 		String[] parts = text.split(":");
 		if (parts != null && text.contains(":")&& NameSpace.isNamespaceString(parts[0])){
 			return parts[0];
@@ -100,7 +103,7 @@ public class Title implements Externalizable {
 	
 	@Override
 	public String toString(){
-		return canonicalTitle;
+		return canonicalTitle + " (" + getLanguage().getLangCode() + ")";
 	}
 	
 	@Override

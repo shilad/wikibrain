@@ -207,14 +207,14 @@ public class LiveAPIQuery {
                 info = IOUtils.toString(inputStr);
             }
             catch(Exception e){
-                throw new DaoException("Error parsing URL");
+                throw new DaoException("Error parsing LiveDao query URL");
             }
             finally {
                 IOUtils.closeQuietly(inputStr);
             }
         }
         catch(Exception e){
-            throw new DaoException("Error getting page from the Wikipedia Server ");
+            throw new DaoException("Error getting page from the Wikipedia Server (Check your internet connection) ");
         }
 
         queryResult = info;

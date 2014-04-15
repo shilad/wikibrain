@@ -63,7 +63,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
             conn = wpDs.getConnection();
             this.dialect = JooqUtils.dialect(conn);
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("SQL Dao Failed. Check if the table exists / if the desired information has been parsed and stored in the database\n" + e.toString());
         } finally {
             quietlyCloseConn(conn);
         }
