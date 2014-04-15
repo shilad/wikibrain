@@ -298,6 +298,66 @@ Properties for Minneapolis:
 ```
 Note that these relationships are *structured*, not just textual. For example, the string "R. T. Rybak" is linked to the multilingual concept "R. T. Rybak," and the lat/long coordinates are accessible as a geographic data structure.
 
+###Spatial
+
+Wikipedia data is often used by researchers and practitioners as a means of understanding the physical world around us.
+WikiBrain incorporates a robust spatial library that makes it simple to work with Wikipedia as spatial data.
+In particular, WikiBrain connects articles about spatial entities to their corresponding spatial footprints.
+It uses two types of spatial footprints: latitude/longitude coordinate locations in Wikidata (as mined from Wikipedia pages) and exogenous geometries (e.g. those from [GADM] (http://www.gadm.org)).
+The exogenous geometry support means that higher-dimensional geometries (e.g. lines and polygons) are supported, rather than just Wikidata's point-based representations.
+
+Spatially-enabling an existing WikiBrain installation requires the completion of several straightforward steps:
+
+(0) Setup Wikidata (see above). The spatial library requires Wikidata.
+
+(1) Install [PostGIS] (http://postgis.net/install) and set up a PostGIS database. This can be the same database you are using for WikiBrain if you are using Postgres (see below) or you can create a unique db for spatial data.
+There are lots of tutorials on how to set up a PostGIS-enabled database (e.g. [this one] (http://postgis.net/docs/postgis_installation.html)), and the particulars vary depending on the method you used to install PostGIS.
+
+For example, if you're on Mac OS X and using Postgres.app (highly recommended), to spatially enable a postgres database, you simply run these commands:
+
+```
+psql -h localhost -d DBNAME -f /Applications/Postgres.app/Contents/MacOS/share/contrib/postgis-VERSION/postgis.sql
+(e.g. psql -h localhost -d wikibrain -f /Applications/Postgres.app/Contents/MacOS/share/contrib/postgis-2.1/postgis.sql)
+
+psql -h localhost -d DBNAME -f /Applications/Postgres.app/Contents/MacOS/share/contrib/postgis-VERSION/spatial_ref_sys.sql
+(e.g. psql -h localhost -d DBNAME -f /Applications/Postgres.app/Contents/MacOS/share/contrib/postgis-VERSION/spatial_ref_sys.sql)
+```
+
+(2) One you have set up your PostGIS database, you have to modify the reference.conf file to tell it where to find the database.
+Find the spatial section of reference.conf and edit it as follows:
+
+```
+
+spatial : {
+
+    dao : {
+
+        dataSource : {
+
+                // These all use keys standard to Geotools JDBC
+                // see: http://docs.geotools.org/stable/userguide/library/jdbc/datastore.html
+
+                #change this part according to your DB settings
+                default : postgis
+                postgis : {
+                    dbtype : postgis
+                    host : localhost
+                    port : 5432
+                    schema : public
+                    database : DBNAME <-- enter your database's name here
+                    user : USERNAME <-- enter your dbuser name here
+                    passwd : PASSWD <-- enter your password here ("" if no password)
+                    max connections : 19 <-- we highly recommend that you keep this under 20 for compatibility reasons
+                }
+            }
+        ...
+```
+
+(3) Run SpatialDataLoader.java.
+
+We recommend giving it at least 1g of RAM (i.e. -Xmx1g).
+
+
 ###Advanced Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
 The default WikAPIdia configuration is determined by the default [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
