@@ -15,6 +15,7 @@ import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
 
 import javax.sql.DataSource;
+import javax.swing.plaf.nimbus.State;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
 /**
  * @author Shilad Sen
  */
-public class WpDataSource {
+public class WpDataSource  {
     private static final Logger LOG = Logger.getLogger(WpDataSource.class.getName());
 
     private DataSource dataSource;
@@ -130,12 +131,13 @@ public class WpDataSource {
 
 
                 Statement st = conn.createStatement();
-                ResultSet rs = st.executeQuery("SHOW search_path");
-                rs.next();
-                System.out.println(rs.getString(1));
+                //ResultSet rs = st.executeQuery("SHOW search_path");
+                //rs.next();
+                //System.out.println(rs.getString(1));
                 System.out.println(s);
                 st.execute(s + ";");
                 st.close();
+
             }
             conn.commit();
         } catch (SQLException e){
@@ -169,6 +171,26 @@ public class WpDataSource {
             } catch (SQLException e) {
                 LOG.log(Level.WARNING, "Failed to close connection: ", e);
             }
+        }
+    }
+
+    /**
+     * In general, open connections are reclaimed and harmless
+     */
+    public void shutdown() throws SQLException {
+        if (dialect == SQLDialect.H2) {
+            Statement stm = null;
+            Connection cnx = getConnection();
+            try {
+                stm = cnx.createStatement();
+                stm.execute("SHUTDOWN;");
+                stm.close();
+            } finally {
+                closeQuietly(cnx);
+            }
+        }
+        if (dataSource instanceof BoneCPDataSource) {
+            ((BoneCPDataSource)dataSource).close();
         }
     }
 

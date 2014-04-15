@@ -42,6 +42,9 @@ ${WP_DIR}/wikAPIdia-parent/pom.xml
 "
 
 # Destination of compiled jars and dependencies
+if [ ! -e "${WP_LIB:-${WP_DIR}/lib}" ]; then
+    mkdir "${WP_LIB:-${WP_DIR}/lib}"
+fi
 WP_LIB=$(full_path "${WP_LIB:-${WP_DIR}/lib}")
 
 # Specify default classpath. This will be updated later, and CLASSPATH will be prepended to it.

@@ -8,9 +8,11 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
+import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.utils.JvmUtils;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +78,7 @@ public class PipelineLoader {
         }
     }
 
-    public static void main(String args[]) throws ConfigurationException, ClassNotFoundException, IOException, InterruptedException {
+    public static void main(String args[]) throws ConfigurationException, ClassNotFoundException, IOException, InterruptedException, SQLException {
         Options options = new Options();
 
 
@@ -122,6 +124,12 @@ public class PipelineLoader {
 
         Env env = new EnvBuilder(cmd).build();
         Config config = env.getConfiguration().get();
+
+        // Shut down the database carefully
+        WpDataSource ds = env.getConfigurator().get(WpDataSource.class);
+        ds.shutdown();
+        Thread.sleep(1000);
+
         boolean offByDefault = cmd.hasOption("f");
 
         Map<String, Boolean> runStages = new HashMap<String, Boolean>();
