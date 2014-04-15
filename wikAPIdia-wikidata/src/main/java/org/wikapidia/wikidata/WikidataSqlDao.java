@@ -22,6 +22,7 @@ import org.wikapidia.core.dao.sql.WpDataSource;
 import org.wikapidia.core.jooq.Tables;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.model.LocalPage;
+import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.parser.WpParseException;
 
 import java.io.File;
@@ -39,6 +40,7 @@ import static org.wikapidia.core.jooq.tables.WikidataStatement.*;
  */
 public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements WikidataDao {
     private static Language FALLBACK_LANGUAGE = Language.getByLangCode("en");
+    private static int WIKIDATA_ALGORITHM_ID = 1;
 
     private static TableField[] FIELDS = new TableField[] {
             WIKIDATA_STATEMENT.ID,
@@ -117,8 +119,19 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     }
 
     @Override
+    public Integer getItemId(LocalPage page) throws DaoException{
+        return upDao.getUnivPageId(page, WIKIDATA_ALGORITHM_ID);
+    }
+
+    @Override
+    public UniversalPage getUniversalPage(int itemId) throws DaoException {
+        UniversalPage uPage = upDao.getById(itemId, WIKIDATA_ALGORITHM_ID);
+        return uPage;
+    }
+
+    @Override
     public List<WikidataStatement> getStatements(LocalPage page) throws DaoException {
-        int conceptId = upDao.getUnivPageId(page, 1);
+        int conceptId = upDao.getUnivPageId(page, getItemId(page));
         if (conceptId < 0) {
             return new ArrayList<WikidataStatement>();
         }
@@ -130,9 +143,11 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         return IteratorUtils.toList(get(filter).iterator());
     }
 
+
+
     @Override
     public Map<String, List<LocalWikidataStatement>> getLocalStatements(LocalPage page) throws DaoException {
-        int conceptId = upDao.getUnivPageId(page, 1);
+        int conceptId = getItemId(page);
         if (conceptId < 0) {
             return new HashMap<String, List<LocalWikidataStatement>>();
         }
@@ -370,6 +385,9 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         if (filter.getEntityIds() != null) {
             conditions.add(WIKIDATA_STATEMENT.ENTITY_ID.in(filter.getEntityIds()));
         }
+        if (filter.getPropertyIds() != null) {
+            conditions.add(WIKIDATA_STATEMENT.PROP_ID.in(filter.getPropertyIds()));
+        }
         if (filter.getRanks() != null) {
             conditions.add(WIKIDATA_STATEMENT.RANK.in(filter.getRankOrdinals()));
         }
@@ -377,8 +395,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         try {
             Cursor<Record> result = jooq.select().
                     from(Tables.WIKIDATA_STATEMENT).
-                    where(conditions).
-                    fetchLazy(getFetchSize());
+                    where(conditions).fetchLazy(getFetchSize());
 
             return new SimpleSqlDaoIterable<WikidataStatement>(result, jooq) {
                 @Override

@@ -10,6 +10,19 @@ import org.wikapidia.core.lang.LocalId;
 import org.wikapidia.core.model.*;
 
 /**
+ *
+ * Prints out all LocalPage titles in each UniversalPage. For instance,
+ * if en and es are loaded, the printout might look like this:
+ *
+ * ...
+ * LocalPage{nameSpace=ARTICLE, title=United States, localId=..., language=English}
+ * LocalPage{nameSpace=ARTICLE, title=Estados Unidos, localId=..., language=Spanish}
+ *
+ * LocalPage{nameSpace=ARTICLE, title=Spain, localId=..., language=English}
+ * LocalPage{nameSpace=ARTICLE, title=España, localId=..., language=Spanish}
+ *
+ * ...
+ *
  */
 public class UniversalPageDaoExample {
     public static void main(String args[]) throws ConfigurationException, DaoException {

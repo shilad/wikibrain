@@ -93,6 +93,7 @@ public abstract class AbstractUniversalEntity<T> {
         return false;
     }
 
+
     /**
      * Returns the number of languages in which this UniversalEntity exists.
      * @return

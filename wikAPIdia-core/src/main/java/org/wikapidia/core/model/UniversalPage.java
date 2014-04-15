@@ -1,6 +1,9 @@
 package org.wikapidia.core.model;
 
 import com.google.common.collect.Multimap;
+import org.wikapidia.core.WikapidiaException;
+import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.lang.LocalId;
@@ -38,6 +41,7 @@ public class UniversalPage extends AbstractUniversalEntity<LocalId> {
         this.nameSpace = nameSpace;
     }
 
+
     public int getUnivId(){
         return univId;
     }
@@ -46,9 +50,6 @@ public class UniversalPage extends AbstractUniversalEntity<LocalId> {
         return nameSpace;
     }
 
-//    public Collection<LocalId> getLocalIds(Language language) {
-//        return new ArrayList<LocalId>(getLocalEntities(language));
-//    }
 
     public static interface LocalPageChooser {
         public LocalId choose(Collection<LocalId> localPages);
@@ -64,4 +65,19 @@ public class UniversalPage extends AbstractUniversalEntity<LocalId> {
             return false;
         }
     }
+
+    //sample code
+    public Title getBestEnglishTitle(LocalPageDao lpDao, boolean returnRandomLangIfEnglishNotAvailable) throws WikapidiaException {
+
+        try {
+            Language lang = getLanguageSet().getBestAvailableEnglishLang(returnRandomLangIfEnglishNotAvailable);
+            LocalPage lp = lpDao.getById(lang, getLocalEntities(lang).iterator().next().getId());
+            return lp.getTitle();
+
+        }catch(DaoException e){
+            throw new WikapidiaException(e);
+        }
+    }
+
+
 }

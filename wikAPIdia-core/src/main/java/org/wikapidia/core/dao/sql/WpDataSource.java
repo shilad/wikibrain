@@ -17,6 +17,7 @@ import org.wikapidia.core.dao.DaoException;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class WpDataSource {
             conn = dataSource.getConnection();
             this.dialect = JooqUtils.dialect(conn);
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("SQL Dao Failed. Check if the table exists / if the desired information has been parsed and stored in the database\n" + e.toString());
         } finally {
             closeQuietly(conn);
         }
@@ -91,7 +92,7 @@ public class WpDataSource {
         try {
             return DSL.using(getConnection(), dialect, settings);
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("SQL Dao Failed. Check if the table exists / if the desired information has been parsed and stored in the database\n" + e.toString());
         }
     }
 
@@ -111,6 +112,7 @@ public class WpDataSource {
     public void executeSqlResource(String name) throws DaoException {
         String script = null;
         try {
+            System.out.println(name);
             script = IOUtils.toString(AbstractSqlDao.class.getResource(name));
         } catch (IOException e) {
             throw new DaoException(e);
@@ -124,7 +126,14 @@ public class WpDataSource {
                     continue;
                 }
                 LOG.fine("executing:\n" + s + "\n=========================================\n");
+
+
+
                 Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery("SHOW search_path");
+                rs.next();
+                System.out.println(rs.getString(1));
+                System.out.println(s);
                 st.execute(s + ";");
                 st.close();
             }
@@ -132,7 +141,7 @@ public class WpDataSource {
         } catch (SQLException e){
             rollbackQuietly(conn);
             LOG.log(Level.SEVERE, "error executing: " + script, e);
-            throw new DaoException(e);
+            throw new DaoException("SQL Dao Failed. Check if the table exists / if the desired information has been parsed and stored in the database\n" + e.toString());
         } finally {
             closeQuietly(conn);
         }
@@ -195,7 +204,7 @@ public class WpDataSource {
                 ds.setUsername(config.getString("username"));
                 ds.setPassword(config.getString("password"));
                 ds.setPartitionCount(Runtime.getRuntime().availableProcessors());
-                ds.setMaxConnectionsPerPartition(3);
+                ds.setMaxConnectionsPerPartition(2);
                 return new WpDataSource(ds);
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException(e);
