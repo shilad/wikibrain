@@ -54,12 +54,14 @@ public class Interpolator implements Serializable {
             double maxScore = -1;
             double minScore = 100;
             for (EnsembleSim es : examples) {
-                double v = es.getScores().get(i);
-                if (!Double.isNaN(v) && !Double.isInfinite(v)) {
-                    maxScore = Math.max(maxScore, v);
-                    minScore = Math.min(minScore, v);
+                if (es != null && es.getScores() != null) {
+                    double v = es.getScores().get(i);
+                    if (!Double.isNaN(v) && !Double.isInfinite(v)) {
+                        maxScore = Math.max(maxScore, v);
+                        minScore = Math.min(minScore, v);
+                    }
+                    maxMissingRanks = Math.max(maxMissingRanks, es.getRanks().get(i));
                 }
-                maxMissingRanks = Math.max(maxMissingRanks, es.getRanks().get(i));
             }
             missingRanks[i] = Math.max(100, maxMissingRanks * 5 / 4);
             missingScores[i] = minScore;
