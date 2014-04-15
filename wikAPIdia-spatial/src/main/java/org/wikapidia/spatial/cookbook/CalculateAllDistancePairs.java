@@ -21,7 +21,9 @@ import org.wikapidia.wikidata.WikidataStatement;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +51,7 @@ public class CalculateAllDistancePairs {
 
 
             //TODO: modify this field if we want multi-language
-            LanguageSet langs = new LanguageSet("simple");
+            LanguageSet langs = new LanguageSet("simple,ia");
 
 
             Map<Integer, MonolingualSRMetric> langIdEnsembleSRMetricMap = new HashMap<Integer, MonolingualSRMetric>();
@@ -105,9 +107,13 @@ public class CalculateAllDistancePairs {
             entries[3] = "ITEM_ID_2";
             entries[4] = "SPATIAL_DISTANCE";
             int lang_counter = 0;
-            for(Language language : langs.getLanguages()){
+            List<Language> langList = new ArrayList<Language>();
+            for(Language language : langs.getLanguages())
+                langList.add(language);
+            for(Language language : langList){
                 entries[5 + 2 * lang_counter] = "SR_ENSEMBLE_" + language.getLangCode();
                 entries[6 + 2 * lang_counter] = "SR_INLINK_" + language.getLangCode();
+                lang_counter ++;
             }
             csvWriter.writeNext(entries);
 
@@ -136,16 +142,29 @@ public class CalculateAllDistancePairs {
                     entries[3] = item2.toString();
                     entries[4] = new Double(calc.getOrthodromicDistance()/1000).toString();
                     lang_counter = 0;
-                    for(Language language : langs.getLanguages()){
+                    for(Language language : langList){
                         int pageId1 = lpDao.getIdByTitle(wdDao.getItem(item1).getLabels().get(language), language, NameSpace.ARTICLE);
                         int pageId2 = lpDao.getIdByTitle(wdDao.getItem(item2).getLabels().get(language), language, NameSpace.ARTICLE);
-                        entries[5 + 2 * lang_counter] = String.valueOf(langIdEnsembleSRMetricMap.get(new Integer(language.getId())).similarity(pageId1, pageId2, false).getScore());
-                        entries[6 + 2 * lang_counter] = String.valueOf(langIdInlinkSRMetricMap.get(new Integer(language.getId())).similarity(pageId1, pageId2, false).getScore());
+                        try{
+                            entries[5 + 2 * lang_counter] = String.valueOf(langIdEnsembleSRMetricMap.get(new Integer(language.getId())).similarity(pageId1, pageId2, false).getScore());
+                        }
+                        catch (Exception e){
+                            entries[5 + 2 * lang_counter] = "ERROR";
+                        }
+                        try {
+                            entries[6 + 2 * lang_counter] = String.valueOf(langIdInlinkSRMetricMap.get(new Integer(language.getId())).similarity(pageId1, pageId2, false).getScore());
+                        }
+                        catch (Exception e){
+                            entries[6 + 2 * lang_counter] = "ERROR";
+                        }
                         lang_counter ++;
+
                     }
                     csvWriter.writeNext(entries);
                 }
                 catch (Exception e){
+                    csvWriter.writeNext(entries);
+                    csvWriter.flush();
                     //do nothing
                 }
 

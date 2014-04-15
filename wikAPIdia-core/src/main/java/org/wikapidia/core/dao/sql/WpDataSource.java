@@ -15,7 +15,7 @@ import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
 
 import javax.sql.DataSource;
-import javax.swing.plaf.nimbus.State;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;

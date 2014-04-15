@@ -41,7 +41,7 @@ public class SRBuilder {
     // The environment and configuration we will use.
     private final Env env;
     private final Configuration config;
-    private final Language language;
+    private  Language language;
     private final File srDir;
 
     // The name of the metric we will use.
@@ -88,6 +88,8 @@ public class SRBuilder {
             srDir.mkdirs();
         }
     }
+
+
 
     public synchronized  MonolingualSRMetric getMetric() throws ConfigurationException {
         return getMetric(metricName);
@@ -318,6 +320,8 @@ public class SRBuilder {
         this.skipBuiltMetrics = skipBuiltMetrics;
     }
 
+    public void setLanguage(Language language) {this.language = language; }
+
     private static TIntSet readIds(String path) throws IOException {
         TIntSet ids = new TIntHashSet();
         BufferedReader reader = WpIOUtils.openBufferedReader(new File(path));
@@ -450,6 +454,9 @@ public class SRBuilder {
         }
         if (cmd.hasOption("o")) {
             builder.setMode(Mode.valueOf(cmd.getOptionValue("p").toUpperCase()));
+        }
+        if (cmd.hasOption("l")) {
+            builder.setLanguage(Language.getByLangCode(cmd.getOptionValue("l")));
         }
 
         builder.build();
