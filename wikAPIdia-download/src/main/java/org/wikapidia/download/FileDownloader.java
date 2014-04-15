@@ -2,6 +2,7 @@ package org.wikapidia.download;
 
 import com.github.axet.wget.WGet;
 import com.github.axet.wget.info.DownloadInfo;
+import com.github.axet.wget.info.URLInfo;
 import com.github.axet.wget.info.ex.DownloadIOCodeError;
 
 import java.io.File;
@@ -43,9 +44,12 @@ public class FileDownloader {
                 DownloadMonitor monitor = new DownloadMonitor(info);
                 info.extract(stop, monitor);
                 file.getParentFile().mkdirs();
-                new WGet(info, file).download(stop, monitor);
-                LOG.log(Level.INFO, "Download complete: " + file.getName());
-                Thread.sleep(sleepTime);
+                WGet wget = new WGet(info, file);
+                wget.download(stop, monitor);
+                LOG.log(Level.INFO, "Download complete: " + file.getAbsolutePath());
+                while (!monitor.isFinished()) {
+                    Thread.sleep(sleepTime);
+                }
                 return file;
             } catch (DownloadIOCodeError e) {
                 if (i < maxAttempts) {
@@ -69,6 +73,11 @@ public class FileDownloader {
         DownloadMonitor(DownloadInfo info) {
             this.info = info;
         }
+
+        public boolean isFinished() {
+            return info.getState() == URLInfo.States.STOP || info.getState() == URLInfo.States.ERROR || info.getState() == URLInfo.States.DONE;
+        }
+
         @Override
         public void run() {
             switch (info.getState()) {
