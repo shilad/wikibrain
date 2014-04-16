@@ -6,6 +6,8 @@ import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +18,7 @@ import org.geotools.data.shapefile.dbf.DbaseFileWriter;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.data.shapefile.shp.ShapefileException;
 import org.geotools.data.shapefile.shp.ShapefileReader;
+import org.hibernate.annotations.SourceType;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.conf.DefaultOptionBuilder;
@@ -28,6 +31,7 @@ import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
 import org.wikapidia.spatial.core.dao.postgis.PostGISDB;
 import org.wikapidia.wikidata.WikidataDao;
+import net.lingala.zip4j.*;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -58,29 +62,37 @@ public class GADMConverter {
     }
 
     /**
-     * Downloads the GADM shape file by country name
-     * @param country
+     * Downloads the GADM shape file
+     *
      */
-    public void downloadGADMShapeFile(String country) {
+    public void downloadGADMShapeFile() {
         if (countryCode.isEmpty()) {
             buildCodeMap();
         }
-        String fileName = countryCode.get(country) + "_adm.zip";
-        String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/shp/" + fileName;
-        File gadmShapeFile = new File(System.getProperty("user.home").replace("\\", "/") + "/Desktop/" + fileName);
+        String fileName = "gadm_v2_shp.zip";
+        String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/" + fileName;
+        File gadmShapeFile = new File("tmp/" + fileName);
         try {
-            System.out.println("Downloading shape file for " + country +"...");
+            System.out.println("Downloading shape file" +"...");
             FileUtils.copyURLToFile(new URL(gadmURL), gadmShapeFile, 5000, 5000); //connection and read timeout are both 5000ms
             System.out.println("Download complete.");
+            System.out.println(gadmShapeFile.getAbsolutePath());
+            ZipFile zipFile = new ZipFile(gadmShapeFile.getAbsolutePath());
+
+            System.out.println("Extracting...");
+            zipFile.extractAll(gadmShapeFile.getParent() + "/gadm_v2_shp/");
+            System.out.println("Extraction complete.");
         } catch (MalformedURLException e){
             e.printStackTrace();
         } catch (IOException e){
+            e.printStackTrace();
+        } catch (ZipException e){
             e.printStackTrace();
         }
     }
 
     //TODO: parse the GADM shape file
-    public void parseShpFile(ShpFiles shpFile) {
+    public void convertShpFile(ShpFiles shpFile) {
         DbaseFileReader dbfReader;
         DbaseFileWriter dbfWriter;
         DbaseFileHeader dbfHeader;
@@ -88,15 +100,16 @@ public class GADMConverter {
         try {
             dbfReader = new DbaseFileReader(shpFile, false, Charset.forName("UTF-8"));
             dbfHeader = new DbaseFileHeader();
-            WritableByteChannel out = new FileOutputStream("thefile.dbf").getChannel();
+            WritableByteChannel out = new FileOutputStream("gadm2.dbf").getChannel();
             dbfWriter = new DbaseFileWriter(dbfHeader,out);
             dbfHeader.addColumn("TITLE1_EN",'c',254,0);
             dbfHeader.addColumn("TITLE2_EN",'c',254,0);
             while (dbfReader.hasNext()) {
                 entry = dbfReader.readEntry();
-                newEntry[0] = (String)entry[4];
-                newEntry[1] = (String)entry[4] + ", " + (String)entry[2];
+                newEntry[0] = (String)entry[5];
+                newEntry[1] = (String)entry[5] + ", " + (String)entry[3];
                 dbfWriter.write(newEntry);
+                //has index out of bound error
             }
             dbfWriter.close();
 
