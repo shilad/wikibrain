@@ -298,13 +298,63 @@ Properties for Minneapolis:
 ```
 Note that these relationships are *structured*, not just textual. For example, the string "R. T. Rybak" is linked to the multilingual concept "R. T. Rybak," and the lat/long coordinates are accessible as a geographic data structure.
 
+###Spatial
+To intialize the spatial data, you should have [PostGIS](http://postgis.net/install) installed. The library was tested on Postgres 9.3.4 with PostGIS 2.12 on Mac OS X. After installing PostGIS,  create a new databse, connect to the new databse and run the following SQL to enable spatial support:
+
+```SQL
+-- Enable PostGIS (includes raster)
+CREATE EXTENSION postgis;
+-- Enable Topology
+CREATE EXTENSION postgis_topology;
+-- fuzzy matching needed for Tiger
+CREATE EXTENSION fuzzystrmatch;
+-- Enable US Tiger Geocoder
+CREATE EXTENSION postgis_tiger_geocoder;
+```
+Then, go to the [reference.conf](wikAPIdia-core/src/main/resources/reference.conf) and configure the following settings corresponding to your PostGIS settings.
+
+```text
+spatial : {
+
+    dao : {
+
+        dataSource : {
+
+                // These all use keys standard to Geotools JDBC
+                // see: http://docs.geotools.org/stable/userguide/library/jdbc/datastore.html
+
+                #change this part according to your DB settings
+                default : postgis
+                postgis : {
+                    dbtype : postgis
+                    host : localhost
+                    port : 5432
+                    schema : public
+                    database : wikibrain
+                    user : toby
+                    passwd : ""
+                    max connections : 19
+                }
+            }
+```
+
+Loading the Wikidata layer in the spatial module also requires having Wikidata loaded (see the Wikidata section of this README file)
+
+Now you can load the Wikidata layer by running:
+
+```bash
+./wp-java.sh org.wikapidia.spatial.loader.SpatialDataLoader
+```
+
+Try running [CalculateGeographicDistanceBetweenPages](wikAPIdia-spatial/src/main/java/org.wikapidia.spatial/cookbook/CalculateGeographicDistanceBetweenPages.java). If it runs correctly, the spatial module is successfully initialized.
+
 ###Advanced Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
 The default WikAPIdia configuration is determined by the default [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
 The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
 To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
 
-For example, suppose we wantd to set the root directory, maxThreads to 8, and the phrase analyzer to the anchortext-based analyzer
+For example, suppose we wanted to set the root directory, maxThreads to 8, and the phrase analyzer to the anchortext-based analyzer
 We could create a file called myapp.conf containing:
 ```text
 maxThreads : 8
