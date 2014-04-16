@@ -59,6 +59,7 @@ public class InterLanguageLinkExtractor {
         RawPageDao dao = env.getConfigurator().get(RawPageDao.class);
         BufferedWriter output = new BufferedWriter(new FileWriter("ills.txt"));
         ParserVisitor visitor = new IllParserVisitor(output);
+        WikiTextLoader.maxThreadsPerLang = env.getMaxThreads(); // HACK
         for (Language lang : langs) {
             System.out.println("extracting ills for: " + lang);
             WikiTextLoader loader = new WikiTextLoader(Arrays.asList(visitor), LanguageSet.ALL, dao, env.getMaxThreads());
