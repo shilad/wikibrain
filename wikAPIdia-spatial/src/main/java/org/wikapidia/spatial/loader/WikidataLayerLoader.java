@@ -41,6 +41,7 @@ public abstract class WikidataLayerLoader {
 
         try {
 
+            int matches = 0;
             int count = 0;
             LanguageSet loadedLangs = new LanguageSet("simple,lad,la");
             ((WikidataSqlDao)wdDao).setFetchSize(5);
@@ -49,16 +50,15 @@ public abstract class WikidataLayerLoader {
 
                 UniversalPage uPage = wdDao.getUniversalPage(statement.getItem().getId());
                 if (uPage != null && uPage.isInLanguageSet(loadedLangs, false)){
-
+                    matches++;
                     storeStatement(statement);
-                    count++;
-                    if (count % 1000 == 0){
-                        LOG.log(Level.INFO, "Done storing " + count + " statements from " + this.getClass().getName());
-                    }
-
-                }else{
-                    if (uPage != null) System.out.println("Found univ id without local pages: " + uPage.getUnivId());
                 }
+
+                count++;
+                if (count % 10000 == 0){
+                    LOG.log(Level.INFO, "Matched " + matches + " out of " + count + " statements from " + this.getClass().getName());
+                }
+
             }
 
         }catch(DaoException e){

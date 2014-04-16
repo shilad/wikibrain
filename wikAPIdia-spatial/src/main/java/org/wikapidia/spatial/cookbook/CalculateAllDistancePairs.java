@@ -35,14 +35,13 @@ public class CalculateAllDistancePairs {
 
     private static final Logger LOG = Logger.getLogger(CalculateAllDistancePairs.class.getName());
 
-    public static void main(String[] args){
-        try {
+    public static void main(String[] args) throws Exception {
             File f=new File("./distance_output.csv");
             //Change this if we'll use more than 25 languages - otherwise it will overflow
             String[] entries = new String[55];
             CSVWriter csvWriter = new CSVWriter(new FileWriter(f), ',');
 
-            Env env = new EnvBuilder().build();
+            Env env = EnvBuilder.envFromArgs(args);
             Configurator c = env.getConfigurator();
 
             SpatialDataDao sdDao = c.get(SpatialDataDao.class);
@@ -51,7 +50,7 @@ public class CalculateAllDistancePairs {
 
 
             //TODO: modify this field if we want multi-language
-            LanguageSet langs = new LanguageSet("simple,ia");
+            LanguageSet langs = env.getLanguages();
 
 
             Map<Integer, MonolingualSRMetric> langIdEnsembleSRMetricMap = new HashMap<Integer, MonolingualSRMetric>();
@@ -85,7 +84,7 @@ public class CalculateAllDistancePairs {
                     continue;
 
                 //TODO: This one should be changed if we switch to full English
-                String name = wdDao.getItem(wdItem).getLabels().get(Language.getByLangCode("simple"));
+                String name = wdDao.getItem(wdItem).getLabels().get(langs.getDefaultLanguage());
                 if(name == null)
                     continue;
 
@@ -205,14 +204,6 @@ public class CalculateAllDistancePairs {
 
             csvWriter.writeNext(entries);
             csvWriter.close();
-
-
-
-        }
-
-        catch(Exception e){
-            e.printStackTrace();;
-        }
 
     }
 
