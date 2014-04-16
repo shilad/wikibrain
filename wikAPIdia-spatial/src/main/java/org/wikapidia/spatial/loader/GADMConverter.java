@@ -48,27 +48,11 @@ import java.util.logging.Logger;
  */
 public class GADMConverter {
 
-    private Map<String, String> countryCode = new HashMap<String, String>();
-
     /**
-     * Auto-generate a map from country name to its ISO3 code
-     */
-    private void buildCodeMap(){
-        String[] iso2Code = Locale.getISOCountries();
-        for (String iso: iso2Code){
-            Locale l = new Locale("", iso);
-            countryCode.put(l.getDisplayCountry(), l.getISO3Country());
-        }
-    }
-
-    /**
-     * Downloads the GADM shape file
-     *
+     * Download GADM shape file
      */
     public void downloadGADMShapeFile() {
-        if (countryCode.isEmpty()) {
-            buildCodeMap();
-        }
+
         String fileName = "gadm_v2_shp.zip";
         String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/" + fileName;
         File gadmShapeFile = new File("tmp/" + fileName);
@@ -91,7 +75,12 @@ public class GADMConverter {
         }
     }
 
-    //TODO: parse the GADM shape file
+    //TODO: fix the index out of bound bug
+
+    /**
+     * Convert GADM shapefile into the format we can read
+     * @param shpFile
+     */
     public void convertShpFile(ShpFiles shpFile) {
         DbaseFileReader dbfReader;
         DbaseFileWriter dbfWriter;
@@ -100,10 +89,10 @@ public class GADMConverter {
         try {
             dbfReader = new DbaseFileReader(shpFile, false, Charset.forName("UTF-8"));
             dbfHeader = new DbaseFileHeader();
-            WritableByteChannel out = new FileOutputStream("gadm2.dbf").getChannel();
-            dbfWriter = new DbaseFileWriter(dbfHeader,out);
-            dbfHeader.addColumn("TITLE1_EN",'c',254,0);
-            dbfHeader.addColumn("TITLE2_EN",'c',254,0);
+            FileOutputStream out = new FileOutputStream("gadm2.dbf");
+            dbfWriter = new DbaseFileWriter(dbfHeader,out.getChannel());
+            dbfHeader.addColumn("TITLE1_EN",'c',20,0);
+            dbfHeader.addColumn("TITLE2_EN",'c',20,0);
             while (dbfReader.hasNext()) {
                 entry = dbfReader.readEntry();
                 newEntry[0] = (String)entry[5];
