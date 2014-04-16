@@ -218,7 +218,7 @@ public class WikiTextParser {
                         } else if (l != lang.getLanguage()) {
                             ParsedIll pill = new ParsedIll();
                             pill.location = new ParsedLocation(xml, -1, -1, ill.getSrcSpan().getStart());
-                            pill.title = new Title(target, false, lang);
+                            pill.title = new Title(target, false, LanguageInfo.getByLanguage(l));
                             visitIll(pill);
                         }
                     }else{
