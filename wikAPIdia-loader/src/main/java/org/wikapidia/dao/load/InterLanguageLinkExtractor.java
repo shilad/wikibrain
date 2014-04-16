@@ -12,8 +12,10 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.RawPage;
 import org.wikapidia.parser.wiki.ParsedIll;
 import org.wikapidia.parser.wiki.ParserVisitor;
+import org.wikapidia.utils.WpIOUtils;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -57,7 +59,7 @@ public class InterLanguageLinkExtractor {
         Env env = EnvBuilder.envFromArgs(args);
         LanguageSet langs = env.getConfigurator().get(LanguageSet.class);
         RawPageDao dao = env.getConfigurator().get(RawPageDao.class);
-        BufferedWriter output = new BufferedWriter(new FileWriter("ills.txt"));
+        BufferedWriter output = WpIOUtils.openWriter(new File("ills.txt"));
         ParserVisitor visitor = new IllParserVisitor(output);
         WikiTextLoader.maxThreadsPerLang = env.getMaxThreads(); // HACK
         for (Language lang : langs) {
