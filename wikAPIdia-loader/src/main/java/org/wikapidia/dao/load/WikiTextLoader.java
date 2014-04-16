@@ -49,7 +49,7 @@ public class WikiTextLoader {
         return rawPageDao;
     }
 
-    private void load(LanguageInfo lang) throws DaoException {
+    public void load(LanguageInfo lang) throws DaoException {
         int numLanguageThreads;
         synchronized (availableThreads) {
             numLanguageThreads = Math.min(availableThreads.get(), maxThreadsPerLang);

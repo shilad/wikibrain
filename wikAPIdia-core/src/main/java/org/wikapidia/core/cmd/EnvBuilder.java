@@ -1,8 +1,6 @@
 package org.wikapidia.core.cmd;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
+import org.apache.commons.cli.*;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.DefaultOptionBuilder;
 import org.wikapidia.core.lang.LanguageSet;
@@ -39,6 +37,10 @@ public class EnvBuilder {
     }
 
     public EnvBuilder(CommandLine cmd) {
+        initializeFromCommandLine(cmd);
+    }
+
+    private void initializeFromCommandLine(CommandLine cmd) {
         setUseLoadedLanguages();
         if (cmd.hasOption("n")) {
             setConceptMapper(cmd.getOptionValue("n"));
@@ -66,6 +68,7 @@ public class EnvBuilder {
             setTmpDir(new File(cmd.getOptionValue("tmp-dir")));
         }
     }
+
 
     public EnvBuilder setConceptMapper(String name) {
         params.put("mapper.default", name);
@@ -184,6 +187,39 @@ public class EnvBuilder {
             return new Env(params);
         } else {
             return new Env(params, configOverride);
+        }
+    }
+
+    public static EnvBuilder builderFromArgs(String args[]) {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String caller = stackTraceElements[1].getClassName();
+        return builderFromArgs(caller, args);
+    }
+
+    public static EnvBuilder builderFromArgs(String caller, String args[]) {
+        Options options = new Options();
+        EnvBuilder.addStandardOptions(options);
+
+        CommandLineParser parser = new PosixParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println("Invalid option usage: " + e.getMessage());
+            new HelpFormatter().printHelp(caller, options);
+            return null;
+        }
+        return new EnvBuilder(cmd);
+    }
+
+    public static Env envFromArgs(String args[]) throws ConfigurationException {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String caller = stackTraceElements[1].getClassName();
+        EnvBuilder builder = builderFromArgs(caller, args);
+        if (builder == null) {
+            return null;
+        } else {
+            return builder.build();
         }
     }
 }
