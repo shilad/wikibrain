@@ -37,7 +37,9 @@ public class InterLanguageLinkExtractor {
             try {
                 // This format may not be easy to parse. Change it.
                 synchronized (output) {
-                    this.output.write(page.getTitle() + "\t" + ill.title + "\n");
+                    this.output.write(
+                            page.getLanguage() + "\t" + page.getTitle().getCanonicalTitle() + "\t" +
+                            ill.title.getLanguage() + "\t" + ill.title.getCanonicalTitle() + "\n");
                 }
                 count.incrementAndGet();
             } catch (IOException e) {
