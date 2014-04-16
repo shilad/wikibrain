@@ -346,7 +346,7 @@ Now you can load the Wikidata layer by running:
 ./wp-java.sh org.wikapidia.spatial.loader.SpatialDataLoader
 ```
 
-Try running [CalculateGeographicDistanceBetweenPages](wikAPIdia-spatial/src/main/java/org.wikapidia.spatial/cookbook/CalculateGeographicDistanceBetweenPages.java). If it runs correctly, the spatial module is successfully initialized.
+Try running [CalculateGeographicDistanceBetweenPages](/wikAPIdia-spatial/src/main/java/org/wikapidia/spatial/cookbook/CalculateGeographicDistanceBetweenPages.java). If it runs correctly, the spatial module is successfully initialized.
 
 ###Advanced Configuration
 The behavior of WikAPIdia can be customized through configuration files or code.
