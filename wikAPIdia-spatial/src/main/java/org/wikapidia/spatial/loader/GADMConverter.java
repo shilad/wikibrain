@@ -89,19 +89,28 @@ public class GADMConverter {
         try {
             dbfReader = new DbaseFileReader(shpFile, false, Charset.forName("UTF-8"));
             dbfHeader = new DbaseFileHeader();
-            FileOutputStream out = new FileOutputStream("gadm2.dbf");
-            dbfWriter = new DbaseFileWriter(dbfHeader,out.getChannel());
-            dbfHeader.addColumn("TITLE1_EN",'c',20,0);
-            dbfHeader.addColumn("TITLE2_EN",'c',20,0);
+            dbfHeader.addColumn("TITLE1_EN",'c',254,0);
+            dbfHeader.addColumn("TITLE2_EN",'c',254,0);
+            File f = new File("gadm2.dbf");
+            FileOutputStream out = new FileOutputStream(f);
+            dbfWriter = new DbaseFileWriter(dbfHeader, out.getChannel(), Charset.forName("UTF-8"));
+            int count = 0;
+            HashMap<Integer, HashSet<Integer>> id = new HashMap<Integer, HashSet<Integer>>(); //key: entry[1] = ID_0 value: entry[4] = ID_1
             while (dbfReader.hasNext()) {
                 entry = dbfReader.readEntry();
-                newEntry[0] = (String)entry[5];
-                newEntry[1] = (String)entry[5] + ", " + (String)entry[3];
-                dbfWriter.write(newEntry);
-                //has index out of bound error
+                if (!id.containsKey(entry[1])) id.put((Integer)entry[1], new HashSet<Integer>());
+                if (!id.get(entry[1]).contains(entry[4])) { //check duplicate
+                    count++;
+                    newEntry[0] = (String) entry[5];
+                    newEntry[1] = (String) entry[5] + ", " + (String) entry[3];
+                    dbfWriter.write(newEntry);
+                    id.get(entry[1]).add((Integer)entry[4]);
+                }
+                else continue;  //skip duplicate records
             }
+            System.out.println("Total number of records: " + count);
             dbfWriter.close();
-
+            out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
