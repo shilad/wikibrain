@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class ToblersLawEvaluator {
 
-    private static int NUM_SAMPLES = 10000;
+    private static int NUM_SAMPLES = 100000;
     private static int WIKIDATA_CONCEPTS = 1;
 
     private static final Logger LOG = Logger.getLogger(ToblersLawEvaluator.class.getName());
