@@ -50,7 +50,11 @@ public abstract class WikidataLayerLoader {
                 UniversalPage uPage = wdDao.getUniversalPage(statement.getItem().getId());
                 if (uPage != null && uPage.isInLanguageSet(langs, false)){
                     matches++;
-                    storeStatement(statement);
+                    try {
+                        storeStatement(statement);
+                    } catch (Exception e) {
+                        LOG.log(Level.SEVERE, "storage of statement failed: " + statement.toString(), e);
+                    }
                 }
 
                 count++;
