@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class ToblersLawEvaluator {
 
-    private static int NUM_SAMPLES = 100000;
+    private static int NUM_SAMPLES = 1000000;
     private static int WIKIDATA_CONCEPTS = 1;
 
     private static final Logger LOG = Logger.getLogger(ToblersLawEvaluator.class.getName());
@@ -80,8 +80,7 @@ public class ToblersLawEvaluator {
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
             if (concept != null && concept.hasAllLanguages(env.getLanguages())) {
                 concepts.add(concept);
-                Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
-                locations.put(concept, g1.getCentroid());
+                locations.put(concept, geometries.get(conceptId).getCentroid());
                 if (concepts.size() % 1000 == 0) {
                     LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), env.getLanguages()));
                 }
@@ -90,11 +89,11 @@ public class ToblersLawEvaluator {
         LOG.info(String.format("Found %d geometries with articles in %s", concepts.size(), env.getLanguages()));
     }
 
-    public void evaluate(File outputPath) throws IOException {
+    public void evaluate(File outputPath, int numSamples) throws IOException {
         this.output = WpIOUtils.openWriter(outputPath);
         writeHeader();
 
-        ParallelForEach.range(0, NUM_SAMPLES, new Procedure<Integer>() {
+        ParallelForEach.range(0, numSamples, new Procedure<Integer>() {
             @Override
             public void call(Integer i) throws Exception {
                 evaluateOneSample();
@@ -129,27 +128,28 @@ public class ToblersLawEvaluator {
     }
 
     private void writeRow(UniversalPage c1, UniversalPage c2, List<SRResult> results) throws WikapidiaException, IOException {
-        double km;
         Point p1 = locations.get(c1).getCentroid();
         Point p2 = locations.get(c2).getCentroid();
 
         GeodeticCalculator geoCalc = new GeodeticCalculator();
         geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
         geoCalc.setDestinationGeographicPoint(p2.getX(), p2.getY());
-        km = geoCalc.getOrthodromicDistance() / 1000;
+        double km = geoCalc.getOrthodromicDistance() / 1000;
 
         Title t1 = c1.getBestEnglishTitle(lpDao, true);
         Title t2 = c2.getBestEnglishTitle(lpDao, true);
-        output.write(t1.getCanonicalTitle() +
-                "\t" + c1.getUnivId() +
-                "\t" + t2.getCanonicalTitle() +
-                "\t" + c2.getUnivId() +
-                "\t" + km
-        );
-        for (SRResult result : results) {
-            output.write("\t" + result.getScore());
+        synchronized (output) {
+            output.write(t1.getCanonicalTitle() +
+                    "\t" + c1.getUnivId() +
+                    "\t" + t2.getCanonicalTitle() +
+                    "\t" + c2.getUnivId() +
+                    "\t" + km
+            );
+            for (SRResult result : results) {
+                output.write("\t" + result.getScore());
+            }
+            output.write("\n");
         }
-        output.write("\n");
     }
 
 
@@ -157,6 +157,6 @@ public class ToblersLawEvaluator {
         Env env = EnvBuilder.envFromArgs(args);
         ToblersLawEvaluator eval = new ToblersLawEvaluator(env);
         eval.retrieveLocations();
-        eval.evaluate(new File("toblers_eval.csv"));
+        eval.evaluate(new File("toblers_eval.csv"), NUM_SAMPLES);
     }
 }
