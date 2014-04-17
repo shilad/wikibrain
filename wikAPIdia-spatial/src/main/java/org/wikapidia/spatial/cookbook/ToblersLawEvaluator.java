@@ -108,8 +108,8 @@ public class ToblersLawEvaluator {
     }
 
     public void evaluateOneSample() throws DaoException, WikapidiaException, IOException {
-        UniversalPage c1 = concepts.get(random.nextInt());
-        UniversalPage c2 = concepts.get(random.nextInt());
+        UniversalPage c1 = concepts.get(random.nextInt(concepts.size()));
+        UniversalPage c2 = concepts.get(random.nextInt(concepts.size()));
 
         List<SRResult> results = new ArrayList<SRResult>();
         for (Language lang : langs) {
