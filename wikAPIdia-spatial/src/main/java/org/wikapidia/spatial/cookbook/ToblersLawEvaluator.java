@@ -12,6 +12,7 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
@@ -33,8 +34,9 @@ import java.util.logging.Logger;
  */
 public class ToblersLawEvaluator {
 
-    private static int NUM_SAMPLES = 100000;
+    private static int NUM_SAMPLES = 10000;
     private static int WIKIDATA_CONCEPTS = 1;
+    private static LanguageSet languageSet = new LanguageSet("simple");
 
     private static final Logger LOG = Logger.getLogger(ToblersLawEvaluator.class.getName());
 
@@ -52,9 +54,12 @@ public class ToblersLawEvaluator {
     private BufferedWriter output;
 
 
-    public ToblersLawEvaluator(Env env) throws ConfigurationException {
+    public ToblersLawEvaluator(Env env, LanguageSet languages) throws ConfigurationException {
         this.env = env;
-        this.langs = new ArrayList<Language>(env.getLanguages().getLanguages());
+        //this.langs = new ArrayList<Language>(env.getLanguages().getLanguages());
+        langs = new ArrayList<Language>();
+        for(Language lang : languages.getLanguages())
+            langs.add(lang);
 
         // Get data access objects
         Configurator c = env.getConfigurator();
@@ -78,16 +83,16 @@ public class ToblersLawEvaluator {
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
-            if (concept != null && concept.hasAllLanguages(env.getLanguages())) {
+            if (concept != null && concept.hasAllLanguages(languageSet)) {
                 concepts.add(concept);
                 Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
                 locations.put(concept, g1.getCentroid());
                 if (concepts.size() % 1000 == 0) {
-                    LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), env.getLanguages()));
+                    LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), languageSet));
                 }
             }
         }
-        LOG.info(String.format("Found %d geometries with articles in %s", concepts.size(), env.getLanguages()));
+        LOG.info(String.format("Found %d geometries with articles in %s", concepts.size(), languageSet));
     }
 
     public void evaluate(File outputPath) throws IOException {
@@ -141,13 +146,13 @@ public class ToblersLawEvaluator {
         Title t1 = c1.getBestEnglishTitle(lpDao, true);
         Title t2 = c2.getBestEnglishTitle(lpDao, true);
         output.write(t1.getCanonicalTitle() +
-                "\t" + c1.getUnivId() +
-                "\t" + t2.getCanonicalTitle() +
-                "\t" + c2.getUnivId() +
-                "\t" + km
+                "," + c1.getUnivId() +
+                "," + t2.getCanonicalTitle() +
+                "," + c2.getUnivId() +
+                "," + km
         );
         for (SRResult result : results) {
-            output.write("\t" + result.getScore());
+            output.write("," + result.getScore());
         }
         output.write("\n");
     }
@@ -155,7 +160,7 @@ public class ToblersLawEvaluator {
 
     public static void main(String[] args) throws Exception {
         Env env = EnvBuilder.envFromArgs(args);
-        ToblersLawEvaluator eval = new ToblersLawEvaluator(env);
+        ToblersLawEvaluator eval = new ToblersLawEvaluator(env, languageSet);
         eval.retrieveLocations();
         eval.evaluate(new File("toblers_eval.csv"));
     }
