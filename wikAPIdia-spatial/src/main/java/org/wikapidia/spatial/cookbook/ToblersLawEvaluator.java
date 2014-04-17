@@ -1,5 +1,6 @@
 package org.wikapidia.spatial.cookbook;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import org.geotools.referencing.GeodeticCalculator;
@@ -24,6 +25,7 @@ import org.wikapidia.utils.WpIOUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -34,9 +36,9 @@ import java.util.logging.Logger;
  */
 public class ToblersLawEvaluator {
 
-    private static int NUM_SAMPLES = 10000;
+
     private static int WIKIDATA_CONCEPTS = 1;
-    private static LanguageSet languageSet = new LanguageSet("simple");
+
 
     private static final Logger LOG = Logger.getLogger(ToblersLawEvaluator.class.getName());
 
@@ -51,7 +53,7 @@ public class ToblersLawEvaluator {
     private final List<UniversalPage> concepts = new ArrayList<UniversalPage>();
     private final Map<UniversalPage, Point> locations = new HashMap<UniversalPage, Point>();
     private final Env env;
-    private BufferedWriter output;
+    private CSVWriter output;
 
 
     public ToblersLawEvaluator(Env env, LanguageSet languages) throws ConfigurationException {
@@ -75,31 +77,52 @@ public class ToblersLawEvaluator {
         }
     }
 
-    public void retrieveLocations() throws DaoException {
+    public void retrieveAllLocations() throws DaoException {
         // Get all known concept geometries
         Map<Integer, Geometry> geometries = sdDao.getAllGeometries("wikidata", "earth");
-        LOG.log(Level.INFO, String.format("Get %d geometries, now building id-name mapping", geometries.size()));
+        LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
-            if (concept != null && concept.hasAllLanguages(languageSet)) {
+            if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
                 concepts.add(concept);
                 Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
                 locations.put(concept, g1.getCentroid());
                 if (concepts.size() % 1000 == 0) {
-                    LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), languageSet));
+                    LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), langs));
                 }
             }
         }
-        LOG.info(String.format("Found %d geometries with articles in %s", concepts.size(), languageSet));
+        LOG.info(String.format("Found %d geometries with articles in %s", concepts.size(), langs));
     }
 
-    public void evaluate(File outputPath) throws IOException {
-        this.output = WpIOUtils.openWriter(outputPath);
-        writeHeader();
+    public void retrieveLocations(Map<Integer, Geometry> geometries) throws DaoException {
+        LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
-        ParallelForEach.range(0, NUM_SAMPLES, new Procedure<Integer>() {
+        // Build up list of concepts in all languages
+        for (Integer conceptId : geometries.keySet()){
+            UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
+            if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
+                concepts.add(concept);
+                Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
+                locations.put(concept, g1.getCentroid());
+                if (concepts.size() % 1000 == 0) {
+                    LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), langs));
+                }
+            }
+        }
+        LOG.info(String.format("Finish loading %d geometries with articles in %s", concepts.size(), langs));
+
+    }
+
+    public void evaluateSample(File outputPath, int numSamples) throws IOException {
+        this.output = new CSVWriter(new FileWriter(outputPath), ',');
+        writeHeader();
+        if(concepts.size() == 0)
+            LOG.warning("No concept has been retrieved");
+
+        ParallelForEach.range(0, numSamples, new Procedure<Integer>() {
             @Override
             public void call(Integer i) throws Exception {
                 evaluateOneSample();
@@ -109,7 +132,7 @@ public class ToblersLawEvaluator {
         this.output.close();
     }
 
-    public void evaluateOneSample() throws DaoException, WikapidiaException, IOException {
+    private void evaluateOneSample() throws DaoException, WikapidiaException, IOException {
         UniversalPage c1 = concepts.get(random.nextInt(concepts.size()));
         UniversalPage c2 = concepts.get(random.nextInt(concepts.size()));
 
@@ -122,15 +145,46 @@ public class ToblersLawEvaluator {
         writeRow(c1, c2, results);
     }
 
-    private void writeHeader() throws IOException {
-        output.write("ITEM_NAME_1");
-        output.write("\tITEM_ID_1");
-        output.write("\tITEM_NAME_2");
-        output.write("\tITEM_ID_2");
-        output.write("\tSPATIAL_DISTANCE");
-        for (Language lang : langs) {
-            output.write("\t" + lang.getLangCode() + "_SR");
+    public void evaluateAll(File outputPath) throws IOException, DaoException, WikapidiaException {
+        this.output = new CSVWriter(new FileWriter(outputPath), ',');
+        writeHeader();
+        if(concepts.size() == 0)
+            LOG.warning("No concept has been retrieved");
+
+        for(UniversalPage c1: concepts){
+            for(UniversalPage c2: concepts){
+                if(c1.equals(c2))
+                    continue;
+                List<SRResult> results = new ArrayList<SRResult>();
+                for (Language lang : langs) {
+                    MonolingualSRMetric sr = metrics.get(lang);
+                    results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
+                }
+                writeRow(c1, c2, results);
+
+
+            }
         }
+
+        this.output.close();
+
+    }
+
+
+    private void writeHeader() throws IOException {
+        String[] headerEntries = new String[5 + langs.size()];
+        headerEntries[0] = "ITEM_NAME_1";
+        headerEntries[1] = "ITEM_ID_1";
+        headerEntries[2] = "ITEM_NAME_2";
+        headerEntries[3] = "ITEM_ID_2";
+        headerEntries[4] = "SPATIAL_DISTANCE";
+        int counter = 0;
+        for (Language lang : langs) {
+            headerEntries[5 + counter] = lang.getLangCode() + "_SR";
+            counter ++;
+        }
+        output.writeNext(headerEntries);
+        output.flush();
     }
 
     private void writeRow(UniversalPage c1, UniversalPage c2, List<SRResult> results) throws WikapidiaException, IOException {
@@ -145,23 +199,20 @@ public class ToblersLawEvaluator {
 
         Title t1 = c1.getBestEnglishTitle(lpDao, true);
         Title t2 = c2.getBestEnglishTitle(lpDao, true);
-        output.write(t1.getCanonicalTitle() +
-                "," + c1.getUnivId() +
-                "," + t2.getCanonicalTitle() +
-                "," + c2.getUnivId() +
-                "," + km
-        );
+
+        String[] rowEntries = new String[5 + langs.size()];
+        rowEntries[0] = t1.getCanonicalTitle();
+        rowEntries[1] = String.valueOf(c1.getUnivId());
+        rowEntries[2] = t2.getCanonicalTitle();
+        rowEntries[3] = String.valueOf(c2.getUnivId());
+        rowEntries[4] = String.valueOf(km);
+        int counter = 0;
         for (SRResult result : results) {
-            output.write("," + result.getScore());
+            rowEntries[5 + counter] = String.valueOf(result.getScore());
+            counter ++;
         }
-        output.write("\n");
+        output.writeNext(rowEntries);
+        output.flush();
     }
 
-
-    public static void main(String[] args) throws Exception {
-        Env env = EnvBuilder.envFromArgs(args);
-        ToblersLawEvaluator eval = new ToblersLawEvaluator(env, languageSet);
-        eval.retrieveLocations();
-        eval.evaluate(new File("toblers_eval.csv"));
-    }
 }
