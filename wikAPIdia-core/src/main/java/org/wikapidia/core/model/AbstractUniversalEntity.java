@@ -90,7 +90,7 @@ public abstract class AbstractUniversalEntity<T> {
                 return false;
             }
         }
-        return false;
+        return true;
     }
 
     public boolean isInLanguageSet(LanguageSet ls) {
