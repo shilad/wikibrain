@@ -45,6 +45,7 @@ public class ToblersLawEvaluator {
     private final UniversalPageDao upDao;
     private final List<Language> langs;
     private final Map<Language, MonolingualSRMetric> metrics;
+    private final GeodeticCalculator geoCalc = new GeodeticCalculator();
 
     private final List<UniversalPage> concepts = new ArrayList<UniversalPage>();
     private final Map<UniversalPage, Point> locations = new HashMap<UniversalPage, Point>();
@@ -76,21 +77,18 @@ public class ToblersLawEvaluator {
         LOG.log(Level.INFO, String.format("Get %d geometries, now building id-name mapping", geometries.size()));
 
         // Build up list of concepts in all languages
-        for(Integer conceptId : geometries.keySet()){
+        for (Integer conceptId : geometries.keySet()){
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
-            if (concept != null && concept.isInLanguageSet(env.getLanguages())) {
+            if (concept != null && concept.hasAllLanguages(env.getLanguages())) {
                 concepts.add(concept);
+                Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
+                locations.put(concept, g1.getCentroid());
+                if (concepts.size() % 1000 == 0) {
+                    LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), env.getLanguages()));
+                }
             }
         }
         LOG.info(String.format("Found %d geometries with articles in %s", concepts.size(), env.getLanguages()));
-
-        // Calculate locations for all concepts
-        for (UniversalPage c : concepts) {
-            GeodeticCalculator calc = new GeodeticCalculator();
-            Geometry g1 = sdDao.getGeometry(c.getUnivId(), "wikidata", "earth");
-            locations.put(c, g1.getCentroid());
-        }
-        LOG.log(Level.INFO, String.format("Finish building locations for %d concepts", concepts.size()));
     }
 
     public void evaluate(File outputPath) throws IOException {
@@ -132,12 +130,15 @@ public class ToblersLawEvaluator {
     }
 
     private void writeRow(UniversalPage c1, UniversalPage c2, List<SRResult> results) throws WikapidiaException, IOException {
+        double km;
         Point p1 = locations.get(c1).getCentroid();
         Point p2 = locations.get(c2).getCentroid();
-        GeodeticCalculator calc = new GeodeticCalculator();
-        calc.setStartingGeographicPoint(p1.getX(), p1.getY());
-        calc.setDestinationGeographicPoint(p2.getX(), p2.getY());
-        double km = calc.getOrthodromicDistance() / 1000;
+
+        synchronized (geoCalc) {
+            geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
+            geoCalc.setDestinationGeographicPoint(p2.getX(), p2.getY());
+            km = geoCalc.getOrthodromicDistance() / 1000;
+        }
 
         Title t1 = c1.getBestEnglishTitle(lpDao, true);
         Title t2 = c2.getBestEnglishTitle(lpDao, true);
