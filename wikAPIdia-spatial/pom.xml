@@ -38,6 +38,11 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.github.shilad.wikapidia</groupId>
+            <artifactId>wikAPIdia-sr</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
             <version>1.12</version>
@@ -87,6 +92,7 @@
             <artifactId>zip4j</artifactId>
             <version>1.2.3</version>
         </dependency>
+
 
 
     </dependencies>

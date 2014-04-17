@@ -350,7 +350,7 @@ public class SpatialDataLoader {
         WikidataDao wdDao = conf.get(WikidataDao.class);
         SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
 
-        LOG.log(Level.INFO, "Preparing to spatiotag data in folder: '" + spatialDataFolderPath + "'");
+//        LOG.log(Level.INFO, "Preparing to spatiotag data in folder: '" + spatialDataFolderPath + "'");
 
 
         //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)

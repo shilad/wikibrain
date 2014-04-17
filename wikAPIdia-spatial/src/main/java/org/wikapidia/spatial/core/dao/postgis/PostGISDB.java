@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.geotools.data.*;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.filter.text.cql2.CQL;
 import org.geotools.jdbc.Index;
@@ -20,7 +21,7 @@ import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,6 +76,7 @@ public class PostGISDB {
 
             FeatureIterator iterator = collection.features();
             Feature feature = iterator.next();
+            iterator.close();
             return ((Geometry)feature.getDefaultGeometryProperty().getValue());
 
 
@@ -82,6 +84,34 @@ public class PostGISDB {
             throw new DaoException(e);
         }
     }
+
+    public Map<Integer, Geometry> getAllGeometries(String layerName, String refSysName) throws DaoException{
+
+        try {
+
+            FeatureSource contents = getFeatureSource();
+            String cqlQuery = String.format("layer_name = '%s' AND ref_sys_name = '%s'", layerName, refSysName);
+            Filter f = CQL.toFilter(cqlQuery);
+            FeatureCollection collection = contents.getFeatures(f);
+
+            if (collection.size() == 0) return null;
+
+            FeatureIterator iterator = collection.features();
+            Feature feature = iterator.next();
+            Map<Integer, Geometry> geometries = new HashMap<Integer, Geometry>();
+            while (iterator.hasNext()){
+                geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
+                feature = iterator.next();
+            }
+            iterator.close();
+            return geometries;
+
+
+        }catch(Exception e){
+            throw new DaoException(e);
+        }
+    }
+
 
     private void initialize(Map<String, Object> manualParameters) throws DaoException {
 

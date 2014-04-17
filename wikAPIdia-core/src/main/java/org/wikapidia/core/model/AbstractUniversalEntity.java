@@ -93,6 +93,9 @@ public abstract class AbstractUniversalEntity<T> {
         return false;
     }
 
+    public boolean isInLanguageSet(LanguageSet ls) {
+        return isInLanguageSet(ls, true);
+    }
 
     /**
      * Returns the number of languages in which this UniversalEntity exists.
