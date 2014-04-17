@@ -20,6 +20,7 @@ import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
+import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.phrases.PhraseAnalyzer;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
 import org.wikapidia.spatial.core.dao.postgis.PostGISDB;
@@ -42,12 +43,14 @@ public class SpatialDataLoader {
     private final File spatialDataFolder;
     private final WikidataDao wdDao;
     private final PhraseAnalyzer analyzer;
+    private final LanguageSet langs;
 
-    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder) {
+    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder, LanguageSet langs) {
         this.spatialDataDao = spatialDataDao;
         this.spatialDataFolder = spatialDataFolder;
         this.wdDao = wdDao;
         this.analyzer = analyzer;
+        this.langs = langs;
     }
 
     //TODO: this should probably be adapted to the PipelineLoader structure
@@ -192,7 +195,7 @@ public class SpatialDataLoader {
 
             for (WikidataLayerLoader layerLoader : layerLoaders) {
                 LOG.log(Level.INFO, "Loading Wikidata layer(s): " + layerLoader.getClass().getName());
-                layerLoader.loadData();
+                layerLoader.loadData(langs);
             }
 
             spatialDataDao.endSaveGeometries();
@@ -354,7 +357,7 @@ public class SpatialDataLoader {
 
 
         //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
-        SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder);
+        SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
         loader.loadWikidataData();
         //loader.loadExogenousData();
 

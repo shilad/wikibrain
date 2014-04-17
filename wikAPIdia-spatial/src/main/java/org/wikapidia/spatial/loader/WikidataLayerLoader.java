@@ -37,19 +37,18 @@ public abstract class WikidataLayerLoader {
 
     protected abstract WikidataFilter getWikidataFilter();
 
-    public final void loadData() throws WikapidiaException {
+    public final void loadData(LanguageSet langs) throws WikapidiaException {
 
         try {
 
             int matches = 0;
             int count = 0;
-            LanguageSet loadedLangs = new LanguageSet("simple,lad,la");
             ((WikidataSqlDao)wdDao).setFetchSize(5);
             Iterable<WikidataStatement> statements = wdDao.get(getWikidataFilter());
             for (WikidataStatement statement : statements){
 
                 UniversalPage uPage = wdDao.getUniversalPage(statement.getItem().getId());
-                if (uPage != null && uPage.isInLanguageSet(loadedLangs, false)){
+                if (uPage != null && uPage.isInLanguageSet(langs, false)){
                     matches++;
                     storeStatement(statement);
                 }
