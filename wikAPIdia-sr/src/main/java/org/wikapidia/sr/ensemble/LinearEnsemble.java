@@ -81,7 +81,7 @@ public class LinearEnsemble implements Ensemble{
         // Remove things that have no observed metrics
         List<EnsembleSim> pruned = new ArrayList<EnsembleSim>();
         for (EnsembleSim es : simList) {
-            if (es.getNumMetricsWithScore() > 0) {
+            if (es != null && es.getNumMetricsWithScore() > 0) {
                 pruned.add(es);
             }
         }

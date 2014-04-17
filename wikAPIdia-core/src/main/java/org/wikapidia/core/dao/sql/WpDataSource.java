@@ -134,7 +134,7 @@ public class WpDataSource  {
                 //ResultSet rs = st.executeQuery("SHOW search_path");
                 //rs.next();
                 //System.out.println(rs.getString(1));
-                System.out.println(s);
+//                System.out.println(s);
                 st.execute(s + ";");
                 st.close();
 
