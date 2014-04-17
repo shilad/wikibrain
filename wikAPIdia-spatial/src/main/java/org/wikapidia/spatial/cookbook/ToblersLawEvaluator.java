@@ -45,7 +45,6 @@ public class ToblersLawEvaluator {
     private final UniversalPageDao upDao;
     private final List<Language> langs;
     private final Map<Language, MonolingualSRMetric> metrics;
-    private final GeodeticCalculator geoCalc = new GeodeticCalculator();
 
     private final List<UniversalPage> concepts = new ArrayList<UniversalPage>();
     private final Map<UniversalPage, Point> locations = new HashMap<UniversalPage, Point>();
@@ -121,7 +120,7 @@ public class ToblersLawEvaluator {
     private void writeHeader() throws IOException {
         output.write("ITEM_NAME_1");
         output.write("\tITEM_ID_1");
-        output.write("ITEM_NAME_2");
+        output.write("\tITEM_NAME_2");
         output.write("\tITEM_ID_2");
         output.write("\tSPATIAL_DISTANCE");
         for (Language lang : langs) {
@@ -134,11 +133,10 @@ public class ToblersLawEvaluator {
         Point p1 = locations.get(c1).getCentroid();
         Point p2 = locations.get(c2).getCentroid();
 
-        synchronized (geoCalc) {
-            geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
-            geoCalc.setDestinationGeographicPoint(p2.getX(), p2.getY());
-            km = geoCalc.getOrthodromicDistance() / 1000;
-        }
+        GeodeticCalculator geoCalc = new GeodeticCalculator();
+        geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
+        geoCalc.setDestinationGeographicPoint(p2.getX(), p2.getY());
+        km = geoCalc.getOrthodromicDistance() / 1000;
 
         Title t1 = c1.getBestEnglishTitle(lpDao, true);
         Title t2 = c2.getBestEnglishTitle(lpDao, true);
@@ -149,7 +147,7 @@ public class ToblersLawEvaluator {
                 "\t" + km
         );
         for (SRResult result : results) {
-            output.write("" + result.getScore());
+            output.write("\t" + result.getScore());
         }
         output.write("\n");
     }
