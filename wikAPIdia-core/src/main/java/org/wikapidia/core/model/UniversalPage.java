@@ -50,6 +50,14 @@ public class UniversalPage extends AbstractUniversalEntity<LocalId> {
         return nameSpace;
     }
 
+    public int getLocalId(Language language) {
+        if (isInLanguage(language)) {
+            return localEntities.get(language).iterator().next().getId();
+        } else {
+            return -1;
+        }
+    }
+
 
     public static interface LocalPageChooser {
         public LocalId choose(Collection<LocalId> localPages);
