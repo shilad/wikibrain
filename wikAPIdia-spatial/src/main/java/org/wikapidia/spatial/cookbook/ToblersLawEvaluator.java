@@ -77,6 +77,12 @@ public class ToblersLawEvaluator {
         }
     }
 
+    /**
+     * Load all locations from all language editions of Wikipedia to concepts
+     *
+     * @throws DaoException
+     */
+
     public void retrieveAllLocations() throws DaoException {
         // Get all known concept geometries
         Map<Integer, Geometry> geometries = sdDao.getAllGeometries("wikidata", "earth");
@@ -97,6 +103,11 @@ public class ToblersLawEvaluator {
         LOG.info(String.format("Found %d geometries with articles in %s", concepts.size(), langs));
     }
 
+    /**
+     * Load specified tagged geometries to concepts
+     * @param geometries
+     * @throws DaoException
+     */
     public void retrieveLocations(Map<Integer, Geometry> geometries) throws DaoException {
         LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
@@ -116,6 +127,12 @@ public class ToblersLawEvaluator {
 
     }
 
+    /**
+     * Evaluate a specified number of random pairs from loaded concepts
+     * @param outputPath
+     * @param numSamples
+     * @throws IOException
+     */
     public void evaluateSample(File outputPath, int numSamples) throws IOException {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
@@ -145,6 +162,13 @@ public class ToblersLawEvaluator {
         writeRow(c1, c2, results);
     }
 
+    /**
+     * Evaluate all pairs from loaded concepts
+     * @param outputPath
+     * @throws IOException
+     * @throws DaoException
+     * @throws WikapidiaException
+     */
     public void evaluateAll(File outputPath) throws IOException, DaoException, WikapidiaException {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
@@ -153,6 +177,49 @@ public class ToblersLawEvaluator {
 
         for(UniversalPage c1: concepts){
             for(UniversalPage c2: concepts){
+                if(c1.equals(c2))
+                    continue;
+                List<SRResult> results = new ArrayList<SRResult>();
+                for (Language lang : langs) {
+                    MonolingualSRMetric sr = metrics.get(lang);
+                    results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
+                }
+                writeRow(c1, c2, results);
+
+
+            }
+        }
+
+        this.output.close();
+
+    }
+
+    /**
+     *
+     * @return A list of parsed concepts
+     */
+    public List<UniversalPage> getParsedConcepts(){
+        return concepts;
+    }
+
+    /**
+     * Evaluate all pairs that one location is in "concepts1" and the other one is in "concepts2"
+     * @param outputPath
+     * @param concepts1
+     * @param concepts2
+     * @throws IOException
+     * @throws DaoException
+     * @throws WikapidiaException
+     */
+    public void evaluateBipartite(File outputPath, List<UniversalPage> concepts1, List<UniversalPage> concepts2) throws IOException, DaoException, WikapidiaException {
+
+        this.output = new CSVWriter(new FileWriter(outputPath), ',');
+        writeHeader();
+        if(concepts1.size() == 0 || concepts2.size() == 0)
+            LOG.warning("No concept has been retrieved");
+
+        for(UniversalPage c1: concepts1){
+            for(UniversalPage c2: concepts2){
                 if(c1.equals(c2))
                     continue;
                 List<SRResult> results = new ArrayList<SRResult>();
