@@ -359,8 +359,8 @@ public class SpatialDataLoader {
 
         //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
         SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
-        //loader.loadWikidataData();
-        loader.loadExogenousData();
+        loader.loadWikidataData();
+        //loader.loadExogenousData();
 
 
 

@@ -82,7 +82,7 @@ public class EarthBasicCoordinatesWikidataLayerLoader extends WikidataLayerLoade
 
         int itemId = statement.getItem().getId();
         Geometry g = jsonToGeometry(statement.getValue().getJsonValue().getAsJsonObject());
-        if (g != null) {
+        if (g != null && spatialDao.getGeometry(itemId, LAYER_NAME, EARTH_REF_SYS_NAME) == null) {
             spatialDao.saveGeometry(itemId, LAYER_NAME, EARTH_REF_SYS_NAME,  g);
             return true;
         }else{
