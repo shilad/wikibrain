@@ -36,7 +36,7 @@ public class SimpleToblersLawEvaluator {
     private static int NUM_SAMPLES = 1000000;
     private static int WIKIDATA_CONCEPTS = 1;
 
-    private static final Logger LOG = Logger.getLogger(ToblersLawEvaluator.class.getName());
+    private static final Logger LOG = Logger.getLogger(SimpleToblersLawEvaluator.class.getName());
 
     private Random random = new Random();
 
