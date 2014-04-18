@@ -51,7 +51,7 @@ public class ToblersLawEvaluator {
     private final Map<Language, MonolingualSRMetric> metrics;
 
     private final List<UniversalPage> concepts = new ArrayList<UniversalPage>();
-    private final Map<UniversalPage, Point> locations = new HashMap<UniversalPage, Point>();
+    private final Map<Integer, Point> locations = new HashMap<Integer, Point>();
     private final Env env;
     private CSVWriter output;
 
@@ -93,8 +93,8 @@ public class ToblersLawEvaluator {
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
             if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
                 concepts.add(concept);
-                Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
-                locations.put(concept, g1.getCentroid());
+                Geometry g1 = geometries.get(conceptId);
+                locations.put(conceptId, g1.getCentroid());
                 if (concepts.size() % 1000 == 0) {
                     LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), langs));
                 }
@@ -116,8 +116,8 @@ public class ToblersLawEvaluator {
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
             if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
                 concepts.add(concept);
-                Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
-                locations.put(concept, g1.getCentroid());
+                Geometry g1 = geometries.get(conceptId);
+                locations.put(conceptId, g1.getCentroid());
                 if (concepts.size() % 1000 == 0) {
                     LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), langs));
                 }
@@ -126,6 +126,8 @@ public class ToblersLawEvaluator {
         LOG.info(String.format("Finish loading %d geometries with articles in %s", concepts.size(), langs));
 
     }
+
+
 
     /**
      * Evaluate a specified number of random pairs from loaded concepts
@@ -173,7 +175,7 @@ public class ToblersLawEvaluator {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
         if(concepts.size() == 0)
-            LOG.warning("No concept has been retrieved");
+            LOG.warning("No cocept has been retrieved");
 
         for(UniversalPage c1: concepts){
             for(UniversalPage c2: concepts){
@@ -222,13 +224,17 @@ public class ToblersLawEvaluator {
             for(UniversalPage c2: concepts2){
                 if(c1.equals(c2))
                     continue;
-                List<SRResult> results = new ArrayList<SRResult>();
-                for (Language lang : langs) {
-                    MonolingualSRMetric sr = metrics.get(lang);
-                    results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
+                try {
+                    List<SRResult> results = new ArrayList<SRResult>();
+                    for (Language lang : langs) {
+                        MonolingualSRMetric sr = metrics.get(lang);
+                        results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
+                    }
+                    writeRow(c1, c2, results);
                 }
-                writeRow(c1, c2, results);
-
+                catch (Exception e){
+                    LOG.warning(String.format("Error evaluating between %s and %s", c1, c2));
+                }
 
             }
         }
@@ -256,8 +262,8 @@ public class ToblersLawEvaluator {
 
     private void writeRow(UniversalPage c1, UniversalPage c2, List<SRResult> results) throws WikapidiaException, IOException {
         double km;
-        Point p1 = locations.get(c1).getCentroid();
-        Point p2 = locations.get(c2).getCentroid();
+        Point p1 = locations.get(c1.getUnivId()).getCentroid();
+        Point p2 = locations.get(c2.getUnivId()).getCentroid();
 
         GeodeticCalculator geoCalc = new GeodeticCalculator();
         geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
