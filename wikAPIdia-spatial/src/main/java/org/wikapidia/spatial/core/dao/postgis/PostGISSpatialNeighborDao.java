@@ -69,14 +69,14 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
 
         Filter layerFilter = ff.and(layerFilters);
 
-        Filter withinFilter = ff.dwithin(geomProperty, ff.literal(g), 10.0 , "m");
-        //Filter beyondFilter = ff.beyond(geomProperty, ff.literal(g), minDist , "km");
+        Filter withinFilter = ff.dwithin(geomProperty, ff.literal(g), maxDist / 111.1949266 , "km");
+        Filter beyondFilter = ff.beyond(geomProperty, ff.literal(g), minDist / 111.1949266 , "km");
 
         List<Filter> filters = Lists.newArrayList();
         filters.add(refSysFilter);
         filters.add(layerFilter);
         filters.add(withinFilter);
-        //filters.add(beyondFilter);
+        filters.add(beyondFilter);
 
         Filter finalFilter = ff.and(filters);
 
