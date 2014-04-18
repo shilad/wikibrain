@@ -72,15 +72,23 @@ public class PostGISDB {
             Filter f = CQL.toFilter(cqlQuery);
             FeatureCollection collection = contents.getFeatures(f);
 
+
             if (collection.size() == 0) return null;
 
             FeatureIterator iterator = collection.features();
+
+            if(!iterator.hasNext()){
+                iterator.close();
+                return null;
+            }
+
             Feature feature = iterator.next();
             iterator.close();
             return ((Geometry)feature.getDefaultGeometryProperty().getValue());
 
 
         }catch(Exception e){
+
             throw new DaoException(e);
         }
     }
@@ -97,7 +105,13 @@ public class PostGISDB {
             if (collection.size() == 0) return null;
 
             FeatureIterator iterator = collection.features();
+
+            if(!iterator.hasNext()){
+                iterator.close();
+                return null;
+            }
             Feature feature = iterator.next();
+
             Map<Integer, Geometry> geometries = new HashMap<Integer, Geometry>();
             while (iterator.hasNext()){
                 geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());

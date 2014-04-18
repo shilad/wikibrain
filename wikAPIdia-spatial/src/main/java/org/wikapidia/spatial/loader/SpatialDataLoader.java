@@ -69,6 +69,7 @@ public class SpatialDataLoader {
                     parseShapefile(layerStruct);
                 }
             }
+
             spatialDataDao.endSaveGeometries();
 
 
@@ -150,7 +151,7 @@ public class SpatialDataLoader {
                 while(i < numDbfFields && !found){
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
                     Integer itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
-                    if (itemId != null){
+                    if (itemId != null && spatialDataDao.getGeometry(itemId, struct.getLayerName(), struct.getRefSysName()) == null){
                         spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
                         found = true;
                         foundGeomCount++;
@@ -304,7 +305,7 @@ public class SpatialDataLoader {
 
     }
 
-    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data";
+    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data_temp";
 
     public static void main(String args[]) throws ConfigurationException, WikapidiaException {
 
@@ -346,8 +347,8 @@ public class SpatialDataLoader {
         PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
 
         //String spatialDataFolderPath = cmd.getOptionValue('f');
-        File spatialDataFolder = new File("/Users/toby/Dropbox/spatial_data_temp");
-        String spatialDataFolderPath = new String("/Users/toby/Dropbox/spatial_data_temp");
+        File spatialDataFolder = new File("/Users/toby/Dropbox/spatial_data_wikibrain");
+        String spatialDataFolderPath = new String("/Users/toby/Dropbox/spatial_data_wikibrain");
         //File spatialDataFolder = new File(spatialDataFolderPath); //TODO: fixme
 
         WikidataDao wdDao = conf.get(WikidataDao.class);
@@ -358,8 +359,8 @@ public class SpatialDataLoader {
 
         //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
         SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
-        loader.loadWikidataData();
-        //loader.loadExogenousData();
+        //loader.loadWikidataData();
+        loader.loadExogenousData();
 
 
 
