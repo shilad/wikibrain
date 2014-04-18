@@ -7,16 +7,13 @@ import gnu.trove.set.TIntSet;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
-import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.UniversalPageDao;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.NameSpace;
 import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
-import org.wikapidia.spatial.cookbook.ToblersLawEvaluator;
 import org.wikapidia.spatial.core.dao.SpatialContainmentDao;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
 import org.wikapidia.wikidata.WikidataDao;
@@ -30,6 +27,17 @@ import java.util.logging.Logger;
  */
 public class BipartiteEvaluatorTest {
     private static final Logger LOG = Logger.getLogger(BipartiteEvaluatorTest.class.getName());
+
+    private static Set<Integer> PickSample(Set<Integer> originalSet, Integer size){
+        if (size > originalSet.size()){
+            LOG.warning(String.format("Want %d elements, only have %d", size, originalSet.size()));
+            return originalSet;
+        }
+        List<Integer> list = new LinkedList<Integer>(originalSet);
+        Collections.shuffle(list);
+        return new HashSet<Integer>(list.subList(0, size));
+    }
+
     public static void main(String[] args) throws Exception {
 
         Env env = EnvBuilder.envFromArgs(args);
@@ -44,17 +52,18 @@ public class BipartiteEvaluatorTest {
 
 
 
-        String layerName = "country";
+        String layerName1 = "country";
+        String layerName2 = "states";
         Set<String> subLayers = Sets.newHashSet();
         subLayers.add("wikidata");
 
 
 
-        Integer containerId1 = wdDao.getItemId(lpDao.getByTitle(new Title("United Kingdom", Language.getByLangCode("simple")), NameSpace.ARTICLE));
-        TIntSet containedItemIds1 = scDao.getContainedItemIds(containerId1,layerName, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
+        Integer containerId1 = wdDao.getItemId(lpDao.getByTitle(new Title("Germany", Language.getByLangCode("simple")), NameSpace.ARTICLE));
+        TIntSet containedItemIds1 = scDao.getContainedItemIds(containerId1,layerName1, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
 
-        Integer containerId2 = wdDao.getItemId(lpDao.getByTitle(new Title("Australia", Language.getByLangCode("simple")), NameSpace.ARTICLE));
-        TIntSet containedItemIds2 = scDao.getContainedItemIds(containerId2,layerName, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
+        Integer containerId2 = wdDao.getItemId(lpDao.getByTitle(new Title("New York", Language.getByLangCode("simple")), NameSpace.ARTICLE));
+        TIntSet containedItemIds2 = scDao.getContainedItemIds(containerId2,layerName2, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
 
         Map<Integer, Geometry> geometriesToParse = new HashMap<Integer, Geometry>();
         List<UniversalPage> concepts1 = new ArrayList<UniversalPage>();
@@ -76,9 +85,13 @@ public class BipartiteEvaluatorTest {
                 return true;
             }
         });
-        for(Integer i : containedId1){
+
+        Set<Integer> sampledContainedId1 = PickSample(containedId1, 500);
+        Set<Integer> sampledContainedId2 = PickSample(containedId2, 500);
+
+        for(Integer i : sampledContainedId1){
             if(counter % 100 == 0)
-                LOG.info(String.format("%d geometries added out of %d", counter, containedId1.size()));
+                LOG.info(String.format("%d geometries added out of %d", counter, sampledContainedId1.size()));
             geometriesToParse.put(i, sdDao.getGeometry(i, "wikidata", "earth"));
             concepts1.add(upDao.getById(i, 1));
             counter ++;
@@ -92,10 +105,12 @@ public class BipartiteEvaluatorTest {
             }
         });
 
+
+
         counter = 0;
-        for(Integer i : containedId2){
+        for(Integer i : sampledContainedId2){
             if(counter % 100 == 0)
-                LOG.info(String.format("%d geometries added out of %d", counter, containedId2.size()));
+                LOG.info(String.format("%d geometries added out of %d", counter, sampledContainedId2.size()));
             geometriesToParse.put(i, sdDao.getGeometry(i, "wikidata", "earth"));
             concepts2.add(upDao.getById(i, 1));
             counter ++;
@@ -104,7 +119,7 @@ public class BipartiteEvaluatorTest {
         LOG.info(String.format("Now retrieving %d locations", geometriesToParse.size()));
         evaluator.retrieveLocations(geometriesToParse);
 
-        evaluator.evaluateBipartite(new File("UK-AUS_Test.csv"), concepts1, concepts2);
+        evaluator.evaluateBipartite(new File("GERMANY-NY_Test.csv"), concepts1, concepts2);
 
 
 

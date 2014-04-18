@@ -2,6 +2,7 @@ package org.wikapidia.spatial.cookbook;
 
 import com.google.common.collect.Sets;
 import gnu.trove.set.TIntSet;
+import org.jooq.util.derby.sys.Sys;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
@@ -39,29 +40,36 @@ public class SpatialContainmentExample {
             LanguageSet loadedLangs = lpDao.getLoadedLanguages();
 
             // set up the parameters for the call to getContainedItemIds
-            String containerName = "Cook County, Illinois";
-            String layerName = "uscounties_lowres_beta";
+            String containerName = "Minnesota";
+            String layerName = "states";
             Set<String> subLayers = Sets.newHashSet();
             subLayers.add("wikidata");
+
+
 
 
             LocalPage lp = lpDao.getByTitle(new Title(containerName,Language.getByLangCode("simple")), NameSpace.ARTICLE);
             Integer id = wdDao.getItemId(lp);
             TIntSet containedItemIds = scDao.getContainedItemIds(id,layerName, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
 
+
+            int counter = 0;
             System.out.println("Items contained in the spatial footprint of the article '" + lp.getTitle() + "' are:");
 
             for (int cId : containedItemIds.toArray()){
                 UniversalPage univPage = wdDao.getUniversalPage(cId);
                 Title t = univPage.getBestEnglishTitle(lpDao, true);
                 System.out.println(t.getCanonicalTitle());
+                counter++;
             }
+
+            System.out.printf("Found %d items\n", counter);
 
 
 
 
         } catch(Exception e){
-            e.printStackTrace();;
+            e.printStackTrace();
         }
 
 
