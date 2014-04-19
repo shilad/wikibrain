@@ -155,4 +155,10 @@ public class Language implements Comparable<Language>, Serializable {
     public String toString() {
         return this.getEnLangName();
     }
+
+
+    public static final Language EN = Language.getByLangCode("en");
+    public static final Language DE = Language.getByLangCode("de");
+    public static final Language SIMPLE = Language.getByLangCode("simple");
+
 }

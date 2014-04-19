@@ -5,6 +5,8 @@ import org.wikapidia.core.lang.LanguageSet;
 import org.wikapidia.core.model.MetaInfo;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The MetaInfoDao interface stores information about what is loaded into WikAPIdia.
@@ -90,6 +92,14 @@ public interface MetaInfoDao extends Dao<MetaInfo> {
      * @return
      */
     public int incrementErrorsQuietly(Class component, Language lang);
+
+
+    /**
+     * Returns all known information.
+     * @return
+     * @throws DaoException
+     */
+    public Map<String, List<MetaInfo>> getAllInfo() throws DaoException;
 
     /**
      * Ensure the counts for all componentsare written to the database.
