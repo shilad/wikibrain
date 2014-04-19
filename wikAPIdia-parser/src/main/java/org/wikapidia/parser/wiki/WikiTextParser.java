@@ -222,7 +222,7 @@ public class WikiTextParser {
                             visitIll(pill);
                         }
                     }else{
-                        LOG.warning("Invalid ILL:\t" + xml + "\t" + ill.getTarget());
+                        LOG.fine("Invalid ILL:\t" + xml + "\t" + ill.getTarget());
                     }
                 } catch (Exception e) {
                     LOG.log(Level.WARNING, String.format("Error while parsing/storing ILL\t%s\t%s\t%s",xml,ill.toString().replaceAll("\n", ","), e.getMessage()));

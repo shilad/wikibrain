@@ -13,19 +13,21 @@ import java.util.logging.Logger;
 
 /**
  */
-public class LoadingStats {
-    private static final Logger LOG = Logger.getLogger(LoadingStats.class.getName());
+public class LoadedStats {
+    private static final Logger LOG = Logger.getLogger(LoadedStats.class.getName());
     private final MetaInfoDao dao;
     private final Env env;
     private static final int FIELD_WIDTH = 28;
     private static final int WIDTH = FIELD_WIDTH * 5 + 2 - 1;
 
-    public LoadingStats(Env env) throws ConfigurationException {
+    public LoadedStats(Env env) throws ConfigurationException {
         this.env = env;
         this.dao = env.getConfigurator().get(MetaInfoDao.class);
     }
 
     public void print() throws DaoException {
+        System.err.flush();
+
         printHeader();
 
         Map<String, List<MetaInfo>> allInfo = dao.getAllInfo();
@@ -57,18 +59,11 @@ public class LoadingStats {
         System.out.println("*" + StringUtils.repeat(" ", WIDTH - 2) + "*");
         System.out.println("*" + StringUtils.center("LOADED WIKIBRAIN DATA:", WIDTH - 2) + "*");
         System.out.println("*" + StringUtils.repeat(" ", WIDTH - 2) + "*");
+        System.out.println("*" + StringUtils.center(" Default language: " + env.getLanguages().getDefaultLanguage(), WIDTH - 2) + "*");
+        System.out.println("*" + StringUtils.center(" Loaded languages: " + env.getLanguages(), WIDTH - 2) + "*");
         System.out.println("*" + StringUtils.repeat(" ", WIDTH - 2) + "*");
-        System.out.println("*" + StringUtils.rightPad(" Default language: " + env.getLanguages().getDefaultLanguage(), WIDTH - 2) + "*");
-        System.out.println("*" + StringUtils.rightPad(" Loaded languages: " + env.getLanguages(), WIDTH - 2) + "*");
-        System.out.println("*" + StringUtils.repeat(" ", WIDTH - 2) + "*");
-        System.out.println(StringUtils.repeat("*", WIDTH));
-
-        System.out.println("");
-
         System.out.println(StringUtils.repeat("-", WIDTH));
-        System.out.println("|" + StringUtils.repeat(" ", WIDTH - 2) + "|");
         printRow("component", "language", "count", "errors", "modified");
-        System.out.println("|" + StringUtils.repeat(" ", WIDTH - 2) + "|");
         System.out.println(StringUtils.repeat("-", WIDTH));
     }
 
@@ -89,7 +84,7 @@ public class LoadingStats {
         if (env == null) {
             return;
         }
-        LoadingStats ls = new LoadingStats(env);
+        LoadedStats ls = new LoadedStats(env);
         ls.print();
     }
 }
