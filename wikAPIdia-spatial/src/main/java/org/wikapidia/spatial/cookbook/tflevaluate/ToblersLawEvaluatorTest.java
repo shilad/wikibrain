@@ -1,7 +1,6 @@
-package org.wikapidia.spatial.cookbook;
+package org.wikapidia.spatial.cookbook.tflevaluate;
 
 import com.vividsolutions.jts.geom.Geometry;
-import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;

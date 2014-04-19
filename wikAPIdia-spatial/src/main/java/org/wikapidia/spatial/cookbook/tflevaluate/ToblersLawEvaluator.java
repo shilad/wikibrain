@@ -1,4 +1,4 @@
-package org.wikapidia.spatial.cookbook;
+package org.wikapidia.spatial.cookbook.tflevaluate;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import com.vividsolutions.jts.geom.Geometry;
@@ -8,7 +8,6 @@ import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.WikapidiaException;
 import org.wikapidia.core.cmd.Env;
-import org.wikapidia.core.cmd.EnvBuilder;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.LocalPageDao;
 import org.wikapidia.core.dao.UniversalPageDao;
@@ -21,9 +20,7 @@ import org.wikapidia.sr.MonolingualSRMetric;
 import org.wikapidia.sr.SRResult;
 import org.wikapidia.utils.ParallelForEach;
 import org.wikapidia.utils.Procedure;
-import org.wikapidia.utils.WpIOUtils;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,7 +48,7 @@ public class ToblersLawEvaluator {
     private final Map<Language, MonolingualSRMetric> metrics;
 
     private final List<UniversalPage> concepts = new ArrayList<UniversalPage>();
-    private final Map<UniversalPage, Point> locations = new HashMap<UniversalPage, Point>();
+    private final Map<Integer, Point> locations = new HashMap<Integer, Point>();
     private final Env env;
     private CSVWriter output;
 
@@ -77,6 +74,12 @@ public class ToblersLawEvaluator {
         }
     }
 
+    /**
+     * Load all locations from all language editions of Wikipedia to concepts
+     *
+     * @throws DaoException
+     */
+
     public void retrieveAllLocations() throws DaoException {
         // Get all known concept geometries
         Map<Integer, Geometry> geometries = sdDao.getAllGeometries("wikidata", "earth");
@@ -87,8 +90,8 @@ public class ToblersLawEvaluator {
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
             if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
                 concepts.add(concept);
-                Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
-                locations.put(concept, g1.getCentroid());
+                Geometry g1 = geometries.get(conceptId);
+                locations.put(conceptId, g1.getCentroid());
                 if (concepts.size() % 1000 == 0) {
                     LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), langs));
                 }
@@ -97,6 +100,11 @@ public class ToblersLawEvaluator {
         LOG.info(String.format("Found %d geometries with articles in %s", concepts.size(), langs));
     }
 
+    /**
+     * Load specified tagged geometries to concepts
+     * @param geometries
+     * @throws DaoException
+     */
     public void retrieveLocations(Map<Integer, Geometry> geometries) throws DaoException {
         LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
@@ -105,8 +113,8 @@ public class ToblersLawEvaluator {
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
             if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
                 concepts.add(concept);
-                Geometry g1 = sdDao.getGeometry(concept.getUnivId(), "wikidata", "earth");
-                locations.put(concept, g1.getCentroid());
+                Geometry g1 = geometries.get(conceptId);
+                locations.put(conceptId, g1.getCentroid());
                 if (concepts.size() % 1000 == 0) {
                     LOG.info(String.format("Loaded %d geometries with articles in %s...", concepts.size(), langs));
                 }
@@ -116,6 +124,14 @@ public class ToblersLawEvaluator {
 
     }
 
+
+
+    /**
+     * Evaluate a specified number of random pairs from loaded concepts
+     * @param outputPath
+     * @param numSamples
+     * @throws IOException
+     */
     public void evaluateSample(File outputPath, int numSamples) throws IOException {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
@@ -137,7 +153,9 @@ public class ToblersLawEvaluator {
         UniversalPage c2 = concepts.get(random.nextInt(concepts.size()));
 
         List<SRResult> results = new ArrayList<SRResult>();
+
         for (Language lang : langs) {
+
             MonolingualSRMetric sr = metrics.get(lang);
             results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
         }
@@ -145,14 +163,26 @@ public class ToblersLawEvaluator {
         writeRow(c1, c2, results);
     }
 
+    /**
+     * Evaluate all pairs from loaded concepts
+     * @param outputPath
+     * @throws IOException
+     * @throws DaoException
+     * @throws WikapidiaException
+     */
     public void evaluateAll(File outputPath) throws IOException, DaoException, WikapidiaException {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
         if(concepts.size() == 0)
-            LOG.warning("No concept has been retrieved");
+            LOG.warning("No cocept has been retrieved");
+        int counter = 0;
+        int total_size = concepts.size() * concepts.size();
 
         for(UniversalPage c1: concepts){
             for(UniversalPage c2: concepts){
+                counter ++;
+                if(counter % 1000 == 0)
+                    LOG.info(String.format("Evaluating %d out of %d pairs", counter, total_size));
                 if(c1.equals(c2))
                     continue;
                 List<SRResult> results = new ArrayList<SRResult>();
@@ -169,6 +199,60 @@ public class ToblersLawEvaluator {
         this.output.close();
 
     }
+
+    /**
+     *
+     * @return A list of parsed concepts
+     */
+    public List<UniversalPage> getParsedConcepts(){
+        return concepts;
+    }
+
+    /**
+     * Evaluate all pairs that one location is in "concepts1" and the other one is in "concepts2"
+     * @param outputPath
+     * @param concepts1
+     * @param concepts2
+     * @throws IOException
+     * @throws DaoException
+     * @throws WikapidiaException
+     */
+    public void evaluateBipartite(File outputPath, List<UniversalPage> concepts1, List<UniversalPage> concepts2) throws IOException, DaoException, WikapidiaException {
+
+        this.output = new CSVWriter(new FileWriter(outputPath), ',');
+        writeHeader();
+        if(concepts1.size() == 0 || concepts2.size() == 0)
+            LOG.warning("No concept has been retrieved");
+        int counter = 0;
+        int total_size = concepts1.size() * concepts2.size();
+
+        for(UniversalPage c1: concepts1){
+            for(UniversalPage c2: concepts2){
+                counter ++;
+                if(counter % 1000 == 0)
+                    LOG.info(String.format("Evaluating %d out of %d pairs", counter, total_size));
+                if(c1.equals(c2))
+                    continue;
+                try {
+                    List<SRResult> results = new ArrayList<SRResult>();
+                    for (Language lang : langs) {
+                        MonolingualSRMetric sr = metrics.get(lang);
+                        results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
+                    }
+                    writeRow(c1, c2, results);
+                }
+                catch (Exception e){
+                    LOG.warning(String.format("Error evaluating between %s and %s", c1, c2));
+                }
+
+            }
+        }
+
+        this.output.close();
+
+    }
+
+
 
 
     private void writeHeader() throws IOException {
@@ -189,8 +273,8 @@ public class ToblersLawEvaluator {
 
     private void writeRow(UniversalPage c1, UniversalPage c2, List<SRResult> results) throws WikapidiaException, IOException {
         double km;
-        Point p1 = locations.get(c1).getCentroid();
-        Point p2 = locations.get(c2).getCentroid();
+        Point p1 = locations.get(c1.getUnivId()).getCentroid();
+        Point p2 = locations.get(c2.getUnivId()).getCentroid();
 
         GeodeticCalculator geoCalc = new GeodeticCalculator();
         geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());

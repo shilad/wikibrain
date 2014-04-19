@@ -1,8 +1,9 @@
 package org.wikapidia.spatial.cookbook;
 
 import com.google.common.collect.Sets;
+import com.vividsolutions.jts.geom.Point;
 import gnu.trove.set.TIntSet;
-import org.jooq.util.derby.sys.Sys;
+import org.geotools.referencing.GeodeticCalculator;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.cmd.Env;
 import org.wikapidia.core.cmd.EnvBuilder;
@@ -15,15 +16,15 @@ import org.wikapidia.core.model.Title;
 import org.wikapidia.core.model.UniversalPage;
 import org.wikapidia.spatial.core.dao.SpatialContainmentDao;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
+import org.wikapidia.spatial.core.dao.SpatialNeighborDao;
 import org.wikapidia.wikidata.WikidataDao;
 
 import java.util.Set;
 
 /**
- * Created by bjhecht on 4/8/14.
+ * Created by toby on 4/17/14.
  */
-public class SpatialContainmentExample {
-
+public class SpatialNeighborExample {
 
     public static void main(String[] args){
 
@@ -32,34 +33,47 @@ public class SpatialContainmentExample {
 
             Env env = new EnvBuilder().build();
             Configurator c = env.getConfigurator();
-
-            SpatialContainmentDao scDao = c.get(SpatialContainmentDao.class);
+            SpatialNeighborDao snDao = c.get(SpatialNeighborDao.class);
             WikidataDao wdDao = c.get(WikidataDao.class);
             LocalPageDao lpDao = c.get(LocalPageDao.class);
+            SpatialDataDao sdDao = c.get(SpatialDataDao.class);
 
             LanguageSet loadedLangs = lpDao.getLoadedLanguages();
 
             // set up the parameters for the call to getContainedItemIds
-            String containerName = "China";
-            String layerName = "country";
+            String originName = "Minnesota";
+            String layerName = "wikidata";
             Set<String> subLayers = Sets.newHashSet();
             subLayers.add("wikidata");
 
 
 
 
-            LocalPage lp = lpDao.getByTitle(new Title(containerName,Language.getByLangCode("simple")), NameSpace.ARTICLE);
+            LocalPage lp = lpDao.getByTitle(new Title(originName, Language.getByLangCode("simple")), NameSpace.ARTICLE);
             Integer id = wdDao.getItemId(lp);
-            TIntSet containedItemIds = scDao.getContainedItemIds(id,layerName, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
 
+            TIntSet neighborItemIds = snDao.getNeighboringItemIds(id, layerName, "earth", subLayers, 800, 1000);
+
+            Point p1 = sdDao.getGeometry(id, layerName, "earth").getCentroid();
 
             int counter = 0;
             System.out.println("Items contained in the spatial footprint of the article '" + lp.getTitle() + "' are:");
 
-            for (int cId : containedItemIds.toArray()){
+            for (int cId : neighborItemIds.toArray()){
                 UniversalPage univPage = wdDao.getUniversalPage(cId);
                 Title t = univPage.getBestEnglishTitle(lpDao, true);
-                System.out.println(t.getCanonicalTitle());
+                System.out.println();
+
+
+                Point p2 = sdDao.getGeometry(cId, "wikidata", "earth").getCentroid();
+
+                GeodeticCalculator geoCalc = new GeodeticCalculator();
+                geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
+                geoCalc.setDestinationGeographicPoint(p2.getX(), p2.getY());
+                System.out.println(t.getCanonicalTitle() + " " + geoCalc.getOrthodromicDistance() / 1000);
+
+
+
                 counter++;
             }
 

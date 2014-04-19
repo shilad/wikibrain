@@ -103,9 +103,11 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     private void flushFeatureBuffer() throws DaoException{
 
         try {
-            SimpleFeatureCollection featuresToStore = new ListFeatureCollection(db.getSchema(), curFeaturesToStore);
-            ((SimpleFeatureStore) db.getFeatureSource()).addFeatures(featuresToStore); // GeoTools can be so weird sometimes
-            curFeaturesToStore.clear();
+            if(curFeaturesToStore != null){
+                SimpleFeatureCollection featuresToStore = new ListFeatureCollection(db.getSchema(), curFeaturesToStore);
+                ((SimpleFeatureStore) db.getFeatureSource()).addFeatures(featuresToStore); // GeoTools can be so weird sometimes
+                curFeaturesToStore.clear();
+            }
         }catch(IOException e){
             throw new DaoException(e);
         }
