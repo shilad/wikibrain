@@ -8,7 +8,10 @@ import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.core.dao.MetaInfoDao;
 import org.wikapidia.core.model.MetaInfo;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
 /**
@@ -17,7 +20,7 @@ public class LoadedStats {
     private static final Logger LOG = Logger.getLogger(LoadedStats.class.getName());
     private final MetaInfoDao dao;
     private final Env env;
-    private static final int FIELD_WIDTH = 28;
+    private static final int FIELD_WIDTH = 24;
     private static final int WIDTH = FIELD_WIDTH * 5 + 2 - 1;
 
     public LoadedStats(Env env) throws ConfigurationException {
@@ -42,13 +45,14 @@ public class LoadedStats {
     }
 
     private void printComponent(String component, List<MetaInfo> metaInfos) {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (MetaInfo mi : metaInfos) {
             printRow(
                     "" + component,
                     "" + mi.getLanguage(),
                     "" + mi.getNumRecords(),
                     "" + mi.getNumErrors(),
-                    "" + mi.getLastUpdated()
+                    "" + df.format(mi.getLastUpdated())
                 );
         }
     }
@@ -79,12 +83,13 @@ public class LoadedStats {
         System.out.println("");
     }
 
-    public static void main(String args[]) throws ConfigurationException, DaoException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, InterruptedException {
         Env env = EnvBuilder.envFromArgs(args);
         if (env == null) {
             return;
         }
         LoadedStats ls = new LoadedStats(env);
+        Thread.currentThread().sleep(1000);
         ls.print();
     }
 }

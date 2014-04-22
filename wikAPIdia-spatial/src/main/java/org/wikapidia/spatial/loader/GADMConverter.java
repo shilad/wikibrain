@@ -113,8 +113,8 @@ public class GADMConverter {
     public void convertShpFile(String fileName) {
         File file = new File(fileName);
         Map map = new HashMap();
-        HashMap<String, List<Geometry>> stateShape = new HashMap<>();
-        HashMap<String, String> stateCountry = new HashMap<>();
+        HashMap<String, List<Geometry>> stateShape = new HashMap<String, List<Geometry>>();
+        HashMap<String, String> stateCountry = new HashMap<String, String>();
         File outputFile = new File("gadm2.shp");
 
         ShapefileReader shpReader;
