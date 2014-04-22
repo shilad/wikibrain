@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -79,6 +80,7 @@ public class Language implements Comparable<Language>, Serializable {
         return locale;
     }
 
+
     /**
      * @param langCode langCode, such as "en"
      * @return associated language
@@ -151,6 +153,13 @@ public class Language implements Comparable<Language>, Serializable {
     public String toString() {
         return this.getEnLangName();
     }
+
+    /**
+     * HACK: Not really a language, but treated as a language by Wikimedia.
+     * Must come before other languages.
+     */
+    public static Language WIKIDATA = new Language((short) -1, "wikidata", "Wikidata", "Wikidata");
+
 
     /**
      * These can be automatically regenereated by running
@@ -441,11 +450,5 @@ public class Language implements Comparable<Language>, Serializable {
     public static final Language MUS = Language.getByLangCode("mus");
     public static final Language KR = Language.getByLangCode("kr");
     public static final Language HZ = Language.getByLangCode("hz");
-
-
-    /**
-     * HACK: Not really a language, but treated as a language by Wikimedia.
-     */
-    public static Language WIKIDATA = new Language((short) -1, "wikidata", "Wikidata", "Wikidata");
 
 }
