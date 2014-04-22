@@ -40,9 +40,10 @@ public class BipartiteEvaluatorTest {
 
     public static void main(String[] args) throws Exception {
 
+        LanguageSet languageSet = new LanguageSet("simple");
         Env env = EnvBuilder.envFromArgs(args);
         Configurator conf = env.getConfigurator();
-        ToblersLawEvaluator evaluator = new ToblersLawEvaluator(env, new LanguageSet("simple"));
+        ToblersLawEvaluator evaluator = new ToblersLawEvaluator(env, languageSet);
         SpatialDataDao sdDao = conf.get(SpatialDataDao.class);
         SpatialContainmentDao scDao = conf.get(SpatialContainmentDao.class);
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
@@ -59,10 +60,10 @@ public class BipartiteEvaluatorTest {
 
 
 
-        Integer containerId1 = wdDao.getItemId(lpDao.getByTitle(new Title("Germany", Language.getByLangCode("simple")), NameSpace.ARTICLE));
+        Integer containerId1 = wdDao.getItemId(lpDao.getByTitle(new Title("China", Language.getByLangCode("simple")), NameSpace.ARTICLE));
         TIntSet containedItemIds1 = scDao.getContainedItemIds(containerId1,layerName1, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
 
-        Integer containerId2 = wdDao.getItemId(lpDao.getByTitle(new Title("New York", Language.getByLangCode("simple")), NameSpace.ARTICLE));
+        Integer containerId2 = wdDao.getItemId(lpDao.getByTitle(new Title("California", Language.getByLangCode("simple")), NameSpace.ARTICLE));
         TIntSet containedItemIds2 = scDao.getContainedItemIds(containerId2,layerName2, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
 
         Map<Integer, Geometry> geometriesToParse = new HashMap<Integer, Geometry>();
@@ -86,17 +87,6 @@ public class BipartiteEvaluatorTest {
             }
         });
 
-        Set<Integer> sampledContainedId1 = PickSample(containedId1, 500);
-        Set<Integer> sampledContainedId2 = PickSample(containedId2, 500);
-
-        for(Integer i : sampledContainedId1){
-            if(counter % 100 == 0)
-                LOG.info(String.format("%d geometries added out of %d", counter, sampledContainedId1.size()));
-            geometriesToParse.put(i, sdDao.getGeometry(i, "wikidata", "earth"));
-            concepts1.add(upDao.getById(i, 1));
-            counter ++;
-        }
-
         containedItemIds2.forEach(new TIntProcedure() {
             @Override
             public boolean execute(int i) {
@@ -105,14 +95,34 @@ public class BipartiteEvaluatorTest {
             }
         });
 
+        Set<Integer> sampledContainedId1 = PickSample(containedId1, 500);
+        Set<Integer> sampledContainedId2 = PickSample(containedId2, 500);
+
+        for(Integer i : sampledContainedId1){
+            if(counter % 100 == 0)
+                LOG.info(String.format("%d geometries added out of %d", counter, sampledContainedId1.size()));
+            UniversalPage concept = upDao.getById(i, 1);
+            if(concept != null && concept.hasAllLanguages(languageSet)){
+                concepts1.add(upDao.getById(i, 1));
+                geometriesToParse.put(i, sdDao.getGeometry(i, "wikidata", "earth"));
+            }
+            counter ++;
+        }
+
+
+
 
 
         counter = 0;
         for(Integer i : sampledContainedId2){
             if(counter % 100 == 0)
                 LOG.info(String.format("%d geometries added out of %d", counter, sampledContainedId2.size()));
-            geometriesToParse.put(i, sdDao.getGeometry(i, "wikidata", "earth"));
-            concepts2.add(upDao.getById(i, 1));
+
+            UniversalPage concept = upDao.getById(i, 1);
+            if(concept != null && concept.hasAllLanguages(languageSet)){
+                concepts2.add(upDao.getById(i, 1));
+                geometriesToParse.put(i, sdDao.getGeometry(i, "wikidata", "earth"));
+            }
             counter ++;
         }
 

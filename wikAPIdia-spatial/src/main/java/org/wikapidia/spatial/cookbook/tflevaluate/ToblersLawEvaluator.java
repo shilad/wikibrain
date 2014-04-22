@@ -242,7 +242,7 @@ public class ToblersLawEvaluator {
                     writeRow(c1, c2, results);
                 }
                 catch (Exception e){
-                    LOG.warning(String.format("Error evaluating between %s and %s", c1, c2));
+                    LOG.warning(String.format("Error evaluating between %s and %s", c1.getBestEnglishTitle(lpDao, true), c2.getBestEnglishTitle(lpDao, true)));
                 }
 
             }

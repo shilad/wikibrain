@@ -15,7 +15,7 @@ public class MostSimilarInDegreesTest {
 
         String testTitle = "Big Ten Conference";
         int degrees = 3;
-        System.out.println(System.lineSeparator() + "The article most related to \"" + testTitle + "\" in " + degrees + " degrees is: " + sim.getMostSimilar(testTitle, degrees));
+        System.out.println("\nThe article most related to \"" + testTitle + "\" in " + degrees + " degrees is: " + sim.getMostSimilar(testTitle, degrees));
         //Can use getMostSimilar(srcId, degrees) as well
 
     }
