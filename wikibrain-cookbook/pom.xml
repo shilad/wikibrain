@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.github.shilad.wikibrain</groupId>
+        <artifactId>wikibrain-parent</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath>../wikibrain-parent</relativePath>
+    </parent>
+
+    <artifactId>wikibrain-cookbook</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.shilad.wikibrain</groupId>
+            <artifactId>wikibrain-mapper</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.shilad.wikibrain</groupId>
+            <artifactId>wikibrain-sr</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.shilad.wikibrain</groupId>
+            <artifactId>wikibrain-wikidata</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.shilad.wikibrain</groupId>
+            <artifactId>wikibrain-loader</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.shilad.wikibrain</groupId>
+            <artifactId>wikibrain-parser</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.corba</groupId>
+            <artifactId>glassfish-corba-idlj</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.3</version>
+        </dependency>
+
+
+
+    </dependencies>
+</project>

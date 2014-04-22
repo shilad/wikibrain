@@ -5,33 +5,33 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.shilad.wikapidia</groupId>
-        <artifactId>wikAPIdia-parent</artifactId>
+        <groupId>com.github.shilad.wikibrain</groupId>
+        <artifactId>wikibrain-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
-        <relativePath>wikAPIdia-parent</relativePath>
+        <relativePath>wikibrain-parent</relativePath>
     </parent>
 
-    <artifactId>wikAPIdia-all</artifactId>
+    <artifactId>wikibrain-all</artifactId>
     <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
-        <module>./wikAPIdia-parent</module>
-        <module>./wikAPIdia-utils</module>
-        <module>./wikAPIdia-matrix</module>
-        <module>./wikAPIdia-core</module>
-        <module>./wikAPIdia-download</module>
-        <module>./wikAPIdia-loader</module>
-        <module>./wikAPIdia-lucene</module>
-        <module>./wikAPIdia-mapper</module>
-        <module>./wikAPIdia-parser</module>
-        <module>./wikAPIdia-phrases</module>
-        <module>./wikAPIdia-wikidata</module>
-        <module>./wikAPIdia-sr</module>
-        <module>./wikAPIdia-integration-tests</module>
-        <module>./wikAPIdia-cookbook</module>
-        <module>./wikAPIdia-spatial</module>
-        <module>./wikAPIdia-pageview</module>
+        <module>./wikibrain-parent</module>
+        <module>./wikibrain-utils</module>
+        <module>./wikibrain-matrix</module>
+        <module>./wikibrain-core</module>
+        <module>./wikibrain-download</module>
+        <module>./wikibrain-loader</module>
+        <module>./wikibrain-lucene</module>
+        <module>./wikibrain-mapper</module>
+        <module>./wikibrain-parser</module>
+        <module>./wikibrain-phrases</module>
+        <module>./wikibrain-wikidata</module>
+        <module>./wikibrain-sr</module>
+        <module>./wikibrain-integration-tests</module>
+        <module>./wikibrain-cookbook</module>
+        <module>./wikibrain-spatial</module>
+        <module>./wikibrain-pageview</module>
     </modules>
 
     <build>
