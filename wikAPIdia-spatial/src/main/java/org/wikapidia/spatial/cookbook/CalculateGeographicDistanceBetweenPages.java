@@ -30,7 +30,7 @@ public class CalculateGeographicDistanceBetweenPages {
 
         try {
 
-            Env env = new EnvBuilder().build();
+            Env env = EnvBuilder.envFromArgs(args);
             Configurator c = env.getConfigurator();
 
             SpatialDataDao sdDao = c.get(SpatialDataDao.class);

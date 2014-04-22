@@ -10,6 +10,7 @@ import org.wikapidia.core.dao.*;
 import org.wikapidia.core.lang.Language;
 import org.wikapidia.core.lang.LanguageInfo;
 import org.wikapidia.core.lang.LanguageSet;
+import org.wikapidia.core.model.InterLanguageLink;
 import org.wikapidia.core.model.LocalCategoryMember;
 import org.wikapidia.core.model.LocalLink;
 import org.wikapidia.parser.wiki.*;
@@ -49,7 +50,7 @@ public class WikiTextLoader {
         return rawPageDao;
     }
 
-    private void load(LanguageInfo lang) throws DaoException {
+    public void load(LanguageInfo lang) throws DaoException {
         int numLanguageThreads;
         synchronized (availableThreads) {
             numLanguageThreads = Math.min(availableThreads.get(), maxThreadsPerLang);
@@ -95,23 +96,29 @@ public class WikiTextLoader {
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         LocalLinkDao llDao = conf.get(LocalLinkDao.class);
         LocalCategoryMemberDao lcmDao = conf.get(LocalCategoryMemberDao.class);
+        InterLanguageLinkDao illDao = conf.get(InterLanguageLinkDao.class);
+
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
         ParserVisitor linkVisitor = new LocalLinkVisitor(llDao, lpDao, metaDao);
         ParserVisitor catVisitor = new LocalCategoryVisitor(lpDao, lcmDao, metaDao);
-        //TODO: ill visitor
+        ParserVisitor illVisitor = new InterLanguageLinkVisitor(illDao, lpDao, metaDao);
 
         visitors.add(linkVisitor);
         visitors.add(catVisitor);
+        visitors.add(illVisitor);
 
-        final WikiTextLoader loader = new WikiTextLoader(visitors, env.getLanguages(), rpDao, env.getMaxThreads());
+        final WikiTextLoader loader = new WikiTextLoader(visitors, LanguageSet.ALL, rpDao, env.getMaxThreads());
 
         if(cmd.hasOption("d")) {
             llDao.clear();
             lcmDao.clear();
+            illDao.clear();
             metaDao.clear(LocalLink.class);
             metaDao.clear(LocalCategoryMember.class);
+            metaDao.clear(InterLanguageLink.class);
         }
+        illDao.beginLoad();
         llDao.beginLoad();
         lcmDao.beginLoad();
         metaDao.beginLoad();
@@ -125,6 +132,7 @@ public class WikiTextLoader {
                     }
                 });
 
+        illDao.endLoad();
         llDao.endLoad();
         lcmDao.endLoad();
         metaDao.endLoad();

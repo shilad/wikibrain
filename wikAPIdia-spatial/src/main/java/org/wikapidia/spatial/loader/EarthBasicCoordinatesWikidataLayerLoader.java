@@ -2,10 +2,7 @@ package org.wikapidia.spatial.loader;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.wikapidia.core.dao.DaoException;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
@@ -59,7 +56,8 @@ public class EarthBasicCoordinatesWikidataLayerLoader extends WikidataLayerLoade
             Coordinate[] coords = new Coordinate[1];
             coords[0] = new Coordinate(longitude, latitude);
             CoordinateArraySequence coordArraySeq = new CoordinateArraySequence(coords);
-            Point p = new Point(coordArraySeq, new GeometryFactory());
+            Point p = new Point(coordArraySeq, new GeometryFactory(new PrecisionModel(), 4326));
+
 
             return p;
 
@@ -84,7 +82,7 @@ public class EarthBasicCoordinatesWikidataLayerLoader extends WikidataLayerLoade
 
         int itemId = statement.getItem().getId();
         Geometry g = jsonToGeometry(statement.getValue().getJsonValue().getAsJsonObject());
-        if (g != null) {
+        if (g != null && spatialDao.getGeometry(itemId, LAYER_NAME, EARTH_REF_SYS_NAME) == null) {
             spatialDao.saveGeometry(itemId, LAYER_NAME, EARTH_REF_SYS_NAME,  g);
             return true;
         }else{

@@ -25,11 +25,11 @@ public class TestDatasetDao {
     public void testDaoRead() throws DaoException {
         DatasetDao dao = new DatasetDao();
         Dataset ds = dao.get(Language.getByLangCode("en"), "wordsim353.txt");
-        assertEquals(351, ds.getData().size());
+        assertEquals(353, ds.getData().size());
         assertEquals("en", ds.getLanguage().getLangCode());
         double sim = Double.NaN;
         for (KnownSim ks : ds.getData()) {
-            if (ks.phrase1.equals("marriage") && ks.phrase2.equals("morality")) {
+            if (ks.phrase1.equals("morality") && ks.phrase2.equals("marriage")) {
                 sim = ks.similarity;
             }
         }

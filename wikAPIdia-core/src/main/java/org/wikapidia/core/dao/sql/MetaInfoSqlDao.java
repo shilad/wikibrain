@@ -15,9 +15,7 @@ import org.wikapidia.core.model.LocalPage;
 import org.wikapidia.core.model.MetaInfo;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -259,6 +257,37 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
             }
         }
         return info;
+    }
+
+    @Override
+    public Map<String, List<MetaInfo>> getAllInfo() throws DaoException {
+        DSLContext context = getJooq();
+        try {
+            Result<Record> result = context
+                    .select()
+                    .from(Tables.META_INFO)
+                    .fetch();
+
+            Map<String, List<MetaInfo>> components = new HashMap<String, List<MetaInfo>>();
+            for (Record record : result) {
+                String klass = record.getValue(Tables.META_INFO.COMPONENT);
+                if (!components.containsKey(klass)) {
+                    components.put(klass, new ArrayList<MetaInfo>());
+                }
+                Short langId = record.getValue(Tables.META_INFO.LANG_ID);
+                components.get(klass).add(
+                        new MetaInfo(null,
+                                (langId == null) ? null : Language.getById(langId),
+                                record.getValue(Tables.META_INFO.ID),
+                                record.getValue(Tables.META_INFO.NUM_RECORDS),
+                                record.getValue(Tables.META_INFO.NUM_ERRORS),
+                                record.getValue(Tables.META_INFO.LAST_UPDATED)
+                        ));
+            }
+            return components;
+        } finally {
+            freeJooq(context);
+        }
     }
 
     private void maybeFlush(MetaInfo info) throws DaoException {

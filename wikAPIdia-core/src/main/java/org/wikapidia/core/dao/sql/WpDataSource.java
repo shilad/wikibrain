@@ -15,7 +15,7 @@ import org.wikapidia.conf.Provider;
 import org.wikapidia.core.dao.DaoException;
 
 import javax.sql.DataSource;
-import javax.swing.plaf.nimbus.State;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -113,7 +113,7 @@ public class WpDataSource  {
     public void executeSqlResource(String name) throws DaoException {
         String script = null;
         try {
-            System.out.println(name);
+//            System.out.println(name);
             script = IOUtils.toString(AbstractSqlDao.class.getResource(name));
         } catch (IOException e) {
             throw new DaoException(e);

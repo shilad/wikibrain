@@ -303,17 +303,11 @@ Properties for Minneapolis:
 Note that these relationships are *structured*, not just textual. For example, the string "R. T. Rybak" is linked to the multilingual concept "R. T. Rybak," and the lat/long coordinates are accessible as a geographic data structure.
 
 ###Spatial
-To intialize the spatial data, you should have [PostGIS](http://postgis.net/install) installed. The library was tested on Postgres 9.3.4 with PostGIS 2.12 on Mac OS X. After installing PostGIS,  create a new databse, connect to the new databse and run the following SQL to enable spatial support:
+To intialize the spatial data, you should have [PostGIS](http://postgis.net/install) installed. The library was tested on Postgres 9.3.4 with PostGIS 2.12 on Mac OS X. After installing PostGIS, create a new database, connect to the new database and run the following SQL to enable spatial support:
 
 ```SQL
 -- Enable PostGIS (includes raster)
 CREATE EXTENSION postgis;
--- Enable Topology
-CREATE EXTENSION postgis_topology;
--- fuzzy matching needed for Tiger
-CREATE EXTENSION fuzzystrmatch;
--- Enable US Tiger Geocoder
-CREATE EXTENSION postgis_tiger_geocoder;
 ```
 Then, go to the [reference.conf](wikAPIdia-core/src/main/resources/reference.conf) and configure the following settings corresponding to your PostGIS settings.
 

@@ -19,6 +19,7 @@ import org.wikapidia.conf.Configuration;
 import org.wikapidia.conf.ConfigurationException;
 import org.wikapidia.conf.Configurator;
 import org.wikapidia.core.dao.DaoException;
+import org.wikapidia.phrases.AnchorTextPhraseAnalyzer;
 import org.wikapidia.spatial.core.SpatialContainerMetadata;
 import org.wikapidia.spatial.core.dao.SpatialDataDao;
 
@@ -48,6 +49,11 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
 
         return db.getGeometry(itemId, layerName, refSysName);
 
+    }
+
+    @Override
+    public Map<Integer, Geometry> getAllGeometries(String layerName, String refSysName) throws DaoException {
+        return db.getAllGeometries(layerName, refSysName);
     }
 
     @Override
@@ -97,9 +103,11 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     private void flushFeatureBuffer() throws DaoException{
 
         try {
-            SimpleFeatureCollection featuresToStore = new ListFeatureCollection(db.getSchema(), curFeaturesToStore);
-            ((SimpleFeatureStore) db.getFeatureSource()).addFeatures(featuresToStore); // GeoTools can be so weird sometimes
-            curFeaturesToStore.clear();
+            if(curFeaturesToStore != null){
+                SimpleFeatureCollection featuresToStore = new ListFeatureCollection(db.getSchema(), curFeaturesToStore);
+                ((SimpleFeatureStore) db.getFeatureSource()).addFeatures(featuresToStore); // GeoTools can be so weird sometimes
+                curFeaturesToStore.clear();
+            }
         }catch(IOException e){
             throw new DaoException(e);
         }
