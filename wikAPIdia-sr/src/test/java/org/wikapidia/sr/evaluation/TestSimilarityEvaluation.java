@@ -54,10 +54,10 @@ public class TestSimilarityEvaluation {
                 estimated.add(v);
             }
         }
-        assertEquals(351, se.getTotal());
+        assertEquals(353, se.getTotal());
         assertEquals(18, se.getFailed());
         assertEquals(36, se.getMissing());
-        assertEquals(351-18-36, se.getSuccessful());
+        assertEquals(353-18-36, se.getSuccessful());
         assertEquals(se.getPearsonsCorrelation(), new PearsonsCorrelation().correlation(actual.toArray(), estimated.toArray()), 0.000001);
         assertEquals(se.getSpearmansCorrelation(), new SpearmansCorrelation().correlation(actual.toArray(), estimated.toArray()), 0.000001);
 
