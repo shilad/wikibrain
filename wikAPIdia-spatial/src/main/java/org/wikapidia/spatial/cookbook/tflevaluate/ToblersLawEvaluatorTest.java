@@ -31,10 +31,10 @@ public class ToblersLawEvaluatorTest {
             if(counter >= 100)
                 break;
         }
-        evaluator.retrieveLocations(geometryMap);
-
-        evaluator.evaluateAll(new File("testTFL.csv"));
-        //evaluator.evaluateSample(new File("testTFL.csv"), 100);
+        //evaluator.retrieveLocations(allGeometries);
+        evaluator.retrieveAllLocations();
+        //evaluator.evaluateAll(new File("testTFL.csv"));
+        evaluator.evaluateSample(new File("testTFL-2.csv"), 1000000);
     }
 
 
