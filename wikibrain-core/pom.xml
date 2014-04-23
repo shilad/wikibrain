@@ -202,7 +202,7 @@
                 <version>1.8</version>
                 <executions>
                     <execution>
-                        <id>test</id>
+                        <id>add-source</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
