@@ -33,27 +33,27 @@ mvn -f wikibrain-parent/pom.xml test
 
 **From an IDE:** If you are using an IDE such as Eclipse or IntelliJ, and your project is integrated with maven you can run these commands directly through your IDE.
 
-**From the command line:** Install our `wp-java.sh` helper bash script that makes it easier to compile and run java programs. 
+**From the command line:** Install our `wb-java.sh` helper bash script that makes it easier to compile and run java programs. 
 
 ```
 mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikibrain.utils.ResourceInstaller
 ```
 
-**JVM options:** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. You can set these defaults in your IDE's run dialog, or if you are using `wp-java.sh`, run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
+**JVM options:** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. You can set these defaults in your IDE's run dialog, or if you are using `wb-java.sh`, run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
 
 ###Importing data
 
 Download and process the dataset:
 
 ```bash
-wp-java.sh org.wikibrain.dao.load.PipelineLoader -l simple
+wb-java.sh org.wikibrain.dao.load.PipelineLoader -l simple
 ```
 
 
 The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. It imports the data into an embedded h2 database. You can customize WikiBrain's importing procedure, (see Configuration, below) but the default should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
-wp-java.sh org.wikibrain.dao.load.PipelineLoader -l en,fr
+wb-java.sh org.wikibrain.dao.load.PipelineLoader -l en,fr
 ``` 
 (beware that this is a lot of data and takes many hours!).
 
@@ -170,7 +170,7 @@ WikiBrain SR metrics support six major functions:
 To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
 
 ```bash
-./wp-java.sh org.wikibrain.sr.SRBuilder -m inlink
+./wb-java.sh org.wikibrain.sr.SRBuilder -m inlink
 ```
 
 The inlink metric is a fast but relatively inaccurate SR metric. You can also build the "ensemble" metric that provides a linear combination of four other metrics. Beware that training the ensemble is costly. It takes about 10 minutes on Simple English Wikipedia, and a little over a day on the full Wikipedia. Most of the model-building time supports the *mostSimilar()* call, so you can speed up model building if you only need *similarity()*. TODO: explain how to do this.
@@ -239,13 +239,13 @@ The WikiBrain library includes support for Wikidata. To use it, you must first i
 First, Wikidata requires the "purewikidata" concept mapper. If you only installed one language (say *en* or *simple*, but not both) this will not have been installed. You will need to run:
 
 ```
-./wp-java.sh org.wikibrain.dao.load.ConceptLoader -n purewikidata -d 
+./wb-java.sh org.wikibrain.dao.load.ConceptLoader -n purewikidata -d 
 ```
 
 Next, load the wikidata:
 
 ```
-./wp-java.sh org.wikibrain.dao.load.PipelineLoader -f -s wikidata:on
+./wb-java.sh org.wikibrain.dao.load.PipelineLoader -f -s wikidata:on
 ```
 
 You can then get statements about a particular page:
@@ -341,7 +341,7 @@ Loading the Wikidata layer in the spatial module also requires having Wikidata l
 Now you can load the Wikidata layer by running:
 
 ```bash
-./wp-java.sh org.wikibrain.spatial.loader.SpatialDataLoader
+./wb-java.sh org.wikibrain.spatial.loader.SpatialDataLoader
 ```
 
 Try running [CalculateGeographicDistanceBetweenPages](/wikibrain-spatial/src/main/java/org/wikibrain/spatial/cookbook/CalculateGeographicDistanceBetweenPages.java). If it runs correctly, the spatial module is successfully initialized.
