@@ -12,7 +12,7 @@ import java.io.InputStream;
  */
 public class ResourceInstaller {
     public static String DEFAULT_RESOURCES[] = new String[] {
-            "/wp-java.sh",
+            "/wb-java.sh",
     };
     public static String DEFAULT_DIR = ".";
 
