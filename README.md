@@ -1,4 +1,4 @@
-wikibrain
+WikiBrain
 =====
 The WikiBrain Java framework provides easy and efficient access to multi-lingual Wikipedia data.
 
@@ -26,7 +26,7 @@ The WikiBrain Java framework provides easy and efficient access to multi-lingual
 ```bash
 cd wikibrain
 git clone https://github.com/shilad/wikibrain.git
-mvn -f wikibrain-parent/pom.xml test
+mvn test
 ```
 
 ###Running WikiBrain programs
