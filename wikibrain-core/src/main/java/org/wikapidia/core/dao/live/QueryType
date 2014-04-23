@@ -1,5 +1,0 @@
-package org.wikapidia.core.dao.live;
-
-public enum QueryType {
-    INFO, CATEGORYMEMBERS, CATEGORIES, LINKS, BACKLINKS, ALLPAGES
-}
