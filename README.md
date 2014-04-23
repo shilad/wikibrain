@@ -1,4 +1,4 @@
-wikibrain
+WikiBrain
 =====
 The WikiBrain Java framework provides easy and efficient access to multi-lingual Wikipedia data.
 
