@@ -5,12 +5,12 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
-import org.wikapidia.conf.Configuration;
-import org.wikapidia.core.WikapidiaException;
-import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.LanguageSet;
-import org.wikapidia.lucene.LuceneOptions;
-import org.wikapidia.lucene.WikapidiaAnalyzer;
+import org.wikibrain.conf.Configuration;
+import org.wikibrain.core.WikiBrainException;
+import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.lucene.LuceneOptions;
+import org.wikibrain.lucene.WikiBrainAnalyzer;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,9 +22,9 @@ public class TestLanguageTokenizer {
     private Field textField = new TextField("test", "wrap around the world", Field.Store.YES);
 
     @Test
-    public void shortTest() throws IOException, WikapidiaException {
+    public void shortTest() throws IOException, WikiBrainException {
         LuceneOptions opts = LuceneOptions.getDefaultOptions();
-        WikapidiaAnalyzer wa = new WikapidiaAnalyzer(Language.getByLangCode("en"));
+        WikiBrainAnalyzer wa = new WikiBrainAnalyzer(Language.getByLangCode("en"));
         IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, wa);
         iwc.setRAMBufferSizeMB(1024.0);
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
@@ -43,7 +43,7 @@ public class TestLanguageTokenizer {
         langCodes.add("sk");
         LanguageSet langSet = new LanguageSet(langCodes);
         for(Language language : langSet){
-            WikapidiaAnalyzer wa = new WikapidiaAnalyzer(language, opts);
+            WikiBrainAnalyzer wa = new WikiBrainAnalyzer(language, opts);
             IndexWriterConfig iwc = new IndexWriterConfig(opts.matchVersion, wa);
             iwc.setRAMBufferSizeMB(1024.0);
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);

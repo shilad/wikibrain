@@ -1,9 +1,9 @@
 import org.apache.lucene.util.Version;
 import org.junit.Test;
-import org.wikapidia.core.lang.Language;
-import org.wikapidia.core.lang.StringNormalizer;
-import org.wikapidia.lucene.LuceneStringNormalizer;
-import org.wikapidia.lucene.TokenizerOptions;
+import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.StringNormalizer;
+import org.wikibrain.lucene.LuceneStringNormalizer;
+import org.wikibrain.lucene.TokenizerOptions;
 
 import static org.junit.Assert.*;
 

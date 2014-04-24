@@ -1,6 +1,6 @@
-wikAPIdia
+WikiBrain
 =====
-The WikAPIdia Java framework provides easy and efficient access to multi-lingual Wikipedia data.
+The WikiBrain Java framework provides easy and efficient access to multi-lingual Wikipedia data.
 
 ###Main features
 * Support for **all Wikipedia language** editions and comparisons between multiple languages.
@@ -17,50 +17,50 @@ The WikAPIdia Java framework provides easy and efficient access to multi-lingual
   * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
   * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
 
-###Installing WikAPIdia
+###Installing WikiBrain
 
 1. If necessary, download and install Sun's JDK 6 or higher.
 2. If necessary, download and install [Maven](http://maven.apache.org/download.cgi). tl;dr: 1) unzip the maven download, 2) set the `M2_HOME` environment variable to point to the unzipped directory, 3) make sure the mvn script in `$M2_HOME` is on your `PATH`. You can test your install by making sure that `mvn --version` works properly
 3. Clone this repository and run the unit tests to make sure your environment is setup properly:
 
 ```bash
-cd wikAPIdia
-git clone https://github.com/shilad/wikAPIdia.git
-mvn -f wikAPIdia-parent/pom.xml test
+cd wikibrain
+git clone https://github.com/shilad/wikibrain.git
+mvn test
 ```
 
-###Running WikAPIdia programs
+###Running WikiBrain programs
 
 **From an IDE:** If you are using an IDE such as Eclipse or IntelliJ, and your project is integrated with maven you can run these commands directly through your IDE.
 
-**From the command line:** Install our `wp-java.sh` helper bash script that makes it easier to compile and run java programs. 
+**From the command line:** Install our `wb-java.sh` helper bash script that makes it easier to compile and run java programs. 
 
 ```
-mvn -f wikAPIdia-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikapidia.utils.ResourceInstaller
+mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikibrain.utils.ResourceInstaller
 ```
 
-**JVM options:** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. You can set these defaults in your IDE's run dialog, or if you are using `wp-java.sh`, run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
+**JVM options:** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. You can set these defaults in your IDE's run dialog, or if you are using `wb-java.sh`, run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
 
 ###Importing data
 
 Download and process the dataset:
 
 ```bash
-wp-java.sh org.wikapidia.dao.load.PipelineLoader -l simple
+wb-java.sh org.wikibrain.dao.load.PipelineLoader -l simple
 ```
 
 
-The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. It imports the data into an embedded h2 database. You can customize WikAPIdia's importing procedure, (see Configuration, below) but the default should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
+The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. It imports the data into an embedded h2 database. You can customize WikiBrain's importing procedure, (see Configuration, below) but the default should be a good start. For example, you can specify different language editions by changing the -l parameters. To analyze English and French you could run: 
 
 ```bash
-wp-java.sh org.wikapidia.dao.load.PipelineLoader -l en,fr
+wb-java.sh org.wikibrain.dao.load.PipelineLoader -l en,fr
 ``` 
 (beware that this is a lot of data and takes many hours!).
 
 
 ###An example program
 Once you have imported data (above), your are ready to write programs that analyze Wikipedia!
-Here's a [simple example](https://github.com/shilad/wikAPIdia/blob/master/wikAPIdia-cookbook/src/main/java/org/wikapidia/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
+Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
 
 ```java
 // Prepare the environment; set the root to the current directory (".").
@@ -100,25 +100,25 @@ resolution of apple
 
 ###A tour of the example
 Let's walk through this program to explain each piece. 
-First, we create an ```Env``, a WikAPIdia environment that provides access to the components we need:
+First, we create an ```Env``, a WikiBrain environment that provides access to the components we need:
 ```java
 Env env = new EnvBuilder()
         .setBaseDir(".")
         .build();
 ```
-The [```EnvBuilder```](wikAPIdia-core/src/main/java/org/wikapidia/core/cmd/EnvBuilder.java) 
+The [```EnvBuilder```](wikibrain-core/src/main/java/org/wikibrain/core/cmd/EnvBuilder.java) 
 provides utility methods to set the languages you want to support, the maximum number of threads available to your program, etc.
-There are more advanced ways of configuring WikAPIdia - both programatically and through configuration files - described in the Configuration section of this page.
+There are more advanced ways of configuring WikiBrain - both programatically and through configuration files - described in the Configuration section of this page.
 
 The Env provides access to a 
-[```Configurator```](wikAPIdia-utils/src/main/java/org/wikapidia/conf/Configurator.java) -
-essentially a Factory for creating WikAPIdia components. We get the Page Resolution component next:
+[```Configurator```](wikibrain-utils/src/main/java/org/wikibrain/conf/Configurator.java) -
+essentially a Factory for creating WikiBrain components. We get the Page Resolution component next:
 ```java
 Configurator configurator = env.getConfigurator();
 PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
 ```
 
-A key feature of WikAPIdia is that it supports multiple implementations of the same component. 
+A key feature of WikiBrain is that it supports multiple implementations of the same component. 
 For example, the default PhraseAnalayzer uses the [Lucene](http://lucene.apache.org/) search engine. 
 We could have explicitly requested the lucene implementation of the PhraseAnalyzer:
 ```java
@@ -139,7 +139,7 @@ resolution of apple
 ```
 
 ###Main components
-The WikAPIdia Configurator offers a set of components that you can use as building blocks in your application.
+The WikiBrain Configurator offers a set of components that you can use as building blocks in your application.
 To get one of these components, use the Configurator.get() method:
 * **RawPageDao** provides detailed information about an article, include the raw WIkiMarkup pagetext.
 * **LocalPageDao** provides basic metadata about an article, including title, namespace, and Wikipedia id.
@@ -156,9 +156,9 @@ To get one of these components, use the Configurator.get() method:
 
 
 ###Semantic relatedness algorithms
-WikAPIdia provides several state-of-the-art semantic relatedness algorithms (*SR metrics*). These algorithms estimate the strength of semantic relationships between concepts. 
+WikiBrain provides several state-of-the-art semantic relatedness algorithms (*SR metrics*). These algorithms estimate the strength of semantic relationships between concepts. 
 These algorithms are designed to be fast, with performance of 10-100 milliseconds and caching and multi-threaded support built in.
-WikAPIdia SR metrics support six major functions:
+WikiBrain SR metrics support six major functions:
 
 * `similarity(phrase1, phrase2)` returns the relatedness score between two phrases.
 * `similarity(page1, page2)` returns the relatedness score between two pages.
@@ -170,7 +170,7 @@ WikAPIdia SR metrics support six major functions:
 To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
 
 ```bash
-./wp-java.sh org.wikapidia.sr.SRBuilder -m inlink
+./wb-java.sh org.wikibrain.sr.SRBuilder -m inlink
 ```
 
 The inlink metric is a fast but relatively inaccurate SR metric. You can also build the "ensemble" metric that provides a linear combination of four other metrics. Beware that training the ensemble is costly. It takes about 10 minutes on Simple English Wikipedia, and a little over a day on the full Wikipedia. Most of the model-building time supports the *mostSimilar()* call, so you can speed up model building if you only need *similarity()*. TODO: explain how to do this.
@@ -178,7 +178,7 @@ The inlink metric is a fast but relatively inaccurate SR metric. You can also bu
 After you build the model for an SR metric, you can use it in your Java application. For example, to use the `mostSimilar()` method for phrases, do the following:
 
 ```java    
-// Initialize the WikAPIdia environment and get the local page dao
+// Initialize the WikiBrain environment and get the local page dao
 Env env = new EnvBuilder().build();
 Configurator conf = env.getConfigurator();
 LocalPageDao lpDao = conf.get(LocalPageDao.class);
@@ -234,18 +234,18 @@ This code (on Simple english) displays:
 ###Wikidata
 Wikipedia's Wikidata initiative "aims to create a free knowledge base about the world that can be read and edited by humans and machines alike." In short, the initiative shifts the "facts" that support Wikipedia articles (Minneapolis is in Minnesota) into a structured universal repository that can be accessed in any language.
 
-The WikAPIdia library includes support for Wikidata. To use it, you must first import the Wikidata archive. This is a relatively large dataset (~10GB uncompressed), so it is not loaded by default during the regular pipeline. **AFTER running the regular pipeline** you need to do the following two steps.
+The WikiBrain library includes support for Wikidata. To use it, you must first import the Wikidata archive. This is a relatively large dataset (~10GB uncompressed), so it is not loaded by default during the regular pipeline. **AFTER running the regular pipeline** you need to do the following two steps.
 
 First, Wikidata requires the "purewikidata" concept mapper. If you only installed one language (say *en* or *simple*, but not both) this will not have been installed. You will need to run:
 
 ```
-./wp-java.sh org.wikapidia.dao.load.ConceptLoader -n purewikidata -d 
+./wb-java.sh org.wikibrain.dao.load.ConceptLoader -n purewikidata -d 
 ```
 
 Next, load the wikidata:
 
 ```
-./wp-java.sh org.wikapidia.dao.load.PipelineLoader -f -s wikidata:on
+./wb-java.sh org.wikibrain.dao.load.PipelineLoader -f -s wikidata:on
 ```
 
 You can then get statements about a particular page:
@@ -309,7 +309,7 @@ To intialize the spatial data, you should have [PostGIS](http://postgis.net/inst
 -- Enable PostGIS (includes raster)
 CREATE EXTENSION postgis;
 ```
-Then, go to the [reference.conf](wikAPIdia-core/src/main/resources/reference.conf) and configure the following settings corresponding to your PostGIS settings.
+Then, go to the [reference.conf](wikibrain-core/src/main/resources/reference.conf) and configure the following settings corresponding to your PostGIS settings.
 
 ```text
 spatial : {
@@ -341,14 +341,14 @@ Loading the Wikidata layer in the spatial module also requires having Wikidata l
 Now you can load the Wikidata layer by running:
 
 ```bash
-./wp-java.sh org.wikapidia.spatial.loader.SpatialDataLoader
+./wb-java.sh org.wikibrain.spatial.loader.SpatialDataLoader
 ```
 
-Try running [CalculateGeographicDistanceBetweenPages](/wikAPIdia-spatial/src/main/java/org/wikapidia/spatial/cookbook/CalculateGeographicDistanceBetweenPages.java). If it runs correctly, the spatial module is successfully initialized.
+Try running [CalculateGeographicDistanceBetweenPages](/wikibrain-spatial/src/main/java/org/wikibrain/spatial/cookbook/CalculateGeographicDistanceBetweenPages.java). If it runs correctly, the spatial module is successfully initialized.
 
 ###Advanced Configuration
-The behavior of WikAPIdia can be customized through configuration files or code.
-The default WikAPIdia configuration is determined by the default [reference.conf](wikAPIdia-core/src/main/resources/reference.conf).
+The behavior of WikiBrain can be customized through configuration files or code.
+The default WikiBrain configuration is determined by the default [reference.conf](wikibrain-core/src/main/resources/reference.conf).
 The configuration is backed by [Typesafe config](https://github.com/typesafehub/config) and uses the [HOCON format](https://github.com/typesafehub/config/blob/master/HOCON.md).
 To override the configuration settings create your own configuration file containing the changes to reference.conf and pass it to the EnvBuilder.
 
@@ -356,7 +356,7 @@ For example, suppose we wanted to set the root directory, maxThreads to 8, and t
 We could create a file called myapp.conf containing:
 ```text
 maxThreads : 8
-baseDir : /my/path/to/wikAPIdia
+baseDir : /my/path/to/wikibrain
 phrases.analyzer.default : anchortext
 ```
 We would then tell the EnvBuilder to use the new config to override the default settings:
@@ -369,15 +369,15 @@ We could also make these changes directly in Java, without the config file:
 ```java
 Env env = new EnvBuilder()
         .setMaxThreads(8)
-        .setBaseDir("/my/path/to/wikAPIdia")
+        .setBaseDir("/my/path/to/wikibrain")
         .setProperty("phrases.analyzer.default", "anchortext")
         .build();
 ```
 
 ###Using external databases
-By default, wikAPIdia uses an embedded [h2 database](http://www.h2database.com/html/main.html). While this is convenient, it does not scale well. For language editions with more than 1M articles, Postgres is recommended.
+By default, wikibrain uses an embedded [h2 database](http://www.h2database.com/html/main.html). While this is convenient, it does not scale well. For language editions with more than 1M articles, Postgres is recommended.
 
-You can configure the project to use postgresql by adjusting the configuration as stated above. The relevant section of the [default reference.conf](wikAPIdia-core/src/main/resources/reference.conf) is:
+You can configure the project to use postgresql by adjusting the configuration as stated above. The relevant section of the [default reference.conf](wikibrain-core/src/main/resources/reference.conf) is:
 
 ```
 dao : {
@@ -391,7 +391,7 @@ dao : {
         }
         psql : {
            driver : org.h2.Driver
-           url: "jdbc:postgresql://localhost/wikAPIdia"
+           url: "jdbc:postgresql://localhost/wikibrain"
            username : grails
            password : ""
         }
