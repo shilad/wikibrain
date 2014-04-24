@@ -200,12 +200,16 @@ public abstract class LanguageTokenizer {
         try{
             String langCode = language.getLangCode();
             String fileName = STOP_WORDS + langCode + ".txt";
-            InputStream stream = FileUtils.openInputStream(new File(fileName));
-            List<String> stopWords = org.apache.commons.io.IOUtils.readLines(stream);
+            File f = new File(fileName);
             CharArraySet charArraySet = new CharArraySet(version, 0, false);
-            for (String stopWord : stopWords) {
-                charArraySet.add(stopWord);
-            }
+            if (f.exists()) {
+                InputStream stream = FileUtils.openInputStream(f);
+                List<String> stopWords = org.apache.commons.io.IOUtils.readLines(stream);
+
+                for (String stopWord : stopWords) {
+                    charArraySet.add(stopWord);
+                }
+            } // when no stopword file exists, do nothing right now
             return charArraySet;
         } catch (IOException e) {
             throw new RuntimeException(e);
