@@ -54,6 +54,7 @@ import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
 import org.wikibrain.wikidata.WikidataDao;
+import org.wikibrain.download.*;
 import net.lingala.zip4j.*;
 
 import java.awt.*;
@@ -73,6 +74,7 @@ import java.util.logging.Logger;
  * Created by aaroniidx on 4/13/14.
  */
 public class GADMConverter {
+    public static final Logger LOG = Logger.getLogger(GADMConverter.class.getName());
 
     /**
      * Download GADM shape file
@@ -83,21 +85,25 @@ public class GADMConverter {
         String fileName = "gadm_v2_shp.zip";
         String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/" + fileName;
         File gadmShapeFile = new File("tmp/" + fileName);
+        FileDownloader downloader = new FileDownloader();
         try {
-            System.out.println("Downloading shape file" +"...");
-            FileUtils.copyURLToFile(new URL(gadmURL), gadmShapeFile, 5000, 5000); //connection and read timeout are both 5000ms
-            System.out.println("Download complete.");
-            System.out.println(gadmShapeFile.getAbsolutePath());
+            if (gadmShapeFile.exists() && !gadmShapeFile.isDirectory())
+                gadmShapeFile.delete();
+            downloader.download(new URL(gadmURL),gadmShapeFile);
             ZipFile zipFile = new ZipFile(gadmShapeFile.getAbsolutePath());
-
-            System.out.println("Extracting...");
+            LOG.log(Level.INFO, "Extracting to " + gadmShapeFile.getParent() + "/gadm_v2_shp/" );
+            //System.out.println("Extracting to " + gadmShapeFile.getParent() + "/gadm_v2_shp/");
             zipFile.extractAll(gadmShapeFile.getParent() + "/gadm_v2_shp/");
-            System.out.println("Extraction complete.");
+            LOG.log(Level.INFO, "Extraction complete." );
+            //System.out.println("Extraction complete.");
+            gadmShapeFile.delete();
         } catch (MalformedURLException e){
             e.printStackTrace();
         } catch (IOException e){
             e.printStackTrace();
         } catch (ZipException e){
+            e.printStackTrace();
+        } catch (InterruptedException e){
             e.printStackTrace();
         }
     }
@@ -107,6 +113,7 @@ public class GADMConverter {
      *
      * @param fileName
      * Takes in the GADM shape file and convert it into the kind of shape file we can read
+     * Recommended JVM max heapsize = 4G
      *
      */
     public void convertShpFile(String fileName) {
@@ -131,9 +138,9 @@ public class GADMConverter {
             SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
             SimpleFeatureIterator inputFeatures = inputCollection.features();
 
-            System.out.println("Mapping polygons...");
+            LOG.log(Level.INFO, "Mapping polygons..." );
             while (inputFeatures.hasNext()) {
-                SimpleFeature feature = inputFeatures.next();;
+                SimpleFeature feature = inputFeatures.next();
 
                 if (!stateShape.containsKey(feature.getAttribute(5))) {
                     stateShape.put((String) feature.getAttribute(5), new ArrayList<Geometry>());
@@ -143,7 +150,7 @@ public class GADMConverter {
                 stateShape.get(feature.getAttribute(5)).add((Geometry)feature.getAttribute(0)); //and put all the polygons under a state into another map
             }
 
-            System.out.println("Mapping complete.");
+            LOG.log(Level.INFO, "Mapping complete." );
 
             typeBuilder = new SimpleFeatureTypeBuilder();  //build the output feature type
             typeBuilder.setName("WIKITYPE");
@@ -159,18 +166,25 @@ public class GADMConverter {
             geometryFactory = JTSFactoryFinder.getGeometryFactory();
             featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
 
-            System.out.println("Processing polygons...");
+            LOG.log(Level.INFO, "Processing polygons...");
 
+            int count = 0;
             for (String state: stateCountry.keySet()){    //create the feature collection for the new shpfile
+                count++;
                 Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).buffer(0);
                 featureBuilder.add(newGeom);
                 featureBuilder.add(state);
                 featureBuilder.add(state + ", " + stateCountry.get(state));
                 SimpleFeature feature = featureBuilder.buildFeature(null);
+                if (count % 50 == 0)
+                    LOG.log(Level.INFO, count + " states processed.");
                 features.add(feature);
+                stateShape.remove(state);
+                System.gc();
             }
 
-            System.out.println("Processing complete.");
+
+            LOG.log(Level.INFO, "Processing complete. " + count + " states processed.");
 
             ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();  //create the output datastore
 
@@ -188,7 +202,7 @@ public class GADMConverter {
             SimpleFeatureSource outputFeatureSource = outputDataStore.getFeatureSource(typeName);
             SimpleFeatureType SHAPE_TYPE = outputFeatureSource.getSchema();
 
-            System.out.println("Writing to " + outputFile.getCanonicalPath());
+            LOG.log(Level.INFO, "Writing to " + outputFile.getCanonicalPath());
 
             if (outputFeatureSource instanceof SimpleFeatureStore) {
                 SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
@@ -204,10 +218,10 @@ public class GADMConverter {
                 } finally {
                     transaction.close();
                 }
-                System.out.println("Success.");
+                LOG.log(Level.INFO, "Writing success.");
                 System.exit(0); // success!
             } else {
-                System.out.println(typeName + " does not support read/write access");
+                LOG.log(Level.INFO, typeName + " does not support read/write access");
                 System.exit(1);
             }
 
