@@ -103,6 +103,17 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
             throw new DaoException(e);
         }
 
+
+
+    }
+    public TIntSet getMaxDistanceKmItemIds(Integer itemId, String layerName, String refSysName, Set<String> subLayers, double maxDist) throws DaoException{
+
+        return getNeighboringItemIds(itemId, layerName, refSysName, subLayers, 0, maxDist / 112);
+    }
+
+    public TIntSet getMaxDistanceKmItemIds(Geometry g, String refSysName, Set<String> subLayers, double maxDist) throws DaoException{
+
+        return getNeighboringItemIds(g, refSysName, subLayers, 0, maxDist / 112);
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<PostGISSpatialNeighborDao> {
