@@ -39,3 +39,9 @@ wp-java.sh
 
 
 *.jar
+
+*.pdf
+
+*.sh
+
+*.history
