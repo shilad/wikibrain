@@ -106,7 +106,11 @@ public class GADMConverter {
     /**
      *
      * @param fileName
+<<<<<<< HEAD
      * Takes in the GADM shape file and convert it into the kind of shape file that we can read
+=======
+     * Takes in the GADM shape file and convert it into the kind of shape file we can read
+>>>>>>> master
      *
      */
     public void convertShpFile(String fileName) {
@@ -114,11 +118,20 @@ public class GADMConverter {
         Map map = new HashMap();
         HashMap<String, List<Geometry>> stateShape = new HashMap<String, List<Geometry>>();
         HashMap<String, String> stateCountry = new HashMap<String, String>();
+<<<<<<< HEAD
         File outputFile = new File("newgadm2/gadm2.shp");
 
         ShapefileReader shpReader;
         GeometryFactory geometryFactory;
         SimpleFeatureTypeBuilder featureTypeBuilder;
+=======
+        new File("newgadm").mkdir(); //Must have this if you want to put the output file in a new directory
+        File outputFile = new File("newgadm/gadm2.shp");
+
+        ShapefileReader shpReader;
+        GeometryFactory geometryFactory;
+        SimpleFeatureTypeBuilder typeBuilder;
+>>>>>>> master
         SimpleFeatureBuilder featureBuilder;
         DataStore inputDataStore;
         List<SimpleFeature> features = new ArrayList<SimpleFeature>();
@@ -129,9 +142,16 @@ public class GADMConverter {
             SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
             SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
             SimpleFeatureIterator inputFeatures = inputCollection.features();
+<<<<<<< HEAD
             System.out.println("Mapping polygons...");
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
+=======
+
+            System.out.println("Mapping polygons...");
+            while (inputFeatures.hasNext()) {
+                SimpleFeature feature = inputFeatures.next();;
+>>>>>>> master
 
                 if (!stateShape.containsKey(feature.getAttribute(6))) {
                     String country = ((String) feature.getAttribute(4)).intern();
@@ -153,6 +173,7 @@ public class GADMConverter {
             featureTypeBuilder.add("TITLE2_EN", String.class);
             featureTypeBuilder.setDefaultGeometry("the_geom");
 
+<<<<<<< HEAD
             final SimpleFeatureType WIKITYPE = featureTypeBuilder.buildFeatureType();
 
 
@@ -160,6 +181,21 @@ public class GADMConverter {
             /*final SimpleFeatureType WIKITYPE = DataUtilities.createType("WIKITYPE",
                     "geom:MultiPolygon:srid=4326, TITLE1_EN:String, TITLE2_EN:String"
             );*/
+=======
+            System.out.println("Mapping complete.");
+
+            typeBuilder = new SimpleFeatureTypeBuilder();  //build the output feature type
+            typeBuilder.setName("WIKITYPE");
+            typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
+            typeBuilder.add("the_geom", MultiPolygon.class);
+            typeBuilder.add("TITLE1_EN", String.class);
+            typeBuilder.add("TITLE2_EN", String.class);
+            typeBuilder.setDefaultGeometry("the_geom");
+
+
+            final SimpleFeatureType WIKITYPE = typeBuilder.buildFeatureType();
+
+>>>>>>> master
             geometryFactory = JTSFactoryFinder.getGeometryFactory();
             featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
 
@@ -194,7 +230,11 @@ public class GADMConverter {
             SimpleFeatureSource outputFeatureSource = outputDataStore.getFeatureSource(typeName);
             SimpleFeatureType SHAPE_TYPE = outputFeatureSource.getSchema();
 
+<<<<<<< HEAD
             System.out.println("Writing to" + outputFile.getCanonicalPath());
+=======
+            System.out.println("Writing to " + outputFile.getCanonicalPath());
+>>>>>>> master
 
             if (outputFeatureSource instanceof SimpleFeatureStore) {
                 SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
@@ -210,6 +250,7 @@ public class GADMConverter {
                 } finally {
                     transaction.close();
                 }
+                System.out.println("Success.");
                 System.exit(0); // success!
             } else {
                 System.out.println(typeName + " does not support read/write access");
@@ -228,53 +269,5 @@ public class GADMConverter {
 
 
     }
-
-
-
-    /**
-     * Convert GADM shapefile into the format we can read
-     * @param shpFile
-     */
-
-    @Deprecated
-    private void convertShpFile(ShpFiles shpFile) {
-        DbaseFileReader dbfReader;
-        DbaseFileWriter dbfWriter;
-        DbaseFileHeader dbfHeader;
-        Object[] entry, newEntry = new Object[2];
-        try {
-            dbfReader = new DbaseFileReader(shpFile, false, Charset.forName("UTF-8"));
-            dbfHeader = new DbaseFileHeader();
-            dbfHeader.addColumn("TITLE1_EN",'c',254,0);
-            dbfHeader.addColumn("TITLE2_EN",'c',254,0);
-            File f = new File("gadm2.dbf");
-            FileOutputStream out = new FileOutputStream(f);
-            dbfWriter = new DbaseFileWriter(dbfHeader, out.getChannel(), Charset.forName("UTF-8"));
-            int count = 0;
-            HashMap<Integer, HashSet<Integer>> id = new HashMap<Integer, HashSet<Integer>>(); //key: entry[1] = ID_0 value: entry[4] = ID_1
-            while (dbfReader.hasNext()) {
-                entry = dbfReader.readEntry();
-                if (!id.containsKey(entry[1])) id.put((Integer)entry[1], new HashSet<Integer>());
-                if (!id.get(entry[1]).contains(entry[4])) { //check duplicate
-                    count++;
-                    newEntry[0] = (String) entry[5];
-                    newEntry[1] = (String) entry[5] + ", " + (String) entry[3];
-                    dbfWriter.write(newEntry);
-                    id.get(entry[1]).add((Integer)entry[4]);
-                }
-                else continue;  //skip duplicate records
-            }
-            System.out.println("Total number of records: " + count);
-            dbfWriter.close();
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
-
-
 
 }

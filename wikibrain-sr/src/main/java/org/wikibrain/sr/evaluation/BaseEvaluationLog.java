@@ -120,7 +120,7 @@ public abstract class BaseEvaluationLog<T extends BaseEvaluationLog> implements 
      * Merges the accumulated values in eval into
      * @param eval
      */
-    public void merge(T eval) throws IOException {
+    public synchronized void merge(T eval) throws IOException {
         if (log != null && eval.logPath != null) {
             write("merge\t" + eval.logPath.getAbsolutePath());
         }
@@ -171,7 +171,7 @@ public abstract class BaseEvaluationLog<T extends BaseEvaluationLog> implements 
     }
 
     /**
-     * Writes a summary of the results to the writer.
+     * Writes a summary of the results to the writer.               ;
      * @param writer
      * @throws java.io.IOException
      */
