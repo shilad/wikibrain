@@ -106,11 +106,7 @@ public class GADMConverter {
     /**
      *
      * @param fileName
-<<<<<<< HEAD
-     * Takes in the GADM shape file and convert it into the kind of shape file that we can read
-=======
      * Takes in the GADM shape file and convert it into the kind of shape file we can read
->>>>>>> master
      *
      */
     public void convertShpFile(String fileName) {
@@ -118,20 +114,12 @@ public class GADMConverter {
         Map map = new HashMap();
         HashMap<String, List<Geometry>> stateShape = new HashMap<String, List<Geometry>>();
         HashMap<String, String> stateCountry = new HashMap<String, String>();
-<<<<<<< HEAD
-        File outputFile = new File("newgadm2/gadm2.shp");
-
-        ShapefileReader shpReader;
-        GeometryFactory geometryFactory;
-        SimpleFeatureTypeBuilder featureTypeBuilder;
-=======
         new File("newgadm").mkdir(); //Must have this if you want to put the output file in a new directory
         File outputFile = new File("newgadm/gadm2.shp");
 
         ShapefileReader shpReader;
         GeometryFactory geometryFactory;
         SimpleFeatureTypeBuilder typeBuilder;
->>>>>>> master
         SimpleFeatureBuilder featureBuilder;
         DataStore inputDataStore;
         List<SimpleFeature> features = new ArrayList<SimpleFeature>();
@@ -142,46 +130,19 @@ public class GADMConverter {
             SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
             SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
             SimpleFeatureIterator inputFeatures = inputCollection.features();
-<<<<<<< HEAD
-            System.out.println("Mapping polygons...");
-            while (inputFeatures.hasNext()) {
-                SimpleFeature feature = inputFeatures.next();
-=======
 
             System.out.println("Mapping polygons...");
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();;
->>>>>>> master
 
-                if (!stateShape.containsKey(feature.getAttribute(6))) {
-                    String country = ((String) feature.getAttribute(4)).intern();
-                    stateShape.put((String) feature.getAttribute(6), new ArrayList<Geometry>());
-                    stateCountry.put((String) feature.getAttribute(6), country); //set up the state-country map
+                if (!stateShape.containsKey(feature.getAttribute(5))) {
+                    stateShape.put((String) feature.getAttribute(5), new ArrayList<Geometry>());
+                    stateCountry.put((String) feature.getAttribute(5), (String) feature.getAttribute(3)); //set up the state-country map
                 }
 
-                stateShape.get(feature.getAttribute(6)).add((Geometry)feature.getAttribute(0)); //and put all the polygons under a state into another map
+                stateShape.get(feature.getAttribute(5)).add((Geometry)feature.getAttribute(0)); //and put all the polygons under a state into another map
             }
-            inputFeatures.close();
-            inputDataStore.dispose();
-            System.out.println("Mapping complete.");
 
-            featureTypeBuilder = new SimpleFeatureTypeBuilder();
-            featureTypeBuilder.setName("WIKITYPE");
-            featureTypeBuilder.setCRS(DefaultGeographicCRS.WGS84);
-            featureTypeBuilder.add("the_geom", MultiPolygon.class);
-            featureTypeBuilder.add("TITLE1_EN", String.class);
-            featureTypeBuilder.add("TITLE2_EN", String.class);
-            featureTypeBuilder.setDefaultGeometry("the_geom");
-
-<<<<<<< HEAD
-            final SimpleFeatureType WIKITYPE = featureTypeBuilder.buildFeatureType();
-
-
-
-            /*final SimpleFeatureType WIKITYPE = DataUtilities.createType("WIKITYPE",
-                    "geom:MultiPolygon:srid=4326, TITLE1_EN:String, TITLE2_EN:String"
-            );*/
-=======
             System.out.println("Mapping complete.");
 
             typeBuilder = new SimpleFeatureTypeBuilder();  //build the output feature type
@@ -195,15 +156,13 @@ public class GADMConverter {
 
             final SimpleFeatureType WIKITYPE = typeBuilder.buildFeatureType();
 
->>>>>>> master
             geometryFactory = JTSFactoryFinder.getGeometryFactory();
             featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
-
 
             System.out.println("Processing polygons...");
 
             for (String state: stateCountry.keySet()){    //create the feature collection for the new shpfile
-                Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
+                Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).buffer(0);
                 featureBuilder.add(newGeom);
                 featureBuilder.add(state);
                 featureBuilder.add(state + ", " + stateCountry.get(state));
@@ -222,7 +181,6 @@ public class GADMConverter {
             ShapefileDataStore outputDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(outputParams);
 
             outputDataStore.createSchema(WIKITYPE);
-            outputDataStore.setCharset(Charset.forName("UTF-8"));
 
             Transaction transaction = new DefaultTransaction("create");
 
@@ -230,11 +188,7 @@ public class GADMConverter {
             SimpleFeatureSource outputFeatureSource = outputDataStore.getFeatureSource(typeName);
             SimpleFeatureType SHAPE_TYPE = outputFeatureSource.getSchema();
 
-<<<<<<< HEAD
-            System.out.println("Writing to" + outputFile.getCanonicalPath());
-=======
             System.out.println("Writing to " + outputFile.getCanonicalPath());
->>>>>>> master
 
             if (outputFeatureSource instanceof SimpleFeatureStore) {
                 SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
