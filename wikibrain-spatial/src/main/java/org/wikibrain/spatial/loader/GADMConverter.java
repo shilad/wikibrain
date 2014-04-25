@@ -3,10 +3,9 @@ package org.wikibrain.spatial.loader;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.cli.*;
@@ -108,17 +107,18 @@ public class GADMConverter {
      *
      * @param fileName
      * Takes in the GADM shape file and convert it into the kind of shape file that we can read
-     * For some reason it won't recognize the CRS ID
+     *
      */
     public void convertShpFile(String fileName) {
         File file = new File(fileName);
         Map map = new HashMap();
         HashMap<String, List<Geometry>> stateShape = new HashMap<String, List<Geometry>>();
         HashMap<String, String> stateCountry = new HashMap<String, String>();
-        File outputFile = new File("gadm2.shp");
+        File outputFile = new File("newgadm2/gadm2.shp");
 
         ShapefileReader shpReader;
         GeometryFactory geometryFactory;
+        SimpleFeatureTypeBuilder featureTypeBuilder;
         SimpleFeatureBuilder featureBuilder;
         DataStore inputDataStore;
         List<SimpleFeature> features = new ArrayList<SimpleFeature>();
@@ -129,30 +129,45 @@ public class GADMConverter {
             SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
             SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
             SimpleFeatureIterator inputFeatures = inputCollection.features();
+            System.out.println("Mapping polygons...");
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
-                //feature.getType().getGeometryDescriptor().getType().getBinding();
 
-                if (!stateShape.containsKey(feature.getAttribute(5))) {
-                    stateShape.put((String) feature.getAttribute(5), new ArrayList<Geometry>());
-                    stateCountry.put((String) feature.getAttribute(5), (String) feature.getAttribute(3)); //set up the state-country map
+                if (!stateShape.containsKey(feature.getAttribute(6))) {
+                    String country = ((String) feature.getAttribute(4)).intern();
+                    stateShape.put((String) feature.getAttribute(6), new ArrayList<Geometry>());
+                    stateCountry.put((String) feature.getAttribute(6), country); //set up the state-country map
                 }
 
-                stateShape.get(feature.getAttribute(5)).add((Geometry)feature.getAttribute(0)); //and put all the polygons under a state into another map
+                stateShape.get(feature.getAttribute(6)).add((Geometry)feature.getAttribute(0)); //and put all the polygons under a state into another map
             }
+            inputFeatures.close();
+            inputDataStore.dispose();
+            System.out.println("Mapping complete.");
+
+            featureTypeBuilder = new SimpleFeatureTypeBuilder();
+            featureTypeBuilder.setName("WIKITYPE");
+            featureTypeBuilder.setCRS(DefaultGeographicCRS.WGS84);
+            featureTypeBuilder.add("the_geom", MultiPolygon.class);
+            featureTypeBuilder.add("TITLE1_EN", String.class);
+            featureTypeBuilder.add("TITLE2_EN", String.class);
+            featureTypeBuilder.setDefaultGeometry("the_geom");
+
+            final SimpleFeatureType WIKITYPE = featureTypeBuilder.buildFeatureType();
 
 
 
-            final SimpleFeatureType WIKITYPE = DataUtilities.createType("wikiType",
-                    "geom:MultiPolygon:srid=4326, TITLE1_EN:String, TITLE2_EN:String"  // Code 4326 not found
-            );
+            /*final SimpleFeatureType WIKITYPE = DataUtilities.createType("WIKITYPE",
+                    "geom:MultiPolygon:srid=4326, TITLE1_EN:String, TITLE2_EN:String"
+            );*/
             geometryFactory = JTSFactoryFinder.getGeometryFactory();
             featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
+
 
             System.out.println("Processing polygons...");
 
             for (String state: stateCountry.keySet()){    //create the feature collection for the new shpfile
-                Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).buffer(0);
+                Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
                 featureBuilder.add(newGeom);
                 featureBuilder.add(state);
                 featureBuilder.add(state + ", " + stateCountry.get(state));
@@ -171,12 +186,15 @@ public class GADMConverter {
             ShapefileDataStore outputDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(outputParams);
 
             outputDataStore.createSchema(WIKITYPE);
+            outputDataStore.setCharset(Charset.forName("UTF-8"));
 
             Transaction transaction = new DefaultTransaction("create");
 
             String typeName = outputDataStore.getTypeNames()[0];
             SimpleFeatureSource outputFeatureSource = outputDataStore.getFeatureSource(typeName);
             SimpleFeatureType SHAPE_TYPE = outputFeatureSource.getSchema();
+
+            System.out.println("Writing to" + outputFile.getCanonicalPath());
 
             if (outputFeatureSource instanceof SimpleFeatureStore) {
                 SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
@@ -198,9 +216,6 @@ public class GADMConverter {
                 System.exit(1);
             }
 
-
-        } catch (SchemaException e){
-            e.printStackTrace();
 
         } catch (MalformedURLException e){
             e.printStackTrace();

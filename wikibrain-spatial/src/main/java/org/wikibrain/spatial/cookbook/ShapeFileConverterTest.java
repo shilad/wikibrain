@@ -15,7 +15,7 @@ public class ShapeFileConverterTest {
         GADMConverter converter = new GADMConverter();
         //converter.downloadGADMShapeFile();
 
-            converter.convertShpFile("tmp/CHN_adm/CHN_adm2.shp");
+        converter.convertShpFile("tmp/gadm_v2_shp/gadm2.shp");
 
     }
 }
