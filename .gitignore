@@ -44,3 +44,6 @@ wp-java.sh
 
 *.sh
 
+*.history
+
+
