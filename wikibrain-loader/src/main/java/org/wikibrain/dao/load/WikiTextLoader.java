@@ -7,6 +7,7 @@ import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.*;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LanguageSet;
@@ -21,12 +22,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * Parses the wiki text associated with articles
  * and populates data stores for links, ills, and categories.
  */
 public class WikiTextLoader {
+    private static final Logger LOG = Logger.getLogger(WikiTextLoader.class.getName());
 
     /**
      * The maximum number of threads to use for a single language edition.
@@ -136,6 +139,9 @@ public class WikiTextLoader {
         llDao.endLoad();
         lcmDao.endLoad();
         metaDao.endLoad();
+
+        LOG.info("optimizing database.");
+        conf.get(WpDataSource.class).optimize();
 
         System.out.println("encountered " + metaDao.getInfo(LocalLink.class).getNumErrors() + " parse errors");
 

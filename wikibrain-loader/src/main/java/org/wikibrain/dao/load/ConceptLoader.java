@@ -14,6 +14,7 @@ import org.wikibrain.core.cmd.FileMatcher;
 import org.wikibrain.core.dao.DaoException;
 
 import org.wikibrain.core.dao.UniversalPageDao;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.UniversalPage;
@@ -134,6 +135,10 @@ public class ConceptLoader {
 
         LOG.log(Level.INFO, "End Load");
         dao.endLoad();
+
+        LOG.info("optimizing database.");
+        conf.get(WpDataSource.class).optimize();
+
         LOG.log(Level.INFO, "DONE");
     }
 }

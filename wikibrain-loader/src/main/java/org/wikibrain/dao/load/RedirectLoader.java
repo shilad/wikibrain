@@ -12,6 +12,7 @@ import org.wikibrain.core.dao.*;
 import org.wikibrain.core.dao.sql.LocalPageSqlDao;
 import org.wikibrain.core.dao.sql.RawPageSqlDao;
 import org.wikibrain.core.dao.sql.RedirectSqlDao;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.RawPage;
@@ -147,6 +148,9 @@ public class RedirectLoader {
 
         redirectLoader.getDao().endLoad();
         metaDao.endLoad();
+
+        LOG.info("optimizing database.");
+        conf.get(WpDataSource.class).optimize();
     }
 
 }
