@@ -17,8 +17,8 @@ public class ShapeFileConverterTest {
         GADMConverter converter = new GADMConverter();
         //converter.downloadGADMShapeFile();  //Uncomment this line if you don't have the shape file for the world
 
-        converter.convertShpFile("tmp/CHN_adm/CHN_adm2.shp");
-        //converter.convertShpFile("tmp/gadm_v2_shp/gadm2.shp");  //Uncomment this line if you want to do the entire world.
+        //converter.convertShpFile("tmp/CHN_adm/CHN_adm2.shp");
+        converter.convertShpFile("tmp/gadm_v2_shp/gadm2.shp");  //Uncomment this line if you want to do the entire world.
 
     }
 }

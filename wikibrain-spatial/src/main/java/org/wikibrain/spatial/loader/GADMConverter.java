@@ -141,14 +141,17 @@ public class GADMConverter {
             LOG.log(Level.INFO, "Mapping polygons..." );
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
+                String country = ((String)feature.getAttribute(4)).intern();
 
-                if (!stateShape.containsKey(feature.getAttribute(5))) {
-                    stateShape.put((String) feature.getAttribute(5), new ArrayList<Geometry>());
-                    stateCountry.put((String) feature.getAttribute(5), (String) feature.getAttribute(3)); //set up the state-country map
+                if (!stateShape.containsKey(feature.getAttribute(6))) {
+                    stateShape.put((String) feature.getAttribute(6), new ArrayList<Geometry>());
+                    stateCountry.put((String) feature.getAttribute(6), country); //set up the state-country map
                 }
 
-                stateShape.get(feature.getAttribute(5)).add((Geometry)feature.getAttribute(0)); //and put all the polygons under a state into another map
+                stateShape.get(feature.getAttribute(6)).add((Geometry)feature.getAttribute(0)); //and put all the polygons under a state into another map
             }
+            inputFeatures.close();
+            inputDataStore.dispose();
 
             LOG.log(Level.INFO, "Mapping complete." );
 
@@ -169,15 +172,16 @@ public class GADMConverter {
             LOG.log(Level.INFO, "Processing polygons...");
 
             int count = 0;
+            int total = stateShape.keySet().size();
             for (String state: stateCountry.keySet()){    //create the feature collection for the new shpfile
                 count++;
-                Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).buffer(0);
+                Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
                 featureBuilder.add(newGeom);
                 featureBuilder.add(state);
                 featureBuilder.add(state + ", " + stateCountry.get(state));
                 SimpleFeature feature = featureBuilder.buildFeature(null);
                 if (count % 50 == 0)
-                    LOG.log(Level.INFO, count + " states processed.");
+                    LOG.log(Level.INFO, count + "/" + total + " states processed.");
                 features.add(feature);
                 stateShape.remove(state);
                 System.gc();
