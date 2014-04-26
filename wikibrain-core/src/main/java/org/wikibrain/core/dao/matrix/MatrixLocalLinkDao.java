@@ -1,8 +1,12 @@
 package org.wikibrain.core.dao.matrix;
 
+import com.google.code.externalsorting.ExternalSort;
 import com.typesafe.config.Config;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.wikibrain.conf.Configuration;
@@ -16,14 +20,15 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.matrix.*;
-import org.wikibrain.utils.ObjectDb;
+import org.wikibrain.utils.*;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -49,9 +54,10 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     private SparseMatrix matrix = null;
     private SparseMatrix transpose = null;
 
-    // used during building
-    private File objectDbPath = null;
-    private ObjectDb<int[]> objectDb = null;
+    private Set<File> allWriterFiles = Collections.newSetFromMap(new ConcurrentHashMap<File, Boolean>());
+    private Set<BufferedWriter> allWriters = Collections.newSetFromMap(
+            new ConcurrentHashMap<BufferedWriter, Boolean>());
+    private ThreadLocal<BufferedWriter> writers = new ThreadLocal<BufferedWriter>();
 
 
     public MatrixLocalLinkDao(LocalLinkDao delegate, File dir) throws DaoException {
@@ -83,26 +89,34 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
     @Override
     public void beginLoad() throws DaoException {
+        allWriters.clear();
         delegate.beginLoad();
-        try {
-            objectDbPath = File.createTempFile("local-links", "odb");
-            FileUtils.forceDeleteOnExit(objectDbPath);
-            objectDb = new ObjectDb<int[]>(objectDbPath, true);
-
-            // Initialize object database with existing links
-            if (matrix != null) {
-                for (SparseMatrixRow row : matrix) {
-                    int dests[] = new int[row.getNumCols()];
+        // Initialize object database with existing links
+        if (matrix != null) {
+            ParallelForEach.iterate(matrix.iterator(), new Procedure<SparseMatrixRow>() {
+                @Override
+                public void call(SparseMatrixRow row) throws Exception {
+                    BufferedWriter writer = getSortingWriter();
                     for (int i = 0; i < row.getNumCols(); i++) {
-                        dests[i] = row.getColIndex(i);
+                        writer.write(row.getRowIndex() + " " + row.getColIndex(i) + "\n");
                     }
-                    objectDb.put(("" + row.getRowIndex()), dests);
                 }
-            }
-        } catch (IOException e) {
-            throw new DaoException(e);
+            });
         }
     }
+
+    private BufferedWriter getSortingWriter() throws IOException {
+        if (writers.get() == null) {
+            File file = File.createTempFile("links-sorter", ".txt");
+            file.deleteOnExit();
+            file.delete();
+            writers.set(WpIOUtils.openWriter(file));
+            allWriters.add(writers.get());
+            allWriterFiles.add(file);
+        }
+        return writers.get();
+    }
+
     @Override
     public void save(LocalLink item) throws DaoException {
         delegate.save(item);
@@ -116,13 +130,10 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             return;
         }
         try {
-            String key = "" + src.toInt();
-            int[] val = objectDb.get(key);
-            objectDb.put(key, ArrayUtils.add(val, dest.toInt()));
+            BufferedWriter writer = getSortingWriter();
+            writer.write(src.toInt() + " " + dest.toInt() + "\n");
         } catch (IOException e) {
            throw new DaoException(e);
-        } catch (ClassNotFoundException e) {
-            throw new DaoException(e);
         }
     }
 
@@ -141,10 +152,61 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         FileUtils.deleteQuietly(getTransposeFile());
     }
 
+
+
+    private static final int MAX_SORT_THREADS = 4;
+    private File sortFiles() throws IOException {
+        for (BufferedWriter writer : allWriters) {
+            writer.close();
+        }
+        ParallelForEach.iterate(allWriterFiles.iterator(), MAX_SORT_THREADS, 10, new Procedure<File>() {
+            @Override
+            public void call(File file) throws Exception {
+                sort(file, MAX_SORT_THREADS);
+            }
+        }, 10);
+
+        File file = File.createTempFile("local-links-sorted.", ".txt");
+        file.deleteOnExit();
+        Comparator<String> comparator = new Comparator<String>() {
+            public int compare(String r1, String r2){
+                return r1.compareTo(r2);}};
+        LOG.info("merging all sorted files to " + file);
+        ExternalSort.mergeSortedFiles(new ArrayList<File>(allWriterFiles), file, comparator, Charset.forName("utf-8"));
+        return file;
+    }
+
+    private static final int SORT_FILES_MAX = 100;
+    private static final long SORT_MEMORY_MAX = (Runtime.getRuntime().maxMemory() / MAX_SORT_THREADS / 5);
+
+    private void sort(File file, long concurrentThreads) throws IOException {
+        long maxMemory = SORT_MEMORY_MAX / concurrentThreads;
+        int maxFiles = (int) Math.max(
+                SORT_FILES_MAX / concurrentThreads,
+                (int)(file.length() / (maxMemory / 2)));
+        LOG.info("sorting " + file + " using max of " + maxFiles);
+        Comparator<String> comparator = new Comparator<String>() {
+            public int compare(String r1, String r2){
+                return r1.compareTo(r2);}};
+        List<File> l = ExternalSort.sortInBatch(
+                WpIOUtils.openBufferedReader(file),
+                file.length(),
+                comparator,
+                maxFiles,
+                maxMemory,
+                Charset.forName("utf-8"),
+                null,
+                true,
+                0,
+                false);
+        LOG.info("merging " + file);
+        ExternalSort.mergeSortedFiles(l, file, comparator, Charset.forName("utf-8"));
+        LOG.info("finished sorting" + file);
+    }
+
     @Override
     public void endLoad() throws DaoException {
         delegate.endLoad();
-        objectDb.flush();
 
         try {
             // close the old matrix and transpose
@@ -152,15 +214,56 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             if (matrix != null) IOUtils.closeQuietly(matrix);
             if (transpose != null) IOUtils.closeQuietly(transpose);
 
+            LOG.info("sorting files");
+            File file = sortFiles();
+
             LOG.info("writing adjacency matrix rows");
             ValueConf vconf = new ValueConf();   // unused because there are no values.
             SparseMatrixWriter writer = new SparseMatrixWriter(getMatrixFile(), vconf);
-            for (Pair<String, int[]> entry : objectDb) {
+
+            BufferedReader reader = WpIOUtils.openBufferedReader(file);
+            TIntList packedDest = new TIntArrayList();
+
+            int cellCount = 0;
+            int rowCount = 0;
+            LocalId lastSrc = null;
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                String tokens[] = line.trim().split(" ");
+                if (tokens.length == 2){
+                    cellCount++;
+                    LocalId src = LocalId.fromInt(Integer.valueOf(tokens[0]));
+                    LocalId dest = LocalId.fromInt(Integer.valueOf(tokens[1]));
+                    if (lastSrc != null && !src.equals(lastSrc)) {
+                        if (++rowCount % 100000 == 0) {
+                            LOG.info("writing adjacency matrix row " + rowCount
+                                    + ", found " + cellCount + " links");
+                        }
+                        SparseMatrixRow row = new SparseMatrixRow(
+                                vconf,
+                                lastSrc.toInt(),
+                                packedDest.toArray(),
+                                new short[packedDest.size()]
+                        );
+                        writer.writeRow(row);
+                        packedDest.clear();
+                    }
+                    packedDest.add(dest.toInt());
+                    lastSrc = src;
+                } else {
+                    LOG.info("Invalid line: '" + StringEscapeUtils.escapeJava(line) + "'");
+                }
+            }
+
+            if (packedDest.size() > 0) {
                 SparseMatrixRow row = new SparseMatrixRow(
                         vconf,
-                        Integer.valueOf(entry.getKey()),
-                        entry.getValue(),
-                        new short[entry.getValue().length]
+                        lastSrc.toInt(),
+                        packedDest.toArray(),
+                        new short[packedDest.size()]
                 );
                 writer.writeRow(row);
             }
