@@ -19,6 +19,11 @@
             <artifactId>wikibrain-parser</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.jgrapht</groupId>
+            <artifactId>jgrapht</artifactId>
+            <version>0.9.0</version>
+        </dependency>
     </dependencies>
     
 </project>
