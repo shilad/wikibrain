@@ -100,6 +100,10 @@ public interface WikidataDao extends Dao<WikidataStatement> {
      */
     public LocalWikidataStatement getLocalStatement(Language language, WikidataStatement statement) throws DaoException;
 
+    Iterable<WikidataStatement> getByValue(WikidataEntity property, WikidataValue value) throws DaoException;
+
+    Iterable<WikidataStatement> getByValue(String propertyName, WikidataValue value) throws DaoException;
+
     /**
      * Returns all statements that meet some sort of criterion.
      * @param filter
