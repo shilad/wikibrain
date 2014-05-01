@@ -37,7 +37,7 @@ public class LocalLinkTimer {
         for (LocalPage p : (Iterable<LocalPage>)lpDao.get(new DaoFilter().setRedirect(false).setDisambig(false))) {
             localIds.add(p.toLocalId());
             if (localIds.size() % 100000 == 0) {
-                System.err.println("added page " + localIds);
+                System.err.println("added page " + localIds.size());
             }
         }
         List<Worker> workers = new ArrayList<Worker>();
