@@ -1,7 +1,9 @@
 package org.wikibrain.wikidata;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -20,6 +22,21 @@ public class WikidataValue implements Serializable {
     private String typeName;
     private Object value;
     private JsonElement jsonValue;
+
+    public static WikidataValue forItem(int itemId) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("entity-type", "item");
+        obj.addProperty("numeric-id", itemId);
+        return new WikidataValue(Type.ITEM, itemId, obj);
+    }
+
+    public static WikidataValue forInt(int value) {
+        return new WikidataValue(Type.INT, value, new JsonPrimitive(value));
+    }
+
+    public static WikidataValue forString(String s) {
+        return new WikidataValue(Type.STRING, s, new JsonPrimitive(s));
+    }
 
     public WikidataValue(String typeName, Object value, JsonElement jsonValue) {
         for (Type t : Type.values()) {
@@ -42,7 +59,6 @@ public class WikidataValue implements Serializable {
         this.value = value;
         this.jsonValue = jsonValue;
     }
-
 
     private void writeObject(ObjectOutputStream o)
             throws IOException {

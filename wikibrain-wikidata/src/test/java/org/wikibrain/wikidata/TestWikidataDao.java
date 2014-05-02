@@ -2,6 +2,7 @@ package org.wikibrain.wikidata;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -130,5 +131,25 @@ public class TestWikidataDao {
         for (LocalWikidataStatement lws : almaMaters) {
             assertEquals("François Hollande alma mater unknown", lws.getFullStatement());
         }
+    }
+
+    @Test
+    public void testSearchForValue() throws Exception {
+        WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
+        WikidataDao wd = new WikidataSqlDao(ds, null, null);
+        List<WikidataStatement> stats = IteratorUtils.toList(
+                wd.get(new WikidataFilter.Builder().withValue(WikidataValue.forString("122353562")).build()
+            ).iterator());
+        assertEquals(1, stats.size());
+        stats = IteratorUtils.toList(wd.getByValue("BnF identifier", WikidataValue.forString("122353562")).iterator());
+        assertEquals(1, stats.size());
+        stats = IteratorUtils.toList(wd.getByValue(wd.getProperty(268), WikidataValue.forString("122353562")).iterator());
+        assertEquals(1, stats.size());
+        stats = IteratorUtils.toList(
+                wd.get(new WikidataFilter.Builder().withValue(WikidataValue.forItem(142)).build()
+                ).iterator());
+        assertEquals(30, stats.size());
+        stats = IteratorUtils.toList(wd.getByValue("country of citizenship", WikidataValue.forItem(142)).iterator());
+        assertEquals(5, stats.size());
     }
 }

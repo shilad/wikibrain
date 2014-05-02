@@ -11,6 +11,7 @@ import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.*;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.lang.LanguageSet;
@@ -151,5 +152,8 @@ public class UniversalLinkLoader {
         loader.loadLinkMap(mapper.getId());
         loader.endLoad();
         LOG.log(Level.INFO, "DONE");
+
+        LOG.info("optimizing database.");
+        conf.get(WpDataSource.class).optimize();
     }
 }

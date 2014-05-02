@@ -12,6 +12,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.dao.RawPageDao;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.LocalPage;
@@ -194,5 +195,8 @@ public class DumpLoader {
         lpDao.endLoad();
         rpDao.endLoad();
         metaDao.endLoad();
+
+        LOG.info("optimizing database.");
+        conf.get(WpDataSource.class).optimize();
     }
 }

@@ -12,6 +12,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.cmd.FileMatcher;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.download.DumpFileDownloader;
@@ -149,5 +150,8 @@ public class WikidataDumpLoader {
 
         wdDao.endLoad();
         metaDao.endLoad();
+
+        LOG.info("optimizing database.");
+        conf.get(WpDataSource.class).optimize();
     }
 }
