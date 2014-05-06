@@ -16,7 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,8 +32,7 @@ public class PhraseLoader {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
-                        .hasArg()
-                        .isRequired()
+                        .hasArgs()
                         .withLongOpt("analyzer")
                         .withDescription("the name of the phrase analyzer to use")
                         .create("p"));
@@ -51,16 +52,19 @@ public class PhraseLoader {
         confOverrides.put("phrases.loading", "true");
 
         Env env = new EnvBuilder(cmd).setProperty("phrases.loading", true).build();
-
-        String name = cmd.getOptionValue("p");
-        if (name.equals("stanford")) {
+        List<String> toLoad = env.getConfiguration().get().getStringList("phrases.toLoad");
+        if (cmd.hasOption("p")) {
+            toLoad = Arrays.asList(cmd.getOptionValues("p"));
+        }
+        if (toLoad.contains("stanford")) {
             StanfordPhraseAnalyzer.downloadDictionaryIfNecessary(env.getConfiguration());
         }
 
-        PhraseAnalyzer analyzer = env.getConfigurator().get(PhraseAnalyzer.class, name);
-
-        LOG.log(Level.INFO, "LOADING PHRASE CORPUS FOR " + name);
-        analyzer.loadCorpus(env.getLanguages());
-        LOG.log(Level.INFO, "DONE");
+        for (String name : toLoad) {
+            PhraseAnalyzer analyzer = env.getConfigurator().get(PhraseAnalyzer.class, name);
+            LOG.log(Level.INFO, "LOADING PHRASE CORPUS FOR " + name);
+            analyzer.loadCorpus(env.getLanguages());
+            LOG.log(Level.INFO, "DONE");
+        }
     }
 }

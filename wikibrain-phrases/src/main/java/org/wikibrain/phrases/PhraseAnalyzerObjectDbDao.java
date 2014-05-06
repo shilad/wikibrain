@@ -156,7 +156,8 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
                 return null;
             }
             boolean isNew = config.getBoolean("isNew");
-            File path = new File(config.getString("path"));
+
+            File path = new File(getConfig().get().getString("phrases.path"), name);
             StringNormalizer normalizer = getConfigurator().get(StringNormalizer.class, config.getString("normalizer"));
 
             try {

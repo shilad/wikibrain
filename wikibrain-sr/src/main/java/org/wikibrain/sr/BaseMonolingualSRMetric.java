@@ -225,6 +225,9 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         if (resolutions.get(0) == null || resolutions.get(1) == null) {
             return new SRResult();
         }
+//        LocalPage lp1 = localPageDao.getById(language, resolutions.get(0).getId());
+//        LocalPage lp2 = localPageDao.getById(language, resolutions.get(1).getId());
+//        System.out.println("resolved " + phrase1 + ", " + phrase2 + " to " + lp1 + ", " + lp2);
         return similarity(resolutions.get(0).getId(), resolutions.get(1).getId(), explanations);
     }
 
