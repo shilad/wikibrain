@@ -160,7 +160,7 @@ public class FastLoader {
                         batchSize++;
                         for (int i = 0; i < row.length; i++) {
                             if(row[i].getClass().equals(java.lang.Character.class))
-                                 statement.setObject(i + 1, row[i].toString);
+                                 statement.setObject(i + 1, row[i].toString());
                             else
                                 statement.setObject(i + 1, row[i]);
                         }
