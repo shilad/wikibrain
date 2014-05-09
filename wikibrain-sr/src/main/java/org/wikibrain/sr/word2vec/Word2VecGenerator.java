@@ -97,7 +97,11 @@ public class Word2VecGenerator implements VectorGenerator {
     private static String readString(DataInputStream dis) throws IOException {
         TCharList bytes = new TCharArrayList();
         while (true) {
-            char c = (char)dis.read();
+            int i = dis.read();
+            if (i < 0) {
+                break;
+            }
+            char c = (char)i;
             if (c == ' ') {
                 break;
             }

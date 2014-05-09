@@ -106,11 +106,11 @@ public class Word2VecTrainer {
                     public void call(String sentence) throws Exception {
                         int n = trainSentence(sentence);
                         wordsTrainedSoFar.addAndGet(n);
-                        // update the learning rate before every job
-                        synchronized (syn0) {
-                            alpha = startingAlpha * (1 - wordsTrainedSoFar.get() / (totalWords + 1.0));
-                            if (alpha < startingAlpha * 0.0001) alpha = startingAlpha * 0.0001;
-                        }
+
+                        // update the learning rate
+                        alpha = Math.max(
+                                startingAlpha * (1 - wordsTrainedSoFar.get() / (totalWords + 1.0)),
+                                startingAlpha * 0.0001);
                     }
                 },
                 10000);
