@@ -2,6 +2,8 @@ WikiBrain
 =====
 The WikiBrain Java framework provides easy and efficient access to multi-lingual Wikipedia data.
 
+WikiBrain's busy thinking up its first public release. If you have questions, ask the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain).
+
 ###Main features
 * Support for **all Wikipedia language** editions and comparisons between multiple languages.
 * Tools that **download** and organize [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
