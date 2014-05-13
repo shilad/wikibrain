@@ -31,15 +31,16 @@ public class ConceptExample {
 
         // get the most common phrases in simple
         Language simple = Language.getByLangCode("simple");   // simple english
-        LinkedHashMap<LocalPage, Float> resolution = pa.resolve(simple, "apple", 5);
+        LinkedHashMap<LocalId, Float> resolution = pa.resolve(simple, "apple", 5);
 
         // show the closest pages
         System.out.println("meanings of apple:");
-        for (LocalPage p : resolution.keySet()) {
+        for (LocalId p : resolution.keySet()) {
             System.out.println("\t" + p + ": " + resolution.get(p));
 
             // translate them...
-            UniversalPage concept = dao.getByLocalPage(p, 1);
+            UniversalPage concept = dao.getByLocalPage(p.asLocalPage(), 1);
+            //UniversalPage concept = dao.getByLocalPage(new Local, 1);
             for (LocalId id : concept.getLocalEntities()) {
                 System.out.println("\t\tin language " + id.getLanguage() + " is " + id);
             }

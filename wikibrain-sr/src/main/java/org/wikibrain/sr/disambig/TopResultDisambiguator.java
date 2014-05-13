@@ -27,13 +27,13 @@ public class TopResultDisambiguator extends Disambiguator{
     public List<LinkedHashMap<LocalId, Float>> disambiguate(List<LocalString> phrases, Set<LocalString> context) throws DaoException {
         List<LinkedHashMap<LocalId, Float>> results = new ArrayList<LinkedHashMap<LocalId, Float>>();
         for (LocalString phrase : phrases) {
-            LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolve(phrase.getLanguage(), phrase.getString(), 10);
+            LinkedHashMap<LocalId, Float> localMap = phraseAnalyzer.resolve(phrase.getLanguage(), phrase.getString(), 10);
             if (localMap==null){
                 results.add(null);
             } else {
                 LinkedHashMap<LocalId, Float> phraseResult = new LinkedHashMap<LocalId, Float>();
-                for (LocalPage page : localMap.keySet()) {
-                    phraseResult.put(page.toLocalId(), localMap.get(page));
+                for (LocalId id : localMap.keySet()) {
+                    phraseResult.put(id, localMap.get(id));
                 }
                 results.add(phraseResult);
             }
