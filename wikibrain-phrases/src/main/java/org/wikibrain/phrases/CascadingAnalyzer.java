@@ -7,6 +7,7 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 
 import java.io.IOException;
@@ -56,8 +57,8 @@ public class CascadingAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
-        LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
+    public LinkedHashMap<LocalId, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
+        LinkedHashMap<LocalId, Float> result = new LinkedHashMap<LocalId, Float>();
         for (PhraseAnalyzer d : delegates) {
             try {
                 result = d.resolve(language, phrase, maxPages);

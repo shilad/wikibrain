@@ -4,7 +4,9 @@ import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalArticleDao;
 import org.wikibrain.core.dao.RedirectDao;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalArticle;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.Title;
@@ -69,10 +71,10 @@ public abstract class IDAttributeHandler {
         public Integer getWikidataItemIdForId(Object id) throws WikiBrainException{
             try {
 
-                LinkedHashMap<LocalPage, Float> candidate = analyzer.resolve(myLang, (String)id, 1);
+                LinkedHashMap<LocalId, Float> candidate = analyzer.resolve(myLang, (String)id, 1);
                 if (candidate.size() == 0) return null;
-                LocalPage lp = candidate.keySet().iterator().next();
-                return wdDao.getItemId(lp);
+                LocalId li = candidate.keySet().iterator().next();
+                return li.getId();
 
             }catch(DaoException e){
 
