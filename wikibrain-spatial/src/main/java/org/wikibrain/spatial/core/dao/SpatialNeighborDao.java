@@ -56,7 +56,10 @@ public interface SpatialNeighborDao {
      */
     public TIntSet getMaxDistanceKmItemIds(Geometry g, String refSysName, Set<String> subLayers, double maxDist) throws DaoException;
 
-    public Map<Integer, Geometry> getKNNeighbors(Integer itemId, int k, String layerName, String refSysName) throws DaoException;
+
+    public Map<Integer, Geometry> getKNNeighbors(Integer itemId, int k, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException;
+
+    public Map<Integer, Geometry> getKNNeighbors(Geometry geometry, int k, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException;
 
 
 }

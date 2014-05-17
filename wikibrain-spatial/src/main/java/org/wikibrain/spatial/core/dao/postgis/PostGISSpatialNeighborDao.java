@@ -113,8 +113,8 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
 
     }
 
-
-    public Map<Integer, Geometry> getKNNeighbors (Geometry g, int k, String layerName, String refSysName) throws DaoException{
+    @Override
+    public Map<Integer, Geometry> getKNNeighbors (Geometry g, int k, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException{
 
 
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
@@ -134,10 +134,17 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
 
 
 
+
         List<Filter> filters = Lists.newArrayList();
         filters.add(refSysFilter);
         filters.add(layerFilter);
         filters.add(withinFilter);
+
+
+        for(Integer i : excludeSet){
+            Filter nonEqualFilter = ff.notEqual(ff.property(db.getItemIdAttributeName()), ff.literal(i));
+            filters.add(nonEqualFilter);
+        }
 
 
         Filter finalFilter = ff.and(filters);
@@ -148,13 +155,21 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
 
             FeatureSource featureSource = db.getFeatureSource();
             FeatureCollection containedFeatures = featureSource.getFeatures(finalFilter);
+
             while(containedFeatures.size() < k && guess * k < 180){
-                guess = guess * (k / containedFeatures .size() > 2 ? 1.3 * Math.sqrt((k / containedFeatures.size())) : 2);
+                if(containedFeatures.size() == 0)
+                    guess = guess * 2;
+                else
+                    guess = guess * (k / containedFeatures .size() > 2 ? 1.3 * Math.sqrt((k / containedFeatures.size())) : 2);
                 withinFilter = ff.dwithin(geomProperty, ff.literal(g), guess * k , "4396");
                 List<Filter> newFilters = Lists.newArrayList();
                 newFilters.add(refSysFilter);
                 newFilters.add(layerFilter);
                 newFilters.add(withinFilter);
+                for(Integer i : excludeSet){
+                    Filter nonEqualFilter = ff.notEqual(ff.property(db.getItemIdAttributeName()), ff.literal(i));
+                    newFilters.add(nonEqualFilter);
+                }
                 finalFilter = ff.and(newFilters);
                 containedFeatures = featureSource.getFeatures(finalFilter);
             }
@@ -182,6 +197,7 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
                 distMap.put(itemId, geoCalc.getOrthodromicDistance());
 
             }
+            featureIterator.close();
 
             Collections.sort(order, new Comparator<Integer>() {
                 @Override
@@ -231,10 +247,10 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
     }
 
     @Override
-    public Map<Integer, Geometry> getKNNeighbors(Integer itemId, int k, String layerName, String refSysName) throws DaoException{
+    public Map<Integer, Geometry> getKNNeighbors(Integer itemId, int k, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException{
 
         Geometry stPoint = db.getGeometry(itemId, layerName, refSysName);
-        return getKNNeighbors(stPoint, k, layerName,refSysName);
+        return getKNNeighbors(stPoint, k, layerName,refSysName, excludeSet);
 
     }
 

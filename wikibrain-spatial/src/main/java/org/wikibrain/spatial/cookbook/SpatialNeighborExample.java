@@ -21,6 +21,7 @@ import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
 import org.wikibrain.wikidata.WikidataDao;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,7 +57,7 @@ public class SpatialNeighborExample {
             LocalPage lp = lpDao.getByTitle(new Title(originName, Language.getByLangCode("simple")), NameSpace.ARTICLE);
             Integer id = wdDao.getItemId(lp);
             Geometry rootPoint = sdDao.getGeometry(id, layerName, "earth");
-            Map<Integer, Geometry> resMap = snDao.getKNNeighbors(id, 1000, layerName, "earth");
+            Map<Integer, Geometry> resMap = snDao.getKNNeighbors(id, 100, layerName, "earth" , new HashSet<Integer>());
 
 
             for(Integer i : resMap.keySet()){
