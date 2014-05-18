@@ -72,7 +72,7 @@ public class SimpleToblersLawEvaluator {
 
     public void retrieveLocations() throws DaoException {
         // Get all known concept geometries
-        Map<Integer, Geometry> geometries = sdDao.getAllGeometries("wikidata", "earth");
+        Map<Integer, Geometry> geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         LOG.log(Level.INFO, String.format("Get %d geometries, now building id-name mapping", geometries.size()));
 
         // Build up list of concepts in all languages

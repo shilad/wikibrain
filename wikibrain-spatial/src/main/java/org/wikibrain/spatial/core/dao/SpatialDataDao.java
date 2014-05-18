@@ -38,7 +38,7 @@ public interface SpatialDataDao {
      * @param articleName (e.g. "Minnesota", "Minneapolis", "Kalifornien")
      * @param language (e.g. Language.EN, Language.DE)
      * @param layerName (e.g. Layers.GADM1)
-     * @return
+     * @return the geometry, or null if no geometry could be found
      * @throws DaoException
      */
     public Geometry getGeometry(String articleName, Language language, String layerName) throws DaoException;
@@ -50,7 +50,7 @@ public interface SpatialDataDao {
      * @param language (e.g. Language.EN, Language.DE)
      * @param layerName (e.g. Layers.GADM1)
      * @param refSysName (e.g. Layers.EARTH)
-     * @return
+     * @return the geometry, or null if no geometry could be found
      * @throws DaoException
      */
     public Geometry getGeometry(String articleName, Language language, String layerName, String refSysName) throws DaoException;
@@ -70,7 +70,7 @@ public interface SpatialDataDao {
      * @return
      * @throws DaoException
      */
-    public Iterable<Integer> getAllItemsInLayer(String layerName, String refSysName) throws DaoException;
+    public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName, String refSysName) throws DaoException;
 
     /**
      * Gets the names of all loaded reference systems.
