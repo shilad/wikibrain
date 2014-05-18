@@ -15,6 +15,7 @@ import java.util.List;
 public class SpatialUtils {
 
     public static enum ShapeType {POINT, POLYLINE, POLYGON};
+    public static enum LatLonPrecision {HIGH, MEDIUM, LOW};
 
     public static Geometry mergeGeometries(Geometry g1, Geometry g2) throws WikiBrainException{
 
