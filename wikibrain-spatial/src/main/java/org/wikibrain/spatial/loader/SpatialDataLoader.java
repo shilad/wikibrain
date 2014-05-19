@@ -25,6 +25,7 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
+import org.wikibrain.utils.WpIOUtils;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.io.*;
@@ -93,7 +94,7 @@ public class SpatialDataLoader {
         for (File curRsFolder : spatialDataFolder.listFiles()){
 
             String curRsName = curRsFolder.getName();
-            if (!curRsFolder.isHidden() && !curRsFolder.getName().startsWith("_disabled")){
+            if (!curRsFolder.isHidden() && !curRsFolder.getName().startsWith("_")){
                 LOG.log(Level.INFO, "Found reference system: " + curRsName);
                 for (File curFile : curRsFolder.listFiles()){
                     LayerStruct lStruct = null;
@@ -308,63 +309,82 @@ public class SpatialDataLoader {
 
     private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data_temp";
 
-    public static void main(String args[]) throws ConfigurationException, WikiBrainException, DaoException {
+    public static void main(String args[]) {
 
-        //public PostGISDB(String host, Integer port, String schema, String db, String user, String pwd,
-       // int maxConnections) throws DaoException{
-//        try {
-//            PostGISDB db = new PostGISDB("localhost",5432,"public","wikibrain_new","bjhecht","",15);
-//        } catch (DaoException e) {
-//            e.printStackTrace();
-//        }
-
-        Options options = new Options();
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("spatial-data-folder")
-                        .withDescription("the folder with spatial data")
-                        .create("f"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("phrase-analyzer")
-                        .withDescription("the PhraseAnalyzer to use to map toponyms to Wikipedia pages (defaults to 'titleandredirect'). Will always choose the first candidate, no matter the minimum probability, so declarative PhraseAnalyzers should be used here.")
-                        .create("p"));
-        EnvBuilder.addStandardOptions(options);
-
-        CommandLineParser parser = new PosixParser();
-        CommandLine cmd;
         try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.err.println( "Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("ConceptLoader", options);
-            return;
+
+            Options options = new Options();
+            options.addOption(
+                    new DefaultOptionBuilder()
+                            .withLongOpt("spatial-data-folder")
+                            .withDescription("The folder with spatial data")
+                            .create("f")
+            );
+            options.addOption(
+                    new DefaultOptionBuilder()
+                            .withLongOpt("phrase-analyzer")
+                            .withDescription("The PhraseAnalyzer to use to map toponyms to Wikipedia pages (defaults to 'titleandredirect'). Will always choose the first candidate, no matter the minimum probability, so declarative PhraseAnalyzers should be used here.")
+                            .create("p")
+            );
+            options.addOption(new DefaultOptionBuilder()
+                    .withLongOpt("steps")
+                    .withDescription("Can be one more more of 'wikidata','exogenous' (comma delimit). If nothing is entered, does all steps.")
+                    .create("s"));
+            EnvBuilder.addStandardOptions(options);
+
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd;
+            try {
+                cmd = parser.parse(options, args);
+            } catch (ParseException e) {
+                System.err.println("Invalid option usage: " + e.getMessage());
+                new HelpFormatter().printHelp("ConceptLoader", options);
+                return;
+            }
+
+            Env env = new EnvBuilder(cmd).build();
+            Configurator conf = env.getConfigurator();
+
+            String phraseAnalyzerName = cmd.getOptionValue("p", "titleredirect"); // add to docs that this has to be
+            PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
+
+            String spatialDataFolderPath = cmd.getOptionValue('f', null);
+            File spatialDataFolder;
+            if (spatialDataFolderPath == null){
+                spatialDataFolder = WpIOUtils.createTempDirectory("spatial_data", false);
+            }else{
+                spatialDataFolder = new File(spatialDataFolderPath);
+            }
+
+            WikidataDao wdDao = conf.get(WikidataDao.class);
+            SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
+            SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
+
+//            String stepsValue = cmd.getOptionValue("s", "wikidata,gadm,exogenous"); // GADM temporarily disabled while we do new mappings
+            String stepsValue = cmd.getOptionValue("s", "wikidata,exogenous");
+            String[] steps = stepsValue.split(",");
+            for (String step : steps) {
+                if (step.trim().toLowerCase().equals("wikidata")) {
+                    LOG.log(Level.INFO, "Beginning to extract geographic information from Wikidata");
+                    loader.loadWikidataData();
+                }
+                if (step.trim().toLowerCase().equals("gadm")){
+                    LOG.log(Level.INFO, "Beginning to download and process GADM data (will be imported in exogenous step)");
+                    // TODO: Aaron, put GADM files in here
+                } else if (step.trim().toLowerCase().equals("exogenous")) {
+                    LOG.log(Level.INFO, "Beginning to load exogenous data");
+                    loader.loadExogenousData();
+                } else {
+                    throw new Exception("Illegal step: '" + step + "'");
+                }
+            }
+
+            LOG.info("optimizing database.");
+            conf.get(WpDataSource.class).optimize();
+
+        }catch(Exception e){
+            e.printStackTrace();
         }
-
-        Env env = new EnvBuilder(cmd).build();
-        Configurator conf = env.getConfigurator();
-
-        String phraseAnalyzerName = cmd.getOptionValue("p","titleredirect"); // add to docs that this has to be
-        PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
-
-//        String spatialDataFolderPath = cmd.getOptionValue('f');
-        File spatialDataFolder = new File("/Users/toby/Dropbox/spatial_data_wikibrain");
-        String spatialDataFolderPath = new String("/Users/toby/Dropbox/spatial_data_wikibrain");
-        //File spatialDataFolder = new File(spatialDataFolderPath); //TODO: fixme
-
-        WikidataDao wdDao = conf.get(WikidataDao.class);
-        SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
-
-//        LOG.log(Level.INFO, "Preparing to spatiotag data in folder: '" + spatialDataFolderPath + "'");
-
-
-        //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
-        SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
-        loader.loadWikidataData();
-        //loader.loadExogenousData();
-
-        LOG.info("optimizing database.");
-        conf.get(WpDataSource.class).optimize();
     }
 
     private static Collection<String> getRsNameCol (File folder, String refSysList) throws WikiBrainException{
