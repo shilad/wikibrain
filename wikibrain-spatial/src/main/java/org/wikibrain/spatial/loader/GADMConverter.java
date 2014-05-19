@@ -12,6 +12,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.codec.digest.*;
 import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
 import org.geotools.data.shapefile.dbf.DbaseFileWriter;
@@ -79,7 +80,7 @@ public class GADMConverter {
 
     public static final Logger LOG = Logger.getLogger(GADMConverter.class.getName());
 
-    public static void downloadAndConvert(SpatialDataFolder folder) throws WikiBrainException{
+    public static void downloadAndConvert(SpatialDataFolder folder) throws WikiBrainException {
 
         try {
 
@@ -96,12 +97,12 @@ public class GADMConverter {
             //}
 
             // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
-            // TODO: It would be better to have a temp folder elsewhere, but this shouldn't be a hack and shouldn't be platform dependent
             folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
             File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
 
             // convert file and save as layer in earth reference system
-            //convertShpFile(rawFile, folder.getRefSysFolder("earth"));
+            //convertShpFile(rawFile, folder.getRefSysFolder("earth"), 1);
+            //convertShpFile(rawFile, folder.getRefSysFolder("earth"), 0);
 
             // delete the temp folder
             // folder.deleteReferenceSystem(tmpFolder);
@@ -141,140 +142,178 @@ public class GADMConverter {
         gadmShapeFile.delete();
         return f;
     }
-//
-//
-//    /**
-//     *
-//     * @param fileName
-//     * @return
-//     * //TODO: reduce memory usage
-//     * Takes in the GADM shape file and converts it into the kind of shape file we can read
-//     * Recommended JVM max heapsize = 4G
-//     *
-//     */
-//    public static void convertShpFile(File rawFile, File outputFolder) {
-//        File file = rawFile;
-//        Map map = new HashMap();
-//        HashMap<String, List<Geometry>> stateShape = new HashMap<String, List<Geometry>>();
-//        HashMap<String, String> stateCountry = new HashMap<String, String>();
-//        new File("newgadm").mkdir(); //Must have this if you want to put the output file in a new directory
-//
-//        ShapefileReader shpReader;
-//        GeometryFactory geometryFactory;
-//        SimpleFeatureTypeBuilder typeBuilder;
-//        SimpleFeatureBuilder featureBuilder;
-//        DataStore inputDataStore;
-//        List<SimpleFeature> features = new ArrayList<SimpleFeature>();
-//
-//        try{
-//            map.put("url", file.toURI().toURL());
-//            inputDataStore = DataStoreFinder.getDataStore(map);
-//            SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
-//            SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
-//            SimpleFeatureIterator inputFeatures = inputCollection.features();
-//
-//            LOG.log(Level.INFO, "Mapping polygons..." );
-//            while (inputFeatures.hasNext()) {
-//                SimpleFeature feature = inputFeatures.next();
-//                String country = ((String)feature.getAttribute(4)).intern();
-//
-//                if (!stateShape.containsKey(feature.getAttribute(6))) {
-//                    stateShape.put((String) feature.getAttribute(6), new ArrayList<Geometry>());
-//                    stateCountry.put((String) feature.getAttribute(6), country); //set up the state-country map
-//                }
-//
-//                stateShape.get(feature.getAttribute(6)).add((Geometry)feature.getAttribute(0)); //and put all the polygons under a state into another map
-//            }
-//            inputFeatures.close();
-//            inputDataStore.dispose();
-//
-//            LOG.log(Level.INFO, "Mapping complete." );
-//
-//            typeBuilder = new SimpleFeatureTypeBuilder();  //build the output feature type
-//            typeBuilder.setName("WIKITYPE");
-//            typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
-//            typeBuilder.add("the_geom", MultiPolygon.class);
-//            typeBuilder.add("TITLE1_EN", String.class);
-//            typeBuilder.add("TITLE2_EN", String.class);
-//            typeBuilder.setDefaultGeometry("the_geom");
-//
-//
-//            final SimpleFeatureType WIKITYPE = typeBuilder.buildFeatureType();
-//
-//            geometryFactory = JTSFactoryFinder.getGeometryFactory();
-//            featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
-//
-//            LOG.log(Level.INFO, "Processing polygons...");
-//
-//            int count = 0;
-//            int total = stateShape.keySet().size();
-//            for (String state: stateCountry.keySet()){    //create the feature collection for the new shpfile
-//                count++;
-//                Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
-//                featureBuilder.add(newGeom);
-//                featureBuilder.add(state);
-//                featureBuilder.add(state + ", " + stateCountry.get(state));
-//                SimpleFeature feature = featureBuilder.buildFeature(null);
-//                if (count % 50 == 0)
-//                    LOG.log(Level.INFO, count + "/" + total + " states processed.");
-//                features.add(feature);
-//                stateShape.remove(state);
-//                System.gc();
-//            }
-//
-//
-//            LOG.log(Level.INFO, "Processing complete. " + count + " states processed.");
-//
-//            ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();  //create the output datastore
-//
-//            Map<String, Serializable> outputParams = new HashMap<String, Serializable>();
-//            outputParams.put("url", outputFile.toURI().toURL());
-//            outputParams.put("create spatial index", Boolean.TRUE);
-//
-//            ShapefileDataStore outputDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(outputParams);
-//
-//            outputDataStore.createSchema(WIKITYPE);
-//
-//            Transaction transaction = new DefaultTransaction("create");
-//
-//            String typeName = outputDataStore.getTypeNames()[0];
-//            SimpleFeatureSource outputFeatureSource = outputDataStore.getFeatureSource(typeName);
-//            SimpleFeatureType SHAPE_TYPE = outputFeatureSource.getSchema();
-//
-//            LOG.log(Level.INFO, "Writing to " + outputFile.getCanonicalPath());
-//
-//            if (outputFeatureSource instanceof SimpleFeatureStore) {
-//                SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
-//
-//                SimpleFeatureCollection collection = new ListFeatureCollection(WIKITYPE, features);
-//                featureStore.setTransaction(transaction);
-//                try {
-//                    featureStore.addFeatures(collection);
-//                    transaction.commit();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    transaction.rollback();
-//                } finally {
-//                    transaction.close();
-//                }
-//                LOG.log(Level.INFO, "Writing success.");
-//                System.exit(0); // success!
-//            } else {
-//                LOG.log(Level.INFO, typeName + " does not support read/write access");
-//                System.exit(1);
-//            }
-//
-//
-//        } catch (MalformedURLException e){
-//            e.printStackTrace();
-//
-//        } catch (IOException e){
-//            e.printStackTrace();
-//
-//        }
-//
-//
-//
-//    }
-//
+
+
+    /**
+     *
+     * @param rawFile
+     * @param outputFolder
+     * @return
+     * //TODO: reduce memory usage
+     * Converts raw GADM shapefile into WikiBrain readable type
+     * Recommended JVM max heapsize = 4G
+     *
+     */
+    public static void convertShpFile(File rawFile, SpatialDataFolder outputFolder, int level) throws IOException {
+        if ((level != 0) || (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
+
+        File file = rawFile;
+        File outputFile;
+        Map map = new HashMap();
+        HashMap<String, List<Geometry>> stateShape = new HashMap<String, List<Geometry>>();
+        HashMap<String, String> stateCountry = new HashMap<String, String>();
+        if (level == 1)
+            outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "GADM1.shp");
+        else
+            outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "GADM0.shp");
+
+        ShapefileReader shpReader;
+        GeometryFactory geometryFactory;
+        SimpleFeatureTypeBuilder typeBuilder;
+        SimpleFeatureBuilder featureBuilder;
+        DataStore inputDataStore;
+        List<SimpleFeature> features = new ArrayList<SimpleFeature>();
+
+        try {
+            map.put("url", file.toURI().toURL());
+            inputDataStore = DataStoreFinder.getDataStore(map);
+            SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
+            SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
+            SimpleFeatureIterator inputFeatures = inputCollection.features();
+
+            LOG.log(Level.INFO, "Mapping polygons...");
+            //level 1 mapping
+            if (level == 1) {
+                while (inputFeatures.hasNext()) {
+                    SimpleFeature feature = inputFeatures.next();
+                    String country = ((String) feature.getAttribute(4)).intern();
+                    String state = ((String) feature.getAttribute(6)).intern();
+
+                    if (!stateShape.containsKey(state)) {
+                        stateShape.put(state, new ArrayList<Geometry>());
+                        stateCountry.put(state, country); //set up the state-country map
+                    }
+
+                    stateShape.get(state).add((Geometry) feature.getAttribute(0)); //and put all the polygons under a state into another map
+                }
+            } else {
+                //level 0 mapping
+                while (inputFeatures.hasNext()) {
+                    SimpleFeature feature = inputFeatures.next();
+                    String country = ((String) feature.getAttribute(4)).intern();
+
+                    if (!stateShape.containsKey(country))
+                        stateShape.put(country, new ArrayList<Geometry>());
+
+                    stateShape.get(country).add((Geometry) feature.getAttribute(0));
+                }
+            }
+            inputFeatures.close();
+            inputDataStore.dispose();
+
+            LOG.log(Level.INFO, "Mapping complete.");
+
+            typeBuilder = new SimpleFeatureTypeBuilder();  //build the output feature type
+            typeBuilder.setName("WIKITYPE");
+            typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
+            typeBuilder.add("the_geom", MultiPolygon.class);
+            typeBuilder.add("TITLE1_EN", String.class);
+            if (level == 1) typeBuilder.add("TITLE2_EN", String.class);
+            typeBuilder.setDefaultGeometry("the_geom");
+
+
+            final SimpleFeatureType WIKITYPE = typeBuilder.buildFeatureType();
+
+            geometryFactory = JTSFactoryFinder.getGeometryFactory();
+            featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
+
+            LOG.log(Level.INFO, "Processing polygons...");
+
+            int count = 0;
+            if (level == 1) {
+                int total = stateShape.keySet().size();
+                for (String state : stateCountry.keySet()) {    //create the feature collection for the new shpfile
+                    count++;
+                    Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
+                    featureBuilder.add(newGeom);
+                    featureBuilder.add(state);
+                    featureBuilder.add(state + ", " + stateCountry.get(state));
+                    SimpleFeature feature = featureBuilder.buildFeature(null);
+                    if (count % 50 == 0)
+                        LOG.log(Level.INFO, count + "/" + total + " states processed.");
+                    features.add(feature);
+                    stateShape.remove(state);
+                    System.gc();
+                }
+            } else {
+                int total = stateShape.keySet().size();
+                for (String country: stateShape.keySet()) {
+                    count++;
+                    Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(country)).union();
+                    featureBuilder.add(newGeom);
+                    featureBuilder.add(country);
+                    SimpleFeature feature = featureBuilder.buildFeature(null);
+                    if (count % 50 == 0)
+                        LOG.log(Level.INFO, count + "/" + total + " states processed.");
+                    features.add(feature);
+                    stateShape.remove(country);
+                    System.gc();
+                }
+            }
+
+
+            LOG.log(Level.INFO, "Processing complete. " + count + " states processed.");
+
+            ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();  //create the output datastore
+
+            Map<String, Serializable> outputParams = new HashMap<String, Serializable>();
+            outputParams.put("url", outputFile.toURI().toURL());
+            outputParams.put("create spatial index", Boolean.TRUE);
+
+            ShapefileDataStore outputDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(outputParams);
+
+            outputDataStore.createSchema(WIKITYPE);
+
+            Transaction transaction = new DefaultTransaction("create");
+
+            String typeName = outputDataStore.getTypeNames()[0];
+            SimpleFeatureSource outputFeatureSource = outputDataStore.getFeatureSource(typeName);
+            SimpleFeatureType SHAPE_TYPE = outputFeatureSource.getSchema();
+
+            LOG.log(Level.INFO, "Writing to " + outputFile.getCanonicalPath());
+
+            if (outputFeatureSource instanceof SimpleFeatureStore) {
+                SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
+
+                SimpleFeatureCollection collection = new ListFeatureCollection(WIKITYPE, features);
+                featureStore.setTransaction(transaction);
+                try {
+                    featureStore.addFeatures(collection);
+                    transaction.commit();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    transaction.rollback();
+                } finally {
+                    transaction.close();
+                }
+                LOG.log(Level.INFO, "Writing success.");
+
+            } else {
+                LOG.log(Level.INFO, typeName + " does not support read/write access");
+
+            }
+
+
+        } catch (MalformedURLException e){
+            e.printStackTrace();
+
+        } catch (IOException e){
+            e.printStackTrace();
+
+        }
+
+
+
+    }
+
 }
