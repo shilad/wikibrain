@@ -80,10 +80,11 @@ public class GADMConverter {
 
     public static final Logger LOG = Logger.getLogger(GADMConverter.class.getName());
 
-    public static void downloadAndConvert(SpatialDataFolder folder) throws WikiBrainException {
+    public static void downloadAndConvert(File folder) throws WikiBrainException {
 
         try {
 
+            SpatialDataFolder baseFolder = new SpatialDataFolder(folder);
             WpIOUtils ioUtils = new WpIOUtils();
             String tmpFolderName = "_gadmdownload";
 
@@ -97,15 +98,16 @@ public class GADMConverter {
             //}
 
             // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
-            folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
+            //folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
             File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
 
-            // convert file and save as layer in earth reference system
-            //convertShpFile(rawFile, folder.getRefSysFolder("earth"), 1);
-            //convertShpFile(rawFile, folder.getRefSysFolder("earth"), 0);
+            //copy level 2 shapefile to earth reference system
+            FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath() + "/gadm_v2_shp"), baseFolder.getRefSysFolder("earth"));
 
-            // delete the temp folder
-            // folder.deleteReferenceSystem(tmpFolder);
+            // convert file and save as layer in earth reference system
+            convertShpFile(rawFile, baseFolder, 1);
+            convertShpFile(rawFile, baseFolder, 0);
+
 
         } catch(IOException e){
             throw new WikiBrainException(e);
@@ -137,7 +139,7 @@ public class GADMConverter {
         ZipFile zipFile = new ZipFile(gadmShapeFile.getCanonicalPath());
         LOG.log(Level.INFO, "Extracting to " + gadmShapeFile.getParent() + "/gadm_v2_shp/");
         zipFile.extractAll(gadmShapeFile.getParent());
-        File f = new File(tmpFolder + "/" + "gadm2.shp");
+        File f = new File(tmpFolder + "/gadm_v2_shp/" + "gadm2.shp");
         LOG.log(Level.INFO, "Extraction complete.");
         gadmShapeFile.delete();
         return f;
@@ -157,15 +159,14 @@ public class GADMConverter {
     public static void convertShpFile(File rawFile, SpatialDataFolder outputFolder, int level) throws IOException {
         if ((level != 0) || (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
 
-        File file = rawFile;
         File outputFile;
         Map map = new HashMap();
         HashMap<String, List<Geometry>> stateShape = new HashMap<String, List<Geometry>>();
         HashMap<String, String> stateCountry = new HashMap<String, String>();
         if (level == 1)
-            outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "GADM1.shp");
+            outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "gadm1.shp");
         else
-            outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "GADM0.shp");
+            outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "gadm0.shp");
 
         ShapefileReader shpReader;
         GeometryFactory geometryFactory;
@@ -175,7 +176,7 @@ public class GADMConverter {
         List<SimpleFeature> features = new ArrayList<SimpleFeature>();
 
         try {
-            map.put("url", file.toURI().toURL());
+            map.put("url", rawFile.toURI().toURL());
             inputDataStore = DataStoreFinder.getDataStore(map);
             SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
             SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();

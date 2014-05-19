@@ -20,11 +20,8 @@ public class ShapeFileConverterTest {
 
     public static void main(String[] args) throws WikiBrainException {
         GADMConverter converter = new GADMConverter();
-        converter.downloadAndConvert(new SpatialDataFolder(new File("gadmtest")));
-        //converter.downloadGADMShapeFile();  //Uncomment this line if you don't have the shape file for the world
+        converter.downloadAndConvert(new File("gadmtest"));
 
-        //converter.convertShpFile("tmp/CHN_adm/CHN_adm2.shp");
-        //converter.convertShpFile("tmp/gadm_v2_shp/gadm2.shp");  //Uncomment this line if you want to do the entire world.
 
     }
 }
