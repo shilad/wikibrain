@@ -9,6 +9,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.spatial.core.SpatialContainerMetadata;
 import org.wikibrain.spatial.core.constants.Layers;
+import org.wikibrain.spatial.core.constants.Precision;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
@@ -22,7 +23,8 @@ public class EasySpatialExamples {
 
 //        useConvenienceFunctionsInSpatialDataDao(args);
 //        printSpatialContainerMetadata(args);
-        printAllLoadedLayersInReferenceSystems(args);
+//        printAllLoadedLayersInReferenceSystems(args);
+          printLatLonPrecisions(args);
 
     }
 
@@ -92,12 +94,12 @@ public class EasySpatialExamples {
             Configurator c = env.getConfigurator();
             SpatialDataDao sdDao = c.get(SpatialDataDao.class);
 
-            Iterable<String> refSyss = sdDao.getAllRefSysNames();
+            Iterable<String> refSyss = sdDao.getAllRefSysNames(); // get all reference systems
             for (String refSys : refSyss) {
 
                 // print out layerNames
                 System.out.printf("Loaded Layers in '%s':\n", refSys);
-                for (String layerName : sdDao.getAllLayerNames(refSys)) {
+                for (String layerName : sdDao.getAllLayerNames(refSys)) { // get all layers in reference system
                     System.out.println(layerName);
                 }
 
@@ -105,6 +107,35 @@ public class EasySpatialExamples {
 
             }
 
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static void printLatLonPrecisions(String args[]){
+
+        try {
+
+            // do basic setup
+            Env env = EnvBuilder.envFromArgs(args);
+            Configurator c = env.getConfigurator();
+            SpatialDataDao sdDao = c.get(SpatialDataDao.class);
+
+            String[] articleNames = new String[] {"Alaska","Minneapolis","California","Germany"};
+            Language lang = Language.SIMPLE;
+            String layerName = Layers.WIKIDATA;
+
+            for (String articleName : articleNames){
+                Geometry g = sdDao.getGeometry(articleName, lang, layerName, Precision.LatLonPrecision.HIGH);
+                if (g != null){
+                    System.out.printf(":-) Found high-precision geometry for '%s' (%s) in layer '%s': %s\n", articleName, lang.toString(), layerName, g.toString());
+                }else{
+                    System.out.printf(":-( Could not find high-precision geometry for '%s' (%s) in layer '%s'\n", articleName, lang.toString(), layerName);
+                }
+            }
 
         }catch(Exception e){
             e.printStackTrace();

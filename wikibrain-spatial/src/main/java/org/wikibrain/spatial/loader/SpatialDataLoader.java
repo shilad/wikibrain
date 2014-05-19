@@ -347,7 +347,7 @@ public class SpatialDataLoader {
         String phraseAnalyzerName = cmd.getOptionValue("p","titleredirect"); // add to docs that this has to be
         PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
 
-        //String spatialDataFolderPath = cmd.getOptionValue('f');
+//        String spatialDataFolderPath = cmd.getOptionValue('f');
         File spatialDataFolder = new File("/Users/toby/Dropbox/spatial_data_wikibrain");
         String spatialDataFolderPath = new String("/Users/toby/Dropbox/spatial_data_wikibrain");
         //File spatialDataFolder = new File(spatialDataFolderPath); //TODO: fixme

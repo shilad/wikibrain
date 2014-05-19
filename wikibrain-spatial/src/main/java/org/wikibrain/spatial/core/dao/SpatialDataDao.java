@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.spatial.core.SpatialContainerMetadata;
+import org.wikibrain.spatial.core.constants.Precision;
 
 import java.util.Map;
 
@@ -11,6 +12,8 @@ import java.util.Map;
  * Created by Brent Hecht on 12/29/13.
  */
 public interface SpatialDataDao {
+
+
 
 
     /**
@@ -34,6 +37,18 @@ public interface SpatialDataDao {
     public Geometry getGeometry(int itemId, String layerName) throws DaoException;
 
     /**
+     * Gets a geometry by Wikidata item id, layer name, and minimum precision. Assumes "earth" reference system.
+     * All geometries of shape type greater than point are high precision.
+     * @param itemId
+     * @param layerName
+     * @param minPrecision See definition of LatLonPrecision
+     * @return
+     * @throws DaoException
+     */
+    public Geometry getGeometry(int itemId, String layerName, Precision.LatLonPrecision minPrecision) throws DaoException;
+
+
+    /**
      * Gets a geometry by article name, language, and layer. Assumes "earth" reference system.
      * @param articleName (e.g. "Minnesota", "Minneapolis", "Kalifornien")
      * @param language (e.g. Language.EN, Language.DE)
@@ -42,6 +57,19 @@ public interface SpatialDataDao {
      * @throws DaoException
      */
     public Geometry getGeometry(String articleName, Language language, String layerName) throws DaoException;
+
+
+    /**
+     * Gets a geometry by article name, language, layer, and minimum precision. Assumes "earth" reference system.
+     * All geometries of shape type greater than point are high precision.
+     * @param articleName
+     * @param language
+     * @param layerName
+     * @param minPrecision See definition of LatLonPrecision
+     * @return
+     * @throws DaoException
+     */
+    public Geometry getGeometry(String articleName, Language language, String layerName, Precision.LatLonPrecision minPrecision) throws DaoException;
 
 
     /**

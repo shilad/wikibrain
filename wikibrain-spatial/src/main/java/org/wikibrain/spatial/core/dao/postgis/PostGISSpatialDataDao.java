@@ -3,6 +3,7 @@ package org.wikibrain.spatial.core.dao.postgis;
 import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureStore;
@@ -19,6 +20,7 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.spatial.core.SpatialContainerMetadata;
+import org.wikibrain.spatial.core.constants.Precision;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
@@ -122,11 +124,41 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
         return getGeometry(itemId, layerName, RefSys.EARTH);
     }
 
+    @Override
+    public Geometry getGeometry(int itemId, String layerName, Precision.LatLonPrecision minPrecision) throws DaoException {
+
+        Geometry g = this.getGeometry(itemId, layerName);
+        return filterByPrecision(g, minPrecision);
+
+    }
+
 
     @Override
     public Geometry getGeometry(String articleName, Language language, String layerName) throws DaoException {
 
         return getGeometry(articleName, language, layerName, RefSys.EARTH);
+
+    }
+
+    private Geometry filterByPrecision(Geometry g, Precision.LatLonPrecision minPrecision){
+
+        if (g == null) return null;
+
+        if (!(g instanceof Point)) return g;
+
+        if (Precision.isGreaterThanOrEqualTo(Precision.getLatLonPrecision((Point)g), minPrecision)){
+            return g;
+        }else{
+            return null;
+        }
+
+    }
+
+    @Override
+    public Geometry getGeometry(String articleName, Language language, String layerName, Precision.LatLonPrecision minPrecision) throws DaoException {
+
+        Geometry g = getGeometry(articleName, language, layerName);
+        return filterByPrecision(g, minPrecision);
 
     }
 
