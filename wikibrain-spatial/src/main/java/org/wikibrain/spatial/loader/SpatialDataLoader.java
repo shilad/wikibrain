@@ -30,6 +30,7 @@ import org.wikibrain.wikidata.WikidataDao;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,12 +43,12 @@ public class SpatialDataLoader {
     private static final Logger LOG = Logger.getLogger(SpatialDataLoader.class.getName());
 
     private final SpatialDataDao spatialDataDao;
-    private final File spatialDataFolder;
+    private final SpatialDataFolder spatialDataFolder;
     private final WikidataDao wdDao;
     private final PhraseAnalyzer analyzer;
     private final LanguageSet langs;
 
-    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder, LanguageSet langs) {
+    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs) {
         this.spatialDataDao = spatialDataDao;
         this.spatialDataFolder = spatialDataFolder;
         this.wdDao = wdDao;
@@ -91,23 +92,21 @@ public class SpatialDataLoader {
 
         List<LayerStruct> layerStructs = Lists.newArrayList();
 
-        for (File curRsFolder : spatialDataFolder.listFiles()){
+        for (String refSysName : spatialDataFolder.getReferenceSystemNames()){
 
-            String curRsName = curRsFolder.getName();
-            if (!curRsFolder.isHidden() && !curRsFolder.getName().startsWith("_")){
-                LOG.log(Level.INFO, "Found reference system: " + curRsName);
-                for (File curFile : curRsFolder.listFiles()){
-                    LayerStruct lStruct = null;
-                    if (curFile.getName().endsWith(".shp")){
-                        lStruct = new LayerStruct(curRsName, FileType.SHP, curFile);
-                    }else if (curFile.getName().endsWith(".wkt")){
-                        lStruct = new LayerStruct(curRsName, FileType.WKT, curFile);
-                    }else if (curFile.isDirectory() && curFile.getName().endsWith("_shpgrp")){
-                        lStruct = new LayerStruct(curRsName, FileType.SHPGRP, curFile);
-                    }
-                    if (lStruct != null) layerStructs.add(lStruct);
+            LOG.log(Level.INFO, "Found reference system: " + refSysName);
+            for (File curFile : spatialDataFolder.getRefSysFolder(refSysName).listFiles()){
+                LayerStruct lStruct = null;
+                if (curFile.getName().endsWith(".shp")){
+                    lStruct = new LayerStruct(refSysName, FileType.SHP, curFile);
+                }else if (curFile.getName().endsWith(".wkt")){
+                    lStruct = new LayerStruct(refSysName, FileType.WKT, curFile);
+                }else if (curFile.isDirectory() && curFile.getName().endsWith("_shpgrp")){
+                    lStruct = new LayerStruct(refSysName, FileType.SHPGRP, curFile);
                 }
+                if (lStruct != null) layerStructs.add(lStruct);
             }
+
         }
         return layerStructs;
     }
@@ -314,33 +313,16 @@ public class SpatialDataLoader {
         try {
 
             Options options = new Options();
-            options.addOption(
-                    new DefaultOptionBuilder()
-                            .withLongOpt("spatial-data-folder")
-                            .withDescription("The folder with spatial data")
-                            .create("f")
-            );
-            options.addOption(
-                    new DefaultOptionBuilder()
-                            .withLongOpt("phrase-analyzer")
-                            .withDescription("The PhraseAnalyzer to use to map toponyms to Wikipedia pages (defaults to 'titleandredirect'). Will always choose the first candidate, no matter the minimum probability, so declarative PhraseAnalyzers should be used here.")
-                            .create("p")
-            );
-            options.addOption(new DefaultOptionBuilder()
-                    .withLongOpt("steps")
-                    .withDescription("Can be one more more of 'wikidata','exogenous' (comma delimit). If nothing is entered, does all steps.")
-                    .create("s"));
+            options.addOption("f", true, "The spatial data folder, structured as defined in the documentation.");
+            options.addOption("p", true, "The PhraseAnalyzer to use to map toponyms to Wikipedia pages (defaults to 'titleandredirect'). Will always choose the first candidate, no matter the minimum probability, so declarative PhraseAnalyzers should be used here.");
+            options.addOption("s", true, "Can be one more more of 'wikidata','exogenous' (comma delimit). If nothing is entered, does all steps.");
+
             EnvBuilder.addStandardOptions(options);
 
             CommandLineParser parser = new PosixParser();
             CommandLine cmd;
-            try {
-                cmd = parser.parse(options, args);
-            } catch (ParseException e) {
-                System.err.println("Invalid option usage: " + e.getMessage());
-                new HelpFormatter().printHelp("ConceptLoader", options);
-                return;
-            }
+
+            cmd = parser.parse(options, args);
 
             Env env = new EnvBuilder(cmd).build();
             Configurator conf = env.getConfigurator();
@@ -348,19 +330,21 @@ public class SpatialDataLoader {
             String phraseAnalyzerName = cmd.getOptionValue("p", "titleredirect"); // add to docs that this has to be
             PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
 
-            String spatialDataFolderPath = cmd.getOptionValue('f', null);
-            File spatialDataFolder;
+            String spatialDataFolderPath = cmd.getOptionValue("f", null);
+            File spatialDataFolderFile;
             if (spatialDataFolderPath == null){
-                spatialDataFolder = WpIOUtils.createTempDirectory("spatial_data", false);
+                spatialDataFolderFile = new File("spatial_data");
             }else{
-                spatialDataFolder = new File(spatialDataFolderPath);
+                spatialDataFolderFile = new File(spatialDataFolderPath);
             }
+            SpatialDataFolder spatialDataFolder = new SpatialDataFolder(spatialDataFolderFile);
 
             WikidataDao wdDao = conf.get(WikidataDao.class);
             SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
             SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
 
 //            String stepsValue = cmd.getOptionValue("s", "wikidata,gadm,exogenous"); // GADM temporarily disabled while we do new mappings
+
             String stepsValue = cmd.getOptionValue("s", "wikidata,exogenous");
             String[] steps = stepsValue.split(",");
             for (String step : steps) {
@@ -368,9 +352,12 @@ public class SpatialDataLoader {
                     LOG.log(Level.INFO, "Beginning to extract geographic information from Wikidata");
                     loader.loadWikidataData();
                 }
-                if (step.trim().toLowerCase().equals("gadm")){
+                if (step.trim().toLowerCase().equals("foss")){
+                    BasicShapefileDownloader.saveShapefileToReferenceSystem("http://thematicmapping.org/downloads/TM_WORLD_BORDERS-0.3.zip",
+                            "earth", spatialDataFolder);
+                }
+                else if (step.trim().toLowerCase().equals("gadm")){
                     LOG.log(Level.INFO, "Beginning to download and process GADM data (will be imported in exogenous step)");
-                    // TODO: Aaron, here's the tie-in with your code
                     GADMConverter.downloadAndConvert(spatialDataFolder);
                 } else if (step.trim().toLowerCase().equals("exogenous")) {
                     LOG.log(Level.INFO, "Beginning to load exogenous data");

@@ -1,5 +1,6 @@
 package org.wikibrain.spatial.loader;
 
+import com.google.common.collect.Sets;
 import org.geotools.data.shapefile.files.ShpFileType;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.wikibrain.core.WikiBrainException;
@@ -9,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Set;
 
 /**
  * Convenience class to deal with spatial data folder structure. Structure is as follows:
@@ -128,6 +130,20 @@ public class SpatialDataFolder {
         }
         folder.delete();
 
+    }
+
+    /**
+     * Gets reference system names
+     */
+    public Set<String> getReferenceSystemNames(){
+
+        Set<String> rVal = Sets.newHashSet();
+        for (File curFolder : baseFolder.listFiles()){
+            if (!curFolder.isHidden() && !curFolder.getName().startsWith("_")) {
+                rVal.add(curFolder.getName());
+            }
+        }
+        return rVal;
     }
 
 

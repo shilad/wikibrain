@@ -20,7 +20,7 @@ public class ShapeFileConverterTest {
 
     public static void main(String[] args) throws WikiBrainException {
         GADMConverter converter = new GADMConverter();
-        converter.downloadAndConvert(new File("gadmtest"));
+        converter.downloadAndConvert(new SpatialDataFolder(new File("test_spatial_data_folder")));
 
 
     }
