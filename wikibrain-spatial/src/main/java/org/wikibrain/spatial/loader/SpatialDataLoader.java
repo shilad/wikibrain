@@ -370,7 +370,8 @@ public class SpatialDataLoader {
                 }
                 if (step.trim().toLowerCase().equals("gadm")){
                     LOG.log(Level.INFO, "Beginning to download and process GADM data (will be imported in exogenous step)");
-                    // TODO: Aaron, put GADM files in here
+                    // TODO: Aaron, here's the tie-in with your code
+                    //  GADMConverer.downloadAndConvert(spatialDataFolder);
                 } else if (step.trim().toLowerCase().equals("exogenous")) {
                     LOG.log(Level.INFO, "Beginning to load exogenous data");
                     loader.loadExogenousData();
