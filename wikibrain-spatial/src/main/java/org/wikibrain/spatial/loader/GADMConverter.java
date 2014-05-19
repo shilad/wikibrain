@@ -96,10 +96,13 @@ public class GADMConverter {
             File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
 
             //copy level 2 shapefile to earth reference system
-            FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath() + "/gadm_v2_shp"), folder.getRefSysFolder("earth"));
+            LOG.log(Level.INFO, "Copying level 2 shapefiles to " + folder.getRefSysFolder("earth").getCanonicalPath());
+            FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath()), folder.getRefSysFolder("earth"));
 
             // convert file and save as layer in earth reference system
+            LOG.log(Level.INFO, "Start mapping level 1 shapefiles.");
             convertShpFile(rawFile, folder, 1);
+            LOG.log(Level.INFO, "Start mapping level 0 shapefiles.");
             convertShpFile(rawFile, folder, 0);
 
 
@@ -124,37 +127,18 @@ public class GADMConverter {
         String baseFileName = "gadm_v2_shp";
         String zipFileName = baseFileName + ".zip";
         String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/" + zipFileName;
-        Collection<File> tmpFileList;
-        File existingFile = null, f = null;
-        boolean found = false;
+        File gadmShapeFile = new File(tmpFolder + "/" + zipFileName);
 
-        //TODO: add MD5 checksum to ensure it's the right file
-        tmpFileList = FileUtils.listFiles(new File(new File(tmpFolder).getParent()), null, true);
-        for (File file: tmpFileList)
-            if (file.getName().equals("gadm_v2_shp.zip")) {
-                found = true;
-                existingFile = file;
-                break;
-            }
-
-        if (!found) {
-            File gadmShapeFile = new File(tmpFolder + "/" + zipFileName);
-            FileDownloader downloader = new FileDownloader();
-            downloader.download(new URL(gadmURL), gadmShapeFile);
-            ZipFile zipFile = new ZipFile(gadmShapeFile.getCanonicalPath());
-            LOG.log(Level.INFO, "Extracting to " + gadmShapeFile.getParent());
-            zipFile.extractAll(gadmShapeFile.getParent());
-            f = new File(tmpFolder + "/gadm2.shp");
-            LOG.log(Level.INFO, "Extraction complete.");
-            return f;
-        }
-
-        ZipFile zipFile = new ZipFile(existingFile.getCanonicalPath());
-        LOG.log(Level.INFO, "Extracting to " + existingFile.getParent());
-        zipFile.extractAll(existingFile.getParent());
-        f = new File(existingFile.getCanonicalPath() + "/gadm2.shp");
+        FileDownloader downloader = new FileDownloader();
+        downloader.download(new URL(gadmURL), gadmShapeFile);
+        ZipFile zipFile = new ZipFile(gadmShapeFile.getCanonicalPath());
+        LOG.log(Level.INFO, "Extracting to " + gadmShapeFile.getParent());
+        zipFile.extractAll(gadmShapeFile.getParent());
+        File f = new File(tmpFolder + "/gadm2.shp");
         LOG.log(Level.INFO, "Extraction complete.");
+        gadmShapeFile.delete();
         return f;
+
 
     }
 
