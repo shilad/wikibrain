@@ -63,7 +63,7 @@ public class MilneWittenGenerator implements VectorGenerator {
 
     @Override
     public TIntFloatMap getVector(int pageId) throws DaoException {
-        TIntFloatMap vector = new TIntFloatHashMap();
+        TIntFloatMap vector = new TIntFloatHashMap(100);
         if (pageId <= 0) {
             throw new IllegalArgumentException("Invalid page id: " + pageId);
         }
@@ -86,7 +86,7 @@ public class MilneWittenGenerator implements VectorGenerator {
         Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
         for (int id : vector1.keys()) {
             if (vector2.containsKey(id)) {
-                lb.insert(id, vector1.get(id) * vector2.get(id));
+                lb.tallyScore(id, vector1.get(id) * vector2.get(id));
             }
         }
         SRResultList top = lb.getTop();

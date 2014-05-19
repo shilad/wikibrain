@@ -150,6 +150,26 @@ public class Language implements Comparable<Language>, Serializable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Language language = (Language) o;
+
+        if (id != language.id) return false;
+        if (!langCode.equals(language.langCode)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) id;
+        result = 31 * result + langCode.hashCode();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return this.getEnLangName();
     }

@@ -10,6 +10,7 @@ import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.RawPage;
+import org.wikibrain.sr.wikify.Wikifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +27,8 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
     private final RawPageDao dao;
     private int maxPages = Integer.MAX_VALUE;
 
-    public WikiTextCorpusCreator(Language language, RawPageDao dao) {
-        super(language);
+    public WikiTextCorpusCreator(Language language, Wikifier wikifier, RawPageDao dao) {
+        super(language, wikifier);
         this.language = language;
         this.dao = dao;
     }
@@ -37,7 +38,7 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
     }
 
     @Override
-    public Iterator<String> getCorpus() throws DaoException {
+    public Iterator<IdAndText> getCorpus() throws DaoException {
         DaoFilter filter = new DaoFilter()
                 .setRedirect(false)
                 .setDisambig(false)
@@ -47,9 +48,9 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
         return new RawPageTextIterator(iter);
     }
 
-    public static class RawPageTextIterator implements Iterator<String> {
+    public static class RawPageTextIterator implements Iterator<IdAndText> {
         private final Iterator<RawPage> iter;
-        private static String buffer = null;
+        private static IdAndText buffer = null;
 
         public RawPageTextIterator(Iterator<RawPage> iter) {
             this.iter = iter;
@@ -62,8 +63,8 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
         }
 
         @Override
-        public String next() {
-            String result = buffer;
+        public IdAndText next() {
+            IdAndText result = buffer;
             if (buffer != null) {
                 buffer = null;
                 fillBuffer();
@@ -83,7 +84,7 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
                     try {
                         String text = rp.getPlainText();
                         if (text != null && text.trim().length() > 0) {
-                            buffer = text.trim();
+                            buffer = new IdAndText(rp.getLocalId(), text.trim());
                         }
                     } catch (Exception e) {
                         LOG.warning("Error when extracting text from: " + rp.getTitle());
@@ -123,8 +124,9 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
         Env env = new EnvBuilder(cmd).build();
         RawPageDao rpd = env.getConfigurator().get(RawPageDao.class);
         Language lang = env.getLanguages().getDefaultLanguage();
+        Wikifier wikifier = env.getConfigurator().get(Wikifier.class, "default", "language", lang.getLangCode());
 
-        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(lang, rpd);
+        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(lang, wikifier, rpd);
         if (cmd.hasOption("x")) {
             creator.setMaxPages(Integer.valueOf(cmd.getOptionValue("x")));
         }

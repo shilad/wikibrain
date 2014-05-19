@@ -65,6 +65,9 @@ public class Word2VecTrainer {
     private float syn0[][];
     private float syn1[][];
 
+    /**
+     * Fast sigmoid function table.
+     */
     private static final double[] EXP_TABLE = new double[EXP_TABLE_SIZE];
     static {
         for (int i = 0; i < EXP_TABLE_SIZE; i++) {

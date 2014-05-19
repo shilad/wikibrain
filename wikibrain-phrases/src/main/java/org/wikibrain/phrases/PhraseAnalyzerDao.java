@@ -1,9 +1,13 @@
 package org.wikibrain.phrases;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.StringNormalizer;
 import org.wikibrain.phrases.PrunedCounts;
+
+import java.util.Iterator;
 
 /**
  * Stores and retrieves information related to phrase to page relationships.
@@ -32,6 +36,21 @@ public interface PhraseAnalyzerDao {
      * @throws org.wikibrain.core.dao.DaoException
      */
     public void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException;
+
+
+    /**
+     * Returns all phrases in the specified language.
+     * @param lang
+     * @return
+     */
+    public Iterator<String> getAllPhrases(Language lang);
+
+    /**
+     * Returns all phrase counts in the specified language.
+     * @param lang
+     * @return
+     */
+    public Iterator<Pair<String, PrunedCounts<Integer>>> getAllPhraseCounts(Language lang);
 
     /**
      * @return The string normalizer used to determine canonical string representations.

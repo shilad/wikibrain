@@ -1,6 +1,8 @@
 package org.wikibrain.phrases;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.lucene.util.Version;
 import org.junit.Test;
 import org.wikibrain.core.dao.DaoException;
@@ -12,10 +14,7 @@ import org.wikibrain.lucene.TokenizerOptions;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -127,5 +126,15 @@ public class TestPhraseAnalyzerDao {
         assertEquals(c6.getTotal(), 13);
         assertEquals(new ArrayList<String>(c6.keySet()), Arrays.asList("Bar", "baz"));
         assertEquals(new ArrayList<Integer>(c6.values()), Arrays.asList(9, 3));
+
+        List<String> phrases = IteratorUtils.toList(dao.getAllPhrases(en));
+        System.out.println("phrases are " + phrases);
+        assertEquals(phrases, Arrays.asList("foo"));
+
+        List<Pair<String, PrunedCounts<Integer>>> phraseCounts = IteratorUtils.toList(dao.getAllPhraseCounts(en));
+        assertEquals(1, phraseCounts.size());
+        assertEquals("foo", phraseCounts.get(0).getKey());
+        assertEquals(2, phraseCounts.get(0).getValue().size());
+        assertEquals((Integer)7, (Integer)phraseCounts.get(0).getValue().get(349));
     }
 }
