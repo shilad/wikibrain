@@ -9,6 +9,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RedirectDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
@@ -55,20 +56,22 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
+    public LinkedHashMap<LocalId, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
 
-        LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
+        LinkedHashMap<LocalId, Float> result = new LinkedHashMap<LocalId, Float>();
 
         if (maxPages < 1) return result;
 
         LocalPage lp = lpDao.getByTitle(new Title(phrase, language), NameSpace.ARTICLE);
+        LocalId localId = null;
         if (lp == null) return result;
 
         if (lp.isRedirect()){
             Integer resolvedLocalId = redirectDao.resolveRedirect(language, lp.getLocalId());
             lp = lpDao.getById(language, resolvedLocalId);
+            localId = new LocalId(language, resolvedLocalId);
         }
-        result.put(lp, 1.0f);
+        result.put(localId, 1.0f);
         return result;
 
     }

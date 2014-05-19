@@ -3,6 +3,7 @@ package org.wikibrain.phrases;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.UniversalPage;
 
@@ -40,6 +41,6 @@ public interface PhraseAnalyzer {
      * @return An map from page to score, ordered by decreasing probability.
      * The scores can be considered probabilities that sum to 1.0 across all possibilities.
      */
-    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException;
+    public LinkedHashMap<LocalId, Float> resolve(Language language, String phrase, int maxPages) throws DaoException;
 
 }

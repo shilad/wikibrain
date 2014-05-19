@@ -27,12 +27,11 @@ public class TopResultConsensusDisambiguator extends Disambiguator {
     public LocalId disambiguateTop(LocalString phrase, Set<LocalString> context) throws DaoException{
         LinkedHashMap<LocalId, Integer> results = new LinkedHashMap<LocalId, Integer>();
         for (PhraseAnalyzer phraseAnalyzer : phraseAnalyzers){
-            LinkedHashMap<LocalPage, Float> localMap = phraseAnalyzer.resolve(phrase.getLanguage(), phrase.getString(), 1);
+            LinkedHashMap<LocalId, Float> localMap = phraseAnalyzer.resolve(phrase.getLanguage(), phrase.getString(), 1);
             if (localMap==null||localMap.isEmpty()){
                 continue;
             }
-            LocalPage localPage = localMap.keySet().iterator().next();
-            LocalId localId = localPage.toLocalId();
+            LocalId localId = localMap.keySet().iterator().next();
             if (results.containsKey(localId)){
                 results.put(localId,results.get(localId)+1);
             }
@@ -74,9 +73,9 @@ public class TopResultConsensusDisambiguator extends Disambiguator {
         for (LocalString phrase : phrases) {
             Map<Integer, Double> pageSums = new HashMap<Integer, Double>();
             for (PhraseAnalyzer pa : phraseAnalyzers) {
-                LinkedHashMap<LocalPage, Float> probs = pa.resolve(phrase.getLanguage(), phrase.getString(), 20);
-                for (Map.Entry<LocalPage, Float> entry : probs.entrySet()) {
-                    int id = entry.getKey().getLocalId();
+                LinkedHashMap<LocalId, Float> probs = pa.resolve(phrase.getLanguage(), phrase.getString(), 20);
+                for (Map.Entry<LocalId, Float> entry : probs.entrySet()) {
+                    int id = entry.getKey().getId();
                     if (pageSums.containsKey(id)) {
                         pageSums.put(id, pageSums.get(id) + entry.getValue());
                     } else {

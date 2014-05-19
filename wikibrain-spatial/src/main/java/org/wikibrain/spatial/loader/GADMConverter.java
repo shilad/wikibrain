@@ -80,38 +80,27 @@ public class GADMConverter {
 
     public static final Logger LOG = Logger.getLogger(GADMConverter.class.getName());
 
-    public static void downloadAndConvert(File folder) throws WikiBrainException {
+    public static void downloadAndConvert(SpatialDataFolder folder) throws WikiBrainException {
 
         try {
 
-            SpatialDataFolder baseFolder = new SpatialDataFolder(folder);
+
             WpIOUtils ioUtils = new WpIOUtils();
             String tmpFolderName = "_gadmdownload";
-            String[] search = {".zip"};
-
 
             File tmpFolder = WpIOUtils.createTempDirectory(tmpFolderName, true);
 
-
-
-
-            // check to see if GADM layers already exist
-            // TODO: this check should be made more sophisticated, esp. in the case of partial downloads
-            //if (folder.hasLayer("GADM0", "earth")){ // if layers already exist, do nothing and return
-            //    return;
-            //}
 
             // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
             //folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
             File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
 
             //copy level 2 shapefile to earth reference system
-            LOG.log(Level.INFO, "Copying level 2 shapefiles to " + folder.getCanonicalPath());
-            FileUtils.copyDirectory(new File(rawFile.getParent()), baseFolder.getRefSysFolder("earth"));
+            FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath() + "/gadm_v2_shp"), folder.getRefSysFolder("earth"));
 
             // convert file and save as layer in earth reference system
-            convertShpFile(rawFile, baseFolder, 1);
-            convertShpFile(rawFile, baseFolder, 0);
+            convertShpFile(rawFile, folder, 1);
+            convertShpFile(rawFile, folder, 0);
 
 
         } catch(IOException e){

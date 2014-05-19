@@ -239,4 +239,42 @@ public class MathUtils {
         res.append("}");
         return res.toString();
     }
+
+    public static double dot(float[] v1, float[] v2) {
+        if (v1.length != v2.length) {
+            throw new IllegalArgumentException();
+        }
+        double dot = 0.0;
+        for (int i = 0; i < v1.length; i++) {
+            dot += v1[i] * v2[i];
+        }
+        return dot;
+    }
+
+    public static void normalize(float[] vector) {
+        double sum = 0.0;
+        for (float x : vector) {
+            sum += x * x;
+        }
+        if (sum == 0) {
+            return;
+        }
+        sum = Math.sqrt(sum);
+        for (int i = 0; i < vector.length; i++) {
+            vector[i] /= sum;
+        }
+    }
+
+    public static float[][] transpose(float [][]M) {
+        if (M.length == 0) {
+            return new float[0][0];
+        }
+        float T[][] = new float[M[0].length][M.length];
+        for (int i = 0; i < M.length; i++) {
+            for (int j = 0; j < M[0].length; j++) {
+                T[j][i] = M[i][j];
+            }
+        }
+        return T;
+    }
 }

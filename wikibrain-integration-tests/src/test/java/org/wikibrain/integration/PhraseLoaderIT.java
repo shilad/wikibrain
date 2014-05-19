@@ -8,6 +8,7 @@ import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.dao.load.PhraseLoader;
 import org.wikibrain.phrases.PhraseAnalyzer;
@@ -46,7 +47,7 @@ public class PhraseLoaderIT {
         PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "lucene");
 
         // get the most common phrases in simple
-        LinkedHashMap<LocalPage, Float> resolution = pa.resolve(SIMPLE, "apple", 20);
+        LinkedHashMap<LocalId, Float> resolution = pa.resolve(SIMPLE, "apple", 20);
 
         // get page ranks
         int fruitRank = Integer.MAX_VALUE;
@@ -55,8 +56,8 @@ public class PhraseLoaderIT {
         int incRank = Integer.MAX_VALUE;
 
         int rank = 0;
-        for (LocalPage p : resolution.keySet()) {
-            switch (p.getLocalId()) {
+        for (LocalId p : resolution.keySet()) {
+            switch (p.getId()) {
                 case APPLE_FRUIT_ID:
                    fruitRank = rank;
                     break;

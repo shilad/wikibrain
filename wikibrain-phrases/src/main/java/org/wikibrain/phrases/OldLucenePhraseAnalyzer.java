@@ -8,6 +8,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.lucene.*;
 
@@ -32,8 +33,8 @@ public class OldLucenePhraseAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
-        LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
+    public LinkedHashMap<LocalId, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
+        LinkedHashMap<LocalId, Float> result = new LinkedHashMap<LocalId, Float>();
         WikiBrainScoreDoc[] wikibrainScoreDocs = searcher.getQueryBuilderByLanguage(language)
                 .setPhraseQuery(phrase)
                 .setNumHits(10)
@@ -56,8 +57,8 @@ public class OldLucenePhraseAnalyzer implements PhraseAnalyzer {
         }
         for (WikiBrainScoreDoc wikibrainScoreDoc : wikibrainScoreDocs) {
             int localPageId = searcher.getLocalIdFromDocId(wikibrainScoreDoc.luceneId, language);
-            LocalPage localPage = localPageDao.getById(language, localPageId);
-            result.put(localPage, wikibrainScoreDoc.score / totalScore);
+            LocalId localId = new LocalId(language, localPageId);
+            result.put(localId, wikibrainScoreDoc.score / totalScore);
         }
         return result;
     }
