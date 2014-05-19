@@ -79,7 +79,7 @@ public class SpatialDataFolder {
             ShpFiles shpFiles = new ShpFiles(path);
 
             return new File(shpFiles.get(ShpFileType.SHP));
-        }catch(MalformedURLException e){
+        } catch(MalformedURLException e){
             throw new WikiBrainException(e);
         }
 

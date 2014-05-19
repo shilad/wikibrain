@@ -1,152 +1,153 @@
-//package org.wikibrain.spatial.loader;
-//
-//
-//import com.google.common.collect.Lists;
-//import com.google.common.collect.Sets;
-//import com.vividsolutions.jts.geom.*;
-//import com.vividsolutions.jts.geom.Geometry;
-//import com.vividsolutions.jts.geom.GeometryFactory;
-//import net.lingala.zip4j.core.ZipFile;
-//import net.lingala.zip4j.exception.ZipException;
-//import org.apache.commons.cli.*;
-//import org.apache.commons.io.FilenameUtils;
-//import org.apache.commons.lang3.StringUtils;
-//import org.apache.commons.io.FileUtils;
-//import org.geotools.data.shapefile.dbf.DbaseFileHeader;
-//import org.geotools.data.shapefile.dbf.DbaseFileReader;
-//import org.geotools.data.shapefile.dbf.DbaseFileWriter;
-//import org.geotools.data.shapefile.files.ShpFiles;
-//import org.geotools.data.shapefile.shp.ShapefileException;
-//import org.geotools.data.shapefile.shp.ShapefileReader;
-//import org.geotools.data.simple.SimpleFeatureIterator;
-//import org.geotools.feature.SchemaException;
-//import org.geotools.geometry.jts.*;
-//import org.geotools.data.DataUtilities;
-//import org.geotools.data.DefaultTransaction;
-//import org.geotools.data.Transaction;
-//import org.geotools.data.collection.ListFeatureCollection;
-//import org.geotools.data.shapefile.ShapefileDataStore;
-//import org.geotools.data.shapefile.ShapefileDataStoreFactory;
-//import org.geotools.data.simple.SimpleFeatureCollection;
-//import org.geotools.data.simple.SimpleFeatureSource;
-//import org.geotools.data.simple.SimpleFeatureStore;
-//import org.geotools.data.*;
-//import org.geotools.feature.simple.SimpleFeatureBuilder;
-//import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-//import org.geotools.geometry.jts.JTSFactoryFinder;
-//import org.geotools.referencing.crs.DefaultGeographicCRS;
-//import org.opengis.feature.simple.SimpleFeature;
-//import org.opengis.feature.simple.SimpleFeatureType;
-//import org.geotools.referencing.crs.DefaultGeographicCRS;
-//import org.opengis.geometry.*;
-//import org.opengis.geometry.coordinate.*;
-//import org.geotools.geometry.jts.*;
-//import org.hibernate.annotations.SourceType;
-//import org.wikibrain.conf.ConfigurationException;
-//import org.wikibrain.conf.Configurator;
-//import org.wikibrain.conf.DefaultOptionBuilder;
-//import org.wikibrain.core.WikiBrainException;
-//import org.wikibrain.core.cmd.Env;
-//import org.wikibrain.core.cmd.EnvBuilder;
-//import org.wikibrain.core.dao.DaoException;
-//import org.wikibrain.core.dao.LocalPageDao;
-//import org.wikibrain.phrases.PhraseAnalyzer;
-//import org.wikibrain.spatial.core.dao.SpatialDataDao;
-//import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
-//import org.wikibrain.wikidata.WikidataDao;
-//import org.wikibrain.download.*;
-//import net.lingala.zip4j.*;
-//
-//import java.awt.*;
-//import java.io.*;
-//import java.net.MalformedURLException;
-//import java.net.URL;
-//import java.nio.channels.FileChannel;
-//import java.nio.channels.WritableByteChannel;
-//import java.nio.charset.Charset;
-//import java.util.*;
-//import java.util.List;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
-//
-//
-///**
-// * Created by aaroniidx on 4/13/14.
-// */
-//public class GADMConverter {
-//
-//
-//    public static final Logger LOG = Logger.getLogger(GADMConverter.class.getName());
-//
-//    public static void downloadAndConvert(SpatialDataFolder folder) throws WikiBrainException{
-//
-//        try {
-//
-//            String tmpFolder = "_gadmdownload";
-//
-//
-//            // check to see if GADM layers already exist
-//            // TODO: this check should be made more sophisticated, esp. in the case of partial downloads
-//            if (folder.hasLayer("GADM0", "earth")){ // if layers already exist, do nothing and retur
-//                return;
-//            }
-//
-//            // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
-//            // TODO: It would be better to have a temp folder elsewhere, but this shouldn't be a hack and shouldn't be platform dependent
-//            folder.createNewReferenceSystemIfNotExists(tmpFolder);
-//            File rawFile = downloadGADMShapeFile(folder.getRefSysFolder(tmpFolder));
-//
-//            // convert file and save as layer in earth reference system
-//            convertShpFile(rawFile, folder.getRefSysFolder("earth"));
-//
-//            // delete the temp folder
-//            folder.deleteReferenceSystem(tmpFolder);
-//
-//        }catch(IOException e){
-//            throw new WikiBrainException(e);
-//        }
-//
-//    }
-//
-//    /**
-//     * Download GADM shape file
-//     *
-//     */
-//    public static File downloadGADMShapeFile(File tmpFolder) {
-//
-//        String baseFileName = "gadm_v2_shp";
-//        String zipFileName = baseFileName + ".zip";
-//        String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/" + zipFileName;
-//        File gadmShapeFile = new File(tmpFolder+"/"+zipFileName);
-//        FileDownloader downloader = new FileDownloader();
-//        try {
-//            if (gadmShapeFile.exists() && !gadmShapeFile.isDirectory())
-//                gadmShapeFile.delete();
-//            downloader.download(new URL(gadmURL),gadmShapeFile);
-//            ZipFile zipFile = new ZipFile(gadmShapeFile.getAbsolutePath());
-//            LOG.log(Level.INFO, "Extracting to " + gadmShapeFile.getParent() + "/gadm_v2_shp/" );
-//            //System.out.println("Extracting to " + gadmShapeFile.getParent() + "/gadm_v2_shp/");
-//            zipFile.extractAll(gadmShapeFile.getParent());
-//            File f = new File(tmpFolder+"/"+baseFileName +".shp");
-//            LOG.log(Level.INFO, "Extraction complete." );
-//            //System.out.println("Extraction complete.");
-//            gadmShapeFile.delete();
-//            return f;
-//        } catch (MalformedURLException e){
-//            e.printStackTrace();
-//        } catch (IOException e){
-//            e.printStackTrace();
-//        } catch (ZipException e){
-//            e.printStackTrace();
-//        } catch (InterruptedException e){
-//            e.printStackTrace();
-//        }
-//    }
+package org.wikibrain.spatial.loader;
+
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import org.apache.commons.cli.*;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.FileUtils;
+import org.geotools.data.shapefile.dbf.DbaseFileHeader;
+import org.geotools.data.shapefile.dbf.DbaseFileReader;
+import org.geotools.data.shapefile.dbf.DbaseFileWriter;
+import org.geotools.data.shapefile.files.ShpFiles;
+import org.geotools.data.shapefile.shp.ShapefileException;
+import org.geotools.data.shapefile.shp.ShapefileReader;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.SchemaException;
+import org.geotools.geometry.jts.*;
+import org.geotools.data.DataUtilities;
+import org.geotools.data.DefaultTransaction;
+import org.geotools.data.Transaction;
+import org.geotools.data.collection.ListFeatureCollection;
+import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.data.*;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.geometry.*;
+import org.opengis.geometry.coordinate.*;
+import org.geotools.geometry.jts.*;
+import org.hibernate.annotations.SourceType;
+import org.wikibrain.conf.ConfigurationException;
+import org.wikibrain.conf.Configurator;
+import org.wikibrain.conf.DefaultOptionBuilder;
+import org.wikibrain.core.WikiBrainException;
+import org.wikibrain.core.cmd.Env;
+import org.wikibrain.core.cmd.EnvBuilder;
+import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.phrases.PhraseAnalyzer;
+import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
+import org.wikibrain.utils.WpIOUtils;
+import org.wikibrain.wikidata.WikidataDao;
+import org.wikibrain.download.*;
+import net.lingala.zip4j.*;
+
+import java.awt.*;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
+/**
+* Created by aaroniidx on 4/13/14.
+*/
+public class GADMConverter {
+
+
+    public static final Logger LOG = Logger.getLogger(GADMConverter.class.getName());
+
+    public static void downloadAndConvert(SpatialDataFolder folder) throws WikiBrainException{
+
+        try {
+
+            WpIOUtils ioUtils = new WpIOUtils();
+            String tmpFolderName = "_gadmdownload";
+
+            File tmpFolder = WpIOUtils.createTempDirectory(tmpFolderName, true);
+
+
+            // check to see if GADM layers already exist
+            // TODO: this check should be made more sophisticated, esp. in the case of partial downloads
+            //if (folder.hasLayer("GADM0", "earth")){ // if layers already exist, do nothing and return
+            //    return;
+            //}
+
+            // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
+            // TODO: It would be better to have a temp folder elsewhere, but this shouldn't be a hack and shouldn't be platform dependent
+            folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
+            File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
+
+            // convert file and save as layer in earth reference system
+            //convertShpFile(rawFile, folder.getRefSysFolder("earth"));
+
+            // delete the temp folder
+            // folder.deleteReferenceSystem(tmpFolder);
+
+        } catch(IOException e){
+            throw new WikiBrainException(e);
+        } catch (ZipException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Download GADM shape file
+     * @param tmpFolder
+     * @return
+     *
+     */
+    public static File downloadGADMShapeFile(String tmpFolder) throws IOException, ZipException, InterruptedException {
+
+        String baseFileName = "gadm_v2_shp";
+        String zipFileName = baseFileName + ".zip";
+        String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/" + zipFileName;
+        File gadmShapeFile = new File(tmpFolder + "/" + zipFileName);
+        FileDownloader downloader = new FileDownloader();
+
+        if (gadmShapeFile.exists() && !gadmShapeFile.isDirectory())
+            gadmShapeFile.delete();
+        downloader.download(new URL(gadmURL), gadmShapeFile);
+        ZipFile zipFile = new ZipFile(gadmShapeFile.getCanonicalPath());
+        LOG.log(Level.INFO, "Extracting to " + gadmShapeFile.getParent() + "/gadm_v2_shp/");
+        zipFile.extractAll(gadmShapeFile.getParent());
+        File f = new File(tmpFolder + "/" + "gadm2.shp");
+        LOG.log(Level.INFO, "Extraction complete.");
+        gadmShapeFile.delete();
+        return f;
+    }
 //
 //
 //    /**
 //     *
 //     * @param fileName
+//     * @return
+//     * //TODO: reduce memory usage
 //     * Takes in the GADM shape file and converts it into the kind of shape file we can read
 //     * Recommended JVM max heapsize = 4G
 //     *
@@ -276,4 +277,4 @@
 //
 //    }
 //
-//}
+}
