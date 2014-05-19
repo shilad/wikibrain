@@ -87,8 +87,12 @@ public class GADMConverter {
             SpatialDataFolder baseFolder = new SpatialDataFolder(folder);
             WpIOUtils ioUtils = new WpIOUtils();
             String tmpFolderName = "_gadmdownload";
+            String[] search = {".zip"};
+
 
             File tmpFolder = WpIOUtils.createTempDirectory(tmpFolderName, true);
+
+
 
 
             // check to see if GADM layers already exist
@@ -102,7 +106,8 @@ public class GADMConverter {
             File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
 
             //copy level 2 shapefile to earth reference system
-            FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath() + "/gadm_v2_shp"), baseFolder.getRefSysFolder("earth"));
+            LOG.log(Level.INFO, "Copying level 2 shapefiles to " + folder.getCanonicalPath());
+            FileUtils.copyDirectory(new File(rawFile.getParent()), baseFolder.getRefSysFolder("earth"));
 
             // convert file and save as layer in earth reference system
             convertShpFile(rawFile, baseFolder, 1);
@@ -130,19 +135,38 @@ public class GADMConverter {
         String baseFileName = "gadm_v2_shp";
         String zipFileName = baseFileName + ".zip";
         String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/" + zipFileName;
-        File gadmShapeFile = new File(tmpFolder + "/" + zipFileName);
-        FileDownloader downloader = new FileDownloader();
+        Collection<File> tmpFileList;
+        File existingFile = null, f = null;
+        boolean found = false;
 
-        if (gadmShapeFile.exists() && !gadmShapeFile.isDirectory())
-            gadmShapeFile.delete();
-        downloader.download(new URL(gadmURL), gadmShapeFile);
-        ZipFile zipFile = new ZipFile(gadmShapeFile.getCanonicalPath());
-        LOG.log(Level.INFO, "Extracting to " + gadmShapeFile.getParent() + "/gadm_v2_shp/");
-        zipFile.extractAll(gadmShapeFile.getParent());
-        File f = new File(tmpFolder + "/gadm_v2_shp/" + "gadm2.shp");
+        //TODO: add MD5 checksum to ensure it's the right file
+        tmpFileList = FileUtils.listFiles(new File(new File(tmpFolder).getParent()), null, true);
+        for (File file: tmpFileList)
+            if (file.getName().equals("gadm_v2_shp.zip")) {
+                found = true;
+                existingFile = file;
+                break;
+            }
+
+        if (!found) {
+            File gadmShapeFile = new File(tmpFolder + "/" + zipFileName);
+            FileDownloader downloader = new FileDownloader();
+            downloader.download(new URL(gadmURL), gadmShapeFile);
+            ZipFile zipFile = new ZipFile(gadmShapeFile.getCanonicalPath());
+            LOG.log(Level.INFO, "Extracting to " + gadmShapeFile.getParent());
+            zipFile.extractAll(gadmShapeFile.getParent());
+            f = new File(tmpFolder + "/gadm2.shp");
+            LOG.log(Level.INFO, "Extraction complete.");
+            return f;
+        }
+
+        ZipFile zipFile = new ZipFile(existingFile.getCanonicalPath());
+        LOG.log(Level.INFO, "Extracting to " + existingFile.getParent());
+        zipFile.extractAll(existingFile.getParent());
+        f = new File(existingFile.getCanonicalPath() + "/gadm2.shp");
         LOG.log(Level.INFO, "Extraction complete.");
-        gadmShapeFile.delete();
         return f;
+
     }
 
 
@@ -157,7 +181,7 @@ public class GADMConverter {
      *
      */
     public static void convertShpFile(File rawFile, SpatialDataFolder outputFolder, int level) throws IOException {
-        if ((level != 0) || (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
+        if ((level != 0) && (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
 
         File outputFile;
         Map map = new HashMap();
