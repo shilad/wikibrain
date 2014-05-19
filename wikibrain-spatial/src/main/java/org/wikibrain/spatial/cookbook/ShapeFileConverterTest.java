@@ -12,8 +12,6 @@ import java.net.MalformedURLException;
 
 /**
  * Created by aaroniidx on 4/13/14.
- * Uses the less big China GADM shape file as an example
- * For the entire world you need to change the indexes in lines 138-143 of GADMConverter: 5 -> 6, 3 -> 4
  *
  */
 public class ShapeFileConverterTest {
