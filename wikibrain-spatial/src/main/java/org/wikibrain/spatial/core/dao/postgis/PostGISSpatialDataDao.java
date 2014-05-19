@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.core.dao.postgis;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -28,6 +29,7 @@ import org.wikibrain.wikidata.WikidataDao;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by bjhecht on 4/7/14.
@@ -76,6 +78,28 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     @Override
     public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName, String refSysName) throws DaoException {
         return db.getAllGeometriesInLayer(layerName, refSysName);
+    }
+
+    @Override
+    public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName) throws DaoException {
+        return getAllGeometriesInLayer(layerName, RefSys.EARTH);
+    }
+
+    @Override
+    public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName, Precision.LatLonPrecision minPrecision) throws DaoException {
+
+        Map<Integer, Geometry> geoms = getAllGeometriesInLayer(layerName);
+        Set<Integer> keys = Sets.newHashSet();
+
+        for (Integer curKey : keys){
+            Geometry g = geoms.get(curKey);
+            if (this.filterByPrecision(g, minPrecision) == null){
+                geoms.remove(curKey);
+            }
+        }
+
+        return geoms;
+
     }
 
     @Override

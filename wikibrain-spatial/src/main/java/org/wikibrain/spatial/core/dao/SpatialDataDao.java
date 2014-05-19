@@ -91,14 +91,35 @@ public interface SpatialDataDao {
      */
     public Iterable<Geometry> getGeometries(int itemId) throws DaoException;
 
+
+
     /**
-     *
+     * Gets all the geometries in a given layer.
      * @param layerName
      * @param refSysName
      * @return
      * @throws DaoException
      */
     public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName, String refSysName) throws DaoException;
+
+
+    /**
+     * Gets all the geometries in a given layer, assumes 'earth' reference system
+     * @param layerName
+     * @return
+     * @throws DaoException
+     */
+    public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName) throws DaoException;
+
+
+    /**
+     * Gets all the geometries in a given layer with a minimum precision, assumes 'earth' reference system
+     * @param layerName
+     * @param minPrecision See definition of LatLonPrecision
+     * @return
+     * @throws DaoException
+     */
+    public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName, Precision.LatLonPrecision minPrecision) throws DaoException;
 
     /**
      * Gets the names of all loaded reference systems.
