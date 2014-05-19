@@ -63,9 +63,9 @@ public class PercentileNormalizer extends BaseNormalizer {
         double halfLife = (sMax - sMin) / 4.0;
         double yDelta = 1.0 / (sample.size() + 1);
 
-        if (x < sample.get(0)) {
+        if (x < sMin) {
             return MathUtils.toAsymptote(sMin - x, halfLife, yDelta, 0.0);
-        } else if (x > sample.get(sample.size() - 1)) {
+        } else if (x > sMax) {
             return MathUtils.toAsymptote(x - sMax, halfLife, 1.0 - yDelta, 1.0);
         } else {
             return interpolator.value(x);

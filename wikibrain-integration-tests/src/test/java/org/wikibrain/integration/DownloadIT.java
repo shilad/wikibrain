@@ -27,7 +27,7 @@ public class DownloadIT {
         assertTrue(f.isFile());
 
         List<String> lines = FileUtils.readLines(f);
-        assertEquals(2, lines.size());
+        assertEquals(5, lines.size());
 
         for (Language lang : new LanguageSet("simple,la")) {
             String match = null;

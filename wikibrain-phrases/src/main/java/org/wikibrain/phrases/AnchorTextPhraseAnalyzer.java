@@ -13,6 +13,7 @@ import org.wikibrain.core.lang.StringNormalizer;
 import org.wikibrain.core.model.LocalLink;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -121,7 +122,9 @@ public class AnchorTextPhraseAnalyzer extends BasePhraseAnalyzer {
             if (!config.getString("type").equals("anchortext")) {
                 return null;
             }
-            PhraseAnalyzerDao paDao = getConfigurator().get(PhraseAnalyzerDao.class, config.getString("phraseDao"));
+            PhraseAnalyzerDao paDao = getConfigurator().construct(
+                    PhraseAnalyzerDao.class, name, config.getConfig("dao"),
+                    new HashMap<String, String>());
             LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             LocalLinkDao llDao = getConfigurator().get(LocalLinkDao.class, config.getString("localLinkDao"));
             PrunedCounts.Pruner<String> phrasePruner = getConfigurator().construct(

@@ -5,6 +5,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.StringNormalizer;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.Title;
@@ -276,14 +277,14 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public LinkedHashMap<LocalPage, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
-        LinkedHashMap<LocalPage, Float> result = new LinkedHashMap<LocalPage, Float>();
+    public LinkedHashMap<LocalId, Float> resolve(Language language, String phrase, int maxPages) throws DaoException {
+        LinkedHashMap<LocalId, Float> result = new LinkedHashMap<LocalId, Float>();
         PrunedCounts<Integer> counts = phraseDao.getPhraseCounts(language, phrase, maxPages);
         if (counts == null) {
             return null;
         }
         for (Integer wpId : counts.keySet()) {
-            result.put(pageDao.getById(language, wpId),
+            result.put(new LocalId(language, wpId),
                     (float)1.0 * counts.get(wpId) / counts.getTotal());
             if (counts.size() >= maxPages) {
                 break;
