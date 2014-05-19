@@ -263,6 +263,9 @@ public class GADMConverter {
 
 
             LOG.log(Level.INFO, "Processing complete. " + count + " states processed.");
+            stateCountry = null;
+            stateShape = null;
+            System.gc();
 
             ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();  //create the output datastore
 
