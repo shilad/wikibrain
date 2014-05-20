@@ -192,8 +192,8 @@ public class SpatialDataLoader {
 
             // this should eventually be moved into a config file or parameters of the parse
             List<WikidataLayerLoader> layerLoaders = Lists.newArrayList();
-            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
-//        layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
+//            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
+            layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
 
             for (WikidataLayerLoader layerLoader : layerLoaders) {
                 LOG.log(Level.INFO, "Loading Wikidata layer(s): " + layerLoader.getClass().getName());
@@ -351,10 +351,6 @@ public class SpatialDataLoader {
                 if (step.trim().toLowerCase().equals("wikidata")) {
                     LOG.log(Level.INFO, "Beginning to extract geographic information from Wikidata");
                     loader.loadWikidataData();
-                }
-                if (step.trim().toLowerCase().equals("foss")){
-                    BasicShapefileDownloader.saveShapefileToReferenceSystem("http://thematicmapping.org/downloads/TM_WORLD_BORDERS-0.3.zip",
-                            "earth", spatialDataFolder);
                 }
                 else if (step.trim().toLowerCase().equals("gadm")){
                     LOG.log(Level.INFO, "Beginning to download and process GADM data (will be imported in exogenous step)");

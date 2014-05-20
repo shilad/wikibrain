@@ -179,7 +179,7 @@ public class GADMConverter {
             SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
             SimpleFeatureIterator inputFeatures = inputCollection.features();
 
-            LOG.log(Level.INFO, "Mapping polygons...");
+            LOG.log(Level.INFO, "Mapping polygons..."); //TODO: What does this mean?
             //level 1 mapping
             if (level == 1) {
                 while (inputFeatures.hasNext()) {
@@ -225,11 +225,11 @@ public class GADMConverter {
             geometryFactory = JTSFactoryFinder.getGeometryFactory();
             featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
 
-            LOG.log(Level.INFO, "Processing polygons...");
+            LOG.log(Level.INFO, "Processing polygons..."); //TODO: What does this mean? Remember, this is quite user-facing
 
             int count = 0;
             if (level == 1) {
-                int total = stateShape.keySet().size();
+                int total = stateShape.keySet().size(); //TODO: We need a lot more in the way of progress statements here
                 for (String state : stateCountry.keySet()) {    //create the feature collection for the new shpfile
                     count++;
                     Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
@@ -237,8 +237,8 @@ public class GADMConverter {
                     featureBuilder.add(state);
                     featureBuilder.add(state + ", " + stateCountry.get(state));
                     SimpleFeature feature = featureBuilder.buildFeature(null);
-                    if (count % 50 == 0)
-                        LOG.log(Level.INFO, count + "/" + total + " states processed.");
+                    if (count % 10 == 0)
+                        LOG.log(Level.INFO, count + "/" + total + " states processed."); //TODO: states and/or administrative districts?
                     features.add(feature);
                     stateShape.remove(state);
                     System.gc();
@@ -251,7 +251,7 @@ public class GADMConverter {
                     featureBuilder.add(newGeom);
                     featureBuilder.add(country);
                     SimpleFeature feature = featureBuilder.buildFeature(null);
-                    if (count % 50 == 0)
+                    if (count % 10 == 0)
                         LOG.log(Level.INFO, count + "/" + total + " states processed.");
                     features.add(feature);
                     stateShape.remove(country);
