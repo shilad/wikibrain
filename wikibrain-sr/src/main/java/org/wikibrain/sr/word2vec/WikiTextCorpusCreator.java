@@ -7,6 +7,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.DaoFilter;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.RawPage;
@@ -27,8 +28,8 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
     private final RawPageDao dao;
     private int maxPages = Integer.MAX_VALUE;
 
-    public WikiTextCorpusCreator(Language language, Wikifier wikifier, RawPageDao dao) {
-        super(language, wikifier);
+    public WikiTextCorpusCreator(Language language, Wikifier wikifier, RawPageDao dao, LocalPageDao lpd) {
+        super(language, lpd, wikifier);
         this.language = language;
         this.dao = dao;
     }
@@ -123,10 +124,11 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
         }
         Env env = new EnvBuilder(cmd).build();
         RawPageDao rpd = env.getConfigurator().get(RawPageDao.class);
+        LocalPageDao lpd = env.getConfigurator().get(LocalPageDao.class);
         Language lang = env.getLanguages().getDefaultLanguage();
         Wikifier wikifier = env.getConfigurator().get(Wikifier.class, "default", "language", lang.getLangCode());
 
-        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(lang, wikifier, rpd);
+        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(lang, wikifier, rpd, lpd);
         if (cmd.hasOption("x")) {
             creator.setMaxPages(Integer.valueOf(cmd.getOptionValue("x")));
         }

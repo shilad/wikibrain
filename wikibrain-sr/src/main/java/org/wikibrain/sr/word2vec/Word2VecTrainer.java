@@ -1,10 +1,13 @@
 package org.wikibrain.sr.word2vec;
 
-import gnu.trove.TCollections;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -15,14 +18,17 @@ import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.nlp.Dictionary;
 import org.wikibrain.utils.*;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 
 /**
  * @author Shilad Sen
@@ -35,16 +41,17 @@ public class Word2VecTrainer {
     private static final int EXP_TABLE_SIZE = 1000;
 
     private final Language language;
-    private final RawPageDao dao;
+    private final LocalPageDao pageDao;
 
     // These are actually indexes and counts of hashes of words.
     private final TLongIntMap wordIndexes = new TLongIntHashMap();
-    final TLongIntMap wordCounts = TCollections.synchronizedMap(new TLongIntHashMap());
-    private TLongObjectMap<String> hashToWords = TCollections.synchronizedMap(new TLongObjectHashMap<String>());
+    private final TLongIntMap wordCounts = new TLongIntHashMap();
+
+    // Mapping from article id to hash of string representation ("/w/en/1000/Hercule_Poirot").
+    private final TIntIntMap articleIndexes = new TIntIntHashMap();
 
     // Total number of words, counting repeats many times
     private long totalWords;
-
 
     /**
      * Minimum word frequency for it to be included in the model.
@@ -52,9 +59,14 @@ public class Word2VecTrainer {
     private int minWordFrequency = 5;
 
     /**
-     * Minimum length of a word for it to be included in the model.
+     * Minimum number of times an article must be mentioned for it to be included in the model.
      */
-    private int minWordLength = 0;
+    private int minMentionFrequency = 5;
+
+    /**
+     * Maximum number of words
+     */
+    private int maxWords = 5000000;
 
 
     private double startingAlpha = 0.025;
@@ -81,17 +93,17 @@ public class Word2VecTrainer {
 
     private byte[][] wordCodes;
     private int[][] wordParents;
-    private String[] words;
+    private String[] words = null;
 
 
-    public Word2VecTrainer(RawPageDao dao, Language language) {
-        this.dao = dao;
+    public Word2VecTrainer(LocalPageDao pageDao, Language language) {
+        this.pageDao = pageDao;
         this.language = language;
     }
 
-    public void train(File directory) throws IOException {
+    public void train(File directory) throws IOException, DaoException {
         LOG.info("counting word frequencies.");
-        readWords(directory);
+        readWords(new File(directory, "dictionary.txt"));
         buildTree();
 
         syn0 = new float[wordIndexes.size()][layer1Size];
@@ -102,7 +114,7 @@ public class Word2VecTrainer {
         }
         syn1 = new float[wordIndexes.size()][layer1Size];
 
-        LineIterator iterator = FileUtils.lineIterator(new File(directory, "hashCorpus.txt"));
+        LineIterator iterator = FileUtils.lineIterator(new File(directory, "corpus.txt"));
         ParallelForEach.iterate(iterator,
                 WpThreadUtils.getMaxThreads(),
                 1000,
@@ -124,77 +136,66 @@ public class Word2VecTrainer {
 
     }
 
-    public void readWords(File directory) throws IOException {
-        wordCounts.clear();
-        hashToWords.clear();
-        totalWords = 0;
-
+    public void readWords(File dictionary) throws IOException, DaoException {
         LOG.info("reading word counts");
-        BufferedReader reader = WpIOUtils.openBufferedReader(new File(directory, "counts.txt"));
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            String tokens[] = line.trim().split(" ");
-            long hash = Long.valueOf(tokens[0]);
-            int count = Integer.valueOf(tokens[1]);
-            int length = Integer.valueOf(tokens[2]);
-            if (length >=minWordLength && count >= minWordFrequency) {
-                wordCounts.put(hash, count);
-            }
-            totalWords += count;
-        }
-        reader.close();
-        LOG.info("retained " + wordIndexes.size() + " words");
+        Dictionary dict = new Dictionary(language, Dictionary.WordStorage.IN_MEMORY);
+        dict.setCountBigrams(false);
+        dict.setContainsMentions(true);
+        dict.read(dictionary, maxWords, minWordFrequency);
 
-
-        Long[] hashes = new Long[wordCounts.size()];
-        int i = 0;
-        for  (long h2 : wordCounts.keys()) {
-            hashes[i++] = h2;
-        }
-        Arrays.sort(hashes, new Comparator<Long>(){
-            @Override
-            public int compare(Long h1, Long h2) {
-                return wordCounts.get(h2) - wordCounts.get(h1);
-            }
-        });
-        if (i != wordCounts.size())
-            throw new IllegalStateException();
-        for (long h2 : hashes) {
-            wordIndexes.put(h2, wordIndexes.size());
-        }
-
-        LOG.info("building hash to word mapping");
-        words = new String[wordIndexes.size()];
-        reader = WpIOUtils.openBufferedReader(new File(directory, "words.txt"));
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            String tokens[] = line.trim().split(" ", 2);
-            long hash = Long.valueOf(tokens[0]);
-            if (wordIndexes.containsKey(hash)) {
-                words[wordIndexes.get(hash)] = tokens[1];
-                hashToWords.put(Long.valueOf(tokens[0]), tokens[1]);
+        totalWords = dict.getTotalCount();
+        List<String> top = dict.getFrequentUnigramsAndMentions(pageDao, maxWords, minWordFrequency, minMentionFrequency);
+        words = top.toArray(new String[top.size()]);
+        for (int i = 0; i < words.length; i++) {
+            long h = hashWord(words[i]);
+            wordIndexes.put(h, i);
+            if (words[i].startsWith("/w/")) {
+                int wpId = Integer.valueOf(words[i].split("/", 5)[3]);
+                articleIndexes.put(wpId, i);
+                wordCounts.put(h, dict.getMentionCount(wpId));
+            } else {
+                wordCounts.put(h, dict.getUnigramCount(words[i]));
             }
         }
+        LOG.info("retained " + dict.getNumUnigrams() + " words and " + (words.length - dict.getNumUnigrams()) + " articles");
     }
 
     private int trainSentence(String sentence) {
-        String hashStrs[] = sentence.trim().split(" ");
-        int indexes[] = new int[hashStrs.length];
-        for (int i = 0; i < hashStrs.length; i++) {
-            indexes[i] = -1;
-            if (hashStrs[i].length() > 0) {
-                long h = Long.valueOf(hashStrs[i]);
-                if (wordIndexes.containsKey(h)) {
-                    indexes[i] = wordIndexes.get(h);
+        String words[] = sentence.trim().split(" +");
+        TIntList indexList = new TIntArrayList(words.length * 3 / 2);
+        for (int i = 0; i < words.length; i++) {
+            int wordIndex = -1;
+            int mentionIndex = -1;
+            int mentionStart = words[i].indexOf(":/w/");
+            if (mentionStart >= 0) {
+                Matcher m = Dictionary.PATTERN_MENTION.matcher(words[i].substring(mentionStart));
+                if (m.matches()) {
+                    int wpId = Integer.valueOf(m.group(3));
+                    if (articleIndexes.containsKey(wpId)) {
+                        mentionIndex = articleIndexes.get(wpId);
+                    }
+                    words[i] = words[i].substring(0, mentionStart);
                 }
             }
+            if (words[i].length() > 0) {
+                long h = hashWord(words[i]);
+                if (wordIndexes.containsKey(h)) {
+                    wordIndex = wordIndexes.get(h);
+                }
+            }
+            if (mentionIndex >= 0) {
+                if (random.nextDouble() >= 0.5) {
+                    indexList.add(wordIndex);
+                    indexList.add(mentionIndex);
+                } else {
+                    indexList.add(mentionIndex);
+                    indexList.add(wordIndex);
+                }
+            } else {
+                indexList.add(wordIndex);
+            }
         }
+        int indexes[] = indexList.toArray();
 
         float[] neu1e = new float[layer1Size];
         for (int i = 0; i < indexes.length; i++) {
@@ -317,18 +318,8 @@ public class Word2VecTrainer {
 
 
     public void save(File path) throws IOException {
-        List<String> words = new ArrayList(Arrays.asList(this.hashToWords.values()));
-        Collections.sort(words, new Comparator<String>() {
-            @Override
-            public int compare(String w1, String w2) {
-                long h1 = Word2VecUtils.hashWord(w1);
-                long h2 = Word2VecUtils.hashWord(w2);
-                return wordCounts.get(h2) - wordCounts.get(h1);
-            }
-        });
-
         OutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
-        stream.write((words.size() + " " + layer1Size + "\n").getBytes());
+        stream.write((words.length + " " + layer1Size + "\n").getBytes());
         for (String w : words) {
             stream.write(w.getBytes("UTF-8"));
             stream.write(' ');
@@ -341,25 +332,16 @@ public class Word2VecTrainer {
     }
 
     private void test() {
-        long h = 0;
-        for (long hash : hashToWords.keys()) {
-            if (hashToWords.get(hash).equals("person")) {
-                h = hash;
-                break;
-            }
-        }
-        if (h == 0) {
-            throw new NoSuchElementException();
-        }
+        long h = hashWord("person");
         float [] v1 = syn0[wordIndexes.get(h)];
         MathUtils.normalize(v1);
 
         Map<String, Double> sims = new HashMap<String, Double>();
-        for (long h2 : wordIndexes.keys()) {
-            float [] v2 = syn0[wordIndexes.get(h2)];
+        for (int i = 0; i < words.length; i++) {
+            float [] v2 = syn0[i];
             MathUtils.normalize(v2);
             double sim =  MathUtils.dot(v1, v2);
-            sims.put(hashToWords.get(h2), sim);
+            sims.put(words[i], sim);
         }
 
         List<String> keys = new ArrayList<String>(sims.keySet());
@@ -378,6 +360,10 @@ public class Word2VecTrainer {
         bytes[2] = (byte)((bits >> 16) & 0xff);
         bytes[3] = (byte)((bits >> 24) & 0xff);
         return bytes;
+    }
+
+    private static long hashWord(String word) {
+        return Word2VecUtils.hashWord(word);
     }
 
     public static void main(String args[]) throws ConfigurationException, IOException, DaoException {
@@ -429,7 +415,7 @@ public class Word2VecTrainer {
         Env env = new EnvBuilder(cmd).build();
         Configurator c = env.getConfigurator();
         Word2VecTrainer trainer = new Word2VecTrainer(
-                c.get(RawPageDao.class),
+                c.get(LocalPageDao.class),
                 env.getLanguages().getDefaultLanguage()
            );
         if (cmd.hasOption("f")) {

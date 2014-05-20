@@ -1,4 +1,4 @@
-package org.wikibrain.sr.word2vec;
+package org.wikibrain.core.nlp;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -9,35 +9,53 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.procedure.TLongIntProcedure;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
+import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.nlp.NGramCreator;
-import org.wikibrain.core.nlp.StringTokenizer;
+import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A class to remember counts for unigrams and (optionally) bigrams.
  *
  * Uses a hashing trick so that a word's counts can be kept in 12 bytes of memory.
- * All count* methods are threadsafe.
+ * All set* methods and other methods that change state are threadsafe.
  *
- * All get* methods are threadsafe as long as they aren't
+ * All get* methods are NOT threadsafe as long as they aren't
  * called at the same time as count* methods.
  *
  * Also remembers the number of mentions for each article.
- * A mention must be in the format "foo:ID3424" where foo is the phrase
- * mentioning the article.
+ * A mention must be in the format "fooXXWPID3424" where foo is the
+ * phrase mentioning the article and 3424 is the Wikipedia article id.
  *
  * @author Shilad Sen
  */
 public class Dictionary implements Closeable {
+    public static Logger LOG = Logger.getLogger(Dictionary.class.getName());
 
+    /**
+     * Matches mentions like:
+     * foo:/w/en/1000
+     * foo:/w/en/1000/Hercule_Poirot
+     */
+    public static final Pattern PATTERN_MENTION = Pattern.compile("(.*?):/w/([^/]+)/(\\d+)(/[^ ]*($| ))?");
 
+    /**
+     * How should words be stored? IN_MEMORY requires much more memory.
+     */
     public static enum WordStorage {
         ON_DISK,
         IN_MEMORY,
@@ -45,8 +63,18 @@ public class Dictionary implements Closeable {
     }
 
     private final Language language;
+
+    /**
+     * Whether the text to be tokenized contains mentions of articles.
+     */
     private boolean containsMentions = true;
-    private boolean countBigrams = true;
+
+    /**
+     * Whether bigrams should be counted.
+     */
+    private boolean countBigrams = false;
+
+
     private final WordStorage wordStorage;
 
     private AtomicLong totalWords = new AtomicLong();
@@ -100,14 +128,19 @@ public class Dictionary implements Closeable {
      * @throws IOException
      */
     public void countRawFile(File corpus) throws IOException {
-        BufferedReader reader = WpIOUtils.openBufferedReader(corpus);
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            countRawText(line);
-        }
+        LineIterator lineIterator = FileUtils.lineIterator(corpus, "UTF-8");
+        ParallelForEach.iterate(
+                lineIterator,
+                Math.min(3, WpThreadUtils.getMaxThreads()), // 3 seems the optimal number of threads here...
+                1000,
+                new Procedure<String>() {
+                    @Override
+                    public void call(String line) throws Exception {
+                        countRawText(line);
+                    }
+                },
+                Integer.MAX_VALUE);
+        lineIterator.close();
     }
 
     /**
@@ -120,14 +153,19 @@ public class Dictionary implements Closeable {
      * @throws IOException
      */
     public void countNormalizedFile(File corpus) throws IOException {
-        BufferedReader reader = WpIOUtils.openBufferedReader(corpus);
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            countRawText(line);
-        }
+        LineIterator lineIterator = FileUtils.lineIterator(corpus, "UTF-8");
+        ParallelForEach.iterate(
+                lineIterator,
+                Math.min(3, WpThreadUtils.getMaxThreads()), // 3 seems the optimal number of threads here...
+                1000,
+                new Procedure<String>() {
+                    @Override
+                    public void call(String line) throws Exception {
+                        countNormalizedText(line);
+                    }
+                },
+                Integer.MAX_VALUE);
+        lineIterator.close();
     }
 
     /**
@@ -137,6 +175,17 @@ public class Dictionary implements Closeable {
      * @param text
      */
     public void countRawText(String text) {
+        // Count and extract mentions if necessary.
+        if (containsMentions) {
+            Matcher m = PATTERN_MENTION.matcher(text);
+            while (m.find()) {
+                int wpId = Integer.valueOf(m.group(3));
+                synchronized (mentionCounts) {
+                    mentionCounts.adjustOrPutValue(wpId, 1, 1);
+                }
+            }
+            text = PATTERN_MENTION.matcher(text).replaceAll("$1 ");
+        }
         countWords(tokenizer.getWords(language, text));
     }
 
@@ -177,11 +226,13 @@ public class Dictionary implements Closeable {
             return;
         }
         if (containsMentions) {
-            Matcher m = Word2VecUtils.PATTERN_ID.matcher(word);
+            Matcher m = PATTERN_MENTION.matcher(word);
             if (m.matches()) {
                 word = m.group(1);
-                int wpId = Integer.valueOf(m.group(2));
-                mentionCounts.adjustOrPutValue(wpId, 1, 1);
+                int wpId = Integer.valueOf(m.group(3));
+                synchronized (mentionCounts) {
+                    mentionCounts.adjustOrPutValue(wpId, 1, 1);
+                }
             }
         }
         long hash = getHash(word);
@@ -192,8 +243,16 @@ public class Dictionary implements Closeable {
                 }
             }
         }
+        int n;
         synchronized (unigramCounts) {
-            unigramCounts.adjustOrPutValue(hash, 1, 1);
+            n = unigramCounts.adjustOrPutValue(hash, 1, 1);
+        }
+        if (n == 1 && wordStorage == WordStorage.ON_DISK) {
+            try {
+                wordWriter.write(word + "\n");
+            } catch (IOException e) {
+                throw new RuntimeException(e);  // shouldn't really happen
+            }
         }
         totalWords.incrementAndGet();
     }
@@ -208,9 +267,9 @@ public class Dictionary implements Closeable {
             return;
         }
         if (containsMentions) {
-            Matcher m = Word2VecUtils.PATTERN_ID.matcher(word);
+            Matcher m = PATTERN_MENTION.matcher(word);
             if (m.matches()) {
-                word = m.group(2);
+                word = m.group(1);
             }
         }
         synchronized (bigramCounts) {
@@ -234,33 +293,46 @@ public class Dictionary implements Closeable {
      * @throws IOException
      */
     public void write(File output, int minCount) throws IOException {
-        if (wordStorage != WordStorage.ON_DISK) {
-            // TODO: implementing IN_MEMORY would be trivial.
+        if (wordStorage == WordStorage.NONE) {
             throw new UnsupportedOperationException();
         }
-        IOUtils.closeQuietly(this);
 
-        BufferedReader reader = WpIOUtils.openBufferedReader(this.wordFile);
+        IOUtils.closeQuietly(this);
         BufferedWriter writer = WpIOUtils.openWriter(output);
-        writer.write("t " + totalWords.get() + "_\n");
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
+        writer.write("t " + totalWords.get() + " _\n");
+
+        if (wordStorage == WordStorage.ON_DISK) {
+            BufferedReader reader = WpIOUtils.openBufferedReader(this.wordFile);
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                String phrase = line.trim();
+                long hash = getHash(phrase);
+                int c = unigramCounts.get(hash);
+                if (c < minCount) {
+                    continue;
+                }
+                writer.write("w " + c + " " + phrase + "\n");
             }
-            String phrase = line.trim();
-            long hash = getHash(phrase);
-            int c = unigramCounts.get(hash);
-            if (c < minCount) {
-                continue;
+            reader.close();
+        } else if (wordStorage == WordStorage.IN_MEMORY) {
+            for (String phrase : words.valueCollection()) {
+                long hash = getHash(phrase);
+                int c = unigramCounts.get(hash);
+                if (c < minCount) {
+                    continue;
+                }
+                writer.write("w " + c + " " + phrase + "\n");
             }
-            writer.write("w " + c + " " + phrase + "\n");
+        } else {
+            throw new IllegalStateException();
         }
         for (int wpId : mentionCounts.keys()) {
             writer.write("m " + wpId + " " + mentionCounts.get(wpId) + "\n");
         }
         writer.close();
-        reader.close();
     }
 
     /**
@@ -365,8 +437,12 @@ public class Dictionary implements Closeable {
 
     }
 
-    public int getUnigramCount(String word) {
-        return unigramCounts.get(getHash(word));
+    public int getUnigramCount(String bigram) {
+        return unigramCounts.get(getHash(bigram));
+    }
+
+    public int getBigramCount(String word1, String word2) {
+        return bigramCounts.get(getHash(word1 + " " + word2));
     }
 
     public int getBigramCount(String word) {
@@ -377,8 +453,24 @@ public class Dictionary implements Closeable {
         return mentionCounts.get(wpId);
     }
 
+    /**
+     * Returns the number of times the article corresponding to the url was mentioned.
+     * @param mentionUrl mention in the format /w/langCode/articleId/ArticleTitle
+     * @return
+     */
+    public int getMentionCount(String mentionUrl) {
+        if (!mentionUrl.startsWith("/w/")) {
+            throw new IllegalArgumentException("format for mentionUrl must be /w/langCode/articleId/ArticleTitle");
+        }
+        String tokens[] = mentionUrl.split("/", 5);
+        if (tokens.length != 5) {
+            throw new IllegalArgumentException("format for mentionUrl must be /w/langCode/articleId/ArticleTitle");
+        }
+        return mentionCounts.get(Integer.valueOf(tokens[3]));
+    }
+
     public final long getHash(String ngram) {
-        return Word2VecUtils.hashWord(ngram);
+        return hashWord(ngram);
     }
 
     public long getTotalCount() {
@@ -413,7 +505,12 @@ public class Dictionary implements Closeable {
         return mentionCounts.size();
     }
 
-    public List<String> getTopUnigrams(int n) {
+    /**
+     * Return the n most frequently used unigrams, in decreasing order.
+     * @param n
+     * @return
+     */
+    public List<String> getFrequentUnigrams(int n) {
         if (wordStorage != WordStorage.IN_MEMORY) {
             throw new UnsupportedOperationException("WordStorage must be in memory to return strings");
         }
@@ -455,10 +552,102 @@ public class Dictionary implements Closeable {
         }
     }
 
+    /**
+     * Return the n most frequently used unigrams and mentions, in decreasing order of frequency.
+     *
+     * Mentions are encoded as words with the format "/w/WikipediaId/ArticleTitle"
+     *
+     * @param lpd
+     * @param maxWords
+     * @param minWordFreq
+     * @param minMentionFreq
+     * @return
+     */
+    public List<String> getFrequentUnigramsAndMentions(LocalPageDao lpd, int maxWords, int minWordFreq, int minMentionFreq) throws DaoException {
+        if (wordStorage != WordStorage.IN_MEMORY) {
+            throw new UnsupportedOperationException("WordStorage must be in memory to return strings");
+        }
+        final int threshold;
+        if (maxWords < unigramCounts.size()) {
+            int counts[] = unigramCounts.values();
+            Arrays.sort(counts);
+            threshold = Math.max(minWordFreq, counts[counts.length - maxWords]);
+        } else {
+            threshold = 0;
+        }
+
+        final List<String> topWords = new ArrayList<String>();
+        unigramCounts.forEachEntry(new TLongIntProcedure() {
+            @Override
+            public boolean execute(long hash, int count) {
+                if (count >= threshold) {
+                    topWords.add(words.get(hash));
+                }
+                return true;
+            }
+        });
+
+        Collections.sort(topWords, new Comparator<String>() {
+            @Override
+            public int compare(String w1, String w2) {
+                int r = getUnigramCount(w2) - getUnigramCount(w1);
+                // order is deterministic for testing ease
+                if (r == 0) {
+                    r = w1.compareTo(w2);
+                }
+                return r;
+            }
+        });
+
+        List<String> result = topWords;
+        if (result.size() > maxWords) result = result.subList(0, maxWords);
+        for (int wpId : mentionCounts.keys()) {
+            if (mentionCounts.get(wpId) >= minMentionFreq) {
+                LocalPage lp = lpd.getById(language, wpId);
+                if (lp != null) {
+                    result.add(makeMentionUrl(lp));
+                }
+            }
+        }
+
+        Collections.sort(result, new Comparator<String>() {
+            @Override
+            public int compare(String w1, String w2) {
+                int n1 = (w1.startsWith("/w/")) ? getMentionCount(w1) : getUnigramCount(w1);
+                int n2 = (w2.startsWith("/w/")) ? getMentionCount(w2) : getUnigramCount(w2);
+                int r = n2 - n1;
+                // order is deterministic for testing ease
+                if (r == 0) {
+                    r = w1.compareTo(w2);
+                }
+                return r;
+            }
+        });
+
+        return result;
+    }
+
+    private String makeMentionUrl(LocalPage page) {
+        return "/w/" + language.getLangCode() + "/" + page.getLocalId() + "/" + page.getTitle().getCanonicalTitle().replaceAll(" ", "_");
+    }
+
+
     @Override
     public void close() throws IOException {
         if (this.wordWriter != null) {
             wordWriter.close();
         }
+    }
+
+    /**
+     * Returns a hashcode for a particular word.
+     * The hashCode 0 will NEVER be returned.
+     * @param w
+     * @return
+     */
+    public static long hashWord(String w) {
+        long h = MurmurHash.hash64(w);
+        if (h == 0) h = 1;  // hack: h == 0 is reserved.
+        return h;
     }
 }

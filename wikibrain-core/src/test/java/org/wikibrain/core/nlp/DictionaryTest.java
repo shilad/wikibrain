@@ -1,7 +1,12 @@
-package org.wikibrain.sr.word2vec;
+package org.wikibrain.core.nlp;
 
 import org.junit.Test;
+import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.core.model.Title;
+import org.wikibrain.core.nlp.Dictionary;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,13 +14,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Shilad Sen
  */
 public class DictionaryTest {
     @Test
-    public void testSimple() {
+    public void testSimple() throws DaoException {
         Dictionary dict = new Dictionary(Language.EN, Dictionary.WordStorage.IN_MEMORY);
         dict.setContainsMentions(true);
         dict.setCountBigrams(true);
@@ -25,29 +31,76 @@ public class DictionaryTest {
         assertEquals(6, dict.getUnigramCount("I"));
         assertEquals(1, dict.getUnigramCount("veil"));
         assertEquals(3, dict.getBigramCount("in a"));
-
-        // Test mentions
         assertEquals(3, dict.getUnigramCount("but"));
         assertEquals(252, dict.getNumUnigrams());
+
+        // Test mentions
         assertEquals(2, dict.getNumMentionedArticles());
         assertEquals(1, dict.getMentionCount(3));
         assertEquals(2, dict.getMentionCount(4));
 
         // Test top unigrams
         List<String> top = Arrays.asList("the", "of", "and", "his", "a", "to", "in", "I", "was", "for", "own", "which");
-        assertEquals(top, dict.getTopUnigrams(12));
+        assertEquals(top, dict.getFrequentUnigrams(12));
+
+        // Test top unigrams and mentions together
+        // Mock a local page dao
+        LocalPageDao lpd = mock(LocalPageDao.class);
+        LocalPage page3 = new LocalPage(Language.EN, 3, "This_is_page_3");
+        LocalPage page4 = new LocalPage(Language.EN, 4, "This_is_page_4");
+        when(lpd.getById(Language.EN, 3)).thenReturn(page3);
+        when(lpd.getById(Language.EN, 4)).thenReturn(page4);
+        top = Arrays.asList("the", "of", "and", "his", "a", "/w/en/4/This_is_page_4", "/w/en/3/This_is_page_3");
+        assertEquals(top, dict.getFrequentUnigramsAndMentions(lpd, 5, 3, 1));
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        Dictionary dict = new Dictionary(Language.EN, Dictionary.WordStorage.ON_DISK);
+        Dictionary dict = new Dictionary(Language.EN, Dictionary.WordStorage.IN_MEMORY);
         dict.setContainsMentions(true);
         dict.setCountBigrams(true);
         dict.countRawText(TEST_CORPUS);
         File tmp = File.createTempFile("dict", "txt");
         tmp.deleteOnExit();
         tmp.delete();
+        dict.write(tmp);
 
+        // Try reading it from disk
+        Dictionary dict2 = new Dictionary(Language.EN, Dictionary.WordStorage.NONE);
+        dict2.read(tmp);
+
+        assertEquals(dict.getTotalCount(), dict2.getTotalCount());
+        assertEquals(dict.getNumUnigrams(), dict2.getNumUnigrams());
+        for (String word : dict.getFrequentUnigrams(Integer.MAX_VALUE)) {
+            assertEquals(dict.getUnigramCount(word), dict2.getUnigramCount(word));
+        }
+
+        // Try streaming the words to disk
+        Dictionary dict3 = new Dictionary(Language.EN, Dictionary.WordStorage.ON_DISK);
+        dict3.setContainsMentions(true);
+        dict3.setCountBigrams(true);
+        dict3.countRawText(TEST_CORPUS);
+        dict.write(tmp);
+
+        assertEquals(dict.getTotalCount(), dict3.getTotalCount());
+        assertEquals(dict.getNumUnigrams(), dict3.getNumUnigrams());
+        for (String word : dict.getFrequentUnigrams(Integer.MAX_VALUE)) {
+            assertEquals(dict.getUnigramCount(word), dict3.getUnigramCount(word));
+        }
+
+        // Try pruning the read-in result
+        Dictionary dict4 = new Dictionary(Language.EN);
+        dict4.read(tmp, Integer.MAX_VALUE, 3);
+        assertEquals(dict4.getNumUnigrams(), 26);
+
+
+        dict4 = new Dictionary(Language.EN);
+        dict4.read(tmp, 5, 2);
+        assertEquals(dict4.getNumUnigrams(), 5);
+        assertEquals(dict.getTotalCount(), dict4.getTotalCount());
+        for (String word : dict.getFrequentUnigrams(5)) {
+            assertEquals(dict.getUnigramCount(word), dict4.getUnigramCount(word));
+        }
     }
 
 
@@ -63,7 +116,7 @@ public class DictionaryTest {
     "admirably balanced mind. He was, I take it, the most perfect\n" +
     "reasoning and observing machine that the world has seen, but as a\n" +
     "lover he would have placed himself in a false position. He never\n" +
-    "spoke of the softer passions, save withXXWPID4 a gibe and a sneer. They\n" +
+    "spoke of the softer passions, save with:/w/en/4/foo a gibe and a sneer. They\n" +
     "were admirable things for the observer--excellent for drawing the\n" +
     "veil from men's motives and actions. But for the trained reasoner\n" +
     "to admit such intrusions into his own delicate and finely\n" +
@@ -71,7 +124,7 @@ public class DictionaryTest {
     "might throw a doubt upon all his mental results. Grit in a\n" +
     "sensitive instrument, or a crack in one of his own high-power\n" +
     "lenses, would not be more disturbing than a strong emotion in a\n" +
-    "nature such as his. And yet there was butXXWPID3 one woman to him, and\n" +
+    "nature such as his. And yet there was but:/w/en/3/foo one woman to him, and\n" +
     "that woman was the late Irene Adler, of dubious and questionable\n" +
     "memory.\n" +
     "\n" +
@@ -80,7 +133,7 @@ public class DictionaryTest {
     "home-centred interests which rise up around the man who first\n" +
     "finds himself master of his own establishment, were sufficient to\n" +
     "absorb all my attention, while Holmes, who loathed every form of\n" +
-    "society with his whole Bohemian soul, remainedXXWPID4 in our lodgings in\n" +
+    "society with his whole Bohemian soul, remained:/w/en/4/foo in our lodgings in\n" +
     "Baker Street, buried among his old books, and alternating from\n" +
     "week to week between cocaine and ambition, the drowsiness of the\n" +
     "drug, and the fierce energy of his own keen nature. He was still,\n" +
@@ -96,6 +149,4 @@ public class DictionaryTest {
     "Beyond these signs of his activity, however, which I merely\n" +
     "shared with all the readers of the daily press, I knew little of\n" +
     "my former friend and companion.";
-
-
 }

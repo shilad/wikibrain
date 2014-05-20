@@ -1,13 +1,15 @@
 package org.wikibrain.sr.word2vec;
 
 import gnu.trove.TCollections;
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.io.FileUtils;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
+import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.core.nlp.Dictionary;
 import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
 import org.wikibrain.sr.wikify.Wikifier;
@@ -15,15 +17,14 @@ import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Shilad Sen
@@ -34,15 +35,16 @@ public abstract class BaseCorpusCreator {
     private final Language language;
     private final StringTokenizer tokenizer = new StringTokenizer();
 
-    private final TLongIntMap wordLengths = new TLongIntHashMap();
-    private final TLongIntMap wordCounts = TCollections.synchronizedMap(new TLongIntHashMap());
     private final Wikifier wikifier;
+    private final LocalPageDao pageDao;
 
-    private BufferedWriter dictionary;
+    private Dictionary dictionary;
     private BufferedWriter corpus;
+    private TIntObjectMap<String> mentionUrls = TCollections.synchronizedMap(new TIntObjectHashMap<String>());
 
-    public BaseCorpusCreator(Language language, Wikifier wikifier) {
+    public BaseCorpusCreator(Language language, LocalPageDao pageDao, Wikifier wikifier) {
         this.language = language;
+        this.pageDao = pageDao;
         this.wikifier = wikifier;
     }
 
@@ -58,7 +60,7 @@ public abstract class BaseCorpusCreator {
             FileUtils.deleteQuietly(dir);
         }
         dir.mkdirs();
-        dictionary = WpIOUtils.openWriter(new File(dir, "dictionary.txt"));
+        dictionary = new Dictionary(language, Dictionary.WordStorage.ON_DISK);
         corpus = WpIOUtils.openWriter(new File(dir, "corpus.txt"));
         ParallelForEach.iterate(getCorpus(), new Procedure<IdAndText>() {
             @Override
@@ -67,22 +69,7 @@ public abstract class BaseCorpusCreator {
             }
         });
         corpus.close();
-        dictionary.close();
-
-        LOG.info("writing " + wordCounts.size() + " counts...");
-        BufferedReader dict = WpIOUtils.openBufferedReader(new File(dir, "dictionary.txt"));
-        BufferedWriter writer = WpIOUtils.openWriter(new File(dir, "words.txt"));
-        while (true) {
-            String line = dict.readLine();
-            if (line == null) {
-                break;
-            }
-            String phrase = line.trim();
-            long hash = Word2VecUtils.hashWord(phrase);
-            writer.write("" + wordCounts.get(hash) + " " + phrase + "\n");
-        }
-        writer.close();
-        dict.close();
+        dictionary.write(new File(dir, "dictionary.txt"));
     }
 
     private void processText(IdAndText text) throws IOException, DaoException {
@@ -99,47 +86,26 @@ public abstract class BaseCorpusCreator {
                 document.append(processSentence);
             }
         }
-
         synchronized (corpus) {
             corpus.write(document.toString() + "\n\n");
         }
-
         countTokens(document.toString());
     }
 
-    Pattern PATTERN_ID = Pattern.compile("^(.*):ID(\\d+)$");
 
     private void countTokens(String document) throws IOException {
-        String [] phrases = document.split(" +");
-        synchronized (wordCounts) {
-            for (String phrase : phrases) {
-                Matcher m = PATTERN_ID.matcher(phrase);
-                if (m.matches()) {
-                    phrase = m.group(1);
-                }
-                long hash = Word2VecUtils.hashWord(phrase);
-                if (hash != 0) {
-                    if (!wordCounts.containsKey(hash)) {
-                        wordLengths.put(hash, phrase.length());
-                        this.dictionary.write("" + hash + " " + phrase + "\n");
-                    }
-                    wordCounts.adjustOrPutValue(hash, 1, 1);
-                }
-            }
-        }
+        dictionary.countNormalizedText(document);
     }
 
 
-    private String processSentence(Token sentence, List<LocalLink> mentions) throws IOException {
+    private String processSentence(Token sentence, List<LocalLink> mentions) throws IOException, DaoException {
         List<Token> words = tokenizer.getWordTokens(language, sentence);
         if (words.isEmpty()) {
             return null;
         }
 
         // Accumulators
-        TLongObjectHashMap<String> wordHashes = new TLongObjectHashMap<String>();
         StringBuilder wordLine = new StringBuilder();
-        TLongIntMap sentenceHashCounts = new TLongIntHashMap();
 
         // Process each word token
         // Warning: If mentions do not align with sentence tokens, this will break...
@@ -165,7 +131,7 @@ public abstract class BaseCorpusCreator {
                     w++;
                     phrase += words.get(w).getToken();
                 }
-                phrase += ":ID" + mentions.get(m).getDestId();
+                phrase += ":" + getMentionUrl(mentions.get(m).getDestId());
             }
 
             phrase = phrase.trim();
@@ -175,16 +141,25 @@ public abstract class BaseCorpusCreator {
             if (phrase.contains("\n")) {
                 throw new IllegalStateException();
             }
-            long h = Word2VecUtils.hashWord(phrase);
-            wordHashes.put(h, phrase);
             if (wordLine.length() > 0) {
                 wordLine.append(' ');
             }
             wordLine.append(phrase);
-            sentenceHashCounts.adjustOrPutValue(h, 1, 1);
         }
         wordLine.append('\n');
 
         return wordLine.toString();
+    }
+
+    private String getMentionUrl(int wpId) throws DaoException {
+        if (!mentionUrls.containsKey(wpId)) {
+            LocalPage page = pageDao.getById(language, wpId);
+            if (page == null) {
+                mentionUrls.put(wpId, "/w/" + language.getLangCode() + "/-1/Unknown_page");
+            } else {
+                mentionUrls.put(wpId, page.getCompactUrl());
+            }
+        }
+        return mentionUrls.get(wpId);
     }
 }
