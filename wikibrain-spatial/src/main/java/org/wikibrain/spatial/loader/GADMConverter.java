@@ -245,6 +245,7 @@ public class GADMConverter {
                         System.gc();
                     }
                     catch (Exception e) {
+                        LOG.log(Level.INFO, "Exception occured: " + e.getMessage());
                         stateShape.remove(state);
                         System.gc();
                         continue;
@@ -266,6 +267,7 @@ public class GADMConverter {
                         System.gc();
                     }
                     catch (Exception e){
+                        LOG.log(Level.INFO, "Exception occured: " + e.getMessage());
                         stateShape.remove(country);
                         System.gc();
                         continue;
