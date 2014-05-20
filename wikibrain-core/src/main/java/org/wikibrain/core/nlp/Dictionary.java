@@ -31,15 +31,18 @@ import java.util.regex.Pattern;
 /**
  * A class to remember counts for unigrams and (optionally) bigrams.
  *
- * Uses a hashing trick so that a word's counts can be kept in 12 bytes of memory.
- * All set* methods and other methods that change state are threadsafe.
+ * This class uses a hashing trick so that a word's counts can be kept in 12
+ * bytes of memory.
  *
- * All get* methods are NOT threadsafe as long as they aren't
- * called at the same time as count* methods.
  *
- * Also remembers the number of mentions for each article.
- * A mention must be in the format "fooXXWPID3424" where foo is the
- * phrase mentioning the article and 3424 is the Wikipedia article id.
+ * All methods that count words are mutually threadsafe.
+ * All methods that return counts are mutually threadsafe.
+ * The two types of methods cannot be mixed with thread safety, though.
+ *
+ * This class also remembers the number of mentions for each article.
+ * A mention must be in the format "foo:/w/en/1000" or "foo:/w/en/1000/Hercule_Poirot"
+ * where foo is the phrase mentioning the article and 1000 is the Wikipedia article id
+ * of the article with title "Hercule_Poirot."
  *
  * @author Shilad Sen
  */
