@@ -1,42 +1,26 @@
 package org.wikibrain.sr.vector;
 
 import com.typesafe.config.Config;
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntFloatMap;
-import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
-import org.wikibrain.core.dao.matrix.MatrixLocalLinkDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.lucene.LuceneSearcher;
-import org.wikibrain.lucene.QueryBuilder;
-import org.wikibrain.lucene.WikiBrainScoreDoc;
-import org.wikibrain.lucene.WpIdFilter;
-import org.wikibrain.matrix.SparseMatrix;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.utils.Leaderboard;
-import org.wikibrain.sr.utils.SimUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -63,7 +47,7 @@ public class MilneWittenGenerator implements VectorGenerator {
 
     @Override
     public TIntFloatMap getVector(int pageId) throws DaoException {
-        TIntFloatMap vector = new TIntFloatHashMap();
+        TIntFloatMap vector = new TIntFloatHashMap(100);
         if (pageId <= 0) {
             throw new IllegalArgumentException("Invalid page id: " + pageId);
         }
@@ -86,7 +70,7 @@ public class MilneWittenGenerator implements VectorGenerator {
         Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
         for (int id : vector1.keys()) {
             if (vector2.containsKey(id)) {
-                lb.insert(id, vector1.get(id) * vector2.get(id));
+                lb.tallyScore(id, vector1.get(id) * vector2.get(id));
             }
         }
         SRResultList top = lb.getTop();

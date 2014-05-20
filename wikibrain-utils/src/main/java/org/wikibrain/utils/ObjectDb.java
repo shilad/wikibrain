@@ -118,6 +118,74 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
     }
 
     /**
+     * Iterate over keys
+     * The cursor is closed when all the pairs have been read or when there is an error.
+     * Otherwise the cursor is not closed... this is bad!
+     * @return an iterator over keys.
+     */
+    public Iterator<String> keyIterator() {
+        final DatabaseEntry key = new DatabaseEntry();
+        final DatabaseEntry val = new DatabaseEntry();
+        val.setPartial(0, 0, true);
+        final Cursor cursor;
+        try {
+            cursor = this.db.openCursor(null, CursorConfig.READ_UNCOMMITTED);
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);  // what else to do?
+        }
+        return new Iterator<String>() {
+            boolean finished = false;
+            boolean hasValue = false;
+
+            @Override
+            public boolean hasNext() {
+                advance();
+                return !finished;
+            }
+
+            @Override
+            public String next() {
+                advance();
+                if (finished) return null;
+                hasValue = false;
+                try {
+                    return new String(key.getData(), "UTF-8");
+                } catch (IOException e) {
+                    close();
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void remove() {
+                try {
+                    cursor.delete();
+                } catch (DatabaseException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            private void advance() {
+                if (finished || hasValue) return;
+                try {
+                    if (cursor.getNext(key, val, LockMode.READ_UNCOMMITTED) != OperationStatus.SUCCESS) {
+                        close();
+                        finished = true;
+                    }
+                } catch (DatabaseException e) {
+                    close();
+                    throw new RuntimeException(e);
+                }
+                hasValue = true;
+            }
+
+            private void close() {
+                try { cursor.close(); } catch (DatabaseException e) {}
+            }
+        };
+    }
+
+    /**
      * Iterate over key / value pairs.
      * The cursor is closed when all the pairs have been read or when there is an error.
      * Otherwise the cursor is not closed... this is bad!

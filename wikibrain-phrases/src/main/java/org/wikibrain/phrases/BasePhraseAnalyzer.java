@@ -293,4 +293,8 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         return result;
     }
 
+    public PhraseAnalyzerDao getDao() {
+        return phraseDao;
+    }
+
 }

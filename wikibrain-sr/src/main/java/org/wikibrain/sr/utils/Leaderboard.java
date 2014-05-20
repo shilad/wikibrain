@@ -15,6 +15,32 @@ public class Leaderboard {
         values[0] = Double.NEGATIVE_INFINITY;
     }
 
+    public void tallyScore(int key, double value) {
+        if (size < values.length - 1) {
+            insert(key, value);
+        } else if (value > values[1]) {
+            assert(size == values.length - 1);
+            removeMin();
+            insert(key, value);
+        }
+    }
+
+    public SRResultList getTop() {
+        SRResultList scores = new SRResultList(size);
+        for (int i = 1; i <= size; i++) {
+            scores.set(i - 1, keys[i], values[i]);
+        }
+        scores.sortAscending();
+        return scores;
+    }
+
+    public void print() {
+        int i;
+        for (i=1; i<=size;i++)
+            System.out.print(values[i] + " ");
+        System.out.println();
+    }
+
     private int leftChild(int pos) {
         return 2*pos;
     }
@@ -44,17 +70,7 @@ public class Leaderboard {
 
     }
 
-    public void tallyScore(int key, double value) {
-        if (size < values.length - 1) {
-            insert(key, value);
-        } else if (value > values[1]) {
-            assert(size == values.length - 1);
-            removeMin();
-            insert(key, value);
-        }
-    }
-
-    public void insert(int key, double value) {
+    private void insert(int key, double value) {
         assert(size < values.length - 1);
         size++;
         keys[size] = key;
@@ -67,22 +83,15 @@ public class Leaderboard {
         }
     }
 
-    public void print() {
-        int i;
-        for (i=1; i<=size;i++)
-            System.out.print(values[i] + " ");
-        System.out.println();
-    }
-
-    public int minKey() {
+    private int minKey() {
         return keys[1];
     }
 
-    public double minValue() {
+    private double minValue() {
         return values[1];
     }
 
-    public void removeMin() {
+    private void removeMin() {
         swap(1,size);
         size--;
         if (size != 0)
@@ -99,14 +108,5 @@ public class Leaderboard {
             swap(position,smallestChild);
             position = smallestChild;
         }
-    }
-
-    public SRResultList getTop() {
-        SRResultList scores = new SRResultList(size);
-        for (int i = 1; i <= size; i++) {
-            scores.set(i - 1, keys[i], values[i]);
-        }
-        scores.sortAscending();
-        return scores;
     }
 }

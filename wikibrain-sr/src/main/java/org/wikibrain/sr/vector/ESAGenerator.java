@@ -99,7 +99,7 @@ public class ESAGenerator implements VectorGenerator {
         Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
         for (int id : vector1.keys()) {
             if (vector2.containsKey(id)) {
-                lb.insert(id, vector1.get(id) * vector2.get(id));
+                lb.tallyScore(id, vector1.get(id) * vector2.get(id));
             }
         }
         SRResultList top = lb.getTop();

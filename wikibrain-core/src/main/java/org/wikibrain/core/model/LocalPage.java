@@ -15,6 +15,16 @@ public class LocalPage {
     protected final boolean isDisambig;
 
     /**
+     * Creates a new page in the main namespace that is NOT a redirect or disambig.
+     * @param language
+     * @param localId
+     * @param title
+     */
+    public LocalPage(Language language, int localId, String title) {
+        this(language, localId, new Title(title, language), NameSpace.ARTICLE);
+    }
+
+    /**
      * Default for NON-redirect pages.
      * @param language
      * @param localId
@@ -88,6 +98,15 @@ public class LocalPage {
         } else {
             return false;
         }
+    }
+
+    /**
+     * @return, for example "/w/en/1000/Hercule_Poirot"
+     */
+    public String getCompactUrl() {
+        String escapedTitle = getTitle().getCanonicalTitle().replace(" ", "_");
+        escapedTitle = escapedTitle.replaceAll("\\s+", "");
+        return "/w/" + getLanguage().getLangCode() + "/" + getLocalId() + "/" + escapedTitle;
     }
 
     @Override

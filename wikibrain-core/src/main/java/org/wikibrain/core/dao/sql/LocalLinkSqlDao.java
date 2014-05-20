@@ -162,16 +162,16 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
         }
     }
 
-    private static final AtomicLong counter = new AtomicLong();
-    private static final AtomicLong timer = new AtomicLong();
+//    private static final AtomicLong counter = new AtomicLong();
+//    private static final AtomicLong timer = new AtomicLong();
     @Override
     public Iterable<LocalLink> getLinks(Language language, int localId, boolean outlinks) throws DaoException{
-        if (counter.incrementAndGet() % 1000 == 0) {
-            double mean = 1.0 * timer.get() / counter.get();
-            System.out.println("counter is " + counter.get() + ", mean millis is " + mean);
-        }
+//        if (counter.incrementAndGet() % 1000 == 0) {
+//            double mean = 1.0 * timer.get() / counter.get();
+//            System.out.println("counter is " + counter.get() + ", mean millis is " + mean);
+//        }
         DSLContext context = getJooq();
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         try {
             TableField idField;
             if (outlinks){
@@ -184,8 +184,8 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
                     .where(Tables.LOCAL_LINK.LANG_ID.equal(language.getId()))
                     .and(idField.equal(localId))
                     .fetchLazy(getFetchSize());
-            long end = System.currentTimeMillis();
-            timer.addAndGet(end - start);
+//            long end = System.currentTimeMillis();
+//            timer.addAndGet(end - start);
             return buildLocalLinks(result, outlinks, context);
         } catch (RuntimeException e) {
             freeJooq(context);
