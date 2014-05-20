@@ -179,9 +179,10 @@ public class GADMConverter {
             SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
             SimpleFeatureIterator inputFeatures = inputCollection.features();
 
-            LOG.log(Level.INFO, "Mapping polygons to the corresponding administrative districts."); //I'm generalizing states to administrative districts
+
             //level 1 mapping
             if (level == 1) {
+                LOG.log(Level.INFO, "Mapping polygons to the corresponding administrative districts.");
                 while (inputFeatures.hasNext()) {
                     SimpleFeature feature = inputFeatures.next();
                     String country = ((String) feature.getAttribute(4)).intern();
@@ -197,6 +198,7 @@ public class GADMConverter {
             } else {
                 //level 0 mapping
                 while (inputFeatures.hasNext()) {
+                    LOG.log(Level.INFO, "Mapping polygons to the corresponding countries.");
                     SimpleFeature feature = inputFeatures.next();
                     String country = ((String) feature.getAttribute(4)).intern();
 
@@ -239,7 +241,7 @@ public class GADMConverter {
                         featureBuilder.add(state + ", " + stateCountry.get(state));
                         SimpleFeature feature = featureBuilder.buildFeature(null);
                         if (count % 10 == 0)
-                            LOG.log(Level.INFO, count + "/" + total + " administrative districts processed.");
+                            LOG.log(Level.INFO, count + "/" + total + " level 1 administrative districts processed.");
                         features.add(feature);
                         stateShape.remove(state);
                         System.gc();
@@ -261,7 +263,7 @@ public class GADMConverter {
                         featureBuilder.add(country);
                         SimpleFeature feature = featureBuilder.buildFeature(null);
                         if (count % 10 == 0)
-                            LOG.log(Level.INFO, count + "/" + total + " administrative districts processed.");
+                            LOG.log(Level.INFO, count + "/" + total + " countries processed.");
                         features.add(feature);
                         stateShape.remove(country);
                         System.gc();
@@ -275,8 +277,12 @@ public class GADMConverter {
                 }
             }
 
+            if (level == 1) {
+                LOG.log(Level.INFO, "Combining complete. " + count + " administrative districts processed.");
+            } else {
+                LOG.log(Level.INFO, "Combining complete. " + count + " countries processed.");
+            }
 
-            LOG.log(Level.INFO, "Combining complete. " + count + " administrative districts processed.");
             stateCountry = null;
             stateShape = null;
             System.gc();
