@@ -179,7 +179,7 @@ public class GADMConverter {
             SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
             SimpleFeatureIterator inputFeatures = inputCollection.features();
 
-            LOG.log(Level.INFO, "Mapping polygons..."); //TODO: What does this mean?
+            LOG.log(Level.INFO, "Mapping polygons to the corresponding administrative districts."); //I'm generalizing states to administrative districts
             //level 1 mapping
             if (level == 1) {
                 while (inputFeatures.hasNext()) {
@@ -225,42 +225,56 @@ public class GADMConverter {
             geometryFactory = JTSFactoryFinder.getGeometryFactory();
             featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
 
-            LOG.log(Level.INFO, "Processing polygons..."); //TODO: What does this mean? Remember, this is quite user-facing
+            LOG.log(Level.INFO, "Combining polygons that belongs to the same administrative districts.");
 
             int count = 0;
             if (level == 1) {
                 int total = stateShape.keySet().size(); //TODO: We need a lot more in the way of progress statements here
                 for (String state : stateCountry.keySet()) {    //create the feature collection for the new shpfile
-                    count++;
-                    Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
-                    featureBuilder.add(newGeom);
-                    featureBuilder.add(state);
-                    featureBuilder.add(state + ", " + stateCountry.get(state));
-                    SimpleFeature feature = featureBuilder.buildFeature(null);
-                    if (count % 10 == 0)
-                        LOG.log(Level.INFO, count + "/" + total + " states processed."); //TODO: states and/or administrative districts?
-                    features.add(feature);
-                    stateShape.remove(state);
-                    System.gc();
+                    try {
+                        count++;
+                        Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
+                        featureBuilder.add(newGeom);
+                        featureBuilder.add(state);
+                        featureBuilder.add(state + ", " + stateCountry.get(state));
+                        SimpleFeature feature = featureBuilder.buildFeature(null);
+                        if (count % 10 == 0)
+                            LOG.log(Level.INFO, count + "/" + total + " administrative districts processed.");
+                        features.add(feature);
+                        stateShape.remove(state);
+                        System.gc();
+                    }
+                    catch (Exception e) {
+                        stateShape.remove(state);
+                        System.gc();
+                        continue;
+                    }
                 }
             } else {
                 int total = stateShape.keySet().size();
                 for (String country: stateShape.keySet()) {
-                    count++;
-                    Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(country)).union();
-                    featureBuilder.add(newGeom);
-                    featureBuilder.add(country);
-                    SimpleFeature feature = featureBuilder.buildFeature(null);
-                    if (count % 10 == 0)
-                        LOG.log(Level.INFO, count + "/" + total + " states processed.");
-                    features.add(feature);
-                    stateShape.remove(country);
-                    System.gc();
+                    try {
+                        count++;
+                        Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(country)).union();
+                        featureBuilder.add(newGeom);
+                        featureBuilder.add(country);
+                        SimpleFeature feature = featureBuilder.buildFeature(null);
+                        if (count % 10 == 0)
+                            LOG.log(Level.INFO, count + "/" + total + " administrative districts processed.");
+                        features.add(feature);
+                        stateShape.remove(country);
+                        System.gc();
+                    }
+                    catch (Exception e){
+                        stateShape.remove(country);
+                        System.gc();
+                        continue;
+                    }
                 }
             }
 
 
-            LOG.log(Level.INFO, "Processing complete. " + count + " states processed.");
+            LOG.log(Level.INFO, "Combining complete. " + count + " administrative districts processed.");
             stateCountry = null;
             stateShape = null;
             System.gc();
