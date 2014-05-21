@@ -125,6 +125,11 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     }
 
     @Override
+    public Integer getItemId(LocalId localId) throws DaoException {
+        return upDao.getUnivPageId(localId.getLanguage(), localId.getId(), WIKIDATA_ALGORITHM_ID);
+    }
+
+    @Override
     public UniversalPage getUniversalPage(int itemId) throws DaoException {
         UniversalPage uPage = upDao.getById(itemId, WIKIDATA_ALGORITHM_ID);
         return uPage;

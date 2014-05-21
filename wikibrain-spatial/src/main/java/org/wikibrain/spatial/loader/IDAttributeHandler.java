@@ -74,7 +74,7 @@ public abstract class IDAttributeHandler {
                 LinkedHashMap<LocalId, Float> candidate = analyzer.resolve(myLang, (String)id, 1);
                 if (candidate.size() == 0) return null;
                 LocalId li = candidate.keySet().iterator().next();
-                return li.getId();
+                return wdDao.getItemId(li);
 
             }catch(DaoException e){
 

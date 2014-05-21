@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.cookbook;
 
 import com.google.common.collect.Sets;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import gnu.trove.set.TIntSet;
 import org.geotools.referencing.GeodeticCalculator;
@@ -14,11 +15,14 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
+import org.wikibrain.spatial.cookbook.tflevaluate.DistanceMetrics;
 import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
 import org.wikibrain.wikidata.WikidataDao;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,11 +41,12 @@ public class SpatialNeighborExample {
             WikidataDao wdDao = c.get(WikidataDao.class);
             LocalPageDao lpDao = c.get(LocalPageDao.class);
             SpatialDataDao sdDao = c.get(SpatialDataDao.class);
+            DistanceMetrics distanceMetrics = new DistanceMetrics();
 
             LanguageSet loadedLangs = lpDao.getLoadedLanguages();
 
             // set up the parameters for the call to getContainedItemIds
-            String originName = "Minnesota";
+            String originName = "South Africa";
             String layerName = "wikidata";
             Set<String> subLayers = Sets.newHashSet();
             subLayers.add("wikidata");
@@ -51,10 +56,19 @@ public class SpatialNeighborExample {
 
             LocalPage lp = lpDao.getByTitle(new Title(originName, Language.getByLangCode("simple")), NameSpace.ARTICLE);
             Integer id = wdDao.getItemId(lp);
+            Geometry rootPoint = sdDao.getGeometry(id, layerName, "earth");
+            Map<Integer, Geometry> resMap = snDao.getKNNeighbors(id, 100, layerName, "earth" , new HashSet<Integer>());
 
-            TIntSet neighborItemIds = snDao.getNeighboringItemIds(id, layerName, "earth", subLayers, 800, 1000);
 
-            Point p1 = sdDao.getGeometry(id, layerName, "earth").getCentroid();
+            for(Integer i : resMap.keySet()){
+                System.out.println(i.toString() + "  " + wdDao.getUniversalPage(i).getBestEnglishTitle(lpDao, true).getCanonicalTitle() + "  " + distanceMetrics.getDistance(resMap.get(i), rootPoint) + " km");
+            }
+
+
+            //TIntSet neighborItemIds = snDao.getNeighboringItemIds(id, layerName, "earth", subLayers, 800, 1000);
+
+            //Point p1 = sdDao.getGeometry(id, layerName, "earth").getCentroid();
+            /*
 
             int counter = 0;
             System.out.println("Items contained in the spatial footprint of the article '" + lp.getTitle() + "' are:");
@@ -78,6 +92,7 @@ public class SpatialNeighborExample {
             }
 
             System.out.printf("Found %d items\n", counter);
+            */
 
 
 
