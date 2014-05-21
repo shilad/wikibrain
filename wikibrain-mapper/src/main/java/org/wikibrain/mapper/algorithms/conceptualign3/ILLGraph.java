@@ -1,4 +1,4 @@
-package edu.collablab.wikapidia.graph;
+package org.wikibrain.mapper.algorithms.conceptualign3;
 
 import java.util.*;
 
@@ -9,22 +9,58 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.UndirectedGraph;
-import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.InterLanguageLinkDao;
+import org.wikibrain.core.WikiBrainException;
+import org.wikibrain.core.dao.*;
+import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.InterLanguageLink;
+import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.mapper.algorithms.conceptualign3.CombinedIllDao;
 import org.wikibrain.mapper.algorithms.conceptualign3.ILLEdge;
 
 
+/**
+ * Graph representation of ILL graph.
+ */
 public class ILLGraph implements UndirectedGraph<LocalId, ILLEdge>{
 
 
     private final CombinedIllDao dao;
+    private final LocalPageDao lpDao;
+    private final MetaInfoDao miDao;
 
-    public ILLGraph(CombinedIllDao dao){
-        this.dao = dao;
+    private Set<LocalId> validLocalIds;
+
+    private final LanguageSet loadedLangs;
+
+    public ILLGraph(CombinedIllDao dao, LocalPageDao lpDao, MetaInfoDao miDao) throws WikiBrainException {
+
+        try {
+
+            // *** do basic setup ***
+
+            this.dao = dao;
+            this.lpDao = lpDao;
+            this.miDao = miDao;
+
+            loadedLangs = miDao.getLoadedLanguages();
+
+            // *** get valid local ids (aka vertices) ***
+
+            validLocalIds = Sets.newHashSet();
+
+            Iterable<LocalPage> lPages = lpDao.get(new DaoFilter().setNameSpaces(NameSpace.ARTICLE));
+            validLocalIds.addAll(LocalPage.toLocalIds(lPages));
+
+        }catch(DaoException e){
+
+            throw new WikiBrainException(e);
+
+        }
+
     }
 
 
@@ -66,7 +102,7 @@ public class ILLGraph implements UndirectedGraph<LocalId, ILLEdge>{
 
     @Override
     public boolean containsVertex(LocalId arg0) {
-        return true; // this should always be true
+        return validLocalIds.contains(arg0);
     }
 
 
@@ -135,6 +171,8 @@ public class ILLGraph implements UndirectedGraph<LocalId, ILLEdge>{
 
         if (containsEdge(arg0, arg1)){
             return new ILLEdge(arg0, arg1);
+        }else{
+            throw new RuntimeException("Could not find expected edge");
         }
     }
 
@@ -144,12 +182,12 @@ public class ILLGraph implements UndirectedGraph<LocalId, ILLEdge>{
     }
 
     @Override
-    public LanguagedLocalId getEdgeSource(ILLEdge arg0) {
+    public LocalId getEdgeSource(ILLEdge arg0) {
         return arg0.host;
     }
 
     @Override
-    public LanguagedLocalId getEdgeTarget(ILLEdge arg0) {
+    public LocalId getEdgeTarget(ILLEdge arg0) {
         return arg0.dest;
     }
 
@@ -164,13 +202,13 @@ public class ILLGraph implements UndirectedGraph<LocalId, ILLEdge>{
     }
 
     @Override
-    public Set<ILLEdge> removeAllEdges(LanguagedLocalId arg0,
-                                       LanguagedLocalId arg1) {
+    public Set<ILLEdge> removeAllEdges(LocalId arg0,
+                                       LocalId arg1) {
         throw new RuntimeException("Read-only graph");
     }
 
     @Override
-    public boolean removeAllVertices(Collection<? extends LanguagedLocalId> arg0) {
+    public boolean removeAllVertices(Collection<? extends LocalId> arg0) {
         throw new RuntimeException("Read-only graph");
     }
 
@@ -180,82 +218,82 @@ public class ILLGraph implements UndirectedGraph<LocalId, ILLEdge>{
     }
 
     @Override
-    public ILLEdge removeEdge(LanguagedLocalId arg0, LanguagedLocalId arg1) {
+    public ILLEdge removeEdge(LocalId arg0, LocalId arg1) {
         throw new RuntimeException("Read-only graph");
     }
 
     @Override
-    public boolean removeVertex(LanguagedLocalId arg0) {
+    public boolean removeVertex(LocalId arg0) {
         throw new RuntimeException("Read-only graph");
     }
 
     @Override
-    public Set<LanguagedLocalId> vertexSet() {
+    public Set<LocalId> vertexSet() {
 
-        try{
-            HashSet<LanguagedLocalId> rVal = new HashSet<LanguagedLocalId>();
-            LanguageSet ls = lcqs.getLanguageSet();
-            for (Integer curLangId : ls.getLangIds()){
-                List<Integer> allLocalIds = lcqs.getAllLocalIds(curLangId);
-                for (Integer localId : allLocalIds){
-                    rVal.add(new LanguagedLocalId(curLangId, localId));
-                }
-            }
-            return rVal;
-        }catch(WikapidiaException e){
-            throw new RuntimeException(e);
-        }
+        return this.validLocalIds;
 
     }
 
-
-    public int inDegreeOf(LanguagedLocalId arg0) {
+    public int inDegreeOf(LocalId arg0) {
         return incomingEdgesOf(arg0).size();
     }
 
 
-    public Set<ILLEdge> incomingEdgesOf(LanguagedLocalId arg0) {
-        try{
-            HashSet<ILLEdge> rVal = new HashSet<ILLEdge>();
-            List<LanguagedLocalId> inlinks = illqs.getInILLs(arg0.getLangId(), arg0.getLocalId());
-            if (inlinks != null){
-                rVal.addAll(makeEdges(arg0,inlinks, false));
+    private Set<ILLEdge> makeEdges(LocalId single, Set<LocalId> multiples, boolean outlinks){
+
+        Set<ILLEdge> rVal = Sets.newHashSet();
+        for (LocalId multiple : multiples){
+
+            if (validLocalIds.contains(multiple)) { // filter out languages that are not loaded
+
+                ILLEdge curEdge = null;
+                if (outlinks) {
+                    curEdge = new ILLEdge(single, multiple);
+                } else {
+                    curEdge = new ILLEdge(multiple, single);
+                }
+
+                rVal.add(curEdge);
             }
-            return rVal;
-        }catch(WikapidiaException e){
-            throw new RuntimeException(e);
         }
+        return rVal;
+
     }
 
 
-    public int outDegreeOf(LanguagedLocalId arg0) {
+    public Set<ILLEdge> incomingEdgesOf(LocalId arg0) {
+
+        try{
+
+            Set<LocalId> incomingLocalIds = dao.getToDest(arg0);
+            return makeEdges(arg0, incomingLocalIds, false);
+
+        }catch(DaoException e){
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+    public int outDegreeOf(LocalId arg0) {
         return outgoingEdgesOf(arg0).size();
     }
 
 
-    public Set<ILLEdge> outgoingEdgesOf(LanguagedLocalId arg0) {
+    public Set<ILLEdge> outgoingEdgesOf(LocalId arg0) {
+
         try{
-            HashSet<ILLEdge> rVal = new HashSet<ILLEdge>();
-            List<LanguagedLocalId> outlinks = illqs.getOutILLs(arg0.getLangId(), arg0.getLocalId());
-            for (LanguagedLocalId outlink : outlinks){
-                if (outlink.getLocalId() == 0){
-                    System.out.println(arg0.getLocalId() + " --> " + outlink.getLocalId());
-                }
-            }
-            if (outlinks != null){
-                rVal.addAll(makeEdges(arg0,outlinks, true));
-            }
-//			for(LanguagedLocalId outlink : outlinks){
-//				System.out.println(arg0.toString() + "-->" + outlink.toString());
-//			}
-            return rVal;
-        }catch(WikapidiaException e){
+
+            Set<LocalId> outgoingLocalIds = dao.getFromSource(arg0);
+            return makeEdges(arg0, outgoingLocalIds, true);
+
+        }catch(DaoException e){
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public int degreeOf(LanguagedLocalId arg0) {
+    public int degreeOf(LocalId arg0) {
         return edgesOf(arg0).size();
     }
 

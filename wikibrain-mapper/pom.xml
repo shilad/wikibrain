@@ -24,6 +24,21 @@
             <artifactId>jgrapht</artifactId>
             <version>0.9.0</version>
         </dependency>
+        <dependency>
+            <groupId>net.sf.jung</groupId>
+            <artifactId>jung2</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jung</groupId>
+            <artifactId>jung-graph-impl</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jung</groupId>
+            <artifactId>jung-algorithms</artifactId>
+            <version>2.0.1</version>
+        </dependency>
     </dependencies>
     
 </project>
