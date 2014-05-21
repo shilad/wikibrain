@@ -1,7 +1,10 @@
 package org.wikibrain.core.model;
 
+import com.google.common.collect.Sets;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
+
+import java.util.Set;
 
 /**
  */
@@ -117,5 +120,19 @@ public class LocalPage {
                 ", localId=" + localId +
                 ", language=" + language +
                 '}';
+    }
+
+    /**
+     * Returns a set of local ids from a collection of local pages
+     * @param localPages
+     * @return
+     */
+    public static Set<LocalId> toLocalIds(Iterable<LocalPage> localPages){
+
+        Set<LocalId> rVal = Sets.newHashSet();
+        for (LocalPage localPage : localPages){
+            rVal.add(localPage.toLocalId());
+        }
+        return rVal;
     }
 }

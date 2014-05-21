@@ -1,6 +1,7 @@
 package org.wikibrain.core.dao;
 
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
@@ -27,13 +28,23 @@ public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
     public T getByTitle(Title title, NameSpace ns) throws DaoException;
 
     /**
-     * Get a single page by its title
+     * Get a single page by its id
      * @param language the page's language
      * @param pageId the page's id
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
     public T getById(Language language, int pageId) throws DaoException;
+
+
+    /**
+     * Gets a single page by a LocalId object
+     * @param localId
+     * @return
+     * @throws DaoException
+     */
+    public T getById(LocalId localId) throws DaoException;
+
 
     /**
      * Get a set of pages by their ids

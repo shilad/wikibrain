@@ -13,6 +13,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.jooq.Tables;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
@@ -141,6 +142,11 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
         } finally {
             freeJooq(context);
         }
+    }
+
+    @Override
+    public T getById(LocalId localId) throws DaoException {
+        return getById(localId.getLanguage(), localId.getId());
     }
 
     @Override
