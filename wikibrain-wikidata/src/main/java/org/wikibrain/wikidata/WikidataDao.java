@@ -3,12 +3,14 @@ package org.wikibrain.wikidata;
 import org.wikibrain.core.dao.Dao;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 
 import javax.xml.stream.events.Namespace;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Shilad Sen
@@ -102,6 +104,14 @@ public interface WikidataDao extends Dao<WikidataStatement> {
      * @throws DaoException
      */
     public LocalWikidataStatement getLocalStatement(Language language, WikidataStatement statement) throws DaoException;
+
+    Iterable<WikidataStatement> getByValue(WikidataEntity property, WikidataValue value) throws DaoException;
+
+    Iterable<WikidataStatement> getByValue(String propertyName, WikidataValue value) throws DaoException;
+
+    Set<Integer> conceptsWithValue(String propertyName, WikidataValue value) throws DaoException;
+
+    Set<LocalId> pagesWithValue(String propertyName, WikidataValue value, Language language) throws DaoException;
 
     /**
      * Returns all statements that meet some sort of criterion.

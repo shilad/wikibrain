@@ -175,6 +175,31 @@ public class WpDataSource  {
     }
 
     /**
+     * Optimizes the performance of the database.
+     * On postgres this translates to vacuum analyze.
+     * On h2 it does nothing.
+     */
+    public void optimize() throws DaoException {
+        if (dialect == SQLDialect.POSTGRES) {
+            Connection conn=null;
+            try {
+                conn = getConnection();
+                conn.setAutoCommit(true);
+                Statement st = conn.createStatement();
+                st.execute("VACUUM ANALYZE VERBOSE;");
+                st.close();
+            } catch (SQLException e) {
+                throw new DaoException(e);
+            } finally {
+                if (conn != null) {
+                    try { conn.setAutoCommit(true); } catch (Exception e) {}
+                    closeQuietly(conn);
+                }
+            }
+        }
+    }
+
+    /**
      * In general, open connections are reclaimed and harmless
      */
     public void shutdown() throws SQLException {

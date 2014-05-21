@@ -20,6 +20,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
@@ -307,7 +308,7 @@ public class SpatialDataLoader {
 
     private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data_temp";
 
-    public static void main(String args[]) throws ConfigurationException, WikiBrainException {
+    public static void main(String args[]) throws ConfigurationException, WikiBrainException, DaoException {
 
         //public PostGISDB(String host, Integer port, String schema, String db, String user, String pwd,
        // int maxConnections) throws DaoException{
@@ -362,8 +363,8 @@ public class SpatialDataLoader {
         loader.loadWikidataData();
         //loader.loadExogenousData();
 
-
-
+        LOG.info("optimizing database.");
+        conf.get(WpDataSource.class).optimize();
     }
 
     private static Collection<String> getRsNameCol (File folder, String refSysList) throws WikiBrainException{

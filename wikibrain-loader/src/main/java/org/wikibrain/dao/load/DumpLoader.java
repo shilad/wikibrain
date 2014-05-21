@@ -12,9 +12,11 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.dao.RawPageDao;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.parser.xml.DumpPageXmlParser;
 import org.wikibrain.utils.ParallelForEach;
@@ -33,8 +35,12 @@ import java.util.logging.Logger;
  */
 public class DumpLoader {
     private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
+    public static final List<NameSpace> DEFAULT_NAMESPACES = Arrays.asList(NameSpace.ARTICLE, NameSpace.CATEGORY);
 
-    private final AtomicInteger counter = new AtomicInteger();
+    private final AtomicInteger allPages = new AtomicInteger();
+    private final AtomicInteger interestingPages = new AtomicInteger();
+
+    private final Collection<NameSpace> nss;
 
     // If there are a maximum number of articles per language, langCounters will track counts per langauge
     private Integer maxPerLang = null;
@@ -45,9 +51,14 @@ public class DumpLoader {
     private final MetaInfoDao metaDao;
 
     public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao, MetaInfoDao metaDao) {
+        this(localPageDao, rawPageDao, metaDao, DEFAULT_NAMESPACES);
+    }
+
+    public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao, MetaInfoDao metaDao, Collection<NameSpace> nss) {
         this.localPageDao = localPageDao;
         this.rawPageDao = rawPageDao;
         this.metaDao = metaDao;
+        this.nss = nss;
     }
 
     /**
@@ -62,15 +73,22 @@ public class DumpLoader {
         DumpPageXmlParser parser = new DumpPageXmlParser(file,
                 LanguageInfo.getByLanguage(lang));
         for (RawPage rp : parser) {
-            if (counter.incrementAndGet() % 10000 == 0) {
-                LOG.info("processing article " + counter.get());
+            if (allPages.incrementAndGet() % 10000 == 0) {
+                LOG.info("processing article " + allPages.get() + " found " + interestingPages.get() + " interesting articles");
             }
-            save(file, rp);
-            incrementLangCount(lang);
-            if (!keepProcessingArticles(lang)) {
-                break;
+            if (isInteresting(rp)) {
+                interestingPages.incrementAndGet();
+                save(file, rp);
+                incrementLangCount(lang);
+                if (!keepProcessingArticles(lang)) {
+                    break;
+                }
             }
         }
+    }
+
+    private boolean isInteresting(RawPage rp) {
+        return rp != null && rp.getNamespace() != null && nss.contains(rp.getNamespace());
     }
 
     private boolean keepProcessingArticles(Language lang) {
@@ -194,5 +212,8 @@ public class DumpLoader {
         lpDao.endLoad();
         rpDao.endLoad();
         metaDao.endLoad();
+
+        LOG.info("optimizing database.");
+        conf.get(WpDataSource.class).optimize();
     }
 }

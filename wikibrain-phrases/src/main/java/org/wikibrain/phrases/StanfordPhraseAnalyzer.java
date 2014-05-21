@@ -207,7 +207,9 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
             if (!config.getString("type").equals("stanford")) {
                 return null;
             }
-            PhraseAnalyzerDao paDao = getConfigurator().get(PhraseAnalyzerDao.class, config.getString("phraseDao"));
+            PhraseAnalyzerDao paDao = getConfigurator().construct(
+                    PhraseAnalyzerDao.class, name, config.getConfig("dao"),
+                    new HashMap<String, String>());
             LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));
             File path = new File(config.getString("path"));
             PrunedCounts.Pruner<String> phrasePruner = getConfigurator().construct(

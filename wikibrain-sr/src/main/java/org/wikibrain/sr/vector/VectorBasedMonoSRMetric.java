@@ -490,7 +490,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                 return null;
             }
 
-            if (!runtimeParams.containsKey("language")){
+            if (runtimeParams == null || !runtimeParams.containsKey("language")){
                 throw new IllegalArgumentException("Monolingual requires 'language' runtime parameter.");
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));

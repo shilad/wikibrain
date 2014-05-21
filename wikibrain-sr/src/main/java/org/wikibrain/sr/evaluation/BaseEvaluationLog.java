@@ -91,7 +91,7 @@ public abstract class BaseEvaluationLog<T extends BaseEvaluationLog> implements 
      * Writes a line, adds a newline, and flushes the log
      * @param line
      */
-    protected void write(String line) throws IOException {
+    protected synchronized void write(String line) throws IOException {
         if (log != null) {
             log.write(line + "\n");
             log.flush();

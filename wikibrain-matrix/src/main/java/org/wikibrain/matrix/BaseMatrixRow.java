@@ -32,7 +32,7 @@ public abstract class BaseMatrixRow implements MatrixRow {
 
     @Override
     public TIntFloatHashMap asTroveMap() {
-        TIntFloatHashMap result = new TIntFloatHashMap(getNumCols());
+        TIntFloatHashMap result = new TIntFloatHashMap(getNumCols()*2);
         for (int i = 0; i < getNumCols(); i++) {
             result.put(getColIndex(i), getColValue(i));
         }

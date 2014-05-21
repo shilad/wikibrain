@@ -13,7 +13,7 @@ import java.io.File;
 public class TestUtils {
     public static final String INTEGRATION_TEST_CONF = "integration-test.conf";
     public static String[] DEFAULT_ARGS = {
-                    "-c", "integration-test.conf",
+                    "-c", "wikibrain-integration-tests/integration-test.conf",
                     "-l", "simple,la"
             };
 

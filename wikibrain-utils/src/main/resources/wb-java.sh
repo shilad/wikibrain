@@ -21,43 +21,43 @@ full_path() {
 
 
 # Base Wikapidia directory. Should be the parent project directory in multi-maven projects
-WP_DIR=$(full_path "${WP_DIR:-.}")
+WB_DIR=$(full_path "${WB_DIR:-.}")
 
 # Java options
-WP_JAVA_OPTS="${WP_JAVA_OPTS:-${JAVA_OPTS} -server -ea}"
+WB_JAVA_OPTS="${WB_JAVA_OPTS:-${JAVA_OPTS} -server -ea}"
 
 # Directories to search for the wp-conf.sh file
-WP_CONF_PATHS="
-${WP_CONF}
+WB_CONF_PATHS="
+${WB_CONF}
 `dirname $0`/wp-conf.sh
 ./wp-conf.sh
-${WP_DIR}/wp-conf.sh
+${WB_DIR}/wp-conf.sh
 "
 
 # Search path for maven pom
-WP_POM_PATHS="
-${WP_POM}
-${WP_DIR}/pom.xml
-${WP_DIR}/wikAPIdia-parent/pom.xml
+WB_POM_PATHS="
+${WB_POM}
+${WB_DIR}/pom.xml
+${WB_DIR}/wikAPIdia-parent/pom.xml
 "
 
 # Destination of compiled jars and dependencies
-if [ ! -e "${WP_LIB:-${WP_DIR}/lib}" ]; then
-    mkdir "${WP_LIB:-${WP_DIR}/lib}"
+if [ ! -e "${WB_LIB:-${WB_DIR}/lib}" ]; then
+    mkdir "${WB_LIB:-${WB_DIR}/lib}"
 fi
-WP_LIB=$(full_path "${WP_LIB:-${WP_DIR}/lib}")
+WB_LIB=$(full_path "${WB_LIB:-${WB_DIR}/lib}")
 
 # Specify default classpath. This will be updated later, and CLASSPATH will be prepended to it.
-WP_CLASSPATH="${WP_CLASSPATH:-${WP_LIB}/*}"
+WB_CLASSPATH="${WB_CLASSPATH:-${WB_LIB}/*}"
 
 # Java executable
-WP_JAVA_BIN="${WP_JAVA_BIN:-java}"
+WB_JAVA_BIN="${WB_JAVA_BIN:-java}"
 
 # Standard maven targets. Clean will be prepended to it if it is the first argument
-WP_MVN_TARGETS="${WP_MVN_TARGETS:-compile install}"
+WB_MVN_TARGETS="${WB_MVN_TARGETS:-compile install}"
 
-echo -e "Wikapidia environment settings follow. WP_CLASSPATH is updated again later\n" >&2
-(set -o posix ; set) | grep WP_ | sed -e 's/^/    /' >&2
+echo -e "Wikapidia environment settings follow. WB_CLASSPATH is updated again later\n" >&2
+(set -o posix ; set) | grep WB_ | sed -e 's/^/    /' >&2
 echo "" >&2
 
 # Displays an error message and exits
@@ -79,7 +79,7 @@ function select_first_file() {
 
 # Process initial arguments and make sure they are valid.
 if [ "$1" == "clean" ]; then
-    WP_MVN_TARGETS="clean ${WP_MVN_TARGETS}"
+    WB_MVN_TARGETS="clean ${WB_MVN_TARGETS}"
     shift
 fi
 if [ -z "$1" ]; then
@@ -88,31 +88,31 @@ fi
 
 
 # Find the maven pom
-pom="$(select_first_file ${WP_POM_PATHS})"
+pom="$(select_first_file ${WB_POM_PATHS})"
 if [ -z "${pom}" ]; then
-    die "Maven pom.xml file not found in ${WP_POM_PATHS}"
+    die "Maven pom.xml file not found in ${WB_POM_PATHS}"
 fi
 echo "Using maven pom ${pom}" >&2
 
 
 # Compile the project and build the classpath files
-rm -rf "${WP_LIB}/*.jar"
-mvn -f "${pom}" -q -DskipTests ${WP_MVN_TARGETS} || die "compilation failed"
-mvn -f "${pom}" -q dependency:copy-dependencies -DoutputDirectory="${WP_LIB}" || die "copying dependencies failed"
+rm -rf "${WB_LIB}/*.jar"
+mvn -f "${pom}" -q -DskipTests ${WB_MVN_TARGETS} || die "compilation failed"
+mvn -f "${pom}" -q dependency:copy-dependencies -DoutputDirectory="${WB_LIB}" || die "copying dependencies failed"
 
 # Update classpath with latest version of jars, etc.
-for srcdir in $(find "${WP_DIR}" -type d -print | grep 'target/classes$'); do
-    WP_CLASSPATH="${srcdir}:${WP_CLASSPATH}"
+for srcdir in $(find "${WB_DIR}" -type d -print | grep 'target/classes$'); do
+    WB_CLASSPATH="${srcdir}:${WB_CLASSPATH}"
 done
 if [ -n "${CLASSPATH}" ]; then
-    WP_CLASSPATH="${CLASSPATH}:${WP_CLASSPATH}"
+    WB_CLASSPATH="${CLASSPATH}:${WB_CLASSPATH}"
 fi
 
-echo "final WP_CLASSPATH is $WP_CLASSPATH" >&2
+echo "final WB_CLASSPATH is $WB_CLASSPATH" >&2
 
 
 
 # Run the command
-echo "executing \"${WP_JAVA_BIN}\" -cp \"${WP_CLASSPATH}\" $WP_JAVA_OPTS $@"
+echo "executing \"${WB_JAVA_BIN}\" -cp \"${WB_CLASSPATH}\" $WB_JAVA_OPTS $@"
 
-exec "${WP_JAVA_BIN}" -cp "${WP_CLASSPATH}" ${WP_JAVA_OPTS} $@
+exec "${WB_JAVA_BIN}" -cp "${WB_CLASSPATH}" ${WB_JAVA_OPTS} $@

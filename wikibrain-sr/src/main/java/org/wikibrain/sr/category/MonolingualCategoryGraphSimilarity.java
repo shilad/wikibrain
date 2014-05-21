@@ -144,7 +144,7 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
                 return null;
             }
 
-            if (!runtimeParams.containsKey("language")){
+            if (runtimeParams == null || !runtimeParams.containsKey("language")){
                 throw new IllegalArgumentException("LocalCategoryGraphBuilder requires 'language' runtime parameter.");
             }
 

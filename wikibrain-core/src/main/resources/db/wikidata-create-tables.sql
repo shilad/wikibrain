@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS WIKIDATA_STATEMENT (
 
   -- Property value
   VAL_TYPE VARCHAR(50) NOT NULL,
-  VAL_STR TEXT NOT NULL,
+  VAL_STR VARCHAR(4096) NOT NULL,
 
   -- Property rank: 0 = deprecated, 1 = normal, 2 = preferred
   RANK SMALLINT NOT NULL

@@ -21,6 +21,7 @@ import org.wikibrain.core.dao.sql.SimpleSqlDaoIterable;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.jooq.Tables;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.parser.WpParseException;
@@ -143,7 +144,34 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         return IteratorUtils.toList(get(filter).iterator());
     }
 
+    public Collection<WikidataEntity> getPropertyByName(Language language, String name) throws DaoException {
+        List<WikidataEntity> matches = new ArrayList<WikidataEntity>();
+        Map<Integer, WikidataEntity> props = getProperties();
+        for (WikidataEntity e : props.values()) {
+            if (e.getAliases().containsKey(language) && e.getAliases().get(language).contains(name)) {
+                matches.add(e);
+            } else if (e.getLabels().containsKey(language) && e.getLabels().get(language).contains(name)) {
+                matches.add(e);
+            }
+        }
+        return matches;
+    }
 
+    public Collection<WikidataEntity> getPropertyByName(String name) throws DaoException {
+        Set<WikidataEntity> matches = new HashSet<WikidataEntity>();
+        Map<Integer, WikidataEntity> props = getProperties();
+        for (WikidataEntity e : props.values()) {
+            if (e.getLabels().values().contains(name)) {
+                matches.add(e);
+                continue;
+            }
+            if (e.getAliases().values().contains(name)) {
+                matches.add(e);
+                continue;
+            }
+        }
+        return matches;
+    }
 
     @Override
     public Map<String, List<LocalWikidataStatement>> getLocalStatements(LocalPage page) throws DaoException {
@@ -270,9 +298,13 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                 item.getItem().getId(),
                 item.getProperty().getId(),
                 item.getValue().getType().toString().toLowerCase(),
-                gson.toJson(item.getValue().getJsonValue()),
+                encodeValue(item.getValue()),
                 item.getRank().ordinal()
         );
+    }
+
+    private String encodeValue(WikidataValue value) {
+        return gson.toJson(value.getJsonValue());
     }
 
     @Override
@@ -374,6 +406,53 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     }
 
     @Override
+    public Iterable<WikidataStatement> getByValue(WikidataEntity property, WikidataValue value) throws DaoException {
+        WikidataFilter filter = new WikidataFilter.Builder()
+                .withPropertyId(property.getId())
+                .withValue(value)
+                .build();
+        return get(filter);
+    }
+
+    @Override
+    public Iterable<WikidataStatement> getByValue(String propertyName, WikidataValue value) throws DaoException {
+        Set<Integer> propIds = new HashSet<Integer>();
+        for (WikidataEntity e : getPropertyByName(propertyName)) {
+            propIds.add(e.getId());
+        }
+        if (propIds.isEmpty()) {
+            return new ArrayList<WikidataStatement>();
+        }
+        WikidataFilter filter = new WikidataFilter.Builder()
+                .withPropertyIds(propIds)
+                .withValue(value)
+                .build();
+        return get(filter);
+    }
+
+    @Override
+    public Set<Integer> conceptsWithValue(String propertyName, WikidataValue value) throws DaoException {
+        Set<Integer> concepts = new HashSet<Integer>();
+        for (WikidataStatement st : getByValue(propertyName, value)) {
+            if (st.getItem().getType() == WikidataEntity.Type.ITEM) {
+                concepts.add(st.getItem().getId());
+            }
+        }
+        return concepts;
+    }
+
+    @Override
+    public Set<LocalId> pagesWithValue(String propertyName, WikidataValue value, Language language) throws DaoException {
+        Set<LocalId> ids = new HashSet<LocalId>();
+        for (int conceptId : conceptsWithValue(propertyName, value)) {
+            UniversalPage up = upDao.getById(conceptId, 1);
+            if (up != null && up.isInLanguage(language)) {
+                ids.add(new LocalId(language, up.getLocalId(language)));
+            }
+        }
+        return ids;
+    }
+    @Override
     public Iterable<WikidataStatement> get(WikidataFilter filter) throws DaoException {
         List<Condition> conditions = new ArrayList<Condition>();
         if (filter.getLangIds() != null) {
@@ -391,8 +470,23 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         if (filter.getRanks() != null) {
             conditions.add(WIKIDATA_STATEMENT.RANK.in(filter.getRankOrdinals()));
         }
+        if (filter.getValues() != null) {
+            String type = null;
+            List<String> values = new ArrayList<String>();
+            for (WikidataValue value : filter.getValues()) {
+                values.add(encodeValue(value));
+                if (type == null) {
+                    type = value.getTypeName();
+                }
+                if (!type.equals(value.getTypeName())) {
+                    throw new IllegalArgumentException("All wikidata filter values must have the same type");
+                }
+            }
+            conditions.add(WIKIDATA_STATEMENT.VAL_TYPE.eq(type.toLowerCase()).and(WIKIDATA_STATEMENT.VAL_STR.in(values)));
+        }
         DSLContext jooq = getJooq();
         try {
+//            System.out.println("EXECUTING " + jooq.select().from(Tables.WIKIDATA_STATEMENT).where(conditions).getSQL());
             Cursor<Record> result = jooq.select().
                     from(Tables.WIKIDATA_STATEMENT).
                     where(conditions).fetchLazy(getFetchSize());

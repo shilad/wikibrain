@@ -2,10 +2,7 @@ package org.wikibrain.wikidata;
 
 import org.wikibrain.core.lang.Language;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Shilad Sen
@@ -20,6 +17,7 @@ public class WikidataFilter {
     // For statements, but not entities
     private Collection<Integer> propertyIds;
     private Collection<WikidataStatement.Rank> ranks;
+    private Collection<WikidataValue> values;
 
     public WikidataFilter() {
     }
@@ -54,6 +52,9 @@ public class WikidataFilter {
         return typeCodes;
     }
 
+    public Collection<WikidataValue> getValues() {
+        return values;
+    }
 
     public Collection<Integer> getEntityIds() {
         return entityIds;
@@ -131,6 +132,16 @@ public class WikidataFilter {
 
         public Builder withRanks(Collection<WikidataStatement.Rank> ranks) {
             filter.ranks = ranks;
+            return this;
+        }
+
+        public Builder withValue(WikidataValue value) {
+            filter.values = Arrays.asList(value);
+            return this;
+        }
+
+        public Builder withValues(Collection<WikidataValue> values) {
+            filter.values = values;
             return this;
         }
 
