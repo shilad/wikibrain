@@ -11,6 +11,7 @@ public class Layers {
     public static String GADM0 = "GADM0";
     public static String GADM1 = "GADM1";
     public static String GADM2 = "GADM2";
+    public static String[] GADM = {"GADM0", "GADM1","GADM2"};
 
     /**
      * Gets a layer name for a type-based Wikidata layer.

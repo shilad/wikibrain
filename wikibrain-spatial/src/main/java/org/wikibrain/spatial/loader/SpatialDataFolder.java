@@ -1,15 +1,19 @@
 package org.wikibrain.spatial.loader;
 
 import com.google.common.collect.Sets;
+import org.codehaus.plexus.util.FileUtils;
 import org.geotools.data.shapefile.files.ShpFileType;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.wikibrain.core.WikiBrainException;
+import org.wikibrain.spatial.core.constants.RefSys;
+import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Set;
 
 /**
@@ -80,7 +84,10 @@ public class SpatialDataFolder {
             String path = refSysFolder + "/" + layerName + ".shp";
             ShpFiles shpFiles = new ShpFiles(path);
 
-            return new File(shpFiles.get(ShpFileType.SHP));
+            URL url = new URL(shpFiles.get(ShpFileType.SHP));
+
+            return new File(url.getFile());
+
         } catch(MalformedURLException e){
             throw new WikiBrainException(e);
         }
@@ -144,6 +151,38 @@ public class SpatialDataFolder {
             }
         }
         return rVal;
+    }
+
+
+    /**
+     * Deletes a layer. Use with caution.
+     * @param layerName Layer to delete
+     * @param refSysName Reference system of layer to delete
+     * @throws WikiBrainException
+     */
+    public void deleteLayer(String layerName, String refSysName) throws WikiBrainException {
+        File mainShapefile = getMainShapefile(layerName, refSysName);
+        WikiBrainSpatialUtils.deleteShapefile(mainShapefile);
+
+    }
+
+    /**
+     * Deletes a specific file in a reference system folder. Good for removing spare files.
+     * @param fileName
+     * @param refSysName
+     * @throws WikiBrainException
+     */
+    public void deleteSpecificFile(String fileName, String refSysName) throws WikiBrainException{
+
+        File refSysFolder = this.getRefSysFolder(refSysName);
+        String path = refSysFolder + "/" + fileName;
+        File toDelete = new File(path);
+        if (!toDelete.exists()){
+            throw new WikiBrainException("No file at path: " + path);
+        }else{
+            toDelete.delete();
+        }
+
     }
 
 

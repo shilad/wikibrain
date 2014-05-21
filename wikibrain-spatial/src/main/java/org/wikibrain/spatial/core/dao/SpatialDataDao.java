@@ -81,6 +81,8 @@ public interface SpatialDataDao {
      * @return the geometry, or null if no geometry could be found
      * @throws DaoException
      */
+
+    // getGeometry("Minnesota", Language.SIMPLE, "gadm1", "earth");
     public Geometry getGeometry(String articleName, Language language, String layerName, String refSysName) throws DaoException;
 
     /**
