@@ -42,7 +42,7 @@ public class SpatialContainmentExample {
             LanguageSet loadedLangs = lpDao.getLoadedLanguages();
 
             // set up the parameters for the call to getContainedItemIds
-            String containerName = "China";
+            String containerName = "Israel";
 
             Set<String> subLayers = Sets.newHashSet();
             subLayers.add("wikidata");
