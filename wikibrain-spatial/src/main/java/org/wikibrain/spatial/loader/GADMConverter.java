@@ -197,8 +197,8 @@ public class GADMConverter {
                 }
             } else {
                 //level 0 mapping
+                LOG.log(Level.INFO, "Mapping polygons to the corresponding countries.");
                 while (inputFeatures.hasNext()) {
-                    LOG.log(Level.INFO, "Mapping polygons to the corresponding countries.");
                     SimpleFeature feature = inputFeatures.next();
                     String country = ((String) feature.getAttribute(4)).intern();
 
@@ -255,15 +255,16 @@ public class GADMConverter {
                 }
             } else {
                 int total = stateShape.keySet().size();
-                for (String country: stateShape.keySet()) {
+                HashSet<String> countryList = new HashSet<String>();
+                countryList.addAll(stateShape.keySet());
+                for (String country: countryList) {
                     try {
                         count++;
+                        LOG.log(Level.INFO, "Combining " + stateShape.get(country).size() + " polygons for " + country + " (" + count + "/" + total + ")");
                         Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(country)).union();
                         featureBuilder.add(newGeom);
                         featureBuilder.add(country);
                         SimpleFeature feature = featureBuilder.buildFeature(null);
-                        if (count % 10 == 0)
-                            LOG.log(Level.INFO, count + "/" + total + " countries processed.");
                         features.add(feature);
                         stateShape.remove(country);
                         System.gc();

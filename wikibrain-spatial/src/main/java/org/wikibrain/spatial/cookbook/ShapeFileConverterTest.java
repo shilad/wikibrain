@@ -8,6 +8,7 @@ import org.apache.commons.codec.digest.*;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 /**
@@ -16,9 +17,11 @@ import java.net.MalformedURLException;
  */
 public class ShapeFileConverterTest {
 
-    public static void main(String[] args) throws WikiBrainException {
+    public static void main(String[] args) throws WikiBrainException, IOException {
         GADMConverter converter = new GADMConverter();
         converter.downloadAndConvert(new SpatialDataFolder(new File("test_spatial_data_folder")));
+
+
 
 
     }
