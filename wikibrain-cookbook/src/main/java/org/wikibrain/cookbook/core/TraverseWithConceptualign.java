@@ -42,7 +42,7 @@ public class TraverseWithConceptualign {
             // print what we found
             while(finalUPages.hasNext()){
                 UniversalPage finalUPage = finalUPages.next();
-                System.out.println(finalUPage.getUnivId() + ": " + finalUPage.toString());
+                System.out.println(finalUPage.getUnivId() + ": " + finalUPage.getBestEnglishTitle(lpDao, true));
             }
 
 
