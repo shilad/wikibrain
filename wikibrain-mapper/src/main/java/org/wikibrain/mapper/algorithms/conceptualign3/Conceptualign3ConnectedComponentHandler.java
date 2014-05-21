@@ -66,7 +66,7 @@ public class Conceptualign3ConnectedComponentHandler implements ConnectedCompone
         }
 
         List<ClusterResult> rVal = new ArrayList<ClusterResult>();
-        int minLangVotes = (int)Math.floor(minVotesRatio*origScanResult.langCount);
+        int minLangVotes = (int)Math.floor(minVotesRatio*origScanResult.langCount-1); // -1 to account for the node itself
         Set<Set<LocalId>> clusters = ILLSplitter.split(ills, minLangVotes, maxVotesPerLang, print, lpDao);
         for (Set<LocalId> curCluster : clusters){
             int clusterUnivId = getCurUnivId();

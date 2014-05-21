@@ -89,7 +89,7 @@ public class ConceptualignConceptMapper extends ConceptMapper{
 
         // parameters
         int maxEdge = 2; // see Bao et al. 2012 for definition
-        double minLang = 0.5; // see Bao et al. 2012 for definition
+        double minLang = 1.0; // see Bao et al. 2012 for definition
 
         // load Wikidata mappings
         if (uPages == null) {

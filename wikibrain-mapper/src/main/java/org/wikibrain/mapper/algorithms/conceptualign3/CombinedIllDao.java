@@ -62,12 +62,14 @@ public class CombinedIllDao implements InterLanguageLinkDao {
         if (localId2ItemIdIndex.contains(input)) {
             Integer itemId = localId2ItemIdIndex.get(input);
             curIlls.addAll(itemId2LocalIdIndex.get(itemId));
+            curIlls.remove(input);
         }
 
     }
 
     @Override
     public Set<LocalId> getFromSource(LocalId source) throws DaoException {
+
 
         Set<LocalId> rVal = new HashSet<LocalId>();
         addWikidataIlls(source, rVal);
@@ -83,6 +85,8 @@ public class CombinedIllDao implements InterLanguageLinkDao {
 
     @Override
     public Set<LocalId> getToDest(LocalId dest) throws DaoException {
+
+
 
         Set<LocalId> rVal = new HashSet<LocalId>();
         addWikidataIlls(dest, rVal);

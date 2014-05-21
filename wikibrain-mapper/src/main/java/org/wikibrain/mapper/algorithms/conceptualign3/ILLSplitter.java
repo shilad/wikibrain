@@ -55,6 +55,14 @@ public class ILLSplitter {
                         if (counter.get(curDest).get(new Integer(curSource.getLanguage().getId())) <= maxVotesPerLang){
                             graph.addEdge(edgeCounter++, curSource, curDest);
                         }
+                    }else{
+                        if (print) {
+                            try {
+                                LOG.info("Removing edge: " + lpDao.getById(curSource).getTitle() + " --> " + lpDao.getById(curDest).getTitle());
+                            }catch(DaoException e){
+                                throw new WikiBrainException(e);
+                            }
+                        }
                     }
                 }else{
                     LOG.warning("Found duplicate ILLs to same lang from same article exceeding maxVotes! " +
