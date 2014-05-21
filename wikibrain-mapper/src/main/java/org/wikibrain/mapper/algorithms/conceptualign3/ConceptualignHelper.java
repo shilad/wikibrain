@@ -11,25 +11,6 @@ import java.util.List;
  */
 public class ConceptualignHelper {
 
-//    /**
-//     * Handles non-conflicted components
-//     * @param curUnivId
-//     * @param curVertices
-//     * @return
-//     */
-//    public static List<ClusterResult> getSingletonClusterResult(int curUnivId, List<LocalId> curVertices){
-//
-//        Multimap<Language, LocalId> mmap = HashMultimap.create();
-//        for(LocalId curVertex : curVertices){
-//            mmap.put(curVertex.getLanguage(), curVertex);
-//        }
-//
-//        List<ClusterResult> rVal = Lists.newArrayList();
-//        rVal.add(new ClusterResult(curUnivId, mmap));
-//
-//        return rVal;
-//
-//    }
 
     public static ScanResult scanVerticesOfComponent(List<LocalId> curVertices){
 

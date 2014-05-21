@@ -73,7 +73,7 @@ public class ILLSplitter {
                 StringBuilder sb = new StringBuilder();
                 for (LocalId clusterMemb : cluster){
                     try {
-                        sb.append(lpDao.getById(clusterMemb).toString());
+                        sb.append(lpDao.getById(clusterMemb).getTitle().toString());
                         sb.append(",");
                     }catch(DaoException e){
                         LOG.severe("Error while getting title of LocalId: " + clusterMemb.toString());

@@ -34,24 +34,53 @@ import java.util.logging.Logger;
  * Disambiguation page support will be more difficult given that we have split articles and disambiguation pages into
  * separate namespaces.
  *
+ * Due to the changes associated with Wikidata, much more research is needed in this area. MaxEdges has been set to 2 as this
+ * seems reasonable, but again, more research is definitely need.
+ *
  */
 public class ConceptualignConceptMapper extends ConceptMapper{
 
-    private final PureWikidataConceptMapper wdMapper;
+    private PureWikidataConceptMapper wdMapper;
     private final InterLanguageLinkDao illDao;
     private final MetaInfoDao miDao;
 
+    private Iterable<UniversalPage> uPages;
+
+    private LanguageSet uPageLs;
+
+    private final boolean print;
 
     private static Logger LOG = Logger.getLogger(ConceptualignConceptMapper.class.getName());
 
 
     public ConceptualignConceptMapper(File wikidataFilePath, int id,
-                 LocalPageDao<LocalPage> localPageDao, InterLanguageLinkDao illDao, MetaInfoDao miDao) {
+                 LocalPageDao<LocalPage> localPageDao, InterLanguageLinkDao illDao, MetaInfoDao miDao, boolean print) {
 
         super(id, localPageDao);
         this.illDao = illDao;
         this.miDao = miDao;
+        this.print = print;
         wdMapper = new PureWikidataConceptMapper(wikidataFilePath, -1, localPageDao);
+
+    }
+
+    /**
+     * For testing purposes only
+     * @param uPages
+     * @param id
+     * @param localPageDao
+     * @param illDao
+     * @param miDao
+     */
+    public ConceptualignConceptMapper(Iterable<UniversalPage> uPages, LanguageSet uPagesLs, int id, LocalPageDao<LocalPage> localPageDao,
+                                      InterLanguageLinkDao illDao, MetaInfoDao miDao, boolean print) {
+        super(id, localPageDao);
+        this.illDao = illDao;
+        this.miDao = miDao;
+        this.uPages = uPages;
+        this.print = print;
+
+        this.uPageLs = uPagesLs;
 
     }
 
@@ -59,20 +88,26 @@ public class ConceptualignConceptMapper extends ConceptMapper{
     public Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikiBrainException, DaoException {
 
         // parameters
-        int maxEdge = 1; // see Bao et al. 2012 for definition
+        int maxEdge = 2; // see Bao et al. 2012 for definition
         double minLang = 0.5; // see Bao et al. 2012 for definition
 
         // load Wikidata mappings
-        LOG.log(Level.INFO, "Loading Wikidata concept mappings");
-        Iterator<UniversalPage> uPages = wdMapper.getConceptMap(ls);
+        if (uPages == null) {
+            LOG.log(Level.INFO, "Loading Wikidata concept mappings");
+            Iterator<UniversalPage> uPages = wdMapper.getConceptMap(ls);
+        }else{
+            if (!ls.equals(uPageLs)){
+                throw new WikiBrainException("LanguageSet mismatch");
+            }
+        }
 
         // perform Conceptualign
-        CombinedIllDao combinedDao = new CombinedIllDao(uPages, illDao);
+        CombinedIllDao combinedDao = new CombinedIllDao(uPages.iterator(), illDao);
         ILLGraph illGraph = new ILLGraph(combinedDao, localPageDao, miDao);
 
         BreadthFirstIterator<LocalId, ILLEdge> bfi = new BreadthFirstIterator<LocalId, ILLEdge>(illGraph);
 		List<ConnectedComponentHandler> ccHandlers = new ArrayList<ConnectedComponentHandler>();
-		ccHandlers.add(new Conceptualign3ConnectedComponentHandler(0.5, 1, true, this.localPageDao));
+		ccHandlers.add(new Conceptualign3ConnectedComponentHandler(minLang, maxEdge, true, this.localPageDao));
 
 
 		ConnectedComponentTraversalListener listener =

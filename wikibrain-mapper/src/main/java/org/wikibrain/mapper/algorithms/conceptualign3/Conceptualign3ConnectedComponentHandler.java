@@ -2,11 +2,15 @@ package org.wikibrain.mapper.algorithms.conceptualign3;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
 import org.wikibrain.core.WikiBrainException;
+import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.LocalId;
+import org.wikibrain.core.model.LocalPage;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by bjhecht on 5/20/14.
@@ -18,6 +22,8 @@ public class Conceptualign3ConnectedComponentHandler implements ConnectedCompone
     private final boolean print;
     private int curUnivId;
     private final LocalPageDao lpDao;
+
+    private static Logger LOG = Logger.getLogger(ConceptualignConceptMapper.class.getName());
 
     public Conceptualign3ConnectedComponentHandler(double minVotesRatio,
                                                    int maxVotesPerLang, boolean print, LocalPageDao lpDao) throws WikiBrainException {
@@ -48,6 +54,7 @@ public class Conceptualign3ConnectedComponentHandler implements ConnectedCompone
         }
 
         // if it is ambiguous... TODO: convert to multimap
+        if (print) printAmbiguousCluster(curVertices);
         Map<LocalId, List<LocalId>> ills = new HashMap<LocalId, List<LocalId>>();
         for (LocalId curVertex : curVertices){
             Set<ILLEdge> edges = graph.outgoingEdgesOf(curVertex);
@@ -69,6 +76,22 @@ public class Conceptualign3ConnectedComponentHandler implements ConnectedCompone
             rVal.add(clusterResult);
         }
         return rVal;
+
+    }
+
+    private void printAmbiguousCluster(List<LocalId> vertices) throws WikiBrainException {
+
+        try {
+            List<String> titles = Lists.newArrayList();
+            for (LocalId vertex : vertices) {
+                LocalPage localPage = lpDao.getById(vertex);
+                titles.add(localPage.getTitle().toString());
+            }
+            LOG.info("Found ambiguous cluster: " + StringUtils.join(titles, ", "));
+        }catch(DaoException e){
+            throw new WikiBrainException(e);
+        }
+
 
     }
 
