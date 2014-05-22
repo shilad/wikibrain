@@ -19,6 +19,8 @@ import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
 import org.wikibrain.sr.ensemble.EnsembleMetric;
 import org.wikibrain.sr.esa.SRConceptSpaceGenerator;
+import org.wikibrain.sr.word2vec.Corpus;
+import org.wikibrain.sr.word2vec.Word2VecTrainer;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.BufferedReader;
@@ -186,6 +188,9 @@ public class SRBuilder {
 
     public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
         LOG.info("building component metric " + name);
+        if (getMetricType(name).equals("vector.word2vec")) {
+            initWord2VecCorpus(name);
+        }
         Dataset ds = getDataset();
         MonolingualSRMetric metric = getMetric(name);
         if (metric instanceof BaseMonolingualSRMetric) {
@@ -209,6 +214,21 @@ public class SRBuilder {
         metric.write();
     }
 
+    private void initWord2VecCorpus(String name) throws ConfigurationException, IOException, DaoException {
+        Config config = getMetricConfig(name).getConfig("generator");
+        Corpus corpus =  env.getConfigurator().get(Corpus.class, config.getString("corpus"), "language", language.getLangCode());
+        if (!corpus.exists()) {
+            corpus.create();
+        }
+        File model = FileUtils.getFile(srDir, name, language.getLangCode(), config.getString("modelFile"));
+        if (!model.isFile()) {
+            Word2VecTrainer trainer = new Word2VecTrainer(
+                    env.getConfigurator().get(LocalPageDao.class),
+                    language);
+            trainer.train(corpus.getDirectory());
+            trainer.save(model);
+        }
+    }
 
     private void setValidMostSimilarIdsFromFile(String file) throws IOException {
         setValidMostSimilarIds(readIds(file));
