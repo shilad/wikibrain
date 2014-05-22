@@ -114,7 +114,7 @@ public class MilneWittenGenerator implements VectorGenerator {
             if (!config.getString("type").equals("links")) {
                 return null;
             }
-            if (!runtimeParams.containsKey("language")) {
+            if (runtimeParams == null || !runtimeParams.containsKey("language")) {
                 throw new IllegalArgumentException("Monolingual SR Metric requires 'language' runtime parameter");
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));

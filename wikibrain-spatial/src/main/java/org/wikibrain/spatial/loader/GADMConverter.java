@@ -235,8 +235,8 @@ public class GADMConverter {
             if (level == 1) {
                 int total = stateShape.keySet().size(); //TODO: We need a lot more in the way of progress statements here
                 for (String state : stateCountry.keySet()) {    //create the feature collection for the new shpfile
+                    count++;
                     try {
-                        count++;
                         Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).union();
                         featureBuilder.add(newGeom);
                         featureBuilder.add(state);
@@ -249,7 +249,15 @@ public class GADMConverter {
                         System.gc();
                     }
                     catch (Exception e) {
-                        LOG.log(Level.INFO, "Exception occured at " + state + " : " + e.getMessage());
+                        Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(state)).buffer(0);
+                        featureBuilder.add(newGeom);
+                        featureBuilder.add(state);
+                        featureBuilder.add(state + ", " + stateCountry.get(state));
+                        SimpleFeature feature = featureBuilder.buildFeature(null);
+                        if (count % 10 == 0)
+                            LOG.log(Level.INFO, count + "/" + total + " level 1 administrative districts processed.");
+                        features.add(feature);
+                        LOG.log(Level.INFO, "Exception occured at " + state + ": " + e.getMessage() + ". Attempting different combining methods.");
                         stateShape.remove(state);
                         System.gc();
                         continue;
@@ -260,8 +268,8 @@ public class GADMConverter {
                 HashSet<String> countryList = new HashSet<String>();
                 countryList.addAll(stateShape.keySet());
                 for (String country: countryList) {
+                    count++;
                     try {
-                        count++;
                         LOG.log(Level.INFO, "Combining " + stateShape.get(country).size() + " polygons for " + country + " (" + count + "/" + total + ")");
                         Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(country)).union();
                         featureBuilder.add(newGeom);
@@ -272,7 +280,12 @@ public class GADMConverter {
                         System.gc();
                     }
                     catch (Exception e){
-                        LOG.log(Level.INFO, "Exception occured at " + country + " : " + e.getMessage());
+                        LOG.log(Level.INFO, "Exception occured at " + country + " : " + e.getMessage() + ". Attempting different combining methods.");
+                        Geometry newGeom = geometryFactory.buildGeometry(stateShape.get(country)).buffer(0);
+                        featureBuilder.add(newGeom);
+                        featureBuilder.add(country);
+                        SimpleFeature feature = featureBuilder.buildFeature(null);
+                        features.add(feature);
                         stateShape.remove(country);
                         System.gc();
                         continue;

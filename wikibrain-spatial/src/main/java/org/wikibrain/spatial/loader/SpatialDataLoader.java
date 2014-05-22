@@ -366,8 +366,14 @@ public class SpatialDataLoader {
                 }
             }
 
+
+        //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
+        loader.loadWikidataData();
+        loader.loadExogenousData();
+
             LOG.info("optimizing database.");
             conf.get(WpDataSource.class).optimize();
+
 
         }catch(Exception e){
             e.printStackTrace();

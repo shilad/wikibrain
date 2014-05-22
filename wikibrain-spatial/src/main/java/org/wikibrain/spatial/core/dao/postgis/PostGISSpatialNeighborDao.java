@@ -186,6 +186,7 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
 
 
             while (featureIterator.hasNext()){
+                try{
 
                 Feature f = featureIterator.next();
                 Integer itemId = (Integer)f.getProperty(db.getItemIdAttributeName()).getValue();
@@ -195,7 +196,10 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
                 geoCalc.setStartingGeographicPoint(geometry.getCoordinate().x, geometry.getCoordinate().y);
                 geoCalc.setDestinationGeographicPoint(g.getCoordinate().x, g.getCoordinate().y);
                 distMap.put(itemId, geoCalc.getOrthodromicDistance());
-
+                }
+                catch (Exception e){
+                    //do nothing
+                }
             }
             featureIterator.close();
 
@@ -218,6 +222,8 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
                     return 0;
                 }
             });
+            if(k > order.size())
+                k = order.size();
 
             for(Integer i: order.subList(0, k)){
                 finalRVal.put(i, rVal.get(i));
