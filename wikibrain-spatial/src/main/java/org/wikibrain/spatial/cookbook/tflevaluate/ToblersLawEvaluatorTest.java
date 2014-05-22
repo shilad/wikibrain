@@ -8,14 +8,15 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by toby on 4/17/14.
  *
  */
 public class ToblersLawEvaluatorTest {
+
+
     public static void main(String[] args) throws Exception {
 
         Env env = EnvBuilder.envFromArgs(args);
@@ -25,6 +26,10 @@ public class ToblersLawEvaluatorTest {
         Map<Integer, Geometry> allGeometries = sdDao.getAllGeometries("wikidata", "earth");
         Map<Integer, Geometry> geometryMap = new HashMap<Integer, Geometry>();
         int counter = 0;
+
+
+
+
         for(Integer id: allGeometries.keySet()){
             geometryMap.put(id, allGeometries.get(id));
             counter ++;
