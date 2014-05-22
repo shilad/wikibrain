@@ -5,6 +5,7 @@ import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.tools.jdbc.JDBCUtils;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,18 +27,20 @@ import java.util.logging.Logger;
  */
 public class FastLoader {
 
+    private static final int NUM_INSERTERS = Math.min(WpThreadUtils.getMaxThreads(), 4);
+
     private static final Object POSION_PILL = new Object();
     private boolean isPostGisLoader = false;
 
     static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
-    static final int BATCH_SIZE = 2000;
+    static final int BATCH_SIZE = 1000;
 
     private final WpDataSource ds;
     private final String table;
     private final String[] fields;
 
     private BlockingQueue<Object[]> rowBuffer =
-            new ArrayBlockingQueue<Object[]>(BATCH_SIZE * 2);
+            new ArrayBlockingQueue<Object[]>(BATCH_SIZE * NUM_INSERTERS * 2);
 
     static enum InserterState {
         RUNNING,            // In normal working mode
@@ -46,7 +49,7 @@ public class FastLoader {
         SHUTDOWN            // Already shutdown
     }
 
-    private Thread inserter = null;
+    private Thread [] inserters = new Thread[NUM_INSERTERS];
     private volatile InserterState inserterState = null;
 
     public FastLoader(WpDataSource ds, TableField[] fields) throws DaoException {
@@ -63,24 +66,28 @@ public class FastLoader {
         this.table = table;
         this.fields = fields;
 
-        inserter = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    insertBatches();
-                } catch (DaoException e) {
-                    LOG.log(Level.SEVERE, "inserter failed", e);
-                    inserterState = InserterState.FAILED;
-                } catch (SQLException e) {
-                    LOG.log(Level.SEVERE, "inserter failed", e);
-                    inserterState = InserterState.FAILED;
-                } catch (InterruptedException e) {
-                    LOG.log(Level.SEVERE, "inserter interrupted", e);
-                    inserterState = InserterState.FAILED;
+        for (int i = 0; i < inserters.length; i++) {
+            inserters[i] = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        insertBatches();
+                    } catch (DaoException e) {
+                        LOG.log(Level.SEVERE, "inserter failed", e);
+                        inserterState = InserterState.FAILED;
+                        rowBuffer.clear();  // allow any existing puts to go through
+                    } catch (SQLException e) {
+                        LOG.log(Level.SEVERE, "inserter failed", e);
+                        inserterState = InserterState.FAILED;
+                        rowBuffer.clear();  // allow any existing puts to go through
+                    } catch (InterruptedException e) {
+                        LOG.log(Level.SEVERE, "inserter interrupted", e);
+                        inserterState = InserterState.FAILED;
+                        rowBuffer.clear();  // allow any existing puts to go through
+                    }
                 }
-                rowBuffer.clear();  // allow any existing puts to go through
-            }
-        });
-        inserter.start();
+            });
+            inserters[i].start();
+        }
         inserterState = InserterState.RUNNING;
     }
 
@@ -99,7 +106,7 @@ public class FastLoader {
      */
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     public void load(Object ... values) throws DaoException {
-        if (inserter == null || inserterState != InserterState.RUNNING) {
+        if (inserters == null || inserterState != InserterState.RUNNING) {
             throw new IllegalStateException("inserter thread in state " + inserterState);
         }
         // Hack convert dates to Timestamps
@@ -147,21 +154,20 @@ public class FastLoader {
             statement = cnx.prepareStatement(sql);
 
 
-            while (!finished) {
+            while (!finished && inserterState != InserterState.FAILED) {
                 // accumulate batch
                 int batchSize = 0;
-                while (!finished && batchSize < BATCH_SIZE) {
+                while (!finished && batchSize < BATCH_SIZE && inserterState != InserterState.FAILED) {
                     Object row[] = rowBuffer.poll(100, TimeUnit.MILLISECONDS);
                     if (row == null) {
                         // do nothing
                     } else if (row[0] == POSION_PILL) {
+                        rowBuffer.put(new Object[]{POSION_PILL});
                         finished = true;
                     } else {
                         batchSize++;
                         for (int i = 0; i < row.length; i++) {
-                            if(row[i] == null)
-                                continue;
-                            if(row[i].getClass().equals(java.lang.Character.class))
+                            if(row[i] != null && row[i].getClass().equals(java.lang.Character.class))
                                  statement.setObject(i + 1, row[i].toString());
                             else
                                 statement.setObject(i + 1, row[i]);
@@ -195,11 +201,13 @@ public class FastLoader {
         } catch (InterruptedException e) {
             throw new DaoException(e);
         }
-        if (inserter != null) {
-            try {
-                inserter.join(60000);
-            } catch (InterruptedException e) {
-                throw new DaoException(e);
+        for (Thread inserter : inserters) {
+            if (inserter != null) {
+                try {
+                    inserter.join(60000);
+                } catch (InterruptedException e) {
+                    throw new DaoException(e);
+                }
             }
         }
         inserterState = InserterState.SHUTDOWN;

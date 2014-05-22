@@ -12,6 +12,7 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.parser.wiki.ParsedIll;
 import org.wikibrain.parser.wiki.ParserVisitor;
+import org.wikibrain.parser.wiki.WikiTextDumpParser;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.BufferedWriter;
@@ -52,22 +53,5 @@ public class InterLanguageLinkExtractor {
         public int getCount() {
             return count.get();
         }
-    }
-
-
-    public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
-        Env env = EnvBuilder.envFromArgs(args);
-        LanguageSet langs = env.getConfigurator().get(LanguageSet.class);
-        RawPageDao dao = env.getConfigurator().get(RawPageDao.class);
-        BufferedWriter output = WpIOUtils.openWriter(new File("ills.txt"));
-        ParserVisitor visitor = new IllParserVisitor(output);
-        WikiTextLoader.maxThreadsPerLang = env.getMaxThreads(); // HACK
-        for (Language lang : langs) {
-            System.out.println("extracting ills for: " + lang);
-            WikiTextLoader loader = new WikiTextLoader(Arrays.asList(visitor), LanguageSet.ALL, dao, env.getMaxThreads());
-            loader.load(LanguageInfo.getByLanguage(lang));
-        }
-        System.out.println("extracted " + ((IllParserVisitor)visitor).getCount() + " ills");
-        output.close();
     }
 }
