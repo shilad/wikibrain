@@ -159,7 +159,12 @@ public class FastLoader {
                     } else {
                         batchSize++;
                         for (int i = 0; i < row.length; i++) {
-                            statement.setObject(i + 1, row[i]);
+                            if(row[i] == null)
+                                continue;
+                            if(row[i].getClass().equals(java.lang.Character.class))
+                                 statement.setObject(i + 1, row[i].toString());
+                            else
+                                statement.setObject(i + 1, row[i]);
                         }
                         statement.addBatch();
                     }

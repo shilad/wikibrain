@@ -54,7 +54,7 @@ public class SimilarityDisambiguator extends Disambiguator {
                 (context == null) ? phrases : CollectionUtils.union(phrases, context));
 
         // Step 0: calculate most frequent candidate senses for each phrase
-        Map<LocalString, LinkedHashMap<LocalPage, Float>> candidates = Maps.newHashMap();
+        Map<LocalString, LinkedHashMap<LocalId, Float>> candidates = Maps.newHashMap();
         for (LocalString s : allPhrases) {
             candidates.put(s, phraseAnalyzer.resolve(s.getLanguage(), s.getString(), numCandidates));
         }
@@ -63,8 +63,8 @@ public class SimilarityDisambiguator extends Disambiguator {
         if (critera == Criteria.POPULARITY) {
             for (LocalString phrase : phrases) {
                 LinkedHashMap<LocalId, Float> m = new LinkedHashMap<LocalId, Float>();
-                for (LocalPage lp : candidates.get(phrase).keySet()) {
-                    m.put(lp.toLocalId(), candidates.get(phrase).get(lp));
+                for (LocalId li : candidates.get(phrase).keySet()) {
+                    m.put(li, candidates.get(phrase).get(li));
                 }
                 results.add(m);
             }
@@ -77,19 +77,19 @@ public class SimilarityDisambiguator extends Disambiguator {
         // Step 3: multiply background probability by sim sums, choose best product
         List<LinkedHashMap<LocalId, Float>> result = new ArrayList<LinkedHashMap<LocalId, Float>>();
         for (LocalString ls : phrases) {
-            Map<LocalPage, Float> phraseCands = candidates.get(ls);
+            Map<LocalId, Float> phraseCands = candidates.get(ls);
             LinkedHashMap<LocalId, Float> pageResult = selectFinalPhraseSenses(pageSims, phraseCands);
             result.add(pageResult);
         }
         return result;
     }
 
-    private LinkedHashMap<LocalId, Float> selectFinalPhraseSenses(Map<LocalPage, Float> pageSims, Map<LocalPage, Float> phrasePops) {
+    private LinkedHashMap<LocalId, Float> selectFinalPhraseSenses(Map<LocalPage, Float> pageSims, Map<LocalId, Float> phrasePops) {
         if (phrasePops == null || phrasePops.isEmpty()) {
             return null;
         }
         double sum = 0.0;
-        for (LocalPage lp : phrasePops.keySet()) {
+        for (LocalId lp : phrasePops.keySet()) {
             float pop = phrasePops.get(lp);
             float sim =  pageSims.get(lp);
 
@@ -115,8 +115,8 @@ public class SimilarityDisambiguator extends Disambiguator {
             sum += score;
         }
         LinkedHashMap<LocalId, Float> pageResult = new LinkedHashMap<LocalId, Float>();
-        for (LocalPage key : WpCollectionUtils.sortMapKeys(phrasePops, true)) {
-            pageResult.put(key.toLocalId(), (float)(phrasePops.get(key) / sum));
+        for (LocalId key : WpCollectionUtils.sortMapKeys(phrasePops, true)) {
+            pageResult.put(key, (float)(phrasePops.get(key) / sum));
         }
         return pageResult;
     }
@@ -127,14 +127,14 @@ public class SimilarityDisambiguator extends Disambiguator {
      * @return
      * @throws DaoException
      */
-    private Map<LocalPage, Float> getCosimilaritySums(Map<LocalString, LinkedHashMap<LocalPage, Float>> candidates) throws DaoException {
-
+    private Map<LocalPage, Float> getCosimilaritySums(Map<LocalString, LinkedHashMap<LocalId, Float>> candidates) throws DaoException {
+    	
         // Step 1: compute the page cosimilarity matrix
-        Set<LocalPage> uniques = new HashSet<LocalPage>();
-        for (LinkedHashMap<LocalPage, Float> prob : candidates.values()) {
+        Set<LocalId> uniques = new HashSet<LocalId>();
+        for (LinkedHashMap<LocalId, Float> prob : candidates.values()) {
             uniques.addAll(prob.keySet());
         }
-        List<LocalPage> pages = new ArrayList<LocalPage>(uniques);
+        List<LocalId> pages = new ArrayList<LocalId>(uniques);
         double[][] cosim;
 
         if (pages.isEmpty()){
@@ -146,7 +146,7 @@ public class SimilarityDisambiguator extends Disambiguator {
             }
             int[] pageIds = new int[pages.size()];
             for (int i=0; i<pages.size(); i++){
-                pageIds[i] = pages.get(i).getLocalId();
+                pageIds[i] = pages.get(i).getId();
             }
             cosim = metrics.get(language).cosimilarity(pageIds);
         }
@@ -161,7 +161,7 @@ public class SimilarityDisambiguator extends Disambiguator {
                 }
             }
             // add 0.0001 to give every candidate a tiny chance and avoid divide by zero errors when there are no good options
-            pageSims.put(pages.get(i), (float)(sum + 0.0001));
+            pageSims.put(pages.get(i).asLocalPage(), (float)(sum + 0.0001));
         }
         return pageSims;
     }

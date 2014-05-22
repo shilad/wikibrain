@@ -23,7 +23,7 @@ public class ToblersLawEvaluatorTest {
         Configurator conf = env.getConfigurator();
         ToblersLawEvaluator evaluator = new ToblersLawEvaluator(env, new LanguageSet("simple"));
         SpatialDataDao sdDao = conf.get(SpatialDataDao.class);
-        Map<Integer, Geometry> allGeometries = sdDao.getAllGeometries("wikidata", "earth");
+        Map<Integer, Geometry> allGeometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         Map<Integer, Geometry> geometryMap = new HashMap<Integer, Geometry>();
         int counter = 0;
 

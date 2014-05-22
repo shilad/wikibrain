@@ -21,6 +21,7 @@ import org.wikibrain.core.dao.sql.SimpleSqlDaoIterable;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.jooq.Tables;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.parser.WpParseException;
@@ -121,6 +122,11 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     @Override
     public Integer getItemId(LocalPage page) throws DaoException{
         return upDao.getUnivPageId(page, WIKIDATA_ALGORITHM_ID);
+    }
+
+    @Override
+    public Integer getItemId(LocalId localId) throws DaoException {
+        return upDao.getUnivPageId(localId.getLanguage(), localId.getId(), WIKIDATA_ALGORITHM_ID);
     }
 
     @Override
@@ -429,6 +435,28 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         return get(filter);
     }
 
+    @Override
+    public Set<Integer> conceptsWithValue(String propertyName, WikidataValue value) throws DaoException {
+        Set<Integer> concepts = new HashSet<Integer>();
+        for (WikidataStatement st : getByValue(propertyName, value)) {
+            if (st.getItem().getType() == WikidataEntity.Type.ITEM) {
+                concepts.add(st.getItem().getId());
+            }
+        }
+        return concepts;
+    }
+
+    @Override
+    public Set<LocalId> pagesWithValue(String propertyName, WikidataValue value, Language language) throws DaoException {
+        Set<LocalId> ids = new HashSet<LocalId>();
+        for (int conceptId : conceptsWithValue(propertyName, value)) {
+            UniversalPage up = upDao.getById(conceptId, 1);
+            if (up != null && up.isInLanguage(language)) {
+                ids.add(new LocalId(language, up.getLocalId(language)));
+            }
+        }
+        return ids;
+    }
     @Override
     public Iterable<WikidataStatement> get(WikidataFilter filter) throws DaoException {
         List<Condition> conditions = new ArrayList<Condition>();

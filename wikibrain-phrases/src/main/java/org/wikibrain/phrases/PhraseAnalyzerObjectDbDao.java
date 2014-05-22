@@ -1,18 +1,27 @@
 package org.wikibrain.phrases;
 
 import com.typesafe.config.Config;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TLongIntHashMap;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections.iterators.FilterIterator;
+import org.apache.commons.collections.iterators.TransformIterator;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.StringNormalizer;
-import org.wikibrain.utils.ObjectDb;
-import org.wikibrain.utils.WpStringUtils;
+import org.wikibrain.core.model.RawPage;
+import org.wikibrain.utils.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -20,6 +29,7 @@ import java.util.Map;
  */
 public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
     private final StringNormalizer normalizer;
+    private File dir;
     private ObjectDb<PrunedCounts<String>> describeDb;
     private ObjectDb<PrunedCounts<Integer>> resolveDb;
 
@@ -30,6 +40,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      * @throws DaoException
      */
     public PhraseAnalyzerObjectDbDao(StringNormalizer normalizer, File path, boolean isNew) throws DaoException {
+        this.dir = path;
         this.normalizer = normalizer;
         if (isNew) {
             if (path.exists()) FileUtils.deleteQuietly(path);
@@ -59,6 +70,49 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
         } catch (IOException e) {
             throw new DaoException(e);
         }
+    }
+
+    @Override
+    public Iterator<String> getAllPhrases(final Language lang) {
+        Predicate langFilter = new Predicate() {
+                @Override
+                public boolean evaluate(Object o) {
+                    String langCode = ((String)o).split(":")[0];
+                    return lang.getLangCode().equals(langCode);
+                }
+            };
+        Transformer stripLang = new Transformer() {
+            @Override
+            public Object transform(Object input) {
+                return ((String)input).split(":", 2)[1];
+            }
+        };
+        return new TransformIterator(
+                    new FilterIterator(resolveDb.keyIterator(), langFilter),
+                    stripLang);
+    }
+
+    @Override
+    public Iterator<Pair<String, PrunedCounts<Integer>>> getAllPhraseCounts(final Language lang) {
+        Predicate langFilter = new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                Pair<String, PrunedCounts<Integer>> pair = (Pair<String, PrunedCounts<Integer>>) o;
+                String langCode = pair.getLeft().split(":")[0];
+                return lang.getLangCode().equals(langCode);
+            }
+        };
+        Transformer stripLang = new Transformer() {
+            @Override
+            public Object transform(Object o) {
+                Pair<String, PrunedCounts<Integer>> pair = (Pair<String, PrunedCounts<Integer>>) o;
+                String phrase = pair.getLeft().split(":", 2)[1];
+                return Pair.of(phrase, pair.getRight());
+            }
+        };
+        return new TransformIterator(
+                new FilterIterator(resolveDb.iterator(), langFilter),
+                stripLang);
     }
 
     @Override
@@ -156,7 +210,8 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
                 return null;
             }
             boolean isNew = config.getBoolean("isNew");
-            File path = new File(config.getString("path"));
+
+            File path = new File(getConfig().get().getString("phrases.path"), name);
             StringNormalizer normalizer = getConfigurator().get(StringNormalizer.class, config.getString("normalizer"));
 
             try {

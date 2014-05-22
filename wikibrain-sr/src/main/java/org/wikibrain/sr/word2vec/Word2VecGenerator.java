@@ -32,12 +32,12 @@ import java.util.logging.Logger;
  */
 public class Word2VecGenerator implements VectorGenerator {
     private static final Logger LOG = Logger.getLogger(Word2VecGenerator.class.getName());
-    private static final int MAX_SIZE = 50;
 
     private final Language language;
     private final LocalPageDao localPageDao;
 
     private Map<String, float[]> wordVectors = new HashMap<String, float[]>();
+    private Map<Integer, float[]> articleVectors = new HashMap<Integer, float[]>();
 
     public Word2VecGenerator(Language language, LocalPageDao localPageDao, File path) throws IOException {
         this.language = language;
@@ -72,6 +72,7 @@ public class Word2VecGenerator implements VectorGenerator {
                 if (i % 50000 == 0) {
                     LOG.info("Read word vector " + word + " (" + i + " of " + numWords + ")");
                 }
+
                 float[] vector = new float[vlength];
                 double norm2 = 0.0;
                 for (int j = 0; j < vlength; j++) {
@@ -84,8 +85,13 @@ public class Word2VecGenerator implements VectorGenerator {
                 for (int j = 0; j < vlength; j++) {
                     vector[j] /= norm2;
                 }
-
-                wordVectors.put(normalize(word), vector);
+                if (word.startsWith("/w/")) {
+                    String[] pieces = word.split("/", 5);
+                    int wpId = Integer.valueOf(pieces[3]);
+                    articleVectors.put(wpId, vector);
+                } else {
+                    wordVectors.put(normalize(word), vector);
+                }
             }
         } finally {
             IOUtils.closeQuietly(bis);
@@ -97,7 +103,11 @@ public class Word2VecGenerator implements VectorGenerator {
     private static String readString(DataInputStream dis) throws IOException {
         TCharList bytes = new TCharArrayList();
         while (true) {
-            char c = (char)dis.read();
+            int i = dis.read();
+            if (i < 0) {
+                break;
+            }
+            char c = (char)i;
             if (c == ' ') {
                 break;
             }
