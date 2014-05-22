@@ -61,5 +61,10 @@ public interface SpatialNeighborDao {
 
     public Map<Integer, Geometry> getKNNeighbors(Geometry geometry, int k, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException;
 
+    public Map<Integer, Geometry> getNeighbors(Geometry geometry, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException;
+
+    public Map<Integer, Geometry> getNeighbors(Integer itemId, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException;
+
+
 
 }
