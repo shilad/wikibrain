@@ -186,6 +186,7 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
 
 
             while (featureIterator.hasNext()){
+                try{
 
                 Feature f = featureIterator.next();
                 Integer itemId = (Integer)f.getProperty(db.getItemIdAttributeName()).getValue();
@@ -195,7 +196,10 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
                 geoCalc.setStartingGeographicPoint(geometry.getCoordinate().x, geometry.getCoordinate().y);
                 geoCalc.setDestinationGeographicPoint(g.getCoordinate().x, g.getCoordinate().y);
                 distMap.put(itemId, geoCalc.getOrthodromicDistance());
-
+                }
+                catch (Exception e){
+                    //do nothing
+                }
             }
             featureIterator.close();
 
@@ -218,6 +222,8 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
                     return 0;
                 }
             });
+            if(k > order.size())
+                k = order.size();
 
             for(Integer i: order.subList(0, k)){
                 finalRVal.put(i, rVal.get(i));
@@ -233,6 +239,68 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
         }
 
 
+
+    }
+    @Override
+    public Map<Integer, Geometry> getNeighbors(Integer itemId, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException{
+        return getNeighbors(db.getGeometry(itemId, layerName, refSysName), layerName, refSysName, excludeSet);
+    }
+
+    @Override
+    public  Map<Integer, Geometry> getNeighbors(Geometry g, String layerName, String refSysName, Set<Integer> excludeSet) throws DaoException{
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+        PropertyName geomProperty = ff.property(db.getGeometryAttributeName());
+
+        //build ref sys clause
+        PropertyName refSysProperty = ff.property(db.getRefSysAttributeName());
+        Filter refSysFilter = ff.equals(refSysProperty, ff.literal(refSysName));
+
+        // build layer-related clause
+        PropertyName layerProperty = ff.property(db.getLayerAttributeName());
+        Filter layerFilter = ff.equals(layerProperty, ff.literal(layerName));
+
+        Filter touchFilter = ff.touches(geomProperty, ff.literal(g));
+        Filter intersectFilter = ff.intersects(geomProperty, ff.literal(g));
+        List<Filter> orFilters = Lists.newArrayList();
+        orFilters.add(touchFilter);
+        orFilters.add(intersectFilter);
+        Filter touchOrIntersectFilter = ff.or(orFilters);
+
+
+
+        List<Filter> filters = Lists.newArrayList();
+        filters.add(refSysFilter);
+        filters.add(layerFilter);
+        filters.add(touchOrIntersectFilter);
+
+
+        for(Integer i : excludeSet){
+            Filter nonEqualFilter = ff.notEqual(ff.property(db.getItemIdAttributeName()), ff.literal(i));
+            filters.add(nonEqualFilter);
+        }
+
+
+        Filter finalFilter = ff.and(filters);
+
+        try {
+
+            FeatureSource featureSource = db.getFeatureSource();
+            FeatureCollection containedFeatures = featureSource.getFeatures(finalFilter);
+            FeatureIterator featureIterator = containedFeatures.features();
+
+            Map<Integer, Geometry> result = new HashMap<Integer, Geometry>();
+
+            while (featureIterator.hasNext()){
+
+                Feature f = featureIterator.next();
+                result.put((Integer)f.getProperty(db.getItemIdAttributeName()).getValue(), (Geometry) f.getDefaultGeometryProperty().getValue());
+            }
+
+            return result;
+
+        }catch(IOException e){
+            throw new DaoException(e);
+        }
 
     }
 
