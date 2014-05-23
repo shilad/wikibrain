@@ -20,7 +20,7 @@ import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
 import org.wikibrain.sr.ensemble.EnsembleMetric;
 import org.wikibrain.sr.esa.SRConceptSpaceGenerator;
-import org.wikibrain.sr.word2vec.Corpus;
+import org.wikibrain.sr.wikify.Corpus;
 import org.wikibrain.sr.word2vec.Word2VecGenerator;
 import org.wikibrain.sr.word2vec.Word2VecTrainer;
 import org.wikibrain.utils.WpIOUtils;
