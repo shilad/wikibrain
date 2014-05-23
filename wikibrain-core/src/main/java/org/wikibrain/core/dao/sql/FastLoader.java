@@ -153,7 +153,6 @@ public class FastLoader {
                     "VALUES (" + StringUtils.join(questions, ",") + ");";
             statement = cnx.prepareStatement(sql);
 
-
             while (!finished && inserterState != InserterState.FAILED) {
                 // accumulate batch
                 int batchSize = 0;
