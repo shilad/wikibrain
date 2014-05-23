@@ -29,6 +29,12 @@ public class DistanceMetrics {
 
     }
 
+    public DistanceMetrics(Env env, Configurator c, SpatialNeighborDao snDao){
+        this.env = env;
+        this.c = c;
+        this.snDao = snDao;
+    }
+
     public double getDistance(Geometry a, Geometry b){
         GeodeticCalculator geoCalc = new GeodeticCalculator();
 

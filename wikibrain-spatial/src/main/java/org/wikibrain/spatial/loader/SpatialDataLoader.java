@@ -193,8 +193,8 @@ public class SpatialDataLoader {
 
             // this should eventually be moved into a config file or parameters of the parse
             List<WikidataLayerLoader> layerLoaders = Lists.newArrayList();
-//            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
-            layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
+            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
+//            layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
 
             for (WikidataLayerLoader layerLoader : layerLoaders) {
                 LOG.log(Level.INFO, "Loading Wikidata layer(s): " + layerLoader.getClass().getName());
@@ -366,8 +366,14 @@ public class SpatialDataLoader {
                 }
             }
 
+
+        //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
+        loader.loadWikidataData();
+        loader.loadExogenousData();
+
             LOG.info("optimizing database.");
             conf.get(WpDataSource.class).optimize();
+
 
         }catch(Exception e){
             e.printStackTrace();
