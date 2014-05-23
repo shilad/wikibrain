@@ -1,4 +1,4 @@
-package org.wikibrain.sr.word2vec;
+package org.wikibrain.sr.wikify;
 
 import org.apache.commons.cli.*;
 import org.wikibrain.conf.ConfigurationException;
@@ -11,7 +11,6 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.RawPage;
-import org.wikibrain.sr.wikify.Wikifier;
 
 import java.io.File;
 import java.io.IOException;

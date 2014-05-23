@@ -3,7 +3,6 @@ package org.wikibrain.spatial.cookbook.tflevaluate;
 import au.com.bytecode.opencsv.CSVWriter;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
-import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.WikiBrainException;
@@ -23,7 +22,6 @@ import org.wikibrain.sr.SRResult;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -32,13 +30,13 @@ import java.util.logging.Logger;
 /**
  * Created by toby on 5/17/14.
  */
-public class TopologicalEvaluator {
+public class KNNEvaluator {
 
 
     private static int WIKIDATA_CONCEPTS = 1;
 
 
-    private static final Logger LOG = Logger.getLogger(TopologicalEvaluator.class.getName());
+    private static final Logger LOG = Logger.getLogger(KNNEvaluator.class.getName());
 
     private Random random = new Random();
 
@@ -58,7 +56,7 @@ public class TopologicalEvaluator {
 
 
 
-    public TopologicalEvaluator(Env env, LanguageSet languages) throws ConfigurationException {
+    public KNNEvaluator(Env env, LanguageSet languages) throws ConfigurationException {
         this.env = env;
         //this.langs = new ArrayList<Language>(env.getLanguages().getLanguages());
         langs = new ArrayList<Language>();
@@ -294,7 +292,7 @@ public class TopologicalEvaluator {
 
         Env env = EnvBuilder.envFromArgs(args);
         Configurator conf = env.getConfigurator();
-        TopologicalEvaluator evaluator = new TopologicalEvaluator(env, new LanguageSet("simple"));
+        KNNEvaluator evaluator = new KNNEvaluator(env, new LanguageSet("simple"));
         SpatialDataDao sdDao = conf.get(SpatialDataDao.class);
         Set<Integer> originSet = new HashSet<Integer>();
         originSet.add(36091);originSet.add(956);originSet.add(64);originSet.add(258);originSet.add(60);originSet.add(65);originSet.add(90);originSet.add(84);originSet.add(1490);
