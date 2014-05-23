@@ -77,6 +77,8 @@ public interface PhraseAnalyzerDao {
      */
     public PrunedCounts<String> getPageCounts(Language lang, int wpId, int maxPhrases) throws DaoException;
 
+    void flush();
+
     /**
      * Closes the dao and flushes any unwritten data to disk.
      * @throws DaoException

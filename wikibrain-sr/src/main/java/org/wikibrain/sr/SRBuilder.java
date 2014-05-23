@@ -15,11 +15,12 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
 import org.wikibrain.sr.ensemble.EnsembleMetric;
 import org.wikibrain.sr.esa.SRConceptSpaceGenerator;
-import org.wikibrain.sr.word2vec.Corpus;
+import org.wikibrain.sr.wikify.Corpus;
 import org.wikibrain.sr.word2vec.Word2VecGenerator;
 import org.wikibrain.sr.word2vec.Word2VecTrainer;
 import org.wikibrain.utils.WpIOUtils;
@@ -190,7 +191,7 @@ public class SRBuilder {
     public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
         LOG.info("building component metric " + name);
         if (getMetricType(name).equals("vector.word2vec")) {
-            initWord2VecCorpus(name);
+            initWord2Vec(name);
         }
         Dataset ds = getDataset();
         MonolingualSRMetric metric = getMetric(name);
@@ -215,7 +216,7 @@ public class SRBuilder {
         metric.write();
     }
 
-    private void initWord2VecCorpus(String name) throws ConfigurationException, IOException, DaoException {
+    private void initWord2Vec(String name) throws ConfigurationException, IOException, DaoException {
         Config config = getMetricConfig(name).getConfig("generator");
         String corpusName = config.getString("corpus");
         Corpus corpus = null;
@@ -237,6 +238,11 @@ public class SRBuilder {
                     language);
             trainer.train(corpus.getDirectory());
             trainer.save(model);
+        }
+
+        LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        if (!lpd.isBuilt()) {
+            lpd.build();
         }
     }
 

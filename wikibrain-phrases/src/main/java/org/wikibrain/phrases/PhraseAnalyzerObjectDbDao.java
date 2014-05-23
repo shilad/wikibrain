@@ -184,6 +184,13 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
         }
     }
 
+    @Override
+    public void flush() {
+        this.describeDb.flush();
+        this.resolveDb.flush();
+    }
+
+    @Override
     public void close() {
         this.describeDb.close();
         this.resolveDb.close();

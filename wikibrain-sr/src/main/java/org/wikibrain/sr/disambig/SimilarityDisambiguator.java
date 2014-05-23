@@ -72,7 +72,7 @@ public class SimilarityDisambiguator extends Disambiguator {
         }
 
         // Step 2: calculate the sum of cosimilarities for each page
-        Map<LocalPage, Float> pageSims = getCosimilaritySums(candidates);
+        Map<LocalId, Float> pageSims = getCosimilaritySums(candidates);
 
         // Step 3: multiply background probability by sim sums, choose best product
         List<LinkedHashMap<LocalId, Float>> result = new ArrayList<LinkedHashMap<LocalId, Float>>();
@@ -84,7 +84,7 @@ public class SimilarityDisambiguator extends Disambiguator {
         return result;
     }
 
-    private LinkedHashMap<LocalId, Float> selectFinalPhraseSenses(Map<LocalPage, Float> pageSims, Map<LocalId, Float> phrasePops) {
+    private LinkedHashMap<LocalId, Float> selectFinalPhraseSenses(Map<LocalId, Float> pageSims, Map<LocalId, Float> phrasePops) {
         if (phrasePops == null || phrasePops.isEmpty()) {
             return null;
         }
@@ -127,7 +127,7 @@ public class SimilarityDisambiguator extends Disambiguator {
      * @return
      * @throws DaoException
      */
-    private Map<LocalPage, Float> getCosimilaritySums(Map<LocalString, LinkedHashMap<LocalId, Float>> candidates) throws DaoException {
+    private Map<LocalId, Float> getCosimilaritySums(Map<LocalString, LinkedHashMap<LocalId, Float>> candidates) throws DaoException {
     	
         // Step 1: compute the page cosimilarity matrix
         Set<LocalId> uniques = new HashSet<LocalId>();
@@ -152,7 +152,7 @@ public class SimilarityDisambiguator extends Disambiguator {
         }
 
         // Step 2: calculate the sum of cosimilarities for each page
-        Map<LocalPage, Float> pageSims = new HashMap<LocalPage, Float>();
+        Map<LocalId, Float> pageSims = new HashMap<LocalId, Float>();
         for (int i = 0; i < pages.size(); i++) {
             double sum = 0.0;
             for (int j = 0; j < pages.size(); j++) {
@@ -161,7 +161,7 @@ public class SimilarityDisambiguator extends Disambiguator {
                 }
             }
             // add 0.0001 to give every candidate a tiny chance and avoid divide by zero errors when there are no good options
-            pageSims.put(pages.get(i).asLocalPage(), (float)(sum + 0.0001));
+            pageSims.put(pages.get(i), (float)(sum + 0.0001));
         }
         return pageSims;
     }

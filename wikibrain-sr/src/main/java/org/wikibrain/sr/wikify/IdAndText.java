@@ -1,4 +1,4 @@
-package org.wikibrain.sr.word2vec;
+package org.wikibrain.sr.wikify;
 
 /**
  * @author Shilad Sen

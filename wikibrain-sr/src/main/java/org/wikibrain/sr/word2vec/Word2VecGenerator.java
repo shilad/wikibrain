@@ -166,6 +166,9 @@ public class Word2VecGenerator implements VectorGenerator {
     @Override
     public TIntFloatMap getVector(int pageId) throws DaoException {
         float[] vector = articles.get(pageId);
+        if (vector == null) {
+            return null;
+        }
         TIntFloatMap result = new TIntFloatHashMap(vector.length);
         for (int i = 0; i < vector.length; i++) {
             result.put(i, vector[i]);
