@@ -217,6 +217,11 @@ public class SRBuilder {
     }
 
     private void initWord2Vec(String name) throws ConfigurationException, IOException, DaoException {
+        LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        if (!lpd.isBuilt()) {
+            lpd.build();
+        }
+
         Config config = getMetricConfig(name).getConfig("generator");
         String corpusName = config.getString("corpus");
         Corpus corpus = null;
@@ -238,11 +243,6 @@ public class SRBuilder {
                     language);
             trainer.train(corpus.getDirectory());
             trainer.save(model);
-        }
-
-        LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
-        if (!lpd.isBuilt()) {
-            lpd.build();
         }
     }
 
