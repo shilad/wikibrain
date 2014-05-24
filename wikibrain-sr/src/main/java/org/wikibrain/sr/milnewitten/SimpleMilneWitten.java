@@ -78,11 +78,8 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
 
     @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
-        TIntSet inlinks1 = getInlinks(pageId1);
-        TIntSet inlinks2 = getInlinks(pageId2);
-
-        double s1 = googleSim(inlinks1, inlinks2);
-        double s2 = cosineSim(inlinks1, inlinks2);
+        double s1 = googleInlink(pageId1, pageId2);
+        double s2 = cosineOutlink(pageId1, pageId2);
 
         return new SRResult(0.5 * s1 + 0.5 * s2);
     }
@@ -94,8 +91,18 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
         }
         return inlinks;
     }
+    private TIntSet getOutlinks(int pageId1) throws DaoException {
+        TIntSet outlinks = new TIntHashSet();
+        for (LocalLink ll : linkDao.getLinks(language, pageId1, true)) {
+            outlinks.add(ll.getDestId());
+        }
+        return outlinks;
+    }
 
-    private double googleSim(TIntSet inlinks1, TIntSet inlinks2) {
+    private double googleInlink(int pageId1, int pageId2) throws DaoException {
+        TIntSet inlinks1 = getInlinks(pageId1);
+        TIntSet inlinks2 = getInlinks(pageId2);
+
         if (inlinks1.isEmpty() && inlinks2.isEmpty()) {
             return 0.0;
         }
@@ -111,9 +118,12 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
         );
     }
 
-    private double cosineSim(TIntSet inlinks1, TIntSet inlinks2) throws DaoException {
-        TIntFloatMap v1 = makeInlinkVector(inlinks1);
-        TIntFloatMap v2 = makeInlinkVector(inlinks2);
+    private double cosineOutlink(int pageId1, int pageId2) throws DaoException {
+        TIntSet outlinks1 = getOutlinks(pageId1);
+        TIntSet outlinks2 = getOutlinks(pageId2);
+
+        TIntFloatMap v1 = makeOutlinkVector(outlinks1);
+        TIntFloatMap v2 = makeOutlinkVector(outlinks2);
         if (v1.isEmpty() || v2.isEmpty()) {
             return 0.0;
         }
@@ -124,7 +134,7 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
         return linkDao.getCount(new DaoFilter().setLanguages(language).setSourceIds(wpId));
     }
 
-    private TIntFloatMap makeInlinkVector(TIntSet links) throws DaoException {
+    private TIntFloatMap makeOutlinkVector(TIntSet links) throws DaoException {
         TIntFloatMap vector = new TIntFloatHashMap();
         for (int wpId : links.toArray()) {
             vector.put(wpId, (float) Math.log(1.0 * numArticles / getNumLinks(wpId)));

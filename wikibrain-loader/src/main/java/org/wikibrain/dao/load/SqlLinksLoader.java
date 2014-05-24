@@ -81,7 +81,7 @@ public class SqlLinksLoader {
         ParallelForEach.iterate(
                 new MySqlDumpParser().parse(sqlDump).iterator(),
                 WpThreadUtils.getMaxThreads(),
-                5000,
+                1000,
                 new Procedure<Object[]>() {
                     @Override
                     public void call(Object[] row) throws Exception {
@@ -123,7 +123,6 @@ public class SqlLinksLoader {
                 existing.add(hash);
                 newLinks.incrementAndGet();
                 dao.save(ll);
-                metaDao.incrementRecords(LocalLink.class, language);
             }
         }
     }
