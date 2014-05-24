@@ -261,9 +261,11 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
 
         Filter touchFilter = ff.touches(geomProperty, ff.literal(g));
         Filter intersectFilter = ff.intersects(geomProperty, ff.literal(g));
+
         List<Filter> orFilters = Lists.newArrayList();
         orFilters.add(touchFilter);
         orFilters.add(intersectFilter);
+
         Filter touchOrIntersectFilter = ff.or(orFilters);
 
 
@@ -272,7 +274,7 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
         filters.add(refSysFilter);
         filters.add(layerFilter);
         filters.add(touchOrIntersectFilter);
-
+        //filters.add(touchFilter);
 
         for(Integer i : excludeSet){
             Filter nonEqualFilter = ff.notEqual(ff.property(db.getItemIdAttributeName()), ff.literal(i));
