@@ -489,7 +489,7 @@ public class SRBuilder {
             builder.setDeleteExistingData(Boolean.valueOf(cmd.getOptionValue("d")));
         }
         if (cmd.hasOption("o")) {
-            builder.setMode(Mode.valueOf(cmd.getOptionValue("p").toUpperCase()));
+            builder.setMode(Mode.valueOf(cmd.getOptionValue("o").toUpperCase()));
         }
         if (cmd.hasOption("l")) {
             builder.setLanguage(Language.getByLangCode(cmd.getOptionValue("l")));
