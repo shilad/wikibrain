@@ -59,7 +59,7 @@ public class DistanceMetricsExample {
         Geometry endPoint = sdDao.getGeometry(endId, layerName, "earth");
 
         System.out.println("Straight-line distance " + distanceMetrics.getDistance(originPoint, endPoint));
-        System.out.println("Topological Distance " + distanceMetrics.getTopologicalDistance(originPoint, originId, endPoint, endId, 1, layerName, "earth"));
+        System.out.println("KNN Distance " + distanceMetrics.getTopologicalDistance(originPoint, originId, endPoint, endId, 1, layerName, "earth"));
 
 
 
