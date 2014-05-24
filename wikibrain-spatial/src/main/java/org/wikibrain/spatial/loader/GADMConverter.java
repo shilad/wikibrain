@@ -229,11 +229,11 @@ public class GADMConverter {
             geometryFactory = JTSFactoryFinder.getGeometryFactory();
             featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
 
-            LOG.log(Level.INFO, "Combining polygons that belongs to the same administrative districts.");
+            LOG.log(Level.INFO, "Combining polygons that belong to the same administrative districts.");
 
             int count = 0;
             if (level == 1) {
-                int total = stateShape.keySet().size(); //TODO: We need a lot more in the way of progress statements here
+                int total = stateShape.keySet().size();
                 for (String state : stateCountry.keySet()) {    //create the feature collection for the new shpfile
                     count++;
                     try {
