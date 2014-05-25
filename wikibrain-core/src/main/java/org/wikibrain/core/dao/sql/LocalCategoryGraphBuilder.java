@@ -1,6 +1,8 @@
 package org.wikibrain.core.dao.sql;
 
 import com.typesafe.config.Config;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
@@ -22,41 +24,56 @@ public class LocalCategoryGraphBuilder {
 
     private static final Logger LOG = Logger.getLogger(LocalCategoryGraphBuilder.class.getName());
 
+    private final LocalPageDao pageDao;
+    private final LocalCategoryMemberDao catDao;
+
+    public LocalCategoryGraphBuilder(LocalPageDao pageDao, LocalCategoryMemberDao catDao) {
+        this.pageDao = pageDao;
+        this.catDao = catDao;
+    }
+
     /**
      *
      * @param language
-     * @param lpDao
-     * @param lcmDao
      * @return
      * @throws DaoException
      */
-    public CategoryGraph build(Language language, LocalPageDao lpDao, LocalCategoryMemberDao lcmDao) throws DaoException {
+    public CategoryGraph build(Language language) throws DaoException {
         CategoryGraph graph = new CategoryGraph(language);
-        loadCategories(graph, lpDao);
-        buildGraph(graph, lcmDao);
+        loadCategories(graph);
+        buildGraph(graph);
         computePageRanks(graph);
         return graph;
     }
 
-    private void loadCategories(CategoryGraph graph, LocalPageDao lpDao) throws DaoException {
+    private void loadCategories(CategoryGraph graph) throws DaoException {
         LOG.info("loading categories...");
         graph.catIndexes = new TIntIntHashMap();
         List<String> catList = new ArrayList<String>();
-        Iterable<LocalPage> catIter = lpDao.get(new DaoFilter()
+        Iterable<LocalPage> catIter = pageDao.get(new DaoFilter()
                 .setNameSpaces(NameSpace.CATEGORY)
                 .setLanguages(graph.language)
         );
+        TIntList catIds = new TIntArrayList();
         for (LocalPage cat : catIter) {
             if (cat != null) {
+                if (graph.catIndexes.containsKey(cat.getLocalId())) {
+                    continue;
+                }
+                assert(catList.size() == graph.catIndexes.size());
+                assert(catIds.size() == graph.catIndexes.size());
+                int ci = graph.catIndexes.size();
+                graph.catIndexes.put (cat.getLocalId(), ci);
                 catList.add(cat.getTitle().getCanonicalTitle());
-                graph.catIndexes.put (cat.getLocalId(),graph.catIndexes.size());
+                catIds.add(cat.getLocalId());
             }
         }
         graph.cats = catList.toArray(new String[0]);
+        graph.catIds = catIds.toArray();
         LOG.info("finished loading " + graph.cats.length + " categories");
     }
 
-    private void buildGraph(CategoryGraph graph, LocalCategoryMemberDao lcmDao) throws DaoException {
+    private void buildGraph(CategoryGraph graph) throws DaoException {
         LOG.info("building category graph");
         graph.catPages = new int[graph.catIndexes.size()][];
         graph.catParents = new int[graph.catIndexes.size()][];
@@ -74,7 +91,7 @@ public class LocalCategoryGraphBuilder {
         int numCatPages[] = new int[graph.catIndexes.size()];
 
         DaoFilter filter = new DaoFilter().setLanguages(graph.language);
-        for (LocalCategoryMember lcm : lcmDao.get(filter)) {
+        for (LocalCategoryMember lcm : catDao.get(filter)) {
             int catIndex1 = graph.getCategoryIndex(lcm.getArticleId());     // cat index for page (probably -1)
             int catIndex2 = graph.getCategoryIndex(lcm.getCategoryId());    // cat index for cat
             if (catIndex1 >= 0 && catIndex2 >= 0) {
@@ -94,7 +111,7 @@ public class LocalCategoryGraphBuilder {
         }
 
         // fill it
-        for (LocalCategoryMember lcm : lcmDao.get(filter)) {
+        for (LocalCategoryMember lcm : catDao.get(filter)) {
             int catIndex1 = graph.getCategoryIndex(lcm.getArticleId());     // cat index for page (probably -1)
             int catIndex2 = graph.getCategoryIndex(lcm.getCategoryId());    // cat index for cat
             if (catIndex1 >= 0 && catIndex2 >= 0) {
