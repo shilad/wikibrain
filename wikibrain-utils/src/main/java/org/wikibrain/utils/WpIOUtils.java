@@ -96,7 +96,7 @@ public class WpIOUtils {
         try {
             return IOUtils.toString(is, "utf-8");
         } finally {
-            is.close();
+            if (is != null) is.close();
         }
     }
 
