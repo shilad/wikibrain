@@ -174,11 +174,17 @@ public class CategoryBfs {
     public double getPageDistance(int pageId) {
         return pageDistances.get(pageId);
     }
-    public boolean hasCategoryDistance(int categoryId) {
-        return catDistances.containsKey(graph.getCategoryIndex(categoryId));
+    public boolean hasCategoryDistanceForIndex(int categoryId) {
+        return catDistances.containsKey(categoryId);
+    }
+    public boolean hasCategoryDistance(int pageId) {
+        return catDistances.containsKey(graph.getCategoryIndex(pageId));
     }
     public double getCategoryDistance(int categoryId) {
         return catDistances.get(graph.getCategoryIndex(categoryId));
+    }
+    public double getCategoryDistanceForIndex(int catIndex) {
+        return catDistances.get(catIndex);
     }
 
     public class BfsVisited {
