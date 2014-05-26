@@ -224,6 +224,9 @@ public class WpDataSource implements Closeable {
         }
         if (dataSource instanceof BoneCPDataSource) {
             ((BoneCPDataSource)dataSource).close();
+
+            // Awful hack that should go away when we upgrade to BoneCP 0.8.0
+            // For now, though many unit tests hang under 0.8.0
             for (Thread thread : Thread.getAllStackTraces().keySet()) {
                 if (thread.toString().contains("com.google.common.base.internal.Finalizer,")) {
                     thread.stop();
