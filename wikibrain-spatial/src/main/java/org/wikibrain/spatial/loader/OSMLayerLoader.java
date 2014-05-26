@@ -6,6 +6,7 @@ import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataFilter;
 import org.wikibrain.wikidata.WikidataStatement;
 
+
 /**
  * Created by bjhecht on 5/21/14.
  *
@@ -29,8 +30,7 @@ public class OSMLayerLoader {
 
         try {
 
-            WikidataFilter filter = (new WikidataFilter.Builder()).withPropertyId(OSM_RELATION_ID).build();
-            Iterable<WikidataStatement> osmRelations = wdDao.get(filter);
+            Iterable<WikidataStatement> osmRelations = getAllOSMRelations();
 
             for (WikidataStatement osmRelation : osmRelations){
                 osmRelation.getValue();
@@ -44,5 +44,16 @@ public class OSMLayerLoader {
         }
 
     }
+
+    public Iterable<WikidataStatement> getAllOSMRelations() throws DaoException{
+
+        WikidataFilter filter = (new WikidataFilter.Builder()).withPropertyId(OSM_RELATION_ID).build();
+
+        Iterable<WikidataStatement> osmRelations = wdDao.get(filter);
+
+        return osmRelations;
+    }
+
+
 
 }
