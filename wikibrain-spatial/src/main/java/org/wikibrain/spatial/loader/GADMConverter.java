@@ -137,6 +137,7 @@ public class GADMConverter {
         Map map = new HashMap();
         List<String> locList = new ArrayList<String>();
         List<Geometry> geoList = new ArrayList<Geometry>();
+        List<String> visited = new ArrayList<String>();
 
         if (level == 1)
             outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "gadm1.shp");
@@ -184,11 +185,7 @@ public class GADMConverter {
 
         try {
 
-            if (level == 1) {
-                LOG.log(Level.INFO, "Start processing polygons for level 1 administrative districts.");
-            } else {
-                LOG.log(Level.INFO, "Start processing polygons for level 0 administrative districts.");
-            }
+            int total = 0;
 
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
@@ -199,16 +196,29 @@ public class GADMConverter {
             }
             inputFeatures.close();
 
+            if (level == 1) {
+                LOG.log(Level.INFO, "Start processing polygons for level 1 administrative districts.");
+                total = locList.size();
+            } else {
+                LOG.log(Level.INFO, "Start processing polygons for level 0 administrative districts.");
+                for (String stateCountryPair: locList) {
+                    String country = stateCountryPair.split("_")[1];
+                    if (!visited.contains(country)) {
+                        visited.add(country);
+                        total++;
+                    } else continue;
+                }
+            }
 
-            int total = locList.size();
+            visited.clear();
             int count = 0;
 
             for (String stateCountryPair: locList) {
                 String state = stateCountryPair.split("_")[0];
                 String country = stateCountryPair.split("_")[1];
-                count++;
                 inputFeatures = inputCollection.features();
                 if (level == 1) {
+                    count++;
                     if (count % 10 == 0)
                         LOG.log(Level.INFO, count + "/" + total + " level 1 administrative districts processed.");
 
@@ -218,6 +228,11 @@ public class GADMConverter {
                             geoList.add((Geometry)feature.getAttribute(0));
                     }
                 } else {
+                    if (!visited.contains(country)) {
+                        visited.add(country);
+                    } else continue;
+
+                    count++;
                     LOG.log(Level.INFO, "Combining polygons for " + country + " (" + count + "/" + total + ")");
 
                     while (inputFeatures.hasNext()) {
@@ -241,8 +256,11 @@ public class GADMConverter {
                 }
 
                 featureBuilder.add(newGeom);
-                featureBuilder.add(state);
-                featureBuilder.add(state + ", " + country);
+                if (level == 1) {
+                    featureBuilder.add(state);
+                    featureBuilder.add(state + ", " + country);
+                } else
+                    featureBuilder.add(country);
                 SimpleFeature feature = featureBuilder.buildFeature(null);
 
                 features.add(feature);
