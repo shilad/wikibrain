@@ -1,8 +1,12 @@
 package org.wikibrain.core.dao.sql;
 
+import com.google.common.base.FinalizableReferenceQueue;
+import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPDataSource;
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderNameStyle;
@@ -16,11 +20,12 @@ import org.wikibrain.core.dao.DaoException;
 
 import javax.sql.DataSource;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.*;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +33,7 @@ import java.util.logging.Logger;
 /**
  * @author Shilad Sen
  */
-public class WpDataSource  {
+public class WpDataSource implements Closeable {
     private static final Logger LOG = Logger.getLogger(WpDataSource.class.getName());
 
     private DataSource dataSource;
@@ -202,20 +207,28 @@ public class WpDataSource  {
     /**
      * In general, open connections are reclaimed and harmless
      */
-    public void shutdown() throws SQLException {
+    public void close() throws IOException {
         if (dialect == SQLDialect.H2) {
             Statement stm = null;
-            Connection cnx = getConnection();
+            Connection cnx = null;
             try {
+                cnx = getConnection();
                 stm = cnx.createStatement();
                 stm.execute("SHUTDOWN;");
                 stm.close();
+            } catch (SQLException e) {
+                throw new IOException(e);
             } finally {
                 closeQuietly(cnx);
             }
         }
         if (dataSource instanceof BoneCPDataSource) {
             ((BoneCPDataSource)dataSource).close();
+            for (Thread thread : Thread.getAllStackTraces().keySet()) {
+                if (thread.toString().contains("com.google.common.base.internal.Finalizer,")) {
+                    thread.stop();
+                }
+            }
         }
     }
 

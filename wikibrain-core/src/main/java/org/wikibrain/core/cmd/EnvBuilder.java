@@ -52,7 +52,7 @@ public class EnvBuilder {
             setMaxThreads(Integer.valueOf(cmd.getOptionValue("h")));
         }
         if (cmd.hasOption("c")) {
-            setConfigFile(new File(cmd.getOptionValue("c")));
+            setConfigFile(new File(cmd.getOptionValue("c").trim()));
         }
         if (cmd.hasOption("l")) {
             String val = cmd.getOptionValue("l");
