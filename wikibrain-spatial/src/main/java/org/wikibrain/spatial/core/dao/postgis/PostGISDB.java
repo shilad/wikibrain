@@ -119,6 +119,7 @@ public class PostGISDB {
                 }
             }
         }
+        iterator.close();
 
         return new SpatialContainerMetadata(layerName, refSysName, count, shapeType);
 
@@ -161,6 +162,7 @@ public class PostGISDB {
             for(Object o : uniques){
                 rVal.add(o.toString());
             }
+
             return rVal;
 
         }catch(Exception e){
@@ -222,6 +224,7 @@ public class PostGISDB {
             collection.accepts(visitor, null);
             CalcResult result = visitor.getResult();
             Set<Object> results = result.toSet();
+
 
             return results;
 
