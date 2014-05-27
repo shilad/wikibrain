@@ -70,7 +70,9 @@ public class SpatialDataLoader {
             for (LayerStruct layerStruct : layerStructs) {
 
                 if (layerStruct.fileType.equals(FileType.SHP)) {
+
                     parseShapefile(layerStruct);
+
                 }
             }
 
@@ -152,7 +154,15 @@ public class SpatialDataLoader {
                 boolean found = false;
                 while(i < numDbfFields && !found){
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
-                    Integer itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
+                    Integer itemId;
+                    try {
+                    itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
+                    }
+                    catch (Exception e){
+                        i++;
+                        continue;
+
+                    }
                     if (itemId != null && spatialDataDao.getGeometry(itemId, struct.getLayerName(), struct.getRefSysName()) == null){
                         spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
                         found = true;
@@ -307,7 +317,7 @@ public class SpatialDataLoader {
 
     }
 
-    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data_temp";
+    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data_wikibrain";
 
     public static void main(String args[]) {
 
@@ -355,7 +365,7 @@ public class SpatialDataLoader {
                 }
                 else if (step.trim().toLowerCase().equals("gadm")){
                     LOG.log(Level.INFO, "Beginning to download and process GADM data (will be imported in exogenous step)");
-                    GADMConverter.downloadAndConvert(spatialDataFolder);
+                    new GADMConverter().downloadAndConvert(spatialDataFolder);
                     //spatialDataFolder.deleteSpecificFile("read_me.pdf", RefSys.EARTH); // TODO: Aaron, please move the following two lines into the correct place in GADMConverter
                     //spatialDataFolder.deleteLayer("gadm2", RefSys.EARTH);
                 } else if (step.trim().toLowerCase().equals("exogenous")) {
@@ -368,8 +378,8 @@ public class SpatialDataLoader {
 
 
         //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
-        loader.loadWikidataData();
-        loader.loadExogenousData();
+        //loader.loadWikidataData();
+        //loader.loadExogenousData();
 
             LOG.info("optimizing database.");
             conf.get(WpDataSource.class).optimize();

@@ -431,6 +431,7 @@ public class SRBuilder {
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("mode")
+                        .hasArg()
                         .withDescription("mode: similarity, mostsimilar, or both")
                         .create("o"));
 
