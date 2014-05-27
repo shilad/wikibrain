@@ -1,7 +1,7 @@
 package org.wikibrain.spatial.loader;
 
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -124,8 +124,7 @@ public class GADMConverter {
 
     /**
      * @param outputFolder
-     * @param level
-     * @return //TODO: reduce memory usage
+     * @param level //TODO: reduce memory usage
      * Converts raw GADM shapefile into WikiBrain readable type
      * Recommended JVM max heapsize = 4G
      */
@@ -136,16 +135,9 @@ public class GADMConverter {
         if ((level != 0) && (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
 
         File outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "gadm" + level +".shp");
-        List<String> locList = new ArrayList<String>();
-        List<Geometry> geoList;
-        List<String> visited = new ArrayList<String>();
-
-        GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();;
-        SimpleFeatureBuilder featureBuilder;
-        List<SimpleFeature> features;
+        ListMultimap<String, String> countryState = ArrayListMultimap.create();
 
         final SimpleFeatureType WIKITYPE = getOutputFeatureType(level);
-        featureBuilder = new SimpleFeatureBuilder(WIKITYPE);
 
         SimpleFeatureSource outputFeatureSource = getOutputDataFeatureSource(outputFile, WIKITYPE);
 
@@ -156,102 +148,35 @@ public class GADMConverter {
 
         try {
 
-            int total = 0;
-
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
                 String country = ((String) feature.getAttribute(4)).intern();
                 String state = ((String) feature.getAttribute(6)).intern();
-                if (!locList.contains(state + "_" + country))
-                    locList.add(state + "_" + country);
+                if (!countryState.containsEntry(country, state))
+                    countryState.put(country, state);
             }
+
             inputFeatures.close();
 
-            if (level == 1) {
-                LOG.log(Level.INFO, "Start processing polygons for level 1 administrative districts.");
-                total = locList.size();
-            } else {
-                LOG.log(Level.INFO, "Start processing polygons for level 0 administrative districts.");
-                for (String stateCountryPair : locList) {
-                    String country = stateCountryPair.split("_")[1];
-                    if (!visited.contains(country)) {
-                        visited.add(country);
-                        total++;
+            LOG.log(Level.INFO, "Start processing polygons for level " + level + " administrative districts.");
+
+            int stateCount = 0, countryCount = 0;
+
+            for (String country: countryState.keySet()) {
+                countryCount++;
+                if (level == 1){
+                    for (String state: countryState.get(country)) {
+                        stateCount++;
+                        LOG.log(Level.INFO, "Combining polygons for " + stateCount + "/" + countryState.get(country).size() +" level 1 administrative districts in " + country + " (" + countryCount + "/" + countryState.keySet().size()+")");
+                        List<SimpleFeature> features = inputFeatureHandler(inputCollection, state, 1, WIKITYPE, countryState);
+                        writeToShpFile(outputFeatureSource,WIKITYPE, transaction, features);
                     }
+                    stateCount = 0;
                 }
-            }
-
-            visited.clear();
-            int count = 0;
-
-            for (String stateCountryPair : locList) {
-                features = new ArrayList<SimpleFeature>();
-                geoList = new ArrayList<Geometry>();
-                String state = stateCountryPair.split("_")[0];
-                String country = stateCountryPair.split("_")[1];
-                inputFeatures = inputCollection.features();
-                if (level == 1) {
-                    count++;
-                    if (count % 10 == 0)
-                        LOG.log(Level.INFO, count + "/" + total + " level 1 administrative districts processed.");
-
-                    while (inputFeatures.hasNext()) {
-                        SimpleFeature feature = inputFeatures.next();
-                        if (feature.getAttribute(6).equals(state) && feature.getAttribute(4).equals(country))
-                            geoList.add((Geometry) feature.getAttribute(0));
-                    }
-                } else {
-                    if (!visited.contains(country)) {
-                        visited.add(country);
-                    } else continue;
-
-                    count++;
-                    LOG.log(Level.INFO, "Combining polygons for " + country + " (" + count + "/" + total + ")");
-
-                    while (inputFeatures.hasNext()) {
-                        SimpleFeature feature = inputFeatures.next();
-                        if (feature.getAttribute(4).equals(country))
-                            geoList.add((Geometry) feature.getAttribute(0));
-                    }
-                }
-
-                inputFeatures.close();
-                Geometry newGeom;
-
-                try {
-                    newGeom = geometryFactory.buildGeometry(geoList).union();
-                } catch (Exception e) {
-                    if (level == 1)
-                        LOG.log(Level.INFO, "Exception occurred at " + state + ": " + e.getMessage() + ". Attempting different combining methods.");
-                    else
-                        LOG.log(Level.INFO, "Exception occurred at " + country + ": " + e.getMessage() + ". Attempting different combining methods.");
-                    newGeom = geometryFactory.buildGeometry(geoList).buffer(0);
-                }
-
-                featureBuilder.add(newGeom);
-                if (level == 1) {
-                    featureBuilder.add(state);
-                    featureBuilder.add(state + ", " + country);
-                } else
-                    featureBuilder.add(country);
-                SimpleFeature feature = featureBuilder.buildFeature(null);
-
-                features.add(feature);
-
-                if (outputFeatureSource instanceof SimpleFeatureStore) {
-                    SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
-
-                    SimpleFeatureCollection collection = new ListFeatureCollection(WIKITYPE, features);
-                    featureStore.setTransaction(transaction);
-                    try {
-                        featureStore.addFeatures(collection);
-                        transaction.commit();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        transaction.rollback();
-                    }
-                } else {
-                    LOG.log(Level.INFO, "WIKITYPE does not support read/write access");
+                else {
+                    LOG.log(Level.INFO, "Combining polygons for " + countryCount + "/" + countryState.keySet().size() + " countries");
+                    List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
+                    writeToShpFile(outputFeatureSource,WIKITYPE, transaction, features);
                 }
             }
 
@@ -267,6 +192,66 @@ public class GADMConverter {
             outputFolder.deleteLayer("gadm2", RefSys.EARTH);
         }
 
+
+    }
+
+    private List<SimpleFeature> inputFeatureHandler(SimpleFeatureCollection inputCollection, String featureName, int level, SimpleFeatureType outputFeatureType, Multimap<String, String> relation){
+
+        GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+        List<Geometry> geometryList = new ArrayList<Geometry>();
+        SimpleFeatureIterator inputFeatures = inputCollection.features();
+        SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(outputFeatureType);
+        Multimap<String, String> reverted = ArrayListMultimap.create();
+        Geometry newGeom;
+
+        while (inputFeatures.hasNext()){
+            SimpleFeature feature = inputFeatures.next();
+            if (level == 1)
+                if (feature.getAttribute(6).equals(featureName)) geometryList.add((Geometry) feature.getAttribute(0));
+            else if (feature.getAttribute(4).equals(featureName)) geometryList.add((Geometry) feature.getAttribute(0));
+        }
+        inputFeatures.close();
+
+        try {
+            newGeom = geometryFactory.buildGeometry(geometryList).union().getBoundary();
+            //LOG.log(Level.INFO, "Simple: " + newGeom.isSimple());
+        } catch (Exception e) {
+            LOG.log(Level.INFO, "Exception occurred at " + featureName + ": " + e.getMessage() + ". Attempting different combining methods.");
+            newGeom = geometryFactory.buildGeometry(geometryList).buffer(0).getBoundary();
+            //LOG.log(Level.INFO, "Simple: " + newGeom.isSimple());
+        }
+
+        featureBuilder.add(newGeom);
+        if (level == 1) {
+            featureBuilder.add(featureName);
+            featureBuilder.add(featureName + ", " + Multimaps.invertFrom(relation, reverted).get(featureName).toArray()[0]);
+        } else
+            featureBuilder.add(featureName);
+        SimpleFeature feature = featureBuilder.buildFeature(null);
+
+        List<SimpleFeature> features = new ArrayList<SimpleFeature>();
+        features.add(feature);
+
+        return features;
+
+    }
+
+    private void writeToShpFile(SimpleFeatureSource outputFeatureSource, SimpleFeatureType outputFeatureType, Transaction transaction, List<SimpleFeature> features) throws IOException{
+        if (outputFeatureSource instanceof SimpleFeatureStore) {
+            SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
+
+            SimpleFeatureCollection collection = new ListFeatureCollection(outputFeatureType, features);
+            featureStore.setTransaction(transaction);
+            try {
+                featureStore.addFeatures(collection);
+                transaction.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+                transaction.rollback();
+            }
+        } else {
+            LOG.log(Level.INFO, "WIKITYPE does not support read/write access");
+        }
 
     }
 
@@ -311,6 +296,88 @@ public class GADMConverter {
         return typeBuilder.buildFeatureType();
 
     }
+
+
+
+//            while (inputFeatures.hasNext()) {
+//                SimpleFeature feature = inputFeatures.next();
+//                String country = ((String) feature.getAttribute(4)).intern();
+//                String state = ((String) feature.getAttribute(6)).intern();
+//                if (!locList.contains(state + "_" + country))
+//                    locList.add(state + "_" + country);
+//            }
+
+//            for (String stateCountryPair : locList) {
+//
+//                geoList = new ArrayList<Geometry>();
+//                String state = stateCountryPair.split("_")[0];
+//                String country = stateCountryPair.split("_")[1];
+//                inputFeatures = inputCollection.features();
+//                if (level == 1) {
+//                    count++;
+//                    if (count % 10 == 0)
+//                        LOG.log(Level.INFO, count + "/" + total + " level 1 administrative districts processed.");
+//
+//                    while (inputFeatures.hasNext()) {
+//                        SimpleFeature feature = inputFeatures.next();
+//                        if (feature.getAttribute(6).equals(state) && feature.getAttribute(4).equals(country))
+//                            geoList.add((Geometry) feature.getAttribute(0));
+//                    }
+//                } else {
+//                    if (!visited.contains(country)) {
+//                        visited.add(country);
+//                    } else continue;
+//
+//                    count++;
+//                    LOG.log(Level.INFO, "Combining polygons for " + country + " (" + count + "/" + total + ")");
+//
+//                    while (inputFeatures.hasNext()) {
+//                        SimpleFeature feature = inputFeatures.next();
+//                        if (feature.getAttribute(4).equals(country))
+//                            geoList.add((Geometry) feature.getAttribute(0));
+//                    }
+//                }
+//
+//                inputFeatures.close();
+//                Geometry newGeom;
+//
+//                try {
+//                    newGeom = geometryFactory.buildGeometry(geoList).union();
+//                } catch (Exception e) {
+//                    if (level == 1)
+//                        LOG.log(Level.INFO, "Exception occurred at " + state + ": " + e.getMessage() + ". Attempting different combining methods.");
+//                    else
+//                        LOG.log(Level.INFO, "Exception occurred at " + country + ": " + e.getMessage() + ". Attempting different combining methods.");
+//                    newGeom = geometryFactory.buildGeometry(geoList).buffer(0);
+//                }
+//
+//                featureBuilder.add(newGeom);
+//                if (level == 1) {
+//                    featureBuilder.add(state);
+//                    featureBuilder.add(state + ", " + country);
+//                } else
+//                    featureBuilder.add(country);
+//                SimpleFeature feature = featureBuilder.buildFeature(null);
+//
+//                List<SimpleFeature> features = new ArrayList<SimpleFeature>();
+//                features.add(feature);
+//
+//                if (outputFeatureSource instanceof SimpleFeatureStore) {
+//                    SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
+//
+//                    SimpleFeatureCollection collection = new ListFeatureCollection(WIKITYPE, features);
+//                    featureStore.setTransaction(transaction);
+//                    try {
+//                        featureStore.addFeatures(collection);
+//                        transaction.commit();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        transaction.rollback();
+//                    }
+//                } else {
+//                    LOG.log(Level.INFO, "WIKITYPE does not support read/write access");
+//                }
+//            }
 
 
 //    public static void convertShpFile(File rawFile, SpatialDataFolder outputFolder, int level) throws IOException {
