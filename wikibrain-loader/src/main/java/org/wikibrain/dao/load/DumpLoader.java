@@ -1,6 +1,9 @@
 package org.wikibrain.dao.load;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.SizeFileComparator;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -18,9 +21,13 @@ import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.RawPage;
+import org.wikibrain.parser.DumpSplitter;
+import org.wikibrain.parser.WpParseException;
 import org.wikibrain.parser.xml.DumpPageXmlParser;
+import org.wikibrain.parser.xml.PageXmlParser;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -49,6 +56,7 @@ public class DumpLoader {
     private final LocalPageDao localPageDao;
     private final RawPageDao rawPageDao;
     private final MetaInfoDao metaDao;
+    private TIntSet validIds = null;
 
     public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao, MetaInfoDao metaDao) {
         this(localPageDao, rawPageDao, metaDao, DEFAULT_NAMESPACES);
@@ -61,34 +69,62 @@ public class DumpLoader {
         this.nss = nss;
     }
 
+    public void setValidIds(TIntSet validIds) {
+        this.validIds = validIds;
+    }
+
     /**
      * Expects file name format starting with lang + "wiki" for example, "enwiki"
      * @param file
      */
-    public void load(File file) {
-        Language lang = FileMatcher.ARTICLES.getLanguage(file.getAbsolutePath());
+    public void load(final File file) {
+        final Language lang = FileMatcher.ARTICLES.getLanguage(file.getAbsolutePath());
         if (!keepProcessingArticles(lang)) {
             return;
         }
-        DumpPageXmlParser parser = new DumpPageXmlParser(file,
-                LanguageInfo.getByLanguage(lang));
-        for (RawPage rp : parser) {
-            if (allPages.incrementAndGet() % 10000 == 0) {
-                LOG.info("processing article " + allPages.get() + " found " + interestingPages.get() + " interesting articles");
-            }
-            if (isInteresting(rp)) {
-                interestingPages.incrementAndGet();
-                save(file, rp);
-                incrementLangCount(lang);
-                if (!keepProcessingArticles(lang)) {
-                    break;
-                }
-            }
+        DumpSplitter parser = new DumpSplitter(file);
+        ParallelForEach.iterate(
+                parser.iterator(),
+                WpThreadUtils.getMaxThreads(),
+                1000,
+                new Procedure<String>() {
+                    @Override
+                    public void call(String page) throws Exception {
+                        try {
+                            processOnePage(file, lang, page);
+                        } catch (WpParseException e) {
+                            LOG.log(Level.WARNING, "parsing of " + file.getPath() + " failed:", e);
+                        }
+                    }
+                },
+                Integer.MAX_VALUE
+        );
+    }
+
+    private void processOnePage(File file, Language lang, String page) throws WpParseException {
+        if (!keepProcessingArticles(lang)) {
+            return;
+        }
+        if (allPages.incrementAndGet() % 10000 == 0) {
+            LOG.info("processing article " + allPages.get() + " found " + interestingPages.get() + " interesting articles");
+        }
+        PageXmlParser parser = new PageXmlParser(LanguageInfo.getByLanguage(lang));
+        RawPage rp = parser.parse(page);
+        if (isInteresting(rp)) {
+            interestingPages.incrementAndGet();
+            save(file, rp);
+            incrementLangCount(lang);
         }
     }
 
     private boolean isInteresting(RawPage rp) {
-        return rp != null && rp.getNamespace() != null && nss.contains(rp.getNamespace());
+        if (rp == null || rp.getNamespace() == null) {
+            return false;
+        } else if (validIds != null && !validIds.contains(rp.getLocalId())) {
+            return false;
+        } else {
+            return nss.contains(rp.getNamespace());
+        }
     }
 
     private boolean keepProcessingArticles(Language lang) {
@@ -150,6 +186,12 @@ public class DumpLoader {
                         .hasArg()
                         .withDescription("maximum articles per language")
                         .create("x"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("validIds")
+                        .hasArg()
+                        .withDescription("list of valid ids")
+                        .create("v"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -159,6 +201,7 @@ public class DumpLoader {
         } catch (ParseException e) {
             System.err.println("Invalid option usage: " + e.getMessage());
             new HelpFormatter().printHelp("DumpLoader", options);
+            System.exit(1);
             return;
         }
 
@@ -190,6 +233,14 @@ public class DumpLoader {
             loader.maxPerLang = Integer.valueOf(cmd.getOptionValue("x"));
         }
 
+        if (cmd.hasOption("v")) {
+            TIntSet validIds = new TIntHashSet();
+            for (String line : FileUtils.readLines(new File(cmd.getOptionValue("v")))) {
+                validIds.add(Integer.valueOf(line.trim()));
+            }
+            loader.setValidIds(validIds);
+        }
+
         if (cmd.hasOption("d")) {
             lpDao.clear();
             rpDao.clear();
@@ -200,14 +251,10 @@ public class DumpLoader {
         metaDao.beginLoad();
 
         // loads multiple dumps in parallel
-        ParallelForEach.loop(paths,
-                new Procedure<File>() {
-                    @Override
-                    public void call(File path) throws Exception {
-                        LOG.info("processing file: " + path);
-                        loader.load(path);
-                    }
-                });
+        for (File path : paths) {
+            LOG.info("processing file: " + path);
+            loader.load(path);
+        }
 
         lpDao.endLoad();
         rpDao.endLoad();

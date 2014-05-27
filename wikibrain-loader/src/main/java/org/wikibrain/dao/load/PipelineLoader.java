@@ -9,6 +9,7 @@ import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.sql.WpDataSource;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.utils.JvmUtils;
 
 import java.io.IOException;
@@ -29,8 +30,17 @@ import java.util.logging.Logger;
 public class PipelineLoader {
     public static Logger LOG =java.util.logging.Logger.getLogger(PipelineLoader.class.getName());
 
+    /**
+     * Whether the stage should be turned on by default.
+     */
+    static enum OnByDefault {
+        TRUE,
+        FALSE,
+        IFMULTILINGUAL,           // only if more than one language is being used
+    }
+
     static class Stage {
-        boolean onBydefault;
+        OnByDefault onByDefault;
         String name;
         Class klass;
         String extraArgs[];
@@ -38,22 +48,17 @@ public class PipelineLoader {
         Stage(Config config) throws ClassNotFoundException {
             this.name = config.getString("name");
             this.klass = Class.forName(config.getString("class"));
-            this.onBydefault = config.getBoolean("onByDefault");
+            this.onByDefault = OnByDefault.valueOf(config.getString("onByDefault").toUpperCase());
             this.extraArgs = config.getStringList("extraArgs").toArray(new String[0]);
-        }
-
-        Stage(String name, Class klass, boolean onByDefault, String ... extraArgs) {
-            this.name = name;
-            this.klass = klass;
-            this.onBydefault = onByDefault;
-            this.extraArgs = extraArgs;
         }
     }
 
+    private final LanguageSet langs;
     private final String[] args;
     private final List<Stage> stages;
 
-    public PipelineLoader(List<Stage> stages, String args[]) {
+    public PipelineLoader(LanguageSet langs, List<Stage> stages, String args[]) {
+        this.langs = langs;
         this.args = args;
         this.stages = stages;
     }
@@ -124,10 +129,11 @@ public class PipelineLoader {
 
         Env env = new EnvBuilder(cmd).build();
         Config config = env.getConfiguration().get();
+        LanguageSet langs = env.getLanguages();
 
         // Shut down the database carefully
         WpDataSource ds = env.getConfigurator().get(WpDataSource.class);
-        ds.shutdown();
+        ds.close();
         Thread.sleep(1000);
 
         boolean offByDefault = cmd.hasOption("f");
@@ -152,7 +158,13 @@ public class PipelineLoader {
             Stage stage = new Stage(stageConfig);
             available.add(stage.name);
 
-            boolean on = offByDefault ? false : stage.onBydefault;
+            boolean on = false;
+            if (stage.onByDefault == OnByDefault.TRUE) {
+                on = true;
+            } else if (stage.onByDefault == OnByDefault.IFMULTILINGUAL && langs.size() > 1) {
+                on = true;
+            }
+
             if (runStages.containsKey(stage.name)) {
                 on = runStages.get(stage.name);
                 runStages.remove(stage.name);
@@ -169,7 +181,7 @@ public class PipelineLoader {
             System.exit(1);
             return;
         }
-        PipelineLoader loader = new PipelineLoader(stages, keeperArgs.toArray(new String[0]));
+        PipelineLoader loader = new PipelineLoader(langs, stages, keeperArgs.toArray(new String[0]));
         loader.run();
     }
 }

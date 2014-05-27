@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.core.dao.postgis;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import com.vividsolutions.jts.geom.Geometry;
@@ -9,6 +10,8 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.feature.visitor.CalcResult;
+import org.geotools.feature.visitor.UniqueVisitor;
 import org.geotools.filter.text.cql2.CQL;
 import org.geotools.jdbc.Index;
 import org.geotools.jdbc.JDBCDataStore;
@@ -19,8 +22,10 @@ import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.spatial.core.SpatialContainerMetadata;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,9 +98,35 @@ public class PostGISDB {
         }
     }
 
-    public Map<Integer, Geometry> getAllGeometries(String layerName, String refSysName) throws DaoException{
 
-        try {
+    public SpatialContainerMetadata getLayerMetadata(String layerName, String refSysName) throws DaoException{
+
+        FeatureIterator iterator = getFeatureIteratorForLayer(layerName, refSysName);
+        int count = 0;
+        SpatialContainerMetadata.ShapeType shapeType = null;
+
+        while(iterator.hasNext()){
+            Feature f = iterator.next();
+            count++;
+            SpatialContainerMetadata.ShapeType curShapeType = SpatialContainerMetadata.getShapeTypeFromGeometry((Geometry)f.getDefaultGeometryProperty().getValue());
+            if (shapeType == null){
+                shapeType = curShapeType;
+            }else{
+                if (!shapeType.equals(SpatialContainerMetadata.ShapeType.MIXED)) {
+                    if (!curShapeType.equals(shapeType)) {
+                        shapeType = SpatialContainerMetadata.ShapeType.MIXED;
+                    }
+                }
+            }
+        }
+
+        return new SpatialContainerMetadata(layerName, refSysName, count, shapeType);
+
+    }
+
+    private FeatureIterator getFeatureIteratorForLayer(String layerName, String refSysName) throws DaoException{
+
+        try{
 
             FeatureSource contents = getFeatureSource();
             String cqlQuery = String.format("layer_name = '%s' AND ref_sys_name = '%s'", layerName, refSysName);
@@ -105,25 +136,121 @@ public class PostGISDB {
             if (collection.size() == 0) return null;
 
             FeatureIterator iterator = collection.features();
-
-            if(!iterator.hasNext()){
-                iterator.close();
-                return null;
-            }
-            Feature feature = iterator.next();
-
-            Map<Integer, Geometry> geometries = new HashMap<Integer, Geometry>();
-            while (iterator.hasNext()){
-                geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
-                feature = iterator.next();
-            }
-            iterator.close();
-            return geometries;
-
+            return iterator;
 
         }catch(Exception e){
             throw new DaoException(e);
         }
+
+    }
+
+    /**
+     * Gets all the layers in a given reference system
+     * @param refSysName
+     * @return empty set if no layers or refSys does not exist, otherwise a set with all the layers in the input refsys
+     * @throws DaoException
+     */
+    public Set<String> getLayersInReferenceSystem(String refSysName) throws DaoException{
+
+        try {
+
+            String cqlQuery = String.format("ref_sys_name = '%s'", refSysName);
+            Filter f = CQL.toFilter(cqlQuery);
+            Set<Object> uniques = getUniqueValues("layer_name", f);
+            Set<String> rVal = Sets.newHashSet();
+            for(Object o : uniques){
+                rVal.add(o.toString());
+            }
+            return rVal;
+
+        }catch(Exception e){
+            throw new DaoException(e);
+        }
+
+    }
+
+
+    /**
+     * Gets all loaded reference systems
+      * @return
+     * @throws DaoException
+     */
+    public Set<String> getAllReferenceSystems() throws DaoException{
+
+        try {
+
+            Set<Object> uniques = getUniqueValues("ref_sys_name", null);
+            Set<String> rVal = Sets.newHashSet();
+            for(Object o : uniques){
+                rVal.add(o.toString());
+            }
+            return rVal;
+
+        }catch(Exception e){
+            throw new DaoException(e);
+        }
+
+    }
+
+
+
+    /**
+     * Returns the unique values in colName in the database, pre-filtered with filter f (if not null)
+     * @param colName
+     * @param f If null, will not use filter
+     * @return
+     * @throws DaoException
+     */
+    private Set<Object> getUniqueValues(String colName, Filter f) throws DaoException{
+
+        try {
+
+            // get feature source
+            FeatureSource contents = getFeatureSource();
+
+            // prep query
+            Query query = getQuery();
+            if (f != null) {
+                query.setFilter(f);
+            }
+            query.setPropertyNames(new String[]{colName});
+
+            UniqueVisitor visitor = new UniqueVisitor(colName);
+
+            // get unique results
+            FeatureCollection collection = contents.getFeatures(query);
+            collection.accepts(visitor, null);
+            CalcResult result = visitor.getResult();
+            Set<Object> results = result.toSet();
+
+            return results;
+
+        }catch(Exception e){
+            throw new DaoException(e);
+        }
+
+
+    }
+
+    public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName, String refSysName) throws DaoException{
+
+        FeatureIterator iterator = getFeatureIteratorForLayer(layerName, refSysName);
+
+        if(!iterator.hasNext()){
+            iterator.close();
+            return null;
+        }
+        Feature feature = iterator.next();
+
+        Map<Integer, Geometry> geometries = new HashMap<Integer, Geometry>();
+        while (iterator.hasNext()){
+            geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
+            feature = iterator.next();
+        }
+        iterator.close();
+        return geometries;
+
+
     }
 
 
@@ -132,6 +259,8 @@ public class PostGISDB {
         try {
 
             store = (JDBCDataStore)DataStoreFinder.getDataStore(manualParameters);
+
+
 
             if (needsToBeInitialized()){ // needs to be initialized
 
@@ -174,6 +303,10 @@ public class PostGISDB {
 
     public JDBCDataStore getRawDataStore() {
         return store;
+    }
+
+    public Query getQuery(){
+        return new Query(SPATIAL_DB_NAME);
     }
 
     public FeatureSource getFeatureSource() throws DaoException{

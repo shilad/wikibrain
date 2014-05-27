@@ -4,7 +4,10 @@ import com.typesafe.config.Config;
 import gnu.trove.list.TCharList;
 import gnu.trove.list.array.TCharArrayList;
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
@@ -16,6 +19,7 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.vector.VectorGenerator;
+import org.wikibrain.utils.ObjectDb;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.*;
@@ -26,28 +30,50 @@ import java.util.logging.Logger;
 
 /**
  * Reads in a word2vec model in the "standard" file format.
+ *
+ * Builds a disk
+ *
  * This code is adapted from https://github.com/ansjsun/Word2VEC_java
  *
  * @author Shilad Sen
  */
 public class Word2VecGenerator implements VectorGenerator {
     private static final Logger LOG = Logger.getLogger(Word2VecGenerator.class.getName());
-    private static final int MAX_SIZE = 50;
 
     private final Language language;
     private final LocalPageDao localPageDao;
 
-    private Map<String, float[]> wordVectors = new HashMap<String, float[]>();
+    private ObjectDb<float[]> phraseDb;
+    private TIntObjectMap<float[]> articles;
 
     public Word2VecGenerator(Language language, LocalPageDao localPageDao, File path) throws IOException {
         this.language = language;
         this.localPageDao = localPageDao;
-        if (wordVectors.isEmpty()) {
-            this.read(path);
-        }
+        this.read(path);
     }
 
     public void read(File path) throws IOException {
+        File phraseFile = new File(path.getAbsolutePath() + ".phrases");
+        File articleFile = new File(path.getAbsolutePath() + ".articles");
+        if (phraseFile.exists()
+        &&  articleFile.exists()
+        &&  phraseFile.lastModified() >= path.lastModified()
+        &&  articleFile.lastModified() >= path.lastModified()) {
+            LOG.info("phrase and article caches are up to date, loading them...");
+            phraseDb = new ObjectDb<float[]>(phraseFile);
+            articles = (TIntObjectMap<float[]>) WpIOUtils.readObjectFromFile(articleFile);
+        } else {
+            createWikiBrainModel(path, phraseFile, articleFile);
+        }
+    }
+
+    private void createWikiBrainModel(File path, File phraseFile, File articleFile) throws IOException {
+        FileUtils.deleteQuietly(phraseFile);
+        FileUtils.deleteQuietly(articleFile);
+
+        phraseDb = new ObjectDb<float[]>(phraseFile, true);
+        articles = new TIntObjectHashMap<float[]>();
+
         DataInputStream dis = null;
         InputStream bis = null;
         try {
@@ -72,6 +98,7 @@ public class Word2VecGenerator implements VectorGenerator {
                 if (i % 50000 == 0) {
                     LOG.info("Read word vector " + word + " (" + i + " of " + numWords + ")");
                 }
+
                 float[] vector = new float[vlength];
                 double norm2 = 0.0;
                 for (int j = 0; j < vlength; j++) {
@@ -84,13 +111,21 @@ public class Word2VecGenerator implements VectorGenerator {
                 for (int j = 0; j < vlength; j++) {
                     vector[j] /= norm2;
                 }
-
-                wordVectors.put(normalize(word), vector);
+                if (word.startsWith("/w/")) {
+                    String[] pieces = word.split("/", 5);
+                    int wpId = Integer.valueOf(pieces[3]);
+                    articles.put(wpId, vector);
+                } else {
+                    phraseDb.put(normalize(word), vector);
+                }
             }
         } finally {
             IOUtils.closeQuietly(bis);
             IOUtils.closeQuietly(dis);
         }
+
+        phraseDb.flush();
+        WpIOUtils.writeObjectToFile(articleFile, articles);
     }
 
 
@@ -130,16 +165,31 @@ public class Word2VecGenerator implements VectorGenerator {
 
     @Override
     public TIntFloatMap getVector(int pageId) throws DaoException {
-        throw new UnsupportedOperationException("Word2Vec only supports phrases, not pages.");
+        float[] vector = articles.get(pageId);
+        if (vector == null) {
+            return null;
+        }
+        TIntFloatMap result = new TIntFloatHashMap(vector.length);
+        for (int i = 0; i < vector.length; i++) {
+            result.put(i, vector[i]);
+        }
+        return result;
     }
 
     @Override
     public TIntFloatMap getVector(String phrase) {
-        float[] vector = wordVectors.get(normalize(phrase));
+        float[] vector;
+        try {
+            vector = phraseDb.get(normalize(phrase));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (vector == null) {
             return null;
         }
-        TIntFloatMap result = new TIntFloatHashMap();
+        TIntFloatMap result = new TIntFloatHashMap(vector.length);
         for (int i = 0; i < vector.length; i++) {
             result.put(i, vector[i]);
         }
@@ -180,7 +230,7 @@ public class Word2VecGenerator implements VectorGenerator {
                 throw new IllegalArgumentException("Monolingual SR Metric requires 'language' runtime parameter");
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));
-            File path = new File(config.getString("path"));
+            File path = getModelFile(config.getString("modelDir"), language);
             if (!path.isFile()) {
                 throw new ConfigurationException("Path to word2vec model " + path.getAbsolutePath() + " is not a file. Do you need to download or build the model?");
             }
@@ -194,5 +244,13 @@ public class Word2VecGenerator implements VectorGenerator {
                 throw new ConfigurationException(e);
             }
         }
+    }
+
+    public static File getModelFile(String dir, Language lang) {
+        return getModelFile(new File(dir), lang);
+    }
+
+    public static File getModelFile(File dir, Language lang) {
+        return new File(dir, lang.getLangCode() + ".bin");
     }
 }

@@ -13,6 +13,8 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
+import org.wikibrain.spatial.core.constants.Layers;
+import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
@@ -40,17 +42,15 @@ public class SpatialContainmentExample {
             LanguageSet loadedLangs = lpDao.getLoadedLanguages();
 
             // set up the parameters for the call to getContainedItemIds
-            String containerName = "China";
-            String layerName = "country";
+            String containerName = "Israel";
+
             Set<String> subLayers = Sets.newHashSet();
             subLayers.add("wikidata");
 
-
-
-
             LocalPage lp = lpDao.getByTitle(new Title(containerName,Language.getByLangCode("simple")), NameSpace.ARTICLE);
             Integer id = wdDao.getItemId(lp);
-            TIntSet containedItemIds = scDao.getContainedItemIds(id,layerName, "earth", subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
+            TIntSet containedItemIds = scDao.getContainedItemIds(id, Layers.GADM0, RefSys.EARTH,
+                    subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
 
 
             int counter = 0;

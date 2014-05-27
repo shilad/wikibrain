@@ -1,4 +1,4 @@
-package org.wikibrain.sr.word2vec;
+package org.wikibrain.sr.wikify;
 
 import gnu.trove.TCollections;
 import gnu.trove.map.TIntObjectMap;
@@ -12,7 +12,6 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.nlp.Dictionary;
 import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
-import org.wikibrain.sr.wikify.Wikifier;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
@@ -22,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**

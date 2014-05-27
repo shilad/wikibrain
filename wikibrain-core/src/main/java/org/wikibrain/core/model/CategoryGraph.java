@@ -24,6 +24,7 @@ public class CategoryGraph implements Serializable{
     // Mapping from local page id to internal dense index.
     public TIntIntMap catIndexes;
 
+    public int[] catIds;    // dense category ids to sparse local page ids
     public double[] catCosts;  // the cost of travelling through each category
     public int[][] catParents;
     public int[][] catPages;
@@ -37,5 +38,23 @@ public class CategoryGraph implements Serializable{
 
     public int getCategoryIndex(int catId) {
         return catIndexes.containsKey(catId) ?  catIndexes.get(catId) : -1;
+    }
+
+    /**
+     * Return the wikipedia page ids for child of the specified category
+     * @param wpId
+     * @return
+     */
+    public int[] getChildren(int wpId) {
+        int parentIndex = getCategoryIndex(wpId);
+        if (parentIndex < 0) {
+            return new int[0];
+        }
+        int [] denseIds = catChildren[parentIndex];
+        int childIds[] = new int[denseIds.length];
+        for (int i = 0; i < denseIds.length; i++) {
+            childIds[i] = catIds[denseIds[i]];
+        }
+        return childIds;
     }
 }

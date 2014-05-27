@@ -235,7 +235,7 @@ public class DatasetDao {
                 if (line == null)
                     break;
                 String tokens[] = line.split(delim);
-                if (tokens.length == 3) {
+                if (tokens.length >= 3) {
                     KnownSim ks = new KnownSim(
                                             tokens[0],
                                             tokens[1],

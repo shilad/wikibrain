@@ -71,6 +71,17 @@ public class LinkProbabilityDao {
         }
     }
 
+    public boolean isBuilt() {
+        return db != null;
+    }
+
+    /**
+     * Fixme: Check the cache here...
+     * @param language
+     * @param mention
+     * @return
+     * @throws DaoException
+     */
     public double getLinkProbability(Language language, String mention) throws DaoException {
         if (db == null) {
             throw new IllegalStateException("Dao has not yet been built. Call build()");
@@ -94,7 +105,9 @@ public class LinkProbabilityDao {
     }
 
     public synchronized void useCache(boolean useCache) {
-        if (useCache) {
+        if (useCache && db == null) {
+            this.cache = new TLongFloatHashMap();   // build cache later
+        } else if (useCache) {
             LOG.info("building cache...");
             TLongFloatMap cache = new TLongFloatHashMap();
             Iterator<Pair<String, Double>> iter = db.iterator();
@@ -102,7 +115,7 @@ public class LinkProbabilityDao {
                 Pair<String, Double> entry = iter.next();
                 String tokens[] = entry.getKey().split(":", 2);
                 Language lang = Language.getByLangCode(tokens[0]);
-                long hash = hashCode(lang, normalizer.normalize(lang, entry.getKey()));
+                long hash = hashCode(lang, entry.getKey());
                 cache.put(hash, entry.getRight().floatValue());
             }
             this.cache = cache;
@@ -172,6 +185,9 @@ public class LinkProbabilityDao {
 //                System.out.println(String.format("inserting values into db: %s, %f", pair.getLeft, p));
                 String key = lang.getLangCode() + ":" + pair.getLeft();
                 db.put(key, p);
+                if (cache != null) {
+                    cache.put(hash, (float) p);
+                }
             } catch (IOException e) {
                 throw new DaoException(e);
             }

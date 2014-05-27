@@ -63,13 +63,15 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
         if (maxPages < 1) return result;
 
         LocalPage lp = lpDao.getByTitle(new Title(phrase, language), NameSpace.ARTICLE);
-        LocalId localId = null;
         if (lp == null) return result;
 
+        LocalId localId = null;
         if (lp.isRedirect()){
             Integer resolvedLocalId = redirectDao.resolveRedirect(language, lp.getLocalId());
             lp = lpDao.getById(language, resolvedLocalId);
             localId = new LocalId(language, resolvedLocalId);
+        }else{
+            localId = lp.toLocalId();
         }
         result.put(localId, 1.0f);
         return result;

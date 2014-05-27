@@ -34,7 +34,7 @@ public class LocalLinkVisitor extends ParserVisitor {
         LanguageInfo langInfo = LanguageInfo.getByLanguage(lang);
 
         int c = counter.getAndIncrement();
-        if(c % 100000==0) LOG.info("Visited link #" + c);
+        if(c % 1000000 == 0) LOG.info("Visited link #" + c);
         try {
             LocalLink.LocationType loc = LocalLink.LocationType.NONE;
             if (link.location.getParagraph() == 0) {

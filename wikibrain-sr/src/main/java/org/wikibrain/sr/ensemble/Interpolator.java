@@ -31,10 +31,12 @@ public class Interpolator implements Serializable {
             int numMissingScores = 0;
             double sumMissingScores = 0.0;
             for (EnsembleSim es : examples) {
-                double v = es.getScores().get(i);
-                if (Double.isNaN(v) || Double.isInfinite(v)) {
-                    sumMissingScores += es.getKnownSim().similarity;
-                    numMissingScores++;
+                if (es != null) {
+                    double v = es.getScores().get(i);
+                    if (Double.isNaN(v) || Double.isInfinite(v)) {
+                        sumMissingScores += es.getKnownSim().similarity;
+                        numMissingScores++;
+                    }
                 }
             }
             missingScores[i] = (numMissingScores > 0) ? (sumMissingScores / numMissingScores) : 0.0;

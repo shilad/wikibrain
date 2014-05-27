@@ -17,7 +17,6 @@ import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.sr.MonolingualSRMetric;
 import gnu.trove.map.TIntObjectMap;
-import org.wikibrain.wikidata.WikidataStatement;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -60,7 +59,7 @@ public class CalculateAllDistancePairs {
                 langIdInlinkSRMetricMap.put(new Integer(lang.getId()), c.get(MonolingualSRMetric.class, "inlink", "language", lang.getLangCode()));
             }
 
-            Map<Integer, Geometry> idGeomMap = sdDao.getAllGeometries("wikidata", "earth");
+            Map<Integer, Geometry> idGeomMap = sdDao.getAllGeometriesInLayer("wikidata", "earth");
             TIntObjectMap<String> idNameMap = new TIntObjectHashMap<String>();
             LOG.log(Level.INFO, String.format("Get %d geometries, now building id-name mapping", idGeomMap.size()));
             int counter1 = 0;

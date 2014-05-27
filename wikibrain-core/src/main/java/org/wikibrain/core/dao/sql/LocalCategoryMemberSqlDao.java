@@ -174,8 +174,8 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                 return graph;
             }
         }
-        LocalCategoryGraphBuilder builder = new LocalCategoryGraphBuilder();
-        CategoryGraph graph =  builder.build(language, localPageDao, this);
+        LocalCategoryGraphBuilder builder = new LocalCategoryGraphBuilder(localPageDao, this);
+        CategoryGraph graph =  builder.build(language);
         cache.put(key, graph);
         return graph;
     }

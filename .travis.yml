@@ -9,3 +9,6 @@ install:
 script:
   - mvn -B test
 
+cache:
+  directories:
+  - $HOME/.m2

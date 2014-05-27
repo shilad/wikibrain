@@ -5,9 +5,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.core.model.NameSpace;
 
-import javax.xml.stream.events.Namespace;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,6 +64,9 @@ public interface WikidataDao extends Dao<WikidataStatement> {
      * @throws DaoException
      */
     Integer getItemId(LocalPage page) throws DaoException;
+
+
+    Integer getItemId(LocalId localId) throws DaoException;
 
 
     /**

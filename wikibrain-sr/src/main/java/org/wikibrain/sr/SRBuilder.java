@@ -15,10 +15,14 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
 import org.wikibrain.sr.ensemble.EnsembleMetric;
 import org.wikibrain.sr.esa.SRConceptSpaceGenerator;
+import org.wikibrain.sr.wikify.Corpus;
+import org.wikibrain.sr.word2vec.Word2VecGenerator;
+import org.wikibrain.sr.word2vec.Word2VecTrainer;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.BufferedReader;
@@ -186,6 +190,9 @@ public class SRBuilder {
 
     public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
         LOG.info("building component metric " + name);
+        if (getMetricType(name).equals("vector.word2vec")) {
+            initWord2Vec(name);
+        }
         Dataset ds = getDataset();
         MonolingualSRMetric metric = getMetric(name);
         if (metric instanceof BaseMonolingualSRMetric) {
@@ -209,6 +216,35 @@ public class SRBuilder {
         metric.write();
     }
 
+    private void initWord2Vec(String name) throws ConfigurationException, IOException, DaoException {
+        LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        if (!lpd.isBuilt()) {
+            lpd.build();
+        }
+
+        Config config = getMetricConfig(name).getConfig("generator");
+        String corpusName = config.getString("corpus");
+        Corpus corpus = null;
+        if (!corpusName.equals("NONE")) {
+            corpus = env.getConfigurator().get(Corpus.class, config.getString("corpus"), "language", language.getLangCode());
+            if (!corpus.exists()) {
+                corpus.create();
+            }
+        }
+        File model = Word2VecGenerator.getModelFile(config.getString("modelDir"), language);
+        if (!model.isFile()) {
+            if (corpus == null) {
+                throw new ConfigurationException(
+                        "word2vec metric " + name + " cannot build or find model!" +
+                        "configuration has no corpus, but model not found at " + model + ".");
+            }
+            Word2VecTrainer trainer = new Word2VecTrainer(
+                    env.getConfigurator().get(LocalPageDao.class),
+                    language);
+            trainer.train(corpus.getDirectory());
+            trainer.save(model);
+        }
+    }
 
     private void setValidMostSimilarIdsFromFile(String file) throws IOException {
         setValidMostSimilarIds(readIds(file));
@@ -395,6 +431,7 @@ public class SRBuilder {
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("mode")
+                        .hasArg()
                         .withDescription("mode: similarity, mostsimilar, or both")
                         .create("o"));
 
@@ -453,7 +490,7 @@ public class SRBuilder {
             builder.setDeleteExistingData(Boolean.valueOf(cmd.getOptionValue("d")));
         }
         if (cmd.hasOption("o")) {
-            builder.setMode(Mode.valueOf(cmd.getOptionValue("p").toUpperCase()));
+            builder.setMode(Mode.valueOf(cmd.getOptionValue("o").toUpperCase()));
         }
         if (cmd.hasOption("l")) {
             builder.setLanguage(Language.getByLangCode(cmd.getOptionValue("l")));
