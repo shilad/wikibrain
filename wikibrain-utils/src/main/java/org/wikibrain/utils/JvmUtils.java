@@ -25,23 +25,19 @@ public class JvmUtils {
 
         // Try to get the URL class loader to make dynamic class loading work for Grails, etc.
         ClassLoader loader = JvmUtils.class.getClassLoader();
-        while (loader.getParent() != null && loader.getParent() instanceof URLClassLoader) {
-            String name = loader.getClass().getName();
-            if (name.contains("RootLoader") || name.contains("GroovyClassLoader")) {
-                break;  // hack for Groovy / Grails RootLoader s
-            }
-            loader = loader.getParent();
-        }
-        if (loader instanceof URLClassLoader) {
-            for (URL url : ((URLClassLoader)loader).getURLs()) {
-                if (isLocalFile(url)) {
-                    try {
-                        classPath += separator + new File(url.toURI());
-                    } catch (URISyntaxException e) {
-                        LOG.warning("Illegal url: " + url);
+        while (loader != null) {
+            if (loader instanceof URLClassLoader) {
+                for (URL url : ((URLClassLoader)loader).getURLs()) {
+                    if (isLocalFile(url)) {
+                        try {
+                            classPath += separator + new File(url.toURI());
+                        } catch (URISyntaxException e) {
+                            LOG.warning("Illegal url: " + url);
+                        }
                     }
                 }
             }
+            loader = loader.getParent();
         }
         return classPath;
     }

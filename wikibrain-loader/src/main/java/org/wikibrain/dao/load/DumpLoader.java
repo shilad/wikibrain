@@ -1,6 +1,9 @@
 package org.wikibrain.dao.load;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.SizeFileComparator;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -53,6 +56,7 @@ public class DumpLoader {
     private final LocalPageDao localPageDao;
     private final RawPageDao rawPageDao;
     private final MetaInfoDao metaDao;
+    private TIntSet validIds = null;
 
     public DumpLoader(LocalPageDao localPageDao, RawPageDao rawPageDao, MetaInfoDao metaDao) {
         this(localPageDao, rawPageDao, metaDao, DEFAULT_NAMESPACES);
@@ -63,6 +67,10 @@ public class DumpLoader {
         this.rawPageDao = rawPageDao;
         this.metaDao = metaDao;
         this.nss = nss;
+    }
+
+    public void setValidIds(TIntSet validIds) {
+        this.validIds = validIds;
     }
 
     /**
@@ -110,7 +118,13 @@ public class DumpLoader {
     }
 
     private boolean isInteresting(RawPage rp) {
-        return rp != null && rp.getNamespace() != null && nss.contains(rp.getNamespace());
+        if (rp == null || rp.getNamespace() == null) {
+            return false;
+        } else if (validIds != null && !validIds.contains(rp.getLocalId())) {
+            return false;
+        } else {
+            return nss.contains(rp.getNamespace());
+        }
     }
 
     private boolean keepProcessingArticles(Language lang) {
@@ -172,6 +186,12 @@ public class DumpLoader {
                         .hasArg()
                         .withDescription("maximum articles per language")
                         .create("x"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("validIds")
+                        .hasArg()
+                        .withDescription("list of valid ids")
+                        .create("v"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -181,6 +201,7 @@ public class DumpLoader {
         } catch (ParseException e) {
             System.err.println("Invalid option usage: " + e.getMessage());
             new HelpFormatter().printHelp("DumpLoader", options);
+            System.exit(1);
             return;
         }
 
@@ -210,6 +231,14 @@ public class DumpLoader {
         final DumpLoader loader = new DumpLoader(lpDao, rpDao, metaDao);
         if (cmd.hasOption("x")) {
             loader.maxPerLang = Integer.valueOf(cmd.getOptionValue("x"));
+        }
+
+        if (cmd.hasOption("v")) {
+            TIntSet validIds = new TIntHashSet();
+            for (String line : FileUtils.readLines(new File(cmd.getOptionValue("v")))) {
+                validIds.add(Integer.valueOf(line.trim()));
+            }
+            loader.setValidIds(validIds);
         }
 
         if (cmd.hasOption("d")) {

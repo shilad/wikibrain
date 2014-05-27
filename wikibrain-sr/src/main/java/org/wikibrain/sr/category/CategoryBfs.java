@@ -7,6 +7,7 @@ import org.wikibrain.core.dao.LocalCategoryMemberDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.CategoryGraph;
 import org.wikibrain.core.model.LocalCategory;
+import org.wikibrain.core.model.NameSpace;
 
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -63,22 +64,36 @@ public class CategoryBfs {
     private TIntSet validWpIds;
 
     public CategoryBfs(CategoryGraph graph, int startCatId, Language language, int maxResults, TIntSet validWpIds, LocalCategoryMemberDao categoryMemberDao) throws DaoException {
-        this.startPage = startCatId;
+        this(graph, startCatId, NameSpace.ARTICLE, language, maxResults, validWpIds, categoryMemberDao, (byte)+1);
+    }
+
+    public CategoryBfs(CategoryGraph graph, int startId, NameSpace startNamespace, Language language, int maxResults, TIntSet validWpIds, LocalCategoryMemberDao categoryMemberDao, int direction) throws DaoException {
+        this.startPage = startId;
         this.maxResults = maxResults;
         this.graph = graph;
         this.validWpIds = validWpIds;
         this.categoryMemberDao = categoryMemberDao;
         this.language = language;
         pageDistances.put(startPage, 0.000000);
-        Map<Integer,LocalCategory> cats = categoryMemberDao.getCategories(language,startCatId);
-        if (cats!=null){
-            for (int catId : categoryMemberDao.getCategories(language,startCatId).keySet()) {
-                int ci = graph.getCategoryIndex(catId);
-                if (ci >= 0) {
-                    openCats.add(new CategoryDistance(ci, graph.cats[ci], graph.catCosts[ci], (byte)+1));
+        if (startNamespace == NameSpace.ARTICLE) {
+            Map<Integer,LocalCategory> cats = categoryMemberDao.getCategories(language,startId);
+            if (cats!=null){
+                for (int catId : categoryMemberDao.getCategories(language,startId).keySet()) {
+                    int ci = graph.getCategoryIndex(catId);
+                    if (ci >= 0) {
+                        openCats.add(new CategoryDistance(ci, graph.cats[ci], graph.catCosts[ci], (byte)direction));
+                    }
                 }
             }
+        } else if (startNamespace == NameSpace.CATEGORY) {
+            int ci = graph.getCategoryIndex(startId);
+            if (ci >= 0) {
+                openCats.add(new CategoryDistance(ci, graph.cats[ci], 0.000000001, (byte)direction));
+            }
+        } else {
+            throw new IllegalArgumentException();
         }
+
     }
 
     public void setAddPages(boolean addPages) {
@@ -160,15 +175,15 @@ public class CategoryBfs {
         return pageDistances.get(pageId);
     }
     public boolean hasCategoryDistance(int categoryId) {
-        return catDistances.containsKey(categoryId);
+        return catDistances.containsKey(graph.getCategoryIndex(categoryId));
     }
     public double getCategoryDistance(int categoryId) {
-        return catDistances.get(categoryId);
+        return catDistances.get(graph.getCategoryIndex(categoryId));
     }
 
     public class BfsVisited {
-        TIntDoubleHashMap pages = new TIntDoubleHashMap();
-        TIntDoubleHashMap cats = new TIntDoubleHashMap();
+        public TIntDoubleHashMap pages = new TIntDoubleHashMap();
+        public TIntDoubleHashMap cats = new TIntDoubleHashMap();
         public void clear() { pages.clear(); cats.clear(); }
         public double maxPageDistance() { return max(pages.values()); }
         public double maxCatDistance() { return max(cats.values()); }
