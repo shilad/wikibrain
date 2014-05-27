@@ -9,6 +9,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.download.FileDownloader;
+import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.phrases.StanfordPhraseAnalyzer;
 

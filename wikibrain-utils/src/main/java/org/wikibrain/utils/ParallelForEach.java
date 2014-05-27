@@ -172,6 +172,7 @@ public class ParallelForEach {
                             }
                             fn.call(obj);
                         } catch (Exception e) {
+                            e.printStackTrace();
                             LOG.log(Level.SEVERE, "error processing list element " + obj, e);
                             LOG.log(Level.SEVERE, "stacktrace: " + ExceptionUtils.getStackTrace(e).replaceAll("\n", " ").replaceAll("\\s+", " "));
                         } finally {

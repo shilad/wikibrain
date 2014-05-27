@@ -1,5 +1,6 @@
 package org.wikibrain.dao.load;
 
+import gnu.trove.TCollections;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import org.apache.commons.cli.*;
@@ -19,6 +20,7 @@ import org.wikibrain.core.model.Title;
 import org.wikibrain.parser.sql.MySqlDumpParser;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
@@ -41,8 +44,12 @@ public class SqlLinksLoader {
 
     private final LocalLinkDao dao;
     private final LocalPageDao pageDao;
-    private TLongSet existing = new TLongHashSet();
+    private TLongSet existing = TCollections.synchronizedSet(new TLongHashSet());
     private final MetaInfoDao metaDao;
+
+    private AtomicLong totalLinks = new AtomicLong();
+    private AtomicLong interestingLinks = new AtomicLong();
+    private AtomicLong newLinks = new AtomicLong();
 
 
     public SqlLinksLoader(LocalLinkDao dao, LocalPageDao pageDao, MetaInfoDao metaDao, File file) {
@@ -67,41 +74,56 @@ public class SqlLinksLoader {
     }
 
     public void addNewLinks() throws DaoException {
-        int totalLinks = 0;
-        int interestingLinks = 0;
-        int newLinks = 0;
-        for (Object[] row : new MySqlDumpParser().parse(sqlDump)) {
+        totalLinks.set(0);
+        newLinks.set(0);
+        interestingLinks.set(0);
 
-            if (++totalLinks % 100000 == 0) {
-                LOG.info("Processed link " + totalLinks + ", found " + interestingLinks + " interesting and " + newLinks + " new");
-            }
+        ParallelForEach.iterate(
+                new MySqlDumpParser().parse(sqlDump).iterator(),
+                WpThreadUtils.getMaxThreads(),
+                1000,
+                new Procedure<Object[]>() {
+                    @Override
+                    public void call(Object[] row) throws Exception {
+                        processOneLink(row);
+                    }
+                },
+                1000000
+        );
+    }
 
-            Integer srcPageId = (Integer) row[0];
-            Integer destNamespace = (Integer) row[1];
-            String destTitle = (String) row[2];
-            NameSpace ns = NameSpace.getNameSpaceByValue(destNamespace);
+    private void processOneLink(Object[] row) throws DaoException {
+        if (totalLinks.incrementAndGet() % 100000 == 0) {
+            LOG.info("Processed link " + totalLinks + ", found " + interestingLinks + " interesting and " + newLinks + " new");
+        }
 
-            // TODO: make this configurable
-            if (ns == null || (ns != NameSpace.ARTICLE && ns != NameSpace.CATEGORY)) {
-                continue;
-            }
-            if (srcPageId < 0 || StringUtils.isEmpty(destTitle)) {
-                continue;
-            }
+        Integer srcPageId = (Integer) row[0];
+        Integer destNamespace = (Integer) row[1];
+        String destTitle = (String) row[2];
+        NameSpace ns = NameSpace.getNameSpaceByValue(destNamespace);
 
-            interestingLinks++;
-            Title title = new Title(destTitle, LanguageInfo.getByLanguage(language));
-            int destId = pageDao.getIdByTitle(title.getTitleStringWithoutNamespace(), language, ns);
-            if (destId < 0) {
-                // Handle red link
-            } else {
-                LocalLink ll = new LocalLink(language, "", srcPageId, destId,
-                        true, -1, false, LocalLink.LocationType.NONE);
-                if (!existing.contains(ll.longHashCode())) {
-                    existing.add(ll.longHashCode());
-                    newLinks++;
-                    dao.save(ll);
-                }
+        // TODO: make this configurable
+        if (ns == null || (ns != NameSpace.ARTICLE && ns != NameSpace.CATEGORY)) {
+            return;
+        }
+        if (srcPageId < 0 || StringUtils.isEmpty(destTitle)) {
+            return;
+        }
+
+        interestingLinks.incrementAndGet();
+        Title title = new Title(destTitle, LanguageInfo.getByLanguage(language));
+        int destId = pageDao.getIdByTitle(title.getTitleStringWithoutNamespace(), language, ns);
+        if (destId < 0) {
+            // Handle red link
+        } else {
+            LocalLink ll = new LocalLink(language, "", srcPageId, destId,
+                    true, -1, false, LocalLink.LocationType.NONE);
+            long hash = ll.longHashCode();
+            if (!existing.contains(ll.longHashCode())) {
+                existing.add(ll.longHashCode());
+                newLinks.incrementAndGet();
+                dao.save(ll);
+                metaDao.incrementRecords(LocalLink.class, language);
             }
         }
     }
@@ -157,14 +179,10 @@ public class SqlLinksLoader {
             metaDao.clear(LocalLink.class);
         }
         llDao.beginLoad();
-        ParallelForEach.loop(paths,
-            new Procedure<File>() {
-                @Override
-                public void call(File path) throws Exception {
-                    final SqlLinksLoader loader = new SqlLinksLoader(llDao, lpDao, metaDao, path);
-                    loader.load();
-                }
-            });
+        for (File path : paths) {
+            SqlLinksLoader loader = new SqlLinksLoader(llDao, lpDao, metaDao, path);
+            loader.load();
+        }
         llDao.endLoad();
     }
 

@@ -318,6 +318,8 @@ public class Word2VecTrainer {
 
 
     public void save(File path) throws IOException {
+        FileUtils.deleteQuietly(path);
+        path.getParentFile().mkdirs();
         OutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
         stream.write((words.length + " " + layer1Size + "\n").getBytes());
         for (String w : words) {
@@ -329,6 +331,7 @@ public class Word2VecTrainer {
                 stream.write(floatToBytes(f));
             }
         }
+        stream.close();
     }
 
     private void test() {

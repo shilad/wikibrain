@@ -18,9 +18,13 @@ import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.RawPage;
+import org.wikibrain.parser.DumpSplitter;
+import org.wikibrain.parser.WpParseException;
 import org.wikibrain.parser.xml.DumpPageXmlParser;
+import org.wikibrain.parser.xml.PageXmlParser;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -65,25 +69,43 @@ public class DumpLoader {
      * Expects file name format starting with lang + "wiki" for example, "enwiki"
      * @param file
      */
-    public void load(File file) {
-        Language lang = FileMatcher.ARTICLES.getLanguage(file.getAbsolutePath());
+    public void load(final File file) {
+        final Language lang = FileMatcher.ARTICLES.getLanguage(file.getAbsolutePath());
         if (!keepProcessingArticles(lang)) {
             return;
         }
-        DumpPageXmlParser parser = new DumpPageXmlParser(file,
-                LanguageInfo.getByLanguage(lang));
-        for (RawPage rp : parser) {
-            if (allPages.incrementAndGet() % 10000 == 0) {
-                LOG.info("processing article " + allPages.get() + " found " + interestingPages.get() + " interesting articles");
-            }
-            if (isInteresting(rp)) {
-                interestingPages.incrementAndGet();
-                save(file, rp);
-                incrementLangCount(lang);
-                if (!keepProcessingArticles(lang)) {
-                    break;
-                }
-            }
+        DumpSplitter parser = new DumpSplitter(file);
+        ParallelForEach.iterate(
+                parser.iterator(),
+                WpThreadUtils.getMaxThreads(),
+                1000,
+                new Procedure<String>() {
+                    @Override
+                    public void call(String page) throws Exception {
+                        try {
+                            processOnePage(file, lang, page);
+                        } catch (WpParseException e) {
+                            LOG.log(Level.WARNING, "parsing of " + file.getPath() + " failed:", e);
+                        }
+                    }
+                },
+                Integer.MAX_VALUE
+        );
+    }
+
+    private void processOnePage(File file, Language lang, String page) throws WpParseException {
+        if (!keepProcessingArticles(lang)) {
+            return;
+        }
+        if (allPages.incrementAndGet() % 10000 == 0) {
+            LOG.info("processing article " + allPages.get() + " found " + interestingPages.get() + " interesting articles");
+        }
+        PageXmlParser parser = new PageXmlParser(LanguageInfo.getByLanguage(lang));
+        RawPage rp = parser.parse(page);
+        if (isInteresting(rp)) {
+            interestingPages.incrementAndGet();
+            save(file, rp);
+            incrementLangCount(lang);
         }
     }
 
@@ -200,14 +222,10 @@ public class DumpLoader {
         metaDao.beginLoad();
 
         // loads multiple dumps in parallel
-        ParallelForEach.loop(paths,
-                new Procedure<File>() {
-                    @Override
-                    public void call(File path) throws Exception {
-                        LOG.info("processing file: " + path);
-                        loader.load(path);
-                    }
-                });
+        for (File path : paths) {
+            LOG.info("processing file: " + path);
+            loader.load(path);
+        }
 
         lpDao.endLoad();
         rpDao.endLoad();

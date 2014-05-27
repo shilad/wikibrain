@@ -1,4 +1,4 @@
-package org.wikibrain.sr.word2vec;
+package org.wikibrain.sr.wikify;
 
 import com.typesafe.config.Config;
 import org.apache.commons.io.FileUtils;
@@ -12,7 +12,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.phrases.AnchorTextPhraseAnalyzer;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.phrases.PhraseAnalyzerDao;
-import org.wikibrain.sr.wikify.Wikifier;
+import org.wikibrain.sr.word2vec.Word2Phrase;
 
 import java.io.File;
 import java.io.IOException;

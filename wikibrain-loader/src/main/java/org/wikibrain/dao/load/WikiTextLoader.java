@@ -29,46 +29,8 @@ import java.util.logging.Logger;
  * and populates data stores for links, ills, and categories.
  */
 public class WikiTextLoader {
+
     private static final Logger LOG = Logger.getLogger(WikiTextLoader.class.getName());
-
-    /**
-     * The maximum number of threads to use for a single language edition.
-     */
-    public static int maxThreadsPerLang = 8;
-
-
-    private final List<ParserVisitor> visitors;
-    private final LanguageSet allowedIlls;
-    private final RawPageDao rawPageDao;
-    private final AtomicInteger availableThreads;
-
-    public WikiTextLoader(List<ParserVisitor> visitors, LanguageSet allowedIlls, RawPageDao rawPageDao, int maxThreads) {
-        this.visitors = visitors;
-        this.allowedIlls = allowedIlls;
-        this.rawPageDao = rawPageDao;
-        this.availableThreads = new AtomicInteger(maxThreads);
-    }
-
-    public RawPageDao getDao() {
-        return rawPageDao;
-    }
-
-    public void load(LanguageInfo lang) throws DaoException {
-        int numLanguageThreads;
-        synchronized (availableThreads) {
-            numLanguageThreads = Math.min(availableThreads.get(), maxThreadsPerLang);
-            availableThreads.getAndAdd(-numLanguageThreads);
-        }
-        try {
-            WikiTextDumpParser dumpParser = new WikiTextDumpParser(rawPageDao, lang, allowedIlls);
-            dumpParser.setMaxThreads(numLanguageThreads);
-            dumpParser.parse(visitors);
-        } finally {
-            synchronized (availableThreads) {
-                availableThreads.getAndAdd(numLanguageThreads);
-            }
-        }
-    }
 
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         Options options = new Options();
@@ -92,7 +54,6 @@ public class WikiTextLoader {
         Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
 
-
         List<ParserVisitor> visitors = new ArrayList<ParserVisitor>();
 
         RawPageDao rpDao = conf.get(RawPageDao.class);
@@ -111,8 +72,6 @@ public class WikiTextLoader {
         visitors.add(catVisitor);
         visitors.add(illVisitor);
 
-        final WikiTextLoader loader = new WikiTextLoader(visitors, LanguageSet.ALL, rpDao, env.getMaxThreads());
-
         if(cmd.hasOption("d")) {
             llDao.clear();
             lcmDao.clear();
@@ -126,14 +85,12 @@ public class WikiTextLoader {
         lcmDao.beginLoad();
         metaDao.beginLoad();
 
-        ParallelForEach.loop(env.getLanguages().getLanguages(),
-                Math.max(1, env.getMaxThreads() / maxThreadsPerLang),
-                new Procedure<Language>() {
-                    @Override
-                    public void call(Language lang) throws Exception {
-                        loader.load(LanguageInfo.getByLanguage(lang));
-                    }
-                });
+        for (Language lang : env.getLanguages().getLanguages()) {
+            WikiTextDumpParser dumpParser = new WikiTextDumpParser(
+                    rpDao, LanguageInfo.getByLanguage(lang), LanguageSet.ALL);
+            dumpParser.parse(visitors);
+
+        }
 
         illDao.endLoad();
         llDao.endLoad();
