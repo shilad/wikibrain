@@ -355,7 +355,7 @@ public class SpatialDataLoader {
                 }
                 else if (step.trim().toLowerCase().equals("gadm")){
                     LOG.log(Level.INFO, "Beginning to download and process GADM data (will be imported in exogenous step)");
-                    GADMConverter.downloadAndConvert(spatialDataFolder);
+                    new GADMConverter().downloadAndConvert(spatialDataFolder);
                     //spatialDataFolder.deleteSpecificFile("read_me.pdf", RefSys.EARTH); // TODO: Aaron, please move the following two lines into the correct place in GADMConverter
                     //spatialDataFolder.deleteLayer("gadm2", RefSys.EARTH);
                 } else if (step.trim().toLowerCase().equals("exogenous")) {
