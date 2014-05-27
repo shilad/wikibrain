@@ -137,6 +137,7 @@ public class GADMConverter {
         Map map = new HashMap();
         List<String> locList = new ArrayList<String>();
         List<Geometry> geoList = new ArrayList<Geometry>();
+        List<String> visited = new ArrayList<String>();
 
         if (level == 1)
             outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "gadm1.shp");
@@ -184,146 +185,105 @@ public class GADMConverter {
 
         try {
 
-            //level 1 mapping
+            int total = 0;
+
+            while (inputFeatures.hasNext()) {
+                SimpleFeature feature = inputFeatures.next();
+                String country = ((String) feature.getAttribute(4)).intern();
+                String state = ((String) feature.getAttribute(6)).intern();
+                if (!locList.contains(state + "_" + country))
+                    locList.add(state + "_" + country);
+            }
+            inputFeatures.close();
+
             if (level == 1) {
-                LOG.log(Level.INFO, "Starting process polygons for level 1 administrative districts.");
-                while (inputFeatures.hasNext()) {
-                    SimpleFeature feature = inputFeatures.next();
-                    String country = ((String) feature.getAttribute(4)).intern();
-                    String state = ((String) feature.getAttribute(6)).intern();
-                    if (!locList.contains(state + "_" + country))
-                        locList.add(state + "_" + country);
-                }
-                inputFeatures.close();
-
-
-                int total = locList.size();
-                int count = 0;
-
+                LOG.log(Level.INFO, "Start processing polygons for level 1 administrative districts.");
+                total = locList.size();
+            } else {
+                LOG.log(Level.INFO, "Start processing polygons for level 0 administrative districts.");
                 for (String stateCountryPair: locList) {
-                    String state = stateCountryPair.split("_")[0];
                     String country = stateCountryPair.split("_")[1];
+                    if (!visited.contains(country)) {
+                        visited.add(country);
+                        total++;
+                    } else continue;
+                }
+            }
+
+            visited.clear();
+            int count = 0;
+
+            for (String stateCountryPair: locList) {
+                String state = stateCountryPair.split("_")[0];
+                String country = stateCountryPair.split("_")[1];
+                inputFeatures = inputCollection.features();
+                if (level == 1) {
                     count++;
                     if (count % 10 == 0)
                         LOG.log(Level.INFO, count + "/" + total + " level 1 administrative districts processed.");
-                    inputFeatures = inputCollection.features();
+
                     while (inputFeatures.hasNext()) {
                         SimpleFeature feature = inputFeatures.next();
                         if (feature.getAttribute(6).equals(state) && feature.getAttribute(4).equals(country))
                             geoList.add((Geometry)feature.getAttribute(0));
                     }
+                } else {
+                    if (!visited.contains(country)) {
+                        visited.add(country);
+                    } else continue;
 
-                    inputFeatures.close();
-
-                    try {
-                        Geometry newGeom = geometryFactory.buildGeometry(geoList).union();
-                        featureBuilder.add(newGeom);
-                        featureBuilder.add(state);
-                        featureBuilder.add(state + ", " + country);
-                        SimpleFeature feature = featureBuilder.buildFeature(null);
-
-                        features.add(feature);
-                    } catch (Exception e) {
-                        LOG.log(Level.INFO, "Exception occured at " + state + ": " + e.getMessage() + ". Attempting different combining methods.");
-                        Geometry newGeom = geometryFactory.buildGeometry(geoList).buffer(0);
-                        featureBuilder.add(newGeom);
-                        featureBuilder.add(state);
-                        featureBuilder.add(state + ", " + country);
-                        SimpleFeature feature = featureBuilder.buildFeature(null);
-
-                        features.add(feature);
-                    }
-
-                    if (outputFeatureSource instanceof SimpleFeatureStore) {
-                        SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
-
-                        SimpleFeatureCollection collection = new ListFeatureCollection(WIKITYPE, features);
-                        featureStore.setTransaction(transaction);
-                        try {
-                            featureStore.addFeatures(collection);
-                            transaction.commit();
-                            collection = null;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            transaction.rollback();
-                        }
-
-
-
-                    } else {
-                        LOG.log(Level.INFO, typeName + " does not support read/write access");
-                    }
-
-                    features.clear();
-                    System.gc();
-                }
-
-            } else {
-                //level 0 mapping
-                LOG.log(Level.INFO, "Starting process polygons for level 0 administrative districts.");
-                while (inputFeatures.hasNext()) {
-                    SimpleFeature feature = inputFeatures.next();
-                    String country = ((String) feature.getAttribute(4)).intern();
-                    if (!locList.contains(country))
-                        locList.add(country);
-                }
-                inputFeatures.close();
-
-                int total = locList.size();
-                int count = 0;
-
-                for (String country: locList) {
                     count++;
                     LOG.log(Level.INFO, "Combining polygons for " + country + " (" + count + "/" + total + ")");
-                    inputFeatures = inputCollection.features();
+
                     while (inputFeatures.hasNext()) {
                         SimpleFeature feature = inputFeatures.next();
                         if (feature.getAttribute(4).equals(country))
                             geoList.add((Geometry)feature.getAttribute(0));
                     }
+                }
 
-                    inputFeatures.close();
+                inputFeatures.close();
+                Geometry newGeom;
 
-                    try {
-                        Geometry newGeom = geometryFactory.buildGeometry(geoList).union();
-                        featureBuilder.add(newGeom);
-                        featureBuilder.add(country);
-                        SimpleFeature feature = featureBuilder.buildFeature(null);
-                        features.add(feature);
-                    } catch (Exception e){
+                try {
+                    newGeom = geometryFactory.buildGeometry(geoList).union();
+                } catch (Exception e) {
+                    if (level == 1)
+                        LOG.log(Level.INFO, "Exception occured at " + state + ": " + e.getMessage() + ". Attempting different combining methods.");
+                    else
                         LOG.log(Level.INFO, "Exception occured at " + country + ": " + e.getMessage() + ". Attempting different combining methods.");
-                        Geometry newGeom = geometryFactory.buildGeometry(geoList).buffer(0);
-                        featureBuilder.add(newGeom);
-                        featureBuilder.add(country);
-                        SimpleFeature feature = featureBuilder.buildFeature(null);
-                        features.add(feature);
+                    newGeom = geometryFactory.buildGeometry(geoList).buffer(0);
+                }
 
+                featureBuilder.add(newGeom);
+                if (level == 1) {
+                    featureBuilder.add(state);
+                    featureBuilder.add(state + ", " + country);
+                } else
+                    featureBuilder.add(country);
+                SimpleFeature feature = featureBuilder.buildFeature(null);
+
+                features.add(feature);
+
+                if (outputFeatureSource instanceof SimpleFeatureStore) {
+                    SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
+
+                    SimpleFeatureCollection collection = new ListFeatureCollection(WIKITYPE, features);
+                    featureStore.setTransaction(transaction);
+                    try {
+                        featureStore.addFeatures(collection);
+                        transaction.commit();
+                        collection = null;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        transaction.rollback();
                     }
-
-
-
-                    if (outputFeatureSource instanceof SimpleFeatureStore) {
-                        SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
-
-                        SimpleFeatureCollection collection = new ListFeatureCollection(WIKITYPE, features);
-                        featureStore.setTransaction(transaction);
-                        try {
-                            featureStore.addFeatures(collection);
-                            transaction.commit();
-                            collection = null;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            transaction.rollback();
-                        }
-                    } else {
+                } else {
                         LOG.log(Level.INFO, typeName + " does not support read/write access");
-                    }
-
+                }
                     features.clear();
                     System.gc();
-                }
             }
-
 
         } catch (MalformedURLException e){
             e.printStackTrace();
