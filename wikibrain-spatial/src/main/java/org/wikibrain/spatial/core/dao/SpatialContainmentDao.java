@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import gnu.trove.set.TIntSet;
 import org.wikibrain.core.dao.DaoException;
 
+import java.io.IOException;
 import java.util.Set;
 
 /**
