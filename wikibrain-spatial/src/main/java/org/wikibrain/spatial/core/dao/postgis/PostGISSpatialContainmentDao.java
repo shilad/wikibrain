@@ -93,28 +93,34 @@ public class PostGISSpatialContainmentDao implements SpatialContainmentDao {
         Filter finalFilter = ff.and(filters);
 
         // *** EXECUTE QUERY ***
-
+        FeatureSource featureSource;
+        FeatureCollection containedFeatures;
         try {
 
-            FeatureSource featureSource = db.getFeatureSource();
-            FeatureCollection containedFeatures = featureSource.getFeatures(finalFilter);
-            FeatureIterator featureIterator = containedFeatures.features();
-
-            TIntSet rVal = new TIntHashSet();
-
-            while (featureIterator.hasNext()){
-
-                Feature f = featureIterator.next();
-                Integer itemId = (Integer)f.getProperty(db.getItemIdAttributeName()).getValue();
-                rVal.add(itemId);
-
-            }
-
-            return rVal;
-
-        }catch(IOException e){
-            throw new DaoException(e);
+            featureSource = db.getFeatureSource();
+            containedFeatures = featureSource.getFeatures(finalFilter);
         }
+        catch (IOException e){
+            throw new DaoException();
+        }
+        FeatureIterator featureIterator = containedFeatures.features();
+
+        TIntSet rVal = new TIntHashSet();
+
+        while (featureIterator.hasNext()){
+
+            Feature f = featureIterator.next();
+            Integer itemId = (Integer)f.getProperty(db.getItemIdAttributeName()).getValue();
+            rVal.add(itemId);
+
+        }
+        featureIterator.close();
+
+
+
+        return rVal;
+
+
 
     }
 
