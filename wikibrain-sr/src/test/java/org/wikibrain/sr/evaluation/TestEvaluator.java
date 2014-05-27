@@ -34,7 +34,7 @@ public class TestEvaluator {
 
         SimilarityEvaluator evaluator = new SimilarityEvaluator(file);
         evaluator.setWriteToStdout(false);
-        evaluator.addCrossfolds(dsDao.get(simple, "wordsim353.txt"), 7);
+        evaluator.addCrossfolds(dsDao.get(simple, "radinsky.txt"), 7);
         evaluator.addCrossfolds(dsDao.get(simple, "atlasify240.txt"), 7);
 
         TestLocalSR.Factory factory = new TestLocalSR.Factory();
@@ -42,7 +42,6 @@ public class TestEvaluator {
 
         List<String> lines = FileUtils.readLines(FileUtils.getFile(file, "local-similarity", "summary.tsv"));
         assertEquals(lines.size(), 4);
-        System.out.println("lines are " + lines);
         assertFalse(StringUtils.join(lines).contains("null"));
         assertTrue(StringUtils.join(lines).contains("thisIsTheMetric"));
         assertTrue(StringUtils.join(lines).contains("thisIsTheDisambiguator"));
@@ -71,9 +70,9 @@ public class TestEvaluator {
         }
         assertEquals("thisIsTheDisambiguator", eval.getSummaryAsMap().get("disambigConfig"));
         assertEquals("thisIsTheMetric", eval.getSummaryAsMap().get("metricConfig"));
-        assertEquals(total, eval.getTotal());
         assertEquals(missing, eval.getMissing());
         assertEquals(failed, eval.getFailed());
+        assertEquals(total, eval.getTotal());
         assertEquals(successful, eval.getSuccessful());
         assertEquals(actual, eval.getActual());
         assertEquals(estimated, eval.getEstimates());

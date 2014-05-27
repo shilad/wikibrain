@@ -17,6 +17,10 @@ final class CategoryDistance implements Comparable<CategoryDistance> {
         this.direction = direction;
     }
 
+    public final String getCatString() {
+        return this.catString;
+    }
+
     public final int getCatIndex() {
         return catIndex;
     }

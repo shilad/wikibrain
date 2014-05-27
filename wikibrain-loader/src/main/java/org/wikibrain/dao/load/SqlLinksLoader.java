@@ -1,9 +1,12 @@
 package org.wikibrain.dao.load;
 
 import gnu.trove.TCollections;
+import gnu.trove.set.TIntSet;
 import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.set.hash.TLongHashSet;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -41,6 +44,7 @@ public class SqlLinksLoader {
     private final AtomicInteger counter = new AtomicInteger();
     private final File sqlDump;
     private final Language language;
+    private TIntSet validIds;
 
     private final LocalLinkDao dao;
     private final LocalPageDao pageDao;
@@ -115,17 +119,23 @@ public class SqlLinksLoader {
         int destId = pageDao.getIdByTitle(title.getTitleStringWithoutNamespace(), language, ns);
         if (destId < 0) {
             // Handle red link
+        } else if (validIds != null && (!validIds.contains(srcPageId) || !validIds.contains(destId))) {
+            // Skip
         } else {
+
             LocalLink ll = new LocalLink(language, "", srcPageId, destId,
                     true, -1, false, LocalLink.LocationType.NONE);
             long hash = ll.longHashCode();
-            if (!existing.contains(ll.longHashCode())) {
-                existing.add(ll.longHashCode());
+            if (!existing.contains(hash)) {
+                existing.add(hash);
                 newLinks.incrementAndGet();
                 dao.save(ll);
-                metaDao.incrementRecords(LocalLink.class, language);
             }
         }
+    }
+
+    public void setValidIds(TIntSet validIds) {
+        this.validIds = validIds;
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException {
@@ -141,6 +151,12 @@ public class SqlLinksLoader {
                         .hasArg()
                         .withDescription("maximum links per language")
                         .create("x"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("validIds")
+                        .hasArg()
+                        .withDescription("list of valid ids")
+                        .create("v"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -169,6 +185,15 @@ public class SqlLinksLoader {
             }
         }
 
+
+        TIntSet validIds = null;
+        if (cmd.hasOption("v")) {
+            validIds = new TIntHashSet();
+            for (String line : FileUtils.readLines(new File(cmd.getOptionValue("v")))) {
+                validIds.add(Integer.valueOf(line.trim()));
+            }
+        }
+
         final LocalLinkDao llDao = conf.get(LocalLinkDao.class);
         final LocalPageDao lpDao = conf.get(LocalPageDao.class);
         final MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
@@ -181,6 +206,7 @@ public class SqlLinksLoader {
         llDao.beginLoad();
         for (File path : paths) {
             SqlLinksLoader loader = new SqlLinksLoader(llDao, lpDao, metaDao, path);
+            if (validIds != null) loader.setValidIds(validIds);
             loader.load();
         }
         llDao.endLoad();

@@ -13,8 +13,10 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.utils.WpThreadUtils;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -24,7 +26,7 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class Env {
+public class Env implements Closeable {
     private static final Logger LOG = Logger.getLogger(Env.class.getName());
 
     private Configuration configuration;
@@ -166,5 +168,10 @@ public class Env {
         String path = conf.get().getString("mapper.default");
         // look up algorithmId under that.
         return conf.get().getInt("mapper."+path+".algorithmId");
+    }
+
+    @Override
+    public void close() throws IOException {
+        configurator.close();
     }
 }

@@ -2,14 +2,18 @@ package org.wikibrain.conf;
 
 import com.typesafe.config.Config;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.clapper.util.classutil.*;
 import org.wikibrain.utils.JvmUtils;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -55,12 +59,13 @@ import java.util.logging.Logger;
  * All generated components are considered singletons. Once a named component is
  * generated once, it is cached and reused for future requests.
  */
-public class Configurator {
+public class Configurator implements Cloneable {
     private static final Logger LOG = Logger.getLogger(Configurator.class.getName());
 
     public static final int MAX_FILE_SIZE = 8 * 1024 * 1024;   // 8MB
 
     private final Configuration conf;
+
 
     /**
      * A collection of providers for a particular type of component (e.g. LocalPageDao).
@@ -113,6 +118,7 @@ public class Configurator {
 
         String separator = System.getProperty("path.separator");
         for (String entry : classPath.split(separator)) {
+            LOG.fine("considering classpath entry " + entry);
             File file = new File(entry);
             if (!file.exists()) {
                 LOG.warning("skipping looking for providers in nonexistent file " + file);
@@ -399,6 +405,24 @@ public class Configurator {
      */
     public <T> T get(Class<T> klass) throws ConfigurationException {
         return get(klass, null);
+    }
+
+    /**
+     * Tries to close all open components, clears the components map.
+     */
+    public void close() {
+        for (Map<String, Object> implementations : components.values() ) {
+            for (Object obj : implementations.values()) {
+                if (obj instanceof Closeable) {
+                    try {
+                        ((java.io.Closeable) obj).close();
+                    } catch (IOException e) {
+                        LOG.log(Level.SEVERE, "closing component " + obj + " failed:", e);
+                    }
+                }
+            }
+        }
+        components.clear();
     }
 
 }

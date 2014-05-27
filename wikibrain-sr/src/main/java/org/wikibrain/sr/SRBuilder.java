@@ -217,6 +217,11 @@ public class SRBuilder {
     }
 
     private void initWord2Vec(String name) throws ConfigurationException, IOException, DaoException {
+        LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        if (!lpd.isBuilt()) {
+            lpd.build();
+        }
+
         Config config = getMetricConfig(name).getConfig("generator");
         String corpusName = config.getString("corpus");
         Corpus corpus = null;
@@ -238,11 +243,6 @@ public class SRBuilder {
                     language);
             trainer.train(corpus.getDirectory());
             trainer.save(model);
-        }
-
-        LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
-        if (!lpd.isBuilt()) {
-            lpd.build();
         }
     }
 
@@ -431,6 +431,7 @@ public class SRBuilder {
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("mode")
+                        .hasArg()
                         .withDescription("mode: similarity, mostsimilar, or both")
                         .create("o"));
 
@@ -489,7 +490,7 @@ public class SRBuilder {
             builder.setDeleteExistingData(Boolean.valueOf(cmd.getOptionValue("d")));
         }
         if (cmd.hasOption("o")) {
-            builder.setMode(Mode.valueOf(cmd.getOptionValue("p").toUpperCase()));
+            builder.setMode(Mode.valueOf(cmd.getOptionValue("o").toUpperCase()));
         }
         if (cmd.hasOption("l")) {
             builder.setLanguage(Language.getByLangCode(cmd.getOptionValue("l")));

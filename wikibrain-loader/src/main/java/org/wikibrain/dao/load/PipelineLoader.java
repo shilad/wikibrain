@@ -133,7 +133,7 @@ public class PipelineLoader {
 
         // Shut down the database carefully
         WpDataSource ds = env.getConfigurator().get(WpDataSource.class);
-        ds.shutdown();
+        ds.close();
         Thread.sleep(1000);
 
         boolean offByDefault = cmd.hasOption("f");

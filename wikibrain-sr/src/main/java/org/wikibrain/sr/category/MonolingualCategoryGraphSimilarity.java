@@ -70,15 +70,17 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
         double maxDist1 = 0;
         double maxDist2 = 0;
 
+        // Note that all the category ids below are dense indexes in [0, numCategories).
+        // The mapping is determined by the graph.
         while ((bfs1.hasMoreResults() || bfs2.hasMoreResults())
                 &&     (maxDist1 + maxDist2 < shortestDistance)) {
             // Search from d1
             while (bfs1.hasMoreResults() && (maxDist1 <= maxDist2 || !bfs2.hasMoreResults())) {
                 CategoryBfs.BfsVisited visited = bfs1.step();
                 for (int catId : visited.cats.keys()) {
-                    if (bfs2.hasCategoryDistance(catId)) {
-                        double d = bfs1.getCategoryDistance(catId)
-                                + bfs2.getCategoryDistance(catId)
+                    if (bfs2.hasCategoryDistanceForIndex(catId)) {
+                        double d = bfs1.getCategoryDistanceForIndex(catId)
+                                + bfs2.getCategoryDistanceForIndex(catId)
                                 - graph.catCosts[catId];    // counted twice
                         shortestDistance = Math.min(d, shortestDistance);
                     }
@@ -90,9 +92,9 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
             while (bfs2.hasMoreResults() && (maxDist2 <= maxDist1 || !bfs1.hasMoreResults())) {
                 CategoryBfs.BfsVisited visited = bfs2.step();
                 for (int catId : visited.cats.keys()) {
-                    if (bfs1.hasCategoryDistance(catId)) {
-                        double d = bfs1.getCategoryDistance(catId) +
-                                bfs2.getCategoryDistance(catId) + 0
+                    if (bfs1.hasCategoryDistanceForIndex(catId)) {
+                        double d = bfs1.getCategoryDistanceForIndex(catId) +
+                                bfs2.getCategoryDistanceForIndex(catId) + 0
                                 - graph.catCosts[catId];    // counted twice;
                         shortestDistance = Math.min(d, shortestDistance);
                     }
