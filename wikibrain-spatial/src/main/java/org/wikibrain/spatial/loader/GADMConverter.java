@@ -45,9 +45,9 @@ import java.net.URL;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 
 /**
@@ -71,12 +71,12 @@ public class GADMConverter {
 
             // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
             //folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
-            File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
-            //File rawFile = new File("tmp/gadm_v2_shp/gadm2.shp");
+            //File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
+            File rawFile = new File("tmp/gadm_v2_shp/gadm2.shp");
 
             //copy level 2 shapefile to earth reference system
             LOG.log(Level.INFO, "Copying level 2 shapefiles to " + folder.getRefSysFolder("earth").getCanonicalPath());
-            FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath()), folder.getRefSysFolder("earth"));
+            //FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath()), folder.getRefSysFolder("earth"));
 
             // convert file and save as layer in earth reference system
             LOG.log(Level.INFO, "Start mapping level 1 shapefiles.");
@@ -85,13 +85,14 @@ public class GADMConverter {
             convertShpFile(rawFile, folder, 0);
 
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new WikiBrainException(e);
-        } finally {
-            folder.deleteSpecificFile("read_me.pdf", RefSys.EARTH);
-            folder.deleteLayer("gadm2", RefSys.EARTH);
         }
-
+//        catch (ZipException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
     }
 
@@ -121,9 +122,11 @@ public class GADMConverter {
 
     }
 
-    //private int countryCount = 0;
-    private AtomicInteger countryCount = new AtomicInteger(0);
-    private List<String> exceptionList;
+    private int countryCount = 0;
+
+    private synchronized void countInc() {
+        countryCount++;
+    }
 
 
     /**
@@ -165,15 +168,12 @@ public class GADMConverter {
 
             inputFeatures.close();
 
-            exceptionList = new ArrayList<String>();
-
             LOG.log(Level.INFO, "Start processing polygons for level " + level + " administrative districts.");
-
 
 
             if (level == 1) {
                 for (String country : countryState.keySet()) {
-
+                    countInc();
                     ParallelForEach.loop(countryState.get(country), new Procedure<String>() {
                         @Override
                         public void call(String state) throws Exception {
@@ -187,26 +187,16 @@ public class GADMConverter {
 
 
             } else {
-
                 ParallelForEach.loop(countryState.keySet(), new Procedure<String>() {
                     @Override
                     public void call(String country) throws Exception {
-
+                        countInc();
                         List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
                         writeQueue.add(features);
                         writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());
 
                     }
                 });
-
-                LOG.log(Level.INFO, "Start processing polygons where exceptions occurred.");
-                int count = 0;
-                for (String country: exceptionList) {
-                    count++;
-                    LOG.log(Level.INFO, "Combining polygons for " + country + "(" + count + "/" + exceptionList.size() + ")");
-                    List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
-                    writeToShpFile(outputFeatureSource, WIKITYPE, transaction, features);
-                }
 
 
             }
@@ -216,7 +206,8 @@ public class GADMConverter {
             e.printStackTrace();
         } finally {
             transaction.close();
-            countryCount.set(0);
+            outputFolder.deleteSpecificFile("read_me.pdf", RefSys.EARTH);
+            outputFolder.deleteLayer("gadm2", RefSys.EARTH);
         }
 
 
@@ -229,18 +220,16 @@ public class GADMConverter {
         SimpleFeatureIterator inputFeatures = inputCollection.features();
         SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(outputFeatureType);
         Multimap<String, String> reverted = ArrayListMultimap.create();
-        Geometry newGeom = null;
+        Geometry newGeom;
         String country;
 
 
-        if (!exceptionList.contains(featureName)) {
-            if (level == 1) {
-                country = (String) Multimaps.invertFrom(relation, reverted).get(featureName).toArray()[0];
-                synchronized (this) {LOG.log(Level.INFO, "Combining polygons for level 1 administrative district: " + featureName + " in " + country + " (" + countryCount.incrementAndGet() + "/" + relation.keySet().size() + ")");}
-            } else {
-                country = featureName;
-                synchronized (this) {LOG.log(Level.INFO, "Combining polygons for " + country + " (" + countryCount.incrementAndGet() + "/" + relation.keySet().size() + ")");}
-            }
+        if (level == 1) {
+            country = (String) Multimaps.invertFrom(relation, reverted).get(featureName).toArray()[0];
+            LOG.log(Level.INFO, "Combining polygons for level 1 administrative district: " + featureName + " in " + country);
+        } else {
+            country = featureName;
+            LOG.log(Level.INFO, "Combining polygons for " + country);
         }
 
         while (inputFeatures.hasNext()) {
@@ -257,9 +246,7 @@ public class GADMConverter {
 
         } catch (Exception e) {
             LOG.log(Level.INFO, "Exception occurred at " + featureName + ": " + e.getMessage() + ". Attempting different combining methods.");
-            if (level == 1 || exceptionList.contains(featureName))
-                newGeom = geometryFactory.buildGeometry(geometryList).buffer(0).getBoundary();
-            else exceptionList.add(featureName);
+            newGeom = geometryFactory.buildGeometry(geometryList).buffer(0).getBoundary();
 
         }
 
