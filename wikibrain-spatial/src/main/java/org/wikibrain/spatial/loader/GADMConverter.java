@@ -45,7 +45,7 @@ import java.net.URL;
 
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -150,7 +150,7 @@ public class GADMConverter {
         final SimpleFeatureCollection inputCollection = getInputCollection(rawFile);
         SimpleFeatureIterator inputFeatures = inputCollection.features();
 
-        final ConcurrentLinkedDeque<List<SimpleFeature>> writeQueue = new ConcurrentLinkedDeque<List<SimpleFeature>>();
+        final ConcurrentLinkedQueue<List<SimpleFeature>> writeQueue = new ConcurrentLinkedQueue<List<SimpleFeature>>();
 
         try {
 
@@ -180,8 +180,8 @@ public class GADMConverter {
                         public void call(String state) throws Exception {
 
                             List<SimpleFeature> features = inputFeatureHandler(inputCollection, state, 1, WIKITYPE, countryState);
-                            writeQueue.push(features);
-                            writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.pop());
+                            writeQueue.add(features);
+                            writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());
                         }
                     });
                 }
@@ -194,8 +194,8 @@ public class GADMConverter {
                     public void call(String country) throws Exception {
 
                         List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
-                        writeQueue.push(features);
-                        writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.pop());
+                        writeQueue.add(features);
+                        writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());
 
                     }
                 });
