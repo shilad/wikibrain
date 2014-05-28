@@ -32,6 +32,8 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wikibrain.core.WikiBrainException;
 
 import org.wikibrain.spatial.core.constants.RefSys;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
 
 import org.wikibrain.download.*;
@@ -43,6 +45,7 @@ import java.net.URL;
 
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,9 +80,9 @@ public class GADMConverter {
 
             // convert file and save as layer in earth reference system
             LOG.log(Level.INFO, "Start mapping level 1 shapefiles.");
-            convertShpFile(folder, 1);
+            convertShpFile(rawFile, folder, 1);
             LOG.log(Level.INFO, "Start mapping level 0 shapefiles.");
-            convertShpFile(folder, 0);
+            convertShpFile(rawFile, folder, 0);
 
 
         } catch (IOException e) {
@@ -119,32 +122,37 @@ public class GADMConverter {
 
     }
 
+    private int countryCount = 0;
 
+    private synchronized void countInc() {
+        countryCount++;
+    }
 
 
     /**
      * @param outputFolder
-     * @param level //TODO: reduce memory usage
-     * Converts raw GADM shapefile into WikiBrain readable type
-     * Recommended JVM max heapsize = 4G
+     * @param level        //TODO: reduce memory usage
+     *                     Converts raw GADM shapefile into WikiBrain readable type
+     *                     Recommended JVM max heapsize = 4G
      */
 
 
-
-    public void convertShpFile(SpatialDataFolder outputFolder, int level) throws IOException, WikiBrainException {
+    public void convertShpFile(File rawFile, SpatialDataFolder outputFolder, int level) throws IOException, WikiBrainException {
         if ((level != 0) && (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
 
-        File outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "gadm" + level +".shp");
-        ListMultimap<String, String> countryState = ArrayListMultimap.create();
+        File outputFile = new File(outputFolder.getRefSysFolder("earth").getCanonicalPath() + "/" + "gadm" + level + ".shp");
+        ListMultimap<String, String> countryStatePair = ArrayListMultimap.create();
 
         final SimpleFeatureType WIKITYPE = getOutputFeatureType(level);
 
-        SimpleFeatureSource outputFeatureSource = getOutputDataFeatureSource(outputFile, WIKITYPE);
+        final SimpleFeatureSource outputFeatureSource = getOutputDataFeatureSource(outputFile, WIKITYPE);
 
-        Transaction transaction = new DefaultTransaction("create");
+        final Transaction transaction = new DefaultTransaction("create");
 
-        SimpleFeatureCollection inputCollection = getInputCollection();
+        final SimpleFeatureCollection inputCollection = getInputCollection(rawFile);
         SimpleFeatureIterator inputFeatures = inputCollection.features();
+
+        final ConcurrentLinkedDeque<List<SimpleFeature>> writeQueue = new ConcurrentLinkedDeque<List<SimpleFeature>>();
 
         try {
 
@@ -152,40 +160,51 @@ public class GADMConverter {
                 SimpleFeature feature = inputFeatures.next();
                 String country = ((String) feature.getAttribute(4)).intern();
                 String state = ((String) feature.getAttribute(6)).intern();
-                if (!countryState.containsEntry(country, state))
-                    countryState.put(country, state);
+                if (!countryStatePair.containsEntry(country, state))
+                    countryStatePair.put(country, state);
             }
+
+            final Multimap<String, String> countryState = countryStatePair;
 
             inputFeatures.close();
 
             LOG.log(Level.INFO, "Start processing polygons for level " + level + " administrative districts.");
 
-            int stateCount = 0, countryCount = 0;
 
-            for (String country: countryState.keySet()) {
-                countryCount++;
-                if (level == 1){
-                    for (String state: countryState.get(country)) {
-                        stateCount++;
-                        LOG.log(Level.INFO, "Combining polygons for " + stateCount + "/" + countryState.get(country).size() +" level 1 administrative districts in " + country + " (" + countryCount + "/" + countryState.keySet().size()+")");
-                        List<SimpleFeature> features = inputFeatureHandler(inputCollection, state, 1, WIKITYPE, countryState);
-                        writeToShpFile(outputFeatureSource,WIKITYPE, transaction, features);
+            if (level == 1) {
+                for (String country : countryState.keySet()) {
+                    countInc();
+                    ParallelForEach.loop(countryState.get(country), new Procedure<String>() {
+                        @Override
+                        public void call(String state) throws Exception {
+
+                            List<SimpleFeature> features = inputFeatureHandler(inputCollection, state, 1, WIKITYPE, countryState);
+                            writeQueue.push(features);
+                            writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.pop());
+                        }
+                    });
+                }
+
+
+            } else {
+                ParallelForEach.loop(countryState.keySet(), new Procedure<String>() {
+                    @Override
+                    public void call(String country) throws Exception {
+                        countInc();
+                        List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
+                        writeQueue.push(features);
+                        writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.pop());
+                        ;
+
                     }
-                    stateCount = 0;
-                }
-                else {
-                    LOG.log(Level.INFO, "Combining polygons for " + countryCount + "/" + countryState.keySet().size() + " countries");
-                    List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
-                    writeToShpFile(outputFeatureSource,WIKITYPE, transaction, features);
-                }
+                });
+
+
             }
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-
         } finally {
             transaction.close();
             outputFolder.deleteSpecificFile("read_me.pdf", RefSys.EARTH);
@@ -195,7 +214,7 @@ public class GADMConverter {
 
     }
 
-    private List<SimpleFeature> inputFeatureHandler(SimpleFeatureCollection inputCollection, String featureName, int level, SimpleFeatureType outputFeatureType, Multimap<String, String> relation){
+    private List<SimpleFeature> inputFeatureHandler(SimpleFeatureCollection inputCollection, String featureName, int level, SimpleFeatureType outputFeatureType, Multimap<String, String> relation) {
 
         GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
         List<Geometry> geometryList = new ArrayList<Geometry>();
@@ -203,22 +222,33 @@ public class GADMConverter {
         SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(outputFeatureType);
         Multimap<String, String> reverted = ArrayListMultimap.create();
         Geometry newGeom;
+        String country;
 
-        while (inputFeatures.hasNext()){
+
+        if (level == 1) {
+            country = (String) Multimaps.invertFrom(relation, reverted).get(featureName).toArray()[0];
+            LOG.log(Level.INFO, "Combining polygons for level 1 administrative district: " + featureName + " in " + country);
+        } else {
+            country = featureName;
+            LOG.log(Level.INFO, "Combining polygons for " + country);
+        }
+
+        while (inputFeatures.hasNext()) {
             SimpleFeature feature = inputFeatures.next();
-            if (level == 1)
+            if (level == 1) {
                 if (feature.getAttribute(6).equals(featureName)) geometryList.add((Geometry) feature.getAttribute(0));
-            else if (feature.getAttribute(4).equals(featureName)) geometryList.add((Geometry) feature.getAttribute(0));
+            } else if (feature.getAttribute(4).equals(featureName))
+                geometryList.add((Geometry) feature.getAttribute(0));
         }
         inputFeatures.close();
 
         try {
             newGeom = geometryFactory.buildGeometry(geometryList).union().getBoundary();
-            //LOG.log(Level.INFO, "Simple: " + newGeom.isSimple());
+
         } catch (Exception e) {
             LOG.log(Level.INFO, "Exception occurred at " + featureName + ": " + e.getMessage() + ". Attempting different combining methods.");
             newGeom = geometryFactory.buildGeometry(geometryList).buffer(0).getBoundary();
-            //LOG.log(Level.INFO, "Simple: " + newGeom.isSimple());
+
         }
 
         featureBuilder.add(newGeom);
@@ -236,7 +266,7 @@ public class GADMConverter {
 
     }
 
-    private void writeToShpFile(SimpleFeatureSource outputFeatureSource, SimpleFeatureType outputFeatureType, Transaction transaction, List<SimpleFeature> features) throws IOException{
+    private synchronized void writeToShpFile(SimpleFeatureSource outputFeatureSource, SimpleFeatureType outputFeatureType, Transaction transaction, List<SimpleFeature> features) throws IOException {
         if (outputFeatureSource instanceof SimpleFeatureStore) {
             SimpleFeatureStore featureStore = (SimpleFeatureStore) outputFeatureSource;
 
@@ -255,7 +285,7 @@ public class GADMConverter {
 
     }
 
-    private SimpleFeatureSource getOutputDataFeatureSource(File outputFile, SimpleFeatureType type) throws IOException, MalformedURLException{
+    private SimpleFeatureSource getOutputDataFeatureSource(File outputFile, SimpleFeatureType type) throws IOException {
 
         ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
         Map<String, Serializable> outputParams = new HashMap<String, Serializable>();
@@ -265,22 +295,18 @@ public class GADMConverter {
         ShapefileDataStore outputDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(outputParams);
         outputDataStore.createSchema(type);
         String typeName = outputDataStore.getTypeNames()[0];
-        SimpleFeatureSource outputFeatureSource = outputDataStore.getFeatureSource(typeName);
-
-        return outputFeatureSource;
+        return outputDataStore.getFeatureSource(typeName);
 
     }
 
-    private SimpleFeatureCollection getInputCollection() throws IOException{
+    private SimpleFeatureCollection getInputCollection(File rawFile) throws IOException {
 
-        Map<String, URL> map = new HashMap();
-        File rawFile = new File("tmp/gadm_v2_shp/gadm2.shp");
+        Map<String, URL> map = new HashMap<String, URL>();
         map.put("url", rawFile.toURI().toURL());
         DataStore inputDataStore = DataStoreFinder.getDataStore(map);
         SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
-        SimpleFeatureCollection inputCollection = inputFeatureSource.getFeatures();
+        return inputFeatureSource.getFeatures();
 
-        return inputCollection;
 
     }
 
@@ -296,7 +322,6 @@ public class GADMConverter {
         return typeBuilder.buildFeatureType();
 
     }
-
 
 
 //            while (inputFeatures.hasNext()) {
