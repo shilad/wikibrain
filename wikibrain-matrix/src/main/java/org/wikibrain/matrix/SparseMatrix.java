@@ -93,11 +93,7 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
 
     @Override
     public int[] getRowIds() {
-        int rowIds[] = new int[this.rowIds.capacity()];
-        for (int i = 0; i < rowIds.length; i++) {
-            rowIds[i] = this.rowIds.get(i);
-        }
-        return rowIds;
+        return rowBuffers.getRowIdsInDiskOrder();
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
 /**
- * A single sparse matrix row backed by a byte buffer. The row contains:
+ * A single dense matrix row backed by a byte buffer. The row contains:
  * - a row id (int),
  * - a set of n columns, each with a value (float packed into two bytes)
  *
@@ -60,6 +60,9 @@ public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
     }
 
     public DenseMatrixRow(ValueConf vconf, int rowIndex, int colIds[], float colVals[]) {
+        if (!SparseMatrixUtils.isIncreasing(colIds)) {
+            throw new IllegalArgumentException("Columns must be sorted by id");
+        }
         this.vconf = vconf;
         this.colIds = colIds;
         short packed[] = new short[colVals.length];
@@ -67,11 +70,6 @@ public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
             packed[i] = vconf.pack(colVals[i]);
         }
         createBuffer(rowIndex, colIds, packed);
-    }
-
-    public DenseMatrixRow(ValueConf vconf, int rowIndex, int colIds[], short colVals[]) {
-        this.vconf = vconf;
-        createBuffer(rowIndex, colIds, colVals);
     }
 
     public void createBuffer(int rowIndex, int colIds[], short colVals[]) {
@@ -103,6 +101,9 @@ public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
      * @param buffer
      */
     public DenseMatrixRow(ValueConf vconf, int colIds[], ByteBuffer buffer) {
+        if (!SparseMatrixUtils.isIncreasing(colIds)) {
+            throw new IllegalArgumentException("Columns must be sorted by id");
+        }
         this.vconf = vconf;
         this.colIds = colIds;
         this.buffer = buffer;

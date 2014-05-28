@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import static org.junit.Assert.assertEquals;
 
 public class TestSparseMatrixRow {
-    private int[] keys = new int[] { 9, 11, 3, 26, 54 };
+    private int[] keys = new int[] { 3, 9, 11, 26, 54 };
     private float[] vals = new float[] {1.0f, 0.7f, 2.0f, 0.1f, -0.1f};
     private int ROW_INDEX = 34;
 

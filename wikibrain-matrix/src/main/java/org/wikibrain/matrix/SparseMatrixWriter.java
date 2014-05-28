@@ -74,12 +74,6 @@ public class SparseMatrixWriter {
         body.write(floatToBytes(vconf.maxScore));
         body.write(intToBytes(rowOffsets.size()));
 
-//        // First write row indexes in stored order (4 bytes per row)
-//        for (int i = 0; i < rowIndexes.size(); i++) {
-//            int rowIndex = rowIndexes.get(i);
-//            body.write(intToBytes(rowIndex));
-//        }
-
         // Next write row indexes in sorted order (4 bytes per row)
         int sortedIndexes[] = rowIndexes.toArray();
         Arrays.sort(sortedIndexes);

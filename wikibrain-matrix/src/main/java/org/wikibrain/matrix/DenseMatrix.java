@@ -7,9 +7,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,8 +27,10 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
 
     public static final int FILE_HEADER = 0xabccba;
 
-    private TIntLongHashMap rowOffsets = new TIntLongHashMap();
-    private int rowIds[];
+    private int numRows;
+    private IntBuffer rowIds;
+    private LongBuffer rowOffsets;
+
     private int colIds[];
     private FileChannel channel;
     private File path;
@@ -46,41 +51,44 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
         info("initializing sparse matrix with file length " + FileUtils.sizeOf(path));
         this.channel = (new FileInputStream(path)).getChannel();
         readHeaders();
-        rowBuffers = new MemoryMappedMatrix(path, channel, rowOffsets);
+        rowBuffers = new MemoryMappedMatrix(path, channel, rowIds, rowOffsets);
     }
 
     private void readHeaders() throws IOException {
-        int pos = 0;
         long size = Math.min(channel.size(), DEFAULT_HEADER_SIZE);
         MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);
 
         // read header
-        if (buffer.getInt(pos) != FILE_HEADER) {
-            throw new IOException("invalid file header: " + buffer.getInt(pos));
+        if (buffer.getInt(0) != FILE_HEADER) {
+            throw new IOException("invalid file header: " + buffer.getInt(0));
         }
-        pos += 4;
-        this.vconf = new ValueConf(buffer.getFloat(pos), buffer.getFloat(pos + 4));
-        pos += 8;
-        int numRows = buffer.getInt(pos);
-        pos += 4;
+        this.vconf = new ValueConf(buffer.getFloat(4), buffer.getFloat(8));
+        this.numRows = buffer.getInt(12);
+        int numCols = buffer.getInt(16);
+        int headerSize = 20 + 12 * numRows + 4 * numCols;
+        if (headerSize > DEFAULT_HEADER_SIZE) {
+            info("maxPageSize not large enough for entire header. Resizing to " + headerSize);
+            buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, headerSize);
+        }
 
-        // read row ids and offsets
-        info("reading offsets for " + numRows + " rows");
-        rowIds = new int[numRows];
-        for (int i = 0; i < numRows; i++) {
-            int rowIndex = buffer.getInt(pos);
-            long rowOffset = buffer.getLong(pos + 4);
-            rowOffsets.put(rowIndex, rowOffset);
-//            debug("adding row index " + rowIndex + " at offset " + rowOffset);
-            rowIds[i] = rowIndex;
-            pos += 12;
+        debug("preparing buffer for " + numRows + " rows");
+        buffer.position(20);
+        buffer.limit(buffer.position() + 4 * numRows);
+        rowIds = buffer.slice().asIntBuffer();
+        if (rowIds.capacity() != numRows) {
+            throw new IllegalStateException();
         }
-        info("read " + numRows + " offsets");
+        buffer.position(20 + 4 * numRows);
+        buffer.limit(buffer.position() + 8 * numRows);
+        rowOffsets = buffer.slice().asLongBuffer();
+        if (rowOffsets.capacity() != numRows) {
+            throw new IllegalStateException();
+        }
 
         // read column ids
-        int numCols = buffer.getInt(pos);
+        buffer.limit(headerSize);
+        int pos = 20 + 12 * numRows;
         info("reading ids for " + numCols + " cols");
-        pos += 4;
         colIds = new int[numCols];
         for (int i = 0; i < numCols; i++) {
             colIds[i] = buffer.getInt(pos);
@@ -101,7 +109,8 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
 
     @Override
     public int[] getRowIds() {
-        return rowIds;
+        return rowBuffers.getRowIdsInDiskOrder();
+
     }
 
     public int[] getColIds() {
@@ -110,25 +119,13 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
 
     @Override
     public int getNumRows() {
-        return rowIds.length;
+        return numRows;
     }
 
     public ValueConf getValueConf() {
         return vconf;
     }
 
-    public void dump() throws IOException {
-        for (int id : rowIds) {
-            System.out.print("" + id + ": ");
-            MatrixRow row = getRow(id);
-            for (int i = 0; i < row.getNumCols(); i++) {
-                int id2 = row.getColIndex(i);
-                float val = row.getColValue(i);
-                System.out.print(" " + id2 + "=" + val);
-            }
-            System.out.println();
-        }
-    }
 
     @Override
     public Iterator<DenseMatrixRow> iterator() {
@@ -136,15 +133,16 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
     }
 
     public class DenseMatrixIterator implements Iterator<DenseMatrixRow> {
-        private int i = 0;
+        private AtomicInteger i = new AtomicInteger();
+        private int[] rowIds = rowBuffers.getRowIdsInDiskOrder();
         @Override
         public boolean hasNext() {
-            return i < rowIds.length;
+            return i.get() < numRows;
         }
         @Override
         public DenseMatrixRow next() {
             try {
-                return getRow(rowIds[i++]);
+                return getRow(rowIds[i.getAndIncrement()]);
             } catch (IOException e) {
                 LOG.log(Level.SEVERE, "getRow failed", e);
                 return null;

@@ -79,12 +79,22 @@ public class DenseMatrixWriter {
         body.write(floatToBytes(vconf.minScore));
         body.write(floatToBytes(vconf.maxScore));
         body.write(intToBytes(rowOffsets.size()));
-        for (int i = 0; i < rowIndexes.size(); i++) {
-            int rowIndex = rowIndexes.get(i);
-            long rowOffset = rowOffsets.get(rowIndex);
+        body.write(intToBytes(colIds.length));
+
+        // Next write row indexes in sorted order (4 bytes per row)
+        int sortedIndexes[] = rowIndexes.toArray();
+        Arrays.sort(sortedIndexes);
+        for (int rowIndex : sortedIndexes) {
             body.write(intToBytes(rowIndex));
+        }
+
+        // Next write offsets for sorted indexes. (8 bytes per row)
+        for (int rowIndex : sortedIndexes) {
+            long rowOffset = rowOffsets.get(rowIndex);
             body.write(longToBytes(rowOffset + sizeHeader));
         }
+
+        // Finally, write column ids
         body.write(intToBytes(colIds.length));
         for (int c : colIds) {
             body.write(intToBytes(c));
