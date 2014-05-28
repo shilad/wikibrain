@@ -72,16 +72,16 @@ public class GADMConverter {
 
             // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
             //folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
-            //File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
-            File rawFile = new File("tmp/gadm_v2_shp/gadm2.shp");
+            File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
+            //File rawFile = new File("tmp/gadm_v2_shp/gadm2.shp");
 
             //copy level 2 shapefile to earth reference system
             LOG.log(Level.INFO, "Copying level 2 shapefiles to " + folder.getRefSysFolder("earth").getCanonicalPath());
-            //FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath()), folder.getRefSysFolder("earth"));
+            FileUtils.copyDirectory(new File(tmpFolder.getCanonicalPath()), folder.getRefSysFolder("earth"));
 
             // convert file and save as layer in earth reference system
             LOG.log(Level.INFO, "Start mapping level 1 shapefiles.");
-            //convertShpFile(rawFile, folder, 1);
+            convertShpFile(rawFile, folder, 1);
             LOG.log(Level.INFO, "Start mapping level 0 shapefiles.");
             convertShpFile(rawFile, folder, 0);
 
