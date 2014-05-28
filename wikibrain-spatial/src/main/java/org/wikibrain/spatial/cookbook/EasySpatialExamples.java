@@ -3,6 +3,7 @@ package org.wikibrain.spatial.cookbook;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.LocalPageDao;
@@ -14,6 +15,8 @@ import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 
+import java.util.Map;
+
 /**
  * Created by bjhecht on 5/17/14.
  */
@@ -24,8 +27,9 @@ public class EasySpatialExamples {
 //        useConvenienceFunctionsInSpatialDataDao(args);
 //        printSpatialContainerMetadata(args);
 //        printAllLoadedLayersInReferenceSystems(args);
-          printLatLonPrecisions(args);
+//          printLatLonPrecisions(args);
 
+        printNonEarthLayer(args);
     }
 
     /**
@@ -94,6 +98,7 @@ public class EasySpatialExamples {
             Configurator c = env.getConfigurator();
             SpatialDataDao sdDao = c.get(SpatialDataDao.class);
 
+
             Iterable<String> refSyss = sdDao.getAllRefSysNames(); // get all reference systems
             for (String refSys : refSyss) {
 
@@ -112,6 +117,25 @@ public class EasySpatialExamples {
             e.printStackTrace();
         }
 
+
+    }
+
+    public static void printNonEarthLayer(String[] args){
+
+        try {
+            // do basic setup
+            Env env = EnvBuilder.envFromArgs(args);
+            Configurator c = env.getConfigurator();
+            SpatialDataDao sdDao = c.get(SpatialDataDao.class);
+
+            Map<Integer, Geometry> geoms = sdDao.getAllGeometriesInLayer(Layers.ELEMENTS, RefSys.PERIODIC_TABLE);
+            for (Integer wdId : geoms.keySet()){
+                System.out.println("Found wikidata id = " + wdId);
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
 
     }
 

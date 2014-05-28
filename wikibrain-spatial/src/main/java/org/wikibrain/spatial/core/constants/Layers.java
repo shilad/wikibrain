@@ -10,6 +10,8 @@ public class Layers {
     public static String WIKIDATA = "wikidata";
     public static String GADM0 = "gadm0";
     public static String GADM1 = "gamd1";
+    public static String[] GADM = {GADM0, GADM1};
+    public static String ELEMENTS = "elements";
 
     /**
      * Gets a layer name for a type-based Wikidata layer.

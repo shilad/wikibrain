@@ -81,7 +81,7 @@ public class SpatialDataFolder {
 
         try {
             File refSysFolder = getRefSysFolder(refSysName);
-            String path = refSysFolder + "/" + layerName + ".shp";
+            String path = refSysFolder + System.getProperty("file.separator") + layerName + ".shp";
             ShpFiles shpFiles = new ShpFiles(path);
 
             URL url = new URL(shpFiles.get(ShpFileType.SHP));
@@ -101,12 +101,20 @@ public class SpatialDataFolder {
      * @return
      * @throws FileNotFoundException
      */
-    public File getRefSysFolder(String refSysName){
+    public File getRefSysFolder(String refSysName, boolean createIfNotExists){
+
+        if (createIfNotExists){
+            createNewReferenceSystemIfNotExists(refSysName);
+        }
 
         String path = baseFolderPath + "/" + refSysName;
         File rVal = new File(path);
         return rVal;
 
+    }
+
+    public File getRefSysFolder(String refSysName){
+        return getRefSysFolder(refSysName, false);
     }
 
     /**
@@ -182,6 +190,19 @@ public class SpatialDataFolder {
         }else{
             toDelete.delete();
         }
+
+    }
+
+    /**
+     * If the reference system does not exist, it will make it
+     * @param mainShapefile
+     * @param refSysName
+     * @throws WikiBrainException
+     */
+    public void moveShapefileToReferenceSystemFolder(File mainShapefile, String refSysName) throws WikiBrainException {
+
+        createNewReferenceSystemIfNotExists(refSysName);
+        WikiBrainSpatialUtils.moveShapefile(mainShapefile, getRefSysFolder(refSysName));
 
     }
 

@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by bjhecht on 4/7/14.
@@ -45,7 +47,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     private SimpleFeatureBuilder simpleFeatureBuilder = null;
     private static final Integer BUFFER_SIZE = 200;
 
-
+    private static final Logger LOG = Logger.getLogger(PostGISDB.class.getName());
 
     private PostGISSpatialDataDao(PostGISDB postGisDb, WikidataDao wikidataDao, LocalPageDao localPageDao){
 
@@ -99,6 +101,26 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
         }
 
         return geoms;
+
+    }
+
+    @Override
+    public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName, String[] notInLayers, String refSysName) throws DaoException {
+
+        Map<Integer, Geometry> rVal = this.getAllGeometriesInLayer(layerName, refSysName);
+
+        for (String notInLayer : notInLayers){
+            Map<Integer, Geometry> temp = this.getAllGeometriesInLayer(notInLayer, refSysName);
+            if (temp != null) {
+                for (Integer key : temp.keySet()) {
+                    rVal.remove(key);
+                }
+            }else{
+                LOG.log(Level.WARNING, "Could not find any geometries in layer: " + layerName);
+            }
+        }
+
+        return rVal;
 
     }
 
