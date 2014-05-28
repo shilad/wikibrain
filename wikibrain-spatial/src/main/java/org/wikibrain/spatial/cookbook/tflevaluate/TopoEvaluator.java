@@ -87,7 +87,7 @@ public class TopoEvaluator {
         // build SR metrics
         this.metrics = new HashMap<Language, MonolingualSRMetric>();
         for(Language lang : langs){
-            MonolingualSRMetric m = c.get(MonolingualSRMetric.class, "ensemble", "language", lang.getLangCode());
+            MonolingualSRMetric m = c.get(MonolingualSRMetric.class, "ESA", "language", lang.getLangCode());
             metrics.put(lang, m);
         }
     }
@@ -177,6 +177,8 @@ public class TopoEvaluator {
 
             MonolingualSRMetric sr = metrics.get(lang);
             results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
+            if(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false) == null){
+                LOG.warning(String.format("error calculating SR for universal page %d %s and %d %s", c1.getUnivId(), c1.getBestEnglishTitle(lpDao, true), c2.getUnivId(), c2.getBestEnglishTitle(lpDao, true)));            }
         }
 
         writeRow(c1, c2, results);
@@ -200,7 +202,7 @@ public class TopoEvaluator {
         output.flush();
     }
 
-    private Integer polygonDistance(Integer itemIdA, Integer itemIdB, String layer, String refSys){
+    public Integer polygonDistance(Integer itemIdA, Integer itemIdB, String layer, String refSys){
         Map.Entry<Integer,Integer> keyEntry = new AbstractMap.SimpleEntry<Integer, Integer>(itemIdA, itemIdB);
         if (polygonPairDistanceMap.containsKey(keyEntry)){
             return polygonPairDistanceMap.get(keyEntry);
@@ -221,6 +223,8 @@ public class TopoEvaluator {
             if(t.equals(itemIdB)){
                 return distList.get(t);
             }
+            if(!polygonWAG.containsKey(t))
+                continue;
 
             for(Integer k : polygonWAG.get(t)){
                 if(!V.contains(k)){
@@ -236,40 +240,54 @@ public class TopoEvaluator {
     }
 
     private void writeRow(UniversalPage c1, UniversalPage c2, List<SRResult> results) throws WikiBrainException, IOException, DaoException {
-        double km;
-        Point p1 = locations.get(c1.getUnivId()).getCentroid();
-        Point p2 = locations.get(c2.getUnivId()).getCentroid();
+        try {
+            double km;
+            if((!locations.containsKey(c1.getUnivId())) || (!locations.containsKey(c2.getUnivId())))
+                return;
+            Point p1 = locations.get(c1.getUnivId()).getCentroid();
+            Point p2 = locations.get(c2.getUnivId()).getCentroid();
 
 
-        //TODO: change this to a topological metric
+            //TODO: change this to a topological metric
 
-        /*
-        GeodeticCalculator geoCalc = new GeodeticCalculator();
-        geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
-        geoCalc.setDestinationGeographicPoint(p2.getX(), p2.getY());
-        km = geoCalc.getOrthodromicDistance() / 1000;
-        */
+            /*
+            GeodeticCalculator geoCalc = new GeodeticCalculator();
+            geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
+            geoCalc.setDestinationGeographicPoint(p2.getX(), p2.getY());
+            km = geoCalc.getOrthodromicDistance() / 1000;
+            */
 
 
-        km = polygonDistance(pointPolygonContainingMap.get(c1.getUnivId()), pointPolygonContainingMap.get(c2.getUnivId()), layerName, "earth");
-        Title t1 = c1.getBestEnglishTitle(lpDao, true);
-        Title t2 = c2.getBestEnglishTitle(lpDao, true);
 
-        String[] rowEntries = new String[7 + langs.size()];
-        rowEntries[0] = t1.getCanonicalTitle();
-        rowEntries[1] = String.valueOf(c1.getUnivId());
-        rowEntries[2] = upDao.getById(pointPolygonContainingMap.get(c1.getUnivId()), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
-        rowEntries[3] = t2.getCanonicalTitle();
-        rowEntries[4] = String.valueOf(c2.getUnivId());
-        rowEntries[5] = upDao.getById(pointPolygonContainingMap.get(c2.getUnivId()), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
-        rowEntries[6] = String.valueOf(km);
-        int counter = 0;
-        for (SRResult result : results) {
-            rowEntries[7 + counter] = String.valueOf(result.getScore());
-            counter ++;
+            if(! (pointPolygonContainingMap.containsKey(c1.getUnivId()) && pointPolygonContainingMap.containsKey(c2.getUnivId())))
+                return;
+            km = polygonDistance(pointPolygonContainingMap.get(c1.getUnivId()), pointPolygonContainingMap.get(c2.getUnivId()), layerName, "earth");
+            Title t1 = c1.getBestEnglishTitle(lpDao, true);
+            Title t2 = c2.getBestEnglishTitle(lpDao, true);
+
+            String[] rowEntries = new String[7 + langs.size()];
+            rowEntries[0] = t1.getCanonicalTitle();
+            rowEntries[1] = String.valueOf(c1.getUnivId());
+            rowEntries[2] = upDao.getById(pointPolygonContainingMap.get(c1.getUnivId()), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+            rowEntries[3] = t2.getCanonicalTitle();
+            rowEntries[4] = String.valueOf(c2.getUnivId());
+            rowEntries[5] = upDao.getById(pointPolygonContainingMap.get(c2.getUnivId()), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+            rowEntries[6] = String.valueOf(km);
+            int counter = 0;
+            for (SRResult result : results) {
+                if(result != null)
+                    rowEntries[7 + counter] = String.valueOf(result.getScore());
+                else
+                    rowEntries[7 + counter] = "0";
+                counter ++;
+            }
+            output.writeNext(rowEntries);
+            output.flush();
         }
-        output.writeNext(rowEntries);
-        output.flush();
+        catch (Exception e){
+            LOG.warning(String.format("error writing row for universal page %d %s and %d %s", c1.getUnivId(), c1.getBestEnglishTitle(lpDao, true), c2.getUnivId(), c2.getBestEnglishTitle(lpDao, true)));
+            //do nothing
+        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -283,8 +301,13 @@ public class TopoEvaluator {
         int counter = 0;
 
 
+
         evaluator.retrieveAllLocations("wikidata", "country");
-        evaluator.evaluateSample(new File("TopoEval.csv"), 10000);
+
+        System.out.println(evaluator.polygonDistance(709, 681153, evaluator.layerName, "earth"));
+        System.out.println(evaluator.polygonDistance(20932, 535551, evaluator.layerName, "earth"));
+        System.out.println(evaluator.polygonDistance(25305, 5089, evaluator.layerName, "earth"));
+        evaluator.evaluateSample(new File("TopoEval.csv"), 100000);
     }
 
 
