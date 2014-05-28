@@ -95,7 +95,6 @@ public class DenseMatrixWriter {
         }
 
         // Finally, write column ids
-        body.write(intToBytes(colIds.length));
         for (int c : colIds) {
             body.write(intToBytes(c));
         }

@@ -88,11 +88,13 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
         // read column ids
         buffer.limit(headerSize);
         int pos = 20 + 12 * numRows;
-        info("reading ids for " + numCols + " cols");
         colIds = new int[numCols];
         for (int i = 0; i < numCols; i++) {
             colIds[i] = buffer.getInt(pos);
             pos += 4;
+        }
+        if (!SparseMatrixUtils.isIncreasing(colIds)) {
+            throw new IllegalArgumentException("Columns must be sorted by id");
         }
         info("read " + colIds.length + " column ids");
     }

@@ -119,15 +119,11 @@ public class MemoryMappedMatrix {
     }
 
     private long getRowOffset(int rowId) {
-        int tmp[] = new int [numRows];
-        for (int i = 0; i < tmp.length; i++) {
-            tmp[i] = rowIds.get(i);
-        }
         int lo = 0;
         int hi = numRows - 1;
         while (lo <= hi) {
             // Key is in a[lo..hi] or not present.
-            int mid = lo + (hi - lo) / 2;
+            int mid = (lo + hi) / 2;
             int midId = rowIds.get(mid);
 
             if (rowId < midId) {
