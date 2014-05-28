@@ -11,6 +11,7 @@ import java.nio.LongBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +48,7 @@ public class MemoryMappedMatrix {
         }
         this.rowIds = rowIds;
         this.rowOffsets = rowOffsets;
-        this.numRows = rowIds.limit() / 4;
+        this.numRows = rowIds.capacity();
         int lastId = Integer.MIN_VALUE;
         for (int i = 0; i < numRows; i++) {
             if (rowIds.get(i) < lastId) {
@@ -118,6 +119,10 @@ public class MemoryMappedMatrix {
     }
 
     private long getRowOffset(int rowId) {
+        int tmp[] = new int [numRows];
+        for (int i = 0; i < tmp.length; i++) {
+            tmp[i] = rowIds.get(i);
+        }
         int lo = 0;
         int hi = numRows - 1;
         while (lo <= hi) {

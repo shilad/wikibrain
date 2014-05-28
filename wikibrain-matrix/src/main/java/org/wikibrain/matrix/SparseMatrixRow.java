@@ -16,6 +16,8 @@ import java.util.logging.Logger;
  *
  * The row can either be created from the component data, or from a byte buffer.
  * This means that the object can wrap data from an mmap'd file in the correct format.
+ *
+ * Newly created rows are reordered so that the columns appear in sorted order.
  */
 public final class SparseMatrixRow extends BaseMatrixRow implements MatrixRow {
     Logger LOG = Logger.getLogger(SparseMatrixRow.class.getName());
@@ -75,6 +77,12 @@ public final class SparseMatrixRow extends BaseMatrixRow implements MatrixRow {
 
     public void createBuffer(int rowIndex, int colIds[], short colVals[]) {
         assert(colIds.length == colVals.length);
+        if (!isIncreasing(colIds)) {
+            quickSort(colIds, colVals, 0, colIds.length - 1);
+            if (!isIncreasing(colIds)) {
+                throw new IllegalStateException();
+            }
+        }
 
         buffer = ByteBuffer.allocate(
                 4 +                 // header
@@ -90,6 +98,53 @@ public final class SparseMatrixRow extends BaseMatrixRow implements MatrixRow {
         headerBuffer.put(2, colVals.length);
         idBuffer.put(colIds, 0, colIds.length);
         valBuffer.put(colVals, 0, colVals.length);
+    }
+
+    // Adapted from http://www.programcreek.com/2012/11/quicksort-array-in-java/
+    private void quickSort(int colIds[], short colVals[], int low, int high) {
+        if (colIds.length == 0 || low >= high)
+            return;
+
+        // pick the pivot
+        int middle = (low + high) / 2;
+        int pivot = colIds[middle];
+
+        // partition around the pivot
+        int i = low, j = high;
+        while (i <= j) {
+            while (colIds[i] < pivot) {
+                i++;
+            }
+            while (colIds[j] > pivot) {
+                j--;
+            }
+            if (i <= j) {
+                int temp = colIds[i];
+                short tempV = colVals[i];
+                colIds[i] = colIds[j];
+                colVals[i] = colVals[j];
+                colIds[j] = temp;
+                colVals[j] = tempV;
+                i++;
+                j--;
+            }
+        }
+
+        //recursively sort two sub parts
+        quickSort(colIds, colVals, low, j);
+        quickSort(colIds, colVals, i, high);
+    }
+
+
+    static boolean isIncreasing(int A[]) {
+        int lastId = Integer.MIN_VALUE;
+        for (int i = 0; i < A.length; i++) {
+            if (A[i] <= lastId) {
+                return false;
+            }
+            lastId = A[i];
+        }
+        return true;
     }
 
     private void createViewBuffers(int numColumns) {

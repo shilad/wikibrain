@@ -64,16 +64,17 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
             info("maxPageSize not large enough for entire header. Resizing to " + headerSize);
             buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, headerSize);
         }
+
         debug("preparing buffer for " + numRows + " rows");
         buffer.position(16);
         buffer.limit(buffer.position() + 4 * numRows);
-        rowIds = buffer.asIntBuffer();
+        rowIds = buffer.slice().asIntBuffer();
         if (rowIds.capacity() != numRows) {
             throw new IllegalStateException();
         }
         buffer.position(16 + 4 * numRows);
         buffer.limit(buffer.position() + 8 * numRows);
-        rowOffsets = buffer.asLongBuffer();
+        rowOffsets = buffer.slice().asLongBuffer();
         if (rowOffsets.capacity() != numRows) {
             throw new IllegalStateException();
         }
