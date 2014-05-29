@@ -293,7 +293,7 @@ public class GADMConverter {
                 transaction.rollback();
             }
         } else {
-            LOG.log(Level.INFO, "WIKITYPE does not support read/write access");
+            LOG.log(Level.INFO, outputFeatureType.getTypeName() + " does not support read/write access");
         }
 
     }

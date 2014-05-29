@@ -57,6 +57,12 @@ public class OSMLayerLoader {
 
     }
 
+    /**
+     *
+     * @param outputFile
+     * @throws Exception
+     */
+
     public void printGeometries(File outputFile) throws Exception{
 
         final SimpleFeatureType OSMTYPE = getOutputFeatureType();
@@ -117,7 +123,7 @@ public class OSMLayerLoader {
                 transaction.rollback();
             }
         } else {
-            LOG.log(Level.INFO, "OSMTYPE does not support read/write access");
+            LOG.log(Level.INFO, outputFeatureType.getTypeName() + " does not support read/write access");
         }
 
     }
