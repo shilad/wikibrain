@@ -2,6 +2,7 @@ package org.wikibrain.matrix;
 
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -71,10 +72,5 @@ public class TestSparseMatrixRow {
             m.put(keys[i], vals[i]);
         }
         return new SparseMatrixRow(new ValueConf(), ROW_INDEX, m);
-    }
-
-    @Test
-    public void tmp() throws IOException {
-        SparseMatrix matrix = new SparseMatrix(new File("./db/matrix/local-link/links-transpose.matrix"));
     }
 }

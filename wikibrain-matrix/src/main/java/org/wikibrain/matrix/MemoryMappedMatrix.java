@@ -75,13 +75,17 @@ public class MemoryMappedMatrix {
             return;
         }
         // tricky: pages must align with row boundaries
-//        long sortedOffsets[] = Arrays.copyOfRange(rowOffsets.array(), rowOffsets.arrayOffset(), rowOffsets.arrayOffset() + rowOffsets.capacity());
-        int sortedIds[] = getRowIdsInDiskOrder();
-        long startPos = getRowOffset(sortedIds[0]);
+        long sortedOffsets[] = new long[numRows];
+        for (int i = 0; i < numRows; i++) {
+            sortedOffsets[i] = rowOffsets.get(i);
+        }
+        Arrays.sort(sortedOffsets);
+
+        long startPos = sortedOffsets[0];
         long lastPos = startPos;
 
         for (int i = 1; i < numRows; i++) {
-            long pos = getRowOffset(sortedIds[i]);
+            long pos = sortedOffsets[i];
             if (pos - startPos > PAGE_SIZE) {
                 assert(lastPos != startPos);
                 addBuffer(startPos, lastPos);
