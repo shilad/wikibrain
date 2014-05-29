@@ -57,6 +57,11 @@ public class QualitativeAnalyzer {
         File logFile = new File(dir, "overall.log");
         SimilarityEvaluationLog log = SimilarityEvaluationLog.read(logFile);
         List<KnownSimGuess> guesses = log.getGuesses();
+        showClosest(guesses);
+        showInfluential(guesses);
+    }
+
+    private void showClosest(List<KnownSimGuess> guesses) {
         Collections.sort(guesses, new Comparator<KnownSimGuess>() {
             @Override
             public int compare(KnownSimGuess g1, KnownSimGuess g2) {
@@ -72,18 +77,86 @@ public class QualitativeAnalyzer {
                 return r;
             }
         });
-        System.out.println("best guesses:");
+        System.out.println("\nclosest guesses:");
         for (int i = 0; i < 50 && i < guesses.size()/2; i++) {
             KnownSimGuess g = guesses.get(i);
             System.out.println(String.format("%d. err=%+.3f '%s' vs. '%s'; actual=%.3f pred=%.3f",
                     (i+1), g.getError(), g.getPhrase1(), g.getPhrase2(), g.getActual(), g.getGuess()));
         }
 
-        System.out.println("\nworst guesses:");
+        System.out.println("\nfurthest guesses:");
         for (int i = 0; i < 50 && i < guesses.size()/2; i++) {
             KnownSimGuess g = guesses.get(guesses.size() - i - 1);
             System.out.println(String.format("%d. err=%+.3f '%s' vs. '%s'; actual=%.3f pred=%.3f",
                     (i+1), g.getError(), g.getPhrase1(), g.getPhrase2(), g.getActual(), g.getGuess()));
+        }
+    }
+
+    private double getGuessMean(List<KnownSimGuess> guesses) {
+        double guessMean = 0.0;
+        int count = 0;
+        for (KnownSimGuess g : guesses) {
+            if (g.hasGuess()) {
+                count++;
+                guessMean += g.getGuess();
+            }
+        }
+        if (count == 0.0) {
+            return 0.0;
+        } else {
+            return guessMean / count;
+        }
+    }
+
+    private double getActualMean(List<KnownSimGuess> guesses) {
+        double actualMean = 0.0;
+        int count = 0;
+        for (KnownSimGuess g : guesses) {
+            if (g.hasGuess()) {
+                count++;
+                actualMean += g.getActual();
+            }
+        }
+        if (count == 0.0) {
+            return 0.0;
+        } else {
+            return actualMean / count;
+        }
+    }
+
+    private void showInfluential(List<KnownSimGuess> guesses) {
+        final double guessMean = getGuessMean(guesses);
+        final double actualMean = getActualMean(guesses);
+
+        Collections.sort(guesses, new Comparator<KnownSimGuess>() {
+            @Override
+            public int compare(KnownSimGuess g1, KnownSimGuess g2) {
+                Double s1 = (g1.getGuess() - guessMean) * (g1.getActual() - actualMean);
+                Double s2 = (g2.getGuess() - guessMean) * (g2.getActual() - actualMean);
+                int r = s1.compareTo(s2);
+                if (r == 0) {
+                    r = g1.getPhrase1().compareTo((g2.getPhrase1()));
+                }
+                if (r == 0) {
+                    r = g1.getPhrase2().compareTo((g2.getPhrase2()));
+                }
+                return r;
+            }
+        });
+        System.out.println("\nmost influential good guesses:");
+        for (int i = 0; i < 50 && i < guesses.size()/2; i++) {
+            KnownSimGuess g = guesses.get(i);
+            double s = (g.getGuess() - guessMean) * (g.getActual() - actualMean);
+            System.out.println(String.format("%d. influence=%.3f '%s' vs. '%s'; actual=%.3f pred=%.3f",
+                    (i+1), s, g.getPhrase1(), g.getPhrase2(), g.getActual(), g.getGuess()));
+        }
+
+        System.out.println("\nmost influential bad guesses:");
+        for (int i = 0; i < 50 && i < guesses.size()/2; i++) {
+            KnownSimGuess g = guesses.get(guesses.size() - i - 1);
+            double s = (g.getGuess() - guessMean) * (g.getActual() - actualMean);
+            System.out.println(String.format("%d. influence=%.3f '%s' vs. '%s'; actual=%.3f pred=%.3f",
+                    (i+1), s, g.getPhrase1(), g.getPhrase2(), g.getActual(), g.getGuess()));
         }
     }
 
