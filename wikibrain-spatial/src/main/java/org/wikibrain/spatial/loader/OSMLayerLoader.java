@@ -79,7 +79,8 @@ public class OSMLayerLoader {
 
                     Geometry itemGeometry = getGeometry(readGeoJson(itemId));
                     List<SimpleFeature> features = buildOutputFeature(itemGeometry, itemLabel, OSMTYPE);
-                    writeToShpFile(outputFeatureSource, OSMTYPE, transaction, features);
+                    writeQueue.add(features);
+                    writeToShpFile(outputFeatureSource, OSMTYPE, transaction, writeQueue.poll());
 
                 }
             });
