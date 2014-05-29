@@ -109,7 +109,7 @@ public class QualitativeAnalyzer {
                         .hasArg()
                         .withValueSeparator(',')
                         .withDescription("list of run numbers to compare")
-                        .create("n"));
+                        .create("b"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -129,10 +129,10 @@ public class QualitativeAnalyzer {
             for (String dir : cmd.getOptionValues("d")) {
                 analyzer.analyze(new File(dir));
             }
-        } else if (cmd.hasOption("n") && cmd.hasOption("g")) {
+        } else if (cmd.hasOption("b") && cmd.hasOption("g")) {
             analyzer.analyze(cmd.getOptionValue("g"), Integer.valueOf(cmd.getOptionValue("n")));
         } else {
-            System.err.println("One of -d or (-n and -g) must be specified");
+            System.err.println("One of -d or (-b and -g) must be specified");
             new HelpFormatter().printHelp("DumpLoader", options);
             System.exit(1);
             return;
