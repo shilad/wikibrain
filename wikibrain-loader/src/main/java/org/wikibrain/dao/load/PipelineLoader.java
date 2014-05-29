@@ -132,8 +132,7 @@ public class PipelineLoader {
         LanguageSet langs = env.getLanguages();
 
         // Shut down the database carefully
-        WpDataSource ds = env.getConfigurator().get(WpDataSource.class);
-        ds.close();
+        env.close();
         Thread.sleep(1000);
 
         boolean offByDefault = cmd.hasOption("f");

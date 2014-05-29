@@ -74,8 +74,8 @@ public class MemoryMappedMatrix {
         if (numRows == 0) {
             return;
         }
-
         // tricky: pages must align with row boundaries
+//        long sortedOffsets[] = Arrays.copyOfRange(rowOffsets.array(), rowOffsets.arrayOffset(), rowOffsets.arrayOffset() + rowOffsets.capacity());
         int sortedIds[] = getRowIdsInDiskOrder();
         long startPos = getRowOffset(sortedIds[0]);
         long lastPos = startPos;
@@ -122,7 +122,6 @@ public class MemoryMappedMatrix {
         int lo = 0;
         int hi = numRows - 1;
         while (lo <= hi) {
-            // Key is in a[lo..hi] or not present.
             int mid = (lo + hi) / 2;
             int midId = rowIds.get(mid);
 
@@ -166,17 +165,48 @@ public class MemoryMappedMatrix {
             for (int i = 0; i < numRows; i++) {
                 ids[i] = rowIds.get(i);
             }
-            IntSorter.qsort(ids, new IntSorter.CompareInt() {
-                @Override
-                public boolean lessThan(int id1, int id2) {
-                    return getRowOffset(id1) < getRowOffset(id2);
-                }
-            });
+            sortIdsByOffset(ids);
             this.rowIdsInDiskOrder = new WeakReference<int[]>(ids);
             return ids;
         } else {
             return rowIdsInDiskOrder.get();
         }
+    }
+
+    // Adapted from http://www.programcreek.com/2012/11/quicksort-array-in-java/
+    private void sortIdsByOffset(int colIds[]) {
+        this.sortIdsByOffset(colIds, 0, colIds.length-1);
+    }
+
+    private void sortIdsByOffset(int colIds[], int low, int high) {
+        if (colIds.length == 0 || low >= high)
+            return;
+
+        // pick the pivot
+        int middle = (low + high) / 2;
+        long pivot = getRowOffset(colIds[middle]);
+
+        // partition around the pivot
+        int i = low, j = high;
+        while (i <= j) {
+            while (getRowOffset(colIds[i]) < pivot) {
+                i++;
+            }
+            while (getRowOffset(colIds[j]) > pivot) {
+                j--;
+            }
+            if (i <= j) {
+                int temp = colIds[i];
+                colIds[i] = colIds[j];
+                colIds[j] = temp;
+                i++;
+                j--;
+            }
+        }
+
+        //recursively sort two sub parts
+        sortIdsByOffset(colIds, low, j);
+        sortIdsByOffset(colIds, i, high);
     }
 
     private void info(String message) {

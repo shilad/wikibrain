@@ -1,9 +1,16 @@
 package org.wikibrain.matrix;
 
+import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.hash.TIntFloatHashMap;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Random;
 
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 public class TestSparseMatrixRow {
@@ -30,6 +37,33 @@ public class TestSparseMatrixRow {
         }
     }
 
+    @Test
+    public void testSorting() {
+        int maxColumns = 100000;
+        Random random = new Random();
+        for (int i = 0; i < 100; i++) {
+            TIntFloatMap vector = new TIntFloatHashMap();
+            int n = random.nextInt(maxColumns);
+            for (int c = 0; c < n; c++) {
+                vector.put(random.nextInt(), random.nextFloat());
+            }
+            int keys[] = vector.keys();
+            float vals[] = vector.values();
+
+            SparseMatrixRow row = new SparseMatrixRow(new ValueConf(), ROW_INDEX, keys, vals);
+            assertEquals(keys.length, row.getNumCols());
+
+            Arrays.sort(keys);
+            for (int j = 0; j < row.getNumCols(); j++) {
+                int k = row.getColIndex(j);
+                float v = row.getColValue(j);
+                assertEquals(k, keys[j]);
+                assertTrue(vector.containsKey(k));
+                assertEquals(vector.get(k), v, 0.01);
+            }
+        }
+    }
+
     public MatrixRow createRow() {
         LinkedHashMap<Integer, Float> m = new LinkedHashMap<Integer, Float>();
         assertEquals(keys.length, vals.length);
@@ -37,5 +71,10 @@ public class TestSparseMatrixRow {
             m.put(keys[i], vals[i]);
         }
         return new SparseMatrixRow(new ValueConf(), ROW_INDEX, m);
+    }
+
+    @Test
+    public void tmp() throws IOException {
+        SparseMatrix matrix = new SparseMatrix(new File("./db/matrix/local-link/links-transpose.matrix"));
     }
 }

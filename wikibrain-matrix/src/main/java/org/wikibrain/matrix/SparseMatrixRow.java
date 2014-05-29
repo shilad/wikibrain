@@ -77,9 +77,9 @@ public final class SparseMatrixRow extends BaseMatrixRow implements MatrixRow {
 
     public void createBuffer(int rowIndex, int colIds[], short colVals[]) {
         assert(colIds.length == colVals.length);
-        if (!isIncreasing(colIds)) {
+        if (!isNonDecreasing(colIds)) {
             quickSort(colIds, colVals, 0, colIds.length - 1);
-            if (!isIncreasing(colIds)) {
+            if (!isNonDecreasing(colIds)) {
                 throw new IllegalStateException();
             }
         }
@@ -136,10 +136,10 @@ public final class SparseMatrixRow extends BaseMatrixRow implements MatrixRow {
     }
 
 
-    static boolean isIncreasing(int A[]) {
+    static boolean isNonDecreasing(int A[]) {
         int lastId = Integer.MIN_VALUE;
         for (int i = 0; i < A.length; i++) {
-            if (A[i] <= lastId) {
+            if (A[i] < lastId) {
                 return false;
             }
             lastId = A[i];
