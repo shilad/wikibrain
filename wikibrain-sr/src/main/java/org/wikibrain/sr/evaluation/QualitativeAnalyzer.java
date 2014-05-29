@@ -110,7 +110,7 @@ public class QualitativeAnalyzer {
                         .withValueSeparator(',')
                         .withDescription("list of run numbers to compare")
                         .create("n"));
-
+        EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;
