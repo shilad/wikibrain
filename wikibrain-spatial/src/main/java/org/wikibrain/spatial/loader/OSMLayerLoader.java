@@ -1,8 +1,6 @@
 package org.wikibrain.spatial.loader;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.*;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Transaction;
 import org.geotools.data.collection.ListFeatureCollection;
@@ -14,6 +12,7 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.geom.GeometryJSON;
+import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -24,12 +23,14 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.wikidata.WikidataDao;
+import org.wikibrain.wikidata.WikidataEntity;
 import org.wikibrain.wikidata.WikidataFilter;
 import org.wikibrain.wikidata.WikidataStatement;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 
 /**
@@ -58,6 +60,8 @@ public class OSMLayerLoader {
 
     }
 
+    //public OSMLayerLoader(){}
+
     /**
      * Print geometries of the wikidata items with OSM relation ID to a shapefile.
      * @param outputFile
@@ -70,6 +74,7 @@ public class OSMLayerLoader {
         final SimpleFeatureSource outputFeatureSource = getOutputDataFeatureSource(outputFile, OSMTYPE);
         final Transaction transaction = new DefaultTransaction("create");
         final ConcurrentLinkedQueue<List<SimpleFeature>> writeQueue = new ConcurrentLinkedQueue<List<SimpleFeature>>();
+        final WikidataStatement testStatement = new WikidataStatement("id", new WikidataEntity(WikidataEntity.Type.ITEM, 1527), new WikidataEntity(WikidataEntity.Type.PROPERTY, 402), null, null);
 
         try {
 
@@ -101,9 +106,22 @@ public class OSMLayerLoader {
                 writeToShpFile(outputFeatureSource, OSMTYPE, transaction, features);
             }*/
 
+            /*WikidataStatement osmRelation = testStatement;
 
-        } catch(DaoException e){
-            throw new WikiBrainException(e);
+
+            int itemId = osmRelation.getItem().getId();
+            String itemLabel = osmRelation.getItem().getLabels().get(Language.SIMPLE); //language might need to change to EN
+
+            synchronized (this) {LOG.log(Level.INFO, "Writing " + itemLabel + " to the shapefile.");}
+
+            Geometry itemGeometry = getGeometry(readGeoJson(itemId));
+            List<SimpleFeature> features = buildOutputFeature(itemGeometry, itemLabel, OSMTYPE);
+            writeQueue.add(features);
+            writeToShpFile(outputFeatureSource, OSMTYPE, transaction, writeQueue.poll());*/
+
+
+        } catch(Exception e){
+            e.printStackTrace();
         } finally {
             transaction.close();
         }
@@ -163,7 +181,9 @@ public class OSMLayerLoader {
         GeometryJSON geoJson = new GeometryJSON();
         Reader reader = new StringReader(geoJsonString);
 
-        return geoJson.readGeometryCollection(reader);
+        Geometry rawGeometry =  geoJson.read(reader);
+        return rawGeometry;
+
 
     }
 
@@ -171,20 +191,27 @@ public class OSMLayerLoader {
 
         String baseURL = "http://tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang=wikidata&article=Q";
         URL jsonURL = new URL(baseURL + itemId);
+        URLConnection c = jsonURL.openConnection();
         String geoJson;
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(jsonURL.openStream()));
+        System.out.println(c.getContentType());
+        System.out.println(c.getContent());
+        System.out.println(c.getContentEncoding());
+        Map header = c.getHeaderFields();
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(c.getInputStream())));
         geoJson = in.readLine();
+        System.out.println(geoJson.trim());
         in.close();
 
-        return geoJson;
+        return geoJson.trim();
     }
 
     private SimpleFeatureType getOutputFeatureType() {
         SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
         typeBuilder.setName("OSMTYPE");
         typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        typeBuilder.add("the_geom", GeometryCollection.class);
+        typeBuilder.add("the_geom", MultiPolygon.class);
         typeBuilder.add("TITLE1_EN", String.class);
         typeBuilder.setDefaultGeometry("the_geom");
 
