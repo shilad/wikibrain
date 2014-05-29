@@ -58,7 +58,7 @@ public class OSMLayerLoader {
     }
 
     /**
-     *
+     * Print geometries of the wikidata items with OSM relation ID to a shapefile.
      * @param outputFile
      * @throws Exception
      */
@@ -191,7 +191,7 @@ public class OSMLayerLoader {
 
     }
 
-    public Iterable<WikidataStatement> getAllOSMRelations() throws DaoException{
+    private Iterable<WikidataStatement> getAllOSMRelations() throws DaoException{
 
         WikidataFilter filter = (new WikidataFilter.Builder()).withPropertyId(OSM_RELATION_ID).build();
 
