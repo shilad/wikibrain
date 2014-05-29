@@ -69,6 +69,29 @@ public class SimilarityEvaluationLog extends BaseEvaluationLog<SimilarityEvaluat
         return new SpearmansCorrelation().correlation(actual.toArray(), estimates.toArray());
     }
 
+    public List<KnownSimGuess> getGuesses() throws IOException, ParseException {
+        List<KnownSimGuess> guesses = new ArrayList<KnownSimGuess>();
+        for (String line : FileUtils.readLines(logPath, "utf-8")) {
+            if (line.endsWith("\n")) {
+                line = line.substring(0, line.length() - 1);
+            }
+            String tokens[] = line.split("\t");
+            if (tokens[0].equals("entry")) {
+                KnownSim ks = new KnownSim(tokens[2], tokens[3], Double.valueOf(tokens[4]), Language.getByFullLangName(tokens[1]));
+                String val = tokens[5];
+                if (val.equals("failed")) {
+                    guesses.add(new KnownSimGuess(ks, Double.NaN));
+                } else {
+                    guesses.add(new KnownSimGuess(ks, Double.valueOf(val)));
+                }
+            }
+        }
+        for (SimilarityEvaluationLog log : getChildEvaluations()) {
+            guesses.addAll(log.getGuesses());
+        }
+        return guesses;
+    }
+
     /**
      * @see BaseEvaluationLog#getSummaryAsMap()
      * @return
@@ -120,18 +143,24 @@ public class SimilarityEvaluationLog extends BaseEvaluationLog<SimilarityEvaluat
             if (line.endsWith("\n")) {
                 line = line.substring(0, line.length() - 1);
             }
+            if (line.trim().isEmpty()) {
+                continue;
+            }
             String tokens[] = line.split("\t");
             if (tokens[0].equals("start")) {
                 start = parseDate(tokens[1]);
             } else if (tokens[0].equals("config")) {
                 config.put(tokens[1], tokens[2]);
             } else if (tokens[0].equals("merge")) {
+                if (eval == null) {
+                    eval = new SimilarityEvaluationLog(config, null, start);
+                }
                 eval.merge(read(new File(tokens[1])));
             } else if (tokens[0].equals("entry")) {
                 if (eval == null) {
                     eval = new SimilarityEvaluationLog(config, null, start);
                 }
-                KnownSim ks = new KnownSim(tokens[2], tokens[3], Double.valueOf(tokens[4]), Language.getByLangCode(tokens[1]));
+                KnownSim ks = new KnownSim(tokens[2], tokens[3], Double.valueOf(tokens[4]), Language.getByFullLangName(tokens[1]));
                 String val = tokens[5];
                 if (val.equals("failed")) {
                     eval.recordFailed(ks);
@@ -142,6 +171,8 @@ public class SimilarityEvaluationLog extends BaseEvaluationLog<SimilarityEvaluat
                 throw new IllegalStateException("invalid event in log " + path + ": " + line);
             }
         }
+        eval.logPath = path;
+
 
         return eval;
     }
