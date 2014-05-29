@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.loader;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Transaction;
@@ -183,7 +184,7 @@ public class OSMLayerLoader {
         SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
         typeBuilder.setName("OSMTYPE");
         typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        typeBuilder.add("the_geom", MultiPolygon.class);
+        typeBuilder.add("the_geom", GeometryCollection.class);
         typeBuilder.add("TITLE1_EN", String.class);
         typeBuilder.setDefaultGeometry("the_geom");
 
