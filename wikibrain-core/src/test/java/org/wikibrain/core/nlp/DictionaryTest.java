@@ -103,7 +103,30 @@ public class DictionaryTest {
         }
     }
 
-
+    @Test
+    public void testPrune() throws IOException {
+        Dictionary dict = new Dictionary(Language.EN, Dictionary.WordStorage.IN_MEMORY);
+        dict.setMaxDictionarySize(10);
+        dict.setContainsMentions(true);
+        dict.setCountBigrams(true);
+        dict.countRawText(TEST_CORPUS);
+        assertEquals(429, dict.getTotalCount());
+        assertEquals(252, dict.getNumUnigrams());
+        assertEquals(23, dict.getUnigramCount("the"));
+        assertEquals(6, dict.getUnigramCount("I"));
+        assertEquals(1, dict.getUnigramCount("veil"));
+        assertEquals(3, dict.getBigramCount("in a"));
+        assertEquals(3, dict.getUnigramCount("but"));
+        dict.pruneIfNecessary();
+        assertEquals(429, dict.getTotalCount());
+        assertEquals(7, dict.getNumUnigrams());
+        assertEquals(23, dict.getUnigramCount("the"));
+        assertEquals(8, dict.getUnigramCount("in"));
+        assertEquals(0, dict.getUnigramCount("I"));
+        assertEquals(0, dict.getUnigramCount("veil"));
+        assertEquals(0, dict.getBigramCount("in a"));
+        assertEquals(0, dict.getUnigramCount("but"));
+    }
     /**
      * From http://www.gutenberg.org/cache/epub/1661/pg1661.txt
      */
