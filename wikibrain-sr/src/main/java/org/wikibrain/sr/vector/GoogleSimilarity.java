@@ -88,6 +88,28 @@ public class GoogleSimilarity implements VectorSimilarity {
         }
         return SimUtils.googleSimilarity(size1, size2, intersect, numPages);
     }
+    @Override
+    public double similarity(MatrixRow a, MatrixRow b) {
+        int na = a.getNumCols();
+        int nb = b.getNumCols();
+        int intersect = 0;
+        int i = 0, j = 0;
+
+        while (i < na && j < nb) {
+            int ca = a.getColIndex(i);
+            int cb = b.getColIndex(j);
+            if (ca < cb) {
+                i++;
+            } else if (ca > cb) {
+                j++;
+            } else {
+                i++;
+                j++;
+                intersect++;
+            }
+        }
+        return SimUtils.googleSimilarity(na, nb, intersect, numPages);
+    }
 
     @Override
     public SRResultList mostSimilar(TIntFloatMap query, int maxResults, TIntSet validIds) throws IOException {
