@@ -266,8 +266,13 @@ public class WpDataSource implements Closeable {
                 ds.setJdbcUrl(config.getString("url"));
                 ds.setUsername(config.getString("username"));
                 ds.setPassword(config.getString("password"));
-                ds.setPartitionCount(Runtime.getRuntime().availableProcessors());
-                ds.setMaxConnectionsPerPartition(2);
+                String partitions = config.getString("partitions");
+                if (partitions.equals("default")) {
+                    ds.setPartitionCount(Math.max(8, Runtime.getRuntime().availableProcessors()));
+                } else {
+                    ds.setPartitionCount(Integer.valueOf(partitions));
+                }
+                ds.setMaxConnectionsPerPartition(config.getInt("connectionsPerPartition"));
                 return new WpDataSource(ds);
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException(e);
