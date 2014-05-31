@@ -189,7 +189,7 @@ public class GADMConverter {
 
             } else {
 
-                ParallelForEach.loop(countryState.keySet(), new Procedure<String>() {
+                /*ParallelForEach.loop(countryState.keySet(), new Procedure<String>() {
                     @Override
                     public void call(String country) throws Exception {
 
@@ -207,6 +207,12 @@ public class GADMConverter {
                     LOG.log(Level.INFO, "Combining polygons for " + country + "(" + count + "/" + exceptionList.size() + ")");
                     List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
                     writeToShpFile(outputFeatureSource, WIKITYPE, transaction, features);
+                }*/
+
+                for (String country: countryState.keySet()) {
+                    List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
+                    writeQueue.add(features);
+                    writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());
                 }
 
 
@@ -258,7 +264,7 @@ public class GADMConverter {
 
         } catch (Exception e) {
             LOG.log(Level.INFO, "Exception occurred at " + featureName + ": " + e.getMessage() + ". Attempting different combining methods.");
-            if (level == 1 || exceptionList.contains(featureName))
+            if (level == 1 || level == 0)
                 newGeom = geometryFactory.buildGeometry(geometryList).buffer(0).getBoundary();
             else exceptionList.add(featureName);
 
