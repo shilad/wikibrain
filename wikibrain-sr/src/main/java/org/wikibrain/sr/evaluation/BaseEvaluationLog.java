@@ -16,7 +16,7 @@ public abstract class BaseEvaluationLog<T extends BaseEvaluationLog> implements 
     protected final List<File> children = new ArrayList<File>();
     protected final Map<String, String> config;
     protected final BufferedWriter log;
-    protected final File logPath;
+    protected File logPath;
 
     protected int sucessful;
     protected int missing;
