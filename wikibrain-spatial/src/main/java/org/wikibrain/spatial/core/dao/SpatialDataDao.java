@@ -6,6 +6,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.spatial.core.SpatialContainerMetadata;
 import org.wikibrain.spatial.core.constants.Precision;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -133,6 +134,17 @@ public interface SpatialDataDao {
      * @throws DaoException
      */
     public Map<Integer, Geometry> getAllGeometriesInLayer(String layerName, String[] notInLayers, String refSysName) throws DaoException;
+
+
+    /**
+     *
+     * @param idList an iterable of ids of geometries
+     * @param layerName
+     * @param refSysName the reference system for both layerName and notInLayers
+     * @return null if layer does not exist
+     * @throws DaoException
+     */
+    public Map<Integer, Geometry> getBulkGeometriesInLayer(List<Integer> idList, String layerName, String refSysName) throws DaoException;
 
     /**
      * Gets the names of all loaded reference systems.

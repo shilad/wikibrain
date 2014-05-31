@@ -5,7 +5,10 @@ import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import com.vividsolutions.jts.geom.Geometry;
+import edu.emory.mathcs.backport.java.util.*;
+import edu.emory.mathcs.backport.java.util.LinkedList;
 import org.geotools.data.*;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureImpl;
@@ -18,6 +21,8 @@ import org.geotools.jdbc.JDBCDataStore;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.expression.PropertyName;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -255,6 +260,74 @@ public class PostGISDB {
 
 
     }
+
+    public Map<Integer, Geometry> getBulkGeometriesInLayer(List<Integer> idList, String layerName, String refSysName) throws DaoException{
+        try {
+
+            //SQL STACK LIMIT!
+            //change to iterative if we have performance issue later
+            int QUERY_SIZE = 500;
+            if(idList.size() > QUERY_SIZE){
+                Map<Integer, Geometry> res = getBulkGeometriesInLayer(idList.subList(0, QUERY_SIZE), layerName, refSysName);
+                res.putAll(getBulkGeometriesInLayer(idList.subList(QUERY_SIZE, idList.size()), layerName, refSysName));
+                return res;
+            }
+
+            FeatureSource contents = getFeatureSource();
+            FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+
+            //build ref sys clause
+            PropertyName refSysProperty = ff.property(getRefSysAttributeName());
+            Filter refSysFilter = ff.equals(refSysProperty, ff.literal(refSysName));
+
+            // build layer-related clause
+            PropertyName layerProperty = ff.property(getLayerAttributeName());
+            Filter layerFilter = ff.equals(layerProperty, ff.literal(layerName));
+
+            List<Filter> idFilters = new java.util.LinkedList<Filter>();
+            PropertyName idProperty = ff.property(getItemIdAttributeName());
+            for(Integer i : idList){
+                idFilters.add(ff.equals(idProperty, ff.literal(i)));
+            }
+            Filter idFilter = ff.or(idFilters);
+
+            List<Filter> filters = new java.util.LinkedList<Filter>();
+            filters.add(refSysFilter);
+            filters.add(layerFilter);
+            filters.add(idFilter);
+
+            Filter finalFilter = ff.and(filters);
+
+            FeatureCollection collection = contents.getFeatures(finalFilter);
+
+
+            if (collection.size() == 0) return null;
+
+            FeatureIterator iterator = collection.features();
+
+            if(!iterator.hasNext()){
+                iterator.close();
+                return null;
+            }
+
+            Feature feature = iterator.next();
+
+            Map<Integer, Geometry> geometries = new HashMap<Integer, Geometry>();
+            while (iterator.hasNext()){
+                geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
+                feature = iterator.next();
+            }
+            iterator.close();
+            return geometries;
+
+
+        }catch(Exception e){
+
+            throw new DaoException(e);
+        }
+
+    }
+
 
 
     private void initialize(Map<String, Object> manualParameters) throws DaoException {

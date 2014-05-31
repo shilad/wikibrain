@@ -220,6 +220,12 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     }
 
     @Override
+    public Map<Integer, Geometry> getBulkGeometriesInLayer(List<Integer> idList, String layerName, String refSysName) throws DaoException{
+        return db.getBulkGeometriesInLayer(idList, layerName, refSysName);
+    }
+
+
+    @Override
     public void beginSaveGeometries() throws DaoException {
         try {
             simpleFeatureBuilder = new SimpleFeatureBuilder(db.getSchema());

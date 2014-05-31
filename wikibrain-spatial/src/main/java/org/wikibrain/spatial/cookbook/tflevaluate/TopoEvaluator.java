@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.noding.IteratedNoder;
@@ -20,6 +21,8 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.InterLanguageLink;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
+import org.wikibrain.spatial.core.constants.Layers;
+import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
@@ -87,14 +90,20 @@ public class TopoEvaluator {
         // build SR metrics
         this.metrics = new HashMap<Language, MonolingualSRMetric>();
         for(Language lang : langs){
-            MonolingualSRMetric m = c.get(MonolingualSRMetric.class, "ESA", "language", lang.getLangCode());
+            MonolingualSRMetric m = c.get(MonolingualSRMetric.class, "ensemble", "language", lang.getLangCode());
             metrics.put(lang, m);
         }
     }
+    public void retrieveAllLocations(String pointLayer, String polygonLayer) throws DaoException, WikiBrainException{
 
-    public void retrieveAllLocations(String pointLayer, String polygonLayer) throws DaoException, WikiBrainException {
-        // Get all known concept geometries
         Map<Integer, Geometry> geometries = sdDao.getAllGeometriesInLayer(pointLayer, "earth");
+        retrieveLocations(geometries, pointLayer, polygonLayer);
+
+    }
+
+    public void retrieveLocations(Map<Integer, Geometry> geometries, String pointLayer, String polygonLayer) throws DaoException, WikiBrainException {
+        // Get all known concept geometries
+
         Map<Integer, Geometry> polygons = sdDao.getAllGeometriesInLayer(polygonLayer, "earth");
 
         LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
@@ -185,7 +194,7 @@ public class TopoEvaluator {
     }
 
     private void writeHeader() throws IOException {
-        String[] headerEntries = new String[7 + langs.size()];
+        String[] headerEntries = new String[8 + langs.size()];
         headerEntries[0] = "ITEM_NAME_1";
         headerEntries[1] = "ITEM_ID_1";
         headerEntries[2] = "CONTAINED_1";
@@ -193,9 +202,11 @@ public class TopoEvaluator {
         headerEntries[4] = "ITEM_ID_2";
         headerEntries[5] = "CONTAINED_2";
         headerEntries[6] = "SPATIAL_DISTANCE";
+        headerEntries[7] = "TOPO_DISTANCE";
+
         int counter = 0;
         for (Language lang : langs) {
-            headerEntries[7 + counter] = lang.getLangCode() + "_SR";
+            headerEntries[8 + counter] = lang.getLangCode() + "_SR";
             counter ++;
         }
         output.writeNext(headerEntries);
@@ -250,35 +261,36 @@ public class TopoEvaluator {
 
             //TODO: change this to a topological metric
 
-            /*
+
             GeodeticCalculator geoCalc = new GeodeticCalculator();
             geoCalc.setStartingGeographicPoint(p1.getX(), p1.getY());
             geoCalc.setDestinationGeographicPoint(p2.getX(), p2.getY());
             km = geoCalc.getOrthodromicDistance() / 1000;
-            */
+
 
 
 
             if(! (pointPolygonContainingMap.containsKey(c1.getUnivId()) && pointPolygonContainingMap.containsKey(c2.getUnivId())))
                 return;
-            km = polygonDistance(pointPolygonContainingMap.get(c1.getUnivId()), pointPolygonContainingMap.get(c2.getUnivId()), layerName, "earth");
+            double TopoDist = polygonDistance(pointPolygonContainingMap.get(c1.getUnivId()), pointPolygonContainingMap.get(c2.getUnivId()), layerName, "earth");
             Title t1 = c1.getBestEnglishTitle(lpDao, true);
             Title t2 = c2.getBestEnglishTitle(lpDao, true);
 
-            String[] rowEntries = new String[7 + langs.size()];
+            String[] rowEntries = new String[8 + langs.size()];
             rowEntries[0] = t1.getCanonicalTitle();
             rowEntries[1] = String.valueOf(c1.getUnivId());
             rowEntries[2] = upDao.getById(pointPolygonContainingMap.get(c1.getUnivId()), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
             rowEntries[3] = t2.getCanonicalTitle();
             rowEntries[4] = String.valueOf(c2.getUnivId());
             rowEntries[5] = upDao.getById(pointPolygonContainingMap.get(c2.getUnivId()), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
-            rowEntries[6] = String.valueOf(km);
+            rowEntries[6] = String.format("%.2f", km);
+            rowEntries[7] = String.valueOf(TopoDist);
             int counter = 0;
             for (SRResult result : results) {
                 if(result != null)
-                    rowEntries[7 + counter] = String.valueOf(result.getScore());
+                    rowEntries[8 + counter] = String.format("%.2f", result.getScore());
                 else
-                    rowEntries[7 + counter] = "0";
+                    rowEntries[8 + counter] = "0";
                 counter ++;
             }
             output.writeNext(rowEntries);
@@ -298,16 +310,29 @@ public class TopoEvaluator {
         SpatialDataDao sdDao = conf.get(SpatialDataDao.class);
         //Map<Integer, Geometry> allGeometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         //Map<Integer, Geometry> geometryMap = new HashMap<Integer, Geometry>();
-        int counter = 0;
 
 
 
-        evaluator.retrieveAllLocations("wikidata", "country");
 
-        System.out.println(evaluator.polygonDistance(709, 681153, evaluator.layerName, "earth"));
-        System.out.println(evaluator.polygonDistance(20932, 535551, evaluator.layerName, "earth"));
-        System.out.println(evaluator.polygonDistance(25305, 5089, evaluator.layerName, "earth"));
-        evaluator.evaluateSample(new File("TopoEval.csv"), 100000);
+        Set<String> subLayers = Sets.newHashSet();
+        subLayers.add("wikidata");
+        SpatialContainmentDao scDao =  conf.get(SpatialContainmentDao.class);
+        TIntSet containedItemIds = scDao.getContainedItemIds(30, "country", RefSys.EARTH,
+                subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
+
+        LinkedList<Integer> itemIdList = new LinkedList<Integer>();
+        int[] itemIds = containedItemIds.toArray();
+        for(Integer k : itemIds){
+            itemIdList.add(k);
+        }
+
+        Map<Integer, Geometry> geometryMap = sdDao.getBulkGeometriesInLayer(itemIdList, "wikidata", "earth");
+
+        evaluator.retrieveLocations(geometryMap, "wikidata", "states");
+
+
+        //evaluator.retrieveAllLocations("wikidata", "country");
+        evaluator.evaluateSample(new File("TopoEval.csv"), 500000);
     }
 
 
