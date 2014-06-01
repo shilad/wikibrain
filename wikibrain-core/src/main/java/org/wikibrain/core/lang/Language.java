@@ -98,6 +98,16 @@ public class Language implements Comparable<Language>, Serializable {
         throw new IllegalArgumentException("unknown langCode: '" + langCode + "'");
     }
 
+    public static Language getByFullLangName(String language) {
+        for (Language lang : LANGUAGES) {
+            if (lang.enLangName.equalsIgnoreCase(language) || lang.nativeName.equalsIgnoreCase(language)) {
+                return lang;
+            }
+        }
+        throw new IllegalArgumentException("unknown language: '" + language + "'");
+
+    }
+
     public static boolean hasLangCode(String langCode) {
         for (Language lang : LANGUAGES) {
             if (lang.langCode.equalsIgnoreCase(langCode)) {
