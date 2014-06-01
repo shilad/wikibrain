@@ -167,7 +167,6 @@ public class GADMConverter {
             inputFeatures.close();
 
 
-
             final SimpleFeatureCollection levelOneInput = getInputCollection(outputFolder.getMainShapefile("gadm1", RefSys.EARTH));
 
             exceptionList = new ArrayList<String>();
@@ -212,15 +211,6 @@ public class GADMConverter {
                     writeQueue.add(features);
                     writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());
                 }*/
-
-                /*for (String country: countryState.keySet()) {
-                    if (country.equals("Thailand")) {
-                    List<SimpleFeature> features = inputFeatureHandler(levelOneInput, country, 0, WIKITYPE, countryState);
-                    writeQueue.add(features);
-                    writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());}
-                }*/
-
-
             }
 
 
@@ -243,13 +233,14 @@ public class GADMConverter {
         Multimap<String, String> reverted = ArrayListMultimap.create();
         Geometry newGeom = null;
         String country;
+        reverted = Multimaps.invertFrom(relation, reverted);
 
 
         if (!exceptionList.contains(featureName)) {
             if (level == 1) {
-                country = (String) Multimaps.invertFrom(relation, reverted).get(featureName).toArray()[0];
+                country = (String) reverted.get(featureName).toArray()[0];
                 synchronized (this) {
-                    LOG.log(Level.INFO, "Combining polygons for level 1 administrative district: " + featureName + " in " + country + " (" + countryCount.incrementAndGet() + "/" + relation.keySet().size() + ")");
+                    LOG.log(Level.INFO, "Combining polygons for level 1 administrative district: " + featureName + " in " + country + " (" + countryCount.incrementAndGet() + "/" + reverted.keySet().size() + ")");
                 }
             } else {
                 country = featureName;
@@ -268,7 +259,7 @@ public class GADMConverter {
         } else {
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
-                if (((String) feature.getAttribute(2)).split(",")[1].trim().equals(featureName))
+                if (((String) feature.getAttribute(2)).replace(feature.getAttribute(1) + ", ", "").equals(featureName))
                     geometryList.add((Geometry) feature.getAttribute(0));
             }
         }
@@ -287,7 +278,7 @@ public class GADMConverter {
         featureBuilder.add(newGeom);
         if (level == 1) {
             featureBuilder.add(featureName);
-            featureBuilder.add(featureName + ", " + Multimaps.invertFrom(relation, reverted).get(featureName).toArray()[0]);
+            featureBuilder.add(featureName + ", " + reverted.get(featureName).toArray()[0]);
         } else
             featureBuilder.add(featureName);
         SimpleFeature feature = featureBuilder.buildFeature(null);
