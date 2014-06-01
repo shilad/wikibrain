@@ -3,6 +3,12 @@ package org.wikibrain.core.dao.sql;
 import com.google.common.base.FinalizableReferenceQueue;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPDataSource;
+import com.jolbox.bonecp.ConnectionHandle;
+import com.jolbox.bonecp.StatementHandle;
+import com.jolbox.bonecp.hooks.AbstractConnectionHook;
+import com.jolbox.bonecp.hooks.AcquireFailConfig;
+import com.jolbox.bonecp.hooks.ConnectionHook;
+import com.jolbox.bonecp.hooks.ConnectionState;
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -27,6 +33,7 @@ import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -272,14 +279,78 @@ public class WpDataSource implements Closeable {
                 } else {
                     ds.setPartitionCount(Integer.valueOf(partitions));
                 }
+
                 //ds.setMaxConnectionsPerPartition(config.getInt("connectionsPerPartition"));
                 ds.setMaxConnectionsPerPartition(Runtime.getRuntime().availableProcessors());
+
                 return new WpDataSource(ds);
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException(e);
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }
+        }
+
+    }
+
+
+    public static class CountConnectionHook extends AbstractConnectionHook {
+        private static ThreadLocal<AtomicInteger> connectionCount=new ThreadLocal<AtomicInteger>();
+        private static final Logger log=Logger.getLogger(CountConnectionHook.class.getName());
+        private int numConnectionsToWarn=0;
+        private int maxNumConnectionsToWarn=10;
+
+        public CountConnectionHook(int numConnectionsToWarn, int maxNumConnectionsToWarn){
+            this.numConnectionsToWarn=numConnectionsToWarn;
+            this.maxNumConnectionsToWarn=maxNumConnectionsToWarn;
+        }
+
+        @Override
+        public void onCheckIn(ConnectionHandle connection) {
+            super.onCheckIn(connection);
+            int numConnections=decrementNumConnections();
+            if(numConnections>numConnectionsToWarn && numConnections<maxNumConnectionsToWarn){
+                log.log(Level.WARNING, "Number connections of thread more than " + numConnectionsToWarn + " after checkout:" + numConnections, new IllegalMonitorStateException());
+            }
+            if(numConnections<0) {
+                log.log(Level.WARNING, "Number connections of thread is negative !", new IllegalMonitorStateException());
+            }
+        }
+
+        @Override
+        public void onCheckOut(ConnectionHandle connection) {
+            super.onCheckOut(connection);
+            int numConnections=incrementNumConnections();
+            if((numConnections>(numConnectionsToWarn+1))
+                    && (numConnections<(maxNumConnectionsToWarn+1))){
+                log.log(Level.WARNING, "Number connections of thread more than " +
+                        String.valueOf(numConnectionsToWarn + 1) +
+                        " before check in:" + numConnections, new IllegalMonitorStateException());
+            }
+        }
+
+        private static int incrementNumConnections(){
+            AtomicInteger connCount=connectionCount.get();
+            int retval;
+            if(connCount==null){
+                retval=1;
+                connCount=new AtomicInteger(retval);
+                connectionCount.set(connCount);
+            } else {
+                retval=connCount.incrementAndGet();
+            }
+            return retval;
+        }
+
+        private static int decrementNumConnections(){
+            AtomicInteger connCount=connectionCount.get();
+            int retval;
+            if(connCount==null){
+                retval=-1;
+            } else {
+                retval=connCount.decrementAndGet();
+            }
+            return retval;
         }
 
     }

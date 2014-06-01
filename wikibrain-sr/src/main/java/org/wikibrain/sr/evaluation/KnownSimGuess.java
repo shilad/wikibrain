@@ -41,6 +41,14 @@ public class KnownSimGuess {
         return guess - known.similarity;
     }
 
+    public String getUniqueKey() {
+        if (getPhrase1().compareTo(getPhrase2()) < 0) {
+            return getPhrase1() + "|" + getPhrase2();
+        } else {
+            return getPhrase2() + "|" + getPhrase1();
+        }
+    }
+
     public double getError2() {
         if (!hasGuess()) {
             return Double.NaN;
