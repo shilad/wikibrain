@@ -69,6 +69,28 @@ public class SimilarityEvaluationLog extends BaseEvaluationLog<SimilarityEvaluat
         return new SpearmansCorrelation().correlation(actual.toArray(), estimates.toArray());
     }
 
+    public double getMeanAbsoluteError() {
+        if (actual.isEmpty()) {
+            return 0.0;
+        }
+        double maeSum = 0.0;
+        for (int i = 0; i < actual.size(); i++) {
+            maeSum += Math.abs(actual.get(i) - estimates.get(i));
+        }
+        return maeSum / actual.size();
+    }
+
+    public double getRootMeanSquareError() {
+        if (actual.isEmpty()) {
+            return 0.0;
+        }
+        double rmsError = 0.0;
+        for (int i = 0; i < actual.size(); i++) {
+            rmsError += (actual.get(i) - estimates.get(i)) * (actual.get(i) - estimates.get(i));
+        }
+        return Math.sqrt(rmsError / actual.size());
+    }
+
     public List<KnownSimGuess> getGuesses() throws IOException, ParseException {
         List<KnownSimGuess> guesses = new ArrayList<KnownSimGuess>();
         for (String line : FileUtils.readLines(logPath, "utf-8")) {
@@ -100,6 +122,8 @@ public class SimilarityEvaluationLog extends BaseEvaluationLog<SimilarityEvaluat
         Map<String, String> summary = super.getSummaryAsMap();
         summary.put("spearmans", Double.toString(getSpearmansCorrelation()));
         summary.put("pearsons", Double.toString(getPearsonsCorrelation()));
+        summary.put("mae", Double.toString(getMeanAbsoluteError()));
+        summary.put("rms", Double.toString(getRootMeanSquareError()));
         return summary;
     }
 
