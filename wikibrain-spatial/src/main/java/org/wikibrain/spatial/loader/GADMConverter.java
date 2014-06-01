@@ -166,10 +166,13 @@ public class GADMConverter {
 
             inputFeatures.close();
 
+
+
+            final SimpleFeatureCollection levelOneInput = getInputCollection(outputFolder.getMainShapefile("gadm1", RefSys.EARTH));
+
             exceptionList = new ArrayList<String>();
 
             LOG.log(Level.INFO, "Start processing polygons for level " + level + " administrative districts.");
-
 
 
             if (level == 1) {
@@ -189,31 +192,33 @@ public class GADMConverter {
 
             } else {
 
-                /*ParallelForEach.loop(countryState.keySet(), new Procedure<String>() {
+                ParallelForEach.loop(countryState.keySet(), new Procedure<String>() {
                     @Override
                     public void call(String country) throws Exception {
 
-                        List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
+                        List<SimpleFeature> features = inputFeatureHandler(levelOneInput, country, 0, WIKITYPE, countryState);
                         writeQueue.add(features);
                         writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());
 
                     }
                 });
 
-                LOG.log(Level.INFO, "Start processing polygons where exceptions occurred.");
+                /*LOG.log(Level.INFO, "Start processing polygons where exceptions occurred.");
                 int count = 0;
-                for (String country: exceptionList) {
+                for (String country : exceptionList) {
                     count++;
                     LOG.log(Level.INFO, "Combining polygons for " + country + "(" + count + "/" + exceptionList.size() + ")");
-                    List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
-                    writeToShpFile(outputFeatureSource, WIKITYPE, transaction, features);
-                }*/
-
-                for (String country: countryState.keySet()) {
-                    List<SimpleFeature> features = inputFeatureHandler(inputCollection, country, 0, WIKITYPE, countryState);
+                    List<SimpleFeature> features = inputFeatureHandler(levelOneInput, country, 0, WIKITYPE, countryState);
                     writeQueue.add(features);
                     writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());
-                }
+                }*/
+
+                /*for (String country: countryState.keySet()) {
+                    if (country.equals("Thailand")) {
+                    List<SimpleFeature> features = inputFeatureHandler(levelOneInput, country, 0, WIKITYPE, countryState);
+                    writeQueue.add(features);
+                    writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());}
+                }*/
 
 
             }
@@ -243,32 +248,41 @@ public class GADMConverter {
         if (!exceptionList.contains(featureName)) {
             if (level == 1) {
                 country = (String) Multimaps.invertFrom(relation, reverted).get(featureName).toArray()[0];
-                synchronized (this) {LOG.log(Level.INFO, "Combining polygons for level 1 administrative district: " + featureName + " in " + country + " (" + countryCount.incrementAndGet() + "/" + relation.keySet().size() + ")");}
+                synchronized (this) {
+                    LOG.log(Level.INFO, "Combining polygons for level 1 administrative district: " + featureName + " in " + country + " (" + countryCount.incrementAndGet() + "/" + relation.keySet().size() + ")");
+                }
             } else {
                 country = featureName;
-                synchronized (this) {LOG.log(Level.INFO, "Combining polygons for " + country + " (" + countryCount.incrementAndGet() + "/" + relation.keySet().size() + ")");}
+                synchronized (this) {
+                    LOG.log(Level.INFO, "Combining polygons for " + country + " (" + countryCount.incrementAndGet() + "/" + relation.keySet().size() + ")");
+                }
             }
         }
 
-        while (inputFeatures.hasNext()) {
-            SimpleFeature feature = inputFeatures.next();
-            if (level == 1) {
-                if (feature.getAttribute(6).equals(featureName)) geometryList.add((Geometry) feature.getAttribute(0));
-            } else if (feature.getAttribute(4).equals(featureName))
-                geometryList.add((Geometry) feature.getAttribute(0));
+        if (level == 1) {
+            while (inputFeatures.hasNext()) {
+                SimpleFeature feature = inputFeatures.next();
+                if (feature.getAttribute(6).equals(featureName))
+                    geometryList.add((Geometry) feature.getAttribute(0));
+            }
+        } else {
+            while (inputFeatures.hasNext()) {
+                SimpleFeature feature = inputFeatures.next();
+                if (((String) feature.getAttribute(2)).split(",")[1].trim().equals(featureName))
+                    geometryList.add((Geometry) feature.getAttribute(0));
+            }
         }
+
         inputFeatures.close();
+
 
         try {
             newGeom = geometryFactory.buildGeometry(geometryList).union().getBoundary();
-
         } catch (Exception e) {
             LOG.log(Level.INFO, "Exception occurred at " + featureName + ": " + e.getMessage() + ". Attempting different combining methods.");
-            if (level == 1 || level == 0)
-                newGeom = geometryFactory.buildGeometry(geometryList).buffer(0).getBoundary();
-            else exceptionList.add(featureName);
-
+            newGeom = geometryFactory.buildGeometry(geometryList).buffer(0);
         }
+
 
         featureBuilder.add(newGeom);
         if (level == 1) {
