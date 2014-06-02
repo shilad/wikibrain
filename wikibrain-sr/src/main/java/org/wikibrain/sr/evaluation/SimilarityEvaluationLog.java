@@ -114,7 +114,12 @@ public class SimilarityEvaluationLog extends BaseEvaluationLog<SimilarityEvaluat
             guesses.addAll(log.getGuesses());
         }
 
-        // Set actual and predicted ranks
+        setRanks(guesses);
+
+        return guesses;
+    }
+
+    public static void setRanks(List<KnownSimGuess> guesses) {
         NaturalRanking nr = new NaturalRanking(TiesStrategy.MAXIMUM);
 
         // Part 1: build up pruned lists of actual / estimates excluded NaNs, etc.
@@ -144,8 +149,6 @@ public class SimilarityEvaluationLog extends BaseEvaluationLog<SimilarityEvaluat
         if (i != prunedActual.size()) {
             throw new IllegalStateException();
         }
-
-        return guesses;
     }
 
     /**
