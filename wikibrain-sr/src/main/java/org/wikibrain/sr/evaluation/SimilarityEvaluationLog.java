@@ -5,6 +5,8 @@ import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import org.apache.commons.math3.stat.ranking.NaturalRanking;
+import org.apache.commons.math3.stat.ranking.TiesStrategy;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.utils.KnownSim;
@@ -111,6 +113,38 @@ public class SimilarityEvaluationLog extends BaseEvaluationLog<SimilarityEvaluat
         for (SimilarityEvaluationLog log : getChildEvaluations()) {
             guesses.addAll(log.getGuesses());
         }
+
+        // Set actual and predicted ranks
+        NaturalRanking nr = new NaturalRanking(TiesStrategy.MAXIMUM);
+
+        // Part 1: build up pruned lists of actual / estimates excluded NaNs, etc.
+        TDoubleList prunedActual = new TDoubleArrayList();
+        TDoubleList prunedEstimates = new TDoubleArrayList();
+
+        for (KnownSimGuess g : guesses) {
+            if (g.hasGuess()) {
+                prunedActual.add(g.getActual());
+                prunedEstimates.add((g.getGuess()));
+            }
+        }
+
+        // Part 2: get ranks
+        double [] actualRanks = nr.rank(prunedActual.toArray());
+        double [] estimatedRanks = nr.rank(prunedEstimates.toArray());
+
+        // Part 3: specify them
+        int i = 0;
+        for (KnownSimGuess g : guesses) {
+            if (g.hasGuess()) {
+                g.setActualRank(1.0 + actualRanks.length - actualRanks[i]);
+                g.setPredictedRank(1.0 + estimatedRanks.length - estimatedRanks[i]);
+                i++;
+            }
+        }
+        if (i != prunedActual.size()) {
+            throw new IllegalStateException();
+        }
+
         return guesses;
     }
 
