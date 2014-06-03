@@ -1,6 +1,7 @@
 package org.wikibrain.sr.wikify;
 
 import com.typesafe.config.Config;
+import gnu.trove.TCollections;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
@@ -199,7 +200,7 @@ public class Wikifier {
         for (int wpId : link.getPrior().keySet()) {
             double prior = link.getPrior().get(wpId);
             double relatedness = allRelatedness.get(wpId);
-            double score = prior * relatedness * link.getLinkProbability();
+            double score = prior * relatedness * link.getLinkProbability() * getGenerality(wpId);
             link.addScore(wpId, score);
         }
         if (link.getScores().size() == 0) {
@@ -216,6 +217,18 @@ public class Wikifier {
             link.setScore(link.getScore() * Math.min(3.0, link.getScore() / score2));
         }
         cache.put(link.getAnchortext(), link);
+    }
+
+    private final TIntDoubleMap generality = TCollections.synchronizedMap(new TIntDoubleHashMap());
+    private final int MAX_INLINKS = 1000;
+    private double getGenerality(int wpId) throws DaoException {
+        if (generality.containsKey(wpId)) {
+            return generality.get(wpId);
+        }
+        int numInLinks = lld.getCount(new DaoFilter().setLanguages(language).setDestIds(wpId));
+        double g = 0.5 + Math.log(1 + Math.min(MAX_INLINKS, numInLinks)) / Math.log(1 + MAX_INLINKS);
+        generality.put(numInLinks, numInLinks);
+        return numInLinks;
     }
 
     private void identifyKnownCandidates(int wpId, List<LinkInfo> candidates) throws DaoException {
