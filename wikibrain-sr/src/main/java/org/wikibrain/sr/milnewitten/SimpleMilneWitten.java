@@ -41,6 +41,7 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
     private final LocalLinkDao linkDao;
     private final AnchorTextPhraseAnalyzer phraseAnalyzer;
     private final int numArticles;
+    private File dataDir;
 
     public SimpleMilneWitten(String name, Language language, LocalPageDao pageDao, LocalLinkDao linkDao, AnchorTextPhraseAnalyzer phraseAnalyzer) throws DaoException {
         this.name = name;
@@ -68,12 +69,12 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
 
     @Override
     public File getDataDir() {
-        throw new UnsupportedOperationException();
+        return dataDir;
     }
 
     @Override
     public void setDataDir(File dir) {
-        throw new UnsupportedOperationException();
+        this.dataDir = dir;
     }
 
     @Override
@@ -212,14 +213,10 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
     }
 
     @Override
-    public void write() throws IOException {
-        throw new UnsupportedOperationException();
-    }
+    public void write() throws IOException {}
 
     @Override
-    public void read() throws IOException {
-        throw new UnsupportedOperationException();
-    }
+    public void read() {}
 
     @Override
     public void trainSimilarity(Dataset dataset) throws DaoException {
