@@ -294,7 +294,7 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
 
         @Override
         public MonolingualSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("milnewitten")) {
+            if (!config.getString("type").equals("simplemilnewitten")) {
                 return null;
             }
             if (runtimeParams == null || !runtimeParams.containsKey("language")){

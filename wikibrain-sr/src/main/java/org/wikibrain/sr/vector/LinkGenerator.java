@@ -29,15 +29,15 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class MilneWittenGenerator implements VectorGenerator {
+public class LinkGenerator implements VectorGenerator {
 
-    private static final Logger LOG = Logger.getLogger(MilneWittenGenerator.class.getName());
+    private static final Logger LOG = Logger.getLogger(LinkGenerator.class.getName());
     private boolean outLinks;
     private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;
     private final Language language;
 
-    public MilneWittenGenerator(Language language, LocalLinkDao linkDao, LocalPageDao pageDao, boolean outLinks) {
+    public LinkGenerator(Language language, LocalLinkDao linkDao, LocalPageDao pageDao, boolean outLinks) {
         this.language = language;
         this.linkDao = linkDao;
         this.outLinks = outLinks;
@@ -118,7 +118,7 @@ public class MilneWittenGenerator implements VectorGenerator {
                 throw new IllegalArgumentException("Monolingual SR Metric requires 'language' runtime parameter");
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));
-            return new MilneWittenGenerator(
+            return new LinkGenerator(
                         language,
                     getConfigurator().get(LocalLinkDao.class),
                     getConfigurator().get(LocalPageDao.class),
