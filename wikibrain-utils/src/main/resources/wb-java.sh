@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This script is installed by running org.wikapidia.utils.ResourceInstaller
+# This script is installed by running org.wikibrain.utils.ResourceInstaller
 #
 # You should not edit this file outside of the sr/main/resources source directory
 # because it may be overwritten.
@@ -20,7 +20,7 @@ full_path() {
 # These can be overriden by setting your environment
 
 
-# Base Wikapidia directory. Should be the parent project directory in multi-maven projects
+# Base WikiBrain directory. Should be the parent project directory in multi-maven projects
 WB_DIR=$(full_path "${WB_DIR:-.}")
 
 # Java options
@@ -56,7 +56,7 @@ WB_JAVA_BIN="${WB_JAVA_BIN:-java}"
 # Standard maven targets. Clean will be prepended to it if it is the first argument
 WB_MVN_TARGETS="${WB_MVN_TARGETS:-compile install}"
 
-echo -e "Wikapidia environment settings follow. WB_CLASSPATH is updated again later\n" >&2
+echo -e "WikiBrain environment settings follow. WB_CLASSPATH is updated again later\n" >&2
 (set -o posix ; set) | grep WB_ | sed -e 's/^/    /' >&2
 echo "" >&2
 
