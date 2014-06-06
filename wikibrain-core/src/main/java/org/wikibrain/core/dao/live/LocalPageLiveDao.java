@@ -15,6 +15,7 @@ import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.LocalPage;
 
@@ -94,6 +95,11 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
                 .addPageid(pageId).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return (T)info.getLocalPage(language);
+    }
+
+    @Override
+    public T getById(LocalId localId) throws DaoException {
+        return getById(localId.getLanguage(), localId.getId());
     }
 
     /**
