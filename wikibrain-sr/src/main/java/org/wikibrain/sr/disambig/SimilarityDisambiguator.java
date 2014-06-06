@@ -9,10 +9,8 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.LocalString;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.sr.MonolingualSRMetric;
 import org.wikibrain.utils.MathUtils;
@@ -38,7 +36,7 @@ public class SimilarityDisambiguator extends Disambiguator {
     }
 
     // Method for disambiguating similar phrases
-    private Criteria critera = Criteria.SUM;
+    private Criteria criteria = Criteria.SUM;
 
     private final MonolingualSRMetric metric;
 
@@ -62,7 +60,7 @@ public class SimilarityDisambiguator extends Disambiguator {
         }
 
         // Skip using the sr metric at all!
-        if (critera == Criteria.POPULARITY) {
+        if (criteria == Criteria.POPULARITY) {
             for (LocalString phrase : phrases) {
                 LinkedHashMap<LocalId, Float> m = new LinkedHashMap<LocalId, Float>();
                 for (LocalId li : candidates.get(phrase).keySet()) {
@@ -96,7 +94,7 @@ public class SimilarityDisambiguator extends Disambiguator {
             float sim =  pageSims.get(lp);
 
             float score;
-            switch (critera) {
+            switch (criteria) {
                 case POPULARITY:
                     score = pop;
                     break;
@@ -167,12 +165,12 @@ public class SimilarityDisambiguator extends Disambiguator {
         return pageSims;
     }
 
-    public Criteria getCritera() {
-        return critera;
+    public Criteria getCriteria() {
+        return criteria;
     }
 
-    public void setCritera(Criteria critera) {
-        this.critera = critera;
+    public void setCriteria(Criteria criteria) {
+        this.criteria = criteria;
     }
 
     public int getNumCandidates() {
@@ -209,7 +207,7 @@ public class SimilarityDisambiguator extends Disambiguator {
             }
             Language lang = Language.getByLangCode(runtimeParams.get("language"));
 
-            PhraseAnalyzer pa = getConfigurator().get(PhraseAnalyzer.class,config.getString("phraseAnalyzer"));
+            PhraseAnalyzer pa = getConfigurator().get(PhraseAnalyzer.class, config.getString("phraseAnalyzer"));
 
             // Create override config for sr metric and load it.
             String srName = config.getString("metric");
@@ -221,7 +219,7 @@ public class SimilarityDisambiguator extends Disambiguator {
 
             SimilarityDisambiguator dab = new SimilarityDisambiguator(pa, sr);
             if (config.hasPath("criteria")) {
-                dab.setCritera(Criteria.valueOf(config.getString("criteria").toUpperCase()));
+                dab.setCriteria(Criteria.valueOf(config.getString("criteria").toUpperCase()));
             }
             return dab;
         }
