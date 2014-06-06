@@ -1,17 +1,22 @@
 package org.wikibrain.sr.vector;
 
 import com.typesafe.config.Config;
+import gnu.trove.function.TFloatFunction;
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
@@ -29,19 +34,29 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class MilneWittenGenerator implements VectorGenerator {
+public class LinkGenerator implements VectorGenerator {
 
-    private static final Logger LOG = Logger.getLogger(MilneWittenGenerator.class.getName());
+    private static final Logger LOG = Logger.getLogger(LinkGenerator.class.getName());
     private boolean outLinks;
     private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;
     private final Language language;
+    private final TIntIntMap linkCounts = new TIntIntHashMap();
+    private boolean weightByPopularity = false;
+    private boolean logTransform = false;
+    private final int numPages;
 
-    public MilneWittenGenerator(Language language, LocalLinkDao linkDao, LocalPageDao pageDao, boolean outLinks) {
+    public LinkGenerator(Language language, LocalLinkDao linkDao, LocalPageDao pageDao, boolean outLinks) throws DaoException {
         this.language = language;
         this.linkDao = linkDao;
         this.outLinks = outLinks;
         this.pageDao = pageDao;
+        numPages = pageDao.getCount(
+                new DaoFilter().setLanguages(language)
+                        .setRedirect(false)
+                        .setDisambig(false)
+                        .setNameSpaces(NameSpace.ARTICLE)
+        );
     }
 
 
@@ -51,14 +66,57 @@ public class MilneWittenGenerator implements VectorGenerator {
         if (pageId <= 0) {
             throw new IllegalArgumentException("Invalid page id: " + pageId);
         }
+        double norm2 = 0.0;
         for (LocalLink link : linkDao.getLinks(language, pageId, outLinks)) {
             int columnId = outLinks ? link.getDestId() : link.getSourceId();
-            if (columnId >= 0) {
-                vector.put(columnId, 1);
+            if (columnId < 0) {
+                continue;
             }
+            double value = 1;
+            if (weightByPopularity) {
+                value = numPages / getNumLinks(columnId);
+                if (logTransform) {
+                    value = Math.log(value);
+                }
+            }
+            vector.put(columnId, (float) value);
+            norm2 += value * value;
         }
+        final double n = norm2;
+        vector.transformValues(new TFloatFunction() {
+            @Override
+            public float execute(float value) {
+                return (float) (value / n);
+            }
+        });
         return vector;
     }
+
+    /**
+     * If outLinks is true, returns the number of links to the specified destination.
+     * Otherwise, returns number of links FROM the specified source.
+     * @param wpId
+     * @return
+     * @throws DaoException
+     */
+    private int getNumLinks(int wpId) throws DaoException {
+        synchronized (linkCounts) {
+            if (linkCounts.containsKey(wpId)) {
+                return linkCounts.get(wpId);
+            }
+        }
+        int n;
+        if (outLinks) {
+            n = linkDao.getCount(new DaoFilter().setLanguages(language).setDestIds(wpId));
+        } else {
+            n = linkDao.getCount(new DaoFilter().setLanguages(language).setSourceIds(wpId));
+        }
+        synchronized (linkCounts) {
+            linkCounts.put(wpId, n);
+        }
+        return n;
+    }
+
 
     @Override
     public TIntFloatMap getVector(String phrase) {
@@ -94,6 +152,14 @@ public class MilneWittenGenerator implements VectorGenerator {
         return explanations;
     }
 
+    public void setWeightByPopularity(boolean weightByPopularity) {
+        this.weightByPopularity = weightByPopularity;
+    }
+
+    public void setLogTransform(boolean logTransform) {
+        this.logTransform = logTransform;
+    }
+
     public static class Provider extends org.wikibrain.conf.Provider<VectorGenerator> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
@@ -118,12 +184,23 @@ public class MilneWittenGenerator implements VectorGenerator {
                 throw new IllegalArgumentException("Monolingual SR Metric requires 'language' runtime parameter");
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));
-            return new MilneWittenGenerator(
-                        language,
-                    getConfigurator().get(LocalLinkDao.class),
-                    getConfigurator().get(LocalPageDao.class),
-                        config.getBoolean("outLinks")
-                    );
+            try {
+                LinkGenerator lg = new LinkGenerator(
+                            language,
+                        getConfigurator().get(LocalLinkDao.class),
+                        getConfigurator().get(LocalPageDao.class),
+                            config.getBoolean("outLinks")
+                        );
+                if (config.hasPath("weightByPopularity")) {
+                    lg.setWeightByPopularity(config.getBoolean("weightByPopularity"));
+                }
+                if (config.hasPath("logTransform")) {
+                    lg.setLogTransform(config.getBoolean("logTransform"));
+                }
+                return lg;
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
         }
     }
 }

@@ -70,4 +70,24 @@ public class WpCollectionUtils {
         }
         return sorted;
     }
+
+    public static <T extends Comparable<T>> T max(Collection<T> elems) {
+        T max = null;
+        for (T t : elems) {
+            if (max == null || max.compareTo(t) < 0) {
+                max = t;
+            }
+        }
+        return max;
+    }
+
+    public static <T extends Comparable<T>> T min(Collection<T> elems) {
+        T min = null;
+        for (T t : elems) {
+            if (min == null || min.compareTo(t) > 0) {
+                min = t;
+            }
+        }
+        return min;
+    }
 }

@@ -132,8 +132,7 @@ public class PipelineLoader {
         LanguageSet langs = env.getLanguages();
 
         // Shut down the database carefully
-        WpDataSource ds = env.getConfigurator().get(WpDataSource.class);
-        ds.close();
+        env.close();
         Thread.sleep(1000);
 
         boolean offByDefault = cmd.hasOption("f");
@@ -159,10 +158,12 @@ public class PipelineLoader {
             available.add(stage.name);
 
             boolean on = false;
-            if (stage.onByDefault == OnByDefault.TRUE) {
-                on = true;
-            } else if (stage.onByDefault == OnByDefault.IFMULTILINGUAL && langs.size() > 1) {
-                on = true;
+            if (!offByDefault) {
+                if (stage.onByDefault == OnByDefault.TRUE) {
+                    on = true;
+                } else if (stage.onByDefault == OnByDefault.IFMULTILINGUAL && langs.size() > 1) {
+                    on = true;
+                }
             }
 
             if (runStages.containsKey(stage.name)) {

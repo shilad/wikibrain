@@ -5,7 +5,9 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.IOUtils;
@@ -132,18 +134,27 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
-        TIntFloatMap vector1 = null;
-        TIntFloatMap vector2 = null;
         try {
-            vector1 = getPageVector(pageId1);
-            vector2 = getPageVector(pageId2);
+            if (hasFeatureMatrix()) {
+                // Optimization that matters: Avoid building page vectors if possible.
+                SparseMatrixRow row1 = featureMatrix.getRow(pageId1);
+                SparseMatrixRow row2 = featureMatrix.getRow(pageId2);
+                if (row1 == null || row2 == null) {
+                    return null;
+                } else {
+                    return normalize(new SRResult(similarity.similarity(row1, row2)));
+                }
+            } else {
+                TIntFloatMap vector1 = getPageVector(pageId1);
+                TIntFloatMap vector2 = getPageVector(pageId2);
+                if (vector1 == null || vector2 == null) {
+                    return null;
+                }
+                return normalize(new SRResult(similarity.similarity(vector1, vector2)));
+            }
         } catch (IOException e) {
             throw new DaoException(e);
         }
-        if (vector1 == null || vector2 == null) {
-            return null;
-        }
-        return normalize(new SRResult(similarity.similarity(vector1, vector2)));
     }
 
     @Override
@@ -289,26 +300,58 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
      */
     @Override
     public double[][] cosimilarity(int rowIds[], int colIds[]) throws DaoException {
-        // Build up vectors for unique pages
-        Map<Integer, TIntFloatMap> vectors = new HashMap<Integer, TIntFloatMap>();
-        for (int pageId : ArrayUtils.addAll(colIds, rowIds)) {
-            if (!vectors.containsKey(pageId)) {
+        if (hasFeatureMatrix()) {
+            // special optimized case
+            TIntObjectMap<SparseMatrixRow> vectors = new TIntObjectHashMap<SparseMatrixRow>(rowIds.length + colIds.length);
+            for (int id : ArrayUtils.addAll(rowIds, colIds)) {
+                if (vectors.containsKey(id)) {
+                    continue;
+                }
+                SparseMatrixRow row = null;
                 try {
-                    vectors.put(pageId, getPageVector(pageId));
+                    row = featureMatrix.getRow(id);
                 } catch (IOException e) {
                     throw new DaoException(e);
                 }
+                if (row != null) {
+                    vectors.put(id, row);
+                }
             }
+            double results[][] = new double[rowIds.length][colIds.length];
+            for (int i = 0; i < rowIds.length; i++) {
+                SparseMatrixRow row1 = vectors.get(rowIds[i]);
+                if (row1 != null) {
+                    for (int j = 0; j < colIds.length; j++) {
+                        SparseMatrixRow row2 = vectors.get(colIds[j]);
+                        if (row2 != null) {
+                            results[i][j] = normalize(similarity.similarity(row1, row2));
+                        }
+                    }
+                }
+            }
+            return results;
+        } else {
+            // Build up vectors for unique pages
+            Map<Integer, TIntFloatMap> vectors = new HashMap<Integer, TIntFloatMap>();
+            for (int pageId : ArrayUtils.addAll(colIds, rowIds)) {
+                if (!vectors.containsKey(pageId)) {
+                    try {
+                        vectors.put(pageId, getPageVector(pageId));
+                    } catch (IOException e) {
+                        throw new DaoException(e);
+                    }
+                }
+            }
+            List<TIntFloatMap> rowVectors = new ArrayList<TIntFloatMap>();
+            for (int rowId : rowIds) {
+                rowVectors.add(vectors.get(rowId));
+            }
+            List<TIntFloatMap> colVectors = new ArrayList<TIntFloatMap>();
+            for (int colId : colIds) {
+                colVectors.add(vectors.get(colId));
+            }
+            return cosimilarity(rowVectors, colVectors);
         }
-        List<TIntFloatMap> rowVectors = new ArrayList<TIntFloatMap>();
-        for (int rowId : rowIds) {
-            rowVectors.add(vectors.get(rowId));
-        }
-        List<TIntFloatMap> colVectors = new ArrayList<TIntFloatMap>();
-        for (int colId : colIds) {
-            colVectors.add(vectors.get(colId));
-        }
-        return cosimilarity(rowVectors, colVectors);
     }
 
     /**
@@ -323,7 +366,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
             for (int j = 0; j < colVectors.size(); j++) {
                 TIntFloatMap vi = rowVectors.get(i);
                 TIntFloatMap vj = colVectors.get(j);
-                results[i][j] = similarity.similarity(vi, vj);
+                results[i][j] = normalize(similarity.similarity(vi, vj));
             }
         }
         return results;
@@ -509,7 +552,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                     name,
                     language,
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
-                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
+                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator"),"language", language.getLangCode()),
                     generator,
                     similarity,
                     phraseVectorCreator

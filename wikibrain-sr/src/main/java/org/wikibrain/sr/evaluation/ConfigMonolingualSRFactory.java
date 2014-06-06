@@ -88,7 +88,7 @@ public class ConfigMonolingualSRFactory implements MonolingualSRFactory {
             dc.put("phraseAnalyzer", phraseName);
             return disambigName + "=" + dc.toString();
         } catch (ConfigurationException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalStateException(e);
         }
     }
 
