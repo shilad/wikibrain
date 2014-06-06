@@ -279,8 +279,10 @@ public class WpDataSource implements Closeable {
                 } else {
                     ds.setPartitionCount(Integer.valueOf(partitions));
                 }
-                ds.setMaxConnectionsPerPartition(config.getInt("connectionsPerPartition"));
-//                ds.setConnectionHook(new CountConnectionHook(0, 20));  // for debugging
+
+                //ds.setMaxConnectionsPerPartition(config.getInt("connectionsPerPartition"));
+                ds.setMaxConnectionsPerPartition(Runtime.getRuntime().availableProcessors());
+
                 return new WpDataSource(ds);
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException(e);
