@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
+import org.wikibrain.core.dao.Dao;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
@@ -17,6 +18,7 @@ import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -29,23 +31,20 @@ public class MapQuestTravelTimeCalculator {
     String destPoint;
     JsonParser parser;
     private static final Logger LOG = Logger.getLogger(MapQuestTravelTimeCalculator.class.getName());
+    int keyCounter = 0;
+    List<String> keys = new ArrayList<String>();
 
 
-    public MapQuestTravelTimeCalculator(String key, String startingPoint, String destPoint){
-        this.key = key;
-        this.startingPoint = startingPoint;
-        this.destPoint = destPoint;
+
+    public MapQuestTravelTimeCalculator(){
+        keys.add("Fmjtd%7Cluur2g68n5%2Cas%3Do5-9a8gqf");
         this.parser = new JsonParser();
+        this.key = keys.get(keyCounter);
     }
 
     public String pointToString(Geometry g){
         Point gc = g.getCentroid();
         return "{latLng:{lat:" + gc.getY() +",lng:" + gc.getX() + "}}";
-    }
-
-    public MapQuestTravelTimeCalculator(){
-        this.parser = new JsonParser();
-
     }
 
     public void setKey(String key){
@@ -60,12 +59,12 @@ public class MapQuestTravelTimeCalculator {
         this.destPoint = destPoint;
     }
 
-    public double getTravelTime() throws Exception{
+    public double getTravelTime() throws DaoException{
         if(key == null){
-            throw new Exception("Null MapQuest key");
+            throw new DaoException("Null MapQuest key");
         }
         if(startingPoint == null || destPoint == null){
-            throw new Exception("Null staring point or end point");
+            throw new DaoException("Null staring point or end point");
         }
         String queryUrl = "http://www.mapquestapi.com/directions/v2/route?key=" + key + "&from=" + startingPoint + "&to=" + destPoint;
         String info = new String();
@@ -95,12 +94,27 @@ public class MapQuestTravelTimeCalculator {
             if(statusCode.equals("400"))
                 time = -1;
             if(statusCode.equals("403")){
-                time = -1;
-                LOG.warning("MapQuest key error");
-                //TODO: auto switch key
+                //time = -1;
+                LOG.warning("MapQuest key error, try to switch to the next key");
+                if(keyCounter < keys.size() - 1){
+                    keyCounter ++;
+                    key = keys.get(keyCounter);
+                    return getTravelTime();
+                }
+                else{
+                    keyCounter = -1;
+                    throw new DaoException("No more available key");
+                }
+
+
             }
         }
-        catch (Exception e) {
+        catch (DaoException e) {
+
+            if(keyCounter == -1)
+                throw e;
+            //else do nothing
+
 
         }
 
@@ -119,8 +133,6 @@ public class MapQuestTravelTimeCalculator {
         UniversalPageDao upDao = c.get(UniversalPageDao.class);
 
         MapQuestTravelTimeCalculator travelTime = new MapQuestTravelTimeCalculator();
-
-        travelTime.setKey("Fmjtd%7Cluur2g68n5%2Cas%3Do5-9a8gqf");
 
         String mpls = travelTime.pointToString(sdDao.getGeometry("Minneapolis", Language.getByLangCode("simple"), "wikidata"));
         String nyc = travelTime.pointToString(sdDao.getGeometry("New York", Language.getByLangCode("simple"), "wikidata"));
