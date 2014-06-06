@@ -17,7 +17,7 @@ import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.sr.disambig.TopResultDisambiguator;
 import org.wikibrain.sr.utils.ExplanationFormatter;
 import org.wikibrain.sr.vector.GoogleSimilarity;
-import org.wikibrain.sr.vector.MilneWittenGenerator;
+import org.wikibrain.sr.vector.LinkGenerator;
 import org.wikibrain.sr.vector.VectorBasedMonoSRMetric;
 import org.wikibrain.sr.vector.VectorGenerator;
 import org.wikibrain.utils.WpIOUtils;
@@ -33,7 +33,7 @@ import java.sql.SQLException;
  * Time: 2:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TestMilneWitten {
+public class TestLinkGenerator {
     private static final Language SIMPLE = Language.getByLangCode("simple");
 
     private static void printResult(SRResult result, ExplanationFormatter expf) throws DaoException {
@@ -132,9 +132,9 @@ public class TestMilneWitten {
 
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
-        VectorGenerator generator = new MilneWittenGenerator(SIMPLE, linkDao, dao, false);
+        VectorGenerator generator = new LinkGenerator(SIMPLE, linkDao, dao, false);
         BaseMonolingualSRMetric srIn = new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
-        generator = new MilneWittenGenerator(SIMPLE, linkDao, dao, true);
+        generator = new LinkGenerator(SIMPLE, linkDao, dao, true);
         BaseMonolingualSRMetric srOut =  new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
 
         double rIn = srIn.similarity(page1.getLocalId(), page2.getLocalId(), true).getScore();

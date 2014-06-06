@@ -1,21 +1,17 @@
 package org.wikibrain.matrix;
 
 import gnu.trove.map.hash.TIntLongHashMap;
-import org.apache.commons.collections.map.LinkedMap;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,15 +26,36 @@ public class MemoryMappedMatrix {
 
     public static final int PAGE_SIZE = 1024 * 1024 * 1024;     // 1GB
 
-    private TIntLongHashMap rowOffsets = new TIntLongHashMap();
     private FileChannel channel;
     protected List<MappedBufferWrapper> buffers = new ArrayList<MappedBufferWrapper>();
     private File path;
 
+    private final IntBuffer rowIds;     // row ids in order of offsets on disk
+    private final LongBuffer rowOffsets;      // row offsets associated with sorted ids
+    private final int numRows;
+
+    private WeakReference<int[]> rowIdsInDiskOrder = null;
+
     public MemoryMappedMatrix(File path, FileChannel channel,TIntLongHashMap rowOffsets) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    public MemoryMappedMatrix(File path, FileChannel channel, IntBuffer rowIds, LongBuffer rowOffsets) throws IOException {
         this.path = path;
         this.channel = channel;
+        if (rowIds.capacity() != rowOffsets.capacity()) {
+            throw new IllegalArgumentException();
+        }
+        this.rowIds = rowIds;
         this.rowOffsets = rowOffsets;
+        this.numRows = rowIds.capacity();
+        int lastId = Integer.MIN_VALUE;
+        for (int i = 0; i < numRows; i++) {
+            if (rowIds.get(i) < lastId) {
+                throw new IllegalArgumentException("Row ids must be in strictly increasing order");
+            }
+            lastId = rowIds.get(i);
+        }
         pageInRows();
     }
 
@@ -46,22 +63,29 @@ public class MemoryMappedMatrix {
         for (MappedBufferWrapper buffer : buffers) {
             buffer.close();
         }
-        System.gc();    // try to garbage collect any freed buffers
+        // try to garbage collect any freed buffers
+        System.gc();
+        System.gc();
+        System.gc();
         channel.close();
     }
 
     private void pageInRows() throws IOException {
-        int rowIds[] = getRowIdsInOrder();
-        if (rowIds.length == 0) {
+        if (numRows == 0) {
             return;
         }
-
         // tricky: pages must align with row boundaries
-        long startPos = rowOffsets.get(rowIds[0]);
+        long sortedOffsets[] = new long[numRows];
+        for (int i = 0; i < numRows; i++) {
+            sortedOffsets[i] = rowOffsets.get(i);
+        }
+        Arrays.sort(sortedOffsets);
+
+        long startPos = sortedOffsets[0];
         long lastPos = startPos;
 
-        for (int i = 1; i < rowIds.length; i++) {
-            long pos = rowOffsets.get(rowIds[i]);
+        for (int i = 1; i < numRows; i++) {
+            long pos = sortedOffsets[i];
             if (pos - startPos > PAGE_SIZE) {
                 assert(lastPos != startPos);
                 addBuffer(startPos, lastPos);
@@ -80,10 +104,10 @@ public class MemoryMappedMatrix {
     }
 
     public ByteBuffer getRow(int rowId) throws IOException {
-        if (!rowOffsets.containsKey(rowId)) {
+        long targetOffset = getRowOffset(rowId);
+        if (targetOffset < 0) {
             return null;
         }
-        long targetOffset = rowOffsets.get(rowId);
         MappedBufferWrapper row = null;
         // TODO: binary search
         for (int i = 0; i < buffers.size(); i++) {
@@ -96,6 +120,24 @@ public class MemoryMappedMatrix {
             throw new IllegalArgumentException("did not find row " + rowId + " with offset " + targetOffset);
         }
         return row.get(targetOffset);
+    }
+
+    private long getRowOffset(int rowId) {
+        int lo = 0;
+        int hi = numRows - 1;
+        while (lo <= hi) {
+            int mid = (lo + hi) / 2;
+            int midId = rowIds.get(mid);
+
+            if (rowId < midId) {
+                hi = mid - 1;
+            } else if (rowId > midId) {
+                lo = mid + 1;
+            } else {
+                return rowOffsets.get(mid);
+            }
+        }
+        return -1;
     }
 
     static class MappedBufferWrapper {
@@ -121,15 +163,54 @@ public class MemoryMappedMatrix {
         }
     }
 
-    private int[] getRowIdsInOrder() {
-        Integer rowIds[] = ArrayUtils.toObject(rowOffsets.keys());
-        Arrays.sort(rowIds, new Comparator<Integer>() {
-            @Override
-            public int compare(Integer r1, Integer r2) {
-                return new Long(rowOffsets.get(r1)).compareTo(rowOffsets.get(r2));
+    public synchronized  int[] getRowIdsInDiskOrder() {
+        if (rowIdsInDiskOrder == null || rowIdsInDiskOrder.get() == null) {
+            int ids[] = new int[numRows];
+            for (int i = 0; i < numRows; i++) {
+                ids[i] = rowIds.get(i);
             }
-        });
-        return ArrayUtils.toPrimitive(rowIds);
+            sortIdsByOffset(ids);
+            this.rowIdsInDiskOrder = new WeakReference<int[]>(ids);
+            return ids;
+        } else {
+            return rowIdsInDiskOrder.get();
+        }
+    }
+
+    // Adapted from http://www.programcreek.com/2012/11/quicksort-array-in-java/
+    private void sortIdsByOffset(int colIds[]) {
+        this.sortIdsByOffset(colIds, 0, colIds.length-1);
+    }
+
+    private void sortIdsByOffset(int colIds[], int low, int high) {
+        if (colIds.length == 0 || low >= high)
+            return;
+
+        // pick the pivot
+        int middle = (low + high) / 2;
+        long pivot = getRowOffset(colIds[middle]);
+
+        // partition around the pivot
+        int i = low, j = high;
+        while (i <= j) {
+            while (getRowOffset(colIds[i]) < pivot) {
+                i++;
+            }
+            while (getRowOffset(colIds[j]) > pivot) {
+                j--;
+            }
+            if (i <= j) {
+                int temp = colIds[i];
+                colIds[i] = colIds[j];
+                colIds[j] = temp;
+                i++;
+                j--;
+            }
+        }
+
+        //recursively sort two sub parts
+        sortIdsByOffset(colIds, low, j);
+        sortIdsByOffset(colIds, i, high);
     }
 
     private void info(String message) {

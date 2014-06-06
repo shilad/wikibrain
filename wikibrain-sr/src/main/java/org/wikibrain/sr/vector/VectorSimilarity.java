@@ -6,6 +6,7 @@ package org.wikibrain.sr.vector;
 
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.set.TIntSet;
+import org.wikibrain.matrix.MatrixRow;
 import org.wikibrain.matrix.SparseMatrix;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
@@ -23,6 +24,14 @@ public interface VectorSimilarity {
      * @param transpose
      */
     public void setMatrices(SparseMatrix features, SparseMatrix transpose);
+
+    /**
+     * Returns the similarity of the two vectors.
+     * @param vector1
+     * @param vector2
+     * @return
+     */
+    public double similarity(MatrixRow vector1, MatrixRow vector2);
 
     /**
      * Computes the similarity between the two vectors.

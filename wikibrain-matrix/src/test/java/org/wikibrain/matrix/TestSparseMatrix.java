@@ -5,11 +5,11 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TestSparseMatrix {
     private List<SparseMatrixRow> srcRows;
@@ -75,8 +75,19 @@ public class TestSparseMatrix {
 
 
     private void verifyIsSourceMatrix(Matrix m) throws IOException {
+        assertEquals(srcRows.size(), m.getNumRows());
+        int [] ids1 = m.getRowIds();
+        int [] ids2 = new int[srcRows.size()];
+        for (int i = 0; i < srcRows.size(); i++) {
+            ids2[i] = srcRows.get(i).getRowIndex();
+        }
+        Arrays.sort(ids1);
+        Arrays.sort(ids2);
+        assertArrayEquals(ids2, ids1);
+
         for (SparseMatrixRow srcRow : srcRows) {
             MatrixRow destRow = m.getRow(srcRow.getRowIndex());
+            assertNotNull(destRow);
             assertEquals(destRow.getRowIndex(), srcRow.getRowIndex());
             assertEquals(destRow.getNumCols(), srcRow.getNumCols());
             for (int i = 0; i < destRow.getNumCols(); i++) {

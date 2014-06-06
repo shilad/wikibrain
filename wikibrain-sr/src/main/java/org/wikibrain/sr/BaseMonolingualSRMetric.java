@@ -241,7 +241,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
             }
             List<LocalId> resolutions;
             synchronized (disambiguator) {
-                ((SimilarityDisambiguator)disambiguator).setCritera(c);
+                ((SimilarityDisambiguator)disambiguator).setCriteria(c);
                 resolutions = disambiguator.disambiguateTop(phrases, null);
             }
             String page1 = resolutions.get(0) == null ? "null" : localPageDao.getById(language, resolutions.get(0).getId()).toString();

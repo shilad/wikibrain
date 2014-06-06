@@ -9,10 +9,8 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.LocalString;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.sr.MonolingualSRMetric;
 import org.wikibrain.utils.MathUtils;
@@ -25,8 +23,7 @@ public class SimilarityDisambiguator extends Disambiguator {
     public static final int DEFAULT_NUM_CANDIDATES = 5;
     protected final PhraseAnalyzer phraseAnalyzer;
     private int numCandidates = DEFAULT_NUM_CANDIDATES;
-
-    private final Map<Language, MonolingualSRMetric> metrics;
+    private Language language;
 
     /**
      * Algorithms for disambiguating similar phrases
@@ -39,11 +36,14 @@ public class SimilarityDisambiguator extends Disambiguator {
     }
 
     // Method for disambiguating similar phrases
-    private Criteria critera = Criteria.SUM;
+    private Criteria criteria = Criteria.SUM;
 
-    public SimilarityDisambiguator(PhraseAnalyzer phraseAnalyzer, Map<Language, MonolingualSRMetric> metrics) {
+    private final MonolingualSRMetric metric;
+
+    public SimilarityDisambiguator(PhraseAnalyzer phraseAnalyzer, MonolingualSRMetric metric) {
         this.phraseAnalyzer = phraseAnalyzer;
-        this.metrics = metrics;
+        this.metric = metric;
+        this.language = metric.getLanguage();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class SimilarityDisambiguator extends Disambiguator {
         }
 
         // Skip using the sr metric at all!
-        if (critera == Criteria.POPULARITY) {
+        if (criteria == Criteria.POPULARITY) {
             for (LocalString phrase : phrases) {
                 LinkedHashMap<LocalId, Float> m = new LinkedHashMap<LocalId, Float>();
                 for (LocalId li : candidates.get(phrase).keySet()) {
@@ -94,7 +94,7 @@ public class SimilarityDisambiguator extends Disambiguator {
             float sim =  pageSims.get(lp);
 
             float score;
-            switch (critera) {
+            switch (criteria) {
                 case POPULARITY:
                     score = pop;
                     break;
@@ -140,15 +140,14 @@ public class SimilarityDisambiguator extends Disambiguator {
         if (pages.isEmpty()){
             cosim = new double[0][0];
         } else {
-            Language language = pages.get(0).getLanguage();
-            if (!metrics.containsKey(language)) {
-                throw new DaoException("No metric for language " + language);
+            if (!pages.get(0).getLanguage().equals(language)) {
+                throw new DaoException("Expected language " + language + ", found " +  pages.get(0).getLanguage());
             }
             int[] pageIds = new int[pages.size()];
             for (int i=0; i<pages.size(); i++){
                 pageIds[i] = pages.get(i).getId();
             }
-            cosim = metrics.get(language).cosimilarity(pageIds);
+            cosim = metric.cosimilarity(pageIds);
         }
 
         // Step 2: calculate the sum of cosimilarities for each page
@@ -166,12 +165,12 @@ public class SimilarityDisambiguator extends Disambiguator {
         return pageSims;
     }
 
-    public Criteria getCritera() {
-        return critera;
+    public Criteria getCriteria() {
+        return criteria;
     }
 
-    public void setCritera(Criteria critera) {
-        this.critera = critera;
+    public void setCriteria(Criteria criteria) {
+        this.criteria = criteria;
     }
 
     public int getNumCandidates() {
@@ -203,26 +202,24 @@ public class SimilarityDisambiguator extends Disambiguator {
                 return null;
             }
 
-            LanguageSet langs = getConfigurator().get(LanguageSet.class);
-            PhraseAnalyzer pa = getConfigurator().get(PhraseAnalyzer.class,config.getString("phraseAnalyzer"));
+            if (runtimeParams == null || !runtimeParams.containsKey("language")){
+                throw new IllegalArgumentException("SimpleMilneWitten requires 'language' runtime parameter.");
+            }
+            Language lang = Language.getByLangCode(runtimeParams.get("language"));
 
-            // Create override config for metric.
+            PhraseAnalyzer pa = getConfigurator().get(PhraseAnalyzer.class, config.getString("phraseAnalyzer"));
+
+            // Create override config for sr metric and load it.
             String srName = config.getString("metric");
             Config newConfig = getConfig().get().getConfig("sr.metric.local." + srName)
                     .withValue("disambiguator", ConfigValueFactory.fromAnyRef("topResult"));
+            Map<String, String> srRuntimeParams = new HashMap<String, String>();
+            srRuntimeParams.put("language", lang.getLangCode());
+            MonolingualSRMetric sr = getConfigurator().construct(MonolingualSRMetric.class, srName, newConfig, srRuntimeParams);
 
-            // Load all metrics
-            Map<Language, MonolingualSRMetric> metrics = new HashMap<Language, MonolingualSRMetric>();
-            for (Language lang : langs) {
-                Map<String, String> srRuntimeParams = new HashMap<String, String>();
-                srRuntimeParams.put("language", lang.getLangCode());
-                MonolingualSRMetric sr = getConfigurator().construct(MonolingualSRMetric.class, srName, newConfig, srRuntimeParams);
-                metrics.put(lang, sr);
-            }
-
-            SimilarityDisambiguator dab = new SimilarityDisambiguator(pa, metrics);
+            SimilarityDisambiguator dab = new SimilarityDisambiguator(pa, sr);
             if (config.hasPath("criteria")) {
-                dab.setCritera(Criteria.valueOf(config.getString("criteria").toUpperCase()));
+                dab.setCriteria(Criteria.valueOf(config.getString("criteria").toUpperCase()));
             }
             return dab;
         }

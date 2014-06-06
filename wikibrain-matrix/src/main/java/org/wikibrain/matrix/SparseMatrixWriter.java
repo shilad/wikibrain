@@ -1,5 +1,6 @@
 package org.wikibrain.matrix;
 
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntLongHashMap;
 import org.apache.commons.io.FileUtils;
@@ -7,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,16 +67,23 @@ public class SparseMatrixWriter {
 
         // write offset file
         info("generating header");
-        int sizeHeader = 16 + rowOffsets.size() * 12;
+        int sizeHeader = 16 + rowOffsets.size() * (4 + 8);
         body = new BufferedOutputStream(new FileOutputStream(path));
         body.write(intToBytes(SparseMatrix.FILE_HEADER));
         body.write(floatToBytes(vconf.minScore));
         body.write(floatToBytes(vconf.maxScore));
         body.write(intToBytes(rowOffsets.size()));
-        for (int i = 0; i < rowIndexes.size(); i++) {
-            int rowIndex = rowIndexes.get(i);
-            long rowOffset = rowOffsets.get(rowIndex);
+
+        // Next write row indexes in sorted order (4 bytes per row)
+        int sortedIndexes[] = rowIndexes.toArray();
+        Arrays.sort(sortedIndexes);
+        for (int rowIndex : sortedIndexes) {
             body.write(intToBytes(rowIndex));
+        }
+
+        // Next write offsets for sorted indexes. (8 bytes per row)
+        for (int rowIndex : sortedIndexes) {
+            long rowOffset = rowOffsets.get(rowIndex);
             body.write(longToBytes(rowOffset + sizeHeader));
         }
 

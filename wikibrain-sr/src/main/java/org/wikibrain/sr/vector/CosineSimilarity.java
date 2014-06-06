@@ -51,6 +51,50 @@ public class CosineSimilarity implements VectorSimilarity {
     }
 
     @Override
+    public double similarity(MatrixRow a, MatrixRow b) {
+        double adota = 0.0;
+        double bdotb = 0.0;
+        double adotb = 0.0;
+
+        int na = a.getNumCols();
+        int nb = b.getNumCols();
+        int i = 0, j = 0;
+
+        while (i < na && j < nb) {
+            int ca = a.getColIndex(i);
+            int cb = b.getColIndex(j);
+            if (ca < cb) {
+                float va = a.getColValue(i++);
+                adota += va * va;
+            } else if (ca > cb) {
+                float vb = b.getColValue(j++);
+                bdotb += vb * vb;
+            } else {
+                float va = a.getColValue(i++);
+                float vb = b.getColValue(j++);
+                adota += va * va;
+                bdotb += vb * vb;
+                adotb += va * vb;
+            }
+        }
+
+        for (; i < na; i++) {
+            float va = a.getColValue(i);
+            adota += va * va;
+        }
+        for (; j < nb; j++) {
+            float vb = b.getColValue(j);
+            bdotb += vb * vb;
+        }
+
+        if (adota * bdotb * adotb == 0) {
+            return 0.0;
+        } else {
+            return adotb / Math.sqrt(adota * bdotb);
+        }
+    }
+
+    @Override
     public double similarity(TIntFloatMap vector1, TIntFloatMap vector2) {
         return SimUtils.cosineSimilarity(vector1, vector2);
     }

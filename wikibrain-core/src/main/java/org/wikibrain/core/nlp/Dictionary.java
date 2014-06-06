@@ -47,6 +47,9 @@ import java.util.regex.Pattern;
  * @author Shilad Sen
  */
 public class Dictionary implements Closeable {
+    public static final int MAX_DICTIONARY_SIZE = 20000000;   // 20M unigrams + bigrams by default.
+    public static int PRUNE_INTERVAL = 10000;   // Consider pruning every PRUNE_INTERVAL increments
+
     public static Logger LOG = Logger.getLogger(Dictionary.class.getName());
 
     /**
@@ -81,6 +84,8 @@ public class Dictionary implements Closeable {
     private final WordStorage wordStorage;
 
     private AtomicLong totalWords = new AtomicLong();
+    private AtomicLong totalBigrams = new AtomicLong();
+
     private final TLongIntMap unigramCounts = new TLongIntHashMap();
     private final TLongIntMap bigramCounts = new TLongIntHashMap();
 
@@ -89,6 +94,32 @@ public class Dictionary implements Closeable {
 
     private BufferedWriter wordWriter;
     private File wordFile;
+
+    /**
+     * The maximum number of unigrams + bigrams (not including mentions)
+     */
+    private int maxDictionarySize = MAX_DICTIONARY_SIZE;
+
+    /**
+     * Things with less than this number of occurrences will be pruned if
+     * the dictionary size exceeds maxDictionarySize.
+     *
+     * This is incremented BEFORE every pruning (e.g. the first pruning will have
+     * minPruneCount = 2).
+     */
+    private int minPruneCount = 1;
+
+    /**
+     * Map of Wikipedia article id -> number of mentions in unigrams.
+     * Only calculated if containsMentions is true.
+     */
+    private final TIntIntMap mentionCounts = new TIntIntHashMap();
+
+    /**
+     * Map from word hashes to actual words.
+     * Only maintained if "rememberWords" is true.
+     */
+    private final TLongObjectMap<String> words = new TLongObjectHashMap<String>();
 
     public Dictionary(Language language) {
         this(language, WordStorage.NONE);
@@ -109,17 +140,6 @@ public class Dictionary implements Closeable {
         }
     }
 
-    /**
-     * Map of Wikipedia article id -> number of mentions in unigrams.
-     * Only calculated if containsMentions is true.
-     */
-    private final TIntIntMap mentionCounts = new TIntIntHashMap();
-
-    /**
-     * Map from word hashes to actual words.
-     * Only maintained if "rememberWords" is true.
-     */
-    private final TLongObjectMap<String> words = new TLongObjectHashMap<String>();
 
     /**
      *
@@ -257,7 +277,9 @@ public class Dictionary implements Closeable {
                 throw new RuntimeException(e);  // shouldn't really happen
             }
         }
-        totalWords.incrementAndGet();
+        if (totalWords.incrementAndGet() % PRUNE_INTERVAL == 0) {
+            pruneIfNecessary();
+        }
     }
 
     /**
@@ -277,6 +299,46 @@ public class Dictionary implements Closeable {
         }
         synchronized (bigramCounts) {
             bigramCounts.adjustOrPutValue(getHash(word), 1, 1);
+        }
+        if (totalBigrams.incrementAndGet() % PRUNE_INTERVAL == 0) {
+            pruneIfNecessary();
+        }
+    }
+
+    public synchronized void pruneIfNecessary() {
+        while (true) {
+            int n1, n2;
+            synchronized (bigramCounts) {
+                n1 = unigramCounts.size();
+            }
+            synchronized (bigramCounts) {
+                n2 = bigramCounts.size();
+            }
+            if (n1 + n2 <= maxDictionarySize) {
+                return;
+            }
+            minPruneCount++;
+            LOG.info("pruning dictionary entries with frequency less than " + minPruneCount);
+            synchronized (unigramCounts) {
+                unigramCounts.retainEntries(new TLongIntProcedure() {
+                    @Override
+                    public boolean execute(long hash, int count) {
+                        return (count >= minPruneCount);
+                    }
+                });
+                n1 = unigramCounts.size();
+            }
+            synchronized (bigramCounts) {
+                bigramCounts.retainEntries(new TLongIntProcedure() {
+                    @Override
+                    public boolean execute(long hash, int count) {
+                        return (count >= minPruneCount);
+                    }
+                });
+                n2 = bigramCounts.size();
+            }
+            LOG.info("after pruning dictionary size is " + (n1 + n2));
+            // TODO: clear out words, but we need a triple lock... ugh.
         }
     }
 
@@ -652,5 +714,9 @@ public class Dictionary implements Closeable {
         long h = MurmurHash.hash64(w);
         if (h == 0) h = 1;  // hack: h == 0 is reserved.
         return h;
+    }
+
+    public void setMaxDictionarySize(int maxDictionarySize) {
+        this.maxDictionarySize = maxDictionarySize;
     }
 }

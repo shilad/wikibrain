@@ -102,6 +102,7 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
                 rVal.add(itemId);
 
             }
+            featureIterator.close();
 
             return rVal;
 
@@ -228,6 +229,7 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
             for(Integer i: order.subList(0, k)){
                 finalRVal.put(i, rVal.get(i));
             }
+            featureIterator.close();
 
 
 
@@ -259,19 +261,24 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
         PropertyName layerProperty = ff.property(db.getLayerAttributeName());
         Filter layerFilter = ff.equals(layerProperty, ff.literal(layerName));
 
+        /*
+
         Filter touchFilter = ff.touches(geomProperty, ff.literal(g));
         Filter intersectFilter = ff.intersects(geomProperty, ff.literal(g));
+
         List<Filter> orFilters = Lists.newArrayList();
         orFilters.add(touchFilter);
         orFilters.add(intersectFilter);
+
         Filter touchOrIntersectFilter = ff.or(orFilters);
 
+        */
 
-
+        Filter intersectFilter = ff.intersects(geomProperty, ff.literal(g));
         List<Filter> filters = Lists.newArrayList();
         filters.add(refSysFilter);
         filters.add(layerFilter);
-        filters.add(touchOrIntersectFilter);
+        filters.add(intersectFilter);
 
 
         for(Integer i : excludeSet){
@@ -295,6 +302,8 @@ public class PostGISSpatialNeighborDao implements SpatialNeighborDao{
                 Feature f = featureIterator.next();
                 result.put((Integer)f.getProperty(db.getItemIdAttributeName()).getValue(), (Geometry) f.getDefaultGeometryProperty().getValue());
             }
+
+            featureIterator.close();
 
             return result;
 

@@ -26,8 +26,10 @@ import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
+import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 import org.wikibrain.utils.WpIOUtils;
 import org.wikibrain.wikidata.WikidataDao;
+import sun.net.www.content.text.Generic;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -70,7 +72,9 @@ public class SpatialDataLoader {
             for (LayerStruct layerStruct : layerStructs) {
 
                 if (layerStruct.fileType.equals(FileType.SHP)) {
+
                     parseShapefile(layerStruct);
+
                 }
             }
 
@@ -152,7 +156,15 @@ public class SpatialDataLoader {
                 boolean found = false;
                 while(i < numDbfFields && !found){
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
-                    Integer itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
+                    Integer itemId;
+                    try {
+                    itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
+                    }
+                    catch (Exception e){
+                        i++;
+                        continue;
+
+                    }
                     if (itemId != null && spatialDataDao.getGeometry(itemId, struct.getLayerName(), struct.getRefSysName()) == null){
                         spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
                         found = true;
@@ -307,7 +319,7 @@ public class SpatialDataLoader {
 
     }
 
-    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data_temp";
+    private static String TEMP_SPATIAL_DATA_FOLDER = "/Users/toby/Dropbox/spatial_data_wikibrain";
 
     public static void main(String args[]) {
 
@@ -344,23 +356,27 @@ public class SpatialDataLoader {
             SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
             SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
 
-//            String stepsValue = cmd.getOptionValue("s", "wikidata,gadm,exogenous"); // GADM temporarily disabled while we do new mappings
+//            String stepsValue = cmd.getOptionValue("s", "wikidata,gadm,download,exogenous"); // GADM temporarily disabled while we do new mappings
 
             String stepsValue = cmd.getOptionValue("s", "wikidata,exogenous");
             String[] steps = stepsValue.split(",");
             for (String step : steps) {
-                if (step.trim().toLowerCase().equals("wikidata")) {
+                String canonicalStep = step.trim().toLowerCase();
+                if (canonicalStep.equals("wikidata")) {
                     LOG.log(Level.INFO, "Beginning to extract geographic information from Wikidata");
                     loader.loadWikidataData();
-                }
-                else if (step.trim().toLowerCase().equals("gadm")){
+                }else if (canonicalStep.equals("gadm")){
                     LOG.log(Level.INFO, "Beginning to download and process GADM data (will be imported in exogenous step)");
-                    GADMConverter.downloadAndConvert(spatialDataFolder);
-                    spatialDataFolder.deleteSpecificFile("read_me.pdf", RefSys.EARTH); // TODO: Aaron, please move the following two lines into the correct place in GADMConverter
-                    spatialDataFolder.deleteLayer("gadm2", RefSys.EARTH);
-                } else if (step.trim().toLowerCase().equals("exogenous")) {
+                    new GADMConverter().downloadAndConvert(spatialDataFolder);
+                    //spatialDataFolder.deleteSpecificFile("read_me.pdf", RefSys.EARTH); // TODO: Aaron, please move the following two lines into the correct place in GADMConverter
+                    //spatialDataFolder.deleteLayer("gadm2", RefSys.EARTH);
+                } else if (canonicalStep.equals("exogenous")) {
                     LOG.log(Level.INFO, "Beginning to load exogenous data");
                     loader.loadExogenousData();
+                } else if (canonicalStep.equals("download")){
+                    LOG.log(Level.INFO, "Downloading shapefiles and moving them into place");
+                    WikiBrainSpatialUtils.downloadZippedShapefileToReferenceSystem("http://www-users.cs.umn.edu/~bhecht/wikibrain/spatial_data/elements.zip",
+                            RefSys.PERIODIC_TABLE, spatialDataFolder); // TODO: this should be moved to the config file at some point
                 } else {
                     throw new Exception("Illegal step: '" + step + "'");
                 }
@@ -368,8 +384,8 @@ public class SpatialDataLoader {
 
 
         //(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, File spatialDataFolder)
-        loader.loadWikidataData();
-        loader.loadExogenousData();
+        //loader.loadWikidataData();
+        //loader.loadExogenousData();
 
             LOG.info("optimizing database.");
             conf.get(WpDataSource.class).optimize();
