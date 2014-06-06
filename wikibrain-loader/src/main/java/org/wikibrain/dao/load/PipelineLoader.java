@@ -158,10 +158,12 @@ public class PipelineLoader {
             available.add(stage.name);
 
             boolean on = false;
-            if (stage.onByDefault == OnByDefault.TRUE) {
-                on = true;
-            } else if (stage.onByDefault == OnByDefault.IFMULTILINGUAL && langs.size() > 1) {
-                on = true;
+            if (!offByDefault) {
+                if (stage.onByDefault == OnByDefault.TRUE) {
+                    on = true;
+                } else if (stage.onByDefault == OnByDefault.IFMULTILINGUAL && langs.size() > 1) {
+                    on = true;
+                }
             }
 
             if (runStages.containsKey(stage.name)) {
