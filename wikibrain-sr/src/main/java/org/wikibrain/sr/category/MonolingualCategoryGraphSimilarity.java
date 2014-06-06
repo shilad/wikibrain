@@ -158,7 +158,7 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
                         name,
                         language,
                         getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
-                        getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
+                        getConfigurator().get(Disambiguator.class,config.getString("disambiguator"), "language", language.getLangCode()),
                         getConfigurator().get(LocalCategoryMemberDao.class,config.getString("categoryMemberDao"))
                 );
             } catch (DaoException e) {

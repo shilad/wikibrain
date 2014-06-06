@@ -552,7 +552,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                     name,
                     language,
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
-                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator")),
+                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator"),"language", language.getLangCode()),
                     generator,
                     similarity,
                     phraseVectorCreator

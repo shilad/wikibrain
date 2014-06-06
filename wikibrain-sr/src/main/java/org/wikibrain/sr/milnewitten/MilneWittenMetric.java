@@ -122,14 +122,15 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
             MonolingualSRMetric outlink = getConfigurator().get(
                     MonolingualSRMetric.class, config.getString("outlink"),
                     "language", language.getLangCode());
+            Disambiguator dab = getConfigurator().get(Disambiguator.class, config.getString("disambiguator"), "language", language.getLangCode());
             return new MilneWittenMetric(
                     name,
                     language,
                     getConfigurator().get(LocalPageDao.class),
                     inlink,
                     outlink,
-                    getConfigurator().get(Disambiguator.class,config.getString("disambiguator"))
-                    );
+                    dab
+            );
         }
     }
 }
