@@ -95,17 +95,26 @@ public class GoogleSimilarity implements VectorSimilarity {
         int intersect = 0;
         int i = 0, j = 0;
 
+        // Start by getting the first column in each matrix
+        int ca = a.getColIndex(i);
+        int cb = b.getColIndex(j);
+
         while (i < na && j < nb) {
-            int ca = a.getColIndex(i);
-            int cb = b.getColIndex(j);
             if (ca < cb) {
+                // if matrix a has a lower value, then get the next column
                 i++;
+                ca = a.getColIndex(i);
             } else if (ca > cb) {
+                // if matrix b has a lower value, then get the next column
                 j++;
+                cb = b.getColIndex(j);
             } else {
+                // if both have the same value, increment the intersection and get the next columns in both matrices
                 i++;
                 j++;
                 intersect++;
+                ca = a.getColIndex(i);
+                cb = b.getColIndex(j);
             }
         }
         return SimUtils.googleSimilarity(na, nb, intersect, numPages);
