@@ -73,7 +73,7 @@ public class TestAtomicLongSet {
     public void benchmark() throws InterruptedException {
         final int n = 50 * 1000000;
         final int nThreads = 8;
-        final AtomicLongSet set = new AtomicLongSet(2 * n);
+        final AtomicLongSet set = new AtomicLongSet();
 //        final TLongSet set = TCollections.synchronizedSet(new TLongHashSet(2 * n));
 //        final TLongSet set = new TLongHashSet(2 * n);
         List<Thread> threads = new ArrayList<Thread>();

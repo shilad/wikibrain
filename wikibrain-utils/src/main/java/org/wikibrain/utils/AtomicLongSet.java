@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
- * An open addressing implementation of a hash set of Longs.
+ * An implement of a set containing longs that uses open addressing
  *
- * The implementation is threadsafe and lock-free.
+ * The implementation is threadsafe and almost entirely lock-free.
  * Locks do occur while the the underlying array is expanded.
  *
  * @author Shilad Sen
@@ -23,7 +23,7 @@ public class AtomicLongSet {
 
     private final AtomicInteger numElements = new AtomicInteger();
 
-    private double loadFactor = 0.5;
+    private double loadFactor = 0.666;
 
     public AtomicLongSet() {
         this(5);
@@ -43,10 +43,8 @@ public class AtomicLongSet {
      * @return
      */
     public boolean contains(long value) {
-
         // An implementation of Knuth's open addressing algorithm adapted from Trove's TLongHash.
         // Returns whether the set contained the value at the *start* of the call
-
         AtomicLongArray tmp = set;      // could change out from under us...
         int length = tmp.length();
         int hash = hash(value);
@@ -122,9 +120,11 @@ public class AtomicLongSet {
             if (numElements.get() < loadFactor * set.length()) {
                 return;
             }
+            int newSize = (int) Math.ceil(set.length() / loadFactor);
+            System.out.println("expanding to " + newSize);
 
             // expand by two, rehash
-            AtomicLongArray newSet = makeEmptyArray(set.length() * 2);
+            AtomicLongArray newSet = makeEmptyArray(newSize);
             for (int i = 0; i < set.length(); i++) {
                 long l = set.get(i);
                 if (l != unusedValue) {
@@ -161,6 +161,13 @@ public class AtomicLongSet {
         return ((int)(value ^ (value >>> 32))) & 0x7fffffff;
     }
 
+    /**
+     * Creates an empty array whose capacity is a prime bigger than the requested size.
+     * The array is filled with the unusedValue.
+     *
+     * @param capacity
+     * @return
+     */
     private AtomicLongArray makeEmptyArray(int capacity) {
         capacity = Math.max(capacity, 5);
         capacity = PrimeFinder.nextPrime(capacity);

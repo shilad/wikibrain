@@ -65,7 +65,7 @@ public class SqlLinksLoader {
         this.language = FileMatcher.LINK_SQL.getLanguage(file.getAbsolutePath());
         int n = dao.getCount(new DaoFilter().setLanguages(language));
         n = Math.max(10000, n);
-        n *= 2 * 3; // guess that there will be as many new sql links as existing once, size should be 3 times as big.
+        n *= 2 * 3; // guess that there will be twice as many links as there are now, to be safe, array size should be 3 times as big.
         LOG.info("guessing at size of array at " + n);
         existing = new AtomicLongSet(n);
     }
