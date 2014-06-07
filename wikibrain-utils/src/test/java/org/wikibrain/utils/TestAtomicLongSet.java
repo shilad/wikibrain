@@ -4,6 +4,7 @@ import gnu.trove.TCollections;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ public class TestAtomicLongSet {
         }
     }
 
+    @Ignore
     @Test
     public void benchmark() throws InterruptedException {
         final int n = 50 * 1000000;
