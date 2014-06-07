@@ -21,6 +21,7 @@ import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.parser.sql.MySqlDumpParser;
+import org.wikibrain.utils.AtomicLongSet;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpThreadUtils;
@@ -48,7 +49,7 @@ public class SqlLinksLoader {
 
     private final LocalLinkDao dao;
     private final LocalPageDao pageDao;
-    private TLongSet existing = TCollections.synchronizedSet(new TLongHashSet());
+    private final AtomicLongSet existing;
     private final MetaInfoDao metaDao;
 
     private AtomicLong totalLinks = new AtomicLong();
@@ -56,12 +57,17 @@ public class SqlLinksLoader {
     private AtomicLong newLinks = new AtomicLong();
 
 
-    public SqlLinksLoader(LocalLinkDao dao, LocalPageDao pageDao, MetaInfoDao metaDao, File file) {
+    public SqlLinksLoader(LocalLinkDao dao, LocalPageDao pageDao, MetaInfoDao metaDao, File file) throws DaoException {
         this.dao = dao;
         this.metaDao = metaDao;
         this.pageDao = pageDao;
         this.sqlDump = file;
         this.language = FileMatcher.LINK_SQL.getLanguage(file.getAbsolutePath());
+        int n = dao.getCount(new DaoFilter().setLanguages(language));
+        n = Math.max(10000, n);
+        n *= 2 * 3; // guess that there will be as many new sql links as existing once, size should be 3 times as big.
+        LOG.info("guessing at size of array at " + n);
+        existing = new AtomicLongSet(n);
     }
 
     public void load() throws DaoException {
