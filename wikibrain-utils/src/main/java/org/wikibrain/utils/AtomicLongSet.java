@@ -12,6 +12,11 @@ import java.util.concurrent.atomic.AtomicLongArray;
  * The implementation is threadsafe and almost entirely lock-free.
  * Locks do occur while the the underlying array is expanded.
  *
+ * If you're careful and spread an accurate guess of capacity,
+ * peformance will be dramatically improved.
+ *
+ * Does not support removals at the moment.
+ *
  * @author Shilad Sen
  */
 public class AtomicLongSet {
@@ -29,6 +34,13 @@ public class AtomicLongSet {
         this(5);
     }
 
+    /**
+     * Create a new set with the specified capacity.
+     * Ideally, the capacity will be at least the number of total elements * (1 / loadFactor)
+     * to prevent future expansions.
+     *
+     * @param capacity
+     */
     public AtomicLongSet(int capacity) {
         set = makeEmptyArray(capacity);
     }
@@ -84,6 +96,11 @@ public class AtomicLongSet {
         setInternal(set, value);
     }
 
+    /**
+     * Store a particular value in an array representing a set.
+     * @param array
+     * @param value
+     */
     private void setInternal(AtomicLongArray array, long value) {
         // An implementation of Knuth's open addressing algorithm adapted from Trove's TLongHash.
         int length = array.length();
@@ -106,10 +123,19 @@ public class AtomicLongSet {
         } while (index != firstIndex);
     }
 
+    /**
+     * Returns the number of elements stored in the set.
+     * @return
+     */
     public int size() {
         return numElements.get();
     }
 
+    /**
+     * Expand the underlying array if the load factor is exceeded.
+     * If the load factor is NOT exceeded, no locking is required.
+     * If it is exceeded, all threads block while one expands.
+     */
     private void expandIfNecessary() {
         // Check if we're safe (usually the case, so its fast!)
         if (numElements.get() < loadFactor * set.length()) {
@@ -177,6 +203,10 @@ public class AtomicLongSet {
         return set;
     }
 
+    /**
+     * Removes all elements in the set.
+     * Does not compact it.
+     */
     public void clear() {
         AtomicLongArray tmp = set;      // could change out from under us...
         for (int i = 0; i < tmp.length(); i++) {
