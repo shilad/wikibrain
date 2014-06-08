@@ -23,7 +23,7 @@ public class AtomicLongSet {
 
     private final AtomicInteger numElements = new AtomicInteger();
 
-    private double loadFactor = 0.666;
+    private double loadFactor = 0.5;
 
     public AtomicLongSet() {
         this(5);
@@ -121,7 +121,6 @@ public class AtomicLongSet {
                 return;
             }
             int newSize = (int) Math.ceil(set.length() / loadFactor);
-            System.out.println("expanding to " + newSize);
 
             // expand by two, rehash
             AtomicLongArray newSet = makeEmptyArray(newSize);
