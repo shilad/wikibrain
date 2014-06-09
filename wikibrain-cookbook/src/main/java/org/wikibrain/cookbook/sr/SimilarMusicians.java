@@ -31,15 +31,21 @@ public class SimilarMusicians {
         LocalPageDao lpd = env.getConfigurator().get(LocalPageDao.class);
         MonolingualSRMetric sr = env.getConfigurator().get(MonolingualSRMetric.class, "ensemble", "language", lang.getLangCode());
 
-        TIntSet musicians = new TIntHashSet();
-//        for (LocalId lid : wdd.pagesWithValue("occupation", WikidataValue.forItem(639669), Language.SIMPLE)) {
-        for (LocalId lid : wdd.pagesWithValue("member of political party", WikidataValue.forItem(29552), lang)) {
-            musicians.add(lid.getId());
+        for (SRResult hit : sr.mostSimilar("jazz", 10, null)) {
+            System.out.println(hit.getScore() + ": " + lpd.getById(lang, hit.getId()));
         }
 
-        int milesId = lpd.getIdByTitle("Miles Davis", lang, NameSpace.ARTICLE);
-        for (SRResult hit : sr.mostSimilar(milesId, 5, musicians)) {
-            System.out.println(lpd.getById(lang, hit.getId()));
+        TIntSet candidates = new TIntHashSet();
+        //for (LocalId lid : wdd.pagesWithValue("occupation", WikidataValue.forItem(639669), Language.SIMPLE)) {
+        for (LocalId lid : wdd.pagesWithValue("instance of", WikidataValue.forItem(11424), lang)) {
+            candidates.add(lid.getId());
+        }
+	System.out.println("found " + candidates.size() + " candidates.");
+
+	System.out.println("");
+        int milesId = lpd.getIdByTitle("Jazz", lang, NameSpace.ARTICLE);
+        for (SRResult hit : sr.mostSimilar(milesId, 10, candidates)) {
+            System.out.println(hit.getScore() + ": " + lpd.getById(lang, hit.getId()));
         }
     }
 }
