@@ -13,6 +13,7 @@ import org.wikibrain.core.dao.sql.MetaInfoSqlDao;
 import org.wikibrain.core.dao.sql.TestDaoUtil;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class TestWikidataDao {
         WikidataSqlDao wd = new WikidataSqlDao(ds, null, null);
         wd.beginLoad();
 
-        WikidataDumpLoader loader = new WikidataDumpLoader(wd, md);
+        WikidataDumpLoader loader = new WikidataDumpLoader(wd, md, LanguageSet.ALL);
         URL url = TestWikidataDao.class.getResource("/testDump.xml.bz2");
         loader.load(new File(url.toURI()));
         wd.endLoad();

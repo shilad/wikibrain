@@ -1,6 +1,7 @@
 package org.wikibrain.wikidata;
 
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 
 import java.io.Serializable;
 import java.util.*;
@@ -79,6 +80,29 @@ public class WikidataEntity implements Serializable {
             }
         }
         return inLang;
+    }
+
+    /**
+     * Prunes a WikiData entity to the specified languages.
+     * Returns true IFF a label, description, or alias exists in one of the specified languages.
+     * @param langs
+     * @return
+     */
+    public boolean prune(LanguageSet langs) {
+        pruneSet(aliases.keySet(), langs);
+        pruneSet(descriptions.keySet(), langs);
+        pruneSet(labels.keySet(), langs);
+        return (aliases.size() > 0 || descriptions.size() > 0 || labels.size() > 0);
+    }
+
+    private void pruneSet(Collection<Language> set, LanguageSet keepers) {
+        Iterator<Language> iter = set.iterator();
+        while (iter.hasNext()) {
+            Language l = iter.next();
+            if (!keepers.containsLanguage(l)) {
+                iter.remove();
+            }
+        }
     }
 
     @Override
