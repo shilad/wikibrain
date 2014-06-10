@@ -1,13 +1,15 @@
 package org.wikibrain.utils;
 
 import gnu.trove.impl.PrimeFinder;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
- * An implement of a set containing longs that uses open addressing
+ * An implement of a set containing int that uses open addressing
  *
  * The implementation is threadsafe and almost entirely lock-free.
  * Locks do occur while the the underlying array is expanded.
@@ -19,18 +21,18 @@ import java.util.concurrent.atomic.AtomicLongArray;
  *
  * @author Shilad Sen
  */
-public class AtomicLongSet {
+public class AtomicIntSet {
 
     // Hack: pick a value that's unlikley to be used as the unused value.
-    private final long unusedValue = Long.MIN_VALUE + 1;
+    private final int unusedValue = Integer.MIN_VALUE + 1;
 
-    private volatile AtomicLongArray set;
+    private volatile AtomicIntegerArray set;
 
     private final AtomicInteger numElements = new AtomicInteger();
 
     private double loadFactor = 0.5;
 
-    public AtomicLongSet() {
+    public AtomicIntSet() {
         this(5);
     }
 
@@ -41,7 +43,7 @@ public class AtomicLongSet {
      *
      * @param capacity
      */
-    public AtomicLongSet(int capacity) {
+    public AtomicIntSet(int capacity) {
         set = makeEmptyArray(capacity);
     }
 
@@ -54,10 +56,10 @@ public class AtomicLongSet {
      * @param value
      * @return
      */
-    public boolean contains(long value) {
+    public boolean contains(int value) {
         // An implementation of Knuth's open addressing algorithm adapted from Trove's TLongHash.
         // Returns whether the set contained the value at the *start* of the call
-        AtomicLongArray tmp = set;      // could change out from under us...
+        AtomicIntegerArray tmp = set;      // could change out from under us...
         int length = tmp.length();
         int hash = hash(value);
         int probe = 1 + (hash % (length - 2));
@@ -69,10 +71,10 @@ public class AtomicLongSet {
             if (index < 0) {
                 index += length;
             }
-            long l = tmp.get(index);
-            if (l == unusedValue) {
+            int v = tmp.get(index);
+            if (v == unusedValue) {
                 return false;
-            }  else if (l == value) {
+            }  else if (v == value) {
                 return true;
             }
         } while (index != firstIndex);
@@ -85,7 +87,7 @@ public class AtomicLongSet {
      * Adds the specified value to the set.
      * @param value
      */
-    public void add(long value) {
+    public void add(int value) {
         if (value == unusedValue) {
             throw new IllegalArgumentException("Value " + value + " is used internally as an unused slot marker!");
         }
@@ -101,7 +103,7 @@ public class AtomicLongSet {
      * @param array
      * @param value
      */
-    private void setInternal(AtomicLongArray array, long value) {
+    private void setInternal(AtomicIntegerArray array, int value) {
         // An implementation of Knuth's open addressing algorithm adapted from Trove's TLongHash.
         int length = array.length();
         int hash = hash(value);
@@ -149,11 +151,11 @@ public class AtomicLongSet {
 
             // expand, rehash
             int newSize = (int) Math.ceil(set.length() / loadFactor);
-            AtomicLongArray newSet = makeEmptyArray(newSize);
+            AtomicIntegerArray newSet = makeEmptyArray(newSize);
             for (int i = 0; i < set.length(); i++) {
-                long l = set.get(i);
-                if (l != unusedValue) {
-                    setInternal(newSet, l);
+                int v = set.get(i);
+                if (v != unusedValue) {
+                    setInternal(newSet, v);
                 }
             }
             set = newSet;
@@ -168,13 +170,13 @@ public class AtomicLongSet {
      *
      * @return the values in the set.
      */
-    public long[] toArray() {
-        TLongArrayList vals = new TLongArrayList();
-        AtomicLongArray tmp = set;      // could change out from under us...
+    public int[] toArray() {
+        TIntArrayList vals = new TIntArrayList();
+        AtomicIntegerArray tmp = set;      // could change out from under us...
         for (int i = 0; i < tmp.length(); i++) {
-            long l = tmp.get(i);
-            if (l != unusedValue) {
-                vals.add(l);
+            int v = tmp.get(i);
+            if (v != unusedValue) {
+                vals.add(v);
             }
         }
         return vals.toArray();
@@ -185,8 +187,8 @@ public class AtomicLongSet {
      * @param value
      * @return
      */
-    public static int hash(long value) {
-        return ((int)(value ^ (value >>> 32))) & 0x7fffffff;
+    public static int hash(int value) {
+        return value & 0x7fffffff;
     }
 
     /**
@@ -196,10 +198,10 @@ public class AtomicLongSet {
      * @param capacity
      * @return
      */
-    private AtomicLongArray makeEmptyArray(int capacity) {
+    private AtomicIntegerArray makeEmptyArray(int capacity) {
         capacity = Math.max(capacity, 5);
         capacity = PrimeFinder.nextPrime(capacity);
-        AtomicLongArray set = new AtomicLongArray(capacity);
+        AtomicIntegerArray set = new AtomicIntegerArray(capacity);
         for (int i = 0; i < capacity; i++) {
             set.set(i, unusedValue);
         }
@@ -211,7 +213,7 @@ public class AtomicLongSet {
      * Does not compact it.
      */
     public void clear() {
-        AtomicLongArray tmp = set;      // could change out from under us...
+        AtomicIntegerArray tmp = set;      // could change out from under us...
         for (int i = 0; i < tmp.length(); i++) {
             tmp.set(i, unusedValue);
         }
