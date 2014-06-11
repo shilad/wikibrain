@@ -1,5 +1,8 @@
 package org.wikibrain.wikidata;
 
+import org.mockito.Mockito;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.collections.IteratorUtils;
@@ -9,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
+import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.dao.sql.MetaInfoSqlDao;
 import org.wikibrain.core.dao.sql.TestDaoUtil;
 import org.wikibrain.core.dao.sql.WpDataSource;
@@ -49,7 +53,26 @@ public class TestWikidataDao {
         WikidataSqlDao wd = new WikidataSqlDao(ds, null, null);
         wd.beginLoad();
 
-        WikidataDumpLoader loader = new WikidataDumpLoader(wd, md, LanguageSet.ALL);
+        // Add all the entity ids we need as values for SOME key
+        Map<Language, TIntIntMap> concepts = new HashMap<Language, TIntIntMap>();
+        TIntIntMap map = new TIntIntHashMap();
+        URL url1 = TestWikidataDao.class.getResource("/Q.txt");
+        File file = new File(url1.getPath());
+        Scanner scan = new Scanner (file);
+        while(scan.hasNext()){
+            int i = scan.nextInt();
+            map.put(i,i);
+        }
+        for (Language lang : LanguageSet.ALL){
+            concepts.put(lang,map);
+        }
+
+        scan.close();
+
+        UniversalPageDao upDao = Mockito.mock(UniversalPageDao.class);
+        Mockito.when(upDao.getAllLocalToUnivIdsMap(1, LanguageSet.ALL)).thenReturn(concepts);
+
+        WikidataDumpLoader loader = new WikidataDumpLoader(wd, md, upDao, LanguageSet.ALL);
         URL url = TestWikidataDao.class.getResource("/testDump.xml.bz2");
         loader.load(new File(url.toURI()));
         wd.endLoad();

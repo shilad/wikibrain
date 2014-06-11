@@ -1,5 +1,8 @@
 package org.wikibrain.wikidata;
 
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
@@ -12,6 +15,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.cmd.FileMatcher;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
+import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
@@ -44,17 +48,39 @@ public class WikidataDumpLoader {
 
     private final MetaInfoDao metaDao;
     private final WikidataDao wikidataDao;
+    private final UniversalPageDao universalPageDao;
     private final LanguageSet languages;
     private final WikidataParser wdParser = new WikidataParser();
+    private final Map<Language, TIntSet> universalIds;
 
-    public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao, LanguageSet langs) {
+    public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao, UniversalPageDao upDao, LanguageSet langs) {
         this.wikidataDao = wikidataDao;
         this.metaDao = metaDao;
         this.languages = langs;
+        this.universalPageDao = upDao;
+        Map<Language, TIntIntMap> localMaps = null;
+        try {
+            localMaps = universalPageDao.getAllLocalToUnivIdsMap(1, languages);
+        } catch (Exception e) {
+            // TODO: Die.
+            localMaps = null;
+            System.err.println("Horrible problem. Please fix this string.");
+        }
+
+        Map<Language, TIntSet> tempMap = new HashMap<Language, TIntSet>();
+
+        for(Language lang : languages) {
+            TIntSet set = new TIntHashSet();
+            set.addAll(localMaps.get(lang).values());
+            tempMap.put(lang, set);
+        }
+
+        this.universalIds = tempMap;
     }
 
     /**
      * Expects file name format starting with lang + "wiki" for example, "enwiki"
+     *
      * @param file
      */
     public void load(final File file) {
@@ -89,10 +115,24 @@ public class WikidataDumpLoader {
         PageXmlParser xmlParser = new PageXmlParser(LanguageInfo.getByLanguage(Language.EN));
         RawPage rp = xmlParser.parse(page);
         if (rp.getModel().equals("wikibase-item") || rp.getModel().equals("wikibase-property")) {
+
             WikidataEntity entity = wdParser.parse(rp);
-            if (entity.prune(languages)) {
+
+            // check if others use prune's boolean?
+            entity.prune(languages);
+
+            if (entity.getType() == WikidataEntity.Type.PROPERTY) {
                 wikidataDao.save(entity);
+            } else {
+                for (Language lang : languages) {
+                    TIntSet set = universalIds.get(lang);
+                    if (set.contains(entity.getId())) {
+                        wikidataDao.save(entity);
+                        break;
+                    }
+                }
             }
+
         } else if (Arrays.asList("wikitext", "css", "javascript").contains(rp.getModel())) {
             // expected
         } else {
@@ -154,15 +194,16 @@ public class WikidataDumpLoader {
         } else {
             paths = new ArrayList<File>();
             for (Object arg : cmd.getArgList()) {
-                paths.add(new File((String)arg));
+                paths.add(new File((String) arg));
             }
         }
 
         WikidataDao wdDao = conf.get(WikidataDao.class);
+        UniversalPageDao upDao = conf.get(UniversalPageDao.class);
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
         LanguageSet langs = conf.get(LanguageSet.class);
 
-        final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao, langs);
+        final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao, upDao, langs);
 
         if (cmd.hasOption("d")) {
             wdDao.clear();
