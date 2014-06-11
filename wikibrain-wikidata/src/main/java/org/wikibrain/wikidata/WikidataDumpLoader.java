@@ -89,6 +89,11 @@ public class WikidataDumpLoader {
         PageXmlParser xmlParser = new PageXmlParser(LanguageInfo.getByLanguage(Language.EN));
         RawPage rp = xmlParser.parse(page);
         if (rp.getModel().equals("wikibase-item") || rp.getModel().equals("wikibase-property")) {
+
+            // Instead of checking the result of prune, check whether the
+            // concept map contains an entry in one of the languages we care about.
+            // You get that information from UniversalPageDao
+            // Related change: always keep properties
             WikidataEntity entity = wdParser.parse(rp);
             if (entity.prune(languages)) {
                 wikidataDao.save(entity);
