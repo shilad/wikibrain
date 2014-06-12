@@ -2,6 +2,7 @@ package org.wikibrain.sr.vector;
 
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.matrix.SparseMatrixRow;
 import org.wikibrain.matrix.ValueConf;
@@ -87,6 +88,7 @@ public class TestCosineSimilarity {
         return map;
     }
 
+    @Ignore
     @Test
     public void benchmark() {
         int numOuter = 100;
