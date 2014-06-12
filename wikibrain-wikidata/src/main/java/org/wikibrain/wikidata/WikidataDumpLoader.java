@@ -51,31 +51,19 @@ public class WikidataDumpLoader {
     private final UniversalPageDao universalPageDao;
     private final LanguageSet languages;
     private final WikidataParser wdParser = new WikidataParser();
-    private final Map<Language, TIntSet> universalIds;
+    private final TIntSet universalIds;
 
-    public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao, UniversalPageDao upDao, LanguageSet langs) {
+    public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao, UniversalPageDao upDao, LanguageSet langs) throws DaoException {
         this.wikidataDao = wikidataDao;
         this.metaDao = metaDao;
         this.languages = langs;
         this.universalPageDao = upDao;
-        Map<Language, TIntIntMap> localMaps = null;
-        try {
-            localMaps = universalPageDao.getAllLocalToUnivIdsMap(1, languages);
-        } catch (Exception e) {
-            // TODO: Die.
-            localMaps = null;
-            System.err.println("Horrible problem. Please fix this string.");
+        Map<Language, TIntIntMap> localMaps = universalPageDao.getAllLocalToUnivIdsMap(1, languages);
+
+        this.universalIds = new TIntHashSet();
+        for(TIntIntMap langMap : localMaps.values()) {
+            universalIds.addAll(langMap.valueCollection());
         }
-
-        Map<Language, TIntSet> tempMap = new HashMap<Language, TIntSet>();
-
-        for(Language lang : languages) {
-            TIntSet set = new TIntHashSet();
-            set.addAll(localMaps.get(lang).values());
-            tempMap.put(lang, set);
-        }
-
-        this.universalIds = tempMap;
     }
 
     /**
@@ -121,16 +109,8 @@ public class WikidataDumpLoader {
             // check if others use prune's boolean?
             entity.prune(languages);
 
-            if (entity.getType() == WikidataEntity.Type.PROPERTY) {
+            if (entity.getType() == WikidataEntity.Type.PROPERTY || universalIds.contains(entity.getId())) {
                 wikidataDao.save(entity);
-            } else {
-                for (Language lang : languages) {
-                    TIntSet set = universalIds.get(lang);
-                    if (set.contains(entity.getId())) {
-                        wikidataDao.save(entity);
-                        break;
-                    }
-                }
             }
 
         } else if (Arrays.asList("wikitext", "css", "javascript").contains(rp.getModel())) {
