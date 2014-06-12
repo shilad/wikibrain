@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
@@ -69,33 +70,46 @@ public class OSMLayerLoader {
      */
 
     public void printGeometries(File outputFile) throws Exception{
+        /*
+        ItemID: 1527 - Minnesota, 148 - China
+         */
 
         final SimpleFeatureType OSMTYPE = getOutputFeatureType();
         final SimpleFeatureSource outputFeatureSource = getOutputDataFeatureSource(outputFile, OSMTYPE);
         final Transaction transaction = new DefaultTransaction("create");
         final ConcurrentLinkedQueue<List<SimpleFeature>> writeQueue = new ConcurrentLinkedQueue<List<SimpleFeature>>();
-        final WikidataStatement testStatement = new WikidataStatement("id", new WikidataEntity(WikidataEntity.Type.ITEM, 1527), new WikidataEntity(WikidataEntity.Type.PROPERTY, 402), null, null);
+        final WikidataStatement testStatement = new WikidataStatement("id", new WikidataEntity(WikidataEntity.Type.ITEM, 148), new WikidataEntity(WikidataEntity.Type.PROPERTY, 402), null, null);
 
         try {
 
             Iterable<WikidataStatement> osmRelations = getAllOSMRelations();
+            final AtomicInteger count = new AtomicInteger(0);
 
-            ParallelForEach.iterate(osmRelations.iterator(), new Procedure<WikidataStatement>() {
+
+            /*ParallelForEach.iterate(osmRelations.iterator(), new Procedure<WikidataStatement>() {
                 @Override
                 public void call(WikidataStatement osmRelation) throws Exception {
 
                     int itemId = osmRelation.getItem().getId();
-                    String itemLabel = osmRelation.getItem().getLabels().get(Language.SIMPLE); //language might need to change to EN
+                    String itemLabel = osmRelation.getItem().getLabels().get(Language.EN);
+                    count.incrementAndGet();
 
-                    synchronized (this) {LOG.log(Level.INFO, "Writing " + itemLabel + " to the shapefile.");}
+                    /*synchronized (this) {LOG.log(Level.INFO, "Writing " + itemLabel + " to the shapefile.");}
 
                     Geometry itemGeometry = getGeometry(readGeoJson(itemId));
                     List<SimpleFeature> features = buildOutputFeature(itemGeometry, itemLabel, OSMTYPE);
                     writeQueue.add(features);
                     writeToShpFile(outputFeatureSource, OSMTYPE, transaction, writeQueue.poll());
+                    System.out.println(itemLabel);
 
                 }
-            });
+            });*/
+
+            for (WikidataStatement osmRelation: osmRelations) {
+                int itemId = osmRelation.getItem().getId();
+                System.out.println(itemId);
+            }
+            System.out.println(count.get());
 
             /*for (WikidataStatement osmRelation : osmRelations){
                 int itemId = osmRelation.getItem().getId();
@@ -181,7 +195,7 @@ public class OSMLayerLoader {
         GeometryJSON geoJson = new GeometryJSON();
         Reader reader = new StringReader(geoJsonString);
 
-        Geometry rawGeometry =  geoJson.read(reader);
+        Geometry rawGeometry =  geoJson.readGeometryCollection(reader);
         return rawGeometry;
 
 
