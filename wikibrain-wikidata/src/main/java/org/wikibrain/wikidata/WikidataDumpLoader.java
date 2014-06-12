@@ -60,6 +60,7 @@ public class WikidataDumpLoader {
         this.universalPageDao = upDao;
         Map<Language, TIntIntMap> localMaps = universalPageDao.getAllLocalToUnivIdsMap(1, languages);
 
+        // Build up set of universal ids we care about
         this.universalIds = new TIntHashSet();
         for(TIntIntMap langMap : localMaps.values()) {
             universalIds.addAll(langMap.valueCollection());
