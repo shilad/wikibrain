@@ -7,6 +7,8 @@ import org.wikibrain.matrix.SparseMatrixRow;
 import org.wikibrain.matrix.ValueConf;
 import org.wikibrain.sr.utils.SimUtils;
 
+import java.util.Random;
+
 import static org.junit.Assert.*;
 
 /**
@@ -83,5 +85,42 @@ public class TestCosineSimilarity {
             map.put(ids[i], vals[i]);
         }
         return map;
+    }
+
+    @Test
+    public void benchmark() {
+        int numOuter = 100;
+        int numInner = 10000;
+
+        long before = System.currentTimeMillis();
+        double sum = 0;
+
+        Random random = new Random();
+        for (int i = 0; i < numOuter; i++) {
+            int overlap[] = new int[10];
+            for (int j = 0; j < overlap.length; j++) {
+                overlap[j] = random.nextInt(Integer.MAX_VALUE / 10);
+            }
+
+            SparseMatrixRow row1 = makeRow(100, overlap);
+            SparseMatrixRow row2 = makeRow(100, overlap);
+            CosineSimilarity sim = new CosineSimilarity();
+            for (int j = 0; j < numInner; j++) {
+                sum += sim.similarity(row1, row2);
+            }
+        }
+        long after = System.currentTimeMillis();
+        System.out.println("elapsed is " + (after - before) + " sim is " + (sum / (numOuter * numInner)));
+    }
+
+    private SparseMatrixRow makeRow(int size, int[] mustInclude) {
+        Random random = new Random();
+        int ids[] = new int[size];
+        float vals[] = new float[size];
+        for (int i = 0; i < size; i++) {
+            ids[i] = (i < mustInclude.length) ? mustInclude[i] : random.nextInt(Integer.MAX_VALUE / 10);
+            vals[i] = random.nextFloat();
+        }
+        return getRow(ids, vals);
     }
 }
