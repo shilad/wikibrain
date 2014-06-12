@@ -33,6 +33,7 @@ public class ToblersLawEvaluatorTest {
         for(Integer id: allGeometries.keySet()){
             geometryMap.put(id, allGeometries.get(id));
             counter ++;
+            System.out.println(id);
             if(counter >= 100)
                 break;
         }
