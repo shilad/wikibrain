@@ -30,7 +30,7 @@ public class ConceptPairGeneratorTest {
         Point here = new Point(coordArraySeq, new GeometryFactory(new PrecisionModel(), 4326)); //SRID
 
 
-        int[] pair = pairGenerator.getConceptPair(here );
+        int[] pair = pairGenerator.getRandomConceptPairWithinDistance(here, 500);
 
         System.out.println( pair[0] +"  "+pair[1]);
 

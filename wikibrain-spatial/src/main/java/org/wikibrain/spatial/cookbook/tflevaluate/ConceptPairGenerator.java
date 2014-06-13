@@ -75,7 +75,7 @@ public class ConceptPairGenerator {
 
     }
 
-    public int[] getConceptPair(Geometry home) {//throws Exception {
+    public int[] getMaximumScoreConceptPair(Geometry home) {//throws Exception {
 
         // random first
         double random = Math.random();
@@ -122,6 +122,48 @@ public class ConceptPairGenerator {
         return new int[] {maxid1, maxid2};
 
     }
+
+    /**
+     * Find two concepts within a certain distance of "home"
+     * @param home
+     * @param threshold In kilometers
+     * @return
+     */
+    public int[] getRandomConceptPairWithinDistance(Point home, double threshold) {//throws Exception {
+
+        // random first
+
+
+        List<Integer> set = new ArrayList<Integer>();
+        // loop through significant geos for second point
+        for (int current: significantGeometries){
+
+                GeodeticCalculator calc = new GeodeticCalculator();
+                Point currentPoint = (Point) geometries.get(current);
+                calc.setStartingGeographicPoint(currentPoint.getX(), currentPoint.getY());
+                calc.setDestinationGeographicPoint(home.getX(), home.getY());
+
+                double distance = calc.getOrthodromicDistance() / 1000; //in km
+                double score = 0;
+
+                if (distance<threshold){
+                    set.add(current);
+                }
+        }
+        if (set.size()<=1){
+            return null;
+        } else {
+            int id1 = set.get((int) (Math.random() * set.size()));
+            int id2 = id1;
+            while (id2 == id1) {
+                id2 = set.get((int) (Math.random() * set.size()));
+            }
+            System.out.println(set.size());
+
+            return new int[]{id1, id2};
+        }
+    }
+
 
     public void extractSignificantGeometries(int threshold) throws  Exception{
         LocalLinkLiveDao linkDao = new LocalLinkLiveDao();
