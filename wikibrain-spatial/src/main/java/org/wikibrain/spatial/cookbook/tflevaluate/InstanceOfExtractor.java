@@ -28,7 +28,6 @@ import java.util.logging.Logger;
  */
 public class InstanceOfExtractor {
 
-
     private static int WIKIDATA_CONCEPTS = 1;
 
 
@@ -71,6 +70,9 @@ public class InstanceOfExtractor {
 
             //getItem because getLocalStatements returns nullpointerexception and getStatements returns empty
             List<WikidataStatement> list = wdao.getItem(conceptId).getStatements();
+            boolean haveFoundOne = false;
+            boolean foundNullNull = false;
+            int id2=0;
             for (WikidataStatement st: list){
                // if (st.getValue().getIntValue())
 
@@ -81,14 +83,31 @@ public class InstanceOfExtractor {
                     int id = st.getValue().getIntValue();
                     set.add(id);
                     try {
+
                         UniversalPage concept2 = upDao.getById(id, WIKIDATA_CONCEPTS);
+                        //System.out.println(concept2==null);
                         LocalPage page = lDao.getById(Language.SIMPLE, concept2.getLocalId(Language.SIMPLE));
                         System.out.println(page.getTitle());
+//                        System.out.println();
+//                        System.out.println(wdao.getItem(id).getLabels().get(Language.EN));
+                        haveFoundOne=true;
                     } catch(Exception e){
                         System.out.println(id);
-                        set2.add(id);
+                        System.out.println(wdao.getItem(id).getLabels().get(Language.EN));
+                        System.out.println(wdao.getItem(id).getLabels().get(Language.SIMPLE));
+
+                        //System.out.println(id);
+                        if (wdao.getItem(id).getLabels().get(Language.EN)==null&&wdao.getItem(id).getLabels().get(Language.SIMPLE)==null) {
+//                            set2.add(id);
+                            foundNullNull = true;
+                            id2=id;
+                        }
                     }
                 }
+            }
+
+            if (!haveFoundOne && foundNullNull ){
+                set2.add(id2);
             }
 
             System.out.println();
@@ -107,7 +126,7 @@ public class InstanceOfExtractor {
 //            }
         }
         System.out.println(set.size());
-        System.out.println(set2.size());
+        System.out.println("null/null id"+set2.size());
 
     }
 
