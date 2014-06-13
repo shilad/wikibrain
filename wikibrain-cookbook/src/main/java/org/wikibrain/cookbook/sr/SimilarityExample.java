@@ -23,6 +23,10 @@ import org.wikibrain.sr.*;
 import org.wikibrain.sr.utils.ExplanationFormatter;
 import org.wikibrain.wikidata.WikidataDao;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +47,7 @@ public class SimilarityExample {
     public static WikidataDao wDao;
     public static Map<Integer, Geometry> allGeometries;
 
-    public static void main(String args[]) throws ConfigurationException, DaoException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         // Initialize the WikiBrain environment and get the local page dao
         //Env env = new EnvBuilder().build();
         env= EnvBuilder.envFromArgs(args);
@@ -72,6 +76,8 @@ public class SimilarityExample {
                 { "Montana", "America"}
         };
 
+        createBlacklist();
+
         for (String pair[] : pairs) {
             if(GET_RID_OF_SPATIAL_ON) {
                 if (isSpatial(pair[0]) || isSpatial(pair[1])) {
@@ -86,6 +92,14 @@ public class SimilarityExample {
             }
         }
     }
+
+    private static void createBlacklist() throws IOException{
+        PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
+        for (Integer conceptID : allGeometries.keySet())
+            pw.println(conceptID);
+        pw.close();
+    }
+
     public static boolean isSpatial(String s) throws DaoException{
         int localID=lpDao.getIdByTitle(s, Language.SIMPLE, NameSpace.ARTICLE);
         UniversalPage page= upDao.getByLocalPage(lpDao.getById(Language.SIMPLE, localID), WIKIDATA_CONCEPTS);
