@@ -26,13 +26,13 @@ import java.util.logging.Logger;
 /**
  *
  */
-public class printAllSpatial {
+public class InstanceOfExtractor {
 
 
     private static int WIKIDATA_CONCEPTS = 1;
 
 
-    private static final Logger LOG = Logger.getLogger(printAllSpatial.class.getName());
+    private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
 
 
 
@@ -62,6 +62,9 @@ public class printAllSpatial {
 //        CoordinateArraySequence coordArraySeq = new CoordinateArraySequence(coords);
 //        Point here = new Point(coordArraySeq, new GeometryFactory(new PrecisionModel(), 4326)); //SRID
 
+
+        HashSet<Integer> set = new HashSet<Integer>();
+        HashSet<Integer> set2 = new HashSet<Integer>();
         for (Integer conceptId : geometries.keySet()){
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
             LocalPage lpage = lDao.getById(Language.SIMPLE,concept.getLocalId(Language.SIMPLE));
@@ -76,12 +79,14 @@ public class printAllSpatial {
                 if (st.getProperty() != null && st.getProperty().getId()==31 ){
                     System.out.println(lpage.getTitle());
                     int id = st.getValue().getIntValue();
+                    set.add(id);
                     try {
                         UniversalPage concept2 = upDao.getById(id, WIKIDATA_CONCEPTS);
                         LocalPage page = lDao.getById(Language.SIMPLE, concept2.getLocalId(Language.SIMPLE));
                         System.out.println(page.getTitle());
                     } catch(Exception e){
                         System.out.println(id);
+                        set2.add(id);
                     }
                 }
             }
@@ -101,6 +106,9 @@ public class printAllSpatial {
 //                System.out.println(concept.getBestEnglishTitle(lDao, true));
 //            }
         }
+        System.out.println(set.size());
+        System.out.println(set2.size());
+
     }
 
 
