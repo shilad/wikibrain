@@ -6,6 +6,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
+import org.wikibrain.core.jooq.tables.LocalPage;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
@@ -29,7 +30,7 @@ public class GeometryPrinter {
     private static LocalPageDao lpDao;
     private static UniversalPageDao upDao;
     public static WikidataDao wDao;
-
+    public static int count= 0;
 
 
     public static void main(String[] args) throws Exception {
@@ -42,23 +43,38 @@ public class GeometryPrinter {
         WikidataDao wDao= conf.get(WikidataDao.class);
         Map<Integer, Geometry> allGeometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
 
-
-        for (Integer conceptId : allGeometries.keySet()){
+        Set<Integer> allGeo= allGeometries.keySet();
+        for (Integer conceptId : allGeo){
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
-            System.out.println(concept.getBestEnglishTitle(lpDao, true) +" is an instance of: ");
+            //System.out.println(concept.getBestEnglishTitle(lpDao, true) +" is an instance of: ");
             List<WikidataStatement> listOfStatements =  wDao.getItem(conceptId).getStatements();
+            boolean hasOtherProp= false;
             for(WikidataStatement stmt: listOfStatements){
+
                 if(stmt.getProperty() == null)
                     continue;
-                if(stmt.getProperty().getId()==INSTANCE_OF){
+                if(stmt.getProperty().getId()==INSTANCE_OF) {
                     int instanceId = (Integer) stmt.getValue().getValue();
                     UniversalPage instance = upDao.getById(instanceId, WIKIDATA_CONCEPTS);
-                    if(instance == null)
+                    if (instance == null) {
+                        if(allGeo.contains(instanceId))
+                            System.out.println("yes");
+                        //count++;
+                        //System.out.println(instanceId);
                         continue;
-                    System.out.println("\t"+instance.getBestEnglishTitle(lpDao, true));
+                    }
+                    hasOtherProp=true;
+                    //System.out.println("\t"+instance.getBestEnglishTitle(lpDao, false));
                 }
             }
-            System.out.println("-----------------------\n");
+            if(hasOtherProp==false) {
+                System.out.println(concept.getBestEnglishTitle(lpDao, true));
+                count++;
+            }
+            //System.out.println("-----------------------\n");
         }
+        System.out.println("done "+ count);
     }
+
 }
+
