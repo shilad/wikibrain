@@ -20,20 +20,21 @@ public class ConceptPairGeneratorTest {
         ConceptPairGenerator pairGenerator = null;
         Env env = EnvBuilder.envFromArgs(args);
         pairGenerator = new ConceptPairGenerator(env);
-//        pairGenerator.loadSignificantGeometries(new File("significantGeo.txt"));
-//
-//        //create a new point
-//        Coordinate[] coords = new Coordinate[1];
-//        coords[0] = new Coordinate(-93.26437,44.988113);
-//        CoordinateArraySequence coordArraySeq = new CoordinateArraySequence(coords);
-//        Point here = new Point(coordArraySeq, new GeometryFactory(new PrecisionModel(), 4326)); //SRID
-//
-//
-//        int[] pair = pairGenerator.getConceptPair(here );
-//
-//        System.out.println( pair[0] +"  "+pair[1]);
 
-        pairGenerator.extractSignificantGeometries(160);
+        pairGenerator.loadSignificantGeometries(new File("significantGeo.txt"));
+
+        //create a new point
+        Coordinate[] coords = new Coordinate[1];
+        coords[0] = new Coordinate(-93.26437,44.988113);
+        CoordinateArraySequence coordArraySeq = new CoordinateArraySequence(coords);
+        Point here = new Point(coordArraySeq, new GeometryFactory(new PrecisionModel(), 4326)); //SRID
+
+
+        int[] pair = pairGenerator.getConceptPair(here );
+
+        System.out.println( pair[0] +"  "+pair[1]);
+
+//        pairGenerator.extractSignificantGeometries(160);
     }
 }
 

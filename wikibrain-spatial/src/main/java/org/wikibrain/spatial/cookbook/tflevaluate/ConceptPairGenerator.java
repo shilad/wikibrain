@@ -70,44 +70,8 @@ public class ConceptPairGenerator {
         geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         simple = Language.getByLangCode("simple");
         sr = c.get(
-                MonolingualSRMetric.class, "inlink",
+                MonolingualSRMetric.class, "ensemble",
                 "language", simple.getLangCode());
-//        lDao = new LocalLinkLiveDao();
-//        //separate significant pages
-//        Set<Integer> keySet = geometries.keySet();
-//        significantGeometries = new ArrayList<Integer>();
-//
-//        for (int geo : keySet) {
-//            // count inlinks
-//            try {
-//                UniversalPage uPage = upDao.getById(geo, 1);
-//                int correctId = uPage.getLocalId(simple);
-//                System.out.println(lpDao.getById(simple,correctId).getTitle());
-//                Iterable<LocalLink> inlinks = lDao.getLinks(simple, correctId, false);
-//                int numLinks = 0;
-//                for (LocalLink inlink : inlinks) {
-//                    numLinks++;
-//                }
-//
-//                if (numLinks>THRESHOLD){
-//                    significantGeometries.add(geo);
-//                }
-//            } catch (Exception e) {
-//                System.out.println("Could not get inlinks");
-//            }
-//
-////            Set<Integer> idSet = new HashSet<Integer>();
-////            idSet.add(geo);
-////            DaoFilter df = new DaoFilter().setLanguages(simple).setSourceIds(idSet);
-////            Language lang = Language.getByLangCode("simple");
-////            int numLinks = 0;
-////            for(LocalLink link: lDao.get(df)){
-////                numLinks++;
-////            }
-////            if (numLinks>THRESHOLD){
-////                    significantGeometries.add(geo);
-////            }
-    //}
 
     }
 
