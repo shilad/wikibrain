@@ -3,9 +3,17 @@ package org.wikibrain.utils;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
- * An adaptation of Java's AtomicIntegerArray for bytes.
  *
- * Four bytes are packed into each int. Only a few methods are implemented for now.
+ *
+ * A {@code byte} array in which elements may be updated atomically.
+ * See the {@link java.util.concurrent.atomic} package
+ * specification for description of the properties of atomic
+ * variables.
+ *
+ * This is an adaptation of Java's AtomicIntegerArray for bytes.
+ *
+ * Four bytes are packed into each int.
+ * Only a few methods are implemented for now.
  *
  * @author Shilad Sen
  */
