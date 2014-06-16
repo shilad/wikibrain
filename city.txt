@@ -1,0 +1,46 @@
+capital
+county
+city
+municipality
+borough
+prefecture
+metropolis
+neighbourhood
+arrondissement
+council area
+village
+settlement
+canton
+district
+duchy
+community
+minicipal corporation
+ward
+suburb
+stadt
+parish
+tehsil
+upazila
+capitals
+counties
+cities
+municipalities
+boroughs
+prefectures
+metropolis
+neighbourhoods
+arrondissements
+council areas
+villages
+settlements
+cantons
+districts
+duchies
+communities
+minicipal corporations
+wards
+suburbs
+stadt
+parishes
+tehsils
+upazilas
