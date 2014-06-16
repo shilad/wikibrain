@@ -55,6 +55,13 @@ public class InstanceOfExtractor {
         wdao = c.get(WikidataDao.class);
     }
 
+    public InstanceOfExtractor(SpatialDataDao sDao, UniversalPageDao uDao, LocalPageDao lDao, WikidataDao wDao) {
+        sdDao = sDao;
+        upDao = uDao;
+        this.lDao = lDao;
+        wdao = wDao;
+    }
+
 
     public static void main (String[] args){
         Env env = null;
@@ -263,6 +270,10 @@ public class InstanceOfExtractor {
             LocalPage lpage = lDao.getById(Language.SIMPLE,concept.getLocalId(Language.SIMPLE));
             System.out.println(lpage.getTitle().toString());
         }
+    }
+
+    public Set<Integer> getScaleIdSet(int id){
+        return scaleIds[id];
     }
 
 

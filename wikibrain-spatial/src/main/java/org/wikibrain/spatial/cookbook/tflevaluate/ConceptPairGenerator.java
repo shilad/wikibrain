@@ -14,6 +14,7 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
 
+import com.google.gson.InstanceCreator;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.geotools.referencing.GeodeticCalculator;
@@ -60,6 +61,7 @@ public class ConceptPairGenerator {
 //    private final LocalLinkLiveDao lDao;
     private List<Integer> significantGeometries;
     private List<Integer> generalGeometries;
+    private InstanceOfExtractor ioe;
 
     public ConceptPairGenerator(Env env) throws Exception {
         this.env = env;
@@ -74,6 +76,9 @@ public class ConceptPairGenerator {
                 MonolingualSRMetric.class, "ensemble",
                 "language", simple.getLangCode());
 
+        ioe = new InstanceOfExtractor(sdDao,upDao,lpDao,wdao);
+        ioe.loadScaleKeywords();
+        ioe.loadScaleIds(new File("scaleIds.txt"));
     }
 
     public int[] getMaximumScoreConceptPair(Geometry home) {//throws Exception {
@@ -124,6 +129,54 @@ public class ConceptPairGenerator {
 
     }
 
+
+    public List<int[]> getValidationConceptPair(int maxPairs, int minPairs) {//throws Exception {
+
+        // random first
+        double max = 0;
+        int maxid1 = 0, maxid2 = 0;
+        Map<Double, int[]> scores = new HashMap<Double, int[]>();
+
+        // loop through significant geos for second point
+        for (int firstId: generalGeometries) {
+            for (int secondId : generalGeometries) {
+
+                if (secondId != firstId) {
+                    double score = 0;
+
+                    try {
+                        UniversalPage u1 = upDao.getById(firstId, WIKIDATA_CONCEPTS);
+                        UniversalPage u2 = upDao.getById(secondId, WIKIDATA_CONCEPTS);
+
+                        SRResult similarity = sr.similarity(u1.getBestEnglishTitle(lpDao, true).getCanonicalTitle(), u2.getBestEnglishTitle(lpDao, true).getCanonicalTitle(), false);
+                        score = similarity.getScore();
+
+                        scores.put(score, new int[]{firstId, secondId});
+
+                    } catch (Exception e) {
+                        System.out.println("Couldn't get universal pages");
+                        System.out.println(e.toString());
+                    }
+
+                }
+            }
+        }
+
+        List sortedList = new ArrayList(scores.keySet());
+        Collections.sort(sortedList);
+        List<int[]> list = new ArrayList<int[]>();
+        for (int i = 0; i < maxPairs;i++) {
+            list.add(scores.get(sortedList.get(i)));
+//            System.out.println(scores.get(sortedList.get(i))[0]+" "+scores.get(sortedList.get(i))[1]+ " "+ sortedList.get(i));
+        }
+        for (int i = 0; i< minPairs; i++){
+            list.add(scores.get(sortedList.get(scores.size()-i-1)));
+//            System.out.println(scores.get(sortedList.get(scores.size()-i-1))[0]+" "+scores.get(sortedList.get(scores.size()-i-1))[1]+ " "+ sortedList.get(scores.size()-i-1));
+
+        }
+        return list;
+
+    }
     /**
      * Find two concepts within a certain distance of "home"
      * @param home
@@ -163,6 +216,39 @@ public class ConceptPairGenerator {
 
             return new int[]{id1, id2};
         }
+    }
+
+    public int[] getRandomConceptPairWithinDistanceAndCategory(Point home, double distance, int category){
+
+        List<Integer> set = new ArrayList<Integer>();
+        // loop through significant geos for second point
+        for (int current: ioe.getScaleIdSet(category)){
+
+            GeodeticCalculator calc = new GeodeticCalculator();
+            Point currentPoint = (Point) geometries.get(current);
+            calc.setStartingGeographicPoint(currentPoint.getX(), currentPoint.getY());
+            calc.setDestinationGeographicPoint(home.getX(), home.getY());
+
+            double distance2 = calc.getOrthodromicDistance() / 1000; //in km
+
+            if (distance2<distance){
+                set.add(current);
+            }
+        }
+        if (set.size()<=1){
+            System.out.println("error "+ distance);
+            return getRandomConceptPairWithinDistanceAndCategory(home, distance*2, category);
+        } else {
+            int id1 = set.get((int) (Math.random() * set.size()));
+            int id2 = id1;
+            while (id2 == id1) {
+                id2 = set.get((int) (Math.random() * set.size()));
+            }
+//            System.out.println(set.size());
+
+            return new int[]{id1, id2};
+        }
+
     }
 
     public int[] getRandomConceptPairFromGeneral(){
@@ -248,7 +334,7 @@ public class ConceptPairGenerator {
      * @param generalThreshold set a threshold for general knowledge
      * @return
      */
-    public List<int[]> generateSurvey(Point home, int significantThreshold, int generalThreshold, double distance){
+    public List<int[]> generateSurvey(Point home, int significantThreshold, int generalThreshold, double distance) {
         loadGeometries(new File("significantGeo" + significantThreshold + ".txt"), new File("significantGeo" + generalThreshold + ".txt"));
 
         //10 general knowledge, 50 domain-specific, 4 validation, 5 duplicates
@@ -256,13 +342,16 @@ public class ConceptPairGenerator {
         for (int i = 0; i < 10 ; i++ ){
             list.add(getRandomConceptPairFromGeneral());
         }
-        for (int i = 0; i < 50 ; i++ ){
-            list.add(getRandomConceptPairWithinDistance(home,distance));
+        for (int i = 0; i < InstanceOfExtractor.MAX; i++ ){
+            for (int j = 0; j < 10; j++){
+                if (i != InstanceOfExtractor.WEIRD){
+                    list.add(getRandomConceptPairWithinDistanceAndCategory(home, distance, i));
+                }
+            }
         }
-        for (int i = 0; i < 4 ; i++){
-            list.add(getMaximumScoreConceptPair(home)); //???
-        }
-        Collections.shuffle(list);
+        List<int[]> validation = getValidationConceptPair(2,2);
+        list.addAll(validation);
+//        Collections.shuffle(list);
 
         return list;
     }
