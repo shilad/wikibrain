@@ -59,6 +59,7 @@ public class ConceptPairGenerator {
     private final Language simple;
 //    private final LocalLinkLiveDao lDao;
     private List<Integer> significantGeometries;
+    private List<Integer> generalGeometries;
 
     public ConceptPairGenerator(Env env) throws Exception {
         this.env = env;
@@ -164,6 +165,15 @@ public class ConceptPairGenerator {
         }
     }
 
+    public int[] getRandomConceptPairFromGeneral(){
+        int id1 = generalGeometries.get((int) (Math.random() * generalGeometries.size()));
+        int id2 = id1;
+        while (id2 == id1) {
+            id2 = generalGeometries.get((int) (Math.random() * generalGeometries.size()));
+        }
+        return new int[]{id1, id2};
+    }
+
 
     public void extractSignificantGeometries(int threshold) throws  Exception{
         LocalLinkLiveDao linkDao = new LocalLinkLiveDao();
@@ -200,7 +210,7 @@ public class ConceptPairGenerator {
                 System.out.println("Could not get inlinks");
             }
         }
-        FileOutputStream fos = new FileOutputStream("significantGeo.txt");
+        FileOutputStream fos = new FileOutputStream("significantGeo" + threshold +".txt");
         ObjectOutputStream oos = new ObjectOutputStream(fos);
 
         oos.writeObject(significantGeometries);
@@ -210,15 +220,54 @@ public class ConceptPairGenerator {
 
     }
 
-    public void loadSignificantGeometries(File file){
+    public void loadGeometries(File file1, File file2){
 
         try {
-            FileInputStream fis = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            significantGeometries = (List) ois.readObject();
-            ois.close();
+            FileInputStream fis1 = new FileInputStream(file1);
+            ObjectInputStream ois1 = new ObjectInputStream(fis1);
+            significantGeometries = (List) ois1.readObject();
+            ois1.close();
+
+            FileInputStream fis2 = new FileInputStream(file2);
+            ObjectInputStream ois2 = new ObjectInputStream(fis2);
+            generalGeometries = (List) ois2.readObject();
+            ois2.close();
+
         } catch (Exception e) {
             System.out.println("file not found");
         }
+    }
+
+    /**
+                scaleIds[i].add(id);
+                foundMatch = true;
+                break;
+     *
+     * @param home
+     * @param significantThreshold set a threshold for significant geometries
+     * @param generalThreshold set a threshold for general knowledge
+     * @return
+     */
+    public List<int[]> generateSurvey(Point home, int significantThreshold, int generalThreshold, double distance){
+        loadGeometries(new File("significantGeo" + significantThreshold + ".txt"), new File("significantGeo" + generalThreshold + ".txt"));
+
+        //10 general knowledge, 50 domain-specific, 4 validation, 5 duplicates
+        List<int[]> list = new ArrayList<int[]>();
+        for (int i = 0; i < 10 ; i++ ){
+            list.add(getRandomConceptPairFromGeneral());
+        }
+        for (int i = 0; i < 50 ; i++ ){
+            list.add(getRandomConceptPairWithinDistance(home,distance));
+        }
+        for (int i = 0; i < 4 ; i++){
+            list.add(getMaximumScoreConceptPair(home)); //???
+        }
+        Collections.shuffle(list);
+
+        return list;
+    }
+
+    public int getInstanceOf(int id){
+        return 0;
     }
 }
