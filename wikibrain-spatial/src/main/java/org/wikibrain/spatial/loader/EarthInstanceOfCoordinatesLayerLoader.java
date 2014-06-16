@@ -34,6 +34,7 @@ public class EarthInstanceOfCoordinatesLayerLoader extends EarthBasicCoordinates
                 int typeItemId = instanceOfStatement.getValue().getItemValue();
                 String layerName = "wikidata_"+Integer.toString(typeItemId);
                 spatialDao.saveGeometry(itemId, layerName, EARTH_REF_SYS_NAME, g);
+
                 count++;
             }
             if (count > 0) {
