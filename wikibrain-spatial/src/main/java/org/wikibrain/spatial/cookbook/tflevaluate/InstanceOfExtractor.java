@@ -37,7 +37,7 @@ public class InstanceOfExtractor {
     public static int MAX = 6;
     private Set<String>[] scaleKeywords = new Set[MAX];
     private Set<Integer>[] scaleIds = new Set[MAX];
-    private String[] fileNames = {"country.txt", "state.txt", "city.txt", "natural.txt", "weird.txt"};
+    private String[] fileNames = {"country.txt", "state.txt", "city.txt", "natural.txt", "weird.txt", "landmark.txt"};
     SpatialDataDao sdDao;
     UniversalPageDao upDao ;
     LocalPageDao lDao ;
@@ -63,23 +63,22 @@ public class InstanceOfExtractor {
     }
 
 
-    public static void main (String[] args){
+    public static void main (String[] args) {
         Env env = null;
         InstanceOfExtractor ioe = null;
         try{
             env = EnvBuilder.envFromArgs(args);
             ioe = new InstanceOfExtractor(env);
             ioe.loadScaleKeywords();
-            ioe.loadScaleIds(new File("scaleIds.txt"));
-
+//            ioe.loadScaleIds(new File("scaleIds.txt"));
+            ioe.generateScaleId();
             // print out concepts in relevant category
-            ioe.printScale(CITY);
-
+//            ioe.printScale(CITY);
+//            ioe.generateRecallTest(150);
+            ioe.printScaleId(CITY);
         }catch(Exception e){
             System.out.println("Problems");
         }
-
-
 
     }
 
@@ -122,6 +121,7 @@ public class InstanceOfExtractor {
                         UniversalPage concept2 = upDao.getById(id, WIKIDATA_CONCEPTS);
                         LocalPage page = lDao.getById(Language.SIMPLE, concept2.getLocalId(Language.SIMPLE));
                         titleSet.add(page.getTitle().toString());
+
                     } catch(Exception e){
                         if (wdao.getItem(id).getLabels().get(Language.EN)!= null){
                             titleSet.add(wdao.getItem(id).getLabels().get(Language.EN).toString());
@@ -136,7 +136,7 @@ public class InstanceOfExtractor {
     }
 
     public void loadScaleKeywords() throws FileNotFoundException{
-        for (int i = 0; i<MAX-1; i++) {
+        for (int i = 0; i<MAX; i++) {
             scaleKeywords[i] = new HashSet<String>();
             Scanner scanner = new Scanner(new File(fileNames[i]));
             while (scanner.hasNextLine()) {
@@ -183,6 +183,7 @@ public class InstanceOfExtractor {
 
             //getItem because getLocalStatements returns nullpointerexception and getStatements returns empty
             List<WikidataStatement> list = wdao.getItem(conceptId).getStatements();
+            boolean found = false;
             for (WikidataStatement st: list){
                 //simple English misses some concept local pages
                 if (st.getProperty() != null && st.getProperty().getId()==31 ){
@@ -194,16 +195,35 @@ public class InstanceOfExtractor {
                         // local page ditto
                         LocalPage page = lDao.getById(Language.SIMPLE, concept2.getLocalId(Language.SIMPLE));
 
-                        findMatch(conceptId, page.getTitle().toString());
+                        if (findMatch(conceptId, page.getTitle().toString(), lpage.getTitle().toString())){
+                            found = true;
+                            break;
+                        }
 
                     } catch(Exception e){
-                        // try to check title in alternate manner
+                        // islandstry to check title in alternate manner
                         if (wdao.getItem(id).getLabels().get(Language.EN)!= null){
-                            findMatch(conceptId, wdao.getItem(id).getLabels().get(Language.EN).toString());
+                            if (findMatch(conceptId, wdao.getItem(id).getLabels().get(Language.EN).toString(), lpage.getTitle().toString())){
+                                found = true;
+                                break;
+                            }
                         } else if (wdao.getItem(id).getLabels().get(Language.SIMPLE)!= null) {
-                            findMatch(conceptId, wdao.getItem(id).getLabels().get(Language.SIMPLE).toString());
+                            if (findMatch(conceptId, wdao.getItem(id).getLabels().get(Language.SIMPLE).toString(), lpage.getTitle().toString())) {
+                                found = true;
+                                break;
+                            }
                         }
                     }
+                }
+            }
+            if (!found) {
+                if (lpage.getTitle().toString().toLowerCase().contains("county,")){
+                    scaleIds[CITY].add(conceptId);
+                } else if (lpage.getTitle().toString().contains(",")) {
+                    scaleIds[CITY].add(conceptId);
+                    System.out.println(lpage.getTitle().toString());
+                } else {
+                    scaleIds[LANDMARK].add(conceptId);
                 }
             }
         }
@@ -218,18 +238,24 @@ public class InstanceOfExtractor {
 
     }
 
-    private void findMatch(int id, String string){
+    private boolean findMatch(int id, String string, String pageTitle){
         boolean foundMatch = false;
-        for (int i=0; i<MAX-1; i++){
-            if (match(scaleKeywords[i], string)){
+        for (int i=0; i<MAX; i++) {
+            if (match(scaleKeywords[i], string)) {
                 scaleIds[i].add(id);
                 foundMatch = true;
                 break;
             }
         }
-        if (!foundMatch){
-            scaleIds[LANDMARK].add(id);
-        }
+//        if (!foundMatch){
+//            if (pageTitle.contains(",")){
+//                scaleIds[CITY].add(id);
+//                System.out.println(pageTitle);
+//            } else {
+//                scaleIds[LANDMARK].add(id);
+//            }
+//        }
+        return foundMatch;
     }
 
     private boolean match(Set<String> scaleKeyword, String pageTitle){
@@ -238,7 +264,8 @@ public class InstanceOfExtractor {
         pageTitle = pageTitle.toLowerCase();
         if (pageTitle.endsWith(" (simple)"))
             pageTitle = pageTitle.substring(0,pageTitle.length()-9);
-
+        if (pageTitle.endsWith(","))
+            pageTitle = pageTitle.substring(0,pageTitle.length()-2);
         // look in the set
         if (scaleKeyword.contains(pageTitle)) {
             return true;
@@ -270,10 +297,41 @@ public class InstanceOfExtractor {
             LocalPage lpage = lDao.getById(Language.SIMPLE,concept.getLocalId(Language.SIMPLE));
             System.out.println(lpage.getTitle().toString());
         }
+        System.out.println(scaleIds[scaleId].size());
+    }
+
+    public void printScaleId( int scaleId) throws DaoException{
+        for (Integer conceptId : scaleIds[scaleId]){
+            System.out.println(conceptId);
+        }
+    }
+
+
+    public void generatePrecisionCalculation(int scaleId, int size) throws Exception {
+        List<Integer> list = new ArrayList<Integer>();
+        list.addAll(scaleIds[scaleId]);
+        Collections.shuffle(list);
+        for (int i = 0; i<size; i++){
+//            UniversalPage concept = upDao.getById(list.get(i), WIKIDATA_CONCEPTS);
+//            LocalPage lpage = lDao.getById(Language.SIMPLE,concept.getLocalId(Language.SIMPLE));
+            System.out.println(i + ". " + list.get(i));
+        }
     }
 
     public Set<Integer> getScaleIdSet(int id){
         return scaleIds[id];
+    }
+
+    public void generateRecallTest(int size) throws  DaoException {
+        Map<Integer, Geometry> geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
+        LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
+
+        List<Integer> list = new ArrayList<Integer>();
+        list.addAll(geometries.keySet());
+        Collections.shuffle(list);
+        for (int i = 0; i< size; i++){
+            System.out.println(i+". "+list.get(i));
+        }
     }
 
 

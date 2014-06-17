@@ -21,8 +21,8 @@ volcanic belt
 sea
 delta
 mudflow
-island
 lake
+harbour
 harbor
 oasis
 swamp
@@ -56,8 +56,8 @@ volcanic belts
 seas
 deltas
 mudflows
-islands
 lakes
+harbours
 harbors
 oases
 oasises
@@ -69,3 +69,10 @@ tributaries
 mountain passes
 mangroves
 caves
+beach
+meadow
+meadows
+archipelago
+archipelagos
+spring
+springs

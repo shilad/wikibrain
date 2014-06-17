@@ -30,3 +30,4 @@ countries
 colonies
 democracies
 federations
+sovereign

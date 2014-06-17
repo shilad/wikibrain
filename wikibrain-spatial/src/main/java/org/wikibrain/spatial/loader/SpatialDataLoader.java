@@ -133,6 +133,7 @@ public class SpatialDataLoader {
 
             shpFile = new ShpFiles(struct.getDataFile().getAbsolutePath());
 
+            // 4326 is the World Geodetic Sysetm http://en.wikipedia.org/wiki/World_Geodetic_System
             shpReader = new ShapefileReader(shpFile, true, true, new GeometryFactory(new PrecisionModel(), 4326));
             dbfReader = new DbaseFileReader(shpFile, false, Charset.forName("UTF-8"));
 
@@ -151,17 +152,15 @@ public class SpatialDataLoader {
                 curGeometry = (Geometry)shpReader.nextRecord().shape();
                 dbfReader.read();
 
-                int i = 0;
-
                 boolean found = false;
-                while(i < numDbfFields && !found){
+
+                for (int i = 0; i < numDbfFields && !found; i++) {
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
                     Integer itemId;
                     try {
                     itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
                     }
                     catch (Exception e){
-                        i++;
                         continue;
 
                     }
@@ -173,7 +172,6 @@ public class SpatialDataLoader {
                             LOG.log(Level.INFO, "Matched " + foundGeomCount + " geometries in layer '" + struct.getLayerName() + "' (" + struct.getRefSysName() + ")");
                         }
                     }
-                    i++;
                 }
 
                 if (!found) missedGeomCount++;
@@ -241,7 +239,7 @@ public class SpatialDataLoader {
 //            }
 //        }catch(DaoException e){
 //            throw new WikiBrainException(e);
-//        }
+//        }refSysName
 //
 //    }
 
@@ -285,7 +283,7 @@ public class SpatialDataLoader {
 //        }catch(Exception e){
 //            throw new WikiBrainException(e);
 //        }
-//
+//refSysName
 //    }
 
 

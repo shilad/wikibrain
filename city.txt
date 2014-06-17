@@ -14,7 +14,7 @@ canton
 district
 duchy
 community
-minicipal corporation
+municipal corporation
 ward
 suburb
 stadt
@@ -37,10 +37,18 @@ cantons
 districts
 duchies
 communities
-minicipal corporations
+municipal corporations
 wards
 suburbs
 stadt
 parishes
 tehsils
 upazilas
+town
+towns
+hamlet
+hamlets
+census-designated
+unincorporated
+commune
+communes

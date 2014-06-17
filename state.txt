@@ -1,4 +1,3 @@
-commune
 region
 province
 state
@@ -12,7 +11,6 @@ territory
 autonomous community
 collectivity
 voivodeship
-communes
 regions
 provinces
 states
