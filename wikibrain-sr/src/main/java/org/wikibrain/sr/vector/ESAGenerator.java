@@ -27,6 +27,7 @@ import org.wikibrain.sr.utils.Leaderboard;
 import org.wikibrain.sr.utils.SimUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -44,11 +45,35 @@ public class ESAGenerator implements VectorGenerator {
     private final LocalPageDao pageDao;
 
     private WpIdFilter conceptFilter = null;
+    private TIntSet blackListSet;
+    private final String blackListFilePath;
 
-    public ESAGenerator(Language language, LocalPageDao pageDao, LuceneSearcher searcher) {
+    public ESAGenerator(Language language, LocalPageDao pageDao, LuceneSearcher searcher, String blackListFilePath) {
         this.language = language;
         this.pageDao = pageDao;
         this.searcher = searcher;
+        this.blackListFilePath = blackListFilePath;
+        try{
+            createBlackListSet();
+        } catch (Exception e){
+            LOG.info("Could not create Blacklist Set");
+        }
+    }
+
+    private void createBlackListSet() throws FileNotFoundException {
+        blackListSet = new TIntHashSet();
+        if(blackListFilePath == null || blackListFilePath.equals("")) {
+            LOG.info("Skipping blacklist creation; no blacklist file specified.");
+            return;
+        }
+
+        File file = new File(blackListFilePath);
+        Scanner scanner = new Scanner(file);
+        while(scanner.hasNext()){
+            blackListSet.add(scanner.nextInt());
+        }
+
+        scanner.close();
     }
 
 
@@ -88,10 +113,17 @@ public class ESAGenerator implements VectorGenerator {
         }
         TIntSet ids = new TIntHashSet();
         for (String wpId : FileUtils.readLines(file)) {
-            ids.add(Integer.valueOf(wpId));
+            int wpLocalIDNumb= Integer.valueOf(wpId);
+            if(!isBlacklisted(wpLocalIDNumb)) {
+                ids.add(wpLocalIDNumb);
+            }
         }
         conceptFilter = new WpIdFilter(ids.toArray());
         LOG.warning("installed " + ids.size() + " concepts for " + language);
+    }
+
+    private boolean isBlacklisted(int wpLocalIDNumb) {
+        return blackListSet.contains(wpLocalIDNumb);
     }
 
     @Override
@@ -191,7 +223,8 @@ public class ESAGenerator implements VectorGenerator {
             ESAGenerator generator = new ESAGenerator(
                     language,
                     getConfigurator().get(LocalPageDao.class),
-                    getConfigurator().get(LuceneSearcher.class, config.getString("luceneSearcher"))
+                    getConfigurator().get(LuceneSearcher.class, config.getString("luceneSearcher")),
+                    getConfig().get().getString("sr.blacklist.path")
             );
             if (config.hasPath("concepts")) {
                 try {
