@@ -30,6 +30,7 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
     private static final Logger LOG = Logger.getLogger(MilneWittenMetric.class.getName());
     private final MonolingualSRMetric inlink;
     private final MonolingualSRMetric outlink;
+    private boolean trainSubmetrics =true;
 
     public MilneWittenMetric(String name, Language language, LocalPageDao dao, MonolingualSRMetric inlink, MonolingualSRMetric outlink, Disambiguator dab) {
         super(name, language, dao,dab);
@@ -49,25 +50,33 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
         SRResult r1 = inlink.similarity(pageId1, pageId2, explanations);
         SRResult r2 = outlink.similarity(pageId1, pageId2, explanations);
-        if (!r1.isValid() || !r2.isValid()) {
+        if (r1 == null || r2 == null || !r1.isValid() || !r2.isValid()) {
             return new SRResult(Double.NaN);
         } else {
             return new SRResult(0.5 * r1.getScore() + 0.5 * r2.getScore());
         }
     }
 
+    public void setTrainSubmetrics(boolean train){
+        trainSubmetrics = train;
+    }
+
     @Override
     public synchronized void trainSimilarity(Dataset dataset) throws DaoException {
-        inlink.trainSimilarity(dataset);
-        outlink.trainSimilarity(dataset);
+        if(trainSubmetrics) {
+            inlink.trainSimilarity(dataset);
+            outlink.trainSimilarity(dataset);
+        }
         super.trainSimilarity(dataset);
     }
 
 
     @Override
     public synchronized void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds){
-        inlink.trainMostSimilar(dataset, numResults, validIds);
-        outlink.trainMostSimilar(dataset, numResults, validIds);
+        if(trainSubmetrics){
+            inlink.trainMostSimilar(dataset, numResults, validIds);
+            outlink.trainMostSimilar(dataset, numResults, validIds);
+        }
         super.trainMostSimilar(dataset, numResults, validIds);
     }
 
@@ -84,6 +93,7 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
         outlink.read();
         super.read();
     }
+
 
 
     @Override
@@ -123,7 +133,7 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
                     MonolingualSRMetric.class, config.getString("outlink"),
                     "language", language.getLangCode());
             Disambiguator dab = getConfigurator().get(Disambiguator.class, config.getString("disambiguator"), "language", language.getLangCode());
-            return new MilneWittenMetric(
+            MilneWittenMetric mw = new MilneWittenMetric(
                     name,
                     language,
                     getConfigurator().get(LocalPageDao.class),
@@ -131,6 +141,8 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
                     outlink,
                     dab
             );
+            configureBase(getConfigurator(), mw, config);
+            return mw;
         }
     }
 }

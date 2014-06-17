@@ -132,9 +132,9 @@ public class TestLinkGenerator {
 
         Disambiguator disambiguator = new TopResultDisambiguator(null);
 
-        VectorGenerator generator = new LinkGenerator(SIMPLE, linkDao, dao, false);
+        VectorGenerator generator = new LinkGenerator(SIMPLE, linkDao, dao, false, null);
         BaseMonolingualSRMetric srIn = new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
-        generator = new LinkGenerator(SIMPLE, linkDao, dao, true);
+        generator = new LinkGenerator(SIMPLE, linkDao, dao, true, null);
         BaseMonolingualSRMetric srOut =  new VectorBasedMonoSRMetric("srIn", SIMPLE, dao, disambiguator,generator, new GoogleSimilarity(6), null);;
 
         double rIn = srIn.similarity(page1.getLocalId(), page2.getLocalId(), true).getScore();

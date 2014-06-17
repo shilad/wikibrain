@@ -6,26 +6,25 @@ import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.DaoFilter;
-import org.wikibrain.core.dao.LocalLinkDao;
-import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
+import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.utils.Leaderboard;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -45,18 +44,38 @@ public class LinkGenerator implements VectorGenerator {
     private boolean weightByPopularity = false;
     private boolean logTransform = false;
     private final int numPages;
+    private TIntSet blackListSet;
+    private final String blackListFilePath;
 
-    public LinkGenerator(Language language, LocalLinkDao linkDao, LocalPageDao pageDao, boolean outLinks) throws DaoException {
+    public LinkGenerator(Language language, LocalLinkDao linkDao, LocalPageDao pageDao, boolean outLinks, String blackListFilePath) throws DaoException, FileNotFoundException {
         this.language = language;
         this.linkDao = linkDao;
         this.outLinks = outLinks;
         this.pageDao = pageDao;
+        this.blackListFilePath = blackListFilePath;
         numPages = pageDao.getCount(
                 new DaoFilter().setLanguages(language)
                         .setRedirect(false)
                         .setDisambig(false)
                         .setNameSpaces(NameSpace.ARTICLE)
         );
+        createBlackListSet();
+    }
+
+    private void createBlackListSet() throws FileNotFoundException {
+        blackListSet = new TIntHashSet();
+        if(blackListFilePath == null || blackListFilePath.equals("")) {
+            LOG.info("Skipping blacklist creation; no blacklist file specified.");
+            return;
+        }
+
+        File file = new File(blackListFilePath);
+        Scanner scanner = new Scanner(file);
+        while(scanner.hasNext()){
+            blackListSet.add(scanner.nextInt());
+        }
+
+        scanner.close();
     }
 
 
@@ -68,8 +87,12 @@ public class LinkGenerator implements VectorGenerator {
         }
         double norm2 = 0.0;
         for (LocalLink link : linkDao.getLinks(language, pageId, outLinks)) {
+
             int columnId = outLinks ? link.getDestId() : link.getSourceId();
             if (columnId < 0) {
+                continue;
+            }
+            if(isBlacklisted(columnId)){
                 continue;
             }
             double value = 1;
@@ -83,6 +106,7 @@ public class LinkGenerator implements VectorGenerator {
             norm2 += value * value;
         }
         final double n = norm2;
+
         vector.transformValues(new TFloatFunction() {
             @Override
             public float execute(float value) {
@@ -90,6 +114,10 @@ public class LinkGenerator implements VectorGenerator {
             }
         });
         return vector;
+    }
+
+    private boolean isBlacklisted(int pageId) {
+        return blackListSet.contains(pageId);
     }
 
     /**
@@ -189,7 +217,9 @@ public class LinkGenerator implements VectorGenerator {
                             language,
                         getConfigurator().get(LocalLinkDao.class),
                         getConfigurator().get(LocalPageDao.class),
-                            config.getBoolean("outLinks")
+                        config.getBoolean("outLinks"),
+                        getConfig().get().getString("sr.blacklist.path")
+
                         );
                 if (config.hasPath("weightByPopularity")) {
                     lg.setWeightByPopularity(config.getBoolean("weightByPopularity"));
@@ -197,10 +227,13 @@ public class LinkGenerator implements VectorGenerator {
                 if (config.hasPath("logTransform")) {
                     lg.setLogTransform(config.getBoolean("logTransform"));
                 }
+
                 return lg;
-            } catch (DaoException e) {
+            } catch (Exception e) {
                 throw new ConfigurationException(e);
             }
+
+
         }
     }
 }
