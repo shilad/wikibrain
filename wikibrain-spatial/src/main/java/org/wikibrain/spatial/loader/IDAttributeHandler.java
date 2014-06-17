@@ -59,6 +59,7 @@ public abstract class IDAttributeHandler {
             super(wdDao);
 
             String[] parts = attrName.split("_");
+            //TODO: Aw...the hack!
             if (parts[1].toLowerCase().equals("en")) parts[1] = "simple"; // TEMPORARY HACK
 
             myLang = Language.getByLangCode(parts[1]);
