@@ -20,6 +20,7 @@ import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
 import org.wikibrain.sr.ensemble.EnsembleMetric;
 import org.wikibrain.sr.esa.SRConceptSpaceGenerator;
+import org.wikibrain.sr.milnewitten.MilneWittenMetric;
 import org.wikibrain.sr.wikify.Corpus;
 import org.wikibrain.sr.word2vec.Word2VecGenerator;
 import org.wikibrain.sr.word2vec.Word2VecTrainer;
@@ -160,6 +161,9 @@ public class SRBuilder {
             }
         } else if (type.equals("vector.mostsimilarconcepts")) {
             toAdd.addAll(getSubmetrics(config.getString("generator.basemetric")));
+        } else if (type.equals("milnewitten")){
+            toAdd.add(config.getString("inlink"));
+            toAdd.add(config.getString("outlink"));
         }
         toAdd.add(parentName);
         List<String> results = new ArrayList<String>();
@@ -183,6 +187,9 @@ public class SRBuilder {
                 LOG.warning("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
                 mode = Mode.BOTH;
             }
+        } else if (type.equals("milnewitten")){
+            MilneWittenMetric mw = (MilneWittenMetric) getMetric(name);
+            mw.setTrainSubmetrics(false);
         } else {
             // simple; nothing needed!
         }
