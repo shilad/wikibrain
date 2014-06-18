@@ -41,6 +41,14 @@ import java.util.logging.Logger;
  *
  * Expanding table:
  *
+ *      The actual space for the extra table is allocated.
+ *      The size of the table is expanded by 1 / load-factor, unless it's overly full, then 2 / load-factor.
+ *      A background thread begins to copy values from the old to new table, as described below.
+ *      Any puts also do a limited amount of help in table expansion.
+ *      If the new table gets too full from new puts, all put threads block and help expansion.
+ *
+ *      The actual procedure for moving a single entry from the old to new table follows:
+ *
  *      Step 1. Create copy of value in new table; new: (!0, !0, FLAG_OLD)
  *      Step 2. Verify original hasn't changed values or state, mark it as moved: old: (!0, *, FLAG_MOVED)
  *      Step 3. Release the new one as available: new: (!0, !0, FLAG_SET)
@@ -283,7 +291,7 @@ public class AtomicIntIntMap {
                 newSize *= 2;
             }
 
-            LOG.info("table expanding from " + table.size() + " to " + newSize + " with between " + potentialNumElements.get() + " elements ");
+            LOG.fine("table expanding from " + table.size() + " to " + newSize + " with between " + potentialNumElements.get() + " elements ");
             resizeCounter = new ResizeCounter(table.keys.length());
             expandedTable = new Table(newSize);
 
@@ -296,7 +304,7 @@ public class AtomicIntIntMap {
                         resizeCounter = null;
                         table = expandedTable;
                         expandedTable = null;
-                        LOG.info("finished expanding to " + table.size() + " with " + potentialNumElements + " potential elements");
+                        LOG.fine("finished expanding to " + table.size() + " with " + potentialNumElements + " potential elements");
                     } catch (Exception e) {
                         LOG.log(Level.SEVERE, "Expansion failed", e);
                         expandedTable = null;
