@@ -410,7 +410,7 @@ public class InstanceOfExtractor {
         for (int i = 0; i<size; i++){
 //            UniversalPage concept = upDao.getById(list.get(i), WIKIDATA_CONCEPTS);
 //            LocalPage lpage = lDao.getById(CUR_LANG,concept.getLocalId(CUR_LANG));
-            System.out.println(i + ". " + list.get(i));, lpage.getTitle().toString()
+            System.out.println(i + ". " + list.get(i));
         }
     }
 
