@@ -83,6 +83,79 @@ public class AtomicByteArray {
         }
     }
 
+
+    /**
+     * Atomically increments by one the element at index {@code i}.
+     *
+     * @param i the index
+     * @return the previous value
+     */
+    public final byte getAndIncrement(int i) {
+        return getAndAdd(i, 1);
+    }
+
+    /**
+     * Atomically decrements by one the element at index {@code i}.
+     *
+     * @param i the index
+     * @return the previous value
+     */
+    public final byte getAndDecrement(int i) {
+        return getAndAdd(i, -1);
+    }
+
+    /**
+     * Atomically adds the given value to the element at index {@code i}.
+     *
+     * @param i the index
+     * @param delta the value to add
+     * @return the previous value
+     */
+    public final byte getAndAdd(int i, int delta) {
+        while (true) {
+            byte current = get(i);
+            byte next = (byte) (current + delta);
+            if (compareAndSet(i, current, next))
+                return current;
+        }
+    }
+
+    /**
+     * Atomically increments by one the element at index {@code i}.
+     *
+     * @param i the index
+     * @return the updated value
+     */
+    public final byte incrementAndGet(int i) {
+        return addAndGet(i, 1);
+    }
+
+    /**
+     * Atomically decrements by one the element at index {@code i}.
+     *
+     * @param i the index
+     * @return the updated value
+     */
+    public final byte decrementAndGet(int i) {
+        return addAndGet(i, -1);
+    }
+
+    /**
+     * Atomically adds the given value to the element at index {@code i}.
+     *
+     * @param i the index
+     * @param delta the value to add
+     * @return the updated value
+     */
+    public final byte addAndGet(int i, int delta) {
+        while (true) {
+            byte current = get(i);
+            byte next = (byte) (current + delta);
+            if (compareAndSet(i, current, next))
+                return next;
+        }
+    }
+
     /**
      * Gets the current value at position {@code i}.
      *
