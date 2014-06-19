@@ -1,6 +1,5 @@
 package org.wikibrain.utils;
 
-import gnu.trove.impl.PrimeFinder;
 import gnu.trove.list.array.TIntArrayList;
 
 import java.util.concurrent.CountDownLatch;
@@ -25,7 +24,7 @@ import java.util.logging.Logger;
  *
  * if expandedTable != null, check it first
  *
- * Keys and values of zero with flag != FLAG_UNSET indicate fast operations are
+ * Keys and values of zero with flag != FLAG_FREE indicate fast operations are
  * in progress. System should try again ASAP.
  *
  * A value of 0 is represented by bitwise or'ing flags with FLAG_VALUE_ZERO
@@ -33,7 +32,7 @@ import java.util.logging.Logger;
  * indicates that an operation is in progress.
  *
  *
- * Free: (0, 0, FLAG_UNSET)
+ * Free: (0, 0, FLAG_FREE)
  *
  * Set: (!0, !0, FLAG_SET)
  *
@@ -62,7 +61,7 @@ public class AtomicIntIntMap {
     public static final int DEFAULT_MISSING_KEY_VALUE = -1;
 
     // Slot is empty
-    private static final byte FLAG_UNSET = 0;
+    private static final byte FLAG_FREE = 0;
 
     // Slot is set and up to date
     private static final byte FLAG_SET = 1;
@@ -354,17 +353,14 @@ public class AtomicIntIntMap {
      */
     private boolean tryToMove(int i) {
         byte f = table.flags.get(i);
-
-        // If not set, try to mark it as moved.
-        // If that fails, something must be in progress... try again
-        if (f != FLAG_SET && f != FLAG_SET_ZERO) {
-            return table.flags.compareAndSet(i, f, FLAG_MOVED);
-        }
         int k = table.keys.get(i);
         int v = table.vals.get(i);
+
         TableResult r = new TableResult(i, k, v, f);
         if (r.isBeingChanged()) {
             return false;
+        } else if (r.isFree() || r.isDeleted()) {
+            return table.flags.compareAndSet(i, f, FLAG_MOVED);
         } else if (!r.isSet()) {
             throw new IllegalStateException("Unexpected state during expansion " + r);
         }
@@ -376,7 +372,7 @@ public class AtomicIntIntMap {
         }
 
         // If somebody already stored the new key in the table it is up-to-date
-        if (r2.flag != FLAG_UNSET) {
+        if (r2.flag != FLAG_FREE) {
             table.flags.set(i, FLAG_MOVED);
             return true;
         }
@@ -489,13 +485,15 @@ public class AtomicIntIntMap {
                     return new TableResult(index, key, vals.get(index), flags.get(index));
                 } else if (k == 0) {
                     TableResult r = new TableResult(index, 0, vals.get(index), flags.get(index));
-                    if (r.isFree()) {
+                    if (r.isMoved()) {
+                        return null;    // there's a new table. use it!
+                    } else if (r.isFree()) {
                         // try to grab the slot
-                        if (flags.compareAndSet(index, FLAG_UNSET, flag)) {
+                        if (flags.compareAndSet(index, FLAG_FREE, flag)) {
                             if (!keys.compareAndSet(index, 0, key)) {
                                 throw new IllegalStateException();  // should have the lock!
                             }
-                            return new TableResult(index, 0, vals.get(index), FLAG_UNSET);
+                            return new TableResult(index, 0, vals.get(index), FLAG_FREE);
                         }
                     }
                     // If not free, or the CAS failed, spin on this index; something's in progress!

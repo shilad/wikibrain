@@ -69,14 +69,16 @@ public class BenchmarkAtomicIntIntMap {
         for (int i = 0; i < 5; i++) {
             testMap(new TroveMap(), keys, threads);
         }
-        System.out.println("\ntesting atomic map");
-        for (int i = 0; i < 5; i++) {
-            testMap(new AtomicMap(), keys, threads);
+        while (true) {
+            System.out.println("\ntesting atomic map");
+            for (int i = 0; i < 5; i++) {
+                testMap(new AtomicMap(), keys, threads);
+            }
         }
-        System.out.println("\ntesting concurrent map");
-        for (int i = 0; i < 5; i++) {
-            testMap(new ConcurrentMap(), keys, threads);
-        }
+//        System.out.println("\ntesting concurrent map");
+//        for (int i = 0; i < 5; i++) {
+//            testMap(new ConcurrentMap(), keys, threads);
+//        }
     }
 
     public static interface IntIntMap {
