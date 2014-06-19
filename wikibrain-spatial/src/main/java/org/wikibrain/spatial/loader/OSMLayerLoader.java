@@ -95,7 +95,7 @@ public class OSMLayerLoader {
                 @Override
                 public void call(WikidataStatement osmRelation) throws Exception {
 
-                    int relationId = Integer.parseInt(osmRelation.getValue().getStringValue());
+                    long relationId = Long.parseLong(osmRelation.getValue().getStringValue());
                     String itemLabel = wdDao.getItem(osmRelation.getItem().getId()).getLabels().get(Language.EN);
                     count.incrementAndGet();
 
@@ -217,7 +217,7 @@ public class OSMLayerLoader {
 
     }
 
-    private String readWkt(int relationId) throws MalformedURLException, IOException{
+    private String readWkt(long relationId) throws MalformedURLException, IOException{
 
         String base = "http://polygons.openstreetmap.fr/index.py?id=";
         URL baseURL = new URL(base + relationId);
