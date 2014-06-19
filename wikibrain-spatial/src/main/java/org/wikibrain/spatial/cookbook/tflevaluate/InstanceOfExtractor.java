@@ -76,6 +76,7 @@ public class InstanceOfExtractor {
 //            ioe.loadScaleKeywords();
 //            ioe.loadScaleIds(new File("scaleIds.txt"));
 //            ioe.generateScaleId();
+
             // print out concepts in relevant category
 //            ioe.printScale(CITY);
 //            ioe.generateRecallTest(150);
@@ -95,6 +96,8 @@ public class InstanceOfExtractor {
 //            System.out.println(e);
         }catch(ConfigurationException e){
             System.out.println(e);
+//        }catch(IOException e){
+//            System.out.println(e);
         }
 
     }
@@ -225,22 +228,24 @@ public class InstanceOfExtractor {
      * This loads an array of sets where each element in the arrray
      * is a set of concept ids associated with a given scale.
      *
-     * @param file The file this array of sets is stored in.
      */
-    public void loadScaleIds(File file){
+    public void loadScaleIds(){
 
         try {
-            FileInputStream fis = new FileInputStream(file);
+            FileInputStream fis = new FileInputStream(new File("scaleId"+CUR_LANG+".txt"));
             ObjectInputStream ois = new ObjectInputStream(fis);
             scaleIds = (Set[]) ois.readObject();
             ois.close();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println("file not found");
+        } catch (ClassNotFoundException e){
+            System.out.println("object in file was wrong class");
         }
     }
 
     /**
+     * Separate concept ids by scale and save into a file.
      *
      * @throws DaoException Could happen when trying to access pages or spatial information
      * @throws IOException Could happen when trying to write the generated ids to their file
@@ -321,7 +326,6 @@ public class InstanceOfExtractor {
                 // assume others with commas are cities
                 else if (lpage.getTitle().toString().contains(",")) {
                     scaleIds[CITY].add(conceptId);
-                    System.out.println(lpage.getTitle().toString());
                 }
                 // assume everything else is a landmark
                 else {
@@ -440,15 +444,12 @@ public class InstanceOfExtractor {
      *
      * @param scaleId
      * @param size
-     * @throws Exception
      */
-    public void generatePrecisionCalculation(int scaleId, int size) throws Exception {
+    public void generatePrecisionCalculation(int scaleId, int size)  {
         List<Integer> list = new ArrayList<Integer>();
         list.addAll(scaleIds[scaleId]);
         Collections.shuffle(list);
         for (int i = 0; i<size; i++){
-//            UniversalPage concept = upDao.getById(list.get(i), WIKIDATA_CONCEPTS);
-//            LocalPage lpage = lDao.getById(CUR_LANG,concept.getLocalId(CUR_LANG));
             System.out.println(i + ". " + list.get(i));
         }
     }

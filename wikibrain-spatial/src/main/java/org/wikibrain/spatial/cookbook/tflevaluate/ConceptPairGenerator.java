@@ -77,7 +77,7 @@ public class ConceptPairGenerator {
 
         ioe = new InstanceOfExtractor(sdDao,upDao,lpDao,wdao);
         ioe.loadScaleKeywords();
-        ioe.loadScaleIds(new File("scaleIds.txt"));
+        ioe.loadScaleIds();
     }
 
     public int[] getMaximumScoreConceptPair(Geometry home) {//throws Exception {

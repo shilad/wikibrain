@@ -38,3 +38,11 @@ stations
 palaces
 school
 schools
+assassination
+institution
+institute
+corporation
+assassinations
+institutions
+institutes
+corporations
