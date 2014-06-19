@@ -13,13 +13,19 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.geometry.jts.WKTReader2;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 
+import org.wikibrain.core.lang.UniversalId;
+import org.wikibrain.core.model.Title;
+import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.wikidata.WikidataDao;
@@ -42,16 +48,18 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 
+
+
 /**
  * Created by bjhecht on 5/21/14.
  *
- * Starting point for Aaron's OSM work.
  */
 public class OSMLayerLoader {
 
     public static final Logger LOG = Logger.getLogger(GADMConverter.class.getName());
 
     private final WikidataDao wdDao;
+
 
     private static final int OSM_RELATION_ID = 402;
 
@@ -70,15 +78,12 @@ public class OSMLayerLoader {
      */
 
     public void printGeometries(File outputFile) throws Exception{
-        /*
-        ItemID: 1527 - Minnesota, 148 - China
-         */
 
         final SimpleFeatureType OSMTYPE = getOutputFeatureType();
         final SimpleFeatureSource outputFeatureSource = getOutputDataFeatureSource(outputFile, OSMTYPE);
         final Transaction transaction = new DefaultTransaction("create");
         final ConcurrentLinkedQueue<List<SimpleFeature>> writeQueue = new ConcurrentLinkedQueue<List<SimpleFeature>>();
-        final WikidataStatement testStatement = new WikidataStatement("id", new WikidataEntity(WikidataEntity.Type.ITEM, 148), new WikidataEntity(WikidataEntity.Type.PROPERTY, 402), null, null);
+        final List<String> exceptionList = new ArrayList<String>();
 
         try {
 
@@ -86,49 +91,59 @@ public class OSMLayerLoader {
             final AtomicInteger count = new AtomicInteger(0);
 
 
-            /*ParallelForEach.iterate(osmRelations.iterator(), new Procedure<WikidataStatement>() {
+            ParallelForEach.iterate(osmRelations.iterator(), new Procedure<WikidataStatement>() {
                 @Override
                 public void call(WikidataStatement osmRelation) throws Exception {
 
-                    int itemId = osmRelation.getItem().getId();
-                    String itemLabel = osmRelation.getItem().getLabels().get(Language.EN);
+                    int relationId = Integer.parseInt(osmRelation.getValue().getStringValue());
+                    String itemLabel = wdDao.getItem(osmRelation.getItem().getId()).getLabels().get(Language.EN);
                     count.incrementAndGet();
 
-                    /*synchronized (this) {LOG.log(Level.INFO, "Writing " + itemLabel + " to the shapefile.");}
+                    synchronized (this) {LOG.log(Level.INFO, "Writing " + itemLabel + " to the shapefile.");}
+                    try{
 
-                    Geometry itemGeometry = getGeometry(readGeoJson(itemId));
-                    List<SimpleFeature> features = buildOutputFeature(itemGeometry, itemLabel, OSMTYPE);
-                    writeQueue.add(features);
-                    writeToShpFile(outputFeatureSource, OSMTYPE, transaction, writeQueue.poll());
-                    System.out.println(itemLabel);
+                    Geometry itemGeometry = getGeometry(readWkt(relationId));
+                    if (itemGeometry != null){
+                        List<SimpleFeature> features = buildOutputFeature(itemGeometry, itemLabel, OSMTYPE);
+                        writeQueue.add(features);
+                        writeToShpFile(outputFeatureSource, OSMTYPE, transaction, writeQueue.poll());
+                    }
+                    } catch(Exception e){
+                        synchronized (this) {exceptionList.add(String.format("%s, %d\n", itemLabel, relationId));}
+                    }
 
                 }
-            });*/
+            });
 
-            for (WikidataStatement osmRelation: osmRelations) {
-                int itemId = osmRelation.getItem().getId();
-                System.out.println(itemId);
-            }
-            System.out.println(count.get());
 
             /*for (WikidataStatement osmRelation : osmRelations){
-                int itemId = osmRelation.getItem().getId();
-                String itemLabel = osmRelation.getItem().getLabels().get(Language.SIMPLE); //language might need to change to EN
+                int relationId = Integer.parseInt(osmRelation.getValue().getStringValue());
+                String itemLabel = wdDao.getItem(osmRelation.getItem().getId()).getLabels().get(Language.EN); //language might need to change to EN
 
-                Geometry itemGeometry = getGeometry(readGeoJson(itemId));
-                List<SimpleFeature> features = buildOutputFeature(itemGeometry, itemLabel, OSMTYPE);
-                writeToShpFile(outputFeatureSource, OSMTYPE, transaction, features);
+                LOG.log(Level.INFO, "Writing " + itemLabel + " to the shapefile.");
+
+                try{
+                    Geometry itemGeometry = getGeometry(readWkt(relationId));
+                    if (itemGeometry != null) {
+                        List<SimpleFeature> features = buildOutputFeature(itemGeometry, itemLabel, OSMTYPE);
+                        writeToShpFile(outputFeatureSource, OSMTYPE, transaction, features);
+                    }
+                } catch (Exception e){
+                    e.printStackTrace();
+                    exceptionList.add(String.format("%s, %d\n", itemLabel, relationId));
+                }
             }*/
+            for (String country: exceptionList){
+                System.out.println(country);
+            }
 
-            /*WikidataStatement osmRelation = testStatement;
 
-
-            int itemId = osmRelation.getItem().getId();
-            String itemLabel = osmRelation.getItem().getLabels().get(Language.SIMPLE); //language might need to change to EN
+            /*int itemId = 270056;
+            String itemLabel = "China";
 
             synchronized (this) {LOG.log(Level.INFO, "Writing " + itemLabel + " to the shapefile.");}
 
-            Geometry itemGeometry = getGeometry(readGeoJson(itemId));
+            Geometry itemGeometry = getGeometry(readWkt(itemId));
             List<SimpleFeature> features = buildOutputFeature(itemGeometry, itemLabel, OSMTYPE);
             writeQueue.add(features);
             writeToShpFile(outputFeatureSource, OSMTYPE, transaction, writeQueue.poll());*/
@@ -190,35 +205,37 @@ public class OSMLayerLoader {
 
     }
 
-    private Geometry getGeometry(String geoJsonString) throws IOException {
+    private Geometry getGeometry(String wktString) throws Exception {
+        //This is super hacky.
 
-        GeometryJSON geoJson = new GeometryJSON();
-        Reader reader = new StringReader(geoJsonString);
+        WKTReader2 wktReader = new WKTReader2();
+        if (wktString.equals("None")) return null;
+        Geometry rawGeometry = wktReader.read(wktString.substring(10));
 
-        Geometry rawGeometry =  geoJson.readGeometryCollection(reader);
         return rawGeometry;
 
 
     }
 
-    private String readGeoJson(int itemId) throws MalformedURLException, IOException{
+    private String readWkt(int relationId) throws MalformedURLException, IOException{
 
-        String baseURL = "http://tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang=wikidata&article=Q";
-        URL jsonURL = new URL(baseURL + itemId);
-        URLConnection c = jsonURL.openConnection();
-        String geoJson;
+        String base = "http://polygons.openstreetmap.fr/index.py?id=";
+        URL baseURL = new URL(base + relationId);
+        URLConnection baseUrlConnection = baseURL.openConnection();
+        baseUrlConnection.getContent();
+        BufferedReader baseIn = new BufferedReader(new InputStreamReader(baseUrlConnection.getInputStream()));
+        while(baseIn.readLine()!=null)
+            continue;
 
-        System.out.println(c.getContentType());
-        System.out.println(c.getContent());
-        System.out.println(c.getContentEncoding());
-        Map header = c.getHeaderFields();
+        URL wktURL = new URL(String.format("http://polygons.openstreetmap.fr/get_wkt.py?id=%d&params=0", relationId));
+        URLConnection c = wktURL.openConnection();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(c.getInputStream())));
-        geoJson = in.readLine();
-        System.out.println(geoJson.trim());
+        BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
+        String wkt = in.readLine();
+        System.out.println(wkt.trim());
         in.close();
 
-        return geoJson.trim();
+        return wkt.trim();
     }
 
     private SimpleFeatureType getOutputFeatureType() {
