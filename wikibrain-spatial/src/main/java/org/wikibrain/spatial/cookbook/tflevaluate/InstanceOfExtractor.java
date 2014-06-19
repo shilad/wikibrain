@@ -44,16 +44,13 @@ public class InstanceOfExtractor {
     private WikidataDao wdao ;
     private static final boolean DEBUG = true;
     private static final Language CUR_LANG = Language.EN;
+    private Map<Integer,Set<Integer>> countryToStateMap;
 
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
 
 
-    public InstanceOfExtractor(Env env ) throws ConfigurationException{
-        Configurator c = env.getConfigurator();
-        sdDao = c.get(SpatialDataDao.class);
-        upDao = c.get(UniversalPageDao.class);
-        lDao = c.get(LocalPageDao.class);
-        wdao = c.get(WikidataDao.class);
+    public InstanceOfExtractor(Configurator c) throws ConfigurationException{
+        this(c.get(SpatialDataDao.class),c.get(UniversalPageDao.class),c.get(LocalPageDao.class),c.get(WikidataDao.class));
     }
 
     public InstanceOfExtractor(SpatialDataDao sDao, UniversalPageDao uDao, LocalPageDao lDao, WikidataDao wDao) {
@@ -61,6 +58,12 @@ public class InstanceOfExtractor {
         upDao = uDao;
         this.lDao = lDao;
         wdao = wDao;
+        try {
+            countryToStateMap = loadHierarchicalData();
+        }catch(DaoException e){
+            countryToStateMap = new HashMap<Integer, Set<Integer>>();
+            System.out.println("Could not load country/state gadm info");
+        }
     }
 
 
@@ -69,7 +72,7 @@ public class InstanceOfExtractor {
         InstanceOfExtractor ioe = null;
         try{
             env = EnvBuilder.envFromArgs(args);
-            ioe = new InstanceOfExtractor(env);
+            ioe = new InstanceOfExtractor(env.getConfigurator());
 //            ioe.loadScaleKeywords();
 //            ioe.loadScaleIds(new File("scaleIds.txt"));
 //            ioe.generateScaleId();
@@ -77,23 +80,59 @@ public class InstanceOfExtractor {
 //            ioe.printScale(CITY);
 //            ioe.generateRecallTest(150);
 //            ioe.printScaleId(CITY);
-            Set<String> set = ioe.extractInstanceOfList();
-            int count = 0;
-            for (String s: set){
-                System.out.println(s);
-                count++;
-                if (count%10000==0){
-                    System.out.println("============================ "+count+" ================================");
-                }
-            }
 
-        }catch(DaoException e){
-            System.out.println(e);
+//            Set<String> set = ioe.extractInstanceOfList();
+//            int count = 0;
+//            for (String s: set){
+//                System.out.println(s);
+//                count++;
+//                if (count%10000==0){
+//                    System.out.println("============================ "+count+" ================================");
+//                }
+//            }
+
+//        }catch(DaoException e){
+//            System.out.println(e);
         }catch(ConfigurationException e){
             System.out.println(e);
         }
 
     }
+
+    /**
+     * Generate a map from countries(' conceptIds) to their states
+     *
+     * @return
+     * @throws DaoException
+     */
+    public Map<Integer,Set<Integer>> loadHierarchicalData() throws DaoException{
+
+        // Get all known country geometries
+        Map<Integer, Geometry> countries = sdDao.getAllGeometriesInLayer("gadm0", "earth");
+        LOG.log(Level.INFO, String.format("Found %d total countries, now loading countries", countries.size()));
+
+        // Get all known state geometries
+        Map<Integer, Geometry> states = sdDao.getAllGeometriesInLayer("gadm1", "earth");
+        LOG.log(Level.INFO, String.format("Found %d total states, now loading geometries", states.size()));
+
+        // Map of countries to states
+        Map<Integer,Set<Integer>> countryStateMap = new HashMap<Integer,Set<Integer>>();
+
+        // Loop over countries and states to generate this map
+        for (int countryId: countries.keySet()){
+            countryStateMap.put(countryId,new HashSet<Integer>());
+            for (int stateId: states.keySet()){
+                if (countries.get(countryId).contains(states.get(stateId))){
+                    countryStateMap.get(countryId).add(stateId);
+                }
+            }
+            System.out.println("Country "+countryId+" has states "+countryStateMap.get(countryId));
+        }
+
+        // return the map
+        return countryStateMap;
+    }
+
 
     /**
      * Creates a set of titles of all spatial concepts in Wikipedia
