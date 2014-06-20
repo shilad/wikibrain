@@ -72,6 +72,10 @@ public class SpatialDataLoader {
             for (LayerStruct layerStruct : layerStructs) {
 
                 if (layerStruct.fileType.equals(FileType.SHP)) {
+                    if(layerStruct.getLayerName().equals("counties")){
+                        parseNonMatchingShapefile(layerStruct);
+                        continue;
+                    }
 
                     parseShapefile(layerStruct);
 
@@ -195,6 +199,92 @@ public class SpatialDataLoader {
         }
 
     }
+
+
+    private void parseNonMatchingShapefile(LayerStruct struct) throws WikiBrainException{
+
+        ShapefileReader shpReader;
+        DbaseFileReader dbfReader;
+        Geometry curGeometry;
+        ShpFiles shpFile;
+
+        LOG.log(Level.INFO,"Parsing data from file: " + struct.getDataFile().getName());
+
+        try {
+
+            shpFile = new ShpFiles(struct.getDataFile().getAbsolutePath());
+
+            shpReader = new ShapefileReader(shpFile, true, true, new GeometryFactory(new PrecisionModel(), 4326));
+            dbfReader = new DbaseFileReader(shpFile, false, Charset.forName("UTF-8"));
+
+            int numDbfFields = dbfReader.getHeader().getNumFields();
+
+            List<IDAttributeHandler> attrHandlers = Lists.newArrayList();
+/*
+            for (int i = 0; i < numDbfFields; i++){
+                attrHandlers.add(IDAttributeHandler.getHandlerByFieldName(dbfReader.getHeader().getFieldName(i), wdDao, analyzer));
+            }
+*/
+            //dbfReader.readField()
+
+            int foundGeomCount = 0;
+            int missedGeomCount = 0;
+
+            while(shpReader.hasNext()){
+
+                curGeometry = (Geometry)shpReader.nextRecord().shape();
+                //dbfReader.read();
+
+                int i = 0;
+
+                boolean found = false;
+
+                while(i < numDbfFields && !found){
+                    //IDAttributeHandler attrHandler = attrHandlers.get(i);
+                    Integer itemId = i;
+
+                    try {
+                        //itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
+                        itemId = (int)Math.round(Double.valueOf((Double)dbfReader.readEntry()[0]));
+                        itemId = itemId;
+                    }
+                    catch (Exception e){
+                        i++;
+                        continue;
+
+                    }
+                    if (itemId != null && spatialDataDao.getGeometry(itemId, struct.getLayerName(), struct.getRefSysName()) == null){
+                        spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
+                        found = true;
+                        foundGeomCount++;
+                        if (foundGeomCount % 10 == 0){
+                            LOG.log(Level.INFO, "Matched " + foundGeomCount + " geometries in layer '" + struct.getLayerName() + "' (" + struct.getRefSysName() + ")");
+                        }
+                    }
+                    i++;
+
+                }
+
+                if (!found) missedGeomCount++;
+
+            }
+
+            double matchRate = ((double)foundGeomCount)/(foundGeomCount + missedGeomCount);
+            LOG.log(Level.INFO, "Finished layer '" + struct.getLayerName() + "': Match rate = " + matchRate);
+
+            dbfReader.close();
+            shpReader.close();
+
+        } catch (ShapefileException e) {
+            throw new WikiBrainException("There was an error accessing an external geometry layer", e);
+        } catch (IOException e) {
+            throw new WikiBrainException("There was an error accessing an external geometry layer", e);
+        } catch (DaoException e){
+            throw new WikiBrainException(e);
+        }
+
+    }
+
 
     private void loadWikidataData() throws WikiBrainException{
 
@@ -388,7 +478,7 @@ public class SpatialDataLoader {
         //loader.loadExogenousData();
 
             LOG.info("optimizing database.");
-            conf.get(WpDataSource.class).optimize();
+            //conf.get(WpDataSource.class).optimize();
 
 
         }catch(Exception e){
