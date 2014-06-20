@@ -197,7 +197,12 @@ public class Word2VecGenerator implements VectorGenerator {
     }
 
     @Override
-    public List<Explanation> getExplanations(LocalPage page1, LocalPage page2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+    public List<Explanation> getExplanations(String phrase1, String phrase2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Explanation> getExplanations(int pageID1, int pageID2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
         return null;
     }
 
