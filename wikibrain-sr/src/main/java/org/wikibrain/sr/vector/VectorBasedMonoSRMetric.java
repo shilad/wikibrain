@@ -127,7 +127,11 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
             // fallback on parent's phrase resolution algorithm
             return super.similarity(phrase1, phrase2, explanations);
         } else {
-            return normalize(new SRResult(similarity.similarity(vector1, vector2)));
+            SRResult result= new SRResult(similarity.similarity(vector1, vector2));
+            if(explanations) {
+                    result.setExplanations(generator.getExplanations(phrase1, phrase2, vector1, vector2, result));
+            }
+            return normalize(result);
         }
     }
 
@@ -142,7 +146,13 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                 if (row1 == null || row2 == null) {
                     return null;
                 } else {
-                    return normalize(new SRResult(similarity.similarity(row1, row2)));
+                    TIntFloatHashMap tfm1=row1.asTroveMap();
+                    TIntFloatHashMap tfm2=row2.asTroveMap();
+                    SRResult result= new SRResult(similarity.similarity(row1, row2));
+                    if(explanations) {
+                        result.setExplanations(generator.getExplanations(pageId1, pageId2, tfm1, tfm2, result));
+                    }
+                    return normalize(result);
                 }
             } else {
                 TIntFloatMap vector1 = getPageVector(pageId1);

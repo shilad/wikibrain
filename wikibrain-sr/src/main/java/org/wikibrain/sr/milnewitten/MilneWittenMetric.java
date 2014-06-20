@@ -8,14 +8,13 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.sr.BaseMonolingualSRMetric;
-import org.wikibrain.sr.MonolingualSRMetric;
-import org.wikibrain.sr.SRResult;
-import org.wikibrain.sr.SRResultList;
+import org.wikibrain.sr.*;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.disambig.Disambiguator;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -53,7 +52,12 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
         if (r1 == null || r2 == null || !r1.isValid() || !r2.isValid()) {
             return new SRResult(Double.NaN);
         } else {
-            return new SRResult(0.5 * r1.getScore() + 0.5 * r2.getScore());
+            SRResult finalResult=new SRResult(0.5 * r1.getScore() + 0.5 * r2.getScore());
+            List<Explanation> explanationList= new ArrayList<Explanation>();
+            explanationList.addAll(r1.getExplanations());
+            explanationList.addAll(r2.getExplanations());
+            finalResult.setExplanations(explanationList);
+            return finalResult;
         }
     }
 
