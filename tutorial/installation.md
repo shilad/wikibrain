@@ -29,6 +29,8 @@ Other modules take additional time and resources:
  * Building the semantic relatedness algorithms can take a few minutes to a few days depending on the algorithms and language editions. 
 
 ### Software Requirements
+
+
 * Maven, Bash, a clone of this repository (instructions in next section).
 * Hardware varies depending on the languages you want to import:
   * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
