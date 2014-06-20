@@ -58,12 +58,29 @@ public class InstanceOfExtractor {
         upDao = uDao;
         this.lDao = lDao;
         wdao = wDao;
+
+        System.out.println("HI in constructor");
+
         try {
-            countryToStateMap = loadHierarchicalData();
-        }catch(DaoException e){
-            countryToStateMap = new HashMap<Integer, Set<Integer>>();
-            System.out.println("Could not load country/state gadm info");
+            FileInputStream fis = new FileInputStream(new File("countryToStateMap.txt"));
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            countryToStateMap = (Map) ois.readObject();
+            ois.close();
+
+        } catch (IOException e) {
+            System.out.println("file not found");
+        } catch (ClassNotFoundException e){
+            System.out.println("object in file was wrong class");
         }
+
+//
+//        try {
+//            countryToStateMap = loadHierarchicalData();
+//
+//        }catch(DaoException e){
+//            countryToStateMap = new HashMap<Integer, Set<Integer>>();
+//            System.out.println("Could not load country/state gadm info");
+//        }
     }
 
 
@@ -73,6 +90,30 @@ public class InstanceOfExtractor {
         try{
             env = EnvBuilder.envFromArgs(args);
             ioe = new InstanceOfExtractor(env.getConfigurator());
+
+            System.out.println("HI");
+
+            // write scale ids out to a file
+//            FileOutputStream fos = new FileOutputStream("countryToStateMap.txt");
+//            ObjectOutputStream oos = new ObjectOutputStream(fos);
+//            oos.writeObject(ioe.countryToStateMap);
+//            oos.close();
+
+            for (int country1:ioe.countryToStateMap.keySet()){
+                for (int country2:ioe.countryToStateMap.keySet()){
+                    if (country1!=country2){
+                        Set<Integer> set1 = ioe.countryToStateMap.get(country1);
+                        Set<Integer> set2 = ioe.countryToStateMap.get(country2);
+                        set1.retainAll(set2);
+                        if (set1.isEmpty()){
+//                            System.out.println(country1+" "+country2+" "+set1);
+                        }
+                    }
+                }
+            }
+
+            System.out.println(ioe.countryToStateMap.get(30));
+            System.out.println(ioe.countryToStateMap.get(16));
 //            ioe.loadScaleKeywords();
 //            ioe.loadScaleIds(new File("scaleIds.txt"));
 //            ioe.generateScaleId();
@@ -125,11 +166,16 @@ public class InstanceOfExtractor {
         for (int countryId: countries.keySet()){
             countryStateMap.put(countryId,new HashSet<Integer>());
             for (int stateId: states.keySet()){
-                if (countries.get(countryId).contains(states.get(stateId))){
+                try {
+                    if (countries.get(countryId) != null && states.get(stateId) != null && countries.get(countryId).contains(states.get(stateId))) {
+                        countryStateMap.get(countryId).add(stateId);
+                    }
+                }catch(TopologyException e){
                     countryStateMap.get(countryId).add(stateId);
+//                    System.out.println("Country "+countryId+" had topology exception with state "+stateId);
                 }
             }
-            System.out.println("Country "+countryId+" has states "+countryStateMap.get(countryId));
+            System.out.println("Country "+countryId+" has "+countryStateMap.get(countryId).size()+" states: "+countryStateMap.get(countryId));
         }
 
         // return the map
