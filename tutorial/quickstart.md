@@ -47,29 +47,10 @@ You can customize WikiBrain's importing procedure, (see Configuration) but the d
 
 ### An example program
 Once you have your imported data (above), your are ready to write programs that analyze Wikipedia!
-Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
+Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java) you can find in the Cookbook:
 
-```java
-// Prepare the environment; set the root to the current directory (".").
-Env env = new EnvBuilder().build();
+<script src="http://gist-it.appspot.com/github/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java?slice=13:40"></script>
 
-// Get the configurator that creates components and a phraze analyzer from it
-Configurator configurator = env.getConfigurator();
-PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "anchortext");
-
-// get the most common phrases in simple
-LinkedHashMap<LocalId, Float> resolution = pa.resolve(Language.SIMPLE, "Apple", 20);
-
-// show the closest pages
-System.out.println("resolution of apple");
-if (resolution == null) {
-    System.out.println("\tno resolution !");
-} else {
-    for (LocalId p : resolution.keySet()) {
-        System.out.println("\t" + p + ": " + resolution.get(p));
-    }
-}
-```
 
 When you run this program, you'll see output:
 
