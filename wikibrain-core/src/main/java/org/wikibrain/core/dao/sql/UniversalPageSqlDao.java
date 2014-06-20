@@ -203,6 +203,35 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     /**
+     * Returns the local page id for that language, or -1 if it does not exist
+     * @param language
+     * @param universalId
+     * @param algorithmId
+     * @return
+     * @throws DaoException
+     */
+    @Override
+    public int getLocalId(Language language, int universalId, int algorithmId) throws DaoException {
+        DSLContext context = getJooq();
+        try {
+            Record record = context.select()
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(Tables.UNIVERSAL_PAGE.LANG_ID.eq(language.getId()))
+                    .and(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(universalId))
+                    .and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
+                    .limit(1)   // TODO: Remove
+                    .fetchOne();
+            if (record == null) {
+                return -1;
+            } else {
+                return record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID);
+            }
+        } finally {
+            freeJooq(context);
+        }
+    }
+
+    /**
      * Build a UniversalPage from a database record representation.
      * Classes that extend class this should override this method.
      *
