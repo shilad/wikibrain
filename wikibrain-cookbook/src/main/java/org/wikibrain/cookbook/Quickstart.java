@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
  * @author Shilad Sen
  */
 public class Quickstart {
-    public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
+    public static void main(String args[]) throws Exception {
 
         // Prepare the environment
         Env env = EnvBuilder.envFromArgs(args);
