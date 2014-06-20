@@ -5,7 +5,7 @@
 
 # System requirements and installation 
 
-### Hardware Requirements
+## Hardware Requirements
 
 WikiBrain's hardware requirements vary depending on the languages you import and modules you use.
 As an example, below are approximate disk and memory requirements for different language editions of Wikipedia.
@@ -28,24 +28,62 @@ Other modules take additional time and resources:
  * Spatial data takes 20 minutes to a few hours depending on the language editions installed.
  * Building the semantic relatedness algorithms can take a few minutes to a few days depending on the algorithms and language editions. 
 
-### Software Requirements
+## Software Requirements
+
+Wikibrain requires a Java JDK, version 6 or higher. Depending on your needs you may also consider:
+
+1. **A Java IDE**. You can directly run Wikibrain programs through any standard Java IDE (Eclipse, Netbeans, IntelliJ, etc.).
+3. **bash**. If you would like to run Wikibrain programs from the command line, you'll need the bash shell.
+2. **Maven**. The [Maven](http://maven.apache.org/) Java dependency management system, version 3.2 or higher. 
+Maven manages Java dependencies and allows you to stay up to date with Wikibrain jars and their dependencies.
+The Maven website details installation instructions.
+tl;dr: 1) unzip the maven download, 2) set the M2_HOME environment variable to point to the unzipped directory, 3) make sure the mvn script in $M2_HOME is on your PATH. You can test your install by making sure that mvn --version works properly.
+4. **Postgresql / PostGIS2**. By default, Wikibrain uses the embedded [h2 database](http://www.h2database.com/). 
+While this works well for most language editions, the [Postgresql](http://www.postgresql.org/) database performs better for the largest language editions (such as full English).
+If you'd like to use the **spatial module**, you must install Postgres and the PostGIS 2 (or higher) extension. Details on installing Postgresql appear at the bottom of this page.    
 
 
-* Maven, Bash, a clone of this repository (instructions in next section).
-* Hardware varies depending on the languages you want to import:
-  * Simple English (175K articles) requires a few GB and 10 minutes of processing on a four core laptop.
-  * Full English (4M articles) requires 200GB and 6 hours of processing on an eight core server.
+## Installing WikiBrain
 
+You can either install WikiBrain by downloading the zip file containing the WikiBrain jars and dependencies or referencing the WikiBrain maven artifacts.
+ While maven requires a bit of initial setup, we strongly recommend using it.
+  
+#### Installing using jars
+ 
+1. Download the [latest WikiBrain zip file](#) containing the WikiBrain jars and their dependencies.
+2. Extract the zip file.
+3. In your IDE, add all jars in the zip file to your classpath.
+  
+#### Installing using maven
 
+1. Download and install Maven, as described above.
+2. Add the following dependency to your project's pom.xml:
+{% include maven.html %}
 
-### Installing WikiBrain
+We've posted a complete [example pom.xml](https://gist.github.com/shilad/958ec6f2cab01b34efe9) that references WikiBrain.
 
-1. If necessary, download and install Sun's JDK 6 or higher.
-2. If necessary, download and install [Maven](http://maven.apache.org/download.cgi). tl;dr: 1) unzip the maven download, 2) set the `M2_HOME` environment variable to point to the unzipped directory, 3) make sure the mvn script in `$M2_HOME` is on your `PATH`. You can test your install by making sure that `mvn --version` works properly
-3. Clone this repository and run the unit tests to make sure your environment is setup properly:
+## Setting your JVM options
 
-{% highlight sh %}
-cd wikibrain
-git clone https://github.com/shilad/wikibrain.git
-mvn test
-{% endhighlight %}
+**JVM options:** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. 
+You can set these defaults in your IDE's run dialog, or if you are using `wb-java.sh` (below), run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
+The memory requirements for the JVM during the import phase are listed above.
+
+## Installing the command line wb-java.sh script
+
+If you'd like to run WikiBrain programs from the command line, we've provided a helpful [wb-java.sh](https://github.com/shilad/wikibrain/blob/master/wikibrain-utils/src/main/resources/wb-java.sh) script.
+It sets appropriate paths and configures command line arguments.
+To use it, first install it:
+
+```bash
+mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikibrain.utils.ResourceInstaller
+```
+
+You can now run WikiBrain programs from the command line as follows:
+
+```bash
+./wb-java.sh org.wikibrain.dao.loader.PipelineLoader -l simple
+```
+
+## Installing Postgresql and PostGIS
+ 
+ TODO

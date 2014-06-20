@@ -7,7 +7,7 @@
 
 As a quick start, we'll load Wikipedia data and foo.
 
-### System requirements for this example:
+## System requirements for this example:
 
 In order to complete this quickstart, you need a basic Java development environment. In particular: 
 
@@ -21,13 +21,13 @@ you'll need substantially more powerful hardware to process full (not simple) En
 
 More details on installation are described in the [system requirements]({{ site.url }}/tutorial/requirements.html) section of the tutorial.
 
-### Install Wikibrain
+## Install Wikibrain
 
 * Open or create the Java project in your IDE of choice.
 * Download and extract the zipfile containing the jars (TODO: link zipfile).
 * Add the jar files to the classpath of your project. 
 
-### Import Simple English
+## Import Simple English
 
 Next, you'll import Simple English Wikipedia.
 Run PipelineLoader which downloads, parses, and imports the data into an embedded [h2 database](http://www.h2database.com/html/main.html) (you can use Postgresql instead by changing the [configuration file]({{ site.url }}/tutorial/configuration.html)).
@@ -45,7 +45,7 @@ The last command downloads, installs, and analyzes the latest database files for
 It imports the data into an embedded h2 database. 
 You can customize WikiBrain's importing procedure, (see Configuration) but the default should be a good start. 
 
-### An example program
+## An example program
 Once you have your imported data (above), your are ready to write programs that analyze Wikipedia!
 Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java) you can find in the Cookbook:
 
@@ -63,7 +63,7 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple A4, localId=251288, language=Simple English}: 0.043859642
 ```
 
-### A tour of the example
+## A tour of the example
 Let's walk through this program to explain each piece. 
 First, we create an ```Env``, a WikiBrain environment that provides access to the components we need:
 

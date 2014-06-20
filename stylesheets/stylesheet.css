@@ -80,7 +80,9 @@ header h1 {
   width: 540px;
 }
 
-
+strong {
+    font-weight: bold;
+}
 header h1 a {
     color: #fff;
 }

@@ -9,7 +9,7 @@ WikiBrain allows researchers and developers to incorporate algorithms that mine 
 
 WikiBrain's busy thinking up its first public release. If you have questions, ask the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain).
 
-### Main features
+## Main features
 * Support for **all Wikipedia language** editions and comparisons between multiple languages.
 * Tools that **download** and organize [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
 * Tools that load downloaded Wikipedia datasets into **databases** for analysis.
@@ -18,7 +18,7 @@ WikiBrain's busy thinking up its first public release. If you have questions, as
 * Support for structured [Wikidata](http://meta.wikimedia.org/wiki/Wikidata) "facts" about articles.
 * Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
-### An example program
+## An example program
 Once you have imported data (above), your are ready to write programs that analyze Wikipedia!
 Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
 
@@ -59,7 +59,7 @@ resolution of apple
 ```
 
 
-### Main components
+## Main components
 The WikiBrain Configurator offers a set of components that you can use as building blocks in your application.
 To get one of these components, use the Configurator.get() method:
 
