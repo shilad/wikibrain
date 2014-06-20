@@ -2,10 +2,9 @@
         layout: default
         title: Homepage
 ---
-WikiBrain
-=====
-WikiBrain is a Java library that democratizes access to a range of Wikipedia-based algorithms and technologies. 
-WikiBrain allows researchers and developers to easily include state-of-the-art algorithms that mine Wikipedia in their applications with a few lines of code.
+
+The WikiBrain Java library democratizes access to state-of-the-art Wikipedia-based algorithms and technologies. 
+WikiBrain allows researchers and developers to incorporate algorithms that mine Wikipedia in their applications with a few lines of code.
 
 
 WikiBrain's busy thinking up its first public release. If you have questions, ask the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain).
@@ -59,60 +58,14 @@ resolution of apple
 	LocalPage{nameSpace=ARTICLE, title=Apple A4, localId=251288, language=Simple English}: 0.043859642
 ```
 
-### A tour of the example
-Let's walk through this program to explain each piece. 
-First, we create an `Env`, a WikiBrain environment that provides access to the components we need:
-
-```java
-Env env = new EnvBuilder()
-        .setBaseDir(".")
-        .build();
-```
-
-The [```EnvBuilder```](wikibrain-core/src/main/java/org/wikibrain/core/cmd/EnvBuilder.java) 
-provides utility methods to set the languages you want to support, the maximum number of threads available to your program, etc.
-There are more advanced ways of configuring WikiBrain - both programatically and through configuration files - described in the Configuration section of this page.
-
-The Env provides access to a 
-[`Configurator`](wikibrain-utils/src/main/java/org/wikibrain/conf/Configurator.java) -
-essentially a Factory for creating WikiBrain components. We get the Page Resolution component next:
-
-```java
-Configurator configurator = env.getConfigurator();
-PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
-```
-
-A key feature of WikiBrain is that it supports multiple implementations of the same component. 
-For example, the default PhraseAnalayzer uses the [Lucene](http://lucene.apache.org/) search engine. 
-We could have explicitly requested the lucene implementation of the PhraseAnalyzer:
-
-```java
-PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "lucene");
-```
-If we instead wanted to use a phrase analyzer that resolves phrases to pages by looking at "intra-wiki" links, we could have used:
-
-```java
-PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "anchortext");
-```
-
-And received the results:
-
-```text
-resolution of apple
-	LocalPage{nameSpace=ARTICLE, title=Apple, localId=39, language=Simple English}: 0.55263156
-	LocalPage{nameSpace=ARTICLE, title=Apple Inc., localId=7111, language=Simple English}: 0.30526316
-	LocalPage{nameSpace=ARTICLE, title=Apple Records, localId=47698, language=Simple English}: 0.12631579
-	LocalPage{nameSpace=ARTICLE, title=App Store (iOS), localId=216566, language=Simple English}: 0.010526316
-	LocalPage{nameSpace=ARTICLE, title=Apple Corps, localId=48013, language=Simple English}: 0.005263158
-```
 
 ### Main components
 The WikiBrain Configurator offers a set of components that you can use as building blocks in your application.
 To get one of these components, use the Configurator.get() method:
 
-* **RawPageDao** provides detailed information about an article, include the raw WIkiMarkup pagetext.
-* **LocalPageDao** provides basic metadata about an article, including title, namespace, and Wikipedia id.
-* **LocalLinkDao** provides access to the Wikilink structure between pages.
+* *RawPageDao* provides detailed information about an article, include the raw WIkiMarkup pagetext.
+* *LocalPageDao* provides basic metadata about an article, including title, namespace, and Wikipedia id.
+* *LocalLinkDao* provides access to the Wikilink structure between pages.
 * **LocalCategoryMemberDao** provides access to Wikipedia's category graph.
 * **UniversalArticleDao** provides access to the multilingual concept mapping.
 * **UniversalLinkDao** exposes the link structure imposed by the multilingual mapping.
