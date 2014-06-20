@@ -1,4 +1,4 @@
-package org.wikibrain.cookbook.phrases;
+package org.wikibrain.cookbook;
 
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -6,9 +6,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.phrases.PhraseAnalyzer;
 
 import java.io.IOException;
@@ -17,10 +15,11 @@ import java.util.LinkedHashMap;
 /**
  * @author Shilad Sen
  */
-public class ResolveExample {
+public class Quickstart {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
 
-        Env env = new EnvBuilder().build();
+        // Prepare the environment
+        Env env = EnvBuilder.envFromArgs(args);
 
         // Get the configurator that creates components and a phraze analyzer from it
         Configurator configurator = env.getConfigurator();
