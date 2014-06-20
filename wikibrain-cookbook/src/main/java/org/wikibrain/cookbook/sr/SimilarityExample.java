@@ -36,7 +36,7 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class SimilarityExample {
-    private static final boolean GET_RID_OF_SPATIAL_ON=true;  //change this line to true in order to get rid of spatial comparisons
+    private static final boolean GET_RID_OF_SPATIAL_ON=false;  //change this line to true in order to get rid of spatial comparisons
     private static int WIKIDATA_CONCEPTS = 1;
     public static Env env;
     public static Configurator conf;
@@ -61,7 +61,7 @@ public class SimilarityExample {
 
         // Retrieve the "ensemble" sr metric for simple english
         MonolingualSRMetric sr = conf.get(
-                MonolingualSRMetric.class, "ensemble",
+                MonolingualSRMetric.class, "ESA",
                 "language", simple.getLangCode());
 
         //Similarity between strings
@@ -73,10 +73,12 @@ public class SimilarityExample {
                 { "Dog", "Computer" },
                 { "Obama", "Japan"},
                 { "Dog", "New York City"},
-                { "Montana", "America"}
+                { "Montana", "United States of America"}
         };
 
         createBlacklist();
+
+        ExplanationFormatter formatter = new ExplanationFormatter(lpDao);
 
         for (String pair[] : pairs) {
             if(GET_RID_OF_SPATIAL_ON) {
@@ -87,8 +89,11 @@ public class SimilarityExample {
                     System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'");
                 }
             } else {
-                SRResult s = sr.similarity(pair[0], pair[1], false);
+                SRResult s = sr.similarity(pair[0], pair[1], true);
                 System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'");
+                for(Explanation e : s.getExplanations()){
+                    System.out.println(formatter.formatExplanation(e));
+                }
             }
         }
     }

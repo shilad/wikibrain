@@ -221,10 +221,16 @@ public class ConceptPairGenerator {
 
         List<Integer> set = new ArrayList<Integer>();
         // loop through significant geos for second point
-        for (int current: ioe.getScaleIdSet(category)){
+
+        for (int current: ioe.getScaleIdSet(category)) {
 
             GeodeticCalculator calc = new GeodeticCalculator();
-            Point currentPoint = (Point) geometries.get(current);
+            Point currentPoint = null;
+            try {
+                currentPoint = (Point) geometries.get(current);
+            } catch (Exception e){
+                continue;
+            }
             calc.setStartingGeographicPoint(currentPoint.getX(), currentPoint.getY());
             calc.setDestinationGeographicPoint(home.getX(), home.getY());
 

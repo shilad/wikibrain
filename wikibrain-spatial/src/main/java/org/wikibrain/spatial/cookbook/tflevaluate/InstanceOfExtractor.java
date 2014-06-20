@@ -43,7 +43,7 @@ public class InstanceOfExtractor {
     private LocalPageDao lDao ;
     private WikidataDao wdao ;
     private static final boolean DEBUG = true;
-    private static final Language CUR_LANG = Language.EN;
+    private static final Language CUR_LANG = Language.SIMPLE;
     private Map<Integer,Set<Integer>> countryToStateMap;
 
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
@@ -74,13 +74,13 @@ public class InstanceOfExtractor {
         }
 
 
-        try {
-            countryToStateMap = loadHierarchicalData();
-
-        }catch(DaoException e){
-            countryToStateMap = new HashMap<Integer, Set<Integer>>();
-            System.out.println("Could not load country/state gadm info");
-        }
+//        try {
+//            countryToStateMap = loadHierarchicalData();
+//
+//        }catch(DaoException e){
+//            countryToStateMap = new HashMap<Integer, Set<Integer>>();
+//            System.out.println("Could not load country/state gadm info");
+//        }
     }
 
 
@@ -279,7 +279,7 @@ public class InstanceOfExtractor {
     public void loadScaleIds(){
 
         try {
-            FileInputStream fis = new FileInputStream(new File("scaleId"+CUR_LANG+".txt"));
+            FileInputStream fis = new FileInputStream(new File("scaleIds"+CUR_LANG+".txt"));
             ObjectInputStream ois = new ObjectInputStream(fis);
             scaleIds = (Set[]) ois.readObject();
             ois.close();
