@@ -72,13 +72,12 @@ resolution of apple
 
 WikiBrain development is led by [Shilad Sen](http://shilad.com) at Macalester College and [Brent Hecht](http://brenthecht.com) at the University of Minnesota.
 WikiBrain has been generously supported by the National Science Foundation, Macalester College, and the University of Minnesota.  
-                                                               
 WikiBrain is licensed under the Apache License, version 2.
 
 **Macalester WikiBrain development team, Summer 2013**
 ![Summer 2013]({{ site.baseurl }}/images/summer2013.jpg)
 
-Many students have made substantial contributions to WikiBrain, including:
+WikiBrain has been made possible through substantial contributions by many students, including:
  Alan Morales Blanco,
  Margaret Giesel,
  Rebecca Gold, 
