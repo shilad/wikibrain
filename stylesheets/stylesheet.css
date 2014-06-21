@@ -171,27 +171,23 @@ aside a.button {
 
 code, pre {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
-  color: #222;
+  color: #2879d0;
   margin-bottom: 30px;
-  font-size: 13px;
+  border: solid 1px #e2e2e2;
+  font-size: 12px;
+  background-color: #fff;
 }
 
 code {
-  background-color: #f2f8fc;
-  border: solid 1px #dbe7f3;
-  padding: 0 3px;
+  padding: 2px 3px;
 }
 
 pre {
-  padding: 20px;
-  background: #fff;
+  padding: 7px 10px;
   text-shadow: none;
   overflow: auto;
-  border: solid 1px #f2f2f2;
 }
 pre code {
-  color: #2879d0;
-  background-color: #fff;
   border: none;
   padding: 0;
 }
@@ -214,7 +210,9 @@ hr {
 
 table {
   width: 100%;
+  background-color: #fff;
   border: 1px solid #ebebeb;
+  margin-bottom: 20px;
 }
 
 th {
@@ -243,12 +241,12 @@ form {
   color: #474747;
 } 
 
-#main-content h1:before {
-  content: "/";
-  color: #9ddcff;
-  padding-right: 0.3em;
-  margin-left: -0.9em;
-}
+/*#main-content h1:before {*/
+  /*content: "/";*/
+  /*color: #9ddcff;*/
+  /*padding-right: 0.3em;*/
+  /*margin-left: -0.9em;*/
+/*}*/
 
 #main-content h2 {
   font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif; 
@@ -265,7 +263,7 @@ form {
 }
 
 #main-content h3 {
-  font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif; 
+  font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
   font-size: 18px;
   font-weight: bold;
   margin-top: 24px;

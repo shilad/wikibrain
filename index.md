@@ -3,20 +3,29 @@
         title: Homepage
 ---
 
-The WikiBrain Java library democratizes access to state-of-the-art Wikipedia-based algorithms and technologies. 
-WikiBrain allows researchers and developers to incorporate algorithms that mine Wikipedia in their applications with a few lines of code.
+The WikiBrain Java library provides access to state-of-the-art Wikipedia-based algorithms and technologies. 
+In just a few lines of code, researchers and developers can incorporate WikiBrain into their projects.
 
 
+**WikiBrain is easy to use**.
+Wikipedia data can be downloaded, parsed, and imported into a database by running a single command.
+WikiBrain allows you to incorporate state-of-the art algorithms in your Java projects in just a few lines of code. 
+
+**WikiBrain is multi-lingual**.
+It supports all 267 Wikipedia language editions, and builds a concept-map that connects an article in one language to the same article in another langauge.
+
+**WikiBrain is fast**.
+It uses single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
+While it imports data into standard SQL databases (h2 or Postgres), it builds optimized local caches for critical data. 
+
+WikiBrain integrates a variety of specific algorithms and datasets in one framework, including: 
+
+* **SR:** Semantic-relatedness algorithms that measure the strength of association between two concepts such as "racecar" and "engine."
+* **Spatial:** WikiBrain provides geospatial algorithms for spatial Wikipedia pages like [Minnesota](http://en.wikipedia.org/wiki/Minnesota) and the [Eiffel Tower](http://en.wikipedia.org/wiki/Eiffel_Tower).      
+* **Wikidata:** Support for structured [Wikidata](http://meta.wikimedia.org/wiki/Wikidata) "facts" about articles.
+* **Pageviews:** Public data about how often Wikipedia pages are viewed with hourly precision.
+               
 WikiBrain's busy thinking up its first public release. If you have questions, ask the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain).
-
-## Main features
-* Support for **all Wikipedia language** editions and comparisons between multiple languages.
-* Tools that **download** and organize [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
-* Tools that load downloaded Wikipedia datasets into **databases** for analysis.
-* Tools that identify **multi-lingual concepts** and the pages in each language edition that link to those concepts.
-* **Semantic-relatedness algorithms** that measure the relationship between two concepts such as "racecar" and "engine."
-* Support for structured [Wikidata](http://meta.wikimedia.org/wiki/Wikidata) "facts" about articles.
-* Single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
 
 ## An example program
 Once you have imported data (above), your are ready to write programs that analyze Wikipedia!
@@ -59,19 +68,31 @@ resolution of apple
 ```
 
 
-## Main components
-The WikiBrain Configurator offers a set of components that you can use as building blocks in your application.
-To get one of these components, use the Configurator.get() method:
+## About
 
-* *RawPageDao* provides detailed information about an article, include the raw WIkiMarkup pagetext.
-* *LocalPageDao* provides basic metadata about an article, including title, namespace, and Wikipedia id.
-* *LocalLinkDao* provides access to the Wikilink structure between pages.
-* **LocalCategoryMemberDao** provides access to Wikipedia's category graph.
-* **UniversalArticleDao** provides access to the multilingual concept mapping.
-* **UniversalLinkDao** exposes the link structure imposed by the multilingual mapping.
-* **WikidataDao** stores factual statements, aliases, and descriptions about to multilingual concepts.
-* **LuceneSearcher** searches arbitrary fields (e.g. title or plain text) in an arbitrary language.
-* **SparseMatrix** represents a sparse matrix of ints (ids) to floats (values) that is persisted using memory mapping to disk.
-* **PhraseAnalyzer** returns the most likely Wikipedia articles for a textual phrase, and the most common textual phrases that represent a particular Wikipedia article.
-* **MonolingualSRMetric** returns the strength of relationship between two Wikipedia pages or phrases in a particular language, and the most closely related pages to a particular phrase or page.
-* **UniversalSRMetric** (not yet tested) returns the same information as the MonolingualSRMetric, but for universal concepts that span multiple languages.
+WikiBrain development is led by [Shilad Sen](http://shilad.com) at Macalester College and [Brent Hecht](http://brenthecht.com) at the University of Minnesota.
+WikiBrain has been generously supported by the National Science Foundation, Macalester College, and the University of Minnesota.  
+                                                               
+WikiBrain is licensed under the Apache License, version 2.
+
+**Macalester WikiBrain development team, Summer 2013**
+![Summer 2013]({{ site.baseurl }}/images/summer2013.jpg)
+
+Many students have made substantial contributions to WikiBrain, including:
+ Alan Morales Blanco,
+ Margaret Giesel,
+ Rebecca Gold, 
+ Becca Harper,
+ Ben Hillman,
+ Sam Horlbeck,
+ Aaron Jiang,
+ Matthew Lesicko,
+ Toby Li,
+ Yulun Li,
+ Huy Mai,
+ Ben Mathers,
+ Sam Naden,
+ Jesse Russell,
+ Laura Sousa Vonessen,
+ Zixiao Wang, 
+ and Ari Weilland   

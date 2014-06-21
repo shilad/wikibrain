@@ -4,6 +4,8 @@
 ---
 # Importing data
 
+It automatically downloads and organizes [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
+
 Download and process the dataset:
 
 ```bash

@@ -68,8 +68,9 @@ Let's walk through this program to explain each piece.
 First, we create an ```Env``, a WikiBrain environment that provides access to the components we need:
 
 ```java
-Env env = new EnvBuilder().build();
+Env env = EnvBuilder.envFromArgs(args);
 ```
+
 The [```EnvBuilder```](wikibrain-core/src/main/java/org/wikibrain/core/cmd/EnvBuilder.java) 
 provides utility methods to set the languages you want to support, the maximum number of threads available to your program, etc.
 There are more advanced ways of configuring WikiBrain - both programatically and through configuration files - described in the Configuration section of this page.
