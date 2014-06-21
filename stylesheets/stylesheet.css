@@ -487,3 +487,8 @@ footer a:hover {
 
 /* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
 @media only screen and (max-width: 479px) {}
+
+#edit-on-gh a {
+    color : #777;
+    font-size : 10px;
+}
