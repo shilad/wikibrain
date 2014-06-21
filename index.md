@@ -3,8 +3,7 @@
         title: Homepage
 ---
 
-The WikiBrain Java library provides access to state-of-the-art Wikipedia-based algorithms and technologies. 
-In just a few lines of code, researchers and developers can incorporate WikiBrain into their projects.
+The WikiBrain Java library enables researchers and developers to incorporate state-of-the-art Wikipedia-based algorithms and technologies in a few lines of code.
 
 
 **WikiBrain is easy to use**.
@@ -12,10 +11,10 @@ Wikipedia data can be downloaded, parsed, and imported into a database by runnin
 WikiBrain allows you to incorporate state-of-the art algorithms in your Java projects in just a few lines of code. 
 
 **WikiBrain is multi-lingual**.
-It supports all 267 Wikipedia language editions, and builds a concept-map that connects an article in one language to the same article in another langauge.
+WikiBrain supports all 267 Wikipedia language editions, and builds a concept-map that connects an article in one language to the same article in another langauge.
 
 **WikiBrain is fast**.
-It uses single-machine **parallelization** (i.e. multi-threading support) for all computationally intensive features.
+WikiBrain uses single-machine **parallelization** (i.e. multi-threading) for all computationally intensive features.
 While it imports data into standard SQL databases (h2 or Postgres), it builds optimized local caches for critical data. 
 
 WikiBrain integrates a variety of specific algorithms and datasets in one framework, including: 
@@ -28,7 +27,7 @@ WikiBrain integrates a variety of specific algorithms and datasets in one framew
 WikiBrain's busy thinking up its first public release. If you have questions, ask the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain).
 
 ## An example program
-Once you have imported data (above), your are ready to write programs that analyze Wikipedia!
+Once you have [imported data](tutorial/import.html), you can write programs that analyze Wikipedia.
 Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
 
 ```java
@@ -71,7 +70,7 @@ resolution of apple
 ## About
 
 WikiBrain development is led by [Shilad Sen](http://shilad.com) at Macalester College and [Brent Hecht](http://brenthecht.com) at the University of Minnesota.
-WikiBrain has been generously supported by the National Science Foundation, Macalester College, and the University of Minnesota.  
+WikiBrain has been generously supported by the National Science Foundation, Macalester College, and the University of Minnesota.
 WikiBrain is licensed under the Apache License, version 2.
 
 **Macalester WikiBrain development team, Summer 2013**
