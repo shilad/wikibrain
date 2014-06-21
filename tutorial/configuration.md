@@ -6,6 +6,136 @@
 
 # Configuration
 
+WikiBrain's configuration uses [Typesafe config](https://github.com/typesafehub/config)
+
+## Overview of configuration file structure
+
+- Whenever a program loads configuration, it loads the default configuration file [/wikibrain-core/src/main/resources/reference.conf](https://github.com/shilad/wikibrain/blob/master/wikibrain-core/src/main/resources/reference.conf).
+- You can specify configuration files that override these default settings (more on this later).
+- Generally, you should _NOT_ edit the reference.conf file. 
+- The configuration file is in a JSON-like format called [HOCON](https://github.com/typesafehub/config#using-hocon-the-json-superset).
+
+
+Consider the section below from the default reference.conf, which defines four disambiguators named `topResult`, `topResultConsensus`, etc. 
+It also tells WikiBrain to use the `similarity` disambiguator by default. 
+
+```text
+sr : {
+    disambig : {
+        default : similarity
+        topResult : {
+            type : topResult
+            phraseAnalyzer : default
+        }
+        topResultConsensus : {
+            type : topResultConsensus
+            phraseAnalyzers : ["lucene","stanford","anchortext"]
+        }
+        milnewitten : {
+            type : milnewitten
+            metric : milnewitten
+            phraseAnalyzer : default
+        }
+        similarity : {
+            type : similarity
+            metric : inlinknotrain
+            phraseAnalyzer : default
+
+            // how to score candidate senses. Possibilities are:
+            //      popularity: just popularity
+            //      similarity: just similarity
+            //      product: similarity * popularity
+            //      sum: similarity + popularity
+            criteria : sum
+        }
+    }
+```
+
+
+## Env, configurator and components
+
+WikiBrain uses the config file to create and configure specific components.
+For example, the above section is associated with the [Disambiguator](https://github.com/shilad/wikibrain/blob/master/wikibrain-sr/src/main/java/org/wikibrain/sr/disambig/Disambiguator.java) component.
+The configurations are used when you ask WikiBrain for a particular component (in this case a Disambiguator).
+
+To create a new WikiBrain environment and get a particular disambiguator you would do the following:
+ 
+```java
+public static void main(String args[]) {
+
+    // Prepare the environment
+    Env env = EnvBuilder.envFromArgs(args);
+    
+    // Get the configurator that creates components and a phraze analyzer from it
+    Configurator configurator = env.getConfigurator();
+    
+    // Get the default disambiguator (named "similarity" in this case)
+    Disambiguator dab = configurator.get(Disambiguator.class);
+            
+    // Get a specific disambiguator
+    Disambiguator dab2 = configurator.get(Disambiguator.class, "topResult");
+}
+```
+
+
+## Customizing your configuration via override files
+You'll commonly want to override the default reference.conf configuration file.
+
+```
+// Overriding file myConf1.conf
+dao.dataSource.h2db.url : "jdbc:h2:db/foo"
+```
+- To run a program with part of the default configurations overridden by myConf1.conf, do
+```
+$ ProgramCommand -c /directory/myConf1.conf
+```
+
+### Extra notes
+- You can create multiple configuration files and save them at convenient directories. 
+- The configuration files can be saved with flexible file types, .conf, .txt, etc.
+
+## Use the Wikapidia Configuration API  
+Please read this section if you write Java codes using the Wikapidia configuration API.  
+This part of the documentation builds on the [previous section](https://github.com/shilad/wikapidia/wiki/Configuration#customizing-your-wikapidia-configuration).  
+
+### Create a configurator object
+- First, create a configuration object by
+ - default configuration
+```
+Configuration configuration = new Configuration();
+```
+ - or override configuration file
+```
+Configuration configuration = new Configuration(myConf);
+```
+- Then you can create the configurator object:
+```
+Configurator conf = new Configurator(configuration);
+```
+
+### Get an instance with a specified class
+- You can use a Configurator object to get an instance of a specified class. For example: 
+```
+LocalPageDao lpDao = configurator.get(LocalPageDao.class);
+```
+returns an object of type LocalPageDao.
+
+### Get configuration values from the configuration file
+- Configuration values are _NOT_ required to associate with a provider. 
+- The [typesafe.config](https://github.com/typesafehub/config/blob/master/config/src/main/java/com/typesafe/config/Config.java) library helps you get configuration values in this case:
+```
+Configuration config = new Configuration();
+config.get().getAnyRef(String string);
+```
+
+## Extending the Wikapidia Configuration API
+
+Please refer to the Configurator and Configuration Javadocs. 
+
+
+
+
+
 Let's walk through this program to explain each piece. 
 First, we create an ```Env``, a WikiBrain environment that provides access to the components we need:
 
