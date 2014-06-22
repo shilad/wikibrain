@@ -10,7 +10,7 @@
         <version>7</version>
     </parent>
 
-    <groupId>com.github.shilad.wikibrain</groupId>
+    <groupId>org.wikibrainapi</groupId>
     <artifactId>wikibrain-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
