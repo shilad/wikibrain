@@ -38,26 +38,26 @@ fi
 rm -rf ${ALL_JARS} ${target}
 
 # prepare release
-git branch ${branch} &&
+git checkout -b ${branch} &&
 mvn clean &&
 mvn versions:set -DnewVersion=${new_version} &&
 mvn  -f ./wikibrain-parent/pom.xml versions:set -DnewVersion=${new_version} &&
 mvn  -N versions:update-child-modules &&
 mvn versions:commit ||
-{ echo "updating versions failed" >&2; exit 1 }
+{ echo "updating versions failed" >&2; exit 1; }
 
 # push release and commit
 mvn clean compile package &&
 git commit -m "Released ${new_version}" &&
+git push origin ${branch} &&
 mvn clean deploy -P release-version -DskipTests=true &&
 mvn nexus-staging:release  -P release-version -DskipTests=true ||
-{ echo "Pushing release to git or sonatype failed" >&2; exit 1 }
+{ echo "Pushing release to git or sonatype failed" >&2; exit 1; }
 
 # zip up full jar
 mvn dependency:copy-dependencies -DoutputDirectory=${ALL_JARS} &&
 cp -p wikibrain*/target/wikibrain*${new_version}.jar ${ALL_JARS} &&
 (cd ${ALL_JARS} && zip ${target} *.jar) &&
 scp -p ${target} shilad.com:/var/www/html/www.shilad.com/wikibrain ||
-{ echo "Uploading master zip failed" >&2; exit 1 }
-
+{ echo "Uploading master zip failed" >&2; exit 1; }
 

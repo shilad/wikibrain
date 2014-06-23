@@ -7,12 +7,12 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.1.0</version>
         <relativePath>wikibrain-parent</relativePath>
     </parent>
 
     <artifactId>wikibrain-all</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>pom</packaging>
 
     <modules>
