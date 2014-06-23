@@ -3,8 +3,10 @@
         title: Homepage
 ---
 
-The WikiBrain Java library enables researchers and developers to incorporate state-of-the-art Wikipedia-based algorithms and technologies in a few lines of code.
 
+**WikiBrain's busy thinking up its first public release. Please be patient while we fine tune our APIs and complete our documentation. Ask us questions at the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain)!**
+
+The WikiBrain Java library enables researchers and developers to incorporate state-of-the-art Wikipedia-based algorithms and technologies in a few lines of code.
 
 **WikiBrain is easy to use**.
 Wikipedia data can be downloaded, parsed, and imported into a database by running a single command.
@@ -23,8 +25,6 @@ WikiBrain integrates a variety of specific algorithms and datasets in one framew
 * **Spatial:** WikiBrain provides geospatial algorithms for spatial Wikipedia pages like [Minnesota](http://en.wikipedia.org/wiki/Minnesota) and the [Eiffel Tower](http://en.wikipedia.org/wiki/Eiffel_Tower).      
 * **Wikidata:** Support for structured [Wikidata](http://meta.wikimedia.org/wiki/Wikidata) "facts" about articles.
 * **Pageviews:** Public data about how often Wikipedia pages are viewed with hourly precision.
-               
-WikiBrain's busy thinking up its first public release. If you have questions, ask the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain).
 
 ## An example program
 Once you have [imported data](tutorial/import.html), you can write programs that analyze Wikipedia.
