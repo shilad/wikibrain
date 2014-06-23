@@ -39,6 +39,6 @@ mvn versions:commit ||
 { echo "updating versions failed" >&2; exit 1; }
 
 # git commit
-mvn clean compile package &&
+mvn clean compile package -DskipTests=true &&
 git commit -m "Bumped snapshot to ${new_version}" ||
 { echo "Pushing release to git or sonatype failed" >&2; exit 1; }
