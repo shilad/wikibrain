@@ -40,5 +40,6 @@ mvn versions:commit ||
 
 # git commit
 mvn clean compile package -DskipTests=true &&
+git add -u &&
 git commit -m "Bumped snapshot to ${new_version}" ||
 { echo "Pushing release to git or sonatype failed" >&2; exit 1; }
