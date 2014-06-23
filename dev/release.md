@@ -5,6 +5,7 @@
 # WikiBrain Release Checklist
 
  1. Run unit tests; make sure they pass.
+
  2. Release new version: 
 
     ```bash
