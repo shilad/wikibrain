@@ -26,6 +26,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -72,7 +73,8 @@ public class GADMConverter {
 
             // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
             //folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
-            File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
+//            File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
+            File rawFile = new File("/scratch/IdeaProjects/wikibrain/.tmp/_gadmdownload2847872550813047835.tmp/gadm2.shp");
             //File rawFile = new File("tmp/gadm_v2_shp/gadm2.shp");
 
             //copy level 2 shapefile to earth reference system
@@ -104,6 +106,8 @@ public class GADMConverter {
      */
     public File downloadGADMShapeFile(String tmpFolder) throws IOException, ZipException, InterruptedException {
 
+        System.out.println("File name: " + tmpFolder + "/gadm2.shp");
+
         String baseFileName = "gadm_v2_shp";
         String zipFileName = baseFileName + ".zip";
         String gadmURL = "http://biogeo.ucdavis.edu/data/gadm2/" + zipFileName;
@@ -133,8 +137,6 @@ public class GADMConverter {
      *                     Converts raw GADM shapefile into WikiBrain readable type
      *                     Recommended JVM max heapsize = 4G
      */
-
-
     public void convertShpFile(File rawFile, SpatialDataFolder outputFolder, int level) throws IOException, WikiBrainException {
         if ((level != 0) && (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
 
@@ -224,6 +226,96 @@ public class GADMConverter {
 
     }
 
+    /**
+     * Converts raw shape file to csv file
+     *
+     * @param rawShpFile
+     * @param level
+     * @param fullFileName
+     */
+    public void convertShpFileToCSV(File rawShpFile, int level, String fullFileName) {
+        if ((level != 0) && (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
+
+        // file to write out to
+        File csvAttributes = new File(fullFileName);
+        BufferedWriter writer = null;
+        {
+            try {
+                writer = new BufferedWriter(new FileWriter(csvAttributes));
+            } catch (Exception e) {
+                System.out.println("Problem when trying to create new csv file");
+            }
+        }
+
+        // collection of features
+        SimpleFeatureCollection inputCollection = null;
+        try{
+            inputCollection=getInputCollection(rawShpFile);
+        }catch(IOException e){
+            System.out.println("Could not get input collection of simple features");
+        }
+
+        try {
+            LOG.log(Level.INFO, "Start processing polygons for level " + level + " administrative districts.");
+            SimpleFeatureIterator inputFeatures = inputCollection.features();
+            StringBuilder out;
+
+            List<Integer> usefulProperties = new ArrayList<Integer>();
+
+            // iterate over elements of shape file
+            int count = 0;
+            while (inputFeatures.hasNext()) {
+
+                // count things
+                count++;
+                if (count%1000 == 0){
+                    System.out.println("Have processed "+count+" administrative entities");
+                    writer.flush();
+                }
+
+                out = new StringBuilder();
+
+                SimpleFeature feature = inputFeatures.next();
+                List<Object> attributes = feature.getAttributes();
+
+                // header line of file
+                if (count == 1){
+                    List<Property> properties = new ArrayList();
+                    properties.addAll(feature.getProperties());
+
+                    // iterate over properties of shape file element
+                    for (int i = 0; i < Math.min(attributes.size(), properties.size()); i++) {
+                        // ignore geometries
+                        if (!Geometry.class.isInstance(attributes.get(i))) {
+                            usefulProperties.add(i);
+                            out.append(attributes.get(i) + ", ");
+                        }
+                    }
+                    out.append(";\n");
+                }
+
+                // iterate over attributes of shape file element
+                for (int i : usefulProperties) {
+                    out.append(attributes.get(i) + ", ");
+                }
+                out.delete(out.length()-2,out.length());
+                out.append(";\n");
+
+                // write this out to the file
+                try{
+                    writer.write(out.toString());
+                }catch(IOException e){
+                    System.out.println("ioexception while writing to csv file");
+                }
+            }
+
+            inputFeatures.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private List<SimpleFeature> inputFeatureHandler(SimpleFeatureCollection inputCollection, String featureName, int level, SimpleFeatureType outputFeatureType, Multimap<String, String> relation) {
 
         GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
@@ -253,8 +345,9 @@ public class GADMConverter {
         if (level == 1) {
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
-                if (feature.getAttribute(6).equals(featureName))
+                if (feature.getAttribute(6).equals(featureName)) {
                     geometryList.add((Geometry) feature.getAttribute(0));
+                }
             }
         } else {
             while (inputFeatures.hasNext()) {
