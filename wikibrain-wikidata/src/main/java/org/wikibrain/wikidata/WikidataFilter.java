@@ -136,6 +136,8 @@ public class WikidataFilter {
         }
 
         public Builder withValue(WikidataValue value) {
+            if(value == null)
+                return this;
             filter.values = Arrays.asList(value);
             return this;
         }
