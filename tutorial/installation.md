@@ -52,7 +52,7 @@ You can either install WikiBrain by downloading the zip file containing the Wiki
   
 #### Installing using jars
  
-1. Download the [latest WikiBrain zip file](http://shilad.com/wikibrain/wikibrain-and-deps-{{ page.latest-version }}.zip) containing the WikiBrain jars and their dependencies.
+1. Download the [latest WikiBrain zip file](http://shilad.com/wikibrain/wikibrain-and-deps-{{ site.wbversion }}.zip) containing the WikiBrain jars and their dependencies.
 2. Extract the zip file.
 3. In your IDE, add all jars in the zip file to your classpath.
   
