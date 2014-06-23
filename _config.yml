@@ -7,5 +7,4 @@ defaults:
     scope:
       path: "" # empty string for all files
     values:
-      latest-version: 0.1.0
-      layout: default
+      latestversion: 0.1.0
