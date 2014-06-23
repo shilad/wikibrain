@@ -30,10 +30,12 @@ Other modules take additional time and resources:
 
 ## Software Requirements
 
-Wikibrain requires a Java JDK, version 6 or higher. Depending on your needs you may also consider:
+Wikibrain requires a Java JDK, version 6 or higher. 
 
-1. **A Java IDE**. You can directly run Wikibrain programs through any standard Java IDE (Eclipse, Netbeans, IntelliJ, etc.).
-3. **bash**. If you would like to run Wikibrain programs from the command line, you'll need the bash shell.
+Depending on your needs you may also consider installing these **optional software** packages:
+
+1. **Java IDE**. You can directly run Wikibrain programs through any standard Java IDE (Eclipse, Netbeans, IntelliJ, etc.).
+3. **Bash**. If you would like to run Wikibrain programs from the command line, you'll need the bash shell.
 2. **Maven**. The [Maven](http://maven.apache.org/) Java dependency management system, version 3.2 or higher. 
 Maven manages Java dependencies and allows you to stay up to date with Wikibrain jars and their dependencies.
 The Maven website details installation instructions.
@@ -50,7 +52,7 @@ You can either install WikiBrain by downloading the zip file containing the Wiki
   
 #### Installing using jars
  
-1. Download the [latest WikiBrain zip file](#) containing the WikiBrain jars and their dependencies.
+1. Download the [latest WikiBrain zip file](http://shilad.com/wikibrain/wikibrain-and-deps-{{ page.latest-version }}.zip) containing the WikiBrain jars and their dependencies.
 2. Extract the zip file.
 3. In your IDE, add all jars in the zip file to your classpath.
   

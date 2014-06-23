@@ -2,3 +2,10 @@ markdown: redcarpet
 redcarpet:
   extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "with_toc_data"]
 baseurl : /wikibrain
+defaults:
+  -
+    scope:
+      path: "" # empty string for all files
+    values:
+      latest-version: 0.1.0
+      layout: default
