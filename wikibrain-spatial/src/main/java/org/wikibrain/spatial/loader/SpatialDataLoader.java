@@ -249,7 +249,7 @@ public class SpatialDataLoader {
 //     */
 //    private void parseWktFile(Integer startGeomId, LayerStruct lStruct) throws WikiBrainException{
 //
-//        try{
+//        try{re
 //
 //            BufferedReader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(lStruct.dataFile.getAbsolutePath()),
 //                    "UTF-8"));

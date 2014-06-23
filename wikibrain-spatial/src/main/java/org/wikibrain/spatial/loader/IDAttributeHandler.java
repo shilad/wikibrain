@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.loader;
 
 import org.wikibrain.core.WikiBrainException;
+import org.wikibrain.core.dao.Dao;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalArticleDao;
 import org.wikibrain.core.dao.RedirectDao;
@@ -12,10 +13,14 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.phrases.TitleRedirectPhraseAnalyzer;
+import org.wikibrain.spatial.cookbook.tflevaluate.InstanceOfExtractor;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataEntity;
+import sun.security.jca.GetInstance;
 
+import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  * Created by bjhecht on 4/1/14.
@@ -69,6 +74,12 @@ public abstract class IDAttributeHandler {
 
         }
 
+        /**
+         *
+         * @param id We know this is a string because this method is in the TitleAttributeHandler, and titles are strings
+         * @return
+         * @throws WikiBrainException
+         */
         @Override
         public Integer getWikidataItemIdForId(Object id) throws WikiBrainException{
             try {
@@ -83,6 +94,20 @@ public abstract class IDAttributeHandler {
                 throw new WikiBrainException(e);
 
             }
+        }
+
+        public Integer getWikidataItemIdForIdWithConditions(Object id, Set<String> keywords, int max) throws WikiBrainException{
+            try {
+                int temp = getWikidataItemIdForId(id);
+                LinkedHashMap<LocalId, Float> candidate = analyzer.resolve(myLang, (String) id, max);
+                Set<LocalId> idSets = candidate.keySet();
+
+
+                return temp;
+            }catch (DaoException e){
+                return 0;
+            }
+
         }
     }
 
