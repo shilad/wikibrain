@@ -3,9 +3,10 @@
         title: Homepage
 ---
 
-The WikiBrain Java library enables researchers and developers to incorporate state-of-the-art Wikipedia-based algorithms and technologies in a few lines of code.
 
 **WikiBrain's busy thinking up its first public release. Please be patient while we fine tune our APIs and complete our documentation. Ask us questions at the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain)!**
+
+The WikiBrain Java library enables researchers and developers to incorporate state-of-the-art Wikipedia-based algorithms and technologies in a few lines of code.
 
 **WikiBrain is easy to use**.
 Wikipedia data can be downloaded, parsed, and imported into a database by running a single command.
