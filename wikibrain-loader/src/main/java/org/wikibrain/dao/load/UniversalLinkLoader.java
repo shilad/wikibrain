@@ -137,7 +137,7 @@ public class UniversalLinkLoader {
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
         UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class);
-        UniversalLinkDao universalLinkSkeletalDao = conf.get(UniversalLinkDao.class, "skeletal-sql");
+        UniversalLinkDao universalLinkSkeletalDao = conf.get(UniversalLinkDao.class, "skeletal-sql-wikidata");
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
 
         UniversalLinkLoader loader = new UniversalLinkLoader(
@@ -148,6 +148,7 @@ public class UniversalLinkLoader {
                 universalLinkSkeletalDao
         );
 
+        System.out.println("loading " + mapper.getId());
         loader.beginLoad(cmd.hasOption("d"));
         loader.loadLinkMap(mapper.getId());
         loader.endLoad();
