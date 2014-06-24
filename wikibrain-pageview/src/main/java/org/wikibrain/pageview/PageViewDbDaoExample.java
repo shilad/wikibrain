@@ -70,7 +70,7 @@ public class PageViewDbDaoExample {
 //        System.out.printf("sum: %d\n", sum);
 
         //Test #3 Get the number of page views for a list of different pages
-         List<Integer> testList = new ArrayList();
+       List<Integer> testList = new ArrayList();
        for (int id: blackListSet){
            testList.add(id);
        }
