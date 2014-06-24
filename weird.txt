@@ -2,7 +2,18 @@ time zone
 latitude
 meridian
 time zones
+time
 latitudes
 meridians
 road
 roads
+motorway
+highway
+avenue
+freeway
+motorways
+highways
+avenues
+freeways
+causeway
+causeways

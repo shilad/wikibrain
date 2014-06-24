@@ -13,7 +13,6 @@ collectivity
 voivodeship
 regions
 provinces
-states
 ISO 3166-2:DE
 divisions
 zones

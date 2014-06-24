@@ -33,6 +33,13 @@ tributary
 mountain pass
 mangrove
 cave
+peak
+pond
+glacier
+creek
+vale
+natural
+ridge
 deserts
 canyons
 rivers
@@ -70,9 +77,17 @@ mountain passes
 mangroves
 caves
 beach
+beaches
 meadow
 meadows
 archipelago
 archipelagos
 spring
 springs
+peaks
+ponds
+glaciers
+creeks
+vales
+ridges
+wildlife

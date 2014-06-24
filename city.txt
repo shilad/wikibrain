@@ -1,5 +1,4 @@
 capital
-county
 city
 municipality
 borough
@@ -10,45 +9,32 @@ arrondissement
 council area
 village
 settlement
-canton
-district
-duchy
 community
 municipal corporation
-ward
+municipal
 suburb
+town
+hamlet
+commune
+census-designated
 stadt
-parish
-tehsil
-upazila
+unincorporated
 capitals
-counties
 cities
 municipalities
 boroughs
 prefectures
-metropolis
+metropolises
 neighbourhoods
 arrondissements
 council areas
 villages
 settlements
-cantons
-districts
-duchies
 communities
 municipal corporations
-wards
 suburbs
-stadt
-parishes
-tehsils
-upazilas
-town
 towns
-hamlet
 hamlets
-census-designated
-unincorporated
-commune
 communes
+locality
+localities
