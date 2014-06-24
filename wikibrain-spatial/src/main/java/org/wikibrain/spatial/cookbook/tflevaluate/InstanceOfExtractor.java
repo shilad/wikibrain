@@ -84,7 +84,7 @@ public class InstanceOfExtractor {
     }
 
 
-    public static void main (String[] args) {
+    public static void main (String[] args)  {
         Env env = null;
         InstanceOfExtractor ioe = null;
         try{
@@ -112,12 +112,12 @@ public class InstanceOfExtractor {
 //
 //            System.out.println(ioe.countryToStateMap.get(30));
 //            System.out.println(ioe.countryToStateMap.get(16));
-//            ioe.loadScaleKeywords();
+            ioe.loadScaleKeywords();
 //            ioe.loadScaleIds(new File("scaleIds.txt"));
-//            ioe.generateScaleId();
+            ioe.generateScaleId();
 
             // print out concepts in relevant category
-//            ioe.printScale(CITY);
+            ioe.printScale(STATE);
 //            ioe.generateRecallTest(150);
 //            ioe.printScaleId(CITY);
 
@@ -131,12 +131,12 @@ public class InstanceOfExtractor {
 //                }
 //            }
 
-//        }catch(DaoException e){
-//            System.out.println(e);
+        }catch(DaoException e){
+            System.out.println(e);
         }catch(ConfigurationException e){
             System.out.println(e);
-//        }catch(IOException e){
-//            System.out.println(e);
+        }catch(IOException e){
+            System.out.println(e);
         }
 
     }
@@ -294,14 +294,20 @@ public class InstanceOfExtractor {
     /**
      * Separate concept ids by scale and save into a file.
      *
-     * @throws DaoException Could happen when trying to access pages or spatial information
-     * @throws IOException Could happen when trying to write the generated ids to their file
+     * @throws org.wikibrain.core.dao.DaoException Could happen when trying to access pages or spatial information
+     * @throws java.io.IOException Could happen when trying to write the generated ids to their file
      */
     public void generateScaleId() throws DaoException,IOException{
 
         // Get all known concept geometries
         Map<Integer, Geometry> geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
+
+        Map<Integer, Geometry> countries = sdDao.getAllGeometriesInLayer("gadm0", "earth");
+        LOG.log(Level.INFO, String.format("Found %d total countries, now loading countries", countries.size()));
+
+        Map<Integer, Geometry> states = sdDao.getAllGeometriesInLayer("gadm1", "earth");
+        LOG.log(Level.INFO, String.format("Found %d total states, now loading states", states.size()));
 
         // initiate scale sets
         for (int i=0; i<MAX; i++   ){
@@ -316,7 +322,7 @@ public class InstanceOfExtractor {
             LocalPage lpage = lDao.getById(CUR_LANG,concept.getLocalId(CUR_LANG));
 
             // counter print
-            if (DEBUG && count%10000 == 0){
+            if (DEBUG && count%1000 == 0){
                 LOG.log(Level.INFO, "++++++++++++++++++++++++++++++++++ " + count + " ++++++++++++++++++++++++++++++++");
             }
             count++;
@@ -326,6 +332,15 @@ public class InstanceOfExtractor {
 
             // break for loop after first proper "instance of" label found for this conceptId
             boolean found = false;
+
+            if (countries.keySet().contains(conceptId)){
+                scaleIds[COUNTRY].add(conceptId);
+                found = true;
+            }
+            if (states.keySet().contains(conceptId)){
+                scaleIds[STATE].add(conceptId);
+                found =  true;
+            }
 
             // loop over this conceptId's statements
             for (WikidataStatement st: list){
@@ -406,13 +421,18 @@ public class InstanceOfExtractor {
             instanceOfLabel = instanceOfLabel.substring(0, instanceOfLabel.length() - 1);
         }
 
+
+
         // check for a match
-        for (int i=0; i<MAX; i++) {
-            if (match(scaleKeywords[i], instanceOfLabel)) {
-                scaleIds[i].add(id);
-                return true;
+            for (int i=0; i<MAX; i++) {
+
+                if (match(scaleKeywords[i], instanceOfLabel)) {
+                    scaleIds[i].add(id);
+                    return true;
+                }
             }
-        }
+
+
 
         // if no match found, return false
         return false;
