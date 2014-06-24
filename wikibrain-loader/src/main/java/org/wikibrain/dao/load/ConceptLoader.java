@@ -21,12 +21,10 @@ import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.download.DumpFileDownloader;
 import org.wikibrain.download.RequestedLinkGetter;
 import org.wikibrain.mapper.ConceptMapper;
-import org.wikibrain.mapper.algorithms.PureWikidataConceptMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,7 +109,7 @@ public class ConceptLoader {
         Configurator conf = env.getConfigurator();
         String algorithm = cmd.getOptionValue("n", null);
 
-        UniversalPageDao dao = conf.get(UniversalPageDao.class);
+        UniversalPageDao dao = conf.get(UniversalPageDao.class, algorithm);
         if (algorithm == null) {
             algorithm = (env.getLanguages().size() <= 1) ? "monolingual" : "purewikidata";
         }

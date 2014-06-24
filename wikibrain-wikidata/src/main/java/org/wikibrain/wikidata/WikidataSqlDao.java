@@ -121,23 +121,23 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
 
     @Override
     public Integer getItemId(LocalPage page) throws DaoException{
-        return upDao.getUnivPageId(page, WIKIDATA_ALGORITHM_ID);
+        return upDao.getUnivPageId(page);
     }
 
     @Override
     public Integer getItemId(LocalId localId) throws DaoException {
-        return upDao.getUnivPageId(localId.getLanguage(), localId.getId(), WIKIDATA_ALGORITHM_ID);
+        return upDao.getUnivPageId(localId.getLanguage(), localId.getId());
     }
 
     @Override
     public UniversalPage getUniversalPage(int itemId) throws DaoException {
-        UniversalPage uPage = upDao.getById(itemId, WIKIDATA_ALGORITHM_ID);
+        UniversalPage uPage = upDao.getById(itemId);
         return uPage;
     }
 
     @Override
     public List<WikidataStatement> getStatements(LocalPage page) throws DaoException {
-        int conceptId = upDao.getUnivPageId(page, getItemId(page));
+        int conceptId = upDao.getUnivPageId(page);
         if (conceptId < 0) {
             return new ArrayList<WikidataStatement>();
         }
@@ -450,7 +450,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     public Set<LocalId> pagesWithValue(String propertyName, WikidataValue value, Language language) throws DaoException {
         Set<LocalId> ids = new HashSet<LocalId>();
         for (int conceptId : conceptsWithValue(propertyName, value)) {
-            UniversalPage up = upDao.getById(conceptId, 1);
+            UniversalPage up = upDao.getById(conceptId);
             if (up != null && up.isInLanguage(language)) {
                 ids.add(new LocalId(language, up.getLocalId(language)));
             }

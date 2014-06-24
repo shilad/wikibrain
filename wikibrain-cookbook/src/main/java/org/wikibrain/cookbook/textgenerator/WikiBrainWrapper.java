@@ -138,9 +138,9 @@ public class WikiBrainWrapper {
      */
     public List<LocalPage> getInOtherLanguages(LocalPage page) {
         try {
-            int conceptId = upDao.getUnivPageId(page, CONCEPT_ALGORITHM_ID);
+            int conceptId = upDao.getUnivPageId(page);
             List<LocalPage> results = new ArrayList<LocalPage>();
-            UniversalPage up = upDao.getById(conceptId, CONCEPT_ALGORITHM_ID);
+            UniversalPage up = upDao.getById(conceptId);
             if (up == null) {
                 return results;
             }

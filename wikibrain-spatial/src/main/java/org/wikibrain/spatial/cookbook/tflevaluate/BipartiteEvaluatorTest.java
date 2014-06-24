@@ -101,9 +101,9 @@ public class BipartiteEvaluatorTest {
         for(Integer i : sampledContainedId1){
             if(counter % 100 == 0)
                 LOG.info(String.format("%d geometries added out of %d", counter, sampledContainedId1.size()));
-            UniversalPage concept = upDao.getById(i, 1);
+            UniversalPage concept = upDao.getById(i);
             if(concept != null && concept.hasAllLanguages(languageSet)){
-                concepts1.add(upDao.getById(i, 1));
+                concepts1.add(upDao.getById(i));
                 geometriesToParse.put(i, sdDao.getGeometry(i, "wikidata", "earth"));
             }
             counter ++;
@@ -118,9 +118,9 @@ public class BipartiteEvaluatorTest {
             if(counter % 100 == 0)
                 LOG.info(String.format("%d geometries added out of %d", counter, sampledContainedId2.size()));
 
-            UniversalPage concept = upDao.getById(i, 1);
+            UniversalPage concept = upDao.getById(i);
             if(concept != null && concept.hasAllLanguages(languageSet)){
-                concepts2.add(upDao.getById(i, 1));
+                concepts2.add(upDao.getById(i));
                 geometriesToParse.put(i, sdDao.getGeometry(i, "wikidata", "earth"));
             }
             counter ++;

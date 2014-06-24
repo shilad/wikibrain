@@ -77,7 +77,7 @@ public class SimpleToblersLawEvaluator {
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
-            UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
+            UniversalPage concept = upDao.getById(conceptId);
             if (concept != null && concept.hasAllLanguages(env.getLanguages())) {
                 concepts.add(concept);
                 locations.put(concept, geometries.get(conceptId).getCentroid());

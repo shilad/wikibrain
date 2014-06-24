@@ -229,9 +229,9 @@ public class SrNormalizers {
                     localStrings.add(new LocalString(ks.language, ks.phrase2));
                     List<LocalId> ids = disambiguator.disambiguateTop(localStrings, null);
                     if (ids != null && ids.size() == 2) {
-                        int pageId1 = dao.getUnivPageId(ids.get(0).asLocalPage(), algorithmId);
-                        int pageId2 = dao.getUnivPageId(ids.get(1).asLocalPage(),algorithmId);
-                        UniversalPage page = dao.getById(pageId1,algorithmId);
+                        int pageId1 = dao.getUnivPageId(ids.get(0).asLocalPage());
+                        int pageId2 = dao.getUnivPageId(ids.get(1).asLocalPage());
+                        UniversalPage page = dao.getById(pageId1);
                         if (page != null) {
                             SRResultList dsl = metric.mostSimilar(page, maxResults, validIds);
                             if (dsl != null) {

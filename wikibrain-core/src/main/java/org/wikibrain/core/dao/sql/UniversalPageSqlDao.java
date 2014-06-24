@@ -37,9 +37,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
             Tables.UNIVERSAL_PAGE.UNIV_ID,
             Tables.UNIVERSAL_PAGE.ALGORITHM_ID
     };
+    private final int algorithmId;
 
-    public UniversalPageSqlDao(WpDataSource dataSource) throws DaoException {
+    public UniversalPageSqlDao(WpDataSource dataSource, int algorithmId) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-page");
+        this.algorithmId = algorithmId;
     }
 
     @Override
@@ -84,7 +86,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
 
                 @Override
                 public T transform(int[] item) throws DaoException {
-                    return getById(item[0], item[1]);
+                    return getById(item[0]);
                 }
             };
         } catch (RuntimeException e) {
@@ -114,7 +116,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public T getById(int univId, int algorithmId) throws DaoException {
+    public T getById(int univId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Result<Record> result = context.select()
@@ -129,28 +131,28 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public Map<Integer, T> getByIds(Collection<Integer> univIds, int algorithmId) throws DaoException {
+    public Map<Integer, T> getByIds(Collection<Integer> univIds) throws DaoException {
         if (univIds == null || univIds.isEmpty()) {
             return null;
         }
         Map<Integer, T> map = new HashMap<Integer, T>();
         for (Integer univId : univIds){
-            map.put(univId, getById(univId, algorithmId));
+            map.put(univId, getById(univId));
         }
         return map;
     }
 
     @Override
-    public UniversalPage getByLocalPage(LocalPage localPage, int algorithmId) throws DaoException {
-        int conceptId = getUnivPageId(localPage, algorithmId);
+    public UniversalPage getByLocalPage(LocalPage localPage) throws DaoException {
+        int conceptId = getUnivPageId(localPage);
         if (conceptId < 0) {
             return null;
         }
-        return getById(conceptId, algorithmId);
+        return getById(conceptId);
     }
 
     @Override
-    public int getUnivPageId(Language language, int localPageId, int algorithmId) throws DaoException {
+    public int getUnivPageId(Language language, int localPageId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Record record = context.select()
@@ -171,12 +173,12 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public int getUnivPageId(LocalPage localPage, int algorithmId) throws DaoException {
-        return getUnivPageId(localPage.getLanguage(), localPage.getLocalId(), algorithmId);
+    public int getUnivPageId(LocalPage localPage) throws DaoException {
+        return getUnivPageId(localPage.getLanguage(), localPage.getLocalId());
     }
 
     @Override
-    public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(int algorithmId, LanguageSet ls) throws DaoException {
+    public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(LanguageSet ls) throws DaoException {
         DSLContext context = getJooq();
         try {
             Map<Language, TIntIntMap> map = new HashMap<Language, TIntIntMap>();
@@ -206,12 +208,11 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
      * Returns the local page id for that language, or -1 if it does not exist
      * @param language
      * @param universalId
-     * @param algorithmId
      * @return
      * @throws DaoException
      */
     @Override
-    public int getLocalId(Language language, int universalId, int algorithmId) throws DaoException {
+    public int getLocalId(Language language, int universalId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Record record = context.select()
@@ -279,10 +280,12 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 return null;
             }
             try {
+                int algorithmId = getConfig().get().getInt("mapper." + config.getString("mapper") + ".algorithmId");
                 return new UniversalPageSqlDao(
                         getConfigurator().get(
                                 WpDataSource.class,
-                                config.getString("dataSource"))
+                                config.getString("dataSource")),
+                        algorithmId
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);

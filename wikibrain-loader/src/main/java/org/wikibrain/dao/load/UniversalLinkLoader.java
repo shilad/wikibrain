@@ -67,7 +67,7 @@ public class UniversalLinkLoader {
         try {
             Iterable<LocalLink> localLinks = localLinkDao.get(new DaoFilter().setLanguages(languageSet));
             LOG.log(Level.INFO, "Fetching ID map");
-            Map<Language, TIntIntMap> map = universalPageDao.getAllLocalToUnivIdsMap(algorithmId, languageSet);
+            Map<Language, TIntIntMap> map = universalPageDao.getAllLocalToUnivIdsMap(languageSet);
             LOG.log(Level.INFO, "Loading links");
             long start = System.currentTimeMillis();
             int i=0;

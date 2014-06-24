@@ -88,10 +88,10 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         if (similar1==null|| similar2==null){
             return new SRResult();
         }
-        int uId1 = universalPageDao.getUnivPageId(similar1.asLocalPage(),algorithmId);
-        UniversalPage up1 = universalPageDao.getById(uId1,algorithmId);
-        int uId2 = universalPageDao.getUnivPageId(similar2.asLocalPage(),algorithmId);
-        UniversalPage up2 = universalPageDao.getById(uId2,algorithmId);
+        int uId1 = universalPageDao.getUnivPageId(similar1.asLocalPage());
+        UniversalPage up1 = universalPageDao.getById(uId1);
+        int uId2 = universalPageDao.getUnivPageId(similar2.asLocalPage());
+        UniversalPage up2 = universalPageDao.getById(uId2);
         return similarity(up1,up2,explanations);
     }
 
@@ -110,8 +110,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
             resultList.set(0, new SRResult());
             return resultList;
         }
-        int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
-        UniversalPage up = universalPageDao.getById(uId,algorithmId);
+        int uId = universalPageDao.getUnivPageId(localId.asLocalPage());
+        UniversalPage up = universalPageDao.getById(uId);
         return mostSimilar(up,maxResults);
     }
 
@@ -123,8 +123,8 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
             resultList.set(0, new SRResult());
             return resultList;
         }
-        int uId = universalPageDao.getUnivPageId(localId.asLocalPage(),algorithmId);
-        UniversalPage up = universalPageDao.getById(uId,algorithmId);
+        int uId = universalPageDao.getUnivPageId(localId.asLocalPage());
+        UniversalPage up = universalPageDao.getById(uId);
         return mostSimilar(up,maxResults,validIds);
     }
 
@@ -216,10 +216,10 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         List<LocalId> rowLocalIds = disambiguator.disambiguateTop(Arrays.asList(rowPhrases), new HashSet<LocalString>(Arrays.asList(colPhrases)));
         List<LocalId> colLocalIds = disambiguator.disambiguateTop(Arrays.asList(colPhrases), new HashSet<LocalString>(Arrays.asList(rowPhrases)));
         for (int i=0; i<rowIds.length; i++){
-            rowIds[i] = universalPageDao.getUnivPageId(rowLocalIds.get(i).asLocalPage(),algorithmId);
+            rowIds[i] = universalPageDao.getUnivPageId(rowLocalIds.get(i).asLocalPage());
         }
         for (int i=0; i<colIds.length; i++){
-            colIds[i] = universalPageDao.getUnivPageId(colLocalIds.get(i).asLocalPage(),algorithmId);
+            colIds[i] = universalPageDao.getUnivPageId(colLocalIds.get(i).asLocalPage());
         }
         return cosimilarity(rowIds, colIds);
     }
@@ -251,7 +251,7 @@ public abstract class BaseUniversalSRMetric implements UniversalSRMetric{
         int ids[] = new int[phrases.length];
         List<LocalId> localIds = disambiguator.disambiguateTop(Arrays.asList(phrases), null);
         for (int i=0; i<phrases.length; i++){
-            ids[i] = universalPageDao.getUnivPageId(localIds.get(i).asLocalPage(),algorithmId);
+            ids[i] = universalPageDao.getUnivPageId(localIds.get(i).asLocalPage());
         }
         return cosimilarity(ids);
     }
