@@ -4,14 +4,11 @@ import gnu.trove.set.TIntSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.LocalString;
-import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.sr.MonolingualSRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
-import org.wikibrain.sr.UniversalSRMetric;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.sr.normalize.IdentityNormalizer;
@@ -134,36 +131,6 @@ public class SrNormalizers {
     /**
      *
      * @param metric
-     * @param dataset
-     */
-    public void trainSimilarity(final UniversalSRMetric metric, Dataset dataset) {
-        if (similarityNormalizer instanceof  IdentityNormalizer) {
-            return;
-        }
-        final Normalizer trainee = similarityNormalizer;
-        similarityNormalizer = new IdentityNormalizer();
-        try {
-            trainee.reset();
-            ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
-                public void call(KnownSim ks) throws IOException, DaoException {
-                    ks.maybeSwap();
-                    LocalString ls1 = new LocalString(ks.language,ks.phrase1);
-                    LocalString ls2 = new LocalString(ks.language,ks.phrase2);
-                    SRResult sim = metric.similarity(ls1, ls2, false);
-                    trainee.observe(sim.getScore(), ks.similarity);
-                }
-            }, 100);
-            trainee.observationsFinished();
-            LOG.info("trained similarity normalizer: " + trainee.dump());
-        } finally {
-            similarityNormalizer = trainee;
-        }
-    }
-
-
-    /**
-     *
-     * @param metric
      * @param disambiguator
      * @param dataset
      * @param validIds
@@ -204,50 +171,6 @@ public class SrNormalizers {
             mostSimilarNormalizer = trainee;
         }
     }
-
-    /**
-     *
-     * @param metric
-     * @param disambiguator
-     * @param dataset
-     * @param validIds
-     * @param maxResults
-     */
-    public void trainMostSimilar(final UniversalSRMetric metric, final Disambiguator disambiguator, final UniversalPageDao dao, final int algorithmId, Dataset dataset, final TIntSet validIds, final int maxResults) {
-        if (similarityNormalizer instanceof  IdentityNormalizer) {
-            return;
-        }
-        final Normalizer trainee = mostSimilarNormalizer;
-        mostSimilarNormalizer = new IdentityNormalizer();
-        try {
-            trainee.reset();
-            ParallelForEach.loop(dataset.getData(), new Procedure<KnownSim>() {
-                public void call(KnownSim ks) throws IOException, DaoException {
-                    ks.maybeSwap();
-                    List<LocalString> localStrings = new ArrayList<LocalString>();
-                    localStrings.add(new LocalString(ks.language, ks.phrase1));
-                    localStrings.add(new LocalString(ks.language, ks.phrase2));
-                    List<LocalId> ids = disambiguator.disambiguateTop(localStrings, null);
-                    if (ids != null && ids.size() == 2) {
-                        int pageId1 = dao.getUnivPageId(ids.get(0).asLocalPage());
-                        int pageId2 = dao.getUnivPageId(ids.get(1).asLocalPage());
-                        UniversalPage page = dao.getById(pageId1);
-                        if (page != null) {
-                            SRResultList dsl = metric.mostSimilar(page, maxResults, validIds);
-                            if (dsl != null) {
-                                trainee.observe(dsl, dsl.getIndexForId(pageId2), ks.similarity);
-                            }
-                        }
-                    }
-                }
-            }, 100);
-            trainee.observationsFinished();
-            LOG.info("trained most similar normalizer: " + trainee.dump());
-        } finally {
-            mostSimilarNormalizer = trainee;
-        }
-    }
-
 
     /**
      * Reads a single normalizer from disk.

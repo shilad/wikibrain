@@ -69,7 +69,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
             }
             if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId));
             }
             Cursor<Record> result = context.select()
                     .from(Tables.UNIVERSAL_PAGE)
@@ -104,7 +104,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                 conditions.add(Tables.UNIVERSAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
             }
             if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+                conditions.add(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId));
             }
             return context.selectDistinct(Tables.UNIVERSAL_PAGE.UNIV_ID, Tables.UNIVERSAL_PAGE.ALGORITHM_ID)
                     .from(Tables.UNIVERSAL_PAGE)
