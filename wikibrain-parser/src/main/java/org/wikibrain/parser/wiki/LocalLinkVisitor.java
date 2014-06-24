@@ -21,6 +21,7 @@ public class LocalLinkVisitor extends ParserVisitor {
     private final LocalPageDao pageDao;
     private final MetaInfoDao metaDao;
     private AtomicInteger counter = new AtomicInteger();
+    private MapDbLinkListener linkListener = null;
 
     public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao, MetaInfoDao metaDao) {
         this.linkDao = linkDao;

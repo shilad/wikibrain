@@ -1,9 +1,12 @@
 package org.wikibrain.dao.load;
 
 import org.apache.commons.cli.*;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.conf.DefaultOptionBuilder;
+import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.*;
@@ -20,7 +23,9 @@ import org.wikibrain.utils.Procedure;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -64,6 +69,7 @@ public class WikiTextLoader {
 
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
+
         ParserVisitor linkVisitor = new LocalLinkVisitor(llDao, lpDao, metaDao);
         ParserVisitor catVisitor = new LocalCategoryVisitor(lpDao, lcmDao, metaDao);
         ParserVisitor illVisitor = new InterLanguageLinkVisitor(illDao, lpDao, metaDao);
@@ -71,6 +77,7 @@ public class WikiTextLoader {
         visitors.add(linkVisitor);
         visitors.add(catVisitor);
         visitors.add(illVisitor);
+        visitors.add(null);             // place holder for map db visitor
 
         if(cmd.hasOption("d")) {
             llDao.clear();
@@ -86,10 +93,22 @@ public class WikiTextLoader {
         metaDao.beginLoad();
 
         for (Language lang : env.getLanguages().getLanguages()) {
+            DB db = DBMaker
+                    .newTempFileDB()
+                    .mmapFileEnable()
+                    .transactionDisable()
+                    .asyncWriteEnable()
+                    .asyncWriteFlushDelay(100)
+                    .make();
+
+            DB.BTreeSetMaker setMaker = db.createTreeSet("linkHashes");
+            MapDbLinkListener linkListener = new MapDbLinkListener(setMaker);
+
             WikiTextDumpParser dumpParser = new WikiTextDumpParser(
                     rpDao, LanguageInfo.getByLanguage(lang), LanguageSet.ALL);
             dumpParser.parse(visitors);
 
+            db.close();
         }
 
         illDao.endLoad();
