@@ -16,4 +16,4 @@ To access this pageview information, you must first run PageViewLoader to downlo
 ```bash
 ./wb-java.sh org.wikibrain.pageview.PageViewLoader simple 2014-6-21-0 2014-6-21-23
 ```
-You must only download the pageviews for each hour once on each machine.
+You must only download the pageviews for each hour once on each machine. If you call one of the methods from PageViewSQLDao with a date not yet downloaded, the class will automatically download the unacquired dates. However, we recommend you use PageViewLoader to download your dates in advance.
