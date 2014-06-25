@@ -207,6 +207,15 @@ public class SESSpaceEvaluator {
         writeRow(c1, c2, results);
     }
 
+    public double evaluatePair(Integer itemId1, Integer itemId2, Language lang) throws  DaoException, WikiBrainException{
+        if(!(pointPolygonContainingMap.containsKey(itemId1)) || !(pointPolygonContainingMap.containsKey(itemId2)))
+            return -1;
+        return polygonDistance(pointPolygonContainingMap.get(itemId1), pointPolygonContainingMap.get(itemId2), layerName, "earth");
+    }
+
+
+
+
     private void writeHeader() throws IOException {
         String[] headerEntries = new String[8 + langs.size()];
         headerEntries[0] = "ITEM_NAME_1";

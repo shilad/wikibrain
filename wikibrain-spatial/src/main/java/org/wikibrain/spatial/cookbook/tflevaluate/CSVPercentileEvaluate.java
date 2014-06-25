@@ -14,12 +14,16 @@ import java.util.*;
  */
 class EvaluationEntry {
     public String itemName1;
-    public String itemID1;
+    public Integer itemID1;
     public String itemName2;
-    public String itemID2;
+    public Integer itemID2;
     public double spatialDistance;
+    public double ordinalDistance;
+    public double SESDistance;
+    public double topoDistance;
     public double SR;
-    public double percentile;
+    public double SR_percentile;
+    public double dist_percentile;
 }
 public class CSVPercentileEvaluate {
     public static void main(String[] args) throws Exception {
@@ -64,9 +68,9 @@ public class CSVPercentileEvaluate {
             while((temp = reader.readNext()) != null){
                 EvaluationEntry entry = new EvaluationEntry();
                 entry.itemName1 = temp[0];
-                entry.itemID1 = temp[1];
+                entry.itemID1 = Integer.valueOf(temp[1]);
                 entry.itemName2 = temp[2];
-                entry.itemID2 = temp[3];
+                entry.itemID2 = Integer.valueOf(temp[3]);
                 entry.spatialDistance = Double.valueOf(temp[4]);
                 entry.SR = Double.valueOf(temp[5]);
                 SRList.add(entry.SR);
@@ -101,7 +105,7 @@ public class CSVPercentileEvaluate {
             writer.flush();
 
             for(EvaluationEntry e : entryList){
-                e.percentile = SRMap.get(e.SR);
+                e.SR_percentile = SRMap.get(e.SR);
                 String[] rowEntries = new String[7];
                 //rowEntries[0] = e.itemName1;
                 //rowEntries[1] = e.itemID1;
@@ -109,7 +113,7 @@ public class CSVPercentileEvaluate {
                 //rowEntries[3] = e.itemID2;
                 rowEntries[0] = String.format("%d", ((int)e.spatialDistance/1)*1);
                 //rowEntries[5] = Double.valueOf(e.SR).toString();
-                rowEntries[1] = String.format("%.2f", e.percentile/SRList.size());
+                rowEntries[1] = String.format("%.2f", e.SR_percentile/SRList.size());
                 writer.writeNext(rowEntries);
                 writer.flush();
             }
