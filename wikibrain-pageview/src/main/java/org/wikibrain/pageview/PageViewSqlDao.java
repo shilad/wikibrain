@@ -245,8 +245,10 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
             }
         }
 //       LOG.info("Number of timestamps not loaded " + datesNotLoaded.size());
-//        load(lang, datesNotLoaded, localPageDao); //THIS SHOULD NOT BE COMMENTED OUT but it is because slowing down comp and already downloaded needed data
-//        LOG.info("Done downloading all timestamps needed");
+        if(datesNotLoaded.size()!=0) {
+            load(lang, datesNotLoaded, localPageDao);
+        }
+// LOG.info("Done downloading all timestamps needed");
     }
 
     private synchronized void setLoadedHours() throws DaoException{
