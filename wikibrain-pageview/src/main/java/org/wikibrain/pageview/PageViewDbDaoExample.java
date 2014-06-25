@@ -74,6 +74,7 @@ public class PageViewDbDaoExample {
        for (int id: blackListSet){
            testList.add(id);
        }
+        //edit for push
 //        testList.add(219587);
 //        testList.add(47);
 //        testList.add(39);
