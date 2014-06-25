@@ -4,7 +4,7 @@
 ---
 
 # Page view module       
-WikiBrain provides a way of downloading the number of pageviews for each article for a given hour. This data is published by the wikimedia foundation on dumps.wikimedia.org website. The number of page views for each article is used as a metric for populatity of articles. Once the requested hour(s) are loaded into the database several pieces of information can be accessed using PageViewSQLDao, including:
+WikiBrain provides a way of downloading the number of pageviews for each article for a given hour. This data is published by the wikimedia foundation on dumps.wikimedia.org website. The number of page views for each article is used as a metric for populatity of articles. Once the requested hour(s) are loaded into the database several pieces of information can be accessed using PageViewSqlDao, including:
 
 * `getNumViews(language, pageid, startDate, endDate)` returns the number of pageviews for the specified page ID in the language given for the hours that fall in between the start and end date.
 * `getNumViews(Language language, int id, DateTime startDate, int numberOfHours, LocalPageDao localPageDao)` returns the number of pageviews for the specified pageviews for the specified page ID in the language given for the number of hours given after the start date.
@@ -16,7 +16,7 @@ To access this pageview information, you must first run PageViewLoader to downlo
 ```bash
 ./wb-java.sh org.wikibrain.pageview.PageViewLoader simple 2014-6-21-0 2014-6-21-23
 ```
-You must only download the pageviews for each hour once on each machine. If you call one of the methods from PageViewSQLDao with a date not yet downloaded, the class will automatically download the unacquired dates. However, we recommend you use PageViewLoader to download your dates in advance.
+You must only download the pageviews for each hour once on each machine. If you call one of the methods from PageViewSqlDao with a date not yet downloaded, the class will automatically download the unacquired dates. However, we recommend you use PageViewLoader to download your dates in advance.
 
 Once you have downloaded the needed pageview files, you can search for pageviews for specific articles with the code like the following:
 
