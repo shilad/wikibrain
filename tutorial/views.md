@@ -17,3 +17,45 @@ To access this pageview information, you must first run PageViewLoader to downlo
 ./wb-java.sh org.wikibrain.pageview.PageViewLoader simple 2014-6-21-0 2014-6-21-23
 ```
 You must only download the pageviews for each hour once on each machine. If you call one of the methods from PageViewSQLDao with a date not yet downloaded, the class will automatically download the unacquired dates. However, we recommend you use PageViewLoader to download your dates in advance.
+
+Once you have downloaded the needed pageview files, you can search for pageviews for specific articles with the code like the following:
+
+```bash
+        // Initialize the WikiBrain environment, get local page dao and pageview dao
+        Env env= EnvBuilder.envFromArgs(args);
+        Configurator configurator = env.getConfigurator();
+        PageViewSqlDao pageViewSqlDao= configurator.get(PageViewSqlDao.class);
+        LocalPageDao localPageDao = configurator.get(LocalPageDao.class);
+        UniversalPageDao universalPageDao= configurator.get(UniversalPageDao.class);
+
+        DateTime startTime= new DateTime(2014,6,21,0,0); //set the start date to year, month,day, hour, min
+        DateTime endTime= new DateTime(2014,6,21,23,0);
+            
+        List<Integer> testList = new ArrayList();
+        
+        //adds local IDs to list to test pageview dao
+        testList.add(219587);
+        testList.add(47);
+        testList.add(39);
+        testList.add(10983);
+        
+        //calls pageview dao and maps local IDs from testList to num views
+        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,startTime,endTime,localPageDao);
+        
+        //prints all pages and pageviews from testList
+        for (Integer id : results.keySet()) {
+            System.out.println(id + " :: " + localPageDao.getById(Language.SIMPLE, id).getTitle().toString() + " :: " + results.get(id));
+        }
+```
+
+When run, this code prints out the following:
+
+```bash
+    39 :: Apple (simple) :: 61
+    858 :: Universe (simple) :: 47
+    219587 :: United States (simple) :: 153
+    47 :: Atom (simple) :: 96
+    10983 :: Minnesota (simple) :: 13
+```
+
+The first number is the local ID (in Simple English) of the concept, followed by the title of the page, and the final number is the number of pageviews. All of this is done in Simple English. For example, the Simple English "Apple" page received 61 pageviews on June 21, 2014, while "United States" received 153.
