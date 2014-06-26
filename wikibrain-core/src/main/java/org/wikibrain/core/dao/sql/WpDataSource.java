@@ -125,7 +125,7 @@ public class WpDataSource implements Closeable {
 
     /**
      * Executes a sql resource on the classpath
-     * @param name Resource path - e.g. "/db/local-page.schema.sql"
+     * @param name Resource path - e.g. "/db/local-page.schema.sql "
      * @throws DaoException
      */
     public void executeSqlResource(String name) throws DaoException {
