@@ -14,10 +14,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.LocalString;
-import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.core.model.Title;
-import org.wikibrain.core.model.UniversalPage;
+import org.wikibrain.core.model.*;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.sr.*;
 import org.wikibrain.sr.utils.ExplanationFormatter;
@@ -27,16 +24,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Shilad Sen
  */
 public class SimilarityExample {
-    private static final boolean GET_RID_OF_SPATIAL_ON=false;  //change this line to true in order to get rid of spatial comparisons
     private static int WIKIDATA_CONCEPTS = 1;
     public static Env env;
     public static Configurator conf;
@@ -46,6 +39,7 @@ public class SimilarityExample {
     public static UniversalPageDao upDao;
     public static WikidataDao wDao;
     public static Map<Integer, Geometry> allGeometries;
+    public static ExplanationFormatter formatter;
 
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         // Initialize the WikiBrain environment and get the local page dao
@@ -58,56 +52,46 @@ public class SimilarityExample {
         upDao= conf.get(UniversalPageDao.class);
         wDao= conf.get(WikidataDao.class);
         allGeometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
+        formatter= new ExplanationFormatter(lpDao);
+        LocalIDToUniversalID.init(conf);
 
-        // Retrieve the "ensemble" sr metric for simple english
+        String srMetric= "ESA"; // Retrieve the indicated sr metric for simple english
+
         MonolingualSRMetric sr = conf.get(
-                MonolingualSRMetric.class, "ESA",
+                MonolingualSRMetric.class, srMetric,
                 "language", simple.getLangCode());
 
         //Similarity between strings
         String pairs[][] = new String[][] {
-                { "Cat", "Kitty" },
-                { "Obama", "President" },
-                { "Tires", "Car" },
+                { "Kitty", "Cat" },
+                { "obama", "president" },
+                { "tires", "car" },
                 { "Java", "Computer" },
                 { "Dog", "Computer" },
+                { "Barack Obama", "Japan"},
                 { "Obama", "Japan"},
                 { "Dog", "New York City"},
-                { "Montana", "United States of America"}
+                { "Montana", "United States of America"},
+                { "Statue of Liberty", "New York City" }
         };
 
-        createBlacklist();
-
-        ExplanationFormatter formatter = new ExplanationFormatter(lpDao);
 
         for (String pair[] : pairs) {
-            if(GET_RID_OF_SPATIAL_ON) {
-                if (isSpatial(pair[0]) || isSpatial(pair[1])) {
-                    System.out.println("This is a spatial comparison" + ": '" + pair[0] + "', '" + pair[1] + "'");
-                } else {
-                    SRResult s = sr.similarity(pair[0], pair[1], false);
-                    System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'");
-                }
-            } else {
                 SRResult s = sr.similarity(pair[0], pair[1], true);
                 System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'");
-                for(Explanation e : s.getExplanations()){
+                for (Explanation e:s.getExplanations()){
                     System.out.println(formatter.formatExplanation(e));
                 }
             }
-        }
+
     }
 
-    private static void createBlacklist() throws IOException{
-        PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
-        for (Integer conceptID : allGeometries.keySet())
-            pw.println(conceptID);
-        pw.close();
-    }
+
 
     public static boolean isSpatial(String s) throws DaoException{
         int localID=lpDao.getIdByTitle(s, Language.SIMPLE, NameSpace.ARTICLE);
         UniversalPage page= upDao.getByLocalPage(lpDao.getById(Language.SIMPLE, localID), WIKIDATA_CONCEPTS);
+        System.out.println("uID "+page.getUnivId()+" localID "+localID);
         return (allGeometries.containsKey(page.getUnivId()));
     }
 
@@ -115,4 +99,3 @@ public class SimilarityExample {
 
 }
 
-// Java is a city so how to deal with multiple names but names are an issue anyways
