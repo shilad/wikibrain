@@ -72,8 +72,9 @@ public class GADMConverter {
 
             // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
             //folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
-            File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
+//            File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
             //File rawFile = new File("tmp/gadm_v2_shp/gadm2.shp");
+            File rawFile = new File("/scratch/wikibrain/.tmp/_gadmdownload8210736559498516871.tmp/gadm2.shp");
 
             //copy level 2 shapefile to earth reference system
             LOG.log(Level.INFO, "Copying level 2 shapefiles to " + folder.getRefSysFolder("earth").getCanonicalPath());
@@ -89,7 +90,7 @@ public class GADMConverter {
         } catch (Exception e) {
             throw new WikiBrainException(e);
         } finally {
-            folder.deleteSpecificFile("read_me.pdf", RefSys.EARTH);
+//            folder.deleteSpecificFile("read_me.pdf", RefSys.EARTH);
             folder.deleteLayer("gadm2", RefSys.EARTH);
         }
 
@@ -176,7 +177,6 @@ public class GADMConverter {
 
             if (level == 1) {
                 for (String country : countryState.keySet()) {
-
                     ParallelForEach.loop(countryState.get(country), new Procedure<String>() {
                         @Override
                         public void call(String state) throws Exception {
@@ -186,6 +186,7 @@ public class GADMConverter {
                             writeToShpFile(outputFeatureSource, WIKITYPE, transaction, writeQueue.poll());
                         }
                     });
+
                 }
 
 
@@ -250,17 +251,27 @@ public class GADMConverter {
             }
         }
 
+        SimpleFeature simpleFeature = null;
+
         if (level == 1) {
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
-                if (feature.getAttribute(6).equals(featureName))
+                if (feature.getAttribute(6).equals(featureName)) {
+                    simpleFeature = feature;
                     geometryList.add((Geometry) feature.getAttribute(0));
+                }
             }
         } else {
             while (inputFeatures.hasNext()) {
                 SimpleFeature feature = inputFeatures.next();
-                if (((String) feature.getAttribute(2)).replace(feature.getAttribute(1) + ", ", "").equals(featureName))
+
+//                System.out.println("Properties: "+feature.getProperties());
+                System.out.println("Property 2 is "+feature.getAttribute(2));
+
+                if (((String) feature.getAttribute(3)).replace(feature.getAttribute(1) + ", ", "").equals(featureName)) {
+//                    simpleFeature = feature;
                     geometryList.add((Geometry) feature.getAttribute(0));
+                }
             }
         }
 
@@ -278,9 +289,20 @@ public class GADMConverter {
         featureBuilder.add(newGeom);
         if (level == 1) {
             featureBuilder.add(featureName);
+
+            // set default description to state
+            if (simpleFeature!=null) {
+                System.out.println(simpleFeature.getAttribute(12));
+                featureBuilder.add(simpleFeature.getAttribute(12));
+//                featureBuilder.set("DESCRIPTIO", simpleFeature.getAttribute(12));
+            } else {
+                featureBuilder.add("state");
+            }
             featureBuilder.add(featureName + ", " + reverted.get(featureName).toArray()[0]);
-        } else
+        } else {
             featureBuilder.add(featureName);
+            featureBuilder.add("country");
+        }
         SimpleFeature feature = featureBuilder.buildFeature(null);
 
         List<SimpleFeature> features = new ArrayList<SimpleFeature>();
@@ -340,6 +362,7 @@ public class GADMConverter {
         typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
         typeBuilder.add("the_geom", MultiPolygon.class);
         typeBuilder.add("TITLE1_EN", String.class);
+        typeBuilder.add("DESCRIPTIO",String.class);
         if (level == 1) typeBuilder.add("TITLE2_EN", String.class);
         typeBuilder.setDefaultGeometry("the_geom");
 
