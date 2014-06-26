@@ -1,5 +1,6 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
+import com.google.common.collect.Lists;
 import com.sun.org.apache.bcel.internal.generic.LAND;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
@@ -113,11 +114,11 @@ public class InstanceOfExtractor {
 //            System.out.println(ioe.countryToStateMap.get(30));
 //            System.out.println(ioe.countryToStateMap.get(16));
             ioe.loadScaleKeywords();
-//            ioe.loadScaleIds(new File("scaleIds.txt"));
-            ioe.generateScaleId();
-
+            ioe.loadScaleIds();
+//            ioe.generateScaleId();
+            ioe.createScaleFile();
             // print out concepts in relevant category
-            ioe.printScale(STATE);
+//            ioe.printScale(CITY);
 //            ioe.generateRecallTest(150);
 //            ioe.printScaleId(CITY);
 
@@ -131,8 +132,8 @@ public class InstanceOfExtractor {
 //                }
 //            }
 
-        }catch(DaoException e){
-            System.out.println(e);
+//        }catch(DaoException e){
+//            System.out.println(e);
         }catch(ConfigurationException e){
             System.out.println(e);
         }catch(IOException e){
@@ -549,5 +550,37 @@ public class InstanceOfExtractor {
         for (int i = 0; i< size; i++){
             System.out.println(i+". "+list.get(i));
         }
+    }
+
+    public void createScaleFile(){
+        Map<Integer, Geometry> geometries =null;
+        try {
+            geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
+            LOG.log(Level.INFO, String.format("Found %d total countries, now loading countries", geometries.size()));
+        } catch(DaoException e){
+            e.printStackTrace();
+        }
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+
+        BufferedWriter bw = null;
+        try {
+            bw = new BufferedWriter(new FileWriter("geometryToScale.txt"));
+
+            List<Integer> list = Lists.newArrayList(geometries.keySet());
+            for (int i = 0; i<list.size();i++){
+                for (int j=0;j<MAX;j++){
+                    if (scaleIds[j].contains(list.get(i))){
+                        bw.write(list.get(i)+"\t"+j+"\n");
+                        break;
+                    }
+                }
+            }
+
+            bw.close();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+
     }
 }

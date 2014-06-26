@@ -20,6 +20,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.phrases.PhraseAnalyzer;
@@ -48,15 +49,19 @@ public class SpatialDataLoader {
     private final SpatialDataDao spatialDataDao;
     private final SpatialDataFolder spatialDataFolder;
     private final WikidataDao wdDao;
+    private final LocalPageDao lpDao;
+    private final UniversalPageDao upDao;
     private final PhraseAnalyzer analyzer;
     private final LanguageSet langs;
 
-    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs) {
+    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs, LocalPageDao lpDao, UniversalPageDao upDao) {
         this.spatialDataDao = spatialDataDao;
         this.spatialDataFolder = spatialDataFolder;
         this.wdDao = wdDao;
         this.analyzer = analyzer;
         this.langs = langs;
+        this.lpDao = lpDao;
+        this.upDao = upDao;
     }
 
     //TODO: this should probably be adapted to the PipelineLoader structure
@@ -147,6 +152,7 @@ public class SpatialDataLoader {
             int foundGeomCount = 0;
             int missedGeomCount = 0;
 
+
             while(shpReader.hasNext()){
 
                 curGeometry = (Geometry)shpReader.nextRecord().shape();
@@ -154,15 +160,26 @@ public class SpatialDataLoader {
 
                 boolean found = false;
 
+                for (int i = 0; i<numDbfFields;i++){
+                    System.out.println(i+" "+dbfReader.readField(i));
+                }
+
                 for (int i = 0; i < numDbfFields && !found; i++) {
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
                     Integer itemId;
                     try {
-                    itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
-                    }
-                    catch (Exception e){
+//                            System.out.println(dbfReader.readField(i));
+                            String string = (String) dbfReader.readField(1);
+                            itemId = ((IDAttributeHandler.TitleAttributeHandler) attrHandler).getWikidataItemIdForId(dbfReader.readField(i),string,lpDao, upDao);
+//                            itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
+                    } catch (NullPointerException e){
+                        if (i!= 1)
+                            e.printStackTrace();
                         continue;
-
+                    } catch (Exception e){
+                        System.out.println("exception which is not nullpointer");
+                        e.printStackTrace();
+                        continue;
                     }
                     if (itemId != null && spatialDataDao.getGeometry(itemId, struct.getLayerName(), struct.getRefSysName()) == null){
                         spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
@@ -352,7 +369,9 @@ public class SpatialDataLoader {
 
             WikidataDao wdDao = conf.get(WikidataDao.class);
             SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
-            SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
+            LocalPageDao localPageDao = conf.get(LocalPageDao.class);
+            UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
+            SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages(),localPageDao, universalPageDao );
 
 //            String stepsValue = cmd.getOptionValue("s", "wikidata,gadm,download,exogenous"); // GADM temporarily disabled while we do new mappings
 
