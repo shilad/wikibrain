@@ -44,11 +44,18 @@ public class PageViewDbDaoExample {
             System.out.println();
         }
 
-        PageViewDbDao pageViewDbDao = new PageViewDbDao(Language.SIMPLE);
+        ArrayList<DateTime[]> dates= new ArrayList<DateTime[]>();
+            for (int i = 0; i < 9; i=i+2) {
+                dates.add(new DateTime[]{parseDate(args[i]),(parseDate(args[i+1]))});
+            }
+
+
+
+//        PageViewDbDao pageViewDbDao = new PageViewDbDao(Language.SIMPLE);
         Env env= EnvBuilder.envFromArgs(args);
         Configurator configurator = env.getConfigurator();
         PageViewSqlDao pageViewSqlDao= configurator.get(PageViewSqlDao.class);
-        LocalPageDao localPageDao = configurator.get(LocalPageDao.class, "live");
+        LocalPageDao localPageDao = configurator.get(LocalPageDao.class);
         LocalIDToUniversalID.init(configurator);
         UniversalPageDao universalPageDao= configurator.get(UniversalPageDao.class);
 
@@ -79,17 +86,23 @@ public class PageViewDbDaoExample {
 //        testList.add(47);
 //        testList.add(39);
 //        testList.add(10983);
+//        testList.add(858);
 
-//        //System.out.println(pageViewDbDao.getPageView(testList, 2014, 6, 21, 0, 15, pDao));
+//        System.out.println(pageViewDbDao.getPageView(testList, 2014, 6, 21, 0, 15, pDao));
+        System.out.println("he");
         Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,startTime,endTime,localPageDao);
-//        System.out.println(results);
+        System.out.println("start");
+//        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,dates,localPageDao);
+        System.out.println("done creating map");
         try {
-            PrintWriter pw = new PrintWriter(new FileWriter("PageHitList.txt"));
-            for( int i=13;i<2000;i++){ //Prints page hits in ascending order (very slow)
+//            PrintWriter pw = new PrintWriter(new FileWriter("PageHitList.txt"));
+            for( int i=50;i<2000;i++){ //Prints page hits in ascending order (very slow)
                 for(Integer key: results.keySet()){
                     if(results.get(key)==i){
-                        String name=universalPageDao.getById(LocalIDToUniversalID.translate(key),1).getBestEnglishTitle(localPageDao,true).toString();
-                        pw.println(name+"\t" + results.get(key));
+                        UniversalPage page= universalPageDao.getById(LocalIDToUniversalID.translate(key),1);
+                        String name=page.getBestEnglishTitle(localPageDao,true).toString();
+//                        pw.println(page.getUnivId());
+//                        pw.println(name+"\t" + results.get(key));
                     }
                 }
 
@@ -102,7 +115,7 @@ public class PageViewDbDaoExample {
 //                }
 //            }
 
-        pw.close();
+//        pw.close();
         }
         catch (Exception e){
 
@@ -119,5 +132,26 @@ public class PageViewDbDaoExample {
 
             scanner.close();
 
+    }
+
+    private static DateTime parseDate(String dateString) throws WikiBrainException {
+        if (dateString == null) {
+            throw new WikiBrainException("Need to specify start and end date");
+        }
+        String[] dateElems = dateString.split("-");
+        for (String de: dateElems){
+//            System.out.println(de);
+        }
+        try {
+            int year = Integer.parseInt(dateElems[0]);
+            int month = Integer.parseInt(dateElems[1]);
+            int day = Integer.parseInt(dateElems[2]);
+            int hour = Integer.parseInt(dateElems[3]);
+            return new DateTime(year, month, day, hour, 0);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            throw new WikiBrainException("Start and end dates must be entered in the following format (hyphen-delimited):\n" +
+                    "<four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23>");
+        }
     }
 }

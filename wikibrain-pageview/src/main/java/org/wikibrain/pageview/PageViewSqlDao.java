@@ -160,6 +160,17 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
         return result;
     }
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
+        Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+        for(Integer id: ids){
+            int sum=0;
+            for(DateTime[] startEndTime: dates){
+                sum+=getNumViews(lang,id,startEndTime[0],startEndTime[1],localPageDao);
+            }
+            result.put(id, sum);
+        }
+        return result;
+    }
 
     /**
      * Returns all pageviews that meet the filter criteria specified by an input PageViewDaoFilter

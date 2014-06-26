@@ -19,6 +19,7 @@ import org.wikibrain.core.lang.LanguageSet;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -124,13 +125,17 @@ public class PageViewLoader {
 
         //String startTime = cmd.getOptionValue("s", null);
 
-        String startTime = args[1];
-        String endTime = args[2];
 
+//        String startTime = args[1];
+//        String endTime = args[2];
+        ArrayList<DateTime[]> dates= new ArrayList<DateTime[]>();
 
         try {
-            DateTime startDate = parseDate(startTime);
-            DateTime endDate = parseDate(endTime);
+            for (int i = 1; i < 10; i=i+2) {
+                dates.add(new DateTime[]{parseDate(args[i]),(parseDate(args[i+1]))});
+            }
+//            DateTime startDate = parseDate(startTime);
+//            DateTime endDate = parseDate(endTime);
 
             CommandLineParser parser = new PosixParser();
             CommandLine cmd;
@@ -163,7 +168,11 @@ public class PageViewLoader {
             LOG.log(Level.INFO, "Begin Load");
             dao.beginLoad();
 
-            loader.load(startDate, endDate);
+            for(DateTime[] startEndDate:dates){
+                loader.load(startEndDate[0],startEndDate[1]);
+//                loader.load(startDate, endDate);
+            }
+
 
             LOG.log(Level.INFO, "End Load");
             dao.endLoad();
@@ -181,7 +190,7 @@ public class PageViewLoader {
         }
         String[] dateElems = dateString.split("-");
         for (String de: dateElems){
-            System.out.println(de);
+//            System.out.println(de);
         }
         try {
             int year = Integer.parseInt(dateElems[0]);
