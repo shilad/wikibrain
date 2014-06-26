@@ -21,12 +21,16 @@ public class LocalLinkVisitor extends ParserVisitor {
     private final LocalPageDao pageDao;
     private final MetaInfoDao metaDao;
     private AtomicInteger counter = new AtomicInteger();
-    private MapDbLinkListener linkListener = null;
+    private Listener linkListener = null;
 
     public LocalLinkVisitor(LocalLinkDao linkDao, LocalPageDao pageDao, MetaInfoDao metaDao) {
         this.linkDao = linkDao;
         this.pageDao = pageDao;
         this.metaDao = metaDao;
+    }
+
+    public void setLinkListener(Listener linkListener) {
+        this.linkListener = linkListener;
     }
 
     @Override
@@ -53,18 +57,21 @@ public class LocalLinkVisitor extends ParserVisitor {
                 link.target = new Title(targetText, langInfo);
             }
             int destId = pageDao.getIdByTitle(targetText, lang, link.target.getNamespace());
-            linkDao.save(
-                    new LocalLink(
-                            lang,
-                            link.text,
-                            link.location.getXml().getLocalId(),
-                            destId,
-                            true,
-                            link.location.getLocation(),
-                            true,
-                            loc
-                    ));
+            LocalLink ll = new LocalLink(
+                    lang,
+                    link.text,
+                    link.location.getXml().getLocalId(),
+                    destId,
+                    true,
+                    link.location.getLocation(),
+                    true,
+                    loc
+            );
+            linkDao.save(ll);
             metaDao.incrementRecords(LocalLink.class, lang);
+            if (linkListener != null) {
+                linkListener.notify(ll);
+            }
         } catch (DaoException e) {
             metaDao.incrementErrorsQuietly(LocalLink.class, lang);
             throw new WikiBrainException(e);
@@ -77,4 +84,7 @@ public class LocalLinkVisitor extends ParserVisitor {
     }
 
 
+    public static interface Listener {
+        public void notify(LocalLink link);
+    }
 }

@@ -105,6 +105,9 @@ public class Env implements Closeable {
         }
         return matches;
     }
+    public List<File> getFiles(Language language, FileMatcher ... matchers) {
+        return getFiles(new LanguageSet(language), matchers);
+    }
 
     public List<File> getFiles(Language lang, FileMatcher fm) {
         return getFiles(lang, fm, configuration);
