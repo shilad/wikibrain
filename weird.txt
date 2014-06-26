@@ -6,3 +6,7 @@ latitudes
 meridians
 road
 roads
+limes
+lime
+frontier
+frontiers

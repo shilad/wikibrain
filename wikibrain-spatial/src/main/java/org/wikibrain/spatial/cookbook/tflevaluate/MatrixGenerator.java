@@ -44,6 +44,7 @@ public class MatrixGenerator {
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
     private List<Integer> list;
     private float[][] matrix;
+    private List<Integer> pageHitList;
 //    private Env env;
 
     public MatrixGenerator(Env env){
@@ -71,7 +72,15 @@ public class MatrixGenerator {
         } catch(ConfigurationException e){
             e.printStackTrace();
         }
-
+        pageHitList = new ArrayList<Integer>();
+        try {
+            Scanner scanner = new Scanner(new File("PageHitList.txt"));
+            while(scanner.hasNext()){
+                pageHitList.add(scanner.nextInt());
+            }
+        } catch(IOException e){
+            System.out.println("cannot find PageHitList.txt");
+        }
     }
 
     public static void main (String[] args){
@@ -82,11 +91,11 @@ public class MatrixGenerator {
             e.printStackTrace();
         }
         MatrixGenerator mg = new MatrixGenerator(env);
-        MatrixWithHeader matrix = mg.generateSRMatrix();
+        MatrixWithHeader matrix = mg.generateTopologicalMatrix();
         System.out.println("Finished generating matrix");
-        mg.createMatrixFile("srmatrix",matrix);
+        mg.createMatrixFile("topomatrix",matrix);
         System.out.println("Finished writing matrix to file");
-        MatrixWithHeader matrix2 = mg.loadMatrixFile("srmatrix",mg.geometries.keySet().size());
+        MatrixWithHeader matrix2 = mg.loadMatrixFile("topomatrix",mg.pageHitList.size());
         System.out.println("Finished loading matrix");
 
         for (int i=0; i<matrix.matrix.length; i++) {
@@ -98,10 +107,10 @@ public class MatrixGenerator {
     }
 
     public MatrixWithHeader generateDistanceMatrix(){
-        int size = geometries.size();
+        int size = pageHitList.size();
         float[][] matrix = new float[size][size];
         GeodeticCalculator calc = new GeodeticCalculator();
-        List<Integer> list = Lists.newArrayList(geometries.keySet());
+        List<Integer> list = pageHitList;
         for (int i = 0; i<size;i++){
             if (i%1000==0){
                 LOG.log(Level.INFO, "Processed "+i+" geometries");
@@ -132,18 +141,16 @@ public class MatrixGenerator {
     }
 
     public MatrixWithHeader generateTopologicalMatrix(){
-        int size = geometries.size();
+        int size = pageHitList.size();
         float[][] matrix = new float[size][size];
-        List<Integer> list = Lists.newArrayList(geometries.keySet());
+        List<Integer> list = pageHitList;
 
         // We will assume item ids are universal (because we think item_id in geometries are universal)
 
         //getTopologicalDistance(Geometry a, Integer itemIdA, Geometry b, Integer itemIdB, int k, String layerName, String refSysName)
 
         for (int i = 0; i<size;i++){
-            if (i%1000==0){
-                LOG.log(Level.INFO, "Processed "+i+" geometries");
-            }
+
 
             int id1 = list.get(i);
             for (int j = 0; j<size;j++){
@@ -151,7 +158,10 @@ public class MatrixGenerator {
                 float distance = 0;
                 try {
                     int id2 = list.get(j);
-                    distance = (float) dm.getTopologicalDistance(geometries.get(id1),id1,  geometries.get(id2),id2,  50, "wikidata", "earth");
+                    distance = (float) dm.getTopologicalDistance(geometries.get(id1),id1,  geometries.get(id2),id2,  10, "wikidata", "earth");
+                    if (j%1==0){
+                        LOG.log(Level.INFO, "Processed "+j+" topological comparisons");
+                    }
                 } catch(DaoException e){
                     e.printStackTrace();
                 }
@@ -162,29 +172,9 @@ public class MatrixGenerator {
     }
 
     public MatrixWithHeader generateSRMatrix(){
-        int size = geometries.size();
-        matrix = new float[5000][5000];
-        list = Lists.newArrayList(geometries.keySet());
-        Collections.shuffle(list);
-        list = list.subList(0,5000);
-        System.out.println(list.size());
-
-
-//        for (int i = 0; i<size;i++){
-//            if (i%1==0){
-//                LOG.log(Level.INFO, "Processed "+i+" geometries");
-//            }
-//            if (i==2000){
-//                break;
-//            }
-//            int id1 = list.get(i);
-
-
-            // feed it i,j
-            // gets ids from list
-            // stores in matrix[i][j]
-
-            // newList<int[]>
+        int size = pageHitList.size();
+        matrix = new float[size][size];
+        list = pageHitList;
 
 
             ParallelForEach.loop(list, new Procedure<Integer>() {
@@ -208,18 +198,7 @@ public class MatrixGenerator {
                     System.out.println("Processed row "+i);
                 }
             });
-//            for (int j = 0; j<size;j++){
-//                float distance = 0;
-//                try {
-//                    int id2 = list.get(j);
-//                    SRResult similarity = sr.similarity(id1,id2, false);
-//                    distance = (float) similarity.getScore();
-//                } catch(DaoException e){
-//                    e.printStackTrace();
-//                }
-//                matrix[i][j] = distance;
-//            }
-//        }
+
         return new MatrixWithHeader(matrix,list);
     }
 

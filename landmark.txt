@@ -46,3 +46,5 @@ assassinations
 institutions
 institutes
 corporations
+house
+houses

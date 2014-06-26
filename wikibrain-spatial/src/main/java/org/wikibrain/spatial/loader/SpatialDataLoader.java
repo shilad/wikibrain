@@ -343,7 +343,7 @@ public class SpatialDataLoader {
             Options options = new Options();
             options.addOption("f", true, "The spatial data folder, structured as defined in the documentation.");
             options.addOption("p", true, "The PhraseAnalyzer to use to map toponyms to Wikipedia pages (defaults to 'titleandredirect'). Will always choose the first candidate, no matter the minimum probability, so declarative PhraseAnalyzers should be used here.");
-            options.addOption("s", true, "Can be one more more of 'wikidata','exogenous' (comma delimit). If nothing is entered, does all steps.");
+            options.addOption("s", true, "Can be one more more of 'wikidata','exogenous', 'pagehitlist' (comma delimit). If nothing is entered, does all steps.");
 
             EnvBuilder.addStandardOptions(options);
 
@@ -390,10 +390,13 @@ public class SpatialDataLoader {
                 } else if (canonicalStep.equals("exogenous")) {
                     LOG.log(Level.INFO, "Beginning to load exogenous data");
                     loader.loadExogenousData();
-                } else if (canonicalStep.equals("download")){
+                } else if (canonicalStep.equals("download")) {
                     LOG.log(Level.INFO, "Downloading shapefiles and moving them into place");
                     WikiBrainSpatialUtils.downloadZippedShapefileToReferenceSystem("http://www-users.cs.umn.edu/~bhecht/wikibrain/spatial_data/elements.zip",
                             RefSys.PERIODIC_TABLE, spatialDataFolder); // TODO: this should be moved to the config file at some point
+                } else if (canonicalStep.equals("pagehitlist")){
+                    LOG.log(Level.INFO, "Loading spatial entities from PageHitList.txt");
+                    loader.loadSignificantGeometries(new File("PageHitList.txt"));
                 } else {
                     throw new Exception("Illegal step: '" + step + "'");
                 }
@@ -408,6 +411,27 @@ public class SpatialDataLoader {
             conf.get(WpDataSource.class).optimize();
 
 
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSignificantGeometries(File file){
+        List<Integer> pageHitList = new ArrayList<Integer>();
+        try {
+            Scanner scanner = new Scanner(file);
+            while(scanner.hasNext()){
+                pageHitList.add(scanner.nextInt());
+            }
+        } catch(IOException e){
+            System.out.println("cannot find significant geometries input");
+        }
+        try {
+            Map<Integer, Geometry> geometries = spatialDataDao.getAllGeometriesInLayer("wikidata", "earth");
+
+            for (Integer i: pageHitList){
+                spatialDataDao.saveGeometry(i,"significant", "earth", geometries.get(i));
+            }
         }catch(Exception e){
             e.printStackTrace();
         }

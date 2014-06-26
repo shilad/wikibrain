@@ -34,11 +34,13 @@ import java.util.logging.Logger;
 public class InstanceOfExtractor {
 
     private static int WIKIDATA_CONCEPTS = 1;
-    public static int COUNTRY = 0 , STATE = 1 , CITY = 2 , NATURAL = 3 , WEIRD = 4 , LANDMARK = 5;
+
+    public static int WEIRD = 0, LANDMARK = 1, COUNTRY = 2 , STATE = 3 , CITY = 4 , NATURAL = 5 ;
+    private String[] fileNames = { "weird.txt", "landmark.txt", "country.txt", "state.txt", "city.txt", "natural.txt" };
     public static int MAX = 6;
     private Set<String>[] scaleKeywords = new Set[MAX];
     private Set<Integer>[] scaleIds = new Set[MAX];
-    private String[] fileNames = {"country.txt", "state.txt", "city.txt", "natural.txt", "weird.txt", "landmark.txt"};
+
     private SpatialDataDao sdDao;
     private UniversalPageDao upDao ;
     private LocalPageDao lDao ;
@@ -114,11 +116,11 @@ public class InstanceOfExtractor {
 //            System.out.println(ioe.countryToStateMap.get(30));
 //            System.out.println(ioe.countryToStateMap.get(16));
             ioe.loadScaleKeywords();
-            ioe.loadScaleIds();
-//            ioe.generateScaleId();
-            ioe.createScaleFile();
+//            ioe.loadScaleIds();
+            ioe.generateScaleId();
+//            ioe.createScaleFile();
             // print out concepts in relevant category
-//            ioe.printScale(CITY);
+            ioe.printScale(NATURAL);
 //            ioe.generateRecallTest(150);
 //            ioe.printScaleId(CITY);
 
@@ -132,8 +134,8 @@ public class InstanceOfExtractor {
 //                }
 //            }
 
-//        }catch(DaoException e){
-//            System.out.println(e);
+        }catch(DaoException e){
+            System.out.println(e);
         }catch(ConfigurationException e){
             System.out.println(e);
         }catch(IOException e){
@@ -489,7 +491,8 @@ public class InstanceOfExtractor {
         for (Integer conceptId : scaleIds[scaleId]){
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
             LocalPage lpage = lDao.getById(CUR_LANG,concept.getLocalId(CUR_LANG));
-            System.out.println(lpage.getTitle().toString());
+            String str = lpage.getTitle().toString();
+            System.out.println(str.substring(0,str.lastIndexOf('(')-1));
         }
         System.out.println(scaleIds[scaleId].size());
     }
