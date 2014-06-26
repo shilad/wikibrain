@@ -82,6 +82,7 @@ public class PageViewLoader {
      * first arg: comma-separated lang codes
      * start date and end date (second and third args) must be in UTC time
      * dates must be entered as <four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23>
+     * can enter as many start date to end date combinations as desired in order to download multiple days
      * @param args
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -128,10 +129,12 @@ public class PageViewLoader {
 
 //        String startTime = args[1];
 //        String endTime = args[2];
+
         ArrayList<DateTime[]> dates= new ArrayList<DateTime[]>();
+        int numbOfDaysDownloading=(args.length-3);
 
         try {
-            for (int i = 1; i < 10; i=i+2) {
+            for (int i = 1; i < numbOfDaysDownloading; i=i+2) {
                 dates.add(new DateTime[]{parseDate(args[i]),(parseDate(args[i+1]))});
             }
 //            DateTime startDate = parseDate(startTime);
