@@ -54,7 +54,7 @@ public class SpatialConceptPair {
         return kmDistance;
     }
 
-    public double getTopDistance() {
+    public int getTopDistance() {
         return topDistance;
     }
 
