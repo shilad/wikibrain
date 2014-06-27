@@ -30,6 +30,7 @@ import java.util.Scanner;
 
 /**
  * @author Toby "Jiajun" Li
+ * REMEMBER TO CHECK TO MAKE SURE THE BLACKLIST CONTAINS LOCALIDS (of only the language you care about)
  */
 public class PageViewDbDaoExample {
     private static ArrayList<Integer> blackListSet= new ArrayList<Integer>();
@@ -81,7 +82,6 @@ public class PageViewDbDaoExample {
        for (int id: blackListSet){
            testList.add(id);
        }
-        //edit for push
 //        testList.add(219587);
 //        testList.add(47);
 //        testList.add(39);
@@ -89,20 +89,19 @@ public class PageViewDbDaoExample {
 //        testList.add(858);
 
 //        System.out.println(pageViewDbDao.getPageView(testList, 2014, 6, 21, 0, 15, pDao));
-        System.out.println("he");
-        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,startTime,endTime,localPageDao);
-        System.out.println("start");
-//        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,dates,localPageDao);
+//        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,startTime,endTime,localPageDao);
+
+        System.out.println("start creating map");
+        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,dates,localPageDao);
         System.out.println("done creating map");
         try {
-//            PrintWriter pw = new PrintWriter(new FileWriter("PageHitList.txt"));
+            PrintWriter pw = new PrintWriter(new FileWriter("PageHitList.txt"));
             for( int i=50;i<2000;i++){ //Prints page hits in ascending order (very slow)
                 for(Integer key: results.keySet()){
                     if(results.get(key)==i){
                         UniversalPage page= universalPageDao.getById(LocalIDToUniversalID.translate(key),1);
                         String name=page.getBestEnglishTitle(localPageDao,true).toString();
-//                        pw.println(page.getUnivId());
-//                        pw.println(name+"\t" + results.get(key));
+                        pw.println(name+"\t" + results.get(key));
                     }
                 }
 
@@ -115,7 +114,7 @@ public class PageViewDbDaoExample {
 //                }
 //            }
 
-//        pw.close();
+        pw.close();
         }
         catch (Exception e){
 
@@ -123,13 +122,13 @@ public class PageViewDbDaoExample {
 
     }
 
+
     private static void createBlackListSet() throws FileNotFoundException {
             File file = new File(blackListFilePath);
             Scanner scanner = new Scanner(file);
             while(scanner.hasNext()){
                 blackListSet.add(scanner.nextInt());
             }
-
             scanner.close();
 
     }

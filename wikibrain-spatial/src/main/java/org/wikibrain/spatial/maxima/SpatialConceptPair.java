@@ -8,8 +8,9 @@ public class SpatialConceptPair {
     private final SpatialConcept secondConcept;
     private double distance;
     private double relatedness;
-    private int knownTypeNumbOfTimesAsked;
-    private int unKnownTypeNumbOfTimesAsked;
+    private int kkTypeNumbOfTimesAsked;
+    private int uuTypeNumbOfTimesAsked;
+    private int ukTypeNumbOfTimesAsked;
 
     public SpatialConceptPair(SpatialConcept firstConcept, SpatialConcept secondConcept) {
         this.firstConcept = firstConcept;
@@ -24,12 +25,16 @@ public class SpatialConceptPair {
         this.relatedness = relatedness;
     }
 
-    public void setKnownTypeNumbOfTimesAsked(int knownTypeNumbOfTimesAsked) {
-        this.knownTypeNumbOfTimesAsked = knownTypeNumbOfTimesAsked;
+    public void setKkTypeNumbOfTimesAsked(int kkTypeNumbOfTimesAsked) {
+        this.kkTypeNumbOfTimesAsked = kkTypeNumbOfTimesAsked;
     }
 
-    public void setUnKnownTypeNumbOfTimesAsked(int unKnownTypeNumbOfTimesAsked) {
-        this.unKnownTypeNumbOfTimesAsked = unKnownTypeNumbOfTimesAsked;
+    public void setUuTypeNumbOfTimesAsked(int uuTypeNumbOfTimesAsked) {
+        this.uuTypeNumbOfTimesAsked = uuTypeNumbOfTimesAsked;
+    }
+
+    public void setUkTypeNumbOfTimesAsked(int ukTypeNumbOfTimesAsked) {
+        this.ukTypeNumbOfTimesAsked = ukTypeNumbOfTimesAsked;
     }
 
     public SpatialConcept getFirstConcept() {
@@ -48,11 +53,15 @@ public class SpatialConceptPair {
         return relatedness;
     }
 
-    public int getKnownTypeNumbOfTimesAsked() {
-        return knownTypeNumbOfTimesAsked;
+    public int getkkTypeNumbOfTimesAsked() {
+        return kkTypeNumbOfTimesAsked;
     }
 
-    public int getUnKnownTypeNumbOfTimesAsked() {
-        return unKnownTypeNumbOfTimesAsked;
+    public int getuuTypeNumbOfTimesAsked() {
+        return uuTypeNumbOfTimesAsked;
+    }
+
+    public int getUkTypeNumbOfTimesAsked() {
+        return ukTypeNumbOfTimesAsked;
     }
 }
