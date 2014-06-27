@@ -5,7 +5,7 @@ package org.wikibrain.spatial.maxima;
  */
 public class SpatialConcept {
     public static enum Scale {
-        COUNTRY, STATE, CITY, NATURAL, WEIRD, LANDMARK;
+        COUNTRY, STATE, CITY, NATURAL, LANDMARK;
     };
     private final int universalID;
     private final String title;
