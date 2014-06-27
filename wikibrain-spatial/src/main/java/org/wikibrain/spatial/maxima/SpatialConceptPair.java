@@ -34,12 +34,24 @@ public class SpatialConceptPair {
         this.kkTypeNumbOfTimesAsked = kkTypeNumbOfTimesAsked;
     }
 
+    public void increaseKkNumbOfTimesAsked(int increase){
+        kkTypeNumbOfTimesAsked=kkTypeNumbOfTimesAsked+increase;
+    }
+
     public void setUuTypeNumbOfTimesAsked(int uuTypeNumbOfTimesAsked) {
         this.uuTypeNumbOfTimesAsked = uuTypeNumbOfTimesAsked;
     }
 
+    public void increaseUuNumbOfTimesAsked(int increase){
+        uuTypeNumbOfTimesAsked=uuTypeNumbOfTimesAsked+increase;
+    }
+
     public void setKuTypeNumbOfTimesAsked(int kuTypeNumbOfTimesAsked) {
         this.kuTypeNumbOfTimesAsked = kuTypeNumbOfTimesAsked;
+    }
+
+    public void increaseKuNumbOfTimesAsked(int increase){
+        kuTypeNumbOfTimesAsked=kuTypeNumbOfTimesAsked+increase;
     }
 
     public SpatialConcept getFirstConcept() {
