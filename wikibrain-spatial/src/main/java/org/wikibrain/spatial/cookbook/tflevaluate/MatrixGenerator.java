@@ -16,6 +16,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.matrix.Matrix;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
 import org.wikibrain.sr.MonolingualSRMetric;
@@ -60,7 +61,7 @@ public class MatrixGenerator {
         }
         // eventually, do something to geometries to make it have only significant entries
         try {
-            this.geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
+            this.geometries = sdDao.getAllGeometriesInLayer("significant", "earth");
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -73,14 +74,15 @@ public class MatrixGenerator {
             e.printStackTrace();
         }
         pageHitList = new ArrayList<Integer>();
-        try {
-            Scanner scanner = new Scanner(new File("PageHitList.txt"));
-            while(scanner.hasNext()){
-                pageHitList.add(scanner.nextInt());
-            }
-        } catch(IOException e){
-            System.out.println("cannot find PageHitList.txt");
-        }
+        pageHitList.addAll(geometries.keySet());
+//        try {
+//            Scanner scanner = new Scanner(new File("PageHitList.txt"));
+//            while(scanner.hasNext()){
+//                pageHitList.add(scanner.nextInt());
+//            }
+//        } catch(IOException e){
+//            System.out.println("cannot find PageHitList.txt");
+//        }
     }
 
     public static void main (String[] args){
@@ -112,30 +114,41 @@ public class MatrixGenerator {
         GeodeticCalculator calc = new GeodeticCalculator();
         List<Integer> list = pageHitList;
         for (int i = 0; i<size;i++){
-            if (i%1000==0){
+            if (i%100==0){
                 LOG.log(Level.INFO, "Processed "+i+" geometries");
             }
-            if (i==2000){
-                break;
-            }
-            Point point1 = (Point) geometries.get(list.get(i));
-            calc.setStartingGeographicPoint(point1.getX(),point1.getY());
-            for (int j = 0; j<size;j++){
-                Point point2 = (Point) geometries.get(list.get(j));
-                calc.setDestinationGeographicPoint(point2.getX(),point2.getY());
-                float distance = 0;
-                try {
-                    distance = (float) (calc.getOrthodromicDistance()/1000);
-                } catch(ArithmeticException e){
+//            if (i==2000){
+//                break;
+//            }
+            try {
+                Point point1 = (Point) geometries.get(list.get(i));
+                calc.setStartingGeographicPoint(point1.getX(), point1.getY());
+                for (int j = i+1; j < size; j++) {
+                    float distance = 0;
                     try {
-                        distance = (float) (DefaultEllipsoid.WGS84.orthodromicDistance(point1.getX(), point1.getY(), point2.getX(), point2.getY()) / 1000);
-                    }catch(Exception e2){
+                        Point point2 = (Point) geometries.get(list.get(j));
+                        calc.setDestinationGeographicPoint(point2.getX(), point2.getY());
+
+                        try {
+                            distance = (float) (calc.getOrthodromicDistance() / 1000);
+                        } catch (ArithmeticException e) {
+                            try {
+                                distance = (float) (DefaultEllipsoid.WGS84.orthodromicDistance(point1.getX(), point1.getY(), point2.getX(), point2.getY()) / 1000);
+                            } catch (ArithmeticException e2) {
 //                        e2.printStackTrace();
-                        distance = 20000;
+                                distance = 20000;
+                            }
+                        }
+                    }catch(NullPointerException e){
+                        System.out.println("Null pointer exception for "+list.get(j));
                     }
+                    matrix[i][j] = distance;
+                    matrix[j][i] = distance;
                 }
-                matrix[i][j] = distance;
+            } catch (NullPointerException e){
+                System.out.println("no geometry for point "+list.get(i));
             }
+
         }
         return new MatrixWithHeader(matrix,list);
     }
@@ -149,23 +162,35 @@ public class MatrixGenerator {
 
         //getTopologicalDistance(Geometry a, Integer itemIdA, Geometry b, Integer itemIdB, int k, String layerName, String refSysName)
 
+        MatrixWithHeader distanceMatrixWithHeader = generateDistanceMatrix();
+        System.out.println("Finished generating distance matrix");
+        float[][] distanceMatrix = distanceMatrixWithHeader.matrix;
+
         for (int i = 0; i<size;i++){
 
+            if (i%10 == 0) {
+                LOG.log(Level.INFO, "Processed " + i + " rows");
+            }
 
             int id1 = list.get(i);
-            for (int j = 0; j<size;j++){
+            for (int j = i+1; j<size;j++){
 
                 float distance = 0;
                 try {
                     int id2 = list.get(j);
-                    distance = (float) dm.getTopologicalDistance(geometries.get(id1),id1,  geometries.get(id2),id2,  10, "wikidata", "earth");
-                    if (j%1==0){
-                        LOG.log(Level.INFO, "Processed "+j+" topological comparisons");
+                    if (distanceMatrix[i][j] > 500){
+                        distance = Float.POSITIVE_INFINITY;
+//                        System.out.println(list.get(i)+" "+list.get(j));
+                    } else {
+//                        System.out.println("distance in km "+distanceMatrix[i][j]);
+                        distance = (float) dm.getTopologicalDistance(geometries.get(id1), id1, geometries.get(id2), id2, 10, "significant", "earth");
+
                     }
                 } catch(DaoException e){
                     e.printStackTrace();
                 }
                 matrix[i][j] = distance;
+                matrix[j][i] = distance;
             }
         }
         return new MatrixWithHeader(matrix,list);

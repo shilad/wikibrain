@@ -78,5 +78,49 @@ public class DistanceMetrics {
 
 
 
+    public Map<Integer,Integer> getTopologicalDistance(Integer itemIdA, Map<Integer,Geometry> compareTo, int k, String layerName, String refSysName, int maxTopoDistance) throws DaoException{
+
+        Geometry a = compareTo.get(itemIdA);
+        // topologies in current level
+        Map<Integer, Geometry> currentLevel = new HashMap<Integer, Geometry>();
+        // topologies found so far
+        Set<Integer> discoveredPoint = new HashSet<Integer>();
+        // result map
+        Map<Integer,Integer> idToDistance = new HashMap<Integer, Integer>();
+        currentLevel.put(itemIdA, a);
+        discoveredPoint.add(itemIdA);
+        idToDistance.put(itemIdA, 0);
+
+        for (int curTopoDistance=1; curTopoDistance<maxTopoDistance; curTopoDistance++){
+            // if no points in current level, leave loop
+            if (currentLevel.isEmpty()){
+                break;
+            }
+            // newly discovered neighbors
+            Map<Integer, Geometry> neighbors = new HashMap<Integer, Geometry>();
+            // find all current level geometries' neighbors
+            for(Integer i : currentLevel.keySet()){
+                Map<Integer, Geometry> singleNeighbors = snDao.getKNNeighbors(compareTo.get(i), k, layerName,refSysName, discoveredPoint);
+                // add new neighbors to discoveredPoint and neighbors
+                for(Integer m : singleNeighbors.keySet()){
+                    if(discoveredPoint.contains(m))
+                        continue;
+                    discoveredPoint.add(m);
+                    neighbors.put(m, singleNeighbors.get(m));
+                }
+            }
+            // new currentLevel
+            currentLevel = neighbors;
+            // loop over it to find geometries with this topo distance
+            for (Integer i: currentLevel.keySet()){
+                if (compareTo.keySet().contains(i)){
+                    idToDistance.put(i,curTopoDistance);
+                }
+            }
+        }
+
+        return idToDistance;
+
+    }
 
 }
