@@ -6,11 +6,16 @@ package org.wikibrain.spatial.maxima;
 public class SemanticRelatednessStratifier extends SpatialConceptPairStratifier {
 
     private static final int numBuckets = 2;
-    private static final double unrelatedCutoff = 0.5;
+    private static final double minRelatedCutoff = 0.33;
+    private static final double maxRelatedCutoff = 0.66;
 
     @Override
     public int getStrata(SpatialConceptPair conceptPair) {
-        return conceptPair.getRelatedness() < unrelatedCutoff ? 0 : 1;
+        double sr = conceptPair.getRelatedness();
+        if(sr < minRelatedCutoff)
+            return 0;
+
+        return sr < maxRelatedCutoff ? 1 : 2;
     }
 
     @Override

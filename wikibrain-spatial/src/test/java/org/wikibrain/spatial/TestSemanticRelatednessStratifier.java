@@ -36,7 +36,10 @@ public class TestSemanticRelatednessStratifier {
         SpatialConceptPair pair = new SpatialConceptPair(c1, c2);
 
         for(double d = 0; d < 1.0; d += 0.01) {
-            int tb = d < 0.5 ? 0 : 1;
+            int tb = 0;
+            if(d >= 0.33) {
+                tb = d < 0.66 ? 1 : 2;
+            }
 
             pair.setRelatedness(d);
             assert(tb == srStratifier.getStrata(pair));
