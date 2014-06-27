@@ -39,13 +39,14 @@ public class BlackListCreator { //Need to finish
         langSet=conf.get(LanguageSet.class);
 
         try{
-            buildList();
+//            buildUsingLocalIdsFromAllLangs();
+            buildUsingLocalIdsFromEnglish();
         } catch (Exception e){
             System.out.println("Could not create blacklist");
         }
     }
 
-    private static void buildList() throws IOException, DaoException {
+    private static void buildUsingLocalIdsFromAllLangs() throws IOException, DaoException {
         PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
 
         for (Integer conceptID : allGeometries.keySet()){
@@ -53,6 +54,16 @@ public class BlackListCreator { //Need to finish
             for (Language lang:langSet) {
                 pw.println(upage.getLocalId(lang));
             }
+        }
+        pw.close();
+    }
+
+    private static void buildUsingLocalIdsFromEnglish() throws IOException, DaoException {
+        PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
+
+        for (Integer conceptID : allGeometries.keySet()){
+            UniversalPage upage= upDao.getById(conceptID, WIKIDATA_CONCEPTS);
+                pw.println(upage.getLocalId(Language.EN));
         }
         pw.close();
     }
