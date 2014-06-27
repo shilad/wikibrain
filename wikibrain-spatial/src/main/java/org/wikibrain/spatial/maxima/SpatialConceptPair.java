@@ -6,19 +6,24 @@ package org.wikibrain.spatial.maxima;
 public class SpatialConceptPair {
     private final SpatialConcept firstConcept;
     private final SpatialConcept secondConcept;
-    private double distance;
+    private double kmDistance;
+    private int topDistance;
     private double relatedness;
     private int kkTypeNumbOfTimesAsked;
     private int uuTypeNumbOfTimesAsked;
-    private int ukTypeNumbOfTimesAsked;
+    private int kuTypeNumbOfTimesAsked;
 
     public SpatialConceptPair(SpatialConcept firstConcept, SpatialConcept secondConcept) {
         this.firstConcept = firstConcept;
         this.secondConcept = secondConcept;
     }
 
-    public void setDistance(double distance) {
-        this.distance = distance;
+    public void setKmDistance(double kmDistance) {
+        this.kmDistance = kmDistance;
+    }
+
+    public void setTopDistance(int topDistance) {
+        this.topDistance = topDistance;
     }
 
     public void setRelatedness(double relatedness) {
@@ -33,8 +38,8 @@ public class SpatialConceptPair {
         this.uuTypeNumbOfTimesAsked = uuTypeNumbOfTimesAsked;
     }
 
-    public void setUkTypeNumbOfTimesAsked(int ukTypeNumbOfTimesAsked) {
-        this.ukTypeNumbOfTimesAsked = ukTypeNumbOfTimesAsked;
+    public void setKuTypeNumbOfTimesAsked(int kuTypeNumbOfTimesAsked) {
+        this.kuTypeNumbOfTimesAsked = kuTypeNumbOfTimesAsked;
     }
 
     public SpatialConcept getFirstConcept() {
@@ -45,8 +50,12 @@ public class SpatialConceptPair {
         return secondConcept;
     }
 
-    public double getDistance() {
-        return distance;
+    public double getKmDistance() {
+        return kmDistance;
+    }
+
+    public double getTopDistance() {
+        return topDistance;
     }
 
     public double getRelatedness() {
@@ -61,7 +70,7 @@ public class SpatialConceptPair {
         return uuTypeNumbOfTimesAsked;
     }
 
-    public int getUkTypeNumbOfTimesAsked() {
-        return ukTypeNumbOfTimesAsked;
+    public int getKuTypeNumbOfTimesAsked() {
+        return kuTypeNumbOfTimesAsked;
     }
 }
