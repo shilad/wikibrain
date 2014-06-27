@@ -35,4 +35,9 @@ public abstract class SpatialConceptPairStratifier {
         return getDesiredStratification().length;
     }
 
+    @Override
+    public String toString() {
+        return "Stratifier." + getName();
+    }
+
 }
