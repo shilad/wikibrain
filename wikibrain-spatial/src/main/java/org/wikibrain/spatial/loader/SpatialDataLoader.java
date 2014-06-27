@@ -421,7 +421,8 @@ public class SpatialDataLoader {
         try {
             Scanner scanner = new Scanner(file);
             while(scanner.hasNext()){
-                pageHitList.add(scanner.nextInt());
+                int nextInt = scanner.nextInt();
+                pageHitList.add(nextInt);
             }
         } catch(IOException e){
             System.out.println("cannot find significant geometries input");
@@ -429,14 +430,21 @@ public class SpatialDataLoader {
         try {
             spatialDataDao.beginSaveGeometries();
             Map<Integer, Geometry> geometries = spatialDataDao.getAllGeometriesInLayer("wikidata", "earth");
+            int count = 0;
             for (Integer i: pageHitList) {
                 if (geometries.get(i)!= null){
-                    System.out.println("processing id "+i);
-                    System.out.println(geometries.get(i).toString());
+//                    System.out.println("processing id "+i);
+//                    System.out.println(geometries.get(i).toString());
                     spatialDataDao.saveGeometry(i.intValue(), "significant", "earth", geometries.get(i));
-                    System.out.println("added geometry with id "+i);
+                    count++;
+//                    System.out.println("added geometry with id "+i);
+                } else {
+                    System.out.println(i);
                 }
             }
+            spatialDataDao.endSaveGeometries();
+            System.out.println();
+            System.out.println(count);
         } catch(DaoException e){
             System.out.println("Dao exception");
             e.printStackTrace();

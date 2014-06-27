@@ -1,15 +1,11 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
 import com.google.common.collect.Lists;
-import com.sun.org.apache.bcel.internal.generic.LAND;
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.dao.Dao;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
@@ -18,9 +14,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.wikidata.LocalWikidataStatement;
 import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.wikidata.WikidataEntity;
 import org.wikibrain.wikidata.WikidataStatement;
 
 import java.io.*;
@@ -35,11 +29,13 @@ public class InstanceOfExtractor {
 
     private static int WIKIDATA_CONCEPTS = 1;
 
-    public static int WEIRD = 0, LANDMARK = 1, COUNTRY = 2 , STATE = 3 , CITY = 4 , NATURAL = 5 ;
-    private String[] fileNames = { "weird.txt", "landmark.txt", "country.txt", "state.txt", "city.txt", "natural.txt" };
-    public static int MAX = 6;
-    private Set<String>[] scaleKeywords = new Set[MAX];
-    private Set<Integer>[] scaleIds = new Set[MAX];
+
+    // only need to change order here
+    public static int WEIRD = 0, LANDMARK = 1, COUNTY = 2, STATE = 3 ,COUNTRY = 4 ,  CITY =5 , NATURAL =6 ;
+    private String[] fileNames = { "weird.txt", "landmark.txt", "county.txt", "state.txt", "country.txt",  "city.txt", "natural.txt" };
+    public static int NUM_SCALES =7;
+    private Set<String>[] scaleKeywords = new Set[NUM_SCALES];
+    private Set<Integer>[] scaleIds = new Set[NUM_SCALES];
 
     private SpatialDataDao sdDao;
     private UniversalPageDao upDao ;
@@ -61,8 +57,6 @@ public class InstanceOfExtractor {
         upDao = uDao;
         this.lDao = lDao;
         wdao = wDao;
-
-        System.out.println("HI in constructor");
 
         try {
             FileInputStream fis = new FileInputStream(new File("countryToStateMap.txt"));
@@ -116,13 +110,15 @@ public class InstanceOfExtractor {
 //            System.out.println(ioe.countryToStateMap.get(30));
 //            System.out.println(ioe.countryToStateMap.get(16));
             ioe.loadScaleKeywords();
-//            ioe.loadScaleIds();
-            ioe.generateScaleId();
+            ioe.loadScaleIds();
+//            ioe.generateScaleId();
 //            ioe.createScaleFile();
             // print out concepts in relevant category
-            ioe.printScale(NATURAL);
-//            ioe.generateRecallTest(150);
-//            ioe.printScaleId(CITY);
+//            ioe.printScale(LANDMARK);
+
+            ioe.generateRecallTest(50);
+
+//            ioe.printScaleId(LANDMARK);
 
 //            Set<String> set = ioe.extractInstanceOfList();
 //            int count = 0;
@@ -265,7 +261,7 @@ public class InstanceOfExtractor {
      * @throws FileNotFoundException
      */
     public void loadScaleKeywords() throws FileNotFoundException{
-        for (int i = 0; i<MAX; i++) {
+        for (int i = 0; i< NUM_SCALES; i++) {
             scaleKeywords[i] = new HashSet<String>();
             Scanner scanner = new Scanner(new File(fileNames[i]));
             while (scanner.hasNextLine()) {
@@ -312,8 +308,8 @@ public class InstanceOfExtractor {
         Map<Integer, Geometry> states = sdDao.getAllGeometriesInLayer("gadm1", "earth");
         LOG.log(Level.INFO, String.format("Found %d total states, now loading states", states.size()));
 
-        // initiate scale sets
-        for (int i=0; i<MAX; i++   ){
+        // initiate scale sets"scaleIds"+CUR_LANG+".txt"
+        for (int i=0; i< NUM_SCALES; i++   ){
             scaleIds[i] = new HashSet<Integer>();
         }
 
@@ -339,10 +335,12 @@ public class InstanceOfExtractor {
             if (countries.keySet().contains(conceptId)){
                 scaleIds[COUNTRY].add(conceptId);
                 found = true;
+//                continue;
             }
             if (states.keySet().contains(conceptId)){
                 scaleIds[STATE].add(conceptId);
                 found =  true;
+//                continue;
             }
 
             // loop over this conceptId's statements
@@ -386,7 +384,7 @@ public class InstanceOfExtractor {
             if (!found) {
                 // counties get special special treatment
                 if (lpage.getTitle().toString().toLowerCase().contains("county,")){
-                    scaleIds[CITY].add(conceptId);
+                    scaleIds[COUNTY].add(conceptId);
                 }
                 // assume others with commas are cities
                 else if (lpage.getTitle().toString().contains(",")) {
@@ -427,7 +425,7 @@ public class InstanceOfExtractor {
 
 
         // check for a match
-            for (int i=0; i<MAX; i++) {
+            for (int i=0; i< NUM_SCALES; i++) {
 
                 if (match(scaleKeywords[i], instanceOfLabel)) {
                     scaleIds[i].add(id);
@@ -473,7 +471,7 @@ public class InstanceOfExtractor {
      * @return The scale associated with it (from one of the final ints)
      */
     public int getScale(int id){
-        for (int i=0; i<MAX; i++){
+        for (int i=0; i< NUM_SCALES; i++){
             if (scaleIds[i].contains(id)){
                 return i;
             }
@@ -551,7 +549,18 @@ public class InstanceOfExtractor {
         list.addAll(geometries.keySet());
         Collections.shuffle(list);
         for (int i = 0; i< size; i++){
-            System.out.println(i+". "+list.get(i));
+            System.out.print(i + "\t" + list.get(i) + "\t");
+            boolean found = false;
+            for (int j=0; j<NUM_SCALES; j++){
+                if (scaleIds[j].contains(list.get(i))){
+                    System.out.println(j+"\t"+fileNames[j]);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found){
+                System.out.println(getScale(list.get(i)));
+            }
         }
     }
 
@@ -571,7 +580,7 @@ public class InstanceOfExtractor {
 
             List<Integer> list = Lists.newArrayList(geometries.keySet());
             for (int i = 0; i<list.size();i++){
-                for (int j=0;j<MAX;j++){
+                for (int j=0;j< NUM_SCALES;j++){
                     if (scaleIds[j].contains(list.get(i))){
                         bw.write(list.get(i)+"\t"+j+"\n");
                         break;

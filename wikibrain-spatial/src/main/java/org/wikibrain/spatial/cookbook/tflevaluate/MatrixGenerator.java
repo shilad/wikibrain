@@ -43,7 +43,7 @@ public class MatrixGenerator {
     private MonolingualSRMetric sr;
     private Language simple = Language.SIMPLE;
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
-    private List<Integer> list;
+//    private List<Integer> list;
     private float[][] matrix;
     private List<Integer> pageHitList;
 //    private Env env;
@@ -93,18 +93,29 @@ public class MatrixGenerator {
             e.printStackTrace();
         }
         MatrixGenerator mg = new MatrixGenerator(env);
-        MatrixWithHeader matrix = mg.generateTopologicalMatrix();
-        System.out.println("Finished generating matrix");
-        mg.createMatrixFile("topomatrix",matrix);
-        System.out.println("Finished writing matrix to file");
+//        MatrixWithHeader matrix = mg.generateTopologicalMatrix(10,15);
+//        System.out.println("Finished generating matrix");
+//        mg.createMatrixFile("topomatrix",matrix);
+//        System.out.println("Finished writing matrix to file");
         MatrixWithHeader matrix2 = mg.loadMatrixFile("topomatrix",mg.pageHitList.size());
+
         System.out.println("Finished loading matrix");
 
-        for (int i=0; i<matrix.matrix.length; i++) {
-            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
-                System.out.println("Unequal row "+i);
+        List<Integer> check = Arrays.asList(18426, 65,36091,34860,16554,38733,79842,496360, 85, 8678);
+        for (Integer i: check){
+            for (int j : check){
+                try {
+                    System.out.println("distance between " + i + " and " + j + " = " + matrix2.matrix[mg.pageHitList.indexOf(i)][mg.pageHitList.indexOf(j)]);
+                } catch(Exception e){
+
+                }
             }
         }
+//        for (int i=0; i<matrix.matrix.length; i++) {
+//            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
+//                System.out.println("Unequal row "+i);
+//            }
+//        }
 
     }
 
@@ -117,9 +128,6 @@ public class MatrixGenerator {
             if (i%100==0){
                 LOG.log(Level.INFO, "Processed "+i+" geometries");
             }
-//            if (i==2000){
-//                break;
-//            }
             try {
                 Point point1 = (Point) geometries.get(list.get(i));
                 calc.setStartingGeographicPoint(point1.getX(), point1.getY());
@@ -153,10 +161,9 @@ public class MatrixGenerator {
         return new MatrixWithHeader(matrix,list);
     }
 
-    public MatrixWithHeader generateTopologicalMatrix(){
+    public MatrixWithHeader generateTopologicalMatrix(final int k, final int maxTopoDistance){
         int size = pageHitList.size();
-        float[][] matrix = new float[size][size];
-        List<Integer> list = pageHitList;
+        final float[][] matrix = new float[size][size];
 
         // We will assume item ids are universal (because we think item_id in geometries are universal)
 
@@ -164,55 +171,50 @@ public class MatrixGenerator {
 
         MatrixWithHeader distanceMatrixWithHeader = generateDistanceMatrix();
         System.out.println("Finished generating distance matrix");
-        float[][] distanceMatrix = distanceMatrixWithHeader.matrix;
+        final float[][] distanceMatrix = distanceMatrixWithHeader.matrix;
 
-        for (int i = 0; i<size;i++){
 
-            if (i%10 == 0) {
-                LOG.log(Level.INFO, "Processed " + i + " rows");
-            }
+        ParallelForEach.loop(pageHitList, new Procedure<Integer>() {
+            @Override
+            public void call(Integer id1) throws Exception {
 
-            int id1 = list.get(i);
-            for (int j = i+1; j<size;j++){
+                int i = pageHitList.indexOf(id1);
 
-                float distance = 0;
                 try {
-                    int id2 = list.get(j);
-                    if (distanceMatrix[i][j] > 500){
-                        distance = Float.POSITIVE_INFINITY;
-//                        System.out.println(list.get(i)+" "+list.get(j));
-                    } else {
-//                        System.out.println("distance in km "+distanceMatrix[i][j]);
-                        distance = (float) dm.getTopologicalDistance(geometries.get(id1), id1, geometries.get(id2), id2, 10, "significant", "earth");
-
+                    Map<Integer, Integer> topoDistance = dm.getTopologicalDistance(id1, geometries, k, maxTopoDistance , distanceMatrix) ;
+                    for (int j = 0; j < distanceMatrix.length; j++) {
+                        if (topoDistance.get(pageHitList.get(j))!=null) {
+                            matrix[i][j] = topoDistance.get(pageHitList.get(j));
+                        } else {
+                            matrix[i][j] = Float.POSITIVE_INFINITY;
+                        }
                     }
-                } catch(DaoException e){
+                } catch (DaoException e){
                     e.printStackTrace();
                 }
-                matrix[i][j] = distance;
-                matrix[j][i] = distance;
+                System.out.println("Processed row "+i);
             }
-        }
-        return new MatrixWithHeader(matrix,list);
+        });
+        return new MatrixWithHeader(matrix,pageHitList);
     }
+
 
     public MatrixWithHeader generateSRMatrix(){
         int size = pageHitList.size();
         matrix = new float[size][size];
-        list = pageHitList;
 
 
-            ParallelForEach.loop(list, new Procedure<Integer>() {
+            ParallelForEach.loop(pageHitList, new Procedure<Integer>() {
                 @Override
                 public void call(Integer id1) throws Exception {
 
-                    int i = list.indexOf(id1);
-                    for (int j=0; j<list.size(); j++) {
+                    int i = pageHitList.indexOf(id1);
+                    for (int j=0; j<pageHitList.size(); j++) {
 
 
                         float distance = 0;
                         try {
-                            SRResult similarity = sr.similarity(id1, list.get(j), false);
+                            SRResult similarity = sr.similarity(id1, pageHitList.get(j), false);
                             distance = (float) similarity.getScore();
                         } catch (DaoException e) {
                             e.printStackTrace();
@@ -224,7 +226,7 @@ public class MatrixGenerator {
                 }
             });
 
-        return new MatrixWithHeader(matrix,list);
+        return new MatrixWithHeader(matrix,pageHitList);
     }
 
     public void createMatrixFile(String fileName, MatrixWithHeader matrixWithHeader){

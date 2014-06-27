@@ -1,5 +1,6 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
+import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Geometry;
 import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.conf.ConfigurationException;
@@ -9,10 +10,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by toby on 5/15/14.
@@ -78,7 +76,7 @@ public class DistanceMetrics {
 
 
 
-    public Map<Integer,Integer> getTopologicalDistance(Integer itemIdA, Map<Integer,Geometry> compareTo, int k, String layerName, String refSysName, int maxTopoDistance) throws DaoException{
+    public Map<Integer,Integer> getTopologicalDistance(Integer itemIdA, Map<Integer,Geometry> compareTo, int k, int maxTopoDistance, float[][] distanceMatrix) throws DaoException{
 
         Geometry a = compareTo.get(itemIdA);
         // topologies in current level
@@ -91,24 +89,31 @@ public class DistanceMetrics {
         discoveredPoint.add(itemIdA);
         idToDistance.put(itemIdA, 0);
 
-        for (int curTopoDistance=1; curTopoDistance<maxTopoDistance; curTopoDistance++){
+        for (int curTopoDistance=1; curTopoDistance<=maxTopoDistance; curTopoDistance++){
             // if no points in current level, leave loop
             if (currentLevel.isEmpty()){
+                System.out.println("Too high: "+curTopoDistance);
                 break;
             }
             // newly discovered neighbors
             Map<Integer, Geometry> neighbors = new HashMap<Integer, Geometry>();
             // find all current level geometries' neighbors
             for(Integer i : currentLevel.keySet()){
-                Map<Integer, Geometry> singleNeighbors = snDao.getKNNeighbors(compareTo.get(i), k, layerName,refSysName, discoveredPoint);
+//                Map<Integer, Geometry> singleNeighbors = snDao.getKNNeighbors(compareTo.get(i), k, layerName,refSysName, discoveredPoint);
                 // add new neighbors to discoveredPoint and neighbors
+                Map<Integer, Geometry> singleNeighbors = getKNNeighbors(i, k, compareTo, distanceMatrix);
+
                 for(Integer m : singleNeighbors.keySet()){
-                    if(discoveredPoint.contains(m))
-                        continue;
-                    discoveredPoint.add(m);
-                    neighbors.put(m, singleNeighbors.get(m));
+                    if(!discoveredPoint.contains(m)) {
+
+                        discoveredPoint.add(m);
+                        neighbors.put(m, singleNeighbors.get(m));
+                    }
                 }
             }
+
+//            System.out.println(curTopoDistance+" "+neighbors.keySet().size());
+
             // new currentLevel
             currentLevel = neighbors;
             // loop over it to find geometries with this topo distance
@@ -119,8 +124,34 @@ public class DistanceMetrics {
             }
         }
 
+        System.out.println("id = "+itemIdA);
+        System.out.println("total "+idToDistance.size());
+
         return idToDistance;
 
     }
 
+    public Map<Integer, Geometry> getKNNeighbors(final Integer itemId, int k, Map<Integer, Geometry> geometries, final float[][] distanceMatrix ) throws DaoException {
+        final List<Integer> order = new ArrayList<Integer>();
+        order.addAll(geometries.keySet());
+        Map<Integer, Geometry> result = new HashMap<Integer, Geometry>();
+        Collections.sort(order, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer integer, Integer integer2) {
+
+
+                    double dist1 = distanceMatrix[order.indexOf(itemId)][order.indexOf(integer)];
+
+                    double dist2 = distanceMatrix[order.indexOf(itemId)][order.indexOf(integer2)];
+
+
+                    return Double.compare(dist1, dist2);
+            }
+        });
+
+        for (int i =1; i<=k; i++){
+            result.put(order.get(i),geometries.get(order.get(i)));
+        }
+        return result;
+    }
 }
