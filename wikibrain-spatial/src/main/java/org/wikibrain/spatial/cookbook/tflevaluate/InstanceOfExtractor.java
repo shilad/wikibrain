@@ -31,8 +31,8 @@ public class InstanceOfExtractor {
 
 
     // only need to change order here
-    public static int WEIRD = 0, LANDMARK = 1, COUNTY = 2, STATE = 3 ,COUNTRY = 4 ,  CITY =5 , NATURAL =6 ;
-    private String[] fileNames = { "weird.txt", "landmark.txt", "county.txt", "state.txt", "country.txt",  "city.txt", "natural.txt" };
+    public static int WEIRD = 0, LANDMARK = 1, COUNTY = 2 ,COUNTRY = 3 , STATE = 4,  CITY =5 , NATURAL =6 ;
+    private String[] fileNames = { "weird.txt", "landmark.txt", "county.txt",  "country.txt", "state.txt", "city.txt", "natural.txt" };
     public static int NUM_SCALES =7;
     private Set<String>[] scaleKeywords = new Set[NUM_SCALES];
     private Set<Integer>[] scaleIds = new Set[NUM_SCALES];
@@ -82,6 +82,15 @@ public class InstanceOfExtractor {
 
 
     public static void main (String[] args)  {
+
+//
+//        String pageTitle = "hello, h,h( hi))";
+//        String[] tokens = pageTitle.split("([, ()]){1,}");
+
+//        for (int i=0; i<tokens.length; i++){
+//            System.out.println("+"+tokens[i]+"+");
+//        }
+
         Env env = null;
         InstanceOfExtractor ioe = null;
         try{
@@ -110,15 +119,15 @@ public class InstanceOfExtractor {
 //            System.out.println(ioe.countryToStateMap.get(30));
 //            System.out.println(ioe.countryToStateMap.get(16));
             ioe.loadScaleKeywords();
-            ioe.loadScaleIds();
-//            ioe.generateScaleId();
+//            ioe.loadScaleIds();
+            ioe.generateScaleId();
 //            ioe.createScaleFile();
             // print out concepts in relevant category
-//            ioe.printScale(LANDMARK);
+            ioe.printScale(COUNTRY);
 
-            ioe.generateRecallTest(50);
+//            ioe.generateRecallTest(50);
 
-//            ioe.printScaleId(LANDMARK);
+//            ioe.printScaleId(COUNTRY);
 
 //            Set<String> set = ioe.extractInstanceOfList();
 //            int count = 0;
@@ -382,9 +391,10 @@ public class InstanceOfExtractor {
             // if didn't find a valid keyword in any of the instance-of descriptions of this concept,
             // do work-arounds
             if (!found) {
+                String str = lpage.getTitle().toString();
                 // counties get special special treatment
-                if (lpage.getTitle().toString().toLowerCase().contains("county,")){
-                    scaleIds[COUNTY].add(conceptId);
+                if (findMatch(conceptId,str)){
+                    continue;
                 }
                 // assume others with commas are cities
                 else if (lpage.getTitle().toString().contains(",")) {
@@ -417,6 +427,9 @@ public class InstanceOfExtractor {
         instanceOfLabel = instanceOfLabel.toLowerCase();
         if (instanceOfLabel.endsWith(" (simple)")) {
             instanceOfLabel = instanceOfLabel.substring(0, instanceOfLabel.length() - 9);
+        }
+        if (instanceOfLabel.endsWith(" (en)")) {
+            instanceOfLabel = instanceOfLabel.substring(0, instanceOfLabel.length() - 5);
         }
         if (instanceOfLabel.endsWith(",")) {
             instanceOfLabel = instanceOfLabel.substring(0, instanceOfLabel.length() - 1);
@@ -453,7 +466,7 @@ public class InstanceOfExtractor {
         }
         // if not there, look for part strings
         else{
-            String[] tokens = pageTitle.split(" ");
+            String[] tokens = pageTitle.split("([, ()]){1,}");
             for (String s: tokens){
                 if (scaleKeyword.contains(s)) {
                     return true;
