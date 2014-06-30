@@ -48,3 +48,9 @@ institutes
 corporations
 house
 houses
+battle
+battles
+net
+nets
+stadium
+stadiums

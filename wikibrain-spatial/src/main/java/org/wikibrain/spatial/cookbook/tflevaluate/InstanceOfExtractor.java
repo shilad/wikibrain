@@ -83,10 +83,10 @@ public class InstanceOfExtractor {
 
     public static void main (String[] args)  {
 
-//
-//        String pageTitle = "hello, h,h( hi))";
-//        String[] tokens = pageTitle.split("([, ()]){1,}");
 
+//        String pageTitle = "hello, h,h( hi))";
+//        String[] tokens = pageTitle.split("([, ]){1,}");
+//
 //        for (int i=0; i<tokens.length; i++){
 //            System.out.println("+"+tokens[i]+"+");
 //        }
@@ -123,9 +123,9 @@ public class InstanceOfExtractor {
             ioe.generateScaleId();
 //            ioe.createScaleFile();
             // print out concepts in relevant category
-            ioe.printScale(COUNTRY);
+//            ioe.printScale(STATE);
 
-//            ioe.generateRecallTest(50);
+            ioe.generateRecallTest(50);
 
 //            ioe.printScaleId(COUNTRY);
 
@@ -344,12 +344,12 @@ public class InstanceOfExtractor {
             if (countries.keySet().contains(conceptId)){
                 scaleIds[COUNTRY].add(conceptId);
                 found = true;
-//                continue;
+                continue;
             }
             if (states.keySet().contains(conceptId)){
                 scaleIds[STATE].add(conceptId);
                 found =  true;
-//                continue;
+                continue;
             }
 
             // loop over this conceptId's statements
@@ -466,7 +466,13 @@ public class InstanceOfExtractor {
         }
         // if not there, look for part strings
         else{
-            String[] tokens = pageTitle.split("([, ()]){1,}");
+//            String[] tokens1 = pageTitle.split(",");
+//            pageTitle = tokens1[0];
+            int i = pageTitle.indexOf(',');
+            if (i>0){
+                pageTitle = pageTitle.substring(0,i);
+            }
+            String[] tokens = pageTitle.split(" ");
             for (String s: tokens){
                 if (scaleKeyword.contains(s)) {
                     return true;

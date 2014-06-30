@@ -1,6 +1,7 @@
 time zone
 latitude
 meridian
+list
 time zones
 latitudes
 meridians
@@ -10,3 +11,7 @@ limes
 lime
 frontier
 frontiers
+lists
+geography
+ministry
+ministries
