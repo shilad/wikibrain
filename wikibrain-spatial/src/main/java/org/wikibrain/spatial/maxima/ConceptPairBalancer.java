@@ -85,10 +85,12 @@ public class ConceptPairBalancer {
         List<SpatialConceptPair> scored = new LinkedList<SpatialConceptPair>();
 
         for(SpatialConceptPair pair : scored) {
-            double score = 0.0;
+            double distance = 0.0;
             for(RunningStratifierInformation info : stratifierInfos) {
-                score += info.calculateScore(pair);
+                distance += info.calculateScore(pair);
             }
+
+            double score = 1 - distance / 2;
 
             pair.setScore(score);
         }
