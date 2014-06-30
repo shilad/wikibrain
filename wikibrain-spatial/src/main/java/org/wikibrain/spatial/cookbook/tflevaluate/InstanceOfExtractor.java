@@ -121,11 +121,11 @@ public class InstanceOfExtractor {
             ioe.loadScaleKeywords();
 //            ioe.loadScaleIds();
             ioe.generateScaleId();
-//            ioe.createScaleFile();
+            ioe.createScaleFile();
             // print out concepts in relevant category
 //            ioe.printScale(STATE);
 
-            ioe.generateRecallTest(50);
+//            ioe.generateRecallTest(50);
 
 //            ioe.printScaleId(COUNTRY);
 
@@ -362,7 +362,7 @@ public class InstanceOfExtractor {
                     try {
                         // universal id corresponding to "instance of" label
                         UniversalPage concept2 = upDao.getById(id, WIKIDATA_CONCEPTS);
-                        // local page ditto
+                        // local page ditto31
                         LocalPage page = lDao.getById(CUR_LANG, concept2.getLocalId(CUR_LANG));
 
                         // check if there's a spatial keyword in this instance-of label title
@@ -597,6 +597,9 @@ public class InstanceOfExtractor {
         try {
             bw = new BufferedWriter(new FileWriter("geometryToScale.txt"));
 
+            for (int i = 0; i<NUM_SCALES; i++){
+                bw.write(i+"\t"+fileNames[i]+"\n");
+            }
             List<Integer> list = Lists.newArrayList(geometries.keySet());
             for (int i = 0; i<list.size();i++){
                 for (int j=0;j< NUM_SCALES;j++){
