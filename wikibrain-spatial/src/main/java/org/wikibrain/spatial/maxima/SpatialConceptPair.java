@@ -12,7 +12,6 @@ public class SpatialConceptPair {
     private int kkTypeNumbOfTimesAsked;
     private int uuTypeNumbOfTimesAsked;
     private int kuTypeNumbOfTimesAsked;
-    private double score;
 
     public SpatialConceptPair(SpatialConcept firstConcept, SpatialConcept secondConcept) {
         this.firstConcept = firstConcept;
@@ -87,11 +86,38 @@ public class SpatialConceptPair {
         return kuTypeNumbOfTimesAsked;
     }
 
-    public double getScore() {
-        return score;
+    private String getCombinedTitle() {
+        String firstStr = firstConcept.getTitle();
+        String secondStr = secondConcept.getTitle();
+
+        String combinedTitle = null;
+        if(firstStr.compareTo(secondStr) < 0) {
+            combinedTitle = firstStr + secondStr;
+        }
+        else {
+            combinedTitle = secondStr + firstStr;
+        }
+
+        return combinedTitle;
     }
 
-    public void setScore(double score) {
-        this.score = score;
+    @Override
+    public int hashCode() {
+        return getCombinedTitle().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if(other == this) {
+            return true;
+        }
+
+        if(other.getClass() != this.getClass()) {
+            return false;
+        }
+
+        String comb = getCombinedTitle();
+        String ocomb = ((SpatialConceptPair) other).getCombinedTitle();
+        return ocomb.equals(comb);
     }
 }
