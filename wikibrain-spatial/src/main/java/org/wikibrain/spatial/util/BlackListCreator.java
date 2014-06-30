@@ -7,6 +7,7 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
@@ -40,7 +41,8 @@ public class BlackListCreator { //Need to finish
 
         try{
 //            buildUsingLocalIdsFromAllLangs();
-            buildUsingLocalIdsFromEnglish();
+//            buildUsingLocalIdsFromSimpleEn();
+            buildUsingUnivIds();
         } catch (Exception e){
             System.out.println("Could not create blacklist");
         }
@@ -58,12 +60,22 @@ public class BlackListCreator { //Need to finish
         pw.close();
     }
 
-    private static void buildUsingLocalIdsFromEnglish() throws IOException, DaoException {
+    private static void buildUsingLocalIdsFromSimpleEn() throws IOException, DaoException {
+        PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
+
+        for (Integer conceptID : allGeometries.keySet()) {
+            UniversalPage upage = upDao.getById(conceptID, WIKIDATA_CONCEPTS);
+            pw.println(upage.getLocalId(Language.SIMPLE));
+        }
+        pw.close();
+    }
+
+    private static void buildUsingUnivIds() throws IOException, DaoException {
         PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
 
         for (Integer conceptID : allGeometries.keySet()){
             UniversalPage upage= upDao.getById(conceptID, WIKIDATA_CONCEPTS);
-                pw.println(upage.getLocalId(Language.EN));
+            pw.println(upage.getUnivId());
         }
         pw.close();
     }

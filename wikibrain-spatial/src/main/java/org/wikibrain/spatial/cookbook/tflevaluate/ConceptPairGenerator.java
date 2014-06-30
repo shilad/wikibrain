@@ -218,17 +218,19 @@ public class ConceptPairGenerator {
             Point currentPoint = null;
             try {
                 currentPoint = (Point) geometries.get(current);
+                calc.setStartingGeographicPoint(currentPoint.getX(), currentPoint.getY());
+                calc.setDestinationGeographicPoint(home.getX(), home.getY());
+                double distance2 = calc.getOrthodromicDistance() / 1000; //in km
+
+                if (distance2<distance){
+                    set.add(current);
+                }
+
             } catch (Exception e){
                 continue;
             }
-            calc.setStartingGeographicPoint(currentPoint.getX(), currentPoint.getY());
-            calc.setDestinationGeographicPoint(home.getX(), home.getY());
 
-            double distance2 = calc.getOrthodromicDistance() / 1000; //in km
 
-            if (distance2<distance){
-                set.add(current);
-            }
         }
         if (set.size()<=1){
             System.out.println("error "+ distance);
