@@ -34,3 +34,5 @@ hamlets
 communities
 suburbs
 stadt
+human settlement
+human settlements

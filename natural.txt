@@ -38,6 +38,7 @@ wet
 tropical
 island
 green
+cape
 deserts
 canyons
 rivers
@@ -83,3 +84,4 @@ spring
 springs
 tropics
 islands
+capes

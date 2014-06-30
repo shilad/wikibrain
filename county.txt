@@ -19,3 +19,5 @@ council areas
 parishes
 tehsils
 list of counties of the republic of china
+regional units
+regional unit

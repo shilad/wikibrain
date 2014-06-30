@@ -11,7 +11,7 @@ public class TopologicalStratifier extends SpatialConceptPairStratifier {
 
     @Override
     public int getStrata(SpatialConceptPair conceptPair) {
-        int topoDistance = conceptPair.getTopDistance();
+        float topoDistance = conceptPair.getGraphDistance();
         if(topoDistance <= tierOneSeparation) {
             return 0;
         }

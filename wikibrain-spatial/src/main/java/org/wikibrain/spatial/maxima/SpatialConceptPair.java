@@ -1,5 +1,11 @@
 package org.wikibrain.spatial.maxima;
 
+import org.wikibrain.core.cmd.Env;
+import org.wikibrain.matrix.Matrix;
+import org.wikibrain.spatial.cookbook.tflevaluate.MatrixGenerator;
+
+import java.util.Map;
+
 /**
  * Created by harpa003 on 6/27/14.
  */
@@ -7,7 +13,7 @@ public class SpatialConceptPair {
     private final SpatialConcept firstConcept;
     private final SpatialConcept secondConcept;
     private double kmDistance;
-    private int topDistance;
+    private float graphDistance;
     private double relatedness;
     private int kkTypeNumbOfTimesAsked;
     private int uuTypeNumbOfTimesAsked;
@@ -22,8 +28,8 @@ public class SpatialConceptPair {
         this.kmDistance = kmDistance;
     }
 
-    public void setTopDistance(int topDistance) {
-        this.topDistance = topDistance;
+    public void setGraphDistance(float graphDistance) {
+        this.graphDistance = graphDistance;
     }
 
     public void setRelatedness(double relatedness) {
@@ -66,8 +72,8 @@ public class SpatialConceptPair {
         return kmDistance;
     }
 
-    public int getTopDistance() {
-        return topDistance;
+    public float getGraphDistance() {
+        return graphDistance;
     }
 
     public double getRelatedness() {
@@ -82,7 +88,7 @@ public class SpatialConceptPair {
         return uuTypeNumbOfTimesAsked;
     }
 
-    public int getKuTypeNumbOfTimesAsked() {
+    public int getkuTypeNumbOfTimesAsked() {
         return kuTypeNumbOfTimesAsked;
     }
 
