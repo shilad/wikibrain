@@ -6,6 +6,7 @@ import org.wikibrain.core.model.MetaInfo;
 import org.wikibrain.utils.JvmUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class PipelineStage {
     PipelineStage dependsOn = null;
 
     /**
-     * One of the class names that is loaded during this stage.
+     * (One of) the class that is loaded during this stage.
      */
     private final String loadsClass;
 
@@ -86,12 +87,12 @@ public class PipelineStage {
     }
 
     public boolean isNeeded() {
-        if (hasBeenRun) {
+        if (hasBeenRun()) {
             return false;
         } else if (runOverride != null) {
             return runOverride;
         } else {
-            return loadedInfo != null && loadedInfo.getNumRecords() > 0;
+            return loadedInfo == null || loadedInfo.getNumRecords() == 0;
         }
     }
 
@@ -148,5 +149,21 @@ public class PipelineStage {
 
     public boolean hasBeenRun() {
         return hasBeenRun;
+    }
+
+    @Override
+    public String toString() {
+        return "PipelineStage{" +
+                "name='" + name + '\'' +
+                ", group='" + group + '\'' +
+                ", klass=" + klass +
+                ", dependsOn=" + ((dependsOn == null) ? "null" : dependsOn.getName()) +
+                ", loadsClass='" + loadsClass + '\'' +
+                ", extraArgs=" + Arrays.toString(extraArgs) +
+                ", runOverride=" + runOverride +
+                ", argsOverride=" + Arrays.toString(argsOverride) +
+                ", loadedInfo=" + loadedInfo +
+                ", hasBeenRun=" + hasBeenRun +
+                '}';
     }
 }

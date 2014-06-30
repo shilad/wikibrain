@@ -34,6 +34,10 @@ public interface MetaInfoDao extends Dao<MetaInfo> {
      */
     public void clear(Class component, Language lang) throws DaoException;
 
+    int incrementRecords(Class component, int n) throws DaoException;
+
+    int incrementRecords(Class component, Language lang, int n) throws DaoException;
+
     /**
      * Increment the count of records for a particular component.
      * Implementations need not write the counts to the database after

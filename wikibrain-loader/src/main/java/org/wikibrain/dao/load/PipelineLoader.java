@@ -105,7 +105,9 @@ public class PipelineLoader {
         }
     }
 
-
+    public void setForceRerun(boolean forceRerun) {
+        this.forceRerun = forceRerun;
+    }
 
     public static void main(String args[]) throws ConfigurationException, ClassNotFoundException, IOException, InterruptedException, SQLException, DaoException {
         Options options = new Options();
@@ -130,8 +132,15 @@ public class PipelineLoader {
                 new DefaultOptionBuilder()
                         .hasArgs()
                         .withLongOpt("groups")
-                        .withDescription("run groups (default is " + DEFAULT_GROUP + ")")
+                        .withDescription("groups that should be run (default is " + DEFAULT_GROUP + ")")
                         .create("g"));
+
+        //Specify the Datasets
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("drop")
+                        .withDescription("Rerun all stages (e.g. drop previous data) whether or not stages have previously been run")
+                        .create("d"));
 
 
         EnvBuilder.addStandardOptions(options);
@@ -151,6 +160,8 @@ public class PipelineLoader {
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-f") || args[i].equals("-off")) {
                 // do not keep
+            } else if (args[i].equals("-d") || args[i].equals("-drop")) {
+                    // do not keep
             } else if (args[i].equals("-s") || args[i].equals("-stage")) {
                 i++;    // do not keep and skip the next arg
             } else if (args[i].equals("-g") || args[i].equals("-groups")) {
@@ -176,8 +187,12 @@ public class PipelineLoader {
             if (cmd.hasOption("s")) {
                 loader.setStageOptions(cmd.getOptionValues("s"));
             }
+            if (cmd.hasOption("d")) {
+                loader.setForceRerun(true);
+            }
             loader.run(groups, keeperArgs.toArray(new String[0]));
         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
             System.err.println("Invalid arguments: " + e.getMessage());
             new HelpFormatter().printHelp("PipelineLoader", options);
             System.exit(1);

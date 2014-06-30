@@ -30,14 +30,16 @@ public class CascadingAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public void loadCorpus(LanguageSet langs) throws DaoException, IOException {
+    public int loadCorpus(LanguageSet langs) throws DaoException, IOException {
+        int n = 0;
         for (PhraseAnalyzer d : delegates) {
             try {
-                d.loadCorpus(langs);
+                n = Math.max(n, d.loadCorpus(langs));
             } catch (UnsupportedOperationException e) {
                 // continue to next delegate
             }
         }
+        return n;
     }
 
     @Override
