@@ -2,8 +2,18 @@ package org.wikibrain.spatial.cookbook.tflevaluate;
 
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.geotools.data.DataStore;
+import org.geotools.data.DataStoreFinder;
+import org.geotools.data.shapefile.files.ShpFiles;
+import org.geotools.data.shapefile.shp.ShapefileReader;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.referencing.GeodeticCalculator;
 import org.geotools.referencing.datum.DefaultEllipsoid;
 import org.omg.CORBA.Environment;
@@ -12,6 +22,7 @@ import org.opengis.referencing.cs.EllipsoidalCS;
 import org.opengis.referencing.datum.Ellipsoid;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
@@ -25,6 +36,7 @@ import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -93,13 +105,22 @@ public class MatrixGenerator {
             e.printStackTrace();
         }
         MatrixGenerator mg = new MatrixGenerator(env);
-        MatrixWithHeader matrix = mg.generateGraphMatrix(10, 15);
-        System.out.println("Finished generating matrix");
-        mg.createMatrixFile("graphmatrix",matrix);
-        System.out.println("Finished writing matrix to file");
-        MatrixWithHeader matrix2 = mg.loadMatrixFile("graphmatrix");
 
-        System.out.println("Finished loading matrix");
+        try {
+            Map<String, Set<Integer>> map = mg.getNearConceptList(mg.getGeoDataFromCities(new File("/scratch/cities2/cities.shp")), 10, 2 );
+            mg.createNeighborFile(map);
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+
+
+//        MatrixWithHeader matrix = mg.generateGraphMatrix(10, 15);
+//        System.out.println("Finished generating matrix");
+//        mg.createMatrixFile("graphmatrix",matrix);
+//        System.out.println("Finished writing matrix to file");
+//        MatrixWithHeader matrix2 = mg.loadMatrixFile("graphmatrix");
+//
+//        System.out.println("Finished loading matrix");
 
 //        List<Integer> check = Arrays.asList(18426, 65,36091,34860,16554,38733,79842,496360, 85, 8678);
 //        for (Integer i: check){
@@ -112,11 +133,11 @@ public class MatrixGenerator {
 //            }
 //        }
 
-        for (int i=0; i<matrix.matrix.length; i++) {
-            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
-                System.out.println("Unequal row "+i);
-            }
-        }
+//        for (int i=0; i<matrix.matrix.length; i++) {
+//            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
+//                System.out.println("Unequal row "+i);
+//            }
+//        }
 
     }
 
@@ -408,4 +429,131 @@ public class MatrixGenerator {
 
 
     }
+
+    public Map<String,Geometry> getGeoDataFromCities(File rawFile) throws IOException{
+        Map<String, Geometry> result = new HashMap<String, Geometry>();
+
+        // get SimpleFeatureIterator
+        Map<String, URL> map = new HashMap<String, URL>();
+        map.put("url", rawFile.toURI().toURL());
+        DataStore inputDataStore = DataStoreFinder.getDataStore(map);
+        SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
+        SimpleFeatureCollection collection = inputFeatureSource.getFeatures();
+        SimpleFeatureIterator inputFeatures = collection.features();
+
+        // shape file fields:
+        // geometry, city, country/state code, state, country code, country,
+        // type of city, population, population category rank, population category, "port_id", "label_flag"
+
+        // loop over items
+        while (inputFeatures.hasNext()) {
+            SimpleFeature feature = inputFeatures.next();
+            // country,state,city
+            String id = feature.getAttribute(6)+","+feature.getAttribute(4)+","+feature.getAttribute(2);
+            System.out.println(id);
+            Geometry g = (Geometry)feature.getAttribute(0);
+            result.put(id,g);
+        }
+
+        return result;
+    }
+
+    public Map<String, Set<Integer>> getNearConceptList(final Map<String, Geometry> citiesMap, final int k, final int maxTopoDistance){
+        final Map<String, Set<Integer>> result = new HashMap<String, Set<Integer>>();
+
+        // We will assume item ids (in 'geometries') are universal (because we think item_id in geometries are universal)
+
+        final List<Geometry> citiesList = new ArrayList<Geometry>();
+        citiesList.addAll(citiesMap.values());
+        final float[][] citiesDistanceMatrix = generateUnbalancedDistanceMatrix(citiesList);
+        final float[][] significantDistanceMatrix = generateDistanceMatrix().matrix;
+        System.out.println("Finished generating distance matrices");
+
+
+        ParallelForEach.loop(citiesMap.keySet(), new Procedure<String>() {
+            @Override
+            public void call(String city) throws Exception {
+
+                try {
+                    Set<Integer> set = dm.getGraphDistance( geometries, k, maxTopoDistance, significantDistanceMatrix,citiesDistanceMatrix[citiesList.indexOf(citiesMap.get(city))]);
+                    result.put(city,set);
+                    System.out.println(city+": "+set.size());
+//                    for (Integer i : set){
+//                        System.out.print(i + "\t");
+//                    }
+//                    System.out.println();
+
+                } catch (DaoException e){
+                    e.printStackTrace();
+                }
+                System.out.println("Processed city "+city);
+            }
+        });
+
+
+        return result;
+    }
+
+    public float[][] generateUnbalancedDistanceMatrix(List<Geometry> cities){
+        int size = pageHitList.size();
+        float[][] matrix = new float[cities.size()][size];
+        GeodeticCalculator calc = new GeodeticCalculator();
+
+        for (int i = 0; i<cities.size();i++){
+
+            Point point1= (Point) cities.get(i);
+            try {
+                calc.setStartingGeographicPoint(point1.getX(), point1.getY());
+                for (int j = 0; j < size; j++) {
+                    float distance = 0;
+                    try {
+                        Point point2 = (Point) geometries.get(pageHitList.get(j));
+                        calc.setDestinationGeographicPoint(point2.getX(), point2.getY());
+
+                        try {
+                            distance = (float) (calc.getOrthodromicDistance() / 1000);
+                        } catch (ArithmeticException e) {
+                            try {
+                                distance = (float) (DefaultEllipsoid.WGS84.orthodromicDistance(point1.getX(), point1.getY(), point2.getX(), point2.getY()) / 1000);
+                            } catch (ArithmeticException e2) {
+//                        e2.printStackTrace();
+                                distance = 20000;
+                            }
+                        }
+                    }catch(NullPointerException e){
+                        System.out.println("Null pointer exception for "+pageHitList.get(j));
+                    }
+                    matrix[i][j] = distance;
+                }
+            } catch (NullPointerException e){
+                System.out.println("no geometry for point "+pageHitList.get(i));
+            }
+
+        }
+        return matrix;
+    }
+
+
+    public void createNeighborFile(Map<String, Set<Integer>> map){
+
+        BufferedWriter bw = null;
+        try {
+            bw = new BufferedWriter(new FileWriter("citiesToNeighbors.txt"));
+
+            for (String string: map.keySet()){
+                bw.write(string+"\t");
+                for (Integer i : map.get(string)){
+                    bw.write(i+"\t");
+                }
+                bw.write("\n");
+            }
+            bw.close();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+
+    }
+
+
 }

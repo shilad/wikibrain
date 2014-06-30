@@ -88,6 +88,9 @@ public class DistanceMetrics {
         currentLevel.put(itemIdA, a);
         discoveredPoint.add(itemIdA);
         idToDistance.put(itemIdA, 0);
+        // ids in order
+        List<Integer> order = new ArrayList<Integer>();
+        order.addAll(compareTo.keySet());
 
         for (int curTopoDistance=1; curTopoDistance<=maxTopoDistance; curTopoDistance++){
             // if no points in current level, leave loop
@@ -101,7 +104,7 @@ public class DistanceMetrics {
             for(Integer i : currentLevel.keySet()){
 //                Map<Integer, Geometry> singleNeighbors = snDao.getKNNeighbors(compareTo.get(i), k, layerName,refSysName, discoveredPoint);
                 // add new neighbors to discoveredPoint and neighbors
-                Map<Integer, Geometry> singleNeighbors = getKNNeighbors(i, k, compareTo, distanceMatrix);
+                Map<Integer, Geometry> singleNeighbors = getKNNeighbors(k, compareTo, distanceMatrix[order.indexOf(i)]);
 
                 for(Integer m : singleNeighbors.keySet()){
                     if(!discoveredPoint.contains(m)) {
@@ -131,7 +134,51 @@ public class DistanceMetrics {
 
     }
 
-    public Map<Integer, Geometry> getKNNeighbors(final Integer itemId, int k, Map<Integer, Geometry> geometries, final float[][] distanceMatrix ) throws DaoException {
+    public Set<Integer> getGraphDistance(Map<Integer,Geometry> compareTo, int k, int maxTopoDistance, float[][] significantDistanceMatrix, float[] cityDistanceMatrix) throws DaoException{
+
+
+        // topologies in current level
+        Map<Integer,Geometry> currentLevel = getKNNeighbors(k,compareTo,cityDistanceMatrix);
+        // topologies found so far
+        Set<Integer> discoveredPoints = new HashSet<Integer>();
+
+        // ids in order
+        List<Integer> order = new ArrayList<Integer>();
+        order.addAll(compareTo.keySet());
+
+        // loop over possible graph distances
+        for (int curTopoDistance=2; curTopoDistance<=maxTopoDistance; curTopoDistance++){
+            // if no points in current level, leave loop
+            if (currentLevel.isEmpty()){
+                System.out.println("Too high: "+curTopoDistance);
+                break;
+            }
+            // newly discovered neighbors
+            Map<Integer, Geometry> neighbors = new HashMap<Integer, Geometry>();
+
+            // find all current level geometries' neighbors
+            for(Integer i : currentLevel.keySet()){
+                // add new neighbors to discoveredPoint and neighbors
+                Map<Integer, Geometry> singleNeighbors = getKNNeighbors( k, compareTo, significantDistanceMatrix[order.indexOf(i)]);
+
+                for(Integer m : singleNeighbors.keySet()){
+                    if(!discoveredPoints.contains(m)) {
+
+                        discoveredPoints.add(m);
+                        neighbors.put(m, singleNeighbors.get(m));
+                    }
+                }
+            }
+
+            // new currentLevel
+            currentLevel = neighbors;
+        }
+
+        return discoveredPoints;
+
+    }
+
+    public Map<Integer, Geometry> getKNNeighbors( int k, Map<Integer, Geometry> geometries, final float[] distanceMatrix ) throws DaoException {
         final List<Integer> order = new ArrayList<Integer>();
         order.addAll(geometries.keySet());
         Map<Integer, Geometry> result = new HashMap<Integer, Geometry>();
@@ -140,9 +187,9 @@ public class DistanceMetrics {
             public int compare(Integer integer, Integer integer2) {
 
 
-                    double dist1 = distanceMatrix[order.indexOf(itemId)][order.indexOf(integer)];
+                    double dist1 = distanceMatrix[order.indexOf(integer)];
 
-                    double dist2 = distanceMatrix[order.indexOf(itemId)][order.indexOf(integer2)];
+                    double dist2 = distanceMatrix[order.indexOf(integer2)];
 
 
                     return Double.compare(dist1, dist2);
