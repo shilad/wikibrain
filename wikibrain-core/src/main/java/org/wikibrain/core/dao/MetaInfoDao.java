@@ -129,12 +129,14 @@ public interface MetaInfoDao extends Dao<MetaInfo> {
      * @return
      * @throws DaoException
      */
-    MetaInfo getInfo(Class component) throws DaoException;
+    public MetaInfo getInfo(Class component) throws DaoException;
+
+    public boolean isLoaded(Class component) throws DaoException;
 
     /**
      * Returns all languages with at least one record.
      */
-    LanguageSet getLoadedLanguages(Class component) throws DaoException;
+    public LanguageSet getLoadedLanguages(Class component) throws DaoException;
 
     /**
      * Returns the current MetaInfo value for the current component.
@@ -144,5 +146,12 @@ public interface MetaInfoDao extends Dao<MetaInfo> {
      * @return
      * @throws DaoException
      */
-    MetaInfo getInfo(Class component, Language lang) throws DaoException;
+    public MetaInfo getInfo(Class component, Language lang) throws DaoException;
+
+    /**
+     * Returns a map from component name to accumulated MetaInfo across all languages.
+     * @return
+     * @throws DaoException
+     */
+    public Map<String, MetaInfo> getAllCummulativeInfo() throws DaoException;
 }

@@ -180,6 +180,12 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         }
     }
 
+    @Override
+    public boolean isLoaded(Class component) throws DaoException {
+        MetaInfo info = getInfo(component);
+        return (info != null && info.getNumRecords() > 0);
+    }
+
 
     @Override
     public LanguageSet getLoadedLanguages() throws DaoException {
@@ -288,6 +294,40 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         } finally {
             freeJooq(context);
         }
+    }
+
+    @Override
+    public Map<String, MetaInfo> getAllCummulativeInfo() throws DaoException {
+        sync();
+        DSLContext context = getJooq();
+        try {
+            Result<Record> result = context
+                    .select()
+                    .from(Tables.META_INFO)
+                    .fetch();
+
+            Map<String, MetaInfo> components = new HashMap<String, MetaInfo>();
+
+            for (Record record : result) {
+                String klass = record.getValue(Tables.META_INFO.COMPONENT);
+                if (!components.containsKey(klass)) {
+                    components.put(klass, new MetaInfo(null));
+                }
+                Short langId = record.getValue(Tables.META_INFO.LANG_ID);
+                components.get(klass).merge(
+                        new MetaInfo(null,
+                                (langId == null) ? null : Language.getById(langId),
+                                record.getValue(Tables.META_INFO.ID),
+                                record.getValue(Tables.META_INFO.NUM_RECORDS),
+                                record.getValue(Tables.META_INFO.NUM_ERRORS),
+                                record.getValue(Tables.META_INFO.LAST_UPDATED)
+                        ));
+            }
+            return components;
+        } finally {
+            freeJooq(context);
+        }
+
     }
 
     private void maybeFlush(MetaInfo info) throws DaoException {
