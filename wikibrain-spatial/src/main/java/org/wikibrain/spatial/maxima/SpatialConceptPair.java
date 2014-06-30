@@ -12,6 +12,7 @@ public class SpatialConceptPair {
     private int kkTypeNumbOfTimesAsked;
     private int uuTypeNumbOfTimesAsked;
     private int kuTypeNumbOfTimesAsked;
+    private double score;
 
     public SpatialConceptPair(SpatialConcept firstConcept, SpatialConcept secondConcept) {
         this.firstConcept = firstConcept;
@@ -84,5 +85,13 @@ public class SpatialConceptPair {
 
     public int getKuTypeNumbOfTimesAsked() {
         return kuTypeNumbOfTimesAsked;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
     }
 }
