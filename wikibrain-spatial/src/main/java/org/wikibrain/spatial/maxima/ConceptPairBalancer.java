@@ -74,7 +74,7 @@ public class ConceptPairBalancer {
         while(newConcepts.size() < numCount) {
             scoreAndOrder(candidateTemp);
 
-            SpatialConceptPair best = candidateTemp.remove(0);;
+            SpatialConceptPair best = candidateTemp.remove(0);
             newConcepts.add(best);
         }
 
@@ -82,7 +82,8 @@ public class ConceptPairBalancer {
     }
 
     private List<SpatialConceptPair> scoreAndOrder(List<SpatialConceptPair> candidates) {
-        List<SpatialConceptPair> scored = new LinkedList<SpatialConceptPair>();
+        List<SpatialConceptPair> scored = new LinkedList<SpatialConceptPair>(candidates);
+        final Map<SpatialConceptPair, Double> scores = new HashMap<SpatialConceptPair, Double>();
 
         for(SpatialConceptPair pair : scored) {
             double distance = 0.0;
@@ -92,14 +93,14 @@ public class ConceptPairBalancer {
 
             double score = 1 - distance / 2;
 
-            pair.setScore(score);
+            scores.put(pair, score);
         }
 
         Collections.sort(scored, new Comparator<SpatialConceptPair>() {
             @Override
             public int compare(SpatialConceptPair o1, SpatialConceptPair o2) {
-                double a = o1.getScore();
-                double b = o2.getScore();
+                double a = scores.get(o1);
+                double b = scores.get(o2);
 
                 if(a > b) {
                     return -1;
