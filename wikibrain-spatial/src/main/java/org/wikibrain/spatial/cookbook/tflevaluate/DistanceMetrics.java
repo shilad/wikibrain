@@ -76,7 +76,7 @@ public class DistanceMetrics {
 
 
 
-    public Map<Integer,Integer> getTopologicalDistance(Integer itemIdA, Map<Integer,Geometry> compareTo, int k, int maxTopoDistance, float[][] distanceMatrix) throws DaoException{
+    public Map<Integer,Integer> getGraphDistance(Integer itemIdA, Map<Integer,Geometry> compareTo, int k, int maxTopoDistance, float[][] distanceMatrix) throws DaoException{
 
         Geometry a = compareTo.get(itemIdA);
         // topologies in current level

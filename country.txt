@@ -7,13 +7,10 @@ great power
 dictatorship
 nation
 monarchy
-empire
 principality
 continent
 country
-colony
 democracy
-federation
 republics
 micronations
 realms
@@ -21,13 +18,8 @@ member states
 baltic states
 great powers
 dictatorships
-nations
 monarchies
-empires
 principalities
 continents
-countries
-colonies
 democracies
-federations
 sovereign

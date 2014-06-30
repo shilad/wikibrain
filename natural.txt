@@ -33,6 +33,11 @@ tributary
 mountain pass
 mangrove
 cave
+tropic
+wet
+tropical
+island
+green
 deserts
 canyons
 rivers
@@ -76,3 +81,5 @@ archipelago
 archipelagos
 spring
 springs
+tropics
+islands

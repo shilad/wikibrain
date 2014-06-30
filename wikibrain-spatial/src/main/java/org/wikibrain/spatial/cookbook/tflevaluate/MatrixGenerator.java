@@ -93,29 +93,30 @@ public class MatrixGenerator {
             e.printStackTrace();
         }
         MatrixGenerator mg = new MatrixGenerator(env);
-//        MatrixWithHeader matrix = mg.generateTopologicalMatrix(10,15);
-//        System.out.println("Finished generating matrix");
-//        mg.createMatrixFile("topomatrix",matrix);
-//        System.out.println("Finished writing matrix to file");
-        MatrixWithHeader matrix2 = mg.loadMatrixFile("topomatrix",mg.pageHitList.size());
+        MatrixWithHeader matrix = mg.generateGraphMatrix(10, 15);
+        System.out.println("Finished generating matrix");
+        mg.createMatrixFile("graphmatrix",matrix);
+        System.out.println("Finished writing matrix to file");
+        MatrixWithHeader matrix2 = mg.loadMatrixFile("graphmatrix");
 
         System.out.println("Finished loading matrix");
 
-        List<Integer> check = Arrays.asList(18426, 65,36091,34860,16554,38733,79842,496360, 85, 8678);
-        for (Integer i: check){
-            for (int j : check){
-                try {
-                    System.out.println("distance between " + i + " and " + j + " = " + matrix2.matrix[mg.pageHitList.indexOf(i)][mg.pageHitList.indexOf(j)]);
-                } catch(Exception e){
-
-                }
-            }
-        }
-//        for (int i=0; i<matrix.matrix.length; i++) {
-//            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
-//                System.out.println("Unequal row "+i);
+//        List<Integer> check = Arrays.asList(18426, 65,36091,34860,16554,38733,79842,496360, 85, 8678);
+//        for (Integer i: check){
+//            for (int j : check){
+//                try {
+//                    System.out.println("distance between " + i + " and " + j + " = " + matrix2.matrix[mg.pageHitList.indexOf(i)][mg.pageHitList.indexOf(j)]);
+//                } catch(Exception e){
+//
+//                }
 //            }
 //        }
+
+        for (int i=0; i<matrix.matrix.length; i++) {
+            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
+                System.out.println("Unequal row "+i);
+            }
+        }
 
     }
 
@@ -161,7 +162,7 @@ public class MatrixGenerator {
         return new MatrixWithHeader(matrix,list);
     }
 
-    public MatrixWithHeader generateTopologicalMatrix(final int k, final int maxTopoDistance){
+    public MatrixWithHeader generateGraphMatrix(final int k, final int maxTopoDistance){
         int size = pageHitList.size();
         final float[][] matrix = new float[size][size];
 
@@ -181,7 +182,7 @@ public class MatrixGenerator {
                 int i = pageHitList.indexOf(id1);
 
                 try {
-                    Map<Integer, Integer> topoDistance = dm.getTopologicalDistance(id1, geometries, k, maxTopoDistance , distanceMatrix) ;
+                    Map<Integer, Integer> topoDistance = dm.getGraphDistance(id1, geometries, k, maxTopoDistance, distanceMatrix) ;
                     for (int j = 0; j < distanceMatrix.length; j++) {
                         if (topoDistance.get(pageHitList.get(j))!=null) {
                             matrix[i][j] = topoDistance.get(pageHitList.get(j));
@@ -229,11 +230,23 @@ public class MatrixGenerator {
         return new MatrixWithHeader(matrix,pageHitList);
     }
 
+    /**
+     * Writes out a MatrixWithHeader to a binary file
+     * The first four bytes are the dimension
+     * The first 4*dimension bytes are the ids corresponding to the rows/columns
+     * Next 4*dimension*dimension bytes are the float values in the matrix
+     *
+     * @param fileName
+     * @param matrixWithHeader
+     */
     public void createMatrixFile(String fileName, MatrixWithHeader matrixWithHeader){
         try {
             OutputStream output = null;
             try {
                 output = new BufferedOutputStream(new FileOutputStream(fileName));
+
+                // write dimension
+                output.write(intArrayToByteArray(new Integer[] {matrixWithHeader.dimension}));
 
                 // write ids
                 output.write(intArrayToByteArray(matrixWithHeader.idsInOrder.toArray()));
@@ -252,19 +265,15 @@ public class MatrixGenerator {
         }
     }
 
-    public MatrixWithHeader loadMatrixFile(String fileName, int dimension){
-        int byteDimension = dimension*4;
-        long expectedFileSize = (dimension+1)*(long)byteDimension;
+    public MatrixWithHeader loadMatrixFile(String fileName ){
+
 
         File file = new File(fileName);
-        if (file.length()!=expectedFileSize){
-            System.out.println("Expected file size "+expectedFileSize+" but got "+file.length());
-//            return null;
-        }
+
 
         // what we read from the file
-        byte[] result = new byte[byteDimension];
-        float[][] matrix = new float[dimension][dimension];
+        byte[] result;
+        float[][] matrix = null;
 
         // list of integers
         List<Integer> ints = null;
@@ -276,6 +285,28 @@ public class MatrixGenerator {
                 long totalBytesRead = 0;
                 input = new BufferedInputStream(new FileInputStream(file));
                 int i = 0;
+
+                byte[] dimensionArray = new byte[4];
+
+                // read dimensions
+                int bytesRead = input.read(dimensionArray, 0, 4);
+                if (bytesRead != 4){
+                    System.out.println("Error reading in file");
+                    return null;
+                }
+                int dimension = byteArrayToIntArray(dimensionArray)[0];
+
+                int byteDimension = dimension*4;
+                long expectedFileSize = (dimension+1)*(long)byteDimension;
+                result = new byte[byteDimension];
+                matrix = new float[dimension][dimension];
+
+                if (file.length()!=expectedFileSize+4){
+                    System.out.println("Expected file size "+expectedFileSize+" but got "+(file.length()-4));
+//            return null;
+                }
+
+
                 // try to read all the bytes
                 while(totalBytesRead < expectedFileSize){
                     long bytesRemaining = expectedFileSize - totalBytesRead;
@@ -283,12 +314,12 @@ public class MatrixGenerator {
                         System.out.println("Unexpected array size: "+bytesRemaining+" bytesRemaining, although dimension is "+dimension);
                     }
                     //input.read() returns -1, 0, or more :
-                    int bytesRead = input.read(result, 0, (int)Math.min(bytesRemaining,byteDimension));
+                    bytesRead = input.read(result, 0, (int)Math.min(bytesRemaining,byteDimension));
 
                     if (bytesRead != byteDimension){
                         System.out.println("Read "+totalBytesRead+"/"+expectedFileSize);
                         System.out.println("Read wrong number of bytes--array will be wrong: read "+bytesRead+", wanted "+byteDimension);
-                        System.exit(1);
+                        return null;
                     }
 
                     // if anything got read this round
@@ -362,6 +393,7 @@ public class MatrixGenerator {
         private float[][] matrix;
         private Map<Integer, Integer> idToIndex;
         private List<Integer> idsInOrder;
+        private int dimension;
 
         public MatrixWithHeader(float[][] matrix, List<Integer> idsInOrder){
             this.matrix = matrix;
@@ -371,6 +403,7 @@ public class MatrixGenerator {
             for (int i=0; i<idsInOrder.size(); i++){
                 idToIndex.put(idsInOrder.get(i),i);
             }
+            dimension = matrix.length;
         }
 
 
