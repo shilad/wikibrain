@@ -127,7 +127,9 @@ public class ESAGenerator implements VectorGenerator {
     }
 
     @Override
-    public List<Explanation> getExplanations(LocalPage page1, LocalPage page2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+    public List<Explanation> getExplanations(int pageID1, int pageID2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+        LocalPage page1=pageDao.getById(language,pageID1);
+        LocalPage page2=pageDao.getById(language,pageID2);
         Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
         for (int id : vector1.keys()) {
             if (vector2.containsKey(id)) {
@@ -145,6 +147,30 @@ public class ESAGenerator implements VectorGenerator {
             LocalPage p = pageDao.getById(language, top.getId(i));
             if (p != null) {
                 explanations.add(new Explanation("Both ? and ? have similar text to ?", page1, page2, p));
+            }
+        }
+        return explanations;
+    }
+
+    @Override
+    public List<Explanation> getExplanations(String phrase1, String phrase2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+        Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
+        for (int id : vector1.keys()) {
+            if (vector2.containsKey(id)) {
+                lb.tallyScore(id, vector1.get(id) * vector2.get(id));
+            }
+        }
+        SRResultList top = lb.getTop();
+        if (top.numDocs() == 0) {
+            return Arrays.asList(new Explanation("? and ? share no tags", phrase1, phrase2));
+        }
+        top.sortDescending();
+
+        List<Explanation> explanations = new ArrayList<Explanation>();
+        for (int i = 0; i < top.numDocs(); i++) {
+            LocalPage p = pageDao.getById(language, searcher.getLocalIdFromDocId(top.getId(i), language));
+            if (p != null) {
+                explanations.add(new Explanation("Both ? and ? have similar text to ?", phrase1, phrase2, p));
             }
         }
         return explanations;

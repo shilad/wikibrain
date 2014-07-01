@@ -113,6 +113,13 @@ public class WpDataSource implements Closeable {
     public void freeJooq(DSLContext context) {
         Connection conn = JooqUtils.getConnection(context);
         if (conn != null) {
+            try {
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             closeQuietly(conn);
         }
     }
