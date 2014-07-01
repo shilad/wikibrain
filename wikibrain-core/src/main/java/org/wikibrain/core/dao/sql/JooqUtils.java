@@ -4,7 +4,9 @@ import org.apache.log4j.Logger;
 import org.jooq.ConnectionProvider;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.Table;
 import org.jooq.impl.DefaultConnectionProvider;
+import org.jooq.impl.TableImpl;
 import org.wikibrain.core.dao.DaoException;
 
 import java.sql.Connection;
@@ -121,5 +123,9 @@ public class JooqUtils {
         } catch (SQLException e) {
             throw new DaoException(e);
         }
+    }
+
+    public static boolean tableExists(DSLContext context, Table table) {
+        return context.meta().getTables().contains(table);
     }
 }
