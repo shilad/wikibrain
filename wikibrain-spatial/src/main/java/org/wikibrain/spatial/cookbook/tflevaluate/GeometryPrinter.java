@@ -50,7 +50,7 @@ public class GeometryPrinter {
         int total = keySet.size();
 
         for (Integer conceptId : keySet){
-            UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
+            UniversalPage concept = upDao.getById(conceptId);
 //            System.out.println(concept.getBestEnglishTitle(lpDao, true) +" is an instance of: ");
             List<WikidataStatement> listOfStatements =  wDao.getItem(conceptId).getStatements();
             boolean hasInstance = false;
@@ -59,7 +59,7 @@ public class GeometryPrinter {
                     continue;
                 if(stmt.getProperty().getId() == INSTANCE_OF){
                     int instanceId = (Integer) stmt.getValue().getValue();
-                    UniversalPage instance = upDao.getById(instanceId, WIKIDATA_CONCEPTS);
+                    UniversalPage instance = upDao.getById(instanceId);
                     if(instance == null)
                         continue;
 

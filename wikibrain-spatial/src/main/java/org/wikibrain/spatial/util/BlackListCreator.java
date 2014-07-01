@@ -52,7 +52,7 @@ public class BlackListCreator { //Need to finish
         PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
 
         for (Integer conceptID : allGeometries.keySet()){
-            UniversalPage upage= upDao.getById(conceptID, WIKIDATA_CONCEPTS);
+            UniversalPage upage= upDao.getById(conceptID);
             for (Language lang:langSet) {
                 pw.println(upage.getLocalId(lang));
             }
@@ -64,7 +64,7 @@ public class BlackListCreator { //Need to finish
         PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
 
         for (Integer conceptID : allGeometries.keySet()) {
-            UniversalPage upage = upDao.getById(conceptID, WIKIDATA_CONCEPTS);
+            UniversalPage upage = upDao.getById(conceptID);
             pw.println(upage.getLocalId(Language.SIMPLE));
         }
         pw.close();
@@ -74,7 +74,7 @@ public class BlackListCreator { //Need to finish
         PrintWriter pw = new PrintWriter(new FileWriter(("Blacklist.txt")));
 
         for (Integer conceptID : allGeometries.keySet()){
-            UniversalPage upage= upDao.getById(conceptID, WIKIDATA_CONCEPTS);
+            UniversalPage upage= upDao.getById(conceptID);
             pw.println(upage.getUnivId());
         }
         pw.close();

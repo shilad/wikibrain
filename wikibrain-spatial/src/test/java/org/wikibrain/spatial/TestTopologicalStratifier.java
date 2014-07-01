@@ -39,7 +39,7 @@ public class TestTopologicalStratifier {
                 tb = i < 6 ? 1 : 2;
             }
 
-            pair.setTopDistance(i);
+            pair.setGraphDistance(i);
             assert(tb == topologicalStratifier.getStrata(pair));
         }
     }

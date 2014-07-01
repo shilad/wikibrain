@@ -130,7 +130,7 @@ public class PageViewDbDaoExample {
             String name;
             for( int i=0;i<5000;i++){ //Prints page hits in ascending order (very slow)
                     if(i < keys.size()){
-                        page= universalPageDao.getById(LocalIDToUniversalID.translate(keys.get(i),Language.SIMPLE),1);
+                        page= universalPageDao.getById(LocalIDToUniversalID.translate(keys.get(i),Language.SIMPLE));
                         name=page.getBestEnglishTitle(localPageDao,true).toString();
                         pw.println(page.getUnivId());
                         pw.println(name+"::" + results.get(keys.get(i)));
