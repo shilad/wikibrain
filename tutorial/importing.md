@@ -8,14 +8,12 @@
 
 WikiBrain's PipelineLoader class manages the downloading, parsing, and import of [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
 
-Most commonly, PipelineLoader is run without any arguments except a language:
+Most commonly, PipelineLoader is run without any arguments except a language. This downloads, parses and imports the latest database files for the Simple English langauge edition of Wikipedia into an embedded h2 database:
 
 ```bash
 org.wikibrain.dao.load.PipelineLoader -l simple
 ```
-This downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. It imports the data into an embedded h2 database. 
 
-You may want to select what data PipelineLoade should import. 
 Each step in the WikiBrain loading process is called a **stage**. 
 Some stages are loaded by default (articles, links, lucene search index), but others are not (wikidata, spatial).
 You can turn on a stage, such as wikidata using the following:
