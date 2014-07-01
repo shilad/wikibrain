@@ -73,8 +73,10 @@ public class GenerateNewSpatialPairs {
     }
 
     private boolean checkScale(SpatialConcept concept) {
-        int scale= idToScaleMap.get(concept.getUniversalID());
-        if(scale==0){
+        Integer scale= idToScaleMap.get(concept.getUniversalID());
+        if (scale == null){
+            return false;
+        } else if(scale==0){
             return false;
         } else if(scale==1){
             concept.setScale(SpatialConcept.Scale.LANDMARK);
