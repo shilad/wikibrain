@@ -61,7 +61,7 @@ public class MetaInfo {
     public synchronized  int incrementNumRecords(int n) {
         lastUpdated = new Date();
         numRecords += n;
-        return n;
+        return numRecords;
     }
 
     public long getId() {
