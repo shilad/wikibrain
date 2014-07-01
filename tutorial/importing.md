@@ -35,7 +35,13 @@ These features are explained in more detail below.
 
 ## Stage selection
 
-WikiBrain provides a variety of stages 
+WikiBrain provides a variety of stages. These are generally organized into **groups.**
+
+ * **core:**
+ * **multilingual:**
+ * **wikidata:**
+ * **spatial:**
+
 
 | stage | group | class | description |
 |-------|-------|-------|-------------|
