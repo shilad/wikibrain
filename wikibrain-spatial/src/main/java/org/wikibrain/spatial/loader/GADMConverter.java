@@ -74,6 +74,8 @@ public class GADMConverter {
             // Download to a temp folder (Note that WikiBrain will ignore all reference systems that begin with "_"
             //folder.createNewReferenceSystemIfNotExists(tmpFolder.getCanonicalPath());
 //            File rawFile = downloadGADMShapeFile(tmpFolder.getCanonicalPath());
+//            File rawFile = new File("/scratch/shapefiles_world/gadm2.shp");
+//            File rawFile = new File("/scratch/wikibrain/.tmp/_gadmdownload3786464046259622171.tmp/gadm2.shp");
             //File rawFile = new File("tmp/gadm_v2_shp/gadm2.shp");
             File rawFile = new File("/scratch/wikibrain/.tmp/_gadmdownload8210736559498516871.tmp/gadm2.shp");
 
@@ -83,9 +85,9 @@ public class GADMConverter {
 
             // convert file and save as layer in earth reference system
             LOG.log(Level.INFO, "Start mapping level 1 shapefiles.");
-            convertShpFile(rawFile, folder, 1);
-            LOG.log(Level.INFO, "Start mapping level 0 shapefiles.");
-            convertShpFile(rawFile, folder, 0);
+            convertShpFileToCSV(rawFile, 1, "attributes1.csv");
+//            LOG.log(Level.INFO, "Start mapping level 0 shapefiles.");
+//            convertShpFileToCSV(rawFile, 0, "attributes0.csv");
 
 
         } catch (Exception e) {
@@ -233,8 +235,10 @@ public class GADMConverter {
      * @param level
      * @param fullFileName
      */
-    public void convertShpFileToCSV(File rawShpFile, int level, String fullFileName) {
+    public void convertShpFileToCSV(File rawShpFile, int level, String fullFileName) throws  IOException{
         if ((level != 0) && (level != 1)) throw new IllegalArgumentException("Level must be 0 or 1");
+
+        final Transaction transaction = new DefaultTransaction("create");
 
         // file to write out to
         File csvAttributes = new File(fullFileName);
@@ -268,7 +272,7 @@ public class GADMConverter {
 
                 // count things
                 count++;
-                if (count%1000 == 0){
+                if (count%100000 == 0){
                     System.out.println("Have processed "+count+" administrative entities");
                     writer.flush();
                 }
@@ -288,7 +292,7 @@ public class GADMConverter {
                         // ignore geometries
                         if (!Geometry.class.isInstance(attributes.get(i))) {
                             usefulProperties.add(i);
-                            out.append(attributes.get(i) + ", ");
+                            out.append(properties.get(i).getName().toString() + ", ");
                         }
                     }
                     out.append(";\n");
@@ -308,11 +312,15 @@ public class GADMConverter {
                     System.out.println("ioexception while writing to csv file");
                 }
             }
-
-            inputFeatures.close();
-
+            try {
+                inputFeatures.close();
+            } catch (Exception e){
+                System.out.println("closing database error");
+            }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            transaction.close();
         }
     }
 

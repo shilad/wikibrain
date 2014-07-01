@@ -1,24 +1,17 @@
 package org.wikibrain.spatial.loader;
 
-import org.wikibrain.conf.ConfigurationException;
-import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.*;
-import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.model.LocalArticle;
 import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.phrases.PhraseAnalyzer;
-import org.wikibrain.phrases.TitleRedirectPhraseAnalyzer;
 import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.wikidata.WikidataEntity;
 import org.wikibrain.wikidata.WikidataStatement;
 
 import java.util.*;
-import java.util.logging.Level;
+import java.util.LinkedHashMap;
 
 /**
  * Created by bjhecht on 4/1/14.
@@ -75,6 +68,12 @@ public abstract class IDAttributeHandler {
 
         }
 
+        /**
+         *
+         * @param id We know this is a string because this method is in the TitleAttributeHandler, and titles are strings
+         * @return
+         * @throws WikiBrainException
+         */
         @Override
         public Integer getWikidataItemIdForId(Object id) throws WikiBrainException{
             try {
