@@ -132,6 +132,7 @@ public class LucenePhraseAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public void loadCorpus(LanguageSet langs) throws DaoException, IOException {
+    public int loadCorpus(LanguageSet langs) throws DaoException, IOException {
+        return -1;
     }
 }

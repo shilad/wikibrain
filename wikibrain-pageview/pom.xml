@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.shilad.wikibrain</groupId>
+        <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>../wikibrain-parent</relativePath>
@@ -21,7 +21,7 @@
             <version>2.3</version>
         </dependency>
         <dependency>
-            <groupId>com.github.shilad.wikibrain</groupId>
+            <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>

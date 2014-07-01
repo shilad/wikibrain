@@ -70,7 +70,7 @@ public class TestWikidataDao {
         scan.close();
 
         UniversalPageDao upDao = Mockito.mock(UniversalPageDao.class);
-        Mockito.when(upDao.getAllLocalToUnivIdsMap(1, LanguageSet.ALL)).thenReturn(concepts);
+        Mockito.when(upDao.getAllLocalToUnivIdsMap(LanguageSet.ALL)).thenReturn(concepts);
 
         WikidataDumpLoader loader = new WikidataDumpLoader(wd, md, upDao, LanguageSet.ALL);
         URL url = TestWikidataDao.class.getResource("/testDump.xml.bz2");

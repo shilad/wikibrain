@@ -28,12 +28,10 @@ public class ParallelForEach {
      * @param fn callback
      */
     public static void range(int from, int to, int numThreads, final Procedure<Integer> fn) {
-        List<Integer> range = new ArrayList<Integer>();
-        for (int i = from; i < to; i++) { range.add(i); }
-        loop(range, numThreads, fn);
+        iterate(new IntRangeIterator(from, to), numThreads, 10000, fn, Integer.MAX_VALUE);
     }
     public static void range(int from, int to, final Procedure<Integer> fn) {
-        range(from, to, WpThreadUtils.getMaxThreads(), fn);
+        iterate(new IntRangeIterator(from, to), WpThreadUtils.getMaxThreads(), 10000, fn, Integer.MAX_VALUE);
     }
     public static <T,R> List<R> range(int from, int to, int numThreads, final Function<Integer, R> fn) {
         List<Integer> range = new ArrayList<Integer>();

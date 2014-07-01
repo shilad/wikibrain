@@ -114,9 +114,9 @@ public class ESAGenerator implements VectorGenerator {
         TIntSet ids = new TIntHashSet();
         for (String wpId : FileUtils.readLines(file)) {
             int wpLocalIDNumb= Integer.valueOf(wpId);
-           if(!isBlacklisted(wpLocalIDNumb)) {
+            if(!isBlacklisted(wpLocalIDNumb)) {
                 ids.add(wpLocalIDNumb);
-           }
+            }
         }
         conceptFilter = new WpIdFilter(ids.toArray());
         LOG.warning("installed " + ids.size() + " concepts for " + language);

@@ -13,6 +13,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.cmd.FileMatcher;
 import org.wikibrain.core.dao.DaoException;
 
+import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
@@ -21,12 +22,10 @@ import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.download.DumpFileDownloader;
 import org.wikibrain.download.RequestedLinkGetter;
 import org.wikibrain.mapper.ConceptMapper;
-import org.wikibrain.mapper.algorithms.PureWikidataConceptMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,10 +41,12 @@ public class ConceptLoader {
     private static final Logger LOG = Logger.getLogger(ConceptLoader.class.getName());
     private final LanguageSet languageSet;
     private final UniversalPageDao dao;
+    private final MetaInfoDao metaDao;
 
-    public ConceptLoader(LanguageSet languageSet, UniversalPageDao dao) {
+    public ConceptLoader(LanguageSet languageSet, UniversalPageDao dao, MetaInfoDao metaDao) {
         this.languageSet = languageSet;
         this.dao = dao;
+        this.metaDao = metaDao;
     }
 
     public UniversalPageDao getDao() {
@@ -61,9 +62,11 @@ public class ConceptLoader {
                 dao.save(pages.next());
                 i++;
                 if (i%10000 == 0) LOG.log(Level.INFO, "UniversalPages loaded: " + i);
+                metaDao.incrementRecords(UniversalPage.class);
             }
             LOG.log(Level.INFO, "All UniversalPages loaded: " + i);
         } catch (DaoException e) {
+            metaDao.incrementErrorsQuietly(UniversalPage.class);
             throw new WikiBrainException(e);
         }
     }
@@ -111,10 +114,11 @@ public class ConceptLoader {
         Configurator conf = env.getConfigurator();
         String algorithm = cmd.getOptionValue("n", null);
 
-        UniversalPageDao dao = conf.get(UniversalPageDao.class);
+        UniversalPageDao dao = conf.get(UniversalPageDao.class, algorithm);
         if (algorithm == null) {
             algorithm = (env.getLanguages().size() <= 1) ? "monolingual" : "purewikidata";
         }
+        MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
         // TODO: handle checking of purewikidata more robustly
         if (algorithm.equals("purewikidata")) {
@@ -122,7 +126,7 @@ public class ConceptLoader {
         }
 
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
-        final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao);
+        final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao, metaDao);
 
         if (cmd.hasOption("d")) {
             LOG.log(Level.INFO, "Clearing data");

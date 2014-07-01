@@ -82,7 +82,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
      * @throws IOException
      */
     @Override
-    public void loadCorpus(LanguageSet langs) throws DaoException, IOException {
+    public int loadCorpus(LanguageSet langs) throws DaoException, IOException {
         // create temp files for storing corpus entries by phrase and local id.
         // these will ultimately be sorted to group together records with the same phrase / id.
         File byWpIdFile = File.createTempFile("wp_phrases_by_id", "txt");
@@ -135,6 +135,8 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         loadFromFile(RecordType.PHRASES, byPhraseFile, pagePruner);
 
         phraseDao.close();
+
+        return (int) Math.min(Integer.MAX_VALUE, numEntriesRetained);
     }
 
     /**

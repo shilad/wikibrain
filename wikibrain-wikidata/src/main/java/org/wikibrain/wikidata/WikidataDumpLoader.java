@@ -58,7 +58,7 @@ public class WikidataDumpLoader {
         this.metaDao = metaDao;
         this.languages = langs;
         this.universalPageDao = upDao;
-        Map<Language, TIntIntMap> localMaps = universalPageDao.getAllLocalToUnivIdsMap(1, languages);
+        Map<Language, TIntIntMap> localMaps = universalPageDao.getAllLocalToUnivIdsMap(languages);
 
         // Build up set of universal ids from the local ids that we know about
         this.universalIds = new TIntHashSet();

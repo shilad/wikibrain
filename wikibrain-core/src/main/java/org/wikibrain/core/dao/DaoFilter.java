@@ -51,7 +51,6 @@ public class DaoFilter {
     private Collection<Integer> sourceIds;
     private Collection<Integer> destIds;
     private Boolean isParseable;
-    private Collection<Integer> algorithmIds;
     private Integer limit;
 
 
@@ -64,7 +63,6 @@ public class DaoFilter {
         destIds = null;
         locTypeIds = null;
         isParseable = null;
-        algorithmIds = null;
     }
 
     public Collection<Short> getLangIds() {
@@ -97,10 +95,6 @@ public class DaoFilter {
 
     public Boolean isParseable() {
         return isParseable;
-    }
-
-    public Collection<Integer> getAlgorithmIds() {
-        return algorithmIds;
     }
 
     /**
@@ -276,27 +270,6 @@ public class DaoFilter {
     public DaoFilter setParseable(Boolean parseable) {
         isParseable = parseable;
         return this;
-    }
-
-    /**
-     * Sets the AlgorithmIds filter to the specified collection of algorithm IDs.
-     * Used by UniversalPage and UniversalLink.
-     * @param algorithmIds
-     * @return
-     */
-    public DaoFilter setAlgorithmIds(Collection<Integer> algorithmIds) {
-        this.algorithmIds = algorithmIds;
-        return this;
-    }
-
-    /**
-     * Sets the AlgorithmIds filter to the specified algorithm ID.
-     * Used by UniversalPage and UniversalLink.
-     * @param algorithmId
-     * @return
-     */
-    public DaoFilter setAlgorithmIds(int algorithmId) {
-        return setAlgorithmIds(Arrays.asList(new Integer[]{algorithmId}));
     }
 
     /**
