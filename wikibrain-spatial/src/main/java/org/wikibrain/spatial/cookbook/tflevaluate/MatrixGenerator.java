@@ -74,7 +74,7 @@ public class MatrixGenerator {
         // eventually, do something to geometries to make it have only significant entries
         try {
             this.geometries = sdDao.getAllGeometriesInLayer("significant", "earth");
-        }catch(Exception e){
+        }catch(DaoException e){
             e.printStackTrace();
         }
         dm = new DistanceMetrics(env, c, snDao);
@@ -105,22 +105,23 @@ public class MatrixGenerator {
             e.printStackTrace();
         }
         MatrixGenerator mg = new MatrixGenerator(env);
-
-        try {
-            Map<String, Set<Integer>> map = mg.getNearConceptList(mg.getGeoDataFromCities(new File("/scratch/cities2/cities.shp")), 10, 2 );
-            mg.createNeighborFile(map);
-        } catch(IOException e){
-            e.printStackTrace();
-        }
-
-
-//        MatrixWithHeader matrix = mg.generateGraphMatrix(10, 15);
-//        System.out.println("Finished generating matrix");
-//        mg.createMatrixFile("graphmatrix",matrix);
-//        System.out.println("Finished writing matrix to file");
-//        MatrixWithHeader matrix2 = mg.loadMatrixFile("graphmatrix");
 //
-//        System.out.println("Finished loading matrix");
+//        try {
+//            Map<String, Set<Integer>> map = mg.getNearConceptList(mg.getGeoDataFromCities(new File("/scratch/cities2/cities.shp")), 10, 2 );
+//            mg.createNeighborFile(map);
+//        } catch(IOException e){
+//            e.printStackTrace();
+//        }
+
+        MatrixWithHeader matrix = mg.generateSRMatrix();
+        System.out.println("Finished generating matrix");
+        mg.createMatrixFile("srmatrix",matrix);
+        System.out.println("Finished writing matrix to file");
+        MatrixWithHeader matrix2 = mg.loadMatrixFile("srmatrix");
+
+        System.out.println("Finished loading matrix");
+
+        System.out.println(matrix.idToIndex.get(30));
 
 //        List<Integer> check = Arrays.asList(18426, 65,36091,34860,16554,38733,79842,496360, 85, 8678);
 //        for (Integer i: check){
@@ -133,11 +134,11 @@ public class MatrixGenerator {
 //            }
 //        }
 
-//        for (int i=0; i<matrix.matrix.length; i++) {
-//            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
-//                System.out.println("Unequal row "+i);
-//            }
-//        }
+        for (int i=0; i<matrix.matrix.length; i++) {
+            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
+                System.out.println("Unequal row "+i);
+            }
+        }
 
     }
 
@@ -412,7 +413,7 @@ public class MatrixGenerator {
 
     private class MatrixWithHeader{
         private float[][] matrix;
-        private Map<Integer, Integer> idToIndex;
+        public Map<Integer, Integer> idToIndex;
         private List<Integer> idsInOrder;
         private int dimension;
 
