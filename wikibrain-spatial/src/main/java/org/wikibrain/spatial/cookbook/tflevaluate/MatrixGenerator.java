@@ -1,33 +1,22 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
-import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.PrecisionModel;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
-import org.geotools.data.shapefile.files.ShpFiles;
-import org.geotools.data.shapefile.shp.ShapefileReader;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.referencing.GeodeticCalculator;
 import org.geotools.referencing.datum.DefaultEllipsoid;
-import org.omg.CORBA.Environment;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.referencing.cs.EllipsoidalCS;
-import org.opengis.referencing.datum.Ellipsoid;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.matrix.Matrix;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
 import org.wikibrain.sr.MonolingualSRMetric;
@@ -59,6 +48,8 @@ public class MatrixGenerator {
     private float[][] matrix;
     private List<Integer> pageHitList;
 //    private Env env;
+    private Map<String,Geometry> cityGeometries;
+    private Map<String,Double> cityPopulations;
 
     public MatrixGenerator(Env env){
         SpatialDataDao sdDao = null;
@@ -105,23 +96,27 @@ public class MatrixGenerator {
             e.printStackTrace();
         }
         MatrixGenerator mg = new MatrixGenerator(env);
-//
+
 //        try {
-//            Map<String, Set<Integer>> map = mg.getNearConceptList(mg.getGeoDataFromCities(new File("/scratch/cities2/cities.shp")), 10, 2 );
+//            mg.getGeoDataFromCities(new File("/scratch/ne_10m_populated_places/ne_10m_populated_places.shp"));
+//            Map<String, Set<Integer>> map = mg.getNearConceptList(10, 2 );
 //            mg.createNeighborFile(map);
+        Map<String,Set<Integer>> neighbors = mg.loadNeighborFile(new File("citiesToNeighbors2.txt"));
+        List<Set<Integer>> simulatedTurkers = mg.generateSimulatedTurkers(neighbors,mg.cityPopulations);
+
 //        } catch(IOException e){
 //            e.printStackTrace();
 //        }
 
-        MatrixWithHeader matrix = mg.generateSRMatrix();
-        System.out.println("Finished generating matrix");
-        mg.createMatrixFile("srmatrix",matrix);
-        System.out.println("Finished writing matrix to file");
-        MatrixWithHeader matrix2 = mg.loadMatrixFile("srmatrix");
-
-        System.out.println("Finished loading matrix");
-
-        System.out.println(matrix.idToIndex.get(30));
+//        MatrixWithHeader matrix = mg.generateSRMatrix();
+//        System.out.println("Finished generating matrix");
+//        mg.createMatrixFile("srmatrix",matrix);
+//        System.out.println("Finished writing matrix to file");
+//        MatrixWithHeader matrix2 = mg.loadMatrixFile("srmatrix");
+//
+//        System.out.println("Finished loading matrix");
+//
+//        System.out.println(matrix.idToIndex.get(30));
 
 //        List<Integer> check = Arrays.asList(18426, 65,36091,34860,16554,38733,79842,496360, 85, 8678);
 //        for (Integer i: check){
@@ -134,11 +129,11 @@ public class MatrixGenerator {
 //            }
 //        }
 
-        for (int i=0; i<matrix.matrix.length; i++) {
-            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
-                System.out.println("Unequal row "+i);
-            }
-        }
+//        for (int i=0; i<matrix.matrix.length; i++) {
+//            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
+//                System.out.println("Unequal row "+i);
+//            }
+//        }
 
     }
 
@@ -431,8 +426,9 @@ public class MatrixGenerator {
 
     }
 
-    public Map<String,Geometry> getGeoDataFromCities(File rawFile) throws IOException{
-        Map<String, Geometry> result = new HashMap<String, Geometry>();
+    public void getGeoDataFromCities(File rawFile) throws IOException{
+        cityGeometries = new HashMap<String, Geometry>();
+        cityPopulations = new HashMap<String, Double>();
 
         // get SimpleFeatureIterator
         Map<String, URL> map = new HashMap<String, URL>();
@@ -445,21 +441,35 @@ public class MatrixGenerator {
         // shape file fields:
         // geometry, city, country/state code, state, country code, country,
         // type of city, population, population category rank, population category, "port_id", "label_flag"
+        Set<String> countryNames = new HashSet<String>();
+        String[] array = {"United States of America","Canada","Brazil","Pakistan","India","France","Spain","United Kingdom","Australia"};
+        for (String s: array){
+            countryNames.add(s);
+        }
 
         // loop over items
         while (inputFeatures.hasNext()) {
             SimpleFeature feature = inputFeatures.next();
-            // country,state,city
-            String id = feature.getAttribute(6)+","+feature.getAttribute(4)+","+feature.getAttribute(2);
-            System.out.println(id);
-            Geometry g = (Geometry)feature.getAttribute(0);
-            result.put(id,g);
-        }
+            if (countryNames.contains(feature.getAttribute(17))) {
+                // country,state,city
+                String id = feature.getAttribute(17) + "," + feature.getAttribute(19) + "," + feature.getAttribute(5);
+                System.out.println(id);
+                Geometry g = (Geometry) feature.getAttribute(0);
+                cityGeometries.put(id, g);
 
-        return result;
+                double pop = 0;
+                for (int j=83; j<=88; j++){
+                    if ((Double)feature.getAttribute(j)!=0){
+                        pop = Math.max(pop,(Double)feature.getAttribute(j));
+                    }
+                }
+                cityPopulations.put(id,pop);
+            }
+        }
     }
 
-    public Map<String, Set<Integer>> getNearConceptList(final Map<String, Geometry> citiesMap, final int k, final int maxTopoDistance){
+    public Map<String, Set<Integer>> getNearConceptList(final int k, final int maxTopoDistance){
+        final Map<String, Geometry> citiesMap = cityGeometries;
         final Map<String, Set<Integer>> result = new HashMap<String, Set<Integer>>();
 
         // We will assume item ids (in 'geometries') are universal (because we think item_id in geometries are universal)
@@ -490,7 +500,6 @@ public class MatrixGenerator {
                 System.out.println("Processed city "+city);
             }
         });
-
 
         return result;
     }
@@ -539,10 +548,10 @@ public class MatrixGenerator {
 
         BufferedWriter bw = null;
         try {
-            bw = new BufferedWriter(new FileWriter("citiesToNeighbors.txt"));
+            bw = new BufferedWriter(new FileWriter("citiesToNeighbors2.txt"));
 
             for (String string: map.keySet()){
-                bw.write(string+"\t");
+                bw.write(string+"\t"+cityPopulations.get(string)+"\t");
                 for (Integer i : map.get(string)){
                     bw.write(i+"\t");
                 }
@@ -556,5 +565,122 @@ public class MatrixGenerator {
 
     }
 
+    public Map<String,Set<Integer>> loadNeighborFile(File file){
+        Map<String,Set<Integer>> result = new HashMap<String, Set<Integer>>();
+        cityPopulations = new HashMap<String, Double>();
+        try {
+            Scanner scan = new Scanner(file);
+            while(scan.hasNextLine()){
+                String line = scan.nextLine();
+                String[] array = line.split("\t");
+                Set<Integer> set = new HashSet<Integer>();
+                String id = array[0];
+                double population = Double.parseDouble(array[1]);
+                for (int i=2; i<array.length; i++){
+                    set.add(Integer.parseInt(array[i]));
+                }
+                result.put(id,set);
+                cityPopulations.put(id,population);
+            }
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
 
+        return result;
+    }
+
+    public List<Set<Integer>> generateSimulatedTurkers(Map<String,Set<Integer>> neighbors, Map<String,Double> citiesPopulation){
+        List<Set<Integer>> result = new ArrayList<Set<Integer>>();
+        double small = 10;
+
+        Map<String,Double> countryPopulation = new HashMap<String, Double>();
+
+        // get country populations
+        for (String cityName:citiesPopulation.keySet()){
+            String countryName = cityName.substring(0, cityName.indexOf(','));
+            double pop = citiesPopulation.get(cityName);
+            if (pop == 0){
+                pop = small;
+            }
+            if (countryPopulation.get(countryName)==null){
+                countryPopulation.put(countryName,pop);
+            }else{
+                countryPopulation.put(countryName,countryPopulation.get(countryName)+pop);
+            }
+        }
+
+        // get world population
+        double total = 0;
+        for (String countryName:countryPopulation.keySet()){
+            total += countryPopulation.get(countryName);
+            System.out.println(countryName+" "+countryPopulation.get(countryName));
+        }
+        System.out.println("total = "+total);
+
+        // get country percent population
+        Map<String,Double> countryPopPercent = new HashMap<String, Double>();
+        for (String countryName:countryPopulation.keySet()){
+            countryPopPercent.put(countryName,(countryPopulation.get(countryName)/total));
+            System.out.println(countryName+" "+(countryPopulation.get(countryName)/total));
+        }
+
+        // from http://www.appappeal.com/maps/amazon-mechanical-turk
+        Map<String,Double> countryTurkPercent = new HashMap<String, Double>();
+        countryTurkPercent.put("United States of America",51.5);
+        countryTurkPercent.put("United Kingdom",1.9);
+        countryTurkPercent.put("India",33.0);
+        countryTurkPercent.put("Brazil",0.8);
+        countryTurkPercent.put("Australia",0.9);
+        countryTurkPercent.put("Pakistan",2.0);
+        countryTurkPercent.put("Spain",0.6);
+        countryTurkPercent.put("Canada",0.7);
+        countryTurkPercent.put("France",0.5);
+
+        // make weighted random collection
+        RandomCollection<String> randomCollection = new RandomCollection<String>();
+        for (String cityName : citiesPopulation.keySet()){
+            double pop = citiesPopulation.get(cityName);
+            if (pop == 0){
+                pop = small;
+            }
+            String countryName = cityName.substring(0, cityName.indexOf(','));
+            pop /= countryPopPercent.get(countryName);
+            pop *= countryTurkPercent.get(countryName);
+            randomCollection.add(pop, cityName);
+        }
+
+        // generate turkers
+        for (int i = 0; i< 200; i++){
+            String city = randomCollection.next();
+            System.out.println(city+" "+cityPopulations.get(city));
+            result.add(neighbors.get(city));
+        }
+        return result;
+    }
+
+    private class RandomCollection<E> {
+        private final NavigableMap<Double, E> map = new TreeMap<Double, E>();
+        private final Random random;
+        private double total = 0;
+
+        public RandomCollection() {
+            this(new Random());
+        }
+
+        public RandomCollection(Random random) {
+            this.random = random;
+        }
+
+        public void add(double weight, E result) {
+            if (weight <= 0) return;
+            total += weight;
+            map.put(total, result);
+        }
+
+        public E next() {
+            double value = random.nextDouble() * total;
+            return map.ceilingEntry(value).getValue();
+        }
+    }
 }
