@@ -40,6 +40,12 @@ creek
 vale
 natural
 ridge
+tropic
+wet
+tropical
+island
+green
+cape
 deserts
 canyons
 rivers
@@ -91,3 +97,6 @@ creeks
 vales
 ridges
 wildlife
+tropics
+islands
+capes

@@ -11,6 +11,7 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalLinkDao;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 
@@ -32,8 +33,9 @@ public class PageViewDbDao {
         this.lang = lang;
         //TODO: Find a new way to deal with the path issue...It is probably not a great idea to hard code the path
         this.db = DBMaker.newFileDB(new File("./db/" + lang.getLangCode() + "_page_view_db")).closeOnJvmShutdown().make();
-        if(db.exists("parsedHourSet"))
+        if(db.exists("parsedHourSet")) {
             this.parsedHourSet = db.getTreeSet("parsedHourSet");
+        }
         else
             this.parsedHourSet = db.createTreeSet("parsedHourSet").make();
     }
@@ -48,8 +50,8 @@ public class PageViewDbDao {
      * @throws WikiBrainException
      * @throws DaoException
      */
-    public PageViewIterator getPageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate) throws WikiBrainException, DaoException {
-        return new PageViewIterator(langs, startDate, endDate);
+    public PageViewIterator getPageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate, LocalPageDao localPageDao) throws WikiBrainException, DaoException {
+        return new PageViewIterator(langs, startDate, endDate, localPageDao);
     }
 
 
@@ -77,6 +79,7 @@ public class PageViewDbDao {
             }
 
         });
+        System.out.println(dateId);
         parsedHourSet.add(dateId);
         db.commit();
     }
@@ -90,10 +93,10 @@ public class PageViewDbDao {
      * @param hour The hour we are getting page view in
      * @return The number of page views
      */
-    public int getPageView(int id, int year, int month, int day, int hour)throws ConfigurationException, DaoException, WikiBrainException{
+    public int getPageView(int id, int year, int month, int day, int hour, LocalPageDao localPageDao)throws ConfigurationException, DaoException, WikiBrainException{
         DateTime time = new DateTime(year, month, day, hour, 0);
         if(!parsedHourSet.contains(time.getMillis())){
-            parse(time);
+            parse(time, localPageDao);
         }
         if(db.exists(Integer.toString(id)) == false)
             return 0;
@@ -119,12 +122,12 @@ public class PageViewDbDao {
      */
 
     //hourly
-    public int getPageView(int id, int startYear, int startMonth, int startDay, int startHour, int numHours) throws ConfigurationException, DaoException, WikiBrainException{
+    public int getPageView(int id, int startYear, int startMonth, int startDay, int startHour, int numHours, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
         int sum = 0;
         DateTime startTime = new DateTime(startYear, startMonth, startDay, startHour, 0);
         DateTime endTime = startTime.plusHours(numHours);
         if(!checkExist(startTime, endTime))
-            parse(startTime, numHours);
+            parse(startTime, numHours, localPageDao);
         if(db.exists(Integer.toString(id)) == false)
             return 0;
         Map<Long, Integer> hourViewMap = db.getTreeMap(Integer.toString(id));
@@ -139,12 +142,12 @@ public class PageViewDbDao {
     }
 
     public Map<Integer, Integer> getPageView(Iterable<Integer> ids, int startYear, int startMonth, int startDay, int startHour,
-                                      int numHours) throws ConfigurationException, DaoException, WikiBrainException{
+        int numHours, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         DateTime startTime = new DateTime(startYear, startMonth, startDay, startHour, 0);
         DateTime endTime = startTime.plusHours(numHours);
         if(!checkExist(startTime, endTime))
-            parse(startTime, numHours);
+            parse(startTime, numHours, localPageDao);
         for(Integer id: ids){
             if(db.exists(Integer.toString(id)) == false){
                 result.put(id, 0);
@@ -170,9 +173,9 @@ public class PageViewDbDao {
      * @throws DaoException
      * @throws WikiBrainException
      */
-    void parse(DateTime startTime, int numHours)throws ConfigurationException, DaoException, WikiBrainException {
+    void parse(DateTime startTime, int numHours, LocalPageDao localPageDao)throws ConfigurationException, DaoException, WikiBrainException {
         DateTime endTime = startTime.plusHours(numHours);
-        PageViewIterator it = new PageViewIterator(new LanguageSet(lang), startTime, endTime);
+        PageViewIterator it = new PageViewIterator(new LanguageSet(lang), startTime, endTime, localPageDao);
         List<PageViewDataStruct> data;
         while(it.hasNext()){
             data = it.next();
@@ -191,8 +194,8 @@ public class PageViewDbDao {
      * @throws DaoException
      * @throws WikiBrainException
      */
-    void parse(DateTime time)throws ConfigurationException, DaoException, WikiBrainException {
-        PageViewIterator it = new PageViewIterator(new LanguageSet(lang), time);
+    void parse(DateTime time, LocalPageDao localPageDao)throws ConfigurationException, DaoException, WikiBrainException {
+        PageViewIterator it = new PageViewIterator(new LanguageSet(lang), time, localPageDao);
         List<PageViewDataStruct> data;
         while(it.hasNext()){
             data = it.next();
@@ -212,8 +215,10 @@ public class PageViewDbDao {
      */
     boolean checkExist(DateTime startTime, DateTime endTime){
         for(DateTime hrTime = startTime; hrTime.getMillis() < endTime.getMillis(); hrTime = hrTime.plusHours(1)){
-            if(!parsedHourSet.contains(hrTime.getMillis()))
+            if(!parsedHourSet.contains(hrTime.getMillis())) {
+                System.out.println("does exist");
                 return false;
+            }
         }
         return true;
     }

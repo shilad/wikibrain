@@ -38,6 +38,7 @@ public class PageViewIterator implements Iterator {
     private LanguageSet langs;
     private static String BASE_URL = "http://dumps.wikimedia.your.org/other/pagecounts-raw/";
     private List<PageViewDataStruct> nextData;
+    private LocalPageDao localPageDao;
 
     /**
      * constructs a PageViewIterator and parses a PageViewDataStruct from the first hour input in the constructor,
@@ -48,30 +49,33 @@ public class PageViewIterator implements Iterator {
      * @throws WikiBrainException
      * @throws DaoException
      */
-    public PageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate)
+    public PageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate, LocalPageDao localPageDao)
             throws WikiBrainException, DaoException {
         this.langs = langs;
         this.currentDate = startDate;
+        this.localPageDao=localPageDao;
         if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
             throw new WikiBrainException("No page view data supported before 6 PM on 12/09/2007");
         }
         this.endDate = endDate;
     }
 
-    public PageViewIterator(Language lang, DateTime startDate, DateTime endDate)
+    public PageViewIterator(Language lang, DateTime startDate, DateTime endDate, LocalPageDao localPageDao)
             throws WikiBrainException, DaoException {
         this.langs = new LanguageSet(lang);
         this.currentDate = startDate;
+        this.localPageDao=localPageDao;
         if (currentDate.getMillis() < (new DateTime(2007, 12, 9, 18, 0)).getMillis()) {
             throw new WikiBrainException("No page view data supported before 6 PM on 12/09/2007");
         }
         this.endDate = endDate;
     }
 
-    public PageViewIterator(LanguageSet langs, DateTime currentDate){
+    public PageViewIterator(LanguageSet langs, DateTime currentDate, LocalPageDao localPageDao){
         this.langs = langs;
         this.currentDate = currentDate;
         this.endDate = currentDate.plusHours(1);
+        this.localPageDao=localPageDao;
     }
 
     public void remove() {
@@ -148,9 +152,16 @@ public class PageViewIterator implements Iterator {
             boolean flag = false;
             while (pageViewDataFile == null && seconds < 60) {
                 String minutesString = twoDigIntStr(minutes);
-                String secondsString = twoDigIntStr(seconds);
-                String fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString + minutesString + secondsString + fileNameSuffix;
-                pageViewDataFile = downloadFile(homeFolder, fileName, tempFolder);
+                String secondsString;
+                String fileName;
+
+                do { //accounts for the possibility of the seconds not ending with 0
+                    secondsString  = twoDigIntStr(seconds);
+                    fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString + minutesString + secondsString + fileNameSuffix;
+                    pageViewDataFile = downloadFile(homeFolder, fileName, tempFolder);
+                    seconds++;
+                }while(pageViewDataFile == null && seconds <= 5);
+
                 if(pageViewDataFile != null){
                     flag = true;
                     break;
@@ -226,13 +237,10 @@ public class PageViewIterator implements Iterator {
         gbin.close();
     }
 
-    private static TIntIntMap parsePageViewDataFromFile(Language lang, File f) throws WikiBrainException, DaoException, ConfigurationException {
+    private TIntIntMap parsePageViewDataFromFile(Language lang, File f) throws WikiBrainException, DaoException, ConfigurationException {
 
         try{
-            Env env = new EnvBuilder().build();
             TIntIntMap data = new TIntIntHashMap();
-            Configurator configurator = env.getConfigurator();
-            LocalPageDao pdao = configurator.get(LocalPageDao.class, "sql");
 
             BufferedReader br =  new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             String curLine;
@@ -245,7 +253,7 @@ public class PageViewIterator implements Iterator {
                 if (cols[0].equals(lang.getLangCode())) {
                     try{
                         String title = URLDecoder.decode(cols[1], "UTF-8");
-                        int pageId = pdao.getIdByTitle(new Title(title, lang));
+                        int pageId = localPageDao.getIdByTitle(new Title(title, lang));
                         int numPageViews = Integer.parseInt(cols[2]);
                         data.adjustOrPutValue(pageId, numPageViews, numPageViews);
                     }

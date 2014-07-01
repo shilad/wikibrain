@@ -168,9 +168,7 @@ public class ESAGenerator implements VectorGenerator {
 
         List<Explanation> explanations = new ArrayList<Explanation>();
         for (int i = 0; i < top.numDocs(); i++) {
-            int id = top.get(i).getId();
-            int id2= top.getId(i);
-            LocalPage p = pageDao.getById(language, top.getId(i)); /// BECCA!!! p is always null for cat which is our problem
+            LocalPage p = pageDao.getById(language, searcher.getLocalIdFromDocId(top.getId(i), language));
             if (p != null) {
                 explanations.add(new Explanation("Both ? and ? have similar text to ?", phrase1, phrase2, p));
             }

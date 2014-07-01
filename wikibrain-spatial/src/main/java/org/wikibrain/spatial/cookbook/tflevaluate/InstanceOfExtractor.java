@@ -1,14 +1,11 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
-import com.sun.org.apache.bcel.internal.generic.LAND;
+import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.dao.Dao;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
@@ -17,9 +14,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.wikidata.LocalWikidataStatement;
 import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.wikidata.WikidataEntity;
 import org.wikibrain.wikidata.WikidataStatement;
 
 import java.io.*;
@@ -33,18 +28,22 @@ import java.util.logging.Logger;
 public class InstanceOfExtractor {
 
     private static int WIKIDATA_CONCEPTS = 1;
-    public static int WEIRD = 0, COUNTRY = 1, STATE = 2, NATURAL = 3, CITY = 4, LANDMARK = 5, COUNTY = 6;
-    private String[] fileNames = {"weird.txt", "country.txt", "state.txt", "natural.txt", "city.txt", "landmark.txt", "county.txt"};
-    public static int MAX = 7;
-    private Set<String>[] scaleKeywords = new Set[MAX];
-    private Set<Integer>[] scaleIds = new Set[MAX];
+
+
+    // only need to change order here
+    public static int WEIRD = 0, LANDMARK = 1, COUNTY = 2 ,COUNTRY = 3 , STATE = 4,  CITY =5 , NATURAL =6 ;
+    private String[] fileNames = { "weird.txt", "landmark.txt", "county.txt",  "country.txt", "state.txt", "city.txt", "natural.txt" };
+    public static int NUM_SCALES =7;
+    private Set<String>[] scaleKeywords = new Set[NUM_SCALES];
+    private Set<Integer>[] scaleIds = new Set[NUM_SCALES];
+
     private SpatialDataDao sdDao;
     private UniversalPageDao upDao;
     private LocalPageDao lDao;
     private WikidataDao wdao;
     private static final boolean DEBUG = true;
-    private static final Language CUR_LANG = Language.EN;
-    private Map<Integer, Set<Integer>> countryToStateMap;
+    private static final Language CUR_LANG = Language.SIMPLE;
+    private Map<Integer,Set<Integer>> countryToStateMap;
 
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
 
@@ -59,8 +58,6 @@ public class InstanceOfExtractor {
         this.lDao = lDao;
         wdao = wDao;
 
-        System.out.println("HI in constructor");
-
         try {
             FileInputStream fis = new FileInputStream(new File("countryToStateMap.txt"));
             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -73,7 +70,7 @@ public class InstanceOfExtractor {
             System.out.println("object in file was wrong class");
         }
 
-//
+
 //        try {
 //            countryToStateMap = loadHierarchicalData();
 //
@@ -84,14 +81,21 @@ public class InstanceOfExtractor {
     }
 
 
-    public static void main(String[] args) {
+    public static void main (String[] args)  {
+
+
+//        String pageTitle = "hello, h,h( hi))";
+//        String[] tokens = pageTitle.split("([, ]){1,}");
+//
+//        for (int i=0; i<tokens.length; i++){
+//            System.out.println("+"+tokens[i]+"+");
+//        }
+
         Env env = null;
         InstanceOfExtractor ioe = null;
         try {
             env = EnvBuilder.envFromArgs(args);
             ioe = new InstanceOfExtractor(env.getConfigurator());
-
-//            System.out.println("HI");
 
             // write scale ids out to a file
 //            FileOutputStream fos = new FileOutputStream("countryToStateMap.txt");
@@ -101,7 +105,7 @@ public class InstanceOfExtractor {
 
 //            for (int country1:ioe.countryToStateMap.keySet()){
 //                for (int country2:ioe.countryToStateMap.keySet()){
-//                    if (country1!=country2){ho
+//                    if (country1!=country2){
 //                        Set<Integer> set1 = ioe.countryToStateMap.get(country1);
 //                        Set<Integer> set2 = ioe.countryToStateMap.get(country2);
 //                        set1.retainAll(set2);
@@ -115,18 +119,15 @@ public class InstanceOfExtractor {
 //            System.out.println(ioe.countryToStateMap.get(30));
 //            System.out.println(ioe.countryToStateMap.get(16));
             ioe.loadScaleKeywords();
-            ioe.loadScaleIds();
-//            ioe.generateScaleId();
-
+//            ioe.loadScaleIds();
+            ioe.generateScaleId();
+            ioe.createScaleFile();
             // print out concepts in relevant category
-//            ioe.printScale(CITY);
-//            ioe.generateRecallTest(150);
-            for (int i = 0; i < MAX; i++) {
-                System.out.println("Found " + ioe.scaleIds[i].size() + " concepts with scale " +i+" (keywords from "+ioe.fileNames[i]+")");
-            }
+//            ioe.printScale(STATE);
 
+//            ioe.generateRecallTest(50);
 
-            ioe.printScale(COUNTRY);
+//            ioe.printScaleId(COUNTRY);
 
 //            Set<String> set = ioe.extractInstanceOfList();
 //            int count = 0;
@@ -138,12 +139,12 @@ public class InstanceOfExtractor {
 //                }
 //            }
 
-        } catch (DaoException e) {
-            e.printStackTrace();
-        } catch (ConfigurationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }catch(DaoException e){
+            System.out.println(e);
+        }catch(ConfigurationException e){
+            System.out.println(e);
+        }catch(IOException e){
+            System.out.println(e);
         }
 
     }
@@ -162,22 +163,25 @@ public class InstanceOfExtractor {
 
         // Get all known state geometries
         Map<Integer, Geometry> states = sdDao.getAllGeometriesInLayer("gadm1", "earth");
-        LOG.log(Level.INFO, String.format("Found %d total states, now loading geometries", states.size()));
+        LOG.log(Level.INFO, String.format("Found %d total states, now loading states", states.size()));
 
         // Map of countries to states
         Map<Integer, Set<Integer>> countryStateMap = new HashMap<Integer, Set<Integer>>();
 
         // Loop over countries and states to generate this map
-        for (int countryId : countries.keySet()) {
-            countryStateMap.put(countryId, new HashSet<Integer>());
-            for (int stateId : states.keySet()) {
+        for (int countryId: countries.keySet()){
+            Geometry country = countries.get(countryId);
+            countryStateMap.put(countryId,new HashSet<Integer>());
+            for (int stateId: states.keySet()){
                 try {
-                    if (countries.get(countryId) != null && states.get(stateId) != null && countries.get(countryId).contains(states.get(stateId))) {
+                    Geometry state = states.get(stateId);
+                    if (country != null && state != null && country.contains(state.getInteriorPoint())) {
                         countryStateMap.get(countryId).add(stateId);
                     }
-                } catch (TopologyException e) {
-                    countryStateMap.get(countryId).add(stateId);
-//                    System.out.println("Country "+countryId+" had topology exception with state "+stateId);
+                }catch(TopologyException e){
+                    //still add exception cases to countryStateMap
+//                    countryStateMap.get(countryId).add(stateId);
+                    System.out.println("Country "+countryId+" had topology exception with state "+stateId);
                 }
             }
             System.out.println("Country " + countryId + " has " + countryStateMap.get(countryId).size() + " states: " + countryStateMap.get(countryId));
@@ -265,8 +269,8 @@ public class InstanceOfExtractor {
      *
      * @throws FileNotFoundException
      */
-    public void loadScaleKeywords() throws FileNotFoundException {
-        for (int i = 0; i < MAX; i++) {
+    public void loadScaleKeywords() throws FileNotFoundException{
+        for (int i = 0; i< NUM_SCALES; i++) {
             scaleKeywords[i] = new HashSet<String>();
             Scanner scanner = new Scanner(new File(fileNames[i]));
             while (scanner.hasNextLine()) {
@@ -282,7 +286,7 @@ public class InstanceOfExtractor {
     public void loadScaleIds() {
 
         try {
-            FileInputStream fis = new FileInputStream(new File("scaleIds" + CUR_LANG + ".txt"));
+            FileInputStream fis = new FileInputStream(new File("scaleIds"+CUR_LANG+".txt"));
             ObjectInputStream ois = new ObjectInputStream(fis);
             scaleIds = (Set[]) ois.readObject();
             ois.close();
@@ -322,7 +326,7 @@ public class InstanceOfExtractor {
             }
 
             int scale = LANDMARK;
-            for (int i = 0; i < MAX; i++) {
+            for (int i = 0; i < NUM_SCALES; i++) {
                 if (scaleIds[i].contains(conceptId)) {
                     scale = i;
                     break;
@@ -342,8 +346,13 @@ public class InstanceOfExtractor {
     /**
      * Separate concept ids by scale and save into a file.
      *
+<<<<<<< HEAD
      * @throws DaoException Could happen when trying to access pages or spatial information
      * @throws IOException  Could happen when trying to write the generated ids to their file
+=======
+     * @throws org.wikibrain.core.dao.DaoException Could happen when trying to access pages or spatial information
+     * @throws java.io.IOException Could happen when trying to write the generated ids to their file
+>>>>>>> b491e3aa5121292efc6dc12cd7fcaf40a605d7b8
      */
     public void generateScaleId() throws DaoException, IOException {
 
@@ -351,8 +360,14 @@ public class InstanceOfExtractor {
         Map<Integer, Geometry> geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
-        // initiate scale sets
-        for (int i = 0; i < MAX; i++) {
+        Map<Integer, Geometry> countries = sdDao.getAllGeometriesInLayer("gadm0", "earth");
+        LOG.log(Level.INFO, String.format("Found %d total countries, now loading countries", countries.size()));
+
+        Map<Integer, Geometry> states = sdDao.getAllGeometriesInLayer("gadm1", "earth");
+        LOG.log(Level.INFO, String.format("Found %d total states, now loading states", states.size()));
+
+        // initiate scale sets"scaleIds"+CUR_LANG+".txt"
+        for (int i=0; i< NUM_SCALES; i++   ){
             scaleIds[i] = new HashSet<Integer>();
         }
 
@@ -368,7 +383,7 @@ public class InstanceOfExtractor {
             LocalPage lpage = lDao.getById(CUR_LANG, concept.getLocalId(CUR_LANG));
 
             // counter print
-            if (DEBUG && count % 10000 == 0) {
+            if (DEBUG && count%1000 == 0){
                 LOG.log(Level.INFO, "++++++++++++++++++++++++++++++++++ " + count + " ++++++++++++++++++++++++++++++++");
 
                 // exit early
@@ -383,6 +398,17 @@ public class InstanceOfExtractor {
 
             // break for loop after first proper "instance of" label found for this conceptId
             boolean found = false;
+
+            if (countries.keySet().contains(conceptId)){
+                scaleIds[COUNTRY].add(conceptId);
+                found = true;
+                continue;
+            }
+            if (states.keySet().contains(conceptId)){
+                scaleIds[STATE].add(conceptId);
+                found =  true;
+                continue;
+            }
 
             // loop over this conceptId's statements
             for (WikidataStatement st : list) {
@@ -400,7 +426,7 @@ public class InstanceOfExtractor {
                     try {
                         // universal id corresponding to "instance of" label
                         UniversalPage concept2 = upDao.getById(id, WIKIDATA_CONCEPTS);
-                        // local page ditto
+                        // local page ditto31
                         LocalPage page = lDao.getById(CUR_LANG, concept2.getLocalId(CUR_LANG));
 
                         // check if there's a spatial keyword in this instance-of label title
@@ -429,13 +455,13 @@ public class InstanceOfExtractor {
             // if didn't find a valid keyword in any of the instance-of descriptions of this concept,
             // do work-arounds based on title
             if (!found) {
-                String s = lpage.getTitle().toString();
-                // first check title as a whole
-                if (findMatch(conceptId, s)) {
-                    // found match
+                String str = lpage.getTitle().toString();
+                // counties get special special treatment
+                if (findMatch(conceptId,str)){
+                    continue;
                 }
                 // assume remaining with commas are cities
-                else if (s.contains(",")) {
+                else if (str.contains(",")) {
                     scaleIds[CITY].add(conceptId);
                 }
                 // assume everything else is a landmark
@@ -473,13 +499,18 @@ public class InstanceOfExtractor {
             instanceOfLabel = instanceOfLabel.substring(0, instanceOfLabel.length() - 1);
         }
 
+
+
         // check for a match
-        for (int i = 0; i < MAX; i++) {
-            if (match(scaleKeywords[i], instanceOfLabel)) {
-                scaleIds[i].add(id);
-                return true;
+            for (int i=0; i< NUM_SCALES; i++) {
+
+                if (match(scaleKeywords[i], instanceOfLabel)) {
+                    scaleIds[i].add(id);
+                    return true;
+                }
             }
-        }
+
+
 
         // if no match found, return false
         return false;
@@ -498,11 +529,16 @@ public class InstanceOfExtractor {
             return true;
         }
         // if not there, look for part strings
-        else {
-            // separate where there are any commas, spaces, or parentheses
-            String[] tokens = pageTitle.split("([, ()]){1,}");
-            for (String s : tokens) {
-                if (s.length()!=0 && scaleKeywords.contains(s)) {
+        else{
+//            String[] tokens1 = pageTitle.split(",");
+//            pageTitle = tokens1[0];
+            int i = pageTitle.indexOf(',');
+            if (i>0){
+                pageTitle = pageTitle.substring(0,i);
+            }
+            String[] tokens = pageTitle.split(" ");
+            for (String s: tokens){
+                if (scaleKeywords.contains(s)) {
                     return true;
                 }
             }
@@ -517,9 +553,9 @@ public class InstanceOfExtractor {
      * @param id A concept id
      * @return The scale associated with it (from one of the final ints)
      */
-    public int getScale(int id) {
-        for (int i = 0; i < MAX; i++) {
-            if (scaleIds[i].contains(id)) {
+    public int getScale(int id){
+        for (int i=0; i< NUM_SCALES; i++){
+            if (scaleIds[i].contains(id)){
                 return i;
             }
         }
@@ -535,12 +571,9 @@ public class InstanceOfExtractor {
     public void printScale(int scaleId) throws DaoException {
         for (Integer conceptId : scaleIds[scaleId]) {
             UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
-            LocalPage lpage = lDao.getById(CUR_LANG, concept.getLocalId(CUR_LANG));
+            LocalPage lpage = lDao.getById(CUR_LANG,concept.getLocalId(CUR_LANG));
             String str = lpage.getTitle().toString();
-            str = str.substring(0,str.lastIndexOf('(')-1);
-//            if (str.contains(")")) {
-                System.out.println(str);
-//            }
+            System.out.println(str.substring(0,str.lastIndexOf('(')-1));
         }
         System.out.println(scaleIds[scaleId].size());
     }
@@ -598,8 +631,54 @@ public class InstanceOfExtractor {
         List<Integer> list = new ArrayList<Integer>();
         list.addAll(geometries.keySet());
         Collections.shuffle(list);
-        for (int i = 0; i < size; i++) {
-            System.out.println(i + ". " + list.get(i));
+        for (int i = 0; i< size; i++){
+            System.out.print(i + "\t" + list.get(i) + "\t");
+            boolean found = false;
+            for (int j=0; j<NUM_SCALES; j++){
+                if (scaleIds[j].contains(list.get(i))){
+                    System.out.println(j+"\t"+fileNames[j]);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found){
+                System.out.println(getScale(list.get(i)));
+            }
         }
+    }
+
+    public void createScaleFile(){
+        Map<Integer, Geometry> geometries =null;
+        try {
+            geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
+            LOG.log(Level.INFO, String.format("Found %d total countries, now loading countries", geometries.size()));
+        } catch(DaoException e){
+            e.printStackTrace();
+        }
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+
+        BufferedWriter bw = null;
+        try {
+            bw = new BufferedWriter(new FileWriter("geometryToScale.txt"));
+
+            for (int i = 0; i<NUM_SCALES; i++){
+                bw.write(i+"\t"+fileNames[i]+"\n");
+            }
+            List<Integer> list = Lists.newArrayList(geometries.keySet());
+            for (int i = 0; i<list.size();i++){
+                for (int j=0;j< NUM_SCALES;j++){
+                    if (scaleIds[j].contains(list.get(i))){
+                        bw.write(list.get(i)+"\t"+j+"\n");
+                        break;
+                    }
+                }
+            }
+
+            bw.close();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+
     }
 }

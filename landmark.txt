@@ -66,3 +66,11 @@ arch
 arches
 hospital
 hospitals
+house
+houses
+battle
+battles
+net
+nets
+stadium
+stadiums

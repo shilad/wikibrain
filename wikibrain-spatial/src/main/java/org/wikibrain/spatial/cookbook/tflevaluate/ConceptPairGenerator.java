@@ -14,30 +14,20 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
 
-import com.google.gson.InstanceCreator;
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.geotools.referencing.GeodeticCalculator;
-import org.wikibrain.conf.Configuration;
-import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
-import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.dao.live.LocalLinkLiveDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.sr.MonolingualSRMetric;
 import org.wikibrain.sr.SRResult;
-import org.wikibrain.wikidata.LocalWikidataStatement;
 import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.wikidata.WikidataEntity;
-import org.wikibrain.wikidata.WikidataStatement;
 
-import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.*;
 
@@ -221,18 +211,26 @@ public class ConceptPairGenerator {
 
         List<Integer> set = new ArrayList<Integer>();
         // loop through significant geos for second point
-        for (int current: ioe.getScaleIdSet(category)){
+
+        for (int current: ioe.getScaleIdSet(category)) {
 
             GeodeticCalculator calc = new GeodeticCalculator();
-            Point currentPoint = (Point) geometries.get(current);
-            calc.setStartingGeographicPoint(currentPoint.getX(), currentPoint.getY());
-            calc.setDestinationGeographicPoint(home.getX(), home.getY());
+            Point currentPoint = null;
+            try {
+                currentPoint = (Point) geometries.get(current);
+                calc.setStartingGeographicPoint(currentPoint.getX(), currentPoint.getY());
+                calc.setDestinationGeographicPoint(home.getX(), home.getY());
+                double distance2 = calc.getOrthodromicDistance() / 1000; //in km
 
-            double distance2 = calc.getOrthodromicDistance() / 1000; //in km
+                if (distance2<distance){
+                    set.add(current);
+                }
 
-            if (distance2<distance){
-                set.add(current);
+            } catch (Exception e){
+                continue;
             }
+
+
         }
         if (set.size()<=1){
             System.out.println("error "+ distance);
@@ -341,7 +339,7 @@ public class ConceptPairGenerator {
         for (int i = 0; i < 10 ; i++ ){
             list.add(getRandomConceptPairFromGeneral());
         }
-        for (int i = 0; i < InstanceOfExtractor.MAX; i++ ){
+        for (int i = 0; i < InstanceOfExtractor.NUM_SCALES; i++ ){
             for (int j = 0; j < 10; j++){
                 if (i != InstanceOfExtractor.WEIRD){
                     list.add(getRandomConceptPairWithinDistanceAndCategory(home, distance, i));

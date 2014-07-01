@@ -1,6 +1,7 @@
 time zone
 latitude
 meridian
+list
 time zones
 time
 latitudes
@@ -17,3 +18,11 @@ avenues
 freeways
 causeway
 causeways
+limes
+lime
+frontier
+frontiers
+lists
+geography
+ministry
+ministries

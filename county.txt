@@ -1,20 +1,23 @@
+upazila
 county
-county,
-prefecture
 canton
 district
 duchy
+prefecture
 ward
+council area
 parish
 tehsil
-upazila
+upazilas
 counties
-counties,
-prefectures
 cantons
 districts
 duchies
+prefectures
 wards
+council areas
 parishes
 tehsils
-upazilas
+list of counties of the republic of china
+regional units
+regional unit

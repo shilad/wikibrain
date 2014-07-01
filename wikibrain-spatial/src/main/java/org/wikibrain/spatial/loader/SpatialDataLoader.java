@@ -20,6 +20,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.phrases.PhraseAnalyzer;
@@ -48,15 +49,19 @@ public class SpatialDataLoader {
     private final SpatialDataDao spatialDataDao;
     private final SpatialDataFolder spatialDataFolder;
     private final WikidataDao wdDao;
+    private final LocalPageDao lpDao;
+    private final UniversalPageDao upDao;
     private final PhraseAnalyzer analyzer;
     private final LanguageSet langs;
 
-    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs) {
+    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs, LocalPageDao lpDao, UniversalPageDao upDao) {
         this.spatialDataDao = spatialDataDao;
         this.spatialDataFolder = spatialDataFolder;
         this.wdDao = wdDao;
         this.analyzer = analyzer;
         this.langs = langs;
+        this.lpDao = lpDao;
+        this.upDao = upDao;
     }
 
     //TODO: this should probably be adapted to the PipelineLoader structure
@@ -147,6 +152,7 @@ public class SpatialDataLoader {
             int foundGeomCount = 0;
             int missedGeomCount = 0;
 
+
             while(shpReader.hasNext()){
 
                 curGeometry = (Geometry)shpReader.nextRecord().shape();
@@ -154,15 +160,26 @@ public class SpatialDataLoader {
 
                 boolean found = false;
 
+                for (int i = 0; i<numDbfFields;i++){
+                    System.out.println(i+" "+dbfReader.readField(i));
+                }
+
                 for (int i = 0; i < numDbfFields && !found; i++) {
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
                     Integer itemId;
                     try {
-                    itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
-                    }
-                    catch (Exception e){
+//                            System.out.println(dbfReader.readField(i));
+                            String string = (String) dbfReader.readField(1);
+                            itemId = ((IDAttributeHandler.TitleAttributeHandler) attrHandler).getWikidataItemIdForId(dbfReader.readField(i),string,lpDao, upDao);
+//                            itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
+                    } catch (NullPointerException e){
+                        if (i!= 1)
+                            e.printStackTrace();
                         continue;
-
+                    } catch (Exception e){
+                        System.out.println("exception which is not nullpointer");
+                        e.printStackTrace();
+                        continue;
                     }
                     if (itemId != null && spatialDataDao.getGeometry(itemId, struct.getLayerName(), struct.getRefSysName()) == null){
                         spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
@@ -326,7 +343,7 @@ public class SpatialDataLoader {
             Options options = new Options();
             options.addOption("f", true, "The spatial data folder, structured as defined in the documentation.");
             options.addOption("p", true, "The PhraseAnalyzer to use to map toponyms to Wikipedia pages (defaults to 'titleandredirect'). Will always choose the first candidate, no matter the minimum probability, so declarative PhraseAnalyzers should be used here.");
-            options.addOption("s", true, "Can be one more more of 'wikidata','exogenous' (comma delimit). If nothing is entered, does all steps.");
+            options.addOption("s", true, "Can be one more more of 'wikidata','exogenous', 'pagehitlist' (comma delimit). If nothing is entered, does all steps.");
 
             EnvBuilder.addStandardOptions(options);
 
@@ -352,7 +369,9 @@ public class SpatialDataLoader {
 
             WikidataDao wdDao = conf.get(WikidataDao.class);
             SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
-            SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
+            LocalPageDao localPageDao = conf.get(LocalPageDao.class);
+            UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
+            SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages(),localPageDao, universalPageDao );
 
 //            String stepsValue = cmd.getOptionValue("s", "wikidata,gadm,download,exogenous"); // GADM temporarily disabled while we do new mappings
 
@@ -371,10 +390,13 @@ public class SpatialDataLoader {
                 } else if (canonicalStep.equals("exogenous")) {
                     LOG.log(Level.INFO, "Beginning to load exogenous data");
                     loader.loadExogenousData();
-                } else if (canonicalStep.equals("download")){
+                } else if (canonicalStep.equals("download")) {
                     LOG.log(Level.INFO, "Downloading shapefiles and moving them into place");
                     WikiBrainSpatialUtils.downloadZippedShapefileToReferenceSystem("http://www-users.cs.umn.edu/~bhecht/wikibrain/spatial_data/elements.zip",
                             RefSys.PERIODIC_TABLE, spatialDataFolder); // TODO: this should be moved to the config file at some point
+                } else if (canonicalStep.equals("pagehitlist")){
+                    LOG.log(Level.INFO, "Loading spatial entities from PageHitList.txt");
+                    loader.loadSignificantGeometries(new File("PageHitList.txt"));
                 } else {
                     throw new Exception("Illegal step: '" + step + "'");
                 }
@@ -390,6 +412,41 @@ public class SpatialDataLoader {
 
 
         }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSignificantGeometries(File file){
+        List<Integer> pageHitList = new ArrayList<Integer>();
+        try {
+            Scanner scanner = new Scanner(file);
+            while(scanner.hasNext()){
+                int nextInt = scanner.nextInt();
+                pageHitList.add(nextInt);
+            }
+        } catch(IOException e){
+            System.out.println("cannot find significant geometries input");
+        }
+        try {
+            spatialDataDao.beginSaveGeometries();
+            Map<Integer, Geometry> geometries = spatialDataDao.getAllGeometriesInLayer("wikidata", "earth");
+            int count = 0;
+            for (Integer i: pageHitList) {
+                if (geometries.get(i)!= null){
+//                    System.out.println("processing id "+i);
+//                    System.out.println(geometries.get(i).toString());
+                    spatialDataDao.saveGeometry(i.intValue(), "significant", "earth", geometries.get(i));
+                    count++;
+//                    System.out.println("added geometry with id "+i);
+                } else {
+                    System.out.println(i);
+                }
+            }
+            spatialDataDao.endSaveGeometries();
+            System.out.println();
+            System.out.println(count);
+        } catch(DaoException e){
+            System.out.println("Dao exception");
             e.printStackTrace();
         }
     }

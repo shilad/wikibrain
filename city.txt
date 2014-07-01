@@ -2,39 +2,41 @@ capital
 city
 municipality
 borough
-prefecture
 metropolis
 neighbourhood
 arrondissement
-council area
 village
 settlement
-community
 municipal corporation
-municipal
+census-designated
+unincorporated
+commune
+town
+hamlet
+community
 suburb
 town
 hamlet
 commune
 census-designated
 stadt
-unincorporated
 capitals
 cities
 municipalities
 boroughs
-prefectures
 metropolises
 neighbourhoods
 arrondissements
-council areas
 villages
 settlements
-communities
 municipal corporations
-suburbs
+census-designated
+unincorporated
+communes
 towns
 hamlets
-communes
-locality
-localities
+communities
+suburbs
+stadt
+human settlement
+human settlements

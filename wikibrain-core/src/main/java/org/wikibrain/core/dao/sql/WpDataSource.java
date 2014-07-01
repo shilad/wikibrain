@@ -113,6 +113,11 @@ public class WpDataSource implements Closeable {
     public void freeJooq(DSLContext context) {
         Connection conn = JooqUtils.getConnection(context);
         if (conn != null) {
+            try {
+                conn.commit();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             closeQuietly(conn);
         }
     }
@@ -120,7 +125,7 @@ public class WpDataSource implements Closeable {
 
     /**
      * Executes a sql resource on the classpath
-     * @param name Resource path - e.g. "/db/local-page.schema.sql"
+     * @param name Resource path - e.g. "/db/local-page.schema.sql "
      * @throws DaoException
      */
     public void executeSqlResource(String name) throws DaoException {
