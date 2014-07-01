@@ -116,14 +116,8 @@ public class Configurator implements Cloneable {
         Set<String> visited = new HashSet<String>();    // files already scanned
         Map<String, File> registered = new HashMap<String, File>();
 
-        String separator = System.getProperty("path.separator");
-        for (String entry : classPath.split(separator)) {
-            LOG.fine("considering classpath entry " + entry);
-            File file = new File(entry);
-            if (!file.exists()) {
-                LOG.warning("skipping looking for providers in nonexistent file " + file);
-                continue;
-            }
+        for (File file : JvmUtils.getClassPathAsList()) {
+            LOG.fine("considering classpath entry " + file);
             if (file.length() > MAX_FILE_SIZE) {
                 LOG.fine("skipping looking for providers in large file " + file);
                 continue;
@@ -136,7 +130,7 @@ public class Configurator implements Cloneable {
             visited.add(canonical);
 
             ClassFinder finder = new ClassFinder();
-            finder.add(new File(entry));
+            finder.add(file);
 
             ClassFilter filter = new ProviderFilter();
             Collection<ClassInfo> foundClasses = new ArrayList<ClassInfo>();

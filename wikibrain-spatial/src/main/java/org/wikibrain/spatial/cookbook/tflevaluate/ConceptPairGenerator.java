@@ -93,8 +93,8 @@ public class ConceptPairGenerator {
                 double score = 0;
 
                 try {
-                    UniversalPage u1 = upDao.getById(firstId, WIKIDATA_CONCEPTS);
-                    UniversalPage u2 = upDao.getById(secondId, WIKIDATA_CONCEPTS);
+                    UniversalPage u1 = upDao.getById(firstId);
+                    UniversalPage u2 = upDao.getById(secondId);
 
                     SRResult similarity = sr.similarity(u1.getBestEnglishTitle(lpDao,true).getCanonicalTitle(), u2.getBestEnglishTitle(lpDao,true).getCanonicalTitle(), false);
                     score = similarity.getScore();
@@ -134,8 +134,8 @@ public class ConceptPairGenerator {
                     double score = 0;
 
                     try {
-                        UniversalPage u1 = upDao.getById(firstId, WIKIDATA_CONCEPTS);
-                        UniversalPage u2 = upDao.getById(secondId, WIKIDATA_CONCEPTS);
+                        UniversalPage u1 = upDao.getById(firstId);
+                        UniversalPage u2 = upDao.getById(secondId);
 
                         SRResult similarity = sr.similarity(u1.getBestEnglishTitle(lpDao, true).getCanonicalTitle(), u2.getBestEnglishTitle(lpDao, true).getCanonicalTitle(), false);
                         score = similarity.getScore();
@@ -273,7 +273,7 @@ public class ConceptPairGenerator {
             }
             // count inlinks
             try {
-                UniversalPage uPage = upDao.getById(geo, WIKIDATA_CONCEPTS);
+                UniversalPage uPage = upDao.getById(geo);
                 int correctId = uPage.getLocalId(simple);
                 Iterable<LocalLink> inlinks = linkDao.getLinks(simple, correctId, false);
                 int numLinks = 0;

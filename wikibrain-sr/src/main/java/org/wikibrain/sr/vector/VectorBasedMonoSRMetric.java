@@ -130,9 +130,9 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
             SRResult result= new SRResult(similarity.similarity(vector1, vector2));
             if(explanations) {
                     result.setExplanations(generator.getExplanations(phrase1, phrase2, vector1, vector2, result));
-            }
-            return normalize(result);
         }
+            return normalize(result);
+    }
     }
 
 
@@ -146,10 +146,10 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                 if (row1 == null || row2 == null) {
                     return null;
                 } else {
-                    TIntFloatHashMap tfm1=row1.asTroveMap();
-                    TIntFloatHashMap tfm2=row2.asTroveMap();
                     SRResult result= new SRResult(similarity.similarity(row1, row2));
                     if(explanations) {
+                        TIntFloatHashMap tfm1=row1.asTroveMap();
+                        TIntFloatHashMap tfm2=row2.asTroveMap();
                         result.setExplanations(generator.getExplanations(pageId1, pageId2, tfm1, tfm2, result));
                     }
                     return normalize(result);

@@ -214,9 +214,9 @@ public class KNNEvaluator {
                     //synchronized (this){
                         for (Language lang : langs) {
                             MonolingualSRMetric sr = metrics.get(lang);
-                            results.add(sr.similarity(upDao.getById(x, WIKIDATA_CONCEPTS).getLocalId(lang), upDao.getById(y, WIKIDATA_CONCEPTS).getLocalId(lang), false));
+                            results.add(sr.similarity(upDao.getById(x).getLocalId(lang), upDao.getById(y).getLocalId(lang), false));
                         }
-                        writeRow(upDao.getById(x, WIKIDATA_CONCEPTS), upDao.getById(y, WIKIDATA_CONCEPTS), Math.abs(evalResult.get(x) - evalResult.get(y)), results);
+                        writeRow(upDao.getById(x), upDao.getById(y), Math.abs(evalResult.get(x) - evalResult.get(y)), results);
                     //}
                     CSVRowCounter++;
                     if(CSVRowCounter % 5000 == 0)

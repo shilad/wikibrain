@@ -145,11 +145,6 @@ public class EnvBuilder {
         Option toAdd[] = new Option[] {
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .withLongOpt("algorithm name ")
-                        .withDescription("universal concept map algorithm name")
-                        .create("n"),
-                new DefaultOptionBuilder()
-                        .hasArg()
                         .withLongOpt("conf")
                         .withDescription("configuration file")
                         .create("c"),

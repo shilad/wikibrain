@@ -12,7 +12,6 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.matrix.*;
 import org.wikibrain.sr.MonolingualSRMetric;
 import org.wikibrain.sr.SRResultList;
-import org.wikibrain.sr.UniversalSRMetric;
 import org.wikibrain.sr.normalize.IdentityNormalizer;
 import org.wikibrain.sr.normalize.Normalizer;
 import org.wikibrain.sr.utils.Leaderboard;
@@ -51,7 +50,6 @@ public class MostSimilarCache implements Closeable {
     private final File dir;
 
     private MonolingualSRMetric monoSr;
-    private UniversalSRMetric universalSr;
 
     private SparseMatrix featureMatrix = null;
     private SparseMatrix featureTransposeMatrix = null;
@@ -80,10 +78,6 @@ public class MostSimilarCache implements Closeable {
             FileUtils.deleteQuietly(dir);
             dir.mkdirs();
         }
-    }
-
-    public MostSimilarCache(UniversalSRMetric metric, PairwiseSimilarity similarity, File dir) {
-        throw new UnsupportedOperationException();
     }
 
     public boolean hasCachedMostSimilarVectors() {
@@ -344,30 +338,31 @@ public class MostSimilarCache implements Closeable {
     }
 
     private void writeFeatureVector(SparseMatrixWriter writer, Integer id) throws WikiBrainException {
-        TIntDoubleMap scores;
-        try {
-            if (monoSr !=null){
-                throw new UnsupportedOperationException();
-            } else if (universalSr!=null){
-                scores = universalSr.getVector(id);
-            } else {
-                throw new IllegalStateException("SRFeatureMatrixWriter does not have a local or universal metric defined.");
-            }
-        } catch (DaoException e){
-            throw new WikiBrainException(e);
-        }
-        if (scores == null || scores.isEmpty()) {
-            return;
-        }
-        LinkedHashMap<Integer,Float> linkedHashMap = new LinkedHashMap<Integer, Float>();
-        for (int i : scores.keys()){
-            linkedHashMap.put(i,(float)scores.get(i));
-        }
-        try {
-            writer.writeRow(new SparseMatrixRow(writer.getValueConf(), id, linkedHashMap));
-        } catch (IOException e){
-            throw new WikiBrainException(e);
-        }
+        throw new UnsupportedOperationException();
+//        TIntDoubleMap scores;
+//        try {
+//            if (monoSr !=null){
+//                throw new UnsupportedOperationException();
+//            } else if (universalSr!=null){
+//                scores = universalSr.getVector(id);
+//            } else {
+//                throw new IllegalStateException("SRFeatureMatrixWriter does not have a local or universal metric defined.");
+//            }
+//        } catch (DaoException e){
+//            throw new WikiBrainException(e);
+//        }
+//        if (scores == null || scores.isEmpty()) {
+//            return;
+//        }
+//        LinkedHashMap<Integer,Float> linkedHashMap = new LinkedHashMap<Integer, Float>();
+//        for (int i : scores.keys()){
+//            linkedHashMap.put(i,(float)scores.get(i));
+//        }
+//        try {
+//            writer.writeRow(new SparseMatrixRow(writer.getValueConf(), id, linkedHashMap));
+//        } catch (IOException e){
+//            throw new WikiBrainException(e);
+//        }
     }
 
     private SRResultList rowToResultList(MatrixRow row, int maxResults, TIntSet validIds) {

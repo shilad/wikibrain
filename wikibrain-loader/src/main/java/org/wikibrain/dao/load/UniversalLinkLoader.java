@@ -39,13 +39,15 @@ public class UniversalLinkLoader {
     private final UniversalPageDao universalPageDao;
     private final UniversalLinkDao universalLinkDao;
     private final UniversalLinkDao universalLinkSkeletalDao;
+    private final MetaInfoDao metaDao;
 
-    public UniversalLinkLoader(LanguageSet languageSet, LocalLinkDao localLinkDao, UniversalPageDao universalPageDao, UniversalLinkDao universalLinkDao, UniversalLinkDao universalLinkSkeletalDao) {
+    public UniversalLinkLoader(LanguageSet languageSet, LocalLinkDao localLinkDao, UniversalPageDao universalPageDao, UniversalLinkDao universalLinkDao, UniversalLinkDao universalLinkSkeletalDao, MetaInfoDao metaDao) {
         this.languageSet = languageSet;
         this.localLinkDao = localLinkDao;
         this.universalPageDao = universalPageDao;
         this.universalLinkDao = universalLinkDao;
         this.universalLinkSkeletalDao = universalLinkSkeletalDao;
+        this.metaDao = metaDao;
     }
 
     public void beginLoad(boolean shouldClear) throws DaoException {
@@ -67,7 +69,7 @@ public class UniversalLinkLoader {
         try {
             Iterable<LocalLink> localLinks = localLinkDao.get(new DaoFilter().setLanguages(languageSet));
             LOG.log(Level.INFO, "Fetching ID map");
-            Map<Language, TIntIntMap> map = universalPageDao.getAllLocalToUnivIdsMap(algorithmId, languageSet);
+            Map<Language, TIntIntMap> map = universalPageDao.getAllLocalToUnivIdsMap(languageSet);
             LOG.log(Level.INFO, "Loading links");
             long start = System.currentTimeMillis();
             int i=0;
@@ -91,6 +93,7 @@ public class UniversalLinkLoader {
                 UniversalLink link = new UniversalLink(univSourceId, univDestId, algorithmId, linkMap);
                 universalLinkDao.save(link);
                 universalLinkSkeletalDao.save(link);
+                metaDao.incrementRecords(UniversalLink.class);
             }
             long end = System.currentTimeMillis();
             double seconds = (end - start) / 1000.0;
@@ -137,17 +140,19 @@ public class UniversalLinkLoader {
         LocalLinkDao localLinkDao = conf.get(LocalLinkDao.class);
         UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
         UniversalLinkDao universalLinkDao = conf.get(UniversalLinkDao.class);
-        UniversalLinkDao universalLinkSkeletalDao = conf.get(UniversalLinkDao.class, "skeletal-sql");
+        UniversalLinkDao universalLinkSkeletalDao = conf.get(UniversalLinkDao.class, "skeletal-sql-wikidata");
         ConceptMapper mapper = conf.get(ConceptMapper.class, algorithm);
+        MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
         UniversalLinkLoader loader = new UniversalLinkLoader(
                 env.getLanguages(),
                 localLinkDao,
                 universalPageDao,
                 universalLinkDao,
-                universalLinkSkeletalDao
-        );
+                universalLinkSkeletalDao,
+                metaDao);
 
+        System.out.println("loading " + mapper.getId());
         loader.beginLoad(cmd.hasOption("d"));
         loader.loadLinkMap(mapper.getId());
         loader.endLoad();

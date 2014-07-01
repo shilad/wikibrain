@@ -21,7 +21,6 @@ import org.wikibrain.core.jooq.Tables;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.model.LocalIDToUniversalID;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -264,29 +263,29 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
 
     private synchronized void setLoadedHours() throws DaoException{
         if (loadedHours.size() == 0) {
-        loadedHours = new ConcurrentHashMap<Integer, Set<Long>>();
-        LOG.info("creating loadedHours cache. This only happens once...");
-        DSLContext context = getJooq();
-        try {
-            Result<Record2<Timestamp, Short>> times = context
-                    .selectDistinct(Tables.PAGEVIEW.TSTAMP,Tables.PAGEVIEW.LANG_ID)
-                    .from(Tables.PAGEVIEW)
-                    .fetch();
+            loadedHours = new ConcurrentHashMap<Integer, Set<Long>>();
+            LOG.info("creating loadedHours cache. This only happens once...");
+            DSLContext context = getJooq();
+            try {
+                Result<Record2<Timestamp, Short>> times = context
+                        .selectDistinct(Tables.PAGEVIEW.TSTAMP,Tables.PAGEVIEW.LANG_ID)
+                        .from(Tables.PAGEVIEW)
+                        .fetch();
 
-           loadedHours= new HashMap<Integer, Set<Long>>();
+                loadedHours= new HashMap<Integer, Set<Long>>();
 
-           for (Record2<Timestamp, Short> record: times){
-                if(!loadedHours.containsKey(record.value2().intValue())){
-                    loadedHours.put(record.value2().intValue(),new HashSet<Long>());
+                for (Record2<Timestamp, Short> record: times){
+                    if(!loadedHours.containsKey(record.value2().intValue())){
+                        loadedHours.put(record.value2().intValue(),new HashSet<Long>());
+                    }
+                    loadedHours.get(record.value2().intValue()).add(((Timestamp) record.value1()).getTime());
+
                 }
-               loadedHours.get(record.value2().intValue()).add(((Timestamp) record.value1()).getTime());
 
-           }
-
-        } finally {
-            freeJooq(context);
+            } finally {
+                freeJooq(context);
+            }
         }
-    }
     }
 
     protected void load(Language lang, List<DateTime> dates, LocalPageDao localPageDao) throws DaoException {
@@ -316,8 +315,8 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
             return null;
         }
         LocalId id = new LocalId(
-            Language.getById(record.getValue(Tables.PAGEVIEW.LANG_ID)),
-            record.getValue(Tables.PAGEVIEW.PAGE_ID)
+                Language.getById(record.getValue(Tables.PAGEVIEW.LANG_ID)),
+                record.getValue(Tables.PAGEVIEW.PAGE_ID)
         );
         return new PageView(
                 id,

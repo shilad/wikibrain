@@ -144,7 +144,7 @@ public abstract class IDAttributeHandler {
                             int instanceOfId = st.getValue().getIntValue();
                             try {
                                 // universal id corresponding to "instance of" label
-                                UniversalPage concept2 = uDao.getById(instanceOfId, 1);
+                                UniversalPage concept2 = uDao.getById(instanceOfId);
                                 // local page ditto
                                 LocalPage page = localPageDao.getById(myLang, concept2.getLocalId(myLang));
 

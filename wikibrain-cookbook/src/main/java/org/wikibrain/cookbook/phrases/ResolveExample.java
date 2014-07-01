@@ -27,8 +27,7 @@ public class ResolveExample {
         PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "anchortext");
 
         // get the most common phrases in simple
-        Language simple = Language.getByLangCode("simple");   // simple english
-        LinkedHashMap<LocalId, Float> resolution = pa.resolve(simple, "Apple", 20);
+        LinkedHashMap<LocalId, Float> resolution = pa.resolve(Language.SIMPLE, "Apple", 20);
 
         // show the closest pages
         System.out.println("resolution of apple");

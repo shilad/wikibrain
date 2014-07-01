@@ -32,6 +32,13 @@ public class LanguageSet implements Iterable<Language> {
     private Language defaultLanguage;
 
     /**
+     * Creates the empty language set
+     */
+    public LanguageSet() {
+        this(null, new ArrayList<Language>());
+    }
+
+    /**
      * Initializes a new instance of a LanguageSet using a comma-separated list of
      * language codes (as defined by the Wikimedia Foundation). For instance,
      * "en,de,fr" will result in a LanguageSet with English, German, and French.

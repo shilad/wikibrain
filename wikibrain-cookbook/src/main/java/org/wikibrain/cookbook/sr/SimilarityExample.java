@@ -90,7 +90,7 @@ public class SimilarityExample {
 
     public static boolean isSpatial(String s) throws DaoException{
         int localID=lpDao.getIdByTitle(s, Language.SIMPLE, NameSpace.ARTICLE);
-        UniversalPage page= upDao.getByLocalPage(lpDao.getById(Language.SIMPLE, localID), WIKIDATA_CONCEPTS);
+        UniversalPage page= upDao.getByLocalPage(lpDao.getById(Language.SIMPLE, localID));
         System.out.println("uID "+page.getUnivId()+" localID "+localID);
         return (allGeometries.containsKey(page.getUnivId()));
     }

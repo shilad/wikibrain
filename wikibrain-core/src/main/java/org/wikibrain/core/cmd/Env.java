@@ -105,6 +105,9 @@ public class Env implements Closeable {
         }
         return matches;
     }
+    public List<File> getFiles(Language language, FileMatcher ... matchers) {
+        return getFiles(new LanguageSet(language), matchers);
+    }
 
     public List<File> getFiles(Language lang, FileMatcher fm) {
         return getFiles(lang, fm, configuration);
@@ -139,10 +142,6 @@ public class Env implements Closeable {
         return matchingFiles;
     }
 
-    public int getUniversalConceptAlgorithmId() {
-        return getUniversalConceptAlgorithmId(configuration);
-    }
-
     public LanguageSet getLanguages() {
         try {
             return configurator.get(LanguageSet.class);
@@ -161,13 +160,6 @@ public class Env implements Closeable {
 
     public int getMaxThreads() {
         return WpThreadUtils.getMaxThreads();
-    }
-
-    public static int getUniversalConceptAlgorithmId(Configuration conf) {
-        // look up mapper.default
-        String path = conf.get().getString("mapper.default");
-        // look up algorithmId under that.
-        return conf.get().getInt("mapper."+path+".algorithmId");
     }
 
     @Override

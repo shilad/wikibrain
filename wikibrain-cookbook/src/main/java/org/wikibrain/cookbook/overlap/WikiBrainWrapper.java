@@ -92,9 +92,9 @@ public class WikiBrainWrapper {
      * @throws org.wikibrain.core.dao.DaoException
      */
     public List<LocalPage> getInOtherLanguages(LocalPage page) throws DaoException {
-        int conceptId = upDao.getUnivPageId(page, CONCEPT_ALGORITHM_ID);
+        int conceptId = upDao.getUnivPageId(page);
         List<LocalPage> results = new ArrayList<LocalPage>();
-        UniversalPage up = upDao.getById(conceptId, CONCEPT_ALGORITHM_ID);
+        UniversalPage up = upDao.getById(conceptId);
         if (up == null) {
             return results;
         }
@@ -114,7 +114,7 @@ public class WikiBrainWrapper {
      * THIS MUST BE CALLED BEFORE AN INSTANCE OF WIKIPADIA WRAPPER IS CREATED!
      * @param langCodes comma separated list of langcodes - ie "simple,la"
      */
-    public static void loadLanguages(String langCodes) throws IOException, InterruptedException, ClassNotFoundException, ConfigurationException, SQLException {
+    public static void loadLanguages(String langCodes) throws IOException, InterruptedException, ClassNotFoundException, ConfigurationException, SQLException, DaoException {
         PipelineLoader.main(new String[]{"-l", langCodes});
     }
 }

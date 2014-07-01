@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.shilad.wikibrain</groupId>
+        <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>wikibrain-parent</relativePath>
     </parent>
 
     <artifactId>wikibrain-all</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -32,6 +32,7 @@
         <module>./wikibrain-cookbook</module>
         <module>./wikibrain-spatial</module>
         <module>./wikibrain-pageview</module>
+        <module>./wikibrain</module>
     </modules>
 
     <build>

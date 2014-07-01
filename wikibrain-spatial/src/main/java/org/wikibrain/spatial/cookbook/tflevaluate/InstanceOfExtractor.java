@@ -27,8 +27,6 @@ import java.util.logging.Logger;
  */
 public class InstanceOfExtractor {
 
-    private static int WIKIDATA_CONCEPTS = 1;
-
 
     // only need to change order here
     public static int WEIRD = 0, LANDMARK = 1, COUNTY = 2 ,COUNTRY = 3 , STATE = 4,  CITY =5 , NATURAL =6 ;
@@ -243,7 +241,7 @@ public class InstanceOfExtractor {
 
                     //some concept local pages are missing
                     try {
-                        UniversalPage concept2 = upDao.getById(id, WIKIDATA_CONCEPTS);
+                        UniversalPage concept2 = upDao.getById(id);
                         LocalPage page = lDao.getById(CUR_LANG, concept2.getLocalId(CUR_LANG));
                         titleSet.add(page.getTitle().toString());
 
@@ -326,7 +324,7 @@ public class InstanceOfExtractor {
         int count = 0;
 
         for (Integer conceptId : geometries.keySet()){
-            UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
+            UniversalPage concept = upDao.getById(conceptId);
             LocalPage lpage = lDao.getById(CUR_LANG,concept.getLocalId(CUR_LANG));
 
             // counter print
@@ -361,7 +359,7 @@ public class InstanceOfExtractor {
                     int id = st.getValue().getIntValue();
                     try {
                         // universal id corresponding to "instance of" label
-                        UniversalPage concept2 = upDao.getById(id, WIKIDATA_CONCEPTS);
+                        UniversalPage concept2 = upDao.getById(id);
                         // local page ditto31
                         LocalPage page = lDao.getById(CUR_LANG, concept2.getLocalId(CUR_LANG));
 
@@ -506,7 +504,7 @@ public class InstanceOfExtractor {
      */
     public void printScale( int scaleId) throws DaoException{
         for (Integer conceptId : scaleIds[scaleId]){
-            UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
+            UniversalPage concept = upDao.getById(conceptId);
             LocalPage lpage = lDao.getById(CUR_LANG,concept.getLocalId(CUR_LANG));
             String str = lpage.getTitle().toString();
             System.out.println(str.substring(0,str.lastIndexOf('(')-1));

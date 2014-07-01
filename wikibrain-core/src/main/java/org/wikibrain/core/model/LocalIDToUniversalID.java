@@ -16,10 +16,10 @@ public class LocalIDToUniversalID {
     private static UniversalPageDao universalPageDao;
     private static int WIKIDATA_CONCEPTS=1;
 
-    public static int translate(int localID, Language language){
+    public static int translate(int localID, Language lang){
         try {
-            LocalPage lp = localPageDao.getById(language, localID);
-            UniversalPage upage = universalPageDao.getByLocalPage(lp, WIKIDATA_CONCEPTS);
+            LocalPage lp = localPageDao.getById(lang, localID);
+            UniversalPage upage = universalPageDao.getByLocalPage(lp);
             return upage.getUnivId();
         } catch(Exception e){
             return -1;
