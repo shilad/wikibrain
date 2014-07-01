@@ -1,6 +1,5 @@
 package org.wikibrain.pageview;
 
-import com.sun.deploy.util.BlackList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.joda.time.DateTime;
