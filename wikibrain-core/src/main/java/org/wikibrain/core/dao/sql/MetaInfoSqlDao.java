@@ -13,6 +13,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.MetaInfo;
+import org.wikibrain.utils.JvmUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -88,16 +89,26 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
     }
 
     @Override
+    public int incrementRecords(Class component, int n) throws DaoException {
+        return incrementRecords(component, null, n);
+    }
+
+    @Override
+    public int incrementRecords(Class component, Language lang, int n) throws DaoException {
+        MetaInfo info = getInfo(component, lang);
+        n = info.incrementNumRecords(n);
+        maybeFlush(info);
+        return n;
+    }
+
+    @Override
     public int incrementRecords(Class component) throws DaoException {
-        return incrementRecords(component, null);
+        return incrementRecords(component, 1);
     }
 
     @Override
     public int incrementRecords(Class component, Language lang) throws DaoException {
-        MetaInfo info = getInfo(component, lang);
-        int n = info.incrementNumRecords();
-        maybeFlush(info);
-        return n;
+        return incrementRecords(component, lang, 1);
     }
 
     @Override
@@ -178,6 +189,12 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         } finally {
             freeJooq(context);
         }
+    }
+
+    @Override
+    public boolean isLoaded(Class component) throws DaoException {
+        MetaInfo info = getInfo(component);
+        return (info != null && info.getNumRecords() > 0);
     }
 
 
@@ -277,6 +294,43 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 Short langId = record.getValue(Tables.META_INFO.LANG_ID);
                 components.get(klass).add(
                         new MetaInfo(null,
+                                (langId == null) ? null : Language.getById(langId),
+                                record.getValue(Tables.META_INFO.ID),
+                                record.getValue(Tables.META_INFO.NUM_RECORDS),
+                                record.getValue(Tables.META_INFO.NUM_ERRORS),
+                                record.getValue(Tables.META_INFO.LAST_UPDATED)
+                        ));
+            }
+            return components;
+        } finally {
+            freeJooq(context);
+        }
+    }
+
+    @Override
+    public Map<String, MetaInfo> getAllCummulativeInfo() throws DaoException {
+        sync();
+        DSLContext context = getJooq();
+        try {
+            Result<Record> result = context
+                    .select()
+                    .from(Tables.META_INFO)
+                    .fetch();
+
+            Map<String, MetaInfo> components = new HashMap<String, MetaInfo>();
+
+            for (Record record : result) {
+                String className = record.getValue(Tables.META_INFO.COMPONENT);
+                Class klass = JvmUtils.classForShortName(className);
+                if (klass == null) {
+                    throw new DaoException("No class found for short name " + className);
+                }
+                if (!components.containsKey(className)) {
+                    components.put(className, new MetaInfo(klass));
+                }
+                Short langId = record.getValue(Tables.META_INFO.LANG_ID);
+                components.get(className).merge(
+                        new MetaInfo(klass,
                                 (langId == null) ? null : Language.getById(langId),
                                 record.getValue(Tables.META_INFO.ID),
                                 record.getValue(Tables.META_INFO.NUM_RECORDS),
