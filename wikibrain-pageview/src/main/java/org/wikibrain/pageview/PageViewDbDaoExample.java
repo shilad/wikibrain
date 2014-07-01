@@ -1,7 +1,5 @@
 package org.wikibrain.pageview;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.joda.time.DateTime;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -9,14 +7,11 @@ import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalIDToUniversalID;
 import org.wikibrain.core.model.UniversalPage;
-import sun.reflect.generics.reflectiveObjects.LazyReflectiveObjectGenerator;
-import sun.rmi.runtime.Log;
 
 import java.io.*;
 import java.util.*;
