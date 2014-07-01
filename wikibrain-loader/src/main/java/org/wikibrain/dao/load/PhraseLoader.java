@@ -8,9 +8,12 @@ import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.MetaInfoDao;
+import org.wikibrain.core.lang.Language;
 import org.wikibrain.download.FileDownloader;
 import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.phrases.PhraseAnalyzer;
+import org.wikibrain.phrases.PrunedCounts;
 import org.wikibrain.phrases.StanfordPhraseAnalyzer;
 
 import java.io.File;
@@ -61,11 +64,16 @@ public class PhraseLoader {
             StanfordPhraseAnalyzer.downloadDictionaryIfNecessary(env.getConfiguration());
         }
 
+        int n = 0;
         for (String name : toLoad) {
             PhraseAnalyzer analyzer = env.getConfigurator().get(PhraseAnalyzer.class, name);
             LOG.log(Level.INFO, "LOADING PHRASE CORPUS FOR " + name);
-            analyzer.loadCorpus(env.getLanguages());
+            n += analyzer.loadCorpus(env.getLanguages());
             LOG.log(Level.INFO, "DONE");
+        }
+        MetaInfoDao metaDao = env.getConfigurator().get(MetaInfoDao.class);
+        for (Language lang : env.getLanguages()) {
+            metaDao.incrementRecords(PrunedCounts.class, lang, n);
         }
     }
 }
