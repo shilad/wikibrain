@@ -97,11 +97,15 @@ public class SpatialConceptPair {
         String secondStr = secondConcept.getTitle();
 
         String combinedTitle = null;
-        if(firstStr.compareTo(secondStr) < 0) {
-            combinedTitle = firstStr + secondStr;
-        }
-        else {
-            combinedTitle = secondStr + firstStr;
+        try {
+            if (firstStr.compareTo(secondStr) < 0) {
+                combinedTitle = firstStr + secondStr;
+            } else {
+                combinedTitle = secondStr + firstStr;
+            }
+        } catch(NullPointerException e){
+            System.out.println(firstConcept.getUniversalID());
+            System.out.println(secondConcept.getUniversalID());
         }
 
         return combinedTitle;

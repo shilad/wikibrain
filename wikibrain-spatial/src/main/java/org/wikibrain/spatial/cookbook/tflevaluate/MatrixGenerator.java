@@ -19,6 +19,8 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
+import org.wikibrain.spatial.maxima.SpatialConceptPair;
+import org.wikibrain.spatial.maxima.SurveyQuestionGenerator;
 import org.wikibrain.sr.MonolingualSRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.utils.ParallelForEach;
@@ -102,7 +104,29 @@ public class MatrixGenerator {
 //            Map<String, Set<Integer>> map = mg.getNearConceptList(10, 2 );
 //            mg.createNeighborFile(map);
         Map<String,Set<Integer>> neighbors = mg.loadNeighborFile(new File("citiesToNeighbors2.txt"));
-        List<Set<Integer>> simulatedTurkers = mg.generateSimulatedTurkers(neighbors,mg.cityPopulations);
+        List<Set<Integer>> simulatedTurkers = mg.generateSimulatedTurkers(neighbors,mg.cityPopulations,200);
+
+        SurveyQuestionGenerator generator = new SurveyQuestionGenerator();
+        List<Integer> knownIds = new ArrayList<Integer>();
+
+        PrintWriter pw = null;
+        try{
+            pw = new PrintWriter(new FileWriter("SimulatedTurkers.txt"));
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+        for (int i=0; i<simulatedTurkers.size(); i++){
+            knownIds.clear();
+            knownIds.addAll(simulatedTurkers.get(i));
+            List<SpatialConceptPair> questions = generator.getConceptPairsToAsk(knownIds,i);
+            for (SpatialConceptPair question: questions){
+                // id, c1, c1_known, c2, c2_known, ans (default is 0.0)
+                String s = i+"\t"+question.getFirstConcept().getUniversalID()+"\t"+knownIds.contains(question.getFirstConcept().getUniversalID())+"\t";
+                s += question.getSecondConcept().getUniversalID()+"\t"+knownIds.contains(question.getSecondConcept().getUniversalID())+"\t"+0.0;
+                pw.println(s);
+            }
+        }
 
 //        } catch(IOException e){
 //            e.printStackTrace();
@@ -590,7 +614,7 @@ public class MatrixGenerator {
         return result;
     }
 
-    public List<Set<Integer>> generateSimulatedTurkers(Map<String,Set<Integer>> neighbors, Map<String,Double> citiesPopulation){
+    public List<Set<Integer>> generateSimulatedTurkers(Map<String,Set<Integer>> neighbors, Map<String,Double> citiesPopulation, int numTurkers){
         List<Set<Integer>> result = new ArrayList<Set<Integer>>();
         double small = 10;
 
@@ -651,7 +675,7 @@ public class MatrixGenerator {
         }
 
         // generate turkers
-        for (int i = 0; i< 200; i++){
+        for (int i = 0; i< numTurkers; i++){
             String city = randomCollection.next();
             System.out.println(city+" "+cityPopulations.get(city));
             result.add(neighbors.get(city));

@@ -767,3 +767,8 @@
 408:Australia (simple)
 668:India (simple)
 145:United Kingdom (simple)
+25322:Arctic (simple)
+30:United States (simple)
+7204:Middle East (simple)
+11694:American Airlines Flight 11 (simple)
+9678:2014 Winter Olympics (simple)
