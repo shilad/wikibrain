@@ -34,6 +34,9 @@ public class ConceptPairBalancer {
 
         public void addToTotal(SpatialConceptPair pair) {
             int b = stratifier.getStrata(pair);
+            if(b >= runningTotal.length) {
+                System.out.println("NOPE");
+            }
             runningTotal[b]++;
             absoluteTotal++;
         }

@@ -121,9 +121,13 @@ public class SpatialConceptPair {
         if(other.getClass() != this.getClass()) {
             return false;
         }
+        SpatialConceptPair opair = (SpatialConceptPair)other;
 
-        String comb = getCombinedTitle();
-        String ocomb = ((SpatialConceptPair) other).getCombinedTitle();
-        return ocomb.equals(comb);
+        int mid1 = firstConcept.getUniversalID();
+        int mid2 = secondConcept.getUniversalID();
+        int oid1 = opair.getFirstConcept().getUniversalID();
+        int oid2 = opair.getSecondConcept().getUniversalID();
+
+        return (mid1 == oid1 && mid2 == oid2) || (mid1 == oid2 && mid2 == oid1);
     }
 }
