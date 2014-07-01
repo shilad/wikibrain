@@ -19,25 +19,18 @@ import org.wikibrain.core.model.UniversalPage;
 import sun.reflect.generics.reflectiveObjects.LazyReflectiveObjectGenerator;
 import sun.rmi.runtime.Log;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 /**
  * @author Toby "Jiajun" Li
- * REMEMBER TO CHECK TO MAKE SURE THE BLACKLIST CONTAINS LOCALIDS (of only the language you care about)
  */
 public class PageViewDbDaoExample {
     private static ArrayList<Integer> blackListSet= new ArrayList<Integer>();
     private static final String blackListFilePath= "Blacklist.txt";
 
 
-    public static void main(String args[]) throws ConfigurationException, DaoException, WikiBrainException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, WikiBrainException, IOException {
 
         try{
             createBlackListSet();
@@ -46,7 +39,7 @@ public class PageViewDbDaoExample {
         }
 
         ArrayList<DateTime[]> dates= new ArrayList<DateTime[]>();
-            for (int i = 0; i < 9; i=i+2) {
+            for (int i = 0; i < args.length-2; i=i+2) {
                 dates.add(new DateTime[]{parseDate(args[i]),(parseDate(args[i+1]))});
             }
 
@@ -60,8 +53,8 @@ public class PageViewDbDaoExample {
         LocalIDToUniversalID.init(configurator);
         UniversalPageDao universalPageDao= configurator.get(UniversalPageDao.class);
 
-        DateTime startTime= new DateTime(2014,6,21,0,0); //set the start date to year, month,day, hour, min
-        DateTime endTime= new DateTime(2014,6,21,23,0);
+//        DateTime startTime= new DateTime(2014,6,21,0,0); //set the start date to year, month,day, hour, min
+//        DateTime endTime= new DateTime(2014,6,21,23,0);
 
        // Test #1 Get the number of views by local page ID, startTime, endTime for sqlDao and by year, month, day, start hour, end hour for dbDao
 //        System.out.println("UniID "+ LocalIDToUniversalID.translate(219587) + " : " + pageViewDbDao.getPageView(219587, 2014, 6, 21, 1, 10, localPageDao));
@@ -70,6 +63,16 @@ public class PageViewDbDaoExample {
         // Test #2 Get numb of view per hour and add them up manually
 //        int sum = 0;
 //        for(int i = 0; i < 24; i++ ){ //Get the hourly pageview
+
+
+
+
+
+
+
+
+
+
 //            int numbOfViews=pageViewSqlDao.getNumViews(Language.SIMPLE,219587,startTime,endTime,localPageDao);
 //            int numbOfViews=pageViewDbDao.getPageView(47, 2014, 6, 21, i, pDao);
 //            System.out.printf("%d:00: %d\n", i,numbOfViews);
@@ -82,6 +85,7 @@ public class PageViewDbDaoExample {
        for (int id: blackListSet){
            testList.add(id);
        }
+        //edit for push
 //        testList.add(219587);
 //        testList.add(47);
 //        testList.add(39);
@@ -89,39 +93,67 @@ public class PageViewDbDaoExample {
 //        testList.add(858);
 
 //        System.out.println(pageViewDbDao.getPageView(testList, 2014, 6, 21, 0, 15, pDao));
-//        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,startTime,endTime,localPageDao);
-
-        System.out.println("start creating map");
-        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,dates,localPageDao);
+//        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.EN,testList,startTime,endTime,localPageDao);
+        System.out.println("start");
+        final Map<Integer,Integer> results= pageViewSqlDao.getNumViews(Language.SIMPLE,testList,dates,localPageDao); //takes a while, but doesn't seize up
         System.out.println("done creating map");
-        try {
-            PrintWriter pw = new PrintWriter(new FileWriter("PageHitList.txt"));
-            for( int i=50;i<2000;i++){ //Prints page hits in ascending order (very slow)
-                for(Integer key: results.keySet()){
-                    if(results.get(key)==i){
-                        UniversalPage page= universalPageDao.getById(LocalIDToUniversalID.translate(key),1);
-                        String name=page.getBestEnglishTitle(localPageDao,true).toString();
-                        pw.println(name+"\t" + results.get(key));
-                    }
+        List<Integer> keys = new ArrayList<Integer>(results.keySet());
+        Collections.sort(keys, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer k1, Integer k2) {
+                int view1 = results.get(k1);
+                int view2 = results.get(k2);
+
+                if(view1>view2){
+                    return -1;
                 }
 
+                else if(view2 > view1)
+                {
+                    return 1;
+                }
+
+                return 0;
             }
+        });
+//
+//        for (int key : keys)
+//            System.out.println(key + " :: " + results.get(key));
 
-//            for (Integer i:results.keySet()){ //Prints all page hits in random order
-//                if(results.get(i)>0) {
-//                    String name=universalPageDao.getById(LocalIDToUniversalID.translate(i),1).getBestEnglishTitle(localPageDao,true).toString();
-//                    pw.println(name+" :: "+LocalIDToUniversalID.translate(i) + " :: " + results.get(i));
-//                }
-//            }
+        System.out.println("Done sorting keys");
+//        Map<Integer,Integer> results=pageViewSqlDao.getNumViews(Language.SIMPLE,testList,dates,localPageDao);
 
-        pw.close();
+        try { //make sure this works
+            System.out.println("Creating Hit List");
+            PrintWriter pw = new PrintWriter(new FileWriter("PageHitList.txt"));
+            UniversalPage page;
+            String name;
+            for( int i=0;i<5000;i++){ //Prints page hits in ascending order (very slow)
+                    if(i < keys.size()){
+                        page= universalPageDao.getById(LocalIDToUniversalID.translate(keys.get(i),Language.SIMPLE),1);
+                        name=page.getBestEnglishTitle(localPageDao,true).toString();
+                        pw.println(page.getUnivId());
+                        pw.println(name+"::" + results.get(keys.get(i)));
+                    }
+            }
+            pw.close();
         }
         catch (Exception e){
-
+            System.err.println("Could Not Create Hit List");
         }
+
+////            for (Integer i:results.keySet()){ //Prints all page hits in random order
+////                if(results.get(i)>0) {
+////                    String name=universalPageDao.getById(LocalIDToUniversalID.translate(i),1).getBestEnglishTitle(localPageDao,true).toString();
+////                    pw.println(name+" :: "+LocalIDToUniversalID.translate(i) + " :: " + results.get(i));
+////                }
+////            }
+
+
 
     }
 
+//
 
     private static void createBlackListSet() throws FileNotFoundException {
             File file = new File(blackListFilePath);
@@ -129,6 +161,7 @@ public class PageViewDbDaoExample {
             while(scanner.hasNext()){
                 blackListSet.add(scanner.nextInt());
             }
+
             scanner.close();
 
     }
@@ -153,4 +186,26 @@ public class PageViewDbDaoExample {
                     "<four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23>");
         }
     }
+
+//    private static class ViewObject
+//    {
+//        public int id;
+//        public int views;
+//
+//        public ViewObject(int id, int views)
+//        {
+//            this.views = views;
+//            this.id = id;
+//        }
+//
+//        public int getViews(){
+//            return this.views;
+//        }
+//
+//        public int getId(){
+//            return this.id;
+//        }
+//    }
 }
+
+
