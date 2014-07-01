@@ -191,7 +191,7 @@ public class SurveyQuestionGenerator {
         ArrayList<SpatialConceptPair> candidatePairs=generator.kkGenerateSpatialPairs(((v.kkTarget-v.kkReturnList.size())*RAND_OVER),allPreviousQList);
         putOnQuestionsOnList(balancer.choosePairs(candidatePairs,v.kkReturnList,(v.kkTarget-v.kkReturnList.size())),KnowledgeType.KK, v);
         candidatePairs=generator.kuGenerateSpatialPairs(((v.kuTarget-v.kuReturnList.size())*RAND_OVER),allPreviousQList);
-        putOnQuestionsOnList(balancer.choosePairs(candidatePairs,v.kuReturnList,(v.kuTarget-v.kuReturnList.size())),KnowledgeType.KU, v);
+        putOnQuestionsOnList(balancer.choosePairs(candidatePairs, v.kuReturnList, (v.kuTarget - v.kuReturnList.size())), KnowledgeType.KU, v);
     }
 
 
@@ -263,7 +263,6 @@ public class SurveyQuestionGenerator {
             kkTarget=(int) (30-(.02*responseNumb));
             uuTarget=40-kkTarget;
             numbOfNewAllowed= (int) (30-.0008*responseNumb);
-            System.out.println("\tkkTarget: "+kkTarget+"\tuuTarget: "+uuTarget);
         }
 
         /**
