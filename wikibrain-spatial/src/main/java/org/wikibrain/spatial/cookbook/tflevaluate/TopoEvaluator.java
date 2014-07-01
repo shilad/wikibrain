@@ -4,8 +4,6 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.noding.IteratedNoder;
-import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.conf.ConfigurationException;
@@ -18,10 +16,8 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.core.model.InterLanguageLink;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.spatial.core.constants.Layers;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
@@ -110,7 +106,7 @@ public class TopoEvaluator {
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
-            UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
+            UniversalPage concept = upDao.getById(conceptId);
             if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
                 concepts.add(concept);
                 Geometry g1 = geometries.get(conceptId);
@@ -129,7 +125,7 @@ public class TopoEvaluator {
         for(Map.Entry<Integer, Geometry> i : polygons.entrySet()){
             counter ++;
             if(counter % 1 == 0){
-                LOG.info(String.format("Processing the %d th polygon : %s out of %d", counter, upDao.getById(i.getKey(), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle(), polygons.size()));
+                LOG.info(String.format("Processing the %d th polygon : %s out of %d", counter, upDao.getById(i.getKey()).getBestEnglishTitle(lpDao, true).getCanonicalTitle(), polygons.size()));
             }
             Map<Integer, Geometry> neighbors = snDao.getNeighbors(i.getValue(), polygonLayer, "earth", new HashSet<Integer>());
             if(!polygonWAG.containsKey(i.getKey())){
@@ -279,10 +275,10 @@ public class TopoEvaluator {
             String[] rowEntries = new String[8 + langs.size()];
             rowEntries[0] = t1.getCanonicalTitle();
             rowEntries[1] = String.valueOf(c1.getUnivId());
-            rowEntries[2] = upDao.getById(pointPolygonContainingMap.get(c1.getUnivId()), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+            rowEntries[2] = upDao.getById(pointPolygonContainingMap.get(c1.getUnivId())).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
             rowEntries[3] = t2.getCanonicalTitle();
             rowEntries[4] = String.valueOf(c2.getUnivId());
-            rowEntries[5] = upDao.getById(pointPolygonContainingMap.get(c2.getUnivId()), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+            rowEntries[5] = upDao.getById(pointPolygonContainingMap.get(c2.getUnivId())).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
             rowEntries[6] = String.format("%.2f", km);
             rowEntries[7] = String.valueOf(TopoDist);
             int counter = 0;

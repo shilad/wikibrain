@@ -41,10 +41,14 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
     public boolean tableExists() throws DaoException {
         DSLContext context = getJooq();
         try {
-            return (context.meta().getTables().contains(Tables.META_INFO));
+            return JooqUtils.tableExists(context, Tables.META_INFO);
         } finally {
             freeJooq(context);
         }
+    }
+
+    public boolean tableExists(DSLContext context) {
+        return JooqUtils.tableExists(context, Tables.META_INFO);
     }
 
     @Override
@@ -175,6 +179,10 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         MetaInfo accumulated = new MetaInfo(component);
         DSLContext context = getJooq();
         try {
+            if (!tableExists(context)) {
+                return accumulated;
+            }
+
             Result<Record3<Integer, Integer, Timestamp>> records =
                     context.select(Tables.META_INFO.NUM_RECORDS, Tables.META_INFO.NUM_ERRORS, Tables.META_INFO.LAST_UPDATED)
                             .from(Tables.META_INFO)
@@ -208,6 +216,9 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         sync(component);
         DSLContext context = getJooq();
         try {
+            if (!tableExists(context)) {
+                return new LanguageSet();
+            }
             Set<Language> langs = new HashSet<Language>();
             Result<Record1<Short>> records =
                     context.select(Tables.META_INFO.LANG_ID)
@@ -251,6 +262,10 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                 } else {
                     DSLContext context = getJooq();
                     try {
+                        if (!tableExists(context)) {
+                            return new MetaInfo(component, lang);
+                        }
+
                         Condition langCondition = (lang == null)
                                 ? Tables.META_INFO.LANG_ID.isNull()
                                 : Tables.META_INFO.LANG_ID.eq(lang.getId());
@@ -280,12 +295,15 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
     public Map<String, List<MetaInfo>> getAllInfo() throws DaoException {
         DSLContext context = getJooq();
         try {
+            Map<String, List<MetaInfo>> components = new HashMap<String, List<MetaInfo>>();
+            if (!tableExists(context)) {
+                return components;
+            }
             Result<Record> result = context
                     .select()
                     .from(Tables.META_INFO)
                     .fetch();
 
-            Map<String, List<MetaInfo>> components = new HashMap<String, List<MetaInfo>>();
             for (Record record : result) {
                 String klass = record.getValue(Tables.META_INFO.COMPONENT);
                 if (!components.containsKey(klass)) {
@@ -312,12 +330,16 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         sync();
         DSLContext context = getJooq();
         try {
+            Map<String, MetaInfo> components = new HashMap<String, MetaInfo>();
+            if (!tableExists(context)) {
+                return components;
+            }
+
             Result<Record> result = context
                     .select()
                     .from(Tables.META_INFO)
                     .fetch();
 
-            Map<String, MetaInfo> components = new HashMap<String, MetaInfo>();
 
             for (Record record : result) {
                 String className = record.getValue(Tables.META_INFO.COMPONENT);

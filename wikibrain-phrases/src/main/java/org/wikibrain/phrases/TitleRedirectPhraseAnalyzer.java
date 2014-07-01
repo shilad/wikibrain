@@ -79,11 +79,6 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
 
     }
 
-    //@Override
-    public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
-        throw new UnsupportedOperationException();
-    }
-
     public static class Provider extends org.wikibrain.conf.Provider<PhraseAnalyzer> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);

@@ -1,7 +1,6 @@
 package org.wikibrain.cookbook.core;
 
 import org.junit.Test;
-import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
@@ -44,7 +43,7 @@ public class UniversalLinkExplorer {
         Configurator configurator = env.getConfigurator();
         UniversalLinkDao dao = configurator.get(UniversalLinkDao.class, "skeletal-sql");
         long start = System.currentTimeMillis();
-        UniversalLinkGroup links = dao.getOutlinks(0, 0);
+        UniversalLinkGroup links = dao.getOutlinks(0);
         int i=0;
         for (UniversalLink link : links) {
             i++;

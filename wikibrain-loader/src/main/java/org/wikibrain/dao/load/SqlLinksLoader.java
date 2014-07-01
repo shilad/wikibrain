@@ -49,7 +49,7 @@ public class SqlLinksLoader {
 
     private final LocalLinkDao dao;
     private final LocalPageDao pageDao;
-    private final AtomicLongSet existing;
+    private final LocalLinkSet existing;
     private final MetaInfoDao metaDao;
 
     private AtomicLong totalLinks = new AtomicLong();
@@ -57,7 +57,7 @@ public class SqlLinksLoader {
     private AtomicLong newLinks = new AtomicLong();
 
 
-    public SqlLinksLoader(LocalLinkDao dao, LocalPageDao pageDao, MetaInfoDao metaDao, File file) throws DaoException {
+    public SqlLinksLoader(LocalLinkDao dao, LocalPageDao pageDao, MetaInfoDao metaDao, File file, LocalLinkSet existing) throws DaoException {
         this.dao = dao;
         this.metaDao = metaDao;
         this.pageDao = pageDao;
@@ -67,23 +67,10 @@ public class SqlLinksLoader {
         n = Math.max(10000, n);
         n *= 2 * 3; // guess that there will be twice as many links as there are now, to be safe, array size should be 3 times as big.
         LOG.info("guessing at size of array at " + n);
-        existing = new AtomicLongSet(n);
+        this.existing = existing;
     }
 
     public void load() throws DaoException {
-        loadExisting();
-        addNewLinks();
-    }
-
-    public void loadExisting() throws DaoException {
-        existing.clear();
-        for (LocalLink ll : dao.get(new DaoFilter().setLanguages(language))) {
-            existing.add(ll.longHashCode());
-        }
-        LOG.info("Loaded " + existing.size() + " existing links");
-    }
-
-    public void addNewLinks() throws DaoException {
         totalLinks.set(0);
         newLinks.set(0);
         interestingLinks.set(0);
@@ -131,9 +118,7 @@ public class SqlLinksLoader {
 
             LocalLink ll = new LocalLink(language, "", srcPageId, destId,
                     true, -1, false, LocalLink.LocationType.NONE);
-            long hash = ll.longHashCode();
-            if (!existing.contains(hash)) {
-                existing.add(hash);
+            if (!existing.contains(ll)) {
                 newLinks.incrementAndGet();
                 dao.save(ll);
             }
@@ -143,79 +128,4 @@ public class SqlLinksLoader {
     public void setValidIds(TIntSet validIds) {
         this.validIds = validIds;
     }
-
-    public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException {
-        Options options = new Options();
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("drop-tables")
-                        .withDescription("drop and recreate all tables")
-                        .create("d"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("max-links")
-                        .hasArg()
-                        .withDescription("maximum links per language")
-                        .create("x"));
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .withLongOpt("validIds")
-                        .hasArg()
-                        .withDescription("list of valid ids")
-                        .create("v"));
-        EnvBuilder.addStandardOptions(options);
-
-        CommandLineParser parser = new PosixParser();
-        CommandLine cmd;
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.err.println("Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("SqlLinksLoader", options);
-            return;
-        }
-
-        EnvBuilder builder = new EnvBuilder(cmd);
-        if (!builder.hasExplicitLanguageSet()) {
-            builder.setUseDownloadedLanguages();
-        }
-        Env env = builder.build();
-        Configurator conf = env.getConfigurator();
-        List<File> paths;
-        if (cmd.getArgList().isEmpty()) {
-            paths = env.getFiles(FileMatcher.LINK_SQL);
-        } else {
-            paths = new ArrayList<File>();
-            for (Object arg : cmd.getArgList()) {
-                paths.add(new File((String)arg));
-            }
-        }
-
-
-        TIntSet validIds = null;
-        if (cmd.hasOption("v")) {
-            validIds = new TIntHashSet();
-            for (String line : FileUtils.readLines(new File(cmd.getOptionValue("v")))) {
-                validIds.add(Integer.valueOf(line.trim()));
-            }
-        }
-
-        final LocalLinkDao llDao = conf.get(LocalLinkDao.class);
-        final LocalPageDao lpDao = conf.get(LocalPageDao.class);
-        final MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
-
-        // TODO: run this in parallel
-        if (cmd.hasOption("d")) {
-            llDao.clear();
-            metaDao.clear(LocalLink.class);
-        }
-        llDao.beginLoad();
-        for (File path : paths) {
-            SqlLinksLoader loader = new SqlLinksLoader(llDao, lpDao, metaDao, path);
-            if (validIds != null) loader.setValidIds(validIds);
-            loader.load();
-        }
-        llDao.endLoad();
-    }
-
 }

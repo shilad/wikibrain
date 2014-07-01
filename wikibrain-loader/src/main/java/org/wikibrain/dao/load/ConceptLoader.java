@@ -114,7 +114,7 @@ public class ConceptLoader {
         Configurator conf = env.getConfigurator();
         String algorithm = cmd.getOptionValue("n", null);
 
-        UniversalPageDao dao = conf.get(UniversalPageDao.class);
+        UniversalPageDao dao = conf.get(UniversalPageDao.class, algorithm);
         if (algorithm == null) {
             algorithm = (env.getLanguages().size() <= 1) ? "monolingual" : "purewikidata";
         }

@@ -30,10 +30,12 @@ import java.util.*;
 public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
 
     private final LocalLinkDao localLinkDao;
-    
-    public UniversalLinkSqlDao(WpDataSource dataSource, LocalLinkDao localLinkDao) throws DaoException {
+    private final int algorithmId;
+
+    public UniversalLinkSqlDao(WpDataSource dataSource, LocalLinkDao localLinkDao, int algorithmId) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-link");
         this.localLinkDao = localLinkDao;
+        this.algorithmId = algorithmId;
     }
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
@@ -82,7 +84,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                 conditions.add(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.in(daoFilter.getDestIds()));
             }
             if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+                conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId));
             }
             Cursor<Record> result = context.select().
                     from(Tables.UNIVERSAL_LINK).
@@ -108,7 +110,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                 conditions.add(Tables.UNIVERSAL_LINK.UNIV_DEST_ID.in(daoFilter.getDestIds()));
             }
             if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+                conditions.add(Tables.UNIVERSAL_LINK.ALGORITHM_ID.eq(algorithmId));
             }
             return context.selectDistinct(Tables.UNIVERSAL_LINK.UNIV_SOURCE_ID, Tables.UNIVERSAL_LINK.UNIV_DEST_ID, Tables.UNIVERSAL_LINK.ALGORITHM_ID)
                     .from(Tables.UNIVERSAL_LINK)
@@ -120,7 +122,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     }
 
     @Override
-    public UniversalLinkGroup getOutlinks(int sourceId, int algorithmId) throws DaoException {
+    public UniversalLinkGroup getOutlinks(int sourceId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Cursor<Record> result = context.select().
@@ -135,7 +137,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     }
 
     @Override
-    public TIntSet getOutlinkIds(int sourceId, int algorithmId) throws DaoException{
+    public TIntSet getOutlinkIds(int sourceId) throws DaoException{
         DSLContext context = getJooq();
         try {
             Cursor<Record> result = context.select().
@@ -154,7 +156,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     }
 
     @Override
-    public UniversalLinkGroup getInlinks(int destId, int algorithmId) throws DaoException {
+    public UniversalLinkGroup getInlinks(int destId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Cursor<Record> result = context.select().
@@ -169,7 +171,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     }
 
     @Override
-    public TIntSet getInlinkIds(int destId, int algorithmId) throws DaoException{
+    public TIntSet getInlinkIds(int destId) throws DaoException{
         DSLContext context = getJooq();
         try {
             Cursor<Record> result = context.select().
@@ -188,7 +190,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
     }
 
     @Override
-    public UniversalLink getUniversalLink(int sourceId, int destId, int algorithmId) throws DaoException {
+    public UniversalLink getUniversalLink(int sourceId, int destId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Result<Record> result = context.select().
@@ -250,7 +252,7 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
 
             @Override
             public UniversalLink transform(Integer[] item) throws DaoException {
-                return getUniversalLink(item[0], item[1], item[2]);
+                return getUniversalLink(item[0], item[1]);
             }
         };
     }
@@ -299,13 +301,16 @@ public class UniversalLinkSqlDao extends AbstractSqlDao<UniversalLink> implement
                 return null;
             }
             try {
+
+                int algorithmId = getConfig().get().getInt("mapper." + config.getString("mapper") + ".algorithmId");
                 return new UniversalLinkSqlDao(
                         getConfigurator().get(
                                 WpDataSource.class,
                                 config.getString("dataSource")),
                         getConfigurator().get(
                                 LocalLinkDao.class,
-                                config.getString("localLinkDao"))
+                                config.getString("localLinkDao")),
+                        algorithmId
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
