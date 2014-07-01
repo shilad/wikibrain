@@ -21,8 +21,7 @@ import java.util.Map;
  */
 public class ShowStatements {
     public static void main(String args[]) throws ConfigurationException, DaoException {
-        Env env = new EnvBuilder().build();
-        //Env env = EnvBuilder.envFromArgs(args); //this is just something that sam and ben said to do.....
+        Env env = EnvBuilder.envFromArgs(args);
         Configurator conf = env.getConfigurator();
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         WikidataDao wdDao = conf.get(WikidataDao.class);

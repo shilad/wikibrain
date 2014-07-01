@@ -53,10 +53,12 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
             return new SRResult(Double.NaN);
         } else {
             SRResult finalResult=new SRResult(0.5 * r1.getScore() + 0.5 * r2.getScore());
-            List<Explanation> explanationList= new ArrayList<Explanation>();
-            explanationList.addAll(r1.getExplanations());
-            explanationList.addAll(r2.getExplanations());
-            finalResult.setExplanations(explanationList);
+            if (explanations) {
+                List<Explanation> explanationList = new ArrayList<Explanation>();
+                explanationList.addAll(r1.getExplanations());
+                explanationList.addAll(r2.getExplanations());
+                finalResult.setExplanations(explanationList);
+            }
             return finalResult;
         }
     }
