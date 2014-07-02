@@ -31,7 +31,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
 
     private static final int COUNTS_PER_FLUSH = 5000;
 
-    private final Map<Class, Map<Language, MetaInfo>> counters =
+    private final ConcurrentHashMap<Class, Map<Language, MetaInfo>> counters =
             new ConcurrentHashMap<Class, Map<Language, MetaInfo>>();
 
     public MetaInfoSqlDao(WpDataSource dataSource) throws DaoException {
@@ -242,16 +242,10 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
 
     @Override
     public MetaInfo getInfo(Class component, Language lang) throws DaoException {
+        counters.putIfAbsent(component, new ConcurrentHashMap<Language, MetaInfo>());
         Map<Language, MetaInfo> langInfos = counters.get(component);
         if (langInfos == null) {
-            synchronized (counters) {
-                if (!counters.containsKey(component)) {
-                    langInfos = new ConcurrentHashMap<Language, MetaInfo>();
-                    counters.put(component, langInfos);
-                } else {
-                    langInfos = counters.get(component);
-                }
-            }
+            throw new IllegalStateException();
         }
         Object langKey = (lang == null ? NULL_KEY : lang);
         MetaInfo info = langInfos.get(langKey);
@@ -263,23 +257,23 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
                     DSLContext context = getJooq();
                     try {
                         if (!tableExists(context)) {
-                            return new MetaInfo(component, lang);
-                        }
-
-                        Condition langCondition = (lang == null)
-                                ? Tables.META_INFO.LANG_ID.isNull()
-                                : Tables.META_INFO.LANG_ID.eq(lang.getId());
-
-                        Record3<Integer, Integer, Timestamp> record =
-                                context.select(Tables.META_INFO.NUM_RECORDS, Tables.META_INFO.NUM_ERRORS, Tables.META_INFO.LAST_UPDATED)
-                                .from(Tables.META_INFO)
-                                .where(Tables.META_INFO.COMPONENT.eq(component.getSimpleName()))
-                                .and(langCondition)
-                                .fetchOne();
-                        if (record == null) {
                             info = new MetaInfo(component, lang);
                         } else {
-                            info = new MetaInfo(component, lang, record.value1(), record.value2(), record.value3());
+                            Condition langCondition = (lang == null)
+                                    ? Tables.META_INFO.LANG_ID.isNull()
+                                    : Tables.META_INFO.LANG_ID.eq(lang.getId());
+
+                            Record3<Integer, Integer, Timestamp> record =
+                                    context.select(Tables.META_INFO.NUM_RECORDS, Tables.META_INFO.NUM_ERRORS, Tables.META_INFO.LAST_UPDATED)
+                                            .from(Tables.META_INFO)
+                                            .where(Tables.META_INFO.COMPONENT.eq(component.getSimpleName()))
+                                            .and(langCondition)
+                                            .fetchOne();
+                            if (record == null) {
+                                info = new MetaInfo(component, lang);
+                            } else {
+                                info = new MetaInfo(component, lang, record.value1(), record.value2(), record.value3());
+                            }
                         }
                     } finally {
                         freeJooq(context);
