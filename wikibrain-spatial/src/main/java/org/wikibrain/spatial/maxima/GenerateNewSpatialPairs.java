@@ -50,33 +50,31 @@ public class GenerateNewSpatialPairs {
         }
     }
 
-    public ArrayList<SpatialConceptPair> kkGenerateSpatialPairs(int numbOfPairs, List<SpatialConceptPair> allPreviousQList){
+    public ArrayList<SpatialConceptPair> kkGenerateSpatialPairs(List<SpatialConceptPair> allPreviousQList){
         ArrayList<SpatialConceptPair> toReturn= new ArrayList<SpatialConceptPair>();
-        for (int i = 0; i < numbOfPairs ; i++) {
-            int rand1= (int) (Math.random()*knownIds.size());
-            int rand2= (int) (Math.random()*knownIds.size());
-            if(rand1 !=rand2) {
-                int idOne=knownIds.get(rand1);
-                SpatialConcept one= new SpatialConcept(idOne,idsStringMap.get(idOne));
-                int idTwo= knownIds.get(rand2);
-                SpatialConcept two= new SpatialConcept(idTwo,idsStringMap.get(idTwo));
-                SpatialConceptPair pair= new SpatialConceptPair(one,two);
-                if(!allPreviousQList.contains(pair) && !toReturn.contains(pair) && checkScale(one) && checkScale(two)) {
-                    setProperties(pair);
-                    toReturn.add(pair);
+        for (int i = 0; i < knownIds.size()-1; i++) {
+            for (int j = i+1; j < knownIds.size() ; j++) {
+                int idOne = knownIds.get(i);
+                SpatialConcept one = new SpatialConcept(idOne, idsStringMap.get(idOne));
+                int idTwo = knownIds.get(j);
+                SpatialConcept two = new SpatialConcept(idTwo, idsStringMap.get(idTwo));
+                SpatialConceptPair pair = new SpatialConceptPair(one, two);
+                if (!allPreviousQList.contains(pair) && !toReturn.contains(pair) && checkScale(one) && checkScale(two)) {
+                     setProperties(pair);
+                     toReturn.add(pair);
                 }
-            } else{
-                numbOfPairs++;
             }
+
         }
         return toReturn;
     }
 
     private boolean checkScale(SpatialConcept concept) {
         Integer scale= idToScaleMap.get(concept.getUniversalID());
-        if (scale == null){
+        if(scale==null){
             return false;
-        } else if(scale==0){
+        }
+        if(scale==0){
             return false;
         } else if(scale==1){
             concept.setScale(SpatialConcept.Scale.LANDMARK);
@@ -89,6 +87,7 @@ public class GenerateNewSpatialPairs {
         } else if(scale==5){
             concept.setScale(SpatialConcept.Scale.CITY);
         }else if(scale==6){
+
             concept.setScale(SpatialConcept.Scale.NATURAL);
         }
         return true;

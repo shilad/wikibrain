@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.maxima;
 
 import java.util.*;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * Created by horla001 on 6/27/14.
@@ -30,25 +31,41 @@ public class ConceptPairBalancer {
             for(SpatialConceptPair pair : previous) {
                 addToTotal(pair);
             }
+
+            absoluteTotal = previous.size();
         }
 
         public void addToTotal(SpatialConceptPair pair) {
             int b = stratifier.getStrata(pair);
-            if(b >= runningTotal.length) {
-                System.out.println("NOPE");
-            }
             runningTotal[b]++;
             absoluteTotal++;
         }
 
         public double calculateScore(SpatialConceptPair pair) {
             double distance = 0;
+
+            int b = stratifier.getStrata(pair);
+            runningTotal[b]++;
+            absoluteTotal++;
+
             for(int i = 0; i < runningTotal.length; i++) {
                 double curr = (double)runningTotal[i] / (double)absoluteTotal;
                 distance += Math.abs(goal[i] - curr);
             }
-
+            absoluteTotal--;
+            runningTotal[b]--;
             return 1 - (distance / 2);
+        }
+
+        // Method only for debug purposes.
+        public double[] getRunningDistribution() {
+            double[] ret = new double[runningTotal.length];
+
+            for(int i = 0; i < runningTotal.length; i++) {
+                ret[i] = (double)runningTotal[i] / (double)absoluteTotal;
+            }
+
+            return ret;
         }
     }
 
@@ -79,27 +96,37 @@ public class ConceptPairBalancer {
 
             SpatialConceptPair best = candidateTemp.remove(0);
             newConcepts.add(best);
+
+            for(RunningStratifierInformation info : stratifierInfos) {
+                info.addToTotal(best);
+            }
         }
 
         return newConcepts;
     }
 
-    private List<SpatialConceptPair> scoreAndOrder(List<SpatialConceptPair> candidates) {
-        List<SpatialConceptPair> scored = new LinkedList<SpatialConceptPair>(candidates);
+    // Method for debug purposes only
+    private void printDoubleArray(double[] arr) {
+        System.out.print("[ ");
+        for(double d : arr)
+            System.out.print(d + ", ");
+        System.out.print("]");
+    }
+
+    private void scoreAndOrder(List<SpatialConceptPair> candidates) {
+//        List<SpatialConceptPair> scored = new LinkedList<SpatialConceptPair>(candidates);
         final Map<SpatialConceptPair, Double> scores = new HashMap<SpatialConceptPair, Double>();
 
-        for(SpatialConceptPair pair : scored) {
-            double distance = 0.0;
+        for(SpatialConceptPair pair : candidates) {
+            double score = 0.0;
             for(RunningStratifierInformation info : stratifierInfos) {
-                distance += info.calculateScore(pair);
+                score += info.calculateScore(pair);
             }
-
-            double score = 1 - distance / 2;
 
             scores.put(pair, score);
         }
 
-        Collections.sort(scored, new Comparator<SpatialConceptPair>() {
+        Collections.sort(candidates, new Comparator<SpatialConceptPair>() {
             @Override
             public int compare(SpatialConceptPair o1, SpatialConceptPair o2) {
                 double a = scores.get(o1);
@@ -112,8 +139,6 @@ public class ConceptPairBalancer {
                 return a == b ? 0 : 1;
             }
         });
-
-        return scored;
     }
 
 }
