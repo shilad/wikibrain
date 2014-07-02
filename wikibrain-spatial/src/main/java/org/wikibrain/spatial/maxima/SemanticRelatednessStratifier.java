@@ -22,7 +22,8 @@ public class SemanticRelatednessStratifier extends SpatialConceptPairStratifier 
     public double[] getDesiredStratification() {
         double[] strats = new double[numBuckets];
 
-        strats[0] = strats[1] = 0.5;
+        strats[0] = strats[2] = 0.4;
+        strats[1] = 0.2;
 
         return strats;
     }

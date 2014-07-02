@@ -18,10 +18,12 @@ public class SpatialConceptPair {
     private int kkTypeNumbOfTimesAsked;
     private int uuTypeNumbOfTimesAsked;
     private int kuTypeNumbOfTimesAsked;
+    private String combinedTitle;
 
     public SpatialConceptPair(SpatialConcept firstConcept, SpatialConcept secondConcept) {
         this.firstConcept = firstConcept;
         this.secondConcept = secondConcept;
+        this.combinedTitle = getCombinedTitle();
     }
 
     public void setKmDistance(double kmDistance) {
@@ -97,15 +99,10 @@ public class SpatialConceptPair {
         String secondStr = secondConcept.getTitle();
 
         String combinedTitle = null;
-        try {
-            if (firstStr.compareTo(secondStr) < 0) {
-                combinedTitle = firstStr + secondStr;
-            } else {
-                combinedTitle = secondStr + firstStr;
-            }
-        } catch(NullPointerException e){
-            System.out.println(firstConcept.getUniversalID());
-            System.out.println(secondConcept.getUniversalID());
+        if (firstStr.compareTo(secondStr) < 0) {
+            combinedTitle = firstStr + secondStr;
+        } else {
+            combinedTitle = secondStr + firstStr;
         }
 
         return combinedTitle;
@@ -113,7 +110,7 @@ public class SpatialConceptPair {
 
     @Override
     public int hashCode() {
-        return getCombinedTitle().hashCode();
+        return combinedTitle.hashCode();
     }
 
     @Override
@@ -133,5 +130,10 @@ public class SpatialConceptPair {
         int oid2 = opair.getSecondConcept().getUniversalID();
 
         return (mid1 == oid1 && mid2 == oid2) || (mid1 == oid2 && mid2 == oid1);
+    }
+
+    @Override
+    public String toString() {
+        return combinedTitle;
     }
 }

@@ -65,21 +65,6 @@ public class SurveyQuestionGenerator {
         }
     }
 
-    public void test(TIntIntMap map){
-        for(Integer id:idsStringMap.keySet()){
-            if(!idToIndexForGraphMatrix.containsKey(id)){
-                System.out.println(id);
-            }
-        }
-//        for(int id: idToIndexForSRMatrix.keySet()){
-//            if(!idsStringMap.containsKey(id)){
-//                System.out.println(id);
-//            }
-//
-//        }
-//        System.out.println(idToIndexForDistanceMatrix.keySet().size());
-//        System.out.println(idsStringMap.keySet().size());
-    }
 
     private void buildMatrices(){
         matrixReader= new MatrixReader();
@@ -123,31 +108,23 @@ public class SurveyQuestionGenerator {
         GenerateNewSpatialPairs generator = new GenerateNewSpatialPairs(knownIds,idsStringMap,variables.knownIdSet,distanceMatrix,srMatrix,graphMatrix,idToIndexForDistanceMatrix,idToIndexForSRMatrix,idToIndexForGraphMatrix,idToScaleCategory);
         ConceptPairBalancer balancer= new ConceptPairBalancer();
 
-        beccasWay(balancer,variables,generator);
-        samsWay(balancer,variables,generator, responseNumb);
+        getPreviousPairs(balancer, variables);
+        getCreatedKkAndKuPairs(generator, balancer, variables);
+        getCreatedUUPairs(generator, balancer, (variables.kkReturnList.size() + variables.kuReturnList.size()), variables);
 
-        System.out.println(responseNumb + "\tkkReturn List Size: " + variables.kkReturnList.size() + "\tkuReturn List Size: " + variables.kuReturnList.size() + "\tuuReturn List Size: " + variables.uuReturnList.size());
+//        System.out.println(responseNumb + "\tkkReturn List Size: " + variables.kkReturnList.size() + "\tkuReturn List Size: " + variables.kuReturnList.size() + "\tuuReturn List Size: " + variables.uuReturnList.size());
         returnPairs.addAll(variables.kkReturnList);
         returnPairs.addAll(variables.kuReturnList);
         returnPairs.addAll(variables.uuReturnList);
         allPreviousQList.addAll(returnPairs);
+        if(responseNumb % 100==0){
+            System.out.println(responseNumb);
+        }
         return returnPairs;
     }
 
     private int calcNewCount(int x) {
         return (int) (Math.log((x + 1400) / 1400) * 1387.7);
-    }
-
-    private void samsWay(ConceptPairBalancer balancer, VariablesWrapper variables, GenerateNewSpatialPairs generator, int responseNumber) {
-        int newTarget = calcNewCount(responseNumber * 50);
-
-
-    }
-
-    private void beccasWay(ConceptPairBalancer balancer, VariablesWrapper variables, GenerateNewSpatialPairs generator) {
-        getPreviousPairs(balancer, variables);
-        getCreatedKkAndKuPairs(generator, balancer, variables);
-        getCreatedUUPairs(generator, balancer, (variables.kkReturnList.size() + variables.kuReturnList.size()), variables);
     }
 
 
@@ -181,15 +158,15 @@ public class SurveyQuestionGenerator {
      */
     private void getPreviousPairs(ConceptPairBalancer balancer, VariablesWrapper v) {
         putOnQuestionsOnList(balancer.choosePairs(v.kkPreviousQList, v.kkReturnList, v.kkTarget), KnowledgeType.KK, v);
-        putOnQuestionsOnList(balancer.choosePairs(v.kuPreviousQList, v.kuReturnList, v.kuTarget),KnowledgeType.KU, v);
+        putOnQuestionsOnList(balancer.choosePairs(v.kuPreviousQList, v.kuReturnList, v.kuTarget), KnowledgeType.KU, v);
     }
 
     /**
      * Adds to the returned list a list of ku and kk concept pairs that have been newly created and chosen based off of ConceptPairBalancer
      */
     private void getCreatedKkAndKuPairs(GenerateNewSpatialPairs generator, ConceptPairBalancer balancer, VariablesWrapper v) {
-        ArrayList<SpatialConceptPair> candidatePairs=generator.kkGenerateSpatialPairs(((v.kkTarget-v.kkReturnList.size())*RAND_OVER),allPreviousQList);
-        putOnQuestionsOnList(balancer.choosePairs(candidatePairs,v.kkReturnList,(v.kkTarget-v.kkReturnList.size())),KnowledgeType.KK, v);
+        ArrayList<SpatialConceptPair> candidatePairs=generator.kkGenerateSpatialPairs(allPreviousQList);
+        putOnQuestionsOnList(balancer.choosePairs(candidatePairs, v.kkReturnList, (v.kkTarget - v.kkReturnList.size())), KnowledgeType.KK, v);
         candidatePairs=generator.kuGenerateSpatialPairs(((v.kuTarget-v.kuReturnList.size())*RAND_OVER),allPreviousQList);
         putOnQuestionsOnList(balancer.choosePairs(candidatePairs, v.kuReturnList, (v.kuTarget - v.kuReturnList.size())), KnowledgeType.KU, v);
     }
