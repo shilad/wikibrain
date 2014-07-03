@@ -130,7 +130,7 @@ public class SurveyQuestionGenerator {
      * @param pairList
      * @param type
      */
-    private void putOnQuestionsOnList(List<SpatialConceptPair> pairList, KnowledgeType type, VariablesWrapper v) {
+    private void putOnQuestionsOnList(Set<SpatialConceptPair> pairList, KnowledgeType type, VariablesWrapper v) {
         for(SpatialConceptPair pair: pairList) {
             switch (type){
                 case KK:
@@ -162,7 +162,7 @@ public class SurveyQuestionGenerator {
      * Adds to the returned list a list of ku and kk concept pairs that have been newly created and chosen based off of ConceptPairBalancer
      */
     private void getCreatedKkAndKuPairs(GenerateNewSpatialPairs generator, ConceptPairBalancer balancer, VariablesWrapper v) {
-        ArrayList<SpatialConceptPair> candidatePairs=generator.kkGenerateSpatialPairs(allPreviousQList);
+        Set<SpatialConceptPair> candidatePairs=generator.kkGenerateSpatialPairs(allPreviousQList);
         putOnQuestionsOnList(balancer.choosePairs(candidatePairs, v.kkReturnList, (v.kkTarget - v.kkReturnList.size())), KnowledgeType.KK, v);
         candidatePairs=generator.kuGenerateSpatialPairs(((v.kuTarget-v.kuReturnList.size())*RAND_OVER),allPreviousQList);
         putOnQuestionsOnList(balancer.choosePairs(candidatePairs, v.kuReturnList, (v.kuTarget - v.kuReturnList.size())), KnowledgeType.KU, v);
@@ -176,7 +176,7 @@ public class SurveyQuestionGenerator {
         int numbRemaining= 50-v.kuReturnList.size()-v.kkReturnList.size();
         putOnQuestionsOnList(balancer.choosePairs(v.uuPreviousQList,v.uuReturnList,numbRemaining),KnowledgeType.UU, v);
         numbRemaining=numbRemaining-v.uuReturnList.size();
-        ArrayList<SpatialConceptPair> candidates = generator.uuGenerateSpatialPairs(numbRemaining*RAND_OVER, allPreviousQList);
+        Set<SpatialConceptPair> candidates = generator.uuGenerateSpatialPairs(numbRemaining*RAND_OVER, allPreviousQList);
         putOnQuestionsOnList(balancer.choosePairs(candidates,v.uuReturnList,numbRemaining),KnowledgeType.UU, v);
     }
 
@@ -185,21 +185,21 @@ public class SurveyQuestionGenerator {
         public int uuTarget=20; //This is the target number of questions of the uu type returned
         public final int kuTarget=10;
         public int kkTarget=20;
-        public List<SpatialConceptPair> uuPreviousQList; //this list changes each time getConceptPairs is called
-        public List<SpatialConceptPair> kuPreviousQList;
-        public List<SpatialConceptPair> kkPreviousQList;
-        public List<SpatialConceptPair> uuReturnList; //this list changes each time getConceptPairs is called
-        public List<SpatialConceptPair> kuReturnList;
-        public List<SpatialConceptPair> kkReturnList;
+        public Set<SpatialConceptPair> uuPreviousQList; //this list changes each time getConceptPairs is called
+        public Set<SpatialConceptPair> kuPreviousQList;
+        public Set<SpatialConceptPair> kkPreviousQList;
+        public Set<SpatialConceptPair> uuReturnList; //this list changes each time getConceptPairs is called
+        public Set<SpatialConceptPair> kuReturnList;
+        public Set<SpatialConceptPair> kkReturnList;
         public TIntSet knownIdSet;
 
         VariablesWrapper(List<Integer> knownIds, int responseNumb){
-            uuPreviousQList=new ArrayList<SpatialConceptPair>();
-            kuPreviousQList=new ArrayList<SpatialConceptPair>();
-            kkPreviousQList=new ArrayList<SpatialConceptPair>();
-            uuReturnList=new ArrayList<SpatialConceptPair>();
-            kuReturnList=new ArrayList<SpatialConceptPair>();
-            kkReturnList=new ArrayList<SpatialConceptPair>();
+            uuPreviousQList=new HashSet<SpatialConceptPair>();
+            kuPreviousQList=new HashSet<SpatialConceptPair>();
+            kkPreviousQList=new HashSet<SpatialConceptPair>();
+            uuReturnList=new HashSet<SpatialConceptPair>();
+            kuReturnList=new HashSet<SpatialConceptPair>();
+            kkReturnList=new HashSet<SpatialConceptPair>();
             buildKnownIdSet(knownIds);
             buildPreviousQLists();
             setTargets(responseNumb);

@@ -16,7 +16,7 @@ public class ConceptPairBalancer {
         private double[] goal;
         private SpatialConceptPairStratifier stratifier;
 
-        public RunningStratifierInformation(Class stratifierClass, List<SpatialConceptPair> previous) {
+        public RunningStratifierInformation(Class stratifierClass, Set<SpatialConceptPair> previous) {
             try {
                 stratifier = (SpatialConceptPairStratifier)stratifierClass.newInstance();
             } catch (InstantiationException e) {
@@ -78,7 +78,7 @@ public class ConceptPairBalancer {
      * @param numCount The number of pairs to choose from candidate
      * @return A new list of pairs chosen from the candidates.
      */
-    public List<SpatialConceptPair> choosePairs(List<SpatialConceptPair> candidates, List<SpatialConceptPair> chosen, int numCount) {
+    public Set<SpatialConceptPair> choosePairs(Set<SpatialConceptPair> candidates, Set<SpatialConceptPair> chosen, int numCount) {
 
         if(candidates.size() <= numCount) {
             return candidates;
@@ -89,7 +89,7 @@ public class ConceptPairBalancer {
         stratifierInfos[1] = new RunningStratifierInformation(ScaleStratifier.class, chosen);
         stratifierInfos[2] = new RunningStratifierInformation(Math.random() < 0.5 ? StraightlineStratifier.class : TopologicalStratifier.class, chosen);
 
-        List<SpatialConceptPair> newConcepts = new ArrayList<SpatialConceptPair>();
+        Set<SpatialConceptPair> newConcepts = new HashSet<SpatialConceptPair>();
         List<SpatialConceptPair> candidateTemp = new LinkedList<SpatialConceptPair>(candidates);
 
         while(newConcepts.size() < numCount) {
