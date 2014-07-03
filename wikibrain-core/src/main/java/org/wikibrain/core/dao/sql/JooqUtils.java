@@ -123,11 +123,9 @@ public class JooqUtils {
     }
 
     public static boolean tableExists(DSLContext context, Table table) {
-        for (Schema schema : context.meta().getSchemas()) {
-            for (Table t : schema.getTables()) {
-                if (t.getName().equalsIgnoreCase(table.getName())) {
-                    return true;
-                }
+        for (Table t : context.meta().getTables()) {
+            if (t.getName().equalsIgnoreCase(table.getName())) {
+                return true;
             }
         }
         return false;
