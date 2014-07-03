@@ -29,9 +29,9 @@ public class InstanceOfExtractor {
 
 
     // only need to change order here
-    public static int WEIRD = 0, LANDMARK = 1, COUNTY = 2 ,COUNTRY = 3 , STATE = 4,  CITY =5 , NATURAL =6 ;
-    private String[] fileNames = { "weird.txt", "landmark.txt", "county.txt",  "country.txt", "state.txt", "city.txt", "natural.txt" };
-    public static int NUM_SCALES =7;
+    public static final int WEIRD = 0, LANDMARK = 1, COUNTY = 2 ,COUNTRY = 3 , STATE = 4,  CITY =5 , NATURAL =6 ;
+    public static final String[] fileNames = { "weird.txt", "landmark.txt", "county.txt",  "country.txt", "state.txt", "city.txt", "natural.txt" };
+    public static final int NUM_SCALES =7;
     private Set<String>[] scaleKeywords = new Set[NUM_SCALES];
     private Set<Integer>[] scaleIds = new Set[NUM_SCALES];
 

@@ -19,6 +19,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
+import org.wikibrain.spatial.maxima.SpatialConcept;
 import org.wikibrain.spatial.maxima.SpatialConceptPair;
 import org.wikibrain.spatial.maxima.SurveyQuestionGenerator;
 import org.wikibrain.sr.MonolingualSRMetric;
@@ -41,8 +42,8 @@ import java.util.logging.Logger;
  */
 public class MatrixGenerator {
 
-    private Map<Integer, Geometry> geometries;
-    private DistanceMetrics dm;
+    public Map<Integer, Geometry> geometries;
+    public DistanceMetrics dm;
     private MonolingualSRMetric sr;
     private Language simple = Language.SIMPLE;
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
@@ -80,14 +81,6 @@ public class MatrixGenerator {
         }
         pageHitList = new ArrayList<Integer>();
         pageHitList.addAll(geometries.keySet());
-//        try {
-//            Scanner scanner = new Scanner(new File("PageHitList.txt"));
-//            while(scanner.hasNext()){
-//                pageHitList.add(scanner.nextInt());
-//            }
-//        } catch(IOException e){
-//            System.out.println("cannot find PageHitList.txt");
-//        }
     }
 
     public static void main (String[] args){
@@ -104,11 +97,16 @@ public class MatrixGenerator {
 //            Map<String, Set<Integer>> map = mg.getNearConceptList(10, 2 );
 //            mg.createNeighborFile(map);
         Map<String,Set<Integer>> neighbors = mg.loadNeighborFile(new File("citiesToNeighbors2.txt"));
-        List<Set<Integer>> simulatedTurkers = mg.generateSimulatedTurkers(neighbors,mg.cityPopulations,200);
+
+        //set number of simulated turkers to 1000
+        List<Set<Integer>> simulatedTurkers = mg.generateSimulatedTurkers(neighbors,mg.cityPopulations,1000);
 
         SurveyQuestionGenerator generator = new SurveyQuestionGenerator();
         List<Integer> knownIds = new ArrayList<Integer>();
 
+        int kk = 0;
+        int ku = 0;
+        int uu = 0;
         PrintWriter pw = null;
         try{
             pw = new PrintWriter(new FileWriter("SimulatedTurkers.txt"));
@@ -116,21 +114,51 @@ public class MatrixGenerator {
             e.printStackTrace();
         }
 
+        Set<SpatialConceptPair> questionPairs = new HashSet<SpatialConceptPair>();
+
         for (int i=0; i<simulatedTurkers.size(); i++){
             knownIds.clear();
             knownIds.addAll(simulatedTurkers.get(i));
             List<SpatialConceptPair> questions = generator.getConceptPairsToAsk(knownIds,i);
             for (SpatialConceptPair question: questions){
-                // id, c1, c1_known, c2, c2_known, ans (default is 0.0)
-                String s = i+"\t"+question.getFirstConcept().getUniversalID()+"\t"+knownIds.contains(question.getFirstConcept().getUniversalID())+"\t";
-                s += question.getSecondConcept().getUniversalID()+"\t"+knownIds.contains(question.getSecondConcept().getUniversalID())+"\t"+0.0;
+                SpatialConcept concept1 = question.getFirstConcept();
+                SpatialConcept concept2 = question.getSecondConcept();
+
+                // id, c1, c1_known, c1_title, c2, c2_known, c2_title, ans (default is 0.0)
+                String s = question.toString();
+                questionPairs.add(question);
+
+
+                if (knownIds.contains(concept1.getUniversalID())&&knownIds.contains(concept2.getUniversalID())){
+                    kk++;
+                } else if ((!knownIds.contains(concept1.getUniversalID()))&&(!knownIds.contains(concept2.getUniversalID()))) {
+                    uu++;
+                } else {
+                    ku++;
+                }
+
+                s = i+"\t"+s+"\t"+(knownIds.contains(concept1.getUniversalID()))+"\t"+(knownIds.contains(concept2.getUniversalID()));
                 pw.println(s);
             }
         }
+        int count = 0;
+        for (SpatialConceptPair pair: questionPairs){
+            if (pair.getkkTypeNumbOfTimesAsked()>=10){
+                System.out.println(pair.getFirstConcept().getTitle()+"\t"+pair.getSecondConcept().getTitle()+"\t"+pair.getkkTypeNumbOfTimesAsked()+"\t"+pair.getuuTypeNumbOfTimesAsked());
+                count++;
+            }
+        }
+        System.out.println(count);
+        try {
+            mg.analyzeQuestionPairs(questionPairs, env.getConfigurator());
+        } catch (ConfigurationException e){
+            e.printStackTrace();
+        }
 
-//        } catch(IOException e){
-//            e.printStackTrace();
-//        }
+        System.out.println(questionPairs.size());
+        System.out.println("known known "+kk);
+        System.out.println("known unknown "+ku);
+        System.out.println("unknown unknown "+uu);
 
 //        MatrixWithHeader matrix = mg.generateSRMatrix();
 //        System.out.println("Finished generating matrix");
@@ -143,7 +171,7 @@ public class MatrixGenerator {
 //        System.out.println(matrix.idToIndex.get(30));
 
 //        List<Integer> check = Arrays.asList(18426, 65,36091,34860,16554,38733,79842,496360, 85, 8678);
-//        for (Integer i: check){
+//        for (Integer i: check){If M and N are any two topological spaces, then the Euler characteristic of their disjoint union is the sum of their Euler characteristics, since homology is additive under disjoint union:
 //            for (int j : check){
 //                try {
 //                    System.out.println("distance between " + i + " and " + j + " = " + matrix2.matrix[mg.pageHitList.indexOf(i)][mg.pageHitList.indexOf(j)]);
@@ -158,7 +186,6 @@ public class MatrixGenerator {
 //                System.out.println("Unequal row "+i);
 //            }
 //        }
-
     }
 
     public MatrixWithHeader generateDistanceMatrix(){
@@ -185,7 +212,6 @@ public class MatrixGenerator {
                             try {
                                 distance = (float) (DefaultEllipsoid.WGS84.orthodromicDistance(point1.getX(), point1.getY(), point2.getX(), point2.getY()) / 1000);
                             } catch (ArithmeticException e2) {
-//                        e2.printStackTrace();
                                 distance = 20000;
                             }
                         }
@@ -209,12 +235,9 @@ public class MatrixGenerator {
 
         // We will assume item ids are universal (because we think item_id in geometries are universal)
 
-        //getTopologicalDistance(Geometry a, Integer itemIdA, Geometry b, Integer itemIdB, int k, String layerName, String refSysName)
-
         MatrixWithHeader distanceMatrixWithHeader = generateDistanceMatrix();
         System.out.println("Finished generating distance matrix");
         final float[][] distanceMatrix = distanceMatrixWithHeader.matrix;
-
 
         ParallelForEach.loop(pageHitList, new Procedure<Integer>() {
             @Override
@@ -240,11 +263,9 @@ public class MatrixGenerator {
         return new MatrixWithHeader(matrix,pageHitList);
     }
 
-
     public MatrixWithHeader generateSRMatrix(){
         int size = pageHitList.size();
         matrix = new float[size][size];
-
 
             ParallelForEach.loop(pageHitList, new Procedure<Integer>() {
                 @Override
@@ -252,7 +273,6 @@ public class MatrixGenerator {
 
                     int i = pageHitList.indexOf(id1);
                     for (int j=0; j<pageHitList.size(); j++) {
-
 
                         float distance = 0;
                         try {
@@ -308,9 +328,7 @@ public class MatrixGenerator {
 
     public MatrixWithHeader loadMatrixFile(String fileName ){
 
-
         File file = new File(fileName);
-
 
         // what we read from the file
         byte[] result;
@@ -346,7 +364,6 @@ public class MatrixGenerator {
                     System.out.println("Expected file size "+expectedFileSize+" but got "+(file.length()-4));
 //            return null;
                 }
-
 
                 // try to read all the bytes
                 while(totalBytesRead < expectedFileSize){
@@ -430,8 +447,8 @@ public class MatrixGenerator {
         return array;
     }
 
-    private class MatrixWithHeader{
-        private float[][] matrix;
+    public class MatrixWithHeader{
+        public float[][] matrix;
         public Map<Integer, Integer> idToIndex;
         private List<Integer> idsInOrder;
         private int dimension;
@@ -447,7 +464,9 @@ public class MatrixGenerator {
             dimension = matrix.length;
         }
 
-
+        public float[][] getMatrix(){
+            return matrix;
+        }
     }
 
     public void getGeoDataFromCities(File rawFile) throws IOException{
@@ -475,6 +494,7 @@ public class MatrixGenerator {
         while (inputFeatures.hasNext()) {
             SimpleFeature feature = inputFeatures.next();
             if (countryNames.contains(feature.getAttribute(17))) {
+
                 // country,state,city
                 String id = feature.getAttribute(17) + "," + feature.getAttribute(19) + "," + feature.getAttribute(5);
                 System.out.println(id);
@@ -482,6 +502,7 @@ public class MatrixGenerator {
                 cityGeometries.put(id, g);
 
                 double pop = 0;
+                // attribute 83 to 88 are populations from 1990 to 2015
                 for (int j=83; j<=88; j++){
                     if ((Double)feature.getAttribute(j)!=0){
                         pop = Math.max(pop,(Double)feature.getAttribute(j));
@@ -500,10 +521,13 @@ public class MatrixGenerator {
 
         final List<Geometry> citiesList = new ArrayList<Geometry>();
         citiesList.addAll(citiesMap.values());
+
+        //distances between cities and significant geometries
         final float[][] citiesDistanceMatrix = generateUnbalancedDistanceMatrix(citiesList);
+
+        //distances between significant geometries
         final float[][] significantDistanceMatrix = generateDistanceMatrix().matrix;
         System.out.println("Finished generating distance matrices");
-
 
         ParallelForEach.loop(citiesMap.keySet(), new Procedure<String>() {
             @Override
@@ -513,18 +537,12 @@ public class MatrixGenerator {
                     Set<Integer> set = dm.getGraphDistance( geometries, k, maxTopoDistance, significantDistanceMatrix,citiesDistanceMatrix[citiesList.indexOf(citiesMap.get(city))]);
                     result.put(city,set);
                     System.out.println(city+": "+set.size());
-//                    for (Integer i : set){
-//                        System.out.print(i + "\t");
-//                    }
-//                    System.out.println();
-
                 } catch (DaoException e){
                     e.printStackTrace();
                 }
                 System.out.println("Processed city "+city);
             }
         });
-
         return result;
     }
 
@@ -550,7 +568,7 @@ public class MatrixGenerator {
                             try {
                                 distance = (float) (DefaultEllipsoid.WGS84.orthodromicDistance(point1.getX(), point1.getY(), point2.getX(), point2.getY()) / 1000);
                             } catch (ArithmeticException e2) {
-//                        e2.printStackTrace();
+                                //set default distance to be 20000 if 2 points are approximately opposite
                                 distance = 20000;
                             }
                         }
@@ -562,11 +580,9 @@ public class MatrixGenerator {
             } catch (NullPointerException e){
                 System.out.println("no geometry for point "+pageHitList.get(i));
             }
-
         }
         return matrix;
     }
-
 
     public void createNeighborFile(Map<String, Set<Integer>> map){
 
@@ -586,7 +602,6 @@ public class MatrixGenerator {
         catch(IOException e){
             e.printStackTrace();
         }
-
     }
 
     public Map<String,Set<Integer>> loadNeighborFile(File file){
@@ -610,12 +625,13 @@ public class MatrixGenerator {
         catch(IOException e){
             e.printStackTrace();
         }
-
         return result;
     }
 
     public List<Set<Integer>> generateSimulatedTurkers(Map<String,Set<Integer>> neighbors, Map<String,Double> citiesPopulation, int numTurkers){
         List<Set<Integer>> result = new ArrayList<Set<Integer>>();
+
+        //if population of a city is not available, set it to small.
         double small = 10;
 
         Map<String,Double> countryPopulation = new HashMap<String, Double>();
@@ -677,12 +693,61 @@ public class MatrixGenerator {
         // generate turkers
         for (int i = 0; i< numTurkers; i++){
             String city = randomCollection.next();
-            System.out.println(city+" "+cityPopulations.get(city));
+            System.out.println(i+" "+city+" "+cityPopulations.get(city));
             result.add(neighbors.get(city));
         }
         return result;
     }
 
+    public void analyzeQuestionPairs(Set<SpatialConceptPair> spatialConceptPairs, Configurator c) throws ConfigurationException {
+        InstanceOfExtractor ioe = new InstanceOfExtractor(c);
+        ioe.loadScaleIds();
+        int[][][] bucketCounts = new int[InstanceOfExtractor.NUM_SCALES][InstanceOfExtractor.NUM_SCALES][6];
+        for (SpatialConceptPair pair: spatialConceptPairs){
+            SpatialConcept concept1 = pair.getFirstConcept();
+            SpatialConcept concept2 = pair.getSecondConcept();
+            int id1 = concept1.getUniversalID();
+            int id2 = concept2.getUniversalID();
+            try {
+                if (pair.getGraphDistance()<=4) {
+                    bucketCounts[ioe.getScale(id1)][ioe.getScale(id2)][(int) pair.getGraphDistance()]++;
+                } else {
+                    bucketCounts[ioe.getScale(id1)][ioe.getScale(id2)][5]++;
+                }
+            } catch (NullPointerException e){
+                System.out.println(id1+" "+id2+" cannot find scale");
+            }
+        }
+        for (int i = 0; i<InstanceOfExtractor.NUM_SCALES;i++){
+            for (int j = 0; j<InstanceOfExtractor.NUM_SCALES;j++){
+                for (int k = 0; k< 6; k++) {
+                    System.out.println(ioe.fileNames[i] + "\t" + ioe.fileNames[j] + "\t" + k+"\t"+bucketCounts[i][j][k]);
+                }
+            }
+        }
+        for (int i = 0; i<InstanceOfExtractor.NUM_SCALES;i++){
+            for (int j = 0; j<InstanceOfExtractor.NUM_SCALES;j++) {
+                int current = 0;
+                for (int k = 0; k< 6; k++) {
+                    current += bucketCounts[i][j][k];
+                }
+                System.out.print(current + "\t");
+            }
+            System.out.println();
+        }
+        for (int i = 0; i<6;i++){
+            int current = 0;
+            for (int j = 0; j<InstanceOfExtractor.NUM_SCALES;j++){
+                for (int k = 0; k< InstanceOfExtractor.NUM_SCALES; k++) {
+                    current += bucketCounts[j][k][i];
+                }
+            }
+            System.out.println(current+" pairs have distance "+i);
+        }
+
+    }
+
+    // random with weights
     private class RandomCollection<E> {
         private final NavigableMap<Double, E> map = new TreeMap<Double, E>();
         private final Random random;
