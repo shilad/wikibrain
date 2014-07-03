@@ -5,10 +5,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.spatial.cookbook.tflevaluate.InstanceOfExtractor;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by harpa003 on 6/27/14.
@@ -50,8 +47,8 @@ public class GenerateNewSpatialPairs {
         }
     }
 
-    public ArrayList<SpatialConceptPair> kkGenerateSpatialPairs(List<SpatialConceptPair> allPreviousQList){
-        ArrayList<SpatialConceptPair> toReturn= new ArrayList<SpatialConceptPair>();
+    public Set<SpatialConceptPair> kkGenerateSpatialPairs(Set<SpatialConceptPair> allPreviousQList){
+        Set<SpatialConceptPair> toReturn= new HashSet<SpatialConceptPair>();
         for (int i = 0; i < knownIds.size()-1; i++) {
             for (int j = i+1; j < knownIds.size() ; j++) {
                 int idOne = knownIds.get(i);
@@ -59,7 +56,7 @@ public class GenerateNewSpatialPairs {
                 int idTwo = knownIds.get(j);
                 SpatialConcept two = new SpatialConcept(idTwo, idsStringMap.get(idTwo));
                 SpatialConceptPair pair = new SpatialConceptPair(one, two);
-                if (!allPreviousQList.contains(pair) && !toReturn.contains(pair) && checkScale(one) && checkScale(two)) {
+                if ((!allPreviousQList.contains(pair)) && !toReturn.contains(pair) && checkScale(one) && checkScale(two)) {
                      setProperties(pair);
                      toReturn.add(pair);
                 }
@@ -93,8 +90,8 @@ public class GenerateNewSpatialPairs {
         return true;
     }
 
-    public ArrayList<SpatialConceptPair> kuGenerateSpatialPairs(int numbOfPairs, List<SpatialConceptPair> allPreviousQList){
-        ArrayList<SpatialConceptPair> toReturn= new ArrayList<SpatialConceptPair>();
+    public Set<SpatialConceptPair> kuGenerateSpatialPairs(int numbOfPairs, Set<SpatialConceptPair> allPreviousQList){
+        Set<SpatialConceptPair> toReturn= new HashSet<SpatialConceptPair>();
         for (int i = 0; i < numbOfPairs ; i++) {
             int rand1= (int) (Math.random()*knownIds.size());
             int rand2= (int) (Math.random()*unknownIds.size());
@@ -115,8 +112,8 @@ public class GenerateNewSpatialPairs {
         return toReturn;
     }
 
-    public ArrayList<SpatialConceptPair> uuGenerateSpatialPairs(int numbOfPairs, List<SpatialConceptPair> allPreviousQList){
-        ArrayList<SpatialConceptPair> toReturn= new ArrayList<SpatialConceptPair>();
+    public Set<SpatialConceptPair> uuGenerateSpatialPairs(int numbOfPairs, Set<SpatialConceptPair> allPreviousQList){
+        Set<SpatialConceptPair> toReturn= new HashSet<SpatialConceptPair>();
         for (int i = 0; i < numbOfPairs ; i++) {
             int rand1= (int) (Math.random()*unknownIds.size());
             int rand2= (int) (Math.random()*unknownIds.size());

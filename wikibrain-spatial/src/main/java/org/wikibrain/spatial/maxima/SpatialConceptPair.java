@@ -134,6 +134,6 @@ public class SpatialConceptPair {
 
     @Override
     public String toString() {
-        return combinedTitle;
+        return firstConcept.getTitle() + "\t::\t" + secondConcept.getTitle();
     }
 }
