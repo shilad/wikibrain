@@ -138,7 +138,7 @@ public class ESAGenerator implements VectorGenerator {
         }
         SRResultList top = lb.getTop();
         if (top.numDocs() == 0) {
-            return Arrays.asList(new Explanation("? and ? share no links", page1, page2));
+            return Arrays.asList(new Explanation("? and ? share no articles", page1, page2));
         }
         top.sortDescending();
 
