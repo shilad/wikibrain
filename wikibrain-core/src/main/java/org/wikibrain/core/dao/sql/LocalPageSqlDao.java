@@ -306,7 +306,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                 else{
                     map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
                 }
-                if (map.size() % 10000 == 0) {
+                if (map.size() % 500000 == 0) {
                     LOG.info("built title cache entry " + map.size() + " of " + n);
                 }
             }

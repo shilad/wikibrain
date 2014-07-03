@@ -115,13 +115,10 @@ public class ConceptLoader {
         String algorithm = cmd.getOptionValue("n", null);
 
         UniversalPageDao dao = conf.get(UniversalPageDao.class, algorithm);
-        if (algorithm == null) {
-            algorithm = (env.getLanguages().size() <= 1) ? "monolingual" : "purewikidata";
-        }
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
         // TODO: handle checking of purewikidata more robustly
-        if (algorithm.equals("purewikidata")) {
+        if (algorithm == null || algorithm.equals("purewikidata")) {
             downloadWikidataLinks(env.getConfiguration());
         }
 

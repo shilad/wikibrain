@@ -59,7 +59,7 @@ public class RedirectLoader {
            Title pTitle = new Title(p.getRedirectTitle(), LanguageInfo.getByLanguage(language));
            redirectIdsToPageIds.put(p.getLocalId(),
                     localPages.getIdByTitle(pTitle.getCanonicalTitle(), language, pTitle.getNamespace()));
-           if(i%10000==0)
+           if(i%100000==0)
                LOG.info("loading redirect # " + i);
             i++;
         }
