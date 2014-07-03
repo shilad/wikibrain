@@ -32,9 +32,8 @@ public class ConceptPairBalancer {
                 for (SpatialConceptPair pair : previous) {
                     addToTotal(pair);
                 }
+                absoluteTotal = previous.size();
             }
-
-            absoluteTotal = previous.size();
         }
 
         public void addToTotal(SpatialConceptPair pair) {

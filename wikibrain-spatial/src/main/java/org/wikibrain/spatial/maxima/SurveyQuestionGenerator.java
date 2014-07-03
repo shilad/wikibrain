@@ -38,11 +38,13 @@ public class SurveyQuestionGenerator {
     float[][] srMatrix;
     public float[][] graphMatrix; //TODO change back to private
 
-    public List<SpatialConceptPair> allPreviousQList; //the list of previously asked questions and never changes but is added to
+    public Set<SpatialConceptPair> allPreviousQList;
+//    public List<SpatialConceptPair> allPreviousQList; //the list of previously asked questions and never changes but is added to
 
 
     public SurveyQuestionGenerator() {
-        allPreviousQList= new ArrayList<SpatialConceptPair>();
+        allPreviousQList= new HashSet<SpatialConceptPair>();
+//        allPreviousQList= new ArrayList<SpatialConceptPair>();
         try{
             buildIdsStringMap();
             readInIdToScaleInfo();
@@ -123,11 +125,6 @@ public class SurveyQuestionGenerator {
         return returnPairs;
     }
 
-    private int calcNewCount(int x) {
-        return (int) (Math.log((x + 1400) / 1400) * 1387.7);
-    }
-
-
     /**
      * Puts the pair on the appropriate list given its type, increases the number of times it's been asked, and adds it to the previous Q list
      * @param pairList
@@ -176,7 +173,6 @@ public class SurveyQuestionGenerator {
      * Adds to the returned list a list of uu concept pairs both pulled from the previously used questions and newly created
      */
     private void getCreatedUUPairs(GenerateNewSpatialPairs generator, ConceptPairBalancer balancer, int numbOfQuestionsSoFar, VariablesWrapper v) {
-        int numbFromOldList = numbOfQuestionsSoFar - v.numbOfNewAllowed;
         int numbRemaining= 50-v.kuReturnList.size()-v.kkReturnList.size();
         putOnQuestionsOnList(balancer.choosePairs(v.uuPreviousQList,v.uuReturnList,numbRemaining),KnowledgeType.UU, v);
         numbRemaining=numbRemaining-v.uuReturnList.size();
@@ -196,7 +192,6 @@ public class SurveyQuestionGenerator {
         public List<SpatialConceptPair> kuReturnList;
         public List<SpatialConceptPair> kkReturnList;
         public TIntSet knownIdSet;
-        int numbOfNewAllowed;
 
         VariablesWrapper(List<Integer> knownIds, int responseNumb){
             uuPreviousQList=new ArrayList<SpatialConceptPair>();
@@ -237,9 +232,8 @@ public class SurveyQuestionGenerator {
         }
 
         private void setTargets(int responseNumb){
-            kkTarget=(int) (30-(.02*responseNumb));
-            uuTarget=40-kkTarget;
-            numbOfNewAllowed= (int) (30-.0008*responseNumb);
+            kkTarget=(int) (20-(.01*responseNumb));
+            uuTarget=30-kkTarget;
         }
 
         /**
