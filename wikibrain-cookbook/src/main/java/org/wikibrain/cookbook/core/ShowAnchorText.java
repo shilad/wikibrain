@@ -6,10 +6,7 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.DaoFilter;
-import org.wikibrain.core.dao.LocalLinkDao;
-import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.LocalPage;
@@ -29,19 +26,7 @@ public class ShowAnchorText {
     public static void main(String args[]) throws ConfigurationException, DaoException {
         // The following ten-line dance to get an env is awkward and repeated over and over.
         // Figure out a good way to consolidate it.
-        Options options = new Options();
-        EnvBuilder.addStandardOptions(options);
-
-        CommandLineParser parser = new PosixParser();
-        CommandLine cmd;
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.err.println("Invalid option usage: " + e.getMessage());
-            new HelpFormatter().printHelp("DumpLoader", options);
-            return;
-        }
-        Env env = new EnvBuilder(cmd).build();
+        Env env = EnvBuilder.envFromArgs(args);
 
         Configurator configurator = env.getConfigurator();
         LocalPageDao lpDao = configurator.get(LocalPageDao.class);
