@@ -1,10 +1,7 @@
 package org.wikibrain.core.dao.sql;
 
 import org.apache.log4j.Logger;
-import org.jooq.ConnectionProvider;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.Table;
+import org.jooq.*;
 import org.jooq.impl.DefaultConnectionProvider;
 import org.jooq.impl.TableImpl;
 import org.wikibrain.core.dao.DaoException;
@@ -126,6 +123,13 @@ public class JooqUtils {
     }
 
     public static boolean tableExists(DSLContext context, Table table) {
-        return context.meta().getTables().contains(table);
+        for (Schema schema : context.meta().getSchemas()) {
+            for (Table t : schema.getTables()) {
+                if (t.getName().equalsIgnoreCase(table.getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
