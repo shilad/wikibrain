@@ -6,11 +6,15 @@ import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpThreadUtils;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataFilter;
 import org.wikibrain.wikidata.WikidataSqlDao;
 import org.wikibrain.wikidata.WikidataStatement;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,32 +41,32 @@ public abstract class WikidataLayerLoader {
 
     protected abstract WikidataFilter getWikidataFilter();
 
-    public final void loadData(LanguageSet langs) throws WikiBrainException {
+    public final void loadData(final LanguageSet langs) throws WikiBrainException {
 
         try {
-
-            int matches = 0;
-            int count = 0;
-            ((WikidataSqlDao)wdDao).setFetchSize(5);
+            final AtomicInteger matches = new AtomicInteger();
+            final AtomicInteger count = new AtomicInteger();
             Iterable<WikidataStatement> statements = wdDao.get(getWikidataFilter());
-            for (WikidataStatement statement : statements){
-
-                UniversalPage uPage = wdDao.getUniversalPage(statement.getItem().getId());
-                if (uPage != null && uPage.isInLanguageSet(langs, false)){
-                    matches++;
-                    try {
-                        storeStatement(statement);
-                    } catch (Exception e) {
-                        LOG.log(Level.SEVERE, "storage of statement failed: " + statement.toString(), e);
+            ParallelForEach.iterate(statements.iterator(), WpThreadUtils.getMaxThreads(), 100, new Procedure<WikidataStatement>() {
+                @Override
+                public void call(WikidataStatement statement) throws Exception {
+                    UniversalPage uPage = wdDao.getUniversalPage(statement.getItem().getId());
+                    if (uPage != null && uPage.isInLanguageSet(langs, false)){
+                        matches.incrementAndGet();
+                        try {
+                            storeStatement(statement);
+                        } catch (Exception e) {
+                            LOG.log(Level.SEVERE, "storage of statement failed: " + statement.toString(), e);
+                        }
                     }
-                }
 
-                count++;
-                if (count % 10000 == 0){
-                    LOG.log(Level.INFO, "Matched " + matches + " out of " + count + " statements from " + this.getClass().getName());
-                }
+                    count.incrementAndGet();
+                    if (count.get() % 10000 == 0){
+                        LOG.log(Level.INFO, "Matched " + matches + " out of " + count + " statements from " + this.getClass().getName());
+                    }
 
-            }
+                }
+            }, Integer.MAX_VALUE);
 
         }catch(DaoException e){
             throw new WikiBrainException(e);
