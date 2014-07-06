@@ -30,10 +30,10 @@ More details on installation are described in the [system requirements]({{ site.
 ## Import Simple English
 
 Next, you'll import Simple English Wikipedia.
-Run PipelineLoader which downloads, parses, and imports the data into an embedded [h2 database](http://www.h2database.com/html/main.html) (you can use Postgresql instead by changing the [configuration file]({{ site.url }}/tutorial/configuration.html)).
-The details for running PipelineLoader are as follows:
+Run the pipeline loader which downloads, parses, and imports the data into an embedded [h2 database](http://www.h2database.com/html/main.html) (you can use Postgresql instead by changing the [configuration file]({{ site.url }}/tutorial/configuration.html)).
+The details for running the loader are as follows:
  
- * main class: `org.wikibrain.dao.loader.PipelineLoader`
+ * main class: `org.wikibrain.loader.pipeline.Main`
  * JVM args: `-Xmx4G`
  * program args: `-l simple`
 
