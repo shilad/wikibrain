@@ -1,18 +1,7 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
-import gnu.trove.TCollections;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TIntHashSet;
-import gnu.trove.set.hash.TLongHashSet;
-import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.wikibrain.conf.ConfigurationException;
-import org.wikibrain.conf.Configurator;
-import org.wikibrain.conf.DefaultOptionBuilder;
-import org.wikibrain.core.cmd.Env;
-import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.cmd.FileMatcher;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
@@ -21,16 +10,11 @@ import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.parser.sql.MySqlDumpParser;
-import org.wikibrain.utils.AtomicLongSet;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;

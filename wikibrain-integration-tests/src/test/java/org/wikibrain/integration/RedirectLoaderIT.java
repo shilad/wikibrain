@@ -9,7 +9,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
-import org.wikibrain.dao.load.RedirectLoader;
+import org.wikibrain.loader.RedirectLoader;
 
 import java.sql.SQLException;
 

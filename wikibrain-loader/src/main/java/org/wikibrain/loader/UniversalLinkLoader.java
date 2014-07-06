@@ -1,4 +1,4 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;

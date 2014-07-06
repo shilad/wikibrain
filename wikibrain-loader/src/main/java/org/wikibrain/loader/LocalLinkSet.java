@@ -1,9 +1,8 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.wikibrain.core.model.LocalLink;
-import org.wikibrain.parser.wiki.LocalLinkVisitor;
 
 import java.util.Iterator;
 import java.util.Set;

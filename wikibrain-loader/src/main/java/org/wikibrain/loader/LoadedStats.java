@@ -1,4 +1,4 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wikibrain.conf.ConfigurationException;
@@ -11,7 +11,6 @@ import org.wikibrain.core.model.MetaInfo;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
 /**

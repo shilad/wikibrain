@@ -1,4 +1,4 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
@@ -19,8 +19,6 @@ import org.wikibrain.core.model.RawPage;
 import org.wikibrain.lucene.LuceneIndexer;
 import org.wikibrain.lucene.LuceneOptions;
 import org.wikibrain.lucene.LuceneSearcher;
-import org.wikibrain.utils.ParallelForEach;
-import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.IOException;

@@ -5,13 +5,10 @@ import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.*;
-import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.core.model.LocalCategory;
 import org.wikibrain.core.model.LocalCategoryMember;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.MetaInfo;
-import org.wikibrain.dao.load.DumpLoader;
-import org.wikibrain.dao.load.WikiTextLoader;
+import org.wikibrain.loader.WikiTextLoader;
 
 import java.io.IOException;
 import java.sql.SQLException;
