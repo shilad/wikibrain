@@ -34,6 +34,20 @@ These features are explained in more detail below.
 ## Stage selection
 
 
-| stage      | dependsOn     | class      | description |
-|------------|---------------|------------|-------------|
-| fetchlinks | nothing       | org.wikibrain.download.RequestedLinkGetter | Downloads a list of available data files in the specified language. |
+| on | stage      | dependsOn     |  description |
+|----|------------|---------------|--------------|
+| Y | fetchlinks | nothing       | Downloads a list of available data files in the requested languages. |
+| Y | download   | fetchlinks    | Downloads any new data files in the requested languages. |
+| Y | dumploader | download      | Loads articles and raw pages from the dump files. |
+| Y | redirects  | dumploader    | Loads redirect mapping. |
+| Y | wikitext   | redirects     | Loads links and categories. |
+| Y | lucene     | wikitext      | Builds lucene full-text search indexes. |
+| Y | phrases    | wikitext      | Builds and loads phrase to page disambiguation mappings. |
+| ? | concepts   | redirects     | Builds and loads mapping from language-specific articles to universal concepts. |
+| N | universal  | concepts, wikitext | Builds "universal" links. |
+| N | wikidata   | concepts      | Downloads and loads wikidata facts for the requested languages. |
+| N | spatial    | wikidata      | Installs geospatial data. |
+| N | sr         | wikitext, phrases, lucene | Builds semantic relatedness models. |
+
+
+
