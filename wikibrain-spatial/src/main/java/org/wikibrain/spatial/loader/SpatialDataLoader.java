@@ -12,28 +12,22 @@ import org.geotools.data.shapefile.dbf.DbaseFileReader;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.data.shapefile.shp.ShapefileException;
 import org.geotools.data.shapefile.shp.ShapefileReader;
-import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
 import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
-import org.wikibrain.utils.WpIOUtils;
 import org.wikibrain.wikidata.WikidataDao;
-import sun.net.www.content.text.Generic;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,13 +39,15 @@ public class SpatialDataLoader {
 
     private static final Logger LOG = Logger.getLogger(SpatialDataLoader.class.getName());
 
+    private final MetaInfoDao metaDao;
     private final SpatialDataDao spatialDataDao;
     private final SpatialDataFolder spatialDataFolder;
     private final WikidataDao wdDao;
     private final PhraseAnalyzer analyzer;
     private final LanguageSet langs;
 
-    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs) {
+    public SpatialDataLoader(MetaInfoDao metaDao, SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs) {
+        this.metaDao = metaDao;
         this.spatialDataDao = spatialDataDao;
         this.spatialDataFolder = spatialDataFolder;
         this.wdDao = wdDao;
@@ -133,6 +129,7 @@ public class SpatialDataLoader {
 
             shpFile = new ShpFiles(struct.getDataFile().getAbsolutePath());
 
+            // 4326 is the World Geodetic Sysetm http://en.wikipedia.org/wiki/World_Geodetic_System
             shpReader = new ShapefileReader(shpFile, true, true, new GeometryFactory(new PrecisionModel(), 4326));
             dbfReader = new DbaseFileReader(shpFile, false, Charset.forName("UTF-8"));
 
@@ -151,29 +148,31 @@ public class SpatialDataLoader {
                 curGeometry = (Geometry)shpReader.nextRecord().shape();
                 dbfReader.read();
 
-                int i = 0;
-
                 boolean found = false;
-                while(i < numDbfFields && !found){
+
+                for (int i = 0; i < numDbfFields && !found; i++) {
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
                     Integer itemId;
                     try {
-                    itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
-                    }
-                    catch (Exception e){
-                        i++;
+                            itemId = ((IDAttributeHandler.TitleAttributeHandler) attrHandler).getWikidataItemIdForId(dbfReader.readField(i));
+                    } catch (NullPointerException e){
+                        if (i!= 1)
+                            e.printStackTrace();
                         continue;
-
+                    } catch (Exception e){
+                        System.out.println("exception which is not nullpointer");
+                        e.printStackTrace();
+                        continue;
                     }
                     if (itemId != null && spatialDataDao.getGeometry(itemId, struct.getLayerName(), struct.getRefSysName()) == null){
                         spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
+                        metaDao.incrementRecords(Geometry.class);
                         found = true;
                         foundGeomCount++;
                         if (foundGeomCount % 10 == 0){
                             LOG.log(Level.INFO, "Matched " + foundGeomCount + " geometries in layer '" + struct.getLayerName() + "' (" + struct.getRefSysName() + ")");
                         }
                     }
-                    i++;
                 }
 
                 if (!found) missedGeomCount++;
@@ -205,7 +204,7 @@ public class SpatialDataLoader {
 
             // this should eventually be moved into a config file or parameters of the parse
             List<WikidataLayerLoader> layerLoaders = Lists.newArrayList();
-            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
+            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(metaDao, wdDao, spatialDataDao));
 //            layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
 
             for (WikidataLayerLoader layerLoader : layerLoaders) {
@@ -342,6 +341,7 @@ public class SpatialDataLoader {
 
             String phraseAnalyzerName = cmd.getOptionValue("p", "titleredirect"); // add to docs that this has to be
             PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
+            MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
             String spatialDataFolderPath = cmd.getOptionValue("f", null);
             File spatialDataFolderFile;
@@ -354,7 +354,7 @@ public class SpatialDataLoader {
 
             WikidataDao wdDao = conf.get(WikidataDao.class);
             SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
-            SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
+            SpatialDataLoader loader = new SpatialDataLoader(metaDao, spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages());
 
 //            String stepsValue = cmd.getOptionValue("s", "wikidata,gadm,download,exogenous"); // GADM temporarily disabled while we do new mappings
 
