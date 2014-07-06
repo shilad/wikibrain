@@ -34,6 +34,6 @@ These features are explained in more detail below.
 ## Stage selection
 
 
-| stage      | dependsOn     | description |
-|------------|---------------|-------------|
-| fetchlinks | nothing       | Downloads a list of available data files in the specified language. |
+| stage      | dependsOn     | class      | description |
+|------------|---------------|------------|-------------|
+| fetchlinks | nothing       | org.wikibrain.download.RequestedLinkGetter | Downloads a list of available data files in the specified language. |
