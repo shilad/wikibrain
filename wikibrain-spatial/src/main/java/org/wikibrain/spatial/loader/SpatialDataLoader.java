@@ -56,7 +56,7 @@ public class SpatialDataLoader {
     private final PhraseAnalyzer analyzer;
     private final LanguageSet langs;
 
-    public SpatialDataLoader(MetaInfoDao metaDao, SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs) {
+    public SpatialDataLoader(MetaInfoDao metaDao, SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs, LocalPageDao lpDao, UniversalPageDao upDao) {
         this.metaDao = metaDao;
         this.spatialDataDao = spatialDataDao;
         this.spatialDataFolder = spatialDataFolder;
@@ -369,7 +369,7 @@ public class SpatialDataLoader {
             SpatialDataDao spatialDataDao = conf.get(SpatialDataDao.class);
             LocalPageDao localPageDao = conf.get(LocalPageDao.class);
             UniversalPageDao universalPageDao = conf.get(UniversalPageDao.class);
-            SpatialDataLoader loader = new SpatialDataLoader(spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages(),localPageDao, universalPageDao );
+            SpatialDataLoader loader = new SpatialDataLoader(metaDao, spatialDataDao, wdDao, phraseAnalyzer, spatialDataFolder, env.getLanguages(),localPageDao, universalPageDao );
 
 //            String stepsValue = cmd.getOptionValue("s", "wikidata,gadm,download,exogenous"); // GADM temporarily disabled while we do new mappings
 
