@@ -21,6 +21,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
+import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.phrases.PhraseAnalyzer;
@@ -46,6 +47,7 @@ public class SpatialDataLoader {
 
     private static final Logger LOG = Logger.getLogger(SpatialDataLoader.class.getName());
 
+    private final MetaInfoDao metaDao;
     private final SpatialDataDao spatialDataDao;
     private final SpatialDataFolder spatialDataFolder;
     private final WikidataDao wdDao;
@@ -54,7 +56,8 @@ public class SpatialDataLoader {
     private final PhraseAnalyzer analyzer;
     private final LanguageSet langs;
 
-    public SpatialDataLoader(SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs, LocalPageDao lpDao, UniversalPageDao upDao) {
+    public SpatialDataLoader(MetaInfoDao metaDao, SpatialDataDao spatialDataDao, WikidataDao wdDao, PhraseAnalyzer analyzer, SpatialDataFolder spatialDataFolder, LanguageSet langs) {
+        this.metaDao = metaDao;
         this.spatialDataDao = spatialDataDao;
         this.spatialDataFolder = spatialDataFolder;
         this.wdDao = wdDao;
@@ -152,7 +155,6 @@ public class SpatialDataLoader {
             int foundGeomCount = 0;
             int missedGeomCount = 0;
 
-
             while(shpReader.hasNext()){
 
                 curGeometry = (Geometry)shpReader.nextRecord().shape();
@@ -160,18 +162,11 @@ public class SpatialDataLoader {
 
                 boolean found = false;
 
-                for (int i = 0; i<numDbfFields;i++){
-                    System.out.println(i+" "+dbfReader.readField(i));
-                }
-
                 for (int i = 0; i < numDbfFields && !found; i++) {
                     IDAttributeHandler attrHandler = attrHandlers.get(i);
                     Integer itemId;
                     try {
-//                            System.out.println(dbfReader.readField(i));
-                            String string = (String) dbfReader.readField(1);
-                            itemId = ((IDAttributeHandler.TitleAttributeHandler) attrHandler).getWikidataItemIdForId(dbfReader.readField(i),string,lpDao, upDao);
-//                            itemId = attrHandler.getWikidataItemIdForId(dbfReader.readField(i));
+                            itemId = ((IDAttributeHandler.TitleAttributeHandler) attrHandler).getWikidataItemIdForId(dbfReader.readField(i));
                     } catch (NullPointerException e){
                         if (i!= 1)
                             e.printStackTrace();
@@ -183,12 +178,14 @@ public class SpatialDataLoader {
                     }
                     if (itemId != null && spatialDataDao.getGeometry(itemId, struct.getLayerName(), struct.getRefSysName()) == null){
                         spatialDataDao.saveGeometry(itemId, struct.getLayerName(), struct.getRefSysName(), curGeometry);
+                        metaDao.incrementRecords(Geometry.class);
                         found = true;
                         foundGeomCount++;
                         if (foundGeomCount % 10 == 0){
                             LOG.log(Level.INFO, "Matched " + foundGeomCount + " geometries in layer '" + struct.getLayerName() + "' (" + struct.getRefSysName() + ")");
                         }
                     }
+                    i++;
                 }
 
                 if (!found) missedGeomCount++;
@@ -220,7 +217,7 @@ public class SpatialDataLoader {
 
             // this should eventually be moved into a config file or parameters of the parse
             List<WikidataLayerLoader> layerLoaders = Lists.newArrayList();
-            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(wdDao, spatialDataDao));
+            layerLoaders.add(new EarthBasicCoordinatesWikidataLayerLoader(metaDao, wdDao, spatialDataDao));
 //            layerLoaders.add(new EarthInstanceOfCoordinatesLayerLoader(wdDao, spatialDataDao));
 
             for (WikidataLayerLoader layerLoader : layerLoaders) {
@@ -256,7 +253,7 @@ public class SpatialDataLoader {
 //            }
 //        }catch(DaoException e){
 //            throw new WikiBrainException(e);
-//        }refSysName
+//        }
 //
 //    }
 
@@ -300,7 +297,7 @@ public class SpatialDataLoader {
 //        }catch(Exception e){
 //            throw new WikiBrainException(e);
 //        }
-//refSysName
+//
 //    }
 
 
@@ -357,6 +354,7 @@ public class SpatialDataLoader {
 
             String phraseAnalyzerName = cmd.getOptionValue("p", "titleredirect"); // add to docs that this has to be
             PhraseAnalyzer phraseAnalyzer = conf.get(PhraseAnalyzer.class, phraseAnalyzerName);
+            MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
 
             String spatialDataFolderPath = cmd.getOptionValue("f", null);
             File spatialDataFolderFile;

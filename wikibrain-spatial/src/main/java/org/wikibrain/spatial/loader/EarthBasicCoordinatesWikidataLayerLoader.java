@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataFilter;
@@ -28,9 +29,11 @@ public class EarthBasicCoordinatesWikidataLayerLoader extends WikidataLayerLoade
     private static final Logger LOG = Logger.getLogger(EarthBasicCoordinatesWikidataLayerLoader.class.getName());
 
     private static final Pattern p = Pattern.compile("longitude=(.+?), latitude=(.+?), globe=(.+?)");
+    private final MetaInfoDao metaDao;
 
-    public EarthBasicCoordinatesWikidataLayerLoader(WikidataDao wdDao, SpatialDataDao spatialDao) {
+    public EarthBasicCoordinatesWikidataLayerLoader(MetaInfoDao metaDao, WikidataDao wdDao, SpatialDataDao spatialDao) {
         super(wdDao, spatialDao);
+        this.metaDao = metaDao;
     }
 
     protected static Geometry jsonToGeometry(JsonObject json){
@@ -84,6 +87,7 @@ public class EarthBasicCoordinatesWikidataLayerLoader extends WikidataLayerLoade
         Geometry g = jsonToGeometry(statement.getValue().getJsonValue().getAsJsonObject());
         if (g != null && spatialDao.getGeometry(itemId, LAYER_NAME, EARTH_REF_SYS_NAME) == null) {
             spatialDao.saveGeometry(itemId, LAYER_NAME, EARTH_REF_SYS_NAME,  g);
+            metaDao.incrementRecords(Geometry.class);
             return true;
         }else{
             return false;

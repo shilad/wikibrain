@@ -6,10 +6,7 @@ import org.wikibrain.core.model.MetaInfo;
 import org.wikibrain.utils.JvmUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
 * @author Shilad Sen
@@ -21,20 +18,14 @@ public class PipelineStage {
     private final String name;
 
     /**
-     * Group this stage belongs to (e.g. "core", "spatial", etc.)
-     */
-    private final String group;
-
-    /**
      * The class whose main method should be run for this stage
      */
     private final Class klass;
 
     /**
      * Stages required to be run before this stage.
-     * TODO: make this a list.
      */
-    PipelineStage dependsOn = null;
+    private List<PipelineStage> dependsOn = new ArrayList<PipelineStage>();
 
     /**
      * (One of) the class that is loaded during this stage.
@@ -46,8 +37,10 @@ public class PipelineStage {
      */
     private final String extraArgs[];
 
-    // User overrides; takes precidence over extraArgs, etc.
-    private Boolean runOverride;
+    // Explicit user request, if it exists
+    private Boolean shouldRun;
+
+    // Explicit arguments requested by user;  takes precidence over extraArgs.
     private String [] argsOverride;
 
     /**
@@ -63,59 +56,47 @@ public class PipelineStage {
     public PipelineStage(Config config, Collection<PipelineStage> previousStages, Map<String, MetaInfo> loadedInfo) throws ClassNotFoundException {
         this.name = config.getString("name");
         this.klass = Class.forName(config.getString("class"));
-        this.group = config.getString("group");
         this.extraArgs = config.getStringList("extraArgs").toArray(new String[0]);
         this.loadsClass =  config.hasPath("loadsClass") ? config.getString("loadsClass") : null;
         if (config.hasPath("dependsOnStage")) {
-            String n = config.getString("dependsOnStage");
-            for (PipelineStage s : previousStages) {
-                if (s.name.equalsIgnoreCase(n)) {
-                    dependsOn = s;
-                    break;
+            Object obj = config.getAnyRef("dependsOnStage");
+            if (obj instanceof String) {
+                dependsOn.add(getStage(previousStages, (String)obj));
+            } else if (obj instanceof List) {
+                for (String s : (List<String>)obj) {
+                    dependsOn.add(getStage(previousStages, s));
                 }
-            }
-            if (dependsOn == null) {
-                throw new IllegalArgumentException("No stage found with name '" + n + "'");
+            } else {
+                throw new IllegalArgumentException("Invalid dependsOn value for pipeline stage " + name + ": " + obj);
             }
         }
         this.loadedInfo = loadsClass == null ? null : loadedInfo.get(loadsClass);
     }
 
     public void setOverrideOptions(Boolean run, String args[]) {
-        this.runOverride = run;
+        this.shouldRun = run;
         this.argsOverride = args;
     }
 
-    public boolean isNeeded() {
-        if (hasBeenRun()) {
+    public boolean isNeeded(boolean forceRerun) {
+        if (hasBeenRun()) {                             // if run this execution cycle, skip
             return false;
-        } else if (runOverride != null) {
-            return runOverride;
-        } else {
+        } else if (shouldRun != null && !shouldRun) {   // if user said not to run, skip
+            return false;
+        } else if (forceRerun) {                        // if we should rerun everything, rerun
+            return true;
+        } else {                                        // check to see if the class is loaded
             return loadedInfo == null || loadedInfo.getNumRecords() == 0;
         }
     }
 
-    public boolean isNeededAtTopLevel(List<String> groups, boolean forceRerun) {
-        if (hasBeenRun()) {
-            return false;
-        } else if (runOverride != null) {
-            return runOverride;
-        } else if (groups.contains(group)) {
-            return forceRerun || loadedInfo == null || loadedInfo.getNumRecords() == 0;
-        } else {
-            return false;
+    public void runWithDependenciesIfNeeded(String [] cmdLineArgs, boolean forceRerun) throws IOException, InterruptedException {
+        for (PipelineStage stage : dependsOn) {
+            stage.runWithDependenciesIfNeeded(cmdLineArgs, forceRerun);
         }
-    }
-
-    public void runWithDependencies(String [] cmdLineArgs) throws IOException, InterruptedException {
-        if (hasBeenRun) {
-            return;
+        if (isNeeded(forceRerun)) {
+            run(cmdLineArgs);
         }
-        if (dependsOn != null && dependsOn.isNeeded()) {
-            dependsOn.runWithDependencies(cmdLineArgs);
-        }
-        run(cmdLineArgs);
     }
 
     public void run(String [] cmdLineArgs) throws IOException, InterruptedException {
@@ -139,10 +120,6 @@ public class PipelineStage {
         return name;
     }
 
-    public String getGroup() {
-        return group;
-    }
-
     public Class getKlass() {
         return klass;
     }
@@ -151,19 +128,40 @@ public class PipelineStage {
         return hasBeenRun;
     }
 
+    public Boolean getShouldRun() {
+        return shouldRun;
+    }
+
     @Override
     public String toString() {
+        String deps = new String();
+        for (PipelineStage s : dependsOn) {
+            if (deps.length() > 0) {
+                deps += ", ";
+            }
+            deps += s;
+        }
         return "PipelineStage{" +
                 "name='" + name + '\'' +
-                ", group='" + group + '\'' +
                 ", klass=" + klass +
-                ", dependsOn=" + ((dependsOn == null) ? "null" : dependsOn.getName()) +
+                ", dependsOn=" + deps +
                 ", loadsClass='" + loadsClass + '\'' +
                 ", extraArgs=" + Arrays.toString(extraArgs) +
-                ", runOverride=" + runOverride +
+                ", shouldRun=" + shouldRun +
                 ", argsOverride=" + Arrays.toString(argsOverride) +
                 ", loadedInfo=" + loadedInfo +
                 ", hasBeenRun=" + hasBeenRun +
                 '}';
+    }
+
+
+
+    private PipelineStage getStage(Collection<PipelineStage> previousStages, String stage) {
+        for (PipelineStage s : previousStages) {
+            if (s.name.equalsIgnoreCase(stage)) {
+                return s;
+            }
+        }
+        throw new IllegalArgumentException("Unknown pipeline stage: " + stage);
     }
 }

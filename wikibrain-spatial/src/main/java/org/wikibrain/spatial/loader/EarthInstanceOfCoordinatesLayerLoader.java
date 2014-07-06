@@ -3,6 +3,7 @@ package org.wikibrain.spatial.loader;
 import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Geometry;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataFilter;
@@ -18,8 +19,8 @@ public class EarthInstanceOfCoordinatesLayerLoader extends EarthBasicCoordinates
     protected static final int INSTANCE_OF_PROPERTY_ID = 31;
     private Map<Integer, String> typeNameCache = Maps.newHashMap();
 
-    public EarthInstanceOfCoordinatesLayerLoader(WikidataDao wdDao, SpatialDataDao spatialDao) {
-        super(wdDao, spatialDao);
+    public EarthInstanceOfCoordinatesLayerLoader(MetaInfoDao metaDao, WikidataDao wdDao, SpatialDataDao spatialDao) {
+        super(metaDao, wdDao, spatialDao);
     }
 
     @Override

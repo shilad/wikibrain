@@ -358,6 +358,9 @@ public class PostGISDB {
                     // note: gist index is created automatically above
                     Index regIndex = new Index(SPATIAL_DB_NAME, "rs_layer_type", true, ITEM_ID_FIELD_NAME,LAYER_FIELD_NAME,REF_SYS_FIELD_NAME);
 
+                    Index itemIdIndex = new Index(SPATIAL_DB_NAME, "geometries_item_id", false, ITEM_ID_FIELD_NAME);
+                    store.createIndex(itemIdIndex);
+
                 }catch(Exception e){
                     throw new DaoException(e);
                 }

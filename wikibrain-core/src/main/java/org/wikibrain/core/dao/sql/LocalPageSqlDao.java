@@ -17,12 +17,16 @@ import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 /**
@@ -276,40 +280,49 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
             }
         }
         LOG.info("Building title to id cache. This will only happen once!");
-        int n = getCount(new DaoFilter());
+        final int n = getCount(new DaoFilter());
         DSLContext context = getJooq();
         try {
             Cursor<Record> cursor = context.select().
                     from(Tables.LOCAL_PAGE).
                     fetchLazy(getFetchSize());
-            TLongIntHashMap map = new TLongIntHashMap(
+            final TLongIntHashMap map = new TLongIntHashMap(
                     Constants.DEFAULT_CAPACITY,
                     Constants.DEFAULT_LOAD_FACTOR,
                     -1, -1);
-            int numRedirects = 0;
-            int numResolved = 0;
-            for (Record record : cursor){
-                long hash = Title.longHashCode(
-                        record.getValue(Tables.LOCAL_PAGE.LANG_ID),
-                        record.getValue(Tables.LOCAL_PAGE.TITLE),
-                        record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
-                if (redirectSqlDao != null && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)){
-                    numRedirects++;
-                    Integer dest = redirectSqlDao.resolveRedirect(
-                            Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID)),
-                            record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
-                    if (dest != null) {
-                        numResolved++;
-                        map.put(hash, dest);
-                    }
-                }
-                else{
-                    map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
-                }
-                if (map.size() % 10000 == 0) {
-                    LOG.info("built title cache entry " + map.size() + " of " + n);
-                }
-            }
+            final AtomicInteger numRedirects = new AtomicInteger();
+            final AtomicInteger numResolved = new AtomicInteger();
+            ParallelForEach.iterate(
+                    cursor.iterator(), WpThreadUtils.getMaxThreads(), 10000,
+                    new Procedure<Record>() {
+                        @Override
+                        public void call(Record record) throws Exception {
+                            long hash = Title.longHashCode(
+                                record.getValue(Tables.LOCAL_PAGE.LANG_ID),
+                                record.getValue(Tables.LOCAL_PAGE.TITLE),
+                                record.getValue(Tables.LOCAL_PAGE.NAME_SPACE));
+                            if (redirectSqlDao != null && record.getValue(Tables.LOCAL_PAGE.IS_REDIRECT)){
+                                numRedirects.incrementAndGet();
+                                Integer dest = redirectSqlDao.resolveRedirect(
+                                        Language.getById(record.getValue(Tables.LOCAL_PAGE.LANG_ID)),
+                                        record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
+                                if (dest != null) {
+                                    numResolved.incrementAndGet();
+                                    synchronized (map) {
+                                        map.put(hash, dest);
+                                    }
+                                }
+                            } else {
+                                synchronized (map) {
+                                    map.put(hash, record.getValue(Tables.LOCAL_PAGE.PAGE_ID));
+                                }
+                            }
+                            if (map.size() % 500000 == 0) {
+                                LOG.info("built title cache entry " + map.size() + " of " + n);
+                            }
+
+                        }
+                    }, Integer.MAX_VALUE);
             LOG.info("resolved " + numResolved + " of " + numRedirects + " redirects.");
             if (cache!=null){
                 cache.put(key, map);

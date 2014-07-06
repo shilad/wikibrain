@@ -19,7 +19,14 @@ import java.util.regex.Pattern;
  * @author Shilad Sen
  */
 public class JvmUtils {
-    private static Pattern WIKIBRAIN_CLASS_PATTERN = Pattern.compile("org.wikibrain.*");
+    /**
+     * Wikibrain + the standard Geometry class
+     */
+    private static Pattern WIKIBRAIN_CLASS_PATTERN = Pattern.compile("org.wikibrain.*|com.vividsolutions.jts.geom.Geometry");
+
+    /**
+     * Ignores Jooq and anonymous classes.
+     */
     private static Pattern WIKIBRAIN_CLASS_BLACKLIST = Pattern.compile("(.*jooq.*|\\$[0-9]+$)");
 
     private static final Logger LOG = Logger.getLogger(JvmUtils.class.getName());

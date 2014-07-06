@@ -142,11 +142,7 @@ public class WikidataDumpLoader {
             return;
         }
 
-        EnvBuilder builder = new EnvBuilder(cmd);
-        if (!builder.hasExplicitLanguageSet()) {
-            builder.setUseDownloadedLanguages();
-        }
-        Env env = builder.build();
+        Env env =  new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
         List<File> paths;
         if (cmd.getArgList().isEmpty()) {

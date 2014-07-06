@@ -508,7 +508,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                 }
             };
         } finally {
-            freeJooq(jooq);
+//            freeJooq(jooq);
         }
     }
 

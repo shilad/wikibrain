@@ -1,6 +1,6 @@
 package org.wikibrain.parser.xml;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.RawPage;
@@ -50,7 +50,7 @@ public class PageXmlParser {
      * @throws WpParseException
      */
     public RawPage parse(String rawXml, long startByte, long stopByte) throws WpParseException {
-        rawXml = StringEscapeUtils.unescapeHtml4(rawXml);
+        rawXml = StringEscapeUtils.unescapeHtml(rawXml);
         String title = extractSingleString(TITLE_PATTERN, rawXml, 1);
         String idString = extractSingleString(ID_PATTERN, rawXml, 1);
         String timestampString = extractSingleString(TIMESTAMP_PATTERN, rawXml, 1);
