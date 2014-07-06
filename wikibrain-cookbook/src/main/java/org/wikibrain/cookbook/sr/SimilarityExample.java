@@ -1,10 +1,14 @@
 package org.wikibrain.cookbook.sr;
 
 import com.vividsolutions.jts.geom.Geometry;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.lang3.StringUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
@@ -20,17 +24,13 @@ import org.wikibrain.sr.*;
 import org.wikibrain.sr.utils.ExplanationFormatter;
 import org.wikibrain.wikidata.WikidataDao;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 
 /**
  * @author Shilad Sen
  */
 public class SimilarityExample {
-    private static int WIKIDATA_CONCEPTS = 1;
     public static Env env;
     public static Configurator conf;
     public static LocalPageDao lpDao;
@@ -40,8 +40,10 @@ public class SimilarityExample {
     public static WikidataDao wDao;
     public static Map<Integer, Geometry> allGeometries;
     public static ExplanationFormatter formatter;
+    public static ArrayList<Integer> topList;
+    public static Map<Integer, String> getTitle;
 
-    public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, IOException, WikiBrainException {
         // Initialize the WikiBrain environment and get the local page dao
         //Env env = new EnvBuilder().build();
         env= EnvBuilder.envFromArgs(args);
@@ -54,6 +56,10 @@ public class SimilarityExample {
         allGeometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         formatter= new ExplanationFormatter(lpDao);
         LocalIDToUniversalID.init(conf);
+        topList= new ArrayList<Integer>();
+        getTitle= new HashMap<Integer, String>();
+        buildSet();
+
 
         String srMetric= "ESA"; // Retrieve the indicated sr metric for simple english
 
@@ -75,27 +81,51 @@ public class SimilarityExample {
                 { "Statue of Liberty", "New York City" }
         };
 
+        SRResult result;
+        for (int i = 0; i <topList.size()-1 ; i++) {
+            for (int j = i+1; j < topList.size() ; j++) {
+                UniversalPage page1= upDao.getById(topList.get(i));
+                UniversalPage page2= upDao.getById(topList.get(j));
+                int id1= page1.getLocalId(Language.SIMPLE);
+                int id2= page2.getLocalId(Language.SIMPLE);
 
-        for (String pair[] : pairs) {
-                SRResult s = sr.similarity(pair[0], pair[1], true);
-                System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'");
-                for (Explanation e:s.getExplanations()){
-                    System.out.println(formatter.formatExplanation(e));
+                    System.out.println(page1.getBestEnglishTitle(lpDao,true));
+
+                result=sr.similarity(page1.getLocalId(Language.SIMPLE),page2.getLocalId(Language.SIMPLE),false);
+                if(result.getScore()>.95){
+                    System.out.println(getTitle.get(topList.get(i))+" "+ getTitle.get(topList.get(j)));
                 }
             }
+        }
+
+//        for (String pair[] : pairs) {
+//                SRResult s = sr.similarity(pair[0], pair[1], true);
+//                System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'");
+//                for (Explanation e:s.getExplanations()){
+//                    System.out.println(formatter.formatExplanation(e));
+//                }
+//            }
 
     }
 
+    private static void buildSet() throws FileNotFoundException{
+        Scanner scanner= new Scanner(new File("Stupid.txt"));
+        while (scanner.hasNextLine()){
+            topList.add(Integer.parseInt(scanner.nextLine()));
+            scanner.nextLine();
+        }
+        scanner.close();
 
-
-    public static boolean isSpatial(String s) throws DaoException{
-        int localID=lpDao.getIdByTitle(s, Language.SIMPLE, NameSpace.ARTICLE);
-        UniversalPage page= upDao.getByLocalPage(lpDao.getById(Language.SIMPLE, localID));
-        System.out.println("uID "+page.getUnivId()+" localID "+localID);
-        return (allGeometries.containsKey(page.getUnivId()));
+        Scanner s= new Scanner(new File("IDsToTitles.txt"));
+        StringTokenizer st;
+        while (s.hasNextLine()){
+            st= new StringTokenizer(s.nextLine(),":", false);
+            int id= Integer.parseInt(st.nextToken());
+            String name= st.nextToken();
+            getTitle.put(id,name);
+        }
+        s.close();
     }
-
-
 
 }
 

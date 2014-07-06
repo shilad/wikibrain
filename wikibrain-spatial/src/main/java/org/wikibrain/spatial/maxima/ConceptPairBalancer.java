@@ -10,13 +10,13 @@ public class ConceptPairBalancer {
 
     private RunningStratifierInformation[] stratifierInfos;
 
-    private class RunningStratifierInformation {
+    private static class RunningStratifierInformation {
         private int[] runningTotal;
         private int absoluteTotal;
         private double[] goal;
         private SpatialConceptPairStratifier stratifier;
 
-        public RunningStratifierInformation(Class stratifierClass, List<SpatialConceptPair> previous) {
+        public RunningStratifierInformation(Class stratifierClass, Set<SpatialConceptPair> previous) {
             try {
                 stratifier = (SpatialConceptPairStratifier)stratifierClass.newInstance();
             } catch (InstantiationException e) {
@@ -28,11 +28,12 @@ public class ConceptPairBalancer {
             runningTotal = new int[stratifier.getNumBuckets()];
             goal = stratifier.getDesiredStratification();
 
-            for(SpatialConceptPair pair : previous) {
-                addToTotal(pair);
+            if(previous != null) {
+                for (SpatialConceptPair pair : previous) {
+                    addToTotal(pair);
+                }
+                absoluteTotal = previous.size();
             }
-
-            absoluteTotal = previous.size();
         }
 
         public void addToTotal(SpatialConceptPair pair) {
@@ -77,7 +78,7 @@ public class ConceptPairBalancer {
      * @param numCount The number of pairs to choose from candidate
      * @return A new list of pairs chosen from the candidates.
      */
-    public List<SpatialConceptPair> choosePairs(List<SpatialConceptPair> candidates, List<SpatialConceptPair> chosen, int numCount) {
+    public Set<SpatialConceptPair> choosePairs(Set<SpatialConceptPair> candidates, Set<SpatialConceptPair> chosen, int numCount) {
 
         if(candidates.size() <= numCount) {
             return candidates;
@@ -88,7 +89,7 @@ public class ConceptPairBalancer {
         stratifierInfos[1] = new RunningStratifierInformation(ScaleStratifier.class, chosen);
         stratifierInfos[2] = new RunningStratifierInformation(Math.random() < 0.5 ? StraightlineStratifier.class : TopologicalStratifier.class, chosen);
 
-        List<SpatialConceptPair> newConcepts = new ArrayList<SpatialConceptPair>();
+        Set<SpatialConceptPair> newConcepts = new HashSet<SpatialConceptPair>();
         List<SpatialConceptPair> candidateTemp = new LinkedList<SpatialConceptPair>(candidates);
 
         while(newConcepts.size() < numCount) {
@@ -100,6 +101,45 @@ public class ConceptPairBalancer {
             for(RunningStratifierInformation info : stratifierInfos) {
                 info.addToTotal(best);
             }
+        }
+
+        return newConcepts;
+    }
+
+    public static List<SpatialConceptPair> chooseOneOffPairs(List<SpatialConceptPair> candidates, int numCount, Class stratClass) {
+        RunningStratifierInformation stratInfo = new RunningStratifierInformation(stratClass, null);
+
+        List<SpatialConceptPair> newConcepts = new ArrayList<SpatialConceptPair>();
+        List<SpatialConceptPair> candidateTemp = new ArrayList<SpatialConceptPair>(candidates);
+
+        while(newConcepts.size() < numCount) {
+            final Map<SpatialConceptPair, Double> scores = new HashMap<SpatialConceptPair, Double>();
+
+            for(SpatialConceptPair pair : candidateTemp) {
+                double score = 0.0;
+                score += stratInfo.calculateScore(pair);
+
+                scores.put(pair, score);
+            }
+
+            Collections.sort(candidateTemp, new Comparator<SpatialConceptPair>() {
+                @Override
+                public int compare(SpatialConceptPair o1, SpatialConceptPair o2) {
+                    double a = scores.get(o1);
+                    double b = scores.get(o2);
+
+                    if(a > b) {
+                        return -1;
+                    }
+
+                    return a == b ? 0 : 1;
+                }
+            });
+
+            SpatialConceptPair best = candidateTemp.remove(0);
+            newConcepts.add(best);
+
+            stratInfo.addToTotal(best);
         }
 
         return newConcepts;

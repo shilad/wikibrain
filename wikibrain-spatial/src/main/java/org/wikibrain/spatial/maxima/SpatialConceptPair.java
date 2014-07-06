@@ -1,11 +1,5 @@
 package org.wikibrain.spatial.maxima;
 
-import org.wikibrain.core.cmd.Env;
-import org.wikibrain.matrix.Matrix;
-import org.wikibrain.spatial.cookbook.tflevaluate.MatrixGenerator;
-
-import java.util.Map;
-
 /**
  * Created by harpa003 on 6/27/14.
  */
@@ -134,6 +128,6 @@ public class SpatialConceptPair {
 
     @Override
     public String toString() {
-        return combinedTitle;
+        return firstConcept.getTitle() + "\t::\t" + secondConcept.getTitle();
     }
 }
