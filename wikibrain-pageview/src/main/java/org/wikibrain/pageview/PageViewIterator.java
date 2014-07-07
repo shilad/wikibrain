@@ -3,6 +3,7 @@ package org.wikibrain.pageview;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.joda.time.DateTime;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -14,6 +15,9 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.Title;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.*;
 import java.net.URL;
@@ -237,37 +241,43 @@ public class PageViewIterator implements Iterator {
         gbin.close();
     }
 
-    private TIntIntMap parsePageViewDataFromFile(Language lang, File f) throws WikiBrainException, DaoException, ConfigurationException {
+    private TIntIntMap parsePageViewDataFromFile(final Language lang, File f) throws WikiBrainException, DaoException, ConfigurationException {
 
         try{
-            TIntIntMap data = new TIntIntHashMap();
+            final TIntIntMap data = new TIntIntHashMap();
 
-            BufferedReader br =  new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
-            String curLine;
-            System.out.println("Beginning to parse file");
-            while ((curLine = br.readLine()) != null) {
-                String[] cols = curLine.split(" ");
-                if (cols.length < 3) {
-                    continue;
-                }
-                if (cols[0].equals(lang.getLangCode())) {
-                    try{
-                        String title = URLDecoder.decode(cols[1], "UTF-8");
-                        int pageId = localPageDao.getIdByTitle(new Title(title, lang));
-                        int numPageViews = Integer.parseInt(cols[2]);
-                        data.adjustOrPutValue(pageId, numPageViews, numPageViews);
-                    }
-                    catch(IllegalArgumentException e){
-                        System.out.println("Decoding error examining this line: " + curLine);
-                    }
-                    catch(DaoException de) {
-                        System.out.println("Error using page DAO to get page ID for line:\n\t" + curLine);
-                        System.out.println(de.getMessage());
-                    }
-                }
-            }
-            br.close();
+            System.out.println("Beginning to parse file " + f);
 
+            ParallelForEach.iterate(
+                    FileUtils.lineIterator(f, "UTF-8"),
+                    WpThreadUtils.getMaxThreads(),
+                    1000,
+                    new Procedure<String>() {
+                        @Override
+                        public void call(String curLine) throws Exception {
+                            String[] cols = curLine.split(" ");
+                            if (cols.length < 3) {
+                                return;
+                            }
+                            if (cols[0].equals(lang.getLangCode())) {
+                                try{
+                                    String title = URLDecoder.decode(cols[1], "UTF-8");
+                                    int pageId = localPageDao.getIdByTitle(new Title(title, lang));
+                                    int numPageViews = Integer.parseInt(cols[2]);
+                                    synchronized (data) {
+                                        data.adjustOrPutValue(pageId, numPageViews, numPageViews);
+                                    }
+                                }
+                                catch(Exception e){
+                                    System.out.println("Decoding error examining this line: " + curLine);
+                                    System.out.println(e.getMessage());
+                                }
+                            }
+
+                        }
+                    },
+                    1000000
+            );
             return data;
         }
         catch(IOException e){
