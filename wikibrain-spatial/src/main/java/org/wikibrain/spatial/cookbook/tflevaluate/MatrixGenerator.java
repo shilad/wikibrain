@@ -546,41 +546,50 @@ public class MatrixGenerator {
         return result;
     }
 
-    public float[][] generateUnbalancedDistanceMatrix(List<Geometry> cities){
-        int size = pageHitList.size();
-        float[][] matrix = new float[cities.size()][size];
-        GeodeticCalculator calc = new GeodeticCalculator();
+    public float[][] generateUnbalancedDistanceMatrix(final List<Geometry> cities){
+        final int size = pageHitList.size();
+        final float[][] matrix = new float[cities.size()][size];
 
-        for (int i = 0; i<cities.size();i++){
 
-            Point point1= (Point) cities.get(i);
-            try {
-                calc.setStartingGeographicPoint(point1.getX(), point1.getY());
-                for (int j = 0; j < size; j++) {
-                    float distance = 0;
-                    try {
-                        Point point2 = (Point) geometries.get(pageHitList.get(j));
-                        calc.setDestinationGeographicPoint(point2.getX(), point2.getY());
 
+        ParallelForEach.loop(cities, new Procedure<Geometry>() {
+            @Override
+            public void call(Geometry geo) throws Exception {
+
+                int i = cities.indexOf(geo);
+
+                Point point1= (Point) geo;
+                try {
+                    GeodeticCalculator calc = new GeodeticCalculator();
+                    // make new each time?
+                    calc.setStartingGeographicPoint(point1.getX(), point1.getY());
+                    for (int j = 0; j < size; j++) {
+                        float distance = 0;
                         try {
-                            distance = (float) (calc.getOrthodromicDistance() / 1000);
-                        } catch (ArithmeticException e) {
+                            Point point2 = (Point) geometries.get(pageHitList.get(j));
+                            calc.setDestinationGeographicPoint(point2.getX(), point2.getY());
+
                             try {
-                                distance = (float) (DefaultEllipsoid.WGS84.orthodromicDistance(point1.getX(), point1.getY(), point2.getX(), point2.getY()) / 1000);
-                            } catch (ArithmeticException e2) {
-                                //set default distance to be 20000 if 2 points are approximately opposite
-                                distance = 20000;
+                                distance = (float) (calc.getOrthodromicDistance() / 1000);
+                            } catch (ArithmeticException e) {
+                                try {
+                                    distance = (float) (DefaultEllipsoid.WGS84.orthodromicDistance(point1.getX(), point1.getY(), point2.getX(), point2.getY()) / 1000);
+                                } catch (ArithmeticException e2) {
+                                    //set default distance to be 20000 if 2 points are approximately opposite
+                                    distance = 20000;
+                                }
                             }
+                        }catch(NullPointerException e){
+                            System.out.println("Null pointer exception for "+pageHitList.get(j));
                         }
-                    }catch(NullPointerException e){
-                        System.out.println("Null pointer exception for "+pageHitList.get(j));
+                        matrix[i][j] = distance;
                     }
-                    matrix[i][j] = distance;
+                } catch (NullPointerException e){
+                    System.out.println("no geometry for point "+pageHitList.get(i));
                 }
-            } catch (NullPointerException e){
-                System.out.println("no geometry for point "+pageHitList.get(i));
             }
-        }
+        });
+
         return matrix;
     }
 

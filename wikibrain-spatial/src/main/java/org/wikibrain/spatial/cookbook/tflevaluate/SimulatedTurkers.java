@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.cookbook.tflevaluate;
 
-import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -42,93 +43,117 @@ public class SimulatedTurkers {
         MatrixGenerator mg = new MatrixGenerator(env);
 
         SimulatedTurkers st = new SimulatedTurkers( mg, env);
+//        try {
+//            st.parseGazetteer();
+//            Map<String, Set<Integer>> map = st.getNearConceptList(10, 2 );
+//            st.createNeighborFile(map, "citiesToNeighbors3.txt");
+//            for (int i = 0; i<st.neighborsCount.length; i++){
+//                System.out.print(i+":"+st.neighborsCount[i]+"\t");
+//            }
+            Map<String,Set<Integer>> neighbors = st.loadNeighborFile(new File("citiesToNeighbors3.txt"));
+            for (String s: neighbors.keySet()){
+                st.neighborsCount[neighbors.get(s).size()]++;
+            }
+            for (int i = 0; i<st.neighborsCount.length; i++){
+                System.out.println(i+"\t"+st.neighborsCount[i]);
+            }
+
+//        } catch (IOException e){
+//
+//        }
+
 
 //        try {
 //            mg.getGeoDataFromCities(new File("/scratch/ne_10m_populated_places/ne_10m_populated_places.shp"));
 //            Map<String, Set<Integer>> map = mg.getNearConceptList(10, 2 );
 //            mg.createNeighborFile(map);
-        Map<String,Set<Integer>> neighbors = st.loadNeighborFile(new File("citiesToNeighbors2.txt"));
-
-        //set number of simulated turkers to 1000
-        List<Set<Integer>> simulatedTurkers = st.generateSimulatedTurkers(neighbors, st.cityPopulations, 1000);
-
-        SurveyQuestionGenerator generator = new SurveyQuestionGenerator();
-        List<Integer> knownIds = new ArrayList<Integer>();
-
-        int kk = 0;
-        int ku = 0;
-        int uu = 0;
-        PrintWriter pw = null;
-        try{
-            pw = new PrintWriter(new FileWriter("SimulatedTurkers.txt"));
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-
-        Set<SpatialConceptPair> questionPairs = new HashSet<SpatialConceptPair>();
-        int[] duplicates = new int[50];
-
-        for (int i=0; i<simulatedTurkers.size(); i++){
-            int count = 0;
-            knownIds.clear();
-            knownIds.addAll(simulatedTurkers.get(i));
-            List<SpatialConceptPair> questions = generator.getConceptPairsToAsk(knownIds,i);
-            Set<SpatialConceptPair> previous = new HashSet<SpatialConceptPair>();
-            for (SpatialConceptPair question: questions){
-                SpatialConcept concept1 = question.getFirstConcept();
-                SpatialConcept concept2 = question.getSecondConcept();
-
-                // id, c1, c1_known, c1_title, c2, c2_known, c2_title, ans (default is 0.0)
-                String s = question.toString();
-                questionPairs.add(question);
-                if (previous.contains(question)){
-                    count++;
-                } else {
-                    previous.add(question);
-                }
-
-                if (knownIds.contains(concept1.getUniversalID())&&knownIds.contains(concept2.getUniversalID())){
-                    kk++;
-                } else if ((!knownIds.contains(concept1.getUniversalID()))&&(!knownIds.contains(concept2.getUniversalID()))) {
-                    uu++;
-                } else {
-                    ku++;
-                }
-                s = i+"\t"+s+"\t"+(knownIds.contains(concept1.getUniversalID()))+"\t"+(knownIds.contains(concept2.getUniversalID()));
-                pw.println(s);
-            }
-            if (count>35){
-                System.out.println(i+" "+count);
-            }
-            duplicates[count]++;
-        }
-        int count = 0;
-        for (SpatialConceptPair pair: questionPairs){
-            if (pair.getkkTypeNumbOfTimesAsked()>=10){
-                System.out.println(pair.getFirstConcept().getTitle()+"\t"+pair.getSecondConcept().getTitle()+"\t"+pair.getkkTypeNumbOfTimesAsked()+"\t"+pair.getuuTypeNumbOfTimesAsked());
-                count++;
-            }
-        }
-        System.out.println(count);
+//        Map<String,Set<Integer>> neighbors = st.loadNeighborFile(new File("citiesToNeighbors2.txt"));
+//
+//        //set number of simulated turkers to 1000
+//        List<Set<Integer>> simulatedTurkers = st.generateSimulatedTurkers(neighbors, st.cityPopulations, 1000);
+//
+//        SurveyQuestionGenerator generator = new SurveyQuestionGenerator();
+//        List<Integer> knownIds = new ArrayList<Integer>();
+//
+//        int kk = 0;
+//        int ku = 0;
+//        int uu = 0;
+//        PrintWriter pw = null;
+//        try{
+//            pw = new PrintWriter(new FileWriter("SimulatedTurkers.txt"));
+//        }catch(IOException e){
+//            e.printStackTrace();
+//        }
+//
+//        Set<SpatialConceptPair> questionPairs = new HashSet<SpatialConceptPair>();
+//        int[] duplicates = new int[50];
+//
+//        for (int i=0; i<simulatedTurkers.size(); i++){
+//            int count = 0;
+//            knownIds.clear();
+//            knownIds.addAll(simulatedTurkers.get(i));
+//            List<SpatialConceptPair> questions = generator.getConceptPairsToAsk(knownIds,i);
+//            Set<SpatialConceptPair> previous = new HashSet<SpatialConceptPair>();
+//            for (SpatialConceptPair question: questions){
+//                SpatialConcept concept1 = question.getFirstConcept();
+//                SpatialConcept concept2 = question.getSecondConcept();
+//
+//                // id, c1, c1_known, c1_title, c2, c2_known, c2_title, ans (default is 0.0)
+//                String s = question.toString();
+//                questionPairs.add(question);
+//                if (previous.contains(question)){
+//                    count++;
+//                } else {
+//                    previous.add(question);
+//                }
+//
+//                if (knownIds.contains(concept1.getUniversalID())&&knownIds.contains(concept2.getUniversalID())){
+//                    kk++;
+//                } else if ((!knownIds.contains(concept1.getUniversalID()))&&(!knownIds.contains(concept2.getUniversalID()))) {
+//                    uu++;
+//                } else {
+//                    ku++;
+//                }
+//                s = i+"\t"+s+"\t"+(knownIds.contains(concept1.getUniversalID()))+"\t"+(knownIds.contains(concept2.getUniversalID()));
+//                pw.println(s);
+//            }
+//            if (count>35){
+//                System.out.println(i+" "+count);
+//            }
+//            duplicates[count]++;
+//        }
+//        int count = 0;
+//        for (SpatialConceptPair pair: questionPairs){
+//            if (pair.getkkTypeNumbOfTimesAsked()>=10){
+//                System.out.println(pair.getFirstConcept().getTitle()+"\t"+pair.getSecondConcept().getTitle()+"\t"+pair.getkkTypeNumbOfTimesAsked()+"\t"+pair.getuuTypeNumbOfTimesAsked());
+//                count++;
+//            }
+//        }
+//        System.out.println(count);
+//        try {
+//            st.analyzeQuestionPairs(questionPairs, env.getConfigurator());
+//        } catch (ConfigurationException e){
+//            e.printStackTrace();
+//        }
+//
+//        System.out.println(questionPairs.size());
+//        System.out.println("known known "+kk);
+//        System.out.println("known unknown "+ku);
+//        System.out.println("unknown unknown "+uu);
+//
+//        System.out.println(Arrays.toString(duplicates));
         try {
-            st.analyzeQuestionPairs(questionPairs, env.getConfigurator());
-        } catch (ConfigurationException e){
-            e.printStackTrace();
+            st.parseGazetteer();
+        } catch(IOException e){
+            System.out.println("File not found");
         }
-
-        System.out.println(questionPairs.size());
-        System.out.println("known known "+kk);
-        System.out.println("known unknown "+ku);
-        System.out.println("unknown unknown "+uu);
-
-        System.out.println(Arrays.toString(duplicates));
     }
 
-    public void createNeighborFile(Map<String, Set<Integer>> map){
+    public void createNeighborFile(Map<String, Set<Integer>> map, String filename){
 
         BufferedWriter bw = null;
         try {
-            bw = new BufferedWriter(new FileWriter("citiesToNeighbors2.txt"));
+            bw = new BufferedWriter(new FileWriter(filename));
 
             for (String string: map.keySet()){
                 bw.write(string+"\t"+cityPopulations.get(string)+"\t");
@@ -357,11 +382,12 @@ public class SimulatedTurkers {
                 try {
                     Set<Integer> set = mg.dm.getGraphDistance(mg.geometries, k, maxTopoDistance, significantDistanceMatrix, citiesDistanceMatrix[citiesList.indexOf(citiesMap.get(city))]);
                     result.put(city, set);
-                    System.out.println(city + ": " + set.size());
+                    increment(set.size());
+//                    System.out.println(city + ": " + set.size());
                 } catch (DaoException e) {
                     e.printStackTrace();
                 }
-                System.out.println("Processed city " + city);
+//                System.out.println("Processed city " + city);
             }
         });
         return result;
@@ -392,5 +418,94 @@ public class SimulatedTurkers {
             double value = random.nextDouble() * total;
             return map.ceilingEntry(value).getValue();
         }
+    }
+
+    public void parseGazetteer() throws IOException {
+        cityPopulations = new HashMap<String, Double>();
+        cityGeometries = new HashMap<String, Geometry>();
+        Scanner scanner = new Scanner(new File("cities1000.txt"));
+        String[] array2 = {"United States of America","Canada","Brazil","Pakistan","India","France","Spain","United Kingdom","Australia"};
+        String[] countryCodes = {"US","CA","BR","PK","IN","FR","ES","GB","AU"};
+        Map<String,String> countryNames = new HashMap<String, String>();
+        for (int i=0; i<countryCodes.length; i++){
+            countryNames.put(countryCodes[i],array2[i]);
+        }
+        Set<String> countries = new HashSet<String>();
+        countries.addAll(Arrays.asList(countryCodes));
+
+        List<City> cityList = new ArrayList<City>();
+
+        while (scanner.hasNextLine()){
+            String line = scanner.nextLine();
+            String[] array = line.split("\t");
+            String name = array[1];
+            Double lat = Double.parseDouble(array[4]);
+            Double longitude = Double.parseDouble(array[5]);
+            Integer pop = Integer.parseInt(array[14]);
+            String country = array[8];
+            String state = array[10];
+
+            if (countries.contains(country)){
+                Coordinate[] coords = new Coordinate[1];
+                coords[0] = new Coordinate(longitude,lat);
+                CoordinateArraySequence coordArraySeq = new CoordinateArraySequence(coords);
+                Point current = new Point(coordArraySeq, new GeometryFactory(new PrecisionModel(), 4326));
+                City city = new City(name, current, pop, country, state);
+                cityList.add(city);
+            }
+        }
+
+        Map<String,String> stateCodesToNames = new HashMap<String, String>();
+        Scanner scan = new Scanner(new File("admin1CodesASCII.txt"));
+        while (scan.hasNextLine()){
+            String line = scan.nextLine();
+            String[] array = line.split("\t");
+            stateCodesToNames.put(array[0],array[1]);
+        }
+
+        for (City city: cityList){
+            city.state = stateCodesToNames.get(city.country+"."+city.state);
+            city.country = countryNames.get(city.country);
+        }
+
+        PrintWriter pw = null;
+        try{
+            pw = new PrintWriter(new FileWriter("newCities.txt"));
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+        for (City city: cityList){
+            cityGeometries.put(city.toString(),city.geo);
+            cityPopulations.put(city.toString(),(double) city.pop);
+            pw.println(city.toString());
+        }
+        pw.close();
+
+    }
+
+    public class City {
+        String name;
+        Geometry geo;
+        Integer pop;
+        String country;
+        String state;
+
+        public City(String name, Geometry geo, Integer pop, String country, String state ){
+            this.name = name;
+            this.geo = geo;
+            this.pop = pop;
+            this.country = country;
+            this.state = state;
+        }
+
+        public String toString(){
+            return country+","+state+","+name;
+        }
+    }
+
+    private int[] neighborsCount = new int[112];
+    public synchronized void increment(int index){
+        neighborsCount[index]++;
     }
 }
