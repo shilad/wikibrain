@@ -33,7 +33,7 @@ Next, you'll import Simple English Wikipedia.
 Run the pipeline loader which downloads, parses, and imports the data into an embedded [h2 database](http://www.h2database.com/html/main.html) (you can use Postgresql instead by changing the [configuration file]({{ site.url }}/tutorial/configuration.html)).
 The details for running the loader are as follows:
  
- * main class: `org.wikibrain.loader.pipeline.Main`
+ * main class: `org.wikibrain.Main`
  * JVM args: `-Xmx4G`
  * program args: `-l simple`
 
