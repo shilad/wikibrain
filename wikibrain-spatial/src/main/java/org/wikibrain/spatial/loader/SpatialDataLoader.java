@@ -340,7 +340,7 @@ public class SpatialDataLoader {
             Options options = new Options();
             options.addOption("f", true, "The spatial data folder, structured as defined in the documentation.");
             options.addOption("p", true, "The PhraseAnalyzer to use to map toponyms to Wikipedia pages (defaults to 'titleandredirect'). Will always choose the first candidate, no matter the minimum probability, so declarative PhraseAnalyzers should be used here.");
-            options.addOption("s", true, "Can be one more more of 'wikidata','exogenous', 'pagehitlist' (comma delimit). If nothing is entered, does all steps.");
+            options.addOption("s", true, "Can be one more more of 'wikidata', 'gadm', 'exogenous', 'pagehitlist' (comma delimit). If nothing is entered, does all steps.");
 
             EnvBuilder.addStandardOptions(options);
 
