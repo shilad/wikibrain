@@ -11,7 +11,7 @@ WikiBrain's PipelineLoader class manages the downloading, parsing, and import of
 Most commonly, PipelineLoader is run without any arguments except a language. This downloads, parses and imports the latest database files for the Simple English langauge edition of Wikipedia into an embedded h2 database:
 
 ```bash
-org.wikibrain.Main -l simple
+org.wikibrain.Loader -l simple
 ```
 
 Each step in the WikiBrain loading process is called a **stage**. 
@@ -19,14 +19,14 @@ By default a set of `core` stages are loaded (articles, links, lucene search ind
 You can specify the stages you want loaded, such as wikidata using the `-s` option:
 
 ```bash
-org.wikibrain.Main -l simple -s wikidata
+org.wikibrain.Loader -l simple -s wikidata
 ```
 
 You may also want to configure how the stages you select are run.
 For example, you can specify that each stage should incorporate a custom override configuration file:
 
 ```bash
-org.wikibrain.Main -l simple -s wikidata -c custom.conf
+org.wikibrain.Loader -l simple -s wikidata -c custom.conf
 ```
 
 These features are explained in more detail below.
@@ -56,13 +56,13 @@ You can run a specific stage using the `-s` flag.
 For example, the following command builds the semantic relatedness (SR) model and prepares it for use.
 
 ```bash
-org.wikibrain.Main -s sr
+org.wikibrain.Loader -s sr
 ```
 
 You can specify multiple stages using multiple `-s` arguments:
 
 ```bash
-org.wikibrain.Main -s sr -s spatial
+org.wikibrain.Loader -s sr -s spatial
 ```
 
 If you ask WikiBrain to run a stage (e.g. `sr`), it checks to see if the stages it depends on (in this case, `wikitext`, `phrases`, `lucene`) have been run.
@@ -92,7 +92,7 @@ In addition, you can pass stage-specific arguments via the `-s` flag.
 For example the following command runs the phrase stage (turns it `on`), and passes the argument `-p stanford` to it to tell it to load the [Stanford concept analyzer](http://googleresearch.blogspot.com/2012/05/from-words-to-concepts-and-back.html).
 
 ```
-org.wikibrain.Main -s "phrases:on:-p stanford"
+org.wikibrain.Loader -s "phrases:on:-p stanford"
 ```
 
 ## More details
