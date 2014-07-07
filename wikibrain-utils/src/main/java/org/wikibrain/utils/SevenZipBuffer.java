@@ -12,7 +12,7 @@ import java.io.IOException;
  * @author Shilad Sen
  */
 public class SevenZipBuffer implements Closeable {
-    private static final int BUFFER_SIZE = 1024*1024;
+    private static final int BUFFER_SIZE = 64 * 1024;
 
     private final File file;
     private final SevenZFile stream;
@@ -26,6 +26,49 @@ public class SevenZipBuffer implements Closeable {
         this.fileLength = file.length();
         this.stream = new SevenZFile(file);
         this.stream.getNextEntry();
+    }
+
+    public boolean skipUntil(String ... markers) throws IOException {
+        int maxMarkerBytes = -1;
+        byte [][] markerBytes = new byte[markers.length][];
+        for (int i = 0; i < markers.length; i++) {
+            markerBytes[i] = markers[i].getBytes();
+            maxMarkerBytes = Math.max(maxMarkerBytes, markerBytes[i].length);
+        }
+
+        // Prime the beginning of the buffer, if possible.
+        int bufferEnd = Math.min(maxMarkerBytes, bytes.size());
+        System.arraycopy(bytes.toArray(), bytes.size() - bufferEnd, buffer, 0, bufferEnd);
+
+        while (true) {
+            int minI = Integer.MAX_VALUE;
+            byte [] minMarker = null;
+
+            for (byte[] marker : markerBytes) {
+                int i = indexOf(buffer, 0, bufferEnd, marker);
+                if (i >= 0 && i < minI) {
+                    minI = i;
+                    minMarker = marker;
+                }
+            }
+
+            if (minMarker != null)  {
+                bytes.resetQuick();
+                bytes.add(buffer, minI + minMarker.length, bufferEnd);
+                return true;
+            }
+
+            int n = stream.read(buffer, bufferEnd, buffer.length - bufferEnd);
+            if (n < 0) {
+                return false;
+            }
+            totalBytes += n;
+            bufferEnd += n;
+
+            int numRetain = Math.min(maxMarkerBytes, bufferEnd);
+            System.arraycopy(buffer, bufferEnd - numRetain, buffer, 0, numRetain);
+            bufferEnd = numRetain;
+        }
     }
 
     public String readUntil(String ... markers) throws IOException {
@@ -65,20 +108,24 @@ public class SevenZipBuffer implements Closeable {
     }
 
     public int indexOf(TByteList bytes, int minOffset, byte [] query) {
-        for (int i = minOffset; i < bytes.size() - query.length; i++) {
-            if (bytesAre(bytes, i, query)) {
+        return indexOf(bytes.toArray(), minOffset, bytes.size(), query);
+    }
+
+    public int indexOf(byte [] bytes, int begIndex, int endIndex, byte [] query) {
+        for (int i = begIndex; i < endIndex - query.length; i++) {
+            if (bytesAre(bytes, i, endIndex, query)) {
                 return i;
             }
         }
         return -1;
     }
 
-    public boolean bytesAre(TByteList bytes, int offset, byte[] query) {
-        if (offset + query.length > bytes.size()) {
+    public boolean bytesAre(byte [] bytes, int offset, int endIndex, byte[] query) {
+        if (offset + query.length > endIndex) {
             return false;
         }
         for (int i = 0; i < query.length; i++) {
-            if (bytes.get(offset + i) != query[i]) {
+            if (bytes[offset + i] != query[i]) {
                 return false;
             }
         }
@@ -96,5 +143,11 @@ public class SevenZipBuffer implements Closeable {
 
     public double getPercentCompleted() {
         return 100.0 * totalBytes / fileLength;
+    }
+
+    private int shiftBufferEndToFront(byte [] buffer, int bytesUsed, int numToShift) {
+        int newLength = Math.min(numToShift, bytesUsed);
+        System.arraycopy(buffer, bytesUsed - newLength, buffer, 0, newLength);
+        return newLength;
     }
 }

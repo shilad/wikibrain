@@ -1,4 +1,4 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader.pipeline;
 
 import com.typesafe.config.Config;
 import org.apache.commons.lang3.ArrayUtils;
@@ -104,9 +104,11 @@ public class PipelineStage {
         if (argsOverride == null) {
             args = ArrayUtils.addAll(cmdLineArgs, extraArgs);
         } else {
-            args = argsOverride;
+            args = ArrayUtils.addAll(cmdLineArgs, argsOverride);
         }
         Process p = JvmUtils.launch(klass, args);
+        System.err.println("FOOO: " + klass + ", " + Arrays.toString(args));
+
         int retVal = p.waitFor();
         if (retVal != 0) {
             System.err.println("command failed with exit code " + retVal + " : ");

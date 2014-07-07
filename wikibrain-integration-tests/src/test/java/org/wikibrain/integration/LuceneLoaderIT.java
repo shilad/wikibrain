@@ -6,10 +6,9 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.dao.load.LuceneLoader;
+import org.wikibrain.loader.LuceneLoader;
 import org.wikibrain.lucene.LuceneSearcher;
 import org.wikibrain.lucene.WikiBrainScoreDoc;
 

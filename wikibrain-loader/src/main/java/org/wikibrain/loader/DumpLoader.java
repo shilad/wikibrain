@@ -1,4 +1,4 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -23,7 +23,6 @@ import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.parser.DumpSplitter;
 import org.wikibrain.parser.WpParseException;
-import org.wikibrain.parser.xml.DumpPageXmlParser;
 import org.wikibrain.parser.xml.PageXmlParser;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;

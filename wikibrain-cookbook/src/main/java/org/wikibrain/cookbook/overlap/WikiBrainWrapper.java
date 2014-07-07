@@ -11,7 +11,7 @@ import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.dao.load.PipelineLoader;
+import org.wikibrain.Main;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,6 +115,6 @@ public class WikiBrainWrapper {
      * @param langCodes comma separated list of langcodes - ie "simple,la"
      */
     public static void loadLanguages(String langCodes) throws IOException, InterruptedException, ClassNotFoundException, ConfigurationException, SQLException, DaoException {
-        PipelineLoader.main(new String[]{"-l", langCodes});
+        Main.main(new String[]{"-l", langCodes});
     }
 }

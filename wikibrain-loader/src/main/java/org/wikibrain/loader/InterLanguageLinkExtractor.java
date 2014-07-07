@@ -1,25 +1,12 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
-import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.WikiBrainException;
-import org.wikibrain.core.cmd.Env;
-import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.RawPageDao;
-import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageInfo;
-import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.parser.wiki.ParsedIll;
 import org.wikibrain.parser.wiki.ParserVisitor;
-import org.wikibrain.parser.wiki.WikiTextDumpParser;
-import org.wikibrain.utils.WpIOUtils;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

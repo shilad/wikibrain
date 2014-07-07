@@ -1,4 +1,4 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
 import org.apache.commons.cli.*;
 import org.wikibrain.conf.ConfigurationException;

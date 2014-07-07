@@ -1,7 +1,6 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.WikiBrainException;
@@ -10,15 +9,11 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.download.FileDownloader;
-import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.phrases.PrunedCounts;
 import org.wikibrain.phrases.StanfordPhraseAnalyzer;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;

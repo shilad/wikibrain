@@ -1,4 +1,4 @@
-package org.wikibrain.dao.load;
+package org.wikibrain.loader;
 
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -9,9 +9,6 @@ import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.*;
-import org.wikibrain.core.dao.sql.LocalPageSqlDao;
-import org.wikibrain.core.dao.sql.RawPageSqlDao;
-import org.wikibrain.core.dao.sql.RedirectSqlDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
@@ -19,7 +16,6 @@ import org.wikibrain.core.model.RawPage;
 import org.wikibrain.core.model.Redirect;
 import org.wikibrain.core.model.Title;
 
-import javax.sql.DataSource;
 import java.util.logging.Logger;
 
 /**
