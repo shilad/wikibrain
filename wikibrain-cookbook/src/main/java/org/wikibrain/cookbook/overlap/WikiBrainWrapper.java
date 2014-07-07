@@ -1,6 +1,7 @@
 package org.wikibrain.cookbook.overlap;
 
 import org.apache.commons.collections.IteratorUtils;
+import org.wikibrain.Loader;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
@@ -11,7 +12,6 @@ import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.Main;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,6 +115,6 @@ public class WikiBrainWrapper {
      * @param langCodes comma separated list of langcodes - ie "simple,la"
      */
     public static void loadLanguages(String langCodes) throws IOException, InterruptedException, ClassNotFoundException, ConfigurationException, SQLException, DaoException {
-        Main.main(new String[]{"-l", langCodes});
+        Loader.main(new String[]{"-l", langCodes});
     }
 }

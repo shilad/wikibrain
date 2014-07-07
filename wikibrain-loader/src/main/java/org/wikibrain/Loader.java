@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author Shilad Sen
  */
-public class Main {
+public class Loader {
     public static void main(String args[]) throws ConfigurationException, ClassNotFoundException, IOException, InterruptedException, SQLException, DaoException {
         Options options = new Options();
 
