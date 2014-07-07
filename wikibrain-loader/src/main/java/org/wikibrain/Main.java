@@ -1,4 +1,4 @@
-package org.wikibrain.loader.pipeline;
+package org.wikibrain;
 
 import org.apache.commons.cli.*;
 import org.wikibrain.conf.ConfigurationException;
@@ -6,6 +6,8 @@ import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.loader.pipeline.PipelineLoader;
+import org.wikibrain.loader.pipeline.StageArgs;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -26,14 +28,6 @@ public class Main {
                         .withLongOpt("stage")
                         .withDescription("turn stage on or off, format is stagename:on or stagename:off")
                         .create("s"));
-
-        //Specify the Datasets
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArgs()
-                        .withLongOpt("groups")
-                        .withDescription("groups that should be run (default is " + PipelineLoader.DEFAULT_GROUP + ")")
-                        .create("g"));
 
         //Specify the Datasets
         options.addOption(

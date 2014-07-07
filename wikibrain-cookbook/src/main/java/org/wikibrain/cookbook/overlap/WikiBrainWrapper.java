@@ -11,7 +11,7 @@ import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.loader.pipeline.Main;
+import org.wikibrain.Main;
 
 import java.io.File;
 import java.io.IOException;
