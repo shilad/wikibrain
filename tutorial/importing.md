@@ -11,7 +11,7 @@ WikiBrain's PipelineLoader class manages the downloading, parsing, and import of
 Most commonly, PipelineLoader is run without any arguments except a language. This downloads, parses and imports the latest database files for the Simple English langauge edition of Wikipedia into an embedded h2 database:
 
 ```bash
-org.wikibrain.dao.loader.Main -l simple
+org.wikibrain.Main -l simple
 ```
 
 Each step in the WikiBrain loading process is called a **stage**. 
@@ -19,14 +19,14 @@ By default a set of `core` stages are loaded (articles, links, lucene search ind
 You can specify the stages you want loaded, such as wikidata using the `-s` option:
 
 ```bash
-org.wikibrain.dao.loader.Main -l simple -s wikidata
+org.wikibrain.Main -l simple -s wikidata
 ```
 
 You may also want to configure how the stages you select are run.
 For example, you can specify that each stage should incorporate a custom override configuration file:
 
 ```bash
-org.wikibrain.dao.load.PipelineLoader -l simple -s wikidata -c custom.conf
+org.wikibrain.Main -l simple -s wikidata -c custom.conf
 ```
 
 These features are explained in more detail below.
@@ -34,6 +34,7 @@ These features are explained in more detail below.
 ## Stage selection
 
 WikiBrain's import pipeline is divided into stages, listed in the table below.
+
 
 | on | stage      | dependsOn     |  description |
 |----|------------|---------------|--------------|
@@ -50,14 +51,26 @@ WikiBrain's import pipeline is divided into stages, listed in the table below.
 | N | spatial    | wikidata      | Installs geospatial data. |
 | N | sr         | wikitext, phrases, lucene | Builds semantic relatedness models. |
 
-Each WikiBrain stage corresponds to a Java class with a `main()` method that can be run as a standalone Java program.
-For example, the wikitext stages coresponds to [org.wikibrain.loader.WikiTextLoader](https://github.com/shilad/wikibrain/blob/master/wikibrain-loader/src/main/java/org/wikibrain/loader/WikiTextLoader.java).
-You can find the full definition of stages at the end of the [reference.conf](https://github.com/shilad/wikibrain/blob/master/wikibrain-core/src/main/resources/reference.conf).
-
 If you don't tell WikiBrain to load specific stages, the stages marked `on = Y` are run.
 The `concepts` stage is also run by default if more than one language is installed.
 
+You can run different stages using the `-s` flag. 
+For example, the following command builds the semantic relatedness (SR) model and prepares it for use.
 
+```bash
+org.wikibrain.Main -s sr
+```
 
+If you ask WikiBrain to run a stage (e.g. `sr`), it checks to see if the stages it depends on (in this case, `wikitext`, `phrases`, `lucene`) have been run.
+If necessary it runs them, and any further transitive dependencies.
+You can specify multiple stages using multiple `-s` arguments:
 
+```bash
+org.wikibrain.Main -s sr -s spatial
+```
 
+## More details
+
+Each WikiBrain stage corresponds to a Java class with a `main()` method that can be run as a standalone Java program.
+For example, the wikitext stages coresponds to [org.wikibrain.loader.WikiTextLoader](https://github.com/shilad/wikibrain/blob/master/wikibrain-loader/src/main/java/org/wikibrain/loader/WikiTextLoader.java).
+You can find the full definition of stages at the end of the [reference.conf](https://github.com/shilad/wikibrain/blob/master/wikibrain-core/src/main/resources/reference.conf).
