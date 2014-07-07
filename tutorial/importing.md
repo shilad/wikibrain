@@ -33,6 +33,7 @@ These features are explained in more detail below.
 
 ## Stage selection
 
+WikiBrain's import pipeline is divided into stages, listed in the table below.
 
 | on | stage      | dependsOn     |  description |
 |----|------------|---------------|--------------|
@@ -48,6 +49,15 @@ These features are explained in more detail below.
 | N | wikidata   | concepts      | Downloads and loads wikidata facts for the requested languages. |
 | N | spatial    | wikidata      | Installs geospatial data. |
 | N | sr         | wikitext, phrases, lucene | Builds semantic relatedness models. |
+
+Each WikiBrain stage corresponds to a Java class with a `main()` method that can be run as a standalone Java program.
+For example, the wikitext stages coresponds to [org.wikibrain.loader.WikiTextLoader](https://github.com/shilad/wikibrain/blob/master/wikibrain-loader/src/main/java/org/wikibrain/loader/WikiTextLoader.java).
+You can find the full definition of stages at the end of the [reference.conf](https://github.com/shilad/wikibrain/blob/master/wikibrain-core/src/main/resources/reference.conf).
+
+If you don't tell WikiBrain to load specific stages, the stages marked `on = Y` are run.
+The `concepts` stage is also run by default if more than one language is installed.
+
+
 
 
 
