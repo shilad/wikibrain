@@ -72,7 +72,8 @@ You can disable checking to see if a stage is run, and rerun all necessary stage
 
 ## Configuring stages
 
-You can configure the global settings for all stages by passing any "standard" WikiBrain argument:
+You can configure the global settings for all stages by passing any "standard" WikiBrain argument.
+If any of these options exist, they will be passed along to all stages.
 
 ```text
  -c,--conf                  configuration file
@@ -85,7 +86,7 @@ You can configure the global settings for all stages by passing any "standard" W
     --tmp-dir               the temporary directory
 ```
 
-If any of these options exist, they will be passed along to all stages.
+
 
 In addition, you can pass stage-specific arguments via the `-s` flag.
 For example the following command runs the phrase stage (turns it `on`), and passes the argument `-p stanford` to it to tell it to load the [Stanford concept analyzer](http://googleresearch.blogspot.com/2012/05/from-words-to-concepts-and-back.html).
