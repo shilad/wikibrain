@@ -48,7 +48,7 @@ public class MatrixGenerator {
     private Language simple = Language.SIMPLE;
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
     private float[][] matrix;
-    private List<Integer> pageHitList;
+    public List<Integer> pageHitList;
 
     public MatrixGenerator(Env env){
         SpatialDataDao sdDao = null;
@@ -66,6 +66,8 @@ public class MatrixGenerator {
             this.geometries = sdDao.getAllGeometriesInLayer("significant", "earth");
         }catch(DaoException e){
             e.printStackTrace();
+        } catch (NullPointerException e){
+            System.out.println("no such layer");
         }
         dm = new DistanceMetrics(env, c, snDao);
         try {
@@ -206,10 +208,10 @@ public class MatrixGenerator {
                         try {
                             SRResult similarity = sr.similarity(id1, pageHitList.get(j), false);
                             distance = (float) similarity.getScore();
+                            System.out.println(id1 +" and "+pageHitList.get(j)+": "+distance);
                         } catch (DaoException e) {
                             e.printStackTrace();
                         }
-
                         matrix[i][j] = distance;
                     }
                     System.out.println("Processed row "+i);
