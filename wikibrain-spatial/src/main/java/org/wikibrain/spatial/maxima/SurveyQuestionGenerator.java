@@ -4,7 +4,7 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.core.nlp.StringTokenizer;
-import org.wikibrain.spatial.cookbook.tflevaluate.MatrixReader;
+import org.wikibrain.spatial.cookbook.tflevaluate.MatrixGenerator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,7 +33,6 @@ public class SurveyQuestionGenerator {
     private Map<Integer,Integer> idToIndexForSRMatrix;
     public Map<Integer,Integer> idToIndexForGraphMatrix; //TODO change back to private
     private Map<Integer, Integer> idToScaleCategory;
-    MatrixReader matrixReader;
     float[][] distanceMatrix;
     float[][] srMatrix;
     public float[][] graphMatrix; //TODO change back to private
@@ -69,14 +68,13 @@ public class SurveyQuestionGenerator {
 
 
     private void buildMatrices(){
-        matrixReader= new MatrixReader();
-        MatrixReader.MatrixWithHeader distanceMatrixWithHeader = matrixReader.loadMatrixFile("distancematrix");
+        MatrixGenerator.MatrixWithHeader distanceMatrixWithHeader = MatrixGenerator.loadMatrixFile("distancematrix");
         distanceMatrix = distanceMatrixWithHeader.matrix;
         idToIndexForDistanceMatrix= distanceMatrixWithHeader.idToIndex;
-        MatrixReader.MatrixWithHeader srMatrixWithHeader = matrixReader.loadMatrixFile("srmatrix");
+        MatrixGenerator.MatrixWithHeader srMatrixWithHeader = MatrixGenerator.loadMatrixFile("srmatrix");
         srMatrix= srMatrixWithHeader.matrix;
         idToIndexForSRMatrix= srMatrixWithHeader.idToIndex;
-        MatrixReader.MatrixWithHeader graphMatrixWithHeader = matrixReader.loadMatrixFile("graphmatrix");
+        MatrixGenerator.MatrixWithHeader graphMatrixWithHeader = MatrixGenerator.loadMatrixFile("graphmatrix");
         graphMatrix= graphMatrixWithHeader.matrix;
         idToIndexForGraphMatrix= graphMatrixWithHeader.idToIndex;
     }
