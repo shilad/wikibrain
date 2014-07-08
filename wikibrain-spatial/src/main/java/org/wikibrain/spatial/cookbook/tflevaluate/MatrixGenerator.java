@@ -276,7 +276,7 @@ public class MatrixGenerator {
      * @param fileName
      * @param matrixWithHeader
      */
-    public void createMatrixFile(String fileName, MatrixWithHeader matrixWithHeader){
+    public static void createMatrixFile(String fileName, MatrixWithHeader matrixWithHeader){
         try {
             OutputStream output = null;
             try {
@@ -302,7 +302,7 @@ public class MatrixGenerator {
         }
     }
 
-    public MatrixWithHeader loadMatrixFile(String fileName ){
+    public static MatrixWithHeader loadMatrixFile(String fileName ){
 
         File file = new File(fileName);
 
@@ -393,7 +393,7 @@ public class MatrixGenerator {
         return new MatrixWithHeader(matrix,ints);
     }
 
-    public byte[] floatArrayToByteArray(float[] values){
+    public static byte[] floatArrayToByteArray(float[] values){
         ByteBuffer buffer = ByteBuffer.allocate(values.length*4).order(ByteOrder.BIG_ENDIAN);
         for (int i=0; i<values.length; i++){
             buffer.putFloat(i*4,values[i]);
@@ -401,7 +401,7 @@ public class MatrixGenerator {
         return buffer.array();
     }
 
-    public byte[] intArrayToByteArray(Object[] values){
+    public static byte[] intArrayToByteArray(Object[] values){
         ByteBuffer buffer = ByteBuffer.allocate(values.length*4).order(ByteOrder.BIG_ENDIAN);
         for (int i=0; i<values.length; i++){
             buffer.putInt(i * 4, (Integer) values[i]);
@@ -409,21 +409,21 @@ public class MatrixGenerator {
         return buffer.array();
     }
 
-    public float[] byteArrayToFloatArray(byte[]values){
+    public static float[] byteArrayToFloatArray(byte[]values){
         FloatBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.BIG_ENDIAN).asFloatBuffer();
         float[] array = new float[values.length/4];
         buffer.get(array);
         return array;
     }
 
-    public int[] byteArrayToIntArray(byte[]values){
+    public static int[] byteArrayToIntArray(byte[]values){
         IntBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
         int[] array = new int[values.length/4];
         buffer.get(array);
         return array;
     }
 
-    public class MatrixWithHeader{
+    public static class MatrixWithHeader{
         public float[][] matrix;
         public Map<Integer, Integer> idToIndex;
         private List<Integer> idsInOrder;
