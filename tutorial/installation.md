@@ -15,8 +15,8 @@ As an example, below are approximate disk and memory requirements for different 
 |------------------|---------|---------|--------|-------|----------|
 | Simple English   | 100K    | 3M      | 2GB    | 4GB   | 8 min    |
 | German           | 1.9M    | 96M     | 8GB    | 80GB  | 300 min  |
-| Full English     | 4.6M    | 470M    | 32GB   | 250GB | 1000 min |
-| Largest 25 langs | 25M     | 1.6B    | 32GB   | 500GB | 3000 min |
+| Full English     | 4.6M    | 470M    | 8GB   | 250GB | 1000 min |
+| Largest 25 langs | 25M     | 1.6B    | 8GB   | 500GB | 3000 min |
 
 <br/>
 The runtimes above used a fairly powerful desktop circa 2014 (e.g. Intel i7, 8 cores).
