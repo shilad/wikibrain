@@ -21,6 +21,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.dao.live.LocalLinkLiveDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
@@ -46,7 +47,7 @@ public class ConceptPairGenerator {
     private final WikidataDao wdao;
     private final Map<Integer, Geometry> geometries;
     private final MonolingualSRMetric sr;
-    private final Language simple;
+    private final Language language;
 //    private final LocalLinkLiveDao lDao;
     private List<Integer> significantGeometries;
     private List<Integer> generalGeometries;
@@ -60,12 +61,13 @@ public class ConceptPairGenerator {
         lpDao = c.get(LocalPageDao.class);
         wdao = c.get(WikidataDao.class);
         geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
-        simple = Language.getByLangCode("simple");
+        // get first language of associated language set
+        language = Language.getByLangCode(c.get(LanguageSet.class).getLangCodes().get(0));
         sr = c.get(
                 MonolingualSRMetric.class, "ensemble",
-                "language", simple.getLangCode());
+                "language", language.getLangCode());
 
-        ioe = new InstanceOfExtractor(sdDao,upDao,lpDao,wdao);
+        ioe = new InstanceOfExtractor(sdDao,upDao,lpDao,wdao,language);
         ioe.loadScaleKeywords();
         ioe.loadScaleIds();
     }
@@ -274,8 +276,8 @@ public class ConceptPairGenerator {
             // count inlinks
             try {
                 UniversalPage uPage = upDao.getById(geo);
-                int correctId = uPage.getLocalId(simple);
-                Iterable<LocalLink> inlinks = linkDao.getLinks(simple, correctId, false);
+                int correctId = uPage.getLocalId(language);
+                Iterable<LocalLink> inlinks = linkDao.getLinks(language, correctId, false);
                 int numLinks = 0;
                 for (LocalLink inlink : inlinks) {
                     numLinks++;
@@ -286,7 +288,7 @@ public class ConceptPairGenerator {
 
                 if (numLinks > threshold) {
                     significantGeometries.add(geo);
-                    System.out.println(lpDao.getById(simple, correctId).getTitle());
+                    System.out.println(lpDao.getById(language, correctId).getTitle());
 
                 }
             } catch (Exception e) {

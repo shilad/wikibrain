@@ -13,6 +13,8 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.spatial.maxima.SpatialConcept;
 import org.wikibrain.spatial.maxima.SpatialConceptPair;
 import org.wikibrain.spatial.maxima.SurveyQuestionGenerator;
@@ -40,6 +42,8 @@ public class SimulatedTurkers {
 
     public static void main(String[] args) throws ConfigurationException {
         Env env = new EnvBuilder().envFromArgs(args);
+        Configurator c = env.getConfigurator();
+        Language language = Language.getByLangCode(c.get(LanguageSet.class).getLangCodes().get(0));
         MatrixGenerator mg = new MatrixGenerator(env);
 
         SimulatedTurkers st = new SimulatedTurkers(mg, env);
@@ -138,7 +142,7 @@ public class SimulatedTurkers {
             }
             System.out.println(count);
             try {
-                st.analyzeQuestionPairs(questionPairs, env.getConfigurator());
+                st.analyzeQuestionPairs(questionPairs, c, language);
             } catch (ConfigurationException e) {
                 e.printStackTrace();
             }
@@ -214,6 +218,7 @@ public class SimulatedTurkers {
 
     /**
      * An old method reading in a shape file to extract cities' populations and locations
+     * It modifies fields cityGeometries and cityPopulations
      *
      * @param rawFile
      * @throws IOException
@@ -359,8 +364,8 @@ public class SimulatedTurkers {
      * @param c
      * @throws ConfigurationException
      */
-    public void analyzeQuestionPairs(Set<SpatialConceptPair> spatialConceptPairs, Configurator c) throws ConfigurationException {
-        InstanceOfExtractor ioe = new InstanceOfExtractor(c);
+    public void analyzeQuestionPairs(Set<SpatialConceptPair> spatialConceptPairs, Configurator c, Language l) throws ConfigurationException {
+        InstanceOfExtractor ioe = new InstanceOfExtractor(c,l);
         ioe.loadScaleIds();
         int[][][] bucketCounts = new int[InstanceOfExtractor.NUM_SCALES][InstanceOfExtractor.NUM_SCALES][6];
         for (SpatialConceptPair pair : spatialConceptPairs) {
@@ -518,7 +523,7 @@ public class SimulatedTurkers {
             String[] array = line.split("\t");
             String country = array[8];
 
-            // if it's a country we care about
+            // if it's in a country we care about
             if (countries.contains(country)) {
                 String name = array[1];
                 String state = array[10];

@@ -11,6 +11,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 //import org.wikibrain.core.jooq.tables.WikidataEntityLabels;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
@@ -40,21 +41,23 @@ public class InstanceOfExtractor {
     private LocalPageDao lDao ;
     private WikidataDao wdao ;
     private static final boolean DEBUG = true;
-    private static final Language CUR_LANG = Language.SIMPLE;
+    private final Language CUR_LANG;
     private Map<Integer,Set<Integer>> countryToStateMap;
+    private static final int INSTANCE_OF_PROPERTY = 31;
 
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
 
 
-    public InstanceOfExtractor(Configurator c) throws ConfigurationException{
-        this(c.get(SpatialDataDao.class),c.get(UniversalPageDao.class),c.get(LocalPageDao.class),c.get(WikidataDao.class));
+    public InstanceOfExtractor(Configurator c, Language lang) throws ConfigurationException{
+        this(c.get(SpatialDataDao.class),c.get(UniversalPageDao.class),c.get(LocalPageDao.class),c.get(WikidataDao.class), lang);
     }
 
-    public InstanceOfExtractor(SpatialDataDao sDao, UniversalPageDao uDao, LocalPageDao lDao, WikidataDao wDao) {
+    public InstanceOfExtractor(SpatialDataDao sDao, UniversalPageDao uDao, LocalPageDao lDao, WikidataDao wDao, Language lang) {
         sdDao = sDao;
         upDao = uDao;
         this.lDao = lDao;
         wdao = wDao;
+        CUR_LANG = lang;
 
         try {
             FileInputStream fis = new FileInputStream(new File("countryToStateMap.txt"));
@@ -93,7 +96,15 @@ public class InstanceOfExtractor {
         InstanceOfExtractor ioe = null;
         try{
             env = EnvBuilder.envFromArgs(args);
-            ioe = new InstanceOfExtractor(env.getConfigurator());
+//            String lang = env.getConfiguration().get().getString("spatial.something.language");
+            Configurator conf = env.getConfigurator();
+            List<String> langSet=conf.get(LanguageSet.class).getLangCodes();
+            if (langSet.size() != 1){
+                throw new ConfigurationException("Wanted 1 language, found "+langSet.size()+" languages when using conf.get(LanguageSet.class) : "+langSet);
+            }
+            ioe = new InstanceOfExtractor(conf,Language.getByLangCode(langSet.get(0)));
+
+
 
             // write scale ids out to a file
 //            FileOutputStream fos = new FileOutputStream("countryToStateMap.txt");
@@ -138,17 +149,17 @@ public class InstanceOfExtractor {
 //            }
 
         }catch(DaoException e){
-            System.out.println(e);
+            e.printStackTrace();
         }catch(ConfigurationException e){
-            System.out.println(e);
+            e.printStackTrace();
         }catch(IOException e){
-            System.out.println(e);
+            e.printStackTrace();
         }
 
     }
 
     /**
-     * Generate a map from countries(' conceptIds) to their states
+     * Generate a map from countries(' conceptIds) to their states using the gadm layer
      *
      * @return
      * @throws DaoException
@@ -225,7 +236,7 @@ public class InstanceOfExtractor {
             for (WikidataStatement st: list){
 
                 // if property is not null and the property id corresponds to "instance of"
-                if (st.getProperty() != null && st.getProperty().getId()==31 ){
+                if (st.getProperty() != null && st.getProperty().getId()==INSTANCE_OF_PROPERTY ){
 
                     // get id of "instance of" label
                     int id=0;
@@ -309,29 +320,30 @@ public class InstanceOfExtractor {
         Map<Integer, Geometry> geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
-        Map<Integer, Geometry> countries = sdDao.getAllGeometriesInLayer("gadm0", "earth");
-        LOG.log(Level.INFO, String.format("Found %d total countries, now loading countries", countries.size()));
-
-        Map<Integer, Geometry> states = sdDao.getAllGeometriesInLayer("gadm1", "earth");
-        LOG.log(Level.INFO, String.format("Found %d total states, now loading states", states.size()));
+        // gadm things
+//        Map<Integer, Geometry> countries = sdDao.getAllGeometriesInLayer("gadm0", "earth");
+//        LOG.log(Level.INFO, String.format("Found %d total countries, now loading countries", countries.size()));
+//
+//        Map<Integer, Geometry> states = sdDao.getAllGeometriesInLayer("gadm1", "earth");
+//        LOG.log(Level.INFO, String.format("Found %d total states, now loading states", states.size()));
 
         // initiate scale sets"scaleIds"+CUR_LANG+".txt"
         for (int i=0; i< NUM_SCALES; i++   ){
             scaleIds[i] = new HashSet<Integer>();
         }
 
-        // counter print, for debug updates
-        int count = 0;
+        List<Integer> idList = new ArrayList<Integer>();
+        idList.addAll(geometries.keySet());
 
-        for (Integer conceptId : geometries.keySet()){
+        for (int i=0; i<idList.size(); i++){
+            int conceptId = idList.get(i);
             UniversalPage concept = upDao.getById(conceptId);
             LocalPage lpage = lDao.getById(CUR_LANG,concept.getLocalId(CUR_LANG));
 
             // counter print
-            if (DEBUG && count%1000 == 0){
-                LOG.log(Level.INFO, "++++++++++++++++++++++++++++++++++ " + count + " ++++++++++++++++++++++++++++++++");
+            if (DEBUG && i%1000 == 0){
+                LOG.log(Level.INFO, "++++++++++++++++++++++++++++++++++ " + i + " ++++++++++++++++++++++++++++++++");
             }
-            count++;
 
             // use getItem because getLocalStatements returns nullpointerexception and getStatements returns empty
             List<WikidataStatement> list = wdao.getItem(conceptId).getStatements();
@@ -339,28 +351,42 @@ public class InstanceOfExtractor {
             // break for loop after first proper "instance of" label found for this conceptId
             boolean found = false;
 
-            if (countries.keySet().contains(conceptId)){
-                scaleIds[COUNTRY].add(conceptId);
-                found = true;
-                continue;
-            }
-            if (states.keySet().contains(conceptId)){
-                scaleIds[STATE].add(conceptId);
-                found =  true;
-                continue;
-            }
+            // more gadm stuff
+//            if (countries.keySet().contains(conceptId)){
+//                scaleIds[COUNTRY].add(conceptId);
+//                found = true;
+//                continue;
+//            }
+//            if (states.keySet().contains(conceptId)){
+//                scaleIds[STATE].add(conceptId);
+//                found =  true;
+//                continue;
+//            }
 
             // loop over this conceptId's statements
             for (WikidataStatement st: list){
 
                 //simple English misses some concept local pages
-                if (st.getProperty() != null && st.getProperty().getId()==31 ){
+                if (st.getProperty() != null && st.getProperty().getId()==INSTANCE_OF_PROPERTY ){
                     // the id belongs to the "instance of" label
-                    int id = st.getValue().getIntValue();
+
+                    int id;
+                    try{
+                        id = st.getValue().getIntValue();
+                    }catch(NullPointerException e){
+                        // weird bug with wikidata
+                        if (st.getValue().getTypeName().equals("SOMEVALUE")) {
+                            continue;
+                        }
+                        else {
+                            throw new NullPointerException("Unexpected statement without an int value: "+st.getValue());
+                        }
+                    }
+
                     try {
                         // universal id corresponding to "instance of" label
                         UniversalPage concept2 = upDao.getById(id);
-                        // local page ditto31
+                        // local page ditto
                         LocalPage page = lDao.getById(CUR_LANG, concept2.getLocalId(CUR_LANG));
 
                         // check if there's a spatial keyword in this instance-of label title
@@ -433,18 +459,14 @@ public class InstanceOfExtractor {
             instanceOfLabel = instanceOfLabel.substring(0, instanceOfLabel.length() - 1);
         }
 
-
-
         // check for a match
-            for (int i=0; i< NUM_SCALES; i++) {
+        for (int i = 0; i < NUM_SCALES; i++) {
 
-                if (match(scaleKeywords[i], instanceOfLabel)) {
-                    scaleIds[i].add(id);
-                    return true;
-                }
+            if (match(scaleKeywords[i], instanceOfLabel)) {
+                scaleIds[i].add(id);
+                return true;
             }
-
-
+        }
 
         // if no match found, return false
         return false;
@@ -453,8 +475,8 @@ public class InstanceOfExtractor {
     /**
      * Check if the pageTitle, or any of its constituent words (space-delimited) are in the given keyword set
      *
-     * @param scaleKeyword
-     * @param pageTitle
+     * @param scaleKeyword The set of keywords associated with the scale under consideration
+     * @param pageTitle Title of the instance-of label
      * @return Whether or not a match was found with the given keyword set
      */
     private boolean match(Set<String> scaleKeyword, String pageTitle){
@@ -464,13 +486,16 @@ public class InstanceOfExtractor {
         }
         // if not there, look for part strings
         else{
-//            String[] tokens1 = pageTitle.split(",");
-//            pageTitle = tokens1[0];
+            // get rid of location information (as in: This College, This County)
             int i = pageTitle.indexOf(',');
             if (i>0){
                 pageTitle = pageTitle.substring(0,i);
             }
+
+            // split string into individual words
             String[] tokens = pageTitle.split(" ");
+
+            // look for individual words in the given set
             for (String s: tokens){
                 if (scaleKeyword.contains(s)) {
                     return true;
