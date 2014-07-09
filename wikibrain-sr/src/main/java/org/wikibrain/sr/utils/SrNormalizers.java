@@ -60,7 +60,7 @@ public class SrNormalizers {
     }
 
     public boolean hasReadableNormalizers(File dir) {
-        return isValidNormalizer(dir, MOST_SIMILAR_NORMALIZER) && isValidNormalizer(dir, SIMILARITY_NORMALIZER);
+        return isValidNormalizer(dir, MOST_SIMILAR_NORMALIZER) || isValidNormalizer(dir, SIMILARITY_NORMALIZER);
     }
 
     /**
@@ -69,8 +69,12 @@ public class SrNormalizers {
      * @throws java.io.IOException
      */
     public void read(File dir) throws IOException {
-        mostSimilarNormalizer = readNormalizer(dir, MOST_SIMILAR_NORMALIZER);
-        similarityNormalizer = readNormalizer(dir, SIMILARITY_NORMALIZER);
+        if (isValidNormalizer(dir, MOST_SIMILAR_NORMALIZER)) {
+            mostSimilarNormalizer = readNormalizer(dir, MOST_SIMILAR_NORMALIZER);
+        }
+        if (isValidNormalizer(dir, SIMILARITY_NORMALIZER)) {
+            similarityNormalizer = readNormalizer(dir, SIMILARITY_NORMALIZER);
+        }
     }
 
     public void write(File dir) throws IOException {
@@ -90,10 +94,10 @@ public class SrNormalizers {
         }
         try {
             return readNormalizer(dir, name).isTrained();
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.log(Level.WARNING,
                     "Failed to load normalizer at " + path.getAbsolutePath() +
-                    ". Setting it to be invalid. Traceback:", e);
+                    ". Setting it to be invalid.");
             return false;
         }
     }
