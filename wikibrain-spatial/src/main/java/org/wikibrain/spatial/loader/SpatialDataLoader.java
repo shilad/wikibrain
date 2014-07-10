@@ -393,8 +393,8 @@ public class SpatialDataLoader {
                     WikiBrainSpatialUtils.downloadZippedShapefileToReferenceSystem("http://www-users.cs.umn.edu/~bhecht/wikibrain/spatial_data/elements.zip",
                             RefSys.PERIODIC_TABLE, spatialDataFolder); // TODO: this should be moved to the config file at some point
                 } else if (canonicalStep.equals("pagehitlist")){
-                    LOG.log(Level.INFO, "Loading spatial entities from PageHitList.txt");
-                    loader.loadSignificantGeometries(new File("PageHitList.txt"));
+                    LOG.log(Level.INFO, "Loading spatial entities from PageHitListFullEng.txt");
+                    loader.loadSignificantGeometries(new File("PageHitListFullEng.txt"));
                 } else {
                     throw new Exception("Illegal step: '" + step + "'");
                 }
@@ -423,6 +423,7 @@ public class SpatialDataLoader {
                 pageHitList.add(nextInt);
             }
         } catch(IOException e){
+            e.printStackTrace();
             System.out.println("cannot find significant geometries input");
         }
         try {

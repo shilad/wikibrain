@@ -3,10 +3,13 @@ package org.wikibrain.spatial.cookbook.tflevaluate;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.conf.ConfigurationException;
+import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.spatial.maxima.GenerateNewSpatialPairs;
 import org.wikibrain.spatial.maxima.SpatialConceptPair;
 import org.wikibrain.spatial.maxima.SurveyQuestionGenerator;
@@ -30,7 +33,9 @@ public class SurveyTest {
     public static void main(String[] args) throws ConfigurationException, DaoException, IOException{
         SurveyQuestionGenerator questionGenerator= new SurveyQuestionGenerator();
         Env env= EnvBuilder.envFromArgs(args);
-        extractor= new InstanceOfExtractor(env.getConfigurator());
+        Configurator c = env.getConfigurator();
+        Language l = Language.getByLangCode(c.get(LanguageSet.class).getLangCodes().get(0));
+        extractor= new InstanceOfExtractor(c,l);
         extractor.loadScaleIds();
         ArrayList<Integer> knownIds= new ArrayList<Integer>();
         BlackListSet= new ArrayList<Integer>();

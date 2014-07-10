@@ -3,32 +3,23 @@ package org.wikibrain.spatial.cookbook.tflevaluate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import org.apache.commons.lang.ArrayUtils;
-import org.geotools.data.DataStore;
-import org.geotools.data.DataStoreFinder;
-import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.referencing.GeodeticCalculator;
 import org.geotools.referencing.datum.DefaultEllipsoid;
-import org.opengis.feature.simple.SimpleFeature;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
-import org.wikibrain.spatial.maxima.SpatialConcept;
-import org.wikibrain.spatial.maxima.SpatialConceptPair;
-import org.wikibrain.spatial.maxima.SurveyQuestionGenerator;
 import org.wikibrain.sr.MonolingualSRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -45,35 +36,36 @@ public class MatrixGenerator {
     public Map<Integer, Geometry> geometries;
     public DistanceMetrics dm;
     private MonolingualSRMetric sr;
-    private Language simple = Language.SIMPLE;
+    private final Language language;
     private static final Logger LOG = Logger.getLogger(InstanceOfExtractor.class.getName());
     private float[][] matrix;
-    public List<Integer> pageHitList;
+    private List<Integer> pageHitList;
 
     public MatrixGenerator(Env env){
         SpatialDataDao sdDao = null;
         SpatialNeighborDao snDao = null;
         Configurator c = env.getConfigurator();
+        Language lan = null;
         try{
             sdDao= c.get(SpatialDataDao.class);
             snDao = c.get(SpatialNeighborDao.class);
+            lan = Language.getByLangCode(c.get(LanguageSet.class).getLangCodes().get(0));
 
         }catch(ConfigurationException e){
             e.printStackTrace();
         }
+        language = lan;
         // eventually, do something to geometries to make it have only significant entries
         try {
             this.geometries = sdDao.getAllGeometriesInLayer("significant", "earth");
         }catch(DaoException e){
             e.printStackTrace();
-        } catch (NullPointerException e){
-            System.out.println("no such layer");
         }
         dm = new DistanceMetrics(env, c, snDao);
         try {
             sr = c.get(
                     MonolingualSRMetric.class, "ensemble",
-                    "language", simple.getLangCode());
+                    "language", language.getLangCode());
         } catch(ConfigurationException e){
             e.printStackTrace();
         }
@@ -90,9 +82,17 @@ public class MatrixGenerator {
         }
         MatrixGenerator mg = new MatrixGenerator(env);
 
-//        MatrixWithHeader matrix = mg.generateSRMatrix();
-//        System.out.println("Finished generating matrix");
-//        mg.createMatrixFile("srmatrix",matrix);
+        // distance
+        MatrixWithHeader matrix = mg.generateDistanceMatrix();
+        System.out.println("Finished generating distance matrix");
+        mg.createMatrixFile("distancematrix_"+mg.language.getLangCode(),matrix);
+
+        // graph distance
+        matrix = mg.generateGraphMatrix(10,15,matrix.matrix);
+        System.out.println("Finished generating graph distance matrix");
+        mg.createMatrixFile("graphmatrix_"+mg.language.getLangCode(),matrix);
+
+
 //        System.out.println("Finished writing matrix to file");
 //        MatrixWithHeader matrix2 = mg.loadMatrixFile("srmatrix");
 //
@@ -100,16 +100,16 @@ public class MatrixGenerator {
 //
 //        System.out.println(matrix.idToIndex.get(30));
 
-//        List<Integer> check = Arrays.asList(18426, 65,36091,34860,16554,38733,79842,496360, 85, 8678);
-//        for (Integer i: check){
-//            for (int j : check){
-//                try {
-//                    System.out.println("distance between " + i + " and " + j + " = " + matrix2.matrix[mg.pageHitList.indexOf(i)][mg.pageHitList.indexOf(j)]);
-//                } catch(Exception e){
-//
-//                }
-//            }
-//        }
+        List<Integer> check = Arrays.asList(18426, 65, 36091,34860,16554,38733,79842,496360, 85, 8678);
+        for (Integer i: check){
+            for (int j : check){
+                try {
+                    System.out.println("distance between " + i + " and " + j + " = " + matrix.matrix[mg.pageHitList.indexOf(i)][mg.pageHitList.indexOf(j)]);
+                } catch(Exception e){
+
+                }
+            }
+        }
 
 //        for (int i=0; i<matrix.matrix.length; i++) {
 //            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
@@ -159,15 +159,16 @@ public class MatrixGenerator {
         return new MatrixWithHeader(matrix,list);
     }
 
-    public MatrixWithHeader generateGraphMatrix(final int k, final int maxTopoDistance){
-        int size = pageHitList.size();
-        final float[][] matrix = new float[size][size];
-
-        // We will assume item ids are universal (because we think item_id in geometries are universal)
-
+    public MatrixWithHeader generateGraphMatrix( int k, int maxTopoDistance){
         MatrixWithHeader distanceMatrixWithHeader = generateDistanceMatrix();
         System.out.println("Finished generating distance matrix");
         final float[][] distanceMatrix = distanceMatrixWithHeader.matrix;
+        return generateGraphMatrix(k, maxTopoDistance, distanceMatrix);
+    }
+
+    public MatrixWithHeader generateGraphMatrix(final int k, final int maxTopoDistance, final float[][] distanceMatrix){
+        int size = pageHitList.size();
+        final float[][] matrix = new float[size][size];
 
         ParallelForEach.loop(pageHitList, new Procedure<Integer>() {
             @Override
@@ -197,26 +198,27 @@ public class MatrixGenerator {
         int size = pageHitList.size();
         matrix = new float[size][size];
 
-            ParallelForEach.loop(pageHitList, new Procedure<Integer>() {
-                @Override
-                public void call(Integer id1) throws Exception {
+        ParallelForEach.loop(pageHitList, new Procedure<Integer>() {
+            @Override
+            public void call(Integer id1) throws Exception {
 
-                    int i = pageHitList.indexOf(id1);
-                    for (int j=0; j<pageHitList.size(); j++) {
+                int i = pageHitList.indexOf(id1);
+                for (int j = 0; j < pageHitList.size(); j++) {
 
-                        float distance = 0;
-                        try {
-                            SRResult similarity = sr.similarity(id1, pageHitList.get(j), false);
-                            distance = (float) similarity.getScore();
-                            System.out.println(id1 +" and "+pageHitList.get(j)+": "+distance);
-                        } catch (DaoException e) {
-                            e.printStackTrace();
-                        }
-                        matrix[i][j] = distance;
+                    float distance = 0;
+                    try {
+                        SRResult similarity = sr.similarity(id1, pageHitList.get(j), false);
+                        distance = (float) similarity.getScore();
+                        System.out.println(distance+" "+id1+" "+pageHitList.get(j));
+                    } catch (DaoException e) {
+                        e.printStackTrace();
                     }
-                    System.out.println("Processed row "+i);
+
+                    matrix[i][j] = distance;
                 }
-            });
+                System.out.println("Processed row " + i);
+            }
+        });
 
         return new MatrixWithHeader(matrix,pageHitList);
     }
