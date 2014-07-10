@@ -121,7 +121,9 @@ public class MatrixGenerator {
 //            System.out.println(sortedIds.get(i)+": "+matrix.matrix[la][matrix.idsInOrder.indexOf(sortedIds.get(i))]+" "+matrix.matrix[matrix.idsInOrder.indexOf(sortedIds.get(i))][la]);
 //        }
 
-        mg.generateGraphNeighborUrl(matrix,65);
+//        mg.generateGraphNeighborUrl(matrix,65,Float, 9.POSITIVE_INFINITY);
+        mg.generateGraphNeighborUrl(matrix,118388,7,Float.POSITIVE_INFINITY);
+
 
 
 //        System.out.println("Finished writing matrix to file");
@@ -131,16 +133,16 @@ public class MatrixGenerator {
 //
 //        System.out.println(matrix.idToIndex.get(30));
 
-        List<Integer> check = Arrays.asList(18426, 65, 36091,34860,16554,38733,79842,496360, 85, 8678);
-        for (Integer i: check){
-            for (int j : check){
-                try {
-                    System.out.println("distance between " + i + " and " + j + " = " + matrix.matrix[mg.pageHitList.indexOf(i)][mg.pageHitList.indexOf(j)]);
-                } catch(Exception e){
-
-                }
-            }
-        }
+//        List<Integer> check = Arrays.asList(18426, 65, 36091,34860,16554,38733,79842,496360, 85, 8678);
+//        for (Integer i: check){
+//            for (int j : check){
+//                try {
+//                    System.out.println("distance between " + i + " and " + j + " = " + matrix.matrix[mg.pageHitList.indexOf(i)][mg.pageHitList.indexOf(j)]);
+//                } catch(Exception e){
+//
+//                }
+//            }
+//        }
 
 //        for (int i=0; i<matrix.matrix.length; i++) {
 //            if (!Arrays.equals(matrix.matrix[i], matrix2.matrix[i])){
@@ -149,9 +151,10 @@ public class MatrixGenerator {
 //        }
     }
 
-    public void generateGraphNeighborUrl (final MatrixWithHeader graph, final int conceptId){
+    public void generateGraphNeighborUrl (final MatrixWithHeader graph, final int conceptId, int zoom, float max){
+        String[] colors = {"color:purple|","color:blue|","color:green|","color:yellow|","color:orange|",""};
         String base = "http://maps.googleapis.com/maps/api/staticmap?center=";
-        String base2 = "&zoom=9&size=800x524&markers=color:blue|";
+        String base2 = "&zoom="+zoom+"&size=800x524&markers=color:black|";
         List<Integer> neighbors = new ArrayList<Integer>();
         neighbors.addAll(geometries.keySet());
         final int conceptIndex = graph.idToIndex.get(conceptId);
@@ -170,7 +173,7 @@ public class MatrixGenerator {
 
         Point source = (Point) geometries.get(conceptId);
         String sourceStr = source.getY()+","+source.getX();
-        base+= sourceStr + base2+ sourceStr+"&markers=";
+        base+= sourceStr + base2+ sourceStr+"|";
         System.out.println(sourceStr);
 
         if (neighbors.get(0)!=conceptId){
@@ -178,30 +181,46 @@ public class MatrixGenerator {
         }
 
         int i=1;
-        float curDepth = 1;
+        float curDepth = 0;
         String current = base;
         int index;
         do{
             index = graph.idsInOrder.indexOf(neighbors.get(i));
             Point p2 = (Point) geometries.get(neighbors.get(i));
-            String p2Str = p2.getY()+","+p2.getX()+"|";
+            String p2Str = String.format("%.4f,%.4f|",p2.getY(),p2.getX());
             float newDepth = graph.matrix[conceptIndex][index];
+
+            // switch color if necessary
             if (newDepth!=curDepth){
-                System.out.println(current.substring(0,current.length()-1));
-                System.out.println("Starting level "+newDepth);
-                current = base+p2Str;
+                if (newDepth == max){
+                    break;
+                }
+                System.out.println("Length: "+(current.length()-1));
+                current = current.substring(0,current.length()-1);
+                p2Str="&markers="+colors[((int)newDepth-1)%colors.length]+p2Str;
                 curDepth = newDepth;
-            }else if (current.length()+p2Str.length()>1000){
+                System.out.println("Starting level "+curDepth);
+                if (current.length()+p2Str.length()>1000){
+                    System.out.println("Length: "+(current.length()-1));
+                    System.out.println(current);
+                    current = base+p2Str;
+                }else{
+                    current += p2Str;
+                }
+            }
+            else if (current.length()+p2Str.length()>1000){
+                System.out.println("Length: "+(current.length()-1));
                 System.out.println(current.substring(0,current.length()-1));
-                current = base+p2Str;
+                current = base+colors[((int)newDepth-1)%colors.length]+p2Str;
             }else{
                 current += p2Str;
             }
             i++;
 
-        }while(graph.matrix[conceptIndex][index]!=Float.POSITIVE_INFINITY);
+        }while(true);//graph.matrix[conceptIndex][index]!=Float.POSITIVE_INFINITY && graph.matrix[conceptIndex][index]<colors.length);
 
-        System.out.println(current);
+        System.out.println("Length: "+(current.length()-1));
+        System.out.println(current.substring(0,current.length()-1));
     }
 
     public MatrixWithHeader generateDistanceMatrix(){
