@@ -3,11 +3,14 @@ package org.wikibrain.spatial.maxima;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.spatial.cookbook.tflevaluate.MatrixGenerator;
 
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -51,6 +54,7 @@ public class SurveyQuestionGenerator {
             System.out.println("File not found");
         }
         buildMatrices();
+
     }
 
     private void readInIdToScaleInfo() throws FileNotFoundException{
@@ -88,7 +92,7 @@ public class SurveyQuestionGenerator {
         Scanner scanner = new Scanner(file);
         while(scanner.hasNextLine()){
             String next= scanner.nextLine();
-            java.util.StringTokenizer st= new java.util.StringTokenizer(next,":",false);
+            java.util.StringTokenizer st= new java.util.StringTokenizer(next,"\t",false);
             int id= Integer.parseInt(st.nextToken());
             String name= st.nextToken();
             idsStringMap.put(id, name);
@@ -120,6 +124,7 @@ public class SurveyQuestionGenerator {
         if(responseNumb % 100==0){
             System.out.println(responseNumb);
         }
+
         return returnPairs;
     }
 
