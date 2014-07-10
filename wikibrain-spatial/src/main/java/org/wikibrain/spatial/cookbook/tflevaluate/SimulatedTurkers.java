@@ -53,24 +53,28 @@ public class SimulatedTurkers {
 
 
         if (loadData) {
-//        try {
-//            st.parseGazetteer();
-//            Map<String, Set<Integer>> map = st.getNearConceptList(10, 2 );
-//            st.createNeighborFile(map, "citiesToNeighbors3.txt");
-//            for (int i = 0; i<st.neighborsCount.length; i++){
-//                System.out.print(i+":"+st.neighborsCount[i]+"\t");
-//            }
-            Map<String, Set<Integer>> neighbors = st.loadNeighborFile(new File("citiesToNeighbors3.txt"));
-            for (String s : neighbors.keySet()) {
-                st.neighborsCount[neighbors.get(s).size()]++;
-            }
-            for (int i = 0; i < st.neighborsCount.length; i++) {
-                System.out.println(i + "\t" + st.neighborsCount[i]);
-            }
+            try {
+                System.out.println("Started parsing cities method");
+                st.parseGazetteer();
+                System.out.println("Finished parsing cities.");
+                Map<String, Set<Integer>> map = st.getNearConceptList(10, 2 );
+                System.out.println("Finished generating map");
+                st.createNeighborFile(map, "citiesToNeighbors4.txt");
+                System.out.println("Finished writing to file.");
+                for (int i = 0; i<st.neighborsCount.length; i++){
+                    System.out.print(i+":"+st.neighborsCount[i]+"\t");
+                }
+    //            Map<String, Set<Integer>> map = st.loadNeighborFile(new File("citiesToNeighbors4.txt"));
+                for (String s : map.keySet()) {
+                    st.neighborsCount[map.get(s).size()]++;
+                }
+                for (int i = 0; i < st.neighborsCount.length; i++) {
+                    System.out.println(i + "\t" + st.neighborsCount[i]);
+                }
 
-//        } catch (IOException e){
-//
-//        }
+            } catch (IOException e){
+                e.printStackTrace();
+            }
         } else {
 
 
