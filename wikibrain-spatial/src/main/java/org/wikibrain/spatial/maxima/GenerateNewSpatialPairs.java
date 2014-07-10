@@ -135,8 +135,20 @@ public class GenerateNewSpatialPairs {
     }
 
     public void setProperties(SpatialConceptPair pair) {
-        pair.setKmDistance(distanceMatrix[idToIndexForDistanceMatrix.get(pair.getFirstConcept().getUniversalID())][idToIndexForDistanceMatrix.get(pair.getSecondConcept().getUniversalID())]);
-        pair.setRelatedness(srMatrix[idToIndexForSRMatrix.get(pair.getFirstConcept().getUniversalID())][idToIndexForSRMatrix.get(pair.getSecondConcept().getUniversalID())]);
-        pair.setGraphDistance(graphMatrix[idToIndexForGraphMatrix.get(pair.getFirstConcept().getUniversalID())][idToIndexForGraphMatrix.get(pair.getSecondConcept().getUniversalID())]);
+        int indexIdOne=idToIndexForDistanceMatrix.get(pair.getFirstConcept().getUniversalID());
+        int indexIdTwo=idToIndexForDistanceMatrix.get(pair.getSecondConcept().getUniversalID());
+        if(indexIdOne != -1 && indexIdTwo != -1) {
+            pair.setKmDistance(distanceMatrix[indexIdOne][indexIdTwo]);
+        }
+        indexIdOne=idToIndexForSRMatrix.get(pair.getFirstConcept().getUniversalID());
+        indexIdTwo=idToIndexForSRMatrix.get(pair.getSecondConcept().getUniversalID());
+        if(indexIdOne != -1 && indexIdTwo != -1) {
+            pair.setRelatedness(srMatrix[indexIdOne][indexIdTwo]);
+        }
+        indexIdOne=idToIndexForGraphMatrix.get(pair.getFirstConcept().getUniversalID());
+        indexIdTwo=idToIndexForGraphMatrix.get(pair.getSecondConcept().getUniversalID());
+        if(indexIdOne !=  -1 && indexIdTwo != -1) {
+            pair.setGraphDistance(graphMatrix[indexIdOne][indexIdTwo]);
+        }
     }
 }
