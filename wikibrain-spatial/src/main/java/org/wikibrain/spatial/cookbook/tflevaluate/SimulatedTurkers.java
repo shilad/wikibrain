@@ -49,7 +49,7 @@ public class SimulatedTurkers {
         SimulatedTurkers st = new SimulatedTurkers(mg, env);
 
         // set this boolean to change the purpose of this program
-        boolean loadData = true;
+        boolean loadData = false;
 
 
         if (loadData) {
@@ -351,10 +351,15 @@ public class SimulatedTurkers {
 
         // generate turkers
         for (int i = 0; i < numTurkers; i++) {
-            String city = randomCollection.next();
-            // turker id, country,state,city, city population
-            System.out.println(i + " " + city + " " + cityPopulations.get(city));
-            listOfTurkerFamiliarIds.add(neighbors.get(city));
+            Set<Integer> familiar = new HashSet<Integer>();
+            double d = 3*Math.random();
+            for (int j=0; j<d; j++){
+                String city = randomCollection.next();
+                // turker id, country,state,city, city population
+                System.out.println(i + " " + city + " " + cityPopulations.get(city));
+                familiar.addAll(neighbors.get(city));
+            }
+            listOfTurkerFamiliarIds.add(familiar);
         }
 
         // return the list
