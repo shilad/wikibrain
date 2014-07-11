@@ -8,9 +8,7 @@ import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.spatial.cookbook.tflevaluate.MatrixGenerator;
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -39,12 +37,13 @@ public class SurveyQuestionGenerator {
     float[][] distanceMatrix;
     float[][] srMatrix;
     public float[][] graphMatrix; //TODO change back to private
+    PrintWriter pw;
 
-    public Set<SpatialConceptPair> allPreviousQList;
+    private Set<SpatialConceptPair> allPreviousQList;
 //    public List<SpatialConceptPair> allPreviousQList; //the list of previously asked questions and never changes but is added to
 
 
-    public SurveyQuestionGenerator() {
+    public SurveyQuestionGenerator() throws IOException{
         allPreviousQList= new HashSet<SpatialConceptPair>();
 //        allPreviousQList= new ArrayList<SpatialConceptPair>();
         try{
@@ -54,8 +53,48 @@ public class SurveyQuestionGenerator {
             System.out.println("File not found");
         }
         buildMatrices();
-
+        resetPreviousQList();
+        pw = new PrintWriter(new FileWriter("previousConceptPairs.txt"), true); //sets autoflush to true
     }
+
+    /**
+     * rebuilds the allPreviousQList Set in the event of a survey crash
+     * @throws IOException
+     */
+    private void resetPreviousQList() throws IOException{
+        Scanner sc = new Scanner(new File("previousConceptPairs.txt"));
+        List<SpatialConceptPair> previousQList = new ArrayList<SpatialConceptPair>();
+
+        while(sc.hasNextLine()){
+            String[] info = sc.nextLine().split(":");
+            int firstConceptID = Integer.parseInt(info[0]);
+            int secondConceptID = Integer.parseInt(info[1]);
+            SpatialConcept firstConcept = new SpatialConcept(firstConceptID, idsStringMap.get(firstConceptID));
+            SpatialConcept secondConcept = new SpatialConcept(secondConceptID, idsStringMap.get(secondConceptID));
+            SpatialConceptPair pair = new SpatialConceptPair(firstConcept, secondConcept);
+
+            int listIndex = previousQList.indexOf(pair);//finds the index of the pair
+            if (listIndex == -1){//adds the pair if not in the list
+                previousQList.add(pair);
+                listIndex = previousQList.size()-1; //changes listIndex to the index of the new pair for the next part
+            }
+
+            String type = info[2];
+            //increases the proper number of times asked for the line read in
+            if(type.equals("kk")){
+                previousQList.get(listIndex).increaseKkNumbOfTimesAsked(1);
+            }
+            else if(type.equals("ku")){
+                previousQList.get(listIndex).increaseKuNumbOfTimesAsked(1);
+            }
+            else{
+                previousQList.get(listIndex).increaseUuNumbOfTimesAsked(1);
+            }
+        }
+
+        allPreviousQList.addAll(previousQList);
+    }
+
 
     private void readInIdToScaleInfo() throws FileNotFoundException{
         idToScaleCategory= new HashMap<Integer, Integer>();
@@ -124,6 +163,20 @@ public class SurveyQuestionGenerator {
         if(responseNumb % 100==0){
             System.out.println(responseNumb);
         }
+
+        //appends all information for each pair being asked into previousConceptPairs.txt in the event of a survey crash
+        for(SpatialConceptPair pair: variables.kkReturnList){
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk" );
+        }
+
+        for(SpatialConceptPair pair: variables.kuReturnList){
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku" );
+        }
+
+        for(SpatialConceptPair pair: variables.uuReturnList){
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu" );
+        }
+
 
         return returnPairs;
     }
