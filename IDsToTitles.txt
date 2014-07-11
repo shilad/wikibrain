@@ -1,774 +1,2151 @@
-3242995:Leavenheath (simple)
-11235:World Trade Center (simple)
-58024:EBay (simple)
-5463:Rocky Mountains (simple)
-1748:Copenhagen (simple)
-486472:Kansas City, Kansas (simple)
-1356:West Bengal (simple)
-22048:Odisha (simple)
-1186:Kerala (simple)
-27275:Central Asia (simple)
-47672:Terracotta Army (simple)
-4512:VfB Stuttgart (simple)
-25277:Hispaniola (simple)
-159868:Amel (simple)
-36004:Cocos (Keeling) Islands (simple)
-29198:2011 Egyptian revolution (simple)
-49108:Massachusetts Institute of Technology (simple)
-792:El Salvador (simple)
-56037:East Berlin (simple)
-123738:Hyde Park, London (simple)
-167394:Kragujevac (simple)
-117892:World Wide Fund for Nature (simple)
-34374:Crete (simple)
-41550:Organisation for Economic Co-operation and Development (simple)
-269:Tashkent (simple)
-33910:Uluru (simple)
-161227:Yalta Conference (simple)
-2038907:Battle of Wuhan (simple)
-1055:Hamburg (simple)
-16990:Mount Etna (simple)
-2634:Naples (simple)
-1402078:Warsaw Uprising (simple)
-638740:National Stock Exchange of India (simple)
-34366:Tasmania (simple)
-3769:French Guiana (simple)
-488278:Battle of Uhud (simple)
-170027:University of London (simple)
-971:Republic of the Congo (simple)
-29265:Canterbury Cathedral (simple)
-130958:The Great Sphinx (simple)
-80919:KGB (simple)
-8733:Qing Dynasty (simple)
-1222:Valle d'Aosta (simple)
-150928:Signal Iduna Park (simple)
-179684:Spanish Armada (simple)
-5859:Chichen Itza (simple)
-1265:Colorado River (simple)
-16641:American Samoa (simple)
-80344:Olympus (simple)
-1489:Mexico City (simple)
-970:Comoros (simple)
-657:Chad (simple)
-1049:Sudan (simple)
-730:Suriname (simple)
-54504:Sydney Harbour (simple)
-82613:Krakatoa (simple)
-5428:Siberia (simple)
-33959:Nice (simple)
-1521725:Louisiana State University and A&M College (simple)
-12563:Landes (simple)
-980:Bavaria (simple)
-34664:Hiroshima (simple)
-270:Warsaw (simple)
-749811:Mutiny on the Bounty (simple)
-42462:York (simple)
-188712:Empire of Japan (simple)
-29466:Kaaba (simple)
-151993:Ruhr Area (simple)
-1032:Niger (simple)
-11260:Broadway (simple)
-34675:Persian Gulf (simple)
-18869:Caucasus (simple)
-33132:Battle of Gettysburg (simple)
-10905515:Ryūkyū Islands (simple)
-2358411:Glenrowan, Victoria (simple)
-40194:Mazatlán (simple)
-122909:Crystal Palace (simple)
-18536:The Shard (simple)
-31063:Christmas Island (simple)
-131230:Mauna Kea (simple)
-215030:London Borough of Lewisham (simple)
-632794:Hawaiian–Emperor seamount chain (simple)
-10686:Belfast (simple)
-1207:North Dakota (simple)
-759:New Hampshire (simple)
-17070:Réunion (simple)
-31487:Kraków (simple)
-131969:Battle of Thermopylae (simple)
-31900:Battle of Marathon (simple)
-230899:University of Manchester (simple)
-179200:Metro-Goldwyn-Mayer (simple)
-12193:Brest, France (simple)
-188617:Kew Gardens (simple)
-1974:British Columbia (simple)
-1754:Stockholm (simple)
-899:Suez Canal (simple)
-1173:Burgundy (simple)
-683:Samoa (simple)
-161885:Kingdom of Great Britain (simple)
-1415:Indiana (simple)
-1445:Tamil Nadu (simple)
-231:Wallonia (simple)
-17269:Tibet (simple)
-161491:Reading, Berkshire (simple)
-131297:Rwandan Genocide (simple)
-14112:Corsica (simple)
-174710:University of California, Los Angeles (simple)
-131397:Venus of Willendorf (simple)
-41931:Hanging Gardens of Babylon (simple)
-131354:Alcatraz Island (simple)
-12772:Tarn (simple)
-174:São Paulo (simple)
-37320:Cleveland, Ohio (simple)
-194057:Mount Rainier (simple)
-43332:Pompeii (simple)
-3616:Tehran (simple)
-16556:Phoenix, Arizona (simple)
-945:Togo (simple)
-879:Bromine (simple)
-60140:Indian subcontinent (simple)
-23334:Abkhazia (simple)
-483551:Walmart (simple)
-1737:Bregenz (simple)
-164679:Great Fire of London (simple)
-99309:Pantheon (simple)
-16338015:Sewol (simple)
-985210:Victoria Station (simple)
-1829:Kaliningrad (simple)
-784:Dominica (simple)
-9679:Isle of Wight (simple)
-1393:Delaware (simple)
-524757:KFC (simple)
-2090:Nuremberg (simple)
-7880:Toulouse (simple)
-3304442:Mission San Luis Obispo de Tolosa (simple)
-79996:Nome, Alaska (simple)
-173882:St. Paul's Cathedral (simple)
-209184:Israel Academy of Sciences and Humanities (simple)
-2044:Florence (simple)
-967:Burundi (simple)
-1952:Nova Scotia (simple)
-727:Amsterdam (simple)
-977:Djibouti (simple)
-510:Mariana Trench (simple)
-1887338:White Lodge, Richmond Park (simple)
-168756:University of California, Berkeley (simple)
-956:Beijing (simple)
-1202:Saxony (simple)
-954:Zimbabwe (simple)
-205495:Gas station (simple)
-1211:South Dakota (simple)
-6346:Indianapolis (simple)
-188304:Sunderland (simple)
-125821:George Washington Bridge (simple)
-15786:1. FC Nuremberg (simple)
-180182:Battle of Iwo Jima (simple)
-18094:Honolulu (simple)
-172613:Teotihuacán (simple)
-114295:Fukushima Daiichi Nuclear Power Plant (simple)
-1471:Seine (simple)
-1212:Montana (simple)
-1494:Mississippi (simple)
-187334:Al Anbar Province (simple)
-1792:Gdańsk (simple)
-8691:London Heathrow Airport (simple)
-774:Guatemala (simple)
-29364:Montgomery, Alabama (simple)
-1014:Liberia (simple)
-164983:Gallipoli Campaign (simple)
-874:Turkmenistan (simple)
-37362:Akrotiri and Dhekelia (simple)
-18221:Turks and Caicos Islands (simple)
-4361:Curitiba (simple)
-7795:Organization of the Petroleum Exporting Countries (simple)
-2004262:USS Arizona Memorial (simple)
-44687:Schutzstaffel (simple)
-626:Volga River (simple)
-3183:Perth, Western Australia (simple)
-5813:Canary Islands (simple)
-34713:Salzburg (simple)
-1865480:Bastille (simple)
-11943:Zürich (canton) (simple)
-975:San Antonio (simple)
-2751:Sienna (simple)
-81307:Greenpeace (simple)
-93332:Appalachian Mountains (simple)
-52062:Nordic countries (simple)
-28179:Joseon (simple)
-174335:French Civil Aviation University (simple)
-151480:Sphinx (simple)
-2814:Halle, Saxony-Anhalt (simple)
-1020:Malawi (simple)
-1273:Tuscany (simple)
-192557:DreamWorks (simple)
-37200:Great Pyramid of Giza (simple)
-25263:Azores (simple)
-1983493:Western Victorian Volcanic Plains (simple)
-7835:Crimea (simple)
-129143:Trafalgar Square (simple)
-1780:Bratislava (simple)
-1505:Sikkim (simple)
-724:Maine (simple)
-1546:Iowa (simple)
-1025:Mauritania (simple)
-638904:Great Pacific Garbage Patch (simple)
-1930:Ottawa (simple)
-31945:Arabian Peninsula (simple)
-22889:Bath, Somerset (simple)
-871991:Cherry blossom (simple)
-914:Volgograd (simple)
-1387:Rhode Island (simple)
-123577:U.S. Open (tennis) (simple)
-1000:Gabon (simple)
-35958:Bosporus (simple)
-43196:Cincinnati (simple)
-819:Laos (simple)
-127552:Pixar (simple)
-824:Oregon (simple)
-1603:Kentucky (simple)
-1371:West Virginia (simple)
-321437:Bodhi Tree (simple)
-574:East Timor (simple)
-102720:Hertha BSC (simple)
-11767:Mesopotamia (simple)
-71719:Hollywood Walk of Fame (simple)
-39061:Northern hemisphere (simple)
-1612:Arkansas (simple)
-1227:Nevada (simple)
-1037:Rwanda (simple)
-1342:Pittsburgh (simple)
-101959:Borussia Mönchengladbach (simple)
-8577:2012 Summer Olympics (simple)
-804:Panama (simple)
-1171:Goa (simple)
-5690:Sparta (simple)
-917:Bhutan (simple)
-833850:Carnac stones (simple)
-265:Uzbekistan (simple)
-124425:Iron Curtain (simple)
-62408:Palace of Westminster (simple)
-1865:Kuala Lumpur (simple)
-1799:Wrocław (simple)
-1050:Swaziland (simple)
-1581:Missouri (simple)
-49658:Loch Ness Monster (simple)
-272434:Globe Theatre (simple)
-3757:Java (simple)
-23337:Salt Lake City (simple)
-717:Venezuela (simple)
-754:Trinidad and Tobago (simple)
-159599:CeBIT (simple)
-71:Geneva (simple)
-128910:The Last Supper (simple)
-164256:Kansai region (simple)
-1553:Nebraska (simple)
-9648:Falkland Islands (simple)
-85:Cairo (simple)
-986:Eritrea (simple)
-35525:White House (simple)
-783:Honduras (simple)
-217:Moldova (simple)
-1197:Lower Saxony (simple)
-1527:Minnesota (simple)
-1537:Wisconsin (simple)
-1183:Puerto Rico (simple)
-4628:Faroe Islands (simple)
-26253:Madeira Islands (simple)
-223644:Solomon's Temple (simple)
-58733:Confederación Sudamericana de Fútbol (simple)
-12837:Iberian Peninsula (simple)
-170495:Topkapı Palace (simple)
-1726:Munich (simple)
-3114:Canberra (simple)
-686:Vanuatu (simple)
-1286:Alps (simple)
-1036:Uganda (simple)
-1361:Hyderabad, India (simple)
-916:Angola (simple)
-933:South Pole (simple)
-1741:Vienna (simple)
-37093:Yahoo! (simple)
-72:Zürich (simple)
-3542:Niger River (simple)
-1456:South Carolina (simple)
-9676:Isle of Man (simple)
-23430:Ulan Bator (simple)
-999109:Port Arthur, Tasmania (simple)
-1529151:Glamis Castle (simple)
-6583:Sahara (simple)
-37230:Central Intelligence Agency (simple)
-382118:Parliament of Australia (simple)
-842:Oman (simple)
-253414:FIFA (simple)
-236:Montenegro (simple)
-181013:Little Boy (simple)
-11929:Solothurn (canton) (simple)
-48159:City of Manchester Stadium (simple)
-275662:Mount Hood (simple)
-24639:Vancouver (simple)
-5456:Andes (simple)
-1027:Mauritius (simple)
-11708:Southeast Asia (simple)
-7178:International Red Cross and Red Crescent Movement (simple)
-40605:Large Hadron Collider (simple)
-1497:Mississippi River (simple)
-173034:Battle of Midway (simple)
-44440:Golden Gate Bridge (simple)
-712:Fiji (simple)
-962:Benin (simple)
-23883:Dead Sea (simple)
-637413:United States Census Bureau (simple)
-1761:Dublin (simple)
-228:Andorra (simple)
-1348:Kolkata (simple)
-734:Guyana (simple)
-1391:Maryland (simple)
-953:Zambia (simple)
-6106:Portland, Oregon (simple)
-36380:Society of Jesus (simple)
-1524:Athens (simple)
-52418:Attack on Pearl Harbor (simple)
-5051616:Catbells (simple)
-180788:National Gallery, London (simple)
-176:Quebec (simple)
-1492:Barcelona (simple)
-817:Kuwait (simple)
-23522:Balkans (simple)
-965:Burkina Faso (simple)
-826:Maldives (simple)
-9337:Flemish Region (simple)
-36091:Minneapolis (simple)
-48249:Falklands War (simple)
-8889:European Parliament (simple)
-104770:1. FC Cologne (simple)
-12061013:Kingsway tramway subway (simple)
-1180:Jammu and Kashmir (simple)
-38095:Galápagos Islands (simple)
-40970:International Olympic Committee (simple)
-131389:International Date Line (simple)
-1156:Mumbai (simple)
-1588:Louisiana (simple)
-779:Connecticut (simple)
-115:Ethiopia (simple)
-1522:New Mexico (simple)
-48314:Battle of Waterloo (simple)
-785:Jersey (simple)
-81591:Great Rift Valley (simple)
-838278:2009 Victorian bushfires (simple)
-138518:Princeton, New Jersey (simple)
-1757:Helsinki (simple)
-34221:Niagara Falls (simple)
-23635:Bermuda (simple)
-16557:Dallas (simple)
-32494:FC Schalke 04 (simple)
-193484:Assassination of John F. Kennedy (simple)
-172030:McLaren (simple)
-4093:Glasgow (simple)
-36704:Yugoslavia (simple)
-11201:Supreme Court of the United States (simple)
-221:Republic of Macedonia (simple)
-180402:Yosemite National Park (simple)
-41179:Mekong River (simple)
-229:Republic of Cyprus (simple)
-1509:Tennessee (simple)
-45178:Sydney Opera House (simple)
-466:World Wide Web (simple)
-750:Bolivia (simple)
-863:Tajikistan (simple)
-1044:Sierra Leone (simple)
-200697:Gilgit-Baltistan (simple)
-1166:Michigan (simple)
-3141:Melbourne (simple)
-1085:Prague (simple)
-41520:The Championships, Wimbledon (simple)
-624556:St. Patrick's Cathedral (New York) (simple)
-23197:Nashville, Tennessee (simple)
-23482:Marseille (simple)
-1231:Kosovo (simple)
-340:Montreal (simple)
-456:Lyon (simple)
-1204:Illinois (simple)
-16552:San Diego, California (simple)
-82425:Brandenburg Gate (simple)
-850231:Leschelle (simple)
-757979:Assassination attempt on Ronald Reagan (simple)
-77:Uruguay (simple)
-1558:Kansas (simple)
-326134:Leuze (simple)
-205976:Mount of Olives (simple)
-39671:Stonehenge (simple)
-238:San Marino (simple)
-1261:Colorado (simple)
-878:United Arab Emirates (simple)
-15878:Normandy (simple)
-40171:Neanderthal (simple)
-172:Toronto (simple)
-32:Luxembourg (simple)
-18419:Brooklyn (simple)
-1397:Ohio (simple)
-1410:Gibraltar (simple)
-1042:Seychelles (simple)
-1011:Cape Verde (simple)
-7156:F.C. Barcelona (simple)
-35672:Pitcairn (simple)
-200130:Azad Kashmir (simple)
-2256:Birmingham (simple)
-829:Utah (simple)
-496360:Idaho Falls (simple)
-13989:Honshū (simple)
-1400:Pennsylvania (simple)
-771:Massachusetts (simple)
-1045:Somalia (simple)
-1009:Cameroon (simple)
-16554:Denver (simple)
-41304:Weimar Republic (simple)
-974:Democratic Republic of the Congo (simple)
-38789:Battle of Stalingrad (simple)
-12514:Three Gorges Dam (simple)
-152033:2008 Sichuan earthquake (simple)
-12508:Giza pyramid complex (simple)
-19686:River Thames (simple)
-130754:2004 Indian Ocean earthquake (simple)
-1214:Wyoming (simple)
-664609:Caribbean (simple)
-1408:New Jersey (simple)
-1454:North Carolina (simple)
-35637:Nobel Peace Prize (simple)
-3224:New South Wales (simple)
-35794:University of Cambridge (simple)
-347:Liechtenstein (simple)
-822:Lebanon (simple)
-171178:Fukushima nuclear disaster (simple)
-29294:Willis Tower (simple)
-1019:Madagascar (simple)
-1030:Namibia (simple)
-7350:Panama Canal (simple)
-38076:McDonald's (simple)
-42646:Windsor Castle (simple)
-200667:Ladakh (simple)
-5484:Caspian Sea (simple)
-2153814:Haines City (simple)
-13706:Sealand (simple)
-406:Istanbul (simple)
-924:Tanzania (simple)
-13991:Shikoku (simple)
-161562:California Institute of Technology (simple)
-963:Botswana (simple)
-43708:Bermuda triangle (simple)
-329266:Crater Lake (simple)
-6373:British Museum (simple)
-23792:Palestine (simple)
-34404:New Orleans (simple)
-912:Mali (simple)
-5272356:Erwarton (simple)
-790:Haiti (simple)
-644636:Cyprus (simple)
-1370:Virginia (simple)
-1123997:Waldorf-Astoria Hotel (simple)
-649:Moscow (simple)
-11972:Aargau (simple)
-641:Venice (simple)
-5092:Baltimore (simple)
-34370:Rotterdam (simple)
-37836:Milwaukee (simple)
-49762:Christian Democratic Union of Germany (simple)
-215:Slovenia (simple)
-14773:Macau (simple)
-192088:Eton College (simple)
-1519761:United States Department of Health, Education, and Welfare (simple)
-1794:Frankfurt (simple)
-19024:Boston Tea Party (simple)
-70:Bern (simple)
-23548:NASA (simple)
-23436:Edinburgh (simple)
-181185:Disneyland (simple)
-524:Mount Vesuvius (simple)
-330872:Badshahi Mosque (simple)
-5725:Mohenjo-daro (simple)
-191:Estonia (simple)
-12724:Ticino (simple)
-184:Belarus (simple)
-4478:Punjab (Pakistan) (simple)
-1039:São Tomé and Príncipe (simple)
-813:Kyrgyzstan (simple)
-1747689:Ancient Rome (simple)
-172691:Thar Desert (simple)
-3392:Nile (simple)
-2981:Notre Dame de Paris (simple)
-28513:Austria-Hungary (simple)
-39231:Mount Fuji (simple)
-26:Northern Ireland (simple)
-398:Bahrain (simple)
-13371:Harvard University (simple)
-38022:St. Louis (simple)
-1693:North Sea (simple)
-34433:University of Oxford (simple)
-482459:Summerhill School (simple)
-419:Peru (simple)
-10690:Cardiff (simple)
-810:Jordan (simple)
-36687:Victoria (Australia) (simple)
-160409:Central Park (simple)
-7164:World Bank (simple)
-786:Dominican Republic (simple)
-172851:Spa-Francorchamps (simple)
-7825:World Trade Organization (simple)
-164815:Woodstock Festival (simple)
-1008:Côte d'Ivoire (simple)
-11703:United States Virgin Islands (simple)
-11701:United States House of Representatives (simple)
-16555:Houston (simple)
-351:Yellowstone National Park (simple)
-13987:Kyūshū (simple)
-5806:Mecca (simple)
-211:Latvia (simple)
-816:Arizona (simple)
-837:Nepal (simple)
-223:Greenland (simple)
-1428:Georgia (U.S. state) (simple)
-43777:2010 Haiti earthquake (simple)
-8678:Rio de Janeiro (simple)
-12439:Detroit (simple)
-17155:Barcelona Cathedral (simple)
-241:Cuba (simple)
-2807:Madrid (simple)
-227:Azerbaijan (simple)
-11268:United States Congress (simple)
-424:Cambodia (simple)
-7809:UNESCO (simple)
-208855:Jallianwala Bagh massacre (simple)
-8646:Hong Kong (simple)
-98:Pacific Ocean (simple)
-214:Slovakia (simple)
-233:Malta (simple)
-65250:39th G8 summit (simple)
-736:Ecuador (simple)
-805:Yemen (simple)
-83497:Mount Rushmore (simple)
-865:Republic of China (simple)
-37:Lithuania (simple)
-9188:Empire State Building (simple)
-126399:Warner Bros. (simple)
-118841:Grand Canyon (simple)
-230:Georgia (country) (simple)
-225:Bosnia and Herzegovina (simple)
-7804:International Monetary Fund (simple)
-18:South America (simple)
-1320376:York Cottage (simple)
-711:Mongolia (simple)
-921:Brunei (simple)
-399:Armenia (simple)
-11010:Parliament of the United Kingdom (simple)
-18097:Korea (simple)
-16635:Guam (simple)
-881:Vietnam (simple)
-180:Wikimedia Foundation (simple)
-1016:Libya (simple)
-43100:Kashmir (simple)
-121233:Boyacá (simple)
-796:Iraq (simple)
-212065:Edinburgh Castle (simple)
-41187:Sony (simple)
-24826:Liverpool (simple)
-1005:The Gambia (simple)
-118388:Death Valley (simple)
-2430320:San Juan de la Maguana (simple)
-173:Alabama (simple)
-117:Ghana (simple)
-20:Norway (simple)
-213:Czech Republic (simple)
-1029:Mozambique (simple)
-1345:Philadelphia (simple)
-771405:South Asia (simple)
-24120:Dunière-sur-Eyrieux (simple)
-36204:2011 Tōhoku earthquake and tsunami (simple)
-15789:FC Bayern Munich (simple)
-846:Qatar (simple)
-114:Kenya (simple)
-224:Croatia (simple)
-1439:Texas (simple)
-262:Algeria (simple)
-18125:Manchester (simple)
-25173:RMS Titanic (simple)
-935116:Sandringham House (simple)
-377156:Rocher (simple)
-222:Albania (simple)
-22890:Ireland (simple)
-23556:Atlanta (simple)
-1490:Tokyo (simple)
-1028:Morocco (simple)
-656:Saint Petersburg (simple)
-189:Iceland (simple)
-232:Kazakhstan (simple)
-800:Costa Rica (simple)
-1649:Oklahoma (simple)
-7341:Auschwitz concentration camp (simple)
-423:North Korea (simple)
-169966:Deccan Plateau (simple)
-66096:United States Senate (simple)
-49042:Southern United States (simple)
-23681:Northern Cyprus (simple)
-1902016:Marlborough College (simple)
-833:Malaysia (simple)
-869:Thailand (simple)
-3130:Sydney (simple)
-79:Egypt (simple)
-25:Wales (simple)
-837833:2010–2011 Queensland floods (simple)
-11299:Manhattan (simple)
-12544:Byzantine Empire (simple)
-35581:Hokkaidō (simple)
-243028:Giron (simple)
-83224:Battle of Hastings (simple)
-151030:Moulin Rouge (simple)
-1033:Nigeria (simple)
-782:Hawaii (simple)
-219:Bulgaria (simple)
-47131:Ku Klux Klan (simple)
-858:Syria (simple)
-41403:Teletubbies (simple)
-220:Rome (simple)
-126982:Sea of Galilee (simple)
-486:Chernobyl disaster (simple)
-7318:Nazi Germany (simple)
-7343:Great Barrier Reef (simple)
-19675:Musée du Louvre (simple)
-121378:Corfu (simple)
-252:Indonesia (simple)
-28:Hungary (simple)
-34863:Oklahoma City (simple)
-160659:London Eye (simple)
-10285:Colosseum (simple)
-298:Chile (simple)
-27:Republic of Ireland (simple)
-1771696:Charminar (simple)
-31:Belgium (simple)
-948:Tunisia (simple)
-4918:Mediterranean Sea (simple)
-1384:New York (simple)
-97:Atlantic Ocean (simple)
-7348:Indus River (simple)
-34006:Hollywood (simple)
-34:Sweden (simple)
-132568:Battle of the Somme (simple)
-7801:International Court of Justice (simple)
-33:Finland (simple)
-902:Bangladesh (simple)
-797:Alaska (simple)
-5083:Seattle (simple)
-828:Americas (simple)
-22502:Taiwan (simple)
-129029:Bhopal disaster (simple)
-49:North America (simple)
-62:San Francisco (simple)
-45:Portugal (simple)
-884:South Korea (simple)
-64:Berlin (simple)
-739:Colombia (simple)
-928:Philippines (simple)
-3783:Amazon River (simple)
-5086:Berlin Wall (simple)
-414:Argentina (simple)
-100:Boston (simple)
-12512:St. Peter's Basilica (simple)
-148:People's Republic of China (simple)
-1218:Jerusalem (simple)
-237:Vatican City (simple)
-51:Antarctica (simple)
-812:Florida (simple)
-1297:Chicago (simple)
-23768:Las Vegas (simple)
-212:Ukraine (simple)
-854:Sri Lanka (simple)
-4675:Mount St. Helens (simple)
-8652:Miami (simple)
-40:Austria (simple)
-99:California (simple)
-334:Singapore (simple)
-1223:Washington (state) (simple)
-36:Poland (simple)
-218:Romania (simple)
-203233:Battle of Plassey (simple)
-851:Saudi Arabia (simple)
-5933:Westminster Abbey (simple)
-99717:Tiananmen Square protests of 1989 (simple)
-889:Afghanistan (simple)
-23220:Berkshire (simple)
-12495:Burj Khalifa (simple)
-83125:Tower Bridge (simple)
-7184:NATO (simple)
-9202:Statue of Liberty (simple)
-258:South Africa (simple)
-177567:Amazon rainforest (simple)
-322:Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch (simple)
-212372:Boko Haram (simple)
-1013:Lesotho (simple)
-16471:Battle of Normandy (simple)
-7785:Commonwealth of Nations (simple)
-48435:Sagrada Família (simple)
-10806:September 11 attacks (simple)
-584:Rhine River (simple)
-96:Mexico (simple)
-366545:Mathieu (simple)
-858651:Carville (simple)
-5089:Ganges (simple)
-996113:Ifs (simple)
-23666:Great Britain (simple)
-13950:Picardy (simple)
-12501:Great Wall of China (simple)
-193306:Falaise (simple)
-685:Solomon Islands (simple)
-16954:Lower Normandy (simple)
-672:Tuvalu (simple)
-43:Turkey (simple)
-1239:Indian Ocean (simple)
-843:Pakistan (simple)
-769:Grenada (simple)
-243:Eiffel Tower (simple)
-155:Brazil (simple)
-691:Papua New Guinea (simple)
-760:Saint Lucia (simple)
-95:Google (simple)
-676203:Machu Picchu (simple)
-757:Saint Vincent and the Grenadines (simple)
-29:Spain (simple)
-17:Japan (simple)
-794:Iran (simple)
-781:Antigua and Barbuda (simple)
-29520:China (simple)
-763:Saint Kitts and Nevis (simple)
-2763:The Holocaust (simple)
-836:Myanmar (simple)
-22:Scotland (simple)
-235:Monaco (simple)
-766:Jamaica (simple)
-513:Mount Everest (simple)
-5451:Himalayas (simple)
-38:Italy (simple)
-15727208:Asia Minor (simple)
-42182:Buckingham Palace (simple)
-62378:Tower of London (simple)
-55:Netherlands (simple)
-41225:Big Ben (simple)
-39:Switzerland (simple)
-90:Paris (simple)
-778:The Bahamas (simple)
-91413:San Gimignano (simple)
-664:New Zealand (simple)
-159:Russia (simple)
-21:England (simple)
-1065:United Nations (simple)
-174825:History of Australia (simple)
-35572:Union of European Football Associations (simple)
-65:Los Angeles (simple)
-60:New York City (simple)
-41:Greece (simple)
-35:Denmark (simple)
-39054:Leaning Tower of Pisa (simple)
-156616:INSEE (simple)
-3249:Calvados (simple)
-183:Germany (simple)
-215138:Monte Fitz Roy (simple)
-61:Washington, D.C. (simple)
-9141:Taj Mahal (simple)
-16:Canada (simple)
-84:London (simple)
-408:Australia (simple)
-668:India (simple)
-145:United Kingdom (simple)
-25322:Arctic (simple)
-30:United States (simple)
-7204:Middle East (simple)
-11694:American Airlines Flight 11 (simple)
-9678:2014 Winter Olympics (simple)
+3757	Java
+833975	Graham Island (Sicily)
+30	United States
+668	India
+145	United Kingdom
+159	Russia
+212	Ukraine
+252	Indonesia
+148	China
+408	Australia
+1239	Indian Ocean
+155	Brazil
+16	Canada
+1065	United Nations
+183	Germany
+60	New York City
+35	Denmark
+43708	Bermuda Triangle
+7835	Crimea
+17	Japan
+62	San Francisco
+142	France
+7156	FC Barcelona
+223	Greenland
+334	Singapore
+84	London
+55	Netherlands
+9141	Taj Mahal
+43332	Pompeii
+1345	Philadelphia
+16555	Houston
+2972691	St. Paul's Cathedral, Dunedin
+235	Monaco
+833	Malaysia
+4648	Bali
+3130	Sydney
+1033	Nigeria
+664	New Zealand
+801	Israel
+39	Switzerland
+1370	Virginia
+1391	Maryland
+38	Italy
+1748	Copenhagen
+96	Mexico
+414	Argentina
+29	Spain
+928	Philippines
+8646	Hong Kong
+3630	Jakarta
+423	North Korea
+43	Turkey
+513	Mount Everest
+168756	University of California, Berkeley
+613	Dubai
+1008	Ivory Coast
+794	Iran
+258	South Africa
+65	Los Angeles
+21	England
+843	Pakistan
+782	Hawaii
+61	Washington, D.C.
+736	Ecuador
+225	Bosnia and Herzegovina
+99	California
+878	United Arab Emirates
+884	South Korea
+836	Burma
+865	Taiwan
+2429253	Islamic State in Iraq and the Levant
+869	Thailand
+11005	House of Commons of the United Kingdom
+31	Belgium
+739627	Pennsylvania State University
+88	Alexandria, Virginia
+846	Qatar
+1297	Chicago
+34	Sweden
+586	Bonn
+749497	Soekarno–Hatta International Airport
+216868	Chesapeake Bay
+79	Egypt
+1384	New York
+35715	South Australia
+41	Greece
+864855	Georgia Institute of Technology
+20	Norway
+1045828	University of East Anglia
+234453	Hollywood, Florida
+881	Vietnam
+36	Poland
+826	Maldives
+2885615	Barrie (electoral district)
+739	Colombia
+1378320	Swarthmore College
+851	Saudi Arabia
+1510905	Oakville, Washington
+406	Istanbul
+1133630	Lawrence Berkeley National Laboratory
+1183	Puerto Rico
+90	Paris
+208134	Madura Island
+2093139	University of Eastern Finland
+22890	Ireland
+2522306	Lohachara Island
+4231772	Ghoramara Island
+902	Bangladesh
+503424	University of Leeds
+12501	Great Wall of China
+889	Afghanistan
+22	Scotland
+189	Iceland
+854	Sri Lanka
+797	Alaska
+218	Romania
+15	Africa
+636774	Valle dei Templi
+243	Eiffel Tower
+224	Croatia
+1028	Morocco
+1510467	Oso, Washington
+1027	Mauritius
+40	Austria
+232	Kazakhstan
+233	Malta
+298	Chile
+45	Portugal
+9949	Naarden
+1156	Mumbai
+117	Ghana
+33	Finland
+810	Jordan
+5788	Petra
+5086	Berlin Wall
+262	Algeria
+783	Honduras
+796	Iraq
+399	Armenia
+230	Georgia (country)
+241	Cuba
+766	Jamaica
+510	Mariana Trench
+213	Czech Republic
+727	Amsterdam
+227	Azerbaijan
+676203	Machu Picchu
+229	Cyprus
+5083	Seattle
+9202	Statue of Liberty
+217	Moldova
+115	Ethiopia
+220	Rome
+641	Venice
+786	Dominican Republic
+8678	Rio de Janeiro
+32	Luxembourg
+858	Syria
+172	Toronto
+100	Boston
+265	Uzbekistan
+51	Antarctica
+403	Serbia
+1492	Barcelona
+974	Democratic Republic of the Congo
+184	Belarus
+28	Hungary
+424	Cambodia
+49	North America
+222	Albania
+822	Lebanon
+12439	Detroit
+13371	Harvard University
+48435	Sagrada Família
+1490	Tokyo
+242	Belize
+114	Kenya
+812	Florida
+23768	Las Vegas
+25	Wales
+48	Asia
+907112	Transnistria
+6680227	Lordship Lane, Southwark
+23556	Atlanta
+39420	Sochi
+4628	Faroe Islands
+1019	Madagascar
+219	Bulgaria
+874317	Kankan
+64	Berlin
+10285	Colosseum
+419	Peru
+214	Slovakia
+39671	Stonehenge
+237	Vatican City
+37	Lithuania
+83497	Mount Rushmore
+191	Estonia
+14773	Macau
+656	Saint Petersburg
+180402	Yosemite National Park
+1045	Somalia
+917	Bhutan
+711	Mongolia
+34404	New Orleans
+717	Venezuela
+174	São Paulo
+37200	Great Pyramid of Giza
+211	Latvia
+921	Brunei
+778	The Bahamas
+23666	Great Britain
+398	Bahrain
+9188	Empire State Building
+24639	Vancouver
+27	Republic of Ireland
+1969730	Schengen Area
+8652	Miami
+712	Fiji
+98	Pacific Ocean
+8686	Shanghai
+924	Tanzania
+1223	Washington (state)
+1400	Pennsylvania
+11299	Manhattan
+6106	Portland, Oregon
+956	Beijing
+215	Slovenia
+1410	Gibraltar
+340	Montreal
+1009	Cameroon
+1741	Vienna
+221	Republic of Macedonia
+790	Haiti
+1218	Jerusalem
+176	Quebec
+26	Northern Ireland
+842	Oman
+649	Moscow
+771	Massachusetts
+1428	Georgia (U.S. state)
+734	Guyana
+236	Montenegro
+1085	Prague
+3141	Melbourne
+16554	Denver
+16635	Guam
+804	Panama
+1042	Seychelles
+1011	Cape Verde
+1353	Delhi
+347	Liechtenstein
+1781	Budapest
+16559	Austin, Texas
+36600	The Hague
+1044	Sierra Leone
+118841	Grand Canyon
+240	Brussels
+769	Grenada
+954	Zimbabwe
+23635	Bermuda
+15966495	Republic of Crimea
+45240	Monte Carlo
+7204	Middle East
+97	Atlantic Ocean
+16557	Dallas
+5428	Siberia
+817	Kuwait
+14452	Easter Island
+16869	Constantinople
+16552	San Diego
+163820	Silicon Valley
+1014	Liberia
+5451	Himalayas
+819	Laos
+7350	Panama Canal
+23883	Dead Sea
+986	Eritrea
+709	Marshall Islands
+1261	Colorado
+1527	Minnesota
+11708	Southeast Asia
+3183	Perth
+948	Tunisia
+244	Barbados
+524	Mount Vesuvius
+1016	Libya
+34221	Niagara Falls
+1865	Kuala Lumpur
+1761	Dublin
+756294	Autonomous Republic of Crimea
+750	Bolivia
+38022	St. Louis
+691	Papua New Guinea
+206859	Walt Disney World
+1519	Abu Dhabi
+1352	Chennai
+1166	Michigan
+120314	Mount Wutai
+805	Yemen
+18125	Manchester
+490	Milan
+5092	Baltimore
+664609	Caribbean
+1861	Bangkok
+1726	Munich
+1036	Uganda
+1486	Buenos Aires
+2044	Florence
+730	Suriname
+19675	The Louvre
+919184	Krubera Cave
+774	Guatemala
+638904	Great Pacific garbage patch
+28513	Austria-Hungary
+44440	Golden Gate Bridge
+16556	Phoenix, Arizona
+816	Arizona
+737945	Kingdom Tower
+12506	Hagia Sophia
+1454	North Carolina
+41506	Stanford University
+1899	Kiev
+1342	Pittsburgh
+35672	Pitcairn Islands
+855003	Stelling van Amsterdam
+1186	Kerala
+1524	Athens
+228	Andorra
+1397	Ohio
+916	Angola
+5806	Mecca
+23197	Nashville, Tennessee
+5465	Cape Town
+2946	Palace of Versailles
+792	El Salvador
+102911	Holland
+813	Kyrgyzstan
+18419	Brooklyn
+8684	Seoul
+1348	Kolkata
+177567	Amazon rainforest
+811	Nicaragua
+183113	Bora Bora
+1494	Mississippi
+24826	Liverpool
+28924	Catacombs of Paris
+39054	Leaning Tower of Pisa
+23436	Edinburgh
+5813	Canary Islands
+41225	Big Ben
+6610	Yakutsk
+1361	Hyderabad
+1204	Illinois
+1460	Sicily
+714828	Fushimi Inari-taisha
+79980	Varanasi
+43473	Angkor Wat
+754	Trinidad and Tobago
+18097	Korea
+785	Jersey
+1581	Missouri
+129296	Santorini
+1445	Tamil Nadu
+1171	Goa
+1387	Rhode Island
+828	Americas
+49108	Massachusetts Institute of Technology
+1190585	Rialto
+779	Connecticut
+18221	Turks and Caicos Islands
+23522	Balkans
+1588	Louisiana
+1522	New Mexico
+4093	Glasgow
+1498	Uttar Pradesh
+1506857	Oak Island
+1794	Frankfurt
+1904	Ontario
+16565	Charlotte, North Carolina
+724	Maine
+175582	Egyptian pyramids
+131354	Alcatraz Island
+3392	Nile
+824	Oregon
+1509	Tennessee
+1674054	Isla Vista, California
+1030	Namibia
+22647	Troy
+958	South Sudan
+1603	Kentucky
+166	Black Sea
+34006	Hollywood
+7347	Great Lakes
+36091	Minneapolis
+929	Central African Republic
+963	Botswana
+4152	Neuschwanstein Castle
+160659	London Eye
+977	Djibouti
+21203	Aruba
+1055	Hamburg
+1050	Swaziland
+11703	United States Virgin Islands
+49114	Brown University
+351	Yellowstone National Park
+1952	Nova Scotia
+874	Turkmenistan
+1974	British Columbia
+975	San Antonio
+1537	Wisconsin
+498671	Lake Hillier
+4675	Mount St. Helens
+1754	Stockholm
+1227	Nevada
+1497	Mississippi River
+10288	Parthenon
+12512	St. Peter's Basilica
+36312	Calgary
+2256	Birmingham
+1854	Ho Chi Minh City
+9648	Falkland Islands
+1191	Maharashtra
+49112	Yale University
+1214	Wyoming
+1212	Montana
+1951	Alberta
+25279	Curaçao
+71	Geneva
+38095	Galápagos Islands
+760	Saint Lucia
+238	San Marino
+1415	Indiana
+574	East Timor
+597	Lisbon
+29466	Kaaba
+7296	Mount Kilimanjaro
+1029	Mozambique
+1041	Senegal
+5785	Cayman Islands
+49233	Orlando, Florida
+1141846	Château de Cheverny
+5705	Catalonia
+1649	Oklahoma
+980	Bavaria
+5089	Ganges
+912	Mali
+1461	Manila
+35794	University of Cambridge
+172822	Hoover Dam
+34932	Brisbane
+5187	Chechnya
+23148	Cornwall
+829	Utah
+2844	Brasília
+34804	Albuquerque, New Mexico
+41304	Weimar Republic
+987	New Delhi
+6583	Sahara
+1553	Nebraska
+37836	Milwaukee
+516651	Moeraki Boulders
+270983	Kinkaku-ji
+18389	New England
+1930	Ottawa
+23482	Marseille
+62378	Tower of London
+16572	Guangzhou
+7525	Sevastopol
+41470	Kurdistan
+49088	Columbia University
+18013	Sacramento, California
+8691	London Heathrow Airport
+174710	University of California, Los Angeles
+863	Tajikistan
+899	Suez Canal
+18438	Long Island
+2981	Notre Dame de Paris
+40236	Manaus
+945030	Coronation Street
+37320	Cleveland
+1006	Guinea
+677037	Telangana
+51614	Anatolia
+771405	South Asia
+365	Cologne
+3114	Canberra
+1558	Kansas
+2841	Bogotá
+72	Zürich
+3783	Amazon River
+37100	Auckland
+41819	Kansas City, Missouri
+1829	Kaliningrad
+29294	Willis Tower
+188712	Empire of Japan
+99309	Pantheon, Rome
+33959	Nice
+33946	Czechoslovakia
+25263	Azores
+170456	Pripyat
+64436	Arc de Triomphe
+2634	Naples
+759	New Hampshire
+965	Burkina Faso
+3861	Doha
+5484	Caspian Sea
+34664	Hiroshima
+34647	Johannesburg
+26253	Madeira
+1393	Delaware
+16551	Vermont
+1546	Iowa
+33788	New Caledonia
+16563	Memphis, Tennessee
+33910	Uluru
+23154	Bristol
+23337	Salt Lake City
+1774	Zanzibar
+80290	Forbidden City
+16553	San Jose, California
+8673	Lagos
+5513	Lake Baikal
+8660	Karachi
+7354	Southern Ocean
+5925	Orange County, California
+6346	Indianapolis
+1437	Rajasthan
+1135655	Lake Magadi
+43196	Cincinnati
+43100	Kashmir
+7343	Great Barrier Reef
+8685	John F. Kennedy International Airport
+683	Samoa
+42182	Buckingham Palace
+3531107	Tomb of the Unknowns
+83063	Petronas Towers
+8810	Granada
+9325	Lufthansa
+745608	Las Vegas Strip
+12514	Three Gorges Dam
+657	Chad
+1207	North Dakota
+275639	Cinque Terre
+52631	Ibiza
+953	Zambia
+43421	Richmond, Virginia
+1032	Niger
+1612	Arkansas
+18094	Honolulu
+160409	Central Park
+1653	Danube
+83286	Socialist Federal Republic of Yugoslavia
+750245	Piazza dei Miracoli
+678	Tonga
+20075	London Underground
+5463	Rocky Mountains
+40435	Buffalo, New York
+16567	Columbus, Ohio
+270	Warsaw
+585	Oslo
+128468	Wembley Stadium
+33935	Tel Aviv
+34497	Saint Helena
+1456	South Carolina
+1221	Idaho
+1025	Mauritania
+34374	Crete
+22424	Punjab, India
+18536	The Shard
+47716	Charleston, South Carolina
+16568	Jacksonville, Florida
+461357	Dawson's Creek
+1005	The Gambia
+11690	Wall Street
+11208	The Pentagon
+615767	Aokigahara
+36117	Borneo
+1335	Montevideo
+2096	Edmonton
+39450	Anchorage, Alaska
+69808	Vichy France
+21578	Princeton University
+1013	Lesotho
+983	Equatorial Guinea
+1020	Malawi
+397905	Columbia, Maryland
+186125	Madison Square Garden
+25230	Guernsey
+34800	Xinjiang
+13706	Principality of Sealand
+213205	San Francisco Bay Area
+10257	Channel Tunnel
+1371	West Virginia
+3870	Nairobi
+12892	Antwerp
+85	Cairo
+784	Dominica
+17070	Réunion
+1462	Sardinia
+189476	Abraj Al Bait
+456	Lyon
+14112	Corsica
+39231	Mount Fuji
+686	Vanuatu
+39473	Transylvania
+10686	Belfast
+49115	Cornell University
+47476	Alhambra
+860188	National Centre for the Performing Arts (China)
+172668	Fucking, Austria
+219060	State of Palestine
+129003	French Southern and Antarctic Lands
+41642	Phoenicia
+3711	Belgrade
+971	Republic of the Congo
+39193	Bohemia
+18869	Caucasus
+636540	Corno Grande
+6343	Carthage
+23311	City of London
+31063	Christmas Island
+205367	Château de Chambord
+3616	Tehran
+46772	Kerguelen Islands
+713750	West Germany
+62408	Palace of Westminster
+43668	Louisville, Kentucky
+10690	Cardiff
+49042	Southern United States
+2023	Nunavut
+3769	French Guiana
+861921	Bhangarh
+1538	Pune
+169962	Lake Tahoe
+45178	Sydney Opera House
+372324	Dawson City
+13353	Montserrat
+1874	Odessa
+230492	University of Michigan
+3224	New South Wales
+71719	Hollywood Walk of Fame
+42000	Tahiti
+131491	Brighton
+10862290	MetLife Stadium
+130958	Great Sphinx of Giza
+93332	Appalachian Mountains
+179191	Rock and Roll Hall of Fame
+576952	Antilia (building)
+52062	Nordic countries
+2028659	Indira Gandhi National Open University
+18424	Queens
+39121	Leeds
+19686	River Thames
+1764	Reykjavík
+5112	Adelaide
+83813	Savannah, Georgia
+1867	Taipei
+19660	Bucharest
+8731	Los Angeles International Airport
+710	Kiribati
+41087	Raleigh, North Carolina
+18547	Shanghai Tower
+7903	Casablanca
+16641	American Samoa
+1627108	Mavericks, California
+35086	South Georgia and the South Sandwich Islands
+1164	Assam
+500253	Kuala Lumpur International Airport
+18575	Tucson, Arizona
+34600	Kyoto
+3037	Kathmandu
+101625	Marrakesh
+17042	Oakland, California
+3820	Beirut
+11194	Sarajevo
+1757	Helsinki
+12994	Bruges
+83101	Taipei 101
+87	Alexandria
+30971	French Polynesia
+1185	Karnataka
+43278	Victoria Falls
+763	Saint Kitts and Nevis
+31487	Kraków
+2887	Santiago
+652046	Mosque of Muhammad Ali
+1022	Stuttgart
+17012	Guadeloupe
+1356	West Bengal
+25231	Svalbard
+45957	Red Fort
+8828	Majorca
+49117	University of Pennsylvania
+1627684	Naval Station Norfolk
+503301	Salton Sea
+133274	Moscow Kremlin
+2943	Sistine Chapel
+5783	Andalusia
+672	Tuvalu
+1979	Prince Edward Island
+8717	Seville
+1211	South Dakota
+70458	Door to Hell
+2135	Winnipeg
+40269	Porto Alegre
+214944	Göbekli Tepe
+40846	Tenerife
+43199	Omaha, Nebraska
+1273	Tuscany
+193439	Dubai International Airport
+2472694	Mount John Laurie
+207323	Vulcano
+650836	Yellowstone Caldera
+134883	CN Tower
+242803	Yasukuni Shrine
+1989	Saskatchewan
+669037	West Indies
+9219	United States Military Academy
+34217	Oxford
+1425428	Newcastle upon Tyne
+685	Solomon Islands
+8818	Valencia
+1780	Bratislava
+495	Turin
+1354	Dhaka
+270995	Clube Atlético Mineiro
+2009	Yukon
+327	Brittany
+1530	Baghdad
+43244	Lighthouse of Alexandria
+35765	Osaka
+192626	Hawaiian Islands
+47134	Shetland
+125006	Brooklyn Bridge
+2620036	Nazca Lines
+26988	Cook Islands
+35883	Aral Sea
+36332	Iguazu Falls
+934	North Pole
+5776	Bethlehem
+25596	Saint Martin
+3624	Addis Ababa
+168751	Duke University
+170478	Bournemouth
+16562	El Paso, Texas
+11259	Times Square
+18808	Pyongyang
+5456	Andes
+17151	Thessaloniki
+6373	British Museum
+9427	Timbuktu
+40888	Andaman and Nicobar Islands
+12837	Iberian Peninsula
+700634	Stalag Luft III
+17054	Martinique
+36678	West Bank
+15174	Shenzhen
+34863	Oklahoma City
+6602	Strasbourg
+200667	Ladakh
+11007	House of Lords
+1000	Gabon
+487119	Compton, California
+1865480	Bastille
+152207	Nürburgring
+550	Champs-Élysées
+3692	Riyadh
+1188	Madhya Pradesh
+945	Togo
+967	Burundi
+46239	Statue of Zeus at Olympia
+75721	ADX Florence
+1479	Bordeaux
+548679	Marina Bay Sands
+464257	Omaha Beach
+214861	Hartsfield–Jackson Atlanta International Airport
+23681	Northern Cyprus
+1731	Dresden
+1858	Hanoi
+83125	Tower Bridge
+1286	Alps
+2868	Lima
+129677	Chernobyl
+192088	Eton College
+5933	Westminster Abbey
+1165	Bihar
+1249840	Reschensee
+4777	Mount Roraima
+4204	Black Forest
+272434	Globe Theatre
+42448	Sheffield
+890783	Bohemian Grove
+25287	Gothenburg
+46280	Charles de Gaulle Airport
+194057	Mount Rainier
+4614	University of Southern California
+27275	Central Asia
+217265	Cappadocia
+914	Volgograd
+172732	Indianapolis Motor Speedway
+15878	Normandy
+151198	Dachau concentration camp
+958391	Georgia Guidestones
+16150196	Donetsk People's Republic
+79848	Southampton
+211618	Rungnado May Day Stadium
+36405	Aberdeen
+154182	Battle of Berlin
+1449	Genoa
+1522557	Lake Retba
+1265	Colorado River
+213717	O'Hare International Airport
+5118	Dagestan
+39709	Des Moines, Iowa
+180422	Harmandir Sahib
+970	Comoros
+530472	Mason–Dixon line
+101959	Borussia Mönchengladbach
+36074	Queensland
+43070	Donetsk
+1499	Uttarakhand
+23661	Wellington
+23406	Red Sea
+82613	Krakatoa
+159848	Camp Nou
+378143	Hearst Castle
+2090	Nuremberg
+47611	Ephesus
+47265	Palo Alto, California
+130018	Mount McKinley
+9679	Isle of Wight
+75459	Delphi
+9248	Baku
+31945	Arabian Peninsula
+6250	Western Sahara
+374365	Jeddah
+34370	Rotterdam
+683705	New York metropolitan area
+350	Cambridge
+1177	Himachal Pradesh
+1891	Bologna
+435	Library of Alexandria
+585521	Biltmore Estate
+23427	South Ossetia
+118388	Death Valley
+48335	Newfoundland
+49116	Dartmouth College
+36036	Lviv
+54109	United States Capitol
+47164	Santa Monica, California
+42941	Agra
+191739	Florence Cathedral
+42646	Windsor Castle
+492386	Centralia, Pennsylvania
+57965	Tokyo Skytree
+1604442	Ruby Ridge
+461371	Casa Batlló
+72786	Belvedere (fort)
+788	Arctic Ocean
+13217298	Giza Necropolis
+235242	Pietà (Michelangelo)
+163	Yorkshire
+187635	Qutb Minar
+45368	Mausoleum at Halicarnassus
+161885	Kingdom of Great Britain
+11274	Chrysler Building
+4412	West Africa
+216344	Arlington National Cemetery
+285468	Hashima Island
+66485	Jaipur
+34020	Niue
+179684	Spanish Armada
+1718	Düsseldorf
+2145	Quebec City
+172077	Dome of the Rock
+16644	Northern Mariana Islands
+36647	Cork (city)
+19446	Blackburn Rovers F.C.
+79867	Birmingham, Alabama
+39760	Gaza Strip
+49218	Rochester, New York
+190128	Hạ Long Bay
+26927	Lakshadweep
+5582862	Cusco
+7419343	Levi's Stadium
+16990	Mount Etna
+206521	Disneyland Paris
+1070	Ahmedabad
+1128327	El Castillo, Chichen Itza
+781	Antigua and Barbuda
+2003	Newfoundland and Labrador
+17704	Hong Kong International Airport
+83457	Old Trafford
+1362236	Arena Corinthians
+139564	Atlantic City, New Jersey
+316390	Antigua
+38555	Santa Fe, New Mexico
+1563	Havana
+35581	Hokkaido
+171400	Circuit de Monaco
+22889	Bath, Somerset
+220982	Tristan da Cunha
+152225	Bikini Atoll
+2467	Nassau, Bahamas
+3960	Australia (continent)
+173882	St Paul's Cathedral
+1773	Riga
+3766	Damascus
+76122	Salar de Uyuni
+128323	Trinidad
+49148	Martha's Vineyard
+1022918	Kowloon Walled City
+5687	Jericho
+35484	Medina
+1278477	Pisa Baptistry
+22048	Odisha
+127856	Beverly Hills, California
+178114	Washington Monument
+36947	Salvador, Bahia
+23276	Surrey
+42462	York
+42800	Belo Horizonte
+202175	Ellis Island
+5413	Yangtze
+11725	Chongqing
+70	Bern
+42314	Channel Islands
+184478	University of California
+766445	Okinawa Prefecture
+5725	Mohenjo-daro
+176635	Tropic of Cancer
+26273	Sint Maarten
+584	Rhine
+487988	St. Augustine, Florida
+25362	Saint Barthélemy
+632261	Hoia Forest
+959	Vladivostok
+170516	Calvary
+1362638	The National Art Center, Tokyo
+7880	Toulouse
+193196	University College London
+3640	Ankara
+105313	Wessex
+308926	Antelope Canyon
+313301	Autobahn
+472	Sofia
+184427	Ajanta Caves
+16739	Long Beach, California
+35775	Boise, Idaho
+106187	Giant's Causeway
+48344	Recife
+41262	Nottingham
+78	Basel
+18383	Providence, Rhode Island
+1574020	The Hamptons
+164027	Santiago Bernabéu Stadium
+1770	Tallinn
+18224	Maersk
+304419	Castle Bravo
+1007	Guinea-Bissau
+49213	University of Texas at Austin
+1174	Haryana
+32159	Singapore Changi Airport
+9888	Ooty
+1948	Manitoba
+131252	University of Chicago
+1435	Zagreb
+1052042	Epcot
+1480013	Minneapolis–Saint Paul
+925252	Half Dome
+28218	Baton Rouge, Louisiana
+5838	Kabul
+205380	Greenwich Village
+5753	Samarkand
+104994	Los Angeles County, California
+131198	Heard Island and McDonald Islands
+130206	London Bridge
+190080	Carnegie Mellon University
+43301	Fresno, California
+36433	Porto
+5955	Altai Mountains
+131626	Smithsonian Institution
+16666	Nanjing
+23430	Ulan Bator
+641527	Arena da Amazônia
+207870	Casa Milà
+7875112	Estádio da Luz
+25322	Arctic
+128745	Le Palais
+179876	Kingdom of England
+187805	Spokane, Washington
+34713	Salzburg
+225641	Mombasa
+212867	Park Güell
+1792	Gdańsk
+1136962	Novorossiya
+159621	Annapurna
+3206	Western Australia
+49225	Reno, Nevada
+188096	Penang
+583	Mont Blanc
+37995	Yangon
+2141	Halifax, Nova Scotia
+1965	New Brunswick
+47916	Lucknow
+23298	Kent
+80344	Mount Olympus
+182822	French Riviera
+15175	Guangdong
+82425	Brandenburg Gate
+102720	Hertha BSC
+6514	Dardanelles
+25395	Newark, New Jersey
+191161	30 St Mary Axe
+1020776	Cabo San Lucas
+152051	Bayer
+1162	Arunachal Pradesh
+24861	Albany, New York
+161562	California Institute of Technology
+29272	Ryugyong Hotel
+219986	Gangkhar Puensum
+36687	Victoria (Australia)
+8851	Málaga
+35958	Bosphorus
+11290	Grand Central Terminal
+46033	Frankfurt Airport
+131013	Acropolis of Athens
+8969	Cancún
+23306	Greater London
+271195	Delhi Metro
+2027162	Gateway Arch
+567833	Madonna of Bruges
+41164	Jeju Province
+178848	University of Notre Dame
+40285	New Guinea
+178948	Khajuraho Group of Monuments
+3826	Muscat, Oman
+270066	7 World Trade Center
+131347	Oahu
+32190	Beijing Capital International Airport
+223644	Solomon's Temple
+504368	Chhatrapati Shivaji International Airport
+1520	Astana
+269	Tashkent
+43788	Madison, Wisconsin
+110403	Snohomish County, Washington
+843869	High Line (New York City)
+25228	Anguilla
+2280	Minsk
+43048	Rhodes
+1362	Islamabad
+38234	Nagasaki
+44989	Tulsa, Oklahoma
+488004	Palm Springs, California
+212065	Edinburgh Castle
+3908	Galicia (Spain)
+48278	Medellín
+648501	Asheville, North Carolina
+9022	Guadalajara
+8703	Gatwick Airport
+121378	Corfu
+1321468	Ozarks
+33486	Hartford, Connecticut
+134821	Western Wall
+1039	São Tomé and Príncipe
+1133309	The Dubai Mall
+749	Groningen
+49145	New Haven, Connecticut
+49212	Texas A&M University
+216	Vilnius
+33200	Mosque–Cathedral of Córdoba
+129234	Hatshepsut
+229107	Mount Kailash
+244165	Nagorno-Karabakh Republic
+46197	Ascension Island
+68740	Hawaii (island)
+1473969	Padmanabhaswamy Temple
+29460	Senkaku Islands
+387047	Malibu, California
+764049	Sing Sing
+1142	Alsace
+9694	Amsterdam Airport Schiphol
+83786	Shimla
+309202	Camp David
+11746	Wuhan
+2028	Verona
+477125	Peoples Temple
+180212	Roman Forum
+186309	Madame Tussauds
+226	Nuuk
+371973	Bill Gates's house
+15799	Club Atlético River Plate
+322	Llanfairpwllgwyngyll
+60140	Indian subcontinent
+169997	Darjeeling
+323813	Jamestown, Virginia
+1850	Phnom Penh
+7129047	Pamantasan ng Lungsod ng Valenzuela
+1799	Wrocław
+34617	Saint Pierre and Miquelon
+234	Flanders
+242066	Toronto Pearson International Airport
+1800	Kochi
+172613	Teotihuacan
+702	Federated States of Micronesia
+5511	Lake Tanganyika
+5823	Ceuta
+463179	Fallingwater
+3787	Abuja
+2966	Heidelberg
+68097	Davos
+191218	San Andreas Fault
+545	Baltic Sea
+165972	Fort Lauderdale, Florida
+13580	Metro Manila
+372093	Olympic National Park
+193727	Johns Hopkins University
+188617	Royal Botanic Gardens, Kew
+129610	Galway
+7332	Bergen-Belsen concentration camp
+1515	Abidjan
+11568	Darwin, Northern Territory
+42070	Gobi Desert
+131454	Library of Congress
+34675	Persian Gulf
+140075	Gold Coast, Queensland
+30002	Chengdu
+23156	Devon
+19572	Kola Superdeep Borehole
+54451	Pennsylvania Station (New York City)
+2132	Victoria, British Columbia
+1066	Lake Superior
+16558	Fort Worth, Texas
+3306	Panama City
+1054169	Centre Pompidou-Metz
+485176	Pasadena, California
+5826	Xi'an
+6225	Coventry
+164055	Tiananmen Square
+213439	University of Virginia
+838284	AT&T Stadium
+83065	Leicester
+34640	English Channel
+677163	Villers-Bretonneux
+31877	Our Lady of Guadalupe
+1148552	Inland Empire
+41211	San Juan, Puerto Rico
+92561	London, Ontario
+180531	Gulf of Alaska
+330015	Denver International Airport
+55816	Chicxulub crater
+34109	Fargo, North Dakota
+38453	Columbia, South Carolina
+82019	Kangchenjunga
+855235	Boracay
+1139250	Crazy Horse Memorial
+522661	Isle of Man TT
+49650	Loch Ness
+35381	Colombo
+2630372	Top Gear test track
+128069	Syracuse, New York
+132790	Biarritz
+194215	Île Amsterdam
+1198	North Rhine-Westphalia
+35997	İzmir
+609700	Stone Mountain
+176609	Arctic Circle
+35493	Almaty
+1050926	Chernobyl Exclusion Zone
+188705	Maui
+28198	Jackson, Mississippi
+43296	Wake Island
+129809	Coral Castle
+9375937	Tirumala Venkateswara Temple
+11277	Rockefeller Center
+49111	Cambridge, Massachusetts
+43448	British Indian Ocean Territory
+126982	Sea of Galilee
+64105	Sky City (Changsha)
+953021	Neverland Ranch
+1568095	Punta Cana
+51679	Saipan
+200016	Visakhapatnam
+485172	Ann Arbor, Michigan
+437	Ljubljana
+39984	Cannes
+211778	Lake District
+1022965	CBGB
+47141	Atacama Desert
+3838	Kinshasa
+54140	Salem, Massachusetts
+757	Saint Vincent and the Grenadines
+219563	University of Washington
+124739	Tijuana
+151055	Denisovan
+1374	Matterhorn
+1363	Tripura
+79990	Christchurch
+3327	Lourdes
+2079	Leipzig
+513821	Sedlec Ossuary
+105092	Mercia
+1437214	Forest Lawn Memorial Park, Glendale
+23725	Byzantium
+192517	Boulder, Colorado
+29052	Vanderbilt University
+29445	Juneau, Alaska
+232771	Shaolin Monastery
+49259	Virginia Beach, Virginia
+1715	Hanover
+2897849	Discovery Island (Bay Lake)
+26793	Bergen
+36454	Narita International Airport
+86446	Ninoy Aquino International Airport
+205318	Zion
+184587	Grand Rapids, Michigan
+186702	Chattanooga, Tennessee
+49247	Anaheim, California
+33405	Little Rock, Arkansas
+5689	Åland Islands
+12707	Great Plains
+7635863	Sukiyabashi Jiro
+626	Volga River
+1184	Jharkhand
+333886	Georgetown University
+6582	Carcassonne
+194316	Suvarnabhumi Airport
+23077	Lancashire
+201026	Kauai
+49201	Portland, Maine
+985	Baden-Württemberg
+4948	Republic of Venice
+1533	Caracas
+182565	Phuket Province
+499887	Elgin, Illinois
+34820	Santo Domingo
+3926	Pretoria
+185582	Knoxville, Tennessee
+1451	Mount Pinatubo
+1017	Aachen
+184355	Mojave Desert
+31057	Norfolk Island
+180376	Hollywood Sign
+131389	International Date Line
+186233	Andaman Islands
+151374	Olympiastadion (Berlin)
+152482	General Sherman (tree)
+80299	Angel Falls
+42798	Borobudur
+459578	Erie Canal
+193163	Temple Mount
+160236	Metropolitan Museum of Art
+115457	Arno
+1147168	La Brea Tar Pits
+1749	Kaliningrad Oblast
+933	South Pole
+217741	Purdue University
+2673740	Appalachia
+332474	Harrods
+459096	Dallas/Fort Worth International Airport
+3995	Basque Country (autonomous community)
+1960	Dar es Salaam
+459173	Challenger Deep
+152010	Treblinka extermination camp
+887	Yekaterinburg
+743898	Naval Base San Diego
+37043	Tallahassee, Florida
+52028	Chiang Mai
+2082	St. John's, Newfoundland and Labrador
+457281	University of Illinois at Urbana–Champaign
+186115	Montmartre
+43382	Plymouth
+1324340	Magic Kingdom
+1693	North Sea
+6441	Montpellier
+186312	Masada
+875637	College of William & Mary
+79638	Fairbanks, Alaska
+180573	South Vietnam
+753529	Yankee Stadium
+5818	Córdoba, Andalusia
+40556	Horn of Africa
+173292	Capri
+79875	Mobile, Alabama
+100166	Orkney
+202902	The Crystal Palace
+306201	Devils Tower
+3805	Amman
+127429	Allianz Arena
+821275	Indira Gandhi International Airport
+49231	Norfolk, Virginia
+42308	Kharkiv
+175517	Norilsk
+5836	Toledo, Spain
+15207543	Cardboard Cathedral
+2656	Palermo
+185103	Roman Britain
+201743	Adam's Bridge
+1458	Calabria
+49266	Wichita, Kansas
+2449	Mogadishu
+3410	Hertfordshire
+28785	Sacré-Cœur, Paris
+45671	Anfield
+29999	Kingdom of the Netherlands
+170027	University of London
+232734	Pamukkale
+49241	Lexington, Kentucky
+677555	Rashtrapati Bhavan
+10566	Saskatoon
+3492	Sumatra
+461572	SoHo, Manhattan
+466835	Washington Dulles International Airport
+24879	Bremen
+130626	Borno State
+816843	San Fernando Valley
+430776	Nazareth
+189471	Cupertino, California
+169274	Sargasso Sea
+2072102	Fes el Bali
+170377	Blackpool
+245347	India Gate
+129143	Trafalgar Square
+82859	Socotra
+123559	Al-Andalus
+133315	Limerick
+1663	Split, Croatia
+152802	Buchenwald concentration camp
+130191	Norwich
+773853	Venice, Los Angeles
+72303	Mount Ararat
+1471	Seine
+35600	Ural Mountains
+133356	Ukrainian Soviet Socialist Republic
+25280	Harrisburg, Pennsylvania
+126148	Tangier
+172125	Lascaux
+16520	Busan
+5468	Durban
+5481	Tatarstan
+106652	Scottish Highlands
+384	Skopje
+86486	Great Blue Hole
+169132	Punjab region
+213559	Lincoln Memorial
+129846	Saint Basil's Cathedral
+273303	Langkawi
+8688	San Francisco International Airport
+381648	St. Francis Dam
+171224	Eugene, Oregon
+49256	Bakersfield, California
+231699	Basilica of Saint Paul Outside the Walls
+1169	Lake Michigan
+503415	University of Maryland, College Park
+26465	Øresund Bridge
+659219	Mall of America
+171857	Agra Fort
+540102	SeaWorld
+11297	Headquarters of the United Nations
+151897	Reichstag building
+2007	Northwest Territories
+29422	Boca Raton, Florida
+912407	San Quentin State Prison
+166276	Madrid–Barajas Airport
+26777	Sierra Nevada (U.S.)
+28848	Saint Paul, Minnesota
+1052807	Wrigley Field
+170072	Dutch Republic
+4361	Curitiba
+545360	Graceland
+1145492	Poveglia
+1953	Yerevan
+15523	Lake Como
+407199	Palestinian territories
+844123	Portland cement
+49242	Corpus Christi, Texas
+192017	Monument Valley
+11196	Republika Srpska
+13375	Pisa
+204853	Haneda Airport
+26590	Ciudad Juárez
+546	Trieste
+659400	Wilmington, North Carolina
+425281	Al-Aqsa Mosque
+34575	Aegean Sea
+4869025	Bathhouse Row
+3561	Algiers
+4176	Cologne Cathedral
+132754	Erbil
+639421	Pondicherry
+1127212	Two World Trade Center
+72259	Portsmouth
+235283	Duluth, Minnesota
+629088	Calabasas, California
+170919	Pattaya
+1783719	Playboy Mansion
+107299	Northumbria
+159762	Mauna Loa
+4970	Hangzhou
+30974	Rouen
+23408	Bouvet Island
+185382	Trevi Fountain
+172691	Thar Desert
+1491	La Paz
+484678	Berkeley, California
+49110	Boston University
+200130	Azad Kashmir
+838330	University of Wisconsin–Madison
+120119	Rikers Island
+311	Père Lachaise Cemetery
+13917	Île-de-France
+9347	Malé
+3761	Accra
+336088	Estádio Nacional Mané Garrincha
+170495	Topkapı Palace
+3572	Tunis
+23157	Somerset
+8692	Bilbao
+170263	Chester
+803	Utrecht
+163995	Emirates Stadium
+382973	Durga
+744748	George Bush Intercontinental Airport
+45797	Dunkirk
+35342	Lake Titicaca
+309331	Ohio State University
+43475	Derby
+725883	Tulum
+161491	Reading, Berkshire
+1599	Nagaland
+212214	Amalfi Coast
+608039	Winchester Mystery House
+10313	San Sebastián
+648	Lille
+491540	Sarasota, Florida
+81997	Boulogne-sur-Mer
+211844	Palm Islands
+611115	Swarovski
+245247	King's College London
+503246	Juilliard School
+151030	Moulin Rouge
+617433	Syracuse University
+49167	Wesleyan University
+80985	Fes
+99236	Millau Viaduct
+3718	Dakar
+167715	Thiruvananthapuram
+463400	Piazza Navona
+163132	Akron, Ohio
+188698	Kīlauea
+883	Novosibirsk
+128147	Kingston upon Hull
+49238	Greensboro, North Carolina
+4527	Western Ghats
+1202	Saxony
+48320	Kobe
+83311	Persian Empire
+486860	Mountain View, California
+559549	United States Naval Academy
+1173	Burgundy
+1353201	Canadian Rockies
+1050826	Greater Los Angeles Area
+5765	Balearic Islands
+1130172	Mayo Clinic
+5505	Lake Victoria
+37660	South China Sea
+238508	Gurgaon
+8749	Celta de Vigo
+2030145	7, Race Course Road
+49236	St. Petersburg, Florida
+185562	Harappa
+192334	University of North Carolina at Chapel Hill
+37951	Sapporo
+49268	Fort Wayne, Indiana
+178065	Centre Georges Pompidou
+36755	Sinai Peninsula
+217365	Bell Labs
+4478	Punjab, Pakistan
+934803	Transfăgărășan
+188161	Dutch East Indies
+128244	Waco, Texas
+131230	Mauna Kea
+80041	Sedona, Arizona
+34739	Dayton, Ohio
+42622	Suzhou
+26087	Tromsø
+845229	Santa Catalina Island, California
+38283	Yokohama
+839805	Myrtle Beach, South Carolina
+155144	Alsace-Lorraine
+23051	Swansea
+657461	Cartagena, Colombia
+80541	Sultan Ahmed Mosque
+1144561	Five Points, Manhattan
+1120798	North and South Brother Islands, East River
+38272	British Isles
+79842	Flagstaff, Arizona
+715286	Black Stone
+215664	Spratly Islands
+86473	Istanbul Atatürk Airport
+671475	Logan International Airport
+26509	Falun
+54495	Sydney Harbour Bridge
+47588	Basque Country (greater region)
+24460	Northeastern United States
+58731	Baja California
+180865	University of Toronto
+319654	LaGuardia Airport
+124377	Canary Wharf
+49149	Nantucket
+160636	Rio Grande
+13116	Benelux
+81033	Monterrey
+787124	Salt Lake Stadium
+2429397	Ancient Carthage
+455587	Upper East Side
+5317	Space Needle
+132726	Yamuna
+230899	University of Manchester
+23109	Norfolk
+983650	Fort Knox
+220728	Flatiron Building
+50816	Mississauga
+20932	Incheon International Airport
+2061	Yellowknife
+54066	Westchester County, New York
+26372	Takeshi Kitano
+80338	Bengal
+202730	Copacabana (Rio de Janeiro)
+12431	Pyrenees
+1068224	Rock Islands (Palau)
+119285	Aleutian Islands
+190210	Mykonos
+199797	Tacoma, Washington
+3140	Hudson River
+542146	South India
+7749795	The Mall in Columbia
+138367	Camden, New Jersey
+638398	Bombay Stock Exchange
+40816	Benghazi
+1754965	Chicago metropolitan area
+638740	National Stock Exchange of India
+1282278	Lucca Cathedral
+332498	Brigham Young University
+13786	Cebu
+19770	Sichuan
+4461035	Akkadian Empire
+23204	Hampshire
+9885	Coimbatore
+162442	Allahabad
+537749	Florida Keys
+172572	Rubicon
+390306	Liberty Bell
+752091	Konark Sun Temple
+83210	Golan Heights
+41179	Mekong
+23402	Musée d'Orsay
+26262	Virgin Islands
+213804	Lindisfarne
+43463	Fortaleza
+622664	University of California, San Diego
+949297	Jim Corbett National Park
+859230	Cedar Point
+762570	Guantanamo Bay Naval Base
+6487	Antalya
+49273	Lubbock, Texas
+168714	Mount Tambora
+1050224	Estádio Beira-Rio
+217039	Rotherham
+1692282	World Trade Center site
+728428	Second Temple
+43194	Yunnan
+599316	The New School
+807966	Barclays Center
+1210	Lombardy
+34692	Kingston, Jamaica
+49136	Fenway Park
+1302545	Forest Lawn Memorial Park (Hollywood Hills)
+17063	Mayotte
+45403	Brahmaputra River
+26339	Jersey City, New Jersey
+1296	Ghent
+133116	Hamilton, Ontario
+128114	Yonkers, New York
+773213	Nainital
+940843	Lotus Temple
+49012	San Luis Obispo, California
+3235	Northern Territory
+486306	Pensacola, Florida
+3856	Nicosia
+916943	Brihadeeswarar Temple
+241357	Saint Peter and Saint Paul Archipelago
+1295	Dortmund
+690347	Rock of Gibraltar
+107393	Skye
+39739	Aconcagua
+1842	Luxembourg (city)
+892103	High Roller (Ferris wheel)
+199528	Dehradun
+186080	Staples Center
+443909	Alton Towers Resort
+1872409	Love Canal
+842909	Rice University
+188856	Panthéon, Paris
+191077	Kingdom of Yugoslavia
+23066	Cumbria
+6499360	Itaipava Arena Fonte Nova
+1813	Saint-Tropez
+83443	Manali, Himachal Pradesh
+3906600	Temple in Jerusalem
+33581	Sloviansk
+4092	Cape of Good Hope
+335506	Salto, Uruguay
+5680	Nineveh
+25396	Bonaire
+463937	Saint Thomas, U.S. Virgin Islands
+642481	Saint Croix, U.S. Virgin Islands
+987729	La Défense
+123738	Hyde Park, London
+201970	Shrewsbury
+29303	Canterbury
+3551	Rabat
+38568	São Paulo FC
+4629	Surat
+153312	Robert F. Kennedy Memorial Stadium
+1193	Manipur
+2251	Columbia River
+23159	Dorset
+1199	Hesse
+42200	Hainan
+1362211	Itaipava Arena Pernambuco
+2751	Siena
+844502	Quetzaltenango Department
+62823	Barranquilla
+12630	Gulf of Mexico
+201633	Iwo Jima
+10086	Mysore
+1914893	Kipling, Saskatchewan
+14314	Santiago de Compostela
+21197	Chișinău
+597051	Palau Güell
+49240	Stockton, California
+5472	Hindu Kush
+23064	Cheshire
+574192	Greenville, South Carolina
+8826	Palma, Majorca
+86768	Bel Air, Los Angeles
+39561	Burbank, California
+68689	Checkpoint Charlie
+31058	Burlington, Vermont
+181123	Sanchi
+183314	Khyber Pakhtunkhwa
+134672	Exeter
+3070	San José, Costa Rica
+1113311	Peshawar
+189022	Imperial College London
+4078	Cape Horn
+6605	Sakha Republic
+1051840	Sarah Lawrence College
+48159	City of Manchester Stadium
+76318	Rogers Centre
+1061229	Piazza del Campo
+42810	Le Havre
+39042	Cheyenne, Wyoming
+1537157	Mount Gongga
+853258	Puerto Vallarta
+1024624	Greater Toronto Area
+327983	Palace of Caserta
+180274	Chartres Cathedral
+807	Lausanne
+5364202	The O2 Arena
+370442	San Diego State University
+200340	Udaipur
+104770	1. FC Köln
+12191	Nantes
+849846	Piazza della Signoria
+19689	Tirana
+13924	Adriatic Sea
+178741	Great Salt Lake
+160493	Inverness
+23220	Berkshire
+43467	Indochina
+1427364	Flathead Lake
+37211	Sindh
+1195	Meghalaya
+2833	Freiburg im Breisgau
+5492	Lake Erie
+506234	Altare della Patria
+4915	Ohio River
+124010	Soho
+6397	Avignon
+3934	Asturias
+604141	Puget Sound
+941908	Three World Trade Center
+235539	Mount Whitney
+112915	Bergen County, New Jersey
+3230327	The Mansion (recording studio)
+14295	Seattle–Tacoma International Airport
+170174	Papal States
+185221	Malacca
+827695	La Tomatina
+107126	Arlington County, Virginia
+215255	Piccadilly Circus
+36823	Tokelau
+844837	Southern California
+48359	Strait of Malacca
+130965	Fordham University
+179385	Greenwich
+2123	Regina, Saskatchewan
+612736	CenturyLink Field
+22905	Bradford
+189849	Plitvice Lakes National Park
+22690	Metz
+40191	Hobart
+74195	Menlo Park, California
+2646503	Hart Island, New York
+19795	Stevenage
+41741	Thrace
+1284	Abruzzo
+1513	Nagpur
+49123	Harvard College
+484799	Marbella
+910370	Mineirão
+207754	Tiruchirappalli
+180522	Aqaba
+37400	Naypyidaw
+3150270	Area code 767
+180209	Isles of Scilly
+6521081	Lembert Dome
+11751	Nagoya
+771404	San Francisco–Oakland Bay Bridge
+1260331	North Sentinel Island
+42956	Harbin
+42053	Isfahan
+1124852	El Capitan
+7792	Sakhalin
+151993	Ruhr
+671288	Bend, Oregon
+5971	Altai Republic
+30623	Manchukuo
+178469	Biafra
+217346	Ithaca, New York
+4558	Cascade Range
+1678260	Jagannath Temple, Puri
+1025124	Munnar
+179046	Fatehpur Sikri
+1329269	Wharton School of the University of Pennsylvania
+23099	Greater Manchester
+863038	Northeast India
+19186	Middlesex
+172640	North Vietnam
+160440	Crimean Khanate
+34110	Oaxaca
+193682	Kansai International Airport
+233678	Jama Masjid, Delhi
+40059	Jordan River
+270844	The World (archipelago)
+189288	Stratford-upon-Avon
+17581	Sydney Airport
+93195	Ulster
+52535	Rosario, Santa Fe
+1759226	Tenryū-ji
+130905	Gulf Stream
+13670	Syracuse, Sicily
+65379	Virginia Tech
+39651	Eyjafjallajökull
+490584	Flint, Michigan
+747129	Necker Island (British Virgin Islands)
+48403	Amritsar
+66568	Kanpur
+81398	Acapulco
+49227	Winston-Salem, North Carolina
+80989	Bhopal
+485186	Key West, Florida
+169101	10 Downing Street
+1198791	Hamad International Airport
+600614	Okinawa Island
+182625	Windsor, Ontario
+5419	Missouri River
+1247	Caribbean Sea
+170322	Qingdao
+135744	Galveston, Texas
+713628	Vietnam Veterans Memorial
+1145348	Hillsong Church
+171240	London Stock Exchange
+320454	Estadio Azteca
+168000	American University
+391028	University of British Columbia
+205666	Hampton Court Palace
+490732	Fort Collins, Colorado
+3575947	New Madrid Seismic Zone
+79809	Barrow, Alaska
+4168	Lorelei
+390275	Bran Castle
+138396	Britannia
+181479	Ben Gurion Airport
+1660598	Quad Cities
+713960	MGM Grand Las Vegas
+201516	Miami Beach, Florida
+205325	Zion National Park
+1542550	Grand Canyon Skywalk
+589099	Cloud Gate
+212646	Hoffmann-La Roche
+2030	Iqaluit
+193193	Sainte-Chapelle
+11249	Midtown Manhattan
+176691	National Institute of Standards and Technology
+41621	Haifa
+49243	Riverside, California
+679366	Muscle Shoals Sound Studio
+191824	Redwood National and State Parks
+4191	Lucerne
+23079	Northumberland
+123709	Dundee
+18068	Milan Cathedral
+858847	Southwestern United States
+1508450	Highclere Castle
+189648	Humayun's Tomb
+676576	Ronald Reagan Washington National Airport
+678313	Villa Borghese gardens
+1544972	Ourang Medan
+1027700	Haight-Ashbury
+329266	Crater Lake
+991369	Fort Bragg
+23103	Shropshire
+487315	Monterey, California
+191333	Khyber Pass
+12603	Pacific Northwest
+418096	Akihabara
+25270	Pristina
+134902	Stoke-on-Trent
+3503	Congo River
+128087	Lesbos
+262483	Deadwood, South Dakota
+8694	Manchester Airport
+207808	Circus Maximus
+130321	Mount Athos
+1424358	Meenakshi Amman Temple
+133566	San Siro
+1289	Grenoble
+82185	La Rochelle
+82601	Tierra del Fuego
+171458	Stamford Bridge (stadium)
+14960	Brno
+49229	Durham, North Carolina
+1065223	Dubai World Central - Al Maktoum International Airport
+13987	Kyushu
+168515	University of Utah
+506451	Fort Myers, Florida
+11959	Alicante
+253851	Kodaikanal
+1785940	Everest Base Camp
+1763	Murmansk
+184775	Ipswich
+209842	University of Paris
+34589	Euphrates
+66743	Puducherry
+163239	Balochistan, Pakistan
+129421	University of California, Davis
+178813	Herculaneum
+49179	Worcester, Massachusetts
+638231	Larsen & Toubro
+746573	Harajuku
+160302	University of Edinburgh
+864862	Gateway of India
+202206	Freetown Christiania
+1553185	Kodagu district
+1435144	Rameswaram
+216273	University of St Andrews
+81136	Northwest Passage
+199605	Guwahati
+1344605	Nevada Test Site
+616591	Oberlin College
+49221	Scottsdale, Arizona
+56973	Barcelona–El Prat Airport
+159260	Santa Clara, California
+174224	Wilmington, Delaware
+270375	Ko Samui
+217242	Katanga Province
+1963	Khartoum
+215419	Chernobyl Nuclear Power Plant
+639129	The Forum (Inglewood)
+13205	Stade de France
+5226121	Daryaganj
+7193206	Pig Beach
+861548	Florida State University
+51691	Amarillo, Texas
+1216	Piedmont
+217563	Edwards Air Force Base
+10305	Zaragoza
+187840	Palais Garnier
+131620	Natal, Rio Grande do Norte
+3897	Luanda
+13869	Palawan
+2058	Whitehorse, Yukon
+503419	University of Arizona
+12642	Morbihan
+163749	West Palm Beach, Florida
+7766239	The Stanley Hotel
+36420	Shanghai Pudong International Airport
+16707782	The Widow's Son, London
+1033076	Candlestick Park
+4120832	Königsberg
+843887	Hermès
+14081	Chimborazo
+2421402	Fly Geyser
+172157	Winchester
+15682	Cádiz
+102728	Ypres
+55019	Covent Garden
+746647	Montmartre Cemetery
+2093794	Vassar College
+80389	Kuril Islands
+189133	Cairns
+49118	Boston College
+484458	Buddhas of Bamiyan
+163584	Derry
+917276	Darién Gap
+11909	Vadodara
+204989	Saint Kitts
+176296	Verkhovna Rada
+23308	British Library
+272153	Sigiriya
+131008	Johnston Atoll
+48256	Dnipropetrovsk
+82070	Tyre, Lebanon
+2164598	Wardenclyffe Tower
+47700	Kalahari Desert
+3579	Tripoli
+1430712	Lloyd's of London
+1000740	Goole
+25007	Bellagio (resort)
+5760	Thebes, Greece
+1055866	Arlington, Washington
+80517	Shreveport, Louisiana
+270222	Michigan State University
+189503	Place de la Concorde
+204561	Modesto, California
+219562	Bryce Canyon National Park
+840668	La Jolla
+51103	Cali
+192240	Northampton
+737517	Fort Sumter
+4526	Sundarbans
+207385	Kensington Palace
+66616	Indore
+123766	Charlottesville, Virginia
+1507497	Darrington, Washington
+868421	University of California, Irvine
+41228	Southern Hemisphere
+43407	Shandong
+40362	Sahrawi Arab Democratic Republic
+2367175	Washington metropolitan area
+528042	Dalmatia
+568610	Manhattan Beach, California
+29364	Montgomery, Alabama
+132783	Hermitage Museum
+11769	Bering Strait
+755798	Milford, Connecticut
+13364	Ravenna
+194450	Thermopylae
+4040	Aragon
+3057766	Gamkaskloof
+1187170	Key West
+1197	Lower Saxony
+278204	Noida
+207353	Acadia
+695221	Mount Abu
+5869	Lhasa
+17872	Alice Springs
+78967	Peloponnese
+193638	Shibuya, Tokyo
+1068752	Howard University
+208035	Guantánamo Bay
+179029	Sabah
+3519	Bari
+1735	Innsbruck
+51689	Plano, Texas
+160139	Mauthausen-Gusen concentration camp
+1345100	Kryptos
+48821	Kennedy Space Center
+79245	Muscle Shoals, Alabama
+58754	Doha International Airport
+430267	Bellingham, Washington
+193639	Royal Albert Hall
+70285	Étel
+1640118	Michigan Stadium
+1468607	Liberty University
+23800	Valletta
+736627	Montréal–Pierre Elliott Trudeau International Airport
+79996	Nome, Alaska
+257830	Naples, Florida
+606662	Elgin Marbles
+44160	Toulon
+40855	Dnieper River
+173527	Knossos
+170115	Srinagar
+49158	Springfield, Massachusetts
+1309	Maastricht
+20934	Incheon
+158205	Sanofi
+330136	Melbourne Cricket Ground
+214164	Bellevue, Washington
+771572	Williamsburg, Brooklyn
+179815	Durham
+2369564	Blarney Stone
+1068289	Chatsworth House
+487999	Gainesville, Florida
+1473	Davao City
+930276	Lombard Street (San Francisco)
+271395	Scranton, Pennsylvania
+131335	Sioux Falls, South Dakota
+109858	Fifth Avenue
+729768	Zulu Kingdom
+127041	Mangalore
+23229	Buckinghamshire
+5917	Huntington Beach, California
+623260	Square des Batignolles
+139377	Kingdom of Aksum
+487981	Benidorm
+127530	Miami International Airport
+1071445	Cheyenne Mountain nuclear bunker
+62646	Germania
+958185	Castelão (Ceará)
+11260	Broadway (Manhattan)
+169966	Deccan Plateau
+756452	Mercedes-Benz Superdome
+25528	Saba
+738258	University of Miami
+569978	Caesars Palace
+38733	Helena, Montana
+1420239	Temple University
+205842	Aspen, Colorado
+1502	Mizoram
+377485	Mount Sinai
+584451	Bethesda, Maryland
+1555	Guatemala City
+1247373	Harrow School
+582280	Rose Bowl (stadium)
+163607	Angkor
+125074	Anheuser-Busch
+1771696	Charminar
+228405	Madurai
+43919	Salem, Oregon
+781973	Rust Belt
+3138	Trier
+38684	Bay of Bengal
+179444	Potomac River
+455167	Amarnath Temple
+739700	East End of London
+443	Ich bin ein Berliner
+809892	National Baseball Hall of Fame and Museum
+720102	St Pancras railway station
+2564257	West Gate Bridge
+621043	Emory University
+201469	Solomon R. Guggenheim Museum
+192733	Sheremetyevo International Airport
+26732	Hampi
+603034	Drexel University
+178925	Gran Canaria
+170054	Arcadia
+931796	Wallace Monument
+1011895	Hampton Roads
+41116	Red Square
+23183	Wiltshire
+268873	Newport Beach, California
+48370	Manchester, New Hampshire
+52636	Minorca
+16892775	Jacob's Well (Texas)
+189602	Missoula, Montana
+108143	San Diego County, California
+2598	Watford
+23111	Suffolk
+1249481	National Capital Region (India)
+35178	Kuwait City
+23443	Provo, Utah
+162082	Kehlsteinhaus
+431381	Meteor Crater
+374096	Chauvet Cave
+1068258	University College Dublin
+2978	Regensburg
+1156982	Bedford–Stuyvesant, Brooklyn
+155921	Bletchley Park
+239743	Niihau
+213510	Belgian Congo
+190974	Oradour-sur-Glane
+172438	Peterborough
+41057	Topeka, Kansas
+181962	Augusta, Georgia
+7876005	Khumbu Icefall
+1123997	Waldorf Astoria New York
+25804	Trondheim
+373567	Glacier National Park (U.S.)
+44254	Ushuaia
+680614	GE Building
+83317	Mosul
+463273	Mahabaleshwar
+8709	London Stansted Airport
+2583112	Islands of Adventure
+49126	Harvard Business School
+1320403	Jamaica, Queens
+166755	Blue Ridge Mountains
+180788	National Gallery
+213274	Old City (Jerusalem)
+1338	Upper Peninsula of Michigan
+124873	Mindanao
+26831	Algarve
+203263	Athens, Georgia
+971998	Atlanta metropolitan area
+988140	Marina del Rey, California
+1783171	Navajo Nation
+490595	Daytona Beach, Florida
+665105	University of Delhi
+739641	Howrah Bridge
+953752	Kings Island
+891	Nizhny Novgorod
+268	Poznań
+585769	Grand Ole Opry
+7024	Lugano
+160199	Cherbourg-Octeville
+35555	Wallis and Futuna
+3396849	Overtoun House
+334569	Cozumel
+171393	Wallachia
+134905	Fraser Island
+9688	Berlin Tegel Airport
+1732216	Louisiana State Penitentiary
+13298	Graz
+326304	Moab
+38891	Aswan Dam
+217717	American Museum of Natural History
+4991540	Serengeti
+213360	Table Mountain
+217527	Piazza San Marco
+123377	Hebrides
+6414	Lake Garda
+617	Padua
+79860	Huntsville, Alabama
+3125051	Meteora
+6454	Calais
+1122565	TCL Chinese Theatre
+168400	Canton Tower
+28237	Lansing, Michigan
+569678	Bozeman, Montana
+546221	Trump International Hotel and Tower (Chicago)
+234004	Narmada River
+144880	Zakynthos
+1359589	West End theatre
+248970	Berklee College of Music
+969850	Stony Brook University
