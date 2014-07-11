@@ -91,7 +91,6 @@ public class SpatialConceptPair {
     private String getCombinedTitle() {
         String firstStr = firstConcept.getTitle();
         String secondStr = secondConcept.getTitle();
-
         String combinedTitle = null;
         if (firstStr.compareTo(secondStr) < 0) {
             combinedTitle = firstStr + secondStr;

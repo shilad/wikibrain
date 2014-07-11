@@ -55,7 +55,8 @@ public class SurveyQuestionGenerator {
         buildMatrices();
         try {
             resetPreviousQList();
-            pw = new PrintWriter(new FileWriter("previousConceptPairs.txt"), true); //sets autoflush to true
+            pw = new PrintWriter(new FileWriter("previousConceptPairs.txt")); //sets autoflush to true
+            pw.flush();
         }catch(IOException e){
             System.out.println("IOException");
         }
@@ -74,7 +75,9 @@ public class SurveyQuestionGenerator {
             int firstConceptID = Integer.parseInt(info[0]);
             int secondConceptID = Integer.parseInt(info[1]);
             SpatialConcept firstConcept = new SpatialConcept(firstConceptID, idsStringMap.get(firstConceptID));
+            assignScale(firstConcept);
             SpatialConcept secondConcept = new SpatialConcept(secondConceptID, idsStringMap.get(secondConceptID));
+            assignScale(secondConcept);
             SpatialConceptPair pair = new SpatialConceptPair(firstConcept, secondConcept);
 
             int listIndex = previousQList.indexOf(pair);//finds the index of the pair
@@ -96,6 +99,7 @@ public class SurveyQuestionGenerator {
             }
         }
 
+        sc.close();
         allPreviousQList.addAll(previousQList);
     }
 
@@ -170,19 +174,37 @@ public class SurveyQuestionGenerator {
 
         //appends all information for each pair being asked into previousConceptPairs.txt in the event of a survey crash
         for(SpatialConceptPair pair: variables.kkReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk" );
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk\n" );
         }
 
         for(SpatialConceptPair pair: variables.kuReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku" );
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku\n" );
         }
 
         for(SpatialConceptPair pair: variables.uuReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu" );
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu\n" );
         }
+        pw.flush();
 
 
         return returnPairs;
+    }
+
+    private void assignScale(SpatialConcept concept) {
+        Integer scale= idToScaleCategory.get(concept.getUniversalID());
+
+        if(scale==1){
+            concept.setScale(SpatialConcept.Scale.LANDMARK);
+        } else if(scale==3){
+            concept.setScale(SpatialConcept.Scale.COUNTRY);
+        } else if(scale==4){
+            concept.setScale(SpatialConcept.Scale.STATE);
+        } else if(scale==5){
+            concept.setScale(SpatialConcept.Scale.CITY);
+        }else if(scale==6){
+            concept.setScale(SpatialConcept.Scale.NATURAL);
+        }
+
     }
 
     /**
