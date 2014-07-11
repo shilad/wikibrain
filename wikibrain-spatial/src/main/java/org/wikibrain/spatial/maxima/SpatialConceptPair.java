@@ -128,6 +128,6 @@ public class SpatialConceptPair {
 
     @Override
     public String toString() {
-        return firstConcept.getTitle() + "\t::\t" + secondConcept.getTitle();
+        return firstConcept.getTitle() + " :: " + secondConcept.getTitle();
     }
 }
