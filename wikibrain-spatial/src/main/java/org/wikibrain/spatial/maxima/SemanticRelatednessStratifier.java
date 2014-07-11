@@ -5,7 +5,7 @@ package org.wikibrain.spatial.maxima;
  */
 public class SemanticRelatednessStratifier extends SpatialConceptPairStratifier {
 
-    private static final int numBuckets = 3;
+    protected static final int numBuckets = 3;
     private static final double minRelatedCutoff = 0.33;
     private static final double maxRelatedCutoff = 0.66;
 
@@ -22,8 +22,8 @@ public class SemanticRelatednessStratifier extends SpatialConceptPairStratifier 
     public double[] getDesiredStratification() {
         double[] strats = new double[numBuckets];
 
-        strats[0] = strats[2] = 0.4;
-        strats[1] = 0.2;
+        strats[2] = strats[1] = 0.4;
+        strats[0] = 0.2;
 
         return strats;
     }

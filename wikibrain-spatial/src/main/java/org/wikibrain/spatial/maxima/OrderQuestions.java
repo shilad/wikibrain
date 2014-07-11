@@ -16,7 +16,7 @@ public class OrderQuestions {
 
     public List<SpatialConceptPair>[] getQuestions(List<Integer> knownIds, int responseNumb){
         ReturnListWrapper rw= new ReturnListWrapper(knownIds,responseNumb);
-        addToReturnList(0, ConceptPairBalancer.chooseOneOffPairs(rw.questions, 10, SemanticRelatednessStratifier.class), rw);
+        addToReturnList(0, ConceptPairBalancer.chooseOneOffPairs(rw.questions, 9, SemanticRelatednessStraddleStratifier.class), rw); //Picks questions on first page
         addValidationPairs(rw);
         randomFill(rw);
         addDuplicates(rw);
@@ -25,23 +25,30 @@ public class OrderQuestions {
 
     private void addDuplicates(ReturnListWrapper rw) {
         int rand;
-        for (int i = 0; i < 3; i++) {
-            SpatialConceptPair reaskPair = null;
-            do {
-                rand = (int) (Math.random() * rw.toReturn[i].size());
-                reaskPair = rw.toReturn[i].get(rand);
-            } while (validationList.contains(reaskPair));
-            rw.toReturn[i + 2].add(reaskPair);
-            Collections.shuffle(rw.toReturn[i + 2]);
-        }
+        rand = (int) (Math.random() * rw.toReturn[0].size());
+        SpatialConceptPair reaskPair = rw.toReturn[0].get(rand);
+        rw.toReturn[2].add(reaskPair);
+        Collections.shuffle(rw.toReturn[2]);
+        SpatialConceptPair reaskPair1;
+        SpatialConceptPair reaskPair2;
+        do{
+            rand = (int) (Math.random() * rw.toReturn[1].size());
+            int rand2 =  (int) (Math.random() * rw.toReturn[1].size());
+            reaskPair1 = rw.toReturn[1].get(rand);
+            reaskPair2 = rw.toReturn[1].get(rand2);
+        } while (reaskPair1.equals(reaskPair2) || validationList.contains(reaskPair1) || validationList.contains(reaskPair2));
+        rw.toReturn[3].add(reaskPair1);
+        rw.toReturn[3].add(reaskPair2);
+        Collections.shuffle(rw.toReturn[3]);
 
     }
 
 
     private void randomFill(ReturnListWrapper rw) {
         int rand;
-        for (int k = 1; k < 5; k++) {
-            for (int i =rw.toReturn[k].size(); i < 9 ; i++) {
+        for (int k = 1; k < 4; k++) {
+            int numbOnPage = k == 1 ? 9 : 8;
+            for (int i =rw.toReturn[k].size(); i < numbOnPage ; i++) {
                 if(!rw.questions.isEmpty()){
                     rand=(int) (Math.random()*rw.questions.size());
                     addToReturnList(k, rw.questions.get(rand), rw);
@@ -60,8 +67,8 @@ public class OrderQuestions {
         validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"USA"),new SpatialConcept(-1,"America")));
         validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"Sydney Opera House"),new SpatialConcept(-1,"Australia")));
         validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"Minnesota"),new SpatialConcept(-1,"Eiffel Tower")));
-        validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"India"),new SpatialConcept(-1,"The Nile River")));
-        //are these the 4 validation questions we want?
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"Egypt"),new SpatialConcept(-1,"The Nile River")));
+        //are these the 4 validation questions we want? TODO
     }
 
     public void addToReturnList(int pageToGoOn, List<SpatialConceptPair> questionsForPg, ReturnListWrapper rw){
@@ -78,8 +85,8 @@ public class OrderQuestions {
         List<SpatialConceptPair> questions;
 
         public ReturnListWrapper(List<Integer> knownIds, int responseNumb){
-            toReturn= new ArrayList[5];
-            for(int i = 0; i < 5; i++) {
+            toReturn= new ArrayList[4];
+            for(int i = 0; i < toReturn.length; i++) {
                 toReturn[i] = new ArrayList<SpatialConceptPair>();
             }
             questions= questionGenerator.getConceptPairsToAsk(knownIds,responseNumb);

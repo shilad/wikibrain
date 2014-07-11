@@ -23,11 +23,11 @@ public class SurveyQuestionGenerator {
     private enum KnowledgeType{
         KK,KU,UU
     };
-    public static final int RAND_OVER=100; //This is how many more times than the desired number of random concepts will be generated
+    public static final int RAND_OVER=1000; //This is how many more times than the desired number of random concepts will be generated
 
-    public static final int kkMaxTimesAsked=10; //This is the maximum number of times each pair can be asked in given category
+    public static final int kkMaxTimesAsked=15; //This is the maximum number of times each pair can be asked in given category
     public static final int kuMaxTimesAsked=10;
-    public static final int uuMaxTimesAsked=10;
+    public static final int uuMaxTimesAsked=15;
 
     private HashMap<Integer,String> idsStringMap;
     private Map<Integer,Integer> idToIndexForDistanceMatrix;
@@ -255,18 +255,18 @@ public class SurveyQuestionGenerator {
      * Adds to the returned list a list of uu concept pairs both pulled from the previously used questions and newly created
      */
     private void getCreatedUUPairs(GenerateNewSpatialPairs generator, ConceptPairBalancer balancer, int numbOfQuestionsSoFar, VariablesWrapper v) {
-        int numbRemaining= 50-v.kuReturnList.size()-v.kkReturnList.size();
+        int numbRemaining= v.kkTarget+v.uuTarget+v.kuTarget-v.kuReturnList.size()-v.kkReturnList.size();
         putOnQuestionsOnList(balancer.choosePairs(v.uuPreviousQList,v.uuReturnList,numbRemaining),KnowledgeType.UU, v);
         numbRemaining=numbRemaining-v.uuReturnList.size();
-        Set<SpatialConceptPair> candidates = generator.uuGenerateSpatialPairs(numbRemaining*RAND_OVER, allPreviousQList);
+        Set<SpatialConceptPair> candidates = generator.uuGenerateSpatialPairs(numbRemaining*RAND_OVER*10, allPreviousQList);
         putOnQuestionsOnList(balancer.choosePairs(candidates,v.uuReturnList,numbRemaining),KnowledgeType.UU, v);
     }
 
 
     private class VariablesWrapper{
-        public int uuTarget=20; //This is the target number of questions of the uu type returned
-        public final int kuTarget=10;
-        public int kkTarget=20;
+        public int uuTarget; //This is the target number of questions of the uu type returned
+        public final int kuTarget=7;
+        public int kkTarget;
         public Set<SpatialConceptPair> uuPreviousQList; //this list changes each time getConceptPairs is called
         public Set<SpatialConceptPair> kuPreviousQList;
         public Set<SpatialConceptPair> kkPreviousQList;
@@ -314,8 +314,10 @@ public class SurveyQuestionGenerator {
         }
 
         private void setTargets(int responseNumb){
-            kkTarget=(int) (20-(.01*responseNumb));
-            uuTarget=30-kkTarget;
+            kkTarget=(int) (15-(.007*responseNumb));
+            uuTarget=23-kkTarget;
+//            kkTarget=(int) (20-(.01*responseNumb));
+//            uuTarget=30-kkTarget;
         }
 
         /**
