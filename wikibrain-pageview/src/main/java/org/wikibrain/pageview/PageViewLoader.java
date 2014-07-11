@@ -159,8 +159,8 @@ public class PageViewLoader {
                 dao.clear();
             } */
 
-            LOG.log(Level.INFO, "Clearing data");
-            dao.clear();
+//            LOG.log(Level.INFO, "Clearing data");
+//            dao.clear();
 
             LOG.log(Level.INFO, "Begin Load");
             dao.beginLoad();

@@ -159,12 +159,12 @@ public class PageViewIterator implements Iterator {
                 String secondsString;
                 String fileName;
 
-                do { //accounts for the possibility of the seconds not ending with 0
+//                do { //accounts for the possibility of the seconds not ending with 0
                     secondsString  = twoDigIntStr(seconds);
                     fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString + minutesString + secondsString + fileNameSuffix;
                     pageViewDataFile = downloadFile(homeFolder, fileName, tempFolder);
-                    seconds++;
-                }while(pageViewDataFile == null && seconds <= 5);
+//                    seconds++;
+//                }while(pageViewDataFile == null && seconds <= 5);
 
                 if(pageViewDataFile != null){
                     flag = true;

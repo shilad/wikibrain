@@ -81,22 +81,43 @@ public class SimilarityExample {
                 { "Statue of Liberty", "New York City" }
         };
 
-        SRResult result;
-        for (int i = 0; i <topList.size()-1 ; i++) {
-            for (int j = i+1; j < topList.size() ; j++) {
-                UniversalPage page1= upDao.getById(topList.get(i));
-                UniversalPage page2= upDao.getById(topList.get(j));
-                int id1= page1.getLocalId(Language.SIMPLE);
-                int id2= page2.getLocalId(Language.SIMPLE);
+//        SRResult result;
+//        for (int i = 0; i <topList.size()-1 ; i++) {
+//            for (int j = i+1; j < topList.size() ; j++) {
+//                UniversalPage page1= upDao.getById(topList.get(i));
+//                UniversalPage page2= upDao.getById(topList.get(j));
+//                int id1= page1.getLocalId(Language.SIMPLE);
+//                int id2= page2.getLocalId(Language.SIMPLE);
+//
+//                    System.out.println(page1.getBestEnglishTitle(lpDao,true));
+//
+//                result=sr.similarity(page1.getLocalId(Language.SIMPLE),page2.getLocalId(Language.SIMPLE),false);
+//                if(result.getScore()>.95){
+//                    System.out.println(getTitle.get(topList.get(i))+" "+ getTitle.get(topList.get(j)));
+//                }
+//            }
+//        }
 
-                    System.out.println(page1.getBestEnglishTitle(lpDao,true));
-
-                result=sr.similarity(page1.getLocalId(Language.SIMPLE),page2.getLocalId(Language.SIMPLE),false);
-                if(result.getScore()>.95){
-                    System.out.println(getTitle.get(topList.get(i))+" "+ getTitle.get(topList.get(j)));
+        Map<Integer, String> map= new HashMap<Integer, String>();
+        Scanner scanner= new Scanner(new File("PageHitListFullEnglish.txt"));
+        while(scanner.hasNextLine()){
+            StringTokenizer st= new StringTokenizer(scanner.nextLine(),"\t", false);
+            if(st.hasMoreTokens()){
+                int id= Integer.parseInt(st.nextToken());
+                if(st.hasMoreTokens()){
+                    map.put(id,st.nextToken());
                 }
             }
         }
+
+        scanner.close();
+
+        PrintWriter pw= new PrintWriter(new FileWriter("IDsToTitles.txt"));
+        for(Integer id:map.keySet()){
+            pw.println(id+":"+map.get(id));
+        }
+        pw.close();
+
 
 //        for (String pair[] : pairs) {
 //                SRResult s = sr.similarity(pair[0], pair[1], true);
@@ -109,17 +130,10 @@ public class SimilarityExample {
     }
 
     private static void buildSet() throws FileNotFoundException{
-        Scanner scanner= new Scanner(new File("Stupid.txt"));
-        while (scanner.hasNextLine()){
-            topList.add(Integer.parseInt(scanner.nextLine()));
-            scanner.nextLine();
-        }
-        scanner.close();
-
         Scanner s= new Scanner(new File("IDsToTitles.txt"));
         StringTokenizer st;
         while (s.hasNextLine()){
-            st= new StringTokenizer(s.nextLine(),":", false);
+            st= new StringTokenizer(s.nextLine(),"\t", false);
             int id= Integer.parseInt(st.nextToken());
             String name= st.nextToken();
             getTitle.put(id,name);

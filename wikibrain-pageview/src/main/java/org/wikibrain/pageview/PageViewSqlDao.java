@@ -131,7 +131,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
     }
 
     public int getNumViews(Language language, int id, DateTime startDate, DateTime endDate, LocalPageDao localPageDao) throws DaoException {
-        checkLoaded(language, startDate, endDate, localPageDao);
+        //checkLoaded(language, startDate, endDate, localPageDao);
         DSLContext context = getJooq();
         Timestamp startTime = new Timestamp(startDate.getMillis());
         Timestamp endTime = new Timestamp(endDate.getMillis());
@@ -152,21 +152,36 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
     }
 
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, List<DateTime[]> dates, LocalPageDao localPageDao) throws DaoException{
+        setLoadedHours();
+        Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+        DateTime startTime;
+        DateTime endTime;
+        int count = 0;
+        for (DateTime[] date : dates){
+            startTime = date[0];
+            endTime = date[1];
+            count++;
+            for(Integer id : ids){
+                if(!result.keySet().contains(id))
+                {
+                    result.put(id, getNumViews(lang, id, startTime, endTime, localPageDao));
+                }
+                else{
+                    int totalViews = result.get(id) + getNumViews(lang, id, startTime, endTime, localPageDao);
+                    result.put(id, totalViews);
+                }
+            }
+            LOG.info(count + " dates loaded");
+        }
+
+        return result;
+    }
+
     public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         for(Integer id: ids){
             result.put(id, getNumViews(lang, id, startTime, endTime, localPageDao));
-        }
-        return result;
-    }
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
-        Map<Integer, Integer> result = new HashMap<Integer, Integer>();
-        for(Integer id: ids){
-            int sum=0;
-            for(DateTime[] startEndTime: dates){
-                sum+=getNumViews(lang,id,startEndTime[0],startEndTime[1],localPageDao);
-            }
-            result.put(id, sum);
         }
         return result;
     }

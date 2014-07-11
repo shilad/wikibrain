@@ -40,9 +40,9 @@ public class BlackListCreator { //Need to finish
         langSet=conf.get(LanguageSet.class);
 
         try{
-//            buildUsingLocalIdsFromAllLangs();
+            buildUsingLocalIdsFromAllLangs();
 //            buildUsingLocalIdsFromSimpleEn();
-            buildUsingUnivIds();
+//            buildUsingUnivIds();
         } catch (Exception e){
             System.out.println("Could not create blacklist");
         }
