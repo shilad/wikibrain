@@ -153,6 +153,11 @@ public class ConceptPairBalancer {
         System.out.print("]");
     }
 
+    private double getFrequentFlyerBoost(SpatialConceptPair pair) {
+        int prevKK = pair.getkkTypeNumbOfTimesAsked();
+        return 0.3 * (prevKK / 15.0);
+    }
+
     private void scoreAndOrder(List<SpatialConceptPair> candidates) {
 //        List<SpatialConceptPair> scored = new LinkedList<SpatialConceptPair>(candidates);
         final Map<SpatialConceptPair, Double> scores = new HashMap<SpatialConceptPair, Double>();
@@ -163,7 +168,7 @@ public class ConceptPairBalancer {
                 score += info.calculateScore(pair);
             }
 
-            scores.put(pair, score);
+            scores.put(pair, score + getFrequentFlyerBoost(pair));
         }
 
         Collections.sort(candidates, new Comparator<SpatialConceptPair>() {

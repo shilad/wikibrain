@@ -1,14 +1,12 @@
 package org.wikibrain.spatial.maxima;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by harpa003 on 7/3/14.
  */
 public class OrderQuestions {
-    List<SpatialConceptPair> validationList;
+    Set<SpatialConceptPair> validationList;
     SurveyQuestionGenerator questionGenerator;
 
     public OrderQuestions(){
@@ -58,8 +56,12 @@ public class OrderQuestions {
     }
 
     private void initValidationList(){
-        validationList= new ArrayList<SpatialConceptPair>();
-        //need to put 4 validation q in this
+        validationList= new HashSet<SpatialConceptPair>();
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"USA"),new SpatialConcept(-1,"America")));
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"Sydney Opera House"),new SpatialConcept(-1,"Australia")));
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"Minnesota"),new SpatialConcept(-1,"Eiffel Tower")));
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"India"),new SpatialConcept(-1,"The Nile River")));
+        //are these the 4 validation questions we want?
     }
 
     public void addToReturnList(int pageToGoOn, List<SpatialConceptPair> questionsForPg, ReturnListWrapper rw){

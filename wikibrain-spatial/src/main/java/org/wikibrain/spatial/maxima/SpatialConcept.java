@@ -20,6 +20,9 @@ public class SpatialConcept {
 
     public void setScale(Scale scale) {
         this.scale = scale;
+        if(scale==null){
+            System.out.println();
+        }
     }
 
     public void setHeardOfProb(double heardOfProb) {
@@ -31,7 +34,6 @@ public class SpatialConcept {
     }
 
     public int getUniversalID() {
-
         return universalID;
     }
 

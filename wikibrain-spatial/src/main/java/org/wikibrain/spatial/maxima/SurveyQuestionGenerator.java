@@ -25,9 +25,9 @@ public class SurveyQuestionGenerator {
     };
     public static final int RAND_OVER=100; //This is how many more times than the desired number of random concepts will be generated
 
-    public static final int kkMaxTimesAsked=10; //This is the maximum number of times each pair can be asked in given category
+    public static final int kkMaxTimesAsked=15; //This is the maximum number of times each pair can be asked in given category
     public static final int kuMaxTimesAsked=10;
-    public static final int uuMaxTimesAsked=10;
+    public static final int uuMaxTimesAsked=15;
 
     private HashMap<Integer,String> idsStringMap;
     private Map<Integer,Integer> idToIndexForDistanceMatrix;
@@ -39,11 +39,11 @@ public class SurveyQuestionGenerator {
     public float[][] graphMatrix; //TODO change back to private
     PrintWriter pw;
 
-    private Set<SpatialConceptPair> allPreviousQList;
+    public Set<SpatialConceptPair> allPreviousQList;
 //    public List<SpatialConceptPair> allPreviousQList; //the list of previously asked questions and never changes but is added to
 
 
-    public SurveyQuestionGenerator() throws IOException{
+    public SurveyQuestionGenerator(){
         allPreviousQList= new HashSet<SpatialConceptPair>();
 //        allPreviousQList= new ArrayList<SpatialConceptPair>();
         try{
@@ -53,8 +53,13 @@ public class SurveyQuestionGenerator {
             System.out.println("File not found");
         }
         buildMatrices();
-        resetPreviousQList();
-        pw = new PrintWriter(new FileWriter("previousConceptPairs.txt"), true); //sets autoflush to true
+        try {
+            resetPreviousQList();
+            pw = new PrintWriter(new FileWriter("previousConceptPairs.txt"), true); //sets autoflush to true
+
+        } catch (IOException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     /**
@@ -70,7 +75,9 @@ public class SurveyQuestionGenerator {
             int firstConceptID = Integer.parseInt(info[0]);
             int secondConceptID = Integer.parseInt(info[1]);
             SpatialConcept firstConcept = new SpatialConcept(firstConceptID, idsStringMap.get(firstConceptID));
+            setScale(firstConcept);
             SpatialConcept secondConcept = new SpatialConcept(secondConceptID, idsStringMap.get(secondConceptID));
+            setScale(secondConcept);
             SpatialConceptPair pair = new SpatialConceptPair(firstConcept, secondConcept);
 
             int listIndex = previousQList.indexOf(pair);//finds the index of the pair
@@ -95,6 +102,21 @@ public class SurveyQuestionGenerator {
         allPreviousQList.addAll(previousQList);
     }
 
+    private void setScale(SpatialConcept concept){
+        Integer scale= idToScaleCategory.get(concept.getUniversalID());
+        if(scale==1){
+            concept.setScale(SpatialConcept.Scale.LANDMARK);
+        }  else if(scale==3){
+            concept.setScale(SpatialConcept.Scale.COUNTRY);
+        } else if(scale==4){
+            concept.setScale(SpatialConcept.Scale.STATE);
+        } else if(scale==5){
+            concept.setScale(SpatialConcept.Scale.CITY);
+        }else if(scale==6){
+            concept.setScale(SpatialConcept.Scale.NATURAL);
+        }
+    }
+
 
     private void readInIdToScaleInfo() throws FileNotFoundException{
         idToScaleCategory= new HashMap<Integer, Integer>();
@@ -111,13 +133,13 @@ public class SurveyQuestionGenerator {
 
 
     private void buildMatrices(){
-        MatrixGenerator.MatrixWithHeader distanceMatrixWithHeader = MatrixGenerator.loadMatrixFile("distancematrix");
+        MatrixGenerator.MatrixWithHeader distanceMatrixWithHeader = MatrixGenerator.loadMatrixFile("distancematrix_en");
         distanceMatrix = distanceMatrixWithHeader.matrix;
         idToIndexForDistanceMatrix= distanceMatrixWithHeader.idToIndex;
-        MatrixGenerator.MatrixWithHeader srMatrixWithHeader = MatrixGenerator.loadMatrixFile("srmatrix");
+        MatrixGenerator.MatrixWithHeader srMatrixWithHeader = MatrixGenerator.loadMatrixFile("srmatrix_en");
         srMatrix= srMatrixWithHeader.matrix;
         idToIndexForSRMatrix= srMatrixWithHeader.idToIndex;
-        MatrixGenerator.MatrixWithHeader graphMatrixWithHeader = MatrixGenerator.loadMatrixFile("graphmatrix");
+        MatrixGenerator.MatrixWithHeader graphMatrixWithHeader = MatrixGenerator.loadMatrixFile("graphmatrix_en");
         graphMatrix= graphMatrixWithHeader.matrix;
         idToIndexForGraphMatrix= graphMatrixWithHeader.idToIndex;
     }
@@ -166,15 +188,15 @@ public class SurveyQuestionGenerator {
 
         //appends all information for each pair being asked into previousConceptPairs.txt in the event of a survey crash
         for(SpatialConceptPair pair: variables.kkReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk" );
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk\n");
         }
 
         for(SpatialConceptPair pair: variables.kuReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku" );
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku\n" );
         }
 
         for(SpatialConceptPair pair: variables.uuReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu" );
+            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu\n" );
         }
 
 
@@ -229,7 +251,7 @@ public class SurveyQuestionGenerator {
      * Adds to the returned list a list of uu concept pairs both pulled from the previously used questions and newly created
      */
     private void getCreatedUUPairs(GenerateNewSpatialPairs generator, ConceptPairBalancer balancer, int numbOfQuestionsSoFar, VariablesWrapper v) {
-        int numbRemaining= 50-v.kuReturnList.size()-v.kkReturnList.size();
+        int numbRemaining= v.kkTarget+v.uuTarget+v.kuTarget-v.kuReturnList.size()-v.kkReturnList.size();
         putOnQuestionsOnList(balancer.choosePairs(v.uuPreviousQList,v.uuReturnList,numbRemaining),KnowledgeType.UU, v);
         numbRemaining=numbRemaining-v.uuReturnList.size();
         Set<SpatialConceptPair> candidates = generator.uuGenerateSpatialPairs(numbRemaining*RAND_OVER, allPreviousQList);

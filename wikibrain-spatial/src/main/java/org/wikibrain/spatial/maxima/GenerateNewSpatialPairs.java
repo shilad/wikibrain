@@ -84,7 +84,6 @@ public class GenerateNewSpatialPairs {
         } else if(scale==5){
             concept.setScale(SpatialConcept.Scale.CITY);
         }else if(scale==6){
-
             concept.setScale(SpatialConcept.Scale.NATURAL);
         }
         return true;
@@ -109,6 +108,7 @@ public class GenerateNewSpatialPairs {
                 }
             }
         }
+
         return toReturn;
     }
 
@@ -135,19 +135,19 @@ public class GenerateNewSpatialPairs {
     }
 
     public void setProperties(SpatialConceptPair pair) {
-        int indexIdOne=idToIndexForDistanceMatrix.get(pair.getFirstConcept().getUniversalID());
-        int indexIdTwo=idToIndexForDistanceMatrix.get(pair.getSecondConcept().getUniversalID());
-        if(indexIdOne != -1 && indexIdTwo != -1) {
+        Integer indexIdOne=idToIndexForDistanceMatrix.get(pair.getFirstConcept().getUniversalID());
+        Integer indexIdTwo=idToIndexForDistanceMatrix.get(pair.getSecondConcept().getUniversalID());
+        if(indexIdOne != null && indexIdTwo != null){
             pair.setKmDistance(distanceMatrix[indexIdOne][indexIdTwo]);
         }
         indexIdOne=idToIndexForSRMatrix.get(pair.getFirstConcept().getUniversalID());
         indexIdTwo=idToIndexForSRMatrix.get(pair.getSecondConcept().getUniversalID());
-        if(indexIdOne != -1 && indexIdTwo != -1) {
+        if(indexIdOne != null && indexIdTwo != null){
             pair.setRelatedness(srMatrix[indexIdOne][indexIdTwo]);
         }
         indexIdOne=idToIndexForGraphMatrix.get(pair.getFirstConcept().getUniversalID());
         indexIdTwo=idToIndexForGraphMatrix.get(pair.getSecondConcept().getUniversalID());
-        if(indexIdOne !=  -1 && indexIdTwo != -1) {
+        if(indexIdOne != null && indexIdTwo != null){
             pair.setGraphDistance(graphMatrix[indexIdOne][indexIdTwo]);
         }
     }
