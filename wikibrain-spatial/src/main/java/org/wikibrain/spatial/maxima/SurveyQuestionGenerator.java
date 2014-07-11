@@ -63,7 +63,7 @@ public class SurveyQuestionGenerator {
     }
 
     /**
-     * rebuilds the allPreviousQList Set in the event of a survey crash
+     * rebuilds the allPreviousQList Set in the event of survey crash
      * @throws IOException
      */
     private void resetPreviousQList() throws IOException{
