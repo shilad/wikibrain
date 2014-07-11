@@ -26,6 +26,8 @@ import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
 import org.wikibrain.sr.MonolingualSRMetric;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -66,8 +68,9 @@ public class SelfFocusBiasEvaluator {
         this.polygonLayer = polygonLayer;
     }
 
-    public Map<Integer, Integer> evaluate(Language lang) throws DaoException{
+    public Map<Integer, Integer> evaluate(Language lang) throws DaoException, IOException{
         this.lang = lang;
+
         this.polygons = sdDao.getAllGeometriesInLayer(polygonLayer, "earth");
         LOG.info(String.format("Finish loading %d polygons", polygons.size()));
         Set<String> layerSet = new HashSet<String>();
@@ -124,18 +127,35 @@ public class SelfFocusBiasEvaluator {
         SelfFocusBiasEvaluator evaluator = new SelfFocusBiasEvaluator(env, "country");
         UniversalPageDao upDao = conf.get(UniversalPageDao.class);
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
-        Map<Integer, Integer> polygonInlinkMap = evaluator.evaluate(Language.getByLangCode("simple"));
-        List<Map.Entry<Integer, Integer>> inlinkList = new ArrayList<Map.Entry<Integer, Integer>>();
-        inlinkList.addAll(polygonInlinkMap.entrySet());
-        Collections.sort(inlinkList, new Comparator<Map.Entry<Integer, Integer>>() {
-            @Override
-            public int compare(Map.Entry<Integer, Integer> integerIntegerEntry, Map.Entry<Integer, Integer> integerIntegerEntry2) {
-                return integerIntegerEntry2.getValue() - integerIntegerEntry.getValue();
+
+
+        Set<Language> langSet = new HashSet<Language>();
+        langSet.add(Language.getByLangCode("simple"));
+        for(Language lang: langSet){
+            LOG.info(String.format("Start evaluating %s", lang.getEnLangName()));
+            Map<Integer, Integer> polygonInlinkMap = evaluator.evaluate(lang);
+            List<Map.Entry<Integer, Integer>> inlinkList = new ArrayList<Map.Entry<Integer, Integer>>();
+            inlinkList.addAll(polygonInlinkMap.entrySet());
+            Collections.sort(inlinkList, new Comparator<Map.Entry<Integer, Integer>>() {
+                @Override
+                public int compare(Map.Entry<Integer, Integer> integerIntegerEntry, Map.Entry<Integer, Integer> integerIntegerEntry2) {
+                    return integerIntegerEntry2.getValue() - integerIntegerEntry.getValue();
+                }
+            });
+            CSVWriter output = new CSVWriter(new FileWriter("SelfFocusBias_" + lang.getLangCode() + ".csv"), ',');
+            String[] entries = new String[2];
+            for(Map.Entry<Integer, Integer> entry : inlinkList){
+                entries[0] = upDao.getById(entry.getKey(), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+                entries[1] = entry.getValue().toString();
+                output.writeNext(entries);
             }
-        });
-        for(Map.Entry<Integer, Integer> entry : inlinkList){
-            System.out.printf("%s : %d \n", upDao.getById(entry.getKey(), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true), entry.getValue());
+            output.flush();
+            LOG.info(String.format("Finish evaluating %s", lang.getEnLangName()));
+
         }
+
+
+
     }
 
 
