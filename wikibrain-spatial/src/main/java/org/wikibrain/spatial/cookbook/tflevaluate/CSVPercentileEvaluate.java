@@ -25,7 +25,12 @@ class EvaluationEntry {
     public double SR_percentile;
     public double dist_percentile;
 }
+
+
 public class CSVPercentileEvaluate {
+    public static int round(double i, int v){
+        return (int)Math.round(i/v) * v;
+    }
     public static void main(String[] args) throws Exception {
         List<Language> langList = new LinkedList<Language>();
         langList.add(Language.getByLangCode("en"));
@@ -58,7 +63,7 @@ public class CSVPercentileEvaluate {
             String lang = langu.getLangCode();
 
             CSVReader reader = new CSVReader(new FileReader("/Users/toby/Dropbox/Tobler2/Data/Basic TFL/TFL-"+lang+".csv"), ',');
-            CSVWriter writer = new CSVWriter(new FileWriter("/Users/toby/Dropbox/Tobler2/Data/Basic TFL/TFL-"+lang+"_new.csv"), ',');
+            CSVWriter writer = new CSVWriter(new FileWriter("/Users/toby/Dropbox/Tobler2/Data/Basic TFL_bin/TFL-"+lang+"_bin.csv"), ',');
             String[] temp;
             List<EvaluationEntry> entryList = new ArrayList<EvaluationEntry>();
             List<Double> SRList = new ArrayList<Double>();
@@ -93,27 +98,29 @@ public class CSVPercentileEvaluate {
                 SRMap.put(d, SRMap.get(d) / SRCounter.get(d));
             }
 
-            String[] headerEntries = new String[7];
-            //headerEntries[0] = "ITEM_NAME_1";
-            //headerEntries[1] = "ITEM_ID_1";
-            //headerEntries[2] = "ITEM_NAME_2";
-            //headerEntries[3] = "ITEM_ID_2";
-            headerEntries[0] = "SPATIAL_DISTANCE";
-            //headerEntries[5] = "SR";
-            headerEntries[1] = "Percentile";
+            String[] headerEntries = new String[8];
+            headerEntries[0] = "ITEM_NAME_1";
+            headerEntries[1] = "ITEM_ID_1";
+            headerEntries[2] = "ITEM_NAME_2";
+            headerEntries[3] = "ITEM_ID_2";
+            headerEntries[4] = "SPATIAL_DISTANCE";
+            headerEntries[5] = "DISTANCE_BIN";
+            headerEntries[6] = "SR";
+            headerEntries[7] = "SR_Percentile";
             writer.writeNext(headerEntries);
             writer.flush();
 
             for(EvaluationEntry e : entryList){
                 e.SR_percentile = SRMap.get(e.SR);
-                String[] rowEntries = new String[7];
-                //rowEntries[0] = e.itemName1;
-                //rowEntries[1] = e.itemID1;
-                //rowEntries[2] = e.itemName2;
-                //rowEntries[3] = e.itemID2;
-                rowEntries[0] = String.format("%d", ((int)e.spatialDistance/1)*1);
-                //rowEntries[5] = Double.valueOf(e.SR).toString();
-                rowEntries[1] = String.format("%.2f", e.SR_percentile/SRList.size());
+                String[] rowEntries = new String[8];
+                rowEntries[0] = e.itemName1;
+                rowEntries[1] = e.itemID1.toString();
+                rowEntries[2] = e.itemName2;
+                rowEntries[3] = e.itemID2.toString();
+                rowEntries[4] = String.format("%.2f", e.spatialDistance);
+                rowEntries[5] = String.format("%d", round(e.spatialDistance, 50));
+                rowEntries[6] = Double.valueOf(e.SR).toString();
+                rowEntries[7] = String.format("%.2f", e.SR_percentile/SRList.size());
                 writer.writeNext(rowEntries);
                 writer.flush();
             }
