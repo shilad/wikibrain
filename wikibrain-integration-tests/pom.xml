@@ -17,27 +17,27 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-sr</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-lucene</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-download</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-loader</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

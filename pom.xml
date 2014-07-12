@@ -8,7 +8,7 @@
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
         <version>0.2-SNAPSHOT</version>
-        <relativePath>wikibrain-parent</relativePath>
+        <relativePath>./wikibrain-parent</relativePath>
     </parent>
 
     <artifactId>wikibrain-all</artifactId>

@@ -17,12 +17,12 @@
       <dependency>
           <groupId>org.wikibrainapi</groupId>
           <artifactId>wikibrain-utils</artifactId>
-          <version>0.1-SNAPSHOT</version>
+          <version>0.2-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.wikibrainapi</groupId>
           <artifactId>wikibrain-matrix</artifactId>
-          <version>0.1-SNAPSHOT</version>
+          <version>0.2-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.jooq</groupId>

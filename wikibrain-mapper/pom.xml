@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-parser</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
