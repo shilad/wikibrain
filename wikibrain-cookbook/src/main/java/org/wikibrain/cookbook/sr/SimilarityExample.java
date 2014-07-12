@@ -55,7 +55,7 @@ public class SimilarityExample {
         wDao= conf.get(WikidataDao.class);
         allGeometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
         formatter= new ExplanationFormatter(lpDao);
-        LocalIDToUniversalID.init(conf);
+//        LocalIDToUniversalID.init(conf);
         topList= new ArrayList<Integer>();
         getTitle= new HashMap<Integer, String>();
         buildSet();
