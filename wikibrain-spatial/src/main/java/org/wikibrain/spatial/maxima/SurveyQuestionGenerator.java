@@ -55,7 +55,7 @@ public class SurveyQuestionGenerator {
         buildMatrices();
         try {
             resetPreviousQList();
-            pw = new PrintWriter(new FileWriter("previousConceptPairs.txt")); //sets autoflush to true
+            pw = new PrintWriter(new FileWriter("previousConceptPairs.txt", true)); //sets autoflush to true
             pw.flush();
         }catch(IOException e){
             System.out.println("IOException");
@@ -172,20 +172,21 @@ public class SurveyQuestionGenerator {
             System.out.println(responseNumb);
         }
 
-        //appends all information for each pair being asked into previousConceptPairs.txt in the event of a survey crash
-        for(SpatialConceptPair pair: variables.kkReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk\n" );
-        }
+        synchronized (pw) {
+            //appends all information for each pair being asked into previousConceptPairs.txt in the event of a survey crash
+            for(SpatialConceptPair pair: variables.kkReturnList){
+                pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk\n");
+            }
 
-        for(SpatialConceptPair pair: variables.kuReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku\n" );
-        }
+            for(SpatialConceptPair pair: variables.kuReturnList){
+                pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku\n");
+            }
 
-        for(SpatialConceptPair pair: variables.uuReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu\n" );
+            for(SpatialConceptPair pair: variables.uuReturnList){
+                pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu\n");
+            }
+            pw.flush();
         }
-        pw.flush();
-
 
         return returnPairs;
     }
