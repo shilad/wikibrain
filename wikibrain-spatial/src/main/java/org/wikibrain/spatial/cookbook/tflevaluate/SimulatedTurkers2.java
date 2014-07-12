@@ -124,7 +124,7 @@ import java.util.*;
                             sortaR++;
                         } else VeryR++;
 
-                        if(pair.getFirstConcept().getUniversalID()==-1){
+                        if(pair.getFirstConcept().getUniversalID() < 0){
                             pw2.print("*");
                         }
                         else if(prevQ.contains(pair)){

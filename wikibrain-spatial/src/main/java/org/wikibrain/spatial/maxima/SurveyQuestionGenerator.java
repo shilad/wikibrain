@@ -119,13 +119,13 @@ public class SurveyQuestionGenerator {
 
 
     private void buildMatrices(){
-        MatrixGenerator.MatrixWithHeader distanceMatrixWithHeader = MatrixGenerator.loadMatrixFile("distancematrix");
+        MatrixGenerator.MatrixWithHeader distanceMatrixWithHeader = MatrixGenerator.loadMatrixFile("distancematrix_en");
         distanceMatrix = distanceMatrixWithHeader.matrix;
         idToIndexForDistanceMatrix= distanceMatrixWithHeader.idToIndex;
-        MatrixGenerator.MatrixWithHeader srMatrixWithHeader = MatrixGenerator.loadMatrixFile("srmatrix");
+        MatrixGenerator.MatrixWithHeader srMatrixWithHeader = MatrixGenerator.loadMatrixFile("srmatrix_en");
         srMatrix= srMatrixWithHeader.matrix;
         idToIndexForSRMatrix= srMatrixWithHeader.idToIndex;
-        MatrixGenerator.MatrixWithHeader graphMatrixWithHeader = MatrixGenerator.loadMatrixFile("graphmatrix");
+        MatrixGenerator.MatrixWithHeader graphMatrixWithHeader = MatrixGenerator.loadMatrixFile("graphmatrix_en");
         graphMatrix= graphMatrixWithHeader.matrix;
         idToIndexForGraphMatrix= graphMatrixWithHeader.idToIndex;
     }
