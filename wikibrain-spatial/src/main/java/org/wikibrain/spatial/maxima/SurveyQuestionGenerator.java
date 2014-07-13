@@ -60,6 +60,29 @@ public class SurveyQuestionGenerator {
         }catch(IOException e){
             System.out.println("IOException");
         }
+
+        Set<Integer> pruned = new HashSet<Integer>(idsStringMap.keySet());
+        pruned.retainAll(idToIndexForDistanceMatrix.keySet());
+        pruned.retainAll(idToIndexForSRMatrix.keySet());
+        pruned.retainAll(idToIndexForGraphMatrix.keySet());
+        pruned.retainAll(idToScaleCategory.keySet());
+
+        System.out.println(
+                String.format(
+                        "original number locations pruned from %d, %d, %d, %d %d to %d\n",
+                        idsStringMap.size(),
+                        idToIndexForDistanceMatrix.size(),
+                        idToIndexForSRMatrix.size(),
+                        idToIndexForGraphMatrix.size(),
+                        idToScaleCategory.size(),
+                        pruned.size()
+                    ));
+
+//        idsStringMap.keySet().retainAll(pruned);
+        idToIndexForDistanceMatrix.keySet().retainAll(pruned);
+        idToIndexForSRMatrix.keySet().retainAll(pruned);
+        idToIndexForGraphMatrix.keySet().retainAll(pruned);
+        idToScaleCategory.keySet().retainAll(pruned);
     }
 
     /**
