@@ -95,7 +95,7 @@ public class ExportEnhancer {
         this.neighbors = new HashMap<String, Set<Integer>>();
         while (scan.hasNextLine()) {
             String line = scan.nextLine();
-            String[] array = line.split("\t", -1);
+            String[] array = line.split("\t");
             Set<Integer> set = new HashSet<Integer>();
             String id = array[0];
             double population = Double.parseDouble(array[1]);
@@ -252,7 +252,7 @@ public class ExportEnhancer {
     public static void main(String args[]) throws IOException {
         ExportEnhancer enhancer = new ExportEnhancer();
         enhancer.enhance(
-                new File("/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/person.tsv"),
+                new File("/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/people.tsv"),
                 new File("/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/questions.tsv"),
                 new File("/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/questions.enhanced.tsv")
         );
