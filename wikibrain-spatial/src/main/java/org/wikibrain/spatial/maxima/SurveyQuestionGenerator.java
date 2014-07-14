@@ -66,6 +66,23 @@ public class SurveyQuestionGenerator {
         pruned.retainAll(idToIndexForSRMatrix.keySet());
         pruned.retainAll(idToIndexForGraphMatrix.keySet());
         pruned.retainAll(idToScaleCategory.keySet());
+        // we missed these in the first pass of removing non-spatial concepts
+        pruned.removeAll(Arrays.asList(1065,
+                7156,
+                188712,
+                270995,
+                154182,
+                179684,
+                19446,
+                161885,
+                179876,
+                102720,
+                4948,
+                83311,
+                638398,
+                191077,
+                104770,
+                170174));
 
         System.out.println(
                 String.format(
