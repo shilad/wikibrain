@@ -94,13 +94,19 @@ public class MatrixGenerator {
 
 
 //        System.out.println("Finished writing matrix to file");
-//        MatrixWithHeader matrix2 = mg.loadMatrixFile("srmatrix");
-//
-//        System.out.println("Finished loading matrix");
-//
-//        System.out.println(matrix.idToIndex.get(30));
+        MatrixWithHeader matrix = mg.loadMatrixFile("graphmatrix_en");
 
-//        List<Integer> check = Arrays.asList(18426, 65, 36091,34860,16554,38733,79842,496360, 85, 8678);
+        System.out.println("Finished loading matrix");
+
+        System.out.println(matrix.idToIndex.get(30));
+
+        List<Integer> check = Arrays.asList(18426, 65, 36091,34860,16554,38733,79842,496360, 85, 8678);
+
+        MatrixWithHeader m2 = prune(matrix,check);
+        for (int i=0; i<m2.dimension; i++) {
+            System.out.println(Arrays.toString(m2.matrix[i]));
+        }
+
 //        for (Integer i: check){
 //            for (int j : check){
 //                try {
@@ -302,6 +308,39 @@ public class MatrixGenerator {
         catch(IOException ex){
             ex.printStackTrace();
         }
+    }
+
+    public static MatrixWithHeader prune(MatrixWithHeader matrix, Collection idsToRetain){
+        List<Integer> newIds = new ArrayList<Integer>();
+        newIds.addAll(matrix.idsInOrder);
+        newIds.retainAll(idsToRetain);
+        int dimension = newIds.size();
+        // in case addAll and retainAll have strange implementation, add as you copy
+        newIds.clear();
+        int newI = 0, newJ;
+        float[][] newMatrix = new float[dimension][dimension];
+        // loop over i of old matrix
+        for (int i=0; i<matrix.dimension; i++){
+            // get associated id
+            int id1 = matrix.idsInOrder.get(i);
+            // if want to keep that id
+            if (idsToRetain.contains(id1)) {
+                // add it to the list
+                newIds.add(id1);
+                // start copying the row over
+                newJ=0;
+                for (int j = 0; j < matrix.dimension; j++) {
+                    // only copy and increment if you actually want to retain that id
+                    if (idsToRetain.contains(matrix.idsInOrder.get(j))) {
+                        newMatrix[newI][newJ]=matrix.matrix[i][j];
+                        newJ++;
+                    }
+                }
+                // only increment if want that id
+                newI++;
+            }
+        }
+        return new MatrixWithHeader(newMatrix,newIds);
     }
 
     public static MatrixWithHeader loadMatrixFile(String fileName ){
