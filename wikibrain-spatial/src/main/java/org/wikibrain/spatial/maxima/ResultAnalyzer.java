@@ -42,7 +42,7 @@ public class ResultAnalyzer {
         }
         pw.println(header);
 
-        final int KK=0,KU=1,UU=2;
+        final int FF=0,FU=1,UU=2;
         for (SpatialConceptPair scp : pairsToResponses.keySet()){
             Set<ResponseLogLine> set = pairsToResponses.get(scp);
             int[] numbers = new int[3];
@@ -51,9 +51,9 @@ public class ResultAnalyzer {
                 if (rll.relatedness!=null && rll.relatedness>=1) {
                     int index;
                     if (rll.known1 && rll.known2) {
-                        index = KK;
+                        index = FF;
                     } else if (rll.known1 || rll.known2) {
-                        index = KU;
+                        index = FU;
                     } else {
                         index = UU;
                     }
@@ -62,7 +62,7 @@ public class ResultAnalyzer {
                 }
             }
             if (numbers[0]+numbers[1]+numbers[2]>=5) {
-                pw.println(scp.toString() + "\t" + averages[KK] + "\t" + averages[KU] + "\t" + averages[UU] + ";");
+                pw.println(scp.toString() + "\t" + averages[FF] + "\t" + averages[FU] + "\t" + averages[UU] + ";");
             }
         }
 
