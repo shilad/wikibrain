@@ -127,6 +127,9 @@ public class SpatialConceptPair {
 
     @Override
     public String toString() {
-        return firstConcept.getTitle() + " :: " + secondConcept.getTitle();
+        return firstConcept + "\t" + secondConcept+"\t"+kmDistance+"\t"+graphDistance+"\t"+relatedness+"\t"+kkTypeNumbOfTimesAsked+"\t"+kuTypeNumbOfTimesAsked+"\t"+uuTypeNumbOfTimesAsked;
     }
+//    public String toString() {
+//        return firstConcept.getTitle() + " :: " + secondConcept.getTitle();
+//    }
 }

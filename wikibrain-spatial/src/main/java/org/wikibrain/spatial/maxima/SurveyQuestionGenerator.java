@@ -25,9 +25,9 @@ public class SurveyQuestionGenerator {
     };
     public static final int RAND_OVER=1000; //This is how many more times than the desired number of random concepts will be generated
 
-    public static final int kkMaxTimesAsked=15; //This is the maximum number of times each pair can be asked in given category
+    public static final int kkMaxTimesAsked=18; //This is the maximum number of times each pair can be asked in given category
     public static final int kuMaxTimesAsked=10;
-    public static final int uuMaxTimesAsked=15;
+    public static final int uuMaxTimesAsked=18;
 
     private HashMap<Integer,String> idsStringMap;
     private Map<Integer,Integer> idToIndexForDistanceMatrix;
@@ -55,11 +55,51 @@ public class SurveyQuestionGenerator {
         buildMatrices();
         try {
             resetPreviousQList();
-            pw = new PrintWriter(new FileWriter("previousConceptPairs.txt")); //sets autoflush to true
+            pw = new PrintWriter(new FileWriter("previousConceptPairs.txt", true)); //sets autoflush to true
             pw.flush();
         }catch(IOException e){
             System.out.println("IOException");
         }
+
+        Set<Integer> pruned = new HashSet<Integer>(idsStringMap.keySet());
+        pruned.retainAll(idToIndexForDistanceMatrix.keySet());
+        pruned.retainAll(idToIndexForSRMatrix.keySet());
+        pruned.retainAll(idToIndexForGraphMatrix.keySet());
+        pruned.retainAll(idToScaleCategory.keySet());
+        // we missed these in the first pass of removing non-spatial concepts
+        pruned.removeAll(Arrays.asList(1065,
+                7156,
+                188712,
+                270995,
+                154182,
+                179684,
+                19446,
+                161885,
+                179876,
+                102720,
+                4948,
+                83311,
+                638398,
+                191077,
+                104770,
+                170174));
+
+        System.out.println(
+                String.format(
+                        "original number locations pruned from %d, %d, %d, %d %d to %d\n",
+                        idsStringMap.size(),
+                        idToIndexForDistanceMatrix.size(),
+                        idToIndexForSRMatrix.size(),
+                        idToIndexForGraphMatrix.size(),
+                        idToScaleCategory.size(),
+                        pruned.size()
+                    ));
+
+//        idsStringMap.keySet().retainAll(pruned);
+        idToIndexForDistanceMatrix.keySet().retainAll(pruned);
+        idToIndexForSRMatrix.keySet().retainAll(pruned);
+        idToIndexForGraphMatrix.keySet().retainAll(pruned);
+        idToScaleCategory.keySet().retainAll(pruned);
     }
 
     /**
@@ -79,7 +119,7 @@ public class SurveyQuestionGenerator {
             SpatialConcept secondConcept = new SpatialConcept(secondConceptID, idsStringMap.get(secondConceptID));
             assignScale(secondConcept);
             SpatialConceptPair pair = new SpatialConceptPair(firstConcept, secondConcept);
-
+            setProperties(pair);
             int listIndex = previousQList.indexOf(pair);//finds the index of the pair
             if (listIndex == -1){//adds the pair if not in the list
                 previousQList.add(pair);
@@ -101,6 +141,24 @@ public class SurveyQuestionGenerator {
 
         sc.close();
         allPreviousQList.addAll(previousQList);
+    }
+
+    private void setProperties(SpatialConceptPair pair){
+            Integer indexIdOne=idToIndexForDistanceMatrix.get(pair.getFirstConcept().getUniversalID());
+            Integer indexIdTwo=idToIndexForDistanceMatrix.get(pair.getSecondConcept().getUniversalID());
+            if(indexIdOne != null && indexIdTwo != null){
+                pair.setKmDistance(distanceMatrix[indexIdOne][indexIdTwo]);
+            }
+            indexIdOne=idToIndexForSRMatrix.get(pair.getFirstConcept().getUniversalID());
+            indexIdTwo=idToIndexForSRMatrix.get(pair.getSecondConcept().getUniversalID());
+            if(indexIdOne != null && indexIdTwo != null){
+                pair.setRelatedness(srMatrix[indexIdOne][indexIdTwo]);
+            }
+            indexIdOne=idToIndexForGraphMatrix.get(pair.getFirstConcept().getUniversalID());
+            indexIdTwo=idToIndexForGraphMatrix.get(pair.getSecondConcept().getUniversalID());
+            if(indexIdOne != null && indexIdTwo != null){
+                pair.setGraphDistance(graphMatrix[indexIdOne][indexIdTwo]);
+            }
     }
 
 
@@ -172,20 +230,21 @@ public class SurveyQuestionGenerator {
             System.out.println(responseNumb);
         }
 
-        //appends all information for each pair being asked into previousConceptPairs.txt in the event of a survey crash
-        for(SpatialConceptPair pair: variables.kkReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk\n" );
-        }
+        synchronized (pw) {
+            //appends all information for each pair being asked into previousConceptPairs.txt in the event of a survey crash
+            for(SpatialConceptPair pair: variables.kkReturnList){
+                pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "kk\n");
+            }
 
-        for(SpatialConceptPair pair: variables.kuReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku\n" );
-        }
+            for(SpatialConceptPair pair: variables.kuReturnList){
+                pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "ku\n");
+            }
 
-        for(SpatialConceptPair pair: variables.uuReturnList){
-            pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu\n" );
+            for(SpatialConceptPair pair: variables.uuReturnList){
+                pw.append(pair.getFirstConcept().getUniversalID() + ":" + pair.getSecondConcept().getUniversalID() + ":" + "uu\n");
+            }
+            pw.flush();
         }
-        pw.flush();
-
 
         return returnPairs;
     }

@@ -156,7 +156,7 @@ public class ConceptPairBalancer {
     private double getFrequentFlyerBoost(SpatialConceptPair pair) {
         int prevKK = pair.getkkTypeNumbOfTimesAsked();
 //        return 0.3 * (prevKK / 15.0);
-        return 0.18034 * Math.log(prevKK + 1);
+        return 0.16981 * Math.log(prevKK + 1);
     }
 
     private void scoreAndOrder(List<SpatialConceptPair> candidates) {

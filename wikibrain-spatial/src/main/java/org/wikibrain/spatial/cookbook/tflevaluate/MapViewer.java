@@ -87,13 +87,13 @@ public class MapViewer {
 //            System.out.println(sortedIds.get(i)+": "+matrix.matrix[la][matrix.idsInOrder.indexOf(sortedIds.get(i))]+" "+matrix.matrix[matrix.idsInOrder.indexOf(sortedIds.get(i))][la]);
 //        }
 
-        List<List<Integer>> manhattan = mv.generateGraphNeighborList(matrix,11299,Float.POSITIVE_INFINITY);
+        List<List<Integer>> manhattan = mv.generateGraphNeighborList(matrix,38733,Float.POSITIVE_INFINITY);
         List<List<Integer>> jfk = mv.generateGraphNeighborList(matrix,8685,Float.POSITIVE_INFINITY);
 
         manhattan.remove(manhattan.size()-1);
         jfk.remove(jfk.size()-1);
 
-        String base = "http://maps.googleapis.com/maps/api/staticmap?center=UpperManhattan,NY&zoom=10&size=400x524";
+        String base = "";//http://maps.googleapis.com/maps/api/staticmap?center=UpperManhattan,NY&zoom=10&size=400x524";
         mv.generateMapUrl(manhattan,11,base);
         mv.generateMapUrl(jfk, 11,base);
     }
@@ -173,7 +173,7 @@ public class MapViewer {
         String current = base +"|";
         for(int i=0; i<levels.size(); i++){
             System.out.println("Starting level "+i);
-            if (current.length()>2000){
+            if (current.length()>1500){
                 System.out.println("Length: "+(current.length()-1));
                 System.out.println(current);
                 current = base + "|";
