@@ -82,7 +82,7 @@ public class SimulatedTurkers {
 //            mg.getGeoDataFromCities(new File("/scratch/ne_10m_populated_places/ne_10m_populated_places.shp"));
 //            Map<String, Set<Integer>> map = mg.getNearConceptList(10, 2 );
 //            mg.createNeighborFile(map);
-            Map<String,Set<Integer>> neighbors = st.loadNeighborFile(new File("citiesToNeighbors3.txt"));
+            Map<String,Set<Integer>> neighbors = st.loadNeighborFile(new File("citiesToNeighbors4.txt"));
 //
             //set number of simulated turkers to 1000
             List<Set<Integer>> simulatedTurkers = st.generateSimulatedTurkers(neighbors, st.cityPopulations, 1000);
