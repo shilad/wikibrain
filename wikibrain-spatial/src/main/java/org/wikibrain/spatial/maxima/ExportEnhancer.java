@@ -41,7 +41,7 @@ public class ExportEnhancer {
         pageRanks = new HashMap<Integer, Integer>();
         int rank = 1;
         for (String line : FileUtils.readLines(new File("PageHitListFullEnglish.txt"))) {
-            String tokens[] = line.trim().split("\t");
+            String tokens[] = line.trim().split("\t", -1);
             pageRanks.put(Integer.valueOf(tokens[0]), rank++);
         }
     }
@@ -85,7 +85,7 @@ public class ExportEnhancer {
         }
         while(scanner.hasNextLine()){
             String s= scanner.nextLine();
-            String[] info= s.split("\t");
+            String[] info= s.split("\t", -1);
             idToScaleCategory.put(Integer.parseInt(info[0]),Integer.parseInt(info[1]));
         }
     }
@@ -95,7 +95,7 @@ public class ExportEnhancer {
         this.neighbors = new HashMap<String, Set<Integer>>();
         while (scan.hasNextLine()) {
             String line = scan.nextLine();
-            String[] array = line.split("\t");
+            String[] array = line.split("\t", -1);
             Set<Integer> set = new HashSet<Integer>();
             String id = array[0];
             double population = Double.parseDouble(array[1]);
@@ -110,7 +110,7 @@ public class ExportEnhancer {
     public void enhance(File personFile, File questionFile, File newQuestionFile) throws IOException {
         Map<String, Set<Integer>> knownLocations = readKnownLocations(personFile);
         BufferedReader reader = WpIOUtils.openBufferedReader(questionFile);
-        String header[] = reader.readLine().trim().split("\t");
+        String header[] = reader.readLine().trim().split("\t", -1);
 
         BufferedWriter writer = WpIOUtils.openWriter(newQuestionFile);
         writeRow(writer, header, "km", "graph", "sr", "scale1", "scale2", "wpId1", "wpId2", "pop1", "pop2", "known1", "known2");
@@ -146,7 +146,7 @@ public class ExportEnhancer {
         }
 
         if (line.endsWith("\n")) { line = line.substring(0, line.length() - 1); }
-        String [] tokens = line.split("\t");
+        String [] tokens = line.split("\t", -1);
 
         String workerId = tokens[workerCol];
         int wpId1 = -1, wpId2 = -1, pageRank1 = -1, pageRank2 = -1, scale1 = -1, scale2 = -1;
@@ -204,7 +204,7 @@ public class ExportEnhancer {
             if (line.endsWith("\n")) {
                 line = line.substring(0, line.length()-1);
             }
-            String tokens[] = line.split("\t");
+            String tokens[] = line.split("\t", -1);
 
             // Grab location columns for header
             if (numFields < 0) {
