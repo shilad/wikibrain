@@ -124,7 +124,6 @@ public class ExportEnhancer {
                 enhanceLine(header, knownLocations, line, writer);
             } catch (Exception e) {
                 System.err.println("error enhancing line: " + line.trim());
-                e.printStackTrace();
             }
         }
         writer.close();
