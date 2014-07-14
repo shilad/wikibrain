@@ -113,7 +113,7 @@ public class ExportEnhancer {
         String header[] = reader.readLine().trim().split("\t", -1);
 
         BufferedWriter writer = WpIOUtils.openWriter(newQuestionFile);
-        writeRow(writer, header, "km", "graph", "sr", "scale1", "scale2", "wpId1", "wpId2", "pop1", "pop2", "known1", "known2");
+        writeRow(writer, header, "km", "graph", "sr", "wpId1", "wpId2", "scale1", "scale2", "pop1", "pop2", "known1", "known2");
 
         while (true) {
             String line = reader.readLine();
