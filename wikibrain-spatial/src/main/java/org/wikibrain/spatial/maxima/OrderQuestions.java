@@ -64,13 +64,10 @@ public class OrderQuestions {
 
     private void initValidationList() {
         validationList= new HashSet<SpatialConceptPair>();
-        validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"USA"),new SpatialConcept(-2,"America")));
-        validationList.add(new SpatialConceptPair(new SpatialConcept(-3,"Sydney Opera House"),new SpatialConcept(-4,"Australia")));
-        validationList.add(new SpatialConceptPair(new SpatialConcept(-5,"Minnesota"),new SpatialConcept(-6,"Eiffel Tower")));
-        validationList.add(new SpatialConceptPair(new SpatialConcept(-7,"Egypt"),new SpatialConcept(-8,"The Nile River")));
-        //are these the 4 validation questions we want? TODO
-        // In order to get the .equals() method to work for these pairs, it is necessary that each concept have
-        // a distinct id.
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-1,"Female"),new SpatialConcept(-2,"Woman")));
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-3,"Film"),new SpatialConcept(-4,"Movie")));
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-5,"Shirt"),new SpatialConcept(-6,"Tiger")));
+        validationList.add(new SpatialConceptPair(new SpatialConcept(-7,"Afternoon"),new SpatialConcept(-8,"Substance")));
     }
 
     public void addToReturnList(int pageToGoOn, List<SpatialConceptPair> questionsForPg, ReturnListWrapper rw){
