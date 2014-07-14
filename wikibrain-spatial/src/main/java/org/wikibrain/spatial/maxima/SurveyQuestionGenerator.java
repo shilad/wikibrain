@@ -25,9 +25,9 @@ public class SurveyQuestionGenerator {
     };
     public static final int RAND_OVER=1000; //This is how many more times than the desired number of random concepts will be generated
 
-    public static final int kkMaxTimesAsked=15; //This is the maximum number of times each pair can be asked in given category
+    public static final int kkMaxTimesAsked=18; //This is the maximum number of times each pair can be asked in given category
     public static final int kuMaxTimesAsked=10;
-    public static final int uuMaxTimesAsked=15;
+    public static final int uuMaxTimesAsked=18;
 
     private HashMap<Integer,String> idsStringMap;
     private Map<Integer,Integer> idToIndexForDistanceMatrix;
@@ -119,7 +119,7 @@ public class SurveyQuestionGenerator {
             SpatialConcept secondConcept = new SpatialConcept(secondConceptID, idsStringMap.get(secondConceptID));
             assignScale(secondConcept);
             SpatialConceptPair pair = new SpatialConceptPair(firstConcept, secondConcept);
-
+            setProperties(pair);
             int listIndex = previousQList.indexOf(pair);//finds the index of the pair
             if (listIndex == -1){//adds the pair if not in the list
                 previousQList.add(pair);
@@ -141,6 +141,24 @@ public class SurveyQuestionGenerator {
 
         sc.close();
         allPreviousQList.addAll(previousQList);
+    }
+
+    private void setProperties(SpatialConceptPair pair){
+            Integer indexIdOne=idToIndexForDistanceMatrix.get(pair.getFirstConcept().getUniversalID());
+            Integer indexIdTwo=idToIndexForDistanceMatrix.get(pair.getSecondConcept().getUniversalID());
+            if(indexIdOne != null && indexIdTwo != null){
+                pair.setKmDistance(distanceMatrix[indexIdOne][indexIdTwo]);
+            }
+            indexIdOne=idToIndexForSRMatrix.get(pair.getFirstConcept().getUniversalID());
+            indexIdTwo=idToIndexForSRMatrix.get(pair.getSecondConcept().getUniversalID());
+            if(indexIdOne != null && indexIdTwo != null){
+                pair.setRelatedness(srMatrix[indexIdOne][indexIdTwo]);
+            }
+            indexIdOne=idToIndexForGraphMatrix.get(pair.getFirstConcept().getUniversalID());
+            indexIdTwo=idToIndexForGraphMatrix.get(pair.getSecondConcept().getUniversalID());
+            if(indexIdOne != null && indexIdTwo != null){
+                pair.setGraphDistance(graphMatrix[indexIdOne][indexIdTwo]);
+            }
     }
 
 
