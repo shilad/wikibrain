@@ -1,5 +1,7 @@
 package org.wikibrain.spatial.maxima;
 
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.io.FileUtils;
@@ -26,7 +28,10 @@ public class ExportEnhancer {
     private float[][] srMatrix;
     private float[][] graphMatrix;
     private Map<String, Set<Integer>> neighbors;
+    private Map<String, String> oldNeighbors;
     private Map<Integer, Integer> pageRanks;
+
+    private static String fileBase = "/scratch/results/";//"/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/";
 
 
     public ExportEnhancer() throws IOException {
@@ -34,6 +39,7 @@ public class ExportEnhancer {
         readMatrices();
         readInIdToScaleInfo();
         readNeighbors();
+        fixNeighbors();
         readPopularity();
     }
 
@@ -107,6 +113,61 @@ public class ExportEnhancer {
         return neighbors;
     }
 
+    public void fixNeighbors() throws FileNotFoundException {
+        Map<Integer,String>[] cities = new Map[2];
+        String[] files = {"cities1000.txt","cities1000.old.txt"};
+        int newCities = 0, oldCities = 1;
+        // country matching
+        String[] array2 = {"United States of America", "Canada", "Brazil", "Pakistan", "India", "France", "Spain", "United Kingdom", "Australia"};
+        String[] countryCodes = {"US", "CA", "BR", "PK", "IN", "FR", "ES", "GB", "AU"};
+        // codes to country names
+        Map<String, String> countryNames = new HashMap<String, String>();
+        for (int i = 0; i < countryCodes.length; i++) {
+            countryNames.put(countryCodes[i], array2[i]);
+        }
+        // set of codes
+        Set<String> countries = new HashSet<String>();
+        countries.addAll(Arrays.asList(countryCodes));
+        // read in file that gives conversion from state code names to state actual names
+        Map<String, String> stateCodesToNames = new HashMap<String, String>();
+        Scanner scan = new Scanner(new File("admin1CodesASCII.txt"));
+        while (scan.hasNextLine()) {
+            String line = scan.nextLine();
+            String[] array = line.split("\t");
+            stateCodesToNames.put(array[0], array[1]);
+        }
+        scan.close();
+        // read city names
+        for (int i=0; i<2; i++){
+            scan = new Scanner(new File(files[i]));
+            cities[i] = new HashMap<Integer, String>();
+            while(scan.hasNextLine()) {
+                String line = scan.nextLine();
+                String[] array = line.split("\t");
+                String country = array[8];
+
+                // if it's in a country we care about
+                if (countries.contains(country)) {
+                    String name = array[1];
+                    String state = array[10];
+                    Integer id = Integer.parseInt(array[0]);
+
+                    // store the information
+                    state = stateCodesToNames.get(country + "." + state);
+                    country = countryNames.get(country);
+                    name = country+","+state+","+name;
+                    cities[i].put(id,name);
+                }
+            }
+            scan.close();
+        }
+        oldNeighbors = new HashMap<String, String>();
+        for (Integer id: cities[oldCities].keySet()){
+            oldNeighbors.put(cities[oldCities].get(id),cities[newCities].get(id));
+        }
+
+    }
+
     public void enhance(File personFile, File questionFile, File newQuestionFile) throws IOException {
         Map<String, Set<Integer>> knownLocations = readKnownLocations(personFile);
         BufferedReader reader = WpIOUtils.openBufferedReader(questionFile);
@@ -122,7 +183,8 @@ public class ExportEnhancer {
             }
             try {
                 enhanceLine(header, knownLocations, line, writer);
-            } catch (Exception e) {
+            }catch (Exception e) {
+                e.printStackTrace();
                 System.err.println("error enhancing line: " + line.trim());
             }
         }
@@ -148,7 +210,8 @@ public class ExportEnhancer {
         if (line.endsWith("\n")) { line = line.substring(0, line.length() - 1); }
         String [] tokens = line.split("\t", -1);
 
-        String workerId = tokens[workerCol];
+        // If you don't trim, bad things happen
+        String workerId = tokens[workerCol].trim();
         int wpId1 = -1, wpId2 = -1, pageRank1 = -1, pageRank2 = -1, scale1 = -1, scale2 = -1;
         double graphDist = -1.0, kmDist = -1.0, srDist = -1.0;
 
@@ -170,8 +233,7 @@ public class ExportEnhancer {
             System.err.println("didn't find information for line " + line.trim());
         }
 
-        writeRow(
-                writer, tokens,
+        writeRow(writer, tokens,
                 kmDist, graphDist, srDist,
                 wpId1, wpId2,
                 scale1, scale2,
@@ -225,6 +287,10 @@ public class ExportEnhancer {
                 continue;
             }
 
+
+            if (line.contains("A18FSRHD10KF0Y")){
+                System.out.println(line);
+            }
             String id = tokens[idCol].trim();
             Set<Integer> known = new HashSet<Integer>();
             for (int i : locationCols.toArray()) {
@@ -236,10 +302,19 @@ public class ExportEnhancer {
                     continue;   // country
                 }
                 s = s.replaceAll("\\|", ",");
+
+
                 if (neighbors.containsKey(s)) {
                     known.addAll(neighbors.get(s));
                 } else {
-                    System.err.println("unknown city for turker: " + s);
+                    if (oldNeighbors.get(s) != null) {
+                        known.addAll(neighbors.get(oldNeighbors.get(s)));
+                    } else {
+                        System.err.println("unknown city "+s+" for turker: " + id);
+                    }
+                }
+                if (id.equals("A18FSRHD10KF0Y")){
+                    System.out.println(known.size());
                 }
             }
 
@@ -252,9 +327,9 @@ public class ExportEnhancer {
     public static void main(String args[]) throws IOException {
         ExportEnhancer enhancer = new ExportEnhancer();
         enhancer.enhance(
-                new File("/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/people.tsv"),
-                new File("/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/questions.tsv"),
-                new File("/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/questions.enhanced.tsv")
+                new File(fileBase+"people.tsv"),
+                new File(fileBase+"questions.tsv"),
+                new File(fileBase+"questions.enhanced.tsv")
         );
     }
 }
