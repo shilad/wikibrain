@@ -48,11 +48,14 @@ public class ResultAnalyzer {
             int[] numbers = new int[3];
             double[] averages = new double[3];
             for (ResponseLogLine rll: set){
-                if (rll.relatedness!=null && rll.relatedness>=1) {
+                if (rll.relatedness!=null && rll.relatedness>=0) {
+                    if (rll.familiarity1 == null || rll.familiarity2 == null) {
+                        continue;
+                    }
                     int index;
-                    if (rll.known1 && rll.known2) {
+                    if (rll.familiarity1 > 3 && rll.familiarity2 > 3) {
                         index = FF;
-                    } else if (rll.known1 || rll.known2) {
+                    } else if (rll.familiarity1 > 3 || rll.familiarity2 > 3) {
                         index = FU;
                     } else {
                         index = UU;
@@ -61,8 +64,8 @@ public class ResultAnalyzer {
                     numbers[index]++;
                 }
             }
-            if (numbers[0]+numbers[1]+numbers[2]>=5) {
-                pw.println(scp.toString() + "\t" + averages[FF] + "\t" + averages[FU] + "\t" + averages[UU] + ";");
+            if (numbers[0]+numbers[1]+numbers[2]>=20) {
+                pw.println(scp.toString() + "\t" + averages[FF] + "\t" + averages[FU] + "\t" + averages[UU] + "");
             }
         }
 
