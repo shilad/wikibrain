@@ -68,7 +68,10 @@ public class ResultAnalyzer {
                 }
             }
             if (numbers[0] >= 5 && numbers[2] >= 5) {
-                pw.println(scp.toString() + StringUtils.join(numbers, "\t") + StringUtils.join(averages, "\t"));
+                List newCols = new ArrayList();
+                for (int i = 0; i < numbers.length; i++) { newCols.add(numbers[i]); }
+                for (int i = 0; i < averages.length; i++) { newCols.add(averages[i]); }
+                pw.println(scp.toString() + "\t" + StringUtils.join(newCols, '\t'));
             }
         }
 
