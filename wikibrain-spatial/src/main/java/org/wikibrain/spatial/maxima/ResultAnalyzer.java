@@ -1,5 +1,8 @@
 package org.wikibrain.spatial.maxima;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,7 +22,7 @@ public class ResultAnalyzer {
     public static void main (String args[]) throws IOException{
         Scanner scan = new Scanner(new File("questions.tsv"));
         scan.nextLine();
-        String header = "Label 1\tID 1\tLabel 2\tID 2\tDistance (km)\tDistance (graph)\tRelatedness\tNum. FF\tNum. FU\tNum. UU\tAvg. FF\tAvg. FU\tAvg. UU;";
+        String header = "Label 1\tID 1\tLabel 2\tID 2\tDistance (km)\tDistance (graph)\tRelatedness\tExpected FF\tExpected FU\tExpected UU\tActual FF\tActual FU\tActual UU\tAvg. FF\tAvg. FU\tAvg. UU";
         Map<String,Set<ResponseLogLine>> byAuthor = new HashMap<String,Set<ResponseLogLine>> ();
         while(scan.hasNextLine()){
             String s = scan.nextLine();
@@ -64,8 +67,8 @@ public class ResultAnalyzer {
                     numbers[index]++;
                 }
             }
-            if (numbers[0]+numbers[1]+numbers[2]>=20) {
-                pw.println(scp.toString() + "\t" + averages[FF] + "\t" + averages[FU] + "\t" + averages[UU] + "");
+            if (numbers[0] >= 5 && numbers[2] >= 5) {
+                pw.println(scp.toString() + StringUtils.join(numbers, "\t") + StringUtils.join(averages, "\t"));
             }
         }
 
