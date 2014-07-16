@@ -20,9 +20,9 @@ public class ResultAnalyzer {
             SpatialConcept.Scale.STATE, SpatialConcept.Scale.CITY, SpatialConcept.Scale.NATURAL};
 
     public static void main (String args[]) throws IOException{
-        Scanner scan = new Scanner(new File("questions.tsv"));
+        Scanner scan = new Scanner(new File("questions.enhanced.tsv"));
         scan.nextLine();
-        String header = "Label 1\tID 1\tLabel 2\tID 2\tDistance (km)\tDistance (graph)\tRelatedness\tExpected FF\tExpected FU\tExpected UU\tActual FF\tActual FU\tActual UU\tAvg. FF\tAvg. FU\tAvg. UU";
+        String header = "Label 1\tID 1\tLabel 2\tID 2\tDistance (km)\tDistance (graph)\tRelatedness\tExpected FF\tExpected FU\tExpected UU\tActual FF\tActual FU\tActual UU\tActual All\tAvg. FF\tAvg. FU\tAvg. UU\tAvg. All";
         Map<String,Set<ResponseLogLine>> byAuthor = new HashMap<String,Set<ResponseLogLine>> ();
         while(scan.hasNextLine()){
             String s = scan.nextLine();
@@ -39,7 +39,7 @@ public class ResultAnalyzer {
 
         PrintWriter pw = null;
         try {
-            pw = new PrintWriter(new FileWriter("results.csv"));
+            pw = new PrintWriter(new FileWriter("results.tsv"));
         }catch(IOException e){
             e.printStackTrace();
         }
@@ -55,6 +55,9 @@ public class ResultAnalyzer {
                     if (rll.familiarity1 == null || rll.familiarity2 == null) {
                         continue;
                     }
+                    if (rll.familiarity1 < 1 || rll.familiarity2 < 1) {
+                        continue;
+                    }
                     int index;
                     if (rll.familiarity1 > 3 && rll.familiarity2 > 3) {
                         index = FF;
@@ -67,10 +70,20 @@ public class ResultAnalyzer {
                     numbers[index]++;
                 }
             }
-            if (numbers[0] >= 5 && numbers[2] >= 5) {
+            if (numbers[0] + numbers[1] + numbers[2] >= 10) {
                 List newCols = new ArrayList();
-                for (int i = 0; i < numbers.length; i++) { newCols.add(numbers[i]); }
-                for (int i = 0; i < averages.length; i++) { newCols.add(averages[i]); }
+                int total = 0;
+                for (int i = 0; i < numbers.length; i++) {
+                    newCols.add(numbers[i]);
+                    total += numbers[i];
+                }
+                newCols.add(total);
+                double sum = 0;
+                for (int i = 0; i < averages.length; i++) {
+                    newCols.add(averages[i]);
+                    sum += averages[i] * numbers[i];
+                }
+                newCols.add(sum / total);
                 pw.println(scp.toString() + "\t" + StringUtils.join(newCols, '\t'));
             }
         }

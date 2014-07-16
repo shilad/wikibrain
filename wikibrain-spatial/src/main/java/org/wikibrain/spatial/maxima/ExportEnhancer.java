@@ -31,7 +31,7 @@ public class ExportEnhancer {
     private Map<String, String> oldNeighbors;
     private Map<Integer, Integer> pageRanks;
 
-    private static String fileBase = "/scratch/results/";//"/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/";
+    private static String fileBase = "./";//"/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/";
 
 
     public ExportEnhancer() throws IOException {
