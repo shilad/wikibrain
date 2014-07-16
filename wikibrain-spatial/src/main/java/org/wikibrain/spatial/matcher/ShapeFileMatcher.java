@@ -111,17 +111,27 @@ public class ShapeFileMatcher {
         Config config = getConfig(name).getConfig("layers." + layer);
         GeoResolver resolver = new GeoResolver(env, config);
 
-        File f = FileUtils.getFile(spatialDir, "matches", name + "." + layer + ".csv");
-        f.getParentFile().mkdirs();
-
-        CsvListWriter csv = new CsvListWriter(new FileWriter(f), CsvPreference.STANDARD_PREFERENCE);
-
+        File csvPath = FileUtils.getFile(spatialDir, "matches", name + "." + layer + ".csv");
+        csvPath.getParentFile().mkdirs();
+        CsvListWriter csv = new CsvListWriter(new FileWriter(csvPath), CsvPreference.STANDARD_PREFERENCE);
 
         WbShapeFile shpFile = new WbShapeFile(getPath(name, layer));
 
 
+        List<String> extraFields = new ArrayList<String>();
+        for (String fieldsKey : new String[] { "titles", "context", "other" }) {
+            if (config.hasPath(fieldsKey)) {
+                for (String field : config.getStringList(fieldsKey)) {
+                    extraFields.add(field);
+                }
+            }
+        }
+
+
         try {
             List<String> fields = new ArrayList<String>();
+            fields.add("ID");
+            fields.add("KEY");
             fields.add("updated");
             fields.add("status");
             fields.add("WB");
@@ -129,7 +139,7 @@ public class ShapeFileMatcher {
             fields.add("WB2");
             fields.add("WB3");
             fields.add("WB_SCORE");
-            fields.addAll(shpFile.getFeatureNames());
+            fields.addAll(extraFields);
             csv.write(fields);
 
             String tstamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
@@ -145,8 +155,18 @@ public class ShapeFileMatcher {
                 LinkedHashMap<LocalPage, Double> guesses = resolver.resolve(rowMap, 3);
                 List<LocalPage> sorted = new ArrayList<LocalPage>(guesses.keySet());
 
+                String key = "";
+                for (String field : config.getStringList("key")) {
+                    if (key.length() != 0) {
+                        key += "|";
+                    }
+                    key += rowMap.get(field);
+                }
+
                 List<String> newRow = new ArrayList<String>();
 
+                newRow.add(row.getID());
+                newRow.add(key);
                 newRow.add(tstamp);
                 newRow.add("U");
                 newRow.add(sorted.size() > 0 ? sorted.get(0).getTitle().getTitleStringWithoutNamespace() : "");
@@ -165,6 +185,9 @@ public class ShapeFileMatcher {
                 }
                 newRow.add(""+score);
 
+                if ()
+                List<String>
+                for (String )
                 for (int i = 0; i < row.getAttributeCount(); i++) {
                     newRow.add(row.getAttribute(i).toString());
                 }

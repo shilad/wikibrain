@@ -18,7 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A utility wrapper around GeoTool's shape file class
+ * A utility wrapper around GeoTool's shape file class.
+ * Also contains many static helper methods.
+ *
+ * Several of the methods contain variants that take a layer and ones that do not.
+ * The ones that do not take a layer default to the "first" layer in the shapefile.
+ *
  * @author Shilad Sen
  */
 public class WbShapeFile {
@@ -28,24 +33,26 @@ public class WbShapeFile {
     private final File file;
 
     private DataStore dataStore;
-    private String layer;
 
+    /**
+     * Creates a new shapefile wrapper associated with the given file.
+     * @param file Must end with ".shp"
+     * @throws IOException
+     */
     public WbShapeFile(File file) throws IOException {
         ensureHasShpExtension(file);
         this.file = file;
         this.dataStore = fileToDataStore(file);
-        this.layer = dataStore.getTypeNames()[0];
     }
 
-    public WbShapeFile(File file, String layer) throws IOException {
-        ensureHasShpExtension(file);
-        this.file = file;
-        this.dataStore = fileToDataStore(file);
-        this.layer = layer;
-    }
-
-    public List<String> getFeatureNames() throws IOException {
-        SimpleFeatureCollection features = getFeatureCollection();
+    /**
+     * Returns all feature names (i.e. column ids) for the specified layer.
+     * @param layer
+     * @return
+     * @throws IOException
+     */
+    public List<String> getFeatureNames(String layer) throws IOException {
+        SimpleFeatureCollection features = getFeatureCollection(layer);
         SimpleFeatureType type = features.getSchema();
         List<String> fields = new ArrayList<String>();
         for (int i = 0; i < type.getAttributeCount(); i++) {
@@ -54,13 +61,49 @@ public class WbShapeFile {
         return fields;
     }
 
+    /**
+     * Returns all feature names (i.e. column ids) for the default layer.
+     * @return
+     * @throws IOException
+     */
+    public List<String> getFeatureNames() throws IOException {
+        return getFeatureNames(getDefaultLayer());
+    }
+
+    /**
+     * Returns an iterator over rows for the default layer.
+     * @return
+     * @throws IOException
+     */
     public SimpleFeatureIterator getFeatureIter() throws IOException {
         return getFeatureCollection().features();
     }
 
-    public SimpleFeatureCollection getFeatureCollection() throws IOException {
+    /**
+     * Returns an iterator over rows for the specified layer.
+     * @return
+     * @throws IOException
+     */
+    public SimpleFeatureIterator getFeatureIter(String layer) throws IOException {
+        return getFeatureCollection(layer).features();
+    }
+
+    public SimpleFeatureCollection getFeatureCollection(String layer) throws IOException {
         SimpleFeatureSource featureSource = dataStore.getFeatureSource(layer);
         return featureSource.getFeatures();
+    }
+
+    public SimpleFeatureCollection getFeatureCollection() throws IOException {
+        return getFeatureCollection(getDefaultLayer());
+    }
+
+    /**
+     * Returns the name of the default layer
+     * @return
+     * @throws IOException
+     */
+    public String getDefaultLayer() throws IOException {
+        return dataStore.getTypeNames()[0];
     }
 
     public static DataStore fileToDataStore(File file) throws IOException {
@@ -90,10 +133,6 @@ public class WbShapeFile {
 
     public DataStore getDataStore() {
         return dataStore;
-    }
-
-    public String getLayer() {
-        return layer;
     }
 
     public static boolean exists(File file) {
