@@ -22,6 +22,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.download.FileDownloader;
+import org.wikibrain.spatial.util.WbShapeFile;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.*;
@@ -48,51 +49,41 @@ public class ShapeFileMatcher {
         spatialDir.mkdirs();
     }
 
-    /**
-     * Returns true if the dbf and shp files for the given file already have been created.
-     * @param name
-     * @return
-     */
-    private boolean filesExist(String name) {
+    private WbShapeFile getShapeFile(String name, String layer) throws IOException {
+        return new WbShapeFile(getPath(name, layer));
+    }
+
+    private File getPath(String name, String layer) {
+        return FileUtils.getFile(spatialDir, "raw", name + "." + layer + ".shp");
+    }
+
+    private boolean hasAllShapefiles(String name) {
         Config config = getConfig(name);
         for (String layer : config.getObject("layers").keySet()) {
-            if (!getDbf(name, layer).isFile() || !getShp(name, layer).isFile() || !getShx(name, layer).isFile()) {
+            if (WbShapeFile.exists(getPath(name, layer))) {
                 return false;
             }
         }
         return true;
     }
 
-    private File getDbf(String name, String layer) {
-        return FileUtils.getFile(spatialDir, "raw", name + "." + layer + ".dbf");
-    }
-
-    private File getShp(String name, String layer) {
-        return FileUtils.getFile(spatialDir, "raw", name + "." + layer + ".shp");
-    }
-
-    private File getShx(String name, String layer) {
-        return FileUtils.getFile(spatialDir, "raw", name + "." + layer + ".shx");
-    }
-
     public void download(String name) throws InterruptedException, IOException, ZipException {
-        if (filesExist(name)) {
+        if (hasAllShapefiles(name)) {
             return;
         }
-
         Config config = getConfig(name);
 
         // Download the file if necessary
         URL url = new URL(config.getString("url"));
         String tokens[] = url.toString().split("/");
-        File dest = FileUtils.getFile(spatialDir, "raw", tokens[tokens.length-1]);
-        if (!dest.isFile()) {
+        File zipDest = FileUtils.getFile(spatialDir, "raw", tokens[tokens.length-1]);
+        if (!zipDest.isFile()) {
             FileDownloader downloader = new FileDownloader();
-            downloader.download(url, dest);
+            downloader.download(url, zipDest);
         }
 
         // Unzip the file
-        ZipFile zipFile = new ZipFile(dest.getCanonicalPath());
+        ZipFile zipFile = new ZipFile(zipDest.getCanonicalPath());
         File tmpDir = File.createTempFile("wikibrain", ".exploded");
         FileUtils.deleteQuietly(tmpDir);
         FileUtils.forceMkdir(tmpDir);
@@ -103,28 +94,16 @@ public class ShapeFileMatcher {
         // Move the appropriate layers over with standardized names
         for (String layer : config.getObject("layers").keySet()) {
             File srcDbf = FileUtils.getFile(tmpDir, config.getString("layers." + layer + ".dbf"));
-            File srcShp = FileUtils.getFile(tmpDir, config.getString("layers." + layer + ".shp"));
-            File srcShx = FileUtils.getFile(tmpDir, config.getString("layers." + layer + ".shx"));
-
-            if (!srcDbf.isFile()) {
-                throw new IllegalArgumentException("expected dbf file " + srcDbf + " not found");
+            for (File file : WbShapeFile.getExtensions(srcDbf)) {
+                if (!file.isFile()) {
+                    throw new IllegalArgumentException("expected file " + file.getAbsolutePath() + " not found");
+                }
             }
-            if (!srcShp.isFile()) {
-                throw new IllegalArgumentException("expected dbf file " + srcShp + " not found");
+            WbShapeFile src = new WbShapeFile(srcDbf);
+            WbShapeFile dest = src.move(getPath(name, layer));
+            if (!WbShapeFile.exists(dest.getFile())) {
+                throw new IllegalArgumentException();
             }
-            if (!srcShx.isFile()) {
-                throw new IllegalArgumentException("expected dbf file " + srcShx + " not found");
-            }
-            File destDbf = getDbf(name, layer);
-            File destShp = getShp(name, layer);
-            File destShx= getShx(name, layer);
-            FileUtils.deleteQuietly(destDbf);
-            FileUtils.deleteQuietly(destShp);
-            FileUtils.deleteQuietly(destShx);
-            destDbf.getParentFile().mkdirs();
-            srcDbf.renameTo(destDbf);
-            srcShp.renameTo(destShp);
-            srcShx.renameTo(destShx);
         }
     }
 
@@ -138,11 +117,7 @@ public class ShapeFileMatcher {
         CsvListWriter csv = new CsvListWriter(new FileWriter(f), CsvPreference.STANDARD_PREFERENCE);
 
 
-        Map<String, URL> map = new HashMap<String, URL>();
-        map.put("url", getShp(name, layer).toURI().toURL());
-        DataStore inputDataStore = DataStoreFinder.getDataStore(map);
-        SimpleFeatureSource inputFeatureSource = inputDataStore.getFeatureSource(inputDataStore.getTypeNames()[0]);
-        SimpleFeatureCollection features = inputFeatureSource.getFeatures();
+        WbShapeFile shpFile = new WbShapeFile(getPath(name, layer));
 
 
         try {
@@ -154,16 +129,12 @@ public class ShapeFileMatcher {
             fields.add("WB2");
             fields.add("WB3");
             fields.add("WB_SCORE");
-
-            SimpleFeatureType type = features.getSchema();
-            for (int i = 0; i < type.getAttributeCount(); i++) {
-                fields.add(type.getDescriptor(i).getLocalName());
-            }
+            fields.addAll(shpFile.getFeatureNames());
             csv.write(fields);
 
             String tstamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
-            SimpleFeatureIterator iter = features.features();
+            SimpleFeatureIterator iter = shpFile.getFeatureIter();
             while (iter.hasNext()) {
                 SimpleFeature row = iter.next();
                 Map<String, String> rowMap = new HashMap<String, String>();
