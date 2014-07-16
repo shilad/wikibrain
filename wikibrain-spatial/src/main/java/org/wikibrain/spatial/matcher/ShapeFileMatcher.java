@@ -185,11 +185,8 @@ public class ShapeFileMatcher {
                 }
                 newRow.add(""+score);
 
-                if ()
-                List<String>
-                for (String )
-                for (int i = 0; i < row.getAttributeCount(); i++) {
-                    newRow.add(row.getAttribute(i).toString());
+                for (String f : extraFields) {
+                    newRow.add(rowMap.get(f).toString());
                 }
                 csv.write(newRow);
             }
