@@ -49,10 +49,6 @@ public class ShapeFileMatcher {
         spatialDir.mkdirs();
     }
 
-    private WbShapeFile getShapeFile(String name, String layer) throws IOException {
-        return new WbShapeFile(getPath(name, layer));
-    }
-
     private File getPath(String name, String layer) {
         return FileUtils.getFile(spatialDir, "raw", name + "." + layer + ".shp");
     }
@@ -99,7 +95,7 @@ public class ShapeFileMatcher {
                     throw new IllegalArgumentException("expected file " + file.getAbsolutePath() + " not found");
                 }
             }
-            WbShapeFile src = new WbShapeFile(srcDbf);
+            WbShapeFile src = new WbShapeFile(srcDbf, config.getString("encoding"));
             WbShapeFile dest = src.move(getPath(name, layer));
             if (!WbShapeFile.exists(dest.getFile())) {
                 throw new IllegalArgumentException();
@@ -113,9 +109,10 @@ public class ShapeFileMatcher {
 
         File csvPath = FileUtils.getFile(spatialDir, "matches", name + "." + layer + ".csv");
         csvPath.getParentFile().mkdirs();
-        CsvListWriter csv = new CsvListWriter(new FileWriter(csvPath), CsvPreference.STANDARD_PREFERENCE);
+        CsvListWriter csv = new CsvListWriter(WpIOUtils.openWriter(csvPath), CsvPreference.STANDARD_PREFERENCE);
 
-        WbShapeFile shpFile = new WbShapeFile(getPath(name, layer));
+        WbShapeFile shpFile = new WbShapeFile(getPath(name, layer), getConfig(name).getString("encoding"));
+        List<String> featureNames = shpFile.getFeatureNames();
 
 
         List<String> extraFields = new ArrayList<String>();
@@ -147,10 +144,10 @@ public class ShapeFileMatcher {
             SimpleFeatureIterator iter = shpFile.getFeatureIter();
             while (iter.hasNext()) {
                 SimpleFeature row = iter.next();
-                Map<String, String> rowMap = new HashMap<String, String>();
 
+                Map<String, String> rowMap = new HashMap<String, String>();
                 for (int i = 0; i < row.getAttributeCount(); i++) {
-                    rowMap.put(fields.get(i), row.getAttribute(i).toString());
+                    rowMap.put(featureNames.get(i), row.getAttribute(i).toString());
                 }
                 LinkedHashMap<LocalPage, Double> guesses = resolver.resolve(rowMap, 3);
                 List<LocalPage> sorted = new ArrayList<LocalPage>(guesses.keySet());

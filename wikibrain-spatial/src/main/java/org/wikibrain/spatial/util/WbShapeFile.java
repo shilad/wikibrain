@@ -3,19 +3,22 @@ package org.wikibrain.spatial.util;
 import org.apache.commons.io.FileUtils;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.supercsv.io.CsvListWriter;
+import org.supercsv.prefs.CsvPreference;
+import org.wikibrain.utils.WpIOUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A utility wrapper around GeoTool's shape file class.
@@ -31,6 +34,7 @@ public class WbShapeFile {
 
     // Ends with ".shp" extension
     private final File file;
+    private final String encoding;
 
     private DataStore dataStore;
 
@@ -39,10 +43,11 @@ public class WbShapeFile {
      * @param file Must end with ".shp"
      * @throws IOException
      */
-    public WbShapeFile(File file) throws IOException {
+    public WbShapeFile(File file, String encoding) throws IOException {
         ensureHasShpExtension(file);
         this.file = file;
-        this.dataStore = fileToDataStore(file);
+        this.encoding = encoding;
+        this.dataStore = fileToDataStore(file, encoding);
     }
 
     /**
@@ -107,12 +112,17 @@ public class WbShapeFile {
     }
 
     public static DataStore fileToDataStore(File file) throws IOException {
-        Map<String, URL> map = new HashMap<String, URL>();
+        return fileToDataStore(file, "utf-8");
+    }
+
+    public static DataStore fileToDataStore(File file, String encoding) throws IOException {
+        Map<String, Object> map = new HashMap<String, Object>();
         try {
             map.put("url", file.toURI().toURL());
         } catch (MalformedURLException e) {
             throw new IOException(e);
         }
+        map.put(ShapefileDataStoreFactory.DBFCHARSET.getName(), encoding);
         return  DataStoreFinder.getDataStore(map);
     }
 
@@ -124,7 +134,7 @@ public class WbShapeFile {
             FileUtils.deleteQuietly(extDest);
             getAlternateExtension(file, ext).renameTo(extDest);
         }
-        return new WbShapeFile(dest);
+        return new WbShapeFile(dest, encoding);
     }
 
     public File getFile() {
@@ -169,4 +179,5 @@ public class WbShapeFile {
             throw new IllegalArgumentException("File " + file + " does not have .shp extension");
         }
     }
+
 }

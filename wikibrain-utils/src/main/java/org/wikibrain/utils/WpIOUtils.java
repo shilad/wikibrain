@@ -188,4 +188,8 @@ public class WpIOUtils {
         String cleanedPath = FilenameUtils.normalize(path.toString());
         return new File(cleanedBase).toURI().relativize(new File(cleanedPath).toURI()).getPath();
     }
+
+    public static Writer openWriter(String path) throws IOException {
+        return openWriter(new File(path));
+    }
 }
