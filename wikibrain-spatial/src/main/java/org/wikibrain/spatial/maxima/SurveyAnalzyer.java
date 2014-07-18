@@ -44,7 +44,7 @@ public class SurveyAnalzyer {
         conf = env.getConfigurator();
         lpDao = conf.get(LocalPageDao.class);
         upDao= conf.get(UniversalPageDao.class);
-        String srMetric= "ESA"; // Retrieve the indicated sr metric for simple english
+        String srMetric= "ensemble"; // Retrieve the indicated sr metric for simple english
 
 
         Map<QuestionAgg,Set<Question>> map= new HashMap<QuestionAgg, Set<Question>>();
@@ -75,7 +75,7 @@ public class SurveyAnalzyer {
 //        }
 //        scanner.close();
 //
-        Scanner scanner= new Scanner(new File("finalsurvey.tsv"));
+        Scanner scanner= new Scanner(new File("questions.enhanced.tsv"));
         List<Question> list= new ArrayList<Question>();
         scanner.nextLine();
         while(scanner.hasNextLine()){

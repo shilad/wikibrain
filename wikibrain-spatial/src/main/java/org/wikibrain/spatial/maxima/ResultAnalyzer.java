@@ -2,6 +2,15 @@ package org.wikibrain.spatial.maxima;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.wikibrain.conf.ConfigurationException;
+import org.wikibrain.core.cmd.Env;
+import org.wikibrain.core.cmd.EnvBuilder;
+import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.model.NameSpace;
+import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRResult;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -19,10 +28,11 @@ public class ResultAnalyzer {
     private static SpatialConcept.Scale[] converter = {null, null, SpatialConcept.Scale.LANDMARK, null,SpatialConcept.Scale.COUNTRY,
             SpatialConcept.Scale.STATE, SpatialConcept.Scale.CITY, SpatialConcept.Scale.NATURAL};
 
-    public static void main (String args[]) throws IOException{
+    public static void main (String args[]) throws IOException, ConfigurationException, DaoException {
+        Env env = EnvBuilder.envFromArgs(args);
         Scanner scan = new Scanner(new File("questions.enhanced.tsv"));
         scan.nextLine();
-        String header = "Label 1\tID 1\tLabel 2\tID 2\tDistance (km)\tDistance (graph)\tRelatedness\tExpected FF\tExpected FU\tExpected UU\tActual FF\tActual FU\tActual UU\tActual All\tAvg. FF\tAvg. FU\tAvg. UU\tAvg. All";
+        String header = "Label 1\tID 1\tLabel 2\tID 2\tDistance (km)\tDistance (graph)\tRelatedness\tExpected FF\tExpected FU\tExpected UU\tActual FF\tActual FU\tActual UU\tActual All\tAvg. FF\tAvg. FU\tAvg. UU\tAvg. All\tSR_Phrase\tSR_Page";
         Map<String,Set<ResponseLogLine>> byAuthor = new HashMap<String,Set<ResponseLogLine>> ();
         while(scan.hasNextLine()){
             String s = scan.nextLine();
@@ -45,8 +55,14 @@ public class ResultAnalyzer {
         }
         pw.println(header);
 
+        MonolingualSRMetric metric = env.getConfigurator().get(MonolingualSRMetric.class, "ensemble", "language", "en");
+        LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
+
         final int FF=0,FU=1,UU=2;
-        for (SpatialConceptPair scp : pairsToResponses.keySet()){
+        for (SpatialConceptPair scp : pairsToResponses.keySet()) {
+            System.out.println("doing " + scp.getFirstConcept().getTitle() + " and " + scp.getSecondConcept().getTitle());
+
+
             Set<ResponseLogLine> set = pairsToResponses.get(scp);
             int[] numbers = new int[3];
             double[] averages = new double[3];
@@ -70,7 +86,7 @@ public class ResultAnalyzer {
                     numbers[index]++;
                 }
             }
-            if (numbers[0] + numbers[1] + numbers[2] >= 10) {
+            if (numbers[0] + numbers[1] + numbers[2] >= 1) {
                 List newCols = new ArrayList();
                 int total = 0;
                 for (int i = 0; i < numbers.length; i++) {
@@ -84,7 +100,26 @@ public class ResultAnalyzer {
                     sum += averages[i] * numbers[i];
                 }
                 newCols.add(sum / total);
+                SRResult sr1 = metric.similarity(scp.getFirstConcept().getTitle(), scp.getSecondConcept().getTitle(), false);
+                if (sr1 != null && sr1.isValid()) {
+                    newCols.add(sr1.getScore());
+                } else {
+                    newCols.add(-1.0);
+                }
+                int page1 = pageDao.getIdByTitle(scp.getFirstConcept().getTitle(), Language.EN, NameSpace.ARTICLE);
+                int page2 = pageDao.getIdByTitle(scp.getSecondConcept().getTitle(), Language.EN, NameSpace.ARTICLE);
+                if (page1 >= 0 && page2 >= 0) {
+                    SRResult sr2 = metric.similarity(page1, page2, false);
+                    if (sr2 != null && sr2.isValid()) {
+                        newCols.add(sr2.getScore());
+                    } else {
+                        newCols.add(-1.0);
+                    }
+                } else {
+                    newCols.add(-1.0);
+                }
                 pw.println(scp.toString() + "\t" + StringUtils.join(newCols, '\t'));
+
             }
         }
 
