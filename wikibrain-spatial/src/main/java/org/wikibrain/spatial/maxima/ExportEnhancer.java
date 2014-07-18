@@ -32,8 +32,7 @@ public class ExportEnhancer {
     private Map<Integer, Integer> pageRanks;
     private List<String> locations;
 
-    public static final String fileBase = "/scratch/results/";//"/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/";
-
+    public static final String fileBase = "/scratch/results/";//"./"//"/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/";
 
     public ExportEnhancer() throws IOException {
         buildIdsStringMap();
