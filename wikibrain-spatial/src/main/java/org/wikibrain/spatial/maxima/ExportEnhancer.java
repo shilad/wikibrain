@@ -30,8 +30,9 @@ public class ExportEnhancer {
     private Map<String, Set<Integer>> neighbors;
     private Map<String, String> oldNeighbors;
     private Map<Integer, Integer> pageRanks;
+    private List<String> locations;
 
-    private static String fileBase = "/scratch/results/";//"/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/";
+    public static final String fileBase = "/scratch/results/";//"/Users/shilad/Documents/IntelliJ/geo-sr/SRSurvey/dat/";
 
 
     public ExportEnhancer() throws IOException {
@@ -256,12 +257,14 @@ public class ExportEnhancer {
         writer.write("\n");
     }
 
-    private Map<String, Set<Integer>> readKnownLocations(File personFile) throws IOException {
+    public Map<String, Set<Integer>> readKnownLocations(File personFile) throws IOException {
         Map<String, Set<Integer>> knownLocations = new HashMap<String, Set<Integer>>();
 
         int numFields = -1;
         int idCol = -1;
         TIntList locationCols = new TIntArrayList();
+
+        locations = new ArrayList<String>();
         for (String line : FileUtils.readLines(personFile)) {
             if (line.endsWith("\n")) {
                 line = line.substring(0, line.length()-1);
@@ -291,6 +294,7 @@ public class ExportEnhancer {
             if (line.contains("A18FSRHD10KF0Y")){
                 System.out.println(line);
             }
+
             String id = tokens[idCol].trim();
             Set<Integer> known = new HashSet<Integer>();
             for (int i : locationCols.toArray()) {
@@ -303,11 +307,12 @@ public class ExportEnhancer {
                 }
                 s = s.replaceAll("\\|", ",");
 
-
                 if (neighbors.containsKey(s)) {
+                    locations.add(s);
                     known.addAll(neighbors.get(s));
                 } else {
                     if (oldNeighbors.get(s) != null) {
+                        locations.add(oldNeighbors.get(s));
                         known.addAll(neighbors.get(oldNeighbors.get(s)));
                     } else {
                         System.err.println("unknown city "+s+" for turker: " + id);
@@ -331,5 +336,9 @@ public class ExportEnhancer {
                 new File(fileBase+"questions.tsv"),
                 new File(fileBase+"questions.enhanced.tsv")
         );
+    }
+
+    public List<String> getLocations(){
+        return locations;
     }
 }

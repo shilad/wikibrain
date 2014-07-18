@@ -288,6 +288,7 @@ public class SimulatedTurkers {
      */
     public List<Set<Integer>> generateSimulatedTurkers(Map<String, Set<Integer>> neighbors, Map<String, Double> citiesPopulation, int numTurkers) {
         List<Set<Integer>> listOfTurkerFamiliarIds = new ArrayList<Set<Integer>>();
+        List<String> cities = new ArrayList<String>();
 
         //if population of a city is not available, set it to small.
         double small = 10;
@@ -358,12 +359,98 @@ public class SimulatedTurkers {
                 // turker id, country,state,city, city population
                 System.out.println(i + " " + city + " " + cityPopulations.get(city));
                 familiar.addAll(neighbors.get(city));
+                cities.add(city);
             }
             listOfTurkerFamiliarIds.add(familiar);
         }
 
         // return the list
         return listOfTurkerFamiliarIds;
+    }
+
+    /**
+     * Given sets of familiar points for each location it is possible for a turker to be from, use known turker country
+     * demographics, and within that, city populations, to generate turkers with reasonable familiar location sets.
+     *
+     * @param numTurkers       Number of turkers to generate
+     * @return A list of sets of concept ids, where each set represents the known concept ids of a simulated turker
+     */
+    public List<String> generateSimulatedTurkerLocations(int numTurkers) {
+        List<String> cities = new ArrayList<String>();
+
+        //if population of a city is not available, set it to small.
+        double small = 10;
+
+        // COUNTRY populations
+        Map<String, Double> countryPopulation = new HashMap<String, Double>();
+
+        // get country populations by adding up city populations
+        for (String cityName : cityPopulations.keySet()) {
+            String countryName = cityName.substring(0, cityName.indexOf(','));
+            double pop = cityPopulations.get(cityName);
+            if (pop < small) {
+                pop = small;
+            }
+            if (countryPopulation.get(countryName) == null) {
+                countryPopulation.put(countryName, pop);
+            } else {
+                countryPopulation.put(countryName, countryPopulation.get(countryName) + pop);
+            }
+        }
+
+        // get world population by adding up relevant country populations
+        double total = 0;
+        for (String countryName : countryPopulation.keySet()) {
+            total += countryPopulation.get(countryName);
+        }
+
+        // get country percent of world population
+        Map<String, Double> countryPopPercent = new HashMap<String, Double>();
+        for (String countryName : countryPopulation.keySet()) {
+            countryPopPercent.put(countryName, (countryPopulation.get(countryName) / total));
+        }
+
+        // Turker demographic percentages
+        // from http://www.appappeal.com/maps/amazon-mechanical-turk
+        Map<String, Double> countryTurkPercent = new HashMap<String, Double>();
+        countryTurkPercent.put("United States of America", 51.5);
+        countryTurkPercent.put("United Kingdom", 1.9);
+        countryTurkPercent.put("India", 33.0);
+        countryTurkPercent.put("Brazil", 0.8);
+        countryTurkPercent.put("Australia", 0.9);
+        countryTurkPercent.put("Pakistan", 2.0);
+        countryTurkPercent.put("Spain", 0.6);
+        countryTurkPercent.put("Canada", 0.7);
+        countryTurkPercent.put("France", 0.5);
+
+        // make weighted random collection
+        RandomCollection<String> randomCollection = new RandomCollection<String>();
+        for (String cityName : cityPopulations.keySet()) {
+            double pop = cityPopulations.get(cityName);
+            if (pop < small) {
+                pop = small;
+            }
+            String countryName = cityName.substring(0, cityName.indexOf(','));
+            // get population as percent of country population
+            pop /= countryPopPercent.get(countryName);
+            // multiply by turker demographic percentage
+            pop *= countryTurkPercent.get(countryName);
+            randomCollection.add(pop, cityName);
+        }
+
+        // generate turkers
+        for (int i = 0; i < numTurkers; i++) {
+            double d = 3*Math.random();
+            for (int j=0; j<d; j++){
+                String city = randomCollection.next();
+                // turker id, country,state,city, city population
+                System.out.println(i + " " + city + " " + this.cityPopulations.get(city));
+                cities.add(city);
+            }
+        }
+
+        // return the list
+        return cities;
     }
 
     /**
