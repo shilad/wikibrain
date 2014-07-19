@@ -47,3 +47,20 @@ Now you can load the Wikidata layer by running:
 
 Try running [CalculateGeographicDistanceBetweenPages](/wikibrain-spatial/src/main/java/org/wikibrain/spatial/cookbook/CalculateGeographicDistanceBetweenPages.java). If it runs correctly, the spatial module is successfully initialized.
 
+## Integrating new layers with WikiBrain (or updating existing integrated layers)
+
+1. Make sure the dataset information is correct in the reference.conf's spatial.datasets configuration.
+2. Run the ShapeFileMatcher with the name of the reference system, layer, and datasetname: 
+
+```bash
+org.wikibrain.spatial.matcher.ShapeFileMatcher earth country naturalEarth
+```
+
+3. Go to the `dat/spatial/<refSys>/<layerGroup>/` directory, and edit the csv file called `<datasetName>.wbmapping.csv`. You can take a look at an example for natural earth countries in this [Google Spreadsheet](https://docs.google.com/a/macalester.edu/spreadsheets/d/1woZTOhw_as6L_Mt-xGxg28jdGYXF-mJlGlzSN5twffE/edit#gid=1543775261). The important columns are as follows:
+
+  *   status: Starts as "U" (unknown) when automatically matched. Change to "V" (verified) after you are certain the matching is correct.
+  *   WB: should contain the title of the correct Wikipedia article. Defaults to WikiBrain's best guess.
+  *   WB1 / WB2 / WB3: Alternate guesses about the title.
+  *   WB_SCORE: A score indicating WikiBrain's confidence in its match.
+
+4. 
