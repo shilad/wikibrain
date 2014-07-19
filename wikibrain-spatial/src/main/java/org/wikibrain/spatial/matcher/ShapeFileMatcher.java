@@ -37,6 +37,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Creates or updates a mapping csv file from a shapefile to WikiBrain.
+ *
  * @author Shilad Sen
  */
 public class ShapeFileMatcher {
@@ -63,8 +65,7 @@ public class ShapeFileMatcher {
         File csvPath = shapeFile.getMappingFile();
         CsvListWriter csv = new CsvListWriter(WpIOUtils.openWriter(csvPath), CsvPreference.STANDARD_PREFERENCE);
 
-        List<String> featureNames = shapeFile.getFeatureNames();
-
+        // Fields from the shapefile that should be included in the final CSV
         List<String> extraFields = new ArrayList<String>();
         for (String fieldsKey : new String[] { "titles", "context", "other" }) {
             if (config.hasPath(fieldsKey)) {
@@ -74,72 +75,86 @@ public class ShapeFileMatcher {
             }
         }
 
+        List<String> featureNames = shapeFile.getFeatureNames();
         try {
-            List<String> fields = new ArrayList<String>();
-            fields.add("ID");
-            fields.add("KEY");
-            fields.add("updated");
-            fields.add("status");
-            fields.add("WB");
-            fields.add("WB1");
-            fields.add("WB2");
-            fields.add("WB3");
-            fields.add("WB_SCORE");
-            fields.addAll(extraFields);
-            csv.write(fields);
-
-            String tstamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-
+            writeHeader(csv, extraFields);
             SimpleFeatureIterator iter = shapeFile.getFeatureIter();
             while (iter.hasNext()) {
-                SimpleFeature row = iter.next();
-
-                Map<String, String> rowMap = new HashMap<String, String>();
-                for (int i = 0; i < row.getAttributeCount(); i++) {
-                    rowMap.put(featureNames.get(i), row.getAttribute(i).toString());
-                }
-                LinkedHashMap<LocalPage, Double> guesses = resolver.resolve(rowMap, 3);
-                List<LocalPage> sorted = new ArrayList<LocalPage>(guesses.keySet());
-
-                String key = "";
-                for (String field : config.getStringList("key")) {
-                    if (key.length() != 0) {
-                        key += "|";
-                    }
-                    key += rowMap.get(field);
-                }
-
-                List<String> newRow = new ArrayList<String>();
-
-                newRow.add(row.getID());
-                newRow.add(key);
-                newRow.add(tstamp);
-                newRow.add("U");
-                newRow.add(sorted.size() > 0 ? sorted.get(0).getTitle().getTitleStringWithoutNamespace() : "");
-
-                for (int i = 0; i < 3; i++) {
-                    if (sorted.size() > i) {
-                        newRow.add(sorted.get(i).getTitle().getTitleStringWithoutNamespace());
-                    } else {
-                        newRow.add("");
-                    }
-                }
-
-                double score = 0.1;
-                if (sorted.size() >= 2) {
-                    score = guesses.get(sorted.get(0)) - guesses.get(sorted.get(1));
-                }
-                newRow.add(""+score);
-
-                for (String f : extraFields) {
-                    newRow.add(rowMap.get(f).toString());
-                }
-                csv.write(newRow);
+                Map<String, String> row = makeRow(featureNames, config.getStringList("key"), iter.next());
+                writeRow(resolver, csv, extraFields, row);
             }
             iter.close();
         } finally {
             csv.close();
         }
+    }
+
+    private Map<String, String> makeRow(List<String> featureNames, List<String> keyFields, SimpleFeature row) {
+        Map<String, String> rowMap = new HashMap<String, String>();
+        for (int i = 0; i < row.getAttributeCount(); i++) {
+            rowMap.put(featureNames.get(i), row.getAttribute(i).toString());
+        }
+        rowMap.put("WB_ID", row.getID());
+
+        String key = "";
+        for (String field : keyFields) {
+            if (key.length() != 0) {
+                key += "|";
+            }
+            key += rowMap.get(field);
+        }
+        rowMap.put("WB_KEY", key);
+
+        return rowMap;
+    }
+
+    private void writeHeader(CsvListWriter writer, List<String> extraFields) throws IOException {
+        List<String> fields = new ArrayList<String>();
+        fields.add("WB_ID");
+        fields.add("WB_KEY");
+        fields.add("WB_UPDATED");
+        fields.add("WB_STATUS");
+        fields.add("WB_TITLE");
+        fields.add("WB_GUESS1");
+        fields.add("WB_GUESS2");
+        fields.add("WB_GUESS3");
+        fields.add("WB_SCORE");
+        fields.addAll(extraFields);
+        writer.write(fields);
+    }
+
+    private void writeRow(GeoResolver resolver, CsvListWriter writer, List<String> extraFields, Map<String, String> row) throws DaoException, IOException {
+        String tstamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+
+        LinkedHashMap<LocalPage, Double> guesses = resolver.resolve(row, 3);
+        List<LocalPage> sorted = new ArrayList<LocalPage>(guesses.keySet());
+
+        List<String> newRow = new ArrayList<String>();
+
+        newRow.add(row.get("WB_ID"));
+        newRow.add(row.get("WB_KEY"));
+        newRow.add(tstamp);
+        newRow.add("U");
+        newRow.add(sorted.size() > 0 ? sorted.get(0).getTitle().getTitleStringWithoutNamespace() : "");
+
+        for (int i = 0; i < 3; i++) {
+            if (sorted.size() > i) {
+                newRow.add(sorted.get(i).getTitle().getTitleStringWithoutNamespace());
+            } else {
+                newRow.add("");
+            }
+        }
+
+        double score = 0.1;
+        if (sorted.size() >= 2) {
+            score = guesses.get(sorted.get(0)) - guesses.get(sorted.get(1));
+        }
+        newRow.add(""+score);
+
+        for (String f : extraFields) {
+            newRow.add(row.get(f).toString());
+        }
+        writer.write(newRow);
     }
 
     public static void main(String args[]) throws Exception {
