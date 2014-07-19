@@ -5,9 +5,11 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.impl.Parseable;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -69,5 +71,33 @@ public class Configuration {
      */
     public Config get() {
         return config;
+    }
+
+    public Config getConfig(String ... path) {
+        return config.getConfig(StringUtils.join(path, "."));
+    }
+
+    public int getInt(String ... path) {
+        return config.getInt(StringUtils.join(path, "."));
+    }
+
+    public String getString(String ... path) {
+        return config.getString(StringUtils.join(path, "."));
+    }
+
+    public Double getDouble(String ... path) {
+        return config.getDouble(StringUtils.join(path, "."));
+    }
+
+    public boolean getBoolean(String ... path) {
+        return config.getBoolean(StringUtils.join(path, "."));
+    }
+
+    public List<String> getStringList(String ... path) {
+        return config.getStringList(StringUtils.join(path, "."));
+    }
+
+    public List<Double> getDoubleList(String ... path) {
+        return config.getDoubleList(StringUtils.join(path, "."));
     }
 }

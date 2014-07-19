@@ -24,7 +24,7 @@ import java.util.*;
  * @author Shilad Sen
  */
 public class WbShapeFile {
-    public static final String [] EXTENSIONS = new String[] { ".shp", ".dbx", ".dbf" };
+    public static final String [] EXTENSIONS = new String[] { ".shp", ".shx", ".dbf" };
 
     public static final String WB_MAP_EXTENSINO = ".wbmapping.csv";
 

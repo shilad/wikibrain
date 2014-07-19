@@ -26,14 +26,10 @@ public class MatchedShapefileLoader {
                 new File(env.getConfiguration().get().getString("spatial.dir")));
     }
 
-    public void load(String dataset) {
-    }
-
-    public void load(String dataset, String layer) {
+    public void load(String refSys, String layerGroup, String dataset) {
 
     }
 
     public void main(String args[]) {
-
     }
 }

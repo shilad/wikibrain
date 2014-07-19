@@ -22,6 +22,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.download.FileDownloader;
+import org.wikibrain.spatial.loader.SpatialDataDownloader;
 import org.wikibrain.spatial.loader.SpatialDataFolder;
 import org.wikibrain.spatial.util.WbShapeFile;
 import org.wikibrain.utils.WpIOUtils;
@@ -42,82 +43,27 @@ public class ShapeFileMatcher {
     private static final Logger LOG = Logger.getLogger(ShapeFileMatcher.class.getName());
     private final Env env;
     private final SpatialDataFolder dir;
+    private final SpatialDataDownloader downloader;
 
 
     public ShapeFileMatcher(Env env) {
         this.env = env;
         this.dir = new SpatialDataFolder(new File(env.getConfiguration().get().getString("spatial.dir")));
+        this.downloader = new SpatialDataDownloader(env);
     }
 
-    private boolean hasAllShapefiles(String name) {
-        Config config = getConfig(name);
-        for (String layer : config.getObject("layers").keySet()) {
-            WbShapeFile file = getShapeFile(name, layer);
-            if (!file.hasComponentFiles()) {
-                return false;
-            }
-        }
-        return true;
+    public void match(String refSys, String layerGroup, String datasetName) throws IOException, InterruptedException, DaoException, ConfigurationException {
+        Config config = env.getConfiguration().getConfig("spatial.datasets", refSys, layerGroup, datasetName);
+        WbShapeFile shapeFile = downloader.download(refSys, layerGroup, datasetName);
+        writeMatches(config, shapeFile);
     }
 
-    private WbShapeFile getShapeFile(String name, String layer) {
-        return dir.getShapeFile("earth", layer, name);
-    }
-
-    private WbShapeFile getShapeFile(String name, String layer, String encoding) {
-        return dir.getShapeFile("earth", layer, name, encoding);
-    }
-
-    public void download(String name) throws InterruptedException, IOException, ZipException {
-        if (hasAllShapefiles(name)) {
-            return;
-        }
-        Config config = getConfig(name);
-
-        // Download the file if necessary
-        URL url = new URL(config.getString("url"));
-        String tokens[] = url.toString().split("/");
-        File zipDest = FileUtils.getFile(dir.getRawFolder(), tokens[tokens.length-1]);
-        if (!zipDest.isFile()) {
-            FileDownloader downloader = new FileDownloader();
-            downloader.download(url, zipDest);
-        }
-
-        // Unzip the file
-        ZipFile zipFile = new ZipFile(zipDest.getCanonicalPath());
-        File tmpDir = File.createTempFile("wikibrain", ".exploded");
-        FileUtils.deleteQuietly(tmpDir);
-        FileUtils.forceMkdir(tmpDir);
-        LOG.log(Level.INFO, "Extracting to " + tmpDir);
-        zipFile.extractAll(tmpDir.getAbsolutePath());
-        FileUtils.forceDeleteOnExit(tmpDir);
-
-        // Move the appropriate layers over with standardized names
-        for (String layer : config.getObject("layers").keySet()) {
-            File srcDbf = FileUtils.getFile(tmpDir, config.getString("layers." + layer + ".dbf"));
-            WbShapeFile src = new WbShapeFile(srcDbf, config.getString("encoding"));
-            for (File file : src.getComponentFiles()) {
-                if (!file.isFile()) {
-                    throw new IllegalArgumentException("expected file " + file.getAbsolutePath() + " not found");
-                }
-            }
-            WbShapeFile dest = src.move(dir.getShapeFile("earth", layer, name).getFile());
-            if (!dest.hasComponentFiles()) {
-                throw new IllegalArgumentException();
-            }
-        }
-    }
-
-    public void writeMatches(String name, String layer) throws IOException, ConfigurationException, DaoException {
-        Config config = getConfig(name).getConfig("layers." + layer);
+    public void writeMatches(Config config, WbShapeFile shapeFile) throws IOException, ConfigurationException, DaoException {
         GeoResolver resolver = new GeoResolver(env, config);
-
-        WbShapeFile shpFile = getShapeFile(name, layer, getConfig(name).getString("encoding"));
-        File csvPath = shpFile.getMappingFile();
-        csvPath.getParentFile().mkdirs();
+        File csvPath = shapeFile.getMappingFile();
         CsvListWriter csv = new CsvListWriter(WpIOUtils.openWriter(csvPath), CsvPreference.STANDARD_PREFERENCE);
 
-        List<String> featureNames = shpFile.getFeatureNames();
+        List<String> featureNames = shapeFile.getFeatureNames();
 
         List<String> extraFields = new ArrayList<String>();
         for (String fieldsKey : new String[] { "titles", "context", "other" }) {
@@ -127,7 +73,6 @@ public class ShapeFileMatcher {
                 }
             }
         }
-
 
         try {
             List<String> fields = new ArrayList<String>();
@@ -145,7 +90,7 @@ public class ShapeFileMatcher {
 
             String tstamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
-            SimpleFeatureIterator iter = shpFile.getFeatureIter();
+            SimpleFeatureIterator iter = shapeFile.getFeatureIter();
             while (iter.hasNext()) {
                 SimpleFeature row = iter.next();
 
@@ -197,16 +142,9 @@ public class ShapeFileMatcher {
         }
     }
 
-    private Config getConfig(String name) {
-        return env.getConfiguration().get().getConfig("spatial.datasets." + name);
-    }
-
     public static void main(String args[]) throws Exception {
-        String name = "naturalEarthCountries";
         Env env = EnvBuilder.envFromArgs(args);
-
         ShapeFileMatcher matcher = new ShapeFileMatcher(env);
-        matcher.download(name);
-        matcher.writeMatches(name, "country");
+        matcher.match("earth", "country", "naturalEarth");
     }
 }

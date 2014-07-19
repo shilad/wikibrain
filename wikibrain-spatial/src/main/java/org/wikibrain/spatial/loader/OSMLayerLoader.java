@@ -48,7 +48,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class OSMLayerLoader {
 
-    public static final Logger LOG = Logger.getLogger(GADMConverter.class.getName());
+    public static final Logger LOG = Logger.getLogger(OSMLayerLoader.class.getName());
 
     private final WikidataDao wdDao;
 

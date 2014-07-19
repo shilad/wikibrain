@@ -23,7 +23,6 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.io.*;
@@ -367,7 +366,7 @@ public class SpatialDataLoader {
                     loader.loadWikidataData();
                 }else if (canonicalStep.equals("gadm")){
                     LOG.log(Level.INFO, "Beginning to download and process GADM data (will be imported in exogenous step)");
-                    new GADMConverter().downloadAndConvert(spatialDataFolder);
+//                    new GADMConverter().downloadAndConvert(spatialDataFolder);
                     //spatialDataFolder.deleteSpecificFile("read_me.pdf", RefSys.EARTH); // TODO: Aaron, please move the following two lines into the correct place in GADMConverter
                     //spatialDataFolder.deleteLayer("gadm2", RefSys.EARTH);
                 } else if (canonicalStep.equals("exogenous")) {
@@ -375,8 +374,8 @@ public class SpatialDataLoader {
                     loader.loadExogenousData();
                 } else if (canonicalStep.equals("download")){
                     LOG.log(Level.INFO, "Downloading shapefiles and moving them into place");
-                    WikiBrainSpatialUtils.downloadZippedShapefileToReferenceSystem("http://www-users.cs.umn.edu/~bhecht/wikibrain/spatial_data/elements.zip",
-                            RefSys.PERIODIC_TABLE, spatialDataFolder); // TODO: this should be moved to the config file at some point
+//                    WikiBrainSpatialUtils.downloadZippedShapefileToReferenceSystem("http://www-users.cs.umn.edu/~bhecht/wikibrain/spatial_data/elements.zip",
+//                            RefSys.PERIODIC_TABLE, spatialDataFolder); // TODO: this should be moved to the config file at some point
                 } else {
                     throw new Exception("Illegal step: '" + step + "'");
                 }
