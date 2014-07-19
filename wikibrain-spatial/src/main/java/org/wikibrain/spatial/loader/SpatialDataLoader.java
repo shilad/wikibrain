@@ -93,10 +93,10 @@ public class SpatialDataLoader {
 
         List<LayerStruct> layerStructs = Lists.newArrayList();
 
-        for (String refSysName : spatialDataFolder.getReferenceSystemNames()){
+        for (String refSysName : spatialDataFolder.getReferenceSystems()){
 
             LOG.log(Level.INFO, "Found reference system: " + refSysName);
-            for (File curFile : spatialDataFolder.getRefSysFolder(refSysName).listFiles()){
+            for (File curFile : spatialDataFolder.getReferenceSystemFolder(refSysName).listFiles()){
                 LayerStruct lStruct = null;
                 if (curFile.getName().endsWith(".shp")){
                     lStruct = new LayerStruct(refSysName, FileType.SHP, curFile);

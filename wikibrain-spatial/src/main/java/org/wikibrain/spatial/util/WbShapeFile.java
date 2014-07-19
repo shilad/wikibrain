@@ -7,17 +7,11 @@ import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.supercsv.io.CsvListWriter;
-import org.supercsv.prefs.CsvPreference;
-import org.wikibrain.utils.WpIOUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -32,6 +26,8 @@ import java.util.*;
 public class WbShapeFile {
     public static final String [] EXTENSIONS = new String[] { ".shp", ".dbx", ".dbf" };
 
+    public static final String WB_MAP_EXTENSINO = ".wbmapping.csv";
+
     // Ends with ".shp" extension
     private final File file;
     private final String encoding;
@@ -43,11 +39,25 @@ public class WbShapeFile {
      * @param file Must end with ".shp"
      * @throws IOException
      */
-    public WbShapeFile(File file, String encoding) throws IOException {
+    public WbShapeFile(File file) {
+        this(file, "UTF-8");
+    }
+
+    /**
+     * Creates a new shapefile wrapper associated with the given file.
+     * @param file Must end with ".shp"
+     * @throws IOException
+     */
+    public WbShapeFile(File file, String encoding) {
         ensureHasShpExtension(file);
         this.file = file;
         this.encoding = encoding;
-        this.dataStore = fileToDataStore(file, encoding);
+    }
+
+    public synchronized void initDataStoreIfNecessary() throws IOException {
+        if (this.dataStore == null) {
+            this.dataStore = fileToDataStore(file, encoding);
+        }
     }
 
     /**
@@ -57,6 +67,7 @@ public class WbShapeFile {
      * @throws IOException
      */
     public List<String> getFeatureNames(String layer) throws IOException {
+        initDataStoreIfNecessary();
         SimpleFeatureCollection features = getFeatureCollection(layer);
         SimpleFeatureType type = features.getSchema();
         List<String> fields = new ArrayList<String>();
@@ -94,6 +105,7 @@ public class WbShapeFile {
     }
 
     public SimpleFeatureCollection getFeatureCollection(String layer) throws IOException {
+        initDataStoreIfNecessary();
         SimpleFeatureSource featureSource = dataStore.getFeatureSource(layer);
         return featureSource.getFeatures();
     }
@@ -108,7 +120,54 @@ public class WbShapeFile {
      * @throws IOException
      */
     public String getDefaultLayer() throws IOException {
+        initDataStoreIfNecessary();
         return dataStore.getTypeNames()[0];
+    }
+
+
+    public WbShapeFile move(File dest) throws IOException {
+        ensureHasShpExtension(dest);
+        dest.getParentFile().mkdirs();
+        for (String ext : EXTENSIONS) {
+            File extDest = getAlternateExtension(dest, ext);
+            FileUtils.deleteQuietly(extDest);
+            getAlternateExtension(file, ext).renameTo(extDest);
+        }
+        return new WbShapeFile(dest, encoding);
+    }
+
+    public File getMappingFile() {
+        return getAlternateExtension(file, WB_MAP_EXTENSINO);
+    }
+
+    public boolean hasMappingFile() {
+        return getMappingFile().isFile();
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public List<File> getComponentFiles() {
+        List<File> files = new ArrayList<File>();
+        for (String ext : EXTENSIONS) {
+            files.add(getAlternateExtension(file, ext));
+        }
+        if (hasMappingFile()) {
+            files.add(getMappingFile());
+        }
+        return files;
+    }
+
+    public boolean hasComponentFiles() {
+        for (File f : getComponentFiles()) {
+            if (!f.isFile()) return false;
+        }
+        return true;
+    }
+
+    public DataStore getDataStore() {
+        return dataStore;
     }
 
     public static DataStore fileToDataStore(File file) throws IOException {
@@ -126,42 +185,9 @@ public class WbShapeFile {
         return  DataStoreFinder.getDataStore(map);
     }
 
-    public WbShapeFile move(File dest) throws IOException {
-        ensureHasShpExtension(dest);
-        dest.getParentFile().mkdirs();
-        for (String ext : EXTENSIONS) {
-            File extDest = getAlternateExtension(dest, ext);
-            FileUtils.deleteQuietly(extDest);
-            getAlternateExtension(file, ext).renameTo(extDest);
-        }
-        return new WbShapeFile(dest, encoding);
-    }
-
-    public File getFile() {
-        return file;
-    }
-
-    public DataStore getDataStore() {
-        return dataStore;
-    }
-
     public static boolean exists(File file) {
         ensureHasShpExtension(file);
-        for (File ext : getExtensions(file)) {
-            if (!ext.isFile()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static List<File> getExtensions(File file) {
-        ensureHasShpExtension(file);
-        List<File> files = new ArrayList<File>();
-        for (String ext : EXTENSIONS) {
-            files.add(getAlternateExtension(file, ext));
-        }
-        return files;
+        return new WbShapeFile(file).hasComponentFiles();
     }
 
     public static File getAlternateExtension(File file, String ext) {

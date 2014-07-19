@@ -22,6 +22,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.download.FileDownloader;
+import org.wikibrain.spatial.loader.SpatialDataFolder;
 import org.wikibrain.spatial.util.WbShapeFile;
 import org.wikibrain.utils.WpIOUtils;
 
@@ -40,27 +41,31 @@ import java.util.logging.Logger;
 public class ShapeFileMatcher {
     private static final Logger LOG = Logger.getLogger(ShapeFileMatcher.class.getName());
     private final Env env;
-    private final File spatialDir;
+    private final SpatialDataFolder dir;
 
 
     public ShapeFileMatcher(Env env) {
         this.env = env;
-        this.spatialDir = new File(env.getConfiguration().get().getString("spatial.dir"));
-        spatialDir.mkdirs();
-    }
-
-    private File getPath(String name, String layer) {
-        return FileUtils.getFile(spatialDir, "raw", name + "." + layer + ".shp");
+        this.dir = new SpatialDataFolder(new File(env.getConfiguration().get().getString("spatial.dir")));
     }
 
     private boolean hasAllShapefiles(String name) {
         Config config = getConfig(name);
         for (String layer : config.getObject("layers").keySet()) {
-            if (WbShapeFile.exists(getPath(name, layer))) {
+            WbShapeFile file = getShapeFile(name, layer);
+            if (!file.hasComponentFiles()) {
                 return false;
             }
         }
         return true;
+    }
+
+    private WbShapeFile getShapeFile(String name, String layer) {
+        return dir.getShapeFile("earth", layer, name);
+    }
+
+    private WbShapeFile getShapeFile(String name, String layer, String encoding) {
+        return dir.getShapeFile("earth", layer, name, encoding);
     }
 
     public void download(String name) throws InterruptedException, IOException, ZipException {
@@ -72,7 +77,7 @@ public class ShapeFileMatcher {
         // Download the file if necessary
         URL url = new URL(config.getString("url"));
         String tokens[] = url.toString().split("/");
-        File zipDest = FileUtils.getFile(spatialDir, "raw", tokens[tokens.length-1]);
+        File zipDest = FileUtils.getFile(dir.getRawFolder(), tokens[tokens.length-1]);
         if (!zipDest.isFile()) {
             FileDownloader downloader = new FileDownloader();
             downloader.download(url, zipDest);
@@ -90,14 +95,14 @@ public class ShapeFileMatcher {
         // Move the appropriate layers over with standardized names
         for (String layer : config.getObject("layers").keySet()) {
             File srcDbf = FileUtils.getFile(tmpDir, config.getString("layers." + layer + ".dbf"));
-            for (File file : WbShapeFile.getExtensions(srcDbf)) {
+            WbShapeFile src = new WbShapeFile(srcDbf, config.getString("encoding"));
+            for (File file : src.getComponentFiles()) {
                 if (!file.isFile()) {
                     throw new IllegalArgumentException("expected file " + file.getAbsolutePath() + " not found");
                 }
             }
-            WbShapeFile src = new WbShapeFile(srcDbf, config.getString("encoding"));
-            WbShapeFile dest = src.move(getPath(name, layer));
-            if (!WbShapeFile.exists(dest.getFile())) {
+            WbShapeFile dest = src.move(dir.getShapeFile("earth", layer, name).getFile());
+            if (!dest.hasComponentFiles()) {
                 throw new IllegalArgumentException();
             }
         }
@@ -107,13 +112,12 @@ public class ShapeFileMatcher {
         Config config = getConfig(name).getConfig("layers." + layer);
         GeoResolver resolver = new GeoResolver(env, config);
 
-        File csvPath = FileUtils.getFile(spatialDir, "matches", name + "." + layer + ".csv");
+        WbShapeFile shpFile = getShapeFile(name, layer, getConfig(name).getString("encoding"));
+        File csvPath = shpFile.getMappingFile();
         csvPath.getParentFile().mkdirs();
         CsvListWriter csv = new CsvListWriter(WpIOUtils.openWriter(csvPath), CsvPreference.STANDARD_PREFERENCE);
 
-        WbShapeFile shpFile = new WbShapeFile(getPath(name, layer), getConfig(name).getString("encoding"));
         List<String> featureNames = shpFile.getFeatureNames();
-
 
         List<String> extraFields = new ArrayList<String>();
         for (String fieldsKey : new String[] { "titles", "context", "other" }) {
