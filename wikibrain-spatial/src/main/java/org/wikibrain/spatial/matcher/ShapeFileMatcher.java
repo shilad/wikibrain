@@ -15,6 +15,7 @@ import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.supercsv.io.CsvListWriter;
+import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
@@ -42,11 +43,13 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class ShapeFileMatcher {
+    private static final char STATUS_UNKNOWN = 'U';
+    private static final char STATUS_VERIFIED = 'V';
+
     private static final Logger LOG = Logger.getLogger(ShapeFileMatcher.class.getName());
     private final Env env;
     private final SpatialDataFolder dir;
     private final SpatialDataDownloader downloader;
-
 
     public ShapeFileMatcher(Env env) {
         this.env = env;
@@ -61,8 +64,10 @@ public class ShapeFileMatcher {
     }
 
     public void writeMatches(Config config, WbShapeFile shapeFile) throws IOException, ConfigurationException, DaoException {
-        GeoResolver resolver = new GeoResolver(env, config);
+
+        Map<String, MappingInfo> existing = readExisting(shapeFile);
         File csvPath = shapeFile.getMappingFile();
+
         CsvListWriter csv = new CsvListWriter(WpIOUtils.openWriter(csvPath), CsvPreference.STANDARD_PREFERENCE);
 
         // Fields from the shapefile that should be included in the final CSV
@@ -76,17 +81,41 @@ public class ShapeFileMatcher {
         }
 
         List<String> featureNames = shapeFile.getFeatureNames();
+        GeoResolver resolver = new GeoResolver(env, config);
         try {
             writeHeader(csv, extraFields);
             SimpleFeatureIterator iter = shapeFile.getFeatureIter();
             while (iter.hasNext()) {
                 Map<String, String> row = makeRow(featureNames, config.getStringList("key"), iter.next());
-                writeRow(resolver, csv, extraFields, row);
+                writeRow(resolver, csv, extraFields, row, existing);
             }
             iter.close();
         } finally {
             csv.close();
         }
+    }
+
+    private Map<String, MappingInfo> readExisting(WbShapeFile shapeFile) throws IOException {
+        HashMap<String, MappingInfo> mapping = new HashMap<String, MappingInfo>();
+        if (!shapeFile.hasMappingFile()) {
+            return mapping;
+        }
+        CsvMapReader reader = new CsvMapReader(
+                WpIOUtils.openBufferedReader(shapeFile.getMappingFile()),
+                CsvPreference.STANDARD_PREFERENCE
+        );
+        String [] header = reader.getHeader(true);
+        while (true) {
+            Map<String, String> row = reader.read(header);
+            if (row == null) {
+                break;
+            }
+            MappingInfo info = new MappingInfo(row);
+            if (!info.isUnknown()) {
+                mapping.put(info.key, info);
+            }
+        }
+        return mapping;
     }
 
     private Map<String, String> makeRow(List<String> featureNames, List<String> keyFields, SimpleFeature row) {
@@ -123,19 +152,25 @@ public class ShapeFileMatcher {
         writer.write(fields);
     }
 
-    private void writeRow(GeoResolver resolver, CsvListWriter writer, List<String> extraFields, Map<String, String> row) throws DaoException, IOException {
+    private void writeRow(GeoResolver resolver, CsvListWriter writer, List<String> extraFields, Map<String, String> row, Map<String, MappingInfo> existing) throws DaoException, IOException {
         String tstamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
         LinkedHashMap<LocalPage, Double> guesses = resolver.resolve(row, 3);
         List<LocalPage> sorted = new ArrayList<LocalPage>(guesses.keySet());
 
         List<String> newRow = new ArrayList<String>();
+        MappingInfo prev = existing.get(row.get("WB_KEY"));
 
         newRow.add(row.get("WB_ID"));
         newRow.add(row.get("WB_KEY"));
-        newRow.add(tstamp);
-        newRow.add("U");
-        newRow.add(sorted.size() > 0 ? sorted.get(0).getTitle().getTitleStringWithoutNamespace() : "");
+        newRow.add(prev == null ? tstamp : prev.timestamp);
+        newRow.add(String.valueOf(prev == null ? STATUS_UNKNOWN : prev.status));
+
+        // Calculate best title
+        String title = "";
+        if (prev != null) title = prev.title;
+        else if (sorted.size() > 0) title = sorted.get(0).getTitle().getTitleStringWithoutNamespace();
+        newRow.add(title);
 
         for (int i = 0; i < 3; i++) {
             if (sorted.size() > i) {
@@ -155,6 +190,24 @@ public class ShapeFileMatcher {
             newRow.add(row.get(f).toString());
         }
         writer.write(newRow);
+    }
+
+    public static class MappingInfo {
+        public final String key;
+        public final String timestamp;
+        public final char status;
+        public final String title;
+
+        public MappingInfo(Map<String, String> row) {
+            key = row.get("WB_KEY");
+            timestamp = row.get("WB_UPDATED");
+            status = row.get("WB_STATUS").toUpperCase().charAt(0);
+            title = row.get("WB_TITLE");
+        }
+
+        public boolean isUnknown() {
+            return status == STATUS_UNKNOWN;
+        }
     }
 
     public static void main(String args[]) throws Exception {
