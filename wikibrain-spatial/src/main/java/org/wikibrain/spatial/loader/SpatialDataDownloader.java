@@ -42,7 +42,8 @@ public class SpatialDataDownloader {
     public WbShapeFile download(URL url, String zipShp, String refSystem, String layerGroup, String name, String encoding) throws InterruptedException, IOException {
         // Download the file if necessary
         String tokens[] = url.toString().split("/");
-        File zipDest = FileUtils.getFile(dir.getRawFolder(), name + ".zip");
+        String filename = refSystem + "_" + layerGroup + "_" + name + "_" + tokens[tokens.length - 1];
+        File zipDest = FileUtils.getFile(dir.getRawFolder(), filename);
         if (!zipDest.isFile()) {
             FileDownloader downloader = new FileDownloader();
             downloader.download(url, zipDest);

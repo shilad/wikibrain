@@ -1,0 +1,38 @@
+capital
+city
+municipality
+borough
+metropolis
+neighbourhood
+arrondissement
+village
+settlement
+municipal corporation
+census-designated
+unincorporated
+commune
+town
+hamlet
+community
+suburb
+stadt
+capitals
+cities
+municipalities
+boroughs
+metropolises
+neighbourhoods
+arrondissements
+villages
+settlements
+municipal corporations
+census-designated
+unincorporated
+communes
+towns
+hamlets
+communities
+suburbs
+stadt
+human settlement
+human settlements

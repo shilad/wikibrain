@@ -8,6 +8,9 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.supercsv.io.CsvMapReader;
+import org.supercsv.prefs.CsvPreference;
+import org.wikibrain.utils.WpIOUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,6 +61,32 @@ public class WbShapeFile {
         if (this.dataStore == null) {
             this.dataStore = fileToDataStore(file, encoding);
         }
+    }
+
+    /**
+     * Reads in a mapping from shapefile key to title for all entries with status != U
+     * @return
+     */
+    public Map<String, String> readMapping() throws IOException {
+        HashMap<String, String> mapping = new HashMap<String, String>();
+        if (!hasMappingFile()) {
+            throw new IOException("No mapping file found: " + getMappingFile());
+        }
+        CsvMapReader reader = new CsvMapReader(
+                WpIOUtils.openBufferedReader(getMappingFile()),
+                CsvPreference.STANDARD_PREFERENCE
+        );
+        String [] header = reader.getHeader(true);
+        while (true) {
+            Map<String, String> row = reader.read(header);
+            if (row == null) {
+                break;
+            }
+            if (!row.get("WB_STATUS").equalsIgnoreCase("U")) {
+                mapping.put(row.get("WB_KEY"), row.get("WB_TITLE"));
+            }
+        }
+        return mapping;
     }
 
     /**

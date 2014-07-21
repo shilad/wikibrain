@@ -202,5 +202,5 @@ public interface SpatialDataDao {
     public void saveGeometry(int itemId, String layerName, String refSysName, Geometry g) throws DaoException;
 
 
-
+    void removeLayer(String refSysName, String layerName) throws DaoException;
 }

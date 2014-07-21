@@ -93,6 +93,9 @@ public class WpIOUtils {
      */
     public static String resourceToString(String path) throws IOException {
         InputStream is = WpIOUtils.class.getResourceAsStream(path);
+        if (is == null) {
+            throw new FileNotFoundException("Unknown resource: " + path);
+        }
         try {
             return IOUtils.toString(is, "utf-8");
         } finally {

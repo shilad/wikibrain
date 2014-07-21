@@ -16,8 +16,10 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.feature.visitor.CalcResult;
 import org.geotools.feature.visitor.UniqueVisitor;
 import org.geotools.filter.text.cql2.CQL;
+import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.jdbc.Index;
 import org.geotools.jdbc.JDBCDataStore;
+import org.geotools.jdbc.JDBCFeatureStore;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -72,6 +74,8 @@ public class PostGISDB {
         initialize(params);
 
     }
+
+
 
     public Geometry getGeometry(int itemId, String layerName, String refSysName) throws DaoException{
 
@@ -174,6 +178,18 @@ public class PostGISDB {
             throw new DaoException(e);
         }
 
+    }
+
+    public void removeLayer(String refSysName, String layerName) throws DaoException {
+        try {
+            String cqlQuery = String.format("ref_sys_name = '%s' and layer_name = '%s'", refSysName, layerName);
+            Filter f = CQL.toFilter(cqlQuery);
+            ((JDBCFeatureStore)getFeatureSource()).removeFeatures(f);
+        } catch (CQLException e) {
+            throw new DaoException(e);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
     }
 
 

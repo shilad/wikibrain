@@ -64,11 +64,9 @@ public class ShapeFileMatcher {
     }
 
     public void writeMatches(Config config, WbShapeFile shapeFile) throws IOException, ConfigurationException, DaoException {
-
         Map<String, MappingInfo> existing = readExisting(shapeFile);
-        File csvPath = shapeFile.getMappingFile();
-
-        CsvListWriter csv = new CsvListWriter(WpIOUtils.openWriter(csvPath), CsvPreference.STANDARD_PREFERENCE);
+        File newFile = File.createTempFile("wbmapping", "csv");
+        CsvListWriter csv = new CsvListWriter(WpIOUtils.openWriter(newFile), CsvPreference.STANDARD_PREFERENCE);
 
         // Fields from the shapefile that should be included in the final CSV
         List<String> extraFields = new ArrayList<String>();
@@ -93,8 +91,22 @@ public class ShapeFileMatcher {
         } finally {
             csv.close();
         }
+
+        // Move original to a backup if it exists
+        if (shapeFile.getMappingFile().exists()) {
+            File backup = new File(shapeFile.getMappingFile().getAbsoluteFile() + ".bak");
+            FileUtils.deleteQuietly(backup);
+            FileUtils.moveFile(shapeFile.getMappingFile(), backup);
+        }
+        FileUtils.moveFile(newFile, shapeFile.getMappingFile());
     }
 
+    /**
+     * TODO: keep track of duplicate or missing keys with special status codes
+     * @param shapeFile
+     * @return
+     * @throws IOException
+     */
     private Map<String, MappingInfo> readExisting(WbShapeFile shapeFile) throws IOException {
         HashMap<String, MappingInfo> mapping = new HashMap<String, MappingInfo>();
         if (!shapeFile.hasMappingFile()) {
@@ -121,7 +133,7 @@ public class ShapeFileMatcher {
     private Map<String, String> makeRow(List<String> featureNames, List<String> keyFields, SimpleFeature row) {
         Map<String, String> rowMap = new HashMap<String, String>();
         for (int i = 0; i < row.getAttributeCount(); i++) {
-            rowMap.put(featureNames.get(i), row.getAttribute(i).toString());
+            rowMap.put(featureNames.get(i).toUpperCase(), row.getAttribute(i).toString());
         }
         rowMap.put("WB_ID", row.getID());
 
@@ -180,9 +192,11 @@ public class ShapeFileMatcher {
             }
         }
 
-        double score = 0.1;
+        double score;
         if (sorted.size() >= 2) {
-            score = guesses.get(sorted.get(0)) - guesses.get(sorted.get(1));
+            score = 2 * guesses.get(sorted.get(0)) - guesses.get(sorted.get(1));
+        } else {
+            score = guesses.get(sorted.get(0));
         }
         newRow.add(""+score);
 

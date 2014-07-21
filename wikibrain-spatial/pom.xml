@@ -47,47 +47,47 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-data</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-cql</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-jdbc</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools.jdbc</groupId>
             <artifactId>gt-jdbc-postgis</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-opengis</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-geojson</artifactId>
-            <version>11.0</version>
+            <version>11.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
