@@ -1,20 +1,16 @@
 package org.wikibrain.spatial.matcher;
 
 import com.typesafe.config.Config;
+import com.vividsolutions.jts.geom.Geometry;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.utils.WpIOUtils;
 import org.wikibrain.wikidata.*;
 
-import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -47,7 +43,7 @@ public class WikidataValueScorer extends AbstractMatchScorer {
     }
 
     @Override
-    public double score(LocalId candidate, Map<String, String> row) throws DaoException {
+    public double score(LocalId candidate, Map<String, String> row, Geometry geometry) throws DaoException {
         if (!row.containsKey(columnName)) {
             throw new IllegalArgumentException("No column with name " + columnName + " in dbx");
         }

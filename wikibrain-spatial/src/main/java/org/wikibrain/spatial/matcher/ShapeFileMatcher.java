@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.matcher;
 
 import com.typesafe.config.Config;
+import com.vividsolutions.jts.geom.Geometry;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
@@ -84,8 +85,10 @@ public class ShapeFileMatcher {
             writeHeader(csv, extraFields);
             SimpleFeatureIterator iter = shapeFile.getFeatureIter();
             while (iter.hasNext()) {
-                Map<String, String> row = makeRow(featureNames, config.getStringList("key"), iter.next());
-                writeRow(resolver, csv, extraFields, row, existing);
+                SimpleFeature row = iter.next();
+                Map<String, String> rowMap = makeRow(featureNames, config.getStringList("key"), row);
+                Geometry geometry = (Geometry) row.getDefaultGeometry();
+                writeRow(resolver, csv, extraFields, rowMap, geometry, existing);
             }
             iter.close();
         } finally {
@@ -164,10 +167,10 @@ public class ShapeFileMatcher {
         writer.write(fields);
     }
 
-    private void writeRow(GeoResolver resolver, CsvListWriter writer, List<String> extraFields, Map<String, String> row, Map<String, MappingInfo> existing) throws DaoException, IOException {
+    private void writeRow(GeoResolver resolver, CsvListWriter writer, List<String> extraFields, Map<String, String> row, Geometry geometry, Map<String, MappingInfo> existing) throws DaoException, IOException {
         String tstamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
-        LinkedHashMap<LocalPage, Double> guesses = resolver.resolve(row, 3);
+        LinkedHashMap<LocalPage, Double> guesses = resolver.resolve(row, geometry, 3);
         List<LocalPage> sorted = new ArrayList<LocalPage>(guesses.keySet());
 
         List<String> newRow = new ArrayList<String>();

@@ -1,10 +1,10 @@
 package org.wikibrain.spatial.matcher;
 
 import com.typesafe.config.Config;
+import com.vividsolutions.jts.geom.Geometry;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.utils.WpIOUtils;
@@ -15,7 +15,6 @@ import org.wikibrain.wikidata.WikidataValue;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,7 +47,7 @@ public class InstanceOfMatchScorer extends AbstractMatchScorer {
     }
 
     @Override
-    public double score(LocalId candidate, Map<String, String> row) throws DaoException {
+    public double score(LocalId candidate, Map<String, String> row, Geometry geometry) throws DaoException {
         for (WikidataStatement st : wikidataDao.getStatements(candidate.asLocalPage())) {
             if (st.getProperty() == null || st.getProperty().getId() != INSTANCE_OF_PROPERTY) {
                 continue;

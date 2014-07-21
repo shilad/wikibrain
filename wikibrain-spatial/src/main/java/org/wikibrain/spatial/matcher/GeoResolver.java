@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.matcher;
 
 import com.typesafe.config.Config;
+import com.vividsolutions.jts.geom.Geometry;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.DaoException;
@@ -59,7 +60,7 @@ public class GeoResolver {
         }
     }
 
-    public LinkedHashMap<LocalPage, Double> resolve(Map<String, String> row, int n) throws DaoException {
+    public LinkedHashMap<LocalPage, Double> resolve(Map<String, String> row, Geometry geometry, int n) throws DaoException {
 
         List<String> titles = new ArrayList<String>();
         for (String field : titleFields) {
@@ -94,7 +95,7 @@ public class GeoResolver {
 
         for (AbstractMatchScorer scorer : scorers) {
             for (LocalId id : scores.keySet()) {
-                scores.put(id, scores.get(id) + scorer.getWeight() * scorer.score(id, row));
+                scores.put(id, scores.get(id) + scorer.getWeight() * scorer.score(id, row, geometry));
             }
         }
 

@@ -5,9 +5,9 @@ import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import com.vividsolutions.jts.geom.Geometry;
-import edu.emory.mathcs.backport.java.util.*;
-import edu.emory.mathcs.backport.java.util.LinkedList;
-import org.geotools.data.*;
+import org.geotools.data.DataStoreFinder;
+import org.geotools.data.FeatureSource;
+import org.geotools.data.Query;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -32,8 +32,10 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.spatial.core.SpatialContainerMetadata;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

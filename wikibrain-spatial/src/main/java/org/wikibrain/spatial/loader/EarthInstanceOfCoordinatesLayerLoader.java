@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataFilter;
 import org.wikibrain.wikidata.WikidataStatement;
@@ -27,7 +28,7 @@ public class EarthInstanceOfCoordinatesLayerLoader extends EarthBasicCoordinates
     protected boolean storeStatement(WikidataStatement statement) throws DaoException {
 
         int itemId = statement.getItem().getId();
-        Geometry g = EarthBasicCoordinatesWikidataLayerLoader.jsonToGeometry(statement.getValue().getJsonValue().getAsJsonObject());
+        Geometry g = WikiBrainSpatialUtils.jsonToGeometry(statement.getValue().getJsonValue().getAsJsonObject());
         if (g != null) {
             Iterable<WikidataStatement> instanceOfStatements = wdDao.get((new WikidataFilter.Builder()).withEntityId(itemId).withPropertyId(INSTANCE_OF_PROPERTY_ID).build());
             int count = 0;
