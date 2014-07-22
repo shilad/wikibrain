@@ -14,7 +14,7 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.spatial.core.constants.Layers;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.spatial.matcher.MatchedShapefileLoader;
+import org.wikibrain.spatial.matcher.MappedShapefileLoader;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.io.IOException;
@@ -47,9 +47,9 @@ public class SpatialDataLoader {
 
     public void loadExogenousData(String refSys, String layerGroup, String dataset) throws IOException, InterruptedException, DaoException, WikiBrainException, ConfigurationException {
         spatialDao.removeLayer(refSys, layerGroup);
-        MatchedShapefileLoader shapefileLoader = new MatchedShapefileLoader(env);
         SpatialDataDownloader downloader  = new SpatialDataDownloader(env.getConfiguration());
         downloader.download(refSys, layerGroup, dataset);
+        MappedShapefileLoader shapefileLoader = new MappedShapefileLoader(env);
         shapefileLoader.load(refSys, layerGroup, dataset);
     }
 

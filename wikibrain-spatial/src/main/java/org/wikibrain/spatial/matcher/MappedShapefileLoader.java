@@ -29,8 +29,8 @@ import java.util.logging.Logger;
 /**
  * @author Shilad Sen
  */
-public class MatchedShapefileLoader {
-    private static final Logger LOG = Logger.getLogger(MatchedShapefileLoader.class.getName());
+public class MappedShapefileLoader {
+    private static final Logger LOG = Logger.getLogger(MappedShapefileLoader.class.getName());
 
     private final Env env;
 
@@ -41,7 +41,7 @@ public class MatchedShapefileLoader {
     private final UniversalPageDao conceptDao;
     private final Language lang;
 
-    public MatchedShapefileLoader(Env env) throws ConfigurationException, WikiBrainException {
+    public MappedShapefileLoader(Env env) throws ConfigurationException, WikiBrainException {
         this.env = env;
         this.lang = env.getLanguages().getBestAvailableEnglishLang(false);
         this.pageDao = env.getConfigurator().get(LocalPageDao.class);
@@ -90,6 +90,7 @@ public class MatchedShapefileLoader {
                 }
                 Geometry geometry = (Geometry) row.getDefaultGeometry();
                 spatialDao.saveGeometry(conceptId, layerGroup, refSys, geometry);
+                metaDao.incrementRecords(Geometry.class);
             }
             if (numRows % 1000 == 0) {
                 LOG.info("for " + shapefile.getFile() + ", matched " + numMatches + " out of " + numRows);
@@ -165,7 +166,7 @@ public class MatchedShapefileLoader {
 
         Env env = new EnvBuilder(cmd).build();
 
-        MatchedShapefileLoader loader = new MatchedShapefileLoader(env);
+        MappedShapefileLoader loader = new MappedShapefileLoader(env);
 
         if (cmd.hasOption("d")) {
             loader.removeLayer(refSys, layer);
