@@ -288,7 +288,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         for (Integer wpId : counts.keySet()) {
             result.put(new LocalId(language, wpId),
                     (float)1.0 * counts.get(wpId) / counts.getTotal());
-            if (counts.size() >= maxPages) {
+            if (result.size() >= maxPages) {
                 break;
             }
         }

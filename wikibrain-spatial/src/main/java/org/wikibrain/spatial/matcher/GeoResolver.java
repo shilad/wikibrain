@@ -53,7 +53,9 @@ public class GeoResolver {
             if (type.equals("instanceOf")) {
                 scorers.add(new InstanceOfMatchScorer(env, scorerConfig));
             } else if (type.equals("wikidataValue")) {
-                    scorers.add(new WikidataValueScorer(env, scorerConfig));
+                scorers.add(new WikidataValueScorer(env, scorerConfig));
+            } else if (type.equals("contains")) {
+                scorers.add(new ContainsPointScorer(env, scorerConfig));
             } else {
                 throw new ConfigurationException("Unknown score type: " + type);
             }

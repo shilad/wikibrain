@@ -34,7 +34,6 @@ public class ContainsPointScorer extends AbstractMatchScorer {
 
             Geometry point = WikiBrainSpatialUtils.jsonToGeometry(st.getValue().getJsonValue().getAsJsonObject());
             if (point != null && geometry.contains(point)) {
-                System.out.println("CONTAINS IS TRUE!");
                 return 1.0;
             }
         }

@@ -84,7 +84,11 @@ public class ShapeFileMatcher {
         try {
             writeHeader(csv, extraFields);
             SimpleFeatureIterator iter = shapeFile.getFeatureIter();
+            int n = 0;
             while (iter.hasNext()) {
+                if (n++ % 1000 == 0) {
+                    LOG.info("Mapping row " + n + " of " + shapeFile.getFile());
+                }
                 SimpleFeature row = iter.next();
                 Map<String, String> rowMap = makeRow(featureNames, config.getStringList("key"), row);
                 Geometry geometry = (Geometry) row.getDefaultGeometry();
@@ -195,10 +199,10 @@ public class ShapeFileMatcher {
             }
         }
 
-        double score;
+        double score = 0;
         if (sorted.size() >= 2) {
             score = 2 * guesses.get(sorted.get(0)) - guesses.get(sorted.get(1));
-        } else {
+        } else if (sorted.size() == 1) {
             score = guesses.get(sorted.get(0));
         }
         newRow.add(""+score);
@@ -230,6 +234,6 @@ public class ShapeFileMatcher {
     public static void main(String args[]) throws Exception {
         Env env = EnvBuilder.envFromArgs(args);
         ShapeFileMatcher matcher = new ShapeFileMatcher(env);
-        matcher.match("earth", "country", "naturalEarth");
+        matcher.match("earth", "state", "naturalEarth");
     }
 }

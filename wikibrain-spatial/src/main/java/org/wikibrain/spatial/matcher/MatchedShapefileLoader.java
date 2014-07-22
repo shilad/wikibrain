@@ -91,9 +91,12 @@ public class MatchedShapefileLoader {
                 Geometry geometry = (Geometry) row.getDefaultGeometry();
                 spatialDao.saveGeometry(conceptId, layerGroup, refSys, geometry);
             }
-            LOG.info("for " + shapefile.getFile() + ", matched " + numMatches + " out of " + numRows);
+            if (numRows % 1000 == 0) {
+                LOG.info("for " + shapefile.getFile() + ", matched " + numMatches + " out of " + numRows);
+            }
         }
         iter.close();
+        LOG.info("for " + shapefile.getFile() + ", matched " + numMatches + " out of " + numRows);
     }
 
     private String makeKey(List<String> keyFields, List<String> featureNames, SimpleFeature row) {
