@@ -211,8 +211,10 @@ public class PostGISDB {
 
             Set<Object> uniques = getUniqueValues("ref_sys_name", null);
             Set<String> rVal = Sets.newHashSet();
-            for(Object o : uniques){
-                rVal.add(o.toString());
+            if (uniques != null) {
+                for (Object o : uniques) {
+                    rVal.add(o.toString());
+                }
             }
             return rVal;
 
@@ -352,64 +354,15 @@ public class PostGISDB {
     }
 
     private void checkPostgisVersion() throws DaoException {
-        LOG.info("checking for postgis extension");
-
-        // First pass through loop may install extension. Second pass should work!
-        for (int i = 0; i < 2; i++) {
-
-            // check we have postgis
-            Connection cnx = null;
-            try {
-                cnx = store.getDataSource().getConnection();
-            } catch (SQLException e) {
-                throw new DaoException(e);
-            }
-            Statement st = null;
-            try {
-                st = cnx.createStatement();
-            } catch (SQLException e) {
-                throw new DaoException(e);
-            }
-            try {
-                ResultSet rs = st.executeQuery("select PostGIS_version()");
-                rs.next();
-                String version = rs.getString(1).trim();
-                rs.close();
-                st.close();
-                cnx.close();
-                if (version.startsWith("2.")) {
-                    return; // We're good!
-                } else {
-                    throw new DaoException("Invalid PostGIS version: " + version + ". Wikibrain requires 2.x");
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                // Extension not available. Try to create it.
-            }
-            LOG.info("PostGIS extension not available for the database. Trying to create it.");
-
-            try {
-                st.execute("create extension postgis");
-                st.close();
-                cnx.close();
-            } catch (SQLException e) {
-                try {
-                    st.close();
-                    cnx.close();
-                } catch (SQLException e1) {
-                }
-                throw new DaoException("Failed to create PostGIS extension for database. Is PostGIS 2.x installed?");
-            }
-        }
-        throw new DaoException("Failed to create PostGIS extension for database. Is PostGIS 2.x installed?");
     }
 
     private void initialize(Map<String, Object> manualParameters) throws DaoException {
 
         try {
+            PostGISVersionChecker versionChecker = new PostGISVersionChecker();
+            versionChecker.verifyVersion(manualParameters);
 
             store = (JDBCDataStore)DataStoreFinder.getDataStore(manualParameters);
-            checkPostgisVersion();
 
             if (needsToBeInitialized()){ // needs to be initialized
 
