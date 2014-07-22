@@ -84,7 +84,7 @@ public class SpatialDataDownloader {
             throw new IllegalArgumentException("To download by name, SpatialDataDownloader must have a configuration");
         }
         Config c = config.getConfig("spatial.datasets", refSysName, layerGroup, datasetName);
-        return download(
+        WbShapeFile shapeFile = download(
                 new URL(c.getString("url")),
                 c.getString("shp"),
                 refSysName,
@@ -92,5 +92,41 @@ public class SpatialDataDownloader {
                 datasetName,
                 c.getString("encoding")
         );
+        downloadMapping(new URL(c.getString("mappingUrl")), shapeFile);
+        return shapeFile;
+    }
+
+    public void downloadMapping(URL mappingUrl, WbShapeFile shapeFile) throws IOException, InterruptedException {
+        File dest = shapeFile.getMappingFile();
+
+        File tmp = File.createTempFile("wikibrain-mapping", "zip");
+        FileUtils.deleteQuietly(tmp);
+
+        if (!tmp.isFile()) {
+            FileDownloader downloader = new FileDownloader();
+            downloader.download(mappingUrl, tmp);
+        }
+        FileUtils.forceDeleteOnExit(tmp);
+
+        // Unzip the file
+        File tmpDir;
+        try {
+            ZipFile zipFile = new ZipFile(tmp.getCanonicalPath());
+            tmpDir = File.createTempFile("wikibrain", ".exploded");
+            FileUtils.deleteQuietly(tmpDir);
+            FileUtils.forceMkdir(tmpDir);
+            LOG.log(Level.INFO, "Extracting " + mappingUrl + " to " + tmpDir);
+            zipFile.extractAll(tmpDir.getAbsolutePath());
+            FileUtils.forceDeleteOnExit(tmpDir);
+        } catch (ZipException e) {
+            throw new IOException(e);
+        }
+
+        File src = FileUtils.getFile(tmpDir, dest.getName());
+        if (!src.isFile()) {
+            throw new IOException("Missing file " + dest.getName() + " in " + mappingUrl);
+        }
+        FileUtils.forceDelete(dest);
+        FileUtils.moveFile(src, dest);
     }
 }

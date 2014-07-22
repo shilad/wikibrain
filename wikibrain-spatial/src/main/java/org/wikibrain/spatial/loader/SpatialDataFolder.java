@@ -2,6 +2,7 @@ package org.wikibrain.spatial.loader;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
+import org.wikibrain.conf.Configuration;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.spatial.util.WbShapeFile;
 
@@ -149,5 +150,14 @@ public class SpatialDataFolder {
             }
         }
         return shapeFiles;
+    }
+
+    /**
+     * Hack: Better to ask the configurator for this!
+     * @param conf
+     * @return
+     */
+    public static SpatialDataFolder get(Configuration conf) {
+        return new SpatialDataFolder(conf.getFile("spatial.dir"));
     }
 }

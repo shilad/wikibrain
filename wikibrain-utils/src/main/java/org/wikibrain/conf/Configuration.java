@@ -85,6 +85,10 @@ public class Configuration {
         return config.getString(StringUtils.join(path, "."));
     }
 
+    public File getFile(String ...path) {
+        return new File(getString(path));
+    }
+
     public Double getDouble(String ... path) {
         return config.getDouble(StringUtils.join(path, "."));
     }
