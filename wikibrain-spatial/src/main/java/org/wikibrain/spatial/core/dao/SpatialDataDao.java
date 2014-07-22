@@ -202,5 +202,16 @@ public interface SpatialDataDao {
     public void saveGeometry(int itemId, String layerName, String refSysName, Geometry g) throws DaoException;
 
 
-    void removeLayer(String refSysName, String layerName) throws DaoException;
+    /**
+     * Removes the layer with the given reference system.
+     * @param refSysName
+     * @param layerName
+     * @throws DaoException
+     */
+    public void removeLayer(String refSysName, String layerName) throws DaoException;
+
+    /**
+     * Optimizes the database, if necessary.
+     */
+    public void optimize() throws DaoException;
 }

@@ -290,6 +290,10 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
         db.removeLayer(refSysName, layerName);
     }
 
+    @Override
+    public void optimize() throws DaoException {
+        db.optimize();
+    }
 
     public static class Provider extends org.wikibrain.conf.Provider<PostGISSpatialDataDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {

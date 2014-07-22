@@ -15,6 +15,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.Table;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
@@ -217,6 +218,40 @@ public class WpDataSource implements Closeable {
                 }
             }
         }
+    }
+
+    /**
+     * Optimizes the performance of the database for some table.
+     * On postgres this translates to vacuum analyze.
+     * On h2 it does nothing.
+     */
+    public void optimize(String table) throws DaoException {
+        if (dialect == SQLDialect.POSTGRES) {
+            Connection conn=null;
+            try {
+                conn = getConnection();
+                conn.setAutoCommit(true);
+                Statement st = conn.createStatement();
+                st.execute("VACUUM ANALYZE " + table);
+                st.close();
+            } catch (SQLException e) {
+                throw new DaoException(e);
+            } finally {
+                if (conn != null) {
+                    try { conn.setAutoCommit(true); } catch (Exception e) {}
+                    closeQuietly(conn);
+                }
+            }
+        }
+    }
+
+    /**
+     * Optimizes the performance of the database for some table.
+     * On postgres this translates to vacuum analyze.
+     * On h2 it does nothing.
+     */
+    public void optimize(Table table) throws DaoException {
+        optimize(table.getName());
     }
 
     /**

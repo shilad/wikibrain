@@ -160,7 +160,7 @@ public class SpatialDataLoader {
             try {
                 layers.add(new LayerInfo(arg));
             } catch (IllegalArgumentException e) {
-                System.err.println("Invalid layer '" + arg + "'. Must be 'layer,dataset' or 'referenceSystem,layer,dataset");
+                System.err.println("Invalid layer '" + arg + "'. Format must be 'layer,dataset' or 'referenceSystem,layer,dataset");
                 new HelpFormatter().printHelp("SpatialDataLoader", options);
                 System.exit(1);
                 return;
@@ -184,6 +184,6 @@ public class SpatialDataLoader {
         spatialDao.endSaveGeometries();
 
         LOG.info("optimizing database.");
-        conf.get(WpDataSource.class).optimize();
+        spatialDao.optimize();
     }
 }

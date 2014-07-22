@@ -3,7 +3,6 @@ package org.wikibrain.spatial.util;
 import com.google.gson.JsonObject;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-import org.wikibrain.spatial.loader.EarthBasicCoordinatesWikidataLayerLoader;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +34,7 @@ public class WikiBrainSpatialUtils {
 
 
             if (globe != null && !(globe.endsWith(EARTH_ITEM_ID) || globe.endsWith("earth"))) {
-                LOG.log(Level.INFO, "Found non-Earth coordinate location: " + json);
+//                LOG.log(Level.INFO, "Found non-Earth coordinate location: " + json);
                 return null; // check to make sure these refer to the Earth
             }
 

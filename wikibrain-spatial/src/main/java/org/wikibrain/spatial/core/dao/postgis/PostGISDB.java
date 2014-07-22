@@ -29,9 +29,14 @@ import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.spatial.core.SpatialContainerMetadata;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -346,19 +351,70 @@ public class PostGISDB {
 
     }
 
+    private void checkPostgisVersion() throws DaoException {
+        LOG.info("checking for postgis extension");
 
+        // First pass through loop may install extension. Second pass should work!
+        for (int i = 0; i < 2; i++) {
+
+            // check we have postgis
+            Connection cnx = null;
+            try {
+                cnx = store.getDataSource().getConnection();
+            } catch (SQLException e) {
+                throw new DaoException(e);
+            }
+            Statement st = null;
+            try {
+                st = cnx.createStatement();
+            } catch (SQLException e) {
+                throw new DaoException(e);
+            }
+            try {
+                ResultSet rs = st.executeQuery("select PostGIS_version()");
+                rs.next();
+                String version = rs.getString(1).trim();
+                rs.close();
+                st.close();
+                cnx.close();
+                if (version.startsWith("2.")) {
+                    return; // We're good!
+                } else {
+                    throw new DaoException("Invalid PostGIS version: " + version + ". Wikibrain requires 2.x");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                // Extension not available. Try to create it.
+            }
+            LOG.info("PostGIS extension not available for the database. Trying to create it.");
+
+            try {
+                st.execute("create extension postgis");
+                st.close();
+                cnx.close();
+            } catch (SQLException e) {
+                try {
+                    st.close();
+                    cnx.close();
+                } catch (SQLException e1) {
+                }
+                throw new DaoException("Failed to create PostGIS extension for database. Is PostGIS 2.x installed?");
+            }
+        }
+        throw new DaoException("Failed to create PostGIS extension for database. Is PostGIS 2.x installed?");
+    }
 
     private void initialize(Map<String, Object> manualParameters) throws DaoException {
 
         try {
 
             store = (JDBCDataStore)DataStoreFinder.getDataStore(manualParameters);
-
-
+            checkPostgisVersion();
 
             if (needsToBeInitialized()){ // needs to be initialized
 
                 LOG.log(Level.INFO, "Initializing spatial database tables");
+
 
                 try {
 
@@ -450,6 +506,12 @@ public class PostGISDB {
 
     }
 
+    public void optimize() throws DaoException {
+        // Hack: wrap the datasource in a WpDataSource to access the helper method.
+        // We don't close the WpDataSource because it doesn't own the connection.
+        WpDataSource src = new WpDataSource(store.getDataSource());
+        src.optimize(SPATIAL_DB_NAME);
+    }
 
 
     public static class Provider extends org.wikibrain.conf.Provider<PostGISDB> {
