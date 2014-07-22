@@ -7,19 +7,11 @@ package org.wikibrain.spatial.core.constants;
  */
 public class Layers {
 
+    // For RefSys.EARTH
     public static String WIKIDATA = "wikidata";
-    public static String GADM0 = "gadm0";
-    public static String GADM1 = "gamd1";
-    public static String[] GADM = {GADM0, GADM1};
+    public static String COUNTRY = "country";
+    public static String STATE = "state";
+
+    // For RefSys.PERIODIC_TABLE
     public static String ELEMENTS = "elements";
-
-    /**
-     * Gets a layer name for a type-based Wikidata layer.
-     * @param type
-     * @return
-     */
-    public static String wikidata(String type){
-        return WIKIDATA + "_" + type;
-    }
-
 }

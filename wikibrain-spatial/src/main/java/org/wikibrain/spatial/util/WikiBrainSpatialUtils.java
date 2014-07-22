@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 */
 public class WikiBrainSpatialUtils {
 
-    private static final String EARTH_LAYER = "earth";
     private static final String EARTH_ITEM_ID = "Q2";
 
     private static final Logger LOG = Logger.getLogger(WikiBrainSpatialUtils.class.getName());

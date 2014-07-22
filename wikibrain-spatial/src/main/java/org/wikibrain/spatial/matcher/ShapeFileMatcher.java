@@ -2,19 +2,9 @@ package org.wikibrain.spatial.matcher;
 
 import com.typesafe.config.Config;
 import com.vividsolutions.jts.geom.Geometry;
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.CharSet;
-import org.geotools.data.DataStore;
-import org.geotools.data.DataStoreFinder;
-import org.geotools.data.shapefile.dbf.DbaseFileHeader;
-import org.geotools.data.shapefile.dbf.DbaseFileReader;
-import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
@@ -23,19 +13,14 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.download.FileDownloader;
 import org.wikibrain.spatial.loader.SpatialDataDownloader;
 import org.wikibrain.spatial.loader.SpatialDataFolder;
-import org.wikibrain.spatial.util.WbShapeFile;
+import org.wikibrain.spatial.core.WikiBrainShapeFile;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.*;
-import java.net.URL;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -60,11 +45,11 @@ public class ShapeFileMatcher {
 
     public void match(String refSys, String layerGroup, String datasetName) throws IOException, InterruptedException, DaoException, ConfigurationException {
         Config config = env.getConfiguration().getConfig("spatial.datasets", refSys, layerGroup, datasetName);
-        WbShapeFile shapeFile = downloader.download(refSys, layerGroup, datasetName);
+        WikiBrainShapeFile shapeFile = downloader.download(refSys, layerGroup, datasetName);
         writeMatches(config, shapeFile);
     }
 
-    public void writeMatches(Config config, WbShapeFile shapeFile) throws IOException, ConfigurationException, DaoException {
+    public void writeMatches(Config config, WikiBrainShapeFile shapeFile) throws IOException, ConfigurationException, DaoException {
         Map<String, MappingInfo> existing = readExisting(shapeFile);
         File newFile = File.createTempFile("wbmapping", "csv");
         CsvListWriter csv = new CsvListWriter(WpIOUtils.openWriter(newFile), CsvPreference.STANDARD_PREFERENCE);
@@ -114,7 +99,7 @@ public class ShapeFileMatcher {
      * @return
      * @throws IOException
      */
-    private Map<String, MappingInfo> readExisting(WbShapeFile shapeFile) throws IOException {
+    private Map<String, MappingInfo> readExisting(WikiBrainShapeFile shapeFile) throws IOException {
         HashMap<String, MappingInfo> mapping = new HashMap<String, MappingInfo>();
         if (!shapeFile.hasMappingFile()) {
             return mapping;

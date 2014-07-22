@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.util;
+package org.wikibrain.spatial.core;
 
 import org.apache.commons.io.FileUtils;
 import org.geotools.data.DataStore;
@@ -26,7 +26,7 @@ import java.util.*;
  *
  * @author Shilad Sen
  */
-public class WbShapeFile {
+public class WikiBrainShapeFile {
     public static final String [] EXTENSIONS = new String[] { ".shp", ".shx", ".dbf" };
 
     public static final String WB_MAP_EXTENSINO = ".wbmapping.csv";
@@ -42,7 +42,7 @@ public class WbShapeFile {
      * @param file Must end with ".shp"
      * @throws IOException
      */
-    public WbShapeFile(File file) {
+    public WikiBrainShapeFile(File file) {
         this(file, "UTF-8");
     }
 
@@ -51,7 +51,7 @@ public class WbShapeFile {
      * @param file Must end with ".shp"
      * @throws IOException
      */
-    public WbShapeFile(File file, String encoding) {
+    public WikiBrainShapeFile(File file, String encoding) {
         ensureHasShpExtension(file);
         this.file = file;
         this.encoding = encoding;
@@ -154,7 +154,7 @@ public class WbShapeFile {
     }
 
 
-    public WbShapeFile move(File dest) throws IOException {
+    public WikiBrainShapeFile move(File dest) throws IOException {
         ensureHasShpExtension(dest);
         dest.getParentFile().mkdirs();
         for (String ext : EXTENSIONS) {
@@ -162,7 +162,7 @@ public class WbShapeFile {
             FileUtils.deleteQuietly(extDest);
             getAlternateExtension(file, ext).renameTo(extDest);
         }
-        return new WbShapeFile(dest, encoding);
+        return new WikiBrainShapeFile(dest, encoding);
     }
 
     public File getMappingFile() {
@@ -216,7 +216,7 @@ public class WbShapeFile {
 
     public static boolean exists(File file) {
         ensureHasShpExtension(file);
-        return new WbShapeFile(file).hasComponentFiles();
+        return new WikiBrainShapeFile(file).hasComponentFiles();
     }
 
     public static File getAlternateExtension(File file, String ext) {

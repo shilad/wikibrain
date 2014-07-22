@@ -10,8 +10,9 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
-import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.spatial.core.constants.Layers;
+import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.matcher.MatchedShapefileLoader;
 import org.wikibrain.wikidata.WikidataDao;
@@ -53,7 +54,7 @@ public class SpatialDataLoader {
     }
 
     public void loadWikidataData() throws DaoException {
-        spatialDao.removeLayer("earth", "wikidata");
+        spatialDao.removeLayer(RefSys.EARTH, Layers.WIKIDATA);
         WikidataLayerLoader loader = new WikidataLayerLoader(metaDao, wdDao, spatialDao);
         loader.loadData(langs);
     }
@@ -82,7 +83,7 @@ public class SpatialDataLoader {
 
     public void loadLayers(List<LayerInfo> layers) throws DaoException, InterruptedException, WikiBrainException, ConfigurationException, IOException {
         for (LayerInfo layer : layers) {
-            if (layer.layer.equalsIgnoreCase("wikidata")) {
+            if (layer.layer.equalsIgnoreCase(Layers.WIKIDATA)) {
                 loadWikidataData();
             } else {
                 loadExogenousData(layer.referenceSystem, layer.layer, layer.dataset);
@@ -96,12 +97,12 @@ public class SpatialDataLoader {
         private final String dataset;
 
         public LayerInfo(String arg) {
-            if (arg.trim().equals("wikidata")) {
-                arg = "earth,wikidata,wikidata";
+            if (arg.trim().equals(Layers.WIKIDATA)) {
+                arg = String.format("%s,%s,%s", RefSys.EARTH, Layers.WIKIDATA, Layers.WIKIDATA);
             }
             String tokens[] = arg.split(",");
             if (tokens.length == 2) {
-                referenceSystem = "earth";
+                referenceSystem = RefSys.EARTH;
                 layer = tokens[0].trim();
                 dataset = tokens[1].trim();
             } else if (tokens.length == 3) {

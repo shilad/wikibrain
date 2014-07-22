@@ -18,7 +18,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.loader.SpatialDataFolder;
-import org.wikibrain.spatial.util.WbShapeFile;
+import org.wikibrain.spatial.core.WikiBrainShapeFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class MatchedShapefileLoader {
 
     public void load(String refSys, String layerGroup, String dataset) throws IOException, DaoException {
         Config c = getConfig(refSys, layerGroup, dataset);
-        WbShapeFile shapefile = folder.getShapeFile(refSys, layerGroup, dataset, c.getString("encoding"));
+        WikiBrainShapeFile shapefile = folder.getShapeFile(refSys, layerGroup, dataset, c.getString("encoding"));
         Map<String, String> mapping = shapefile.readMapping();
         List<String> keyFields = c.getStringList("key");
 

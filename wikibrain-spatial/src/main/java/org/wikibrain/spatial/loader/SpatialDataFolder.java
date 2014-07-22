@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.core.WikiBrainException;
-import org.wikibrain.spatial.util.WbShapeFile;
+import org.wikibrain.spatial.core.WikiBrainShapeFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,7 +37,6 @@ public class SpatialDataFolder {
         if (!baseFolder.exists()){
             baseFolder.mkdirs();
         }
-        getReferenceSystemFolder("earth").mkdirs();
     }
 
     /**
@@ -54,13 +53,13 @@ public class SpatialDataFolder {
         return FileUtils.getFile(baseFolder, "_raw");
     }
 
-    public WbShapeFile getShapeFile(String refSys, String layerGroup, String name) {
-        return new WbShapeFile(FileUtils.getFile(baseFolder, refSys, layerGroup, name + ".shp"));
+    public WikiBrainShapeFile getShapeFile(String refSys, String layerGroup, String name) {
+        return new WikiBrainShapeFile(FileUtils.getFile(baseFolder, refSys, layerGroup, name + ".shp"));
     }
 
 
-    public WbShapeFile getShapeFile(String refSys, String layerGroup, String name, String encoding) {
-        return new WbShapeFile(FileUtils.getFile(baseFolder, refSys, layerGroup, name + ".shp"), encoding);
+    public WikiBrainShapeFile getShapeFile(String refSys, String layerGroup, String name, String encoding) {
+        return new WikiBrainShapeFile(FileUtils.getFile(baseFolder, refSys, layerGroup, name + ".shp"), encoding);
     }
 
     /**
@@ -142,11 +141,11 @@ public class SpatialDataFolder {
         FileUtils.deleteQuietly(FileUtils.getFile(baseFolder, refSysName, layerGroup));
     }
 
-    public List<WbShapeFile> getFilesInLayerGroup(String refSysName, String layerName) {
-        List<WbShapeFile> shapeFiles = new ArrayList<WbShapeFile>();
+    public List<WikiBrainShapeFile> getFilesInLayerGroup(String refSysName, String layerName) {
+        List<WikiBrainShapeFile> shapeFiles = new ArrayList<WikiBrainShapeFile>();
         for (File file : getLayerGroupFolder(refSysName, layerName).listFiles()) {
             if (isImportantFile(file) && file.toString().toLowerCase().endsWith(".shp")) {
-                shapeFiles.add(new WbShapeFile(file));
+                shapeFiles.add(new WikiBrainShapeFile(file));
             }
         }
         return shapeFiles;

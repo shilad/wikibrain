@@ -53,7 +53,7 @@ public interface SpatialDataDao {
      * Gets a geometry by article name, language, and layer. Assumes "earth" reference system.
      * @param articleName (e.g. "Minnesota", "Minneapolis", "Kalifornien")
      * @param language (e.g. Language.EN, Language.DE)
-     * @param layerName (e.g. Layers.GADM1)
+     * @param layerName (e.g. Layers.STATE)
      * @return the geometry, or null if no geometry could be found
      * @throws DaoException
      */
@@ -77,7 +77,7 @@ public interface SpatialDataDao {
      * public Geometry getGeometry(String articleName, Language language, String layerName) throws DaoException;
      * @param articleName (e.g. "Minnesota", "Minneapolis", "Kalifornien")
      * @param language (e.g. Language.EN, Language.DE)
-     * @param layerName (e.g. Layers.GADM1)
+     * @param layerName (e.g. Layers.STATE)
      * @param refSysName (e.g. Layers.EARTH)
      * @return the geometry, or null if no geometry could be found
      * @throws DaoException
