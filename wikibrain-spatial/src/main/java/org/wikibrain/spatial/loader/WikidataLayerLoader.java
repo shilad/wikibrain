@@ -1,11 +1,18 @@
 package org.wikibrain.spatial.loader;
 
+import com.vividsolutions.jts.geom.Geometry;
+import gnu.trove.TCollections;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.UniversalPage;
+import org.wikibrain.spatial.core.constants.Layers;
+import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpThreadUtils;
@@ -19,62 +26,70 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by bjhecht on 4/1/14.
+ * Loads points from wikidata as a layer.
+ *
+ * @author bjhecht, Shilad
  */
-public abstract class WikidataLayerLoader {
-
-
-    protected final WikidataDao wdDao;
-    protected final SpatialDataDao spatialDao;
-    private final MetaInfoDao miDao;
-
-    public static final String EARTH_REF_SYS_NAME = "earth";
+public class WikidataLayerLoader {
 
     private static final Logger LOG = Logger.getLogger(WikidataLayerLoader.class.getName());
 
+    private static final int COORDINATE_LOCATION_PROPERTY_ID = 625;
 
-    public WikidataLayerLoader(WikidataDao wdDao, SpatialDataDao spatialDao) {
+    private final WikidataDao wdDao;
+    private final SpatialDataDao spatialDao;
+    private final MetaInfoDao miDao;
+
+    public WikidataLayerLoader(MetaInfoDao metaDao, WikidataDao wdDao, SpatialDataDao spatialDao) {
         this.wdDao = wdDao;
         this.spatialDao = spatialDao;
-        this.miDao = null;
+        this.miDao = metaDao;
     }
 
-    protected abstract WikidataFilter getWikidataFilter();
+    public final void loadData(final LanguageSet langs) throws DaoException {
+        final TIntSet savedConcepts = TCollections.synchronizedSet(new TIntHashSet());
 
-    public final void loadData(final LanguageSet langs) throws WikiBrainException {
+        final AtomicInteger matches = new AtomicInteger();
+        final AtomicInteger count = new AtomicInteger();
 
-        try {
-            final AtomicInteger matches = new AtomicInteger();
-            final AtomicInteger count = new AtomicInteger();
-            Iterable<WikidataStatement> statements = wdDao.get(getWikidataFilter());
-            ParallelForEach.iterate(statements.iterator(), WpThreadUtils.getMaxThreads(), 100, new Procedure<WikidataStatement>() {
-                @Override
-                public void call(WikidataStatement statement) throws Exception {
-                    UniversalPage uPage = wdDao.getUniversalPage(statement.getItem().getId());
-                    if (uPage != null && uPage.isInLanguageSet(langs, false)){
+        WikidataFilter filter = (new WikidataFilter.Builder()).withPropertyId(COORDINATE_LOCATION_PROPERTY_ID).build();
+        Iterable<WikidataStatement> statements = wdDao.get(filter);
+        ParallelForEach.iterate(statements.iterator(), WpThreadUtils.getMaxThreads(), 100, new Procedure<WikidataStatement>() {
+            @Override
+            public void call(WikidataStatement statement) throws Exception {
+                try {
+                    if (storeStatement(savedConcepts, langs, statement)) {
                         matches.incrementAndGet();
-                        try {
-                            storeStatement(statement);
-                        } catch (Exception e) {
-                            LOG.log(Level.SEVERE, "storage of statement failed: " + statement.toString(), e);
-                        }
                     }
-
-                    count.incrementAndGet();
-                    if (count.get() % 10000 == 0){
-                        LOG.log(Level.INFO, "Matched " + matches + " out of " + count + " statements from " + this.getClass().getName());
-                    }
-
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE, "storage of statement failed: " + statement.toString(), e);
+                    miDao.incrementErrorsQuietly(Geometry.class);
                 }
-            }, Integer.MAX_VALUE);
+                if (count.incrementAndGet() % 10000 == 0){
+                    LOG.log(Level.INFO, "Matched " + matches + " out of " + count + " statements from " + this.getClass().getName());
+                }
+            }
+        }, Integer.MAX_VALUE);
+    }
 
-        }catch(DaoException e){
-            throw new WikiBrainException(e);
+    private boolean storeStatement(TIntSet savedConcepts, LanguageSet langs, WikidataStatement statement) throws DaoException {
+        UniversalPage uPage = wdDao.getUniversalPage(statement.getItem().getId());
+        if (uPage == null || !uPage.isInLanguageSet(langs, false)){
+            return false;
         }
 
+        int itemId = statement.getItem().getId();
+        Geometry g = WikiBrainSpatialUtils.jsonToGeometry(statement.getValue().getJsonValue().getAsJsonObject());
+        if (g == null) {
+            return false;
+        }
+
+        if (savedConcepts.contains(itemId)) {
+            return false;
+        }
+        savedConcepts.add(itemId);
+        spatialDao.saveGeometry(itemId, Layers.WIKIDATA, RefSys.EARTH,  g);
+        miDao.incrementRecords(Geometry.class);
+        return true;
     }
-
-    protected abstract boolean storeStatement(WikidataStatement statement) throws DaoException;
-
-
 }

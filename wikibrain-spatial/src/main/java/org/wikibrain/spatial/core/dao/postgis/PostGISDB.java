@@ -5,9 +5,9 @@ import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import com.vividsolutions.jts.geom.Geometry;
-import edu.emory.mathcs.backport.java.util.*;
-import edu.emory.mathcs.backport.java.util.LinkedList;
-import org.geotools.data.*;
+import org.geotools.data.DataStoreFinder;
+import org.geotools.data.FeatureSource;
+import org.geotools.data.Query;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -16,8 +16,10 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.feature.visitor.CalcResult;
 import org.geotools.feature.visitor.UniqueVisitor;
 import org.geotools.filter.text.cql2.CQL;
+import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.jdbc.Index;
 import org.geotools.jdbc.JDBCDataStore;
+import org.geotools.jdbc.JDBCFeatureStore;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -27,11 +29,18 @@ import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.spatial.core.SpatialContainerMetadata;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,6 +81,8 @@ public class PostGISDB {
         initialize(params);
 
     }
+
+
 
     public Geometry getGeometry(int itemId, String layerName, String refSysName) throws DaoException{
 
@@ -176,6 +187,18 @@ public class PostGISDB {
 
     }
 
+    public void removeLayer(String refSysName, String layerName) throws DaoException {
+        try {
+            String cqlQuery = String.format("ref_sys_name = '%s' and layer_name = '%s'", refSysName, layerName);
+            Filter f = CQL.toFilter(cqlQuery);
+            ((JDBCFeatureStore)getFeatureSource()).removeFeatures(f);
+        } catch (CQLException e) {
+            throw new DaoException(e);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+    }
+
 
     /**
      * Gets all loaded reference systems
@@ -188,8 +211,10 @@ public class PostGISDB {
 
             Set<Object> uniques = getUniqueValues("ref_sys_name", null);
             Set<String> rVal = Sets.newHashSet();
-            for(Object o : uniques){
-                rVal.add(o.toString());
+            if (uniques != null) {
+                for (Object o : uniques) {
+                    rVal.add(o.toString());
+                }
             }
             return rVal;
 
@@ -328,19 +353,21 @@ public class PostGISDB {
 
     }
 
-
+    private void checkPostgisVersion() throws DaoException {
+    }
 
     private void initialize(Map<String, Object> manualParameters) throws DaoException {
 
         try {
+            PostGISVersionChecker versionChecker = new PostGISVersionChecker();
+            versionChecker.verifyVersion(manualParameters);
 
             store = (JDBCDataStore)DataStoreFinder.getDataStore(manualParameters);
-
-
 
             if (needsToBeInitialized()){ // needs to be initialized
 
                 LOG.log(Level.INFO, "Initializing spatial database tables");
+
 
                 try {
 
@@ -432,6 +459,12 @@ public class PostGISDB {
 
     }
 
+    public void optimize() throws DaoException {
+        // Hack: wrap the datasource in a WpDataSource to access the helper method.
+        // We don't close the WpDataSource because it doesn't own the connection.
+        WpDataSource src = new WpDataSource(store.getDataSource());
+        src.optimize(SPATIAL_DB_NAME);
+    }
 
 
     public static class Provider extends org.wikibrain.conf.Provider<PostGISDB> {

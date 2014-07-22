@@ -72,6 +72,18 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     }
 
     @Override
+    public WikidataEntity getProperty(Language language, String name) throws DaoException {
+        name = name.toLowerCase();
+        for (WikidataEntity entity : getProperties().values()) {
+            String ename = entity.getLabels().get(language);
+            if (ename != null && ename.toLowerCase().equals(name)) {
+                return entity;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public WikidataEntity getProperty(int id) throws DaoException {
         Map<Integer, WikidataEntity> properties = getProperties();  // should be cached!
         if (properties == null || properties.size() == 0) {

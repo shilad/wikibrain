@@ -16,6 +16,11 @@ import java.util.Set;
 public interface WikidataDao extends Dao<WikidataStatement> {
 
     /**
+     * Gets a property by a name in some language.
+     */
+    WikidataEntity getProperty(Language language, String name) throws DaoException;
+
+    /**
      * Fetches the property associated with an id.
      * There aren't many properties (~850 as of Jan 2014), so the implementation should cache them.
      * @param id The numeric number appearing after the "P" in the Wikimedia Foundation ids.

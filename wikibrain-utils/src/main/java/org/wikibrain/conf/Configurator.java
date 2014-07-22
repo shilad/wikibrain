@@ -3,6 +3,7 @@ package org.wikibrain.conf;
 import com.typesafe.config.Config;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.clapper.util.classutil.*;
@@ -184,7 +185,7 @@ public class Configurator implements Cloneable {
             if (pset.type != type) {
                 throw new IllegalStateException();
             }
-            if (!pset.path.equals(path)) {
+            if (!ObjectUtils.equals(pset.path, path)) {
                 throw new ConfigurationException(
                         "inconsistent component path declared for provider " + klass +
                         " that provides type " + type +

@@ -249,14 +249,14 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
 
     @Override
     public void endSaveGeometries() throws DaoException {
-        flushFeatureBuffer();
+        flushFeatureBuffer(true);
     }
 
-    private void flushFeatureBuffer() throws DaoException{
+    private void flushFeatureBuffer(boolean force) throws DaoException{
         try {
             List<SimpleFeature> batch = new ArrayList<SimpleFeature>();
             synchronized (curFeaturesToStore) {
-                if (curFeaturesToStore.size() < BUFFER_SIZE) {
+                if (!force && curFeaturesToStore.size() < BUFFER_SIZE) {
                     return;
                 }
                 curFeaturesToStore.drainTo(batch);
@@ -275,7 +275,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
             SimpleFeature curFeature = simpleFeatureBuilder.get().buildFeature("n/a", new Object[]{new Integer(itemId), layerName, refSysName, g});
             curFeaturesToStore.put(curFeature);
             if (curFeaturesToStore.size() > BUFFER_SIZE){
-                flushFeatureBuffer();
+                flushFeatureBuffer(false);
             }
 
 
@@ -285,6 +285,15 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
 
     }
 
+    @Override
+    public void removeLayer(String refSysName, String layerName) throws DaoException {
+        db.removeLayer(refSysName, layerName);
+    }
+
+    @Override
+    public void optimize() throws DaoException {
+        db.optimize();
+    }
 
     public static class Provider extends org.wikibrain.conf.Provider<PostGISSpatialDataDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {

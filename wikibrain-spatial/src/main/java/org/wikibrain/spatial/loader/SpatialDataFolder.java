@@ -1,32 +1,31 @@
 package org.wikibrain.spatial.loader;
 
 import com.google.common.collect.Sets;
-import org.codehaus.plexus.util.FileUtils;
-import org.geotools.data.shapefile.files.ShpFileType;
-import org.geotools.data.shapefile.files.ShpFiles;
+import org.apache.commons.io.FileUtils;
+import org.wikibrain.conf.Configuration;
 import org.wikibrain.core.WikiBrainException;
-import org.wikibrain.spatial.core.constants.RefSys;
-import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
+import org.wikibrain.spatial.core.WikiBrainShapeFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Convenience class to deal with spatial data folder structure. Structure is as follows:
- * * Each reference system has its own folder (will ignore any reference system that starts with '_'
- * * Shapefiles that are placed in each folder will be loaded in as separate layers
  *
- * Created by bjhecht on 5/18/14
+ * Each reference system has its own folder (will ignore any reference system that starts with '_'
+ * Each layerGroup has its own subdirectory
+ * Shapefiles that are placed in each folder will be loaded for the same layer
+ *
+ * For example: baseFolder/earth/country/naturalEarth.shp
+ *
+ * @author bjhecht and shilad
  */
 public class SpatialDataFolder {
-
     private final File baseFolder;
-    private final String baseFolderPath;
 
 
     /**
@@ -34,29 +33,33 @@ public class SpatialDataFolder {
      * @param baseFolder
      */
     public SpatialDataFolder(File baseFolder){
-
         this.baseFolder = baseFolder;
-        this.baseFolderPath = baseFolder.getAbsolutePath();
-
         if (!baseFolder.exists()){
-            baseFolder.mkdir();
+            baseFolder.mkdirs();
         }
-
-        this.createNewReferenceSystemIfNotExists("earth");
-
     }
 
     /**
      * Returns true of spatial data folder has a given layer
-     * @param layerName
+     * @param layerGroup
      * @param refSysName
      * @return
      */
-    public boolean hasLayer(String layerName, String refSysName) throws WikiBrainException{
+    public boolean hasLayerGroup(String refSysName, String layerGroup) {
+        return !getFilesInLayerGroup(refSysName, layerGroup).isEmpty();
+    }
 
-        File shpFile = getMainShapefile(layerName, refSysName);
-        return shpFile.exists();
+    public File getRawFolder() {
+        return FileUtils.getFile(baseFolder, "_raw");
+    }
 
+    public WikiBrainShapeFile getShapeFile(String refSys, String layerGroup, String name) {
+        return new WikiBrainShapeFile(FileUtils.getFile(baseFolder, refSys, layerGroup, name + ".shp"));
+    }
+
+
+    public WikiBrainShapeFile getShapeFile(String refSys, String layerGroup, String name, String encoding) {
+        return new WikiBrainShapeFile(FileUtils.getFile(baseFolder, refSys, layerGroup, name + ".shp"), encoding);
     }
 
     /**
@@ -65,71 +68,29 @@ public class SpatialDataFolder {
      * @return
      */
     public boolean hasReferenceSystem(String refSysName){
-        File f = getRefSysFolder(refSysName);
-        return f.exists();
+        File refFolder = getReferenceSystemFolder(refSysName);
+        return isImportantFile(refFolder) && !getLayerGroups(refSysName).isEmpty();
     }
 
     /**
-     * Gets the main shapefile (the .shp files) of a given layer in a given reference system
-     * @param layerName
-     * @param refSysName
+     * Returns the file for the given reference system
      * @return
-     * @throws FileNotFoundException
-     * @throws MalformedURLException
+     * @param refSysName
      */
-    public File getMainShapefile(final String layerName, String refSysName) throws WikiBrainException {
-
-        try {
-            File refSysFolder = getRefSysFolder(refSysName);
-            String path = refSysFolder + System.getProperty("file.separator") + layerName + ".shp";
-            ShpFiles shpFiles = new ShpFiles(path);
-
-            URL url = new URL(shpFiles.get(ShpFileType.SHP));
-
-            return new File(url.getFile());
-
-        } catch(MalformedURLException e){
-            throw new WikiBrainException(e);
-        }
-
-
+    public File getReferenceSystemFolder(String refSysName) {
+        return FileUtils.getFile(baseFolder, refSysName);
     }
 
     /**
-     * Gets the folder for a given reference system
-     * @param refSysName
+     * Returns the directory for the given reference system and layer
+     * @param refSys e.g. "earth"
+     * @param layerGroup e.g. "country"
      * @return
-     * @throws FileNotFoundException
      */
-    public File getRefSysFolder(String refSysName, boolean createIfNotExists){
-
-        if (createIfNotExists){
-            createNewReferenceSystemIfNotExists(refSysName);
-        }
-
-        String path = baseFolderPath + "/" + refSysName;
-        File rVal = new File(path);
-        return rVal;
-
+    public File getLayerGroupFolder(String refSys, String layerGroup) {
+        return FileUtils.getFile(baseFolder, refSys, layerGroup);
     }
 
-    public File getRefSysFolder(String refSysName){
-        return getRefSysFolder(refSysName, false);
-    }
-
-    /**
-     * Creates a new reference system if it doesn't already exist
-     * @param refSysName
-     */
-    public void createNewReferenceSystemIfNotExists(String refSysName){
-
-        if (!hasReferenceSystem(refSysName)){
-            String path = baseFolderPath + "/" + refSysName;
-            File folder = new File(path);
-            folder.mkdir();
-        }
-
-    }
 
     /**
      * Deletes a reference system. Use with caution!
@@ -137,76 +98,65 @@ public class SpatialDataFolder {
      * @throws FileNotFoundException
      */
     public void deleteReferenceSystem(String refSysName) throws FileNotFoundException{
-
-
-        File folder = getRefSysFolder(refSysName);
-        for (File f : folder.listFiles()){
-            f.delete();
-        }
-        folder.delete();
-
+        FileUtils.deleteQuietly(getReferenceSystemFolder(refSysName));
     }
 
     /**
      * Gets reference system names
      */
-    public Set<String> getReferenceSystemNames(){
-
+    public Set<String> getReferenceSystems(){
         Set<String> rVal = Sets.newHashSet();
-        for (File curFolder : baseFolder.listFiles()){
-            if (!curFolder.isHidden() && !curFolder.getName().startsWith("_")) {
-                rVal.add(curFolder.getName());
+        for (File refFolder : baseFolder.listFiles()){
+            String refSysName = refFolder.getName();
+            if (hasReferenceSystem(refSysName)) {
+                rVal.add(refSysName);
             }
         }
         return rVal;
     }
 
+    private static boolean isImportantFile(File file) {
+        return file.exists() && !file.isHidden() && !file.getName().startsWith("_");
+    }
+
+    public Set<String> getLayerGroups(String refSysName) {
+        Set<String> layerGroups = new HashSet<String>();
+        for (File file : getReferenceSystemFolder(refSysName).listFiles()) {
+            String layerGroup = file.getName();
+            if (isImportantFile(file) && !getFilesInLayerGroup(refSysName, layerGroup).isEmpty()) {
+                layerGroups.add(layerGroup);
+            }
+        }
+        return layerGroups;
+    }
+
 
     /**
      * Deletes a layer. Use with caution.
-     * @param layerName Layer to delete
      * @param refSysName Reference system of layer to delete
+     * @param layerGroup Layer to delete
      * @throws WikiBrainException
      */
-    public void deleteLayer(String layerName, String refSysName) throws WikiBrainException {
-        File mainShapefile = getMainShapefile(layerName, refSysName);
-        WikiBrainSpatialUtils.deleteShapefile(mainShapefile);
-
+    public void deleteLayer(String refSysName, String layerGroup) throws WikiBrainException {
+        FileUtils.deleteQuietly(FileUtils.getFile(baseFolder, refSysName, layerGroup));
     }
 
-    /**
-     * Deletes a specific file in a reference system folder. Good for removing spare files.
-     * @param fileName
-     * @param refSysName
-     * @throws WikiBrainException
-     */
-    public void deleteSpecificFile(String fileName, String refSysName) throws WikiBrainException{
-
-        File refSysFolder = this.getRefSysFolder(refSysName);
-        String path = refSysFolder + "/" + fileName;
-        File toDelete = new File(path);
-        if (!toDelete.exists()){
-            throw new WikiBrainException("No file at path: " + path);
-        }else{
-            toDelete.delete();
+    public List<WikiBrainShapeFile> getFilesInLayerGroup(String refSysName, String layerName) {
+        List<WikiBrainShapeFile> shapeFiles = new ArrayList<WikiBrainShapeFile>();
+        for (File file : getLayerGroupFolder(refSysName, layerName).listFiles()) {
+            if (isImportantFile(file) && file.toString().toLowerCase().endsWith(".shp")) {
+                shapeFiles.add(new WikiBrainShapeFile(file));
+            }
         }
-
+        return shapeFiles;
     }
 
     /**
-     * If the reference system does not exist, it will make it
-     * @param mainShapefile
-     * @param refSysName
-     * @throws WikiBrainException
+     * Hack: Better to ask the configurator for this!
+     * @param conf
+     * @return
      */
-    public void moveShapefileToReferenceSystemFolder(File mainShapefile, String refSysName) throws WikiBrainException {
-
-        createNewReferenceSystemIfNotExists(refSysName);
-        WikiBrainSpatialUtils.moveShapefile(mainShapefile, getRefSysFolder(refSysName));
-
+    public static SpatialDataFolder get(Configuration conf) {
+        return new SpatialDataFolder(conf.getFile("spatial.dir"));
     }
-
-
-
-
 }

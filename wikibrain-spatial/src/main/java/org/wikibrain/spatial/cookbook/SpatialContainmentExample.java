@@ -2,7 +2,6 @@ package org.wikibrain.spatial.cookbook;
 
 import com.google.common.collect.Sets;
 import gnu.trove.set.TIntSet;
-import org.jooq.util.derby.sys.Sys;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
@@ -16,7 +15,6 @@ import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.constants.Layers;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.util.Set;
@@ -49,7 +47,7 @@ public class SpatialContainmentExample {
 
             LocalPage lp = lpDao.getByTitle(new Title(containerName,Language.getByLangCode("simple")), NameSpace.ARTICLE);
             Integer id = wdDao.getItemId(lp);
-            TIntSet containedItemIds = scDao.getContainedItemIds(id, Layers.GADM0, RefSys.EARTH,
+            TIntSet containedItemIds = scDao.getContainedItemIds(id, Layers.COUNTRY, RefSys.EARTH,
                     subLayers, SpatialContainmentDao.ContainmentOperationType.CONTAINMENT);
 
 

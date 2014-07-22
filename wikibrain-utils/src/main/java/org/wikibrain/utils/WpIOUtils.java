@@ -93,6 +93,9 @@ public class WpIOUtils {
      */
     public static String resourceToString(String path) throws IOException {
         InputStream is = WpIOUtils.class.getResourceAsStream(path);
+        if (is == null) {
+            throw new FileNotFoundException("Unknown resource: " + path);
+        }
         try {
             return IOUtils.toString(is, "utf-8");
         } finally {
@@ -187,5 +190,9 @@ public class WpIOUtils {
         String cleanedBase = FilenameUtils.normalize(base.toString());
         String cleanedPath = FilenameUtils.normalize(path.toString());
         return new File(cleanedBase).toURI().relativize(new File(cleanedPath).toURI()).getPath();
+    }
+
+    public static Writer openWriter(String path) throws IOException {
+        return openWriter(new File(path));
     }
 }

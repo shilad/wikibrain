@@ -1,0 +1,28 @@
+region
+province
+state
+ISO 3166-2:DE
+division
+zone
+emirate
+federal district
+subdivision
+territory
+autonomous community
+collectivity
+voivodeship
+regions
+provinces
+ISO 3166-2:DE
+divisions
+zones
+emirates
+federal districts
+subdivisions
+territories
+autonomous communities
+collectivities
+voivodeships
+regierungsbezirk
+crown colony of the british empire
+crown colony

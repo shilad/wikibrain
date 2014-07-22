@@ -5,6 +5,7 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
@@ -20,14 +21,15 @@ import java.util.LinkedHashMap;
 public class ResolveExample {
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
 
-        Env env = new EnvBuilder().build();
+        Env env = EnvBuilder.envFromArgs(args);
 
         // Get the configurator that creates components and a phraze analyzer from it
         Configurator configurator = env.getConfigurator();
         PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "anchortext");
+        LocalPageDao pd = configurator.get(LocalPageDao.class);
 
         // get the most common phrases in simple
-        LinkedHashMap<LocalId, Float> resolution = pa.resolve(Language.SIMPLE, "Apple", 20);
+        LinkedHashMap<LocalId, Float> resolution = pa.resolve(Language.EN, "Georgia", 100);
 
         // show the closest pages
         System.out.println("resolution of apple");
@@ -35,7 +37,8 @@ public class ResolveExample {
             System.out.println("\tno resolution !");
         } else {
             for (LocalId p : resolution.keySet()) {
-                System.out.println("\t" + p + ": " + resolution.get(p));
+                LocalPage lp = pd.getById(p);
+                System.out.println("\t" + lp + ": " + resolution.get(p));
             }
         }
     }
