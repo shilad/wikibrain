@@ -126,7 +126,7 @@ public class SpatialDataDownloader {
         if (!src.isFile()) {
             throw new IOException("Missing file " + dest.getName() + " in " + mappingUrl);
         }
-        FileUtils.forceDelete(dest);
+        FileUtils.deleteQuietly(dest);
         FileUtils.moveFile(src, dest);
     }
 }
