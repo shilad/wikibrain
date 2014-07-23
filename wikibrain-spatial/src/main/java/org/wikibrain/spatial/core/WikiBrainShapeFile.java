@@ -7,6 +7,7 @@ import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.h2.util.StringUtils;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * A utility wrapper around GeoTool's shape file class.
@@ -27,6 +29,8 @@ import java.util.*;
  * @author Shilad Sen
  */
 public class WikiBrainShapeFile {
+    private static final Logger LOG = Logger.getLogger(WikiBrainShapeFile.class.getName());
+
     public static final String [] EXTENSIONS = new String[] { ".shp", ".shx", ".dbf" };
 
     public static final String WB_MAP_EXTENSINO = ".wbmapping.csv";
@@ -63,6 +67,30 @@ public class WikiBrainShapeFile {
         }
     }
 
+    static class KeyAndScore implements Comparable<KeyAndScore> {
+        String key;
+        Double score;
+
+        KeyAndScore(String key, Double score) {
+            this.key = key;
+            this.score = score;
+        }
+
+        @Override
+        public int compareTo(KeyAndScore o) {
+            int r = -1 * score.compareTo(o.score);
+            if (r == 0) {
+                r = key.compareTo(o.key);
+            }
+            return r;
+        }
+
+        @Override
+        public String toString() {
+            return "{" + "key='" + key + '\'' + ", score=" + score + '}';
+        }
+    }
+
     /**
      * Reads in a mapping from shapefile key to title for all entries with status != U
      * @return
@@ -76,6 +104,9 @@ public class WikiBrainShapeFile {
                 WpIOUtils.openBufferedReader(getMappingFile()),
                 CsvPreference.STANDARD_PREFERENCE
         );
+
+        // Read in the data and scores
+        Map<String, List<KeyAndScore>> scores = new HashMap<String, List<KeyAndScore>>();
         String [] header = reader.getHeader(true);
         while (true) {
             Map<String, String> row = reader.read(header);
@@ -83,9 +114,28 @@ public class WikiBrainShapeFile {
                 break;
             }
             if (!row.get("WB_STATUS").equalsIgnoreCase("U")) {
-                mapping.put(row.get("WB_KEY"), row.get("WB_TITLE"));
+                String key = row.get("WB_KEY");
+                String title = row.get("WB_TITLE");
+                double score = Double.valueOf(row.get("WB_SCORE"));
+                if (StringUtils.isNullOrEmpty(title)) {
+                    continue;
+                }
+                if (!scores.containsKey(title)) {
+                    scores.put(title, new ArrayList<KeyAndScore>());
+                }
+                scores.get(title).add(new KeyAndScore(key, score));
             }
         }
+
+        for (String title : scores.keySet()) {
+            List<KeyAndScore> titleScores = scores.get(title);
+            Collections.sort(titleScores);
+            mapping.put(titleScores.get(0).key, title);
+            if (titleScores.size() > 1) {
+                LOG.warning("duplicate keys for title " + title + ": " + titleScores);
+            }
+        }
+
         return mapping;
     }
 

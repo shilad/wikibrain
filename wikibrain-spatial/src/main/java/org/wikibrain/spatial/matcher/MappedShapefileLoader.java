@@ -68,36 +68,41 @@ public class MappedShapefileLoader {
             featureNames.set(i, featureNames.get(i).toUpperCase());
         }
 
+        int missingTitles = 0;
+        int missingConcepts = 0;
+        int missingKeys = 0;
         int numRows = 0;
         int numMatches = 0;
         SimpleFeatureIterator iter = shapefile.getFeatureIter();
         while (iter.hasNext()) {
-            numRows++;
+            if (++numRows % 1000 == 0) {
+                LOG.info(String.format("for %s, matched %d of %d rows (no key = %d, no title = %d, no concept = %d)",
+                        shapefile.getFile(), numMatches, numRows, missingKeys, missingTitles, missingConcepts));
+            }
             SimpleFeature row = iter.next();
             String key = makeKey(keyFields, featureNames, row);
-            if (mapping.containsKey(key)) {
-                numMatches++;
-                String title = mapping.get(key);
-                int pageId = pageDao.getIdByTitle(title, lang, NameSpace.ARTICLE);
-                if (pageId < 0) {
-                    LOG.warning("Didn't find page with title " + title);
-                    continue;
-                }
-                int conceptId = conceptDao.getUnivPageId(lang, pageId);
-                if (conceptId < 0) {
-                    LOG.warning("Didn't find universal concept for page " + pageId);
-                    continue;
-                }
-                Geometry geometry = (Geometry) row.getDefaultGeometry();
-                spatialDao.saveGeometry(conceptId, layerGroup, refSys, geometry);
-                metaDao.incrementRecords(Geometry.class);
+            if (!mapping.containsKey(key)) {
+                missingKeys++;
             }
-            if (numRows % 1000 == 0) {
-                LOG.info("for " + shapefile.getFile() + ", matched " + numMatches + " out of " + numRows);
+            String title = mapping.get(key);
+            int pageId = pageDao.getIdByTitle(title, lang, NameSpace.ARTICLE);
+            if (pageId < 0) {
+                missingTitles++;
+                continue;
             }
+            int conceptId = conceptDao.getUnivPageId(lang, pageId);
+            if (conceptId < 0) {
+                missingConcepts++;
+                continue;
+            }
+            numMatches++;
+            Geometry geometry = (Geometry) row.getDefaultGeometry();
+            spatialDao.saveGeometry(conceptId, layerGroup, refSys, geometry);
+            metaDao.incrementRecords(Geometry.class);
         }
         iter.close();
-        LOG.info("for " + shapefile.getFile() + ", matched " + numMatches + " out of " + numRows);
+        LOG.info(String.format("for %s, matched %d of %d rows (no key = %d, no title = %d, no concept = %d)",
+                shapefile.getFile(), numMatches, numRows, missingKeys, missingTitles, missingConcepts));
     }
 
     private String makeKey(List<String> keyFields, List<String> featureNames, SimpleFeature row) {
