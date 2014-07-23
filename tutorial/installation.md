@@ -88,4 +88,30 @@ You can now run WikiBrain programs from the command line as follows:
 
 ## Installing Postgresql and PostGIS
  
- TODO
+Notes, TODO: write them up:
+
+ * Postgresql 8.4+
+ * For spatial: Postgresql 9.2+, PostGIS 2+
+ * Postgresql.app for Mac
+ * Standard installer for Windows
+ * Linux use official Postgresql repos (e.g. http://wiki.postgresql.org/wiki/Apt)
+ * Linux: add the following two lines to /etc/sysctl.conf and reboot:
+```
+kernel.shmmax = 64205988352
+kernel.shmall = 15675290
+```
+ * Read the performance tuning page: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
+ * Crucial settings:
+
+```
+    listen_addresses = '*'
+    max_connections = 500         # Must be at least 300
+    shared_buffers = 48GB         # Should be 1/4 of system memory
+    effective_cache_size = 96GB   # Should be 1/2 of system memory
+    fsync = off                 
+    synchronous_commit = off    
+    checkpoint_segments = 256
+    checkpoint_completion_target = 0.9
+
+
+```
