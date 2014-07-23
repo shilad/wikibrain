@@ -41,7 +41,6 @@ import static org.wikibrain.core.jooq.tables.WikidataStatement.*;
  */
 public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements WikidataDao {
     private static Language FALLBACK_LANGUAGE = Language.getByLangCode("en");
-    private static int WIKIDATA_ALGORITHM_ID = 1;
 
     private static TableField[] FIELDS = new TableField[] {
             WIKIDATA_STATEMENT.ID,
@@ -104,7 +103,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
             return properties;
         }
         if (cache != null) {
-            properties = (Map<Integer, WikidataEntity>) cache.get("wikidata-properties", WikidataStatement.class);
+            properties = (Map<Integer, WikidataEntity>) cache.get("wikidata-properties", WikidataEntity.class);
         }
         if (properties == null || properties.size() == 0) {
             properties = new ConcurrentHashMap<Integer, WikidataEntity>();
@@ -125,6 +124,9 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                 }
             } finally {
                 freeJooq(context);
+            }
+            if (cache != null) {
+                cache.put("wikidata-properties", properties);
             }
         }
         LOG.info("loaded properties with size " + ((properties == null) ? 0 : properties.size()));
