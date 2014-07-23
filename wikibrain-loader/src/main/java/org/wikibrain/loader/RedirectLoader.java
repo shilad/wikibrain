@@ -144,9 +144,6 @@ public class RedirectLoader {
 
         redirectLoader.getDao().endLoad();
         metaDao.endLoad();
-
-        LOG.info("optimizing database.");
-        conf.get(WpDataSource.class).optimize();
     }
 
 }

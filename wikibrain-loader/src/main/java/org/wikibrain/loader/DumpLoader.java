@@ -258,8 +258,5 @@ public class DumpLoader {
         lpDao.endLoad();
         rpDao.endLoad();
         metaDao.endLoad();
-
-        LOG.info("optimizing database.");
-        conf.get(WpDataSource.class).optimize();
     }
 }

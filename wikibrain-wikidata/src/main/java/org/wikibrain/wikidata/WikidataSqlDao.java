@@ -338,6 +338,11 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         if (cache != null) {
             cache.put("wikidata-properties", properties);
         }
+
+        wpDs.optimize(WIKIDATA_ENTITY_LABELS);
+        wpDs.optimize(WIKIDATA_ENTITY_ALIASES);
+        wpDs.optimize(WIKIDATA_ENTITY_DESCRIPTIONS);
+        wpDs.optimize(WIKIDATA_STATEMENT);
     }
 
     @Override

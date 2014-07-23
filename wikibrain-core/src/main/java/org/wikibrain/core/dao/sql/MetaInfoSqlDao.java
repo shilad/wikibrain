@@ -411,6 +411,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
     public void endLoad() throws DaoException {
         sync();
         super.endLoad();
+        wpDs.optimize(Tables.META_INFO);
     }
 
     /**

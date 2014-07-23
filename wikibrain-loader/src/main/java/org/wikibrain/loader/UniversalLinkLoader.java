@@ -157,8 +157,5 @@ public class UniversalLinkLoader {
         loader.loadLinkMap(mapper.getId());
         loader.endLoad();
         LOG.log(Level.INFO, "DONE");
-
-        LOG.info("optimizing database.");
-        conf.get(WpDataSource.class).optimize();
     }
 }

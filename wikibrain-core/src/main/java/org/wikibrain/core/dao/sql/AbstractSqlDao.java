@@ -133,6 +133,9 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
             loader.endLoad();
         }
         executeSqlScriptWithSuffix("-create-indexes.sql");
+        if (fields != null && fields.length > 0) {
+            wpDs.optimize(fields[0].getTable());
+        }
     }
 
     /**

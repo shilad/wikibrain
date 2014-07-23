@@ -114,9 +114,6 @@ public class WikiTextLoader {
         lcmDao.endLoad();
         metaDao.endLoad();
 
-        LOG.info("optimizing database.");
-        conf.get(WpDataSource.class).optimize();
-
         System.out.println("encountered " + metaDao.getInfo(LocalLink.class).getNumErrors() + " parse errors");
 
         // Why is this necessary???

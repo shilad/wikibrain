@@ -137,9 +137,6 @@ public class ConceptLoader {
         LOG.log(Level.INFO, "End Load");
         dao.endLoad();
 
-        LOG.info("optimizing database.");
-        conf.get(WpDataSource.class).optimize();
-
         LOG.log(Level.INFO, "DONE");
     }
 }
