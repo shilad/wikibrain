@@ -2,7 +2,6 @@ package org.wikibrain.parser.wiki;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import netscape.javascript.JSObject;
 import org.apache.commons.io.IOUtils;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.live.QueryParser;

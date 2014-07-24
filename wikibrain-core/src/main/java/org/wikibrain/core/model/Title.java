@@ -129,9 +129,9 @@ public class Title implements Externalizable {
 		return new Title(upTitle, true, language);
 	}
 	
-	public String toUrlEncodedVersion() throws WikiBrainException{
+	public String toUrl() throws WikiBrainException{
 		try {
-			return URLEncoder.encode(toString(), "UTF-8");
+			return "http://" + language.getLanguage().getDomain() + "/wiki/" + URLEncoder.encode(getCanonicalTitle().replaceAll(" ", "_"), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new WikiBrainException(e);
 		}

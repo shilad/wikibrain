@@ -17,6 +17,8 @@ import java.util.logging.Logger;
  * Languages can be queried by langCode or id.
  */
 public class Language implements Comparable<Language>, Serializable {
+    private static final long serialVersionUID = 6331325313592646604l;
+
     private static Logger LOG = Logger.getLogger(Language.class.getName());
     public static final String LANGUAGE_TSV = "languages.tsv";
 
