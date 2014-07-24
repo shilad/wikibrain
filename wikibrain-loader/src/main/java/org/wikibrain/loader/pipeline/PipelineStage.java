@@ -49,6 +49,17 @@ public class PipelineStage {
     private MetaInfo loadedInfo;
 
     /**
+     * If true, don't actually run things. Just record what you would have run.
+     */
+    private boolean dryRun = false;
+
+    /**
+     * Arguments used during the previous run.
+     * Null indicates that the stage was not run.
+     */
+    private String actualArgs[] = null;
+
+    /**
      * Whether or not the stage has already been run this Pipeline execution.
      */
     private boolean hasBeenRun = false;
@@ -100,22 +111,27 @@ public class PipelineStage {
     }
 
     public void run(String [] cmdLineArgs) throws IOException, InterruptedException {
-        String [] args;
         if (argsOverride == null) {
-            args = ArrayUtils.addAll(cmdLineArgs, extraArgs);
+            actualArgs = ArrayUtils.addAll(cmdLineArgs, extraArgs);
         } else {
-            args = ArrayUtils.addAll(cmdLineArgs, argsOverride);
+            actualArgs = ArrayUtils.addAll(cmdLineArgs, argsOverride);
         }
-        Process p = JvmUtils.launch(klass, args);
-        System.err.println("FOOO: " + klass + ", " + Arrays.toString(args));
 
-        int retVal = p.waitFor();
-        if (retVal != 0) {
-            System.err.println("command failed with exit code " + retVal + " : ");
-            System.err.println("ABORTING!");
-            System.exit(retVal);
+        if (!dryRun) {
+            Process p = JvmUtils.launch(klass, actualArgs);
+            int retVal = p.waitFor();
+            if (retVal != 0) {
+                System.err.println("command failed with exit code " + retVal + " : ");
+                System.err.println("ABORTING!");
+                System.exit(retVal);
+            }
         }
         hasBeenRun = true;
+    }
+
+    public void setDryRun(boolean dryRun) {
+        reset();
+        this.dryRun = dryRun;
     }
 
     public String getName() {
@@ -156,7 +172,15 @@ public class PipelineStage {
                 '}';
     }
 
+    public void reset() {
+        dryRun = false;
+        hasBeenRun = false;
+        argsOverride = null;
+    }
 
+    public String[] getActualArgs() {
+        return actualArgs;
+    }
 
     private PipelineStage getStage(Collection<PipelineStage> previousStages, String stage) {
         for (PipelineStage s : previousStages) {

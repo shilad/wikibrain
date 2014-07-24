@@ -57,8 +57,28 @@ public class PipelineLoader {
         setStageArguments(args);
     }
 
+    public void dryRun(String [] args) throws IOException, InterruptedException {
+        for (PipelineStage stage : stages.values()) {
+            stage.reset();
+            stage.setDryRun(true);
+        }
+        LOG.info("Beginning dry run");
+        for (PipelineStage stage : stages.values()) {
+            if (stage.getShouldRun() != null && stage.getShouldRun()) {
+                stage.runWithDependenciesIfNeeded(args, forceRerun);
+            }
+        }
+        LOG.info("Ended dry run");
+        for (PipelineStage stage : stages.values()) {
+            stage.reset();
+            stage.setDryRun(true);
+        }
+    }
 
     public void run(String [] args) throws IOException, InterruptedException {
+        for (PipelineStage stage : stages.values()) {
+            stage.reset();
+        }
         LOG.info("Beginning loading");
         for (PipelineStage stage : stages.values()) {
             if (stage.getShouldRun() != null && stage.getShouldRun()) {
