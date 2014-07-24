@@ -154,6 +154,10 @@ public class Language implements Comparable<Language>, Serializable {
         }
     }
 
+    public String getDomain() {
+        return langCode + ".wikipedia.org";
+    }
+
     @Override
     public int compareTo(Language language) {
         return Short.valueOf(this.id).compareTo(language.id);
