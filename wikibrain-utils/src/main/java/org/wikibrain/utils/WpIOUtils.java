@@ -144,6 +144,17 @@ public class WpIOUtils {
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8"));
     }
 
+    /**
+     * Opens a buffered writer that uses UTF-8 encoding.
+     * TODO: handle compression automatically based on file extension.
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static BufferedWriter openWriterForAppend(File path) throws IOException {
+        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path, true), "UTF-8"));
+    }
+
     public static BufferedWriter openBZ2Writer(File path) throws IOException {
         return new BufferedWriter(new OutputStreamWriter(
                 new BZip2CompressorOutputStream(new FileOutputStream(path)),
