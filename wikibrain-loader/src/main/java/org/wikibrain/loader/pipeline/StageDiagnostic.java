@@ -44,9 +44,14 @@ public class StageDiagnostic {
      */
     private double megabytesUsed;
 
-    public StageDiagnostic(String stage, Date date, LanguageSet langs, double elapsedSeconds, double singleCoreSpeed, double multiCoreSpeed, double megabytesUsed) {
+    /**
+     * True if the stage succeeded; default is true
+     */
+    private boolean succeeded = true;
+
+    public StageDiagnostic(String stage, LanguageSet langs, double elapsedSeconds, double singleCoreSpeed, double multiCoreSpeed, double megabytesUsed) {
         this.stage = stage;
-        this.date = date;
+        this.date = new Date();
         this.langs = langs;
         this.elapsedSeconds = elapsedSeconds;
         this.singleCoreSpeed = singleCoreSpeed;
@@ -80,5 +85,19 @@ public class StageDiagnostic {
 
     public double getMultiCoreSpeed() {
         return multiCoreSpeed;
+    }
+
+    public String getSystem() {
+        return System.getProperty("os.name") + "; " +
+                System.getProperty("os.version") + "; " +
+                System.getProperty("os.arch");
+    }
+
+    public void setSucceeded(boolean succeeded) {
+        this.succeeded = succeeded;
+    }
+
+    public boolean getSucceeded() {
+        return succeeded;
     }
 }

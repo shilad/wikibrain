@@ -50,6 +50,7 @@ public class DiagnosticDao {
         FileUtils.write(logFile, contents, true);
         ParseObject object = new ParseObject("StageDiagnostic");
         object.put("installToken", token);
+        object.put("system", diagnostic.getSystem());
         object.put("stage", diagnostic.getStage());
         object.put("date", diagnostic.getDate());
         object.put("langs", diagnostic.getLangs().getLangCodeString());
@@ -57,6 +58,7 @@ public class DiagnosticDao {
         object.put("singleCoreSpeed", diagnostic.getSingleCoreSpeed());
         object.put("multiCoreSpeed", diagnostic.getMultiCoreSpeed());
         object.put("megabytes", diagnostic.getMegabytesUsed());
+        object.put("suceeded", diagnostic.getSucceeded());
         object.save();
     }
 
@@ -66,23 +68,6 @@ public class DiagnosticDao {
         } catch (Exception e) {
             LOG.log(Level.WARNING, "Save of diagnostics failed: ", e);
         }
-    }
-
-    public List<StageDiagnostic> getAll() throws ParseException {
-        List<StageDiagnostic> result = new ArrayList<StageDiagnostic>();
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("StageDiagnostic");
-        for (ParseObject object : query.find()) {
-            result.add(new StageDiagnostic(
-                    object.getString("stage"),
-                    object.getDate("date"),
-                    new LanguageSet(object.getString("langs")),
-                    object.getDouble("elapsed"),
-                    object.getDouble("singleCoreSpeed"),
-                    object.getDouble("multiCoreSpeed"),
-                    object.getDouble("megabytes")
-            ));
-        }
-        return result;
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<DiagnosticDao> {

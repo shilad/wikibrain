@@ -64,6 +64,21 @@ public class PipelineStage {
      */
     private boolean hasBeenRun = false;
 
+    /**
+     * Time the stage started.
+     */
+    private Date startTime = null;
+
+    /**
+     * Time the stage required.
+     */
+    private double elapsedSeconds = 0;
+
+    /**
+     * Whether the stage succeded or failed
+     */
+    private Boolean succeeded = null;
+
     public PipelineStage(Config config, Collection<PipelineStage> previousStages, Map<String, MetaInfo> loadedInfo) throws ClassNotFoundException {
         this.name = config.getString("name");
         this.klass = Class.forName(config.getString("class"));
@@ -101,7 +116,7 @@ public class PipelineStage {
         }
     }
 
-    public void runWithDependenciesIfNeeded(String [] cmdLineArgs, boolean forceRerun) throws IOException, InterruptedException {
+    public void runWithDependenciesIfNeeded(String [] cmdLineArgs, boolean forceRerun) throws IOException, InterruptedException, StageFailedException {
         for (PipelineStage stage : dependsOn) {
             stage.runWithDependenciesIfNeeded(cmdLineArgs, forceRerun);
         }
@@ -110,7 +125,7 @@ public class PipelineStage {
         }
     }
 
-    public void run(String [] cmdLineArgs) throws IOException, InterruptedException {
+    public void run(String [] cmdLineArgs) throws IOException, InterruptedException, StageFailedException {
         if (argsOverride == null) {
             actualArgs = ArrayUtils.addAll(cmdLineArgs, extraArgs);
         } else {
@@ -118,13 +133,17 @@ public class PipelineStage {
         }
 
         if (!dryRun) {
+            startTime = new Date();
+            long before = System.currentTimeMillis();
             Process p = JvmUtils.launch(klass, actualArgs);
             int retVal = p.waitFor();
             if (retVal != 0) {
-                System.err.println("command failed with exit code " + retVal + " : ");
-                System.err.println("ABORTING!");
-                System.exit(retVal);
+                succeeded = false;
+                throw new StageFailedException(this, retVal);
             }
+            succeeded = true;
+            long after = System.currentTimeMillis();
+            elapsedSeconds = (after - before) / 1000.0;
         }
         hasBeenRun = true;
     }
@@ -180,6 +199,18 @@ public class PipelineStage {
 
     public String[] getActualArgs() {
         return actualArgs;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public double getElapsedSeconds() {
+        return elapsedSeconds;
+    }
+
+    public Boolean getSucceeded() {
+        return succeeded;
     }
 
     private PipelineStage getStage(Collection<PipelineStage> previousStages, String stage) {
