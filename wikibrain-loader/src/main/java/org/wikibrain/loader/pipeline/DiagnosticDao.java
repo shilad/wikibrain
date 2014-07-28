@@ -51,6 +51,7 @@ public class DiagnosticDao {
         FileUtils.write(logFile, contents, true);
         ParseObject object = new ParseObject("StageDiagnostic");
         object.put("installToken", token);
+        object.put("runId", diagnostic.getRunId());
         object.put("system", diagnostic.getSystem());
         object.put("stage", diagnostic.getStage());
         object.put("date", diagnostic.getDate());
@@ -60,6 +61,7 @@ public class DiagnosticDao {
         object.put("multiCoreSpeed", diagnostic.getMultiCoreSpeed());
         object.put("megabytes", diagnostic.getMegabytesUsed());
         object.put("suceeded", diagnostic.getSucceeded());
+        object.put("version", "0.2-SNAPSHOT");
         object.save();
     }
 
@@ -92,7 +94,7 @@ public class DiagnosticDao {
                 File tokenFile = new File(config.getString("tokenFile"));
                 if (!tokenFile.isFile()) {
                     Random random = new Random();
-                        FileUtils.write(tokenFile, "" + random.nextLong());
+                        FileUtils.write(tokenFile, "" + Math.abs(random.nextLong()));
                 }
                 String token = FileUtils.readFileToString(tokenFile).trim();
                 String appId = config.getString("appId");

@@ -105,10 +105,12 @@ public class PipelineLoader {
 
     private void quietlySaveDiagnostics() {
         try {
+            long runId = Math.abs(new Random().nextLong());
             DiagnosticReport report = new DiagnosticReport();
             for (PipelineStage stage : stages.values()) {
                 if (stage != null && stage.hasBeenRun()) {
                     StageDiagnostic sd = new StageDiagnostic(
+                            runId,
                             stage.getName(),
                             langs,
                             stage.getElapsedSeconds(),

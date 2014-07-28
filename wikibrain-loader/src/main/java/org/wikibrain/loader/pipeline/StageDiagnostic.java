@@ -10,6 +10,12 @@ import java.util.Date;
 public class StageDiagnostic {
 
     /**
+     * Random, but unique id for each run of the importer.
+     * Can be used to track total import time.
+     */
+    private final long runId;
+
+    /**
      * Name of the stage
      */
     private String stage;
@@ -49,7 +55,8 @@ public class StageDiagnostic {
      */
     private boolean succeeded = true;
 
-    public StageDiagnostic(String stage, LanguageSet langs, double elapsedSeconds, double singleCoreSpeed, double multiCoreSpeed, double megabytesUsed) {
+    public StageDiagnostic(long runId, String stage, LanguageSet langs, double elapsedSeconds, double singleCoreSpeed, double multiCoreSpeed, double megabytesUsed) {
+        this.runId = runId;
         this.stage = stage;
         this.date = new Date();
         this.langs = langs;
@@ -99,5 +106,9 @@ public class StageDiagnostic {
 
     public boolean getSucceeded() {
         return succeeded;
+    }
+
+    public long getRunId() {
+        return runId;
     }
 }
