@@ -36,7 +36,7 @@ public class DiagnosticDao {
     public void save(StageDiagnostic diagnostic) throws ParseException, IOException {
         String contents = "";
         if (!logFile.exists()) {
-            contents = "stage\tdate\tlangs\telapsed\tsingleCoreSpeed\tmultiCoreSpeed\tmegabytes\n";
+            contents = "stage\tdate\tlangs\telapsed\tsingleCoreSpeed\tmultiCoreSpeed\tmegabytes\tsucceeded\n";
         }
         contents += StringUtils.join(Arrays.asList(
                             diagnostic.getStage(),
@@ -45,7 +45,8 @@ public class DiagnosticDao {
                             diagnostic.getElapsedSeconds(),
                             diagnostic.getSingleCoreSpeed(),
                             diagnostic.getMultiCoreSpeed(),
-                            diagnostic.getMegabytesUsed()
+                            diagnostic.getMegabytesUsed(),
+                            diagnostic.getSucceeded()
                     ), "\t") + "\n";
         FileUtils.write(logFile, contents, true);
         ParseObject object = new ParseObject("StageDiagnostic");

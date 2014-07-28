@@ -107,7 +107,7 @@ public class PipelineLoader {
         try {
             DiagnosticReport report = new DiagnosticReport();
             for (PipelineStage stage : stages.values()) {
-                if (stage != null || stage.hasBeenRun()) {
+                if (stage != null && stage.hasBeenRun()) {
                     StageDiagnostic sd = new StageDiagnostic(
                             stage.getName(),
                             langs,
