@@ -100,6 +100,7 @@ Notes, TODO: write them up:
 kernel.shmmax = 64205988352
 kernel.shmall = 15675290
 ```
+ * Mac: needs to add similar lines http://www.caktusgroup.com/blog/2009/08/13/setting-postgresqls-shmmax-in-mac-os-x-105-leopard/
  * Read the performance tuning page: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
  * Crucial settings:
 
