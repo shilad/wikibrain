@@ -258,8 +258,6 @@ public class LanguageInfo {
 
     private static void loadLanguage(String fields[], String line) throws WikiBrainException {
         String tokens[] = StringUtils.splitPreserveAllTokens(line, "\t");
-        System.err.println(tokens.length);
-        System.err.println(fields.length);
         if (tokens.length != fields.length) {
             throw new WikiBrainException("invalid number of fields in " + StringEscapeUtils.escapeJava(line));
         }

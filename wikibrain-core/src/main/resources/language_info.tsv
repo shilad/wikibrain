@@ -1,286 +1,286 @@
 langCode	numArticles	numLinks	categoryNames	redirectNames	disambiguationCategoryNames	mainTemplates	mainInlines	seeAlsoTemplates	seeAlsoInlines	seeAlsoHeaders	topLevelCategoryNames	alternativeArticleNamespaces
-en	4600000	300000000	Category	#REDIRECT	Disambiguation	pages	\QMain\E	\QMain	Article	���\E	\QSee\E,\QSee also\E,\QFurther2\E,\Qseealso\E,\Qdetails\E,\QFurther\E	\QSee	also\E	\QSee	Also\E
-de	1750000	60000000	Category,Kategorie	#WEITERLEITUNG,#REDIRECT	Begriffskl�_rung	\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-fr	1500000	80000000	Category,Cat̩gorie	#REDIRECT,#REDIRECTION	Homonymie	\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-nl	1750000	40000000	Category,Categorie	#DOORVERWIJZING,#REDIRECT	Wikipedia:Doorverwijspagina	\QZie	hoofdartikel\E		\QZie	ook\E	\QZie	ook\E	\QZie	ook\E	
-it	1000000	80000000	Category,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO	Disambigua		\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-pl	1000000	50000000	Category,Kategoria	#TAM,#PATRZ,#REDIRECT,#PRZEKIERUJ	Strony	ujednoznaczniaj��ce	\QVer artigo principal\E,\Qkategoria g���_wna\E,\Qmainsec\E,\Qmain\E		\QAnexo\E,\QDetails\E		\QZobacz	te�_\E			
-es	1000000	40000000	Categor�_a,Category	#REDIRECT,#REDIRECCION,#REDIRECCI��N	Wikipedia:Desambiguaci�_n	\QAP\E	\QArt�_culo	principal\E	\QVT\E	\QV̩ase\E,\QV̩ase tambi̩n\E	\QV̩ase	tambi̩n\E		Anexo;104	
-ru	1000000	60000000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT	_�_________�___���__��_�	��_���___�__��	\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E	
-ja	850000	60000000	��ǋĠ�⫋Ļ,Category	�_ċĻ��ۋ�_������,#REDIRECT,#�Ȣ�ہ,�_ďȢ�ہ,#�Ļ��ۋ�_������	��о����_���	\Qmain2\E,\Qmain\E		\QSee also\E,\Qseealso\E,\Qsee\E		\Q�Т�ۣ��ɍݨ\E,\Q��ď_�\E					
-pt	750000	40000000	Category,Categoria	#REDIRECT,#REDIRECIONAMENTO	Desambigua̤̣o	\Qprincipal\E,\QVer artigo principal\E,\QAP\E,\QArtigo principal\E,\QMain\E	\QVer	artigos	principais\E	\QVertamb̩m\E,\QAnexo\E,\Qver anexo\E,\QVer p��gina anexa\E		\QVer	tamb̩m\E		Anexo;102
-zh	600000	35000000	Category,���_,���	#REDIRECT,#�͌�_���	���_��_�	\Q���\E,\Q��Ⱦ���ݨ\E,\QMain\E		\Q�����\E,\Q��⏤�\E,\Qsee also\E,\QSeealso\E		\Q���__���\E,\Q�����\E,\Q�����\E,\Q��ጏ���\E,\Q��Ďб\E,\Q��ď��\E,\Q��⏤�\E,\Q�ɦ���\E,\Q��ď_�\E					
-sv	1750000	26000000	Category,Kategori	#REDIRECT,#OMDIRIGERING	F̦rgreningssidor	\QF̦rdjupning\E,\QHuvudartikel\E	\QHuvudartikel\E	\QSe	�_ven\E	\QSe	�_ven\E	\QSe	�_ven\E		
-vi	1000000	50000000	Category,Th���_lo���i	#�ԇȥi,#REDIRECT											
-uk	500000	40000000	Category,___���_�____�ۄЄ�,___���_�____��_�	#_�_���_�___�_�_�___�_�___�_�,#_�_���_�___�_�,#REDIRECT,#_�_�_�_�_�_�_�_�_�_�_�_�_�_�_�,#_�_�_�_�_�_�_�_�	_�_�___���___�___���__��	��___�____��___�	\Q__��_________��� ����_���΄�\E,\QCatmore\E,\QMain\E,\Q_�___�_�_�_�__�Є�_�\E,\Qmain\E,\Q__��_________� ����_���ℏ\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__. ��_�_�_�_�\E,\Q_�_�__. ��_�_�___� ����_����_\E,\Q_�_�__. ��_�_�___�\E	\Q_�__. _�_�_�_�_�\E,\Q_�_�__. _�_�_�___�\E,\Q_�_�__ ��_�_�___�\E,\Q_�_�__�Є�΄��� ��_�_�___�\E			
-ca	400000	30000000	Category,Categoria	#REDIRECT	P��gines	de	desambiguaci�_	\Qcategoria principal\E,\QAP\E,\QPrincipal\E,\Qmain\E	\QArticle	principal\E	\QVT\E	\QVegeu	tamb̩\E	\QVegeu	tamb̩\E
-no	400000	12000000	Category,Kategori	#REDIRECT,#OMDIRIGERING	Pekere	\Qutdypende\E,\Qhoved\E,\QUtdypende artikkel\E,\Qhovedartikkel\E	\QSe utdypende artikkel\E,\QHovedartikkel\E,\QUtdypende artikler\E,\QUtdypende artikkel\E	\Qse ogs̴\E,\Qse_ogs̴\E,\Qse\E	\QUtfyllende artikkel\E,\QSe ogs̴\E	\QSe	ogs̴\E				
-fi	350000	10000000	Category,Luokka	#OHJAUS,#UUDELLEENOHJAUS,#REDIRECT	T�_smennyssivut	\QP�_�_artikkeli\E	\QP�_�_artikkeli\E	\QKatso	my̦s\E	\QKatso	my̦s\E	\QKatso	my̦s\E		
-cs	300000	12000000	Category,Kategorie	#REDIRECT,#P��ESM�_RUJ	Rozcestn�_ky	\QHlavn�_	��l��nek\E	\QHlavn�_	��l��nek\E	\Qpodrobn��\E,\Qviz t̩�_\E,\QPodrobn��\E	\QViz	t̩�_\E	\QSouvisej�_c�_	��l��nky\E	
-hu	250000	15000000	Category,Kateg�_ria	#́TIŔNY̍T́S,#REDIRECT	Egy̩rtelm��s�_t��	lapok	\QF��\E,\QB��vebben\E		\QL��sd\E,\QL��sd m̩g\E	\QL��sd	m̩g\E	\QL��sd	m̩g\E		
-ko	300000	11000000	Category,��㑴�	#REDIRECT,#���_���_��	�����Γ�����Ы_�����	\Q�_���\E		\Q���_�\E,\Q��_��� ���\E,\Q���a\E		\Q������ �_���\E,\Q������ �_���\E					
-fa	400000	12000000	Category,������	#REDIRECT,#�������ί��ɯ_�ί�											
-id	350000	9000000	Category,Kategori	#REDIRECT,#ALIH	Disambiguasi	\Qutama\E,\Qmain article\E,\QMain\E		\QSee\E,\Qvandal\E,\Qsee also\E		\QLihat	pula\E				
-tr	250000	11000000	Category,Kategori	#REDIRECT,#Y��NLEND��RME,#Y��NLEND��R	Anlam	ayr��m��	\QAnamadde\E,\QAna\E,\Qana madde\E	\QAs��l Makale;\E,\QAna Madde\E,\QAs��l makale\E	\QSee also\E,\QAyr��ca bak��n��z\E,\QBak��n��z\E	\Qayr��ca	bak��n��z\E	\QBak��n��z\E,\QAyr��ca Bak��n��z\E			
-ar	300000	10500000	Category,������_�	#���_���_��,#REDIRECT	���_����_�����_�_										
-ro	250000	8750000	Category,Categorie	#REDIRECT,#REDIRECTEAZA	Dezambiguizare	\Qarticolprincipal\E,\QAP\E,\QARP\E,\Qarticol principal\E,\Qmain\E	\QVezi articolul principal\E,\QArticol principal\E,\QArticole principale\E		\QSee also\E,\QVezi �i\E,\Qvezi articolul\E	\QVezi	�i\E				
-sk	200000	6000000	Category,Kateg�_ria	#presmeruj,#REDIRECT	V�_honky	\QHlavn�_	��l��nok\E	\QHlavn�_ ��l��nok o sp̫soboch tla��e pozri\E,\QHlavn�_ ��l��nok\E	\QPozri	aj\E	\QPozri aj\E,\QPozri ��l��nky\E	\QPozri	aj\E		
-eo	200000	7000000	Category,Kategorio	#ALIDIREKTI,#ALIDIREKTU,#REDIRECT,#AL											
-da	200000	7000000	Category,Kategori	#REDIRECT	Flertydig	\QUddybende\E,\Quddybende artikel\E,\Qhovedartikel\E,\QMain\E	\QUddybende	artikel\E	\Qse	ogs̴\E		\QSe	ogs̴\E		
-sr	250000	8750000	Category,___���_�____��_��_�,Kategorija	#_�_�_�_�_�_�_�_�_�_�,#redirect,#_ل�_��Ą�__��_���_�,#REDIRECT,#_�_��Ą�___���_�,#_�_��Ą�__��_���_�,#_ل�_��Ą�___���_�,#_�_�_�_�_�_�_�_�_�											
-lt	150000	5250000	Category,Kategorija	#REDIRECT,#PERADRESAVIMAS											
-ms	250000	8750000	Category,Kategori	#REDIRECT,#LENCONG											
-he	150000	5250000	Category,_�_�_�_�_�_�_�	#_�___�_�_�,#REDIRECT	___�_�_�_�_�_�_�_�	\Q_�_�__ ___�_�_�_�\E,\Q_�___�_�_� _�_�_�__ ___�_�_�_�\E		\Q_�_�_�	_�_�\E		\Q_�_�_�	_�_�\E			
-eu	200000	7000000	Category,Kategoria	#REDIRECT,#BIRZUZENDU											
-sl	200000	7000000	Category,Kategorija	#REDIRECT,#PREUSMERITEV											
-bg	150000	5250000	Category,___���_�____��_�	#REDIRECT,#___�_�,#_�_�___���__��___�___�											
-kk	200000	7000000	Sanat,Category,�_�����,_�_�___���	#_�_�_�_�_�,#REDIRECT											
-vo	100000	3500000	Category,Klad	#REDIRECT											
-hr	150000	5250000	Category,Kategorija	#REDIRECT,#PREUSMJERI											
-war	1000000	35000000	Category,Kaarangay	#REDIRECT											
-hi	100000	3500000	Category,�_�����_����_����	#REDIRECT											
-et	150000	5250000	Category,Kategooria	#suuna,#REDIRECT											
-gl	100000	3500000	Categor�_a,Category,Categoria	#REDIRECT,#REDIRECIONAMENTO,#REDIRECCI��N		\Qprincipal\E,\QVer artigo principal\E,\QAP\E,\QArtigo principal\E,\QMain\E	\QVer	artigos	principais\E	\QVertamb̩m\E,\QAnexo\E,\Qver anexo\E,\QVer p��gina anexa\E		\QVer	tamb̩m\E		
-az	100000	3500000	Category,Kateqoriya	#ﾀﾡSTﾀﾡQAMﾮﾏTLﾮﾏNDﾀﾡRMﾮﾏ,#ﾀﾡSTﾀﾡQAMﾮﾏTLﾮﾏNDﾀﾡR,#REDIRECT											
-nn	100000	3500000	Category,Kategori	#omdiriger,#REDIRECT											
-simple	100000	3500000	Category	#REDIRECT	Disambiguation	\Qdetails\E,\QMain\E	\QMain Article ���\E,\QMain article\E	\QSee\E,\Qfurther2\E,\QSee also\E,\QFurther2\E,\Qseealso\E,\Qfurther\E,\Qdetails\E,\QOther pages\E,\QFurther\E	\QSee	also\E	\QSee also\E,\QRelated pages\E,\QSee Also\E,\QOther pages\E				
-la	100000	3500000	Category,Categoria	#REDIRECT											
-el	100000	3500000	Category,�_������_������	#������_���_���������,#REDIRECT											
-th	100000	3500000	Category,��ǈ�H��ӈ�ǈ�H�_�_�	#�_ۈ�݈��_����ш�_���,#REDIRECT											
-new	70000	2450000	Category,�_�����__�_�	#REDIRECT											
-roa-rup	500	17500	Category	#REDIRECT											
-oc	100000	3500000	Category,Categoria	#REDIRECT,#REDIRECCION											
-sh	200000	7000000	Category,Kategorija	#PREUSMERI,#REDIRECT,#PREUSMJERI											
-ka	100000	3500000	�Ī�Đ�Ģ��Ӈ�Շĝ��ʇ��Đ,Category	#REDIRECT,#��ՇĐ��҇Đ��݇���GĐ��݇Đ��ʇ�ч�Ӈ�ԇĐ											
-mk	75000	2625000	Category,___���_�____��_��_�	#_ل�_�___���__���___��__�,#REDIRECT,#___�_�_�,#_�_�_�_�_�_�___�_�_�_�___�,#_�_�___���__���___��__�											
-tl	62000	2170000	Category,Kaurian,Kategorya	#REDIRECT											
-ht	50000	1750000	Category,Kategori,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-pms	65000	2275000	Category,Categor��a,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO			\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-te	60000	2100000	Category,�����������ш��	#REDIRECT,#��_��_���������_������������											
-ta	60000	2100000	�������񈨻����,Category	#������������_�������,#REDIRECT											
-be-x-old	50000	1750000	Category,___��ℍ____�ۄ܄�	#REDIRECT,#_�_���_�___�_��Є�_�___�__��___�											
-be	75000	2625000	Category,___��ℍ____�ۄ܄�	#REDIRECT											
-br	50000	1750000	Category,Rummad	#ADKAS,#REDIRECT											
-ceb	1000000	35000000	Category,Kategoriya	#REDIRECT											
-lv	50000	1750000	Category,Kategorija	#REDIRECT											
-sq	50000	1750000	Category,Kategori,Kategoria	#REDIRECT,#RIDREJTO											
-jv	50000	1750000	Category,Kategori	#REDIRECT,#ALIH		\Qutama\E,\Qmain article\E,\QMain\E		\QSee\E,\Qvandal\E,\Qsee also\E		\QLihat	pula\E				
-mg	50000	1750000	Sokajy,Category,Cat̩gorie	#FIHODINANA,#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-cy	60000	2100000	Category,Categori	#ailgyfeirio,#REDIRECT,#ail-cyfeirio											
-lb	40000	1400000	Category,Kategorie	#VIRULEEDUNG,#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-mr	40000	1400000	Category,�_��_�����_�	#REDIRECT,#�_�����_�����_��_��__�����__���_��_�,#�_�����_��_�����_��__�����__���_��_�											
-is	40000	1400000	Category,Flokkur	#TILV̍SUN,#REDIRECT,#tilv�_sun											
-bs	50000	1750000	Category,Kategorija	#REDIRECT,#PREUSMJERI											
-yo	30000	1050000	Category,�����ka	#REDIRECT											
-an	30000	1050000	Categor�_a,Category	#REENDRECERA,#REDIRECT,#REDIRECCION,#ENDRECERA,#REDIRECCI��N		\QAP\E	\QArt�_culo	principal\E	\QVT\E	\QV̩ase\E,\QV̩ase tambi̩n\E	\QV̩ase	tambi̩n\E			
-lmo	30000	1050000	Category,Categuria,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO			\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-hy	125000	4375000	Category,������ʹͣ�������	#REDIRECT,#�_�͐�����������											
-fy	30000	1050000	Category,Kategory	#REDIRECT											
-bpy	20000	700000	�_��__�_�,Category,�___�_�__�_�����_����_����	#REDIRECT											
-ml	20000	700000	������_��_��ш��,Category,������,�����_��ш����ш��,���	#REDIRECT,#��_�������_�����_���������و�_,#��_�������_�����_���������و�����											
-pnb	20000	700000	Category	#REDIRECT											
-sw	20000	700000	Category,Jamii	#REDIRECT											
-bn	20000	700000	Category,�___�_�__�_�����_����_����	#REDIRECT											
-io	20000	700000	Category,Kategorio	#REDIRECT											
-af	20000	700000	Category,Kategorie	#AANSTUUR,#REDIRECT											
-gu	20000	700000	Category,����Ǎ�����Ȼ����	#REDIRECT											
-zh-yue	20000	700000	Category,���_	#REDIRECT											
-ne	20000	700000	Category,�_�����_����_����	#REDIRECT											
-nds	20000	700000	Category,Kategorie	#WEITERLEITUNG,#wiederleiden,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-ur	20000	700000	Category,�_�ɯ��	#REDIRECT											
-ku	20000	700000	Category,Kategor̨	#REDIRECT											
-uz	20000	700000	Category,Kategoriya,Turkum	#REDIRECT											
-ast	20000	700000	Categor�_a,Category	#REDIRECT											
-scn	20000	700000	Category,Catigur��a,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO			\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-su	20000	700000	Category,Kategori	#REDIRECT,#ALIH		\Qutama\E,\Qmain article\E,\QMain\E		\QSee\E,\Qvandal\E,\Qsee also\E		\QLihat	pula\E				
-qu	20000	700000	Categor�_a,Category,Katiguriya	#REDIRECT,#REDIRECCION,#REDIRECCI��N,#PUSAPUNA		\QAP\E	\QArt�_culo	principal\E	\QVT\E	\QV̩ase\E,\QV̩ase tambi̩n\E	\QV̩ase	tambi̩n\E			
-diq	20000	700000	Category	#REDIRECT											
-ba	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-tt	20000	700000	Țrkem,Category,_��_�_�__,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT,#_�_���_�_��		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-my	20000	700000	Category	#REDIRECT											
-ga	20000	700000	Rang,Category,Catag�_ir	#athsheoladh,#REDIRECT											
-cv	20000	700000	Category,___���_�____��_�,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-ia	20000	700000	Category,Categoria	#REDIRECT											
-nap	20000	700000	Categur��a,Category,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO			\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-bat-smg	20000	700000	Category,Kateguor��j��,Kategorija	#REDIRECT,#PERADRESAVIMAS											
-map-bms	20000	700000	Category,Kategori	#REDIRECT,#ALIH		\Qutama\E,\Qmain article\E,\QMain\E		\QSee\E,\Qvandal\E,\Qsee also\E		\QLihat	pula\E				
-wa	20000	700000	Category,Categoreye,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-als	20000	700000	Category,Kategorie	#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-kn	20000	700000	Category,�_��_��_��_�	#REDIRECT											
-am	20000	700000	Category,���ܡ��	#REDIRECT											
-gd	20000	700000	Category	#REDIRECT											
-bug	20000	700000	Category	#REDIRECT											
-tg	20000	700000	Category,_҄Ą����_	#REDIRECT											
-zh-min-nan	20000	700000	Category	#REDIRECT											
-yi	20000	700000	Category,_�_�_�_�_�_�_�_�_�,_�_���_�_�_�_���_�_�_�,_�_�_�_�_�_�_�	#_�___�_�_�,#REDIRECT,#_�_�_�_�_�_�_�___�_�_�		\Q_�_�__ ___�_�_�_�\E,\Q_�___�_�_� _�_�_�__ ___�_�_�_�\E		\Q_�_�_�	_�_�\E		\Q_�_�_�	_�_�\E			
-vec	20000	700000	Category,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO,#VARDA			\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-sco	20000	700000	Category	#REDIRECT											
-hif	20000	700000	Category	#REDIRECT											
-roa-tara	20000	700000	Category	#REDIRECT											
-os	20000	700000	Category,___���_�____��_�,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT,#_�_�_�_�_�_�_�		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-arz	20000	700000	Category,������_�	#���_���_��,#REDIRECT											
-nah	20000	700000	Categor�_a,Category,Neneuhc��y��tl	#REDIRECT,#REDIRECCION,#REDIRECCI��N		\QAP\E	\QArt�_culo	principal\E	\QVT\E	\QV̩ase\E,\QV̩ase tambi̩n\E	\QV̩ase	tambi̩n\E			
-mzn	20000	700000	Category,������,����	#REDIRECT,#�������ί��ɯ_�ί�,#����											
-sah	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-ky	20000	700000	Category	#REDIRECT											
-mn	20000	700000	Category,_�_____�_�_�_�	#REDIRECT											
-sa	20000	700000	Category,�_��_�����_ш_�,�_�����_����_����	#REDIRECT,#�_�����_��_�����_��___���_��_�											
-pam	20000	700000	Category	#REDIRECT											
-hsb	20000	700000	Category,Kategorie,Kategorija	#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-li	20000	700000	Category,Categorie,Kategorie	#DOORVERWIJZING,#REDIRECT		\QZie	hoofdartikel\E		\QZie	ook\E	\QZie	ook\E	\QZie	ook\E	
-mi	20000	700000	Category	#REDIRECT											
-si	20000	700000	Category,�����_�ۍ��Ȉ�ۈ�Ȉ�_��ψ��	#�����Ɉ�Ո����ψ���ӈ��,#REDIRECT											
-co	20000	700000	Category	#REDIRECT											
-ckb	20000	700000	Category,�_���	#REDIRECT											
-gan	20000	700000	���_��ϩ�,Category,���_,���	#REDIRECT,#�͌�_���											
-glk	20000	700000	Category,������	#REDIRECT,#�������ί��ɯ_�ί�											
-bo	20000	700000	Category	#REDIRECT											
-fo	20000	700000	Category,B�_lkur	#REDIRECT											
-bar	20000	700000	Category,Kategorie	#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-bcl	20000	700000	Category,Kategorya	#REDIRECT											
-ilo	20000	700000	Category	#REDIRECT											
-mrj	20000	700000	Category,___���_�____��_�,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-se	20000	700000	Category	#REDIRECT											
-fiu-vro	20000	700000	Category,Kat̵gooria,Kategooria	#suuna,#saadaq,#REDIRECT											
-nds-nl	20000	700000	Category,Categorie,Kategorie,Kattegerie	#DOORVERWIJZING,#REDIRECT,#DEURVERWIEZING		\QZie	hoofdartikel\E		\QZie	ook\E	\QZie	ook\E	\QZie	ook\E	
-tk	20000	700000	Category,Kategori�_a	#REDIRECT											
-vls	20000	700000	Category,Categorie	#DOORVERWIJZING,#REDIRECT		\QZie	hoofdartikel\E		\QZie	ook\E	\QZie	ook\E	\QZie	ook\E	
-ps	20000	700000	Category,��󐯫��_�_��	#REDIRECT											
-gv	20000	700000	Category,Ronney	#REDIRECT											
-rue	20000	700000	Category,___���_���__�ۄЄ�,___���_�____�ۄЄ�,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT,#_�_�_�_�_�_�_�_�_�_�_�_�_�_�_�,#_�_�_�_�_�_�_�_�		\Q__��_________��� ����_���΄�\E,\QCatmore\E,\QMain\E,\Q_�___�_�_�_�__�Є�_�\E,\Qmain\E,\Q__��_________� ����_���ℏ\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__. ��_�_�_�_�\E,\Q_�_�__. ��_�_�___� ����_����_\E,\Q_�_�__. ��_�_�___�\E	\Q_�_�__. _�_�_�___�\E,\Q_�_�__ ��_�_�___�\E,\Q_�__. _�_�_�_�_�\E,\Q_�_�__�Є�΄��� ��_�_�___�\E				
-dv	20000	700000	Category,___�_�_�_�_�	#REDIRECT											
-nrm	20000	700000	Category	#REDIRECT											
-pag	20000	700000	Category	#REDIRECT											
-pa	20000	700000	Category,���_��������Ȭ����	#REDIRECT											
-koi	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-rm	20000	700000	Category,Categoria	#REDIRECT,#RENVIAMENT											
-km	20000	700000	Category,�_ɇ٠�__�_��_���܇_ۇ�Շ__�_ȇ_�,�_ɇ٠�_҇_��_���܇_���Շ_҇_��_ۇ�܇_ۇ�Շ__�_ȇ_�,�_ɇ٠�__�_��_���܇_���Շ_҇_��_ۇ�܇_ۇ�Շ__�_ȇ_�	#�_Ӈ�Շ__�__�__�_ԇ_�_��_��٠�_�_ԇ��,#�_Ӈ�Շ__�__�__�_ɇ٠�__�_�_�__�_�,#�_Ӈ�Շ_��__�__�_ԇ_�_��_��٠�_�,#�_Ӈ_��Շ_�__�_҇_Ӈ_҇�Շ_�,#REDIRECT,#�_Ӈ�Շ__�__�__�_ԇ_�_��_��٠�_�,#�_Ӈ�Շ_��__�__�_ԇ_�_��_��٠�_�_ԇ��											
-kv	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-udm	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-csb	20000	700000	Category,Kateg�_r��j̫,Kategoria	#TAM,#PATRZ,#REDIRECT,#PRZEKIERUJ		\QVer artigo principal\E,\Qkategoria g���_wna\E,\Qmainsec\E,\Qmain\E		\QAnexo\E,\QDetails\E		\QZobacz	te�_\E				
-mhr	20000	700000	Category,___���_�____��_�__,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-fur	20000	700000	Category,Categorie,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO			\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-mt	20000	700000	Category,Kategorija	#REDIRECT,#RINDIRIZZA											
-zea	20000	700000	Category,Categorie	#DOORVERWIJZING,#REDIRECT		\QZie	hoofdartikel\E		\QZie	ook\E	\QZie	ook\E	\QZie	ook\E	
-wuu	20000	700000	Category,���	#REDIRECT,#�͌�_���											
-lij	20000	700000	Category,Categor̨a,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO			\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-ug	20000	700000	����,Category	#REDIRECT											
-lad	20000	700000	Categor�_a,Category,Kateggor�_a,Kat��ggor�_a	#DIRECCI��N,#REDIRECT,#REDIRECCION,#DIRIJAR,#REDIRECCI��N		\QAP\E	\QArt�_culo	principal\E	\QVT\E	\QV̩ase\E,\QV̩ase tambi̩n\E	\QV̩ase	tambi̩n\E			
-pi	20000	700000	Category,�_��___�__�_�	#REDIRECT											
-xmf	20000	700000	�Ī�Đ�Ģ��Ӈ�Շĝ��ʇ��Đ,Category	#REDIRECT,#��ՇĐ��҇Đ��݇���GĐ��݇Đ��ʇ�ч�Ӈ�ԇĐ											
-sc	20000	700000	Category,Categoria	#REDIRECT											
-bh	20000	700000	Category,�_�����_����_����	#REDIRECT											
-zh-classical	20000	700000	Category	#REDIRECT											
-or	20000	700000	Category,�¦�_��¡�_�£�_�,����_��_���	#��_�_����و�_�£���,#REDIRECT											
-nov	20000	700000	Category	#REDIRECT											
-ksh	20000	700000	Saachjrupp,Category,Saachjrop,Kategorie,Sachjrop,Katejori,Kattejori,Saachjropp	#WEITERLEITUNG,#��MLEIDUNG,#LEIDT_��M_OP,#��MLEIDE_OP,#REDIRECT,#��MLEIDE		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-ang	20000	700000	Flocc,Category	#REDIRECT											
-so	20000	700000	Category	#REDIRECT											
-kw	20000	700000	Category,Klass,Class	#REDIRECT											
-stq	20000	700000	Category,Kategorie	#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-nv	20000	700000	Category,T�_���A���h��gi_��t�_̩ego	#REDIRECT											
-hak	20000	700000	Category	#REDIRECT											
-frr	20000	700000	Category,Kategorie	#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-ay	20000	700000	Categor�_a,Category	#REDIRECT,#REDIRECCION,#REDIRECCI��N		\QAP\E	\QArt�_culo	principal\E	\QVT\E	\QV̩ase\E,\QV̩ase tambi̩n\E	\QV̩ase	tambi̩n\E			
-frp	20000	700000	Category,Cat̬gorie,Cat̩gorie	#REDIR��CCION,#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-ext	20000	700000	Category	#REDIRECT											
-szl	20000	700000	Category,Kategoria	#TAM,#PATRZ,#REDIRECT,#PRZEKIERUJ		\QVer artigo principal\E,\Qkategoria g���_wna\E,\Qmainsec\E,\Qmain\E		\QAnexo\E,\QDetails\E		\QZobacz	te�_\E				
-pcd	20000	700000	Category,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-ie	20000	700000	Category,Categorie	#REDIRECT											
-gag	20000	700000	Category,Kategoriya,Kategori	#Y��NNEND��R,#REDIRECT,#Y��NNEND��RM��KLER,#Y��NLEND��RME,#Y��NLEND��R,#Y��NNEND��RM��		\QAnamadde\E,\QAna\E,\Qana madde\E	\QAs��l Makale;\E,\QAna Madde\E,\QAs��l makale\E	\QSee also\E,\QAyr��ca bak��n��z\E,\QBak��n��z\E	\Qayr��ca	bak��n��z\E	\QBak��n��z\E,\QAyr��ca Bak��n��z\E				
-haw	20000	700000	Mﾀﾁhele,Category	#REDIRECT											
-xal	20000	700000	_�___�,Category,���_�,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-ln	20000	700000	Category,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-rw	20000	700000	Category	#REDIRECT											
-pdc	20000	700000	Category,Abdeeling,Kategorie	#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-pfl	20000	700000	Category,Kategorie	#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-vep	20000	700000	Category,Kategorii,Kategooria	#suuna,#REDIRECT											
-krc	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-crh	20000	700000	Category,Kategoriya,___���_�____��_�	#REDIRECT											
-eml	20000	700000	Category,Categoria	#RINVIO,#REDIRECT,#RINVIA,#RIMANDO			\QVedi	anche\E	\Qvedi anche\E,\Qmain\E		\QVoci	correlate\E			
-gn	20000	700000	Categor�_a,Category,��emohenda	#REDIRECT,#REDIRECCION,#REDIRECCI��N		\QAP\E	\QArt�_culo	principal\E	\QVT\E	\QV̩ase\E,\QV̩ase tambi̩n\E	\QV̩ase	tambi̩n\E			
-ace	20000	700000	Category,Kawan,Kategori	#REDIRECT,#ALIH		\Qutama\E,\Qmain article\E,\QMain\E		\QSee\E,\Qvandal\E,\Qsee also\E		\QLihat	pula\E				
-to	20000	700000	Category	#REDIRECT											
-ce	20000	700000	Category,___�_�_�___���,_�___�_�,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#_�l_���_��Ʉ�_�_�_�___���\,#REDIRECT,,#�Ʉ�_�_�_�____		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-kl	20000	700000	Category,Sumut_atassuseq,Kategori	#REDIRECT		\QUddybende\E,\Quddybende artikel\E,\Qhovedartikel\E,\QMain\E	\QUddybende	artikel\E	\Qse	ogs̴\E		\QSe	ogs̴\E		
-arc	20000	700000	Category,��������	#REDIRECT,#����Ն�											
-myv	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-dsb	20000	700000	Category,Kategorie,Kategorija	#WEITERLEITUNG,#REDIRECT		\QHauptartikel\E	\Q��� Hauptartikel\E,\QHauptartikel\E	\QSiehe	auch\E	\QSiehe	auch\E	\QSiehe	auch\E		
-as	20000	700000	Category,�_����������_����,�_�����_����_����,�_�����_����_����	#REDIRECT											
-bjn	20000	700000	Category,Kategori,Tumbung	#REDIRECT,#ALIH		\Qutama\E,\Qmain article\E,\QMain\E		\QSee\E,\Qvandal\E,\Qsee also\E		\QLihat	pula\E				
-pap	20000	700000	Category	#REDIRECT											
-tpi	20000	700000	Category	#REDIRECT											
-lbe	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-mdf	20000	700000	Category,___���_�____��_�_�,___���_�____��_�	#REDIRECT											
-wo	20000	700000	Category,W��ll,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-jbo	20000	700000	Category	#REDIRECT											
-kab	20000	700000	Category,Taggayt	#REDIRECT											
-sn	20000	700000	Category	#REDIRECT											
-av	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-cbk-zam	20000	700000	Category	#REDIRECT											
-ty	20000	700000	Category,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-srn	20000	700000	Category,Categorie,Guru	#DOORVERWIJZING,#REDIRECT,#STIR		\QZie	hoofdartikel\E		\QZie	ook\E	\QZie	ook\E	\QZie	ook\E	
-kbd	20000	700000	Category	#REDIRECT											
-lo	20000	700000	Category,�ȝ������	#REDIRECT											
-lez	20000	700000	Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-ab	20000	700000	_�_�_���_�____��_�_�,Category,___���_�____��_�	#_�_���_�___�_�,#_�_���_�___�_�_�___�_�___�_�,#REDIRECT		\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E	\Q__��_________���	����_���΄�\E	\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E	\Q_�__.	��_�_�_�_�\E	\Q_�__.	_�_�_�_�_�\E		
-mwl	20000	700000	Category,Catadorie,Categoria	#ANCAMINAR,#REDIRECT,#REDIRECIONAMENTO		\Qprincipal\E,\QVer artigo principal\E,\QAP\E,\QArtigo principal\E,\QMain\E	\QVer	artigos	principais\E	\QVertamb̩m\E,\QAnexo\E,\Qver anexo\E,\QVer p��gina anexa\E		\QVer	tamb̩m\E		
-ltg	20000	700000	Category,Kategoreja,Kategorija	#REDIRECT											
-na	20000	700000	Category	#REDIRECT											
-ig	20000	700000	Category,��t�_,��b̩on�ȍr	#REDIRECT,#K�_F̪											
-kg	20000	700000	Category	#REDIRECT											
-tet	20000	700000	Category,Kategoria	#REDIRECT											
-za	20000	700000	Category,���	#REDIRECT,#�͌�_���											
-kaa	20000	700000	Sanat,Category,Kategoriya,�_�����,_�_�___���	#_�_�_�_�_�,#A̝DAW,#REDIRECT											
-nso	20000	700000	Category,Setensele	#REDIRECT											
-zu	20000	700000	Category	#REDIRECT											
-rmy	20000	700000	Category,Shopni,Categorie	#REDIRECT,#REDIRECTEAZA		\Qarticolprincipal\E,\QAP\E,\QARP\E,\Qarticol principal\E,\Qmain\E	\QVezi articolul principal\E,\QArticol principal\E,\QArticole principale\E		\QSee also\E,\QVezi �i\E,\Qvezi articolul\E	\QVezi	�i\E				
-cu	20000	700000	___���_�____�ۄ�,Category,___���_�____�ۄѐ��	#_�_ʄ�_�_�_�_�_�_�_�_�_�_�_,#REDIRECT											
-tn	20000	700000	Category	#REDIRECT											
-chr	20000	700000	Category	#REDIRECT											
-chy	20000	700000	Category	#REDIRECT											
-got	20000	700000	Category	#REDIRECT											
-sm	20000	700000	Category	#REDIRECT											
-bi	20000	700000	Category	#REDIRECT											
-mo	20000	700000	Category,Categorie	#REDIRECT,#REDIRECTEAZA		\Qarticolprincipal\E,\QAP\E,\QARP\E,\Qarticol principal\E,\Qmain\E	\QVezi articolul principal\E,\QArticol principal\E,\QArticole principale\E		\QSee also\E,\QVezi �i\E,\Qvezi articolul\E	\QVezi	�i\E				
-bm	20000	700000	Category,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-iu	20000	700000	Category	#REDIRECT											
-pih	20000		Category	#REDIRECT											
-ik	20000		Category	#REDIRECT											
-ss	20000		Category	#REDIRECT											
-sd	20000		Category,�_�ɯ���	#����_��,#REDIRECT											
-pnt	20000		Category,�_������_�������_	#REDIRECT											
-cdo	20000		Category	#REDIRECT											
-ee	20000		Category	#REDIRECT											
-ha	20000		Category	#REDIRECT											
-ti	20000		Category	#REDIRECT											
-bxr	20000		Category	#REDIRECT											
-ts	20000		Category	#REDIRECT											
-om	20000		Category	#REDIRECT											
-ks	20000		Category	#REDIRECT											
-ki	20000		Category	#REDIRECT											
-ve	20000		Category	#REDIRECT											
-sg	20000		Category,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-rn	20000		Category	#REDIRECT											
-cr	20000		Category	#REDIRECT											
-dz	20000		Category	#REDIRECT											
-lg	20000		Category	#REDIRECT											
-ak	20000		Category	#REDIRECT											
-ff	20000		Category,Cat̩gorie	#REDIRECT,#REDIRECTION		\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E		\QVoir\E,\QVoir aussi\E		\QVoir aussi\E,\QVegeu tamb̩\E					
-tum	20000		Category	#REDIRECT											
-fj	20000		Category	#REDIRECT											
-st	20000		Category	#REDIRECT											
-tw	20000		Category	#REDIRECT											
-xh	20000		Category	#REDIRECT											
-ch	20000		Category,Katigoria	#REDIRECT											
-ny	20000		Category	#REDIRECT											
-ng	20000		Category	#REDIRECT											
-ii	20000		Category,���	#REDIRECT,#�͌�_���											
-cho	20000		Category	#REDIRECT											
-mh	20000		Category	#REDIRECT											
-aa	20000		Category	#REDIRECT											
-kj	20000		Category	#REDIRECT											
-ho	20000		Category	#REDIRECT											
-mus	20000		Category	#REDIRECT											
-kr	20000		Category	#REDIRECT											
-hz	20000		Category	#REDIRECT											
+en	4600000	300000000	Category	#REDIRECT	Disambiguation pages	\QMain\E	\QMain Article ���\E	"\QSee\E,\QSee also\E,\QFurther2\E,\Qseealso\E,\Qdetails\E,\QFurther\E"	\QSee also\E	\QSee Also\E		
+de	1750000	60000000	"Category,Kategorie"	"#WEITERLEITUNG,#REDIRECT"	Begriffskl�_rung	\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+fr	1500000	80000000	"Category,Cat̩gorie"	"#REDIRECT,#REDIRECTION"	Homonymie	"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+nl	1750000	40000000	"Category,Categorie"	"#DOORVERWIJZING,#REDIRECT"	Wikipedia:Doorverwijspagina	\QZie hoofdartikel\E		\QZie ook\E	\QZie ook\E	\QZie ook\E		
+it	1000000	80000000	"Category,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO"	Disambigua		\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+pl	1000000	50000000	"Category,Kategoria"	"#TAM,#PATRZ,#REDIRECT,#PRZEKIERUJ"	Strony ujednoznaczniaj��ce	"\QVer artigo principal\E,\Qkategoria g���_wna\E,\Qmainsec\E,\Qmain\E"		"\QAnexo\E,\QDetails\E"		\QZobacz te�_\E		
+es	1000000	40000000	"Categor�_a,Category"	"#REDIRECT,#REDIRECCION,#REDIRECCI��N"	Wikipedia:Desambiguaci�_n	\QAP\E	\QArt�_culo principal\E	\QVT\E	"\QV̩ase\E,\QV̩ase tambi̩n\E"	\QV̩ase tambi̩n\E		Anexo;104
+ru	1000000	60000000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"	_�_________�___���__��_� ��_���___�__��	"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+ja	850000	60000000	"��ǋĠ�⫋Ļ,Category"	"�_ċĻ��ۋ�_������,#REDIRECT,#�Ȣ�ہ,�_ďȢ�ہ,#�Ļ��ۋ�_������"	��о�������_���	"\Qmain2\E,\Qmain\E"		"\QSee also\E,\Qseealso\E,\Qsee\E"		"\Q�Т�ۣ��ɍݨ\E,\Q��ď_�\E"		
+pt	750000	40000000	"Category,Categoria"	"#REDIRECT,#REDIRECIONAMENTO"	Desambigua̤̣o	"\Qprincipal\E,\QVer artigo principal\E,\QAP\E,\QArtigo principal\E,\QMain\E"	\QVer artigos principais\E	"\QVertamb̩m\E,\QAnexo\E,\Qver anexo\E,\QVer p��gina anexa\E"		\QVer tamb̩m\E		Anexo;102
+zh	600000	35000000	"Category,�����_,������"	"#REDIRECT,#�����_���"	����_��_�	"\Q���\E,\Q��Ⱦ���ݨ\E,\QMain\E"		"\Q�����\E,\Q��⏤�\E,\Qsee also\E,\QSeealso\E"		"\Q���__���\E,\Q�����\E,\Q�����\E,\Q��ጏ���\E,\Q��Ďб\E,\Q��ď��\E,\Q��⏤�\E,\Q�ɦ���\E,\Q��ď_�\E"		
+sv	1750000	26000000	"Category,Kategori"	"#REDIRECT,#OMDIRIGERING"	F̦rgreningssidor	"\QF̦rdjupning\E,\QHuvudartikel\E"	\QHuvudartikel\E	\QSe �_ven\E	\QSe �_ven\E	\QSe �_ven\E		
+vi	1000000	50000000	"Category,Th���_lo���i"	"#�ԇȥi,#REDIRECT"								
+uk	500000	40000000	"Category,___���_�____�ۄЄ�,___���_�____��_�"	"#_�_���_�___�_���_�___�_�___�_�,#_�_���_�___�_���,#REDIRECT,#_�_�_�_�_�_�_�_�_�_�_�_�_�_�_�,#_�_�_�_�_�_�_�_�"	_�_�___���___�___���__�� ��___�____��___�	"\Q__��_________��� ����_���΄�\E,\QCatmore\E,\QMain\E,\Q_�___�_�_�_�__�Є�_�\E,\Qmain\E,\Q__��_________� ����_���ℏ\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	"\Q_�__. ��_�_�_�_�\E,\Q_�_�__. ��_�_�___� ����_����_\E,\Q_�_�__. ��_�_�___�\E"	"\Q_�__. _�_�_�_�_�\E,\Q_�_�__. _�_�_�___�\E,\Q_�_�__ ��_�_�___�\E,\Q_�_�__�Є�΄��� ��_�_�___�\E"		
+ca	400000	30000000	"Category,Categoria"	#REDIRECT	P��gines de desambiguaci�_	"\Qcategoria principal\E,\QAP\E,\QPrincipal\E,\Qmain\E"	\QArticle principal\E	\QVT\E	\QVegeu tamb̩\E	\QVegeu tamb̩\E		
+no	400000	12000000	"Category,Kategori"	"#REDIRECT,#OMDIRIGERING"	Pekere	"\Qutdypende\E,\Qhoved\E,\QUtdypende artikkel\E,\Qhovedartikkel\E"	"\QSe utdypende artikkel\E,\QHovedartikkel\E,\QUtdypende artikler\E,\QUtdypende artikkel\E"	"\Qse ogs̴\E,\Qse_ogs̴\E,\Qse\E"	"\QUtfyllende artikkel\E,\QSe ogs̴\E"	\QSe ogs̴\E		
+fi	350000	10000000	"Category,Luokka"	"#OHJAUS,#UUDELLEENOHJAUS,#REDIRECT"	T�_smennyssivut	\QP�_�_artikkeli\E	\QP�_�_artikkeli\E	\QKatso my̦s\E	\QKatso my̦s\E	\QKatso my̦s\E		
+cs	300000	12000000	"Category,Kategorie"	"#REDIRECT,#P��ESM�_RUJ"	Rozcestn�_ky	\QHlavn�_ ��l��nek\E	\QHlavn�_ ��l��nek\E	"\Qpodrobn��\E,\Qviz t̩�_\E,\QPodrobn��\E"	\QViz t̩�_\E	\QSouvisej�_c�_ ��l��nky\E		
+hu	250000	15000000	"Category,Kateg�_ria"	"#́TIŔNY̍T́S,#REDIRECT"	Egy̩rtelm��s�_t�� lapok	"\QF��\E,\QB��vebben\E"		"\QL��sd\E,\QL��sd m̩g\E"	\QL��sd m̩g\E	\QL��sd m̩g\E		
+ko	300000	11000000	"Category,��㑴�"	"#REDIRECT,#����_���_��"	�����Γ������Ы_�����	\Q�_���\E		"\Q���_�\E,\Q��_��� ���\E,\Q�����\E"		"\Q������ �_���\E,\Q������ �_���\E"		
+fa	400000	12000000	"Category,������"	"#REDIRECT,#�������ί��ɯ_�ί�"								
+id	350000	9000000	"Category,Kategori"	"#REDIRECT,#ALIH"	Disambiguasi	"\Qutama\E,\Qmain article\E,\QMain\E"		"\QSee\E,\Qvandal\E,\Qsee also\E"		\QLihat pula\E		
+tr	250000	11000000	"Category,Kategori"	"#REDIRECT,#Y��NLEND��RME,#Y��NLEND��R"	Anlam ayr��m��	"\QAnamadde\E,\QAna\E,\Qana madde\E"	"\QAs��l Makale;\E,\QAna Madde\E,\QAs��l makale\E"	"\QSee also\E,\QAyr��ca bak��n��z\E,\QBak��n��z\E"	\Qayr��ca bak��n��z\E	"\QBak��n��z\E,\QAyr��ca Bak��n��z\E"		
+ar	300000	10500000	"Category,�������_�"	"#���_���_��,#REDIRECT"	���_����_�������_�_							
+ro	250000	8750000	"Category,Categorie"	"#REDIRECT,#REDIRECTEAZA"	Dezambiguizare	"\Qarticolprincipal\E,\QAP\E,\QARP\E,\Qarticol principal\E,\Qmain\E"	"\QVezi articolul principal\E,\QArticol principal\E,\QArticole principale\E"		"\QSee also\E,\QVezi �i\E,\Qvezi articolul\E"	\QVezi �i\E		
+sk	200000	6000000	"Category,Kateg�_ria"	"#presmeruj,#REDIRECT"	V�_honky	\QHlavn�_ ��l��nok\E	"\QHlavn�_ ��l��nok o sp̫soboch tla��e pozri\E,\QHlavn�_ ��l��nok\E"	\QPozri aj\E	"\QPozri aj\E,\QPozri ��l��nky\E"	\QPozri aj\E		
+eo	200000	7000000	"Category,Kategorio"	"#ALIDIREKTI,#ALIDIREKTU,#REDIRECT,#AL"								
+da	200000	7000000	"Category,Kategori"	#REDIRECT	Flertydig	"\QUddybende\E,\Quddybende artikel\E,\Qhovedartikel\E,\QMain\E"	\QUddybende artikel\E	\Qse ogs̴\E		\QSe ogs̴\E		
+sr	250000	8750000	"Category,___���_�____��_��_�,Kategorija"	"#_�_�_�_�_�_�_�_�_�_�,#redirect,#_ل�_��Ą�__��_���_�,#REDIRECT,#_���_��Ą�___���_�,#_���_��Ą�__��_���_�,#_ل�_��Ą�___���_�,#_�_�_�_�_�_�_�_�_�"								
+lt	150000	5250000	"Category,Kategorija"	"#REDIRECT,#PERADRESAVIMAS"								
+ms	250000	8750000	"Category,Kategori"	"#REDIRECT,#LENCONG"								
+he	150000	5250000	"Category,_�_�_�_�_�_�_�"	"#_�___�_�_�,#REDIRECT"	___�_�_�_�_�_�_�_�	"\Q_�_�__ ___�_�_�_�\E,\Q_�___�_�_� _�_�_�__ ___�_�_�_�\E"		\Q_�_�_� _�_�\E		\Q_�_�_� _�_�\E		
+eu	200000	7000000	"Category,Kategoria"	"#REDIRECT,#BIRZUZENDU"								
+sl	200000	7000000	"Category,Kategorija"	"#REDIRECT,#PREUSMERITEV"								
+bg	150000	5250000	"Category,___���_�____��_�"	"#REDIRECT,#___�_�,#_���_�___���__��___�___�"								
+kk	200000	7000000	"Sanat,Category,�_��������,_�_�___���"	"#_�_�_�_�_�,#REDIRECT"								
+vo	100000	3500000	"Category,Klad"	#REDIRECT								
+hr	150000	5250000	"Category,Kategorija"	"#REDIRECT,#PREUSMJERI"								
+war	1000000	35000000	"Category,Kaarangay"	#REDIRECT								
+hi	100000	3500000	"Category,�_�����_�����_����"	#REDIRECT								
+et	150000	5250000	"Category,Kategooria"	"#suuna,#REDIRECT"								
+gl	100000	3500000	"Categor�_a,Category,Categoria"	"#REDIRECT,#REDIRECIONAMENTO,#REDIRECCI��N"		"\Qprincipal\E,\QVer artigo principal\E,\QAP\E,\QArtigo principal\E,\QMain\E"	\QVer artigos principais\E	"\QVertamb̩m\E,\QAnexo\E,\Qver anexo\E,\QVer p��gina anexa\E"		\QVer tamb̩m\E		
+az	100000	3500000	"Category,Kateqoriya"	"#��ST��QAM��TL��ND��RM��,#��ST��QAM��TL��ND��R,#REDIRECT"								
+nn	100000	3500000	"Category,Kategori"	"#omdiriger,#REDIRECT"								
+simple	100000	3500000	Category	#REDIRECT	Disambiguation	"\Qdetails\E,\QMain\E"	"\QMain Article ���\E,\QMain article\E"	"\QSee\E,\Qfurther2\E,\QSee also\E,\QFurther2\E,\Qseealso\E,\Qfurther\E,\Qdetails\E,\QOther pages\E,\QFurther\E"	\QSee also\E	"\QSee also\E,\QRelated pages\E,\QSee Also\E,\QOther pages\E"		
+la	100000	3500000	"Category,Categoria"	#REDIRECT								
+el	100000	3500000	"Category,�_������_������"	"#������_���_���������,#REDIRECT"								
+th	100000	3500000	"Category,��ǈ�����ӈ�ǈ����_�_�"	"#�_ۈ�݈��_�����ш�_���,#REDIRECT"								
+new	70000	2450000	"Category,�_�����__�_�"	#REDIRECT								
+roa-rup	500	17500	Category	#REDIRECT								
+oc	100000	3500000	"Category,Categoria"	"#REDIRECT,#REDIRECCION"								
+sh	200000	7000000	"Category,Kategorija"	"#PREUSMERI,#REDIRECT,#PREUSMJERI"								
+ka	100000	3500000	"�Ī�Đ�Ģ��Ӈ�Շĝ��ʇ���Đ,Category"	"#REDIRECT,#��ՇĐ��҇Đ��݇������Đ��݇Đ��ʇ�ч�Ӈ�ԇĐ"								
+mk	75000	2625000	"Category,___���_�____��_��_�"	"#_ل�_�___���__����___��__�,#REDIRECT,#___�_�_�,#_�_�_�_�_�_�___�_�_�_�___�,#_���_�___���__����___��__�"								
+tl	62000	2170000	"Category,Kaurian,Kategorya"	#REDIRECT								
+ht	50000	1750000	"Category,Kategori,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+pms	65000	2275000	"Category,Categor��a,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO"			\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+te	60000	2100000	"Category,�����������ш��"	"#REDIRECT,#��_��_�����������_������������"								
+ta	60000	2100000	"������������,Category"	"#��������������_�������,#REDIRECT"								
+be-x-old	50000	1750000	"Category,___��ℍ____�ۄ܄�"	"#REDIRECT,#_�_���_�___�_��Є�_�___�__��___�"								
+be	75000	2625000	"Category,___��ℍ____�ۄ܄�"	#REDIRECT								
+br	50000	1750000	"Category,Rummad"	"#ADKAS,#REDIRECT"								
+ceb	1000000	35000000	"Category,Kategoriya"	#REDIRECT								
+lv	50000	1750000	"Category,Kategorija"	#REDIRECT								
+sq	50000	1750000	"Category,Kategori,Kategoria"	"#REDIRECT,#RIDREJTO"								
+jv	50000	1750000	"Category,Kategori"	"#REDIRECT,#ALIH"		"\Qutama\E,\Qmain article\E,\QMain\E"		"\QSee\E,\Qvandal\E,\Qsee also\E"		\QLihat pula\E		
+mg	50000	1750000	"Sokajy,Category,Cat̩gorie"	"#FIHODINANA,#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+cy	60000	2100000	"Category,Categori"	"#ailgyfeirio,#REDIRECT,#ail-cyfeirio"								
+lb	40000	1400000	"Category,Kategorie"	"#VIRULEEDUNG,#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+mr	40000	1400000	"Category,�_��_�����_�"	"#REDIRECT,#�_�����_�����_��_��_��_�����__����_��_�,#�_�����_��_�����_��_��_�����__����_��_�"								
+is	40000	1400000	"Category,Flokkur"	"#TILV̍SUN,#REDIRECT,#tilv�_sun"								
+bs	50000	1750000	"Category,Kategorija"	"#REDIRECT,#PREUSMJERI"								
+yo	30000	1050000	"Category,�����ka"	#REDIRECT								
+an	30000	1050000	"Categor�_a,Category"	"#REENDRECERA,#REDIRECT,#REDIRECCION,#ENDRECERA,#REDIRECCI��N"		\QAP\E	\QArt�_culo principal\E	\QVT\E	"\QV̩ase\E,\QV̩ase tambi̩n\E"	\QV̩ase tambi̩n\E		
+lmo	30000	1050000	"Category,Categuria,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO"			\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+hy	125000	4375000	"Category,������ʹͣ�������"	"#REDIRECT,#�_�͐�����������"								
+fy	30000	1050000	"Category,Kategory"	#REDIRECT								
+bpy	20000	700000	"�_��__�_�,Category,�__��_�_�__�_�����_�����_����"	#REDIRECT								
+ml	20000	700000	"��������_��_��ш��,Category,������,�����_��ш����ш��,���"	"#REDIRECT,#��_�����������_�����_�����������و�_,#��_�����������_�����_�����������و�����"								
+pnb	20000	700000	Category	#REDIRECT								
+sw	20000	700000	"Category,Jamii"	#REDIRECT								
+bn	20000	700000	"Category,�__��_�_�__�_�����_�����_����"	#REDIRECT								
+io	20000	700000	"Category,Kategorio"	#REDIRECT								
+af	20000	700000	"Category,Kategorie"	"#AANSTUUR,#REDIRECT"								
+gu	20000	700000	"Category,����Ǎ������������"	#REDIRECT								
+zh-yue	20000	700000	"Category,�����_"	#REDIRECT								
+ne	20000	700000	"Category,�_�����_�����_����"	#REDIRECT								
+nds	20000	700000	"Category,Kategorie"	"#WEITERLEITUNG,#wiederleiden,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+ur	20000	700000	"Category,�_�ɯ��"	#REDIRECT								
+ku	20000	700000	"Category,Kategor̨"	#REDIRECT								
+uz	20000	700000	"Category,Kategoriya,Turkum"	#REDIRECT								
+ast	20000	700000	"Categor�_a,Category"	#REDIRECT								
+scn	20000	700000	"Category,Catigur��a,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO"			\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+su	20000	700000	"Category,Kategori"	"#REDIRECT,#ALIH"		"\Qutama\E,\Qmain article\E,\QMain\E"		"\QSee\E,\Qvandal\E,\Qsee also\E"		\QLihat pula\E		
+qu	20000	700000	"Categor�_a,Category,Katiguriya"	"#REDIRECT,#REDIRECCION,#REDIRECCI��N,#PUSAPUNA"		\QAP\E	\QArt�_culo principal\E	\QVT\E	"\QV̩ase\E,\QV̩ase tambi̩n\E"	\QV̩ase tambi̩n\E		
+diq	20000	700000	Category	#REDIRECT								
+ba	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+tt	20000	700000	"Țrkem,Category,_��_�_�__,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT,#_�_���_�_��"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+my	20000	700000	Category	#REDIRECT								
+ga	20000	700000	"Rang,Category,Catag�_ir"	"#athsheoladh,#REDIRECT"								
+cv	20000	700000	"Category,___���_�____��_�,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+ia	20000	700000	"Category,Categoria"	#REDIRECT								
+nap	20000	700000	"Categur��a,Category,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO"			\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+bat-smg	20000	700000	"Category,Kateguor��j��,Kategorija"	"#REDIRECT,#PERADRESAVIMAS"								
+map-bms	20000	700000	"Category,Kategori"	"#REDIRECT,#ALIH"		"\Qutama\E,\Qmain article\E,\QMain\E"		"\QSee\E,\Qvandal\E,\Qsee also\E"		\QLihat pula\E		
+wa	20000	700000	"Category,Categoreye,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+als	20000	700000	"Category,Kategorie"	"#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+kn	20000	700000	"Category,�_��_��_��_�"	#REDIRECT								
+am	20000	700000	"Category,����ܡ��"	#REDIRECT								
+gd	20000	700000	Category	#REDIRECT								
+bug	20000	700000	Category	#REDIRECT								
+tg	20000	700000	"Category,_҄Ą����_"	#REDIRECT								
+zh-min-nan	20000	700000	Category	#REDIRECT								
+yi	20000	700000	"Category,_�_�_�_�_�_�_�_�_�,_�_���_�_�_�_���_�_�_�,_�_�_�_�_�_�_�"	"#_�___�_�_�,#REDIRECT,#_�_�_�_�_�_�_�___�_�_�"		"\Q_�_�__ ___�_�_�_�\E,\Q_�___�_�_� _�_�_�__ ___�_�_�_�\E"		\Q_�_�_� _�_�\E		\Q_�_�_� _�_�\E		
+vec	20000	700000	"Category,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO,#VARDA"			\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+sco	20000	700000	Category	#REDIRECT								
+hif	20000	700000	Category	#REDIRECT								
+roa-tara	20000	700000	Category	#REDIRECT								
+os	20000	700000	"Category,___���_�____��_�,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT,#_�_�_�_�_�_�_�"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+arz	20000	700000	"Category,�������_�"	"#���_���_��,#REDIRECT"								
+nah	20000	700000	"Categor�_a,Category,Neneuhc��y��tl"	"#REDIRECT,#REDIRECCION,#REDIRECCI��N"		\QAP\E	\QArt�_culo principal\E	\QVT\E	"\QV̩ase\E,\QV̩ase tambi̩n\E"	\QV̩ase tambi̩n\E		
+mzn	20000	700000	"Category,������,����"	"#REDIRECT,#�������ί��ɯ_�ί�,#������"								
+sah	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+ky	20000	700000	Category	#REDIRECT								
+mn	20000	700000	"Category,_�_____�_�_�_�"	#REDIRECT								
+sa	20000	700000	"Category,�_��_�����_ш_�,�_�����_�����_����"	"#REDIRECT,#�_�����_��_�����_��_��__����_��_�"								
+pam	20000	700000	Category	#REDIRECT								
+hsb	20000	700000	"Category,Kategorie,Kategorija"	"#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+li	20000	700000	"Category,Categorie,Kategorie"	"#DOORVERWIJZING,#REDIRECT"		\QZie hoofdartikel\E		\QZie ook\E	\QZie ook\E	\QZie ook\E		
+mi	20000	700000	Category	#REDIRECT								
+si	20000	700000	"Category,�����_�ۍ��Ȉ�ۈ�Ȉ�_��ψ��"	"#�����Ɉ�Ո����ψ���ӈ��,#REDIRECT"								
+co	20000	700000	Category	#REDIRECT								
+ckb	20000	700000	"Category,�_���"	#REDIRECT								
+gan	20000	700000	"�����_������,Category,�����_,������"	"#REDIRECT,#�����_���"								
+glk	20000	700000	"Category,������"	"#REDIRECT,#�������ί��ɯ_�ί�"								
+bo	20000	700000	Category	#REDIRECT								
+fo	20000	700000	"Category,B�_lkur"	#REDIRECT								
+bar	20000	700000	"Category,Kategorie"	"#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+bcl	20000	700000	"Category,Kategorya"	#REDIRECT								
+ilo	20000	700000	Category	#REDIRECT								
+mrj	20000	700000	"Category,___���_�____��_�,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+se	20000	700000	Category	#REDIRECT								
+fiu-vro	20000	700000	"Category,Kat̵gooria,Kategooria"	"#suuna,#saadaq,#REDIRECT"								
+nds-nl	20000	700000	"Category,Categorie,Kategorie,Kattegerie"	"#DOORVERWIJZING,#REDIRECT,#DEURVERWIEZING"		\QZie hoofdartikel\E		\QZie ook\E	\QZie ook\E	\QZie ook\E		
+tk	20000	700000	"Category,Kategori�_a"	#REDIRECT								
+vls	20000	700000	"Category,Categorie"	"#DOORVERWIJZING,#REDIRECT"		\QZie hoofdartikel\E		\QZie ook\E	\QZie ook\E	\QZie ook\E		
+ps	20000	700000	"Category,��󐯫���_�_��"	#REDIRECT								
+gv	20000	700000	"Category,Ronney"	#REDIRECT								
+rue	20000	700000	"Category,___���_���__�ۄЄ�,___���_�____�ۄЄ�,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT,#_�_�_�_�_�_�_�_�_�_�_�_�_�_�_�,#_�_�_�_�_�_�_�_�"		"\Q__��_________��� ����_���΄�\E,\QCatmore\E,\QMain\E,\Q_�___�_�_�_�__�Є�_�\E,\Qmain\E,\Q__��_________� ����_���ℏ\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	"\Q_�__. ��_�_�_�_�\E,\Q_�_�__. ��_�_�___� ����_����_\E,\Q_�_�__. ��_�_�___�\E"	"\Q_�_�__. _�_�_�___�\E,\Q_�_�__ ��_�_�___�\E,\Q_�__. _�_�_�_�_�\E,\Q_�_�__�Є�΄��� ��_�_�___�\E"		
+dv	20000	700000	"Category,___�_�_�_�_�"	#REDIRECT								
+nrm	20000	700000	Category	#REDIRECT								
+pag	20000	700000	Category	#REDIRECT								
+pa	20000	700000	"Category,���_���������������"	#REDIRECT								
+koi	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+rm	20000	700000	"Category,Categoria"	"#REDIRECT,#RENVIAMENT"								
+km	20000	700000	"Category,�_ɇ٠�__�_��_���܇_ۇ�Շ__�_ȇ_�,�_ɇ٠�_҇_��_���܇_���Շ_҇_��_ۇ�܇_ۇ�Շ__�_ȇ_�,�_ɇ٠�__�_��_���܇_���Շ_҇_��_ۇ�܇_ۇ�Շ__�_ȇ_�"	"#�_Ӈ�Շ__�__�__�_ԇ_�_��_��٠�_�_ԇ��,#�_Ӈ�Շ__�__�__�_ɇ٠�__�_�_��__�_�,#�_Ӈ�Շ_��__�__�_ԇ_�_��_��٠�_�,#�_Ӈ_��Շ_��__�_҇_Ӈ_҇�Շ_�,#REDIRECT,#�_Ӈ�Շ__�__�__�_ԇ_�_��_��٠�_�,#�_Ӈ�Շ_��__�__�_ԇ_�_��_��٠�_�_ԇ��"								
+kv	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+udm	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+csb	20000	700000	"Category,Kateg�_r��j̫,Kategoria"	"#TAM,#PATRZ,#REDIRECT,#PRZEKIERUJ"		"\QVer artigo principal\E,\Qkategoria g���_wna\E,\Qmainsec\E,\Qmain\E"		"\QAnexo\E,\QDetails\E"		\QZobacz te�_\E		
+mhr	20000	700000	"Category,___���_�____��_�__,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+fur	20000	700000	"Category,Categorie,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO"			\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+mt	20000	700000	"Category,Kategorija"	"#REDIRECT,#RINDIRIZZA"								
+zea	20000	700000	"Category,Categorie"	"#DOORVERWIJZING,#REDIRECT"		\QZie hoofdartikel\E		\QZie ook\E	\QZie ook\E	\QZie ook\E		
+wuu	20000	700000	"Category,������"	"#REDIRECT,#�����_���"								
+lij	20000	700000	"Category,Categor̨a,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO"			\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+ug	20000	700000	"������,Category"	#REDIRECT								
+lad	20000	700000	"Categor�_a,Category,Kateggor�_a,Kat��ggor�_a"	"#DIRECCI��N,#REDIRECT,#REDIRECCION,#DIRIJAR,#REDIRECCI��N"		\QAP\E	\QArt�_culo principal\E	\QVT\E	"\QV̩ase\E,\QV̩ase tambi̩n\E"	\QV̩ase tambi̩n\E		
+pi	20000	700000	"Category,�_��_��__�__�_�"	#REDIRECT								
+xmf	20000	700000	"�Ī�Đ�Ģ��Ӈ�Շĝ��ʇ���Đ,Category"	"#REDIRECT,#��ՇĐ��҇Đ��݇������Đ��݇Đ��ʇ�ч�Ӈ�ԇĐ"								
+sc	20000	700000	"Category,Categoria"	#REDIRECT								
+bh	20000	700000	"Category,�_�����_�����_����"	#REDIRECT								
+zh-classical	20000	700000	Category	#REDIRECT								
+or	20000	700000	"Category,�¦�_��¡�_��£�_�,������_��_���"	"#��_�_�����و�_�£���,#REDIRECT"								
+nov	20000	700000	Category	#REDIRECT								
+ksh	20000	700000	"Saachjrupp,Category,Saachjrop,Kategorie,Sachjrop,Katejori,Kattejori,Saachjropp"	"#WEITERLEITUNG,#��MLEIDUNG,#LEIDT_��M_OP,#��MLEIDE_OP,#REDIRECT,#��MLEIDE"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+ang	20000	700000	"Flocc,Category"	#REDIRECT								
+so	20000	700000	Category	#REDIRECT								
+kw	20000	700000	"Category,Klass,Class"	#REDIRECT								
+stq	20000	700000	"Category,Kategorie"	"#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+nv	20000	700000	"Category,T�_��������h��gi_��t�_̩ego"	#REDIRECT								
+hak	20000	700000	Category	#REDIRECT								
+frr	20000	700000	"Category,Kategorie"	"#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+ay	20000	700000	"Categor�_a,Category"	"#REDIRECT,#REDIRECCION,#REDIRECCI��N"		\QAP\E	\QArt�_culo principal\E	\QVT\E	"\QV̩ase\E,\QV̩ase tambi̩n\E"	\QV̩ase tambi̩n\E		
+frp	20000	700000	"Category,Cat̬gorie,Cat̩gorie"	"#REDIR��CCION,#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+ext	20000	700000	Category	#REDIRECT								
+szl	20000	700000	"Category,Kategoria"	"#TAM,#PATRZ,#REDIRECT,#PRZEKIERUJ"		"\QVer artigo principal\E,\Qkategoria g���_wna\E,\Qmainsec\E,\Qmain\E"		"\QAnexo\E,\QDetails\E"		\QZobacz te�_\E		
+pcd	20000	700000	"Category,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+ie	20000	700000	"Category,Categorie"	#REDIRECT								
+gag	20000	700000	"Category,Kategoriya,Kategori"	"#Y��NNEND��R,#REDIRECT,#Y��NNEND��RM��KLER,#Y��NLEND��RME,#Y��NLEND��R,#Y��NNEND��RM��"		"\QAnamadde\E,\QAna\E,\Qana madde\E"	"\QAs��l Makale;\E,\QAna Madde\E,\QAs��l makale\E"	"\QSee also\E,\QAyr��ca bak��n��z\E,\QBak��n��z\E"	\Qayr��ca bak��n��z\E	"\QBak��n��z\E,\QAyr��ca Bak��n��z\E"		
+haw	20000	700000	"M��hele,Category"	#REDIRECT								
+xal	20000	700000	"_�___�,Category,���_�,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+ln	20000	700000	"Category,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+rw	20000	700000	Category	#REDIRECT								
+pdc	20000	700000	"Category,Abdeeling,Kategorie"	"#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+pfl	20000	700000	"Category,Kategorie"	"#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+vep	20000	700000	"Category,Kategorii,Kategooria"	"#suuna,#REDIRECT"								
+krc	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+crh	20000	700000	"Category,Kategoriya,___���_�____��_�"	#REDIRECT								
+eml	20000	700000	"Category,Categoria"	"#RINVIO,#REDIRECT,#RINVIA,#RIMANDO"			\QVedi anche\E	"\Qvedi anche\E,\Qmain\E"		\QVoci correlate\E		
+gn	20000	700000	"Categor�_a,Category,��emohenda"	"#REDIRECT,#REDIRECCION,#REDIRECCI��N"		\QAP\E	\QArt�_culo principal\E	\QVT\E	"\QV̩ase\E,\QV̩ase tambi̩n\E"	\QV̩ase tambi̩n\E		
+ace	20000	700000	"Category,Kawan,Kategori"	"#REDIRECT,#ALIH"		"\Qutama\E,\Qmain article\E,\QMain\E"		"\QSee\E,\Qvandal\E,\Qsee also\E"		\QLihat pula\E		
+to	20000	700000	Category	#REDIRECT								
+ce	20000	700000	"Category,___�_�_�___���,_�___�_�,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#_�l_���_��Ʉ�_�_�_�___���\,#REDIRECT,,#�Ʉ�_�_�_�____"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+kl	20000	700000	"Category,Sumut_atassuseq,Kategori"	#REDIRECT		"\QUddybende\E,\Quddybende artikel\E,\Qhovedartikel\E,\QMain\E"	\QUddybende artikel\E	\Qse ogs̴\E		\QSe ogs̴\E		
+arc	20000	700000	"Category,��������"	"#REDIRECT,#�������Ն�"								
+myv	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+dsb	20000	700000	"Category,Kategorie,Kategorija"	"#WEITERLEITUNG,#REDIRECT"		\QHauptartikel\E	"\Q��� Hauptartikel\E,\QHauptartikel\E"	\QSiehe auch\E	\QSiehe auch\E	\QSiehe auch\E		
+as	20000	700000	"Category,�_�����������_����,�_�����_�����_����,�_�����_�����_����"	#REDIRECT								
+bjn	20000	700000	"Category,Kategori,Tumbung"	"#REDIRECT,#ALIH"		"\Qutama\E,\Qmain article\E,\QMain\E"		"\QSee\E,\Qvandal\E,\Qsee also\E"		\QLihat pula\E		
+pap	20000	700000	Category	#REDIRECT								
+tpi	20000	700000	Category	#REDIRECT								
+lbe	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+mdf	20000	700000	"Category,___���_�____��_�_�,___���_�____��_�"	#REDIRECT								
+wo	20000	700000	"Category,W��ll,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+jbo	20000	700000	Category	#REDIRECT								
+kab	20000	700000	"Category,Taggayt"	#REDIRECT								
+sn	20000	700000	Category	#REDIRECT								
+av	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+cbk-zam	20000	700000	Category	#REDIRECT								
+ty	20000	700000	"Category,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+srn	20000	700000	"Category,Categorie,Guru"	"#DOORVERWIJZING,#REDIRECT,#STIR"		\QZie hoofdartikel\E		\QZie ook\E	\QZie ook\E	\QZie ook\E		
+kbd	20000	700000	Category	#REDIRECT								
+lo	20000	700000	"Category,�ȝ������"	#REDIRECT								
+lez	20000	700000	"Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+ab	20000	700000	"_�_�_���_�____��_�_�,Category,___���_�____��_�"	"#_�_���_�___�_���,#_�_���_�___�_���_�___�_�___�_�,#REDIRECT"		"\Q__��_________��� ����_���΄�\E,\QMain\E,\Qmain\E"	\Q__��_________��� ����_���΄�\E	"\Q��____���_� ��_�_�_�_�\E,\Q_�__. ��_�_�_�_�\E,\Qsee\E,\Qalso\E,\Qsee also\E"	\Q_�__. ��_�_�_�_�\E	\Q_�__. _�_�_�_�_�\E		
+mwl	20000	700000	"Category,Catadorie,Categoria"	"#ANCAMINAR,#REDIRECT,#REDIRECIONAMENTO"		"\Qprincipal\E,\QVer artigo principal\E,\QAP\E,\QArtigo principal\E,\QMain\E"	\QVer artigos principais\E	"\QVertamb̩m\E,\QAnexo\E,\Qver anexo\E,\QVer p��gina anexa\E"		\QVer tamb̩m\E		
+ltg	20000	700000	"Category,Kategoreja,Kategorija"	#REDIRECT								
+na	20000	700000	Category	#REDIRECT								
+ig	20000	700000	"Category,��t�_,��b̩on�ȍr"	"#REDIRECT,#K�_F̪"								
+kg	20000	700000	Category	#REDIRECT								
+tet	20000	700000	"Category,Kategoria"	#REDIRECT								
+za	20000	700000	"Category,������"	"#REDIRECT,#�����_���"								
+kaa	20000	700000	"Sanat,Category,Kategoriya,�_��������,_�_�___���"	"#_�_�_�_�_�,#A̝DAW,#REDIRECT"								
+nso	20000	700000	"Category,Setensele"	#REDIRECT								
+zu	20000	700000	Category	#REDIRECT								
+rmy	20000	700000	"Category,Shopni,Categorie"	"#REDIRECT,#REDIRECTEAZA"		"\Qarticolprincipal\E,\QAP\E,\QARP\E,\Qarticol principal\E,\Qmain\E"	"\QVezi articolul principal\E,\QArticol principal\E,\QArticole principale\E"		"\QSee also\E,\QVezi �i\E,\Qvezi articolul\E"	\QVezi �i\E		
+cu	20000	700000	"___���_�____�ۄ�,Category,___���_�____�ۄѐ��"	"#_�_ʄ�_�_�_�_�_�_�_�_�_�_��_,#REDIRECT"								
+tn	20000	700000	Category	#REDIRECT								
+chr	20000	700000	Category	#REDIRECT								
+chy	20000	700000	Category	#REDIRECT								
+got	20000	700000	Category	#REDIRECT								
+sm	20000	700000	Category	#REDIRECT								
+bi	20000	700000	Category	#REDIRECT								
+mo	20000	700000	"Category,Categorie"	"#REDIRECT,#REDIRECTEAZA"		"\Qarticolprincipal\E,\QAP\E,\QARP\E,\Qarticol principal\E,\Qmain\E"	"\QVezi articolul principal\E,\QArticol principal\E,\QArticole principale\E"		"\QSee also\E,\QVezi �i\E,\Qvezi articolul\E"	\QVezi �i\E		
+bm	20000	700000	"Category,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+iu	20000	700000	Category	#REDIRECT								
+pih	20000	700000	Category	#REDIRECT								
+ik	20000	700000	Category	#REDIRECT								
+ss	20000	700000	Category	#REDIRECT								
+sd	20000	700000	"Category,�_�ɯ���"	"#������_��,#REDIRECT"								
+pnt	20000	700000	"Category,�_������_�������_"	#REDIRECT								
+cdo	20000	700000	Category	#REDIRECT								
+ee	20000	700000	Category	#REDIRECT								
+ha	20000	700000	Category	#REDIRECT								
+ti	20000	700000	Category	#REDIRECT								
+bxr	20000	700000	Category	#REDIRECT								
+ts	20000	700000	Category	#REDIRECT								
+om	20000	700000	Category	#REDIRECT								
+ks	20000	700000	Category	#REDIRECT								
+ki	20000	700000	Category	#REDIRECT								
+ve	20000	700000	Category	#REDIRECT								
+sg	20000	700000	"Category,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+rn	20000	700000	Category	#REDIRECT								
+cr	20000	700000	Category	#REDIRECT								
+dz	20000	700000	Category	#REDIRECT								
+lg	20000	700000	Category	#REDIRECT								
+ak	20000	700000	Category	#REDIRECT								
+ff	20000	700000	"Category,Cat̩gorie"	"#REDIRECT,#REDIRECTION"		"\QLoupe\E,\QArticle d̩taill̩\E,\QArticle connexe\E,\Qloupe\E,\QPrincipal\E"		"\QVoir\E,\QVoir aussi\E"		"\QVoir aussi\E,\QVegeu tamb̩\E"		
+tum	20000	700000	Category	#REDIRECT								
+fj	20000	700000	Category	#REDIRECT								
+st	20000	700000	Category	#REDIRECT								
+tw	20000	700000	Category	#REDIRECT								
+xh	20000	700000	Category	#REDIRECT								
+ch	20000	700000	"Category,Katigoria"	#REDIRECT								
+ny	20000	700000	Category	#REDIRECT								
+ng	20000	700000	Category	#REDIRECT								
+ii	20000	700000	"Category,������"	"#REDIRECT,#�����_���"								
+cho	20000	700000	Category	#REDIRECT								
+mh	20000	700000	Category	#REDIRECT								
+aa	20000	700000	Category	#REDIRECT								
+kj	20000	700000	Category	#REDIRECT								
+ho	20000	700000	Category	#REDIRECT								
+mus	20000	700000	Category	#REDIRECT								
+kr	20000	700000	Category	#REDIRECT								
+hz	20000	700000	Category	#REDIRECT								
