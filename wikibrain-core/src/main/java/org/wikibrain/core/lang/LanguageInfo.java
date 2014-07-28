@@ -72,6 +72,9 @@ public class LanguageInfo {
     private Pattern seeAlsoInlinePattern = null;
     private Pattern seeAlsoHeaderPattern = null;
 
+    private int numLinks;
+    private int numArticles;
+
     private LanguageInfo(Language language) {
         this.language = language;
     }
@@ -265,7 +268,11 @@ public class LanguageInfo {
                 info.setAlternativeArticleNamespaces(tokens[i]);
             } else {
                 try {
-                    BeanUtils.setProperty(info, fields[i], csv2List(tokens[i]));
+                    if (fields[i].startsWith("num")) {
+                        BeanUtils.setProperty(info, fields[i], Integer.valueOf(tokens[i]));
+                    } else {
+                        BeanUtils.setProperty(info, fields[i], csv2List(tokens[i]));
+                    }
                 } catch (IllegalAccessException e) {
                     throw new WikiBrainException("unknown property in LanguageInfo: " + fields[i]);
                 } catch (InvocationTargetException e) {

@@ -13,8 +13,10 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.MetaInfo;
 
 import java.io.IOException;
+import java.nio.channels.Pipe;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -34,6 +36,7 @@ public class PipelineLoader {
     private final LanguageSet langs;
     private final LinkedHashMap<String, PipelineStage> stages = new LinkedHashMap<String, PipelineStage>();
     private final Map<String, List<String>> groups = new HashMap<String, List<String>>();
+    private final DiagnosticDao diagnosticDao;
     private boolean forceRerun = false;
 
     public PipelineLoader(Env env) throws ConfigurationException, DaoException, ClassNotFoundException, InterruptedException {
@@ -44,6 +47,8 @@ public class PipelineLoader {
         MetaInfoDao metaDao = env.getConfigurator().get(MetaInfoDao.class);
         this.langs = env.getLanguages();
         this.state = metaDao.getAllCummulativeInfo();
+        this.diagnosticDao = env.getConfigurator().get(DiagnosticDao.class);
+
         initConfig(env.getConfiguration());
         if (args == null) {
             if (langs.size() == 0) {
@@ -57,17 +62,67 @@ public class PipelineLoader {
         setStageArguments(args);
     }
 
-
-    public void run(String [] args) throws IOException, InterruptedException {
-        LOG.info("Beginning loading");
+    public void dryRun(String [] args) throws IOException, InterruptedException {
+        for (PipelineStage stage : stages.values()) {
+            stage.reset();
+            stage.setDryRun(true);
+        }
+        LOG.info("Beginning dry run");
         for (PipelineStage stage : stages.values()) {
             if (stage.getShouldRun() != null && stage.getShouldRun()) {
-                LOG.info("Beginning stage " + stage.getName());
-                stage.runWithDependenciesIfNeeded(args, forceRerun);
-                LOG.info("Successfully completed stage " + stage.getName());
+                try {
+                    stage.runWithDependenciesIfNeeded(args, forceRerun);
+                } catch (StageFailedException e) {
+                    throw new IllegalStateException(e); // shouldn't happen
+                }
             }
         }
-        LOG.info("Loading successfully finished");
+        LOG.info("Ended dry run");
+        for (PipelineStage stage : stages.values()) {
+            stage.reset();
+            stage.setDryRun(true);
+        }
+    }
+
+    public void run(String [] args) throws IOException, InterruptedException, StageFailedException {
+        for (PipelineStage stage : stages.values()) {
+            stage.reset();
+        }
+        LOG.info("Beginning loading");
+        try {
+            for (PipelineStage stage : stages.values()) {
+                if (stage.getShouldRun() != null && stage.getShouldRun()) {
+                    LOG.info("Beginning stage " + stage.getName());
+                    stage.runWithDependenciesIfNeeded(args, forceRerun);
+                    LOG.info("Successfully completed stage " + stage.getName());
+                }
+            }
+            LOG.info("Loading successfully finished");
+        } finally {
+            quietlySaveDiagnostics();
+        }
+    }
+
+    private void quietlySaveDiagnostics() {
+        try {
+            DiagnosticReport report = new DiagnosticReport();
+            for (PipelineStage stage : stages.values()) {
+                if (stage != null && stage.hasBeenRun()) {
+                    StageDiagnostic sd = new StageDiagnostic(
+                            stage.getName(),
+                            langs,
+                            stage.getElapsedSeconds(),
+                            report.getSingleCoreSpeed(),
+                            report.getMultiCoreSpeed(),
+                            -1.0
+                    );
+                    sd.setSucceeded(stage.getSucceeded());
+                    diagnosticDao.saveQuietly(sd);
+                }
+            }
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "Diagnostics save failed (this should be harmless):", e);
+        }
     }
 
     public void initConfig(Configuration config) throws ClassNotFoundException {

@@ -8,6 +8,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.loader.pipeline.PipelineLoader;
 import org.wikibrain.loader.pipeline.StageArgs;
+import org.wikibrain.loader.pipeline.StageFailedException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -89,6 +90,9 @@ public class Loader {
             e.printStackTrace();
             System.err.println("Invalid arguments: " + e.getMessage());
             new HelpFormatter().printHelp("PipelineLoader", options);
+            System.exit(1);
+        } catch (StageFailedException e) {
+            System.err.println("Stage " + e.getStage().getName() + " failed with exit code " + e.getExitCode());
             System.exit(1);
         }
     }

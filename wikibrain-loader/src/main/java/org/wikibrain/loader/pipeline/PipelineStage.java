@@ -49,9 +49,35 @@ public class PipelineStage {
     private MetaInfo loadedInfo;
 
     /**
+     * If true, don't actually run things. Just record what you would have run.
+     */
+    private boolean dryRun = false;
+
+    /**
+     * Arguments used during the previous run.
+     * Null indicates that the stage was not run.
+     */
+    private String actualArgs[] = null;
+
+    /**
      * Whether or not the stage has already been run this Pipeline execution.
      */
     private boolean hasBeenRun = false;
+
+    /**
+     * Time the stage started.
+     */
+    private Date startTime = null;
+
+    /**
+     * Time the stage required.
+     */
+    private double elapsedSeconds = 0;
+
+    /**
+     * Whether the stage succeded or failed
+     */
+    private Boolean succeeded = null;
 
     public PipelineStage(Config config, Collection<PipelineStage> previousStages, Map<String, MetaInfo> loadedInfo) throws ClassNotFoundException {
         this.name = config.getString("name");
@@ -90,7 +116,7 @@ public class PipelineStage {
         }
     }
 
-    public void runWithDependenciesIfNeeded(String [] cmdLineArgs, boolean forceRerun) throws IOException, InterruptedException {
+    public void runWithDependenciesIfNeeded(String [] cmdLineArgs, boolean forceRerun) throws IOException, InterruptedException, StageFailedException {
         for (PipelineStage stage : dependsOn) {
             stage.runWithDependenciesIfNeeded(cmdLineArgs, forceRerun);
         }
@@ -99,23 +125,32 @@ public class PipelineStage {
         }
     }
 
-    public void run(String [] cmdLineArgs) throws IOException, InterruptedException {
-        String [] args;
+    public void run(String [] cmdLineArgs) throws IOException, InterruptedException, StageFailedException {
         if (argsOverride == null) {
-            args = ArrayUtils.addAll(cmdLineArgs, extraArgs);
+            actualArgs = ArrayUtils.addAll(cmdLineArgs, extraArgs);
         } else {
-            args = ArrayUtils.addAll(cmdLineArgs, argsOverride);
+            actualArgs = ArrayUtils.addAll(cmdLineArgs, argsOverride);
         }
-        Process p = JvmUtils.launch(klass, args);
-        System.err.println("FOOO: " + klass + ", " + Arrays.toString(args));
 
-        int retVal = p.waitFor();
-        if (retVal != 0) {
-            System.err.println("command failed with exit code " + retVal + " : ");
-            System.err.println("ABORTING!");
-            System.exit(retVal);
+        if (!dryRun) {
+            startTime = new Date();
+            long before = System.currentTimeMillis();
+            Process p = JvmUtils.launch(klass, actualArgs);
+            int retVal = p.waitFor();
+            if (retVal != 0) {
+                succeeded = false;
+                throw new StageFailedException(this, retVal);
+            }
+            succeeded = true;
+            long after = System.currentTimeMillis();
+            elapsedSeconds = (after - before) / 1000.0;
         }
         hasBeenRun = true;
+    }
+
+    public void setDryRun(boolean dryRun) {
+        reset();
+        this.dryRun = dryRun;
     }
 
     public String getName() {
@@ -156,7 +191,27 @@ public class PipelineStage {
                 '}';
     }
 
+    public void reset() {
+        dryRun = false;
+        hasBeenRun = false;
+        argsOverride = null;
+    }
 
+    public String[] getActualArgs() {
+        return actualArgs;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public double getElapsedSeconds() {
+        return elapsedSeconds;
+    }
+
+    public Boolean getSucceeded() {
+        return succeeded;
+    }
 
     private PipelineStage getStage(Collection<PipelineStage> previousStages, String stage) {
         for (PipelineStage s : previousStages) {
