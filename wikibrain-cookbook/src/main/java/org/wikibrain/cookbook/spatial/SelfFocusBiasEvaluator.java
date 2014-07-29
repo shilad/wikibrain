@@ -70,6 +70,9 @@ public class SelfFocusBiasEvaluator {
 
     public Map<Integer, Integer> evaluate(Language lang) throws DaoException, IOException{
         this.lang = lang;
+        String mostInlinkPage = "";
+        String mostInlinkLang = "";
+        int maxInlink = 0;
 
         this.polygons = sdDao.getAllGeometriesInLayer(polygonLayer, "earth");
         LOG.info(String.format("Finish loading %d polygons", polygons.size()));
@@ -97,6 +100,11 @@ public class SelfFocusBiasEvaluator {
                         counter ++;
                         i.next();
                     }
+                    if(counter > maxInlink ){
+                        maxInlink = counter;
+                        mostInlinkLang = lang.getEnLangName();
+                        mostInlinkPage = upDao.getById(c, WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+                    }
                     if(polygonInlinkMap.containsKey(entry.getKey())){
                         polygonInlinkMap.put(entry.getKey(), polygonInlinkMap.get(entry.getKey()) + counter);
                     }
@@ -117,6 +125,7 @@ public class SelfFocusBiasEvaluator {
             System.out.printf("finished processing polygon %d out of %d \n", polygonCounter, polygons.size());
 
         }
+        System.out.printf("Most linked page is %s from %s with %d in links\n", mostInlinkPage, mostInlinkLang, maxInlink);
         return  polygonInlinkMap;
 
     }
