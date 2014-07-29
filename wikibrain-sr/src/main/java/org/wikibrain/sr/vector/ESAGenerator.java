@@ -27,6 +27,7 @@ import org.wikibrain.sr.utils.Leaderboard;
 import org.wikibrain.sr.utils.SimUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -44,11 +45,35 @@ public class ESAGenerator implements VectorGenerator {
     private final LocalPageDao pageDao;
 
     private WpIdFilter conceptFilter = null;
+    private TIntSet blackListSet;
+    private final String blackListFilePath;
 
-    public ESAGenerator(Language language, LocalPageDao pageDao, LuceneSearcher searcher) {
+    public ESAGenerator(Language language, LocalPageDao pageDao, LuceneSearcher searcher, String blackListFilePath) {
         this.language = language;
         this.pageDao = pageDao;
         this.searcher = searcher;
+        this.blackListFilePath = blackListFilePath;
+        try{
+            createBlackListSet();
+        } catch (Exception e){
+            LOG.info("Could not create Blacklist Set");
+        }
+    }
+
+    private void createBlackListSet() throws FileNotFoundException {
+        blackListSet = new TIntHashSet();
+        if(blackListFilePath == null || blackListFilePath.equals("")) {
+            LOG.info("Skipping blacklist creation; no blacklist file specified.");
+            return;
+        }
+
+        File file = new File(blackListFilePath);
+        Scanner scanner = new Scanner(file);
+        while(scanner.hasNext()){
+            blackListSet.add(scanner.nextInt());
+        }
+
+        scanner.close();
     }
 
 
@@ -88,14 +113,23 @@ public class ESAGenerator implements VectorGenerator {
         }
         TIntSet ids = new TIntHashSet();
         for (String wpId : FileUtils.readLines(file)) {
-            ids.add(Integer.valueOf(wpId));
+            int wpLocalIDNumb= Integer.valueOf(wpId);
+            if(!isBlacklisted(wpLocalIDNumb)) {
+                ids.add(wpLocalIDNumb);
+            }
         }
         conceptFilter = new WpIdFilter(ids.toArray());
         LOG.warning("installed " + ids.size() + " concepts for " + language);
     }
 
+    private boolean isBlacklisted(int wpLocalIDNumb) {
+        return blackListSet.contains(wpLocalIDNumb);
+    }
+
     @Override
-    public List<Explanation> getExplanations(LocalPage page1, LocalPage page2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+    public List<Explanation> getExplanations(int pageID1, int pageID2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+        LocalPage page1=pageDao.getById(language,pageID1);
+        LocalPage page2=pageDao.getById(language,pageID2);
         Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
         for (int id : vector1.keys()) {
             if (vector2.containsKey(id)) {
@@ -113,6 +147,30 @@ public class ESAGenerator implements VectorGenerator {
             LocalPage p = pageDao.getById(language, top.getId(i));
             if (p != null) {
                 explanations.add(new Explanation("Both ? and ? have similar text to ?", page1, page2, p));
+            }
+        }
+        return explanations;
+    }
+
+    @Override
+    public List<Explanation> getExplanations(String phrase1, String phrase2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+        Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
+        for (int id : vector1.keys()) {
+            if (vector2.containsKey(id)) {
+                lb.tallyScore(id, vector1.get(id) * vector2.get(id));
+            }
+        }
+        SRResultList top = lb.getTop();
+        if (top.numDocs() == 0) {
+            return Arrays.asList(new Explanation("? and ? share no tags", phrase1, phrase2));
+        }
+        top.sortDescending();
+
+        List<Explanation> explanations = new ArrayList<Explanation>();
+        for (int i = 0; i < top.numDocs(); i++) {
+            LocalPage p = pageDao.getById(language, searcher.getLocalIdFromDocId(top.getId(i), language));
+            if (p != null) {
+                explanations.add(new Explanation("Both ? and ? have similar text to ?", phrase1, phrase2, p));
             }
         }
         return explanations;
@@ -191,7 +249,8 @@ public class ESAGenerator implements VectorGenerator {
             ESAGenerator generator = new ESAGenerator(
                     language,
                     getConfigurator().get(LocalPageDao.class),
-                    getConfigurator().get(LuceneSearcher.class, config.getString("luceneSearcher"))
+                    getConfigurator().get(LuceneSearcher.class, config.getString("luceneSearcher")),
+                    getConfig().get().getString("sr.blacklist.path")
             );
             if (config.hasPath("concepts")) {
                 try {

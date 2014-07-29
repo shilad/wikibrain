@@ -25,11 +25,14 @@ import org.wikibrain.spatial.core.constants.Precision;
 import org.wikibrain.spatial.core.constants.RefSys;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,17 +46,27 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     private final LocalPageDao localPageDao;
 
     // for writing data
-    private List<SimpleFeature> curFeaturesToStore = null;
-    private SimpleFeatureBuilder simpleFeatureBuilder = null;
+    private ArrayBlockingQueue<SimpleFeature> curFeaturesToStore = null;
+    private ThreadLocal<SimpleFeatureBuilder> simpleFeatureBuilder;
     private static final Integer BUFFER_SIZE = 200;
 
     private static final Logger LOG = Logger.getLogger(PostGISDB.class.getName());
 
     private PostGISSpatialDataDao(PostGISDB postGisDb, WikidataDao wikidataDao, LocalPageDao localPageDao){
-
         this.db = postGisDb;
         this.wikidataDao = wikidataDao;
         this.localPageDao = localPageDao;
+        this.curFeaturesToStore = new ArrayBlockingQueue<SimpleFeature>(BUFFER_SIZE * 10);
+        simpleFeatureBuilder = new ThreadLocal<SimpleFeatureBuilder>() {
+            @Override
+            public SimpleFeatureBuilder initialValue() {
+                try {
+                    return new SimpleFeatureBuilder(db.getSchema());
+                } catch (DaoException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 
     @Override
@@ -228,7 +241,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     @Override
     public void beginSaveGeometries() throws DaoException {
         try {
-            simpleFeatureBuilder = new SimpleFeatureBuilder(db.getSchema());
+            curFeaturesToStore.clear();
         }catch(Exception e){
             throw new DaoException(e);
         }
@@ -240,13 +253,16 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     }
 
     private void flushFeatureBuffer() throws DaoException{
-
         try {
-            if(curFeaturesToStore != null){
-                SimpleFeatureCollection featuresToStore = new ListFeatureCollection(db.getSchema(), curFeaturesToStore);
-                ((SimpleFeatureStore) db.getFeatureSource()).addFeatures(featuresToStore); // GeoTools can be so weird sometimes
-                curFeaturesToStore.clear();
+            List<SimpleFeature> batch = new ArrayList<SimpleFeature>();
+            synchronized (curFeaturesToStore) {
+                if (curFeaturesToStore.size() < BUFFER_SIZE) {
+                    return;
+                }
+                curFeaturesToStore.drainTo(batch);
             }
+            SimpleFeatureCollection featuresToStore = new ListFeatureCollection(db.getSchema(), batch);
+            ((SimpleFeatureStore) db.getFeatureSource()).addFeatures(featuresToStore); // GeoTools can be so weird sometimes
         }catch(IOException e){
             throw new DaoException(e);
         }
@@ -256,15 +272,9 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     public void saveGeometry(int itemId, String layerName, String refSysName, Geometry g) throws DaoException {
 
         try {
-
-            if (curFeaturesToStore == null) {
-                curFeaturesToStore = Lists.newArrayList();
-            }
-
-            SimpleFeature curFeature = simpleFeatureBuilder.buildFeature("n/a", new Object[]{new Integer(itemId), layerName, refSysName, g});
-            curFeaturesToStore.add(curFeature);
-
-            if (curFeaturesToStore.size() % BUFFER_SIZE == 0){
+            SimpleFeature curFeature = simpleFeatureBuilder.get().buildFeature("n/a", new Object[]{new Integer(itemId), layerName, refSysName, g});
+            curFeaturesToStore.put(curFeature);
+            if (curFeaturesToStore.size() > BUFFER_SIZE){
                 flushFeatureBuffer();
             }
 

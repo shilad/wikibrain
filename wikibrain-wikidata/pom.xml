@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.shilad.wikibrain</groupId>
+        <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>../wikibrain-parent</relativePath>
@@ -15,22 +15,22 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.shilad.wikibrain</groupId>
+            <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.shilad.wikibrain</groupId>
+            <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-download</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.shilad.wikibrain</groupId>
+            <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-utils</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.shilad.wikibrain</groupId>
+            <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-parser</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
@@ -38,6 +38,12 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

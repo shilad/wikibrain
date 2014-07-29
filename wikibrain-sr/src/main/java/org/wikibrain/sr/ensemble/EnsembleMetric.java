@@ -246,7 +246,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             } else {
                 throw new ConfigurationException("I don't know how to do that ensemble.");
             }
-            Disambiguator disambiguator = getConfigurator().get(Disambiguator.class,config.getString("disambiguator"));
+            Disambiguator disambiguator = getConfigurator().get(Disambiguator.class,config.getString("disambiguator"), "language", language.getLangCode());
             LocalPageDao pagehelper = getConfigurator().get(LocalPageDao.class,config.getString("pageDao"));
             EnsembleMetric sr = new EnsembleMetric(name, language, metrics,ensemble,disambiguator,pagehelper);
             if (config.hasPath("resolvephrases")) {

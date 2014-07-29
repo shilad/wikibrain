@@ -1,5 +1,9 @@
 package org.wikibrain.utils;
 
+import org.apache.commons.io.FilenameUtils;
+import org.clapper.util.classutil.*;
+import org.wikibrain.conf.ProviderFilter;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -7,13 +11,28 @@ import java.lang.management.RuntimeMXBean;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * @author Shilad Sen
  */
 public class JvmUtils {
+    /**
+     * Wikibrain + the standard Geometry class
+     */
+    private static Pattern WIKIBRAIN_CLASS_PATTERN = Pattern.compile("org.wikibrain.*|com.vividsolutions.jts.geom.Geometry");
+
+    /**
+     * Ignores Jooq and anonymous classes.
+     */
+    private static Pattern WIKIBRAIN_CLASS_BLACKLIST = Pattern.compile("(.*jooq.*|\\$[0-9]+$)");
+
     private static final Logger LOG = Logger.getLogger(JvmUtils.class.getName());
+
+    public static final int MAX_FILE_SIZE = 8 * 1024 * 1024;   // 8MB
+
 
     /**
      * Returns a carefully constructed classpath matching the current process.
@@ -40,6 +59,25 @@ public class JvmUtils {
             loader = loader.getParent();
         }
         return classPath;
+    }
+
+    private static List<File> CLASS_PATH = null;
+    public synchronized static List<File> getClassPathAsList() {
+        if (CLASS_PATH != null) {
+            return CLASS_PATH;
+        }
+        CLASS_PATH = new ArrayList<File>();
+        String separator = System.getProperty("path.separator");
+        for (String entry : getClassPath().split(separator)) {
+            LOG.fine("considering classpath entry " + entry);
+            File file = new File(entry);
+            if (!file.exists()) {
+                LOG.warning("skipping nonexistent classpath file " + file);
+                continue;
+            }
+            CLASS_PATH.add(new File(FilenameUtils.normalize(file.getAbsolutePath())));
+        }
+        return CLASS_PATH;
     }
 
     /**
@@ -84,5 +122,75 @@ public class JvmUtils {
      */
     private static int maxMemoryInMbs() {
         return (int) (Runtime.getRuntime().maxMemory() / (1024*1024));
+    }
+
+
+    public static void setWikiBrainClassPattern(Pattern pattern, Pattern blacklist) {
+        WIKIBRAIN_CLASS_PATTERN = pattern;
+        WIKIBRAIN_CLASS_BLACKLIST = blacklist;
+    }
+
+    /**
+     * Returns the first class in the classpath that has the specified short name.
+     * For example, "LocalLink" -> org.wikibrain.core.LocalLink.class
+     *
+     * The full mapping between short names and full names is cached because it is costly to build it.
+     *
+     * @param shortName
+     * @return Class, or null if no full classname matches the short name.
+     */
+    public static Class classForShortName(String shortName) {
+        String fullName = getFullClassName(shortName);
+        if (fullName == null) {
+            return null;
+        }
+        try {
+            return Class.forName(fullName);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);  // class came from the classpath, so this shouldn't happen
+        }
+    }
+    private static Map<String, String> NAME_TO_CLASS = null;
+
+    /**
+     * Returns the first element in the classpath that has the specified short name.
+     * For example, "LocalLink" -> "org.wikibrain.core.LocalLink"
+     * The full mapping between short names and full names is cached because it is costly to build it.
+     *
+     * @param shortName
+     * @return Full name, or null if no full name matches the short name.
+     */
+    public synchronized static String getFullClassName(String shortName) {
+        if (NAME_TO_CLASS != null) {
+            return NAME_TO_CLASS.get(shortName);
+        }
+        NAME_TO_CLASS = new HashMap<String, String>();
+        for (File file : getClassPathAsList()) {
+            if (file.length() > MAX_FILE_SIZE) {
+                LOG.fine("skipping looking for providers in large file " + file);
+                continue;
+            }
+            ClassFinder finder = new ClassFinder();
+            finder.add(file);
+            ClassFilter filter = new AndClassFilter(
+                    new RegexClassFilter(WIKIBRAIN_CLASS_PATTERN.pattern()),
+                    new NotClassFilter(new RegexClassFilter(WIKIBRAIN_CLASS_BLACKLIST.pattern()))
+            );
+            Collection<ClassInfo> foundClasses = new ArrayList<ClassInfo>();
+            finder.findClasses(foundClasses,filter);
+            for (ClassInfo info : foundClasses) {
+                String tokens[] = info.getClassName().split("[.]");
+                if (tokens.length == 0) {
+                    continue;   // SHOULD NEVER HAPPEN
+                }
+                String n = tokens[tokens.length - 1];
+                if (!NAME_TO_CLASS.containsKey(n)) {
+                    NAME_TO_CLASS.put(n, info.getClassName());
+                }
+            }
+        }
+        LOG.info("found " + NAME_TO_CLASS.size() + " classes when constructing short to full class name mapping");
+//        System.err.println(NAME_TO_CLASS);
+        return NAME_TO_CLASS.get(shortName);
     }
 }

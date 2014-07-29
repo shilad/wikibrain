@@ -1,5 +1,8 @@
 package org.wikibrain.wikidata;
 
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
@@ -12,13 +15,20 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.cmd.FileMatcher;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
+import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.model.RawPage;
 import org.wikibrain.download.DumpFileDownloader;
 import org.wikibrain.download.RequestedLinkGetter;
+import org.wikibrain.parser.DumpSplitter;
+import org.wikibrain.parser.WpParseException;
+import org.wikibrain.parser.xml.PageXmlParser;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,33 +48,76 @@ public class WikidataDumpLoader {
 
     private final MetaInfoDao metaDao;
     private final WikidataDao wikidataDao;
+    private final UniversalPageDao universalPageDao;
+    private final LanguageSet languages;
+    private final WikidataParser wdParser = new WikidataParser();
+    private final TIntSet universalIds;
 
-    public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao) {
+    public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao, UniversalPageDao upDao, LanguageSet langs) throws DaoException {
         this.wikidataDao = wikidataDao;
         this.metaDao = metaDao;
+        this.languages = langs;
+        this.universalPageDao = upDao;
+        Map<Language, TIntIntMap> localMaps = universalPageDao.getAllLocalToUnivIdsMap(languages);
+
+        // Build up set of universal ids from the local ids that we know about
+        this.universalIds = new TIntHashSet();
+        for(TIntIntMap langMap : localMaps.values()) {
+            universalIds.addAll(langMap.valueCollection());
+        }
     }
 
     /**
      * Expects file name format starting with lang + "wiki" for example, "enwiki"
+     *
      * @param file
      */
-    public void load(File file) {
-        WikidataDumpParser parser = new WikidataDumpParser(file);
-        for (WikidataEntity rp : parser) {
-            if (counter.incrementAndGet() % 10000 == 0) {
-                LOG.info("processing wikidata entity " + counter.get());
-            }
-            save(file, rp);
-        }
+    public void load(final File file) {
+        DumpSplitter parser = new DumpSplitter(file);
+        ParallelForEach.iterate(
+                parser.iterator(),
+                WpThreadUtils.getMaxThreads(),
+                1000,
+                new Procedure<String>() {
+                    @Override
+                    public void call(String page) {
+                        try {
+                            save(file, page);
+                            metaDao.incrementRecords(WikidataEntity.class);
+                        } catch (WpParseException e) {
+                            LOG.log(Level.WARNING, "parsing of " + file.getPath() + " failed:", e);
+                            metaDao.incrementErrorsQuietly(WikidataEntity.class);
+                        } catch (DaoException e) {
+                            LOG.log(Level.WARNING, "parsing of " + file.getPath() + " failed:", e);
+                            metaDao.incrementErrorsQuietly(WikidataEntity.class);
+                        }
+                    }
+                },
+                Integer.MAX_VALUE
+        );
     }
 
-    private void save(File file, WikidataEntity rp) {
-        try {
-            wikidataDao.save(rp);
-            metaDao.incrementRecords(rp.getClass());
-        } catch (DaoException e) {
-            LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
-            metaDao.incrementErrorsQuietly(rp.getClass());
+    private void save(File file, String page) throws WpParseException, DaoException {
+        if (counter.incrementAndGet() % 10000 == 0) {
+            LOG.info("processing wikidata entity " + counter.get());
+        }
+        PageXmlParser xmlParser = new PageXmlParser(LanguageInfo.getByLanguage(Language.EN));
+        RawPage rp = xmlParser.parse(page);
+        if (rp.getModel().equals("wikibase-item") || rp.getModel().equals("wikibase-property")) {
+
+            WikidataEntity entity = wdParser.parse(rp);
+
+            // check if others use prune's boolean?
+            entity.prune(languages);
+
+            if (entity.getType() == WikidataEntity.Type.PROPERTY || universalIds.contains(entity.getId())) {
+                wikidataDao.save(entity);
+            }
+
+        } else if (Arrays.asList("wikitext", "css", "javascript").contains(rp.getModel())) {
+            // expected
+        } else {
+            LOG.warning("unknown model: " + rp.getModel() + " in page " + rp.getTitle());
         }
     }
 
@@ -89,11 +142,7 @@ public class WikidataDumpLoader {
             return;
         }
 
-        EnvBuilder builder = new EnvBuilder(cmd);
-        if (!builder.hasExplicitLanguageSet()) {
-            builder.setUseDownloadedLanguages();
-        }
-        Env env = builder.build();
+        Env env =  new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
         List<File> paths;
         if (cmd.getArgList().isEmpty()) {
@@ -122,14 +171,16 @@ public class WikidataDumpLoader {
         } else {
             paths = new ArrayList<File>();
             for (Object arg : cmd.getArgList()) {
-                paths.add(new File((String)arg));
+                paths.add(new File((String) arg));
             }
         }
 
         WikidataDao wdDao = conf.get(WikidataDao.class);
+        UniversalPageDao upDao = conf.get(UniversalPageDao.class);
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
+        LanguageSet langs = conf.get(LanguageSet.class);
 
-        final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao);
+        final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao, upDao, langs);
 
         if (cmd.hasOption("d")) {
             wdDao.clear();

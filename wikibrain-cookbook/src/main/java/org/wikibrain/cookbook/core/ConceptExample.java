@@ -8,7 +8,6 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.phrases.PhraseAnalyzer;
 
@@ -39,7 +38,7 @@ public class ConceptExample {
             System.out.println("\t" + p + ": " + resolution.get(p));
 
             // translate them...
-            UniversalPage concept = dao.getByLocalPage(p.asLocalPage(), 1);
+            UniversalPage concept = dao.getByLocalPage(p.asLocalPage());
             //UniversalPage concept = dao.getByLocalPage(new Local, 1);
             for (LocalId id : concept.getLocalEntities()) {
                 System.out.println("\t\tin language " + id.getLanguage() + " is " + id);

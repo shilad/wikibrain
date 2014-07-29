@@ -1,9 +1,10 @@
 package org.wikibrain.wikidata;
 
+import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.parser.DumpSplitter;
-import org.wikibrain.parser.WpParseException;
 import org.wikibrain.parser.xml.PageXmlParser;
 
 import java.io.File;
@@ -21,16 +22,20 @@ public class WikidataDumpParser implements Iterable<WikidataEntity> {
 
     private final WikidataParser wdParser;
     private final PageXmlParser xmlParser;
-    DumpSplitter impl;
-    LanguageInfo language;
+    private final LanguageSet languages;
+    private final DumpSplitter impl;
+
+    public WikidataDumpParser(File file) {
+        this(file, LanguageSet.ALL);
+    }
 
     /**
      * @param file
      */
-    public WikidataDumpParser(File file) {
-        this.language = LanguageInfo.getByLangCode("en");
+    public WikidataDumpParser(File file, LanguageSet languages) {
+        this.languages = languages;
         this.impl = new DumpSplitter(file);
-        this.xmlParser = new PageXmlParser(language);
+        this.xmlParser = new PageXmlParser(LanguageInfo.getByLanguage(Language.EN));
         this.wdParser = new WikidataParser();
     }
 
@@ -65,6 +70,9 @@ public class WikidataDumpParser implements Iterable<WikidataEntity> {
                     RawPage rp = xmlParser.parse(iterImpl.next());
                     if (rp.getModel().equals("wikibase-item") || rp.getModel().equals("wikibase-property")) {
                         buff = wdParser.parse(rp);
+                        if (!buff.prune(languages)) {
+                            buff = null;
+                        }
                     } else if (Arrays.asList("wikitext", "css", "javascript").contains(rp.getModel())) {
                         buff = null;
                     } else {

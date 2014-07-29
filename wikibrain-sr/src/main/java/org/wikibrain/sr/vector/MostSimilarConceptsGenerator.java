@@ -61,6 +61,11 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public List<Explanation> getExplanations(String phrase1, String phrase2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+        throw new UnsupportedOperationException();
+    }
+
     public void setConcepts(File file) throws IOException {
         conceptIds = new TIntHashSet();
         if (!file.isFile()) {
@@ -74,7 +79,9 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
     }
 
     @Override
-    public List<Explanation> getExplanations(LocalPage page1, LocalPage page2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+    public List<Explanation> getExplanations(int pageID1, int pageID2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+        LocalPage page1=pageDao.getById(language,pageID1);
+        LocalPage page2=pageDao.getById(language,pageID2);
         Leaderboard lb = new Leaderboard(5);    // TODO: make 5 configurable
         for (int id : vector1.keys()) {
             if (vector2.containsKey(id)) {

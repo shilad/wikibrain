@@ -10,7 +10,7 @@ import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.RawPage;
-import org.wikibrain.dao.load.DumpLoader;
+import org.wikibrain.loader.DumpLoader;
 
 import java.io.IOException;
 import java.sql.SQLException;

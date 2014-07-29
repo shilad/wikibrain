@@ -17,11 +17,12 @@ public interface PhraseAnalyzer {
 
     /**
      * Loads a specific corpus into the dao.
+     * Returns the number of phrases loaded.
      *
      * @throws DaoException
      * @throws IOException
      */
-    void loadCorpus(LanguageSet langs) throws DaoException, IOException;
+    int loadCorpus(LanguageSet langs) throws DaoException, IOException;
 
     /**
      * Returns the most descriptive phrases for a wikipedia page.

@@ -50,9 +50,13 @@ public class SimilarityExample {
                 { "dog", "computer" },
         };
 
+        ExplanationFormatter formatter= new ExplanationFormatter(lpDao);
         for (String pair[] : pairs) {
-            SRResult s = sr.similarity(pair[0], pair[1], false);
+                SRResult s = sr.similarity(pair[0], pair[1], true);
             System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'");
+            for (Explanation e:s.getExplanations()) {
+                System.out.println(formatter.formatExplanation(e));
+            }
         }
     }
 }

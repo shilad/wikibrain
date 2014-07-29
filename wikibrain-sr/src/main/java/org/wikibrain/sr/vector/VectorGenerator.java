@@ -33,11 +33,21 @@ public interface VectorGenerator {
 
     /**
      * Adds the explanation for a particular SRResult if it is supported.
-     * @param page1 First page
-     * @param page2 Second page
+     * @param phrase1 First phrase
+     * @param phrase2 Second phrase
      * @param vector1 Vector representing first item
      * @param vector2 Vector representing second item
      * @param result Original sr object, with explanations (hopefully) added.
      */
-    public List<Explanation> getExplanations(LocalPage page1, LocalPage page2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException;
+    public List<Explanation> getExplanations(String phrase1, String phrase2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException;
+
+    /**
+     * Adds the explanation for a particular SRResult if it is supported.
+     * @param pageID1 First page
+     * @param pageID2 Second page
+     * @param vector1 Vector representing first item
+     * @param vector2 Vector representing second item
+     * @param result Original sr object, with explanations (hopefully) added.
+     */
+    public List<Explanation> getExplanations(int pageID1, int pageID2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException;
 }

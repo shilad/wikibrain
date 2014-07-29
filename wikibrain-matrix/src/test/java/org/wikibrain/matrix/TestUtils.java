@@ -4,10 +4,7 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class TestUtils {
     /**
@@ -106,6 +103,7 @@ public class TestUtils {
         List<DenseMatrixRow> rows = new ArrayList<DenseMatrixRow>();
         int rowIds[] = pickIds(nRows, nRows * 2);
         int colIds[] = pickIds(numCols, numCols * 2);
+        Arrays.sort(colIds);
         for (int id1 : rowIds) {
             LinkedHashMap<Integer, Float> data = new LinkedHashMap<Integer, Float>();
             for (int id2 : colIds) {

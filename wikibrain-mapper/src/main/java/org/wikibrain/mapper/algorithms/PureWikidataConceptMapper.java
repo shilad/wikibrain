@@ -35,7 +35,7 @@ public class PureWikidataConceptMapper extends ConceptMapper {
     private static Logger LOG = Logger.getLogger(PureWikidataConceptMapper.class.getName());
     private final File wikiDataPath;
 
-    protected PureWikidataConceptMapper(File wikiDataPath, int id, LocalPageDao localPageDao) {
+    public PureWikidataConceptMapper(File wikiDataPath, int id, LocalPageDao localPageDao) {
         super(id, localPageDao);
         this.wikiDataPath = wikiDataPath;
     }

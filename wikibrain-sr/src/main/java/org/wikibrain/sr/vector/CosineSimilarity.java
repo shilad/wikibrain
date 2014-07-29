@@ -51,6 +51,63 @@ public class CosineSimilarity implements VectorSimilarity {
     }
 
     @Override
+    public double similarity(MatrixRow a, MatrixRow b) {
+        double adota = 0.0;
+        double bdotb = 0.0;
+        double adotb = 0.0;
+
+        int na = a.getNumCols();
+        int nb = b.getNumCols();
+        int i = 0, j = 0;
+
+        if((na == 0 || nb == 0)) { // do not perform calculations if one or both are 0
+            return 0;
+        }
+
+        int ca = a.getColIndex(i);
+        int cb = b.getColIndex(j);
+
+        while (i < na && j < nb) {
+            if (ca < cb) {
+                // if matrix a has a lower value, then get the next column
+                float va = a.getColValue(i++);
+                adota += va * va;
+                ca = a.getColIndex(i);
+            } else if (ca > cb) {
+                // if matrix b has a lower value, then get the next column
+                float vb = b.getColValue(j++);
+                bdotb += vb * vb;
+                cb = b.getColIndex(j);
+            } else {
+                // if both have the same value, increment the intersection and get the next columns in both matrices
+                float va = a.getColValue(i++);
+                float vb = b.getColValue(j++);
+                adota += va * va;
+                bdotb += vb * vb;
+                adotb += va * vb;
+
+                ca = a.getColIndex(i);
+                cb = b.getColIndex(j);
+            }
+        }
+
+        for (; i < na; i++) {
+            float va = a.getColValue(i);
+            adota += va * va;
+        }
+        for (; j < nb; j++) {
+            float vb = b.getColValue(j);
+            bdotb += vb * vb;
+        }
+
+        if (adota * bdotb * adotb == 0) {
+            return 0.0;
+        } else {
+            return adotb / Math.sqrt(adota * bdotb);
+        }
+    }
+
+    @Override
     public double similarity(TIntFloatMap vector1, TIntFloatMap vector2) {
         return SimUtils.cosineSimilarity(vector1, vector2);
     }

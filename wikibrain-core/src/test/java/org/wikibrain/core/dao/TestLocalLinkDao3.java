@@ -2,6 +2,7 @@ package org.wikibrain.core.dao;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.wikibrain.core.dao.matrix.MatrixLocalLinkDao;
 import org.wikibrain.core.dao.sql.LocalLinkSqlDao;
@@ -23,9 +24,11 @@ public class TestLocalLinkDao3 {
     public void testLink() throws ClassNotFoundException, IOException, DaoException {
         WpDataSource ds = TestDaoUtil.getWpDataSource();
 
+        File f = new File(".tmp/links");
+        FileUtils.deleteQuietly(f);
         Language lang = Language.getByLangCode("simple");
         LocalLinkSqlDao sqlDao = new LocalLinkSqlDao(ds);
-        MatrixLocalLinkDao matrixDao = new MatrixLocalLinkDao(sqlDao, new File(".tmp/links"));
+        MatrixLocalLinkDao matrixDao = new MatrixLocalLinkDao(sqlDao, f);
         matrixDao.beginLoad();
 
         for (int i = 1; i <= 200; i++) {

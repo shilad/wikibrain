@@ -48,14 +48,20 @@ public class MetaInfo {
         this.lastUpdated = lastUpdated;
     }
 
-    public synchronized int incrementNumRecords() {
-        lastUpdated = new Date();
-        return ++numRecords;
+    public int incrementNumRecords() {
+        return incrementNumRecords(1);
     }
 
     public synchronized int incrementNumErrors() {
         lastUpdated = new Date();
         return ++numErrors;
+    }
+
+
+    public synchronized  int incrementNumRecords(int n) {
+        lastUpdated = new Date();
+        numRecords += n;
+        return numRecords;
     }
 
     public long getId() {
@@ -118,5 +124,16 @@ public class MetaInfo {
         } else if (info.lastUpdated != null && info.lastUpdated.compareTo(lastUpdated) > 0) {
             lastUpdated = info.lastUpdated;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "MetaInfo{" +
+                "component=" + component +
+                ", language=" + language +
+                ", numRecords=" + numRecords +
+                ", numErrors=" + numErrors +
+                ", lastUpdated=" + lastUpdated +
+                '}';
     }
 }

@@ -167,9 +167,10 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
         for (LocalId lid1 : candidates1.keySet()) {
             for (LocalId lid2 : candidates2.keySet()) {
                 double pop = candidates1.get(lid1) * candidates2.get(lid2);
-                if (pop > highestPop) {
+                double score = similarity(lid1.getId(), lid2.getId(), false).getScore();
+                if (score >= 0.4 * highestScore && pop >= highestPop) {
                     highestPop = pop;
-                    result = similarity(lid1.getId(), lid2.getId(), false).getScore();
+                    result = score;
                 }
             }
         }
@@ -294,7 +295,7 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
 
         @Override
         public MonolingualSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("milnewitten")) {
+            if (!config.getString("type").equals("simplemilnewitten")) {
                 return null;
             }
             if (runtimeParams == null || !runtimeParams.containsKey("language")){

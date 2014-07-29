@@ -9,8 +9,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.dao.load.PhraseLoader;
+import org.wikibrain.loader.PhraseLoader;
 import org.wikibrain.phrases.PhraseAnalyzer;
 
 import java.io.IOException;

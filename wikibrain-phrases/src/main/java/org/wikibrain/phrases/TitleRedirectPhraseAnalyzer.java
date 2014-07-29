@@ -41,8 +41,9 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
     }
 
     @Override
-    public void loadCorpus(LanguageSet langs) throws DaoException, IOException {
+    public int loadCorpus(LanguageSet langs) throws DaoException, IOException {
         // nothing to do here
+        return -1;
     }
 
     @Override
@@ -76,11 +77,6 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
         result.put(localId, 1.0f);
         return result;
 
-    }
-
-    //@Override
-    public LinkedHashMap<UniversalPage, Float> resolveUniversal(Language language, String phrase, int algorithmId, int maxPages) {
-        throw new UnsupportedOperationException();
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<PhraseAnalyzer> {

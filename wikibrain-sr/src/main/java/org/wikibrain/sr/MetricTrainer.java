@@ -31,12 +31,6 @@ public class MetricTrainer {
     public static void main(String[] args) throws ConfigurationException, DaoException, IOException, WikiBrainException {
         Options options = new Options();
 
-        options.addOption(
-                new DefaultOptionBuilder()
-                        .hasArg()
-                        .withLongOpt("universal")
-                        .withDescription("set a universal metric")
-                        .create("u"));
         //Number of Max Results(otherwise take from config)
         options.addOption(
                 new DefaultOptionBuilder()
@@ -119,24 +113,13 @@ public class MetricTrainer {
         }
 
         MonolingualSRMetric sr=null;
-        UniversalSRMetric usr=null;
         if (cmd.hasOption("m")){
             Language language = datasets.get(0).getLanguage();
             FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("m")+"/"+"normalizer/"));
             sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
         }
-        if (cmd.hasOption("u")){
-            FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("u")+"/"+"normalizer/"));
-            usr = c.get(UniversalSRMetric.class,cmd.getOptionValue("u"));
-        }
 
         Dataset dataset = new Dataset(datasets);
-        if (usr!=null){
-            usr.trainSimilarity(dataset);
-            usr.trainMostSimilar(dataset,maxResults,null);
-            usr.write(path);
-            usr.read(path);
-        }
         if (sr!=null){
             sr.trainMostSimilar(dataset, maxResults, null);
             sr.trainSimilarity(dataset);

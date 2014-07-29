@@ -32,11 +32,13 @@ import java.util.*;
  */
 public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> implements UniversalLinkDao {
 
+    private final int algorithmId;
     private File path;
     private ObjectDb<byte[]> objectDb;
 
-    public UniversalLinkSkeletalSqlDao(WpDataSource dataSource) throws DaoException {
+    public UniversalLinkSkeletalSqlDao(WpDataSource dataSource, int algorithmId) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/universal-skeletal-link");
+        this.algorithmId = algorithmId;
     }
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
@@ -64,9 +66,8 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
         try {
             int sourceId = item.getSourceId();
             int destId = item.getDestId();
-            int algorithmId = item.getAlgorithmId();
             LanguageSet languages = item.getLanguageSet();
-            String key = sourceId + "_" + destId + "_" + algorithmId;
+            String key = sourceId + "_" + destId + "_" + item.getAlgorithmId();
             byte[] temp = objectDb.get(key);
             if (temp != null) {
                 languages = new LanguageSet(Sets.union(LanguageSet.getLanguageSet(temp).getLanguages(), languages.getLanguages()));
@@ -107,7 +108,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                 conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.in(daoFilter.getDestIds()));
             }
             if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId));
             }
             Cursor<Record> result = context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
@@ -139,7 +140,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                 conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.DEST_ID.in(daoFilter.getDestIds()));
             }
             if (daoFilter.isRedirect() != null) {
-                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.in(daoFilter.getAlgorithmIds()));
+                conditions.add(Tables.UNIVERSAL_SKELETAL_LINK.ALGORITHM_ID.eq(algorithmId));
             }
             return context.select()
                     .from(Tables.UNIVERSAL_SKELETAL_LINK)
@@ -151,7 +152,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     }
 
     @Override
-    public UniversalLinkGroup getOutlinks(int sourceId, int algorithmId) throws DaoException {
+    public UniversalLinkGroup getOutlinks(int sourceId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Result<Record> result = context.select()
@@ -166,7 +167,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     }
 
     @Override
-    public UniversalLinkGroup getInlinks(int destId, int algorithmId) throws DaoException {
+    public UniversalLinkGroup getInlinks(int destId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Result<Record> result = context.select()
@@ -181,7 +182,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     }
 
     @Override
-    public TIntSet getOutlinkIds(int sourceId, int algorithmId) throws DaoException {
+    public TIntSet getOutlinkIds(int sourceId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Cursor<Record> result = context.select()
@@ -200,7 +201,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     }
 
     @Override
-    public TIntSet getInlinkIds(int destId, int algorithmId) throws DaoException {
+    public TIntSet getInlinkIds(int destId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Cursor<Record> result = context.select()
@@ -219,7 +220,7 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
     }
 
     @Override
-    public UniversalLink getUniversalLink(int sourceId, int destId, int algorithmId) throws DaoException {
+    public UniversalLink getUniversalLink(int sourceId, int destId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Record record = context.select()
@@ -301,10 +302,12 @@ public class UniversalLinkSkeletalSqlDao extends AbstractSqlDao<UniversalLink> i
                 return null;
             }
             try {
+                int algorithmId = getConfig().get().getInt("mapper." + config.getString("mapper") + ".algorithmId");
                 return new UniversalLinkSkeletalSqlDao(
                         getConfigurator().get(
                                 WpDataSource.class,
-                                config.getString("dataSource"))
+                                config.getString("dataSource")),
+                        algorithmId
                 );
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
