@@ -265,7 +265,6 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
     public LinkedHashMap<String, Float> describe(Language language, LocalPage page, int maxPhrases) throws DaoException {
         LinkedHashMap<String, Float> result = new LinkedHashMap<String, Float>();
         PrunedCounts<String> counts = phraseDao.getPageCounts(language, page.getLocalId(), maxPhrases);
-        System.out.println(counts);
         if (counts == null) {
             return null;
         }

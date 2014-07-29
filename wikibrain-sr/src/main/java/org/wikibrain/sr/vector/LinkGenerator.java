@@ -35,6 +35,12 @@ import java.util.logging.Logger;
  */
 public class LinkGenerator implements VectorGenerator {
 
+    public static enum LinkType {
+        IN,
+        OUT,
+        DIRECT
+    }
+
     private static final Logger LOG = Logger.getLogger(LinkGenerator.class.getName());
     private boolean outLinks;
     private final LocalLinkDao linkDao;
@@ -239,8 +245,6 @@ public class LinkGenerator implements VectorGenerator {
             } catch (Exception e) {
                 throw new ConfigurationException(e);
             }
-
-
         }
     }
 }
