@@ -93,7 +93,7 @@ public class SelfFocusBiasEvaluator {
             LOG.info(String.format("Got %d points in polygon %d", containedIds.size(), polygonCounter));
             for(Integer c : containedIds.toArray()){
                 try {
-                    Iterable<org.wikibrain.core.model.LocalLink> links = llDao.getLinks(lang, upDao.getById(c, WIKIDATA_CONCEPTS).getLocalId(lang), false);
+                    Iterable<org.wikibrain.core.model.LocalLink> links = llDao.getLinks(lang, upDao.getById(c).getLocalId(lang), false);
                     int counter = 0;
                     Iterator i = links.iterator();
                     while (i.hasNext()){
@@ -103,7 +103,7 @@ public class SelfFocusBiasEvaluator {
                     if(counter > maxInlink ){
                         maxInlink = counter;
                         mostInlinkLang = lang.getEnLangName();
-                        mostInlinkPage = upDao.getById(c, WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+                        mostInlinkPage = upDao.getById(c).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
                     }
                     if(polygonInlinkMap.containsKey(entry.getKey())){
                         polygonInlinkMap.put(entry.getKey(), polygonInlinkMap.get(entry.getKey()) + counter);
@@ -154,7 +154,7 @@ public class SelfFocusBiasEvaluator {
             CSVWriter output = new CSVWriter(new FileWriter("SelfFocusBias_" + lang.getLangCode() + ".csv"), ',');
             String[] entries = new String[2];
             for(Map.Entry<Integer, Integer> entry : inlinkList){
-                entries[0] = upDao.getById(entry.getKey(), WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+                entries[0] = upDao.getById(entry.getKey()).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
                 entries[1] = entry.getValue().toString();
                 output.writeNext(entries);
             }

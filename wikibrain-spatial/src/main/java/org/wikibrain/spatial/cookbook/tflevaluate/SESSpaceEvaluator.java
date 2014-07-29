@@ -118,7 +118,7 @@ public class SESSpaceEvaluator {
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
-            UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
+            UniversalPage concept = upDao.getById(conceptId);
             if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
                 concepts.add(concept);
                 Geometry g1 = geometries.get(conceptId);

@@ -118,7 +118,7 @@ public class RankingEvaluator {
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
-            UniversalPage concept = upDao.getById(conceptId, WIKIDATA_CONCEPTS);
+            UniversalPage concept = upDao.getById(conceptId);
             if (concept != null && concept.hasAllLanguages(new LanguageSet(langs))) {
                 concepts.add(concept);
                 Geometry g1 = geometries.get(conceptId);
@@ -195,7 +195,7 @@ public class RankingEvaluator {
     public List<KNNEntry> evaluate(final Integer originId, Integer numSamples) throws DaoException, IOException, WikiBrainException{
         //TODO: parallel this process...originId.size() should definitely be larger than the number of available threads
         final List<KNNEntry> resultEntries = Collections.synchronizedList(new ArrayList<KNNEntry>()); Collections.synchronizedList(new ArrayList<KNNEntry>());
-        final String originTitle = upDao.getById(originId, WIKIDATA_CONCEPTS).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+        final String originTitle = upDao.getById(originId).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
         final Point originGeom = sdDao.getGeometry(originId, layerName).getCentroid();
         ParallelForEach.range(0, numSamples, new Procedure<Integer>() {
             @Override
@@ -225,7 +225,7 @@ public class RankingEvaluator {
 
         MonolingualSRMetric sr = metrics.get(langs.get(0));
 
-        resultEntries.add(new KNNEntry(originId, originTitle,  c2.getLocalId(langs.get(0)), c2.getBestEnglishTitle(lpDao, true).getCanonicalTitle(), km, null, sr.similarity(upDao.getById(originId, WIKIDATA_CONCEPTS).getLocalId(langs.get(0)), c2.getLocalId(langs.get(0)), false).getScore()));
+        resultEntries.add(new KNNEntry(originId, originTitle,  c2.getLocalId(langs.get(0)), c2.getBestEnglishTitle(lpDao, true).getCanonicalTitle(), km, null, sr.similarity(upDao.getById(originId).getLocalId(langs.get(0)), c2.getLocalId(langs.get(0)), false).getScore()));
     }
 
     private void sortAndPrint(List<List<KNNEntry>> entryListList,  String outPath) throws IOException, WikiBrainException{
