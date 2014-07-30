@@ -14,9 +14,6 @@ import java.util.Map;
  */
 public interface SpatialDataDao {
 
-
-
-
     /**
      * Gets a geometry by Wikidata item id, layer name, and reference system name.
      * @param itemId
@@ -26,7 +23,6 @@ public interface SpatialDataDao {
      * @throws DaoException
      */
     public Geometry getGeometry(int itemId, String layerName, String refSysName) throws DaoException;
-
 
     /**
      * Gets a geometry by Wikidata item id and layer name. Assumes "earth" reference system.
@@ -48,7 +44,6 @@ public interface SpatialDataDao {
      */
     public Geometry getGeometry(int itemId, String layerName, Precision.LatLonPrecision minPrecision) throws DaoException;
 
-
     /**
      * Gets a geometry by article name, language, and layer. Assumes "earth" reference system.
      * @param articleName (e.g. "Minnesota", "Minneapolis", "Kalifornien")
@@ -58,7 +53,6 @@ public interface SpatialDataDao {
      * @throws DaoException
      */
     public Geometry getGeometry(String articleName, Language language, String layerName) throws DaoException;
-
 
     /**
      * Gets a geometry by article name, language, layer, and minimum precision. Assumes "earth" reference system.
@@ -71,7 +65,6 @@ public interface SpatialDataDao {
      * @throws DaoException
      */
     public Geometry getGeometry(String articleName, Language language, String layerName, Precision.LatLonPrecision minPrecision) throws DaoException;
-
 
     /**
      * public Geometry getGeometry(String articleName, Language language, String layerName) throws DaoException;

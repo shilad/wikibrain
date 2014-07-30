@@ -236,6 +236,13 @@ public class LanguageInfo {
         return rVal;
     }
 
+    public int getNumLinks() {
+        return numLinks;
+    }
+
+    public int getNumArticles() {
+        return numArticles;
+    }
 
     public String getDefaultCategoryNamespaceName(){
         return categoryNames.get(0);
