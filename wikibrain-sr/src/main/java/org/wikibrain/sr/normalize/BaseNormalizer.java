@@ -79,7 +79,7 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
     @Override
     public void observe(double x) {
         synchronized (this) {
-            if (!Double.isNaN(x)) {
+            if (!Double.isNaN(x) && !Double.isInfinite(x)) {
                 if (x < min) { min = x; }
                 if (x > max) { max = x; }
                 if (sample.size() < SAMPLE_SIZE) {
