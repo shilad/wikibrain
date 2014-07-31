@@ -40,6 +40,8 @@ import java.util.regex.Pattern;
  */
 public abstract class Evaluator <T extends BaseEvaluationLog<T>> {
 
+    private static final Object LOCK = new Object();
+
     private static final Logger LOG = Logger.getLogger(Evaluator.class.getName());
     private final File baseDir;
     private final String modeName;
@@ -130,10 +132,18 @@ public abstract class Evaluator <T extends BaseEvaluationLog<T>> {
     public synchronized T evaluate(MonolingualSRFactory factory) throws IOException, DaoException, WikiBrainException {
         T overall = createResults(null);
         overall.setConfig("dataset", "overall");
-        int runNumber = getNextRunNumber();
+
+        String metricName;
+        int runNumber;
+        synchronized (LOCK) {
+            runNumber = getNextRunNumber();
+            metricName = factory.getName();
+            for (Split split : splits) {
+                ensureIsDirectory(getLocalDir(split, runNumber, metricName));
+            }
+        }
 
         Map<String, T> groupEvals = new HashMap<String, T>();
-        String metricName = factory.getName();
 
         for (Split split : splits) {
             T splitEval = evaluateSplitInternal(factory, split, runNumber);
