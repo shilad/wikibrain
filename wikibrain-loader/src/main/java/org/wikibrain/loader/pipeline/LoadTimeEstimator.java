@@ -17,18 +17,18 @@ import java.util.List;
 /**
  * @author Shilad Sen
  */
-public class FitTimeModels {
+public class LoadTimeEstimator {
     private final Env env;
     private final List<StageDiagnostic> diagnostics;
 
-    public FitTimeModels(Env env) throws ConfigurationException, ParseException {
+    public LoadTimeEstimator(Env env) throws ConfigurationException, ParseException {
         this.env = env;
         this.diagnostics = env.getConfigurator().get(DiagnosticDao.class).getAll();
         System.out.println("read " + this.diagnostics.size() + " diagnostics");
     }
 
     public void write(String path) throws IOException {
-        CsvListWriter writer = new CsvListWriter(WpIOUtils.openWriter("timing.csv"), CsvPreference.STANDARD_PREFERENCE);
+        CsvListWriter writer = new CsvListWriter(WpIOUtils.openWriter(path), CsvPreference.STANDARD_PREFERENCE);
         writer.write(Arrays.asList("stage", "singleCoreSpeed", "multiCoreSpeed", "numLinks", "numArticles", "elapsed"));
         for (StageDiagnostic diagnostic : diagnostics) {
             int numArticles = 0;
@@ -53,9 +53,9 @@ public class FitTimeModels {
 
 
 
-    public void main(String args[]) throws ConfigurationException, ParseException, IOException {
+    public static void main(String args[]) throws ConfigurationException, ParseException, IOException {
         Env env = EnvBuilder.envFromArgs(args);
-        FitTimeModels fitter = new FitTimeModels(env);
+        LoadTimeEstimator fitter = new LoadTimeEstimator(env);
         fitter.write("timings.csv");
     }
 }

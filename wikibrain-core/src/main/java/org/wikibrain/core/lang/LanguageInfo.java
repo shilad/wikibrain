@@ -244,6 +244,14 @@ public class LanguageInfo {
         return numArticles;
     }
 
+    public void setNumLinks(int numLinks) {
+        this.numLinks = numLinks;
+    }
+
+    public void setNumArticles(int numArticles) {
+        this.numArticles = numArticles;
+    }
+
     public String getDefaultCategoryNamespaceName(){
         return categoryNames.get(0);
     }
