@@ -4,10 +4,7 @@ package org.wikibrain.loader;
  * Created by toby on 7/15/14.
  */
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.typesafe.config.Config;
 import org.wikibrain.Loader;
 import org.wikibrain.conf.Configuration;
@@ -522,8 +519,19 @@ public class GraphicLoader extends JFrame implements ItemListener{
 
         ref = defaultConf.toString().substring(defaultConf.toString().indexOf("{"), defaultConf.toString().lastIndexOf("}") + 1);
         JsonParser jp = new JsonParser();
-        JsonObject refObj = jp.parse(ref).getAsJsonObject();
+
+        JsonObject refObj = new JsonObject();
         refObj.addProperty("maxThreads", maxThread.getText());
+        refObj.add("dao", new JsonObject());
+        refObj.add("spatial", new JsonObject());
+        refObj.get("dao").getAsJsonObject().add("dataSource", new JsonObject());
+        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().add("h2", new JsonObject());
+        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().add("psql", new JsonObject());
+        refObj.get("spatial").getAsJsonObject().add("dao", new JsonObject());
+        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().add("dataSource", new JsonObject());
+        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().add("postgis", new JsonObject());
+
+
         if(dataSourceSelection.getSelectedIndex() == 0)
             refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().addProperty("default", "h2");
         else
@@ -537,6 +545,8 @@ public class GraphicLoader extends JFrame implements ItemListener{
         refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("database", postgresSpatialDB.getText());
         refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("user", username.getText());
         refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("passwd", new String(pass.getPassword()));
+
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         ref = gson.toJson(refObj);
 
