@@ -11,6 +11,7 @@ import org.wikibrain.matrix.SparseMatrix;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -22,8 +23,9 @@ public interface VectorSimilarity {
      * Sets the matrix capturing features and transposes.
      * @param features
      * @param transpose
+     * @param dataDir
      */
-    public void setMatrices(SparseMatrix features, SparseMatrix transpose);
+    public void setMatrices(SparseMatrix features, SparseMatrix transpose, File dataDir) throws IOException;
 
     /**
      * Returns the similarity of the two vectors.

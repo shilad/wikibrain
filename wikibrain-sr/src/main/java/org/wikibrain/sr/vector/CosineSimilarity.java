@@ -2,6 +2,7 @@ package org.wikibrain.sr.vector;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
@@ -12,11 +13,12 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.matrix.MatrixRow;
 import org.wikibrain.matrix.SparseMatrix;
 import org.wikibrain.matrix.SparseMatrixRow;
-import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.utils.Leaderboard;
 import org.wikibrain.sr.utils.SimUtils;
+import org.wikibrain.utils.WpIOUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -27,27 +29,42 @@ import java.util.logging.Logger;
 public class CosineSimilarity implements VectorSimilarity {
     private static final Logger LOG = Logger.getLogger(CosineSimilarity.class.getName());
 
-    private final TIntFloatHashMap lengths = new TIntFloatHashMap();   // lengths of each row
-    private final TIntSet idsInResults = new TIntHashSet();
+    private TIntFloatHashMap lengths = new TIntFloatHashMap();   // lengths of each row
+    private TIntSet idsInResults = new TIntHashSet();
     private int maxResults = -1;
 
     private SparseMatrix features;
     private SparseMatrix transpose;
 
     @Override
-    public synchronized  void setMatrices(SparseMatrix features, SparseMatrix transpose) {
+    public synchronized  void setMatrices(SparseMatrix features, SparseMatrix transpose, File dataDir) throws IOException {
         this.features = features;
         this.transpose = transpose;
 
-        LOG.info("building cached matrix information");
-        lengths.clear();
-        idsInResults.clear();
-        maxResults = 0;
-        for (SparseMatrixRow row : features) {
-            lengths.put(row.getRowIndex(), (float) row.getNorm());
-            maxResults = Math.max(maxResults, row.getNumCols());
+        File idCacheFile = new File(dataDir, "cosineSimilarity-ids.bin");
+        File lengthCacheFile = new File(dataDir, "cosineSimilarity-lengths.bin");
+        File maxCacheFile = new File(dataDir, "cosineSimilarity-maxResults.bin");
+
+        if (lengthCacheFile.exists() && lengthCacheFile.lastModified() >= features.lastModified()
+                &&  idCacheFile.exists() && idCacheFile.lastModified() >= transpose.lastModified()) {
+            LOG.info("reading matrix information from cache");
+            lengths = (TIntFloatHashMap) WpIOUtils.readObjectFromFile(lengthCacheFile);
+            idsInResults = (TIntSet) WpIOUtils.readObjectFromFile(idCacheFile);
+            maxResults = (Integer) WpIOUtils.readObjectFromFile(maxCacheFile);
+        } else {
+            LOG.info("building cached matrix information");
+            lengths.clear();
+            idsInResults.clear();
+            maxResults = 0;
+            for (SparseMatrixRow row : features) {
+                lengths.put(row.getRowIndex(), (float) row.getNorm());
+                maxResults = Math.max(maxResults, row.getNumCols());
+            }
+            idsInResults.addAll(transpose.getRowIds());
+            WpIOUtils.writeObjectToFile(lengthCacheFile, lengths);
+            WpIOUtils.writeObjectToFile(idCacheFile, idsInResults);
+            WpIOUtils.writeObjectToFile(maxCacheFile, maxResults);
         }
-        idsInResults.addAll(transpose.getRowIds());
     }
 
     @Override
