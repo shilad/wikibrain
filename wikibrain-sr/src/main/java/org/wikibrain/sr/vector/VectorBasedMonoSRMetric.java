@@ -425,7 +425,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                 .transpose();
         transposeMatrix = new SparseMatrix(getTransposeMatrixPath());
 
-        similarity.setMatrices(featureMatrix, transposeMatrix);
+        similarity.setMatrices(featureMatrix, transposeMatrix, getDataDir());
     }
 
     private TIntSet getAllPageIds() throws IOException {
@@ -461,7 +461,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
             IOUtils.closeQuietly(transposeMatrix);
             featureMatrix = new SparseMatrix(getFeatureMatrixPath());
             transposeMatrix = new SparseMatrix(getTransposeMatrixPath());
-            similarity.setMatrices(featureMatrix, transposeMatrix);
+            similarity.setMatrices(featureMatrix, transposeMatrix, getDataDir());
         }
     }
 

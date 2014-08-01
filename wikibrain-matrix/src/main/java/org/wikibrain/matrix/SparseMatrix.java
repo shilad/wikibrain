@@ -51,6 +51,10 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
         rowBuffers = new MemoryMappedMatrix(path, channel, rowIds, rowOffsets);
     }
 
+    public long lastModified() {
+        return path.lastModified();
+    }
+
     private void readHeaders() throws IOException {
         long size = Math.min(channel.size(), DEFAULT_HEADER_SIZE);
         MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);

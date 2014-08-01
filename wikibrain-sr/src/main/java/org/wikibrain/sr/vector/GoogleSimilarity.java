@@ -3,8 +3,6 @@ package org.wikibrain.sr.vector;
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntDoubleHashMap;
-import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -19,11 +17,12 @@ import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.matrix.MatrixRow;
 import org.wikibrain.matrix.SparseMatrix;
 import org.wikibrain.matrix.SparseMatrixRow;
-import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.utils.Leaderboard;
 import org.wikibrain.sr.utils.SimUtils;
+import org.wikibrain.utils.WpIOUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -39,8 +38,8 @@ public class GoogleSimilarity implements VectorSimilarity {
 
     private static final Logger LOG = Logger.getLogger(CosineSimilarity.class.getName());
 
-    private final TIntIntMap lengths = new TIntIntHashMap();   // lengths of each row
-    private final TIntSet idsInResults = new TIntHashSet();
+    private TIntIntMap lengths = new TIntIntHashMap();   // lengths of each row
+    private TIntSet idsInResults = new TIntHashSet();
     private final int numPages;
 
     private SparseMatrix features;
@@ -51,18 +50,29 @@ public class GoogleSimilarity implements VectorSimilarity {
     }
 
     @Override
-    public synchronized  void setMatrices(SparseMatrix features, SparseMatrix transpose) {
+    public synchronized  void setMatrices(SparseMatrix features, SparseMatrix transpose, File dataDir) throws IOException {
         this.features = features;
         this.transpose = transpose;
 
-        LOG.info("building cached matrix information");
-        lengths.clear();
-        idsInResults.clear();
-        for (SparseMatrixRow row : features) {
-            lengths.put(row.getRowIndex(), row.getNumCols());
+        File idCacheFile = new File(dataDir, "googleSimilarity-ids.bin");
+        File lengthCacheFile = new File(dataDir, "googleSimilarity-lengths.bin");
+
+        if (lengthCacheFile.exists() && lengthCacheFile.lastModified() >= features.lastModified()
+        &&  idCacheFile.exists() && idCacheFile.lastModified() >= transpose.lastModified()) {
+            LOG.info("reading matrix information from cache");
+            lengths = (TIntIntMap) WpIOUtils.readObjectFromFile(lengthCacheFile);
+            idsInResults = (TIntSet) WpIOUtils.readObjectFromFile(idCacheFile);
+        } else {
+            LOG.info("building cached matrix information");
+            lengths.clear();
+            idsInResults.clear();
+            for (SparseMatrixRow row : features) {
+                lengths.put(row.getRowIndex(), row.getNumCols());
+            }
+            idsInResults.addAll(transpose.getRowIds());
+            WpIOUtils.writeObjectToFile(lengthCacheFile, lengths);
+            WpIOUtils.writeObjectToFile(idCacheFile, idsInResults);
         }
-        idsInResults.addAll(transpose.getRowIds());
-        System.out.println("found " + features.getNumRows() + " and " + transpose.getNumRows());
     }
 
     @Override
