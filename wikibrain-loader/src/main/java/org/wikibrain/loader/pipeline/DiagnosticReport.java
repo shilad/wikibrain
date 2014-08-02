@@ -1,23 +1,37 @@
 package org.wikibrain.loader.pipeline;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
+import org.apache.commons.io.FileSystemUtils;
+import org.wikibrain.conf.ConfigurationException;
+import org.wikibrain.core.cmd.Env;
+import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.utils.JvmUtils;
-import org.wikibrain.utils.WbCommandLine;
+import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
+import org.wikibrain.spatial.loader.SpatialDataLoader;
+import org.wikibrain.utils.OS;
+import org.wikibrain.utils.WpIOUtils;
 
+import javax.swing.filechooser.FileSystemView;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Shilad Sen
  */
 public class DiagnosticReport {
+    private static final Logger LOG = Logger.getLogger(DiagnosticReport.class.getName());
+
     public static double FUDGE_FACTOR = 1.2;    // Better to underpromise than overpromise
 
     public interface Diagnostic {
@@ -30,17 +44,21 @@ public class DiagnosticReport {
         public boolean runDiagnostic(PrintWriter writer);
     }
 
+    private final Env env;
     private final Map<String, PipelineStage> stages;
     private final LanguageSet langs;
     private List<? extends Diagnostic> diagnostics;
 
-    public DiagnosticReport(LanguageSet langs, Map<String, PipelineStage>stages) {
+    public DiagnosticReport(Env env, LanguageSet langs, Map<String, PipelineStage> stages) {
+        this.env = env;
         this.langs = langs;
         this.stages = stages;
         this.diagnostics = Arrays.asList(
                 new CompletionTimeDiagnostic(),
                 new DiskSpaceDiagnostic(),
-                new MemoryDiagnostic()
+                new MemoryDiagnostic(),
+                new DatabaseDiagnostic(),
+                new SpatialDatabaseDiagnostic()
         );
     }
 
@@ -52,6 +70,9 @@ public class DiagnosticReport {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             boolean passed = d.runDiagnostic(pw);
+            if (sw.getBuffer().length() == 0) {
+                continue;
+            }
             pw.append("\n");
             pw.close();
             if (passed) {
@@ -152,34 +173,88 @@ public class DiagnosticReport {
             }
             if (getAvailableDiskInMBs() >= total) {
                 writer.write(
-                        String.format("Disk space is okay. (need %.3f GBs, have %.3f)\n",
-                                total / 1024.0, getAvailableDiskInMBs()));
+                        String.format("Disk space is okay. (need %.3f GBs, have %.3f GBs)\n",
+                                total / 1024.0, getAvailableDiskInMBs() / 1024.0));
             } else {
                 writer.write(
-                        String.format("NOT ENOUGH DISK SPACE! (need %.3f GBs, have %.3f)\n",
-                                total / 1024.0, getAvailableDiskInMBs()));
+                        String.format("NOT ENOUGH DISK SPACE! (need %.3f GBs, have %.3f GBs)\n",
+                                total / 1024.0, getAvailableDiskInMBs() / 1024.0));
             }
+            writer.write("\tWarning: Available disk space may be INACCURATE if you have multiple drives.\n");
             for (String name : stageMbs.keySet()) {
                 writer.write(String.format("\tstage %s: %.1f MBs\n", name, stageMbs.get(name)));
             }
-            return getAvailableDiskInMBs() >= total;
+            return true;
         }
     }
 
     class DatabaseDiagnostic implements Diagnostic {
         @Override
         public boolean runDiagnostic(PrintWriter writer) {
-            return true;
+            Config config = null;
+            try {
+                config = env.getConfigurator().getConfig(WpDataSource.class, null);
+            } catch (ConfigurationException e) {
+                throw new IllegalStateException(e);
+            }
+
+            boolean passed = true;
+            try {
+                WpDataSource ds = env.getConfigurator().get(WpDataSource.class);
+                ds.getConnection().close();
+                writer.write("Connection to database succeeded. Active configuration:\n");
+            } catch (Exception e) {
+                writer.write("Connection to database FAILED! Active configuration:\n");
+                passed = false;
+            }
+            for (Map.Entry<String, ConfigValue > entry : config.entrySet()) {
+                writer.write("\t" + entry.getKey() + ": " + entry.getValue().render() + "\n");
+            }
+            return passed;
         }
     }
 
 
+    class SpatialDatabaseDiagnostic implements Diagnostic {
+        @Override
+        public boolean runDiagnostic(PrintWriter writer) {
+            boolean found = false;
+            for (PipelineStage stage : stages.values()) {
+                if (stage.getKlass() == SpatialDataLoader.class) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                return true;
+            }
+            Config config = null;
+            try {
+                config = env.getConfigurator().getConfig(PostGISDB.class, null);
+            } catch (ConfigurationException e) {
+                throw new IllegalStateException(e);
+            }
+
+            boolean passed = true;
+            try {
+                PostGISDB ds = env.getConfigurator().get(PostGISDB.class);
+                writer.write("Connection to spatial database succeeded. Active configuration:\n");
+            } catch (Exception e) {
+                writer.write("Connection to spatial database FAILED! Active configuration:\n");
+                passed = false;
+            }
+            for (Map.Entry<String, ConfigValue > entry : config.entrySet()) {
+                writer.write("\t" + entry.getKey() + ": " + entry.getValue().render() + "\n");
+            }
+            return passed;
+        }
+    }
 
     private double getAvailableDiskInMBs() {
-        long bytes = 0;
-        for (File file : File.listRoots()) {
-            bytes += file.getFreeSpace();
+        try {
+            return FileSystemUtils.freeSpaceKb(10000) / 1024;
+        } catch (IOException e) {
+            LOG.log(Level.WARNING, "failed to calculate free space in current dir:", e);
+            return 0.0;
         }
-        return bytes / (1024.0 * 1024.0);
     }
 }

@@ -78,18 +78,19 @@ public class Loader {
 
             PipelineLoader loader = new PipelineLoader(env, stageArgs);
 
-            // Close and pause
-            env.close();
-            Thread.sleep(1000);
 
             if (cmd.hasOption("d")) {
                 loader.setForceRerun(true);
             }
             String [] loaderArgs = keeperArgs.toArray(new String[0]);
-            if (!loader.runDiagnostics(loaderArgs, System.err)) {
+            if (!loader.runDiagnostics(env, loaderArgs, System.err)) {
                 System.err.println("Diagnostics failed. Aborting execution.");
                 System.exit(1);
             }
+            // Close and pause
+            env.close();
+            Thread.sleep(1000);
+
             loader.run(loaderArgs);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();

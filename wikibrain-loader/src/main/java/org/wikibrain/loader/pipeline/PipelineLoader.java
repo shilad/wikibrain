@@ -57,14 +57,14 @@ public class PipelineLoader {
         setStageArguments(args);
     }
 
-    public boolean runDiagnostics(String [] args, PrintStream writer) throws IOException, InterruptedException {
+    public boolean runDiagnostics(Env env, String[] args, PrintStream writer) throws IOException, InterruptedException {
         PrintWriter pw = new PrintWriter(writer);
-        boolean b = runDiagnostics(args, pw);
+        boolean b = runDiagnostics(env, args, pw);
         pw.flush();
         return b;
     }
 
-    public synchronized boolean runDiagnostics(String [] args, PrintWriter writer) throws IOException, InterruptedException {
+    public synchronized boolean runDiagnostics(Env env, String[] args, PrintWriter writer) throws IOException, InterruptedException {
         for (PipelineStage stage : stages.values()) {
             stage.reset();
             stage.setDryRun(true);
@@ -81,7 +81,7 @@ public class PipelineLoader {
             }
         }
 
-        DiagnosticReport report = new DiagnosticReport(langs, stages);
+        DiagnosticReport report = new DiagnosticReport(env, langs, stages);
         boolean result = report.runDiagnostics(writer);
 
         LOG.info("Ended dry run");
