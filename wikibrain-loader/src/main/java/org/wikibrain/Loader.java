@@ -85,7 +85,12 @@ public class Loader {
             if (cmd.hasOption("d")) {
                 loader.setForceRerun(true);
             }
-            loader.run(keeperArgs.toArray(new String[0]));
+            String [] loaderArgs = keeperArgs.toArray(new String[0]);
+            if (!loader.runDiagnostics(loaderArgs, System.err)) {
+                System.err.println("Diagnostics failed. Aborting execution.");
+                System.exit(1);
+            }
+            loader.run(loaderArgs);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             System.err.println("Invalid arguments: " + e.getMessage());

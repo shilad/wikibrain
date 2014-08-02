@@ -27,7 +27,7 @@ public class LoadTimeEstimator {
         System.out.println("read " + this.diagnostics.size() + " diagnostics");
     }
 
-    public void write(String path) throws IOException {
+    public void writeAllData(String path) throws IOException {
         CsvListWriter writer = new CsvListWriter(WpIOUtils.openWriter(path), CsvPreference.STANDARD_PREFERENCE);
         writer.write(Arrays.asList("stage", "singleCoreSpeed", "multiCoreSpeed", "numLinks", "numArticles", "elapsed"));
         for (StageDiagnostic diagnostic : diagnostics) {
@@ -56,6 +56,6 @@ public class LoadTimeEstimator {
     public static void main(String args[]) throws ConfigurationException, ParseException, IOException {
         Env env = EnvBuilder.envFromArgs(args);
         LoadTimeEstimator fitter = new LoadTimeEstimator(env);
-        fitter.write("timings.csv");
+        fitter.writeAllData("timings.csv");
     }
 }
