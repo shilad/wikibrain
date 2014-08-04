@@ -470,18 +470,18 @@ public class JavaProcessBuilder{
      * 
      * @exception  IOException  if an I/O error occurs.
      */
-    public Process launch(OutputStream output, OutputStream error) throws IOException{
+    public Process launch(final OutputStream output, final OutputStream error) throws IOException{
         final Process process = Runtime.getRuntime().exec(command(), null, workingDir);
         new Thread(new Runnable() {public void run() {
             try {
-                IOUtils.copy(process.getInputStream(), System.out);
+                IOUtils.copy(process.getInputStream(), output);
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         } } ).start();
         new Thread(new Runnable() {public void run() {
             try {
-                IOUtils.copy(process.getErrorStream(), System.err);
+                IOUtils.copy(process.getErrorStream(), error);
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }

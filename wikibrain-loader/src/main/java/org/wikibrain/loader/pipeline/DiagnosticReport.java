@@ -11,11 +11,7 @@ import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
 import org.wikibrain.spatial.loader.SpatialDataLoader;
-import org.wikibrain.utils.OS;
-import org.wikibrain.utils.WpIOUtils;
 
-import javax.swing.filechooser.FileSystemView;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -98,8 +94,7 @@ public class DiagnosticReport {
 
         writer.write(succeeded.toString());
 
-        return false;
-//        return failed.length() > 0;
+        return failed.length() > 0;
     }
 
     class MemoryDiagnostic implements Diagnostic {

@@ -6,6 +6,7 @@ import org.wikibrain.conf.ProviderFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.URISyntaxException;
@@ -89,6 +90,18 @@ public class JvmUtils {
      * @throws InterruptedException
      */
     public static Process launch(Class klass, String args[]) throws IOException, InterruptedException {
+        return launch(klass, args, System.out, System.err);
+    }
+
+    /**
+     * Launches a new java program that uses the running configuration settings.
+     * @param klass
+     * @param args
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static Process launch(Class klass, String args[], OutputStream out, OutputStream err) throws IOException, InterruptedException {
         JavaProcessBuilder builder = new JavaProcessBuilder();
         RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
         for (String jvmArg : runtimeMxBean.getInputArguments()) {
@@ -104,7 +117,7 @@ public class JvmUtils {
             builder.arg(arg);
         }
         builder.mainClass(klass.getName());
-        return builder.launch(System.out, System.err);
+        return builder.launch(out, err);
     }
 
     /**

@@ -2,482 +2,361 @@ package org.wikibrain.loader;
 
 /**
  * Created by toby on 7/15/14.
+ * Refined by Shilad on 8/3/14.
  */
 
 import com.google.gson.*;
 import com.typesafe.config.Config;
-import org.wikibrain.Loader;
+import org.apache.commons.lang3.StringUtils;
 import org.wikibrain.conf.Configuration;
+import org.wikibrain.utils.JvmUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import java.util.Timer;
 
-public class GraphicLoader extends JFrame implements ItemListener{
-    private JComboBox dataSourceSelection;
-    private JLabel jLabel;
-    private JTextField maxThread;
-    //private JTextField heapSize;
-    //private JTextField stackSize;
-    private JTextField language;
-    private JButton jButton;
-    private JTextField h2Path = new JTextField("\"${baseDir}\"/db/h2");
-    private JTextField username = new JTextField();
-    private JTextField postgresHost = new JTextField("localhost");
-    private JTextField portNo = new JTextField("5432");
-    private JTextField postgresDB = new JTextField("wikibrain");
-    private JTextField postgresSpatialDB = new JTextField("wikibrain_spatial");
-    private JPasswordField pass = new JPasswordField(20);
-    private JCheckBox basicWikipediaButton = new JCheckBox("Basic Wikipedia Data Structure");
+public class GraphicLoader extends JFrame {
+
+    public static final String DEFAULT_H2_PATH = "\"${baseDir}\"/db/h2";
+    public static final String DEFAULT_PG_HOST = "localhost";
+    public static final String DEFAULT_PG_PORT = "5432";
+    public static final String DEFAULT_PG_DB = "wikibrain";
+    public static final String DEFAULT_HEAPSIZE = "4G";
+    public static final String DEFAULT_BASEDIR = ".";
+    public static final String DEFAULT_LANG = "simple";
+
+    private JPanel mainPanel;
+
+    private JPanel paramPanel;
+    private JPanel phasePanel;
+    private JPanel buttonPanel;
+    private JPanel outputPanel;
+
+    private JLabel commandLabel = new JLabel("Click the run button to see command");
+    private JTextArea runLog;
+
+    private JComboBox dataSourceSelection = new JComboBox(new String[] {"H2", "PostgreSQL"});
+
+    private JTextField baseDir = new JTextField(DEFAULT_BASEDIR);
+    private JTextField heapSize = new JTextField(DEFAULT_HEAPSIZE);
+    private JTextField language = new JTextField(DEFAULT_LANG);
+
+    private JPanel dbPanel = new JPanel();
+    private JPanel h2Panel = new JPanel();
+    private JTextField h2Path = new JTextField(DEFAULT_H2_PATH);
+
+    private JPanel postgresPanel = new JPanel();
+    private JTextField postgresHost = new JTextField(DEFAULT_PG_HOST);
+    private JTextField postgresPort = new JTextField(DEFAULT_PG_PORT);
+    private JTextField postgresDB = new JTextField(DEFAULT_PG_DB);
+
+    private JTextField postgresUser = new JTextField();
+    private JPasswordField postgresPass = new JPasswordField(20);
+
+    private JCheckBox basicWikipediaButton = new JCheckBox("Basic data");
     private JCheckBox luceneButton = new JCheckBox("Lucene");
     private JCheckBox phrasesButton = new JCheckBox("Phrases");
     private JCheckBox conceptsButton = new JCheckBox("Concepts");
-    private JCheckBox univeralButton = new JCheckBox("Universal Links");
+    private JCheckBox univeralButton = new JCheckBox("Universal links");
     private JCheckBox wikidataButton = new JCheckBox("Wikidata");
-    private JCheckBox spatialButton = new JCheckBox("Spatial Data");
-    private JCheckBox srButton = new JCheckBox("Semantic Relatedness Model");
+    private JCheckBox spatialButton = new JCheckBox("Spatial data");
+    private JCheckBox srButton = new JCheckBox("Semantic relatedness");
+    private Process process;
+    private JButton runButton;
+    private JButton defaultButton;
 
-
-
-
-
-
-
-
-
-    public GraphicLoader()
-    {
+    public GraphicLoader() {
         super();
-        this.setSize(480, 300);
+        this.setSize(1000, 600);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
-        JPanel jPanel1 = new JPanel(new GridBagLayout());
+        this.setTitle("WikiBrain Configuration");
+
+        this.initParamPanel();
+        this.initOutputPanel();
+        this.initButtonPanel();
+        this.initPhaseSelector();
+
+        mainPanel = new JPanel(new GridBagLayout());
+        this.getContentPane().add(mainPanel);
         GridBagConstraints c = new GridBagConstraints();
-        this.getContentPane().add(jPanel1);
 
-        //this.add(getJTextField(), null);
-
-
+        c.anchor = GridBagConstraints.NORTH;
+        c.weighty = 1.0;
+        c.insets = new Insets(10, 10, 10, 10);
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridx = 0;
-        c.gridy = 0;
-        jPanel1.add(new JLabel("  Data source"), c);
 
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 2;
+        c.weightx = 0.1;
+        mainPanel.add(paramPanel, c);
+
         c.gridx = 1;
-        c.gridy = 0;
-        jPanel1.add(getDataSourceSelection(), c);
-        //jPanel1.add(getJLabel(), null);
+        mainPanel.add(phasePanel, c);
 
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 2;
+        c.gridy = 0;
+        c.weightx = 0.8;
+        c.weighty = 1.0;
+        c.fill = GridBagConstraints.BOTH;
+        mainPanel.add(outputPanel, c);
+
         c.gridx = 0;
         c.gridy = 1;
-        c.gridwidth = 1;
-        jPanel1.add(new JLabel("  Max Thread"), c);
-        maxThread = getJTextField("-1");
-
+        c.gridwidth = 3;
+        c.weightx = 1.0;
+        c.weighty = 0.0;
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 1;
-        jPanel1.add(maxThread, c);
+        mainPanel.add(buttonPanel, c);
 
-        c.fill = GridBagConstraints.HORIZONTAL;
+        reset();
+    }
+
+    private void initOutputPanel() {
+        outputPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.weightx = 1.0;
+        c.weighty = 0.0;
         c.gridx = 0;
-        c.gridy = 2;
-        //jPanel1.add(new JLabel("  Heap Size"), c);
-
+        c.insets = new Insets(0, 5, 10, 5);
+        c.gridy = 0;
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 2;
-        //heapSize = getJTextField("4G");
-        //jPanel1.add(heapSize, c);
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridx = 0;
+        outputPanel.add(commandLabel, c);
+//        c.gridy = 1;
+//        outputPanel.add(new JLabel("Estimated run time: 3414 min"), c);
+//        c.gridy = 2;
+//        outputPanel.add(new JLabel("Estimated disk space: 1.3 GB"), c);
+        c.weighty = 1.0;
         c.gridy = 3;
-        //jPanel1.add(new JLabel("  Stack Size"), c);
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        runLog = new JTextArea(40, 80);
+        runLog.setText("Output log:\n");
+        runLog.setEnabled(true);
+        outputPanel.add(new JScrollPane(runLog), c);
+    }
 
+    private void initButtonPanel() {
+        buttonPanel = new JPanel(new GridLayout(1, 3));
 
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 3;
-        //stackSize = getJTextField("1G");
-        //jPanel1.add(stackSize, c);
-
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 2;
-        c.gridheight = 3;
-        c.gridx = 0;
-        c.gridy = 4;
-        jPanel1.add(new JLabel("    "), c);
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridx = 0;
-        c.gridheight = 2;
-        c.gridy = 4;
-        jPanel1.add(new JLabel("  Language"), c);
-
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 2;
-        c.gridheight = 2;
-        c.gridx = 1;
-        c.gridy = 4;
-        language = getJTextField("simple");
-        jPanel1.add(language, c);
-
-
-
-
-
-
-
-
-
-
-
-
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 8;
-        final JButton okButton = getJButton("OK");
-        okButton.addActionListener(new ActionListener() {
+        runButton = new JButton("Run");
+        runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if(actionEvent.getSource().equals(okButton)){
-                    /*
-                    System.out.println("button clicked");
-                    System.out.println(dataSourceSelection.getSelectedItem());
-                    System.out.println(maxThread.getText());
-                    System.out.println(heapSize.getText());
-                    System.out.println(stackSize.getText());
-                    System.out.println(language.getText());
-                    */
-
-                    if(dataSourceSelection.getSelectedItem().toString().contentEquals("H2")){
-                        Object[] options = {"No I don't want H2", "Yep I Know it"};
-                        int n = JOptionPane.showOptionDialog(new JFrame("Wikibrain"), "You have selected H2 database. \n H2 works out of box and does not require further configuration. \n But it does not support the Wikibrain spatial module", "Wikibrain Data Source", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-
-                        if(n == 1){
-                            //System.out.println("OK clicked");
-                            JPanel panel = new JPanel(new GridLayout(6,2));
-
-                            panel.add(new JLabel("H2 Path"));
-                            panel.add(h2Path);
-
-                            final JButton defaultButton = getJButton("Restore Default");
-                            defaultButton.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent actionEvent) {
-                                    if (actionEvent.getSource().equals(defaultButton)) {
-                                        h2Path.setText("\"${baseDir}\"/db/h2");
-
-                                    }
-
-
-                                }
-                            });
-                            panel.add(new JLabel(" "));
-                            panel.add(defaultButton);
-
-
-                            String[] options2 = new String[]{"Cancel", "OK"};
-                            int option = JOptionPane.showOptionDialog(null, panel, "Postgres Settings",
-                                    JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-                                    null, options2, options2[1]);
-                            if(option == 1) // pressing OK button
-                            {
-                                char[] password = pass.getPassword();
-                                //System.out.println("Your h2 path is  " + h2Path.getText());
-                                int phaseOption = JOptionPane.showOptionDialog(null, getPhaseSelector(), "Phase Selector",
-                                        JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-                                        null, options2, options2[1]);
-                                if(phaseOption == 1){
-                                    createConfig();
-                                }
-
-                            }
-                        }
-                    }
-
-                    if(dataSourceSelection.getSelectedItem().toString().contentEquals("Postgres")){
-                        Object[] options = {"No I don't have Postgres ready", "Sure"};
-                        int n = JOptionPane.showOptionDialog(new JFrame("Wikibrain"), "You have selected Postgres database. \n Make sure that you have already installed Postgres on your machine \n We will help you connect Wikibrain to your Postgres database", "Wikibrain Data Source", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-
-                        if(n == 1){
-                            //System.out.println("OK clicked");
-                            JPanel panel = new JPanel(new GridLayout(0,2));
-
-                            panel.add(new JLabel("Postgres Host"));
-                            panel.add(postgresHost);
-                            panel.add(new JLabel("Port Number"));
-                            panel.add(portNo);
-                            panel.add(new JLabel("Wikibrain Database Name"));
-                            panel.add(postgresDB);
-                            panel.add(new JLabel("Wikibrain Spatial Database Name"));
-                            panel.add(postgresSpatialDB);
-                            panel.add(new JLabel("Postgres Username"));
-                            panel.add(username);
-                            panel.add(new JLabel("Postgres Password"));
-                            panel.add(pass);
-
-
-                            final JButton defaultButton = new JButton("Restore Default");
-                            defaultButton.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent actionEvent) {
-                                    if (actionEvent.getSource().equals(defaultButton)) {
-                                        postgresHost.setText("localhost");
-                                        portNo.setText("5432");
-                                        postgresDB.setText("wikibrain");
-                                        postgresSpatialDB.setText("wikibrain_spatial");
-                                        username.setText("");
-                                        pass.setText("");
-
-                                    }
-
-
-                                }
-                            });
-
-                            panel.add(new JLabel(""));
-
-
-                            panel.add(defaultButton);
-                            //panel.add(new JLabel("hello"));
-
-
-                            String[] options2 = new String[]{"Cancel", "OK"};
-                            int option = JOptionPane.showOptionDialog(null, panel, "Postgres Settings",
-                                    JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-                                    null, options2, options2[1]);
-                            if(option == 1) // pressing OK button
-                            {
-                                char[] password = pass.getPassword();
-                                /*
-                                System.out.println("Your postgres host is  " + postgresHost.getText() + ":" + portNo.getText());
-                                System.out.println("Your postgres db is  " + postgresDB.getText());
-                                System.out.println("Your postgres spatial db is  " + postgresSpatialDB.getText());
-                                System.out.println("Your username is:  " + username.getText());
-                                System.out.println("Your password is:  " + new String(password));
-                               */
-                                int phaseOption = JOptionPane.showOptionDialog(null, getPhaseSelector(), "Phase Selector",
-                                        JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-                                        null, options2, options2[1]);
-                                if(phaseOption == 1){
-                                    createConfig();
-                                }
-
-
-                            }
-                        }
-                    }
+                if (actionEvent.getSource().equals(runButton)) {
+                    runOrStop();
                 }
-
-
             }
         });
+        runButton.setBackground(Color.GREEN);
+        runButton.setOpaque(true);
+        runButton.setBorderPainted(false);
 
-        jPanel1.add(okButton, c);
+        buttonPanel.add(runButton);
 
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 1;
-        c.gridx = 1;
-        c.gridy = 8;
-        final JButton cancelButton = getJButton("Cancel");
+        final JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if(actionEvent.getSource().equals(cancelButton)){
-                    //System.out.println("cancel clicked");
                     System.exit(0);
                 }
-
-
             }
         });
-        jPanel1.add(cancelButton, c);
+        buttonPanel.add(cancelButton);
 
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
-        c.gridwidth = 1;
-        c.gridx = 2;
-        c.gridy = 8;
-        final JButton defaultButton = getJButton("Restore Default");
+        defaultButton = new JButton("Restore Default");
         defaultButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (actionEvent.getSource().equals(defaultButton)) {
-                    dataSourceSelection.setSelectedIndex(0);
-                    //heapSize.setText("4G");
-                    //stackSize.setText("1G");
-                    maxThread.setText("-1");
-                    language.setText("simple");
-
+                    reset();
                 }
-
-
             }
         });
-        jPanel1.add(defaultButton, c);
-
-
-
-
-
-        this.setTitle("WikiBrain Configuration");
+        buttonPanel.add(defaultButton);
     }
 
-    private javax.swing.JLabel getJLabel() {
-        if(jLabel == null) {
-            jLabel = new javax.swing.JLabel();
-            jLabel.setBorder(BorderFactory.createEmptyBorder());
-            jLabel.setText("H2 database is easier to config\nPostgres provides better flexibility\n(Postgres is required for spatial module)");
-        }
-        return jLabel;
+    private void initParamPanel() {
+        paramPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(5, 5, 5, 5);
+
+        // Base directory
+        c.weightx = 0.5;
+        c.gridx = 0;
+        c.gridy = 0;
+        paramPanel.add(new JLabel("Base directory"), c);
+
+        c.gridx = 1;
+        paramPanel.add(baseDir, c);
+
+        c.gridx = 0;
+        c.gridy = 1;
+        paramPanel.add(new JLabel("Heap Size"), c);
+
+        c.gridx = 1;
+        paramPanel.add(heapSize, c);
+
+        c.gridx = 0;
+        c.gridy = 2;
+        paramPanel.add(new JLabel("Language"), c);
+
+        c.gridx = 1;
+        paramPanel.add(language, c);
+
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 4;
+        paramPanel.add(new JLabel("Data source"), c);
+
+        c.gridx = 1;
+        paramPanel.add(dataSourceSelection, c);
+        dataSourceSelection.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                while (dbPanel.getComponentCount() > 0) dbPanel.remove(0);
+                if (dataSourceSelection.getSelectedIndex() == 0) {
+                    dbPanel.add(h2Panel);
+                } else {
+                    dbPanel.add(postgresPanel);
+                }
+                dbPanel.revalidate();
+                dbPanel.repaint();
+                pack();
+            }
+        });
+
+        h2Panel.setLayout(new GridLayout(0, 2));
+        h2Panel.add(new JLabel("H2 Path"));
+        h2Panel.add(h2Path);
+
+        postgresPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c2 = new GridBagConstraints();
+
+        c2.gridx = 0;
+        c2.gridy = 0;
+        c2.weightx = 0.4;
+        c2.anchor = GridBagConstraints.EAST;
+        postgresPanel.add(new JLabel("PG host: "), c2);
+        c2.gridy = 1;
+        postgresPanel.add(new JLabel("PG port: "), c2);
+        c2.gridy = 2;
+        postgresPanel.add(new JLabel("PG database: "), c2);
+        c2.gridy = 3;
+        postgresPanel.add(new JLabel("PG user: "), c2);
+        c2.gridy = 4;
+        postgresPanel.add(new JLabel("PG passwd: "), c2);
+
+        c2.gridx = 1;
+        c2.gridy = 0;
+        c2.weightx = 0.5;
+        c2.fill = GridBagConstraints.HORIZONTAL;
+        c2.anchor = GridBagConstraints.WEST;
+        postgresPanel.add(postgresHost, c2);
+        c2.gridy = 1;
+        postgresPanel.add(postgresPort, c2);
+        c2.gridy = 2;
+        postgresPanel.add(postgresDB, c2);
+        c2.gridy = 3;
+        postgresPanel.add(postgresUser, c2);
+        c2.gridy = 4;
+        postgresPanel.add(postgresPass, c2);
+
+        c.weightx = 1.0;
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 5;
+        paramPanel.add(dbPanel, c);
     }
 
-    private JComboBox getDataSourceSelection() {
-        if(dataSourceSelection == null) {
-            String[] dataSources = {"H2", "Postgres"};
-            dataSourceSelection = new JComboBox(dataSources);
-            //dataSourceSelection.setBorder(BorderFactory.createTitledBorder("Select your data source"));
-            //dataSourceSelection.setPreferredSize(new Dimension(600,80));
+    public void reset() {
+        baseDir.setText(DEFAULT_BASEDIR);
+        heapSize.setText(DEFAULT_HEAPSIZE);
+        language.setText(DEFAULT_LANG);
 
-        }
-        return  dataSourceSelection;
-    }
+        dataSourceSelection.setSelectedIndex(0);
 
-    private javax.swing.JTextField getJTextField(String def) {
+        h2Path.setText(DEFAULT_H2_PATH);
 
-            JTextField jTextField = new javax.swing.JTextField();
-            //jTextField.setBorder(BorderFactory.createTitledBorder(prompt));
-           // jTextField.setBorder(BorderFactory.createTitledBorder(prompt));
+        postgresUser.setText("");
+        postgresPass.setText("");
+        postgresPort.setText(DEFAULT_PG_PORT);
+        postgresHost.setText(DEFAULT_PG_HOST);
+        postgresDB.setText(DEFAULT_PG_DB);
 
-            //jTextField.setPreferredSize(new Dimension(600, 40));
-            //jTextField.setSize(600, 40);
-            jTextField.setText(def);
+        conceptsButton.setText("Concepts");
+        wikidataButton.setText("Wikidata");
+        phrasesButton.setText("Phrases");
+        luceneButton.setText("Lucene");
 
-        return jTextField;
-    }
+        basicWikipediaButton.setSelected(true);
+        luceneButton.setSelected(true);
+        phrasesButton.setSelected(true);
+        conceptsButton.setSelected(false);
+        wikidataButton.setSelected(false);
+        univeralButton.setSelected(false);
+        spatialButton.setSelected(false);
+        srButton.setSelected(false);
 
-    private javax.swing.JButton getJButton(String s) {
-
-        JButton jButton = new javax.swing.JButton();
-        //jButton.setPreferredSize(new Dimension(100, 20));
-            //jButton.setBounds(103, 110, 71, 27);
-        jButton.setText(s);
-
-        return jButton;
-    }
-
-
-    public static void main(String[] args)
-    {
-        GraphicLoader w = new GraphicLoader();
-        w.setVisible(true);
-        w.setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-
+        basicWikipediaButton.setEnabled(false);
+        luceneButton.setEnabled(true);
+        phrasesButton.setEnabled(true);
+        conceptsButton.setEnabled(true);
+        wikidataButton.setEnabled(true);
+        univeralButton.setEnabled(true);
+        spatialButton.setEnabled(true);
+        srButton.setEnabled(true);
     }
 
 
-     private JPanel getPhaseSelector(){
+     private void initPhaseSelector(){
+         phasePanel = new JPanel();
+         phasePanel.setLayout(new GridLayout(0, 1));
+         phasePanel.add(new JLabel("Please select phases:"));
 
-         JPanel panel = new JPanel();
-         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-         panel.add(new JLabel("Please select phases you want to load"));
-         panel.add(new JLabel(" "));
-
-         basicWikipediaButton.setSelected(true);
          basicWikipediaButton.setEnabled(false);
 
-         luceneButton.setSelected(true);
+         phasePanel.add(basicWikipediaButton);
+         phasePanel.add(luceneButton);
+         phasePanel.add(phrasesButton);
+         phasePanel.add(conceptsButton);
+         phasePanel.add(univeralButton);
+         phasePanel.add(wikidataButton);
+         phasePanel.add(spatialButton);
+         phasePanel.add(srButton);
 
-         phrasesButton.setSelected(true);
+         ActionListener adapter = new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 stageButtonClicked(e);
+             }
+         };
 
-         if(language.getText().contains(",")){
-            conceptsButton.setSelected(true);
-             conceptsButton.setEnabled(false);
-         }
-         else{
-             conceptsButton.setSelected(false);
-         }
-
-         univeralButton.setSelected(false);
-
-         wikidataButton.setSelected(false);
-
-         spatialButton.setSelected(false);
-         if(dataSourceSelection.getSelectedIndex() == 0){
-             spatialButton.setText("Spatial Data (require postgres database)");
-             spatialButton.setEnabled(false);
-         }
-
-         srButton.setSelected(false);
-         panel.setSize(480, 300);
-         panel.add(basicWikipediaButton);
-         panel.add(luceneButton);
-         panel.add(phrasesButton);
-         panel.add(conceptsButton);
-         panel.add(univeralButton);
-         panel.add(wikidataButton);
-         panel.add(spatialButton);
-         panel.add(srButton);
-
-         luceneButton.addItemListener(this);
-         phrasesButton.addItemListener(this);
-         conceptsButton.addItemListener(this);
-         univeralButton.addItemListener(this);
-         wikidataButton.addItemListener(this);
-         spatialButton.addItemListener(this);
-         srButton.addItemListener(this);
-
-
-
-
-
-
-
-
-         return  panel;
-
-
-
+         luceneButton.addActionListener(adapter);
+         phrasesButton.addActionListener(adapter);
+         conceptsButton.addActionListener(adapter);
+         univeralButton.addActionListener(adapter);
+         wikidataButton.addActionListener(adapter);
+         spatialButton.addActionListener(adapter);
+         srButton.addActionListener(adapter);
      }
 
-    public void itemStateChanged(ItemEvent e){
-
-        Object source = e.getItemSelectable();
+    public void stageButtonClicked(ActionEvent e){
         basicWikipediaButton.setEnabled(false);
         luceneButton.setEnabled(true);
         phrasesButton.setEnabled(true);
         conceptsButton.setEnabled(!language.getText().contains(","));
         wikidataButton.setEnabled(true);
+
         conceptsButton.setText("Concepts");
         wikidataButton.setText("Wikidata");
         phrasesButton.setText("Phrases");
         luceneButton.setText("Lucene");
+
         if(univeralButton.isSelected()){
             conceptsButton.setSelected(true);
             conceptsButton.setEnabled(false);
@@ -501,11 +380,15 @@ public class GraphicLoader extends JFrame implements ItemListener{
             phrasesButton.setText("Phrases (required by SR)");
             luceneButton.setText("Lucene (required by SR)");
         }
-
-
     }
 
-    public void createConfig() {
+    public void runOrStop() {
+        if (process != null) {
+            process.destroy();
+            appendToLog("\n\nPROCESS CANCELLED!");
+            return;
+        }
+
         String ref = new String();
         String dsSelection;
         if(dataSourceSelection.getSelectedIndex() == 0)
@@ -521,7 +404,7 @@ public class GraphicLoader extends JFrame implements ItemListener{
         JsonParser jp = new JsonParser();
 
         JsonObject refObj = new JsonObject();
-        refObj.addProperty("maxThreads", maxThread.getText());
+        refObj.addProperty("baseDir", baseDir.getText());
         refObj.add("dao", new JsonObject());
         refObj.add("spatial", new JsonObject());
         refObj.get("dao").getAsJsonObject().add("dataSource", new JsonObject());
@@ -538,13 +421,13 @@ public class GraphicLoader extends JFrame implements ItemListener{
             refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().addProperty("default", "psql");
         refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("h2").getAsJsonObject().addProperty("url", String.format("jdbc:h2:%s;LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0;MAX_OPERATION_MEMORY=100000000", h2Path.getText()));
         refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("url", String.format("jdbc:postgresql://%s/%s", postgresHost.getText(), postgresDB.getText()));
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("username", username.getText());
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("password", new String(pass.getPassword()));
+        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("postgresUser", postgresUser.getText());
+        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("password", new String(postgresPass.getPassword()));
         refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("host", postgresHost.getText());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("port", portNo.getText());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("database", postgresSpatialDB.getText());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("user", username.getText());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("passwd", new String(pass.getPassword()));
+        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("port", postgresPort.getText());
+        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("database", postgresDB.getText());
+        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("user", postgresUser.getText());
+        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("passwd", new String(postgresPass.getPassword()));
 
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -578,20 +461,20 @@ public class GraphicLoader extends JFrame implements ItemListener{
 
 
         try {
-            StringBuffer output = new StringBuffer();
-            Process p;
-            this.setVisible(false);
-
-            p = Runtime.getRuntime().exec("mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikibrain.utils.ResourceInstaller\n");
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line = "";
-            while ((line = reader.readLine()) != null){
-                output.append(line + "\n");
-                System.out.println(line);
-
-            }
-            p.waitFor();
+//            StringBuffer output = new StringBuffer();
+//            Process p;
+//            this.setVisible(false);
+//
+//            p = Runtime.getRuntime().exec("mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikibrain.utils.ResourceInstaller\n");
+//
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//            String line = "";
+//            while ((line = reader.readLine()) != null){
+//                output.append(line + "\n");
+//                System.out.println(line);
+//
+//            }
+//            p.waitFor();
             //System.out.println(output.toString());
 
             /*
@@ -652,24 +535,89 @@ public class GraphicLoader extends JFrame implements ItemListener{
             //p = Runtime.getRuntime().exec(loader);
             String arg[] = new String[argList.size()];
             arg = argList.toArray(arg);
-            Loader.main(arg);
 
+            commandLabel.setText("org.wikibrain.Loader " + StringUtils.join(arg, " "));
 
-            //System.out.println(loader);
-            System.exit(0);
+            OutputStream out = new PrintStream(new LogOutputStream(System.out), true);
+            OutputStream err = new PrintStream(new LogOutputStream(System.err), true);
 
+            runButton.setText("Stop");
+            runButton.setBackground(Color.RED);
+            runLog.setText("");
+            defaultButton.setEnabled(false);
+
+            this.process = JvmUtils.launch(org.wikibrain.Loader.class, arg, out, err);
+            final Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                               @Override
+                               public void run() {
+                                   if (checkIfProcessHasFinished()) {
+                                       timer.cancel();
+                                   }
+                               }
+                           }, 1000, 100);
         }
         catch (Exception e){
             e.printStackTrace();
         }
+    }
 
+    private synchronized boolean checkIfProcessHasFinished() {
+        if (process == null) {
+            return true;
+        }
+        try {
+            int val = process.exitValue();
+            if (val == 0) {
+                appendToLog("\n\nLOADING COMPLETED SUCCESSFULLY!\n\n");
+            } else {
+                appendToLog("\n\nLOADING FAILED!\n\n\n");
+            }
+            process = null;
+            runButton.setText("Run");
+            runButton.setBackground(Color.GREEN);
+            defaultButton.setEnabled(true);
+            return true;
+        } catch (IllegalThreadStateException e2) {
+            return false;
+        }
+    }
 
-
-
-
+    private void appendToLog(String text) {
+        runLog.append(text);
+        // scrolls the text area to the end of data
+        runLog.setCaretPosition(runLog.getDocument().getLength());
     }
 
 
+
+    public static void main(String[] args)
+    {
+        GraphicLoader w = new GraphicLoader();
+        w.setVisible(true);
+        w.setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+    }
+
+    class LogOutputStream extends OutputStream {
+        private final PrintStream stream;
+
+        public LogOutputStream(PrintStream stream) {
+            this.stream = stream;
+        }
+
+        @Override
+        public void write(byte[] buffer, int offset, int length) throws IOException {
+            final String text = new String(buffer, offset, length);
+            stream.write(buffer, offset, length);
+            appendToLog(text);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            write(new byte[]{(byte) b}, 0, 1);
+        }
+    }
 
 }
 
