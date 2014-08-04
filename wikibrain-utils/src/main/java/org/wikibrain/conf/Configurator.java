@@ -111,18 +111,14 @@ public class Configurator implements Cloneable {
      * @throws ConfigurationException
      */
     private void registerProviders() throws ConfigurationException {
-        String classPath = JvmUtils.getClassPath();
-
         // map from class names to file they are registered in.
         Set<String> visited = new HashSet<String>();    // files already scanned
         Map<String, File> registered = new HashMap<String, File>();
 
+        String classRegEx = System.getProperty("wikibrain.classRegEx", "org\\.wikibrain\\.*");
+
         for (File file : JvmUtils.getClassPathAsList()) {
             LOG.fine("considering classpath entry " + file);
-            if (file.length() > MAX_FILE_SIZE) {
-                LOG.fine("skipping looking for providers in large file " + file);
-                continue;
-            }
             String canonical = FilenameUtils.normalize(file.getAbsolutePath());
             if (visited.contains(canonical)) {
                 LOG.fine("skipping looking for providers in duplicate classpath entry " + canonical);
@@ -133,7 +129,7 @@ public class Configurator implements Cloneable {
             ClassFinder finder = new ClassFinder();
             finder.add(file);
 
-            ClassFilter filter = new ProviderFilter();
+            ClassFilter filter = new AndClassFilter(new RegexClassFilter(classRegEx), new ProviderFilter());
             Collection<ClassInfo> foundClasses = new ArrayList<ClassInfo>();
             finder.findClasses (foundClasses,filter);
 
