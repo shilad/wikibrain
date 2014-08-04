@@ -4,8 +4,9 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.sql.LocalArticleSqlDao;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.sql.LocalLinkSqlDao;
+import org.wikibrain.core.dao.sql.LocalPageSqlDao;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
@@ -64,7 +65,7 @@ public class TestLinkGenerator {
         WpDataSource wpDs = new WpDataSource(ds);
 
         LanguageInfo lang = LanguageInfo.getByLangCode("simple");
-        LocalArticleSqlDao dao = new LocalArticleSqlDao(wpDs);
+        LocalPageDao dao = new LocalPageSqlDao(wpDs);
         LocalLinkSqlDao linkDao = new LocalLinkSqlDao(wpDs);
         ExplanationFormatter expf = new ExplanationFormatter(dao);
 

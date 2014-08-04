@@ -23,14 +23,14 @@ public abstract class ConceptMapper {
 
     private final int id;
 
-    protected final LocalPageDao<LocalPage> localPageDao;
+    protected final LocalPageDao localPageDao;
 
     /**
      * All purpose constructor
      * @param id
      * @param localPageDao
      */
-    public ConceptMapper(int id, LocalPageDao<LocalPage> localPageDao) {
+    public ConceptMapper(int id, LocalPageDao localPageDao) {
         this.localPageDao = localPageDao;
         this.id = id;
     }

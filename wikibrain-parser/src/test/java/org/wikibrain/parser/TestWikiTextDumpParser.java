@@ -75,7 +75,7 @@ public class TestWikiTextDumpParser {
         LocalLinkDao linkDao = new LocalLinkSqlDao(wpDs);
         LocalPageDao pageDao = new LocalPageSqlDao(wpDs);
         LocalCategoryMemberDao catMemDao = new LocalCategoryMemberSqlDao(
-                wpDs, new LocalCategorySqlDao(wpDs), new LocalArticleSqlDao(wpDs));
+                wpDs, new LocalPageSqlDao(wpDs));
         MetaInfoDao metaDao = new MetaInfoSqlDao(wpDs);
 
         linkDao.beginLoad();

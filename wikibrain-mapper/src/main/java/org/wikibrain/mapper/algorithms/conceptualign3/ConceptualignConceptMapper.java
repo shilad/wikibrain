@@ -54,7 +54,7 @@ public class ConceptualignConceptMapper extends ConceptMapper{
 
 
     public ConceptualignConceptMapper(File wikidataFilePath, int id,
-                 LocalPageDao<LocalPage> localPageDao, InterLanguageLinkDao illDao, MetaInfoDao miDao, boolean print) {
+                 LocalPageDao localPageDao, InterLanguageLinkDao illDao, MetaInfoDao miDao, boolean print) {
 
         super(id, localPageDao);
         this.illDao = illDao;
@@ -72,7 +72,7 @@ public class ConceptualignConceptMapper extends ConceptMapper{
      * @param illDao
      * @param miDao
      */
-    public ConceptualignConceptMapper(Iterable<UniversalPage> uPages, LanguageSet uPagesLs, int id, LocalPageDao<LocalPage> localPageDao,
+    public ConceptualignConceptMapper(Iterable<UniversalPage> uPages, LanguageSet uPagesLs, int id, LocalPageDao localPageDao,
                                       InterLanguageLinkDao illDao, MetaInfoDao miDao, boolean print) {
         super(id, localPageDao);
         this.illDao = illDao;

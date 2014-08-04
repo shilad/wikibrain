@@ -12,9 +12,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -30,12 +28,10 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             Tables.CATEGORY_MEMBERS.CATEGORY_ID,
             Tables.CATEGORY_MEMBERS.ARTICLE_ID,
     };
-    private final LocalCategoryDao localCategoryDao;
     private final LocalPageDao localPageDao;
 
-    public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalCategoryDao localCategoryDao, LocalPageDao localArticleDao) throws DaoException {
+    public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalPageDao localArticleDao) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/category-members");
-        this.localCategoryDao = localCategoryDao;
         this.localPageDao = localArticleDao;
     }
 
@@ -49,8 +45,33 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public void save(LocalCategory category, LocalPage article) throws DaoException, WikiBrainException {
+    public void save(LocalPage category, LocalPage article) throws DaoException, WikiBrainException {
         save(new LocalCategoryMember(category, article));
+    }
+
+    @Override
+    public LocalPage getClosestCategory(LocalPage page, Set<LocalPage> candidates, boolean weightedDistance) throws DaoException {
+        CategoryGraph graph = getGraph(page.getLanguage());
+        CategoryBfs bfs = new CategoryBfs(graph, page.getLocalId(), page.getLanguage(), Integer.MAX_VALUE, null, this);
+        Map<Integer, LocalPage> indexToCandidates = new HashMap<Integer, LocalPage>();
+        for (LocalPage c : candidates) {
+            indexToCandidates.put(graph.getCategoryIndex(c.getLocalId()), c);
+        }
+
+        List<LocalPage> matches = new ArrayList<LocalPage>();
+        while (bfs.hasMoreResults() && matches.isEmpty()) {
+            CategoryBfs.BfsVisited visited = bfs.step();
+            for (int catId : visited.cats.keys()) {
+                if (indexToCandidates.containsKey(catId)) {
+                    matches.add(indexToCandidates.get(catId));
+                }
+            }
+        }
+        if (matches.isEmpty()) {
+            return null;
+        } else {
+            return matches.get(new Random().nextInt(matches.size()));
+        }
     }
 
     /**
@@ -117,7 +138,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public Collection<Integer> getCategoryMemberIds(LocalCategory localCategory) throws DaoException {
+    public Collection<Integer> getCategoryMemberIds(LocalPage localCategory) throws DaoException {
         return getCategoryMemberIds(localCategory.getLanguage(), localCategory.getLocalId());
     }
 
@@ -128,7 +149,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public Map<Integer, LocalPage> getCategoryMembers(LocalCategory localCategory) throws DaoException {
+    public Map<Integer, LocalPage> getCategoryMembers(LocalPage localCategory) throws DaoException {
         Collection<Integer> articleIds = getCategoryMemberIds(localCategory);
         return localPageDao.getByIds(localCategory.getLanguage(), articleIds);
     }
@@ -154,15 +175,15 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public Map<Integer, LocalCategory> getCategories(Language language, int articleId) throws DaoException {
+    public Map<Integer, LocalPage> getCategories(Language language, int articleId) throws DaoException {
         Collection<Integer> categoryIds = getCategoryIds(language, articleId);
-        return localCategoryDao.getByIds(language, categoryIds);
+        return localPageDao.getByIds(language, categoryIds);
     }
 
     @Override
-    public Map<Integer, LocalCategory> getCategories(LocalPage localArticle) throws DaoException {
+    public Map<Integer, LocalPage> getCategories(LocalPage localArticle) throws DaoException {
         Collection<Integer> categoryIds = getCategoryIds(localArticle);
-        return localCategoryDao.getByIds(localArticle.getLanguage(), categoryIds);
+        return localPageDao.getByIds(localArticle.getLanguage(), categoryIds);
     }
 
     @Override
@@ -227,7 +248,6 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                         getConfigurator().get(
                                 WpDataSource.class,
                                 config.getString("dataSource")),
-                        getConfigurator().get(LocalCategoryDao.class),
                         getConfigurator().get(LocalPageDao.class)
                 );
                 String cachePath = getConfig().get().getString("dao.sqlCachePath");

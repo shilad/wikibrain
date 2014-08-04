@@ -30,10 +30,9 @@ import java.util.*;
 
 /**
  * Fetch a LocalPage object from Wikipedia Server
- * @param <T> LocalPage object fetched
  */
 
-public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
+public class LocalPageLiveDao implements LocalPageDao  {
     /**
      * Sets if we should try to follow the redirects or not. Default is true (to following them).
      * @param followRedirects
@@ -54,13 +53,13 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
     public void endLoad()throws DaoException{
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
-    public void save(T a)throws DaoException{
+    public void save(LocalPage a)throws DaoException{
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public int getCount(DaoFilter a)throws DaoException{
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
-    public Iterable<T> get(DaoFilter a)throws DaoException{
+    public Iterable<LocalPage> get(DaoFilter a)throws DaoException{
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
     public LanguageSet getLoadedLanguages() throws DaoException {
@@ -81,24 +80,24 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @throws org.wikibrain.core.dao.DaoException if there was an error retrieving the page
      */
 
-    public T getByTitle(Title title, NameSpace ns) throws DaoException{
+    public LocalPage getByTitle(Title title, NameSpace ns) throws DaoException{
         Language lang = title.getLanguage();
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", lang)
                 .addTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
-        return (T)info.getLocalPage(lang);
+        return (LocalPage)info.getLocalPage(lang);
     }
 
 
-    public T getById(Language language, int pageId) throws DaoException{
+    public LocalPage getById(Language language, int pageId) throws DaoException{
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
                 .addPageid(pageId).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
-        return (T)info.getLocalPage(language);
+        return (LocalPage)info.getLocalPage(language);
     }
 
     @Override
-    public T getById(LocalId localId) throws DaoException {
+    public LocalPage getById(LocalId localId) throws DaoException {
         return getById(localId.getLanguage(), localId.getId());
     }
 
@@ -109,13 +108,13 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return a map of ids to pages
      * @throws org.wikibrain.core.dao.DaoException if there was an error retrieving the pages
      */
-    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException{
-        Map<Integer,T> pageMap = new HashMap<Integer, T>();
+    public Map<Integer, LocalPage> getByIds(Language language, Collection<Integer> pageIds) throws DaoException{
+        Map<Integer,LocalPage> pageMap = new HashMap<Integer, LocalPage>();
         for(Integer pageId : pageIds){
             LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
                     .addPageid(pageId).setRedirects(followRedirects);
             QueryReply info = builder.build().getValuesFromQueryResult().get(0);
-            pageMap.put(pageId, (T)info.getLocalPage(language));
+            pageMap.put(pageId, (LocalPage)info.getLocalPage(language));
         }
         return pageMap;
     }
@@ -128,13 +127,13 @@ public class LocalPageLiveDao<T extends LocalPage> implements LocalPageDao<T> {
      * @return a map of titles to pages
      * @throws org.wikibrain.core.dao.DaoException if there was an error retrieving the pages
      */
-    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException{
-        Map<Title, T> pageMap = new HashMap<Title, T>();
+    public Map<Title, LocalPage> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException{
+        Map<Title, LocalPage> pageMap = new HashMap<Title, LocalPage>();
         for(Title title : titles){
             LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
                     .addTitle(title.getCanonicalTitle().replace(" ", "_")).setRedirects(followRedirects);
             QueryReply info = builder.build().getValuesFromQueryResult().get(0);
-            pageMap.put(title, (T)info.getLocalPage(language));
+            pageMap.put(title, (LocalPage)info.getLocalPage(language));
         }
         return pageMap;
     }

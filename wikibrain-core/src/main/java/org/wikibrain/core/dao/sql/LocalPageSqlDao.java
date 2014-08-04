@@ -31,7 +31,7 @@ import java.util.logging.Level;
 
 /**
  */
-public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> implements LocalPageDao<T> {
+public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalPageDao {
     private volatile TLongIntHashMap titlesToIds = null;
     private RedirectSqlDao redirectSqlDao;
 
@@ -68,7 +68,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     @Override
-    public Iterable<T> get(final DaoFilter daoFilter) throws DaoException {
+    public Iterable<LocalPage> get(final DaoFilter daoFilter) throws DaoException {
         DSLContext context = getJooq();
         try {
             Collection<Condition> conditions = new ArrayList<Condition>();
@@ -89,11 +89,11 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     where(conditions).
                     limit(daoFilter.getLimitOrInfinity()).
                     fetchLazy(getFetchSize());
-            return new SimpleSqlDaoIterable<T>(result, context) {
+            return new SimpleSqlDaoIterable<LocalPage>(result, context) {
                 @Override
-                public T transform(Record r) {
+                public LocalPage transform(Record r) {
                     try {
-                        return (T)buildLocalPage(r, daoFilter);
+                        return buildLocalPage(r, daoFilter);
                     } catch (DaoException e) {
                         LOG.log(Level.WARNING, e.getMessage(), e);
                         return null;
@@ -133,7 +133,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     @Override
-    public T getById(Language language, int pageId) throws DaoException {
+    public LocalPage getById(Language language, int pageId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Record record = context.select().
@@ -141,15 +141,14 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
                     fetchOne();
-            LocalPage page = buildLocalPage(record);
-            return (T)page;
+            return buildLocalPage(record);
         } finally {
             freeJooq(context);
         }
     }
 
     @Override
-    public T getById(LocalId localId) throws DaoException {
+    public LocalPage getById(LocalId localId) throws DaoException {
         return getById(localId.getLanguage(), localId.getId());
     }
 
@@ -164,7 +163,7 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     @Override
-    public T getByTitle(Title title, NameSpace nameSpace) throws DaoException {
+    public LocalPage getByTitle(Title title, NameSpace nameSpace) throws DaoException {
         DSLContext context = getJooq();
         try {
             Record record = context.select().
@@ -174,19 +173,18 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
                     and(Tables.LOCAL_PAGE.NAME_SPACE.eq(nameSpace.getArbitraryId())).
                     limit(1).
                     fetchOne();
-            LocalPage page = buildLocalPage(record);
-            return (T)page;
+            return buildLocalPage(record);
         } finally {
             freeJooq(context);
         }
     }
 
     @Override
-    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
+    public Map<Integer, LocalPage> getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
         if (pageIds == null || pageIds.isEmpty()) {
             return null;
         }
-        Map<Integer, T> map = new HashMap<Integer, T>();
+        Map<Integer, LocalPage> map = new HashMap<Integer, LocalPage>();
         for (Integer pageId : pageIds){
             map.put(pageId, getById(language, pageId));
         }
@@ -194,11 +192,11 @@ public class LocalPageSqlDao<T extends LocalPage> extends AbstractSqlDao<T> impl
     }
 
     @Override
-    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace nameSpace) throws DaoException {
+    public Map<Title, LocalPage> getByTitles(Language language, Collection<Title> titles, NameSpace nameSpace) throws DaoException {
         if (titles == null || titles.isEmpty()) {
             return null;
         }
-        Map<Title, T> map = new HashMap<Title, T>();
+        Map<Title, LocalPage> map = new HashMap<Title, LocalPage>();
         for (Title title : titles){
             map.put(title, getByTitle(title, nameSpace));
         }

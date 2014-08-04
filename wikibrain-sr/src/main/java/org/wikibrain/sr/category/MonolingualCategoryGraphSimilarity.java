@@ -1,25 +1,22 @@
 package org.wikibrain.sr.category;
 
 import com.typesafe.config.Config;
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalCategoryMemberDao;
 import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.sql.CategoryBfs;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.CategoryGraph;
 import org.wikibrain.sr.BaseMonolingualSRMetric;
 import org.wikibrain.sr.MonolingualSRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
-import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.disambig.Disambiguator;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**

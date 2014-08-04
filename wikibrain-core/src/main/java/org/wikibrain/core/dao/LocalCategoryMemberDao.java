@@ -4,11 +4,11 @@ import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.CategoryGraph;
 import org.wikibrain.core.model.LocalCategoryMember;
-import org.wikibrain.core.model.LocalCategory;
 import org.wikibrain.core.model.LocalPage;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -27,7 +27,9 @@ public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
      * @throws DaoException if there was an error saving the item
      * @throws org.wikibrain.core.WikiBrainException if the category and article are in different languages
      */
-    public void save(LocalCategory category, LocalPage article) throws DaoException, WikiBrainException;
+    public void save(LocalPage category, LocalPage article) throws DaoException, WikiBrainException;
+
+    public LocalPage getClosestCategory(LocalPage page, Set<LocalPage> candidates, boolean weightedDistance) throws DaoException;
 
     /**
      * Gets a collection of page IDs of articles that are members of the category
@@ -45,7 +47,7 @@ public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
      * @return a collection of page IDs of articles
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Collection<Integer> getCategoryMemberIds(LocalCategory localCategory) throws DaoException;
+    public Collection<Integer> getCategoryMemberIds(LocalPage localCategory) throws DaoException;
 
     /**
      * Gets a map of local articles mapped from their page IDs, based on a category
@@ -63,7 +65,7 @@ public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
      * @return a map of page IDs to articles
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Integer, LocalPage> getCategoryMembers(LocalCategory localCategory) throws DaoException;
+    public Map<Integer, LocalPage> getCategoryMembers(LocalPage localCategory) throws DaoException;
 
     /**
      * Gets a collection of page IDs of categories that the article specified by
@@ -91,7 +93,7 @@ public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
      * @return a map of page IDs to categories
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Integer, LocalCategory> getCategories(Language language, int articleId) throws DaoException;
+    public Map<Integer, LocalPage> getCategories(Language language, int articleId) throws DaoException;
 
     /**
      * Gets a map of local categories mapped from their page IDs, based on a specified article
@@ -99,7 +101,7 @@ public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
      * @return a map of page IDs to categories
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Integer, LocalCategory> getCategories(LocalPage localArticle) throws DaoException;
+    public Map<Integer, LocalPage> getCategories(LocalPage localArticle) throws DaoException;
 
     /**
      * Returns a compact representation of the category graph.

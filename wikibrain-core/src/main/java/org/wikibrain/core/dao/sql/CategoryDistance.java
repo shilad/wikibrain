@@ -1,4 +1,4 @@
-package org.wikibrain.sr.category;
+package org.wikibrain.core.dao.sql;
 
 /**
  * Captures the distance to a category.

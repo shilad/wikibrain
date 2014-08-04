@@ -10,7 +10,7 @@ public class LocalCategoryMember {
     private final int articleId;
     private final Language language;
 
-    public LocalCategoryMember(LocalCategory localCategory, LocalPage localArticle) throws WikiBrainException {
+    public LocalCategoryMember(LocalPage localCategory, LocalPage localArticle) throws WikiBrainException {
         if (!localArticle.getLanguage().equals(localCategory.getLanguage())) {
             throw new WikiBrainException("Language Mismatch");
         }

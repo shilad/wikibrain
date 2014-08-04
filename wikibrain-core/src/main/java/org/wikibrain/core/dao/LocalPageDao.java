@@ -9,7 +9,7 @@ import org.wikibrain.core.model.Title;
 import java.util.Collection;
 import java.util.Map;
 
-public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
+public interface LocalPageDao extends Dao<LocalPage> {
 
     /**
      * Sets if we should try to follow the redirects or not. Default is true (to following them).
@@ -25,7 +25,7 @@ public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public T getByTitle(Title title, NameSpace ns) throws DaoException;
+    public LocalPage getByTitle(Title title, NameSpace ns) throws DaoException;
 
     /**
      * Get a single page by its id
@@ -34,7 +34,7 @@ public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
      * @return the requested LocalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public T getById(Language language, int pageId) throws DaoException;
+    public LocalPage getById(Language language, int pageId) throws DaoException;
 
 
     /**
@@ -43,7 +43,7 @@ public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
      * @return
      * @throws DaoException
      */
-    public T getById(LocalId localId) throws DaoException;
+    public LocalPage getById(LocalId localId) throws DaoException;
 
 
     /**
@@ -53,7 +53,7 @@ public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
      * @return a map of ids to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Integer, T> getByIds(Language language, Collection<Integer> pageIds) throws DaoException;
+    public Map<Integer, LocalPage> getByIds(Language language, Collection<Integer> pageIds) throws DaoException;
 
     /**
      * Get a map of pages by their titles
@@ -63,7 +63,7 @@ public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
      * @return a map of titles to pages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Title, T> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException;
+    public Map<Title, LocalPage> getByTitles(Language language, Collection<Title> titles, NameSpace ns) throws DaoException;
 
     /**
      * Get an id from a title. Returns -1 if it doesn't exist.
@@ -81,4 +81,8 @@ public interface LocalPageDao<T extends LocalPage> extends Dao<T> {
      * @return
      */
     public int getIdByTitle(Title title) throws DaoException;
+
+    @Override
+    public Iterable<LocalPage> get(DaoFilter daoFilter) throws DaoException;
+
 }

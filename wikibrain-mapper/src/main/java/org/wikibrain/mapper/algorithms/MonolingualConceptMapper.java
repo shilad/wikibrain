@@ -31,7 +31,7 @@ public class MonolingualConceptMapper extends ConceptMapper {
 
     private static final AtomicInteger nextUnivId = new AtomicInteger(0);
 
-    public MonolingualConceptMapper(int id, LocalPageDao<LocalPage> localPageDao) {
+    public MonolingualConceptMapper(int id, LocalPageDao localPageDao) {
         super(id, localPageDao);
     }
 

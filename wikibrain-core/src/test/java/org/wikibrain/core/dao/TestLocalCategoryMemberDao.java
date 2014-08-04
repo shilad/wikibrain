@@ -4,9 +4,8 @@ import org.junit.Test;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.sql.*;
 import org.wikibrain.core.lang.LanguageInfo;
-import org.wikibrain.core.model.LocalArticle;
-import org.wikibrain.core.model.LocalCategory;
 import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 
 import java.io.IOException;
@@ -27,13 +26,12 @@ public class TestLocalCategoryMemberDao {
 
         LocalCategoryMemberSqlDao dao = new LocalCategoryMemberSqlDao(
                 ds,
-                new LocalCategorySqlDao(ds),
-                new LocalArticleSqlDao(ds));
+                new LocalPageSqlDao(ds));
         LocalPageSqlDao pageDao = new LocalPageSqlDao(ds);
 
         dao.beginLoad();
         pageDao.beginLoad();
-        List<LocalCategory> localCategories = new ArrayList<LocalCategory>();
+        List<LocalPage> localCategories = new ArrayList<LocalPage>();
 
         /*
         This giant for-loop establishes a set of categories and articles and their relationship.
@@ -44,20 +42,22 @@ public class TestLocalCategoryMemberDao {
          */
         for (int i=1; i<=100; i++) {
             if (isPrime(i)) {
-                LocalCategory localCategory = new LocalCategory(
+                LocalPage localCategory = new LocalPage(
                         lang.getLanguage(),
                         i,
-                        new Title("Category " + i, lang)
+                        new Title("Category " + i, lang),
+                        NameSpace.CATEGORY
                 );
                 localCategories.add(localCategory);
                 pageDao.save(localCategory);
             }
-            LocalArticle localArticle = new LocalArticle(
+            LocalPage localArticle = new LocalPage(
                     lang.getLanguage(),
                     i+100,
-                    new Title("Article " + i, lang)
+                    new Title("Article " + i, lang),
+                    NameSpace.ARTICLE
             );
-            for (LocalCategory localCategory : localCategories) {
+            for (LocalPage localCategory : localCategories) {
                 if (i%localCategory.getLocalId() == 0) {
                     dao.save(localCategory, localArticle);
                 }
@@ -72,7 +72,7 @@ public class TestLocalCategoryMemberDao {
         map = dao.getCategoryMembers(lang.getLanguage(), 7);
         assertEquals(100/7, map.size());
 
-        Map<Integer, LocalCategory> map2 = dao.getCategories(lang.getLanguage(), 42+100);
+        Map<Integer, LocalPage> map2 = dao.getCategories(lang.getLanguage(), 42+100);
         assertEquals(3, map2.size());
         map2 = dao.getCategories(lang.getLanguage(), 81+100);
         assertEquals(1, map2.size());

@@ -1,4 +1,4 @@
-package org.wikibrain.sr.category;
+package org.wikibrain.core.dao.sql;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
@@ -6,7 +6,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalCategoryMemberDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.CategoryGraph;
-import org.wikibrain.core.model.LocalCategory;
+import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 
 import java.util.Map;
@@ -76,7 +76,7 @@ public class CategoryBfs {
         this.language = language;
         pageDistances.put(startPage, 0.000000);
         if (startNamespace == NameSpace.ARTICLE) {
-            Map<Integer,LocalCategory> cats = categoryMemberDao.getCategories(language,startId);
+            Map<Integer,LocalPage> cats = categoryMemberDao.getCategories(language,startId);
             if (cats!=null){
                 for (int catId : categoryMemberDao.getCategories(language,startId).keySet()) {
                     int ci = graph.getCategoryIndex(catId);

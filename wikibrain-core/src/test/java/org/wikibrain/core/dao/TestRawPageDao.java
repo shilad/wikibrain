@@ -2,7 +2,7 @@ package org.wikibrain.core.dao;
 
 
 import org.junit.Test;
-import org.wikibrain.core.dao.sql.LocalArticleSqlDao;
+import org.wikibrain.core.dao.sql.LocalPageSqlDao;
 import org.wikibrain.core.dao.sql.RawPageSqlDao;
 import org.wikibrain.core.dao.sql.TestDaoUtil;
 import org.wikibrain.core.dao.sql.WpDataSource;
@@ -18,7 +18,7 @@ public class TestRawPageDao {
     public void test() throws ClassNotFoundException, IOException, SQLException, DaoException {
         WpDataSource wpDs = TestDaoUtil.getWpDataSource();
         LanguageInfo lang = LanguageInfo.getByLangCode("en");
-        LocalArticleSqlDao lpDao = new LocalArticleSqlDao(wpDs);
+        LocalPageSqlDao lpDao = new LocalPageSqlDao(wpDs);
         RawPageDao rpDao = new RawPageSqlDao(wpDs);
         lpDao.beginLoad();
         rpDao.beginLoad();
@@ -39,7 +39,7 @@ public class TestRawPageDao {
         lpDao.endLoad();
         rpDao.endLoad();
 
-        LocalArticle savedPage = lpDao.getById(lang.getLanguage(), 7);
+        LocalPage savedPage = lpDao.getById(lang.getLanguage(), 7);
         assert (savedPage != null);
         assert (page.getLocalId() == savedPage.getLocalId());
         assert (page.getTitle().equals(savedPage.getTitle()));
