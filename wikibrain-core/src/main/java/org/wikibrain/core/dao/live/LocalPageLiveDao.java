@@ -204,6 +204,11 @@ public class LocalPageLiveDao implements LocalPageDao  {
         return  pages;
     }
 
+    @Override
+    public LocalPage getByTitle(Language language, NameSpace ns, String title) throws DaoException {
+        return getByTitle(new Title(title, language), ns);
+    }
+
     public static class Provider extends org.wikibrain.conf.Provider<LocalPageDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);

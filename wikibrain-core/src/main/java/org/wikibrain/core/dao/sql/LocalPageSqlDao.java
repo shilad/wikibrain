@@ -180,6 +180,11 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
     }
 
     @Override
+    public LocalPage getByTitle(Language language, NameSpace ns, String title) throws DaoException {
+        return getByTitle(new Title(title, language), ns);
+    }
+
+    @Override
     public Map<Integer, LocalPage> getByIds(Language language, Collection<Integer> pageIds) throws DaoException {
         if (pageIds == null || pageIds.isEmpty()) {
             return null;
@@ -271,6 +276,7 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
             key += ".noRedirect";
         }
         if (cache!=null) {
+            System.err.println("HERE!");
             TLongIntHashMap map = (TLongIntHashMap)cache.get(key, LocalPage.class);
             if (map!=null){
                 titlesToIds = map;

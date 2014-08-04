@@ -13,6 +13,7 @@ import org.wikibrain.core.model.*;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -29,6 +30,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             Tables.CATEGORY_MEMBERS.ARTICLE_ID,
     };
     private final LocalPageDao localPageDao;
+    private Map<Language, CategoryGraph> graphs = new HashMap<Language, CategoryGraph>();
 
     public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalPageDao localArticleDao) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/category-members");
@@ -46,6 +48,9 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
 
     @Override
     public void save(LocalPage category, LocalPage article) throws DaoException, WikiBrainException {
+        if (!graphs.isEmpty()) {
+            graphs.clear();
+        }
         save(new LocalCategoryMember(category, article));
     }
 
@@ -53,6 +58,8 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     public LocalPage getClosestCategory(LocalPage page, Set<LocalPage> candidates, boolean weightedDistance) throws DaoException {
         CategoryGraph graph = getGraph(page.getLanguage());
         CategoryBfs bfs = new CategoryBfs(graph, page.getLocalId(), page.getLanguage(), Integer.MAX_VALUE, null, this);
+        bfs.setAddPages(false);
+        bfs.setExploreChildren(false);
         Map<Integer, LocalPage> indexToCandidates = new HashMap<Integer, LocalPage>();
         for (LocalPage c : candidates) {
             indexToCandidates.put(graph.getCategoryIndex(c.getLocalId()), c);
@@ -187,17 +194,22 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     }
 
     @Override
-    public CategoryGraph getGraph(Language language) throws DaoException {
+    public synchronized  CategoryGraph getGraph(Language language) throws DaoException {
+        if (graphs.containsKey(language)) {
+            return graphs.get(language);
+        }
         String key = "cat-graph-" + language.getLangCode();
         if (cache != null) {
             CategoryGraph graph = (CategoryGraph) cache.get(key, LocalPage.class, LocalCategoryMember.class);
             if (graph != null) {
+                graphs.put(language, graph);
                 return graph;
             }
         }
         LocalCategoryGraphBuilder builder = new LocalCategoryGraphBuilder(localPageDao, this);
         CategoryGraph graph =  builder.build(language);
         cache.put(key, graph);
+        graphs.put(language, graph);
         return graph;
     }
 

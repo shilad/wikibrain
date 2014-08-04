@@ -127,8 +127,8 @@ public class DiagnosticReport {
             } else {
                 writer.write("Not enough memory has been allocated for the JVM!\n");
             }
-            writer.write("\tmemory required, in GBs: " + necessaryGBs + "GB\n");
-            writer.write("\tmemory allocated, in GBs: " + allocatedGBs + "GB\n");
+            writer.write(String.format("\tmemory required: %.1fGB\n", (double)necessaryGBs));
+            writer.write(String.format("\tmemory allocated: %.1fGB\n", allocatedGBs));
             return passed;
         }
     }

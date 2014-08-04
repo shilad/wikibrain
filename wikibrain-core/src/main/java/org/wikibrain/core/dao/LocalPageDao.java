@@ -28,6 +28,17 @@ public interface LocalPageDao extends Dao<LocalPage> {
     public LocalPage getByTitle(Title title, NameSpace ns) throws DaoException;
 
     /**
+     * Get a single page by its title
+     *
+     * @param language the page's language
+     * @param ns the page's namespace
+     * @param title the page's title
+     * @return the requested LocalPage
+     * @throws DaoException if there was an error retrieving the page
+     */
+    public LocalPage getByTitle(Language language, NameSpace ns, String title) throws DaoException;
+
+    /**
      * Get a single page by its id
      * @param language the page's language
      * @param pageId the page's id

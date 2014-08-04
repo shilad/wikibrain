@@ -9,6 +9,7 @@ import org.wikibrain.core.model.CategoryGraph;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -76,9 +77,9 @@ public class CategoryBfs {
         this.language = language;
         pageDistances.put(startPage, 0.000000);
         if (startNamespace == NameSpace.ARTICLE) {
-            Map<Integer,LocalPage> cats = categoryMemberDao.getCategories(language,startId);
+            Collection<Integer> cats = categoryMemberDao.getCategoryIds(language, startId);
             if (cats!=null){
-                for (int catId : categoryMemberDao.getCategories(language,startId).keySet()) {
+                for (int catId : cats) {
                     int ci = graph.getCategoryIndex(catId);
                     if (ci >= 0) {
                         openCats.add(new CategoryDistance(ci, graph.cats[ci], graph.catCosts[ci], (byte)direction));
