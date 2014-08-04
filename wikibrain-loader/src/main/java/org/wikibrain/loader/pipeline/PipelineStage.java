@@ -94,6 +94,11 @@ public class PipelineStage {
      */
     private final String diskEstimateEquation;
 
+    /**
+     * Equation used to estimate the disk space required for a particular stage in MBs.
+     */
+    private final String downloadEstimateEquation;
+
     public PipelineStage(Config config, Collection<PipelineStage> previousStages, Map<String, MetaInfo> loadedInfo) throws ClassNotFoundException {
         this.name = config.getString("name");
         this.klass = Class.forName(config.getString("class"));
@@ -113,6 +118,11 @@ public class PipelineStage {
         }
         this.timeEstimateEquation = config.getString("runtime");
         this.diskEstimateEquation = config.getString("diskSpace");
+        if (config.hasPath("downloadSize")) {
+            this.downloadEstimateEquation = config.getString("downloadSize");
+        } else {
+            this.downloadEstimateEquation = "0.0";
+        }
         this.loadedInfo = loadsClass == null ? null : loadedInfo.get(loadsClass);
     }
 
@@ -253,7 +263,7 @@ public class PipelineStage {
     }
 
 
-    public double estimateMegabytes(LanguageSet langs) {
+    public double estimateDiskMegabytes(LanguageSet langs) {
         int numArticles = 0;
         int numLinks = 0;
         for (Language lang : langs) {
@@ -268,6 +278,26 @@ public class PipelineStage {
         mathEvaluator.setVariables(variables);
         try {
             return mathEvaluator.getNumberResult(diskEstimateEquation);
+        } catch (EvaluationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public double estimateDownloadMegabytes(LanguageSet langs) {
+        int numArticles = 0;
+        int numLinks = 0;
+        for (Language lang : langs) {
+            LanguageInfo li = LanguageInfo.getByLanguage(lang);
+            numLinks += li.getNumLinks();
+            numArticles += li.getNumArticles();
+        }
+        Evaluator mathEvaluator = new Evaluator();
+        Map<String, String> variables = new HashMap<String, String>();
+        variables.put("links", ""+numLinks);
+        variables.put("articles", ""+numArticles);
+        mathEvaluator.setVariables(variables);
+        try {
+            return mathEvaluator.getNumberResult(downloadEstimateEquation);
         } catch (EvaluationException e) {
             throw new RuntimeException(e);
         }

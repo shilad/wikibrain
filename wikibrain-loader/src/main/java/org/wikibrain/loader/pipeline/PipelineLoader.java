@@ -120,7 +120,7 @@ public class PipelineLoader {
         LOG.info("Ended dry run");
         for (PipelineStage stage : stages.values()) {
             if (stage.hasBeenRun()) {
-                mbs += stage.estimateMegabytes(langs);
+                mbs += stage.estimateDiskMegabytes(langs);
                 seconds += stage.estimateSeconds(langs);
             }
             stage.reset();

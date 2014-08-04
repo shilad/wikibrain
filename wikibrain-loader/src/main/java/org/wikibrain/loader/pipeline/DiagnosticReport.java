@@ -50,6 +50,7 @@ public class DiagnosticReport {
         this.langs = langs;
         this.stages = stages;
         this.diagnostics = Arrays.asList(
+                new DownloadDiagnostic(),
                 new CompletionTimeDiagnostic(),
                 new DiskSpaceDiagnostic(),
                 new MemoryDiagnostic(),
@@ -161,7 +162,7 @@ public class DiagnosticReport {
             LinkedHashMap<String, Double> stageMbs = new LinkedHashMap<String, Double>();
             for (PipelineStage stage : stages.values()) {
                 if (stage.hasBeenRun()) {
-                    double mbs = stage.estimateMegabytes(langs) * FUDGE_FACTOR;;
+                    double mbs = stage.estimateDiskMegabytes(langs) * FUDGE_FACTOR;;
                     total += mbs;
                     stageMbs.put(stage.getName(), mbs);
                 }
@@ -178,6 +179,33 @@ public class DiagnosticReport {
             writer.write("\tWarning: Available disk space may be INACCURATE if you have multiple drives.\n");
             for (String name : stageMbs.keySet()) {
                 writer.write(String.format("\tstage %s: %.1f MBs\n", name, stageMbs.get(name)));
+            }
+            return true;
+        }
+    }
+
+    class DownloadDiagnostic implements Diagnostic {
+        @Override
+        public boolean runDiagnostic(PrintWriter writer) {
+            double total = 0.0;
+            LinkedHashMap<String, Double> stageMbs = new LinkedHashMap<String, Double>();
+            for (PipelineStage stage : stages.values()) {
+                if (stage.hasBeenRun()) {
+                    double mbs = stage.estimateDownloadMegabytes(langs) * FUDGE_FACTOR;
+                    total += mbs;
+                    if (mbs > 0.01) {
+                        stageMbs.put(stage.getName(), mbs);
+                    }
+                }
+            }
+            writer.write(String.format("Rough estimate of download size: %.1f MBs\n",  total));
+            writer.write("\tThis may be an over-estimate if some files have already been downloaded.\n");
+            writer.write(String.format("\tTime on dial-up (50kbs): %.1f minutes\n", total / 0.005 / 60));
+            writer.write(String.format("\tTime on Broadband (1Mbs): %.1f minutes\n", total / 0.1 / 60));
+            writer.write(String.format("\tTime on Broadband (10Mbs): %.1f minutes\n", total / 1 / 60));
+            writer.write(String.format("\tTime on Broadband (100Mbs): %.1f minutes\n", total / 10 / 60));
+            for (String name : stageMbs.keySet()) {
+                writer.write(String.format("\tstage %s will download about %.1f about MBs\n", name, stageMbs.get(name)));
             }
             return true;
         }
