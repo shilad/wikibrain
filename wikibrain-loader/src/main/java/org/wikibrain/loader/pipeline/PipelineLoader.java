@@ -1,20 +1,15 @@
 package org.wikibrain.loader.pipeline;
 
 import com.typesafe.config.Config;
-import org.apache.commons.cli.*;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
-import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
-import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.MetaInfo;
 
-import java.io.IOException;
-import java.nio.channels.Pipe;
-import java.sql.SQLException;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,11 +57,19 @@ public class PipelineLoader {
         setStageArguments(args);
     }
 
-    public void dryRun(String [] args) throws IOException, InterruptedException {
+    public boolean runDiagnostics(Env env, String[] args, PrintStream writer) throws IOException, InterruptedException {
+        PrintWriter pw = new PrintWriter(writer);
+        boolean b = runDiagnostics(env, args, pw);
+        pw.flush();
+        return b;
+    }
+
+    public synchronized boolean runDiagnostics(Env env, String[] args, PrintWriter writer) throws IOException, InterruptedException {
         for (PipelineStage stage : stages.values()) {
             stage.reset();
             stage.setDryRun(true);
         }
+
         LOG.info("Beginning dry run");
         for (PipelineStage stage : stages.values()) {
             if (stage.getShouldRun() != null && stage.getShouldRun()) {
@@ -77,14 +80,56 @@ public class PipelineLoader {
                 }
             }
         }
+
+        DiagnosticReport report = new DiagnosticReport(env, langs, stages);
+        boolean result = report.runDiagnostics(writer);
+
         LOG.info("Ended dry run");
+        for (PipelineStage stage : stages.values()) {
+            stage.reset();
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a length two array containing the estimated runtime in seconds and disk usage in megabytes.
+     * @param env
+     * @param args
+     * @return
+     */
+    public synchronized  double [] getResourceEstimates(Env env, String[] args) throws IOException, InterruptedException {
+        double seconds = 0.0;
+        double mbs = 0.0;
         for (PipelineStage stage : stages.values()) {
             stage.reset();
             stage.setDryRun(true);
         }
+
+        LOG.info("Beginning dry run");
+        for (PipelineStage stage : stages.values()) {
+            if (stage.getShouldRun() != null && stage.getShouldRun()) {
+                try {
+                    stage.runWithDependenciesIfNeeded(args, forceRerun);
+                } catch (StageFailedException e) {
+                    throw new IllegalStateException(e); // shouldn't happen
+                }
+            }
+        }
+
+        LOG.info("Ended dry run");
+        for (PipelineStage stage : stages.values()) {
+            if (stage.hasBeenRun()) {
+                mbs += stage.estimateMegabytes(langs);
+                seconds += stage.estimateSeconds(langs);
+            }
+            stage.reset();
+        }
+
+        return new double[] { seconds, mbs };
     }
 
-    public void run(String [] args) throws IOException, InterruptedException, StageFailedException {
+    public synchronized void run(String [] args) throws IOException, InterruptedException, StageFailedException {
         for (PipelineStage stage : stages.values()) {
             stage.reset();
         }
@@ -106,7 +151,6 @@ public class PipelineLoader {
     private void quietlySaveDiagnostics() {
         try {
             long runId = Math.abs(new Random().nextLong());
-            DiagnosticReport report = new DiagnosticReport();
             for (PipelineStage stage : stages.values()) {
                 if (stage != null && stage.hasBeenRun()) {
                     StageDiagnostic sd = new StageDiagnostic(
@@ -114,8 +158,8 @@ public class PipelineLoader {
                             stage.getName(),
                             langs,
                             stage.getElapsedSeconds(),
-                            report.getSingleCoreSpeed(),
-                            report.getMultiCoreSpeed(),
+                            CpuBenchmarker.getSingleCoreSpeed(),
+                            CpuBenchmarker.getMultiCoreSpeed(),
                             -1.0
                     );
                     sd.setSucceeded(stage.getSucceeded());
@@ -127,7 +171,7 @@ public class PipelineLoader {
         }
     }
 
-    public void initConfig(Configuration config) throws ClassNotFoundException {
+    private void initConfig(Configuration config) throws ClassNotFoundException {
         for (Config stageConfig : config.get().getConfigList("loader.stages")) {
             PipelineStage stage = new PipelineStage(stageConfig, stages.values(), state);
             stages.put(stage.getName(), stage);
@@ -144,7 +188,7 @@ public class PipelineLoader {
         }
     }
 
-    public void setStageArguments(List<StageArgs> stageArgs) {
+    private void setStageArguments(List<StageArgs> stageArgs) {
         // expand groups in the options to the individual stages
         List<StageArgs> expandedArgs = new ArrayList<StageArgs>();
         for (StageArgs sa : stageArgs) {

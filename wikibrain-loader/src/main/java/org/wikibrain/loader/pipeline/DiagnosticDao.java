@@ -73,6 +73,23 @@ public class DiagnosticDao {
         }
     }
 
+    public List<StageDiagnostic> getAll() throws ParseException {
+        List<StageDiagnostic> result = new ArrayList<StageDiagnostic>();
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("StageDiagnostic");
+        for (ParseObject object : query.find()) {
+            result.add(new StageDiagnostic(
+                    object.getLong("runId"),
+                    object.getString("stage"),
+                    new LanguageSet(object.getString("langs")),
+                    object.getDouble("elapsed"),
+                    object.getDouble("singleCoreSpeed"),
+                    object.getDouble("multiCoreSpeed"),
+                    object.getDouble("megabytes")
+            ));
+        }
+        return result;
+    }
+
     public static class Provider extends org.wikibrain.conf.Provider<DiagnosticDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);

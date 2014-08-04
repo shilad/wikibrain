@@ -6,6 +6,7 @@ import org.wikibrain.conf.ProviderFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.URISyntaxException;
@@ -89,22 +90,49 @@ public class JvmUtils {
      * @throws InterruptedException
      */
     public static Process launch(Class klass, String args[]) throws IOException, InterruptedException {
+        return launch(klass, args, System.out, System.err, null);
+    }
+
+    /**
+     * Launches a new java program that uses the running configuration settings.
+     * @param klass
+     * @param args
+     * @param out stdout stream for process
+     * @param err stderr stream for process
+     * @param heapSize Maximum heap memory (e.g. 4M, 4G, etc) or null to use existing setting.
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static Process launch(Class klass, String args[], OutputStream out, OutputStream err, String heapSize) throws IOException, InterruptedException {
         JavaProcessBuilder builder = new JavaProcessBuilder();
         RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+
+
+        String heapArg = heapSize == null ? null : ("-Xmx" + heapSize);
+        boolean foundHeapArg = false;
         for (String jvmArg : runtimeMxBean.getInputArguments()) {
             if (!jvmArg.startsWith("-")) {
                 break;
+            }
+            if (heapArg != null && jvmArg.startsWith("-Xmx")) {
+                foundHeapArg = true;
+                jvmArg = heapArg;
             }
             if (!jvmArg.equals("-jar")) {
                 builder.jvmArg(jvmArg);
             }
         }
+        if (heapArg != null && !foundHeapArg) {
+            builder.jvmArg(heapArg);
+        }
+
         builder.classpath(getClassPath());
         for (String arg : args) {
             builder.arg(arg);
         }
         builder.mainClass(klass.getName());
-        return builder.launch(System.out, System.err);
+        return builder.launch(out, err);
     }
 
     /**

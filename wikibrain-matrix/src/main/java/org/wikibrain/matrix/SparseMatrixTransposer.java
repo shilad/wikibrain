@@ -1,5 +1,7 @@
 package org.wikibrain.matrix;
 
+import gnu.trove.impl.Constants;
+import gnu.trove.impl.hash.TIntHash;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TShortArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -109,13 +111,14 @@ public class SparseMatrixTransposer {
     private static final int BYTES_PER_REF =
             Integer.valueOf(System.getProperty("sun.arch.data.model")) / 8;
     private static final int BYTES_PER_OBJECT = 40;     // an estimate at overhead
+    private static final double EXPANSION_FACTOR = 1.0 / Constants.DEFAULT_LOAD_FACTOR;
 
     private double getSizeInMbOfRowDataStructure(int numEntries) {
         return (
             // row accumulator object itself
             BYTES_PER_OBJECT + 4 + 2 * BYTES_PER_REF +
             // ids and values in accumulator
-            numEntries * (4 + 2)
+            EXPANSION_FACTOR * numEntries * (4 + 2)
         ) / (1024.0 * 1024.0);
     }
 
@@ -139,7 +142,7 @@ public class SparseMatrixTransposer {
     /**
      * Calculates a reasonable buffer size for transposing the matrix.
      * If the heapsize < 1000, returns 1/3 of the heapsize.
-     * Otherwise return (heapsize/5), but truncated to the range [350MB, 5000MB].
+     * Otherwise return (heapsize/6), but truncated to the range [350MB, 5000MB].
      * @return The default heapsize, in MBs.
      */
     private static int defaultBufferSizeInMbs() {
@@ -147,7 +150,7 @@ public class SparseMatrixTransposer {
         if (totalMem < 1000) {
             return totalMem / 3;
         } else {
-            int size = totalMem / 5;
+            int size = totalMem / 6;
             if (size < 350) size = 350;
             if (size > 5000) size = 5000;
             return size;

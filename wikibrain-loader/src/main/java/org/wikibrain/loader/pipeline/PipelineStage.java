@@ -1,7 +1,12 @@
 package org.wikibrain.loader.pipeline;
 
 import com.typesafe.config.Config;
+import net.sourceforge.jeval.EvaluationException;
+import net.sourceforge.jeval.Evaluator;
 import org.apache.commons.lang3.ArrayUtils;
+import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageInfo;
+import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.MetaInfo;
 import org.wikibrain.utils.JvmUtils;
 
@@ -79,6 +84,16 @@ public class PipelineStage {
      */
     private Boolean succeeded = null;
 
+    /**
+     * Equation used to estimate the time required for a particular stage.
+     */
+    private final String timeEstimateEquation;
+
+    /**
+     * Equation used to estimate the disk space required for a particular stage in MBs.
+     */
+    private final String diskEstimateEquation;
+
     public PipelineStage(Config config, Collection<PipelineStage> previousStages, Map<String, MetaInfo> loadedInfo) throws ClassNotFoundException {
         this.name = config.getString("name");
         this.klass = Class.forName(config.getString("class"));
@@ -96,6 +111,8 @@ public class PipelineStage {
                 throw new IllegalArgumentException("Invalid dependsOn value for pipeline stage " + name + ": " + obj);
             }
         }
+        this.timeEstimateEquation = config.getString("runtime");
+        this.diskEstimateEquation = config.getString("diskSpace");
         this.loadedInfo = loadsClass == null ? null : loadedInfo.get(loadsClass);
     }
 
@@ -211,6 +228,49 @@ public class PipelineStage {
 
     public Boolean getSucceeded() {
         return succeeded;
+    }
+
+    public double estimateSeconds(LanguageSet langs) {
+        int numArticles = 0;
+        int numLinks = 0;
+        for (Language lang : langs) {
+            LanguageInfo li = LanguageInfo.getByLanguage(lang);
+            numLinks += li.getNumLinks();
+            numArticles += li.getNumArticles();
+        }
+        Evaluator mathEvaluator = new Evaluator();
+        Map<String, String> variables = new HashMap<String, String>();
+        variables.put("singleCoreSpeed", ""+CpuBenchmarker.getSingleCoreSpeed());
+        variables.put("multiCoreSpeed", ""+CpuBenchmarker.getMultiCoreSpeed());
+        variables.put("links", ""+numLinks);
+        variables.put("articles", ""+numArticles);
+        mathEvaluator.setVariables(variables);
+        try {
+            return mathEvaluator.getNumberResult(timeEstimateEquation);
+        } catch (EvaluationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public double estimateMegabytes(LanguageSet langs) {
+        int numArticles = 0;
+        int numLinks = 0;
+        for (Language lang : langs) {
+            LanguageInfo li = LanguageInfo.getByLanguage(lang);
+            numLinks += li.getNumLinks();
+            numArticles += li.getNumArticles();
+        }
+        Evaluator mathEvaluator = new Evaluator();
+        Map<String, String> variables = new HashMap<String, String>();
+        variables.put("links", ""+numLinks);
+        variables.put("articles", ""+numArticles);
+        mathEvaluator.setVariables(variables);
+        try {
+            return mathEvaluator.getNumberResult(diskEstimateEquation);
+        } catch (EvaluationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private PipelineStage getStage(Collection<PipelineStage> previousStages, String stage) {

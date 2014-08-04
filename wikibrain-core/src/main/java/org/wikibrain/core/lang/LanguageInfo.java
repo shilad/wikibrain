@@ -236,6 +236,21 @@ public class LanguageInfo {
         return rVal;
     }
 
+    public int getNumLinks() {
+        return numLinks;
+    }
+
+    public int getNumArticles() {
+        return numArticles;
+    }
+
+    public void setNumLinks(int numLinks) {
+        this.numLinks = numLinks;
+    }
+
+    public void setNumArticles(int numArticles) {
+        this.numArticles = numArticles;
+    }
 
     public String getDefaultCategoryNamespaceName(){
         return categoryNames.get(0);
