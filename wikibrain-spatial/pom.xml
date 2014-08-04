@@ -6,8 +6,8 @@
 
     <parent>
         <groupId>org.wikibrainapi</groupId>
+        <version>${wikibrain.version}</version>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.1-SNAPSHOT</version>
         <relativePath>../wikibrain-parent</relativePath>
     </parent>
 
@@ -17,27 +17,27 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${wikibrain.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-mapper</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${wikibrain.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-wikidata</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${wikibrain.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-phrases</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${wikibrain.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-sr</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${wikibrain.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vividsolutions</groupId>
