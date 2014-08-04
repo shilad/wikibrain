@@ -119,7 +119,7 @@ public class DiagnosticReport {
             }
 
             // TODO: Should we use 1024^3 to be more accurate?
-            double allocatedGBs = Runtime.getRuntime().maxMemory() / (1000*1000*1000);
+            double allocatedGBs = Runtime.getRuntime().maxMemory() / (1000.0*1000.0*1000.0);
             boolean passed =  (allocatedGBs + 0.01 >= necessaryGBs);
             if (passed) {
                 writer.write("Amount of memory allocated for the JVM is okay\n");

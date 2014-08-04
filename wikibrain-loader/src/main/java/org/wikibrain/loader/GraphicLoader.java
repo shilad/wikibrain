@@ -8,6 +8,7 @@ package org.wikibrain.loader;
 import com.google.gson.*;
 import com.typesafe.config.Config;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.plexus.util.ExceptionUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.utils.JvmUtils;
 
@@ -196,7 +197,7 @@ public class GraphicLoader extends JFrame {
 
         c.gridx = 0;
         c.gridy = 1;
-        paramPanel.add(new JLabel("Heap Size"), c);
+        paramPanel.add(new JLabel("Java memory"), c);
 
         c.gridx = 1;
         paramPanel.add(heapSize, c);
@@ -546,7 +547,7 @@ public class GraphicLoader extends JFrame {
             runLog.setText("");
             defaultButton.setEnabled(false);
 
-            this.process = JvmUtils.launch(org.wikibrain.Loader.class, arg, out, err);
+            this.process = JvmUtils.launch(org.wikibrain.Loader.class, arg, out, err, heapSize.getText());
             final Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                                @Override
@@ -556,8 +557,9 @@ public class GraphicLoader extends JFrame {
                                    }
                                }
                            }, 1000, 100);
-        }
-        catch (Exception e){
+        } catch (Exception e){
+            runLog.append("ERROR WHEN PARSING ARGUMENTS:\n\n\n");
+            runLog.append(ExceptionUtils.getFullStackTrace(e));
             e.printStackTrace();
         }
     }
