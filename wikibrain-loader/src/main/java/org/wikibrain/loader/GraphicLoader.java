@@ -38,7 +38,7 @@ public class GraphicLoader extends JFrame {
     private JPanel buttonPanel;
     private JPanel outputPanel;
 
-    private JLabel commandLabel = new JLabel("Click the run button to see command");
+    private JLabel commandLabel = new JLabel("Command output:");
     private JTextArea runLog;
 
     private JComboBox dataSourceSelection = new JComboBox(new String[] {"H2", "PostgreSQL"});
@@ -135,8 +135,10 @@ public class GraphicLoader extends JFrame {
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
         runLog = new JTextArea(40, 80);
-        runLog.setText("Output log:\n");
-        runLog.setEnabled(true);
+        runLog.setText("");
+        runLog.setEditable(false);
+        runLog.setLineWrap(true);
+        runLog.setWrapStyleWord(false);
         outputPanel.add(new JScrollPane(runLog), c);
     }
 
@@ -566,14 +568,13 @@ public class GraphicLoader extends JFrame {
             String arg[] = new String[argList.size()];
             arg = argList.toArray(arg);
 
-            commandLabel.setText("org.wikibrain.Loader " + StringUtils.join(arg, " "));
 
             OutputStream out = new PrintStream(new LogOutputStream(System.out), true);
             OutputStream err = new PrintStream(new LogOutputStream(System.err), true);
 
+            runLog.setText("running:\norg.wikibrain.Loader " + StringUtils.join(arg, " ") + "\n\n\n");
             runButton.setText("Stop");
             runButton.setBackground(Color.RED);
-            runLog.setText("");
             defaultButton.setEnabled(false);
 
             this.process = JvmUtils.launch(org.wikibrain.Loader.class, arg, out, err, heapSize.getText());
@@ -615,9 +616,12 @@ public class GraphicLoader extends JFrame {
     }
 
     private void appendToLog(String text) {
-        runLog.append(text);
-        // scrolls the text area to the end of data
-        runLog.setCaretPosition(runLog.getDocument().getLength());
+        synchronized (runLog) {
+            // TODO: figure out how to show line wraps
+            runLog.append(text);
+            // scrolls the text area to the end of data
+            runLog.setCaretPosition(runLog.getDocument().getLength());
+        }
     }
 
 
@@ -638,10 +642,9 @@ public class GraphicLoader extends JFrame {
         }
 
         @Override
-        public void write(byte[] buffer, int offset, int length) throws IOException {
-            final String text = new String(buffer, offset, length);
-            stream.write(buffer, offset, length);
-            appendToLog(text);
+        public void write(byte[] bytes, int offset, int length) throws IOException {
+            stream.write(bytes, offset, length);
+            appendToLog(new String(bytes, offset, length, "UTF-8"));
         }
 
         @Override

@@ -216,6 +216,7 @@ public class DiagnosticReport {
             boolean found = false;
             for (PipelineStage stage : stages.values()) {
                 if (stage.getKlass() == SpatialDataLoader.class && stage.hasBeenRun()) {
+                    System.err.println("HERE!");
                     found = true;
                 }
             }
