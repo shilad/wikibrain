@@ -13,6 +13,8 @@ import org.wikibrain.conf.Configuration;
 import org.wikibrain.utils.JvmUtils;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -156,17 +158,6 @@ public class GraphicLoader extends JFrame {
 
         buttonPanel.add(runButton);
 
-        final JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                if(actionEvent.getSource().equals(cancelButton)){
-                    System.exit(0);
-                }
-            }
-        });
-        buttonPanel.add(cancelButton);
-
         defaultButton = new JButton("Restore Default");
         defaultButton.addActionListener(new ActionListener() {
             @Override
@@ -177,6 +168,19 @@ public class GraphicLoader extends JFrame {
             }
         });
         buttonPanel.add(defaultButton);
+
+
+        final JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (actionEvent.getSource().equals(closeButton)) {
+                    System.exit(0);
+                }
+            }
+        });
+        buttonPanel.add(closeButton);
+
     }
 
     private void initParamPanel() {
@@ -204,10 +208,26 @@ public class GraphicLoader extends JFrame {
 
         c.gridx = 0;
         c.gridy = 2;
-        paramPanel.add(new JLabel("Language"), c);
+        paramPanel.add(new JLabel("Language(s)"), c);
 
         c.gridx = 1;
         paramPanel.add(language, c);
+        language.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                respondToLanguageUpdate();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                respondToLanguageUpdate();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                respondToLanguageUpdate();
+            }
+        });
 
         c.gridwidth = 1;
         c.gridx = 0;
@@ -272,6 +292,15 @@ public class GraphicLoader extends JFrame {
         c.gridx = 0;
         c.gridy = 5;
         paramPanel.add(dbPanel, c);
+    }
+
+    private void respondToLanguageUpdate() {
+        if (language.getText().contains(",")) {
+            conceptsButton.setSelected(true);
+            conceptsButton.setEnabled(false);
+        } else {
+            conceptsButton.setEnabled(true);
+        }
     }
 
     public void reset() {
