@@ -215,7 +215,7 @@ public class DiagnosticReport {
         public boolean runDiagnostic(PrintWriter writer) {
             boolean found = false;
             for (PipelineStage stage : stages.values()) {
-                if (stage.getKlass() == SpatialDataLoader.class) {
+                if (stage.getKlass() == SpatialDataLoader.class && stage.hasBeenRun()) {
                     found = true;
                 }
             }
