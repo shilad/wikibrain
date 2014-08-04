@@ -451,7 +451,7 @@ public class GraphicLoader extends JFrame {
             refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().addProperty("default", "psql");
         refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("h2").getAsJsonObject().addProperty("url", String.format("jdbc:h2:%s;LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0;MAX_OPERATION_MEMORY=100000000", h2Path.getText()));
         refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("url", String.format("jdbc:postgresql://%s/%s", postgresHost.getText(), postgresDB.getText()));
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("postgresUser", postgresUser.getText());
+        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("username", postgresUser.getText());
         refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("password", new String(postgresPass.getPassword()));
         refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("host", postgresHost.getText());
         refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("port", postgresPort.getText());

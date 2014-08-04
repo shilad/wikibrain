@@ -94,7 +94,7 @@ public class DiagnosticReport {
 
         writer.write(succeeded.toString());
 
-        return failed.length() > 0;
+        return failed.length() == 0;
     }
 
     class MemoryDiagnostic implements Diagnostic {
