@@ -63,11 +63,11 @@ public class PageViewLoader {
                 }
             }
             double elapsed = (System.currentTimeMillis() - start) / 60000;
-            System.out.println("Loading took " + elapsed + " minutes");
+            LOG.info("Loading took " + elapsed + " minutes");
             LOG.log(Level.INFO, "All Page View files loaded: " + i);
         } catch (DaoException e) {
             double elapsed = (System.currentTimeMillis() - start) / 60000;
-            System.out.println(elapsed + " minutes passed before exception thrown");
+            LOG.info(elapsed + " minutes passed before exception thrown");
             throw new WikiBrainException(e);
         }
     }

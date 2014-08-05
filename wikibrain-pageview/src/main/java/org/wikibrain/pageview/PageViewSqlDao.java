@@ -11,10 +11,12 @@ import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.WikiBrainException;
+import org.wikibrain.core.dao.Dao;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.sql.AbstractSqlDao;
+import org.wikibrain.core.dao.sql.JooqUtils;
 import org.wikibrain.core.dao.sql.SimpleSqlDaoIterable;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.jooq.Tables;
@@ -83,6 +85,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
      * @throws DaoException
      */
     public void addData(PageViewDataStruct data) throws DaoException {
+        beginLoad();
         TIntIntIterator it = data.stats.iterator();
         while (it.hasNext()) {
             it.advance();
@@ -92,6 +95,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
             save(view);
             recordLoadedHours(view);
         }
+        endLoad();
     }
 
     protected void recordLoadedHours(PageView view) {
@@ -160,14 +164,28 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         return result;
     }
     public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
+        setLoadedHours();
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
-        for(Integer id: ids){
-            int sum=0;
-            for(DateTime[] startEndTime: dates){
-                sum+=getNumViews(lang,id,startEndTime[0],startEndTime[1],localPageDao);
+        DateTime startTime;
+        DateTime endTime;
+        int count = 0;
+        for (DateTime[] date : dates){
+            startTime = date[0];
+            endTime = date[1];
+            count++;
+            for(Integer id : ids){
+                if(!result.keySet().contains(id))
+                {
+                    result.put(id, getNumViews(lang, id, startTime, endTime, localPageDao));
+                }
+                else{
+                    int totalViews = result.get(id) + getNumViews(lang, id, startTime, endTime, localPageDao);
+                    result.put(id, totalViews);
+                }
             }
-            result.put(id, sum);
+            LOG.info(count + " dates loaded");
         }
+
         return result;
     }
 
@@ -264,8 +282,11 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
     private synchronized void setLoadedHours() throws DaoException{
         if (loadedHours.size() == 0) {
             loadedHours = new ConcurrentHashMap<Integer, Set<Long>>();
-            LOG.info("creating loadedHours cache. This only happens once...");
             DSLContext context = getJooq();
+            if (!JooqUtils.tableExists(context, Tables.PAGEVIEW)) {
+                return;
+            }
+            LOG.info("creating loadedHours cache. This only happens once...");
             try {
                 Result<Record2<Timestamp, Short>> times = context
                         .selectDistinct(Tables.PAGEVIEW.TSTAMP,Tables.PAGEVIEW.LANG_ID)
@@ -279,7 +300,6 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
                         loadedHours.put(record.value2().intValue(),new HashSet<Long>());
                     }
                     loadedHours.get(record.value2().intValue()).add(((Timestamp) record.value1()).getTime());
-
                 }
 
             } finally {
@@ -302,9 +322,9 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
             try {
                 loader.load(startDate, endDate);
             } catch (ConfigurationException cE) {
-                System.out.println(cE.getMessage());
+                throw new DaoException(cE);
             } catch (WikiBrainException wE) {
-                System.out.println(wE.getMessage());
+                throw new DaoException(wE);
             }
         }
         endLoad();

@@ -14,14 +14,18 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.Title;
+import org.wikibrain.download.FileDownloader;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -33,10 +37,13 @@ import java.util.zip.GZIPInputStream;
  */
 public class PageViewIterator implements Iterator {
 
+    private static String BASE_URL = "http://dumps.wikimedia.org/other/pagecounts-raw/";
+
+    private static final Logger LOG = Logger.getLogger(PageViewIterator.class.getName());
+
     private DateTime currentDate;
     private DateTime endDate;
     private LanguageSet langs;
-    private static String BASE_URL = "http://dumps.wikimedia.your.org/other/pagecounts-raw/";
     private List<PageViewDataStruct> nextData;
     private LocalPageDao localPageDao;
 
@@ -146,32 +153,18 @@ public class PageViewIterator implements Iterator {
 
         String homeFolder = BASE_URL + String.format("%s/%s-%s/", yearString, yearString, monthString);
         File pageViewDataFile = null;
-        int minutes = 0;
-        while (pageViewDataFile == null && minutes < 60) {
-            int seconds = 0;
-            boolean flag = false;
-            while (pageViewDataFile == null && seconds < 60) {
+        for (int minutes = 0; pageViewDataFile == null && minutes < 60; minutes++) {
+            for (int seconds = 0; seconds < 60; seconds++) {
                 String minutesString = twoDigIntStr(minutes);
-                String secondsString;
-                String fileName;
-
-                do { //accounts for the possibility of the seconds not ending with 0
-                    secondsString  = twoDigIntStr(seconds);
-                    fileName = "pagecounts-" + yearString + monthString + dayString + "-" + hourString + minutesString + secondsString + fileNameSuffix;
-                pageViewDataFile = downloadFile(homeFolder, fileName, tempFolder);
-                    seconds++;
-                }while(pageViewDataFile == null && seconds <= 5);
-
-                if(pageViewDataFile != null){
-                    flag = true;
+                String secondsString  = twoDigIntStr(seconds);
+                String f = "pagecounts-" + yearString + monthString + dayString + "-" + hourString + minutesString + secondsString + fileNameSuffix;
+                if (ping(homeFolder + f, 5000)) {
+                    pageViewDataFile = downloadFile(homeFolder, f, tempFolder);
                     break;
                 }
-                seconds++;
             }
-            if(flag)
-                break;
-            minutes++;
         }
+
         if(pageViewDataFile == null) {
             DateTime tempDate = currentDate;
             currentDate = currentDate.plusHours(1);
@@ -210,7 +203,8 @@ public class PageViewIterator implements Iterator {
             File dest = new File(localPath);
             if(!dest.exists()){
                 System.out.println("File not exist. Downloading...");
-                FileUtils.copyURLToFile(url, dest, 60000, 120000);
+                FileDownloader downloader = new FileDownloader();
+                downloader.download(url, dest);
             }
             else{
                 System.out.println("File existed. Skip...");
@@ -226,6 +220,8 @@ public class PageViewIterator implements Iterator {
             System.out.println("\nFile name " + fileName + " couldn't be found online");
             System.out.println(e.getMessage() + "\n");
             return null;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
     }
@@ -274,6 +270,40 @@ public class PageViewIterator implements Iterator {
             throw new WikiBrainException(e);
         }
 
+    }
+
+    /**
+     * From http://stackoverflow.com/questions/3584210/preferred-java-way-to-ping-a-http-url-for-availability
+     * Pings a HTTP URL. This effectively sends a HEAD request and returns <code>true</code> if the response code is in
+     * the 200-399 range.
+     * @param url The HTTP URL to be pinged.
+     * @param timeout The timeout in millis for both the connection timeout and the response read timeout. Note that
+     * the total timeout is effectively two times the given timeout.
+     * @return <code>true</code> if the given HTTP URL has returned response code 200-399 on a HEAD request within the
+     * given timeout, otherwise <code>false</code>.
+     */
+    public static boolean ping(String url, int timeout) {
+        url = url.replaceFirst("https", "http"); // Otherwise an exception may be thrown on invalid SSL certificates.
+        HttpURLConnection connection = null;
+        try {
+            URL u = new URL(url);
+            connection = (HttpURLConnection) u.openConnection();
+            connection.setConnectTimeout(timeout);
+            connection.setReadTimeout(timeout);
+            connection.setRequestMethod("HEAD");
+            int code = connection.getResponseCode();
+            return (200 <= code && code <= 399);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(e);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 
 }

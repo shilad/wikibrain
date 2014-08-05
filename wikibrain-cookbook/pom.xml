@@ -41,6 +41,11 @@
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-pageview</artifactId>
+            <version>${wikibrain.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-spatial</artifactId>
             <version>${wikibrain.version}</version>
         </dependency>

@@ -25,6 +25,11 @@
             <artifactId>wikibrain-core</artifactId>
             <version>${wikibrain.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-download</artifactId>
+            <version>${wikibrain.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
