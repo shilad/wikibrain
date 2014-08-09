@@ -14,8 +14,8 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.sr.MonolingualSRMetric;
 import gnu.trove.map.TIntObjectMap;
 
 import java.io.File;
@@ -52,11 +52,11 @@ public class CalculateAllDistancePairs {
             LanguageSet langs = env.getLanguages();
 
 
-            Map<Integer, MonolingualSRMetric> langIdEnsembleSRMetricMap = new HashMap<Integer, MonolingualSRMetric>();
-            Map<Integer, MonolingualSRMetric> langIdInlinkSRMetricMap = new HashMap<Integer, MonolingualSRMetric>();
+            Map<Integer, SRMetric> langIdEnsembleSRMetricMap = new HashMap<Integer, SRMetric>();
+            Map<Integer, SRMetric> langIdInlinkSRMetricMap = new HashMap<Integer, SRMetric>();
             for(Language lang : langs.getLanguages()){
-                langIdEnsembleSRMetricMap.put(new Integer(lang.getId()), c.get(MonolingualSRMetric.class, "ensemble", "language", lang.getLangCode()));
-                langIdInlinkSRMetricMap.put(new Integer(lang.getId()), c.get(MonolingualSRMetric.class, "inlink", "language", lang.getLangCode()));
+                langIdEnsembleSRMetricMap.put(new Integer(lang.getId()), c.get(SRMetric.class, "ensemble", "language", lang.getLangCode()));
+                langIdInlinkSRMetricMap.put(new Integer(lang.getId()), c.get(SRMetric.class, "inlink", "language", lang.getLangCode()));
             }
 
             Map<Integer, Geometry> idGeomMap = sdDao.getAllGeometriesInLayer("wikidata", "earth");

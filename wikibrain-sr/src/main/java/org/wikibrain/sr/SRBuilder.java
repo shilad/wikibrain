@@ -88,7 +88,7 @@ public class SRBuilder {
         datasetNames = config.get().getStringList("sr.dataset.defaultsets");
 
         // Properly resolve the default metric name.
-        this.metricName = env.getConfigurator().resolveComponentName(MonolingualSRMetric.class, metricName);
+        this.metricName = env.getConfigurator().resolveComponentName(SRMetric.class, metricName);
         if (!srDir.isDirectory()) {
             srDir.mkdirs();
         }
@@ -96,12 +96,12 @@ public class SRBuilder {
 
 
 
-    public synchronized  MonolingualSRMetric getMetric() throws ConfigurationException {
+    public synchronized SRMetric getMetric() throws ConfigurationException {
         return getMetric(metricName);
     }
 
-    public synchronized MonolingualSRMetric getMetric(String name) throws ConfigurationException {
-            return env.getConfigurator().get(MonolingualSRMetric.class, name, "language", language.getLangCode());
+    public synchronized SRMetric getMetric(String name) throws ConfigurationException {
+            return env.getConfigurator().get(SRMetric.class, name, "language", language.getLangCode());
     }
 
     /**
@@ -201,9 +201,9 @@ public class SRBuilder {
             initWord2Vec(name);
         }
         Dataset ds = getDataset();
-        MonolingualSRMetric metric = getMetric(name);
-        if (metric instanceof BaseMonolingualSRMetric) {
-            ((BaseMonolingualSRMetric)metric).setBuildMostSimilarCache(buildCosimilarity);
+        SRMetric metric = getMetric(name);
+        if (metric instanceof BaseSRMetric) {
+            ((BaseSRMetric)metric).setBuildMostSimilarCache(buildCosimilarity);
         }
         if (mode == Mode.SIMILARITY || mode == Mode.BOTH) {
             if (skipBuiltMetrics && metric.similarityIsTrained()) {
@@ -321,7 +321,7 @@ public class SRBuilder {
     }
 
     public Config getMetricConfig(String name) throws ConfigurationException {
-        return env.getConfigurator().getConfig(MonolingualSRMetric.class, name);
+        return env.getConfigurator().getConfig(SRMetric.class, name);
     }
 
     public void setRowIdsFromFile(String path) throws IOException {

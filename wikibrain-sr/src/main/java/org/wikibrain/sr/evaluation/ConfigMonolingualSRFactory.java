@@ -5,7 +5,7 @@ import com.typesafe.config.ConfigFactory;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.disambig.Disambiguator;
 
 import java.util.HashMap;
@@ -53,18 +53,18 @@ public class ConfigMonolingualSRFactory implements MonolingualSRFactory {
         if (configOverrides != null) {
             config = config.withFallback(ConfigFactory.parseMap(configOverrides));
         }
-        config = config.withFallback(configurator.getConfig(MonolingualSRMetric.class, name));
+        config = config.withFallback(configurator.getConfig(SRMetric.class, name));
         this.configurator = configurator;
         this.name = name;
         this.language = language;
     }
 
     @Override
-    public MonolingualSRMetric create() {
+    public SRMetric create() {
         try {
             Map<String, String> runtimeParams = new HashMap<String, String>();
             runtimeParams.put("language", language.getLangCode());
-            return configurator.construct(MonolingualSRMetric.class, name, config, runtimeParams);
+            return configurator.construct(SRMetric.class, name, config, runtimeParams);
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }

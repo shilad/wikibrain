@@ -1,6 +1,5 @@
 package org.wikibrain.sr.pairwise;
 
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -8,9 +7,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.lang.Language;
 import org.wikibrain.matrix.*;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.normalize.IdentityNormalizer;
 import org.wikibrain.sr.normalize.Normalizer;
@@ -22,7 +20,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -49,16 +46,16 @@ public class MostSimilarCache implements Closeable {
 
     private final File dir;
 
-    private MonolingualSRMetric monoSr;
+    private SRMetric monoSr;
 
     private SparseMatrix featureMatrix = null;
     private SparseMatrix featureTransposeMatrix = null;
     private SparseMatrix cosimilarityMatrix = null;
 
     /**
-     * @see #MostSimilarCache(org.wikibrain.sr.MonolingualSRMetric, PairwiseSimilarity, java.io.File)
+     * @see #MostSimilarCache(org.wikibrain.sr.SRMetric, PairwiseSimilarity, java.io.File)
      */
-    public MostSimilarCache(MonolingualSRMetric metric, File dir) {
+    public MostSimilarCache(SRMetric metric, File dir) {
         this(metric, null, dir);
     }
 
@@ -70,7 +67,7 @@ public class MostSimilarCache implements Closeable {
      * @param similarity
      * @param dir
      */
-    public MostSimilarCache(MonolingualSRMetric metric, PairwiseSimilarity similarity, File dir) {
+    public MostSimilarCache(SRMetric metric, PairwiseSimilarity similarity, File dir) {
         this.monoSr = metric;
         this.similarity = similarity;
         this.dir = dir;

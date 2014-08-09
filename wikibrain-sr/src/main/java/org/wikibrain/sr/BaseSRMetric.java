@@ -43,8 +43,8 @@ import java.util.logging.Logger;
 /**
  * This abstract class provides many useful building blocks for Monolingual SR Metrics.
  */
-public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
-    private static Logger LOG = Logger.getLogger(BaseMonolingualSRMetric.class.getName());
+public abstract class BaseSRMetric implements SRMetric {
+    private static Logger LOG = Logger.getLogger(BaseSRMetric.class.getName());
 
     private final String name;
     private final Language language;
@@ -73,7 +73,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         public float maxScore = +1.1f;
     }
 
-    public BaseMonolingualSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig) {
+    public BaseSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig) {
         this.name = name;
         this.language = language;
         this.disambiguator = disambig;
@@ -514,7 +514,7 @@ public abstract class BaseMonolingualSRMetric implements MonolingualSRMetric {
         this.mostSimilarCacheRowIds = rowIds;
     }
 
-    protected static void configureBase(Configurator configurator, BaseMonolingualSRMetric sr, Config config) throws ConfigurationException {
+    protected static void configureBase(Configurator configurator, BaseSRMetric sr, Config config) throws ConfigurationException {
         Config rootConfig = configurator.getConf().get();
 
         File path = new File(rootConfig.getString("sr.metric.path"));

@@ -308,4 +308,13 @@ public class DaoFilter {
                 && (isRedirect == null || isRedirect == page.isRedirect())
                 && (isDisambig == null || isDisambig == page.isDisambig());
     }
+
+
+    public static DaoFilter normalPageFilter(Language language) {
+        return new DaoFilter()
+                .setDisambig(false)
+                .setRedirect(false)
+                .setNameSpaces(NameSpace.ARTICLE)
+                .setLanguages(language);
+    }
 }

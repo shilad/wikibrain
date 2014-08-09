@@ -1,6 +1,5 @@
 package org.wikibrain.sr.evaluation;
 
-import com.typesafe.config.Config;
 import org.apache.commons.cli.*;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -10,7 +9,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
 
@@ -211,8 +210,8 @@ public class EvaluationMain {
 
         MonolingualSRFactory factory;
         if (cmd.hasOption("a")) {
-            MonolingualSRMetric sr = env.getConfigurator().get(
-                                        MonolingualSRMetric.class,
+            SRMetric sr = env.getConfigurator().get(
+                                        SRMetric.class,
                                         cmd.getOptionValue("m"),
                                         "language",
                                         lang.getLangCode()

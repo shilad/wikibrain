@@ -3,10 +3,8 @@ package org.wikibrain.sr.word2vec;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +17,6 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
-import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.nlp.Dictionary;
 import org.wikibrain.utils.*;
@@ -223,7 +220,7 @@ public class Word2VecTrainer {
 
                 for (int k = 0; k < parents.length; k++) {
                     float l2[] = syn1[parents[k]];
-                    double f = MathUtils.dot(l1, l2);
+                    double f = WbMathUtils.dot(l1, l2);
                     if (f <= -MAX_EXP || f >= MAX_EXP) {
                         continue;
                     }
@@ -326,7 +323,7 @@ public class Word2VecTrainer {
             stream.write(w.getBytes("UTF-8"));
             stream.write(' ');
             float[] vector = syn0[wordIndexes.get(Word2VecUtils.hashWord(w))];
-            MathUtils.normalize(vector);
+            WbMathUtils.normalize(vector);
             for (float f : vector) {
                 stream.write(floatToBytes(f));
             }
@@ -337,13 +334,13 @@ public class Word2VecTrainer {
     private void test() {
         long h = hashWord("person");
         float [] v1 = syn0[wordIndexes.get(h)];
-        MathUtils.normalize(v1);
+        WbMathUtils.normalize(v1);
 
         Map<String, Double> sims = new HashMap<String, Double>();
         for (int i = 0; i < words.length; i++) {
             float [] v2 = syn0[i];
-            MathUtils.normalize(v2);
-            double sim =  MathUtils.dot(v1, v2);
+            WbMathUtils.normalize(v2);
+            double sim =  WbMathUtils.dot(v1, v2);
             sims.put(words[i], sim);
         }
 

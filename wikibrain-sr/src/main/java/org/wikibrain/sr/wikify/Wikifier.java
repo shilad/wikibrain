@@ -6,7 +6,6 @@ import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.io.FileUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -15,22 +14,16 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.core.nlp.NGramCreator;
 import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
 import org.wikibrain.phrases.*;
-import org.wikibrain.sr.MonolingualSRMetric;
-import org.wikibrain.sr.SRResult;
-import org.wikibrain.sr.vector.VectorGenerator;
-import org.wikibrain.utils.*;
+import org.wikibrain.sr.SRMetric;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -42,7 +35,7 @@ public class Wikifier {
     private final LocalPageDao lpd;
     private final LocalLinkDao lld;
     private final RawPageDao rpd;
-    private final MonolingualSRMetric metric;
+    private final SRMetric metric;
     private final PhraseAnalyzerDao phraseDao;
     private final LinkProbabilityDao linkProbDao;
 
@@ -55,7 +48,7 @@ public class Wikifier {
     private StringTokenizer tokenizer = new StringTokenizer();
     private NGramCreator nGramCreator = new NGramCreator();
 
-    public Wikifier(MonolingualSRMetric metric, AnchorTextPhraseAnalyzer pa, LocalPageDao lpd, RawPageDao rpd, LocalLinkDao lld, LinkProbabilityDao linkProbDao) {
+    public Wikifier(SRMetric metric, AnchorTextPhraseAnalyzer pa, LocalPageDao lpd, RawPageDao rpd, LocalLinkDao lld, LinkProbabilityDao linkProbDao) {
         this.lpd = lpd;
         this.linkProbDao = linkProbDao;
         this.phraseDao = pa.getDao();
@@ -335,7 +328,7 @@ public class Wikifier {
             }
 
             Wikifier dab = new Wikifier(
-                    c.get(MonolingualSRMetric.class, srName, "language", language.getLangCode()),
+                    c.get(SRMetric.class, srName, "language", language.getLangCode()),
                     (AnchorTextPhraseAnalyzer)c.get(PhraseAnalyzer.class, phraseName),
                     c.get(LocalPageDao.class),
                     c.get(RawPageDao.class),

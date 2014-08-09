@@ -12,8 +12,8 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.LocalString;
 import org.wikibrain.phrases.PhraseAnalyzer;
-import org.wikibrain.sr.MonolingualSRMetric;
-import org.wikibrain.utils.MathUtils;
+import org.wikibrain.sr.SRMetric;
+import org.wikibrain.utils.WbMathUtils;
 import org.wikibrain.utils.WpCollectionUtils;
 
 import java.util.*;
@@ -29,18 +29,18 @@ public class SimilarityDisambiguator extends Disambiguator {
      * Algorithms for disambiguating similar phrases
      */
     public static enum Criteria {
-        SUM,         // select senses with highest sum of popularity + similarity
-        PRODUCT,     // select senses with highest sum of popularity * similarity
-        POPULARITY,  // select most popular senses
-        SIMILARITY   // select most similar senses
+        SUM,         // cluster senses with highest sum of popularity + similarity
+        PRODUCT,     // cluster senses with highest sum of popularity * similarity
+        POPULARITY,  // cluster most popular senses
+        SIMILARITY   // cluster most similar senses
     }
 
     // Method for disambiguating similar phrases
     private Criteria criteria = Criteria.SUM;
 
-    private final MonolingualSRMetric metric;
+    private final SRMetric metric;
 
-    public SimilarityDisambiguator(PhraseAnalyzer phraseAnalyzer, MonolingualSRMetric metric) {
+    public SimilarityDisambiguator(PhraseAnalyzer phraseAnalyzer, SRMetric metric) {
         this.phraseAnalyzer = phraseAnalyzer;
         this.metric = metric;
         this.language = metric.getLanguage();
@@ -155,7 +155,7 @@ public class SimilarityDisambiguator extends Disambiguator {
         for (int i = 0; i < pages.size(); i++) {
             double sum = 0.0;
             for (int j = 0; j < pages.size(); j++) {
-                if (i != j && MathUtils.isReal(cosim[i][j])) {
+                if (i != j && WbMathUtils.isReal(cosim[i][j])) {
                     sum += Math.max(0, cosim[i][j]);    // Hack: no negative numbers
                 }
             }
@@ -215,7 +215,7 @@ public class SimilarityDisambiguator extends Disambiguator {
                     .withValue("disambiguator", ConfigValueFactory.fromAnyRef("topResult"));
             Map<String, String> srRuntimeParams = new HashMap<String, String>();
             srRuntimeParams.put("language", lang.getLangCode());
-            MonolingualSRMetric sr = getConfigurator().construct(MonolingualSRMetric.class, srName, newConfig, srRuntimeParams);
+            SRMetric sr = getConfigurator().construct(SRMetric.class, srName, newConfig, srRuntimeParams);
 
             SimilarityDisambiguator dab = new SimilarityDisambiguator(pa, sr);
             if (config.hasPath("criteria")) {

@@ -1,9 +1,6 @@
 package org.wikibrain.sr.vector;
 
 import com.typesafe.config.Config;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
@@ -19,15 +16,12 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.lang.LocalString;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.matrix.*;
-import org.wikibrain.sr.BaseMonolingualSRMetric;
-import org.wikibrain.sr.MonolingualSRMetric;
-import org.wikibrain.sr.SRResult;
-import org.wikibrain.sr.SRResultList;
+import org.wikibrain.sr.*;
+import org.wikibrain.sr.BaseSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.utils.*;
@@ -62,7 +56,7 @@ import java.util.logging.Logger;
  * @see org.wikibrain.sr.vector.VectorGenerator
  * @see org.wikibrain.sr.vector.VectorSimilarity
  */
-public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
+public class VectorBasedMonoSRMetric extends BaseSRMetric {
     private static enum PhraseMode {
         GENERATOR,  // try to get phrase vectors from the generator directly
         CREATOR,    // try to get phrase vectors form the phrase vector creator
@@ -221,7 +215,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
     }
 
     /**
-     * @see org.wikibrain.sr.MonolingualSRMetric#trainMostSimilar(org.wikibrain.sr.dataset.Dataset, int, gnu.trove.set.TIntSet)
+     * @see org.wikibrain.sr.SRMetric#trainMostSimilar(org.wikibrain.sr.dataset.Dataset, int, gnu.trove.set.TIntSet)
      */
     @Override
     public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) {
@@ -405,7 +399,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
                                         (float)similarity.getMaxValue());
         final SparseMatrixWriter writer = new SparseMatrixWriter(getFeatureMatrixPath(), vconf);
         ParallelForEach.loop(
-                WpArrayUtils.toList(validIds.toArray()),
+                WbArrayUtils.toList(validIds.toArray()),
                 WpThreadUtils.getMaxThreads(),
                 new Procedure<Integer>() {
                     public void call(Integer pageId) throws IOException {
@@ -522,14 +516,14 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         this.phraseMode = mode;
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<MonolingualSRMetric> {
+    public static class Provider extends org.wikibrain.conf.Provider<SRMetric> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return MonolingualSRMetric.class;
+            return SRMetric.class;
         }
 
         @Override
@@ -538,7 +532,7 @@ public class VectorBasedMonoSRMetric extends BaseMonolingualSRMetric {
         }
 
         @Override
-        public MonolingualSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public SRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("vector")) {
                 return null;
             }
