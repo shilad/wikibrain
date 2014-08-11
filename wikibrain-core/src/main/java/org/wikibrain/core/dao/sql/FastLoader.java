@@ -179,7 +179,10 @@ public class FastLoader {
                     cnx.commit();
                 } catch (SQLException e) {
                     cnx.rollback();
-                    LOG.log(Level.SEVERE, "insert batch failed, attempting to continue:", e);
+                    while (e != null) {
+                        LOG.log(Level.SEVERE, "insert batch failed, attempting to continue:", e);
+                        e = e.getNextException();
+                    }
                 }
                 statement.clearBatch();
             }
