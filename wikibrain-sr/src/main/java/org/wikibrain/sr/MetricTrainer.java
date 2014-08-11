@@ -112,11 +112,11 @@ public class MetricTrainer {
             datasets.add(datasetDao.get(lang, name));
         }
 
-        MonolingualSRMetric sr=null;
+        SRMetric sr=null;
         if (cmd.hasOption("m")){
             Language language = datasets.get(0).getLanguage();
             FileUtils.deleteDirectory(new File(path+cmd.getOptionValue("m")+"/"+"normalizer/"));
-            sr = c.get(MonolingualSRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
+            sr = c.get(SRMetric.class,cmd.getOptionValue("m"), "language", language.getLangCode());
         }
 
         Dataset dataset = new Dataset(datasets);

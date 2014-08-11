@@ -209,6 +209,15 @@ public class LocalPageLiveDao implements LocalPageDao  {
         return getByTitle(new Title(title, language), ns);
     }
 
+    @Override
+    public Set<LocalId> getIds(DaoFilter daoFilter) throws DaoException {
+        Set<LocalId> ids = new HashSet<LocalId>();
+        for (LocalPage lp : get(daoFilter)) {
+            ids.add(lp.toLocalId());
+        }
+        return ids;
+    }
+
     public static class Provider extends org.wikibrain.conf.Provider<LocalPageDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);

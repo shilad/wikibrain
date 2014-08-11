@@ -6,7 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.LocalString;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.dataset.Dataset;
@@ -107,7 +107,7 @@ public class SrNormalizers {
      * @param metric
      * @param dataset
      */
-    public void trainSimilarity(final MonolingualSRMetric metric, Dataset dataset) {
+    public void trainSimilarity(final SRMetric metric, Dataset dataset) {
         if (similarityNormalizer instanceof  IdentityNormalizer) {
             return;
         }
@@ -140,8 +140,8 @@ public class SrNormalizers {
      * @param validIds
      * @param maxResults
      */
-    public void trainMostSimilar(final MonolingualSRMetric metric, final Disambiguator disambiguator, Dataset dataset, final TIntSet validIds, final int maxResults) {
-        if (similarityNormalizer instanceof  IdentityNormalizer) {
+    public void trainMostSimilar(final SRMetric metric, final Disambiguator disambiguator, Dataset dataset, final TIntSet validIds, final int maxResults) {
+        if (mostSimilarNormalizer instanceof  IdentityNormalizer) {
             return;
         }
         if (!dataset.getLanguage().equals(metric.getLanguage())) {
@@ -170,7 +170,7 @@ public class SrNormalizers {
                 }
             }, 100);
             trainee.observationsFinished();
-            LOG.info("trained most similar normalizer: " + trainee.dump());
+            LOG.info("trained most similar normalizer for " + metric.getName() + ": " + trainee.dump());
         } finally {
             mostSimilarNormalizer = trainee;
         }

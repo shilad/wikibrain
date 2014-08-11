@@ -11,10 +11,9 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.sql.CategoryBfs;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.CategoryGraph;
-import org.wikibrain.sr.BaseMonolingualSRMetric;
-import org.wikibrain.sr.MonolingualSRMetric;
-import org.wikibrain.sr.SRResult;
-import org.wikibrain.sr.SRResultList;
+import org.wikibrain.sr.*;
+import org.wikibrain.sr.BaseSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.disambig.Disambiguator;
 
 import java.util.Map;
@@ -23,11 +22,11 @@ import java.util.Map;
  * @author Matt Lesicko
  * @author Shilad Sen
  */
-public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
+public class CategoryGraphSimilarity extends BaseSRMetric {
     private final CategoryGraph graph;
     LocalCategoryMemberDao catHelper;
 
-    public MonolingualCategoryGraphSimilarity(String name, Language language, LocalPageDao pageDao, Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao) throws DaoException {
+    public CategoryGraphSimilarity(String name, Language language, LocalPageDao pageDao, Disambiguator disambiguator, LocalCategoryMemberDao categoryMemberDao) throws DaoException {
         super(name, language,pageDao,disambiguator);
         this.catHelper=categoryMemberDao;
         this.graph = categoryMemberDao.getGraph(language);
@@ -122,14 +121,14 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
         return normalize(results);
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<MonolingualSRMetric> {
+    public static class Provider extends org.wikibrain.conf.Provider<SRMetric> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return MonolingualSRMetric.class;
+            return SRMetric.class;
         }
 
         @Override
@@ -138,7 +137,7 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
         }
 
         @Override
-        public MonolingualSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public SRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("categorygraphsimilarity")) {
                 return null;
             }
@@ -149,9 +148,9 @@ public class MonolingualCategoryGraphSimilarity extends BaseMonolingualSRMetric{
 
             Language language = Language.getByLangCode(runtimeParams.get("language"));
 
-            MonolingualCategoryGraphSimilarity sr = null;
+            CategoryGraphSimilarity sr = null;
             try {
-                sr = new MonolingualCategoryGraphSimilarity(
+                sr = new CategoryGraphSimilarity(
                         name,
                         language,
                         getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),

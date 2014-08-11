@@ -1,6 +1,5 @@
 package org.wikibrain.core.cookbook;
 
-import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
@@ -10,17 +9,11 @@ import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.sr.MonolingualSRMetric;
-import org.wikibrain.wikidata.LocalWikidataStatement;
-import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.wikidata.WikidataEntity;
-import org.wikibrain.wikidata.WikidataStatement;
+import org.wikibrain.sr.SRMetric;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * An example that finds the most similar article in certain degrees
@@ -35,14 +28,14 @@ public class MostSimilarInDegrees {
         this.lDao = conf.get(LocalLinkDao.class, "sql");
         this.lang = Language.getByLangCode(lang);
         this.sr = conf.get(
-                MonolingualSRMetric.class, "ensemble",
+                SRMetric.class, "ensemble",
                 "language", this.lang.getLangCode());
     }
 
     LocalPageDao pDao;
     LocalLinkDao lDao;
     Language lang;
-    MonolingualSRMetric sr;
+    SRMetric sr;
 
 
     /**

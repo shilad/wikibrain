@@ -7,7 +7,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.utils.MathUtils;
+import org.wikibrain.utils.WbMathUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -64,9 +64,9 @@ public class PercentileNormalizer extends BaseNormalizer {
         double yDelta = 1.0 / (sample.size() + 1);
 
         if (x < sMin) {
-            return MathUtils.toAsymptote(sMin - x, halfLife, yDelta, 0.0);
+            return WbMathUtils.toAsymptote(sMin - x, halfLife, yDelta, 0.0);
         } else if (x > sMax) {
-            return MathUtils.toAsymptote(x - sMax, halfLife, 1.0 - yDelta, 1.0);
+            return WbMathUtils.toAsymptote(x - sMax, halfLife, 1.0 - yDelta, 1.0);
         } else {
             return interpolator.value(x);
         }

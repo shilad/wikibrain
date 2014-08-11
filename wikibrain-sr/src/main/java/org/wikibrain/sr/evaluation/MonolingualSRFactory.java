@@ -1,6 +1,6 @@
 package org.wikibrain.sr.evaluation;
 
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 
 /**
  * @author Shilad Sen
@@ -10,7 +10,7 @@ public interface MonolingualSRFactory {
      * Creates a new, uninitialized SR metric.
      * @return
      */
-    MonolingualSRMetric create();
+    SRMetric create();
 
     /**
      * Returns a string describing the disambig config. Used in the results output.

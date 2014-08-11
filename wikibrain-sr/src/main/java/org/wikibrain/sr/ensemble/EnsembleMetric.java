@@ -1,7 +1,6 @@
 package org.wikibrain.sr.ensemble;
 
 import com.typesafe.config.Config;
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
@@ -26,23 +25,23 @@ import java.util.logging.Logger;
  * @author Matt Lesicko
  * @author Shilad Sen
  */
-public class EnsembleMetric extends BaseMonolingualSRMetric {
+public class EnsembleMetric extends BaseSRMetric {
     private static final Logger LOG = Logger.getLogger(EnsembleMetric.class.getName());
 
     public static final int EXTRA_SEARCH_DEPTH = 2;
-    private List<MonolingualSRMetric> metrics;
+    private List<SRMetric> metrics;
     private Ensemble ensemble;
     private boolean resolvePhrases = true;
     private boolean trainSubmetrics = true;
 
 
-    public EnsembleMetric(String name, Language language, List<MonolingualSRMetric> metrics, Ensemble ensemble, Disambiguator disambiguator, LocalPageDao pageHelper){
+    public EnsembleMetric(String name, Language language, List<SRMetric> metrics, Ensemble ensemble, Disambiguator disambiguator, LocalPageDao pageHelper){
         super(name, language, pageHelper, disambiguator);
         this.metrics=metrics;
         this.ensemble=ensemble;
     }
 
-    public List<MonolingualSRMetric> getMetrics() {
+    public List<SRMetric> getMetrics() {
         return metrics;
     }
 
@@ -58,7 +57,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
         List<SRResult> scores = new ArrayList<SRResult>();
-        for (MonolingualSRMetric metric : metrics){
+        for (SRMetric metric : metrics){
             scores.add(metric.similarity(pageId1,pageId2,explanations));
         }
         return ensemble.predictSimilarity(scores);
@@ -70,7 +69,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             return super.similarity(phrase1, phrase2, explanations);
         }
         List<SRResult> scores = new ArrayList<SRResult>();
-        for (MonolingualSRMetric metric : metrics){
+        for (SRMetric metric : metrics){
             scores.add(metric.similarity(phrase1,phrase2,explanations));
         }
         return ensemble.predictSimilarity(scores);
@@ -83,7 +82,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             return mostSimilar;
         }
         List<SRResultList> scores = new ArrayList<SRResultList>();
-        for (MonolingualSRMetric metric : metrics){
+        for (SRMetric metric : metrics){
             scores.add(metric.mostSimilar(pageId,maxResults*EXTRA_SEARCH_DEPTH,validIds));
         }
         return ensemble.predictMostSimilar(scores, maxResults);
@@ -95,7 +94,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             return super.mostSimilar(phrase, maxResults, validIds);
         }
         List<SRResultList> scores = new ArrayList<SRResultList>();
-        for (MonolingualSRMetric metric : metrics){
+        for (SRMetric metric : metrics){
             scores.add(metric.mostSimilar(phrase,maxResults*EXTRA_SEARCH_DEPTH,validIds));
         }
         return ensemble.predictMostSimilar(scores,maxResults);
@@ -109,7 +108,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
     @Override
     public void trainSimilarity(final Dataset dataset) throws DaoException {
         if (trainSubmetrics) {
-            for (MonolingualSRMetric metric : metrics) {
+            for (SRMetric metric : metrics) {
                 metric.trainSimilarity(dataset);
             }
         }
@@ -120,7 +119,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
                     @Override
                     public void call(KnownSim ks) throws Exception {
                         EnsembleSim es = new EnsembleSim(ks);
-                        for (MonolingualSRMetric metric : metrics){
+                        for (SRMetric metric : metrics){
                             double score = Double.NaN;
                             try {
                                 SRResult result = metric.similarity(ks.phrase1,ks.phrase2,false);
@@ -153,7 +152,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             clearMostSimilarCache();
         }
         if (trainSubmetrics) {
-            for (MonolingualSRMetric metric : metrics){
+            for (SRMetric metric : metrics){
                 metric.trainMostSimilar(dataset,numResults,validIds);
             }
         }
@@ -169,7 +168,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
                 }
                 int pageId = ids.get(0).getId();
                 EnsembleSim es = new EnsembleSim(ks);
-                for (MonolingualSRMetric metric : metrics) {
+                for (SRMetric metric : metrics) {
                     double score = Double.NaN;
                     int rank = -1;
                     try {
@@ -207,14 +206,14 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
         ensemble.read(new File(getDataDir(), "ensemble").getAbsolutePath());
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<MonolingualSRMetric>{
+    public static class Provider extends org.wikibrain.conf.Provider<SRMetric>{
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return MonolingualSRMetric.class;
+            return SRMetric.class;
         }
 
         @Override
@@ -223,7 +222,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
         }
 
         @Override
-        public MonolingualSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException{
+        public SRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException{
             if (!config.getString("type").equals("ensemble")) {
                 return null;
             }
@@ -234,9 +233,9 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
             if (!config.hasPath("metrics")){
                 throw new ConfigurationException("Ensemble metric has no base metrics to use.");
             }
-            List<MonolingualSRMetric> metrics = new ArrayList<MonolingualSRMetric>();
+            List<SRMetric> metrics = new ArrayList<SRMetric>();
             for (String metric : config.getStringList("metrics")){
-                metrics.add(getConfigurator().get(MonolingualSRMetric.class, metric, "language", language.getLangCode()));
+                metrics.add(getConfigurator().get(SRMetric.class, metric, "language", language.getLangCode()));
             }
             Ensemble ensemble;
             if (config.getString("ensemble").equals("linear")){
@@ -253,7 +252,7 @@ public class EnsembleMetric extends BaseMonolingualSRMetric {
                 sr.setResolvePhrases(config.getBoolean("resolvephrases"));
             }
 
-            BaseMonolingualSRMetric.configureBase(getConfigurator(), sr, config);
+            BaseSRMetric.configureBase(getConfigurator(), sr, config);
             return sr;
         }
     }

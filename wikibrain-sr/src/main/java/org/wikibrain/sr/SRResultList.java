@@ -6,6 +6,7 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import org.apache.commons.collections.iterators.ArrayIterator;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -213,6 +214,18 @@ public class SRResultList implements  Iterable<SRResult>{
      */
     public void sortDescending() {
         Arrays.sort(results, 0, numDocs, Collections.reverseOrder());
+    }
+
+    /**
+     * Sorts by id, ascending.
+     */
+    public void sortById() {
+        Arrays.sort(results, 0, numDocs, new Comparator<SRResult>() {
+            @Override
+            public int compare(SRResult o1, SRResult o2) {
+                return o1.getId() - o2.getId();
+            }
+        });
     }
 
     /**

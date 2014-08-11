@@ -9,16 +9,11 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.wikidata.WikidataStatement;
 import org.wikibrain.wikidata.WikidataValue;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Shilad Sen
@@ -29,7 +24,7 @@ public class SimilarMusicians {
         Language lang = env.getLanguages().getDefaultLanguage();
         WikidataDao wdd = env.getConfigurator().get(WikidataDao.class);
         LocalPageDao lpd = env.getConfigurator().get(LocalPageDao.class);
-        MonolingualSRMetric sr = env.getConfigurator().get(MonolingualSRMetric.class, "ensemble", "language", lang.getLangCode());
+        SRMetric sr = env.getConfigurator().get(SRMetric.class, "ensemble", "language", lang.getLangCode());
 
         for (SRResult hit : sr.mostSimilar("jazz", 10, null)) {
             System.out.println(hit.getScore() + ": " + lpd.getById(lang, hit.getId()));

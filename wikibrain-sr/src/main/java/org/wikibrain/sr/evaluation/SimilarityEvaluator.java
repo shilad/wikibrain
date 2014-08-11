@@ -3,7 +3,7 @@ package org.wikibrain.sr.evaluation;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.utils.KnownSim;
@@ -73,7 +73,7 @@ public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationLog> {
 
     @Override
     protected SimilarityEvaluationLog evaluateSplit(MonolingualSRFactory factory, Split split, File log, File err, Map<String, String> config) throws DaoException, IOException {
-        MonolingualSRMetric metric = factory.create();
+        SRMetric metric = factory.create();
         metric.trainSimilarity(split.getTrain());
         SimilarityEvaluationLog splitEval = new SimilarityEvaluationLog(config, log);
         BufferedWriter errFile = new BufferedWriter(new FileWriter(err));

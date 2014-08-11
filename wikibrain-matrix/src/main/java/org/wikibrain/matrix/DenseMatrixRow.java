@@ -149,6 +149,8 @@ public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
         return colIds;
     }
 
+
+
     public float[] getValues() {
         float vals[] = new float[colIds.length];
         for (int i = 0; i < vals.length; i++) {

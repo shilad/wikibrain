@@ -19,7 +19,7 @@ import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.phrases.AnchorTextPhraseAnalyzer;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.phrases.PrunedCounts;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.dataset.Dataset;
@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * @author Shilad Sen
  */
-public class SimpleMilneWitten implements MonolingualSRMetric {
+public class SimpleMilneWitten implements SRMetric {
     private final String name;
     private final Language language;
     private final LocalPageDao pageDao;
@@ -277,15 +277,15 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
         throw new UnsupportedOperationException();
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<MonolingualSRMetric> {
+    public static class Provider extends org.wikibrain.conf.Provider<SRMetric> {
 
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
-        public Class<MonolingualSRMetric> getType() {
-            return MonolingualSRMetric.class;
+        public Class<SRMetric> getType() {
+            return SRMetric.class;
         }
 
         @Override
@@ -294,7 +294,7 @@ public class SimpleMilneWitten implements MonolingualSRMetric {
         }
 
         @Override
-        public MonolingualSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public SRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("simplemilnewitten")) {
                 return null;
             }

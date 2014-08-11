@@ -1,28 +1,14 @@
 package org.wikibrain.cookbook.sr;
 
-import org.apache.commons.lang3.StringUtils;
-import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
-import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.lang.LocalString;
-import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.core.model.Title;
-import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.sr.*;
 import org.wikibrain.sr.utils.ExplanationFormatter;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Shilad Sen
@@ -37,8 +23,8 @@ public class SimilarityExample {
         Language simple = Language.getByLangCode("simple");
 
         // Retrieve the "ensemble" sr metric for simple english
-        MonolingualSRMetric sr = conf.get(
-                MonolingualSRMetric.class, "ensemble",
+        SRMetric sr = conf.get(
+                SRMetric.class, "ensemble",
                 "language", simple.getLangCode());
 
         //Similarity between strings

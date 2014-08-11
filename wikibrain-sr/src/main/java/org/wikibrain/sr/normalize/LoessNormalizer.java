@@ -11,7 +11,7 @@ import org.apache.commons.math3.stat.ranking.TiesStrategy;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.utils.MathUtils;
+import org.wikibrain.utils.WbMathUtils;
 
 import java.text.DecimalFormat;
 import java.util.Map;
@@ -87,9 +87,9 @@ public class LoessNormalizer extends BaseNormalizer {
             double halfLife = (sMax - sMin) / 4.0;
             double yDelta = 0.1 * (yMax - yMin);
             if (x < sMin) {
-                x2 =  MathUtils.toAsymptote(sMin - x, halfLife, yMin, yMin - yDelta);
+                x2 =  WbMathUtils.toAsymptote(sMin - x, halfLife, yMin, yMin - yDelta);
             } else if (x > sMax) {
-                x2 = MathUtils.toAsymptote(x - sMax, halfLife, yMax, yMax + yDelta);
+                x2 = WbMathUtils.toAsymptote(x - sMax, halfLife, yMax, yMax + yDelta);
             } else {
                 throw new IllegalStateException("" + x + " not in [" + sMin + "," + sMax + "]");
             }
@@ -109,7 +109,7 @@ public class LoessNormalizer extends BaseNormalizer {
         }
 
         // remove infinite or nan values
-        TDoubleList pruned[] = MathUtils.removeNotNumberPoints(X, Y);
+        TDoubleList pruned[] = WbMathUtils.removeNotNumberPoints(X, Y);
         X = pruned[0];
         Y = pruned[1];
 
@@ -131,7 +131,7 @@ public class LoessNormalizer extends BaseNormalizer {
 
         // create the smoothed points.
         int windowSize = Math.min(20, X.size() / 10);
-        double smoothed[][] = MathUtils.smooth(
+        double smoothed[][] = WbMathUtils.smooth(
                 logIfNeeded(X.toArray()),
                 Y.toArray(),
                 windowSize,
@@ -147,9 +147,9 @@ public class LoessNormalizer extends BaseNormalizer {
         interpolatorMin = smoothedX[0];
         interpolatorMax = smoothedX[smoothedX.length - 1];
 
-        MathUtils.makeMonotonicIncreasing(smoothedX, EPSILON);
+        WbMathUtils.makeMonotonicIncreasing(smoothedX, EPSILON);
         if (monotonic) {
-            MathUtils.makeMonotonicIncreasing(smoothedY, EPSILON);
+            WbMathUtils.makeMonotonicIncreasing(smoothedY, EPSILON);
         }
 
         // create the interpolator

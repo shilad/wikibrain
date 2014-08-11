@@ -16,7 +16,7 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
@@ -45,7 +45,7 @@ public class ToblersLawEvaluator {
     private final LocalPageDao lpDao;
     private final UniversalPageDao upDao;
     private final List<Language> langs;
-    private final Map<Language, MonolingualSRMetric> metrics;
+    private final Map<Language, SRMetric> metrics;
 
     private final List<UniversalPage> concepts = new ArrayList<UniversalPage>();
     private final Map<Integer, Point> locations = new HashMap<Integer, Point>();
@@ -67,9 +67,9 @@ public class ToblersLawEvaluator {
         this.upDao = c.get(UniversalPageDao.class);
 
         // build SR metrics
-        this.metrics = new HashMap<Language, MonolingualSRMetric>();
+        this.metrics = new HashMap<Language, SRMetric>();
         for(Language lang : langs){
-            MonolingualSRMetric m = c.get(MonolingualSRMetric.class, "ensemble", "language", lang.getLangCode());
+            SRMetric m = c.get(SRMetric.class, "ensemble", "language", lang.getLangCode());
             metrics.put(lang, m);
         }
     }
@@ -156,7 +156,7 @@ public class ToblersLawEvaluator {
 
         for (Language lang : langs) {
 
-            MonolingualSRMetric sr = metrics.get(lang);
+            SRMetric sr = metrics.get(lang);
             results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
         }
 
@@ -187,7 +187,7 @@ public class ToblersLawEvaluator {
                     continue;
                 List<SRResult> results = new ArrayList<SRResult>();
                 for (Language lang : langs) {
-                    MonolingualSRMetric sr = metrics.get(lang);
+                    SRMetric sr = metrics.get(lang);
                     results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
                 }
                 writeRow(c1, c2, results);
@@ -236,7 +236,7 @@ public class ToblersLawEvaluator {
                 try {
                     List<SRResult> results = new ArrayList<SRResult>();
                     for (Language lang : langs) {
-                        MonolingualSRMetric sr = metrics.get(lang);
+                        SRMetric sr = metrics.get(lang);
                         results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
                     }
                     writeRow(c1, c2, results);

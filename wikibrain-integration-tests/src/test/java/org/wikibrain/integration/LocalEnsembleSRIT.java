@@ -7,17 +7,14 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.sr.Explanation;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
 import org.wikibrain.sr.utils.ExplanationFormatter;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -54,7 +51,7 @@ public class LocalEnsembleSRIT {
 
     public void testAccuracy(String srName, double minPearson, double minSpearman, int maxNoPred) throws ConfigurationException, DaoException {
         Env env = TestUtils.getEnv();
-        MonolingualSRMetric sr = env.getConfigurator().get(MonolingualSRMetric.class, srName, "language", "simple");
+        SRMetric sr = env.getConfigurator().get(SRMetric.class, srName, "language", "simple");
         DatasetDao datasetDao = new DatasetDao();
         Dataset ds = datasetDao.get(SIMPLE, "wordsim353.txt");
 
@@ -84,7 +81,7 @@ public class LocalEnsembleSRIT {
         Env env = TestUtils.getEnv();
         DatasetDao datasetDao = new DatasetDao();
         Dataset ds = datasetDao.get(SIMPLE, "wordsim353.txt");
-        MonolingualSRMetric sr = env.getConfigurator().get(MonolingualSRMetric.class, srName, "language", "simple");
+        SRMetric sr = env.getConfigurator().get(SRMetric.class, srName, "language", "simple");
         sr.trainSimilarity(ds);
         ExplanationFormatter formatter = env.getConfigurator().get(ExplanationFormatter.class);
         SRResult result = sr.similarity(phrase1, phrase2, true);

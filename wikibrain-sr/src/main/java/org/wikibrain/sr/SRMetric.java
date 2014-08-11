@@ -17,7 +17,7 @@ import java.io.IOException;
  * @author Shilad Sen
  */
 
-public interface MonolingualSRMetric {
+public interface SRMetric {
 
     /**
      * @return the name of the similarity metric in a human readable format

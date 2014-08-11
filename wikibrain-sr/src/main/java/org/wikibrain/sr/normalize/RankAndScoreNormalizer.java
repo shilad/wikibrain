@@ -102,6 +102,11 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
             );
     }
 
+    @Override
+    public String toString() {
+        return "Rank and score normalizer: " + dump();
+    }
+
     public static class Provider extends org.wikibrain.conf.Provider<RankAndScoreNormalizer> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
