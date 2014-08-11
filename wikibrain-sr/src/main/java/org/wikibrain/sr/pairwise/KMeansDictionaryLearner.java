@@ -233,7 +233,7 @@ public class KMeansDictionaryLearner {
 
         int c1 = bestCluster;
 
-        if (iteration == 1) {
+        if (iteration == 3) {
             // initialize second-level clusters
             synchronized (nextCentroids2) {
                 int c2 = k2 * c1 + random.nextInt(k2);
@@ -536,11 +536,11 @@ public class KMeansDictionaryLearner {
             concepts.add(Integer.valueOf(line.trim()));
         }
 
-        KMeansDictionaryLearner selector = new KMeansDictionaryLearner(env, metric, concepts, 40, 10);
+        KMeansDictionaryLearner selector = new KMeansDictionaryLearner(env, metric, concepts, 500, 2);
         selector.cluster();
 
         StringBuffer contents = new StringBuffer();
-        for (int id : selector.selectDictionary(50)) {
+        for (int id : selector.selectDictionary(500)) {
             contents.append("" + id + "\n");
         }
         FileUtils.write(new File("dictionary_ids.txt"), contents);
