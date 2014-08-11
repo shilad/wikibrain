@@ -19,7 +19,7 @@ import java.util.List;
 public class MostSimilarExample {
     public static void main(String[] args) throws Exception{
         // Initialize the WikiBrain environment and get the local page dao
-        Env env = new EnvBuilder().build();
+        Env env = new EnvBuilder().envFromArgs(args);
         Configurator conf = env.getConfigurator();
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         Language simple = Language.getByLangCode("simple");
