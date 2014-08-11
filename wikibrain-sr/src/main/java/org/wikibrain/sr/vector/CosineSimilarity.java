@@ -167,11 +167,16 @@ public class CosineSimilarity implements VectorSimilarity {
 
     private SRResultList mostSimilarWithInvertedIndex(TIntFloatMap query, int maxResults, TIntSet validIds) throws IOException {
         TIntDoubleHashMap dots = new TIntDoubleHashMap(maxResults * 5);
-        for (int id : query.keys()) {
+
+        // Eschew a for-each loop here for performance reasons.
+        int keys[] = query.keys();
+        for (int i = 0; i < keys.length; i++) {
+            int id = keys[i];
             float val1 = query.get(id);
             MatrixRow row2 = transpose.getRow(id);
             if (row2 != null) {
-                for (int j = 0; j < row2.getNumCols(); j++) {
+                int n = row2.getNumCols();
+                for (int j = 0; j < n; j++) {
                     int id2 = row2.getColIndex(j);
                     if (validIds == null || validIds.contains(id2)) {
                         float val2 = row2.getColValue(j);
@@ -183,7 +188,9 @@ public class CosineSimilarity implements VectorSimilarity {
 
         final Leaderboard leaderboard = new Leaderboard(maxResults);
         double rowNorm = norm(query);
-        for (int id : dots.keys()) {
+        keys = dots.keys();
+        for (int i = 0; i < keys.length; i++) {
+            int id = keys[i];
             double l1 = lengths.get(id);
             double l2 = rowNorm;
             double dot = dots.get(id);
