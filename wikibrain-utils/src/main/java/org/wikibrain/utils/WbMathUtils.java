@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class MathUtils {
+public class WbMathUtils {
     /**
      * @param nums Any descendant of Number (Integer, Short, Double, Float, etc)
      * @return The mean of the number, or Double.NaN if the list is empty.
@@ -251,9 +251,132 @@ public class MathUtils {
         return dot;
     }
 
+    public static double dot(double[] v1, float[] v2) {
+        if (v1.length != v2.length) {
+            throw new IllegalArgumentException();
+        }
+        double dot = 0.0;
+        for (int i = 0; i < v1.length; i++) {
+            dot += v1[i] * v2[i];
+        }
+        return dot;
+    }
+
+    public static double dot(double[] v1, double[] v2) {
+        if (v1.length != v2.length) {
+            throw new IllegalArgumentException();
+        }
+        double dot = 0.0;
+        for (int i = 0; i < v1.length; i++) {
+            dot += v1[i] * v2[i];
+        }
+        return dot;
+    }
+
+    /**
+     * v1 <- alpha * v2 + v3
+     * @param v1
+     * @param v2
+     * @param alpha
+     * @return
+     */
+    public static void add(double alpha, double[] v1, double[] v2, double v3[]) {
+        for (int i = 0; i < v1.length; i++) {
+            v1[i] = alpha * v2[i] + v3[i];
+        }
+    }
+
+    /**
+     * v1 <- alpha * v2 + v3
+     * @param v1
+     * @param v2
+     * @param alpha
+     * @return
+     */
+    public static void add(double alpha, double[] v1, double[] v2, float v3[]) {
+        for (int i = 0; i < v1.length; i++) {
+            v1[i] = alpha * v2[i] + v3[i];
+        }
+    }
+    /**
+     * v1 <- alpha * v2 + v3
+     * @param v1
+     * @param v2
+     * @param alpha
+     * @return
+     */
+    public static void add(double alpha, double[] v1, float[] v2, float v3[]) {
+        for (int i = 0; i < v1.length; i++) {
+            v1[i] = alpha * v2[i] + v3[i];
+        }
+    }
+    /**
+     * v1 <- alpha * v2 + v3
+     * @param v1
+     * @param v2
+     * @param alpha
+     * @return
+     */
+    public static void add(float alpha, float[] v1, float[] v2, float v3[]) {
+        for (int i = 0; i < v1.length; i++) {
+            v1[i] = alpha * v2[i] + v3[i];
+        }
+    }
+
+    /**
+     * v1 += v2
+     * @param v1
+     * @param v2
+     */
+    public static void increment(double v1[], double[] v2) {
+        add(1.0, v1, v1, v2);
+    }
+
+    /**
+     * v1 += v2
+     * @param v1
+     * @param v2
+     */
+    public static void increment(double v1[], float[] v2) {
+        add(1.0, v1, v1, v2);
+    }
+
+    /**
+     * v1 += v2
+     * @param v1
+     * @param v2
+     */
+    public static void increment(float v1[], float[] v2) {
+        add(1.0f, v1, v1, v2);
+    }
+
     public static void normalize(float[] vector) {
         double sum = 0.0;
         for (float x : vector) {
+            sum += x * x;
+        }
+        if (sum == 0) {
+            return;
+        }
+        sum = Math.sqrt(sum);
+        for (int i = 0; i < vector.length; i++) {
+            vector[i] /= sum;
+        }
+    }
+
+
+
+    public static float[] double2Float(double []v) {
+        float f[] = new float[v.length];
+        for (int i = 0; i < v.length; i++) {
+            f[i] = (float) v[i];
+        }
+        return f;
+    }
+
+    public static void normalize(double[] vector) {
+        double sum = 0.0;
+        for (double x : vector) {
             sum += x * x;
         }
         if (sum == 0) {
@@ -276,5 +399,17 @@ public class MathUtils {
             }
         }
         return T;
+    }
+
+    public static void zero(float [][] M) {
+        for (int i = 0; i < M.length; i++) {
+            Arrays.fill(M[i], 0);
+        }
+    }
+
+    public static void zero(double [][] M) {
+        for (int i = 0; i < M.length; i++) {
+            Arrays.fill(M[i], 0);
+        }
     }
 }

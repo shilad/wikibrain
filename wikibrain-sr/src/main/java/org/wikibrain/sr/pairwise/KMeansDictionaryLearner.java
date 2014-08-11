@@ -1,6 +1,7 @@
 package org.wikibrain.sr.pairwise;
 
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
@@ -22,17 +23,15 @@ import static org.wikibrain.utils.WbMathUtils.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
  * @author Shilad Sen
  */
-public class PairwiseConceptSelector {
-    private static final Logger LOG = Logger.getLogger(PairwiseConceptSelector.class.getName());
+public class KMeansDictionaryLearner {
+    private static final Logger LOG = Logger.getLogger(KMeansDictionaryLearner.class.getName());
 
     private final Random random = new Random();
     private final Env env;
@@ -44,6 +43,7 @@ public class PairwiseConceptSelector {
 
     private final int k1;
     private final int k2;
+    private int iteration = 0;
 
     private double [][] centroids1;
     private double [][] centroids2;
@@ -61,7 +61,7 @@ public class PairwiseConceptSelector {
 
     private DenseMatrix candidateCosims;
 
-    public PairwiseConceptSelector(Env env, SRMetric metric, final TIntSet candidateSet, int k1, int k2) throws ConfigurationException, DaoException, IOException {
+    public KMeansDictionaryLearner(Env env, SRMetric metric, final TIntSet candidateSet, int k1, int k2) throws ConfigurationException, DaoException, IOException {
         if (candidateSet.size() <= k1 * k2) {
             throw new IllegalArgumentException();
         }
@@ -82,7 +82,7 @@ public class PairwiseConceptSelector {
 
         // Initialize secondary clusters
         centroids2 = new double[k1*k2][candidates.length];
-        nextCentroids1 = new double[k1*k2][candidates.length];
+        nextCentroids2 = new double[k1*k2][candidates.length];
         clusterCounts2 = new int[k1*k2];
         nextClusterCounts2 = new int[k1*k2];
 
@@ -100,27 +100,31 @@ public class PairwiseConceptSelector {
 
 
 
-    public TIntDoubleMap cluster() throws DaoException {
+    public void cluster() throws DaoException {
         LOG.info("Initializing clusters");
         initializeClusters();
 
-        for (int i = 0; i < 200; i++) {
-            LOG.info("performing iteration " + i);
+        for (iteration = 0; iteration < 10; iteration++) {
+            LOG.info("performing iteration " + iteration);
             resetDatastructures();
 
             ParallelForEach.iterate(getCosimIterable(true).iterator(), new Procedure<CandidateCosim>() {
                 @Override
                 public void call(CandidateCosim cc) throws Exception {
-                    placeCandidate(cc);
+                    try {
+                        placeCandidate(cc);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
 
             finalizeDatastructures();
 
-            System.err.format("Mean sim is %.3f, counts are %s\n", overallSim1 / candidates.length, Arrays.toString(clusterCounts1));
+            System.err.format("Mean sim 1 is %.3f, counts are %s\n", overallSim1 / candidates.length, Arrays.toString(clusterCounts1));
+            System.err.format("Mean sim 2 is %.3f, counts are %s\n", overallSim2 / candidates.length, Arrays.toString(clusterCounts2));
             describeCentroids();
         }
-        return null;
     }
 
     /**
@@ -186,17 +190,36 @@ public class PairwiseConceptSelector {
                     throw new RuntimeException("Unexpected DAO failure!");
                 }
             }
+            if (iteration <= 7) {
+                continue;
+            }
+            for (int j = 0; j < k2; j++) {
+                top = new Leaderboard(3);
+                int c2 = i * k2 + j;
+                System.out.format("Subcluster %d (n=%d)\n", c2, clusterCounts2[c2]);
+                for (int k = 0; k < candidates.length; k++) {
+                    top.tallyScore(candidates[k], centroids2[c2][k]);
+                }
+                for (SRResult r : top.getTop()) {
+                    try {
+                        LocalPage lp = pageDao.getById(language, r.getId());
+                        System.out.format("\t\t%.3f %s\n", r.getScore(), lp.toString());
+                    } catch (DaoException e) {
+                        throw new RuntimeException("Unexpected DAO failure!");
+                    }
+                }
+            }
         }
     }
 
     private void placeCandidate(CandidateCosim cc) {
         int bestCluster = -1;
         double bestScore = -1.0;
-        for (int k = 0; k < k1; k++) {
-            double s = dot(centroids1[k], cc.cosims);
+        for (int i = 0; i < k1; i++) {
+            double s = dot(centroids1[i], cc.cosims);
             if (s > bestScore) {
                 bestScore = s;
-                bestCluster = k;
+                bestCluster = i;
             }
         }
         if (bestCluster < 0) {
@@ -207,8 +230,139 @@ public class PairwiseConceptSelector {
             nextClusterCounts1[bestCluster]++;
             overallSim1 += bestScore;
         }
+
+        int c1 = bestCluster;
+
+        if (iteration == 1) {
+            // initialize second-level clusters
+            synchronized (nextCentroids2) {
+                int c2 = k2 * c1 + random.nextInt(k2);
+                increment(nextCentroids2[c2], cc.cosims);
+                clusterCounts2[c2]++;
+            }
+        } else if (iteration > 3) {
+            bestCluster = -1;
+            bestScore = -1.0;
+            for (int i = 0; i < k2; i++) {
+                double s = dot(centroids2[c1 * k2 + i], cc.cosims);
+                if (s > bestScore) {
+                    bestScore = s;
+                    bestCluster = i;
+                }
+            }
+            synchronized (nextCentroids2) {
+                increment(nextCentroids2[c1 * k2 + bestCluster], cc.cosims);
+                nextClusterCounts2[c1 * k2 + bestCluster]++;
+                overallSim2 += bestScore;
+            }
+        }
         if (cc.candidateIndex % 1000 == 0) {
-            LOG.info("placing candidate " + cc.candidateIndex + " of " + candidates.length + " with best " + bestScore);
+            LOG.info("placing candidate " + cc.candidateIndex + " of " + candidates.length);
+        }
+    }
+
+    private int[] selectDictionary(int n) {
+        int multiplier = Math.max(1, n / (k1 * k2)) * 2;
+
+        TIntDoubleMap scores = selectCandidates(centroids1, clusterCounts1, k1 * multiplier * 4);
+        for (int i = 0; i < k2; i++) {
+            double centroids[][] = Arrays.copyOfRange(centroids2, i  * k2, (i+1)*k2);
+            int [] counts = Arrays.copyOfRange(clusterCounts2, i * k2, (i+1) * k2);
+            TIntDoubleMap cscores = selectCandidates(centroids, counts, multiplier);
+            for (int id : cscores.keys()) {
+                scores.adjustOrPutValue(id, cscores.get(id), cscores.get(id));
+            }
+        }
+
+        Leaderboard board = new Leaderboard(n);
+        for (int id : scores.keys()) {
+            board.tallyScore(id, scores.get(id));
+        }
+        int dictionary[] =  board.getTop().getIds();
+        for (int id : dictionary) {
+            try {
+                System.out.format("dictionary: %s\n", pageDao.getById(language, id).getTitle().getCanonicalTitle());
+            } catch (DaoException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return dictionary;
+    }
+
+    private TIntDoubleMap selectCandidates(double[][] centroids, int counts[], int n) {
+        // Calculate entropies
+        double sums[] = new double[candidates.length];
+        for (double [] centroid : centroids) {
+            increment(sums, centroid);
+        }
+
+        double entropies[] = new double[candidates.length];
+        for (double [] centroid : centroids) {
+            for (int i = 0; i < candidates.length; i++) {
+                double p = centroid[i] / sums[i];
+                if (p > 0) {
+                    entropies[i] += -p * Math.log(p);
+                }
+            }
+        }
+
+        // Calculate the most discriminative item for each centroid
+        Map<Integer, CandidateScore> scores = new HashMap<Integer, CandidateScore>();
+        for (int i = 0; i < centroids.length; i++) {
+            double centroid[] = centroids[i];
+            Leaderboard board = new Leaderboard(5);
+            for (int j = 0; j < candidates.length; j++) {
+                double s = Math.log(1 + Math.log(counts[i] + 1)) * centroid[j] / (entropies[j] + 0.1);
+                board.tallyScore(candidates[j], s);
+            }
+            SRResultList top = board.getTop();
+            top.sortDescending();
+            for (int j = 0; j < top.numDocs(); j++) {
+                int id = top.getId(j);
+                if (!scores.containsKey(id)) {
+                    scores.put(id, new CandidateScore(id));
+                }
+                scores.get(id).observe(j, top.getScore(j));
+            }
+        }
+
+        List<CandidateScore> sortedScores = new ArrayList<CandidateScore>(scores.values());
+        Collections.sort(sortedScores);
+
+        TIntDoubleMap result = new TIntDoubleHashMap();
+        for (int i = 0; i < sortedScores.size() && i < n; i++) {
+            result.put(sortedScores.get(i).id, sortedScores.get(i).score);
+        }
+        return result;
+    }
+
+    class CandidateScore implements Comparable<CandidateScore> {
+        int id;
+        int minRank = 100000;
+        double score;
+
+        public CandidateScore(int id) {
+            this.id = id;
+        }
+
+        public void observe(int rank, double score) {
+            minRank = Math.min(rank, minRank);
+            this.score += score;
+        }
+
+        @Override
+        public int compareTo(CandidateScore o) {
+            if (minRank < o.minRank) {
+                return -1;
+            } else if (minRank > o.minRank) {
+                return +1;
+            } else if (score > o.score) {
+                return -1;
+            } else if (score < o.score) {
+                return +1;
+            } else {
+                return id - o.id;
+            }
         }
     }
 
@@ -382,7 +536,13 @@ public class PairwiseConceptSelector {
             concepts.add(Integer.valueOf(line.trim()));
         }
 
-        PairwiseConceptSelector selector = new PairwiseConceptSelector(env, metric, concepts, 20, 20);
+        KMeansDictionaryLearner selector = new KMeansDictionaryLearner(env, metric, concepts, 40, 10);
         selector.cluster();
+
+        StringBuffer contents = new StringBuffer();
+        for (int id : selector.selectDictionary(50)) {
+            contents.append("" + id + "\n");
+        }
+        FileUtils.write(new File("dictionary_ids.txt"), contents);
     }
 }

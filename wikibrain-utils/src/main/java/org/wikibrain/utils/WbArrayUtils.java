@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  */
-public class WpArrayUtils {
+public class WbArrayUtils {
     static public int[] grow(int A[], int amount) {
         int B[] = new int[A.length + amount];
         System.arraycopy(A, 0, B, 0, A.length);
@@ -23,4 +23,6 @@ public class WpArrayUtils {
     static public List<Integer> toList(int A[]) {
         return Arrays.asList(ArrayUtils.toObject(A));
     }
+
+
 }
