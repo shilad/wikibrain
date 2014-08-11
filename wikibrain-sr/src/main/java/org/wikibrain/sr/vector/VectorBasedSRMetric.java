@@ -56,7 +56,7 @@ import java.util.logging.Logger;
  * @see org.wikibrain.sr.vector.VectorGenerator
  * @see org.wikibrain.sr.vector.VectorSimilarity
  */
-public class VectorBasedMonoSRMetric extends BaseSRMetric {
+public class VectorBasedSRMetric extends BaseSRMetric {
     private static enum PhraseMode {
         GENERATOR,  // try to get phrase vectors from the generator directly
         CREATOR,    // try to get phrase vectors form the phrase vector creator
@@ -64,7 +64,7 @@ public class VectorBasedMonoSRMetric extends BaseSRMetric {
         NONE        // don't resolve phrases at all.
     }
 
-    private static final Logger LOG = Logger.getLogger(VectorBasedMonoSRMetric.class.getName());
+    private static final Logger LOG = Logger.getLogger(VectorBasedSRMetric.class.getName());
     private final VectorGenerator generator;
     private final VectorSimilarity similarity;
     private final SRConfig config;
@@ -75,7 +75,7 @@ public class VectorBasedMonoSRMetric extends BaseSRMetric {
 
     private PhraseMode phraseMode = PhraseMode.BOTH;
 
-    public VectorBasedMonoSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity, PhraseVectorCreator creator) {
+    public VectorBasedSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity, PhraseVectorCreator creator) {
         super(name, language, dao, disambig);
         this.generator = generator;
         this.similarity = similarity;
@@ -552,7 +552,7 @@ public class VectorBasedMonoSRMetric extends BaseSRMetric {
                 phraseVectorCreator = getConfigurator().construct(
                         PhraseVectorCreator.class, null, config.getConfig("phrases"), null);
             }
-            VectorBasedMonoSRMetric sr = new VectorBasedMonoSRMetric(
+            VectorBasedSRMetric sr = new VectorBasedSRMetric(
                     name,
                     language,
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),

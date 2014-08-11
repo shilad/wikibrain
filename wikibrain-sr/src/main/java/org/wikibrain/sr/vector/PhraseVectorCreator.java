@@ -46,7 +46,7 @@ import java.util.*;
 public class PhraseVectorCreator {
     private final LuceneSearcher searcher;
     private Language language;
-    private VectorBasedMonoSRMetric metric;
+    private VectorBasedSRMetric metric;
     private Disambiguator disambig;
     private VectorGenerator generator;
 
@@ -102,7 +102,7 @@ public class PhraseVectorCreator {
      * Set metric must be called before this component can be used.
      * @param metric
      */
-    public void setMetric(VectorBasedMonoSRMetric metric) {
+    public void setMetric(VectorBasedSRMetric metric) {
         this.metric = metric;
         this.language = metric.getLanguage();
         this.disambig = metric.getDisambiguator();

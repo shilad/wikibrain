@@ -182,7 +182,7 @@ public class SRBuilder {
         if (type.equals("ensemble")) {
             EnsembleMetric ensemble = (EnsembleMetric) getMetric(name);
             ensemble.setTrainSubmetrics(false);         // Do it by hand
-        } else if (type.equals("pairwisecosinesim")) {
+        } else if (type.equals("vector.mostsimilarconcepts")) {
             if (mode == Mode.SIMILARITY) {
                 LOG.warning("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
                 mode = Mode.BOTH;
@@ -217,7 +217,17 @@ public class SRBuilder {
             if (skipBuiltMetrics && metric.mostSimilarIsTrained()) {
                 LOG.info("metric " + name + " mostSimilar() is already trained... skipping");
             } else {
-                metric.trainMostSimilar(ds, maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH, validMostSimilarIds);
+                Config config = getMetricConfig(name);
+                int n = maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH;
+                TIntSet validIds = validMostSimilarIds;
+                if (config.hasPath("maxResults")) {
+                    n = config.getInt("maxResults");
+                }
+                if (config.hasPath("mostSimilarConcepts")) {
+                    String path = String.format("%s/%s.txt", config.getString("mostSimilarConcepts"), metric.getLanguage().getLangCode());
+                    validIds = readIds(path);
+                }
+                metric.trainMostSimilar(ds, n, validIds);
             }
         }
         metric.write();
