@@ -7,6 +7,7 @@ package org.wikibrain.loader;
 
 import com.google.gson.*;
 import com.typesafe.config.Config;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
 import org.wikibrain.conf.Configuration;
@@ -20,10 +21,12 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.util.Timer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GraphicLoader extends JFrame {
 
-    public static final String DEFAULT_H2_PATH = "\"${baseDir}\"/db/h2";
+    public static final String DEFAULT_H2_PATH = "${baseDir}/db/h2";
     public static final String DEFAULT_PG_HOST = "localhost";
     public static final String DEFAULT_PG_PORT = "5432";
     public static final String DEFAULT_PG_DB = "wikibrain";
@@ -414,6 +417,26 @@ public class GraphicLoader extends JFrame {
         }
     }
 
+    private static Pattern HOCON_VAR = Pattern.compile("^(.*)(\\$\\{[^}]+\\})(.*)$");
+    private void writeHOCONString(BufferedWriter writer, Object value) throws IOException {
+        writer.write('"');
+        String s = value.toString();
+        while (!s.isEmpty()) {
+            Matcher m = HOCON_VAR.matcher(s);
+            if (m.matches()) {
+                writer.write(StringEscapeUtils.escapeEcmaScript(m.group(1)));
+                writer.write('"');
+                writer.write(m.group(2));
+                writer.write('"');
+                s = m.group(3);
+            } else {
+                writer.write(StringEscapeUtils.escapeEcmaScript(s));
+                break;
+            }
+        }
+        writer.write('"');
+    }
+
     public void runOrStop() {
         if (process != null) {
             process.destroy();
@@ -421,71 +444,43 @@ public class GraphicLoader extends JFrame {
             return;
         }
 
-        String ref = new String();
-        String dsSelection;
-        if(dataSourceSelection.getSelectedIndex() == 0)
-            dsSelection = "h2";
-        else
-            dsSelection = "psql";
-
-
-        Config defaultConf = new Configuration().get();
-
-
-        ref = defaultConf.toString().substring(defaultConf.toString().indexOf("{"), defaultConf.toString().lastIndexOf("}") + 1);
-        JsonParser jp = new JsonParser();
-
-        JsonObject refObj = new JsonObject();
-        refObj.addProperty("baseDir", baseDir.getText());
-        refObj.add("dao", new JsonObject());
-        refObj.add("spatial", new JsonObject());
-        refObj.get("dao").getAsJsonObject().add("dataSource", new JsonObject());
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().add("h2", new JsonObject());
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().add("psql", new JsonObject());
-        refObj.get("spatial").getAsJsonObject().add("dao", new JsonObject());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().add("dataSource", new JsonObject());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().add("postgis", new JsonObject());
-
-
-        if(dataSourceSelection.getSelectedIndex() == 0)
-            refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().addProperty("default", "h2");
-        else
-            refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().addProperty("default", "psql");
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("h2").getAsJsonObject().addProperty("url", String.format("jdbc:h2:%s;LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0;MAX_OPERATION_MEMORY=100000000", h2Path.getText()));
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("url", String.format("jdbc:postgresql://%s/%s", postgresHost.getText(), postgresDB.getText()));
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("username", postgresUser.getText());
-        refObj.get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("psql").getAsJsonObject().addProperty("password", new String(postgresPass.getPassword()));
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("host", postgresHost.getText());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("port", postgresPort.getText());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("database", postgresDB.getText());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("user", postgresUser.getText());
-        refObj.get("spatial").getAsJsonObject().get("dao").getAsJsonObject().get("dataSource").getAsJsonObject().get("postgis").getAsJsonObject().addProperty("passwd", new String(postgresPass.getPassword()));
-
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        ref = gson.toJson(refObj);
-
-
-
-
-
-
-
-        //System.out.print(ref);
         try {
 
             File file = new File("customized.conf");
             BufferedWriter output = new BufferedWriter(new FileWriter(file));
-            output.write(ref);
-            output.close();
-            /*
-            Object[] options = {"Yes please", "No thanks"};
-            int n = JOptionPane.showOptionDialog(new JFrame("Edit Configuration File"), "Configuration file has been generated \n Do you want to open the file for advanced settings? ", "Edit Configuration File", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-            if(n == 0){
-                Desktop.getDesktop().edit(file);
+            output.write("baseDir : ");
+            writeHOCONString(output, baseDir.getText());
 
-            }
-            */
+            if(dataSourceSelection.getSelectedIndex() == 0)
+                output.write("\n\ndao.dataSource.default : h2");
+            else
+                output.write("\n\ndao.dataSource.default : psql");
+
+            output.write("\n\ndao.dataSource.h2.url : ");
+            writeHOCONString(output,
+                    String.format("jdbc:h2:%s;LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0;MAX_OPERATION_MEMORY=100000000", h2Path.getText()));
+
+            output.write("\n\ndao.dataSource.psql.url : ");
+            writeHOCONString(output,
+                    String.format("jdbc:postgresql://%s/%s", postgresHost.getText(), postgresDB.getText()));
+            output.write("\ndao.dataSource.psql.username : ");
+            writeHOCONString(output, postgresUser.getText());
+            output.write("\ndao.dataSource.psql.password : ");
+            writeHOCONString(output, postgresPass.getPassword());
+
+            output.write("\n\ndao.dataSource.postgis.host : ");
+            writeHOCONString(output, postgresHost.getText());
+            output.write("\ndao.dataSource.postgis.port : ");
+            writeHOCONString(output, postgresPort.getText());
+            output.write("\ndao.dataSource.postgis.database : ");
+            writeHOCONString(output, postgresDB.getText());
+            output.write("\ndao.dataSource.postgis.user : ");
+            writeHOCONString(output, postgresUser.getText());
+            output.write("\ndao.dataSource.postgis.passwd : ");
+            writeHOCONString(output, postgresPass.getPassword());
+            output.write("\n\n");
+            output.close();
+
         }
         catch (Exception e){
             e.printStackTrace();
@@ -493,25 +488,6 @@ public class GraphicLoader extends JFrame {
 
 
         try {
-//            StringBuffer output = new StringBuffer();
-//            Process p;
-//            this.setVisible(false);
-//
-//            p = Runtime.getRuntime().exec("mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikibrain.utils.ResourceInstaller\n");
-//
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//            String line = "";
-//            while ((line = reader.readLine()) != null){
-//                output.append(line + "\n");
-//                System.out.println(line);
-//
-//            }
-//            p.waitFor();
-            //System.out.println(output.toString());
-
-            /*
-            String loader = new String("./wb-java.sh org.wikibrain.Loader");
-            */
             java.util.List<String> argList = new ArrayList<String>();
 
             argList.add("-l");
