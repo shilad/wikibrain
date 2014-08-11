@@ -12,7 +12,7 @@ import org.wikibrain.sr.vector.VectorSimilarity;
  * @author Shilad Sen
  */
 public class Word2VecMetric extends VectorBasedSRMetric {
-    public Word2VecMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity, PhraseVectorCreator creator) {
-        super(name, language, dao, disambig, generator, similarity, creator);
+    public Word2VecMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity) {
+        super(name, language, dao, disambig, generator, similarity);
     }
 }

@@ -57,25 +57,17 @@ import java.util.logging.Logger;
  * @see org.wikibrain.sr.vector.VectorSimilarity
  */
 public class VectorBasedSRMetric extends BaseSRMetric {
-    private static enum PhraseMode {
-        GENERATOR,  // try to get phrase vectors from the generator directly
-        CREATOR,    // try to get phrase vectors form the phrase vector creator
-        BOTH,       // first try the generator, then the creator
-        NONE        // don't resolve phrases at all.
-    }
 
     private static final Logger LOG = Logger.getLogger(VectorBasedSRMetric.class.getName());
-    private final VectorGenerator generator;
-    private final VectorSimilarity similarity;
-    private final SRConfig config;
-    private final PhraseVectorCreator phraseVectorCreator;
+    protected final VectorGenerator generator;
+    protected final VectorSimilarity similarity;
+    protected final SRConfig config;
 
     private SparseMatrix featureMatrix;
     private SparseMatrix transposeMatrix;
 
-    private PhraseMode phraseMode = PhraseMode.BOTH;
 
-    public VectorBasedSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity, PhraseVectorCreator creator) {
+    public VectorBasedSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity) {
         super(name, language, dao, disambig);
         this.generator = generator;
         this.similarity = similarity;
@@ -84,49 +76,28 @@ public class VectorBasedSRMetric extends BaseSRMetric {
         this.config.minScore = (float) similarity.getMinValue();
         this.config.maxScore = (float) similarity.getMaxValue();
 
-        this.phraseVectorCreator = creator;
-        if (creator != null) {
-            creator.setMetric(this);
-        }
     }
 
     @Override
     public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
-        if (phraseMode == PhraseMode.NONE) {
-            return super.similarity(phrase1, phrase2, explanations);
-        }
         TIntFloatMap vector1 = null;
         TIntFloatMap vector2 = null;
         // try using phrases directly
-        if (phraseMode == PhraseMode.BOTH || phraseMode == PhraseMode.GENERATOR) {
-            try {
-                vector1 = generator.getVector(phrase1);
-                vector2 = generator.getVector(phrase2);
-            } catch (UnsupportedOperationException e) {
-                // try using other methods
-            }
-        }
-        if ((vector1 == null || vector2 == null)
-        &&  (phraseMode == PhraseMode.BOTH || phraseMode == PhraseMode.CREATOR)) {
-            if (phraseVectorCreator == null) {
-                throw new IllegalStateException("phraseMode is " + phraseMode + " but phraseVectorCreator is null");
-            }
-            TIntFloatMap vectors[] = phraseVectorCreator.getPhraseVectors(phrase1, phrase2);
-            if (vectors != null) {
-                vector1 = vectors[0];
-                vector2 = vectors[1];
-            }
+        try {
+            vector1 = generator.getVector(phrase1);
+            vector2 = generator.getVector(phrase2);
+        } catch (UnsupportedOperationException e) {
+            // try using other methods
         }
         if (vector1 == null || vector2 == null) {
-            // fallback on parent's phrase resolution algorithm
             return super.similarity(phrase1, phrase2, explanations);
         } else {
             SRResult result= new SRResult(similarity.similarity(vector1, vector2));
             if(explanations) {
-                    result.setExplanations(generator.getExplanations(phrase1, phrase2, vector1, vector2, result));
-        }
+                result.setExplanations(generator.getExplanations(phrase1, phrase2, vector1, vector2, result));
+            }
             return normalize(result);
-    }
+        }
     }
 
 
@@ -163,23 +134,12 @@ public class VectorBasedSRMetric extends BaseSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
-        if (phraseMode == PhraseMode.NONE) {
-            return super.mostSimilar(phrase, maxResults, validIds);
-        }
         TIntFloatMap vector = null;
         // try using phrases directly
-        if (phraseMode == PhraseMode.BOTH || phraseMode == PhraseMode.GENERATOR) {
-            try {
-                vector = generator.getVector(phrase);
-            } catch (UnsupportedOperationException e) {
-                // try using other methods
-            }
-        }
-        if (vector == null &&  (phraseMode == PhraseMode.BOTH || phraseMode == PhraseMode.CREATOR)) {
-            if (phraseVectorCreator == null) {
-                throw new IllegalStateException("phraseMode is " + phraseMode + " but phraseVectorCreator is null");
-            }
-            vector = phraseVectorCreator.getPhraseVector(phrase);
+        try {
+            vector = generator.getVector(phrase);
+        } catch (UnsupportedOperationException e) {
+            // try using other methods
         }
         if (vector == null) {
             // fall back on parent's phrase resolution algorithm
@@ -271,28 +231,11 @@ public class VectorBasedSRMetric extends BaseSRMetric {
             }
         } catch (UnsupportedOperationException e) {
         }
-
-        // If direct phrase vectors failed, try to disambiguate
         if (rowVectors.isEmpty() || colVectors.isEmpty()) {
-            List<String> unique = new ArrayList<String>();
-            for (String s : ArrayUtils.addAll(rowPhrases, colPhrases)) {
-                if (!unique.contains(s)) {
-                    unique.add(s);
-                }
-            }
-            TIntFloatMap[] vectors = phraseVectorCreator.getPhraseVectors(unique.toArray(new String[0]));
-            for (String s : rowPhrases) {
-                int i = unique.indexOf(s);
-                if (i < 0) throw new IllegalStateException();
-                rowVectors.add(vectors[i]);
-            }
-            for (String s : colPhrases) {
-                int i = unique.indexOf(s);
-                if (i < 0) throw new IllegalStateException();
-                colVectors.add(vectors[i]);
-            }
+            return super.cosimilarity(rowPhrases, colPhrases);
+        } else {
+            return cosimilarity(rowVectors, colVectors);
         }
-        return cosimilarity(rowVectors, colVectors);
     }
 
     /**
@@ -477,20 +420,6 @@ public class VectorBasedSRMetric extends BaseSRMetric {
         }
     }
 
-    /**
-     * Returns the vector associated with a particular phrase
-     * @param phrase
-     * @return
-     * @throws DaoException
-     */
-    public TIntFloatMap getPhraseVector(String phrase) throws DaoException {
-        try {
-            return generator.getVector(phrase);
-        } catch (UnsupportedOperationException e) {
-            return phraseVectorCreator.getPhraseVector(phrase);
-        }
-    }
-
     protected boolean hasFeatureMatrix() {
         return featureMatrix != null && featureMatrix.getNumRows() > 0;
     }
@@ -510,10 +439,6 @@ public class VectorBasedSRMetric extends BaseSRMetric {
     @Override
     public SRConfig getConfig() {
         return config;
-    }
-
-    public void setPhraseMode(PhraseMode mode) {
-        this.phraseMode = mode;
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<SRMetric> {
@@ -547,25 +472,15 @@ public class VectorBasedSRMetric extends BaseSRMetric {
                     VectorGenerator.class, null, config.getConfig("generator"), params);
             VectorSimilarity similarity = getConfigurator().construct(
                     VectorSimilarity.class,  null, config.getConfig("similarity"), params);
-            PhraseVectorCreator phraseVectorCreator = null;
-            if (config.hasPath("phrases")) {
-                phraseVectorCreator = getConfigurator().construct(
-                        PhraseVectorCreator.class, null, config.getConfig("phrases"), null);
-            }
             VectorBasedSRMetric sr = new VectorBasedSRMetric(
                     name,
                     language,
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),
                     getConfigurator().get(Disambiguator.class,config.getString("disambiguator"),"language", language.getLangCode()),
                     generator,
-                    similarity,
-                    phraseVectorCreator
+                    similarity
             );
-            if (config.hasPath("phraseMode")) {
-                sr.setPhraseMode(PhraseMode.valueOf(config.getString("phraseMode").toUpperCase()));
-            }
             configureBase(getConfigurator(), sr, config);
-            if (phraseVectorCreator != null) phraseVectorCreator.setMetric(sr);
             return sr;
         }
 
