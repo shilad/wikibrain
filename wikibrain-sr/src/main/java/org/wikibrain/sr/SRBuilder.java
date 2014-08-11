@@ -502,6 +502,9 @@ public class SRBuilder {
         if (cmd.hasOption("l")) {
             builder.setLanguage(Language.getByLangCode(cmd.getOptionValue("l")));
         }
+        if (cmd.hasOption("r")) {
+            builder.setMaxResults(Integer.valueOf(cmd.getOptionValue("r")));
+        }
 
         builder.build();
     }
