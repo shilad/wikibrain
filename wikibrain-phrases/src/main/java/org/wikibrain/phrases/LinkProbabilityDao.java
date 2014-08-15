@@ -5,7 +5,10 @@ import gnu.trove.map.TLongFloatMap;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TLongFloatHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
@@ -18,7 +21,6 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.StringNormalizer;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.RawPage;
-import org.wikibrain.core.nlp.NGramCreator;
 import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
 import org.wikibrain.utils.*;
@@ -45,12 +47,7 @@ public class LinkProbabilityDao {
 
     private ObjectDb<Double> db;
     private TLongFloatMap cache = null;
-
-    /**
-     * Range of ngrams to consider.
-     */
-    private int minGram = 1;
-    private int maxGram = 3;
+    private TLongSet subGrams = null;
 
 
     public LinkProbabilityDao(File path, LanguageSet langs, RawPageDao pageDao, PhraseAnalyzerDao phraseDao) throws DaoException {
@@ -75,6 +72,29 @@ public class LinkProbabilityDao {
         return db != null;
     }
 
+    public boolean isSubgram(Language lang, String phrase, boolean normalize) {
+        if (cache == null || subGrams == null) {
+            throw new IllegalArgumentException("Subgrams require a cache!");
+        }
+        String cleaned = cleanString(lang, phrase, normalize);
+        long h = hashCode(lang, cleaned);
+        return cache.containsKey(h) || subGrams.contains(h);
+    }
+
+    private String cleanString(Language lang, String s) {
+        return cleanString(lang, s, false);
+    }
+
+    private String cleanString(Language lang, String s, boolean normalize) {
+        if (normalize) s = normalizer.normalize(lang, s);
+        StringTokenizer t = new StringTokenizer();
+        return StringUtils.join(t.getWords(lang, s), " ");
+    }
+
+    public double getLinkProbability(Language language, String mention) throws DaoException {
+        return getLinkProbability(language, mention, true);
+    }
+
     /**
      * Fixme: Check the cache here...
      * @param language
@@ -82,11 +102,11 @@ public class LinkProbabilityDao {
      * @return
      * @throws DaoException
      */
-    public double getLinkProbability(Language language, String mention) throws DaoException {
+    public double getLinkProbability(Language language, String mention, boolean normalize) throws DaoException {
         if (db == null) {
             throw new IllegalStateException("Dao has not yet been built. Call build()");
         }
-        String normalizedMention = normalizer.normalize(language, mention);
+        String normalizedMention = cleanString(language, mention, normalize);
         String key = language.getLangCode() + ":" + normalizedMention;
 
         Double d = null;
@@ -111,15 +131,22 @@ public class LinkProbabilityDao {
             LOG.info("building cache...");
             TLongFloatMap cache = new TLongFloatHashMap();
             Iterator<Pair<String, Double>> iter = db.iterator();
+            TLongSet subgrams = new TLongHashSet();
             while (iter.hasNext()) {
                 Pair<String, Double> entry = iter.next();
-                String tokens[] = entry.getKey().split(":", 2);
-                Language lang = Language.getByLangCode(tokens[0]);
-                long hash = hashCode(lang, entry.getKey());
-                cache.put(hash, entry.getRight().floatValue());
+                if (entry.getKey().startsWith(":s:")) {
+                    long hash = Long.valueOf(entry.getKey().substring(3));
+                    subgrams.add(hash);
+                } else {
+                    String tokens[] = entry.getKey().split(":", 2);
+                    Language lang = Language.getByLangCode(tokens[0]);
+                    long hash = hashCode(lang, entry.getKey());
+                    cache.put(hash, entry.getRight().floatValue());
+                }
             }
             this.cache = cache;
-            LOG.info("created cache with " + cache.size() + " entries");
+            this.subGrams = subgrams;
+            LOG.info("created cache with " + cache.size() + " entries and " + subgrams.size() + " subgrams");
         } else {
             cache = null;
         }
@@ -145,14 +172,26 @@ public class LinkProbabilityDao {
     }
 
     private void build(Language lang) throws DaoException {
+        subGrams = new TLongHashSet();
+
         final TLongIntMap counts = new TLongIntHashMap();
         Iterator<String> iter = phraseDao.getAllPhrases(lang);
+        StringTokenizer tokenizer = new StringTokenizer();
+
         while (iter.hasNext()) {
             String phrase = iter.next();
-            long hash = hashCode(lang, phrase);
+            List<String> words = tokenizer.getWords(lang, phrase);
+            StringBuilder buffer = new StringBuilder("");
+            long hash = -1;
+            for (int i = 0; i < words.size(); i++) {
+                if (i > 0) buffer.append(' ');
+                buffer.append(words.get(i));
+                hash = hashCode(lang, buffer.toString());
+                subGrams.add(hash);
+            }
             counts.put(hash, 0);
         }
-        LOG.info("found " + counts.size() + " unique anchortexts");
+        LOG.info("found " + counts.size() + " unique anchortexts and " + subGrams.size() + " subgrams");
 
         DaoFilter filter = new DaoFilter()
                 .setRedirect(false)
@@ -172,18 +211,34 @@ public class LinkProbabilityDao {
                 },
                 10000);
 
-        Iterator<Pair<String, PrunedCounts<Integer>>> phraseIter = phraseDao.getAllPhraseCounts(lang);
         int count = 0;
-        double sum = 0;
+        int misses = 0;
+        double sum = 0.0;
+
+        TLongSet completed = new TLongHashSet();
+        TLongIntMap linkCounts = getPhraseLinkCounts(lang);
+
+        Iterator<Pair<String, PrunedCounts<Integer>>> phraseIter = phraseDao.getAllPhraseCounts(lang);
+
         while (phraseIter.hasNext()) {
             Pair<String, PrunedCounts<Integer>> pair = phraseIter.next();
-            long hash = hashCode(lang, pair.getLeft());
+            String phrase = cleanString(lang, pair.getLeft());
+            long hash = hashCode(lang, phrase);
+            if (completed.contains(hash)) {
+                continue;
+            }
+            completed.add(hash);
             try {
-                double p = 1.0 * pair.getRight().getTotal() / counts.get(hash);
+                int numLinks = linkCounts.get(hash);
+                int numText = counts.get(hash);
+                if (numText == 0) {
+                    misses++;
+                }
                 count++;
+                double p = 1.0 * numLinks / (numText + 3.0);  // 3.0 for smoothing
                 sum += p;
 //                System.out.println(String.format("inserting values into db: %s, %f", pair.getLeft, p));
-                String key = lang.getLangCode() + ":" + pair.getLeft();
+                String key = lang.getLangCode() + ":" + phrase;
                 db.put(key, p);
                 if (cache != null) {
                     cache.put(hash, (float) p);
@@ -193,25 +248,60 @@ public class LinkProbabilityDao {
             }
         }
 
+        for (long h : subGrams.toArray()) {
+            try {
+                db.put(":s:" + h, -1.0);
+            } catch (IOException e) {
+                throw new DaoException(e);
+            }
+        }
+
         if (count != 0) {
             LOG.info(String.format(
-                    "Inserted link probabilities for %d anchors with mean probability %.4f",
-                    count, sum/count));
+                    "Inserted link probabilities for %d anchors with mean probability %.4f and %d mises",
+                    count, sum/count, misses));
         }
+    }
+
+    private TLongIntMap getPhraseLinkCounts(Language lang) {
+        Iterator<Pair<String, PrunedCounts<Integer>>> phraseIter = phraseDao.getAllPhraseCounts(lang);
+        TLongIntMap counts = new TLongIntHashMap();
+        while (phraseIter.hasNext()) {
+            Pair<String, PrunedCounts<Integer>> pair = phraseIter.next();
+            String phrase = cleanString(lang, pair.getLeft());
+            long hash = hashCode(lang, phrase);
+            int n = pair.getRight().getTotal();
+            counts.adjustOrPutValue(hash, n, n);
+        }
+        return counts;
     }
 
     private void processPage(TLongIntMap counts, RawPage page) {
         Language lang = page.getLanguage();
-        NGramCreator nGramCreator = new NGramCreator();
         StringTokenizer tokenizer = new StringTokenizer();
         for (Token sentence : tokenizer.getSentenceTokens(lang, page.getPlainText())) {
             List<Token> words = tokenizer.getWordTokens(lang, sentence);
-            for (Token ngram : nGramCreator.getNGramTokens(words, minGram, maxGram)) {
-                String phrase = normalizer.normalize(lang, ngram.getToken());
-                long hash = hashCode(lang, phrase);
-                synchronized (counts) {
-                    if (counts.containsKey(hash)) {
-                        counts.adjustValue(hash, 1);
+            for (int i = 0; i < words.size(); i++) {
+                StringBuilder buffer = new StringBuilder();
+                for (int j = i; j < words.size(); j++) {
+                    if (j > i) {
+                        buffer.append(' ');
+                    }
+                    buffer.append(words.get(j).getToken());
+                    String phrase = cleanString(lang, buffer.toString(), true);
+                    long hash = hashCode(lang, phrase);
+                    if (subGrams.contains(hash)) {
+                        synchronized (counts) {
+                            if (counts.containsKey(hash)) {
+//                                System.out.println("here 1: " + phrase);
+                                counts.adjustValue(hash, 1);
+                            } else {
+//                                System.out.println("here 2: " + phrase);
+                            }
+                        }
+                    } else {
+//                        System.out.println("here 3: " + phrase);
+                        break;  // no point in going any further...
                     }
                 }
             }

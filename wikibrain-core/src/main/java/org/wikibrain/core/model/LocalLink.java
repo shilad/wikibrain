@@ -1,10 +1,11 @@
 package org.wikibrain.core.model;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.wikibrain.core.lang.Language;
 
 /**
  */
-public class LocalLink {
+public class LocalLink implements Comparable<LocalLink> {
 
     private final Language language;
     private final String anchorText;
@@ -17,6 +18,27 @@ public class LocalLink {
     private final Boolean isParseable;
 
     private final LocationType locType;
+
+    @Override
+    public int compareTo(LocalLink o) {
+        int r = location - o.getLocation();
+        if (r == 0) {
+            r = language.compareTo(o.language);
+        }
+        if (r == 0) {
+            r = sourceId - o.sourceId;
+        }
+        if (r == 0) {
+            r = destId - o.destId;
+        }
+        if (r == 0) {
+            r = ObjectUtils.compare(isOutlink, o.isOutlink);
+        }
+        if (r == 0) {
+            r = ObjectUtils.compare(anchorText, anchorText);
+        }
+        return r;
+    }
 
     public static enum LocationType {FIRST_PARA, FIRST_SEC, NONE}
 

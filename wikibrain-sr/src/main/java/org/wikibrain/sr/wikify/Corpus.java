@@ -10,6 +10,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.phrases.AnchorTextPhraseAnalyzer;
+import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.phrases.PhraseAnalyzerDao;
 import org.wikibrain.sr.word2vec.Word2Phrase;
@@ -28,14 +29,16 @@ public class Corpus {
     private final RawPageDao rawPageDao;
     private final LocalPageDao localPageDao;
     private final PhraseAnalyzerDao phraseAnalyzerDao;
+    private final LinkProbabilityDao linkProbabilityDao;
 
-    public Corpus(Language language, File directory, Wikifier wikifer, RawPageDao rawPageDao, LocalPageDao localPageDao, PhraseAnalyzerDao phraseAnalyzerDao) {
+    public Corpus(Language language, File directory, Wikifier wikifer, RawPageDao rawPageDao, LocalPageDao localPageDao, PhraseAnalyzerDao phraseAnalyzerDao, LinkProbabilityDao linkProbabilityDao) {
         this.language = language;
         this.directory = directory;
         this.wikifer = wikifer;
         this.rawPageDao = rawPageDao;
         this.localPageDao = localPageDao;
         this.phraseAnalyzerDao = phraseAnalyzerDao;
+        this.linkProbabilityDao = linkProbabilityDao;
     }
 
     public File getDirectory() {
@@ -50,7 +53,7 @@ public class Corpus {
         tmpCorpus.delete();
         tmpCorpus.mkdirs();
 
-        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(language, wikifer, rawPageDao, localPageDao);
+        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(language, wikifer, rawPageDao, localPageDao, linkProbabilityDao);
         creator.write(tmpCorpus);
         FileUtils.forceDeleteOnExit(tmpCorpus);
 
@@ -95,10 +98,11 @@ public class Corpus {
             }
             Language lang = Language.getByLangCode(runtimeParams.get("language"));
             Configurator c = getConfigurator();
-            Wikifier wikifier = c.get(Wikifier.class, "default", "language", lang.getLangCode());
+            Wikifier wikifier = c.get(MilneWittenWikifier.class, "default", "language", lang.getLangCode());
             AnchorTextPhraseAnalyzer phraseAnalyzer = (AnchorTextPhraseAnalyzer)c.get(
                     PhraseAnalyzer.class, config.getString("phraseAnalyzer"));
             PhraseAnalyzerDao paDao = phraseAnalyzer.getDao();
+            LinkProbabilityDao linkProbabilityDao = c.get(LinkProbabilityDao.class);
 
             return new Corpus(
                     lang,
@@ -106,7 +110,8 @@ public class Corpus {
                     wikifier,
                     c.get(RawPageDao.class, config.getString("rawPageDao")),
                     c.get(LocalPageDao.class, config.getString("localPageDao")),
-                    paDao
+                    paDao,
+                    linkProbabilityDao
             );
         }
     }

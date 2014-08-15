@@ -1,5 +1,6 @@
 package org.wikibrain.core.model;
 
+import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.FlushTemplates;
 import de.tudarmstadt.ukp.wikipedia.parser.mediawiki.MediaWikiParserFactory;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
@@ -122,10 +123,21 @@ public class RawPage {
      * @return
      */
     public String getPlainText() {
+        return getPlainText(false);
+    }
+    /**
+     * Returns a plain text output of the body of this RawPage
+     * @return
+     */
+    public String getPlainText(boolean includeTemplates) {
         if (body.isEmpty()) {
             return "";
         } else {
-            return new MediaWikiParserFactory().createParser().parse(body).getText();
+            MediaWikiParserFactory factory = new MediaWikiParserFactory();
+            if (!includeTemplates) {
+                factory.setTemplateParserClass(FlushTemplates.class);
+            }
+            return factory.createParser().parse(body).getText();
         }
     }
 
