@@ -1,24 +1,24 @@
 package org.wikibrain.sr.wikify;
 
+import com.typesafe.config.Config;
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.DaoFilter;
-import org.wikibrain.core.dao.LocalLinkDao;
-import org.wikibrain.core.dao.RawPageDao;
+import org.wikibrain.conf.Configuration;
+import org.wikibrain.conf.ConfigurationException;
+import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
-import org.wikibrain.phrases.LinkProbabilityDao;
-import org.wikibrain.phrases.PhraseAnalyzerDao;
-import org.wikibrain.phrases.PhraseTokenizer;
+import org.wikibrain.phrases.*;
 import org.wikibrain.sr.SRMetric;
+import org.wikibrain.sr.vector.FeatureFilter;
 import org.wikibrain.utils.Scoreboard;
 
 import java.util.*;
@@ -33,6 +33,11 @@ import java.util.logging.Logger;
 public class WebSailWikifier implements Wikifier {
     private static final Logger LOG = Logger.getLogger(WebSailWikifier.class.getName());
 
+    /**
+     * TODO: Make this configurable
+     */
+    private int numTrainingLinks = 10000;
+
     private final Wikifier identityWikifier;
     private final SRMetric metric;
     private final LinkProbabilityDao linkProbDao;
@@ -42,7 +47,7 @@ public class WebSailWikifier implements Wikifier {
     private final PhraseAnalyzerDao phraseDao;
     private final RawPageDao rawPageDao;
 
-    private double desiredLinkRecall = 0.90;
+    private double desiredLinkRecall = 0.98;
     private double minLinkProbability = 0.01;
 
     public WebSailWikifier(Wikifier identityWikifier, RawPageDao rawPageDao, LocalLinkDao linkDao, LinkProbabilityDao linkProbDao, PhraseAnalyzerDao phraseDao, SRMetric metric) throws DaoException {
@@ -60,13 +65,16 @@ public class WebSailWikifier implements Wikifier {
     private void learnMinLinkProbability() throws DaoException {
         LOG.info("Learning minimum link probability");
         TDoubleList probs = new TDoubleArrayList();
-        for (LocalLink ll : linkDao.get(new DaoFilter().setLanguages(language).setLimit(10000))) {
-            probs.add(linkProbDao.getLinkProbability(language, ll.getAnchorText()));
+        for (LocalLink ll : linkDao.get(new DaoFilter().setLanguages(language).setLimit(numTrainingLinks))) {
+            if (ll.getDestId() >= 0) {
+                double p = linkProbDao.getLinkProbability(language, ll.getAnchorText());
+                probs.add(p);
+            }
         }
         probs.sort();
         probs.reverse();
-//        for (int i = 0; i < probs.size(); i++) {
-//            System.out.println("i: " + i + " is " + probs.get(i));
+//        for (int i = 0; i < 100; i++) {
+//            System.out.println("i: " + i + " is " + probs.get(probs.size() * i / 100));
 //        }
         minLinkProbability = probs.get((int)(desiredLinkRecall * probs.size()));
         LOG.info("Set minimum link probability to " + minLinkProbability + " to achieve " + desiredLinkRecall + " recall");
@@ -87,6 +95,7 @@ public class WebSailWikifier implements Wikifier {
         }
         return candidates;
     }
+
 
     @Override
     public List<LocalLink> wikify(int wpId, String text) throws DaoException {
@@ -206,5 +215,56 @@ public class WebSailWikifier implements Wikifier {
             }
         });
         return results;
+    }
+
+
+    public static class Provider extends org.wikibrain.conf.Provider<Wikifier> {
+        public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
+            super(configurator, config);
+        }
+
+        @Override
+        public Class<Wikifier> getType() {
+            return Wikifier.class;
+        }
+
+        @Override
+        public String getPath() {
+            return "sr.wikifier";
+        }
+
+        @Override
+        public Wikifier get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+            if (runtimeParams == null || !runtimeParams.containsKey("language")){
+                throw new IllegalArgumentException("Wikifier requires 'language' runtime parameter.");
+            }
+            if (!config.getString("type").equals("websail")) {
+                return  null;
+            }
+
+            Language language = Language.getByLangCode(runtimeParams.get("language"));
+            Configurator c = getConfigurator();
+            String srName = config.getString("sr");
+            String phraseName = config.getString("phraseAnalyzer");
+            String identityName = config.getString("identityWikifier");
+            String linkName = config.getString("localLinkDao");
+            LinkProbabilityDao lpd = c.get(LinkProbabilityDao.class);
+            if (config.getBoolean("useLinkProbabilityCache")) {
+                lpd.useCache(true);
+            }
+
+            try {
+                return new WebSailWikifier(
+                            c.get(Wikifier.class, identityName),
+                            c.get(RawPageDao.class),
+                            c.get(LocalLinkDao.class, linkName),
+                            lpd,
+                            ((AnchorTextPhraseAnalyzer)c.get(PhraseAnalyzer.class, phraseName)).getDao(),
+                            c.get(SRMetric.class, srName, "language", language.getLangCode())
+                        );
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
+        }
     }
 }

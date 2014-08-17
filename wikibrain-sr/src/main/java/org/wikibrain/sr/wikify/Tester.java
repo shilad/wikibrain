@@ -51,12 +51,12 @@ public class Tester {
         SRMetric sr = c.get(SRMetric.class, "milnewitten", "language", "simple");
         Wikifier identity = c.get(Wikifier.class, "identity", "language", "simple");
         Wikifier websail = new WebSailWikifier(identity, rpd, linkDao, linkProbabilityDao, phraseAnalyzer.getDao(), sr);
-//        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(Language.SIMPLE, websail, rpd, pageDao, linkProbabilityDao);
-//        creator.write(new File("foo"));
-        LocalPage obama = pageDao.getByTitle(Language.SIMPLE, NameSpace.ARTICLE, "Barack Obama");
-        for (LocalLink ll :websail.wikify(obama.getLocalId())) {
-            System.out.println(ll.getAnchorText() + ": " + pageDao.getById(Language.SIMPLE, ll.getLocalId()) + "\n");
-        }
+        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(Language.SIMPLE, websail, rpd, pageDao, linkProbabilityDao);
+        creator.write(new File("foo"));
+//        LocalPage obama = pageDao.getByTitle(Language.SIMPLE, NameSpace.ARTICLE, "Barack Obama");
+//        for (LocalLink ll :websail.wikify(obama.getLocalId())) {
+//            System.out.println(ll.getAnchorText() + ": " + pageDao.getById(Language.SIMPLE, ll.getLocalId()) + "\n");
+//        }
     }
 
     private static String cleanString(String s) {

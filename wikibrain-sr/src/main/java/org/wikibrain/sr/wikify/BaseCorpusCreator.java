@@ -68,6 +68,11 @@ public abstract class BaseCorpusCreator {
         dir.mkdirs();
         dictionary = new Dictionary(language, Dictionary.WordStorage.ON_DISK);
         corpus = WpIOUtils.openWriter(new File(dir, "corpus.txt"));
+        corpus.write(String.format("@WikiBrainCorpus %s %s %s\n",
+                this.language.getLangCode(),
+                this.getClass().getName(),
+                wikifier.getClass().getName()
+            ));
         ParallelForEach.iterate(getCorpus(), new Procedure<IdAndText>() {
             @Override
             public void call(IdAndText text) throws Exception {
@@ -88,7 +93,7 @@ public abstract class BaseCorpusCreator {
         LocalPage page = pageDao.getById(language, text.getId());
         String title = (page == null) ? "Unknown" : page.getTitle().getCanonicalTitle();
         StringBuilder document = new StringBuilder();
-        document.append("\n@WikiBrainMeta\t" + text.getId() + "\t" + title + "\n");
+        document.append("\n@WikiBrainDoc\t" + text.getId() + "\t" + title + "\n");
 
         for (Token sentence : tokenizer.getSentenceTokens(language, text.getText())) {
             List<String> tokens = addMentions(sentence, mentions);
@@ -97,6 +102,7 @@ public abstract class BaseCorpusCreator {
             }
             String finalSentence = joinPhrases(tokens);
             document.append(finalSentence);
+            document.append('\n');
         }
         synchronized (corpus) {
             corpus.write(document.toString() + "\n");

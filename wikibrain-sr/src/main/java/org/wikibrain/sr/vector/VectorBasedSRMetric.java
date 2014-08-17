@@ -62,6 +62,7 @@ public class VectorBasedSRMetric extends BaseSRMetric {
     protected final VectorGenerator generator;
     protected final VectorSimilarity similarity;
     protected final SRConfig config;
+    private FeatureFilter featureFilter = null;
 
     private SparseMatrix featureMatrix;
     private SparseMatrix transposeMatrix;
@@ -80,6 +81,9 @@ public class VectorBasedSRMetric extends BaseSRMetric {
 
     @Override
     public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
+        if (featureFilter != null) {
+            throw new UnsupportedOperationException();
+        }
         TIntFloatMap vector1 = null;
         TIntFloatMap vector2 = null;
         // try using phrases directly
@@ -111,6 +115,10 @@ public class VectorBasedSRMetric extends BaseSRMetric {
                 if (row1 == null || row2 == null) {
                     return null;
                 } else {
+                    if (featureFilter != null) {
+                        row1 = featureFilter.filter(pageId1, row1);
+                        row2 = featureFilter.filter(pageId2, row2);
+                    }
                     SRResult result= new SRResult(similarity.similarity(row1, row2));
                     if(explanations) {
                         TIntFloatHashMap tfm1=row1.asTroveMap();
@@ -120,6 +128,7 @@ public class VectorBasedSRMetric extends BaseSRMetric {
                     return normalize(result);
                 }
             } else {
+                // feature filter gets applied in getPageVector if necessary
                 TIntFloatMap vector1 = getPageVector(pageId1);
                 TIntFloatMap vector2 = getPageVector(pageId2);
                 if (vector1 == null || vector2 == null) {
@@ -134,6 +143,9 @@ public class VectorBasedSRMetric extends BaseSRMetric {
 
     @Override
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet validIds) throws DaoException {
+        if (featureFilter != null) {
+            throw new UnsupportedOperationException();
+        }
         TIntFloatMap vector = null;
         // try using phrases directly
         try {
@@ -155,6 +167,9 @@ public class VectorBasedSRMetric extends BaseSRMetric {
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
+        if (featureFilter != null) {
+            throw new UnsupportedOperationException();
+        }
         try {
             TIntFloatMap vector = getPageVector(pageId);
             if (vector == null) return null;
@@ -210,6 +225,9 @@ public class VectorBasedSRMetric extends BaseSRMetric {
      */
     @Override
     public double[][] cosimilarity(String rowPhrases[], String colPhrases[]) throws DaoException {
+        if (featureFilter != null) {
+            throw new UnsupportedOperationException();
+        }
         if (rowPhrases.length == 0 || colPhrases.length == 0) {
             return new double[rowPhrases.length][colPhrases.length];
         }
@@ -261,6 +279,9 @@ public class VectorBasedSRMetric extends BaseSRMetric {
                     throw new DaoException(e);
                 }
                 if (row != null) {
+                    if (featureFilter != null) {
+                        row = featureFilter.filter(id, row);
+                    }
                     vectors.put(id, row);
                 }
             }
@@ -308,6 +329,9 @@ public class VectorBasedSRMetric extends BaseSRMetric {
      * @return
      */
     protected double[][] cosimilarity(List<TIntFloatMap> rowVectors, List<TIntFloatMap> colVectors) {
+        if (featureFilter != null) {
+            throw new UnsupportedOperationException();
+        }
         double results[][] = new double[rowVectors.size()][colVectors.size()];
         for (int i = 0; i < rowVectors.size(); i++) {
             for (int j = 0; j < colVectors.size(); j++) {
@@ -410,10 +434,20 @@ public class VectorBasedSRMetric extends BaseSRMetric {
     public TIntFloatMap getPageVector(int pageId) throws IOException {
         if (hasFeatureMatrix()) {
             SparseMatrixRow row = featureMatrix.getRow(pageId);
-            return row == null ? null : row.asTroveMap();
+            if (row == null) {
+                return null;
+            } else if (featureFilter != null) {
+                return featureFilter.filter(pageId, row.asTroveMap());
+            } else {
+                return row.asTroveMap();
+            }
         } else {
             try {
-                return generator.getVector(pageId);
+                if (featureFilter != null) {
+                    return featureFilter.filter(pageId, generator.getVector(pageId));
+                } else {
+                    return generator.getVector(pageId);
+                }
             } catch (DaoException e) {
                 throw new IOException(e);
             }
@@ -434,6 +468,10 @@ public class VectorBasedSRMetric extends BaseSRMetric {
 
     public VectorSimilarity getSimilarity() {
         return similarity;
+    }
+
+    public void setFeatureFilter(FeatureFilter filter) {
+        this.featureFilter = filter;
     }
 
     @Override

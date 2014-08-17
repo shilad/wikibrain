@@ -49,18 +49,8 @@ public class Corpus {
         FileUtils.deleteQuietly(directory);
         directory.mkdirs();
 
-        File tmpCorpus = File.createTempFile("corpus", "");
-        tmpCorpus.delete();
-        tmpCorpus.mkdirs();
-
         WikiTextCorpusCreator creator = new WikiTextCorpusCreator(language, wikifer, rawPageDao, localPageDao, linkProbabilityDao);
-        creator.write(tmpCorpus);
-        FileUtils.forceDeleteOnExit(tmpCorpus);
-
-        Word2Phrase w2p = new Word2Phrase(language, phraseAnalyzerDao);
-        w2p.concatenateBigrams(tmpCorpus, directory, 4);
-
-        FileUtils.deleteQuietly(tmpCorpus);
+        creator.write(directory);
     }
 
     public File getCorpusFile() {
@@ -98,7 +88,8 @@ public class Corpus {
             }
             Language lang = Language.getByLangCode(runtimeParams.get("language"));
             Configurator c = getConfigurator();
-            Wikifier wikifier = c.get(MilneWittenWikifier.class, "default", "language", lang.getLangCode());
+            Wikifier wikifier = c.get(Wikifier.class, "default", "language", lang.getLangCode());
+            System.err.println("Wikifier is " + wikifier);
             AnchorTextPhraseAnalyzer phraseAnalyzer = (AnchorTextPhraseAnalyzer)c.get(
                     PhraseAnalyzer.class, config.getString("phraseAnalyzer"));
             PhraseAnalyzerDao paDao = phraseAnalyzer.getDao();
