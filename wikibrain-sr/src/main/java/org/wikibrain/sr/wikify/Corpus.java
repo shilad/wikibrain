@@ -89,7 +89,6 @@ public class Corpus {
             Language lang = Language.getByLangCode(runtimeParams.get("language"));
             Configurator c = getConfigurator();
             Wikifier wikifier = c.get(Wikifier.class, "default", "language", lang.getLangCode());
-            System.err.println("Wikifier is " + wikifier);
             AnchorTextPhraseAnalyzer phraseAnalyzer = (AnchorTextPhraseAnalyzer)c.get(
                     PhraseAnalyzer.class, config.getString("phraseAnalyzer"));
             PhraseAnalyzerDao paDao = phraseAnalyzer.getDao();

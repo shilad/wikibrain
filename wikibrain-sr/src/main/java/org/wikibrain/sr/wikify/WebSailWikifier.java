@@ -255,7 +255,7 @@ public class WebSailWikifier implements Wikifier {
 
             try {
                 return new WebSailWikifier(
-                            c.get(Wikifier.class, identityName),
+                            c.get(Wikifier.class, identityName, "language", language.getLangCode()),
                             c.get(RawPageDao.class),
                             c.get(LocalLinkDao.class, linkName),
                             lpd,
