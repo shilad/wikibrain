@@ -31,10 +31,8 @@ Once you have [imported data](tutorial/importing.html), you can write programs t
 Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
 
 ```java
-// Prepare the environment; set the root to the current directory (".").
-Env env = new EnvBuilder()
-        .setBaseDir(".")
-        .build();
+// Prepare the environment; set the root based on command-line arguments.)
+Env env = EnvBuilder.envFromArgs(args);
 
 // Get the configurator that creates components and a phraze analyzer from it 
 Configurator configurator = env.getConfigurator();
@@ -70,7 +68,7 @@ resolution of apple
 ## About
 
 WikiBrain development is led by [Shilad Sen](http://shilad.com) at Macalester College and [Brent Hecht](http://brenthecht.com) at the University of Minnesota.
-WikiBrain has been generously supported by the National Science Foundation, Macalester College, and the University of Minnesota.
+WikiBrain has been generously supported by the National Science Foundation, Macalester College, the Howard Hughes Medical Institute, and the University of Minnesota.
 WikiBrain is licensed under the Apache License, version 2.
 
 **Macalester WikiBrain development team, Summer 2013**
