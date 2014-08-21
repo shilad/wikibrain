@@ -18,6 +18,7 @@
 package org.wikibrain.utils;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -414,8 +415,9 @@ public class JavaProcessBuilder{
 
         path = toString(workingDir, classpath);
         if(path.length()>0){
-            cmd.add("-classpath");
-            cmd.add(path);
+            // Hack to prevent windows command line arg from being too long. Send this through environment.
+//            cmd.add("-classpath");
+//            cmd.add(path);
         }
 
         path = toString(workingDir, extDirs);
@@ -471,7 +473,24 @@ public class JavaProcessBuilder{
      * @exception  IOException  if an I/O error occurs.
      */
     public Process launch(final OutputStream output, final OutputStream error) throws IOException{
-        final Process process = Runtime.getRuntime().exec(command(), null, workingDir);
+        Map<String, String> envMap = System.getenv();
+        String env[] = new String[envMap.size()+1];
+        int i = 0;
+        boolean found = false;
+        for (String name : envMap.keySet()) {
+            String value = envMap.get(name);
+            if (name.equalsIgnoreCase("CLASSPATH")) {
+                value = toString(workingDir, classpath);
+                found = true;
+            }
+            env[i++] = name + "=" + value;
+        }
+        if (found) {
+            env = ArrayUtils.subarray(env, 0, env.length - 1);
+        } else {
+            env[i] = "CLASSPATH=" + toString(workingDir, classpath);
+        }
+        final Process process = Runtime.getRuntime().exec(command(), env, workingDir);
         new Thread(new Runnable() {public void run() {
             try {
                 IOUtils.copy(process.getInputStream(), output);
