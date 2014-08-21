@@ -21,8 +21,8 @@ While it imports data into standard SQL databases (h2 or Postgres), it builds op
 
 WikiBrain integrates a variety of specific algorithms and datasets in one framework, including: 
 
-* **SR:** Semantic-relatedness algorithms that measure the strength of association between two concepts such as "racecar" and "engine."
-* **Spatial:** WikiBrain provides geospatial algorithms for spatial Wikipedia pages like [Minnesota](http://en.wikipedia.org/wiki/Minnesota) and the [Eiffel Tower](http://en.wikipedia.org/wiki/Eiffel_Tower).      
+* **Semantic-relatedness** algorithms that measure the strength of association between two concepts such as "racecar" and "engine."
+* **GeoSpatial** algorithms for spatial Wikipedia pages like [Minnesota](http://en.wikipedia.org/wiki/Minnesota) and the [Eiffel Tower](http://en.wikipedia.org/wiki/Eiffel_Tower).      
 * **Wikidata:** Support for structured [Wikidata](http://meta.wikimedia.org/wiki/Wikidata) "facts" about articles.
 * **Pageviews:** Public data about how often Wikipedia pages are viewed with hourly precision.
 
