@@ -14,6 +14,7 @@ In order to complete this quickstart, you need a basic Java development environm
 * Sun's Java JDK 6 or higher.
 * Some Java IDE (Eclipse, IntelliJ, NetBeans, etc).
 * At least 4GB of memory.
+* At least 4GB of free hard disk space.
 
 These three requirements will enable you to complete this tutorial, however your hardware and software requirements will vary depending on your software application and goals.
 For example, you can install WikiBrain using command line shell scripts, you can include it using maven dependency management system, and
@@ -23,9 +24,8 @@ More details on installation are described in the [system requirements]({{ site.
 
 ## Install Wikibrain
 
-* Open or create the Java project in your IDE of choice.
-* Download and extract the zipfile containing the jars (TODO: link zipfile).
-* Add the jar files to the classpath of your project. 
+* Download and extract the [WikiBrain plus dependencies archive].
+* Double click the extracted jar file. You should see the GUI import screen (below).
 
 ## Import Simple English
 
@@ -46,8 +46,15 @@ It imports the data into an embedded h2 database.
 You can customize WikiBrain's importing procedure, (see Configuration) but the default should be a good start. 
 
 ## An example program
+
+* Download and extract the zipfile containing the jars (TODO: link zipfile).
+* Add the jar files to the classpath of your project. 
+
 Once you have your imported data (above), your are ready to write programs that analyze Wikipedia!
-Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java) you can find in the Cookbook:
+
+Begin by creating the Java project in your IDE of choice (NetBeans, Eclipse, IntelliJ, etc). Add the WikiBrain plus dependencies jar file (that you downloaded in the previous step) to your java project.
+
+Start writing your program! Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java) you can find in the Cookbook:
 
 <script src="http://gist-it.appspot.com/github/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java?slice=13:40"></script>
 
