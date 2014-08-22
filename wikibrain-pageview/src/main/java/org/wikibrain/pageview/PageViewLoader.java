@@ -1,75 +1,45 @@
 package org.wikibrain.pageview;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.LanguageSet;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created with IntelliJ IDEA.
- * User: derian
- * Date: 1/2/14
- * Time: 11:47 AM
- * To change this template use File | Settings | File Templates.
+ * Java "script" to load pageviews.
+ * By default it loads two hours worth of pageviews from exactly one week ago.
  */
 public class PageViewLoader {
     private static final Logger LOG = Logger.getLogger(PageViewLoader.class.getName());
     private final LanguageSet languageSet;
-    private final PageViewSqlDao dao;
-    private LocalPageDao localPageDao;
+    private final PageViewDao dao;
 
-    public PageViewLoader(LanguageSet languageSet, PageViewSqlDao dao, LocalPageDao localPageDao) {
+    public PageViewLoader(LanguageSet languageSet, PageViewDao dao) {
         this.languageSet = languageSet;
         this.dao = dao;
-        this.localPageDao=localPageDao;
     }
 
-    public PageViewSqlDao getDao() {
+    public PageViewDao getDao() {
         return dao;
     }
 
-    public void load(DateTime startDate, DateTime endDate) throws ConfigurationException, WikiBrainException {
-        double start = System.currentTimeMillis();
-        try {
-            LOG.log(Level.INFO, "Loading Page Views");
-            PageViewIterator iterator = dao.getPageViewIterator(languageSet, startDate, endDate,localPageDao);
-            int i = 0;
-            while (iterator.hasNext()) {
-                List<PageViewDataStruct> dataStructs = iterator.next();
-                for (PageViewDataStruct data : dataStructs) {
-                    dao.addData(data);
-                }
-                i++;
-                if (i % 24 == 0) {
-                    double elapsed = (System.currentTimeMillis() - start) / 60000;
-                    LOG.log(Level.INFO, "Loaded " + (i/24) + " days worth of Page View files in " + elapsed + " minutes");
-                }
-                if (i % 744 == 0) {
-                    double elapsed = (System.currentTimeMillis() - start) / 60000;
-                    LOG.log(Level.INFO, "Loaded " + (i/744) + "months worth of Page View files in " + elapsed + " minutes");
-                }
-            }
-            double elapsed = (System.currentTimeMillis() - start) / 60000;
-            LOG.info("Loading took " + elapsed + " minutes");
-            LOG.log(Level.INFO, "All Page View files loaded: " + i);
-        } catch (DaoException e) {
-            double elapsed = (System.currentTimeMillis() - start) / 60000;
-            LOG.info(elapsed + " minutes passed before exception thrown");
-            throw new WikiBrainException(e);
-        }
+    public void load(DateTime startDate, DateTime endDate) throws DaoException {
+        dao.ensureLoaded(startDate, endDate, languageSet);
     }
 
     /**
@@ -86,7 +56,7 @@ public class PageViewLoader {
      * @throws DaoException
      */
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikiBrainException, DaoException {
-        /*Options options = new Options();
+        Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("drop-tables")
@@ -96,14 +66,12 @@ public class PageViewLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("start-date")
                         .withDescription("date at which to start loading page view files")
-                        .isRequired()
                         .hasArg()
                         .create("s"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("end-date")
                         .withDescription("date at which to stop loading page view files")
-                        .isRequired()
                         .hasArg()
                         .create("e"));
         EnvBuilder.addStandardOptions(options);
@@ -116,90 +84,57 @@ public class PageViewLoader {
             System.err.println( "Invalid option usage: " + e.getMessage());
             new HelpFormatter().printHelp("PageViewLoader", options);
             return;
-        }*/
-
-        //String startTime = cmd.getOptionValue("s", null);
-
-
-//        String startTime = args[1];
-//        String endTime = args[2];
-
-        ArrayList<DateTime[]> dates= new ArrayList<DateTime[]>();
-        int numbOfDaysDownloading=(args.length-3);
-
-        try {
-            for (int i = 1; i < numbOfDaysDownloading; i=i+2) {
-                dates.add(new DateTime[]{parseDate(args[i]),(parseDate(args[i+1]))});
-            }
-//            DateTime startDate = parseDate(startTime);
-//            DateTime endDate = parseDate(endTime);
-
-            CommandLineParser parser = new PosixParser();
-            CommandLine cmd;
-
-            Options opts = new Options();
-            EnvBuilder.addStandardOptions(opts);
-            try {
-                cmd = parser.parse(opts, args);
-            } catch (ParseException e) {
-                System.err.println("Invalid option usage: " + e.getMessage());
-//                new HelpFormatter().printHelp("WikidataDumpLoader", options);
-                return;
-            }
-
-            Env env = EnvBuilder.envFromArgs(args);
-            //Env env = new EnvBuilder(cmd).build();
-            Configurator conf = env.getConfigurator();
-            PageViewSqlDao dao = conf.get(PageViewSqlDao.class);
-            LocalPageDao lpDao= conf.get(LocalPageDao.class);
-            final PageViewLoader loader = new PageViewLoader(env.getLanguages(), dao, lpDao);
-
-            /*if (cmd.hasOption("d")) {
-                LOG.log(Level.INFO, "Clearing data");
-                dao.clear();
-            } */
-
-            LOG.log(Level.INFO, "Clearing data");
-            dao.clear();
-
-            LOG.log(Level.INFO, "Begin Load");
-            dao.beginLoad();
-
-            for(DateTime[] startEndDate:dates){
-                loader.load(startEndDate[0],startEndDate[1]);
-//                loader.load(startDate, endDate);
-            }
-
-
-            LOG.log(Level.INFO, "End Load");
-            dao.endLoad();
-            LOG.log(Level.INFO, "DONE");
-        } catch (WikiBrainException wE) {
-            System.err.println("Invalid option usage:" + wE.getMessage());
-            //new HelpFormatter().printHelp("PageViewLoader", options);
-            return;
         }
+
+        /**
+         * By default, load one days worth of data from a week ago.
+         */
+        DateTime start = DateTime.now().minusWeeks(1);
+        if (cmd.hasOption("s")) {
+            start = parseDateOrDie(cmd.getOptionValue("s"));
+        }
+
+        DateTime end = start.plusMinutes(60 * 2 - 1);
+        if (cmd.hasOption("e")) {
+            end = parseDateOrDie(cmd.getOptionValue("e"));
+        }
+
+        Env env = new EnvBuilder(cmd).build();
+        Configurator conf = env.getConfigurator();
+        PageViewSqlDao dao = conf.get(PageViewSqlDao.class);
+        PageViewLoader loader = new PageViewLoader(env.getLanguages(), dao);
+
+        if (cmd.hasOption("d")) {
+            LOG.info("Clearing pageview data");
+            dao.clear();
+        }
+
+        SortedSet<DateTime> tstamps = PageViewUtils.timestampsInInterval(start, end);
+        LOG.info("loading pageview data for " + tstamps.size() + " hours");
+
+        loader.load(start, end);
+
+        LOG.log(Level.INFO, "DONE");
     }
 
-    private static DateTime parseDate(String dateString) throws WikiBrainException {
-        if (dateString == null) {
-            throw new WikiBrainException("Need to specify start and end date");
+    public static String[] DATE_FORMATS = new String[] {"yyyy-MM-dd", "yyyy-MM-dd:HH"};
+
+
+    private static DateTime parseDateOrDie(String dateString) throws WikiBrainException {
+        DateTime result = null;
+        for (String format : DATE_FORMATS) {
+            DateTimeFormatter fmt = DateTimeFormat.forPattern(format);
+            try {
+                result = fmt.parseDateTime(dateString);
+            } catch (IllegalArgumentException e) {
+                // Try the next format
+            }
         }
-        String[] dateElems = dateString.split("-");
-        for (String de: dateElems){
-//            System.out.println(de);
+        if (result == null) {
+            System.err.format("Invalid date format '%s'. Must be one of %s.\n", dateString, StringUtils.join(DATE_FORMATS, ", "));
+            System.exit(1);
         }
-        try {
-            int year = Integer.parseInt(dateElems[0]);
-            int month = Integer.parseInt(dateElems[1]);
-            int day = Integer.parseInt(dateElems[2]);
-            int hour = Integer.parseInt(dateElems[3]);
-            return new DateTime(year, month, day, hour, 0);
-        } catch (Exception e) {
-            System.out.println(e.toString());
-            throw new WikiBrainException("Start and end dates must be entered in the following format (hyphen-delimited):\n" +
-                    "<four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23>");
-        }
+        return result;
     }
 }
 

@@ -2,6 +2,7 @@ package org.wikibrain.utils;
 
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TIntIntMap;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
@@ -51,6 +52,24 @@ public class WpCollectionUtils {
                 Double v1 = map.get(k1);
                 Double v2 = map.get(k2);
                 return v1.compareTo(v2);
+            }
+        });
+        if (reverse) {
+            ArrayUtils.reverse(keys);
+        }
+        return ArrayUtils.toPrimitive(keys);
+    }
+
+    public static int[] sortMapKeys(final TIntIntMap map) {
+        return sortMapKeys(map, false);
+    }
+
+    public static int[] sortMapKeys(final TIntIntMap map, boolean reverse) {
+        Integer keys[] = ArrayUtils.toObject(map.keys());
+        Arrays.sort(keys, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer k1, Integer k2) {
+                return map.get(k1) - map.get(k2);
             }
         });
         if (reverse) {

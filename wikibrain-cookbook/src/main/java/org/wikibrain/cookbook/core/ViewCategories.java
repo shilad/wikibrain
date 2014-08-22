@@ -7,9 +7,10 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.core.model.Title;
+import org.wikibrain.pageview.PageViewDao;
 import org.wikibrain.pageview.PageViewSqlDao;
 import org.wikibrain.utils.WpCollectionUtils;
 
@@ -37,7 +38,7 @@ public class ViewCategories {
         Env env = EnvBuilder.envFromArgs(args);
 
         Configurator configurator = env.getConfigurator();
-        PageViewSqlDao viewDao = configurator.get(PageViewSqlDao.class);
+        PageViewDao viewDao = configurator.get(PageViewSqlDao.class);
         LocalPageDao pageDao = configurator.get(LocalPageDao.class);
         LocalCategoryMemberDao memberDao = configurator.get(LocalCategoryMemberDao.class);
 
@@ -66,7 +67,7 @@ public class ViewCategories {
         int i = 0;
         Map<LocalPage, Integer> counts = new HashMap<LocalPage, Integer>();
         for (LocalPage page : pageDao.get(filter)) {
-            int views = viewDao.getNumViews(Language.SIMPLE, page.getLocalId(), new DateTime(2014, 1, 1, 1, 1), 24, pageDao);
+            int views = viewDao.getNumViews(new LocalId(Language.SIMPLE, page.getLocalId()), new DateTime(2014, 1, 1, 1, 1), 24);
             LocalPage cat = memberDao.getClosestCategory(page, topLevelCategories, true);
             if (cat != null) {
                 if (counts.containsKey(cat)) {
