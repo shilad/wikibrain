@@ -36,7 +36,7 @@ import java.util.logging.Level;
  *
  * @author Shilad Sen
  */
-public class PageViewSqlDao extends AbstractSqlDao<PageView> {
+public class PageViewSqlDao extends AbstractSqlDao<PageView> implements PageViewDao {
     public static final String LOADED_CACHE_KEY = "pageviewhours";
     private final File downloadDir;
     private final LocalPageDao pageDao;
@@ -76,7 +76,8 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         );
     }
 
-    public TIntIntMap getAllViews(Language language, DateTime startDate, DateTime endDate, LocalPageDao localPageDao) throws DaoException {
+    @Override
+    public TIntIntMap getAllViews(Language language, DateTime startDate, DateTime endDate) throws DaoException {
         DSLContext context = getJooq();
         Timestamp startTime = new Timestamp(startDate.getMillis());
         Timestamp endTime = new Timestamp(endDate.getMillis());
@@ -102,20 +103,22 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
     }
 
-    public int getNumViews(Language language, int id, DateTime startDate, int numberOfHours, LocalPageDao localPageDao) throws DaoException {
-        return getNumViews(language, id, startDate, startDate.plusHours(numberOfHours), localPageDao);
+    @Override
+    public int getNumViews(LocalId pageId, DateTime startDate, int numberOfHours) throws DaoException {
+        return getNumViews(pageId, startDate, startDate.plusHours(numberOfHours));
     }
 
-    public int getNumViews(Language language, int id, DateTime startDate, DateTime endDate, LocalPageDao localPageDao) throws DaoException {
+    @Override
+    public int getNumViews(LocalId pageId, DateTime startDate, DateTime endDate) throws DaoException {
         DSLContext context = getJooq();
         Timestamp startTime = new Timestamp(startDate.getMillis());
         Timestamp endTime = new Timestamp(endDate.getMillis());
         try {
             Cursor<Record> result = context.select().
                     from(Tables.PAGEVIEW).
-                    where(Tables.PAGEVIEW.LANG_ID.eq(language.getId())).
+                    where(Tables.PAGEVIEW.LANG_ID.eq(pageId.getLanguage().getId())).
                     and(Tables.PAGEVIEW.TSTAMP.between(startTime, endTime)).
-                    and(Tables.PAGEVIEW.PAGE_ID.eq(id)).
+                    and(Tables.PAGEVIEW.PAGE_ID.eq(pageId.getId())).
                     fetchLazy(getFetchSize());
             int numViews = 0;
             for (Record record : result){
@@ -127,14 +130,16 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
     }
 
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
+    @Override
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime) throws ConfigurationException, DaoException, WikiBrainException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         for(Integer id: ids){
-            result.put(id, getNumViews(lang, id, startTime, endTime, localPageDao));
+            result.put(id, getNumViews(new LocalId(lang, id), startTime, endTime));
         }
         return result;
     }
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
+    @Override
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates) throws ConfigurationException, DaoException, WikiBrainException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         DateTime startTime;
         DateTime endTime;
@@ -146,10 +151,10 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
             for(Integer id : ids){
                 if(!result.keySet().contains(id))
                 {
-                    result.put(id, getNumViews(lang, id, startTime, endTime, localPageDao));
+                    result.put(id, getNumViews(new LocalId(lang, id), startTime, endTime));
                 }
                 else{
-                    int totalViews = result.get(id) + getNumViews(lang, id, startTime, endTime, localPageDao);
+                    int totalViews = result.get(id) + getNumViews(new LocalId(lang, id), startTime, endTime);
                     result.put(id, totalViews);
                 }
             }
@@ -232,10 +237,12 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void ensureLoaded(DateTime start, DateTime end, LanguageSet langs) throws DaoException {
         ensureLoaded(Arrays.asList(new Interval(start, end)), langs);
     }
 
+    @Override
     public synchronized void ensureLoaded(List<Interval> intervals, final LanguageSet langs) throws DaoException {
         // FIXME: At the moment we totally ignore the language setting
         final Map<Language, SortedSet<DateTime>> loaded = getLoadedHours();
@@ -376,14 +383,14 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         );
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<PageViewSqlDao> {
+    public static class Provider extends org.wikibrain.conf.Provider<PageViewDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return PageViewSqlDao.class;
+            return PageViewDao.class;
         }
 
         @Override
@@ -392,7 +399,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
 
         @Override
-        public PageViewSqlDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public PageViewDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }

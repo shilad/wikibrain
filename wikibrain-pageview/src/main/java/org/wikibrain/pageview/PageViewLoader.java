@@ -12,13 +12,10 @@ import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.LanguageSet;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,14 +27,14 @@ import java.util.logging.Logger;
 public class PageViewLoader {
     private static final Logger LOG = Logger.getLogger(PageViewLoader.class.getName());
     private final LanguageSet languageSet;
-    private final PageViewSqlDao dao;
+    private final PageViewDao dao;
 
-    public PageViewLoader(LanguageSet languageSet, PageViewSqlDao dao) {
+    public PageViewLoader(LanguageSet languageSet, PageViewDao dao) {
         this.languageSet = languageSet;
         this.dao = dao;
     }
 
-    public PageViewSqlDao getDao() {
+    public PageViewDao getDao() {
         return dao;
     }
 
