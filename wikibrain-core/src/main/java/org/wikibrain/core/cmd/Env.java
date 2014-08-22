@@ -162,6 +162,10 @@ public class Env implements Closeable {
         return WpThreadUtils.getMaxThreads();
     }
 
+    public Language getDefaultLanguage() {
+        return getLanguages().getDefaultLanguage();
+    }
+
     @Override
     public void close() throws IOException {
         configurator.close();

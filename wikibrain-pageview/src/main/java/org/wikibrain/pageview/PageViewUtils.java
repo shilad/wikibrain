@@ -2,8 +2,6 @@ package org.wikibrain.pageview;
 
 import org.joda.time.DateTime;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -21,6 +19,9 @@ public class PageViewUtils {
                 start.dayOfMonth().get(),
                 start.hourOfDay().get(),
                 0);
+        if (current.isBefore(start)) {
+            current = current.plusHours(1);
+        }
         SortedSet<DateTime> result = new TreeSet<DateTime>();
         while (!current.isAfter(end)) {
             result.add(current);
