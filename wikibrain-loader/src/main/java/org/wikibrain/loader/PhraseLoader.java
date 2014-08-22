@@ -70,5 +70,8 @@ public class PhraseLoader {
         for (Language lang : env.getLanguages()) {
             metaDao.incrementRecords(PrunedCounts.class, lang, n);
         }
+
+        // For some reasons this appears to hang without this line.
+        System.exit(0);
     }
 }
