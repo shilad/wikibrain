@@ -308,7 +308,6 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
             key += ".noRedirect";
         }
         if (cache!=null) {
-            System.err.println("HERE!");
             TLongIntHashMap map = (TLongIntHashMap)cache.get(key, LocalPage.class);
             if (map!=null){
                 titlesToIds = map;

@@ -1,5 +1,6 @@
 package org.wikibrain.core.dao.sql;
 
+import org.apache.commons.io.FileUtils;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.model.MetaInfo;
@@ -36,6 +37,14 @@ public class SqlCache {
         catch (IOException e){
             throw new DaoException(e);
         }
+    }
+
+    /**
+     * Removes a cached entity if it exists.
+     * @param name
+     */
+    public void remove(String name) {
+        FileUtils.deleteQuietly(getCacheFile(name));
     }
 
     private File getCacheFile(String name) {

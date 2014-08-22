@@ -84,12 +84,12 @@ public class PageViewReader implements Iterable<RawPageView> {
                         continue;
                     }
 
-                    // Check if it's a project (e.g. Wiktionary)
-                    if (cols[0].contains(".")) {
-                        continue;
+                    Language lang;
+                    try {
+                        lang = Language.getByLangCode(cols[0]);
+                    } catch (IllegalArgumentException e) {
+                        continue;   // Not a wikipedia (e.g. Wiktionary)
                     }
-
-                    Language lang = Language.getByLangCode(cols[0]);
                     if (langs.containsLanguage(lang)) {
                         String title = URLDecoder.decode(cols[1], "UTF-8");
                         buffer = new RawPageView(

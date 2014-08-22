@@ -28,6 +28,7 @@ import org.wikibrain.utils.Procedure;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 /**
@@ -57,6 +58,12 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         this.downloadDir = downloadDir;
         this.pageDao = pageDao;
         this.metaDao = metaDao;
+    }
+
+    @Override
+    public void clear() throws DaoException {
+        super.clear();
+        cache.remove(LOADED_CACHE_KEY);
     }
 
     @Override
@@ -263,14 +270,21 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
 
         beginLoad();
 
+        final AtomicInteger[] counters = new AtomicInteger[] { new AtomicInteger(), new AtomicInteger() };
+
         ParallelForEach.loop(toLoad.keySet(), new Procedure<DateTime>() {
             @Override
             public void call(DateTime tstamp) throws Exception {
-                loadOneFile(tstamp, toLoad.get(tstamp), langs);
+                LOG.info("loading pageview file " + toLoad.get(tstamp));
+                loadOneFile(tstamp, toLoad.get(tstamp), langs, counters);
+                LOG.info("finished pageview file " + toLoad.get(tstamp));
             }
         });
 
         endLoad();
+
+        LOG.info(String.format("Found %d pageviews for langs %s and resolved %d of them.",
+                counters[0].get(), langs, counters[1].get()));
 
         // Make sure one second passes between the last view loaded and the save of the cached info
         // Otherwise we may incorrectly think the cache is stale.
@@ -291,12 +305,14 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         cache.put(LOADED_CACHE_KEY, loaded);
     }
 
-    private void loadOneFile(DateTime tstamp, File file, LanguageSet langs) {
+    private void loadOneFile(DateTime tstamp, File file, LanguageSet langs, AtomicInteger[] counters) {
         PageViewReader reader = new PageViewReader(file, langs);
         for (RawPageView view : reader) {
             try {
+                counters[0].getAndIncrement();
                 int id = pageDao.getIdByTitle(view.getTitle());
                 if (id >= 0) {
+                    counters[1].incrementAndGet();
                     PageView pv = new PageView(
                             new LocalId(view.getLanguage(), id),
                             tstamp.toDate(),
@@ -313,17 +329,17 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
 
     public synchronized  Map<Language, SortedSet<DateTime>> getLoadedHours() throws DaoException {
         DSLContext context = getJooq();
-        if (!JooqUtils.tableExists(context, Tables.PAGEVIEW)) {
-            return new HashMap<Language, SortedSet<DateTime>>();
-        }
-        Map<Language, SortedSet<DateTime>> loaded = (Map<Language, SortedSet<DateTime>>) cache.get(LOADED_CACHE_KEY, PageView.class);
-        if (loaded != null) {
-            return loaded;
-        }
-
-        LOG.info("creating loadedHours cache. This only happens once...");
-        loaded = new HashMap<Language, SortedSet<DateTime>>();
         try {
+            if (!JooqUtils.tableExists(context, Tables.PAGEVIEW)) {
+                return new HashMap<Language, SortedSet<DateTime>>();
+            }
+            Map<Language, SortedSet<DateTime>> loaded = (Map<Language, SortedSet<DateTime>>) cache.get(LOADED_CACHE_KEY, PageView.class);
+            if (loaded != null) {
+                return loaded;
+            }
+
+            LOG.info("creating loadedHours cache. This only happens once...");
+            loaded = new HashMap<Language, SortedSet<DateTime>>();
             Result<Record2<Timestamp, Short>> times = context
                     .selectDistinct(Tables.PAGEVIEW.TSTAMP,Tables.PAGEVIEW.LANG_ID)
                     .from(Tables.PAGEVIEW)
@@ -337,11 +353,11 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
                 }
                 loaded.get(lang).add(date);
             }
+            cache.put(LOADED_CACHE_KEY, loaded);
+            return loaded;
         } finally {
             freeJooq(context);
         }
-        cache.put(LOADED_CACHE_KEY, loaded);
-        return loaded;
     }
 
 
