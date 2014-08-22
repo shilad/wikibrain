@@ -4,7 +4,31 @@
 ---
 
 # Page view module       
-WikiBrain provides a way of downloading the number of pageviews for each article for a given hour. This data is published by the wikimedia foundation on dumps.wikimedia.org website. The number of page views for each article is used as a metric for populatity of articles. Once the requested hour(s) are loaded into the database several pieces of information can be accessed using PageViewSqlDao, including:
+WikiBrain allows programs to load and query the number of pageviews for each article with hourly resolution.
+The raw pageview data that WikiBrain uses was originally created by Domas Mituzas and is available at http://dumps.wikimedia.org/other/pagecounts-raw/.
+
+
+## Importing pageviews
+To import the pageview data, you must ensure that pageviews are loaded into the database.
+The pageview datafiles are about 100MB per hour, so they take some time to download and space to store.
+The following code would load two hours of data (about 200MB of downloaded data).
+
+```java
+// Get the pageview dao
+Env env = EnvBuilder.envFromArgs(args);
+PageViewDao viewDao = env.getConfigurator().get(PageViewDao.class);
+
+// Download and import pageview stats if necessary
+DateTime start = new DateTime(2014, 8, 14, 21, 0, 0);
+DateTime end = new DateTime(2014, 8, 14, 22, 0, 0);
+viewDao.ensureLoaded(start, end,  env.getLanguages());
+```
+
+## Warnings
+
+Once the requested hour(s) are loaded into the database, they can be queried
+
+several pieces of information can be accessed using PageViewSqlDao, including:
 
 * `getNumViews(language, pageid, startDate, endDate)` returns the number of pageviews for the specified page ID in the language given for the hours that fall in between the start and end date.
 * `getNumViews(Language language, int id, DateTime startDate, int numberOfHours, LocalPageDao localPageDao)` returns the number of pageviews for the specified pageviews for the specified page ID in the language given for the number of hours given after the start date.
