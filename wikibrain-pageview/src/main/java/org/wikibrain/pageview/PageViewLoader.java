@@ -41,35 +41,8 @@ public class PageViewLoader {
         return dao;
     }
 
-    public void load(DateTime startDate, DateTime endDate) throws ConfigurationException, WikiBrainException {
-        double start = System.currentTimeMillis();
-        try {
-            LOG.log(Level.INFO, "Loading Page Views");
-            PageViewIterator iterator = dao.getPageViewIterator(languageSet, startDate, endDate,localPageDao);
-            int i = 0;
-            while (iterator.hasNext()) {
-                List<PageViewDataStruct> dataStructs = iterator.next();
-                for (PageViewDataStruct data : dataStructs) {
-                    dao.addData(data);
-                }
-                i++;
-                if (i % 24 == 0) {
-                    double elapsed = (System.currentTimeMillis() - start) / 60000;
-                    LOG.log(Level.INFO, "Loaded " + (i/24) + " days worth of Page View files in " + elapsed + " minutes");
-                }
-                if (i % 744 == 0) {
-                    double elapsed = (System.currentTimeMillis() - start) / 60000;
-                    LOG.log(Level.INFO, "Loaded " + (i/744) + "months worth of Page View files in " + elapsed + " minutes");
-                }
-            }
-            double elapsed = (System.currentTimeMillis() - start) / 60000;
-            LOG.info("Loading took " + elapsed + " minutes");
-            LOG.log(Level.INFO, "All Page View files loaded: " + i);
-        } catch (DaoException e) {
-            double elapsed = (System.currentTimeMillis() - start) / 60000;
-            LOG.info(elapsed + " minutes passed before exception thrown");
-            throw new WikiBrainException(e);
-        }
+    public void load(DateTime startDate, DateTime endDate) throws DaoException {
+        dao .ensureLoaded(startDate, endDate, languageSet);
     }
 
     /**
