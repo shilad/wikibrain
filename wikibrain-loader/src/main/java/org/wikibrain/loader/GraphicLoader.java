@@ -351,7 +351,7 @@ public class GraphicLoader extends JFrame {
      private void initPhaseSelector(){
          phasePanel = new JPanel();
          phasePanel.setLayout(new GridLayout(0, 1));
-         phasePanel.add(new JLabel("Please cluster phases:"));
+         phasePanel.add(new JLabel("Please select phases:"));
 
          basicWikipediaButton.setEnabled(false);
 
