@@ -82,11 +82,7 @@ public class CategoryViews {
             });
 
         for (LocalPage page : viewCounts.keySet()) {
-            System.out.format("%s\t%d\t%d\n",
-                    page.getTitle().getCanonicalTitle(),
-                    articleCounts.get(page),
-                    viewCounts.get(page)
-                );
+            System.out.format("%s\t%d\t%d\n", page.getTitle().getCanonicalTitle(), articleCounts.get(page), viewCounts.get(page) );
         }
     }
 }
