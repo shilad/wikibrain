@@ -39,8 +39,7 @@ Configurator configurator = env.getConfigurator();
 PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
 
 // get the most common phrases in simple  
-Language simple = Language.getByLangCode("simple");   // simple english 
-LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(simple, "apple", 5);
+LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(Language.SIMPLE, "apple", 5);
         
 // show the closest pages
 System.out.println("resolution of apple");
