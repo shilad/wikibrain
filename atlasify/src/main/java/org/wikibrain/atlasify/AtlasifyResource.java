@@ -21,11 +21,41 @@ import sun.net.www.content.text.plain;
 import java.awt.Color;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 
 // The Java class will be hosted at the URI path "/helloworld"
 @Path("/wikibrain")
 public class AtlasifyResource {
+
+    private static class AtlasifyQuery{
+        private String keyword;
+        private String[] input;
+
+        public AtlasifyQuery(){
+
+        }
+
+        public AtlasifyQuery(String keyword, String[] input){
+            this.keyword = keyword;
+            this.input = input;
+        }
+
+        public AtlasifyQuery(String keyword, List<String> input){
+            this.keyword = keyword;
+            this.input = input.toArray(new String[input.size()]);
+        }
+
+        public String getKeyword(){
+            return keyword;
+        }
+
+        public String[] getInput(){
+            return input;
+        }
+
+    }
 
     private static SRMetric sr = null;
 
@@ -39,7 +69,7 @@ public class AtlasifyResource {
             Language simple = Language.getByLangCode("simple");
 
             sr = conf.get(
-                    SRMetric.class, "inlink",
+                    SRMetric.class, "ensemble",
                     "language", simple.getLangCode());
 
 
@@ -67,6 +97,41 @@ public class AtlasifyResource {
         }
         return Response.ok(new JSONObject(srMap).toString()).header("Access-Control-Allow-Origin", "*").build();
     }
+/*
+    @POST
+    @Path("/send")
+    @Produces("text/plain")
+    public Response nullResponse () {
+        return Response.ok("success").build();
+    }
+*/
+    @POST
+    @Path("/send")
+    @Consumes("application/json")
+    @Produces("text/plain")
+
+    public Response consumeJSON (AtlasifyQuery query) throws DaoException{
+        if(sr == null){
+            wikibrainSRinit();
+        }
+        String[] features = query.getInput();
+        Map<String, String> srMap = new HashMap<String, String>();
+        for(int i = 0; i < features.length; i++){
+            String color = "#ffffff";
+            try {
+                color = getColorStringFromSR(sr.similarity(query.getKeyword(), features[i].toString(), false).getScore());
+            }
+            catch (Exception e){
+                //do nothing
+            }
+
+            srMap.put(features[i].toString(), color);
+        }
+        return Response.ok(new JSONObject(srMap).toString()).build();
+
+    }
+
+
 
     private String getColorStringFromSR(double SR){
         if(SR < 0.2873)

@@ -19,9 +19,12 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.grizzly2.servlet.GrizzlyWebContainerFactory;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.ContainerResponse;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
 import java.net.URI;
@@ -45,12 +48,13 @@ public class AtlasifyServer {
 
 
     protected static HttpServer startServer() throws IOException{
-        final Map<String, String> initParams = new HashMap<String, String>();
-        initParams.put("jersey.config.server.provider.packages", "org.wikibrain.atlasify");
+        final ResourceConfig rc = new ResourceConfig().packages("org.wikibrain.atlasify");
+        rc.register(org.wikibrain.atlasify.CORSFilter.class);
+        rc.register(JacksonFeature.class);
 
         System.out.println("Staring grizzly...");
 
-        HttpServer server = GrizzlyWebContainerFactory.create(baseURI, initParams);
+        HttpServer server = GrizzlyHttpServerFactory.createHttpServer(baseURI, rc);
         return server;
     }
 
