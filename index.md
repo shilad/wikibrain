@@ -31,25 +31,27 @@ Once you have [imported data](tutorial/importing.html), you can write programs t
 Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
 
 ```java
-// Prepare the environment; set the root based on command-line arguments.)
+// Prepare the environment
 Env env = EnvBuilder.envFromArgs(args);
 
-// Get the configurator that creates components and a phraze analyzer from it 
+// Get the configurator that creates components and a phraze analyzer from it
 Configurator configurator = env.getConfigurator();
-PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class);
+PhraseAnalyzer pa = configurator.get(PhraseAnalyzer.class, "anchortext");
+LocalPageDao pageDao = configurator.get(LocalPageDao.class);
 
-// get the most common phrases in simple  
-LinkedHashMap<LocalPage, Float> resolution = pa.resolveLocal(Language.SIMPLE, "apple", 5);
-        
+// get the most common phrases in simple
+LinkedHashMap<LocalId, Float> resolution = pa.resolve(Language.SIMPLE, "Apple", 20);
+
 // show the closest pages
 System.out.println("resolution of apple");
-if (resolution == null) { 
+if (resolution == null) {
     System.out.println("\tno resolution !");
 } else {
-    for (LocalPage p : resolution.keySet()) {
-        System.out.println("\t" + p + ": " + resolution.get(p));
-    }       
-} 
+    for (LocalId p : resolution.keySet()) {
+        Title title = pageDao.getById(p).getTitle();
+        System.out.println("\t" + title + ": " + resolution.get(p));
+    }
+}
 ```
 
 When you run this program, you'll see output:
