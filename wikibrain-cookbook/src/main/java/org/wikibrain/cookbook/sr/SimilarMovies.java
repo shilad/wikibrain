@@ -12,34 +12,41 @@ import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
+import org.wikibrain.sr.SRResultList;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataValue;
 
 /**
  * @author Shilad Sen
  */
-public class SimilarMusicians {
+public class SimilarMovies {
     public static void main(String args[]) throws ConfigurationException, DaoException {
         Env env = EnvBuilder.envFromArgs(args);
-        Language lang = env.getLanguages().getDefaultLanguage();
+
+        String phrase = "Berlin";
+        Language lang = env.getDefaultLanguage();
         WikidataDao wdd = env.getConfigurator().get(WikidataDao.class);
         LocalPageDao lpd = env.getConfigurator().get(LocalPageDao.class);
-        SRMetric sr = env.getConfigurator().get(SRMetric.class, "ensemble", "language", lang.getLangCode());
+        SRMetric sr = env.getConfigurator().get(SRMetric.class, "milnewitten", "language", lang.getLangCode());
 
-        for (SRResult hit : sr.mostSimilar("jazz", 10, null)) {
+        // Most similar to phrase
+        SRResultList results = sr.mostSimilar(phrase, 10, null);
+        results.sortDescending();
+        for (SRResult hit : results) {
             System.out.println(hit.getScore() + ": " + lpd.getById(lang, hit.getId()));
         }
 
+        // Get all movies
         TIntSet candidates = new TIntHashSet();
-        //for (LocalId lid : wdd.pagesWithValue("occupation", WikidataValue.forItem(639669), Language.SIMPLE)) {
         for (LocalId lid : wdd.pagesWithValue("instance of", WikidataValue.forItem(11424), lang)) {
             candidates.add(lid.getId());
         }
-	System.out.println("found " + candidates.size() + " candidates.");
 
-	System.out.println("");
-        int milesId = lpd.getIdByTitle("Jazz", lang, NameSpace.ARTICLE);
-        for (SRResult hit : sr.mostSimilar(milesId, 10, candidates)) {
+        // Most similar movies to phrase
+        int pageId = lpd.getIdByTitle(phrase, lang, NameSpace.ARTICLE);
+        results = sr.mostSimilar(pageId, 10, candidates);
+        results.sortDescending();
+        for (SRResult hit : results) {
             System.out.println(hit.getScore() + ": " + lpd.getById(lang, hit.getId()));
         }
     }

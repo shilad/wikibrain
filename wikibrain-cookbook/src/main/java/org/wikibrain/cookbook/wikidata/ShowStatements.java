@@ -25,13 +25,14 @@ public class ShowStatements {
         Configurator conf = env.getConfigurator();
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         WikidataDao wdDao = conf.get(WikidataDao.class);
-        Language simple = Language.getByLangCode("simple");
 
-        // Get Barack Obama's page
-        Title title = new Title("Barack Obama", simple);
-        LocalPage obama = lpDao.getByTitle(title, NameSpace.ARTICLE);
-        Map<String, List<LocalWikidataStatement>> statements = wdDao.getLocalStatements(obama);
+        // Get page
+        Title title = new Title("Berlin", env.getDefaultLanguage());
+        LocalPage page = lpDao.getByTitle(title, NameSpace.ARTICLE);
         System.out.println("Properties for " + title);
+
+        // Show statements
+        Map<String, List<LocalWikidataStatement>> statements = wdDao.getLocalStatements(page);
         for (String property : statements.keySet()) {
             System.out.println("values for property " + property + " are:");
             for (LocalWikidataStatement lws : statements.get(property)) {

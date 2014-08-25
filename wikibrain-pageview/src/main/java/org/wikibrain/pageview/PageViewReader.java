@@ -9,6 +9,7 @@ import org.wikibrain.utils.WpIOUtils;
 import java.io.*;
 import java.net.URLDecoder;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +18,7 @@ import java.util.logging.Logger;
  * An iterator over the page views in a particular file.
  */
 public class PageViewReader implements Iterable<RawPageView> {
+
 
     private final LanguageSet langs;
 
@@ -41,6 +43,10 @@ public class PageViewReader implements Iterable<RawPageView> {
     }
 
     public class PageViewIterator implements Iterator<RawPageView> {
+        private AtomicInteger lines = new AtomicInteger();
+        private AtomicInteger errors = new AtomicInteger();
+        private AtomicInteger matches = new AtomicInteger();
+
         private BufferedReader reader;
         private RawPageView buffer = null;
 
@@ -78,6 +84,10 @@ public class PageViewReader implements Iterable<RawPageView> {
                         close();
                         break;
                     }
+                    if (lines.incrementAndGet() % 1000000 == 0) {
+                        LOG.info(String.format("File %s: lines=%d, errors=%d, matches=%d",
+                                    path, lines.get(), errors.get(), matches.get()));
+                    }
                     String[] cols = line.split(" ");
                     if (cols.length < 3) {
                         LOG.log(Level.INFO, "Invalid pageview line: " + line);
@@ -96,11 +106,18 @@ public class PageViewReader implements Iterable<RawPageView> {
                                 null,
                                 new Title(title, lang),
                                 Integer.valueOf(cols[2]));
+                        matches.incrementAndGet();
                     }
                 } catch (IllegalArgumentException e) {
-                    LOG.log(Level.INFO, "Invalid pageview line: " + line, e);
+                    errors.incrementAndGet();
+//                    LOG.log(Level.INFO, "Invalid pageview line: " + line, e);
+                    // Invalid language, perhaps... just continue
+                } catch (UnsupportedEncodingException e) {
+                    errors.incrementAndGet();
+//                    LOG.log(Level.INFO, "Invalid pageview line: " + line, e);
                     // Invalid language, perhaps... just continue
                 } catch (IOException e) {
+                    errors.incrementAndGet();
                     throw new RuntimeException(e);
                 }
             }

@@ -60,7 +60,7 @@ public class PostGISVersionChecker extends PostgisNGDataStoreFactory {
             throw new DaoException(e);
         }
         try {
-            ResultSet rs = st.executeQuery("cluster PostGIS_version()");
+            ResultSet rs = st.executeQuery("select PostGIS_version()");
             rs.next();
             String version = rs.getString(1).trim();
             LOG.info("Found PostGIS version " + version);
