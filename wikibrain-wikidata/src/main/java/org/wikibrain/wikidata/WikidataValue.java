@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Shilad Sen
@@ -101,7 +102,12 @@ public class WikidataValue implements Serializable {
     }
 
     public int getIntValue() {
-        return (Integer)value;
+        // Handle numeric ranges
+        if (value instanceof Map && ((Map)value).containsKey("amount"))  {
+            return Integer.valueOf((String)((Map)value).get("amount"));
+        } else {
+            return (Integer) value;
+        }
     }
 
     public JsonElement getJsonValue() {

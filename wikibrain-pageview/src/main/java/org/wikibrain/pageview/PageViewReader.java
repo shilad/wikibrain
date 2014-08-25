@@ -86,7 +86,7 @@ public class PageViewReader implements Iterable<RawPageView> {
                     }
                     if (lines.incrementAndGet() % 1000000 == 0) {
                         LOG.info(String.format("File %s: lines=%d, errors=%d, matches=%d",
-                                    path, lines.get(), errors.get(), matches.get()));
+                                path, lines.get(), errors.get(), matches.get()));
                     }
                     String[] cols = line.split(" ");
                     if (cols.length < 3) {
@@ -119,6 +119,7 @@ public class PageViewReader implements Iterable<RawPageView> {
                 } catch (IOException e) {
                     errors.incrementAndGet();
                     throw new RuntimeException(e);
+                } catch (Exception e) {
                 }
             }
             return buffer != null;

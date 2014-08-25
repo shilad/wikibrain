@@ -109,6 +109,16 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> implements PageView
     }
 
     @Override
+    public int getNumViews(Language lang, int pageId, DateTime startDate, int numberOfHours) throws DaoException {
+        return getNumViews(new LocalId(lang, pageId), startDate, startDate.plusHours(numberOfHours));
+    }
+
+    @Override
+    public int getNumViews(Language lang, int pageId, DateTime startDate, DateTime endDate) throws DaoException {
+        return getNumViews(new LocalId(lang, pageId), startDate, endDate);
+    }
+
+    @Override
     public int getNumViews(LocalId pageId, DateTime startDate, DateTime endDate) throws DaoException {
         DSLContext context = getJooq();
         Timestamp startTime = new Timestamp(startDate.getMillis());

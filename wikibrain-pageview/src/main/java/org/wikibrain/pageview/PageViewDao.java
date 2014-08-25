@@ -42,6 +42,10 @@ public interface PageViewDao extends Dao<PageView> {
      */
     public int getNumViews(LocalId pageId, DateTime startDate, int numberOfHours) throws DaoException;
 
+    int getNumViews(Language lang, int pageId, DateTime startDate, int numberOfHours) throws DaoException;
+
+    int getNumViews(Language lang, int pageId, DateTime startDate, DateTime endDate) throws DaoException;
+
     /**
      * Returns the total number of views for the requested page.
      *
