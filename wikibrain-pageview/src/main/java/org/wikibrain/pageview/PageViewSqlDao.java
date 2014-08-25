@@ -131,7 +131,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> implements PageView
     }
 
     @Override
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime) throws ConfigurationException, DaoException, WikiBrainException{
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime) throws ConfigurationException, DaoException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         for(Integer id: ids){
             result.put(id, getNumViews(new LocalId(lang, id), startTime, endTime));
@@ -139,7 +139,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> implements PageView
         return result;
     }
     @Override
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates) throws ConfigurationException, DaoException, WikiBrainException{
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates) throws ConfigurationException, DaoException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         DateTime startTime;
         DateTime endTime;

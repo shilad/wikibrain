@@ -64,7 +64,7 @@ public interface PageViewDao extends Dao<PageView> {
      * @throws DaoException
      * @throws WikiBrainException
      */
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime) throws ConfigurationException, DaoException, WikiBrainException;
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime) throws ConfigurationException, DaoException;
 
     /**
      * Returns the total number of views for the requested page.
@@ -76,7 +76,7 @@ public interface PageViewDao extends Dao<PageView> {
      * @throws DaoException
      * @throws WikiBrainException
      */
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates) throws ConfigurationException, DaoException, WikiBrainException;
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates) throws ConfigurationException, DaoException;
 
     /**
      * Ensure the pageviews for the specified languages and time interval are loaded.

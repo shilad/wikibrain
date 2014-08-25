@@ -18,6 +18,7 @@ import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.utils.WpCollectionUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -41,12 +42,18 @@ public class CountryPageViews {
         Map<Integer, Geometry> countries = spatialDao.getAllGeometriesInLayer("country");
         System.out.println("Found " + countries.size() + " countries");
 
+        Map<LocalPage, Integer> countryViews = new HashMap<LocalPage, Integer>();
         for (int conceptId : countries.keySet()) {
             int pageId = conceptDao.getById(conceptId).getLocalId(lang);
             if (pageId > 0) {
                 LocalPage page = pageDao.getById(lang, pageId);
-                System.out.println("Country is " + countries);
+                int views = viewDao.getNumViews(page.toLocalId(), start, end);
+                countryViews.put(page, views);
             }
+        }
+
+        for (LocalPage page : WpCollectionUtils.sortMapKeys(countryViews, true)) {
+            System.out.format("Page %s has %d views\n", page.getTitle(), countryViews.get(page));
         }
     }
 }
