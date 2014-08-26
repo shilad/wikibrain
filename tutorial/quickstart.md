@@ -5,7 +5,7 @@
         
 # Quickstart 
 
-As a quick start, we'll load Wikipedia data and foo.
+This quickstart will walk you through installing WikiBrain, importing data from Simple English Wikipedia, and writing a basic WikiBrain java program.
 
 ## System requirements for this example:
 
@@ -24,31 +24,19 @@ More details on installation are described in the [system requirements]({{ site.
 
 ## Install Wikibrain
 
-* Download and extract the [WikiBrain plus dependencies archive].
-* Double click the extracted jar file. You should see the GUI import screen (below).
+* Download the [WikiBrain plus dependencies jar file](http://shilad.com/wikibrain/wikibrain-withdeps-{{ site.wbversion }}.jar).
+* Double click the downloaded jar file. You should see the GUI import screen (below).
 
 ## Import Simple English
 
 Next, you'll import Simple English Wikipedia.
-Run the pipeline loader which downloads, parses, and imports the data into an embedded [h2 database](http://www.h2database.com/html/main.html) (you can use Postgresql instead by changing the [configuration file]({{ site.url }}/tutorial/configuration.html)).
-The details for running the loader are as follows:
- 
- * main class: `org.wikibrain.Loader`
- * JVM args: `-Xmx4G`
- * program args: `-l simple`
-
-In IntelliJ, this looks like the following:
+By default, the loader downloads, parses, and imports the data into an embedded [h2 database](http://www.h2database.com/html/main.html).
+You can customize WikiBrain's importing procedure, (see Configuration) but the default should be a good start. 
 
 ![PipelineLoader]({{ site.baseurl }}/images/run-pipeline.png)
 
-The last command downloads, installs, and analyzes the latest database files for the Simple English langauge edition of Wikipedia. 
-It imports the data into an embedded h2 database. 
-You can customize WikiBrain's importing procedure, (see Configuration) but the default should be a good start. 
 
 ## An example program
-
-* Download and extract the zipfile containing the jars (TODO: link zipfile).
-* Add the jar files to the classpath of your project. 
 
 Once you have your imported data (above), your are ready to write programs that analyze Wikipedia!
 
