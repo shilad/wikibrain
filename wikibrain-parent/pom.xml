@@ -6,7 +6,7 @@
 
     <properties>
         <!-- Unique entry point for version number management -->
-        <wikibrain.version>0.3-SNAPSHOT</wikibrain.version>
+        <wikibrain.version>0.3.0</wikibrain.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
