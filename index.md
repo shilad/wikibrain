@@ -3,16 +3,17 @@
         title: Homepage
 ---
 
+**Resources related to Shilad's 2014 OpenSym talk:**
+
+* [Talk slides](https://www.dropbox.com/s/f0o2jcsd1g2fz4w/WikiBrain_WikiSym.pdf?dl=1)
+* [WikiSym 2014 paper](http://www-users.cs.umn.edu/~bhecht/publications/WikiBrain-WikiSym2014.pdf)
+* Source files: [Quickstart.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java), [TranslateConcept.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/concepts/TranslateConcept.java), [SimilarMovies.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/sr/SimilarMovies.java), [CountryPageViews.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/pageview/CountryPageViews.java), [SimpleToblersEvaluator.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-spatial/src/main/java/org/wikibrain/spatial/cookbook/SimpleToblersLawEvaluator.java), [CategoryViews.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/pageview/CategoryViews.java)
+
 
 **WikiBrain's busy thinking up its first public release. Please be patient while we fine tune our APIs and complete our documentation. Ask us questions at the [WikiBrain google group](https://groups.google.com/forum/#!forum/wikibrain)!**
 
 The WikiBrain Java library enables researchers and developers to incorporate state-of-the-art Wikipedia-based algorithms and technologies in a few lines of code.
 
-**Resources related to Shilad's 2014 OpenSym talk:**
-
-* [Talk slides](https://www.dropbox.com/s/f0o2jcsd1g2fz4w/WikiBrain_WikiSym.pdf?dl=0)
-* [WikiSym 2014 paper](http://www-users.cs.umn.edu/~bhecht/publications/WikiBrain-WikiSym2014.pdf)
-* Source files: [Quickstart.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java), [TranslateConcept.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/concepts/TranslateConcept.java), [SimilarMovies.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/sr/SimilarMovies.java), [CountryPageViews.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/pageview/CountryPageViews.java), [SimpleToblersEvaluator.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-spatial/src/main/java/org/wikibrain/spatial/cookbook/SimpleToblersLawEvaluator.java), [CategoryViews.java](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/pageview/CategoryViews.java)
 
 **WikiBrain is easy to use**.
 Wikipedia data can be downloaded, parsed, and imported into a database by running a single command.
