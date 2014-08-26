@@ -35,6 +35,7 @@ You can customize WikiBrain's importing procedure, (see Configuration) but the d
 
 ![PipelineLoader]({{ site.baseurl }}/images/run-pipeline.png)
 
+Be aware that the loader writes a configuration file named `customized.conf` that you'll need to use when running your java programs (i.e. `-c customized.conf`).
 
 ## An example program
 
@@ -47,7 +48,8 @@ Start writing your program! Here's a [simple example](https://github.com/shilad/
 <script src="http://gist-it.appspot.com/github/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java?slice=20:45"></script>
 
 
-When you run this program, you'll see output:
+When you run this program, you must pass the name of the configuration file created by the graphical loader in the previous step (e.g. `-c customized.conf`).
+After running your program, you'll see output:
 
 ```text
 resolution of apple
