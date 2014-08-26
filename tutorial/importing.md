@@ -4,11 +4,27 @@
 ---
 # Importing data
 
-**Warning: This describes the operation of the PipelineLoader in the new better-pipeline branch.**
+The Graphical Loader offers the easiest way to import data.
+However, WikiBrain supports much more sophisticated importing configurations.
 
-WikiBrain's PipelineLoader class manages the downloading, parsing, and import of [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
+### GraphicalLoader
 
-Most commonly, PipelineLoader is run without any arguments except a language. This downloads, parses and imports the latest database files for the Simple English langauge edition of Wikipedia into an embedded h2 database:
+You can launch the graphical loader by double-clicking the wikibrain-withdeps jarfile, or by running the `org.wikibrain.GuiLoader` class.
+After running the class, you'll see the loader program:
+
+![PipelineLoader]({{ site.baseurl }}/images/run-pipeline.png)
+
+You can customize basic features of the loading process using the graphical loader.
+Be aware that the loader writes a configuration file named `customized.conf` that you'll need to use when running your java programs (i.e. `-c customized.conf`).
+
+### Customized loading setups
+
+You can achieve more customized loader setups by running the Loader program directly.
+You can do this your IDE's run dialog, or by downloading and installing the wb-java.sh script described in the Installation page.
+
+WikiBrain's Loader class manages the downloading, parsing, and import of [Wikipedia datasets](http://en.wikipedia.org/wiki/Wikipedia:Database_download) published by the Wikimedia foundation.
+
+Most commonly, Loader is run without any arguments except a language. This downloads, parses and imports the latest database files for the Simple English langauge edition of Wikipedia into an embedded h2 database:
 
 ```bash
 org.wikibrain.Loader -l simple
