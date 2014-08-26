@@ -8,7 +8,6 @@ To intialize the spatial data, you should have [PostGIS](http://postgis.net/inst
 
 After installing PostGIS, create a new database, connect to the new database and run the following SQL to enable spatial support:
 
-```
 Then, go to your configuration file and configure the settings corresponding to your PostGIS settings. For example:
 
 ```text
