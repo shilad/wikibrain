@@ -18,7 +18,6 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
 
 import java.io.IOException;
 import java.util.List;

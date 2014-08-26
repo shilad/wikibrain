@@ -33,10 +33,6 @@ import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.spatial.core.SpatialContainerMetadata;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
