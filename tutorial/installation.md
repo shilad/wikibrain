@@ -19,7 +19,7 @@ As an example, below are approximate disk and memory requirements for different 
 | Largest 25 langs | 25M     | 1.6B    | 8GB   | 500GB | 3000 min |
 
 <br/>
-The runtimes above used a fairly powerful desktop circa 2014 (e.g. Intel i7, 8 cores).
+The runtimes above are on a 2012 Macbook Pro.
 They only include importing the **core** data import (pages, links, categories, etc) and do not include the time to download the data files.  
 
 Other modules take additional time and resources:
@@ -50,11 +50,11 @@ If you'd like to use the **spatial module**, you must install Postgres and the P
 You can either install WikiBrain by downloading the zip file containing the WikiBrain jars and dependencies or referencing the WikiBrain maven artifacts.
  While maven requires a bit of initial setup, we strongly recommend using it.
   
-#### Installing using jars
+#### Installing using the single uber-jar
  
-1. Download the [latest WikiBrain zip file](http://shilad.com/wikibrain/wikibrain-and-deps-{{ site.wbversion }}.zip) containing the WikiBrain jars and their dependencies.
-2. Extract the zip file.
-3. In your IDE, add all jars in the zip file to your classpath.
+1. Download the [latest WikiBrain jar file](http://shilad.com/wikibrain/wikibrain-withdeps-{{ site.wbversion }}.jar) containing the WikiBrain jars and their dependencies.
+2. In your IDE, add the jar to your classpath.
+3. As an alternative, you can also download a [zipfile](http://shilad.com/wikibrain/wikibrain-withdeps-{{ site.wbversion }}.zip) containing the individual wikibrain jars and dependencies.
   
 #### Installing using maven
 
