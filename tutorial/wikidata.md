@@ -7,18 +7,12 @@
 # Wikidata
 Wikipedia's Wikidata initiative "aims to create a free knowledge base about the world that can be read and edited by humans and machines alike." In short, the initiative shifts the "facts" that support Wikipedia articles (Minneapolis is in Minnesota) into a structured universal repository that can be accessed in any language.
 
-The WikiBrain library includes support for Wikidata. To use it, you must first import the Wikidata archive. This is a relatively large dataset (~10GB uncompressed), so it is not loaded by default during the regular pipeline. **AFTER running the regular pipeline** you need to do the following two steps.
+The WikiBrain library includes support for Wikidata. To use it, you must first import the Wikidata archive. This is a relatively large dataset (~10GB uncompressed), so it is not loaded by default.
 
-First, Wikidata requires the "purewikidata" concept mapper. If you only installed one language (say *en* or *simple*, but not both) this will not have been installed. You will need to run:
-
-```
-./wb-java.sh org.wikibrain.dao.load.ConceptLoader -n purewikidata -d 
-```
-
-Next, load the wikidata:
+To load it, you must check the "Wikidata" box in the graphical loader or load it manually (see Importing for more details):
 
 ```
-./wb-java.sh org.wikibrain.dao.load.PipelineLoader -f -s wikidata:on
+./wb-java.sh org.wikibrain.dao.Loader -s wikidata
 ```
 
 You can then get statements about a particular page:
