@@ -2,4 +2,4 @@ markdown: redcarpet
 redcarpet:
   extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "with_toc_data"]
 baseurl : /wikibrain                     
-wbversion : "0.1.0"
+wbversion : "0.3.1"
