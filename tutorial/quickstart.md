@@ -44,7 +44,7 @@ Begin by creating the Java project in your IDE of choice (NetBeans, Eclipse, Int
 
 Start writing your program! Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java) you can find in the Cookbook:
 
-<script src="http://gist-it.appspot.com/github/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java?slice=20:46"></script>
+<script src="http://gist-it.appspot.com/github/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java?slice=20:45"></script>
 
 
 When you run this program, you'll see output:
