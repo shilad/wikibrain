@@ -17,14 +17,16 @@ public class TranslateConcept {
 
     public static void main(String args[]) throws ConfigurationException, DaoException {
 
-        // Get the pageview dao
+        // Setup environment
         Env env = EnvBuilder.envFromArgs(args);
         LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
         UniversalPageDao conceptDao = env.getConfigurator().get(UniversalPageDao.class);
 
+        // Get local and universal pages
         LocalPage page = pageDao.getByTitle(Language.EN, "Apple");
         UniversalPage concept = conceptDao.getByLocalPage(page);
 
+        // Translate to other languages.
         System.out.format("%s in other languages:\n", page.getTitle());
         for (Language lang : concept.getLanguageSet()) {
             LocalPage page2 = pageDao.getById(lang, concept.getLocalId(lang));

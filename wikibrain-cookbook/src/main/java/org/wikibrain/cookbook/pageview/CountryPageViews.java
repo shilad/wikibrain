@@ -16,8 +16,6 @@ import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpCollectionUtils;
 import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.wikidata.WikidataFilter;
-import org.wikibrain.wikidata.WikidataStatement;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,24 +25,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Shilad Sen
  */
 public class CountryPageViews {
-    private final Env env;
+
     private final PageViewDao viewDao;
     private final SpatialDataDao spatialDao;
     private final Language lang;
     private final UniversalPageDao conceptDao;
     private final Map<Integer, Geometry> countryShapes;
     private final HashMap<Integer, LocalPage> countryPages;
-    private final WikidataDao wikidataDao;
     private final DateTime start;
     private final DateTime end;
 
     public CountryPageViews(Env env) throws ConfigurationException, DaoException {
-        this.env = env;
         this.viewDao = env.getConfigurator().get(PageViewDao.class);
         this.spatialDao = env.getConfigurator().get(SpatialDataDao.class);
         this.lang = env.getDefaultLanguage();
         this.conceptDao = env.getConfigurator().get(UniversalPageDao.class);
-        this.wikidataDao = env.getConfigurator().get(WikidataDao.class);
 
         // Download and import pageview stats if necessary.
         start = new DateTime(2014, 8, 14, 11, 0, 0);
@@ -112,19 +107,6 @@ public class CountryPageViews {
         }
     }
 
-    public void showCountryPopulations() throws DaoException {
-        for (int conceptId : countryPages.keySet()) {
-            WikidataFilter filter = new WikidataFilter.Builder()
-                    .withPropertyId(1082)
-                    .withEntityId(conceptId).build();
-            int maxPopulation = 0;
-            for (WikidataStatement stm : wikidataDao.get(filter)) {
-                maxPopulation = Math.max(stm.getValue().getIntValue(), maxPopulation);
-            }
-            System.out.format("%s\t%d\n", countryPages.get(conceptId).getTitle().getCanonicalTitle(), maxPopulation);
-        }
-    }
-
     private LocalPage findCountry(Geometry point) {
         for (int countryId : countryShapes.keySet()) {
             if (countryShapes.get(countryId).contains(point)) {
@@ -138,8 +120,7 @@ public class CountryPageViews {
         Env env = EnvBuilder.envFromArgs(args);
         CountryPageViews cpv = new CountryPageViews(env);
 
-//        cpv.showCountryArticleViews();
-//        cpv.showViewsContainedInCountry();
-        cpv.showCountryPopulations();
+        cpv.showCountryArticleViews();
+        cpv.showViewsContainedInCountry();
     }
 }
