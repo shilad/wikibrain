@@ -368,6 +368,12 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
         }
     }
 
+    @Override
+    public LocalPage getByTitle(Language lang, String title) throws DaoException {
+        return getByTitle(lang, NameSpace.ARTICLE, title);
+    }
+
+
     public static class Provider extends org.wikibrain.conf.Provider<LocalPageDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
