@@ -6,6 +6,10 @@
 # Spatial
 To intialize the spatial data, you should have [PostGIS](http://postgis.net/install) installed. The library was tested on Postgres 9.3.4 with PostGIS 2.12 on Mac OS X. 
 
+The easiest way to import the data needed by the spatial components is to click the "spatial" box in the graphical loader tool. 
+However, you can also configure and initialize the spatial components manually.
+
+
 After installing PostGIS, create a new database, connect to the new database and run the following SQL to enable spatial support:
 
 Then, go to your configuration file and configure the settings corresponding to your PostGIS settings. For example:
