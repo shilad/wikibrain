@@ -4,13 +4,12 @@
 ---
         
 # Spatial
-To intialize the spatial data, you should have [PostGIS](http://postgis.net/install) installed. The library was tested on Postgres 9.3.4 with PostGIS 2.12 on Mac OS X. After installing PostGIS, create a new database, connect to the new database and run the following SQL to enable spatial support:
+To intialize the spatial data, you should have [PostGIS](http://postgis.net/install) installed. The library was tested on Postgres 9.3.4 with PostGIS 2.12 on Mac OS X. 
 
-```text
--- Enable PostGIS (includes raster)
-CREATE EXTENSION postgis;
+After installing PostGIS, create a new database, connect to the new database and run the following SQL to enable spatial support:
+
 ```
-Then, go to the [reference.conf](wikibrain-core/src/main/resources/reference.conf) and configure the following settings corresponding to your PostGIS settings.
+Then, go to your configuration file and configure the settings corresponding to your PostGIS settings. For example:
 
 ```text
 spatial : {
@@ -37,17 +36,19 @@ spatial : {
             }
 ```
 
-Loading the Wikidata layer in the spatial module also requires having Wikidata loaded (see the Wikidata section of this README file)
 
-Now you can load the Wikidata layer by running:
+Now you can load the spatial layer by running the following command. 
+Note that if you haven't loaded the concept or wikidata stages (required by the spatial components), they will also be loaded.
 
 ```bash
-./wb-java.sh org.wikibrain.spatial.loader.SpatialDataLoader
+org.wikibrain.Loader -s spatial
 ```
 
 Try running [CalculateGeographicDistanceBetweenPages](/wikibrain-spatial/src/main/java/org/wikibrain/spatial/cookbook/CalculateGeographicDistanceBetweenPages.java). If it runs correctly, the spatial module is successfully initialized.
 
 ## Integrating new layers with WikiBrain (or updating existing integrated layers)
+
+TODO: translate these notes into something coherent.
 
 1. Make sure the dataset information is correct in the reference.conf's spatial.datasets configuration.
 2. Run the ShapeFileMatcher with the name of the reference system, layer, and datasetname: 
