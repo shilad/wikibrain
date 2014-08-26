@@ -61,7 +61,7 @@ public class DiagnosticDao {
         object.put("multiCoreSpeed", diagnostic.getMultiCoreSpeed());
         object.put("megabytes", diagnostic.getMegabytesUsed());
         object.put("suceeded", diagnostic.getSucceeded());
-        object.put("version", "0.3.0");
+        object.put("version", "0.3.1");
         object.save();
     }
 
