@@ -66,8 +66,11 @@ We've posted a complete [example pom.xml](https://gist.github.com/shilad/958ec6f
 
 ## Setting your JVM options
 
-**JVM options:** Set reasonable java options defaults. For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. 
+Set reasonable java options defaults. 
+For example `-d64 -Xmx8000M -server` uses a 64-bit JVM with 8GB memory and server optimizations. 
+
 You can set these defaults in your IDE's run dialog, or if you are using `wb-java.sh` (below), run the command: `export JAVA_OPTS="-d64 -Xmx8000M -server"`
+
 The memory requirements for the JVM during the import phase are listed above.
 
 ## Installing the command line wb-java.sh script
