@@ -25,21 +25,13 @@ public class PageViewExample {
         // Get the pageview dao
         Env env = EnvBuilder.envFromArgs(args);
         PageViewDao viewDao = env.getConfigurator().get(PageViewDao.class);
-
-        // Download and import pageview stats if necessary.
-        DateTime start = new DateTime(2014, 8, 14, 21, 0, 0);
-        DateTime end = new DateTime(2014, 8, 14, 22, 0, 0);
-        viewDao.ensureLoaded(start, end,  env.getLanguages());
-
-        // Retrieve and display pageviews for specific pages
         LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
         Language lang = env.getDefaultLanguage();
-        System.out.println("Number of page views for specific pages:");
-        for (String title : Arrays.asList("Mozart", "Justin Bieber")) {
-            int id = pageDao.getIdByTitle(title, lang, NameSpace.ARTICLE);
-            int views = viewDao.getNumViews(new LocalId(lang, id), start, end);
-            System.out.format("\t%s (id=%d) is %d\n", title, id, views);
-        }
+
+        // Download and import pageview stats if necessary.
+        DateTime start = new DateTime(2014, 8, 14, 11, 0, 0);
+        DateTime end = new DateTime(2014, 8, 14, 23, 0, 0);
+        viewDao.ensureLoaded(start, end,  env.getLanguages());
 
         // Retrieve counts for all pageviews
         TIntIntMap allViews = viewDao.getAllViews(lang, start, end);

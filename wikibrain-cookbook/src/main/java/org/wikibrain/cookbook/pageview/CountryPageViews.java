@@ -26,74 +26,38 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CountryPageViews {
 
-    private final PageViewDao viewDao;
-    private final SpatialDataDao spatialDao;
-    private final Language lang;
-    private final UniversalPageDao conceptDao;
-    private final Map<Integer, Geometry> countryShapes;
-    private final HashMap<Integer, LocalPage> countryPages;
-    private final DateTime start;
-    private final DateTime end;
-
-    public CountryPageViews(Env env) throws ConfigurationException, DaoException {
-        this.viewDao = env.getConfigurator().get(PageViewDao.class);
-        this.spatialDao = env.getConfigurator().get(SpatialDataDao.class);
-        this.lang = env.getDefaultLanguage();
-        this.conceptDao = env.getConfigurator().get(UniversalPageDao.class);
-
-        // Download and import pageview stats if necessary.
-        start = new DateTime(2014, 8, 14, 11, 0, 0);
-        end = new DateTime(2014, 8, 14, 23, 0, 0);
+    public static void main(String args[]) throws ConfigurationException, DaoException {
+        // Configure environment
+        Env env = EnvBuilder.envFromArgs(args);
+        final PageViewDao viewDao = env.getConfigurator().get(PageViewDao.class);
+        final LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
+        final SpatialDataDao spatialDao = env.getConfigurator().get(SpatialDataDao.class);
+        final Language lang = env.getDefaultLanguage();
+        final UniversalPageDao conceptDao = env.getConfigurator().get(UniversalPageDao.class);
+        final DateTime start = new DateTime(2014, 8, 14, 11, 0, 0);
+        final DateTime end = new DateTime(2014, 8, 14, 23, 0, 0);
         viewDao.ensureLoaded(start, end,  env.getLanguages());
 
-        // Build universal id -> country shape
-        this.countryShapes = spatialDao.getAllGeometriesInLayer("country");
-
-        // Build universal id -> local page
-        LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
-        this.countryPages = new HashMap<Integer, LocalPage>();
-        for (int conceptId : countryShapes.keySet()) {
+        // Build universal id -> country shape and local page -> shape
+        Map<Integer, Geometry> conceptShapes = spatialDao.getAllGeometriesInLayer("country");
+        final Map<LocalPage, Geometry> countryShapes = new HashMap<LocalPage, Geometry>();
+        for (int conceptId : conceptShapes.keySet()) {
             int pageId = conceptDao.getById(conceptId).getLocalId(lang);
             LocalPage page = pageDao.getById(lang, pageId);
             if (page != null) {
-                countryPages.put(conceptId, page);
-            }
-        }
-    }
-
-    /**
-     * Shows direct views for all articles in each country.
-     * @throws DaoException
-     */
-    public void showCountryArticleViews() throws DaoException {
-        Map<LocalPage, Integer> views = new HashMap<LocalPage, Integer>();
-        for (int conceptId : countryPages.keySet()) {
-            LocalPage page = countryPages.get(conceptId);
-            if (page != null) {
-                views.put(countryPages.get(conceptId), viewDao.getNumViews(page.toLocalId(), start, end));
+                countryShapes.put(page, conceptShapes.get(conceptId));
             }
         }
 
-        System.out.println("Views for each country's article");
-        for (LocalPage page : WpCollectionUtils.sortMapKeys(views, true)) {
-            System.out.format("%s\t%s\n", page.getTitle().getCanonicalTitle(), views.get(page).toString());
-        }
-    }
-
-    /**
-     * Shows direct views for all articles in each country.
-     * @throws DaoException
-     */
-    public void showViewsContainedInCountry() throws DaoException {
-        // Initial view count by country
+        // Initialize view count by country
         final Map<LocalPage, Integer> views = new ConcurrentHashMap<LocalPage, Integer>();
-        for (LocalPage p : countryPages.values()) views.put(p, 0);
+        for (LocalPage p : countryShapes.keySet()) views.put(p, 0);
 
         final Map<Integer, Geometry> conceptPoints = spatialDao.getAllGeometriesInLayer("wikidata");
         ParallelForEach.loop(conceptPoints.keySet(), new Procedure<Integer>() {
             @Override
             public void call(Integer conceptId) throws Exception {
-                LocalPage country = findCountry(conceptPoints.get(conceptId));
+                LocalPage country = findCountry(countryShapes, conceptPoints.get(conceptId));
                 int pageId = conceptDao.getLocalId(lang, conceptId);
                 if (country == null || pageId < 0) return;  // probably in the ocean or outer space
                 int n = viewDao.getNumViews(lang, pageId, start, end);
@@ -107,20 +71,12 @@ public class CountryPageViews {
         }
     }
 
-    private LocalPage findCountry(Geometry point) {
-        for (int countryId : countryShapes.keySet()) {
-            if (countryShapes.get(countryId).contains(point)) {
-                return countryPages.get(countryId);
+    private static LocalPage findCountry(Map<LocalPage, Geometry> countryShapes, Geometry point) {
+        for (LocalPage country : countryShapes.keySet()) {
+            if (countryShapes.get(country).contains(point)) {
+                return country;
             }
         }
         return null;
-    }
-
-    public static void main(String args[]) throws ConfigurationException, DaoException {
-        Env env = EnvBuilder.envFromArgs(args);
-        CountryPageViews cpv = new CountryPageViews(env);
-
-        cpv.showCountryArticleViews();
-        cpv.showViewsContainedInCountry();
     }
 }
