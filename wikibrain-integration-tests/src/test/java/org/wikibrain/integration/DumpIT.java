@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
@@ -26,7 +27,7 @@ public class DumpIT {
         TestDB db = TestUtils.getTestDb();
         db.restoreDownloads();
     }
-
+    @Ignore
     @Test
     public void testDump() throws ClassNotFoundException, SQLException, DaoException, ConfigurationException, IOException {
         DumpLoader.main(TestUtils.getArgs("-d"));
