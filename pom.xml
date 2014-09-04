@@ -203,6 +203,7 @@
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <allowUntracked>true</allowUntracked>
+                    <pushReleases>true</pushReleases>
                 </configuration>
             </plugin>
         </plugins>
