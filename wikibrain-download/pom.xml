@@ -7,8 +7,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>${wikibrain.version}</version>
-        <relativePath>../wikibrain-parent</relativePath>
+        <version>0.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>wikibrain-download</artifactId>
@@ -17,7 +16,7 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
-            <version>${wikibrain.version}</version>
+            <version>0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
