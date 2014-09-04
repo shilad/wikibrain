@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.4.0</version>
     </parent>
 
     <artifactId>wikibrain-parser</artifactId>
@@ -15,7 +15,7 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.akiban</groupId>
