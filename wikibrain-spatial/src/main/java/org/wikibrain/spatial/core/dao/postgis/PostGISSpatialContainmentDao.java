@@ -37,6 +37,10 @@ public class PostGISSpatialContainmentDao implements SpatialContainmentDao {
         this.db = db;
     }
 
+    public PostGISDB getDb(){
+        return db;
+    }
+
     @Override
     public TIntSet getContainedItemIds(Integer itemId, String layerName, String refSysName, Set<String> subLayers, ContainmentOperationType opType) throws DaoException {
 

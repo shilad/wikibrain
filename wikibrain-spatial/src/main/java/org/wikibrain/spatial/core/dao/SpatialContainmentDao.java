@@ -3,6 +3,7 @@ package org.wikibrain.spatial.core.dao;
 import com.vividsolutions.jts.geom.Geometry;
 import gnu.trove.set.TIntSet;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
 
 import java.io.IOException;
 import java.util.Set;
@@ -27,6 +28,7 @@ public interface SpatialContainmentDao {
      */
     public TIntSet getContainedItemIds(Integer itemId, String layerName, String refSysName, Set<String> subLayers, ContainmentOperationType opType) throws DaoException;
 
+    public PostGISDB getDb();
 
     /**
      * Returns the item ids spatially contained/intersected with the input geometry
