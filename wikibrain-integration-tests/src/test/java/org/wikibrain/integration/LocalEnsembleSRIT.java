@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
@@ -36,13 +37,13 @@ public class LocalEnsembleSRIT {
         TestDB db = TestUtils.getTestDb();
         db.restoreLucene();
     }
-
+    @Ignore
     @Test
     public void testESAAccuracy() throws Exception {
         testAccuracy("ESA", 0.50, 0.58, 0);
         testExplain("ESA", "President", "Obama");
     }
-
+    @Ignore
     @Test
     public void testMilneWittenAccuracy() throws Exception {
         testAccuracy("milnewitten", 0.35, 0.37, 0);

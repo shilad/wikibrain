@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -36,6 +37,7 @@ public class PhraseLoaderIT {
         db.restoreLucene();
     }
 
+    @Ignore
     @Test
     public void testLoader() throws ClassNotFoundException, SQLException, WikiBrainException, DaoException, ConfigurationException, IOException, InterruptedException {
         PhraseLoader.main(TestUtils.getArgs("-p", "lucene")); // lucene requires no loading!
