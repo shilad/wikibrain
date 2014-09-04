@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
@@ -26,6 +27,7 @@ public class WikiTextLoaderIT {
         db.restoreRedirect();
     }
 
+    @Ignore
     @Test
     public void testLoader() throws ClassNotFoundException, SQLException, DaoException, ConfigurationException, IOException {
         WikiTextLoader.main(TestUtils.getArgs("-d"));

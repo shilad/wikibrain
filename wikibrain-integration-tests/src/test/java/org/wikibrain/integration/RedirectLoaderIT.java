@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.dao.DaoException;
@@ -28,6 +29,7 @@ public class RedirectLoaderIT {
         dao = testDB.getEnv().getConfigurator().get(LocalPageDao.class);
     }
 
+    @Ignore
     @Test
     public void testRedirects() throws DaoException, ConfigurationException {
         RedirectLoader.main(TestUtils.getArgs("-d"));

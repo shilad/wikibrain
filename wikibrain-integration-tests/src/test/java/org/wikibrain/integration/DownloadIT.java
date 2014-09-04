@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.WikiBrainException;
@@ -20,6 +21,7 @@ import static org.junit.Assert.*;
  */
 public class DownloadIT {
 
+    @Ignore
     @Test
     public void testLinkGetter() throws ConfigurationException, WikiBrainException, ParseException, IOException {
         RequestedLinkGetter.main(TestUtils.getArgs());
