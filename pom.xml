@@ -118,7 +118,7 @@
             </build>
         </profile>
         <profile>
-            <id>release-version</id>
+            <id>release-profile</id>
             <activation>
                 <property>
                     <name>performRelease</name>
