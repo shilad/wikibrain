@@ -1,6 +1,7 @@
 package org.wikibrain.spatial.distance;
 
 import com.vividsolutions.jts.geom.Geometry;
+import gnu.trove.set.TIntSet;
 import org.wikibrain.core.dao.DaoException;
 
 import java.util.List;
@@ -21,6 +22,8 @@ public interface SpatialDistanceMetric {
             this.distance = distance;
         }
     }
+
+    void setValidConcepts(TIntSet concepts);
 
     /**
      * Build an efficient in-memory cache if helpful.

@@ -35,6 +35,7 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
         this.spatialDao = spatialDao;
     }
 
+    @Override
     public void setValidConcepts(TIntSet concepts) {
         this.concepts = concepts;
     }

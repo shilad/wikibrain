@@ -32,6 +32,7 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
     private final GeodeticDistanceMetric geodetic;
     private int numNeighbors = 20;
     private int maxDistance = 10;
+    private TIntSet concepts;
 
     public GraphDistanceMetric(SpatialDataDao dao, GeodeticDistanceMetric geodetic) throws DaoException {
         this.spatialDao = dao;
@@ -47,12 +48,20 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
     }
 
     @Override
+    public void setValidConcepts(TIntSet concepts) {
+        this.concepts = concepts;
+    }
+
+    @Override
     public void enableCache(boolean enable) throws DaoException {
         final Map<Integer, Geometry> points = this.spatialDao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH);
         ParallelForEach.loop(points.keySet(), WpThreadUtils.getMaxThreads(),
                 new Procedure<Integer>() {
                     @Override
                     public void call(Integer conceptId) throws Exception {
+                        if (concepts != null && !concepts.contains(conceptId)) {
+                            return;
+                        }
                         TIntSet neighbors = new TIntHashSet();
                         for (Neighbor n : geodetic.getNeighbors(points.get(conceptId), numNeighbors)) {
                             neighbors.add(n.conceptId);
