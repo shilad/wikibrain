@@ -14,8 +14,8 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialContainmentDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.io.File;

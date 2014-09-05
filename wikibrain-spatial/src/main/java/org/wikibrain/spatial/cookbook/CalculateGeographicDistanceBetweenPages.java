@@ -7,16 +7,14 @@ import org.geotools.referencing.GeodeticCalculator;
 
 
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.LocalPageDao;
-import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.util.List;

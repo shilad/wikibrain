@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.core.dao.postgis;
+package org.wikibrain.spatial.dao.postgis;
 
 import org.geotools.data.postgis.PostgisNGDataStoreFactory;
 import org.geotools.jdbc.JDBCDataStore;

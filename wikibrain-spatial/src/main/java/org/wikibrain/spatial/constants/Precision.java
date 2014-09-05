@@ -1,6 +1,5 @@
-package org.wikibrain.spatial.core.constants;
+package org.wikibrain.spatial.constants;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 /**

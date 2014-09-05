@@ -8,7 +8,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataEntity;
 import org.wikibrain.wikidata.WikidataStatement;
@@ -17,9 +17,7 @@ import org.wikibrain.wikidata.WikidataValue;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Calculates the distance between all countries in Wikipedia.

@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.core;
+package org.wikibrain.spatial;
 
 import org.apache.commons.io.FileUtils;
 import org.geotools.data.DataStore;

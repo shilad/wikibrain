@@ -11,11 +11,10 @@ import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.pageview.PageViewDao;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpCollectionUtils;
-import org.wikibrain.wikidata.WikidataDao;
 
 import java.util.HashMap;
 import java.util.Map;

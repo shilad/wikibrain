@@ -15,7 +15,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.spatial.loader.SpatialDataDownloader;
 import org.wikibrain.spatial.loader.SpatialDataFolder;
-import org.wikibrain.spatial.core.WikiBrainShapeFile;
+import org.wikibrain.spatial.WikiBrainShapeFile;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.*;

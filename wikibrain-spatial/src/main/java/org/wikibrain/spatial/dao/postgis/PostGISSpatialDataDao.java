@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.core.dao.postgis;
+package org.wikibrain.spatial.dao.postgis;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -20,10 +20,10 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
-import org.wikibrain.spatial.core.SpatialContainerMetadata;
-import org.wikibrain.spatial.core.constants.Precision;
-import org.wikibrain.spatial.core.constants.RefSys;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.SpatialContainerMetadata;
+import org.wikibrain.spatial.constants.Precision;
+import org.wikibrain.spatial.constants.RefSys;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.io.IOException;

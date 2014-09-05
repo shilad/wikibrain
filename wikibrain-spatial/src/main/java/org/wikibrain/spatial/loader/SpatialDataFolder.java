@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.core.WikiBrainException;
-import org.wikibrain.spatial.core.WikiBrainShapeFile;
+import org.wikibrain.spatial.WikiBrainShapeFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;

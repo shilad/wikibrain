@@ -16,9 +16,9 @@ import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.spatial.loader.SpatialDataFolder;
-import org.wikibrain.spatial.core.WikiBrainShapeFile;
+import org.wikibrain.spatial.WikiBrainShapeFile;
 
 import java.io.File;
 import java.io.IOException;

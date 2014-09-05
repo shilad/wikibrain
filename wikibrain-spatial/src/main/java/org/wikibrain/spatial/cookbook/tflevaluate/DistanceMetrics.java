@@ -7,7 +7,7 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
+import org.wikibrain.spatial.dao.SpatialNeighborDao;
 
 import java.util.HashMap;
 import java.util.HashSet;

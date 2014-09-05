@@ -13,7 +13,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.wikidata.WikidataDao;
 import gnu.trove.map.TIntObjectMap;
