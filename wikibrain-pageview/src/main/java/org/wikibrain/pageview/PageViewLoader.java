@@ -92,19 +92,20 @@ public class PageViewLoader {
 
         List<Interval> intervals = new ArrayList<Interval>();
         if (cmd.hasOption("s")) {
-            DateTime start = DateTime.now().minusWeeks(1);
-            DateTime end = start.plusMinutes(60 * 2 - 1);
-            intervals.add(new Interval(start, end));
-        } else {
             String [] startStrings = cmd.getOptionValues("s");
             String [] endStrings = cmd.hasOption("e") ? cmd.getOptionValues("e") : new String[0];
             for (int i = 0; i < startStrings.length; i++) {
                 DateTime start = parseDateOrDie(startStrings[i]);
                 DateTime end = (endStrings.length >= i)
-                                    ? parseDateOrDie(endStrings[i])
-                                    : start.plusMinutes(60 * 2 - 1);
+                        ? parseDateOrDie(endStrings[i])
+                        : start.plusMinutes(60 * 2 - 1);
                 intervals.add(new Interval(start, end));
             }
+        } else {
+            // Default to two hours of views a week ago.
+            DateTime start = DateTime.now().minusWeeks(1);
+            DateTime end = start.plusMinutes(60 * 2 - 1);
+            intervals.add(new Interval(start, end));
         }
 
         Env env = new EnvBuilder(cmd).build();
