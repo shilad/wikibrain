@@ -109,7 +109,7 @@ public class PageViewLoader {
 
         Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
-        PageViewSqlDao dao = conf.get(PageViewSqlDao.class);
+        PageViewDao dao = conf.get(PageViewDao.class);
         PageViewLoader loader = new PageViewLoader(env.getLanguages(), dao);
 
         if (cmd.hasOption("d")) {
