@@ -30,8 +30,8 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
     private final SpatialDataDao spatialDao;
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
     private final GeodeticDistanceMetric geodetic;
-    private int numNeighbors = 100;
-    private int maxDistance = 50;
+    private int numNeighbors = 20;
+    private int maxDistance = 10;
 
     public GraphDistanceMetric(SpatialDataDao dao, GeodeticDistanceMetric geodetic) throws DaoException {
         this.spatialDao = dao;
@@ -72,6 +72,9 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public double distance(Geometry g1, Geometry g2) {
+        if (adjacencyList.isEmpty()) {
+            throw new UnsupportedOperationException();
+        }
         // Hack: Replace g2 with CLOSEST concept
         List<Neighbor> closest = geodetic.getNeighbors(g2, 1);
         int maxSteps = maxDistance;

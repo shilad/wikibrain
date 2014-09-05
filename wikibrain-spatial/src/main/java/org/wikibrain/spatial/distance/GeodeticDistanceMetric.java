@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
+import gnu.trove.set.TIntSet;
 import net.sf.jsi.Rectangle;
 import net.sf.jsi.rtree.RTree;
 import org.geotools.referencing.GeodeticCalculator;
@@ -28,9 +29,14 @@ import java.util.Map;
 public class GeodeticDistanceMetric implements SpatialDistanceMetric {
     private RTree index;
     private final SpatialDataDao spatialDao;
+    private TIntSet concepts;
 
     public GeodeticDistanceMetric(SpatialDataDao spatialDao) {
         this.spatialDao = spatialDao;
+    }
+
+    public void setValidConcepts(TIntSet concepts) {
+        this.concepts = concepts;
     }
 
     /**
@@ -51,6 +57,9 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
                 new Procedure<Integer>() {
             @Override
             public void call(Integer conceptId) throws Exception {
+                if (concepts != null && !concepts.contains(conceptId)) {
+                    return;
+                }
                 Envelope e = points.get(conceptId)
                         .getEnvelope()
                         .buffer(1 / 10000.0)    // roughly 10m

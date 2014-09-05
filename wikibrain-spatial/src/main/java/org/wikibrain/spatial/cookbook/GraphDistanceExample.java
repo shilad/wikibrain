@@ -22,7 +22,7 @@ import java.util.Random;
 /**
  * @author Shilad Sen
  */
-public class GraphDistance {
+public class GraphDistanceExample {
     public static void main(String args[]) throws ConfigurationException, DaoException {
         Env env = EnvBuilder.envFromArgs(args);
         Language lang = env.getDefaultLanguage();
@@ -44,7 +44,7 @@ public class GraphDistance {
             int univId1 = ids.get(random.nextInt(ids.size()));
             int univId2 = ids.get(random.nextInt(ids.size()));
             LocalPage page1 = pageDao.getById(lang, conceptDao.getLocalId(lang, univId1));
-            LocalPage page2 = pageDao.getById(lang, conceptDao.getLocalId(lang, univId1));
+            LocalPage page2 = pageDao.getById(lang, conceptDao.getLocalId(lang, univId2));
             double distance = metric2.distance(points.get(univId1), points.get(univId2));
             System.out.println("distance between " + page1 + " and " + page2 + " is " + distance);
         }
