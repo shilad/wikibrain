@@ -20,6 +20,8 @@ import org.wikibrain.utils.WpThreadUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * Estimates the number of kilometers between geometries.
@@ -27,6 +29,8 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class GraphDistanceMetric implements SpatialDistanceMetric {
+    private static final Logger LOG = Logger.getLogger(GraphDistanceMetric.class.getName());
+
     private final SpatialDataDao spatialDao;
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
     private final GeodeticDistanceMetric geodetic;
@@ -54,6 +58,7 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public void enableCache(boolean enable) throws DaoException {
+        final AtomicInteger numEdges = new AtomicInteger();
         final Map<Integer, Geometry> points = this.spatialDao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH);
         ParallelForEach.loop(points.keySet(), WpThreadUtils.getMaxThreads(),
                 new Procedure<Integer>() {
@@ -66,11 +71,13 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
                         for (Neighbor n : geodetic.getNeighbors(points.get(conceptId), numNeighbors)) {
                             neighbors.add(n.conceptId);
                         }
+                        numEdges.addAndGet(neighbors.size());
                         synchronized (adjacencyList) {
                             adjacencyList.put(conceptId, neighbors);
                         }
                     }
                 }, 50000);
+        LOG.info("Found " + adjacencyList.size() + " edges and " + numEdges.get() + " edges.");
     }
 
     @Override
