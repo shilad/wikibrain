@@ -18,6 +18,7 @@ import org.wikibrain.utils.WpThreadUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Estimates the number of kilometers between geometries.
@@ -27,6 +28,7 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class GeodeticDistanceMetric implements SpatialDistanceMetric {
+    private static final Logger LOG = Logger.getLogger(SpatialDistanceMetric.class.getName());
     private RTree index;
     private final SpatialDataDao spatialDao;
     private TIntSet concepts;
@@ -73,6 +75,7 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
                 }
             }
         }, 100000);
+        LOG.info("loaded " + index.size() + " points");
     }
 
     @Override
