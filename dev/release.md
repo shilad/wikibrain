@@ -9,11 +9,15 @@
  2. Release new version: 
 
     ```bash
-    # for major releases (creates new branch)
-    ./push-major-release.sh 0.x.0
     
-    # for point releases
-    ./push-minor-release.sh 0.x.0
+    # for major releases
+    git checkout develop
+    mvn jgitflow:release-start -DskipTests=true
+    mvn jgitflow:release-finish -DskipTests=true
+    git checkout <release-version>
+    ./push-major-release.sh
+    git checkout develop
+    
     ```
 
  3. Bump snapshot release:
