@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.4.1</version>
     </parent>
 
     <artifactId>wikibrain-cookbook</artifactId>
@@ -14,37 +14,37 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-mapper</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-sr</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-wikidata</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-loader</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-parser</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-pageview</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-spatial</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.sun.corba</groupId>
