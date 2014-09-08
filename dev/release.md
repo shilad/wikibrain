@@ -14,9 +14,10 @@
     git checkout develop
     mvn jgitflow:release-start -DskipTests=true
     mvn jgitflow:release-finish -DskipTests=true
+    git checkout <release-version>
     ./push-major-release.sh
+    git checkout develop
     
-    # for point releases (TODO)
     ```
 
  3. Bump snapshot release:
