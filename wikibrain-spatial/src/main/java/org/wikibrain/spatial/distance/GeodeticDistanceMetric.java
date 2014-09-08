@@ -1,9 +1,6 @@
 package org.wikibrain.spatial.distance;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 import gnu.trove.set.TIntSet;
 import net.sf.jsi.Rectangle;
@@ -124,7 +121,27 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
         return index.nearestN(p, maxNeighbors, (float)maxDistance);
     }
 
+    public Geometry cleanupGeometry(Geometry g) {
+        if (!(g instanceof MultiPolygon)) {
+            return g;
+        }
+        Geometry largest = null;
+        double largestArea = -1;
+        MultiPolygon mp = (MultiPolygon)g;
+        for (int i = 0; i < mp.getNumGeometries(); i++) {
+            Geometry g2 = mp.getGeometryN(i);
+            double area = g2.getArea();
+            if (area > largestArea) {
+                largestArea = area;
+                largest = g2;
+            }
+        }
+        return largest;
+    }
+
     private double distance(GeodeticCalculator calc, Geometry g1, Geometry g2) {
+        g1 = cleanupGeometry(g1);
+        g2 = cleanupGeometry(g2);
         Coordinate[] pair = DistanceOp.nearestPoints(g1, g2);
         calc.setStartingGeographicPoint(pair[0].x, pair[0].y);
         calc.setDestinationGeographicPoint(pair[1].x, pair[1].y);
