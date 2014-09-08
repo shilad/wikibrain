@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.core.constants;
+package org.wikibrain.spatial.constants;
 
 /**
  * Series of static variables to simplify access to reference systems loaded by default.

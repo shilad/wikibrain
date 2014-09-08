@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.core.dao.postgis;
+package org.wikibrain.spatial.dao.postgis;
 
 import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
@@ -17,7 +17,7 @@ import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
+import org.wikibrain.spatial.dao.SpatialContainmentDao;
 
 import java.io.IOException;
 import java.util.List;

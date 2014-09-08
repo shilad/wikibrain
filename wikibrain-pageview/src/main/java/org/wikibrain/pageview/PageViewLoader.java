@@ -3,6 +3,7 @@ package org.wikibrain.pageview;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.wikibrain.conf.ConfigurationException;
@@ -16,6 +17,9 @@ import org.wikibrain.core.lang.LanguageSet;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,8 +42,8 @@ public class PageViewLoader {
         return dao;
     }
 
-    public void load(DateTime startDate, DateTime endDate) throws DaoException {
-        dao.ensureLoaded(startDate, endDate, languageSet);
+    public void load(List<Interval> intervals) throws DaoException {
+        dao.ensureLoaded(intervals, languageSet);
     }
 
     /**
@@ -66,13 +70,13 @@ public class PageViewLoader {
                 new DefaultOptionBuilder()
                         .withLongOpt("start-date")
                         .withDescription("date at which to start loading page view files")
-                        .hasArg()
+                        .hasArgs()
                         .create("s"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("end-date")
                         .withDescription("date at which to stop loading page view files")
-                        .hasArg()
+                        .hasArgs()
                         .create("e"));
         EnvBuilder.addStandardOptions(options);
 
@@ -86,22 +90,27 @@ public class PageViewLoader {
             return;
         }
 
-        /**
-         * By default, load one days worth of data from a week ago.
-         */
-        DateTime start = DateTime.now().minusWeeks(1);
+        List<Interval> intervals = new ArrayList<Interval>();
         if (cmd.hasOption("s")) {
-            start = parseDateOrDie(cmd.getOptionValue("s"));
-        }
-
-        DateTime end = start.plusMinutes(60 * 2 - 1);
-        if (cmd.hasOption("e")) {
-            end = parseDateOrDie(cmd.getOptionValue("e"));
+            String [] startStrings = cmd.getOptionValues("s");
+            String [] endStrings = cmd.hasOption("e") ? cmd.getOptionValues("e") : new String[0];
+            for (int i = 0; i < startStrings.length; i++) {
+                DateTime start = parseDateOrDie(startStrings[i]);
+                DateTime end = (endStrings.length >= i)
+                        ? parseDateOrDie(endStrings[i])
+                        : start.plusMinutes(60 * 2 - 1);
+                intervals.add(new Interval(start, end));
+            }
+        } else {
+            // Default to two hours of views a week ago.
+            DateTime start = DateTime.now().minusWeeks(1);
+            DateTime end = start.plusMinutes(60 * 2 - 1);
+            intervals.add(new Interval(start, end));
         }
 
         Env env = new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
-        PageViewSqlDao dao = conf.get(PageViewSqlDao.class);
+        PageViewDao dao = conf.get(PageViewDao.class);
         PageViewLoader loader = new PageViewLoader(env.getLanguages(), dao);
 
         if (cmd.hasOption("d")) {
@@ -109,10 +118,9 @@ public class PageViewLoader {
             dao.clear();
         }
 
-        SortedSet<DateTime> tstamps = PageViewUtils.timestampsInInterval(start, end);
-        LOG.info("loading pageview data for " + tstamps.size() + " hours");
+        LOG.info("loading pageview data for intervals " + intervals);
 
-        loader.load(start, end);
+        loader.load(intervals);
 
         LOG.log(Level.INFO, "DONE");
     }

@@ -11,9 +11,9 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.spatial.core.constants.Layers;
-import org.wikibrain.spatial.core.constants.RefSys;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.constants.Layers;
+import org.wikibrain.spatial.constants.RefSys;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.spatial.matcher.MappedShapefileLoader;
 import org.wikibrain.wikidata.WikidataDao;
 

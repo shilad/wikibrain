@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.core.dao.postgis;
+package org.wikibrain.spatial.dao.postgis;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -30,7 +30,7 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.sql.WpDataSource;
-import org.wikibrain.spatial.core.SpatialContainerMetadata;
+import org.wikibrain.spatial.SpatialContainerMetadata;
 
 import java.io.IOException;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.core;
+package org.wikibrain.spatial;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;

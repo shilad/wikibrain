@@ -2,9 +2,6 @@ package org.wikibrain.spatial.cookbook;
 
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import gnu.trove.set.TIntSet;
-import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
@@ -14,11 +11,9 @@ import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
-import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.cookbook.tflevaluate.DistanceMetrics;
-import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialNeighborDao;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.util.HashSet;

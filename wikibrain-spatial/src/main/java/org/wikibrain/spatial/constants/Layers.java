@@ -1,4 +1,4 @@
-package org.wikibrain.spatial.core.constants;
+package org.wikibrain.spatial.constants;
 
 /**
  *

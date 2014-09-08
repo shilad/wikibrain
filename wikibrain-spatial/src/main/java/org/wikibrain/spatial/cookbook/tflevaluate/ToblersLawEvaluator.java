@@ -15,7 +15,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.utils.ParallelForEach;

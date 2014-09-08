@@ -9,7 +9,7 @@ import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
+import org.wikibrain.spatial.dao.postgis.PostGISDB;
 import org.wikibrain.spatial.loader.SpatialDataLoader;
 
 import java.io.IOException;

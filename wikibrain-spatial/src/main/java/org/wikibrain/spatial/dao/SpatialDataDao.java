@@ -1,10 +1,10 @@
-package org.wikibrain.spatial.core.dao;
+package org.wikibrain.spatial.dao;
 
 import com.vividsolutions.jts.geom.Geometry;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.spatial.core.SpatialContainerMetadata;
-import org.wikibrain.spatial.core.constants.Precision;
+import org.wikibrain.spatial.SpatialContainerMetadata;
+import org.wikibrain.spatial.constants.Precision;
 
 import java.util.List;
 import java.util.Map;
