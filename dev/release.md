@@ -12,8 +12,9 @@
     
     # for major releases
     git checkout develop
-    mvn jgitflow:release-start
-    mvn jgitflow:release-finish
+    mvn jgitflow:release-start -DskipTests=true
+    mvn jgitflow:release-finish -DskipTests=true
+    ./push-major-release.sh
     
     # for point releases (TODO)
     ```
