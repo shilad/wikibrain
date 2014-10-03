@@ -35,7 +35,7 @@ WikiBrain integrates a variety of specific algorithms and datasets in one framew
 
 ## An example program
 Once you have [imported data](tutorial/importing.html), you can write programs that analyze Wikipedia.
-Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/phrases/cookbook/ResolveExample.java) you can find in the Cookbook:
+Here's a [simple example](https://github.com/shilad/wikibrain/blob/master/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/Quickstart.java) you can find in the Cookbook:
 
 ```java
 // Prepare the environment
