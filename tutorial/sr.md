@@ -33,8 +33,8 @@ LocalPageDao lpDao = conf.get(LocalPageDao.class);
 Language simple = Language.getByLangCode("simple");
 
 // Retrieve the "ensemble" sr metric for simple english 
-MonolingualSRMetric sr = conf.get(
-        MonolingualSRMetric.class, "ensemble",
+SRMetric sr = conf.get(
+        SRMetric.class, "ensemble",
         "language", simple.getLangCode());
 
 //Similarity between strings 
@@ -58,7 +58,7 @@ This code (on Simple english) displays:
 *vim* is similar to 1) Vim, 2) Text editor, 3) GNU Emacs
 ```
 
-You can also calculate a relatedness score between any two pages or phrases using the same MonolingualSRMetric:
+You can also calculate a relatedness score between any two pages or phrases using the same SRMetric:
 
 ```java
 //Similarity between strings 
