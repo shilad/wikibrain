@@ -169,7 +169,7 @@ While this is convenient, it does not scale well and does not currently support 
 For language editions with more than 1M articles, Postgres is recommended.
 
 You can configure the project to use postgresql by adjusting the configuration as stated above. 
-The relevant section of the [default reference.conf](wikibrain-core/src/main/resources/reference.conf) is:
+The relevant section of the [default reference.conf](https://github.com/shilad/wikibrain/blob/master/wikibrain-core/src/main/resources/reference.conf) is:
 
 ```
 dao : {
