@@ -65,7 +65,7 @@ public class WikidataLayerLoader {
                     LOG.log(Level.SEVERE, "storage of statement failed: " + statement.toString(), e);
                     miDao.incrementErrorsQuietly(Geometry.class);
                 }
-                if (count.incrementAndGet() % 10000 == 0){
+                 if (count.incrementAndGet() % 10000 == 0){
                     LOG.log(Level.INFO, "Matched " + matches + " out of " + count + " statements from " + this.getClass().getName());
                 }
             }

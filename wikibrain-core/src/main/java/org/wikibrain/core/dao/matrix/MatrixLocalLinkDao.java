@@ -206,7 +206,6 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
     @Override
     public void endLoad() throws DaoException {
-        delegate.endLoad();
 
         try {
             // close the old matrix and transpose
@@ -282,6 +281,8 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         } catch (IOException e) {
             throw new DaoException(e);
         }
+        delegate.endLoad();
+
     }
 
     @Override

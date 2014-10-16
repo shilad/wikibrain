@@ -130,7 +130,7 @@ public class WikidataDumpLoader {
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("d"));
-        EnvBuilder.addStandardOptions(options);
+        //EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd;

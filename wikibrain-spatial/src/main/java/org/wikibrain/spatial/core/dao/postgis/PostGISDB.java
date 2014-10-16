@@ -359,8 +359,8 @@ public class PostGISDB {
     private void initialize(Map<String, Object> manualParameters) throws DaoException {
 
         try {
-            PostGISVersionChecker versionChecker = new PostGISVersionChecker();
-            versionChecker.verifyVersion(manualParameters);
+           // PostGISVersionChecker versionChecker = new PostGISVersionChecker();
+            //versionChecker.verifyVersion(manualParameters);
 
             store = (JDBCDataStore)DataStoreFinder.getDataStore(manualParameters);
 

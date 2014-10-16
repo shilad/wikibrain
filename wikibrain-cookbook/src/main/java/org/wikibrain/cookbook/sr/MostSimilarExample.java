@@ -30,7 +30,7 @@ public class MostSimilarExample {
                 "language", simple.getLangCode());
 
         //Similarity between strings
-        for (String phrase : Arrays.asList("Barack Obama", "US", "Canada", "vim")) {
+        for (String phrase : Arrays.asList("Barack Obama", "US", "Canada", "vim", "Dinkytown")) {
             SRResultList similar = sr.mostSimilar(phrase, 3);
             List<String> pages = new ArrayList<String>();
             for (int i = 0; i < similar.numDocs(); i++) {

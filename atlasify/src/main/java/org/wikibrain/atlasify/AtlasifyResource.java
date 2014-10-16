@@ -68,9 +68,11 @@ public class AtlasifyResource {
 
             Language simple = Language.getByLangCode("simple");
 
+
+
             sr = conf.get(
                     SRMetric.class, "ensemble",
-                    "language", simple.getLangCode());
+                    "language", "simple");
 
 
         } catch (ConfigurationException e) {

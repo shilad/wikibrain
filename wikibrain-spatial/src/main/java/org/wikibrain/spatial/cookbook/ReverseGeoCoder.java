@@ -18,6 +18,9 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.UniversalPageDao;
+import org.wikibrain.core.jooq.tables.LocalPage;
 import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
 import org.wikibrain.spatial.core.dao.SpatialDataDao;
 import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
@@ -25,6 +28,7 @@ import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,15 +42,27 @@ public class ReverseGeoCoder  {
         CSVReader reader = new CSVReader(new FileReader("lat_lon_codes.csv"), ',');
         CSVWriter writer = new CSVWriter(new FileWriter("new_lat_lon_codes.csv"), ',');
         SpatialContainmentDao scDao = conf.get(SpatialContainmentDao.class);
+        UniversalPageDao upDao = conf.get(UniversalPageDao.class);
+        LocalPageDao lpDao = conf.get(LocalPageDao.class);
+        int cnt = 0;
         for(String[] row : reader.readAll()){
-            double lat = Double.parseDouble(row[2]);
-            double lon = Double.parseDouble(row[3]);
-
+            cnt ++;
+            if(cnt % 1000 == 0)
+                System.out.println("finished " + String.valueOf(cnt));
+            double lat = 0, lon = 0;
+            try{
+                lat = Double.parseDouble(row[3]);
+                lon = Double.parseDouble(row[2]);
+            }
+            catch (Exception e){
+                continue;
+            }
             Geometry g = new GeometryFactory().createPoint(new Coordinate(lat, lon));
 
 
             // *** BUILD SOMEWHAT COMPLEX QUERY ***
             PostGISDB db = scDao.getDb();
+            //PostGISDB db = new PostGISDB(new HashMap<String, Object>());
             FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
             PropertyName geomProperty = ff.property(db.getGeometryAttributeName());
 
@@ -96,6 +112,22 @@ public class ReverseGeoCoder  {
 
             }
             featureIterator.close();
+
+            String[] writeRow = new String[5];
+            for(int i = 0; i < 4; i ++){
+                writeRow[i] = row[i];
+            }
+            int[] result = new int[10];
+            result = rVal.toArray(result);
+            writeRow[4] = "";
+            try{
+                writeRow[4] = upDao.getById(result[0]).getBestEnglishTitle(lpDao, true).getCanonicalTitle();
+            }
+            catch (Exception e){
+                //do nothing
+            }
+            writer.writeNext(writeRow);
+            writer.flush();
 
 
 
