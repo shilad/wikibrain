@@ -3,7 +3,7 @@ package org.wikibrain.spatial.dao;
 import com.vividsolutions.jts.geom.Geometry;
 import gnu.trove.set.TIntSet;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
+import org.wikibrain.spatial.dao.postgis.PostGISDB;
 
 import java.util.Set;
 

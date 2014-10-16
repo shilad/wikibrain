@@ -17,10 +17,10 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.spatial.cookbook.tflevaluate.DistanceMetrics;
-import org.wikibrain.spatial.core.constants.RefSys;
-import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
+import org.wikibrain.spatial.constants.RefSys;
+import org.wikibrain.spatial.dao.SpatialContainmentDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialNeighborDao;
 
 import java.io.*;
 import java.util.*;

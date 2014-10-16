@@ -21,9 +21,9 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.jooq.tables.LocalPage;
-import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.spatial.core.dao.postgis.PostGISDB;
+import org.wikibrain.spatial.dao.SpatialContainmentDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.postgis.PostGISDB;
 
 import java.io.FileReader;
 import java.io.FileWriter;
