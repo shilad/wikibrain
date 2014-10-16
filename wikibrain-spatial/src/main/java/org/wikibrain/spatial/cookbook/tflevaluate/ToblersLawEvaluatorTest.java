@@ -5,7 +5,7 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 
 import java.io.File;
 import java.util.*;

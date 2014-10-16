@@ -29,10 +29,10 @@ public class SimilarityDisambiguator extends Disambiguator {
      * Algorithms for disambiguating similar phrases
      */
     public static enum Criteria {
-        SUM,         // cluster senses with highest sum of popularity + similarity
-        PRODUCT,     // cluster senses with highest sum of popularity * similarity
-        POPULARITY,  // cluster most popular senses
-        SIMILARITY   // cluster most similar senses
+        SUM,         // select senses with highest sum of popularity + similarity
+        PRODUCT,     // select senses with highest sum of popularity * similarity
+        POPULARITY,  // select most popular senses
+        SIMILARITY   // select most similar senses
     }
 
     // Method for disambiguating similar phrases

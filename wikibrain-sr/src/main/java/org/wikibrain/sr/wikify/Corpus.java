@@ -10,6 +10,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.phrases.AnchorTextPhraseAnalyzer;
+import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.phrases.PhraseAnalyzerDao;
 import org.wikibrain.sr.word2vec.Word2Phrase;
@@ -28,14 +29,16 @@ public class Corpus {
     private final RawPageDao rawPageDao;
     private final LocalPageDao localPageDao;
     private final PhraseAnalyzerDao phraseAnalyzerDao;
+    private final LinkProbabilityDao linkProbabilityDao;
 
-    public Corpus(Language language, File directory, Wikifier wikifer, RawPageDao rawPageDao, LocalPageDao localPageDao, PhraseAnalyzerDao phraseAnalyzerDao) {
+    public Corpus(Language language, File directory, Wikifier wikifer, RawPageDao rawPageDao, LocalPageDao localPageDao, PhraseAnalyzerDao phraseAnalyzerDao, LinkProbabilityDao linkProbabilityDao) {
         this.language = language;
         this.directory = directory;
         this.wikifer = wikifer;
         this.rawPageDao = rawPageDao;
         this.localPageDao = localPageDao;
         this.phraseAnalyzerDao = phraseAnalyzerDao;
+        this.linkProbabilityDao = linkProbabilityDao;
     }
 
     public File getDirectory() {
@@ -46,18 +49,8 @@ public class Corpus {
         FileUtils.deleteQuietly(directory);
         directory.mkdirs();
 
-        File tmpCorpus = File.createTempFile("corpus", "");
-        tmpCorpus.delete();
-        tmpCorpus.mkdirs();
-
-        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(language, wikifer, rawPageDao, localPageDao);
-        creator.write(tmpCorpus);
-        FileUtils.forceDeleteOnExit(tmpCorpus);
-
-        Word2Phrase w2p = new Word2Phrase(language, phraseAnalyzerDao);
-        w2p.concatenateBigrams(tmpCorpus, directory, 4);
-
-        FileUtils.deleteQuietly(tmpCorpus);
+        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(language, wikifer, rawPageDao, localPageDao, linkProbabilityDao);
+        creator.write(directory);
     }
 
     public File getCorpusFile() {
@@ -99,6 +92,7 @@ public class Corpus {
             AnchorTextPhraseAnalyzer phraseAnalyzer = (AnchorTextPhraseAnalyzer)c.get(
                     PhraseAnalyzer.class, config.getString("phraseAnalyzer"));
             PhraseAnalyzerDao paDao = phraseAnalyzer.getDao();
+            LinkProbabilityDao linkProbabilityDao = c.get(LinkProbabilityDao.class);
 
             return new Corpus(
                     lang,
@@ -106,7 +100,8 @@ public class Corpus {
                     wikifier,
                     c.get(RawPageDao.class, config.getString("rawPageDao")),
                     c.get(LocalPageDao.class, config.getString("localPageDao")),
-                    paDao
+                    paDao,
+                    linkProbabilityDao
             );
         }
     }

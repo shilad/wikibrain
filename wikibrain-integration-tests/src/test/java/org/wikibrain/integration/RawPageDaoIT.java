@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
@@ -33,7 +34,7 @@ public class RawPageDaoIT {
         dao = testDb.getEnv().getConfigurator().get(RawPageDao.class);
         metaDao = testDb.getEnv().getConfigurator().get(MetaInfoDao.class);
     }
-
+    @Ignore
     @Test
     public void testIteration() throws DaoException {
 
@@ -69,6 +70,7 @@ public class RawPageDaoIT {
 
     }
 
+    @Ignore
     @Test
     public void testMeta() throws DaoException {
         MetaInfo mi = metaDao.getInfo(RawPage.class);

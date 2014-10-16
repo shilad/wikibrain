@@ -118,6 +118,9 @@ public class Word2VecTrainer {
                 new Procedure<String>() {
                     @Override
                     public void call(String sentence) throws Exception {
+                        if (sentence.startsWith("@WikiBrain")) {
+                            return;
+                        }
                         int n = trainSentence(sentence);
                         wordsTrainedSoFar.addAndGet(n);
 
@@ -129,8 +132,6 @@ public class Word2VecTrainer {
                 },
                 10000);
         iterator.close();
-
-
     }
 
     public void readWords(File dictionary) throws IOException, DaoException {

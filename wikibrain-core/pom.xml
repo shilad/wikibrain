@@ -1,14 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>${wikibrain.version}</version>
-        <relativePath>../wikibrain-parent</relativePath>
+        <version>0.4.1</version>
     </parent>
 
   <artifactId>wikibrain-core</artifactId>
@@ -17,12 +13,12 @@
       <dependency>
           <groupId>org.wikibrainapi</groupId>
           <artifactId>wikibrain-utils</artifactId>
-          <version>${wikibrain.version}</version>
+          <version>0.4.1</version>
       </dependency>
       <dependency>
           <groupId>org.wikibrainapi</groupId>
           <artifactId>wikibrain-matrix</artifactId>
-          <version>${wikibrain.version}</version>
+          <version>0.4.1</version>
       </dependency>
       <dependency>
           <groupId>org.jooq</groupId>
@@ -127,7 +123,7 @@
                     <driver>org.h2.Driver</driver>
                     <url>jdbc:h2:tmp/maven-test</url>
                     <username>sa</username>
-                    <password></password>
+                    <password />
                     <!--all executions are ignored if -Dmaven.test.skip=true -->
                     <!--<skip>${maven.test.skip}</skip>-->
                     <autocommit>true</autocommit>
@@ -182,14 +178,14 @@
                         <driver>org.h2.Driver</driver>
                         <url>jdbc:h2:tmp/maven-test</url>
                         <user>sa</user>
-                        <password></password>
+                        <password />
                     </jdbc>
                     <generator>
                         <name>org.jooq.util.DefaultGenerator</name>
                         <database>
                             <name>org.jooq.util.h2.H2Database</name>
                             <includes>.*</includes>
-                            <excludes></excludes>
+                            <excludes />
                             <dateAsTimestamp>true</dateAsTimestamp>
                             <inputSchema>PUBLIC</inputSchema>
                         </database>

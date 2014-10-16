@@ -1,9 +1,14 @@
 package org.wikibrain.sr.wikify;
 
 import gnu.trove.TCollections;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
@@ -12,6 +17,8 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.nlp.Dictionary;
 import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
+import org.wikibrain.phrases.LinkProbabilityDao;
+import org.wikibrain.phrases.PhraseTokenizer;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
@@ -19,8 +26,7 @@ import org.wikibrain.utils.WpIOUtils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -34,15 +40,18 @@ public abstract class BaseCorpusCreator {
 
     private final Wikifier wikifier;
     private final LocalPageDao pageDao;
-
     private Dictionary dictionary;
     private BufferedWriter corpus;
     private TIntObjectMap<String> mentionUrls = TCollections.synchronizedMap(new TIntObjectHashMap<String>());
 
-    public BaseCorpusCreator(Language language, LocalPageDao pageDao, Wikifier wikifier) {
+    private boolean joinPhrases = true;
+    private final PhraseTokenizer phraseTokenizer;
+
+    public BaseCorpusCreator(Language language, LocalPageDao pageDao, Wikifier wikifier, LinkProbabilityDao linkProbDao) {
         this.language = language;
         this.pageDao = pageDao;
         this.wikifier = wikifier;
+        this.phraseTokenizer = new PhraseTokenizer(linkProbDao);
     }
 
     /**
@@ -59,6 +68,11 @@ public abstract class BaseCorpusCreator {
         dir.mkdirs();
         dictionary = new Dictionary(language, Dictionary.WordStorage.ON_DISK);
         corpus = WpIOUtils.openWriter(new File(dir, "corpus.txt"));
+        corpus.write(String.format("@WikiBrainCorpus %s %s %s\n",
+                this.language.getLangCode(),
+                this.getClass().getName(),
+                wikifier.getClass().getName()
+            ));
         ParallelForEach.iterate(getCorpus(), new Procedure<IdAndText>() {
             @Override
             public void call(IdAndText text) throws Exception {
@@ -76,33 +90,51 @@ public abstract class BaseCorpusCreator {
         } else {
             mentions = wikifier.wikify(text.getText());
         }
+        LocalPage page = pageDao.getById(language, text.getId());
+        String title = (page == null) ? "Unknown" : page.getTitle().getCanonicalTitle();
         StringBuilder document = new StringBuilder();
+        document.append("\n@WikiBrainDoc\t" + text.getId() + "\t" + title + "\n");
+
         for (Token sentence : tokenizer.getSentenceTokens(language, text.getText())) {
-            String processSentence = processSentence(sentence, mentions);
-            if (processSentence != null) {
-                document.append(processSentence);
+            List<String> tokens = addMentions(sentence, mentions);
+            if (tokens == null) {
+                continue;
             }
+            String finalSentence = joinPhrases(tokens);
+            document.append(finalSentence);
+            document.append('\n');
         }
         synchronized (corpus) {
-            corpus.write(document.toString() + "\n\n");
+            corpus.write(document.toString() + "\n");
         }
         countTokens(document.toString());
     }
 
+    private String joinPhrases(List<String> words) throws DaoException {
+        if (words.isEmpty()) {
+            return null;
+        }
+        StringBuilder buffer = new StringBuilder();
+        for (String phrase : phraseTokenizer.makePhrases(language, words)) {
+            if (buffer.length() > 0) buffer.append(' ');
+            buffer.append(phrase.replaceAll(" ", "_"));
+        }
+        return buffer.toString();
+    }
 
     private void countTokens(String document) throws IOException {
         dictionary.countNormalizedText(document);
     }
 
 
-    private String processSentence(Token sentence, List<LocalLink> mentions) throws IOException, DaoException {
+    private List<String> addMentions(Token sentence, List<LocalLink> mentions) throws IOException, DaoException {
         List<Token> words = tokenizer.getWordTokens(language, sentence);
         if (words.isEmpty()) {
             return null;
         }
 
         // Accumulators
-        StringBuilder wordLine = new StringBuilder();
+        List<String> line = new ArrayList<String>();
 
         // Process each word token
         // Warning: If mentions do not align with sentence tokens, this will break...
@@ -138,14 +170,10 @@ public abstract class BaseCorpusCreator {
             if (phrase.contains("\n")) {
                 throw new IllegalStateException();
             }
-            if (wordLine.length() > 0) {
-                wordLine.append(' ');
-            }
-            wordLine.append(phrase);
+            line.add(phrase);
         }
-        wordLine.append('\n');
 
-        return wordLine.toString();
+        return line;
     }
 
     private String getMentionUrl(int wpId) throws DaoException {
@@ -158,5 +186,9 @@ public abstract class BaseCorpusCreator {
             }
         }
         return mentionUrls.get(wpId);
+    }
+
+    public void setJoinPhrases(boolean joinPhrases) {
+        this.joinPhrases = joinPhrases;
     }
 }

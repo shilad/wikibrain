@@ -204,6 +204,39 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         }
     }
 
+
+    /**
+     * Returns the local page ids for that language, value in map is -1 they do not exist
+     * @param language
+     * @param universalIds
+     * @return
+     * @throws DaoException
+     */
+    @Override
+    public Map<Integer, Integer> getLocalIds(Language language, Collection<Integer> universalIds) throws DaoException {
+        DSLContext context = getJooq();
+        try {
+            Object rows[][] = context
+                    .select(Tables.UNIVERSAL_PAGE.UNIV_ID, Tables.UNIVERSAL_PAGE.PAGE_ID)
+                    .from(Tables.UNIVERSAL_PAGE)
+                    .where(Tables.UNIVERSAL_PAGE.LANG_ID.eq(language.getId()))
+                    .and(Tables.UNIVERSAL_PAGE.UNIV_ID.in(universalIds))
+                    .and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
+                    .fetchArrays();
+
+            Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+            if (rows == null) {
+                return result;
+            }
+            for (Object [] row : rows) {
+                result.put((Integer)row[0], (Integer)row[1]);
+            }
+            return result;
+        } finally {
+            freeJooq(context);
+        }
+    }
+
     /**
      * Returns the local page id for that language, or -1 if it does not exist
      * @param language

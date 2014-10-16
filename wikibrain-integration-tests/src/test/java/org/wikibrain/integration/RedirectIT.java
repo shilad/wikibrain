@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.dao.DaoException;
@@ -30,6 +31,7 @@ public class RedirectIT {
         metaDao = testDb.getEnv().getConfigurator().get(MetaInfoDao.class);
     }
 
+    @Ignore
     @Test
     public void testRedirect() throws DaoException {
         LocalPage page = dao.getByTitle(new Title("Obama", Language.getByLangCode("simple")), NameSpace.ARTICLE);
@@ -37,6 +39,7 @@ public class RedirectIT {
     }
 
 
+    @Ignore
     @Test
     public void testMeta() throws DaoException {
         MetaInfo mi = metaDao.getInfo(Redirect.class);

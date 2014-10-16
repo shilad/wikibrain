@@ -14,7 +14,7 @@ import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.utils.ParallelForEach;
@@ -33,10 +33,8 @@ import java.util.logging.Logger;
  */
 public class SimpleToblersLawEvaluator {
 
-    private static int NUM_SAMPLES = 1000000;
-    private static int WIKIDATA_CONCEPTS = 1;
-
     private static final Logger LOG = Logger.getLogger(SimpleToblersLawEvaluator.class.getName());
+    private static int NUM_SAMPLES = 1000000;
 
     private Random random = new Random();
 

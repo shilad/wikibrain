@@ -12,9 +12,9 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.spatial.core.constants.Layers;
-import org.wikibrain.spatial.core.constants.RefSys;
-import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
+import org.wikibrain.spatial.constants.Layers;
+import org.wikibrain.spatial.constants.RefSys;
+import org.wikibrain.spatial.dao.SpatialContainmentDao;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.util.Set;

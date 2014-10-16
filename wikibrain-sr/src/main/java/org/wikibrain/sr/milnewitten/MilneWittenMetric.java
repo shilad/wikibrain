@@ -69,6 +69,24 @@ public class MilneWittenMetric extends BaseSRMetric {
         }
     }
 
+    @Override
+    public double[][] cosimilarity(int rowIds[], int columnIds[]) throws DaoException {
+        double [][] cm1 = inlink.cosimilarity(rowIds, columnIds);
+        double [][] cm2 = outlink.cosimilarity(rowIds, columnIds);
+        for (int i = 0; i < rowIds.length; i++) {
+            for (int j = 0; j < columnIds.length; j++) {
+                double s1 = cm1[i][j];
+                double s2 = cm2[i][j];
+                if (Double.isNaN(s1) || Double.isNaN(s2) || Double.isInfinite(s1) || Double.isInfinite(s2)) {
+                    cm1[i][j] = Double.NaN;
+                } else {
+                    cm1[i][j] = s1 * 0.5 + s2 * 0.5;
+                }
+            }
+        }
+        return cm1;
+    }
+
     public void setTrainSubmetrics(boolean train){
         trainSubmetrics = train;
     }

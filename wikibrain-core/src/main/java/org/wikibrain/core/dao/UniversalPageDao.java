@@ -66,5 +66,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {
      */
     public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(LanguageSet ls) throws DaoException;
 
+    Map<Integer, Integer> getLocalIds(Language language, Collection<Integer> universalIds) throws DaoException;
+
     int getLocalId(Language language, int universalId) throws DaoException;
 }

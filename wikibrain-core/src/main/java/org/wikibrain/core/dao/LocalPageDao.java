@@ -99,4 +99,11 @@ public interface LocalPageDao extends Dao<LocalPage> {
     @Override
     public Iterable<LocalPage> get(DaoFilter daoFilter) throws DaoException;
 
+    /**
+     * Defaults to namespace main
+     * @param lang
+     * @param title
+     * @return
+     */
+    public LocalPage getByTitle(Language lang, String title) throws DaoException;
 }

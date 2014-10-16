@@ -1,20 +1,19 @@
 package org.wikibrain.pageview;
 
 import com.typesafe.config.Config;
-import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.TIntSet;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.jooq.*;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.WikiBrainException;
-import org.wikibrain.core.dao.Dao;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.dao.sql.AbstractSqlDao;
 import org.wikibrain.core.dao.sql.JooqUtils;
 import org.wikibrain.core.dao.sql.SimpleSqlDaoIterable;
@@ -23,11 +22,13 @@ import org.wikibrain.core.jooq.Tables;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.lang.LocalId;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
 
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 /**
@@ -35,9 +36,11 @@ import java.util.logging.Level;
  *
  * @author Shilad Sen
  */
-public class PageViewSqlDao extends AbstractSqlDao<PageView> {
-
-    Map<Integer, Set<Long>> loadedHours = new HashMap<Integer, Set<Long>>();
+public class PageViewSqlDao extends AbstractSqlDao<PageView> implements PageViewDao {
+    public static final String LOADED_CACHE_KEY = "pageviewhours";
+    private final File downloadDir;
+    private final LocalPageDao pageDao;
+    private final MetaInfoDao metaDao;
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
             Tables.PAGEVIEW.LANG_ID,
@@ -50,9 +53,17 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
      * @param dataSource      Data source for jdbc connections
      * @throws org.wikibrain.core.dao.DaoException
      */
-    public PageViewSqlDao(WpDataSource dataSource) throws DaoException {
+    public PageViewSqlDao(WpDataSource dataSource, MetaInfoDao metaDao, LocalPageDao pageDao, File downloadDir) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/pageview");
-//        setLoadedHours();
+        this.downloadDir = downloadDir;
+        this.pageDao = pageDao;
+        this.metaDao = metaDao;
+    }
+
+    @Override
+    public void clear() throws DaoException {
+        super.clear();
+        cache.remove(LOADED_CACHE_KEY);
     }
 
     @Override
@@ -65,48 +76,8 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         );
     }
 
-    /**
-     * method to access a PageViewIterator via the DAO, can be used by clients to keep track of each of the PageViewDataStructs
-     * retrieved by the iterator
-     * @param langs
-     * @param startDate
-     * @param endDate
-     * @return
-     * @throws org.wikibrain.core.WikiBrainException
-     * @throws DaoException
-     */
-    public PageViewIterator getPageViewIterator(LanguageSet langs, DateTime startDate, DateTime endDate, LocalPageDao lpDao) throws WikiBrainException, DaoException {
-        return new PageViewIterator(langs, startDate, endDate, lpDao);
-    }
-
-    /**
-     * adds all the page view entries in an input PageViewDataStruct to the SQL database
-     * @param data
-     * @throws DaoException
-     */
-    public void addData(PageViewDataStruct data) throws DaoException {
-        beginLoad();
-        TIntIntIterator it = data.stats.iterator();
-        while (it.hasNext()) {
-            it.advance();
-            LocalId pageId = new LocalId(data.lang, it.key());
-            Date hour = new Date(data.start.getMillis());
-            PageView view = new PageView(pageId, hour, it.value());
-            save(view);
-            recordLoadedHours(view);
-        }
-        endLoad();
-    }
-
-    protected void recordLoadedHours(PageView view) {
-        int langId = view.getPageId().getLanguage().getId();
-        Set<Long> hours = (loadedHours.get(langId) != null) ? loadedHours.get(langId) : new HashSet<Long>();
-        hours.add(view.getHour().getTime());
-        loadedHours.put(langId, hours);
-    }
-
-    public TIntIntMap getAllViews(Language language, DateTime startDate, DateTime endDate, LocalPageDao localPageDao) throws DaoException {
-        checkLoaded(language, startDate, endDate, localPageDao);
+    @Override
+    public TIntIntMap getAllViews(Language language, DateTime startDate, DateTime endDate) throws DaoException {
         DSLContext context = getJooq();
         Timestamp startTime = new Timestamp(startDate.getMillis());
         Timestamp endTime = new Timestamp(endDate.getMillis());
@@ -121,7 +92,9 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
                     gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
                     -1, -1);
             for (Record record : result){
-                views.put(record.getValue(Tables.PAGEVIEW.PAGE_ID),
+                views.adjustOrPutValue(
+                        record.getValue(Tables.PAGEVIEW.PAGE_ID),
+                        record.getValue(Tables.PAGEVIEW.NUM_VIEWS),
                         record.getValue(Tables.PAGEVIEW.NUM_VIEWS));
             }
             return views;
@@ -130,21 +103,32 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
     }
 
-    public int getNumViews(Language language, int id, DateTime startDate, int numberOfHours, LocalPageDao localPageDao) throws DaoException {
-        return getNumViews(language, id, startDate, startDate.plusHours(numberOfHours), localPageDao);
+    @Override
+    public int getNumViews(LocalId pageId, DateTime startDate, int numberOfHours) throws DaoException {
+        return getNumViews(pageId, startDate, startDate.plusHours(numberOfHours));
     }
 
-    public int getNumViews(Language language, int id, DateTime startDate, DateTime endDate, LocalPageDao localPageDao) throws DaoException {
-        checkLoaded(language, startDate, endDate, localPageDao);
+    @Override
+    public int getNumViews(Language lang, int pageId, DateTime startDate, int numberOfHours) throws DaoException {
+        return getNumViews(new LocalId(lang, pageId), startDate, startDate.plusHours(numberOfHours));
+    }
+
+    @Override
+    public int getNumViews(Language lang, int pageId, DateTime startDate, DateTime endDate) throws DaoException {
+        return getNumViews(new LocalId(lang, pageId), startDate, endDate);
+    }
+
+    @Override
+    public int getNumViews(LocalId pageId, DateTime startDate, DateTime endDate) throws DaoException {
         DSLContext context = getJooq();
         Timestamp startTime = new Timestamp(startDate.getMillis());
         Timestamp endTime = new Timestamp(endDate.getMillis());
         try {
             Cursor<Record> result = context.select().
                     from(Tables.PAGEVIEW).
-                    where(Tables.PAGEVIEW.LANG_ID.eq(language.getId())).
+                    where(Tables.PAGEVIEW.LANG_ID.eq(pageId.getLanguage().getId())).
                     and(Tables.PAGEVIEW.TSTAMP.between(startTime, endTime)).
-                    and(Tables.PAGEVIEW.PAGE_ID.eq(id)).
+                    and(Tables.PAGEVIEW.PAGE_ID.eq(pageId.getId())).
                     fetchLazy(getFetchSize());
             int numViews = 0;
             for (Record record : result){
@@ -156,15 +140,16 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
     }
 
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
+    @Override
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime) throws ConfigurationException, DaoException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         for(Integer id: ids){
-            result.put(id, getNumViews(lang, id, startTime, endTime, localPageDao));
+            result.put(id, getNumViews(new LocalId(lang, id), startTime, endTime));
         }
         return result;
     }
-    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates, LocalPageDao localPageDao) throws ConfigurationException, DaoException, WikiBrainException{
-        setLoadedHours();
+    @Override
+    public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates) throws ConfigurationException, DaoException{
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         DateTime startTime;
         DateTime endTime;
@@ -176,10 +161,10 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
             for(Integer id : ids){
                 if(!result.keySet().contains(id))
                 {
-                    result.put(id, getNumViews(lang, id, startTime, endTime, localPageDao));
+                    result.put(id, getNumViews(new LocalId(lang, id), startTime, endTime));
                 }
                 else{
-                    int totalViews = result.get(id) + getNumViews(lang, id, startTime, endTime, localPageDao);
+                    int totalViews = result.get(id) + getNumViews(new LocalId(lang, id), startTime, endTime);
                     result.put(id, totalViews);
                 }
             }
@@ -262,73 +247,136 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         throw new UnsupportedOperationException();
     }
 
-    protected void checkLoaded(Language lang, DateTime startDate, DateTime endDate, LocalPageDao localPageDao) throws DaoException {
-        setLoadedHours(); // Is this where this should go?
-        List<DateTime> datesNotLoaded = new ArrayList<DateTime>();
-        int langId = lang.getId();
-        Set<Long> loadedHourSet = (loadedHours.containsKey(langId)) ? loadedHours.get(langId) : new HashSet<Long>();
-        for (DateTime currentDate = startDate; currentDate.getMillis() < endDate.getMillis(); currentDate = currentDate.plusHours(1)) {
-            if (!loadedHourSet.contains(currentDate.getMillis())) {
-                datesNotLoaded.add(currentDate);
-            }
-        }
-//       LOG.info("Number of timestamps not loaded " + datesNotLoaded.size());
-        if(datesNotLoaded.size()!=0) {
-            load(lang, datesNotLoaded, localPageDao);
-        }
-// LOG.info("Done downloading all timestamps needed");
+    @Override
+    public void ensureLoaded(DateTime start, DateTime end, LanguageSet langs) throws DaoException {
+        ensureLoaded(Arrays.asList(new Interval(start, end)), langs);
     }
 
-    private synchronized void setLoadedHours() throws DaoException{
-        if (loadedHours.size() == 0) {
-            loadedHours = new ConcurrentHashMap<Integer, Set<Long>>();
-            DSLContext context = getJooq();
-            if (!JooqUtils.tableExists(context, Tables.PAGEVIEW)) {
-                return;
-            }
-            LOG.info("creating loadedHours cache. This only happens once...");
-            try {
-                Result<Record2<Timestamp, Short>> times = context
-                        .selectDistinct(Tables.PAGEVIEW.TSTAMP,Tables.PAGEVIEW.LANG_ID)
-                        .from(Tables.PAGEVIEW)
-                        .fetch();
+    @Override
+    public synchronized void ensureLoaded(List<Interval> intervals, final LanguageSet langs) throws DaoException {
+        // FIXME: At the moment we totally ignore the language setting
+        final Map<Language, SortedSet<DateTime>> loaded = getLoadedHours();
 
-                loadedHours= new HashMap<Integer, Set<Long>>();
-
-                for (Record2<Timestamp, Short> record: times){
-                    if(!loadedHours.containsKey(record.value2().intValue())){
-                        loadedHours.put(record.value2().intValue(),new HashSet<Long>());
+        SortedSet<DateTime> needed = new TreeSet<DateTime>();
+        for (Interval i : intervals) {
+            for (DateTime tstamp : PageViewUtils.timestampsInInterval(i.getStart(), i.getEnd())) {
+                for (Language l : langs) {
+                    if (!loaded.containsKey(l) || !loaded.get(l).contains(tstamp)) {
+                        needed.add(tstamp);
                     }
-                    loadedHours.get(record.value2().intValue()).add(((Timestamp) record.value1()).getTime());
                 }
-
-            } finally {
-                freeJooq(context);
             }
         }
-    }
 
-    protected void load(Language lang, List<DateTime> dates, LocalPageDao localPageDao) throws DaoException {
+        if (needed.isEmpty()) {
+            LOG.info("All requested page views are loaded.");
+            return;
+        }
+
+        LOG.info(String.format("Loading pageviews for %d timestamps between %s and %s",
+                    needed.size(), needed.first().toString(), needed.last().toString()));
+
+
+        PageViewDownloader downloader = new PageViewDownloader(downloadDir);
+        final TreeMap<DateTime, File> toLoad;
+        try {
+            toLoad = downloader.download(needed);
+        } catch (WikiBrainException e) {
+            throw new DaoException(e);
+        }
+
         beginLoad();
-        PageViewLoader loader = new PageViewLoader(new LanguageSet(lang), this, localPageDao);
-        int i = 0;
-        while (i < dates.size()) {
-            DateTime startDate = dates.get(i++);
-            DateTime endDate = startDate.plusHours(1);
-            while ((i < dates.size()) && (dates.get(i).equals(endDate))) {
-                endDate = endDate.plusHours(1);
-                i++;
+
+        final AtomicInteger[] counters = new AtomicInteger[] { new AtomicInteger(), new AtomicInteger() };
+
+        ParallelForEach.loop(toLoad.keySet(), new Procedure<DateTime>() {
+            @Override
+            public void call(DateTime tstamp) throws Exception {
+                LOG.info("loading pageview file " + toLoad.get(tstamp));
+                loadOneFile(tstamp, toLoad.get(tstamp), langs, counters);
+                LOG.info("finished pageview file " + toLoad.get(tstamp));
             }
-            try {
-                loader.load(startDate, endDate);
-            } catch (ConfigurationException cE) {
-                throw new DaoException(cE);
-            } catch (WikiBrainException wE) {
-                throw new DaoException(wE);
+        });
+
+        endLoad();
+
+        LOG.info(String.format("Found %d pageviews for langs %s and resolved %d of them.",
+                counters[0].get(), langs, counters[1].get()));
+
+        // Make sure one second passes between the last view loaded and the save of the cached info
+        // Otherwise we may incorrectly think the cache is stale.
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        for (Language lang : langs) {
+            if (!loaded.containsKey(lang)) {
+                loaded.put(lang, new TreeSet<DateTime>());
+            }
+            for (DateTime tstamp : needed) {
+                loaded.get(lang).add(tstamp);
             }
         }
-        endLoad();
+        cache.put(LOADED_CACHE_KEY, loaded);
     }
+
+    private void loadOneFile(DateTime tstamp, File file, LanguageSet langs, AtomicInteger[] counters) {
+        PageViewReader reader = new PageViewReader(file, langs);
+        for (RawPageView view : reader) {
+            try {
+                counters[0].getAndIncrement();
+                int id = pageDao.getIdByTitle(view.getTitle());
+                if (id >= 0) {
+                    counters[1].incrementAndGet();
+                    PageView pv = new PageView(
+                            new LocalId(view.getLanguage(), id),
+                            tstamp.toDate(),
+                            view.getViews());
+                    save(pv);
+                    metaDao.incrementRecords(PageView.class, pv.getPageId().getLanguage());
+                }
+            } catch (DaoException e) {
+                metaDao.incrementErrorsQuietly(PageView.class);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public synchronized  Map<Language, SortedSet<DateTime>> getLoadedHours() throws DaoException {
+        DSLContext context = getJooq();
+        try {
+            if (!JooqUtils.tableExists(context, Tables.PAGEVIEW)) {
+                return new HashMap<Language, SortedSet<DateTime>>();
+            }
+            Map<Language, SortedSet<DateTime>> loaded = (Map<Language, SortedSet<DateTime>>) cache.get(LOADED_CACHE_KEY, PageView.class);
+            if (loaded != null) {
+                return loaded;
+            }
+
+            LOG.info("creating loadedHours cache. This only happens once...");
+            loaded = new HashMap<Language, SortedSet<DateTime>>();
+            Result<Record2<Timestamp, Short>> times = context
+                    .selectDistinct(Tables.PAGEVIEW.TSTAMP,Tables.PAGEVIEW.LANG_ID)
+                    .from(Tables.PAGEVIEW)
+                    .fetch();
+
+            for (Record2<Timestamp, Short> record: times){
+                Language lang = Language.getById(record.value2());
+                DateTime date = new DateTime(record.value1());
+                if (!loaded.containsKey(lang)) {
+                    loaded.put(lang, new TreeSet<DateTime>());
+                }
+                loaded.get(lang).add(date);
+            }
+            cache.put(LOADED_CACHE_KEY, loaded);
+            return loaded;
+        } finally {
+            freeJooq(context);
+        }
+    }
+
 
     protected PageView buildPageView(Record record) throws DaoException {
         if (record == null) {
@@ -345,14 +393,14 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         );
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<PageViewSqlDao> {
+    public static class Provider extends org.wikibrain.conf.Provider<PageViewDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return PageViewSqlDao.class;
+            return PageViewDao.class;
         }
 
         @Override
@@ -361,7 +409,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
         }
 
         @Override
-        public PageViewSqlDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public PageViewDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("sql")) {
                 return null;
             }
@@ -369,14 +417,17 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> {
                 PageViewSqlDao dao = new PageViewSqlDao(
                         getConfigurator().get(
                                 WpDataSource.class,
-                                config.getString("dataSource"))
+                                config.getString("dataSource")),
+                        getConfigurator().get(MetaInfoDao.class),
+                        getConfigurator().get(LocalPageDao.class),
+                        new File(config.getString("dir"))
                 );
-//                String cachePath = getConfig().get().getString("dao.sqlCachePath");
-//                File cacheDir = new File(cachePath);
-//                if (!cacheDir.isDirectory()) {
-//                    cacheDir.mkdirs();
-//                }
-//                dao.useCache(cacheDir);
+                String cachePath = getConfig().get().getString("dao.sqlCachePath");
+                File cacheDir = new File(cachePath);
+                if (!cacheDir.isDirectory()) {
+                    cacheDir.mkdirs();
+                }
+                dao.useCache(cacheDir);
                 return dao;
             } catch (DaoException e) {
                 throw new ConfigurationException(e);

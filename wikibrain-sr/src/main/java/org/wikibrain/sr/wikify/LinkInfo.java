@@ -1,6 +1,9 @@
 package org.wikibrain.sr.wikify;
 
 import gnu.trove.set.TIntSet;
+import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.model.LocalLink;
+import org.wikibrain.core.nlp.Token;
 import org.wikibrain.phrases.PrunedCounts;
 import org.wikibrain.utils.Scoreboard;
 
@@ -22,6 +25,20 @@ public class LinkInfo implements Comparable<LinkInfo> {
     private int startChar;
     private int endChar;
 
+    public LinkInfo() {}
+
+    public LinkInfo(Token token) {
+        this.startChar = token.getBegin();
+        this.endChar = token.getEnd();
+        this.anchortext = token.getToken();
+    }
+
+    public LinkInfo(LocalLink link) {
+        this.startChar = link.getLocation();
+        this.endChar = startChar + link.getAnchorText().length();
+        this.anchortext = link.getAnchorText();
+        this.knownDest = link.getDestId();
+    }
 
     public boolean hasOnePossibility() {
         return getPrior().size() == 1;
@@ -37,17 +54,17 @@ public class LinkInfo implements Comparable<LinkInfo> {
 
     @Override
     public int compareTo(LinkInfo o) {
-        if (Double.isNaN(score) && Double.isNaN(o.score)) {
-            return 0;
-        } else if (Double.isNaN(score)) {
-            return 1;
-        } else if (Double.isNaN(o.score)) {
-            return -1;
-        } else if (getScore() == null && o.getScore() == null) {
+        if (getScore() == null && o.getScore() == null) {
             return 0;
         } else if (getScore() == null) {
             return 1;
         } else if (o.getScore() == null) {
+            return -1;
+        } else if (Double.isNaN(score) && Double.isNaN(o.score)) {
+            return 0;
+        } else if (Double.isNaN(score)) {
+            return 1;
+        } else if (Double.isNaN(o.score)) {
             return -1;
         } else {
             return -1 * score.compareTo(o.score);
@@ -149,5 +166,9 @@ public class LinkInfo implements Comparable<LinkInfo> {
 
     public void setScore(Double score) {
         this.score = score;
+    }
+
+    public LocalLink toLocalLink(Language language, int wpId) {
+        return new LocalLink(language, anchortext, wpId, dest, true, startChar, true, LocalLink.LocationType.NONE);
     }
 }

@@ -308,7 +308,6 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
             key += ".noRedirect";
         }
         if (cache!=null) {
-            System.err.println("HERE!");
             TLongIntHashMap map = (TLongIntHashMap)cache.get(key, LocalPage.class);
             if (map!=null){
                 titlesToIds = map;
@@ -368,6 +367,12 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
             freeJooq(context);
         }
     }
+
+    @Override
+    public LocalPage getByTitle(Language lang, String title) throws DaoException {
+        return getByTitle(lang, NameSpace.ARTICLE, title);
+    }
+
 
     public static class Provider extends org.wikibrain.conf.Provider<LocalPageDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {

@@ -9,6 +9,8 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.procedure.TLongIntProcedure;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -85,9 +87,11 @@ public class Dictionary implements Closeable {
 
     private AtomicLong totalWords = new AtomicLong();
     private AtomicLong totalBigrams = new AtomicLong();
+    private AtomicLong totalNgrams = new AtomicLong();
 
     private final TLongIntMap unigramCounts = new TLongIntHashMap();
     private final TLongIntMap bigramCounts = new TLongIntHashMap();
+    private final TLongIntMap ngramCounts = new TLongIntHashMap();
 
     private StringTokenizer tokenizer = new StringTokenizer();
     private NGramCreator nGramCreator = new NGramCreator();
@@ -115,6 +119,13 @@ public class Dictionary implements Closeable {
      */
     private final TIntIntMap mentionCounts = new TIntIntHashMap();
 
+
+    /**
+     * Hashes of interesting ngrams.
+     */
+    private TLongSet interestingNGrams = null;
+    private TLongSet interestingSubGrams = null;
+
     /**
      * Map from word hashes to actual words.
      * Only maintained if "rememberWords" is true.
@@ -137,6 +148,28 @@ public class Dictionary implements Closeable {
             } catch (IOException e) {
                 throw new RuntimeException(e);  // shouldn't happen for a temp file...
             }
+        }
+    }
+
+    public void setInterestingNgrams(Iterator<String> ngrams) {
+        interestingSubGrams = new TLongHashSet();
+        interestingNGrams = new TLongHashSet();
+        while (ngrams.hasNext()) {
+            List<String> words = tokenizer.getWords(language, ngrams.next());
+            if (words.isEmpty()) {
+                continue;
+            }
+            StringBuilder b = new StringBuilder();
+            long hash = -1;
+            for (int i = 0; i < words.size(); i++) {
+                if (i > 0) {
+                    b.append(' ');
+                }
+                b.append(words.get(i));
+                hash = hashWord(b.toString());
+                interestingSubGrams.add(hash);
+            }
+            interestingNGrams.add(hash);
         }
     }
 
@@ -230,6 +263,9 @@ public class Dictionary implements Closeable {
                 countBigram(bigram);
             }
         }
+        if (interestingNGrams != null) {
+            countNgrams(tokens);
+        }
     }
 
     /**
@@ -302,6 +338,23 @@ public class Dictionary implements Closeable {
         }
         if (totalBigrams.incrementAndGet() % PRUNE_INTERVAL == 0) {
             pruneIfNecessary();
+        }
+    }
+
+    public void countNgrams(List<String> words) {
+        for (int i = 0; i < words.size(); i++) {
+            StringBuilder buffer = new StringBuilder();
+            for (int j = i; j < words.size(); j++) {
+                if (j > i) {
+                    buffer.append(' ');
+                }
+                buffer.append(words.get(i));
+                long hash = hashWord(buffer.toString());
+                if (!interestingNGrams.contains(hash) && !interestingSubGrams.contains(hash)) {
+                    break;
+                }
+            }
+
         }
     }
 

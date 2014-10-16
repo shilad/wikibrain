@@ -6,7 +6,7 @@ import java.util.List;
  * Captures a token ranging from begin (inclusive) to end (exclusive)
  * @author Shilad Sen
  */
-public class Token {
+public class Token implements  Comparable<Token> {
     private int begin;
     private int end;
     private String fullText;
@@ -52,4 +52,12 @@ public class Token {
         return fullText.substring(begin, end);
     }
 
+    @Override
+    public int compareTo(Token t) {
+        int r = begin - t.begin;
+        if (r == 0) {
+            r = end - t.end;
+        }
+        return r;
+    }
 }

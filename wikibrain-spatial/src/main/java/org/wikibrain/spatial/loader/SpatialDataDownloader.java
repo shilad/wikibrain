@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.download.FileDownloader;
-import org.wikibrain.spatial.core.WikiBrainShapeFile;
+import org.wikibrain.spatial.WikiBrainShapeFile;
 
 import java.io.File;
 import java.io.IOException;
