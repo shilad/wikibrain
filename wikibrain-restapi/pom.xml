@@ -10,50 +10,25 @@
 
     <artifactId>wikibrain-restapi</artifactId>
 
-    <!--<repositories>-->
-        <!--<repository>-->
-            <!--<releases>-->
-                <!--<enabled>true</enabled>-->
-                <!--<updatePolicy>always</updatePolicy>-->
-                <!--<checksumPolicy>warn</checksumPolicy>-->
-            <!--</releases>-->
-            <!--<id>clapper-org-maven-repo</id>-->
-            <!--<name>org.clapper Maven Repo</name>-->
-            <!--<url>http://maven.clapper.org/</url>-->
-            <!--<layout>default</layout>-->
-        <!--</repository>-->
-    <!--</repositories>-->
-
-    <!--<dependencyManagement>-->
-        <!--<dependencies>-->
-            <!--<dependency>-->
-                <!--<groupId>org.glassfish.jersey</groupId>-->
-                <!--<artifactId>jersey-bom</artifactId>-->
-                <!--<version>${jersey.version}</version>-->
-                <!--<type>pom</type>-->
-                <!--<scope>import</scope>-->
-            <!--</dependency>-->
-        <!--</dependencies>-->
-    <!--</dependencyManagement>-->
-
     <dependencies>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-grizzly2-http</artifactId>
             <version>${jersey.version}</version>
         </dependency>
-        <!-- uncomment this to get JSON support:
-         <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-moxy</artifactId>
-        </dependency>
-        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.9</version>
             <scope>test</scope>
         </dependency>
+        <!-- This dependency loads Jackson JSON library -->
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.13</version>
+        </dependency>
+        <!-- Wikibrian Dependency Starts -->
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-utils</artifactId>
@@ -78,7 +53,8 @@
                    <groupId>org.wikibrainapi</groupId>
                    <artifactId>wikibrain-sr</artifactId>
                    <version>0.4.1</version>
-               </dependency>
+        </dependency>
+        <!-- Wikibrian Dependency Ends -->
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>

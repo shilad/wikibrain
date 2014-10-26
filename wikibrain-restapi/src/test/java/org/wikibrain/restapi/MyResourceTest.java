@@ -54,4 +54,14 @@ public class MyResourceTest {
         String responseMsg = target.path("myresource/similarityBasic").request().get(String.class);
         assertEquals("0.7949277818968377: 'cat', 'kitty'0.819256786419553: 'obama', 'president'0.7888198946695613: 'tires', 'car'0.7152675353640431: 'java', 'computer'0.4714520068290455: 'dog', 'computer'", responseMsg);
     }
+
+    /**
+     * Test getSimilarity function with JSON
+     */
+    @Test
+    public void testGetSimilarityBasicJSON() {
+        String responseMsg = target.path("myresource/similarityBasicJSON").request().get(String.class);
+        assertEquals("[{\"pairs\":\"tires', 'car'\",\"score\":\"0.7888198946695613\"},{\"pairs\":\"obama', 'president'\",\"score\":\"0.819256786419553\"},{\"success\":\"true\"},{\"pairs\":\"cat', 'kitty'\",\"score\":\"0.7949277818968377\"},{\"pairs\":\"dog', 'computer'\",\"score\":\"0.4714520068290455\"},{\"pairs\":\"java', 'computer'\",\"score\":\"0.7152675353640431\"}]", responseMsg);
+    }
+
 }
