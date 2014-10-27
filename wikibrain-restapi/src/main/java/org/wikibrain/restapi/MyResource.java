@@ -1,9 +1,6 @@
 package org.wikibrain.restapi;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 import org.wikibrain.conf.ConfigurationException;
@@ -17,7 +14,6 @@ import org.wikibrain.sr.*;
 import org.wikibrain.sr.utils.ExplanationFormatter;
 
 import java.util.*;
-
 
 
 /**
@@ -126,5 +122,34 @@ public class MyResource {
             results.add(errMsg);
             return results;
         }
+    }
+
+    @GET
+    @Path("similarityScore")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String, String> getSimilarityScore(@QueryParam("phrase1") String phrase1, @QueryParam("phrase2") String phrase2) {
+        Map<String, String> results = new HashMap<String, String>();
+        results.put("phrase1", phrase1);
+        results.put("phrase2", phrase2);
+        try {
+            // Initialize the WikiBrain environment and get the local page dao
+            Env env = new EnvBuilder().build();
+            Configurator conf = env.getConfigurator();
+            LocalPageDao lpDao = conf.get(LocalPageDao.class);
+            Language simple = Language.getByLangCode("simple");
+
+            // Retrieve the "ensemble" sr metric for simple english
+            SRMetric sr = conf.get(
+                    SRMetric.class, "ensemble",
+                    "language", simple.getLangCode());
+
+            //Similarity between strings
+            SRResult s = sr.similarity(phrase1, phrase2, true);
+            results.put("score", s.getScore()+"");
+            results.put("success", "true");
+        } catch (Exception ex) {
+            results.put("success", "false");
+        }
+        return results;
     }
 }
