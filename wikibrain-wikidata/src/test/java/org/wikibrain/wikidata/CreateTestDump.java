@@ -1,12 +1,15 @@
 package org.wikibrain.wikidata;
 
 import org.wikibrain.parser.DumpSplitter;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -27,23 +30,26 @@ public class CreateTestDump {
             System.exit(1);
         }
         DumpSplitter splitter = new DumpSplitter(new File(args[0]));
-        BufferedWriter writer = WpIOUtils.openBZ2Writer(new File(args[1]));
+        final BufferedWriter writer = WpIOUtils.openBZ2Writer(new File(args[1]));
         writer.write("<mediawiki>\n");
-        int i = 0;
-        int articles = 0;
-        for (String article : splitter) {
-            if (articles++ % 100000 == 0) {
-                LOG.info("processing article " + articles);
-            }
-            String strippedArticle = article.replaceAll("\\s+", "");
-            if (strippedArticle.contains("<model>wikibase-item</model>")) {
-                if (i++ < 400) {
-                    writer.write(article + "\n");
+        final AtomicInteger i = new AtomicInteger();
+        final AtomicInteger articles = new AtomicInteger();
+        ParallelForEach.iterate(splitter.iterator(), new Procedure<String>() {
+            @Override
+            public void call(String article) throws Exception {
+                if (articles.incrementAndGet() % 10000 == 0) {
+                    LOG.info("processing article " + articles);
                 }
-            } else if (strippedArticle.contains("<model>wikibase-property</model>")) {
-                writer.write(article + "\n");
+                String strippedArticle = article.replaceAll("\\s+", "");
+                if (strippedArticle.contains("<model>wikibase-item</model>")) {
+                    if (i.incrementAndGet() < 400) {
+                        synchronized (writer) { writer.write(article + "\n"); }
+                    }
+                } else if (strippedArticle.contains("<model>wikibase-property</model>")) {
+                    synchronized (writer) { writer.write(article + "\n"); }
+                }
             }
-        }
+        });
         writer.write("</mediawiki>\n");
         writer.close();
     }
