@@ -47,8 +47,8 @@ public class SpatialDataLoader {
 
     public void loadExogenousData(String refSys, String layerGroup, String dataset) throws IOException, InterruptedException, DaoException, WikiBrainException, ConfigurationException {
         spatialDao.removeLayer(refSys, layerGroup);
-        SpatialDataDownloader downloader  = new SpatialDataDownloader(env.getConfiguration());
-        downloader.download(refSys, layerGroup, dataset);
+        //SpatialDataDownloader downloader  = new SpatialDataDownloader(env.getConfiguration());
+        //downloader.download(refSys, layerGroup, dataset);
         MappedShapefileLoader shapefileLoader = new MappedShapefileLoader(env);
         shapefileLoader.load(refSys, layerGroup, dataset);
     }

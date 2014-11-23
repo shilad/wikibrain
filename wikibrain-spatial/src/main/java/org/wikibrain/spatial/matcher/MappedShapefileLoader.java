@@ -59,7 +59,7 @@ public class MappedShapefileLoader {
     public void load(String refSys, String layerGroup, String dataset) throws IOException, DaoException {
         Config c = getConfig(refSys, layerGroup, dataset);
         WikiBrainShapeFile shapefile = folder.getShapeFile(refSys, layerGroup, dataset, c.getString("encoding"));
-        Map<String, String> mapping = shapefile.readMapping();
+//        Map<String, String> mapping = shapefile.readMapping();
         List<String> keyFields = c.getStringList("key");
 
         // Read in and uppercase feature names
@@ -80,6 +80,8 @@ public class MappedShapefileLoader {
                         shapefile.getFile(), numMatches, numRows, missingKeys, missingTitles, missingConcepts));
             }
             SimpleFeature row = iter.next();
+            String OBJECTID = row.getAttribute(1).toString();
+            /*
             String key = makeKey(keyFields, featureNames, row);
             if (!mapping.containsKey(key)) {
                 missingKeys++;
@@ -95,9 +97,11 @@ public class MappedShapefileLoader {
                 missingConcepts++;
                 continue;
             }
+            */
             numMatches++;
+            System.out.println("loaded " + String.format("%d", numMatches));
             Geometry geometry = (Geometry) row.getDefaultGeometry();
-            spatialDao.saveGeometry(conceptId, layerGroup, refSys, geometry);
+            spatialDao.saveGeometry((int)Double.parseDouble(OBJECTID), layerGroup, refSys, geometry);
             metaDao.incrementRecords(Geometry.class);
         }
         iter.close();

@@ -37,11 +37,18 @@ public class WikidataParser {
             System.err.println("invalid page: " + rawPage.getBody());
             throw new WpParseException(e);
         }
-
+		WikidataEntity record;
         if (!obj.has("entity")) {
-            throw new WpParseException("Page " + obj + " missing entity field");
+			try {
+				record = parseEntity(obj);
+			}
+			catch (WpParseException e){
+            throw e;
+		}
+			
         }
-        WikidataEntity record = parseEntity(obj.get("entity"));
+		else
+        	record = parseEntity(obj.get("entity"));
 
         for (Map.Entry<String, JsonElement> fields : obj.entrySet()) {
             String name = fields.getKey();
@@ -124,6 +131,20 @@ public class WikidataParser {
     private WikidataEntity parseEntity(JsonElement value) throws WpParseException {
         WikidataEntity.Type entityType = null;
         int entityId = -1;
+		if(value.isJsonObject()){
+			JsonObject valueObj = value.getAsJsonObject();
+			if(valueObj.has("type") && valueObj.has("id")){
+				if(valueObj.get("type").getAsString().equals("item"))
+					entityType = WikidataEntity.Type.ITEM;
+				else if(valueObj.get("type").getAsString().equals("property"))
+					entityType = WikidataEntity.Type.PROPERTY;
+				else
+					throw new WpParseException("can not recognize type " + value);
+				entityId = Integer.valueOf(valueObj.get("id").getAsString().substring(1));
+				return new WikidataEntity(entityType, entityId);
+			}
+		}
+		
         if (value.isJsonArray()) {
             JsonArray array = value.getAsJsonArray();
             String s = array.get(0).getAsString();
