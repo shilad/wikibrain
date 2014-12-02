@@ -6,6 +6,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.conf.DefaultOptionBuilder;
@@ -28,6 +29,7 @@ import org.wikibrain.parser.WpParseException;
 import org.wikibrain.parser.xml.PageXmlParser;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpIOUtils;
 import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.File;
@@ -72,10 +74,10 @@ public class WikidataDumpLoader {
      *
      * @param file
      */
-    public void load(final File file) {
-        DumpSplitter parser = new DumpSplitter(file);
+    public void load(final File file) throws IOException {
+        LineIterator lines = new LineIterator(WpIOUtils.openBufferedReader(file));
         ParallelForEach.iterate(
-                parser.iterator(),
+                lines,
                 WpThreadUtils.getMaxThreads(),
                 1000,
                 new Procedure<String>() {
@@ -95,29 +97,19 @@ public class WikidataDumpLoader {
                 },
                 Integer.MAX_VALUE
         );
+        lines.close();
     }
 
-    private void save(File file, String page) throws WpParseException, DaoException {
+    private void save(File file, String json) throws WpParseException, DaoException {
         if (counter.incrementAndGet() % 10000 == 0) {
             LOG.info("processing wikidata entity " + counter.get());
         }
-        PageXmlParser xmlParser = new PageXmlParser(LanguageInfo.getByLanguage(Language.EN));
-        RawPage rp = xmlParser.parse(page);
-        if (rp.getModel().equals("wikibase-item") || rp.getModel().equals("wikibase-property")) {
+        WikidataEntity entity = wdParser.parse(json);
+        // check if others use prune's boolean?
+        entity.prune(languages);
 
-            WikidataEntity entity = wdParser.parse(rp);
-
-            // check if others use prune's boolean?
-            entity.prune(languages);
-
-            if (entity.getType() == WikidataEntity.Type.PROPERTY || universalIds.contains(entity.getId())) {
-                wikidataDao.save(entity);
-            }
-
-        } else if (Arrays.asList("wikitext", "css", "javascript").contains(rp.getModel())) {
-            // expected
-        } else {
-            LOG.warning("unknown model: " + rp.getModel() + " in page " + rp.getTitle());
+        if (entity.getType() == WikidataEntity.Type.PROPERTY || universalIds.contains(entity.getId())) {
+            wikidataDao.save(entity);
         }
     }
 

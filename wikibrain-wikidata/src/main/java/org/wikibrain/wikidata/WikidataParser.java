@@ -37,36 +37,17 @@ public class WikidataParser {
 
     private static BufferedWriter writer;
 
-
-    public WikidataEntity parse(RawPage rawPage) throws WpParseException {
-        MwRevision mwRevision = new RawPageWrapper(rawPage);
-        JacksonTermedDocument mwDoc = null;
-        String title = rawPage.getTitle().getTitleStringWithoutNamespace();
-        WikidataEntity.Type entityType = null;
-        System.err.println(rawPage.getBody().substring(0, 100));
+    public WikidataEntity parse(String json) throws WpParseException {
+        JacksonTermedDocument mwDoc;
 
         try {
-            if (MwRevision.MODEL_WIKIBASE_ITEM.equals(mwRevision.getModel())) {
-                mwDoc = mapper.readValue(mwRevision.getText(), JacksonItemDocument.class);
-                entityType = WikidataEntity.Type.ITEM;
-            } else if (MwRevision.MODEL_WIKIBASE_PROPERTY.equals(mwRevision.getModel())) {
-                System.err.println(rawPage.getBody());
-                mwDoc = mapper.readValue(mwRevision.getText(), JacksonPropertyDocument.class);
-                entityType = WikidataEntity.Type.PROPERTY;
-            } else {
-                LOG.info("unknown record type for " + rawPage.getTitle());
-                return null;
-            }
+            mwDoc = mapper.readValue(json, JacksonTermedDocument.class);
         } catch (IOException e) {
+            LOG.info("Error parsing: " + json);
             throw new WpParseException(e);
         }
 
-        WikidataEntity record;
-        try {
-            record = new WikidataEntity(entityType, Integer.valueOf(title.substring(1)));
-        } catch (NumberFormatException e) {
-            throw new WpParseException("Invalid record id: " + title);
-        }
+        WikidataEntity record = new WikidataEntity(mwDoc.getEntityId().getId());
 
         // Aliases (multiple per language)
         for (List<MonolingualTextValue> vlist : mwDoc.getAliases().values()) {
