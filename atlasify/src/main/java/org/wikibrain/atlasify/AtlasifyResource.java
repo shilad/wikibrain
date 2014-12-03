@@ -13,7 +13,12 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.model.NameSpace;
+import org.wikibrain.core.model.Title;
+import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.sr.SRMetric;
@@ -75,6 +80,8 @@ public class AtlasifyResource {
     private static PhraseAnalyzer pa = null;
     private static LocalPageDao lpDao = null;
     private static Language lang = Language.getByLangCode("en");
+    private static LocalPageAutocompleteSqlDao lpaDao = null;
+    private static LocalLinkDao llDao = null;
 
     private static void wikibrainSRinit(){
 
@@ -263,6 +270,42 @@ public class AtlasifyResource {
         if(SR < 0.7942)
             return "#00441b";
         return "#002000";
+    }
+
+    @POST
+    @Path("/autocomplete")
+    @Consumes("application/json")
+    @Produces("text/plain")
+
+    public Response autocompleteSearch(AtlasifyQuery query) throws Exception {
+        if (pa == null) {
+            wikibrainSRinit();
+        }
+
+        Language language = Language.SIMPLE;
+        Map<String, String> autocompleteMap = new HashMap<String, String>();
+        try {
+            LinkedHashMap<LocalId, Float> resolution = pa.resolve(language, query.getKeyword(), 10);
+            int i = 0;
+
+            Title title = new Title(query.getKeyword(), language);
+            List<LocalPage> similarPages = lpaDao.getBySimilarTitle(title, NameSpace.ARTICLE, llDao);
+
+            /*for (LocalId p : resolution.keySet()) {
+                org.wikibrain.core.model.LocalPage page = lpDao.getById(p);
+                autocompleteMap.put(i + "", page.getTitle().getCanonicalTitle());
+                i++;
+            }*/
+
+            for (LocalPage p : similarPages) {
+                autocompleteMap.put(i + "", p.getTitle().getCanonicalTitle());
+                i++;
+            }
+        } catch (Exception e) {
+            autocompleteMap = new HashMap<String, String>();
+        }
+
+        return Response.ok(new JSONObject(autocompleteMap).toString()).build();
     }
 
 

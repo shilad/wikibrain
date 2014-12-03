@@ -40,7 +40,7 @@ public class AtlasifyServer {
 
     private static int portNo = 9998;
     private static URI getBaseURI() {
-        return UriBuilder.fromUri("http://flagon.cs.umn.edu/").port(portNo).build();
+        return UriBuilder.fromUri("http://atlasify.cs.umn.edu/").port(portNo).build();
     }
     private static URI baseURI = getBaseURI();
 
