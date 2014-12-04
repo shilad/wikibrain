@@ -124,6 +124,9 @@ public class WikidataParser {
     public WikidataValue snakToValue(final String type, Value snak) {
         String jsonStr = snak.accept(new ValueJsonConverter()).toString();
         final JsonElement element = new JsonParser().parse(jsonStr);
+        final JsonElement jsonValue = (element.isJsonObject() && element.getAsJsonObject().has("value"))
+                ? element.getAsJsonObject().get("value")
+                : null;
         WikidataValue val = snak.accept(new ValueVisitor<WikidataValue>() {
 
             @Override
@@ -139,12 +142,12 @@ public class WikidataParser {
 
             @Override
             public WikidataValue visit(GlobeCoordinatesValue value) {
-                return new WikidataValue(type, gsonToPrimitive(element), element);
+                return new WikidataValue(type, gsonToPrimitive(jsonValue), jsonValue);
             }
 
             @Override
             public WikidataValue visit(QuantityValue value) {
-                return new WikidataValue(type, gsonToPrimitive(element), element);
+                return new WikidataValue(type, gsonToPrimitive(jsonValue), jsonValue);
             }
 
             @Override
@@ -160,7 +163,7 @@ public class WikidataParser {
                 return new WikidataValue(
                         WikidataValue.Type.TIME,
                         c.getTime(),
-                        element
+                        jsonValue
                 );
             }
 
@@ -182,9 +185,11 @@ public class WikidataParser {
             return new WikidataValue(WikidataValue.Type.SOMEVALUE, null, JsonNull.INSTANCE);
         } else if (type.equals("novalue")) {
             return new WikidataValue(WikidataValue.Type.NOVALUE, null, JsonNull.INSTANCE);
+        } else if (type.equals("item") || type.equals("property")) {
+            type = "wikibase-entityid";
         }
 
-        String fullJson = "{ \"type\" : " + type + ", \"value\" : " + element.toString() + " }";
+        String fullJson = "{ \"type\" : \"" + type + "\", \"value\" : " + element.toString() + " }";
         System.out.println("fullJson is " + fullJson);
         try {
             Value snak = mapper.readValue(fullJson, JacksonValue.class);

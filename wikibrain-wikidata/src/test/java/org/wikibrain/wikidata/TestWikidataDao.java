@@ -1,5 +1,7 @@
 package org.wikibrain.wikidata;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.mockito.Mockito;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -18,7 +20,9 @@ import org.wikibrain.core.dao.sql.TestDaoUtil;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.utils.WpIOUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -45,6 +49,39 @@ public class TestWikidataDao {
         cacheFile = File.createTempFile("dao", "cache");
         cacheFile.delete();
         cacheFile.mkdirs();
+        // Add all the entity ids we need as values for SOME key
+        URL url = TestWikidataDao.class.getResource("/testDump.json.bz2");
+
+        TIntIntMap map = new TIntIntHashMap();
+        BufferedReader reader = WpIOUtils.openBufferedReader(new File(url.toURI()));
+        while (true) {
+            String line = reader.readLine();
+            if (line == null) {
+                break;
+            }
+            if (!line.contains("{")) {
+                continue;
+            }
+            line = line.trim();
+            if (line.endsWith(",")) {
+                line = line.substring(0, line.length()-1);
+            }
+            JsonElement element = new JsonParser().parse(line.trim());
+            String id = element.getAsJsonObject().get("id").getAsString();
+            if (id.startsWith("Q")) {
+                int i = Integer.valueOf(id.substring(1));
+                map.put(i,i);
+            }
+        }
+        reader.close();
+        Map<Language, TIntIntMap> concepts = new HashMap<Language, TIntIntMap>();
+        for (Language lang : LanguageSet.ALL){
+            concepts.put(lang,map);
+        }
+
+        UniversalPageDao upDao = Mockito.mock(UniversalPageDao.class);
+        Mockito.when(upDao.getAllLocalToUnivIdsMap(LanguageSet.ALL)).thenReturn(concepts);
+
 
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
         MetaInfoDao md = new MetaInfoSqlDao(ds);
@@ -53,27 +90,7 @@ public class TestWikidataDao {
         WikidataSqlDao wd = new WikidataSqlDao(ds, null, null);
         wd.beginLoad();
 
-        // Add all the entity ids we need as values for SOME key
-        Map<Language, TIntIntMap> concepts = new HashMap<Language, TIntIntMap>();
-        TIntIntMap map = new TIntIntHashMap();
-        URL url1 = TestWikidataDao.class.getResource("/Q.txt");
-        File file = new File(url1.getPath());
-        Scanner scan = new Scanner (file);
-        while(scan.hasNext()){
-            int i = scan.nextInt();
-            map.put(i,i);
-        }
-        for (Language lang : LanguageSet.ALL){
-            concepts.put(lang,map);
-        }
-
-        scan.close();
-
-        UniversalPageDao upDao = Mockito.mock(UniversalPageDao.class);
-        Mockito.when(upDao.getAllLocalToUnivIdsMap(LanguageSet.ALL)).thenReturn(concepts);
-
         WikidataDumpLoader loader = new WikidataDumpLoader(wd, md, upDao, LanguageSet.ALL);
-        URL url = TestWikidataDao.class.getResource("/testDump.xml.bz2");
         loader.load(new File(url.toURI()));
         wd.endLoad();
         md.endLoad();
@@ -92,7 +109,7 @@ public class TestWikidataDao {
         WikidataDao wd = new WikidataSqlDao(ds, null, null);
 
         Map<Integer, WikidataEntity> props = wd.getProperties();
-        assertEquals(props.size(), 836);
+        assertEquals(props.size(), 1304);
         assertTrue(props.containsKey(127));
 
         WikidataEntity entity = wd.getProperty(127);
@@ -100,7 +117,7 @@ public class TestWikidataDao {
         assertEquals(WikidataEntity.Type.PROPERTY, entity.getType());
 
         assertEquals("owned by", entity.getLabels().get(EN));
-        assertEquals("propietario", entity.getLabels().get(Language.getByLangCode("es")));
+        assertEquals("propietario", entity.getLabels().get(Language.ES));
 
         assertEquals("owner of the subject", entity.getDescriptions().get(EN));
         assertTrue(entity.getAliases().get(Language.getByLangCode("cs")).contains("majitel"));
@@ -113,19 +130,19 @@ public class TestWikidataDao {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
         WikidataDao wd = new WikidataSqlDao(ds, null, null);
 
-        WikidataEntity entity = wd.getItem(157);
-        assertEquals(157, entity.getId());
+        WikidataEntity entity = wd.getItem(23);
+        assertEquals(23, entity.getId());
         assertEquals(WikidataEntity.Type.ITEM, entity.getType());
 
-        assertEquals("Fran\u00e7ois Hollande", entity.getLabels().get(Language.getByLangCode("en")));
-        assertEquals("\u041e\u043b\u043b\u0430\u043d\u0434, \u0424\u0440\u0430\u043d\u0441\u0443\u0430", entity.getLabels().get(Language.getByLangCode("ru")));
+        assertEquals("George Washington", entity.getLabels().get(Language.getByLangCode("en")));
+        assertEquals("\u0414\u0436\u043e\u0440\u0434\u0436 \u0412\u0430\u0448\u0438\u043d\u0433\u0442\u043e\u043d", entity.getLabels().get(Language.getByLangCode("ru")));
 
-        assertEquals("24th President of the French Republic", entity.getDescriptions().get(Language.getByLangCode("en")));
-        assertTrue(entity.getAliases().get(Language.getByLangCode("ca")).contains("Hollande"));
-        assertEquals(36, entity.getStatements().size());
+        assertEquals("American politician, 1st president of the United States (in office from 1789 to 1797)", entity.getDescriptions().get(Language.getByLangCode("en")));
+        assertTrue(entity.getAliases().get(Language.getByLangCode("ta")).contains("\u0b9c\u0bcb\u0bb0\u0bcd\u0b9c\u0bcd \u0bb5\u0bca\u0bb7\u0bbf\u0b99\u0bcd\u0b9f\u0ba9\u0bcd"));
+        assertEquals(67, entity.getStatements().size());
         Map<String, List<WikidataStatement>> statements = entity.getStatementsInLanguage(Language.getByLangCode("en"));
 
-        assertEquals(4, statements.get("award received").size());
+        assertEquals(2, statements.get("award received").size());
         TIntSet ids = new TIntHashSet();
         for (WikidataStatement st : statements.get("award received")) {
             assertEquals(166, st.getProperty().getId());
@@ -133,15 +150,15 @@ public class TestWikidataDao {
             assertEquals(WikidataValue.Type.ITEM, st.getValue().getType());
             ids.add(st.getValue().getItemValue());
         }
-        assertEquals(new TIntHashSet(new int[] {84020, 10855226, 13422143, 14539990}), ids);
+        assertEquals(new TIntHashSet(new int[] {3519573, 721743}), ids);
     }
 
     @Test
     public void testLocalStatements() throws DaoException, IOException, ClassNotFoundException {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
         WikidataDao wd = new WikidataSqlDao(ds, null, null);
-        Map<String, List<LocalWikidataStatement>> statements = wd.getLocalStatements(EN, WikidataEntity.Type.ITEM, 157);
-        assertEquals(25, statements.keySet().size());
+        Map<String, List<LocalWikidataStatement>> statements = wd.getLocalStatements(EN, WikidataEntity.Type.ITEM, 23);
+        assertEquals(57, statements.keySet().size());
 
         for (String prop : statements.keySet()) {
             System.out.println("property " + prop + " has statements:");
@@ -150,10 +167,10 @@ public class TestWikidataDao {
             }
         }
 
-        List<LocalWikidataStatement> almaMaters = statements.get("alma mater");
-        assertEquals(4, almaMaters.size());
-        for (LocalWikidataStatement lws : almaMaters) {
-            assertEquals("François Hollande alma mater unknown", lws.getFullStatement());
+        List<LocalWikidataStatement> occupations = statements.get("occupation");
+        assertEquals(4, occupations.size());
+        for (LocalWikidataStatement lws : occupations) {
+            assertEquals("George Washington occupation unknown", lws.getFullStatement());
         }
     }
 
@@ -162,18 +179,18 @@ public class TestWikidataDao {
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
         WikidataDao wd = new WikidataSqlDao(ds, null, null);
         List<WikidataStatement> stats = IteratorUtils.toList(
-                wd.get(new WikidataFilter.Builder().withValue(WikidataValue.forString("122353562")).build()
+                wd.get(new WikidataFilter.Builder().withValue(WikidataValue.forString("11928912p")).build()
             ).iterator());
         assertEquals(1, stats.size());
-        stats = IteratorUtils.toList(wd.getByValue("BnF identifier", WikidataValue.forString("122353562")).iterator());
+        stats = IteratorUtils.toList(wd.getByValue("BnF identifier", WikidataValue.forString("11928912p")).iterator());
         assertEquals(1, stats.size());
-        stats = IteratorUtils.toList(wd.getByValue(wd.getProperty(268), WikidataValue.forString("122353562")).iterator());
+        stats = IteratorUtils.toList(wd.getByValue(wd.getProperty(268), WikidataValue.forString("11928912p")).iterator());
         assertEquals(1, stats.size());
         stats = IteratorUtils.toList(
                 wd.get(new WikidataFilter.Builder().withValue(WikidataValue.forItem(142)).build()
                 ).iterator());
-        assertEquals(30, stats.size());
+        assertEquals(34, stats.size());
         stats = IteratorUtils.toList(wd.getByValue("country of citizenship", WikidataValue.forItem(142)).iterator());
-        assertEquals(5, stats.size());
+        assertEquals(6, stats.size());
     }
 }

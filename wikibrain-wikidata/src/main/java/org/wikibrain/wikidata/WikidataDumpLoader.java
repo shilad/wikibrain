@@ -101,6 +101,13 @@ public class WikidataDumpLoader {
     }
 
     private void save(File file, String json) throws WpParseException, DaoException {
+        if (!json.contains("{")) {
+            return;
+        }
+        json = json.trim();
+        if (json.endsWith(",")) {
+            json = json.substring(0, json.length()-1);
+        }
         if (counter.incrementAndGet() % 10000 == 0) {
             LOG.info("processing wikidata entity " + counter.get());
         }
