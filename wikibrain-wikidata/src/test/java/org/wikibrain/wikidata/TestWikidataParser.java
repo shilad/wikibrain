@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
+import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.parser.WpParseException;
@@ -23,23 +24,25 @@ public class TestWikidataParser {
 
     @Test
     public void testWikidataRawRecord() throws IOException, WpParseException {
-        String xml = WpIOUtils.resourceToString("/testPage.xml");
-        PageXmlParser parser = new PageXmlParser(LanguageInfo.getByLangCode("en"));
-        RawPage rawPage = parser.parse(xml);
-        assertEquals("application/json", rawPage.getFormat());
-        assertEquals("wikibase-item", rawPage.getModel());
-
-        WikidataParser parser2 = new WikidataParser();
-        WikidataEntity record = parser2.parse(rawPage);
-
+        String json = WpIOUtils.resourceToString("/testPage.json");
+        WikidataParser parser = new WikidataParser();
+        WikidataEntity entity = parser.parse(json);
+        assertEquals(entity.getType(), WikidataEntity.Type.ITEM);
+        assertEquals(entity.getId(), 157);
+        assertEquals(entity.getLabels().get(Language.ES), "Fran\u00e7ois Hollande");
+        assertEquals(entity.getDescriptions().get(Language.EN), "24th President of the French Republic");
+        WikidataStatement stm = entity.getStatements().get(0);
+        assertEquals(stm.getProperty().getId(), 40);
+        assertEquals(stm.getValue().getType(), WikidataValue.Type.ITEM);
+        assertEquals(stm.getValue().getItemValue(), 16783695);
     }
 
     @Test
     public void testDump() throws IOException, WpParseException {
-        File tmp = File.createTempFile("wikibrain", "dump.xml.bz2");
+        File tmp = File.createTempFile("wikibrain", "dump.json.bz2");
         try {
             tmp.deleteOnExit();
-            InputStream in = TestWikidataParser.class.getResourceAsStream("/testDump.xml.bz2");
+            InputStream in = TestWikidataParser.class.getResourceAsStream("/testDump.json.bz2");
             OutputStream out = new FileOutputStream(tmp);
             IOUtils.copy(in, out);
             IOUtils.closeQuietly(in);
@@ -55,16 +58,10 @@ public class TestWikidataParser {
                     numProperties++;
                 }
             }
-            assertEquals(400, numItems);
-            assertEquals(836, numProperties);
+            assertEquals(399, numItems);
+            assertEquals(1304, numProperties);
         } finally {
             tmp.delete();
         }
-    }
-
-    @Test
-    public void testDateParser() throws ParseException {
-        String s = "+00000001996-12-20T00:00:00Z";
-        Date d = DateUtils.parseDate(s, "'+0000000'yyyy-MM-dd'T'HH:mm:ss'Z'");
     }
 }

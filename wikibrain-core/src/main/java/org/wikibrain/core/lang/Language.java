@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -100,6 +101,21 @@ public class Language implements Comparable<Language>, Serializable {
         throw new IllegalArgumentException("unknown langCode: '" + langCode + "'");
     }
 
+    public static Language getByLangCodeLenient(String langCode) {
+        List<String> flavors = new ArrayList<String>();
+        flavors.add(langCode);
+        if (langCode.contains("-")) {
+            flavors.add(langCode.substring(0, langCode.indexOf("-")));
+        }
+        for (String s : flavors) {
+            try {
+                return getByLangCode(s);
+            } catch (IllegalArgumentException e) {
+            }
+        }
+        throw new IllegalArgumentException("unknown langCode: '" + langCode + "'");
+    }
+
     public static Language getByFullLangName(String language) {
         for (Language lang : LANGUAGES) {
             if (lang.enLangName.equalsIgnoreCase(language) || lang.nativeName.equalsIgnoreCase(language)) {
@@ -121,7 +137,7 @@ public class Language implements Comparable<Language>, Serializable {
 
     /**
      * @param id numeric id associated with the language
-     * @return associated language
+     * @return associated language                                             w
      * @throws IllegalArgumentException if id is unknown.
      */
     public static Language getById(int id) {
