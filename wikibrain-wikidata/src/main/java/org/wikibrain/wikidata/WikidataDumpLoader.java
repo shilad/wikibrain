@@ -23,6 +23,7 @@ import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.download.DumpFileDownloader;
+import org.wikibrain.download.FileDownloader;
 import org.wikibrain.download.RequestedLinkGetter;
 import org.wikibrain.parser.DumpSplitter;
 import org.wikibrain.parser.WpParseException;
@@ -34,6 +35,7 @@ import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -143,35 +145,32 @@ public class WikidataDumpLoader {
 
         Env env =  new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
-        List<File> paths;
+        File path;
         if (cmd.getArgList().isEmpty()) {
-            File dumpFile = File.createTempFile("wikiapidia", "dumplinks");
-            dumpFile.deleteOnExit();
-
-            // Write a file with the links that the need to be fetched
-            RequestedLinkGetter getter = new RequestedLinkGetter(
-                    Language.WIKIDATA,
-                    Arrays.asList(FileMatcher.ARTICLES),
-                    new Date()
-            );
-            FileUtils.writeLines(dumpFile, getter.getLangLinks());
+            WikidataDumpHelper helper = new WikidataDumpHelper();
 
             // Fetch the file (if necessary) to the standard path
-            String filePath = conf.getConf().get().getString("download.path");
-            DumpFileDownloader downloader = new DumpFileDownloader(new File(filePath));
-            downloader.downloadFrom(dumpFile);
-
-            paths = new ArrayList<File>();
-            for (File f : env.getFiles(new LanguageSet(Language.WIKIDATA), FileMatcher.ARTICLES)) {
-                if (f.getName().contains("wikidata")) {
-                    paths.add(f);
+            String downloadDir = conf.getConf().get().getString("download.path");
+            File dest = FileUtils.getFile(downloadDir, helper.getMostRecentFile());
+            if (!dest.isFile()) {
+                dest.getParentFile().mkdirs();
+                File tmp = File.createTempFile("wikibrain-wikidata", "json");
+                FileUtils.deleteQuietly(tmp);
+                URL url = new URL(helper.getMostRecentUrl());
+                FileDownloader downloader = new FileDownloader();
+                downloader.download(url, tmp);
+                if (dest.isFile()) {
+                    throw new IllegalStateException();
                 }
+                FileUtils.moveFile(tmp, dest);
             }
+            path = dest;
+        } else if (cmd.getArgList().size() == 1) {
+            path = new File(cmd.getArgList().get(0).toString());
         } else {
-            paths = new ArrayList<File>();
-            for (Object arg : cmd.getArgList()) {
-                paths.add(new File((String) arg));
-            }
+            System.err.println("Invalid option usage:");
+            new HelpFormatter().printHelp("WikidataDumpLoader", options);
+            return;
         }
 
         WikidataDao wdDao = conf.get(WikidataDao.class);
@@ -179,7 +178,7 @@ public class WikidataDumpLoader {
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
         LanguageSet langs = conf.get(LanguageSet.class);
 
-        final WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao, upDao, langs);
+        WikidataDumpLoader loader = new WikidataDumpLoader(wdDao, metaDao, upDao, langs);
 
         if (cmd.hasOption("d")) {
             wdDao.clear();
@@ -187,16 +186,7 @@ public class WikidataDumpLoader {
         }
         wdDao.beginLoad();
         metaDao.beginLoad();
-
-        // loads multiple dumps in parallel
-        ParallelForEach.loop(paths,
-                new Procedure<File>() {
-                    @Override
-                    public void call(File path) throws Exception {
-                        LOG.info("processing file: " + path);
-                        loader.load(path);
-                    }
-                });
+        loader.load(path);
 
         wdDao.endLoad();
         metaDao.endLoad();
