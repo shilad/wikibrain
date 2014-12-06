@@ -59,6 +59,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     private FastLoader descLoader = null;
     private FastLoader aliasLoader = null;
     private Map<Integer, WikidataEntity> properties;
+    private WikidataParser parser = new WikidataParser();
 
     /**
      * @param dataSource      Data source for jdbc connections
@@ -249,7 +250,11 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                     .withEntityType(type)
                     .withEntityId(id)
                     .build();
-            entity.getStatements().addAll(IteratorUtils.toList(get(filter).iterator()));
+            for (WikidataStatement st : get(filter)) {
+                if (st != null) {
+                    entity.getStatements().add(st);
+                }
+            }
             return entity;
         } finally {
             freeJooq(jooq);
@@ -555,7 +560,8 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         JsonElement json = new JsonParser().parse(record.getValue(Tables.WIKIDATA_STATEMENT.VAL_STR));
         WikidataValue val;
         try {
-            val = JsonUtils.jsonToValue( record.getValue(Tables.WIKIDATA_STATEMENT.VAL_TYPE), json);
+            System.err.println("json is " + json);
+            val = parser.jsonToValue( record.getValue(Tables.WIKIDATA_STATEMENT.VAL_TYPE), json);
         } catch (WpParseException e) {
             throw new DaoException(e);
         }

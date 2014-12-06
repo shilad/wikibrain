@@ -27,14 +27,29 @@ public class WikidataEntity implements Serializable {
         }
     }
 
-    private Type type;
-    private int id;
+    private final Type type;
+    private final int id;
 
     private Map<Language, String> labels = new LinkedHashMap<Language, String>();
     private Map<Language, String> descriptions = new LinkedHashMap<Language, String>();
     private Map<Language, List<String>> aliases = new LinkedHashMap<Language, List<String>>();
     private List<WikidataStatement> statements = new ArrayList<WikidataStatement>();
 
+    /**
+     * ID must be a "P" or "Q" id. E.g. "P34"
+     * @param id
+     */
+    public WikidataEntity(String id) {
+        if (id.toUpperCase().startsWith("P")) {
+            type = Type.PROPERTY;
+            this.id = Integer.valueOf(id.substring(1));
+        } else if (id.toUpperCase().startsWith("Q")) {
+            type = Type.ITEM;
+            this.id = Integer.valueOf(id.substring(1));
+        } else {
+            throw new IllegalArgumentException("Invalid wikidata id: " + id);
+        }
+    }
     public WikidataEntity(Type type, int id) {
         this.type = type;
         this.id = id;
