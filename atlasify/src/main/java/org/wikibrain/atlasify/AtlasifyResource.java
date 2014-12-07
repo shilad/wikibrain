@@ -90,7 +90,8 @@ public class AtlasifyResource {
             Env env = new EnvBuilder().build();
             Configurator conf = env.getConfigurator();
             lpDao = conf.get(LocalPageDao.class);
-
+            lpaDao = conf.get(LocalPageAutocompleteSqlDao.class);
+			llDao = conf.get(LocalLinkDao.class);
 
             pa = conf.get(PhraseAnalyzer.class, "anchortext");
             System.out.println("FINISHED LOADING WIKIBRAIN");
@@ -142,7 +143,12 @@ public class AtlasifyResource {
 
         return result;
     }
-
+    @GET
+    @Path("/helloworld")
+    @Produces("text/plain")
+    public Response helloWorld() throws Exception{
+	return Response.ok("hello world").header("Access-Control-Allow-Origin", "*").build();
+    }
     // The Java method will process HTTP GET requests
     @GET
     // The Java method will produce content identified by the MIME Media
@@ -245,7 +251,7 @@ public class AtlasifyResource {
             }
         }
 
-        return Response.ok(new JSONObject(srMap).toString()).build();
+        return Response.ok(new JSONObject(srMap).toString()).header("Access-Control-Allow-Origin", "*").build();
     }
 
     private String getColorStringFromSR(double SR){
@@ -282,7 +288,7 @@ public class AtlasifyResource {
             wikibrainSRinit();
         }
 
-        Language language = Language.SIMPLE;
+        Language language = Language.EN;
         Map<String, String> autocompleteMap = new HashMap<String, String>();
         try {
             LinkedHashMap<LocalId, Float> resolution = pa.resolve(language, query.getKeyword(), 10);
@@ -302,6 +308,7 @@ public class AtlasifyResource {
                 i++;
             }
         } catch (Exception e) {
+			e.printStackTrace();
             autocompleteMap = new HashMap<String, String>();
         }
 
@@ -357,7 +364,7 @@ public class AtlasifyResource {
         }
         System.out.println("REQUESTED explanation between " + keywordTitle + " and " + featureTitle + "\n\n" + returnVal);
         */
-        return Response.ok("I'm explanation for" + keywordTitle + " and " + featureTitle).header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok(stringBuilder.toString()).header("Access-Control-Allow-Origin", "*").build();
 
 
 

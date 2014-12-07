@@ -38,7 +38,7 @@ public class AtlasifyServer {
 
 
 
-    private static int portNo = 9998;
+    private static int portNo = 8080;
     private static URI getBaseURI() {
         return UriBuilder.fromUri("http://atlasify.cs.umn.edu/").port(portNo).build();
     }
