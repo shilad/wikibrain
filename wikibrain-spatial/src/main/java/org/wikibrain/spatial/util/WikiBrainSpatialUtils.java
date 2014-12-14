@@ -48,4 +48,30 @@ public class WikiBrainSpatialUtils {
             return null;
         }
     }
+
+    /**
+     * Returns the effective centroid of the geometry.
+     * This is (currently) the centroid of the largest polygon.
+     * @param g
+     * @return
+     */
+    public static Point getCenter(Geometry g) {
+        if (g instanceof Point) {
+            return (Point)g;
+        }
+        Geometry largest = g;
+        if (largest instanceof MultiPolygon) {
+            double largestArea = -1;
+            MultiPolygon mp = (MultiPolygon)g;
+            for (int i = 0; i < mp.getNumGeometries(); i++) {
+                Geometry g2 = mp.getGeometryN(i);
+                double area = g2.getArea();
+                if (area > largestArea) {
+                    largestArea = area;
+                    largest = g2;
+                }
+            }
+        }
+        return largest.getCentroid();
+    }
 }

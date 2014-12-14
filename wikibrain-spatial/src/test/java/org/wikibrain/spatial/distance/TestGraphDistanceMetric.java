@@ -25,7 +25,7 @@ public class TestGraphDistanceMetric {
     @Test
     public void testKnn() throws DaoException {
         Map<Integer, Geometry> points = new HashMap<Integer, Geometry>();
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 10000; i++) {
             points.put(i * 3, makePoint());
         }
 
@@ -33,7 +33,7 @@ public class TestGraphDistanceMetric {
         when(dao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH))
                 .thenReturn(points);
 
-        GeodeticDistanceMetric metric1 = new GeodeticDistanceMetric(dao);
+        SphericalDistanceMetric metric1 = new SphericalDistanceMetric(dao);
         metric1.enableCache(true);
 
         GraphDistanceMetric metric2 = new GraphDistanceMetric(dao, metric1);
