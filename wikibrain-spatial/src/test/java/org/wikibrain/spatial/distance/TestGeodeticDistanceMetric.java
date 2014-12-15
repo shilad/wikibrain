@@ -12,10 +12,7 @@ import org.wikibrain.spatial.loader.SpatialDataLoader;
 import org.wikibrain.sr.utils.Leaderboard;
 import org.wikibrain.utils.Scoreboard;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -61,7 +58,10 @@ public class TestGeodeticDistanceMetric {
         when(dao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH))
                 .thenReturn(points);
 
-        GeodeticDistanceMetric metric = new GeodeticDistanceMetric(dao);
+
+        SphericalDistanceMetric spherical = new SphericalDistanceMetric(dao);
+        spherical.enableCache(true);
+        GeodeticDistanceMetric metric = new GeodeticDistanceMetric(dao, spherical);
         metric.enableCache(true);
 
         System.out.println("Closest points to " + query + " are: ");
@@ -70,11 +70,42 @@ public class TestGeodeticDistanceMetric {
         long after = System.currentTimeMillis();
         System.err.println("elapsed millis is " + (after - before));
 
-        for (int i = 0; i < neighbors.size(); i++) {
+        for (int i = 0; i < numNeighbors; i++) {
             SpatialDistanceMetric.Neighbor n = neighbors.get(i);
-            Point p = actual.getElement(i);
-            assertSame(p, points.get(n.conceptId));
-            System.out.println("\t" + points.get(n.conceptId) + " with distance " + n.distance);
+            Point p1 = actual.getElement(i);
+            Geometry p2 = (Point)points.get(n.conceptId);
+
+            assertEquals(n.distance, actual.getScore(i), n.distance * 0.005);  // maximum error due to ellipsoid is 0.5%
+//            System.out.println("\tgot" + p2 + " with distance " + n.distance + " expected " + p1 + " with distance " + actual.getScore(i));
+        }
+    }
+
+
+    @Test
+    public void testMatrix() throws DaoException {
+
+        SpatialDataDao dao = mock(SpatialDataDao.class);
+        when(dao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH))
+                .thenReturn(new HashMap<Integer, Geometry>());
+
+        SphericalDistanceMetric spherical = new SphericalDistanceMetric(dao);
+        spherical.enableCache(true);
+        GeodeticDistanceMetric metric = new GeodeticDistanceMetric(dao, spherical);
+
+        List<Geometry> cols = new ArrayList<Geometry>();
+        List<Geometry> rows = new ArrayList<Geometry>();
+        for (int i = 0; i < 10; i++) {
+            cols.add(makePoint());
+        }
+        for (int i = 0; i < 5; i++) {
+            rows.add(makePoint());
+        }
+        float [][] distance = metric.distance(rows, cols);
+        for (int i = 0; i < cols.size(); i++) {
+            for (int j = 0; j < rows.size(); j++) {
+//                System.err.println("i " +i + ", j " + j);
+                assertEquals(metric.distance(rows.get(j), cols.get(i)), distance[j][i], 1.5);
+            }
         }
     }
 

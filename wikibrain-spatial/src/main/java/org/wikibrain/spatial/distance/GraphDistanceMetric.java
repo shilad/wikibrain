@@ -95,6 +95,10 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
             return Double.POSITIVE_INFINITY;
         }
 
+        if (g1 == g2 || g1.equals(g2)) {
+            return 0;
+        }
+
         int targetId = closest.get(0).conceptId;
 
         TIntSet seen = new TIntHashSet();

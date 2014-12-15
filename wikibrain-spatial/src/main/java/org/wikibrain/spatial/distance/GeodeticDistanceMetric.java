@@ -127,7 +127,6 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
             if (kms <= maxDistance) {
                 results.add(new Neighbor(ip.conceptId, kms));
             }
-            results.add(new Neighbor(ip.conceptId, kms));
         }
         Collections.sort(results);
         if (results.size() > maxNeighbors) {
