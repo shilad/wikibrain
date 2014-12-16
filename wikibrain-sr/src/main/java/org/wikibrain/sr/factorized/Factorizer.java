@@ -29,6 +29,16 @@ public class Factorizer {
 
     /**
      *
+     * Loss function is
+     *
+     * L(x', y') = alpha * (x'y' - xy)^2 + beta * (x')^2
+     *
+     * Derivative for d/dx' is:
+     *
+     * d/dx'(L) = 2 * alpha * (x'y' - xy) * y' + 2 * beta * x'
+     * d/dx'(L) = 2 * alpha * err * y' + 2 * beta * x'
+     *
+     * d/dy' just swaps x and y.
      *
      *
      * @param similarity
@@ -79,6 +89,7 @@ public class Factorizer {
                     System.arraycopy(vectors[index1], 0, tmp, 0, rank);
                     double dot = WbMathUtils.dot(vectors[index1], vectors[index2]);
                     double err = val - dot;
+                    err *= 0.1 + val * val;
                     error += err * err;
                     WbMathUtils.add(0.001 * err, vectors[index1], vectors[index2], vectors[index1]);
                     WbMathUtils.add(0.001 * err, vectors[index2], tmp, vectors[index2]);

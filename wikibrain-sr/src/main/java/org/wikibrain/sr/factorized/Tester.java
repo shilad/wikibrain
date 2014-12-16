@@ -53,18 +53,18 @@ public class Tester {
             }
         }
 
-//        DenseMatrix dm = new DenseMatrix(
-//                new File("/Volumes/ShiladsFastDrive/wikibrain-simple/dat/sr/ensemble/simple/factorized.matrix"));
-//
-//        for (String q : queries) {
-//            LocalPage p = pageDao.getByTitle(Language.SIMPLE, q);
-//            int neighbors[] = getNeighbors(dm, p.getLocalId());
-//            System.out.println("Results for " + q + " are:");
-//            for (int i = 0; i < NUM_NEIGHBORS; i++) {
-//                int id = neighbors[i];
-//                System.out.println("\t" + i + ". " + pageDao.getById(Language.SIMPLE, id));
-//            }
-//        }
+        DenseMatrix dm = new DenseMatrix(
+                new File("/Volumes/ShiladsFastDrive/wikibrain-simple/dat/sr/ensemble/simple/factorized.matrix"));
+
+        for (String q : queries) {
+            LocalPage p = pageDao.getByTitle(Language.SIMPLE, q);
+            int neighbors[] = getNeighbors(dm, p.getLocalId());
+            System.out.println("Results for " + q + " are:");
+            for (int i = 0; i < NUM_NEIGHBORS; i++) {
+                int id = neighbors[i];
+                System.out.println("\t" + i + ". " + pageDao.getById(Language.SIMPLE, id));
+            }
+        }
     }
 
     public static int[] getNeighbors(DenseMatrix m, int id) throws IOException {
