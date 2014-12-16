@@ -1,18 +1,15 @@
 package org.wikibrain.spatial.distance;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import net.sf.jsi.Rectangle;
-import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.spatial.constants.Precision;
 import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.util.ClosestPointIndex;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpThreadUtils;
@@ -22,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+
 
 /**
  * Estimates the number of kilometers between geometries.
@@ -33,14 +31,19 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
 
     private final SpatialDataDao spatialDao;
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
-    private final GeodeticDistanceMetric geodetic;
+    private final ClosestPointIndex index;
     private int numNeighbors = 20;
     private int maxDistance = 10;
     private TIntSet concepts;
 
-    public GraphDistanceMetric(SpatialDataDao dao, GeodeticDistanceMetric geodetic) throws DaoException {
+    public GraphDistanceMetric(SpatialDataDao dao, ClosestPointIndex index) {
         this.spatialDao = dao;
-        this.geodetic = geodetic;
+        this.index = index;
+    }
+
+    public GraphDistanceMetric(SpatialDataDao dao, SphericalDistanceMetric spherical) {
+        this.spatialDao = dao;
+        this.index = spherical.getIndex();
     }
 
     public void setNumNeighbors(int numNeighbors) {
@@ -68,8 +71,8 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
                             return;
                         }
                         TIntSet neighbors = new TIntHashSet();
-                        for (Neighbor n : geodetic.getNeighbors(points.get(conceptId), numNeighbors)) {
-                            neighbors.add(n.conceptId);
+                        for (ClosestPointIndex.Result r : index.query(points.get(conceptId), numNeighbors)) {
+                            neighbors.add(r.id);
                         }
                         numEdges.addAndGet(neighbors.size());
                         synchronized (adjacencyList) {
@@ -92,22 +95,26 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
             throw new UnsupportedOperationException();
         }
         // Hack: Replace g2 with CLOSEST concept
-        List<Neighbor> closest = geodetic.getNeighbors(g2, 1);
+        List<ClosestPointIndex.Result> closest = index.query(g2, 1);
         int maxSteps = maxDistance;
         if (maxSteps == 0 || closest.isEmpty()) {
             return Double.POSITIVE_INFINITY;
         }
 
-        int targetId = closest.get(0).conceptId;
+        if (g1 == g2 || g1.equals(g2)) {
+            return 0;
+        }
+
+        int targetId = closest.get(0).id;
 
         TIntSet seen = new TIntHashSet();
         TIntLinkedList queue = new TIntLinkedList();
-        for (Neighbor n : geodetic.getNeighbors(g1, numNeighbors)) {
-            if (n.conceptId == targetId) {
+        for (ClosestPointIndex.Result n : index.query(g1, numNeighbors)) {
+            if (n.id== targetId) {
                 return 1;
             }
-            queue.add(n.conceptId);
-            seen.add(n.conceptId);
+            queue.add(n.id);
+            seen.add(n.id);
         }
 
         for (int level = 2; level <= maxSteps; level++) {
@@ -128,6 +135,7 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
                     }
                 }
             }
+//            System.err.println("at level " + level + " saw " + seen.size());
         }
         return Double.POSITIVE_INFINITY;
     }
@@ -157,10 +165,10 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
 
         TIntSet seen = new TIntHashSet();
         TIntLinkedList queue = new TIntLinkedList();
-        for (Neighbor n : geodetic.getNeighbors(g, numNeighbors)) {
-            queue.add(n.conceptId);
-            result.add(new Neighbor(n.conceptId, 1));
-            seen.add(n.conceptId);
+        for (ClosestPointIndex.Result r : index.query(g, numNeighbors)) {
+            queue.add(r.id);
+            result.add(new Neighbor(r.id, 1));
+            seen.add(r.id);
         }
 
         for (int level = 2; level <= maxSteps; level++) {
