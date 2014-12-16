@@ -9,6 +9,7 @@ import gnu.trove.set.TIntSet;
 import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.util.ClosestPointIndex;
 import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
     private static final double EARTH_RADIUS = 6371.0 * 1000;   // radius of the earth in meters
 
     private static final Logger LOG = Logger.getLogger(SpatialDistanceMetric.class.getName());
-    private final SphericalDistanceMetric spherical;
+    private final ClosestPointIndex index;
     private final SpatialDataDao spatialDao;
     private TIntSet concepts;
     private boolean useBorders = false;
@@ -45,14 +46,14 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
      * @param spatialDao
      * @param useBorders
      */
-    public GeodeticDistanceMetric(SpatialDataDao spatialDao, SphericalDistanceMetric spherical, boolean useBorders) {
+    public GeodeticDistanceMetric(SpatialDataDao spatialDao, ClosestPointIndex index, boolean useBorders) {
         this.spatialDao = spatialDao;
-        this.spherical = spherical;
+        this.index = index;
         this.useBorders = useBorders;
     }
 
     public GeodeticDistanceMetric(SpatialDataDao spatialDao, SphericalDistanceMetric spherical) {
-        this(spatialDao, spherical, false);
+        this(spatialDao, spherical.getIndex(), false);
     }
 
     @Override
@@ -121,11 +122,13 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
         GeodeticCalculator calc = new GeodeticCalculator();
         calc.setStartingGeographicPoint(c.getX(), c.getY());
         List<Neighbor> results = new ArrayList<Neighbor>();
-        for (SphericalDistanceMetric.IndexPoint ip : spherical.getNeighborsInternal(g, maxNeighbors, maxDistance)) {
-            calc.setDestinationGeographicPoint(ip.point.getX(), ip.point.getY());
-            double kms = calc.getOrthodromicDistance();
-            if (kms <= maxDistance) {
-                results.add(new Neighbor(ip.conceptId, kms));
+        for (ClosestPointIndex.Result r: index.query(g, maxNeighbors)) {
+            if (r.distance < maxDistance) {
+                calc.setDestinationGeographicPoint(r.point.getX(), r.point.getY());
+                double kms = calc.getOrthodromicDistance();
+                if (kms <= maxDistance) {
+                    results.add(new Neighbor(r.id, kms));
+                }
             }
         }
         Collections.sort(results);

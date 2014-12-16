@@ -3,6 +3,7 @@ package org.wikibrain.spatial.util;
 import com.google.gson.JsonObject;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import org.apache.commons.math3.util.FastMath;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +13,10 @@ import java.util.logging.Logger;
 */
 public class WikiBrainSpatialUtils {
 
+    /**
+     * Radius of earth, in meters.
+     */
+    public static final double EARTH_RADIUS = 6372800;
     private static final String EARTH_ITEM_ID = "Q2";
 
     private static final Logger LOG = Logger.getLogger(WikiBrainSpatialUtils.class.getName());
@@ -73,5 +78,45 @@ public class WikiBrainSpatialUtils {
             }
         }
         return largest.getCentroid();
+    }
+
+    public static double[] get3DPoints(Point p) {
+        double lng = FastMath.toRadians(p.getX());
+        double lat = FastMath.toRadians(p.getY());
+        return new double[] {
+                FastMath.cos(lat) * FastMath.sin(-lng),
+                FastMath.cos(lat) * FastMath.cos(-lng),
+                FastMath.sin(-lat),
+        };
+    }
+
+    public static double haversine(Point p1, Point p2) {
+        return haversine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+    }
+
+    /**
+     * Approximation of the distance between two geographic points that treats the
+     * earth as a sphere. Fast, but can have 0.5% error because the Earth is closer
+     * to an ellipsoid.
+     *
+     * From http://rosettacode.org/wiki/Haversine_formula#Java
+     *
+     * The use of FastMath below cuts the time by more than 50%.
+     *
+     * @param lon1
+     * @param lat1
+     * @param lon2
+     * @param lat2
+     * @return
+     */
+    public static double haversine(double lon1, double lat1, double lon2, double lat2) {
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
+
+        double a = FastMath.sin(dLat / 2) * FastMath.sin(dLat / 2) + FastMath.sin(dLon / 2) * FastMath.sin(dLon / 2) * FastMath.cos(lat1) * FastMath.cos(lat2);
+        double c = 2 * FastMath.asin(FastMath.sqrt(a));
+        return EARTH_RADIUS * c;
     }
 }

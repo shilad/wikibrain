@@ -6,11 +6,11 @@ import ags.utils.dataStructures.trees.thirdGenKD.SquareEuclideanDistanceFunction
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import gnu.trove.set.TIntSet;
-import org.apache.commons.math3.util.FastMath;
 import org.geotools.referencing.GeodeticCalculator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.spatial.constants.Precision;
 import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.util.ClosestPointIndex;
 import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public class SphericalDistanceMetric implements SpatialDistanceMetric {
 
     private static final Logger LOG = Logger.getLogger(SpatialDistanceMetric.class.getName());
-    private KdTree<IndexPoint> index;
+    private ClosestPointIndex index;
     private final SpatialDataDao spatialDao;
     private TIntSet concepts;
 
@@ -54,7 +54,7 @@ public class SphericalDistanceMetric implements SpatialDistanceMetric {
             index = null;
             return;
         }
-        index = new KdTree<IndexPoint>(3);
+        index = new ClosestPointIndex();
         final Map<Integer, Geometry> points = this.spatialDao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH);
         ParallelForEach.loop(points.keySet(), WpThreadUtils.getMaxThreads(),
                 new Procedure<Integer>() {
@@ -63,16 +63,7 @@ public class SphericalDistanceMetric implements SpatialDistanceMetric {
                 if (concepts != null && !concepts.contains(conceptId)) {
                     return;
                 }
-
-                // create 3-d spherical coordinates
-                Point p = WikiBrainSpatialUtils.getCenter(points.get(conceptId));
-                double[] coords = get3DPoints(p);
-                IndexPoint ip = new IndexPoint();
-                ip.conceptId = conceptId;
-                ip.point = p;
-                synchronized (index) {
-                    index.addPoint(coords, ip);
-                }
+                index.insert(conceptId, points.get(conceptId));
             }
         }, 100000);
         LOG.info("loaded " + index.size() + " points");
@@ -85,7 +76,7 @@ public class SphericalDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public double distance(Geometry g1, Geometry g2) {
-        return haversine(WikiBrainSpatialUtils.getCenter(g1), WikiBrainSpatialUtils.getCenter(g2));
+        return WikiBrainSpatialUtils.haversine(WikiBrainSpatialUtils.getCenter(g1), WikiBrainSpatialUtils.getCenter(g2));
     }
 
     @Override
@@ -130,87 +121,16 @@ public class SphericalDistanceMetric implements SpatialDistanceMetric {
     public List<Neighbor> getNeighbors(Geometry g, int maxNeighbors, double maxDistance) {
         final Point c = WikiBrainSpatialUtils.getCenter(g);
         List<Neighbor> results = new ArrayList<Neighbor>();
-        for (IndexPoint ip : getNeighborsInternal(g, maxNeighbors, maxDistance)) {
-            results.add(new Neighbor(
-                    ip.conceptId,
-                    haversine(c, ip.point)
-            ));
+        for (ClosestPointIndex.Result r : index.query(g, maxNeighbors)) {
+            if (r.distance <= maxDistance) {
+                results.add(new Neighbor(r.id, r.distance));
+            }
         }
         Collections.sort(results);
         return results;
     }
 
-    protected List<IndexPoint> getNeighborsInternal(Geometry g, int maxNeighbors, double maxDistance) {
-        if (index == null) {
-            // TODO: get from Toby's code
-            throw new UnsupportedOperationException();
-        }
-        final Point c = WikiBrainSpatialUtils.getCenter(g);
-        final double[] c1 = get3DPoints(c);
-        MaxHeap<IndexPoint> heap = index.findNearestNeighbors(
-                c1,
-                maxNeighbors,
-                new SquareEuclideanDistanceFunction());
-
-        GeodeticCalculator calc = new GeodeticCalculator();
-        calc.setStartingGeographicPoint(c.getX(), c.getY());
-        List<IndexPoint> results = new ArrayList<IndexPoint>();
-        while (heap.size() > 0) {
-            results.add(heap.getMax());
-            heap.removeMax();
-        }
-        Collections.reverse(results);
-        return results;
-    }
-
-    public static double[] get3DPoints(Point p) {
-        double lng = FastMath.toRadians(p.getX());
-        double lat = FastMath.toRadians(p.getY());
-        return new double[] {
-                FastMath.cos(lat) * FastMath.sin(-lng),
-                FastMath.cos(lat) * FastMath.cos(-lng),
-                FastMath.sin(-lat),
-        };
-    }
-
-    protected static class IndexPoint {
-        public int conceptId;
-        public Point point;
-    }
-
-
-    /**
-     * Radius of earth, in meters.
-     */
-    public static final double EARTH_RADIUS = 6372800;
-
-    public static double haversine(Point p1, Point p2) {
-        return haversine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
-    }
-
-    /**
-     * Approximation of the distance between two geographic points that treats the
-     * earth as a sphere. Fast, but can have 0.5% error because the Earth is closer
-     * to an ellipsoid.
-     *
-     * From http://rosettacode.org/wiki/Haversine_formula#Java
-     *
-     * The use of FastMath below cuts the time by more than 50%.
-     *
-     * @param lon1
-     * @param lat1
-     * @param lon2
-     * @param lat2
-     * @return
-     */
-    public static double haversine(double lon1, double lat1, double lon2, double lat2) {
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        lat1 = Math.toRadians(lat1);
-        lat2 = Math.toRadians(lat2);
-
-        double a = FastMath.sin(dLat / 2) * FastMath.sin(dLat / 2) + FastMath.sin(dLon / 2) * FastMath.sin(dLon / 2) * FastMath.cos(lat1) * FastMath.cos(lat2);
-        double c = 2 * FastMath.asin(FastMath.sqrt(a));
-        return EARTH_RADIUS * c;
+    public ClosestPointIndex getIndex() {
+        return index;
     }
 }

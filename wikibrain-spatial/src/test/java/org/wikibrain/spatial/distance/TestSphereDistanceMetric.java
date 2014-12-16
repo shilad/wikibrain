@@ -2,7 +2,6 @@ package org.wikibrain.spatial.distance;
 
 
 import com.vividsolutions.jts.geom.*;
-import org.geotools.referencing.GeodeticCalculator;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.core.dao.DaoException;
@@ -43,7 +42,7 @@ public class TestSphereDistanceMetric {
         for (int i = 0; i < 100000; i++) {
             Point p = makePoint();
             points.put(i * 3, p);
-            actual.add(p, SphericalDistanceMetric.haversine(query, p));
+            actual.add(p, WikiBrainSpatialUtils.haversine(query, p));
         }
 
         SpatialDataDao dao = mock(SpatialDataDao.class);
@@ -108,9 +107,9 @@ public class TestSphereDistanceMetric {
             Point p2 = makePoint();
             Point p3 = makePoint();
 
-            double d12 = SphericalDistanceMetric.haversine(p1, p2);
-            double d13 = SphericalDistanceMetric.haversine(p1, p3);
-            double d23 = SphericalDistanceMetric.haversine(p2, p3);
+            double d12 = WikiBrainSpatialUtils.haversine(p1, p2);
+            double d13 = WikiBrainSpatialUtils.haversine(p1, p3);
+            double d23 = WikiBrainSpatialUtils.haversine(p2, p3);
 
             double e12 = euclidean(p1, p2);
             double e13 = euclidean(p1, p3);
@@ -123,8 +122,8 @@ public class TestSphereDistanceMetric {
     }
 
     private double euclidean(Point p1, Point p2) {
-        double [] c1 = SphericalDistanceMetric.get3DPoints(p1);
-        double [] c2 = SphericalDistanceMetric.get3DPoints(p2);
+        double [] c1 = WikiBrainSpatialUtils.get3DPoints(p1);
+        double [] c2 = WikiBrainSpatialUtils.get3DPoints(p2);
         return Math.sqrt(
                 (c1[0] - c2[0]) * (c1[0] - c2[0]) +
                 (c1[1] - c2[1]) * (c1[1] - c2[1]) +
@@ -139,7 +138,7 @@ public class TestSphereDistanceMetric {
         for (int i = 0; i < 1000000; i++) {
             Point p1 = makePoint();
             Point p2 = makePoint();
-            sum += SphericalDistanceMetric.haversine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+            sum += WikiBrainSpatialUtils.haversine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
         }
         long after = System.currentTimeMillis();
         System.err.println("elapsed is " + (after-before));
