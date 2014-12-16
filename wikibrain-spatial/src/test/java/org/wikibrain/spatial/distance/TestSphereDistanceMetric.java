@@ -2,25 +2,25 @@ package org.wikibrain.spatial.distance;
 
 
 import com.vividsolutions.jts.geom.*;
-import org.geotools.referencing.GeodeticCalculator;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.spatial.constants.Precision;
 import org.wikibrain.spatial.dao.SpatialDataDao;
-import org.wikibrain.spatial.loader.SpatialDataLoader;
-import org.wikibrain.sr.utils.Leaderboard;
+import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 import org.wikibrain.utils.Scoreboard;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Shilad Sen
  */
-public class TestGeodeticDistanceMetric {
+public class TestSphereDistanceMetric {
     private Random random = new Random();
     private GeometryFactory factory = new GeometryFactory(new PrecisionModel(),8307);
 
@@ -37,31 +37,19 @@ public class TestGeodeticDistanceMetric {
         int numNeighbors = 100;
         Point query = makePoint();
         Scoreboard<Point> actual = new Scoreboard<Point>(numNeighbors, Scoreboard.Order.INCREASING);
-        GeodeticCalculator calc = new GeodeticCalculator();
-        calc.setStartingGeographicPoint(query.getX(), query.getY());
 
         Map<Integer, Geometry> points = new HashMap<Integer, Geometry>();
-        int diverged = 0;
         for (int i = 0; i < 100000; i++) {
             Point p = makePoint();
             points.put(i * 3, p);
-            calc.setDestinationGeographicPoint(p.getX(), p.getY());
-            try {
-                actual.add(p, calc.getOrthodromicDistance());
-            } catch (ArithmeticException e) {
-                diverged++;
-            }
+            actual.add(p, WikiBrainSpatialUtils.haversine(query, p));
         }
-        System.err.println("number of diverged points: " + diverged);
 
         SpatialDataDao dao = mock(SpatialDataDao.class);
         when(dao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH))
                 .thenReturn(points);
 
-
-        SphericalDistanceMetric spherical = new SphericalDistanceMetric(dao);
-        spherical.enableCache(true);
-        GeodeticDistanceMetric metric = new GeodeticDistanceMetric(dao, spherical);
+        SphericalDistanceMetric metric = new SphericalDistanceMetric(dao);
         metric.enableCache(true);
 
         System.out.println("Closest points to " + query + " are: ");
@@ -70,16 +58,13 @@ public class TestGeodeticDistanceMetric {
         long after = System.currentTimeMillis();
         System.err.println("elapsed millis is " + (after - before));
 
-        for (int i = 0; i < numNeighbors; i++) {
+        for (int i = 0; i < neighbors.size(); i++) {
             SpatialDistanceMetric.Neighbor n = neighbors.get(i);
-            Point p1 = actual.getElement(i);
-            Geometry p2 = (Point)points.get(n.conceptId);
-
-            assertEquals(n.distance, actual.getScore(i), n.distance * 0.005);  // maximum error due to ellipsoid is 0.5%
-//            System.out.println("\tgot" + p2 + " with distance " + n.distance + " expected " + p1 + " with distance " + actual.getScore(i));
+            Point p = actual.getElement(i);
+            assertSame(p, points.get(n.conceptId));
+            System.out.println("\t" + points.get(n.conceptId) + " with distance " + n.distance);
         }
     }
-
 
     @Test
     public void testMatrix() throws DaoException {
@@ -88,9 +73,8 @@ public class TestGeodeticDistanceMetric {
         when(dao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH))
                 .thenReturn(new HashMap<Integer, Geometry>());
 
-        SphericalDistanceMetric spherical = new SphericalDistanceMetric(dao);
-        spherical.enableCache(true);
-        GeodeticDistanceMetric metric = new GeodeticDistanceMetric(dao, spherical);
+        SphericalDistanceMetric metric = new SphericalDistanceMetric(dao);
+        metric.enableCache(true);
 
         List<Geometry> cols = new ArrayList<Geometry>();
         List<Geometry> rows = new ArrayList<Geometry>();
@@ -103,7 +87,7 @@ public class TestGeodeticDistanceMetric {
         float [][] distance = metric.distance(rows, cols);
         for (int i = 0; i < cols.size(); i++) {
             for (int j = 0; j < rows.size(); j++) {
-//                System.err.println("i " +i + ", j " + j);
+                System.err.println("i " +i + ", j " + j);
                 assertEquals(metric.distance(rows.get(j), cols.get(i)), distance[j][i], 1.5);
             }
         }
@@ -115,4 +99,48 @@ public class TestGeodeticDistanceMetric {
         return factory.createPoint(new Coordinate(lon, lat));
     }
 
+    @Test
+    public void testSphereOrdering() {
+        // Make sure ordering for euclidean and spherical distances are consistent.
+        for (int i = 0; i < 10000; i++) {
+            Point p1 = makePoint();
+            Point p2 = makePoint();
+            Point p3 = makePoint();
+
+            double d12 = WikiBrainSpatialUtils.haversine(p1, p2);
+            double d13 = WikiBrainSpatialUtils.haversine(p1, p3);
+            double d23 = WikiBrainSpatialUtils.haversine(p2, p3);
+
+            double e12 = euclidean(p1, p2);
+            double e13 = euclidean(p1, p3);
+            double e23 = euclidean(p2, p3);
+
+            assert((d12 > d13) == (e12 > e13));
+            assert((d12 > d23) == (e12 > e23));
+            assert((d13 > d23) == (e13 > e23));
+        }
+    }
+
+    private double euclidean(Point p1, Point p2) {
+        double [] c1 = WikiBrainSpatialUtils.get3DPoints(p1);
+        double [] c2 = WikiBrainSpatialUtils.get3DPoints(p2);
+        return Math.sqrt(
+                (c1[0] - c2[0]) * (c1[0] - c2[0]) +
+                (c1[1] - c2[1]) * (c1[1] - c2[1]) +
+                (c1[2] - c2[2]) * (c1[2] - c2[2])
+            );
+    }
+
+    @Test
+    public void benchHaversine() {
+        double sum = 0.0;
+        long before = System.currentTimeMillis();
+        for (int i = 0; i < 1000000; i++) {
+            Point p1 = makePoint();
+            Point p2 = makePoint();
+            sum += WikiBrainSpatialUtils.haversine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+        }
+        long after = System.currentTimeMillis();
+        System.err.println("elapsed is " + (after-before));
+    }
 }

@@ -13,13 +13,24 @@ import java.util.List;
  * @author Shilad Sen
  */
 public interface SpatialDistanceMetric {
-    public static class Neighbor {
+    public static class Neighbor implements Comparable<Neighbor> {
         public final int conceptId;
         public final double distance;
 
         public Neighbor(int conceptId, double distance) {
             this.conceptId = conceptId;
             this.distance = distance;
+        }
+
+        @Override
+        public int compareTo(Neighbor that) {
+            if (this.distance < that.distance) {
+                return -1;
+            } else if (this.distance > that.distance) {
+                return +1;
+            } else {
+                return 0;
+            }
         }
     }
 
