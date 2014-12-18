@@ -1,21 +1,14 @@
 package org.wikibrain.cookbook.sr;
 
-import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LocalString;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.sr.*;
-import org.wikibrain.sr.utils.ExplanationFormatter;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,14 +19,14 @@ import java.util.List;
 public class MostSimilarExample {
     public static void main(String[] args) throws Exception{
         // Initialize the WikiBrain environment and get the local page dao
-        Env env = new EnvBuilder().build();
+        Env env = new EnvBuilder().envFromArgs(args);
         Configurator conf = env.getConfigurator();
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         Language simple = Language.getByLangCode("simple");
 
         // Retrieve the "ensemble" sr metric for simple english
-        MonolingualSRMetric sr = conf.get(
-                MonolingualSRMetric.class, "ensemble",
+        SRMetric sr = conf.get(
+                SRMetric.class, "ensemble",
                 "language", simple.getLangCode());
 
         //Similarity between strings

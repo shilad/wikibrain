@@ -1,6 +1,8 @@
 package org.wikibrain.utils;
 
 /**
+ * Priority queue that stores the largest or smallest n scores.
+ *
  * @author Shilad Sen
  */
 public class Scoreboard<T> {

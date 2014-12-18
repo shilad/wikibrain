@@ -1,17 +1,15 @@
 package org.wikibrain.sr.evaluation;
 
 import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
-import org.wikibrain.utils.WpIOUtils;
 import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.BufferedWriter;
@@ -123,7 +121,7 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
      */
     @Override
     protected MostSimilarEvaluationLog evaluateSplit(MonolingualSRFactory factory, Split split, File log, final File err, Map<String, String> config) throws IOException, DaoException, WikiBrainException {
-        final MonolingualSRMetric metric = factory.create();
+        final SRMetric metric = factory.create();
         metric.trainMostSimilar(split.getTrain(), numMostSimilarResults, mostSimilarIds);
         final MostSimilarEvaluationLog splitEval = new MostSimilarEvaluationLog(config, log);
         final BufferedWriter errFile = new BufferedWriter(new FileWriter(err));

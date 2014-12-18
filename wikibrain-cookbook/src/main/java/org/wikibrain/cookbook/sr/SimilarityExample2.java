@@ -7,7 +7,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 
 /**
@@ -24,8 +24,8 @@ public class SimilarityExample2 {
 
             Language simple = Language.getByLangCode("simple");
 
-            MonolingualSRMetric sr = conf.get(
-                    MonolingualSRMetric.class, "ensemble",
+            SRMetric sr = conf.get(
+                    SRMetric.class, "ensemble",
                     "language", simple.getLangCode());
 
             s = sr.similarity("cat","kitty",true);

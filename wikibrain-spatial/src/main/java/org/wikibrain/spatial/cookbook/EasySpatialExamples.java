@@ -3,17 +3,14 @@ package org.wikibrain.spatial.cookbook;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.spatial.core.SpatialContainerMetadata;
-import org.wikibrain.spatial.core.constants.Layers;
-import org.wikibrain.spatial.core.constants.Precision;
-import org.wikibrain.spatial.core.constants.RefSys;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.wikidata.WikidataDao;
+import org.wikibrain.spatial.SpatialContainerMetadata;
+import org.wikibrain.spatial.constants.Layers;
+import org.wikibrain.spatial.constants.Precision;
+import org.wikibrain.spatial.constants.RefSys;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 
 import java.util.Map;
 

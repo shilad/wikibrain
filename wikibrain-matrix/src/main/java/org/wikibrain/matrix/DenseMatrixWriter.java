@@ -40,6 +40,10 @@ public class DenseMatrixWriter {
         info("writing body to tmp file at " + bodyPath);
     }
 
+    public ValueConf getValueConf() {
+        return vconf;
+    }
+
     public synchronized void writeRow(DenseMatrixRow row) throws IOException {
         if (!row.getValueConf().almostEquals(vconf)) {
             throw new IllegalArgumentException("Value conf for row does not match the writer's value conf");

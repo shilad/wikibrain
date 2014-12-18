@@ -2,12 +2,10 @@ package org.wikibrain.sr.evaluation;
 
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
-import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.dataset.Dataset;
@@ -25,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Shilad Sen
  */
-public class TestLocalSR implements MonolingualSRMetric {
+public class TestLocalSR implements SRMetric {
     private Random random = new Random();
 
     // -1 values indicates failures
@@ -227,7 +225,7 @@ public class TestLocalSR implements MonolingualSRMetric {
     public static class Factory implements MonolingualSRFactory {
         public List<TestLocalSR> metrics = new ArrayList<TestLocalSR>();
         @Override
-        public MonolingualSRMetric create() {
+        public SRMetric create() {
             TestLocalSR sr = new TestLocalSR();
             metrics.add(sr);
             return sr;

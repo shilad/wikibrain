@@ -11,6 +11,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.RawPage;
+import org.wikibrain.phrases.LinkProbabilityDao;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,8 +28,8 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
     private final RawPageDao dao;
     private int maxPages = Integer.MAX_VALUE;
 
-    public WikiTextCorpusCreator(Language language, Wikifier wikifier, RawPageDao dao, LocalPageDao lpd) {
-        super(language, lpd, wikifier);
+    public WikiTextCorpusCreator(Language language, Wikifier wikifier, RawPageDao dao, LocalPageDao lpd, LinkProbabilityDao probabilityDao) {
+        super(language, lpd, wikifier, probabilityDao);
         this.language = language;
         this.dao = dao;
     }
@@ -82,7 +83,7 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
                 RawPage rp = iter.next();
                 if (rp != null) {
                     try {
-                        String text = rp.getPlainText();
+                        String text = rp.getPlainText(false);
                         if (text != null && text.trim().length() > 0) {
                             buffer = new IdAndText(rp.getLocalId(), text.trim());
                         }
@@ -124,10 +125,11 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
         Env env = new EnvBuilder(cmd).build();
         RawPageDao rpd = env.getConfigurator().get(RawPageDao.class);
         LocalPageDao lpd = env.getConfigurator().get(LocalPageDao.class);
+        LinkProbabilityDao linkProbabilityDao =env.getConfigurator().get(LinkProbabilityDao.class);
         Language lang = env.getLanguages().getDefaultLanguage();
-        Wikifier wikifier = env.getConfigurator().get(Wikifier.class, "default", "language", lang.getLangCode());
+        Wikifier wikifier = env.getConfigurator().get(MilneWittenWikifier.class, "default", "language", lang.getLangCode());
 
-        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(lang, wikifier, rpd, lpd);
+        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(lang, wikifier, rpd, lpd, linkProbabilityDao);
         if (cmd.hasOption("x")) {
             creator.setMaxPages(Integer.valueOf(cmd.getOptionValue("x")));
         }

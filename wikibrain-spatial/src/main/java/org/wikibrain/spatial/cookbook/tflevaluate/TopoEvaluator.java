@@ -18,11 +18,11 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
-import org.wikibrain.spatial.core.constants.RefSys;
-import org.wikibrain.spatial.core.dao.SpatialContainmentDao;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.spatial.constants.RefSys;
+import org.wikibrain.spatial.dao.SpatialContainmentDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialNeighborDao;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
@@ -52,7 +52,7 @@ public class TopoEvaluator {
     private final SpatialNeighborDao snDao;
     private final SpatialContainmentDao scDao;
     private final List<Language> langs;
-    private final Map<Language, MonolingualSRMetric> metrics;
+    private final Map<Language, SRMetric> metrics;
     private final DistanceMetrics distanceMetrics;
 
     private final List<UniversalPage> concepts = new ArrayList<UniversalPage>();
@@ -84,9 +84,9 @@ public class TopoEvaluator {
         this.distanceMetrics = new DistanceMetrics(env, c, snDao);
 
         // build SR metrics
-        this.metrics = new HashMap<Language, MonolingualSRMetric>();
+        this.metrics = new HashMap<Language, SRMetric>();
         for(Language lang : langs){
-            MonolingualSRMetric m = c.get(MonolingualSRMetric.class, "ensemble", "language", lang.getLangCode());
+            SRMetric m = c.get(SRMetric.class, "ensemble", "language", lang.getLangCode());
             metrics.put(lang, m);
         }
     }
@@ -180,7 +180,7 @@ public class TopoEvaluator {
 
         for (Language lang : langs) {
 
-            MonolingualSRMetric sr = metrics.get(lang);
+            SRMetric sr = metrics.get(lang);
             results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
             if(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false) == null){
                 LOG.warning(String.format("error calculating SR for universal page %d %s and %d %s", c1.getUnivId(), c1.getBestEnglishTitle(lpDao, true), c2.getUnivId(), c2.getBestEnglishTitle(lpDao, true)));            }

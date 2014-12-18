@@ -22,10 +22,7 @@ import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
@@ -100,6 +97,41 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
                     }
                 }
             };
+        } catch (RuntimeException e) {
+            freeJooq(context);
+            throw e;
+        }
+    }
+
+    @Override
+    public Set<LocalId> getIds(final DaoFilter daoFilter) throws DaoException {
+        DSLContext context = getJooq();
+        try {
+            Collection<Condition> conditions = new ArrayList<Condition>();
+            if (daoFilter.getLangIds() != null) {
+                conditions.add(Tables.LOCAL_PAGE.LANG_ID.in(daoFilter.getLangIds()));
+            }
+            if (daoFilter.getNameSpaceIds() != null) {
+                conditions.add(Tables.LOCAL_PAGE.NAME_SPACE.in(daoFilter.getNameSpaceIds()));
+            }
+            if (daoFilter.isRedirect() != null) {
+                conditions.add(Tables.LOCAL_PAGE.IS_REDIRECT.in(daoFilter.isRedirect()));
+            }
+            if (daoFilter.isDisambig() != null) {
+                conditions.add(Tables.LOCAL_PAGE.IS_DISAMBIG.in(daoFilter.isDisambig()));
+            }
+            Cursor<Record2<Short, Long>> result = context.select(Tables.LOCAL_PAGE.LANG_ID, Tables.LOCAL_PAGE.ID).
+                    from(Tables.LOCAL_PAGE).
+                    where(conditions).
+                    limit(daoFilter.getLimitOrInfinity()).
+                    fetchLazy(getFetchSize());
+            Set<LocalId> ids = new HashSet<LocalId>();
+            for (Record2<Short, Long> record : result) {
+                ids.add(
+                        new LocalId(Language.getById(record.value1()),
+                        record.value2().intValue()));
+            }
+            return ids;
         } catch (RuntimeException e) {
             freeJooq(context);
             throw e;
@@ -276,7 +308,6 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
             key += ".noRedirect";
         }
         if (cache!=null) {
-            System.err.println("HERE!");
             TLongIntHashMap map = (TLongIntHashMap)cache.get(key, LocalPage.class);
             if (map!=null){
                 titlesToIds = map;
@@ -336,6 +367,12 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
             freeJooq(context);
         }
     }
+
+    @Override
+    public LocalPage getByTitle(Language lang, String title) throws DaoException {
+        return getByTitle(lang, NameSpace.ARTICLE, title);
+    }
+
 
     public static class Provider extends org.wikibrain.conf.Provider<LocalPageDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {

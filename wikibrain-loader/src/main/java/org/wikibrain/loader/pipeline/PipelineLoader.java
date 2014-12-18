@@ -92,42 +92,6 @@ public class PipelineLoader {
         return result;
     }
 
-    /**
-     * Returns a length two array containing the estimated runtime in seconds and disk usage in megabytes.
-     * @param env
-     * @param args
-     * @return
-     */
-    public synchronized  double [] getResourceEstimates(Env env, String[] args) throws IOException, InterruptedException {
-        double seconds = 0.0;
-        double mbs = 0.0;
-        for (PipelineStage stage : stages.values()) {
-            stage.reset();
-            stage.setDryRun(true);
-        }
-
-        LOG.info("Beginning dry run");
-        for (PipelineStage stage : stages.values()) {
-            if (stage.getShouldRun() != null && stage.getShouldRun()) {
-                try {
-                    stage.runWithDependenciesIfNeeded(args, forceRerun);
-                } catch (StageFailedException e) {
-                    throw new IllegalStateException(e); // shouldn't happen
-                }
-            }
-        }
-
-        LOG.info("Ended dry run");
-        for (PipelineStage stage : stages.values()) {
-            if (stage.hasBeenRun()) {
-                mbs += stage.estimateDiskMegabytes(langs);
-                seconds += stage.estimateSeconds(langs);
-            }
-            stage.reset();
-        }
-
-        return new double[] { seconds, mbs };
-    }
 
     public synchronized void run(String [] args) throws IOException, InterruptedException, StageFailedException {
         for (PipelineStage stage : stages.values()) {

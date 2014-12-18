@@ -1,6 +1,5 @@
 package org.wikibrain.spatial.cookbook;
 
-import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Geometry;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -14,11 +13,9 @@ import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.spatial.cookbook.tflevaluate.DistanceMetrics;
-import org.wikibrain.spatial.core.dao.SpatialDataDao;
-import org.wikibrain.spatial.core.dao.SpatialNeighborDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.dao.SpatialNeighborDao;
 import org.wikibrain.wikidata.WikidataDao;
-
-import java.util.Set;
 
 /**
  * Created by toby on 5/17/14.

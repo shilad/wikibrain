@@ -1,7 +1,12 @@
 package org.wikibrain.sr.milnewitten;
 
 import com.typesafe.config.Config;
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -11,6 +16,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.sr.*;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.disambig.Disambiguator;
+import org.wikibrain.sr.utils.Leaderboard;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,14 +30,14 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class MilneWittenMetric extends BaseMonolingualSRMetric {
+public class MilneWittenMetric extends BaseSRMetric {
 
     private static final Logger LOG = Logger.getLogger(MilneWittenMetric.class.getName());
-    private final MonolingualSRMetric inlink;
-    private final MonolingualSRMetric outlink;
+    private final SRMetric inlink;
+    private final SRMetric outlink;
     private boolean trainSubmetrics =true;
 
-    public MilneWittenMetric(String name, Language language, LocalPageDao dao, MonolingualSRMetric inlink, MonolingualSRMetric outlink, Disambiguator dab) {
+    public MilneWittenMetric(String name, Language language, LocalPageDao dao, SRMetric inlink, SRMetric outlink, Disambiguator dab) {
         super(name, language, dao,dab);
         this.inlink = inlink;
         this.outlink = outlink;
@@ -61,6 +67,24 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
             }
             return finalResult;
         }
+    }
+
+    @Override
+    public double[][] cosimilarity(int rowIds[], int columnIds[]) throws DaoException {
+        double [][] cm1 = inlink.cosimilarity(rowIds, columnIds);
+        double [][] cm2 = outlink.cosimilarity(rowIds, columnIds);
+        for (int i = 0; i < rowIds.length; i++) {
+            for (int j = 0; j < columnIds.length; j++) {
+                double s1 = cm1[i][j];
+                double s2 = cm2[i][j];
+                if (Double.isNaN(s1) || Double.isNaN(s2) || Double.isInfinite(s1) || Double.isInfinite(s2)) {
+                    cm1[i][j] = Double.NaN;
+                } else {
+                    cm1[i][j] = s1 * 0.5 + s2 * 0.5;
+                }
+            }
+        }
+        return cm1;
     }
 
     public void setTrainSubmetrics(boolean train){
@@ -104,18 +128,62 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        return null;
+        SRResultList l1 = inlink.mostSimilar(pageId, maxResults * 2, validIds);
+        TIntDoubleMap scores = new TIntDoubleHashMap(maxResults * 4);
+
+        TIntSet inList1 = new TIntHashSet();
+        if (l1 != null) {
+            for (int i = 0; i < l1.numDocs(); i++) {
+                double s = l1.getScore(i);
+                if (!Double.isInfinite(s) && !Double.isNaN(s)) {
+                    scores.adjustOrPutValue(l1.getId(i), s, s);
+                    inList1.add(l1.getId(i));
+                }
+            }
+        }
+        SRResultList l2 = outlink.mostSimilar(pageId, maxResults * 2, validIds);
+        TIntSet inList2 = new TIntHashSet();
+        if (l2 != null) {
+            for (int i = 0; i < l2.numDocs(); i++) {
+                double s = l2.getScore(i);
+                if (!Double.isInfinite(s) && !Double.isNaN(s)) {
+                    scores.adjustOrPutValue(l2.getId(i), s, s);
+                    inList2.add(l2.getId(i));
+                }
+            }
+        }
+
+        double missingScore1 = (l1 == null) ? 0.0 : l1.getMissingScore();
+        double missingScore2 = (l2 == null) ? 0.0 : l2.getMissingScore();
+
+        for (int p1 : inList1.toArray()) {
+            if (!inList2.contains(p1)) {
+                scores.adjustValue(p1, missingScore2);
+            }
+        }
+        for (int p2 : inList2.toArray()) {
+            if (!inList1.contains(p2)) {
+                scores.adjustValue(p2, missingScore1);
+            }
+        }
+
+        Leaderboard leaderboard = new Leaderboard(maxResults);
+        for (int id : scores.keys()) {
+            leaderboard.tallyScore(id, scores.get(id));
+        }
+
+        return normalize(leaderboard.getTop());
     }
 
 
-    public static class Provider extends org.wikibrain.conf.Provider<MonolingualSRMetric> {
+    public static class Provider extends org.wikibrain.conf.Provider<SRMetric> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return MonolingualSRMetric.class;
+            return SRMetric.class;
         }
 
         @Override
@@ -124,7 +192,7 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
         }
 
         @Override
-        public MonolingualSRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public SRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("milnewitten")) {
                 return null;
             }
@@ -132,11 +200,11 @@ public class MilneWittenMetric extends BaseMonolingualSRMetric {
                 throw new IllegalArgumentException("Monolingual SR Metric requires 'language' runtime parameter");
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));
-            MonolingualSRMetric inlink = getConfigurator().get(
-                    MonolingualSRMetric.class, config.getString("inlink"),
+            SRMetric inlink = getConfigurator().get(
+                    SRMetric.class, config.getString("inlink"),
                     "language", language.getLangCode());
-            MonolingualSRMetric outlink = getConfigurator().get(
-                    MonolingualSRMetric.class, config.getString("outlink"),
+            SRMetric outlink = getConfigurator().get(
+                    SRMetric.class, config.getString("outlink"),
                     "language", language.getLangCode());
             Disambiguator dab = getConfigurator().get(Disambiguator.class, config.getString("disambiguator"), "language", language.getLangCode());
             MilneWittenMetric mw = new MilneWittenMetric(

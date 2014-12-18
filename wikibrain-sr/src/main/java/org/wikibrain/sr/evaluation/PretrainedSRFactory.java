@@ -1,11 +1,9 @@
 package org.wikibrain.sr.evaluation;
 
-import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
-import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.dataset.Dataset;
@@ -21,13 +19,13 @@ import java.io.IOException;
  * @author Shilad Sen
  */
 public class PretrainedSRFactory implements MonolingualSRFactory {
-    private final MonolingualSRMetric metric;
+    private final SRMetric metric;
 
-    public PretrainedSRFactory(MonolingualSRMetric metric) {
+    public PretrainedSRFactory(SRMetric metric) {
         this.metric = metric;
     }
     @Override
-    public MonolingualSRMetric create() {
+    public SRMetric create() {
         return new PretrainedMetric(metric);
     }
 
@@ -46,10 +44,10 @@ public class PretrainedSRFactory implements MonolingualSRFactory {
         return metric.getName();
     }
 
-    public static class PretrainedMetric implements MonolingualSRMetric {
-        private final MonolingualSRMetric delegate;
+    public static class PretrainedMetric implements SRMetric {
+        private final SRMetric delegate;
 
-        public PretrainedMetric(MonolingualSRMetric delegate) {
+        public PretrainedMetric(SRMetric delegate) {
             this.delegate = delegate;
         }
 

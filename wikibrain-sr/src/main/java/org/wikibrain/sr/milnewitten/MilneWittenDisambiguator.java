@@ -14,12 +14,10 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.LocalString;
 import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.phrases.AnchorTextPhraseAnalyzer;
 import org.wikibrain.phrases.PhraseAnalyzer;
-import org.wikibrain.phrases.PrunedCounts;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.disambig.Disambiguator;
-import org.wikibrain.utils.MathUtils;
+import org.wikibrain.utils.WbMathUtils;
 import org.wikibrain.utils.WpCollectionUtils;
 
 import java.util.*;
@@ -36,7 +34,7 @@ public class MilneWittenDisambiguator extends Disambiguator {
     private final Language language;
     private final LocalPageDao pageDao;
     private final PhraseAnalyzer analyzer;
-    private final MonolingualSRMetric metric;
+    private final SRMetric metric;
     private final int numPages;
 
     /**
@@ -47,7 +45,7 @@ public class MilneWittenDisambiguator extends Disambiguator {
      * @param metric
      * @throws DaoException
      */
-    public MilneWittenDisambiguator(LocalPageDao pageDao, PhraseAnalyzer analyzer, MonolingualSRMetric metric) throws DaoException {
+    public MilneWittenDisambiguator(LocalPageDao pageDao, PhraseAnalyzer analyzer, SRMetric metric) throws DaoException {
         this.language = metric.getLanguage();
         this.pageDao = pageDao;
         this.analyzer = analyzer;
@@ -201,7 +199,7 @@ public class MilneWittenDisambiguator extends Disambiguator {
         for (int i = 0; i < pages.size(); i++) {
             double sum = 0.0;
             for (int j = 0; j < pages.size(); j++) {
-                if (i != j && MathUtils.isReal(cosim[i][j])) {
+                if (i != j && WbMathUtils.isReal(cosim[i][j])) {
                     sum += Math.max(0, cosim[i][j]);    // Hack: no negative numbers
                 }
             }
@@ -245,7 +243,7 @@ public class MilneWittenDisambiguator extends Disambiguator {
                     .withValue("disambiguator", ConfigValueFactory.fromAnyRef("topResult"));
             Map<String, String> srRuntimeParams = new HashMap<String, String>();
             srRuntimeParams.put("language", lang.getLangCode());
-            MonolingualSRMetric sr = getConfigurator().construct(MonolingualSRMetric.class, srName, newConfig, srRuntimeParams);
+            SRMetric sr = getConfigurator().construct(SRMetric.class, srName, newConfig, srRuntimeParams);
 
             try {
                 return new MilneWittenDisambiguator(pageDao, pa, sr);

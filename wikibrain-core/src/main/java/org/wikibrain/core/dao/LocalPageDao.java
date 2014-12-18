@@ -8,6 +8,7 @@ import org.wikibrain.core.model.Title;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 public interface LocalPageDao extends Dao<LocalPage> {
 
@@ -37,6 +38,8 @@ public interface LocalPageDao extends Dao<LocalPage> {
      * @throws DaoException if there was an error retrieving the page
      */
     public LocalPage getByTitle(Language language, NameSpace ns, String title) throws DaoException;
+
+    Set<LocalId> getIds(DaoFilter daoFilter) throws DaoException;
 
     /**
      * Get a single page by its id
@@ -96,4 +99,11 @@ public interface LocalPageDao extends Dao<LocalPage> {
     @Override
     public Iterable<LocalPage> get(DaoFilter daoFilter) throws DaoException;
 
+    /**
+     * Defaults to namespace main
+     * @param lang
+     * @param title
+     * @return
+     */
+    public LocalPage getByTitle(Language lang, String title) throws DaoException;
 }

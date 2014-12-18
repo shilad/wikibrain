@@ -2,6 +2,7 @@ package org.wikibrain.utils;
 
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TIntIntMap;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
@@ -59,6 +60,24 @@ public class WpCollectionUtils {
         return ArrayUtils.toPrimitive(keys);
     }
 
+    public static int[] sortMapKeys(final TIntIntMap map) {
+        return sortMapKeys(map, false);
+    }
+
+    public static int[] sortMapKeys(final TIntIntMap map, boolean reverse) {
+        Integer keys[] = ArrayUtils.toObject(map.keys());
+        Arrays.sort(keys, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer k1, Integer k2) {
+                return map.get(k1) - map.get(k2);
+            }
+        });
+        if (reverse) {
+            ArrayUtils.reverse(keys);
+        }
+        return ArrayUtils.toPrimitive(keys);
+    }
+
     public static <K, V extends Comparable<V>> LinkedHashMap<K, V> sortMap(final Map<K, V> map) {
         return sortMap(map, false);
     }
@@ -79,6 +98,28 @@ public class WpCollectionUtils {
             }
         }
         return max;
+    }
+
+    /**
+     * From http://stackoverflow.com/questions/3047051/how-to-determine-if-a-list-is-sorted-in-java
+     * @param iterable
+     * @param <T>
+     * @return
+     */
+    public static <T extends Comparable<? super T>> boolean isSorted(Iterable<T> iterable) {
+        Iterator<T> iter = iterable.iterator();
+        if (!iter.hasNext()) {
+            return true;
+        }
+        T t = iter.next();
+        while (iter.hasNext()) {
+            T t2 = iter.next();
+            if (t.compareTo(t2) > 0) {
+                return false;
+            }
+            t = t2;
+        }
+        return true;
     }
 
     public static <T extends Comparable<T>> T min(Collection<T> elems) {

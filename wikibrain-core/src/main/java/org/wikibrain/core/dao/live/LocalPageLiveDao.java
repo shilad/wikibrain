@@ -62,6 +62,12 @@ public class LocalPageLiveDao implements LocalPageDao  {
     public Iterable<LocalPage> get(DaoFilter a)throws DaoException{
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
     }
+
+    @Override
+    public LocalPage getByTitle(Language lang, String title) throws DaoException {
+        return getByTitle(lang, NameSpace.ARTICLE, title);
+    }
+
     public LanguageSet getLoadedLanguages() throws DaoException {
         throw new UnsupportedOperationException("Can't use this method for remote wiki server!");
 
@@ -208,6 +214,17 @@ public class LocalPageLiveDao implements LocalPageDao  {
     public LocalPage getByTitle(Language language, NameSpace ns, String title) throws DaoException {
         return getByTitle(new Title(title, language), ns);
     }
+
+    @Override
+    public Set<LocalId> getIds(DaoFilter daoFilter) throws DaoException {
+        Set<LocalId> ids = new HashSet<LocalId>();
+        for (LocalPage lp : get(daoFilter)) {
+            ids.add(lp.toLocalId());
+        }
+        return ids;
+    }
+
+
 
     public static class Provider extends org.wikibrain.conf.Provider<LocalPageDao> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {

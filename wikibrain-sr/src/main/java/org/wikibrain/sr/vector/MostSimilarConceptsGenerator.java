@@ -13,7 +13,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.sr.Explanation;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.utils.Leaderboard;
@@ -34,11 +34,11 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
 
     private final Language language;
     private final LocalPageDao pageDao;
-    private final MonolingualSRMetric baseMetric;
+    private final SRMetric baseMetric;
     private final int numConcepts;
     private TIntSet conceptIds = null;
 
-    public MostSimilarConceptsGenerator(Language language, LocalPageDao pageDao, MonolingualSRMetric baseMetric, int numConcepts) {
+    public MostSimilarConceptsGenerator(Language language, LocalPageDao pageDao, SRMetric baseMetric, int numConcepts) {
         this.language = language;
         this.pageDao = pageDao;
         this.baseMetric = baseMetric;
@@ -128,8 +128,8 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
                 throw new IllegalArgumentException("Monolingual SR Metric requires 'language' runtime parameter");
             }
             Language language = Language.getByLangCode(runtimeParams.get("language"));
-            MonolingualSRMetric baseMetric = getConfigurator().get(
-                    MonolingualSRMetric.class,
+            SRMetric baseMetric = getConfigurator().get(
+                    SRMetric.class,
                     config.getString("basemetric"),
                     "language",
                     language.getLangCode());

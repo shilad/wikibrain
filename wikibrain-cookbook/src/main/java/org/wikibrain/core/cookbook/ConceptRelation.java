@@ -10,17 +10,14 @@ import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.sr.MonolingualSRMetric;
+import org.wikibrain.sr.SRMetric;
 import org.wikibrain.wikidata.LocalWikidataStatement;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.wikidata.WikidataEntity;
-import org.wikibrain.wikidata.WikidataStatement;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author Toby "Jiajun" Li
@@ -159,8 +156,8 @@ public class ConceptRelation {
          * Check org.wikibrain.cookbook.sr for detailed examples in using the semantic relatedness module
          *
          */
-        final MonolingualSRMetric sr = new Configurator(new Configuration()).get(
-                MonolingualSRMetric.class, "ensemble",      //can be change to "inlink" for another SR implementation
+        final SRMetric sr = new Configurator(new Configuration()).get(
+                SRMetric.class, "ensemble",      //can be change to "inlink" for another SR implementation
                 "language", lang.getLangCode());            //initialize a SR resolver
         final int finalDstId = dstId;
         Comparator<Integer> QueueComparator = new Comparator<Integer>() {

@@ -1,6 +1,7 @@
 package org.wikibrain.integration;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.WikiBrainException;
@@ -29,7 +30,8 @@ public class LuceneLoaderIT {
         db.restoreWikiText();
     }
 
-    @Test
+    @Ignore
+   @Test
     public void testLoader() throws DaoException, WikiBrainException, ConfigurationException, IOException {
         LuceneLoader.main(TestUtils.getArgs("-d"));
 

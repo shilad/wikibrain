@@ -139,7 +139,7 @@ public class ParallelForEach {
 
 
     public static <T> void iterate(Iterator<T> iterator, final Procedure<T> fn) {
-        iterate(iterator, WpThreadUtils.getMaxThreads(), 100, fn, 1000);
+        iterate(iterator, WpThreadUtils.getMaxThreads(), 100, fn, -1);
     }
 
     public static <T> void iterate(
@@ -165,7 +165,7 @@ public class ParallelForEach {
                     public void run() {
                         try {
                             int i = counter.incrementAndGet();
-                            if (i % logModulo == 0) {
+                            if (logModulo >= 0 && i % logModulo == 0) {
                                 LOG.info("processing iterable " + i);
                             }
                             fn.call(obj);
