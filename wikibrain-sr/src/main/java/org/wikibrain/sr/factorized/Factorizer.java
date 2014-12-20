@@ -60,7 +60,7 @@ public class Factorizer {
 
         TIntSet found = new TIntHashSet(100000);
         double tmp[] = new double[rank];
-        for (int iter = 0; iter < 5; iter++) {
+        for (int iter = 0; iter < 10; iter++) {
             double error = 0.0;
             int counter = 0;
             for (SparseMatrixRow row : similarity) {
@@ -69,23 +69,14 @@ public class Factorizer {
                     continue;
                 }
                 found.clear();
-                for (int i = 0; i < row.getNumCols() + 1000; i++) {
-                    double val;
-                    int index2;
-                    if (i < row.getNumCols()) {
-                        index2 = idToIndex.get(row.getColIndex(i));
-                        if (index2 < 0) {
-                            continue;
-                        }
-                        val = row.getColValue(i);
-                    } else {
-                        index2 = random.nextInt(vectors.length);
-                        val = 0.0;
-                    }
-                    if (found.contains(index2) || index2 == index1) {
+                for (int i = 0; i < row.getNumCols(); i++) {
+                    int index2 = idToIndex.get(row.getColIndex(i));
+                    if (index2 < 0) {
                         continue;
                     }
                     found.add(index2);
+                    double val = row.getColValue(i);
+
                     System.arraycopy(vectors[index1], 0, tmp, 0, rank);
                     double dot = WbMathUtils.dot(vectors[index1], vectors[index2]);
                     double err = val - dot;
@@ -123,10 +114,13 @@ public class Factorizer {
         writer.finish();
     }
 
+    private void updateVectors(int i, int j, double actualSim) {
+    }
+
     public static void main (String args[]) throws ConfigurationException, IOException {
-        Factorizer f = new Factorizer(100);
+        Factorizer f = new Factorizer(20);
         File dir = new File("/Volumes/ShiladsFastDrive/wikibrain-simple/dat/sr/ensemble/simple/");
-        File input = FileUtils.getFile(dir, "mostSimilar.matrix");
+        File input = FileUtils.getFile(dir, "symMostSimilar.matrix");
         File output = FileUtils.getFile(dir, "factorized.matrix");
         f.factorize(new SparseMatrix(input), output);
     }
