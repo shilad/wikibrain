@@ -135,6 +135,7 @@ public class StochasticNeighborhoodEmbedder {
      * Loss function:
      *
      * L = (S[i,j] - w[i]w[j])^2 / (1 - min(S[i,j], w[i]w[j]))
+     *
      * d/dw[i](L) = - 1 / (1 - S[i,j]) * 2(S[i,j] - w[i]w[j]) w[j]
      *
      * @param m
@@ -159,17 +160,26 @@ public class StochasticNeighborhoodEmbedder {
 
                 double[] v2 = vectors[col];
                 double estimated = WbMathUtils.dot(v1, v2);
-
-                double den = 10E-3 + Math.max(0, 1 - actual); // distance
                 double err = actual - estimated;
+                double den = 10E-3 + Math.max(0, 1 - Math.min(actual, estimated)); // distance
                 objNum += err * err / den;
                 objDen += 1.0 / den;
-                double k = lambda * 2 / den;
-                for (int p = 0; p < rank; p++) {
-                    double x1 = v1[p];
-                    double x2 = v2[p];
-                    v2[p] += k * err * x1;
-                    v1[p] += k * err * x2;
+                if (actual < estimated) {
+                    double k = lambda * 2 / den * err;
+                    for (int p = 0; p < rank; p++) {
+                        double x1 = v1[p];
+                        double x2 = v2[p];
+                        v2[p] += k * x1;
+                        v1[p] += k * x2;
+                    }
+                } else {
+                    double k = lambda * err * (err - 2 * den) / (den*den);
+                    for (int p = 0; p < rank; p++) {
+                        double x1 = v1[p];
+                        double x2 = v2[p];
+                        v2[p] -= k * x1;
+                        v1[p] -= k * x2;
+                    }
                 }
             }
 //            System.err.println(objNum + "," +  objDen + "," + objectiveNumerator / objectiveDenominator);
@@ -245,7 +255,7 @@ public class StochasticNeighborhoodEmbedder {
 
 
     public static void main (String args[]) throws ConfigurationException, IOException {
-        StochasticNeighborhoodEmbedder f = new StochasticNeighborhoodEmbedder(80);
+        StochasticNeighborhoodEmbedder f = new StochasticNeighborhoodEmbedder(50);
         f.env = EnvBuilder.envFromArgs(args);
         File dir = new File("/Volumes/ShiladsFastDrive/wikibrain-simple/dat/sr/ensemble/simple/");
         File input = FileUtils.getFile(dir, "symMostSimilar.matrix");
