@@ -1,11 +1,12 @@
 package ags.utils.dataStructures.trees.thirdGenKD;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  *
  */
-class KdNode<T> {
+class KdNode<T> implements Serializable {
     // All types
     protected int dimensions;
     protected int bucketCapacity;

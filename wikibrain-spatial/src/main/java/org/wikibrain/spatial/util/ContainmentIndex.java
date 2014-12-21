@@ -7,13 +7,14 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Shilad Sen
  */
-public class ContainmentIndex {
+public class ContainmentIndex implements Serializable {
     /**
      * Default buffer width in degrees. This is about 0.1 kms.
      */

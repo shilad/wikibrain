@@ -321,7 +321,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                 item.getItem().getType().code,
                 item.getItem().getId(),
                 item.getProperty().getId(),
-                item.getValue().getType().toString().toLowerCase(),
+                item.getValue().getTypeName().toLowerCase(),
                 encodeValue(item.getValue()),
                 item.getRank().ordinal()
         );
@@ -560,7 +560,6 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         JsonElement json = new JsonParser().parse(record.getValue(Tables.WIKIDATA_STATEMENT.VAL_STR));
         WikidataValue val;
         try {
-            System.err.println("json is " + json);
             val = parser.jsonToValue( record.getValue(Tables.WIKIDATA_STATEMENT.VAL_TYPE), json);
         } catch (WpParseException e) {
             throw new DaoException(e);

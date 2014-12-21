@@ -193,4 +193,14 @@ public class TestWikidataDao {
         stats = IteratorUtils.toList(wd.getByValue("country of citizenship", WikidataValue.forItem(142)).iterator());
         assertEquals(6, stats.size());
     }
+
+    @Test
+    public void testGeoCoordinates() throws Exception {
+        WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
+        WikidataDao wd = new WikidataSqlDao(ds, null, null);
+        WikidataFilter filter = (new WikidataFilter.Builder()).withPropertyId(625).build();
+
+        List<WikidataStatement> stats = IteratorUtils.toList(wd.get(filter).iterator());
+        assertEquals(189, stats.size());
+    }
 }
