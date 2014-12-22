@@ -33,6 +33,7 @@ public class GraphicLoader extends JFrame {
     public static final String DEFAULT_HEAPSIZE = "4G";
     public static final String DEFAULT_BASEDIR = ".";
     public static final String DEFAULT_LANG = "simple";
+    public static final int MAX_LOG_LINES = 60000;
 
     private JPanel mainPanel;
 
@@ -43,6 +44,7 @@ public class GraphicLoader extends JFrame {
 
     private JLabel commandLabel = new JLabel("Command output:");
     private JTextArea runLog;
+    private int runLogLines = 0;
 
     private JComboBox dataSourceSelection = new JComboBox(new String[] {"H2", "PostgreSQL"});
 
@@ -548,6 +550,7 @@ public class GraphicLoader extends JFrame {
             OutputStream out = new PrintStream(new LogOutputStream(System.out), true);
             OutputStream err = new PrintStream(new LogOutputStream(System.err), true);
 
+            runLogLines = 0;
             runLog.setText("running:\norg.wikibrain.Loader " + StringUtils.join(arg, " ") + "\n\n\n");
             runButton.setText("Stop");
             runButton.setBackground(Color.RED);
@@ -593,10 +596,16 @@ public class GraphicLoader extends JFrame {
 
     private void appendToLog(String text) {
         synchronized (runLog) {
-            // TODO: figure out how to show line wraps
-            runLog.append(text);
-            // scrolls the text area to the end of data
-            runLog.setCaretPosition(runLog.getDocument().getLength());
+            if (runLogLines <= MAX_LOG_LINES) {
+                // TODO: figure out how to show line wraps
+                runLog.append(text);
+                if (runLogLines == MAX_LOG_LINES) {
+                    runLog.append("\n\nSupressing future log messages to conserve memory.\n");
+                }
+                // scrolls the text area to the end of data
+                runLog.setCaretPosition(runLog.getDocument().getLength());
+               runLogLines++;
+            }
         }
     }
 
