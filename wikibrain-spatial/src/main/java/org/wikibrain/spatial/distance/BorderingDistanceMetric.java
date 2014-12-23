@@ -88,7 +88,7 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public String getName() {
-        return "bordering distance metric";
+        return "bordering distance metric for " + layer;
     }
 
     @Override
@@ -184,8 +184,10 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
             for (int i = 0; i < nodes; i++) {
                 int id = queue.removeAt(0);
                 if (!added.contains(id)) {
-                    neighbors.add(new Neighbor(id, distance));
                     added.add(id);
+                    if (concepts == null || concepts.contains(id)) {
+                        neighbors.add(new Neighbor(id, distance));
+                    }
                 }
                 if (!adjacencyList.containsKey(id)) {
                     continue;

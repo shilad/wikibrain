@@ -32,9 +32,10 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
     private final SpatialDataDao spatialDao;
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
     private final ClosestPointIndex index;
-    private int numNeighbors = 20;
-    private int maxDistance = 10;
+    private int numNeighbors = 100;
+    private int maxDistance = 30;
     private TIntSet concepts;
+    private TIntSet validNodes;
 
     public GraphDistanceMetric(SpatialDataDao dao, ClosestPointIndex index) {
         this.spatialDao = dao;
@@ -44,6 +45,14 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
     public GraphDistanceMetric(SpatialDataDao dao, SphericalDistanceMetric spherical) {
         this.spatialDao = dao;
         this.index = spherical.getIndex();
+        if (spherical.getValidConcepts() != null) {
+            LOG.warning("Warning: ClosestPoint index has been constrained to particular concepts. You probably don't want this. Instead, let GraphDistanceMetric create its own index");
+        }
+    }
+
+    public GraphDistanceMetric(SpatialDataDao dao) {
+        this.spatialDao = dao;
+        this.index = new ClosestPointIndex();
     }
 
     public void setNumNeighbors(int numNeighbors) {
@@ -54,6 +63,18 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
         this.maxDistance = maxDistance;
     }
 
+    /**
+     * Sets the nodes that can be traversed as neighbors.
+     * @param nodes
+     */
+    public void setValidNodes(TIntSet nodes) {
+        this.validNodes = nodes;
+    }
+
+    /**
+     * Sets the nodes that can be RETURNED as neighbors.
+     * @param concepts
+     */
     @Override
     public void setValidConcepts(TIntSet concepts) {
         this.concepts = concepts;
@@ -61,13 +82,26 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public void enableCache(boolean enable) throws DaoException {
+        if (index == null) throw new NullPointerException();
         final AtomicInteger numEdges = new AtomicInteger();
         final Map<Integer, Geometry> points = this.spatialDao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH);
+
+        // Insert points into the index if necessary.
+        if (index.size() == 0) {
+            ParallelForEach.loop(points.keySet(), WpThreadUtils.getMaxThreads(),
+                    new Procedure<Integer>() {
+                        @Override
+                        public void call(Integer conceptId) throws Exception {
+                            index.insert(conceptId, points.get(conceptId));
+                        }
+                    }, 50000);
+        }
+
         ParallelForEach.loop(points.keySet(), WpThreadUtils.getMaxThreads(),
                 new Procedure<Integer>() {
                     @Override
                     public void call(Integer conceptId) throws Exception {
-                        if (concepts != null && !concepts.contains(conceptId)) {
+                        if (validNodes != null && !validNodes.contains(conceptId)) {
                             return;
                         }
                         TIntSet neighbors = new TIntHashSet();
@@ -85,7 +119,7 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public String getName() {
-        return "geodetic distance metric";
+        return "graph distance metric";
     }
 
 
@@ -167,8 +201,10 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
         TIntLinkedList queue = new TIntLinkedList();
         for (ClosestPointIndex.Result r : index.query(g, numNeighbors)) {
             queue.add(r.id);
-            result.add(new Neighbor(r.id, 1));
             seen.add(r.id);
+            if (concepts == null || concepts.contains(r.id)) {
+                result.add(new Neighbor(r.id, 1));
+            }
         }
 
         for (int level = 2; level <= maxSteps; level++) {
@@ -182,19 +218,15 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
                 for (int id2 : adjacencyList.get(id).toArray()) {
                     if (!seen.contains(id2)) {
                         queue.add(id2);
-                        result.add(new Neighbor(id2, level));
                         seen.add(id2);
+                        if (concepts == null || concepts.contains(id2)) {
+                            result.add(new Neighbor(id2, level));
+                        }
                     }
                     if (result.size() >= maxNeighbors) {
-                        break;
+                        return result;
                     }
                 }
-                if (result.size() >= maxNeighbors) {
-                    break;
-                }
-            }
-            if (result.size() >= maxNeighbors) {
-                break;
             }
         }
         return result;

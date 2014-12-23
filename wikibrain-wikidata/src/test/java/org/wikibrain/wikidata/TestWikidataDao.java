@@ -201,6 +201,6 @@ public class TestWikidataDao {
         WikidataFilter filter = (new WikidataFilter.Builder()).withPropertyId(625).build();
 
         List<WikidataStatement> stats = IteratorUtils.toList(wd.get(filter).iterator());
-        assertEquals(189, stats.size());
+        assertEquals(190, stats.size());
     }
 }

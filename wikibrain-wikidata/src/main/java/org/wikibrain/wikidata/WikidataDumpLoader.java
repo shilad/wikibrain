@@ -62,12 +62,12 @@ public class WikidataDumpLoader {
         this.metaDao = metaDao;
         this.languages = langs;
         this.universalPageDao = upDao;
-        Map<Language, TIntIntMap> localMaps = universalPageDao.getAllLocalToUnivIdsMap(languages);
+        Map<Language, TIntIntMap> localMaps = universalPageDao.getAllUnivToLocalIdsMap(languages);
 
         // Build up set of universal ids from the local ids that we know about
         this.universalIds = new TIntHashSet();
         for(TIntIntMap langMap : localMaps.values()) {
-            universalIds.addAll(langMap.valueCollection());
+            universalIds.addAll(langMap.keys());
         }
     }
 
@@ -188,7 +188,9 @@ public class WikidataDumpLoader {
         metaDao.beginLoad();
         loader.load(path);
 
+        LOG.info("building indexes");
         wdDao.endLoad();
         metaDao.endLoad();
+        LOG.info("finished");
     }
 }
