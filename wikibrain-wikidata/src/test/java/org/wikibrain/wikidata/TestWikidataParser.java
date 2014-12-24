@@ -58,7 +58,7 @@ public class TestWikidataParser {
                     numProperties++;
                 }
             }
-            assertEquals(399, numItems);
+            assertEquals(400, numItems);
             assertEquals(1304, numProperties);
         } finally {
             tmp.delete();
