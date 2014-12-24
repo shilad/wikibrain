@@ -80,7 +80,7 @@ public class TestWikidataDao {
         }
 
         UniversalPageDao upDao = Mockito.mock(UniversalPageDao.class);
-        Mockito.when(upDao.getAllLocalToUnivIdsMap(LanguageSet.ALL)).thenReturn(concepts);
+        Mockito.when(upDao.getAllUnivToLocalIdsMap(LanguageSet.ALL)).thenReturn(concepts);
 
 
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);

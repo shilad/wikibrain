@@ -12,6 +12,7 @@ import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.spatial.util.ClosestPointIndex;
 import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -169,6 +170,13 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
             calc.setStartingGeographicPoint(p1.getX(), p1.getY());
             calc.setDestinationGeographicPoint(p2.getX(), p2.getY());
         }
-        return calc.getOrthodromicDistance();
+        try {
+            return calc.getOrthodromicDistance();
+        } catch (ArithmeticException e) {
+            // If there's an arithmetic error, fall back on the haversine formula
+            Point2D p1 = calc.getStartingGeographicPoint();
+            Point2D p2 = calc.getDestinationGeographicPoint();
+            return WikiBrainSpatialUtils.haversine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+        }
     }
 }

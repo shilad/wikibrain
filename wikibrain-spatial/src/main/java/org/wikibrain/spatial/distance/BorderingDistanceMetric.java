@@ -33,7 +33,7 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
 
     private double bufferWidth = DEFAULT_BUFFER_WIDTH;
 
-    private int maxSteps = 10;
+    private int maxSteps = 50;
     private final String layer;
     private final SpatialDataDao dao;
     private Map<Integer, Geometry> geometries;
