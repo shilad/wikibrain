@@ -85,7 +85,7 @@ public interface SpatialDataDao {
      * @return
      * @throws DaoException
      */
-    public Iterable<Geometry> getGeometries(int itemId) throws DaoException;
+    public Map<String, Geometry> getGeometries(int itemId) throws DaoException;
 
 
 

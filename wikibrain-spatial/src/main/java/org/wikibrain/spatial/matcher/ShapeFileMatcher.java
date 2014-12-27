@@ -45,7 +45,7 @@ public class ShapeFileMatcher {
 
     public void match(String refSys, String layerGroup, String datasetName) throws IOException, InterruptedException, DaoException, ConfigurationException {
         Config config = env.getConfiguration().getConfig("spatial.datasets", refSys, layerGroup, datasetName);
-        WikiBrainShapeFile shapeFile = downloader.download(refSys, layerGroup, datasetName);
+        WikiBrainShapeFile shapeFile = downloader.download(refSys, layerGroup, datasetName, false);
         writeMatches(config, shapeFile);
     }
 
@@ -219,6 +219,6 @@ public class ShapeFileMatcher {
     public static void main(String args[]) throws Exception {
         Env env = EnvBuilder.envFromArgs(args);
         ShapeFileMatcher matcher = new ShapeFileMatcher(env);
-        matcher.match("earth", "state", "naturalEarth");
+        matcher.match("earth", "marine", "naturalEarth");
     }
 }

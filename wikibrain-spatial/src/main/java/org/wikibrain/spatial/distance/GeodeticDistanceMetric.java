@@ -125,8 +125,13 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
         List<Neighbor> results = new ArrayList<Neighbor>();
         for (ClosestPointIndex.Result r: index.query(g, maxNeighbors)) {
             if (r.distance < maxDistance) {
-                calc.setDestinationGeographicPoint(r.point.getX(), r.point.getY());
-                double kms = calc.getOrthodromicDistance();
+                double kms;
+                try {
+                    calc.setDestinationGeographicPoint(r.point.getX(), r.point.getY());
+                    kms = calc.getOrthodromicDistance();
+                } catch (ArithmeticException e) {
+                    kms = r.distance;
+                }
                 if (kms <= maxDistance) {
                     results.add(new Neighbor(r.id, kms));
                 }

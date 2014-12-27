@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.core.dao.DaoException;
@@ -36,6 +37,7 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
     private int maxDistance = 30;
     private TIntSet concepts;
     private TIntSet validNodes;
+    private boolean directed = false;
 
     public GraphDistanceMetric(SpatialDataDao dao, ClosestPointIndex index) {
         this.spatialDao = dao;
@@ -104,7 +106,7 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
                         if (validNodes != null && !validNodes.contains(conceptId)) {
                             return;
                         }
-                        TIntSet neighbors = new TIntHashSet();
+                        final TIntSet neighbors = new TIntHashSet();
                         for (ClosestPointIndex.Result r : index.query(points.get(conceptId), numNeighbors)) {
                             neighbors.add(r.id);
                         }
@@ -114,6 +116,18 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
                         }
                     }
                 }, 50000);
+        // Make links symmetric if necessary
+        if (!directed) {
+            for (int id1 : adjacencyList.keys()) {
+                for (int id2 : adjacencyList.get(id1).toArray()) {
+                    if (!adjacencyList.containsKey(id2)) {
+                        adjacencyList.put(id2, new TIntHashSet());
+                    }
+                    adjacencyList.get(id2).add(id1);
+                }
+            }
+
+        }
         LOG.info("Found " + adjacencyList.size() + " edges and " + numEdges.get() + " edges.");
     }
 
@@ -186,7 +200,7 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public List<Neighbor> getNeighbors(Geometry g, int maxNeighbors) {
-        return getNeighbors(g, maxNeighbors, Double.MAX_VALUE);
+        return getNeighbors(g, maxNeighbors, Integer.MAX_VALUE);
     }
 
     @Override
@@ -207,7 +221,8 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
             }
         }
 
-        for (int level = 2; level <= maxSteps; level++) {
+        for (int level = 2; !queue.isEmpty() && level <= maxSteps; level++) {
+//            System.err.println("at level " + level + ", size is " + seen.size() + ", " + result.size());
             // Do all nodes at this level
             int nodes = queue.size();
             for (int i = 0; i < nodes; i++) {
@@ -230,5 +245,9 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
             }
         }
         return result;
+    }
+
+    public void setDirected(boolean directed) {
+        this.directed = directed;
     }
 }
