@@ -19,6 +19,7 @@ import java.util.Set;
  * @author Shilad Sen
  */
 public class CategoryGraph implements Serializable{
+    static final long serialVersionUID = -3429823331722647576l;
     public Language language;
 
     // Mapping from local page id to internal dense index.
@@ -45,7 +46,7 @@ public class CategoryGraph implements Serializable{
      * @param wpId
      * @return
      */
-    public int[] getChildren(int wpId) {
+    public int[] getChildCategories(int wpId) {
         int parentIndex = getCategoryIndex(wpId);
         if (parentIndex < 0) {
             return new int[0];
@@ -56,5 +57,13 @@ public class CategoryGraph implements Serializable{
             childIds[i] = catIds[denseIds[i]];
         }
         return childIds;
+    }
+
+    public int[] getCategoryPages(int wpId) {
+        int parentIndex = getCategoryIndex(wpId);
+        if (parentIndex < 0) {
+            return new int[0];
+        }
+        return catPages[parentIndex];
     }
 }
