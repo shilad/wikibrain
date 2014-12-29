@@ -76,71 +76,47 @@ public class SynRank extends BaseSRMetric {
             return null;
         }
 
-        TIntSet ids1 = new TIntHashSet();
-        for (LocalLink ll : getLinksTo(pageId1)) {
-            ids1.add(ll.getSourceId());
-        }
-        TIntSet ids2 = new TIntHashSet();
-        for (LocalLink ll : getLinksTo(pageId2)) {
-            ids2.add(ll.getSourceId());
-        }
-
+        TIntSet ids1 = getLinksTo(pageId1);
+        TIntSet ids2 = getLinksTo(pageId2);
         TIntSet both = new TIntHashSet(ids1);
+
         both.retainAll(ids2);
         if (both.isEmpty()) {
             return new SRResult(0.0);
         }
 
         double pmi = 1.0 * numArticles * both.size() / (ids1.size() * ids2.size());
-        double boost = Math.log(both.size());
+        double boost = Math.log10(both.size());
         double graphDistance = graphDistance(pageId1, pageId2);
-        String t1 = getLocalPageDao().getById(getLanguage(), pageId1).getTitle().toString();
-        String t2 = getLocalPageDao().getById(getLanguage(), pageId2).getTitle().toString();
-        System.err.println(String.format("Values for %s, %s, are %.4f, %.4f, %.4f\n", t1, t2, pmi, boost, graphDistance));
+//        String t1 = getLocalPageDao().getById(getLanguage(), pageId1).getTitle().toString();
+//        String t2 = getLocalPageDao().getById(getLanguage(), pageId2).getTitle().toString();
+//        System.err.println(String.format("Values for %s, %s, are %.4f, %.4f, %.4f\n", t1, t2, pmi, boost, graphDistance));
 
         return new SRResult(pmi * boost / graphDistance);
     }
 
-    private Iterable<LocalLink> getLinksTo(int pageId) throws DaoException {
-        return linkDao.get(new DaoFilter().setDestIds(pageId).setLanguages(getLanguage()));
+    private TIntSet getLinksTo(int pageId) throws DaoException {
+        TIntSet ids = new TIntHashSet();
+        for (LocalLink ll : linkDao.get(new DaoFilter().setDestIds(pageId).setLanguages(getLanguage()))) {
+            ids.add(ll.getSourceId());
+        }
+        return ids;
+    }
+
+    private TIntSet getLinksFrom(int pageId) throws DaoException {
+        TIntSet ids = new TIntHashSet();
+        for (LocalLink ll : linkDao.get(new DaoFilter().setSourceIds(pageId).setLanguages(getLanguage()))) {
+            ids.add(ll.getDestId());
+        }
+        return ids;
     }
 
     private int graphDistance(int pageId1, int pageId2) throws DaoException {
-        TIntSet seen = new TIntHashSet();
-        TIntList queue = new TIntLinkedList();
-        queue.add(pageId1);
-        seen.add(pageId1);
-
-        int level = 0;
-        while (!queue.isEmpty() && level < 3) {
-            int n = queue.size();
-            for (int i = 0; i < n; i++) {
-                int id1 = queue.removeAt(0);
-                for (int id2 : getLinks(id1))  {
-                    if (id2 == pageId2) {
-                        return level + 1;
-                    }
-                    if (!seen.contains(id2)) {
-                        seen.add(id2);
-                        queue.add(id2);
-                    }
-                }
-            }
-            level++;
+        if (getLinksTo(pageId1).contains(pageId2) || getLinksFrom(pageId1).contains(pageId2)) {
+            return 1;
+        } else {
+            return 2;
         }
-
-        return 5;
-    }
-
-    private int[] getLinks(int pageId) throws DaoException {
-        TIntSet result = new TIntHashSet();
-//        for (LocalLink ll : linkDao.get(new DaoFilter().setDestIds(pageId).setLanguages(getLanguage()))) {
-//            result.add(ll.getSourceId());
-//        }
-        for (LocalLink ll : linkDao.get(new DaoFilter().setSourceIds(pageId).setLanguages(getLanguage()))) {
-            result.add(ll.getDestId());
-        }
-        return result.toArray();
     }
 
     @Override
