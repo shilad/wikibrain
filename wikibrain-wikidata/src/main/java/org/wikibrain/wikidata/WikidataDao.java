@@ -111,6 +111,8 @@ public interface WikidataDao extends Dao<WikidataStatement> {
      */
     public LocalWikidataStatement getLocalStatement(Language language, WikidataStatement statement) throws DaoException;
 
+    String getLabel(Language language, WikidataEntity.Type type, int id) throws DaoException;
+
     Iterable<WikidataStatement> getByValue(WikidataEntity property, WikidataValue value) throws DaoException;
 
     Iterable<WikidataStatement> getByValue(String propertyName, WikidataValue value) throws DaoException;
