@@ -36,6 +36,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.commons.codec.binary.Base64;
 
 // The Java class will be hosted at the URI path "/helloworld"
 @Path("/wikibrain")
@@ -288,33 +294,72 @@ public class AtlasifyResource {
             wikibrainSRinit();
         }
 
-        Language language = Language.EN;
+        Language language = Language.SIMPLE;
         Map<String, String> autocompleteMap = new HashMap<String, String>();
         try {
-            LinkedHashMap<LocalId, Float> resolution = pa.resolve(language, query.getKeyword(), 10);
             int i = 0;
-
-            Title title = new Title(query.getKeyword(), language);
-            List<LocalPage> similarPages = lpaDao.getBySimilarTitle(title, NameSpace.ARTICLE, llDao);
-
-            /*for (LocalId p : resolution.keySet()) {
+            /* Phrase Analyzer
+            LinkedHashMap<LocalId, Float> resolution = pa.resolve(language, query.getKeyword(), 100);
+            for (LocalId p : resolution.keySet()) {
                 org.wikibrain.core.model.LocalPage page = lpDao.getById(p);
                 autocompleteMap.put(i + "", page.getTitle().getCanonicalTitle());
                 i++;
-            }*/
+            } */
+
+            /* Page Titles that being/contain search term
+            Title title = new Title(query.getKeyword(), language);
+            List<LocalPage> similarPages = lpaDao.getBySimilarTitle(title, NameSpace.ARTICLE, llDao);
 
             for (LocalPage p : similarPages) {
                 autocompleteMap.put(i + "", p.getTitle().getCanonicalTitle());
                 i++;
+            } */
+
+            /* Bing */
+            String bingAccountKey = "Y+KqEsFSCzEzNB85dTXJXnWc7U4cSUduZsUJ3pKrQfs";
+            byte[] bingAccountKeyBytes = Base64.encodeBase64((bingAccountKey + ":" + bingAccountKey).getBytes());
+            String bingAccountKeyEncoded = new String(bingAccountKeyBytes);
+
+            String bingQuery = query.getKeyword();
+            URL bingQueryurl = new URL("https://api.datamarket.azure.com/Bing/SearchWeb/v1/Web?Query=%27"+java.net.URLEncoder.encode(bingQuery, "UTF-8")+"%20site%3Aen.wikipedia.org%27&$top=50&$format=json");
+
+            HttpURLConnection connection = (HttpURLConnection)bingQueryurl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Authorization", "Basic " + bingAccountKeyEncoded);
+            connection.setRequestProperty("Accept", "application/json");
+            BufferedReader br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
+
+            String output;
+            StringBuilder sb = new StringBuilder();
+            while ((output = br.readLine()) != null) {
+                sb.append(output);
             }
+
+            JSONObject bingResponse = new JSONObject(sb.toString());
+            bingResponse = bingResponse.getJSONObject("d");
+            JSONArray bingResponses = bingResponse.getJSONArray("results");
+            JSONObject response;
+            for (int j = 0; j < bingResponses.length() && i < 10; j++) {
+                response = bingResponses.getJSONObject(j);
+                URL url = new URL(response.getString("Url"));
+                String path = url.getPath();
+                String title = path.substring(path.lastIndexOf('/') + 1).replace('_', ' ');
+                LocalPage page = new LocalPage(language, 0, "");
+                for (LocalId p : pa.resolve(language, title, 1).keySet()) {
+                    page = lpDao.getById(p);
+                }
+                if (page != null && !autocompleteMap.values().contains(page.getTitle().getCanonicalTitle())){
+                    autocompleteMap.put(i + "", page.getTitle().getCanonicalTitle());
+                    i++;
+                }
+            }
+
         } catch (Exception e) {
-			e.printStackTrace();
             autocompleteMap = new HashMap<String, String>();
         }
 
         return Response.ok(new JSONObject(autocompleteMap).toString()).build();
     }
-
 
     @GET
     // The Java method will produce content identified by the MIME Media
