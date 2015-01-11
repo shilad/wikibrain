@@ -363,7 +363,7 @@ public class AtlasifyResource {
         } catch (Exception e) {
             autocompleteMap = new HashMap<String, String>();
         }
-	System.out.println("Get Auto Complete Result" + JSONObject(autocompleteMap).toString());
+	System.out.println("Get Auto Complete Result" + new JSONObject(autocompleteMap).toString());
         return Response.ok(new JSONObject(autocompleteMap).toString()).build();
     }
 
