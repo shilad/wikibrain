@@ -24,11 +24,16 @@ import org.wikibrain.phrases.PhraseAnalyzer;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import sun.net.www.content.text.plain;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import org.wikibrain.lucene.LuceneSearcher;
+import org.wikibrain.phrases.LucenePhraseAnalyzer;
 
 import java.awt.Color;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.util.*;
 
 import java.net.URL;
