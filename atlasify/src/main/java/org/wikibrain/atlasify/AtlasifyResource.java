@@ -299,7 +299,8 @@ public class AtlasifyResource {
             wikibrainSRinit();
         }
 
-        Language language = Language.SIMPLE;
+        Language language = Language.EN;
+        System.out.println("Received Auto Complete Query " + query.getKeyword());
         Map<String, String> autocompleteMap = new HashMap<String, String>();
         try {
             int i = 0;
@@ -362,7 +363,7 @@ public class AtlasifyResource {
         } catch (Exception e) {
             autocompleteMap = new HashMap<String, String>();
         }
-
+	System.out.println("Get Auto Complete Result" + JSONObject(autocompleteMap).toString());
         return Response.ok(new JSONObject(autocompleteMap).toString()).build();
     }
 
