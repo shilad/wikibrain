@@ -198,7 +198,7 @@ public class AtlasifyResource {
                 queryID = wikibrainPhaseResolution(query.getKeyword());
             }
             catch (Exception e){
-                System.out.println("Failed to resolve keyword" + query.getKeyword());
+                System.out.println("Failed to resolve keyword " + query.getKeyword());
                 return Response.ok(new JSONObject(srMap).toString()).build();
             }
             // LocalId queryID = new LocalId(Language.EN, 19908980);
@@ -251,7 +251,7 @@ public class AtlasifyResource {
             }
         }
 
-        return Response.ok(new JSONObject(srMap).toString()).header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok(new JSONObject(srMap).toString()).build();
     }
 
     private String getColorStringFromSR(double SR){
