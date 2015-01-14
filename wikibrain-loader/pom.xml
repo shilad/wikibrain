@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.5.0</version>
+        <version>0.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>wikibrain-loader</artifactId>
@@ -14,17 +14,17 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-download</artifactId>
-            <version>0.5.0</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-phrases</artifactId>
-            <version>0.5.0</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-wikidata</artifactId>
-            <version>0.5.0</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -55,12 +55,12 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-mapper</artifactId>
-            <version>0.5.0</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-spatial</artifactId>
-            <version>0.5.0</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
