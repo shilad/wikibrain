@@ -80,7 +80,7 @@ public class TestWikidataDao {
         }
 
         UniversalPageDao upDao = Mockito.mock(UniversalPageDao.class);
-        Mockito.when(upDao.getAllLocalToUnivIdsMap(LanguageSet.ALL)).thenReturn(concepts);
+        Mockito.when(upDao.getAllUnivToLocalIdsMap(LanguageSet.ALL)).thenReturn(concepts);
 
 
         WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
@@ -192,5 +192,15 @@ public class TestWikidataDao {
         assertEquals(34, stats.size());
         stats = IteratorUtils.toList(wd.getByValue("country of citizenship", WikidataValue.forItem(142)).iterator());
         assertEquals(6, stats.size());
+    }
+
+    @Test
+    public void testGeoCoordinates() throws Exception {
+        WpDataSource ds = TestDaoUtil.getWpDataSource(dbDir);
+        WikidataDao wd = new WikidataSqlDao(ds, null, null);
+        WikidataFilter filter = (new WikidataFilter.Builder()).withPropertyId(625).build();
+
+        List<WikidataStatement> stats = IteratorUtils.toList(wd.get(filter).iterator());
+        assertEquals(190, stats.size());
     }
 }

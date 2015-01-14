@@ -27,10 +27,7 @@ import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.wikidata.WikidataDao;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,17 +73,17 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     }
 
     @Override
-    public Iterable<Geometry> getGeometries(int itemId) throws DaoException {
-
-        List<Geometry> rVal = Lists.newArrayList();
+    public Map<String, Geometry> getGeometries(int itemId) throws DaoException {
+        Map<String, Geometry> result = new HashMap<String, Geometry>();
         for (String refSys : this.getAllRefSysNames()){
             for (String layer : this.getAllLayerNames(refSys)){
                 Geometry g = getGeometry(itemId, layer, refSys);
-                rVal.add(g);
+                if (g != null) {
+                    result.put(layer, g);
+                }
             }
         }
-        return rVal;
-
+        return result;
     }
 
     @Override

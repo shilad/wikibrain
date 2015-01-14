@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Ari Weiland
  *
  */
-public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {
+public interface UniversalPageDao extends Dao<UniversalPage> {
 
     /**
      * Returns a UniversalPage instance of the specified page type corresponding to the input universal ID
@@ -24,7 +24,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {
      * @return a UniversalPage
      * @throws DaoException if there was an error retrieving the page
      */
-    public T getById(int univId) throws DaoException;
+    public UniversalPage getById(int univId) throws DaoException;
 
     /**
      * Returns a map of UniversalPages of the specified page type by a collection of universal IDs
@@ -32,7 +32,7 @@ public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {
      * @return a map of universal IDs to UniversalPages
      * @throws DaoException if there was an error retrieving the pages
      */
-    public Map<Integer, T> getByIds(Collection<Integer> univIds) throws DaoException;
+    public Map<Integer, UniversalPage> getByIds(Collection<Integer> univIds) throws DaoException;
 
     UniversalPage getByLocalPage(LocalPage localPage) throws DaoException;
 
@@ -65,6 +65,8 @@ public interface UniversalPageDao<T extends UniversalPage> extends Dao<T> {
      * @throws DaoException
      */
     public Map<Language, TIntIntMap> getAllLocalToUnivIdsMap(LanguageSet ls) throws DaoException;
+
+    Map<Language, TIntIntMap> getAllUnivToLocalIdsMap(LanguageSet ls) throws DaoException;
 
     Map<Integer, Integer> getLocalIds(Language language, Collection<Integer> universalIds) throws DaoException;
 

@@ -56,18 +56,19 @@ public class WikidataDumpLoader {
     private final LanguageSet languages;
     private final WikidataParser wdParser = new WikidataParser();
     private final TIntSet universalIds;
+    private boolean keepAllLabeledEntities = false;
 
     public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao, UniversalPageDao upDao, LanguageSet langs) throws DaoException {
         this.wikidataDao = wikidataDao;
         this.metaDao = metaDao;
         this.languages = langs;
         this.universalPageDao = upDao;
-        Map<Language, TIntIntMap> localMaps = universalPageDao.getAllLocalToUnivIdsMap(languages);
+        Map<Language, TIntIntMap> localMaps = universalPageDao.getAllUnivToLocalIdsMap(languages);
 
         // Build up set of universal ids from the local ids that we know about
         this.universalIds = new TIntHashSet();
         for(TIntIntMap langMap : localMaps.values()) {
-            universalIds.addAll(langMap.valueCollection());
+            universalIds.addAll(langMap.keys());
         }
     }
 
@@ -110,16 +111,32 @@ public class WikidataDumpLoader {
         if (json.endsWith(",")) {
             json = json.substring(0, json.length()-1);
         }
-        if (counter.incrementAndGet() % 10000 == 0) {
+        if (counter.incrementAndGet() % 100000 == 0) {
             LOG.info("processing wikidata entity " + counter.get());
         }
         WikidataEntity entity = wdParser.parse(json);
         // check if others use prune's boolean?
         entity.prune(languages);
 
-        if (entity.getType() == WikidataEntity.Type.PROPERTY || universalIds.contains(entity.getId())) {
+        if (keepEntity(entity)) {
             wikidataDao.save(entity);
         }
+    }
+
+    private boolean keepEntity(WikidataEntity entity) {
+        if (entity.getType() == WikidataEntity.Type.PROPERTY) {
+            return true;
+        } else if (universalIds.contains(entity.getId())) {
+            return true;
+        } else if (keepAllLabeledEntities && !entity.getLabels().isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void setKeepAllLabeledEntities(boolean keepAllLabeledEntities) {
+        this.keepAllLabeledEntities = keepAllLabeledEntities;
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException, WikiBrainException, java.text.ParseException, InterruptedException {
@@ -131,6 +148,11 @@ public class WikidataDumpLoader {
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("d"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("keep-labeled")
+                        .withDescription("keep all labeled entities")
+                        .create("k"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -184,11 +206,16 @@ public class WikidataDumpLoader {
             wdDao.clear();
             metaDao.clear(WikidataStatement.class);
         }
+        if (cmd.hasOption("k")) {
+            loader.setKeepAllLabeledEntities(true);
+        }
         wdDao.beginLoad();
         metaDao.beginLoad();
         loader.load(path);
 
+        LOG.info("building indexes");
         wdDao.endLoad();
         metaDao.endLoad();
+        LOG.info("finished");
     }
 }
