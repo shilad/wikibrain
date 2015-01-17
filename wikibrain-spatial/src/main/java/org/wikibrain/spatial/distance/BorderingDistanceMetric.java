@@ -1,8 +1,12 @@
 package org.wikibrain.spatial.distance;
 
 import com.vividsolutions.jts.geom.Geometry;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -15,6 +19,7 @@ import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpThreadUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,12 +38,13 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
 
     private double bufferWidth = DEFAULT_BUFFER_WIDTH;
 
-    private int maxSteps = 10;
+    private int maxSteps = 50;
     private final String layer;
     private final SpatialDataDao dao;
     private Map<Integer, Geometry> geometries;
     private TIntSet concepts;
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
+    private Map<Integer, TIntList> children = new HashMap<Integer, TIntList>();
     private ContainmentIndex index;
 
     public BorderingDistanceMetric(SpatialDataDao dao, String layer) {
@@ -60,9 +66,6 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
                 new Procedure<Integer>() {
                     @Override
                     public void call(Integer conceptId) throws Exception {
-                        if (concepts != null && !concepts.contains(conceptId)) {
-                            return;
-                        }
                         TIntSet neighbors = getBorderingRegions(conceptId);
                         numEdges.addAndGet(neighbors.size());
                         synchronized (adjacencyList) {
@@ -72,6 +75,29 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
                     }
                 }, 50000);
         LOG.info("Found " + adjacencyList.size() + " nodes and " + numEdges.get() + " edges.");
+
+        geometries = dao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH);
+        ParallelForEach.loop(geometries.keySet(), WpThreadUtils.getMaxThreads(),
+                new Procedure<Integer>() {
+                    @Override
+                    public void call(Integer conceptId) throws Exception {
+                        if (concepts != null && !concepts.contains(conceptId)) {
+                            return;
+                        }
+                        List<ContainmentIndex.Result> results = index.getContainer(geometries.get(conceptId));
+                        if (results.size() >= 1) {
+                            if (results.size() > 1) LOG.info("concept " + conceptId + " returned " + results.size());
+                            int parentId = results.get(0).id;
+                            synchronized (children) {
+                                if (!children.containsKey(parentId)) {
+                                    children.put(parentId, new TIntArrayList());
+                                }
+                                children.get(parentId).add(conceptId);
+                            }
+                        }
+                    }
+                }, 50000);
+
     }
 
     private TIntSet getBorderingRegions(int conceptId) {
@@ -88,7 +114,7 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public String getName() {
-        return "bordering distance metric";
+        return "bordering distance metric for " + layer;
     }
 
     @Override
@@ -166,7 +192,14 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
         }
 
         List<Neighbor> neighbors = new ArrayList<Neighbor>();
-        neighbors.add(new Neighbor(srcId, 0));
+        if (concepts == null || concepts.contains(srcId)) {
+            neighbors.add(new Neighbor(srcId, 0));
+        }
+        if (children.containsKey(srcId)) {
+            for (int id : children.get(srcId).toArray()) {
+                neighbors.add(new Neighbor(id, 0));
+            }
+        }
 
         TIntSet added = new TIntHashSet();
         TIntSet seen = new TIntHashSet();
@@ -184,8 +217,15 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
             for (int i = 0; i < nodes; i++) {
                 int id = queue.removeAt(0);
                 if (!added.contains(id)) {
-                    neighbors.add(new Neighbor(id, distance));
                     added.add(id);
+                    if (concepts == null || concepts.contains(id)) {
+                        neighbors.add(new Neighbor(id, distance));
+                    }
+                    if (children.containsKey(id)) {
+                        for (int childId : children.get(id).toArray()) {
+                            neighbors.add(new Neighbor(childId, distance));
+                        }
+                    }
                 }
                 if (!adjacencyList.containsKey(id)) {
                     continue;
@@ -217,7 +257,7 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
         if (index == null) {
             throw new IllegalStateException();
         }
-        List<ContainmentIndex.Result> result = index.query(g);
+        List<ContainmentIndex.Result> result = index.getContainer(g);
 //        System.err.println("query returned " + result.size());
         for (ContainmentIndex.Result r : result) {
             Geometry g2 = r.geometry;

@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import org.geotools.referencing.GeodeticCalculator;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
  *
  * @author Shilad Sen
  */
-public class ClosestPointIndex {
+public class ClosestPointIndex implements Serializable {
     private final KdTree<Result> index = new KdTree<Result>(3);
 
     public ClosestPointIndex() {}
@@ -72,7 +73,7 @@ public class ClosestPointIndex {
         return index.size();
     }
 
-    public static class Result {
+    public static class Result implements Serializable {
         public final int id;
         public final Geometry geometry;
         public final Point point;

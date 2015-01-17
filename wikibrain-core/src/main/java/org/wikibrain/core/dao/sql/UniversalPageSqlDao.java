@@ -28,7 +28,7 @@ import java.util.*;
  * @author Shilad Sen
  *
  */
-public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao<T> implements UniversalPageDao<T> {
+public class UniversalPageSqlDao extends AbstractSqlDao<UniversalPage> implements UniversalPageDao {
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
             Tables.UNIVERSAL_PAGE.LANG_ID,
@@ -61,7 +61,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public Iterable<T> get(DaoFilter daoFilter) throws DaoException {
+    public Iterable<UniversalPage> get(DaoFilter daoFilter) throws DaoException {
         DSLContext context = getJooq();
         try {
             Collection<Condition> conditions = new ArrayList<Condition>();
@@ -82,10 +82,10 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                         record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
                         record.getValue(Tables.UNIVERSAL_PAGE.ALGORITHM_ID)});
             }
-            return new SqlDaoIterable<T, int[]>(result, pages.iterator(), context) {
+            return new SqlDaoIterable<UniversalPage, int[]>(result, pages.iterator(), context) {
 
                 @Override
-                public T transform(int[] item) throws DaoException {
+                public UniversalPage transform(int[] item) throws DaoException {
                     return getById(item[0]);
                 }
             };
@@ -116,7 +116,7 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
     }
 
     @Override
-    public T getById(int univId) throws DaoException {
+    public UniversalPage getById(int univId) throws DaoException {
         DSLContext context = getJooq();
         try {
             Result<Record> result = context.select()
@@ -124,18 +124,18 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
                     .where(Tables.UNIVERSAL_PAGE.UNIV_ID.eq(univId))
                     .and(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
                     .fetch();
-            return (T)buildUniversalPage(result);
+            return (UniversalPage)buildUniversalPage(result);
         } finally {
             freeJooq(context);
         }
     }
 
     @Override
-    public Map<Integer, T> getByIds(Collection<Integer> univIds) throws DaoException {
+    public Map<Integer, UniversalPage> getByIds(Collection<Integer> univIds) throws DaoException {
         if (univIds == null || univIds.isEmpty()) {
             return null;
         }
-        Map<Integer, T> map = new HashMap<Integer, T>();
+        Map<Integer, UniversalPage> map = new HashMap<Integer, UniversalPage>();
         for (Integer univId : univIds){
             map.put(univId, getById(univId));
         }
@@ -204,6 +204,32 @@ public class UniversalPageSqlDao<T extends UniversalPage> extends AbstractSqlDao
         }
     }
 
+    @Override
+    public Map<Language, TIntIntMap> getAllUnivToLocalIdsMap(LanguageSet ls) throws DaoException {
+        DSLContext context = getJooq();
+        try {
+            Map<Language, TIntIntMap> map = new HashMap<Language, TIntIntMap>();
+            for (Language l : ls) {
+                Cursor<Record> cursor = context.select()
+                        .from(Tables.UNIVERSAL_PAGE)
+                        .where(Tables.UNIVERSAL_PAGE.ALGORITHM_ID.eq(algorithmId))
+                        .and(Tables.UNIVERSAL_PAGE.LANG_ID.eq(l.getId()))
+                        .fetchLazy(getFetchSize());
+                TIntIntMap ids = new TIntIntHashMap(
+                        gnu.trove.impl.Constants.DEFAULT_CAPACITY,
+                        gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR,
+                        -1, -1);
+                for (Record record : cursor) {
+                    ids.put(record.getValue(Tables.UNIVERSAL_PAGE.UNIV_ID),
+                            record.getValue(Tables.UNIVERSAL_PAGE.PAGE_ID));
+                }
+                map.put(l, ids);
+            }
+            return map;
+        } finally {
+            freeJooq(context);
+        }
+    }
 
     /**
      * Returns the local page ids for that language, value in map is -1 they do not exist

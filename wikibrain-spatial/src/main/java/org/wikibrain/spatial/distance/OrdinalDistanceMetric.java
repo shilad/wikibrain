@@ -23,13 +23,13 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
     private static final Logger LOG = Logger.getLogger(GraphDistanceMetric.class.getName());
     private final SpatialDataDao spatialDao;
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
-    private final GeodeticDistanceMetric geodetic;
+    private final SphericalDistanceMetric geodetic;
     private TIntSet concepts;
 
     private final TIntObjectMap<Point> sample = new TIntObjectHashMap<Point>();
 
 
-    public OrdinalDistanceMetric(SpatialDataDao dao, GeodeticDistanceMetric geodetic) throws DaoException {
+    public OrdinalDistanceMetric(SpatialDataDao dao, SphericalDistanceMetric geodetic) throws DaoException {
         this.spatialDao = dao;
         this.geodetic = geodetic;
     }

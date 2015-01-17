@@ -4,6 +4,10 @@ import ags.utils.dataStructures.BinaryHeap;
 import ags.utils.dataStructures.MaxHeap;
 import ags.utils.dataStructures.MinHeap;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  */
@@ -31,6 +35,66 @@ public class KdTree<T> extends KdNode<T> {
         }
 
         return evaluatedPoints;
+    }
+
+    public List<T> findInBounds(double [] minBound, double [] maxBound) {
+        if (minBound.length != dimensions || maxBound.length != dimensions) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = 0; i < minBound.length; i++) {
+            if (minBound[i] > maxBound[i]) {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        List<T> results = new ArrayList<T>();
+
+        // Give up if there is no hope of overlap
+        if (!this.isLeaf()) {
+            for (int i = 0; i < dimensions; i++) {
+                if (!overlaps(minBound[i], maxBound[i], this.minBound[i], this.maxBound[i])) {
+                    return results;
+                }
+            }
+        }
+
+        List<KdNode<T>> queue = new LinkedList<KdNode<T>>();
+        queue.add(this);
+
+        while (!queue.isEmpty()) {
+            KdNode<T> node = queue.remove(0);
+
+            // Add matching points
+            for (int i = 0; i < node.size(); i++) {
+                if (inBounds(minBound, maxBound, node.points[i])) {
+                    results.add((T) node.data[i]);
+                }
+            }
+
+            // Descend if necessary
+            int d = node.splitDimension;
+            if (node.left != null && overlaps(node.minBound[d], node.splitValue, minBound[d], maxBound[d])) {
+                queue.add(node.left);
+            }
+            if (node.right != null && overlaps(node.splitValue, node.maxBound[d], minBound[d], maxBound[d])) {
+                queue.add(node.right);
+            }
+        }
+
+        return results;
+    }
+
+    private boolean inBounds(double [] minPoint, double [] maxPoints, double [] candidate) {
+        for (int i = 0; i < candidate.length; i++) {
+            if (candidate[i] < minPoint[i] || candidate[i] > maxPoints[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean overlaps(double minA, double maxA, double minB, double maxB) {
+        return (minA <= maxB) && (minB <= maxA);
     }
 
     @SuppressWarnings("unchecked")

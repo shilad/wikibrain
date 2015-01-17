@@ -43,6 +43,10 @@ public class SphericalDistanceMetric implements SpatialDistanceMetric {
         this.concepts = concepts;
     }
 
+    public TIntSet getValidConcepts() {
+        return concepts;
+    }
+
     /**
      * TODO: handle non-point geometries.
      * @param enable
@@ -71,7 +75,7 @@ public class SphericalDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public String getName() {
-        return "geodetic distance metric";
+        return "spherical distance metric";
     }
 
     @Override

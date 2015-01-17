@@ -190,7 +190,6 @@ public class WikidataParser {
         }
 
         String fullJson = "{ \"type\" : \"" + type + "\", \"value\" : " + element.toString() + " }";
-        System.out.println("fullJson is " + fullJson);
         try {
             Value snak = mapper.readValue(fullJson, JacksonValue.class);
             return snakToValue(type, snak);
