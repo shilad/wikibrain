@@ -30,49 +30,47 @@ public class FactorizerUtils {
      *
      * @param dir
      */
-    public void writeTextFormat(Matrix<MatrixRow> matrix, File dir, LocalPageDao pageDao, Language language) throws IOException, DaoException {
+    public static void writeTextFormat(Matrix<? extends MatrixRow> matrix, File dir, LocalPageDao pageDao, Language language) throws IOException, DaoException {
         dir.mkdirs();
 
         // Write row ids
-        BufferedWriter w = WpIOUtils.openWriter(FileUtils.getFile(dir, "rows.txt"));
+        TIntIntMap idMap= new TIntIntHashMap();
+        BufferedWriter w = WpIOUtils.openWriter(FileUtils.getFile(dir, "ids.txt"));
         int i = 1;
         for (int rowId : matrix.getRowIds()) {
+            idMap.put(rowId, i);
             LocalPage p = pageDao.getById(language, rowId);
             String title = (p == null) ? "unknown" : p.getTitle().getCanonicalTitle();
-            w.write((i++) + "\t" + rowId + "\t" + title + "\n");
+            w.write(i + "\t" + rowId + "\t" + title + "\n");
+            i++;
+        }
+
+        // Write any unknown column ids
+        for (MatrixRow row : matrix) {
+            for (int j = 0; j < row.getNumCols(); j++) {
+                int colId = row.getColIndex(j);
+                if (!idMap.containsKey(colId)) {
+                    idMap.put(colId, i);
+                    LocalPage p = pageDao.getById(language, colId);
+                    String title = (p == null) ? "unknown" : p.getTitle().getCanonicalTitle();
+                    w.write(i + "\t" + colId + "\t" + title + "\n");
+                    i++;
+                }
+            }
         }
         w.close();
 
         // Write matrix
-        TIntIntMap colIdMap = new TIntIntHashMap();
         w = WpIOUtils.openWriter(FileUtils.getFile(dir, "matrix.txt"));
         for (MatrixRow row : matrix) {
             for (int j = 0; j < row.getNumCols(); j++) {
                 if (j != 0) { w.write(' '); }
                 int colId = row.getColIndex(j);
-                int denseColId;
-                if (colIdMap.containsKey(colId)) {
-                    denseColId = colIdMap.get(colId);
-                } else {
-                    denseColId = colIdMap.size() + 1;
-                    colIdMap.put(colId, denseColId);
-                }
+                int denseColId = idMap.get(colId);
+                if (denseColId <= 0) throw new IllegalStateException();
                 w.write(denseColId + ":" + row.getColValue(j));
             }
             w.write('\n');
-        }
-        w.close();
-
-        // Write col ids
-        w = WpIOUtils.openWriter(FileUtils.getFile(dir, "cols.txt"));
-        int colIds[] = WpCollectionUtils.sortMapKeys(colIdMap);
-        for (i = 0; i < colIds.length; i++) {
-            int colId = colIds[i];
-            int denseId = colIdMap.get(colId);
-            if (denseId != (i+1)) throw new IllegalStateException();
-            LocalPage p = pageDao.getById(language, colId);
-            String title = (p == null) ? "unknown" : p.getTitle().getCanonicalTitle();
-            w.write((i++) + "\t" + colId + "\t" + title + "\n");
         }
         w.close();
     }
