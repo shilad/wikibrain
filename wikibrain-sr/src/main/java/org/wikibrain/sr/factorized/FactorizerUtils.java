@@ -4,6 +4,10 @@ import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
+import no.uib.cipr.matrix.io.MatrixVectorReader;
+import no.uib.cipr.matrix.sparse.CompRowMatrix;
+import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
+import no.uib.cipr.matrix.sparse.SparseVector;
 import org.apache.commons.io.FileUtils;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
@@ -73,6 +77,21 @@ public class FactorizerUtils {
             w.write('\n');
         }
         w.close();
+    }
+
+    public static FlexCompRowMatrix toMTJ(SparseMatrix matrix) {
+        int n = matrix.getNumRows();
+        FlexCompRowMatrix mtj = new FlexCompRowMatrix(n, n);
+        for (SparseMatrixRow row : matrix) {
+            int [] ids = new int[row.getNumCols()];
+            double [] vals = new double[row.getNumCols()];
+            for (int i = 0; i < row.getNumCols(); i++) {
+                ids[i] = row.getColIndex(i);
+                vals[i] = row.getColValue(i);
+            }
+            mtj.setRow(row.getRowIndex(), new SparseVector(n, ids, vals, false));
+        }
+        return mtj;
     }
 
     public static InMemorySparseMatrix makeSymmetric(Matrix<? extends MatrixRow> m) throws IOException {

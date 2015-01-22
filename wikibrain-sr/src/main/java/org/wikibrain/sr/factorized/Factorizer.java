@@ -7,5 +7,5 @@ import org.wikibrain.matrix.SparseMatrix;
  * @author Shilad Sen
  */
 public interface Factorizer {
-    public TIntObjectMap<float[]> factorize(SparseMatrix adjacencies);
+    public float[][] factorize(SparseMatrix adjacencies, int rank);
 }
