@@ -1,0 +1,50 @@
+administrative office	town hall	0.6209
+mountain hut	"hilltop, mountaintop"	0.4897
+arts centre	bureau de change/currency exchange	0.1612
+art shop	art gallery	0.748
+barracks	shooting range	0.5145
+ambulance station	city	0.1542
+basketball court	volleyball facility	0.7807
+bay	"body of water (lake, pond)"	0.7623
+beauty parlour	fire station	0.0943
+canal	dock	0.5943
+canoe spot	hunting shop	0.2354
+car store/shop	cycling facility	0.2727
+church	historic ruins	0.5348
+city	railway station	0.3279
+city suburb	antiques furniture shop	0.0717
+community centre	stream	0.0579
+fashion shop	swimming spot	0.0847
+floodplain	wetland	0.7686
+glacier	"body of water (lake, pond)"	0.5574
+greengrocer	aqueduct	0.031
+"heritage item,area"	valley	0.2896
+historic battlefield	monument	0.668
+historic castle	city walls	0.6446
+industrial landuse	landfill	0.4385
+interior decoration shop	tomb	0.0504
+managed forest	"lone, significant tree"	0.3992
+motel	hotel	0.9037
+bed and breakfast	school building	0.1393
+nursing home	continent	0.0169
+office building	academic bookstore	0.2686
+panoramic viewpoint	race track	0.124
+picnic site	stream	0.3689
+police station	prison	0.6107
+political boundary	women's clothes shop	0.0208
+post box	town	0.2097
+public transport station	railway platform	0.8115
+restaurant	beverages shop	0.6496
+school	toy shop	0.2172
+sea	island	0.3914
+shelter	agricultural field	0.1488
+speed bump	car park	0.3893
+stadium	athletics track	0.7643
+swimming pool	water reservoir	0.4174
+"football,soccer, baseball pitch/field"	corporate office	0.1086
+theatre	cinema	0.873
+tower	lighthouse	0.6168
+supermarket	surveillance camera	0.2042
+tram way	subway	0.7643
+vending machine	gate	0.0806
+water ski facility	office furniture shop	0.0517

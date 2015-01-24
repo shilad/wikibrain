@@ -123,7 +123,6 @@ public class SphericalDistanceMetric implements SpatialDistanceMetric {
      * @return
      */
     public List<Neighbor> getNeighbors(Geometry g, int maxNeighbors, double maxDistance) {
-        final Point c = WikiBrainSpatialUtils.getCenter(g);
         List<Neighbor> results = new ArrayList<Neighbor>();
         for (ClosestPointIndex.Result r : index.query(g, maxNeighbors)) {
             if (r.distance <= maxDistance) {
