@@ -97,9 +97,16 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
         }
         double furthest = neighborDistances[neighborDistances.length-1];
         if (sphericalDist >= furthest) {
-            return (sphericalDist - furthest) / (maxDistance - furthest) * (numConcepts - neighborDistances.length);
+            double ds = sphericalDist - furthest;
+            double maxds = maxDistance - furthest;
+            int remainingConcepts = numConcepts - neighborDistances.length;
+            return neighborDistances.length + ds / maxds * remainingConcepts;
         } else {
-            return Math.abs(Arrays.binarySearch(neighborDistances, sphericalDist));
+            int i = Arrays.binarySearch(neighborDistances, sphericalDist);
+            if (i < 0) {
+                i = -i - 1;
+            }
+            return i;
         }
     }
 
@@ -149,4 +156,14 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
     public void setMaxDistance(double maxDistance) {
         this.maxDistance = maxDistance;
     }
+
+    public double getFractionRankedExactly() {
+        return fractionRankedExactly;
+    }
+
+    public int getNumConcepts() {
+        return numConcepts;
+    }
+
+
 }
