@@ -14,6 +14,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.matrix.*;
+import org.wikibrain.utils.WbArrayUtils;
 import org.wikibrain.utils.WbMathUtils;
 import org.wikibrain.utils.WpCollectionUtils;
 import org.wikibrain.utils.WpIOUtils;
@@ -80,7 +81,16 @@ public class FactorizerUtils {
     }
 
     public static FlexCompRowMatrix toMTJ(SparseMatrix matrix) {
-        int n = matrix.getNumRows();
+        // Size is one more than max id
+        int n = 0;
+        for (SparseMatrixRow r : matrix) {
+            n = Math.max(n, r.getRowIndex());
+            for (int i = 0; i < r.getNumCols(); i++) {
+                n = Math.max(n, r.getColIndex(i));
+            }
+        }
+        n += 1;
+
         FlexCompRowMatrix mtj = new FlexCompRowMatrix(n, n);
         for (SparseMatrixRow row : matrix) {
             int [] ids = new int[row.getNumCols()];

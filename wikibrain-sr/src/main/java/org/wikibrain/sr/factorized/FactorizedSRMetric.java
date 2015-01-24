@@ -146,7 +146,7 @@ public class FactorizedSRMetric extends BaseSRMetric {
                             packedRow.put(id2, (float) r.getScore());
                         }
                     }
-                    SparseMatrixRow row = new SparseMatrixRow(vconf, denseId, rl.asTroveMap());
+                    SparseMatrixRow row = new SparseMatrixRow(vconf, denseId, packedRow);
                     writer.writeRow(row);
                 }
             });
