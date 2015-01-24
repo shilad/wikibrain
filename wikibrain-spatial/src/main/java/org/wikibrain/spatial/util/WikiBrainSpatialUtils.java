@@ -17,6 +17,7 @@ public class WikiBrainSpatialUtils {
      * Radius of earth, in meters.
      */
     public static final double EARTH_RADIUS = 6372800;
+    public static final double EARTH_CIRCUMFERENCE = 2 * Math.PI * EARTH_RADIUS;
     private static final String EARTH_ITEM_ID = "Q2";
 
     private static final Logger LOG = Logger.getLogger(WikiBrainSpatialUtils.class.getName());
