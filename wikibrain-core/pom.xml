@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.5.1</version>
     </parent>
 
   <artifactId>wikibrain-core</artifactId>
@@ -13,12 +13,12 @@
       <dependency>
           <groupId>org.wikibrainapi</groupId>
           <artifactId>wikibrain-utils</artifactId>
-          <version>0.5.1-SNAPSHOT</version>
+          <version>0.5.1</version>
       </dependency>
       <dependency>
           <groupId>org.wikibrainapi</groupId>
           <artifactId>wikibrain-matrix</artifactId>
-          <version>0.5.1-SNAPSHOT</version>
+          <version>0.5.1</version>
       </dependency>
       <dependency>
           <groupId>org.jooq</groupId>
