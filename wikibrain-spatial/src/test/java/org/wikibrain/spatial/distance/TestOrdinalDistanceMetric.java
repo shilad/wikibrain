@@ -39,8 +39,8 @@ public class TestOrdinalDistanceMetric {
         spherical.enableCache(true);
         ordinal.enableCache(true);
 
-        assertEquals(ordinal.getNumConcepts(), points.size());
-        int numNeighbors = (int) (ordinal.getNumConcepts() * ordinal.getFractionRankedExactly());
+        assertEquals(spherical.getNumConcepts(), points.size());
+        int numNeighbors = (int) (spherical.getNumConcepts() * ordinal.getFractionRankedExactly());
 
         for (int i = 0; i < 100; i++) {
             Point p = makePoint();
@@ -72,8 +72,8 @@ public class TestOrdinalDistanceMetric {
         spherical.enableCache(true);
         ordinal.enableCache(true);
 
-        assertEquals(ordinal.getNumConcepts(), points.size());
-        int numNeighbors = (int) (ordinal.getNumConcepts() * ordinal.getFractionRankedExactly());
+        assertEquals(spherical.getNumConcepts(), points.size());
+        int numNeighbors = (int) (spherical.getNumConcepts() * ordinal.getFractionRankedExactly());
 
         for (int i = 0; i < 50; i++) {
             final Point p1 = makePoint();

@@ -1,8 +1,10 @@
 package org.wikibrain.spatial.util;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.operation.distance.DistanceOp;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -25,6 +27,7 @@ public class ContainmentIndex implements Serializable {
 
     private STRtree[] indexes;
     private double [] bufferWidths;
+    private boolean forceContains = false;
 
     public ContainmentIndex() {
         setBufferWidths(DEFAULT_BUFFER_WIDTHS);
@@ -54,6 +57,21 @@ public class ContainmentIndex implements Serializable {
             }
             if (!results.isEmpty()) break;
         }
+        if (results.isEmpty() && forceContains) {
+            double closestDistance = 0;
+            int closestId = -1;
+            for (int id : geometries.keys()) {
+                Coordinate[] pair = DistanceOp.nearestPoints(query, geometries.get(id));
+                double d = pair[0].distance(pair[1]);
+                if (closestId < 0 || d < closestDistance) {
+                    closestDistance = d;
+                    closestId = id;
+                }
+            }
+            if (closestId >= 0) {
+                results.add(new Result(closestId, geometries.get(closestId)));
+            }
+        }
         return results;
     }
 
@@ -75,5 +93,9 @@ public class ContainmentIndex implements Serializable {
             this.id = id;
             this.geometry = geometry;
         }
+    }
+
+    public void setForceContains(boolean forceContains) {
+        this.forceContains = forceContains;
     }
 }

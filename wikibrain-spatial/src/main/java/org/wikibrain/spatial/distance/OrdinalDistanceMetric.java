@@ -10,6 +10,7 @@ import org.wikibrain.spatial.constants.Precision;
 import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -37,9 +38,7 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
     private final SphericalDistanceMetric spherical;
     private TIntSet concepts;
 
-    private int numConcepts;
-    private double fractionRankedExactly = 0.05;
-    private final TIntObjectMap<Point> sample = new TIntObjectHashMap<Point>();
+    private double fractionRankedExactly = 0.10;
     private double maxDistance = WikiBrainSpatialUtils.EARTH_CIRCUMFERENCE / 2;
 
 
@@ -55,10 +54,17 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public List<SpatialDistanceMetric.Neighbor> getNeighbors(Geometry g, int maxNeighbors, double maxDistance) {
-        List<SpatialDistanceMetric.Neighbor> result = spherical.getNeighbors(g, maxNeighbors, Double.MAX_VALUE);
-        for (int i = 0; i < result.size(); i++) {
-            Neighbor n = result.get(i);
-            result.set(i, new Neighbor(n.conceptId, i));
+        int k = maxNeighbors;
+        if (concepts != null) {
+            k = Math.max(k, maxNeighbors);
+        }
+        List<SpatialDistanceMetric.Neighbor> sphericalNeighbors = spherical.getNeighbors(g, k, Double.MAX_VALUE);
+        List<SpatialDistanceMetric.Neighbor> result = new ArrayList<Neighbor>();
+        for (int i = 0; i < sphericalNeighbors.size() && result.size() < maxNeighbors; i++) {
+            Neighbor n = sphericalNeighbors.get(i);
+            if (concepts == null || concepts.contains(n.conceptId)) {
+                result.add(new Neighbor(n.conceptId, i));
+            }
         }
         return result;
     }
@@ -71,12 +77,6 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
 
     @Override
     public void enableCache(boolean enable) throws DaoException {
-        if (!enable) return;
-        if (concepts == null) {
-            this.numConcepts = this.spatialDao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH).size();
-        } else {
-            this.numConcepts = concepts.size();
-        }
     }
 
     @Override
@@ -92,6 +92,7 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
     }
 
     private double estimateOrdinalDistance(double [] neighborDistances, double sphericalDist) {
+        int numConcepts = spherical.getNumConcepts();
         if (neighborDistances.length > numConcepts) {
             throw new IllegalStateException();
         }
@@ -120,7 +121,7 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
     }
 
     private int getMaxNeighbors() {
-        return (int) (fractionRankedExactly * numConcepts);
+        return (int) (fractionRankedExactly * spherical.getNumConcepts());
     }
 
     @Override
@@ -149,20 +150,12 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
         return distance(geometries, geometries);
     }
 
-    public void setNumConcepts(int numConcepts) {
-        this.numConcepts = numConcepts;
-    }
-
     public void setMaxDistance(double maxDistance) {
         this.maxDistance = maxDistance;
     }
 
     public double getFractionRankedExactly() {
         return fractionRankedExactly;
-    }
-
-    public int getNumConcepts() {
-        return numConcepts;
     }
 
 
