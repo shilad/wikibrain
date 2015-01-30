@@ -39,8 +39,10 @@ public class ContainmentIndex implements Serializable {
             Envelope env = exp.getEnvelopeInternal();
             synchronized (indexes[i]) {
                 indexes[i].insert(env, id);
-                geometries.put(id, geometry);
                 expanded[i].put(id, exp);
+            }
+            synchronized (geometries) {
+                geometries.put(id, geometry);
             }
         }
     }
