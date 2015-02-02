@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.5.2-SNAPSHOT</version>
+        <version>0.5.2</version>
     </parent>
 
     <artifactId>wikibrain-wikidata</artifactId>
@@ -14,22 +14,22 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
-            <version>0.5.2-SNAPSHOT</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-download</artifactId>
-            <version>0.5.2-SNAPSHOT</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-utils</artifactId>
-            <version>0.5.2-SNAPSHOT</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-parser</artifactId>
-            <version>0.5.2-SNAPSHOT</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
