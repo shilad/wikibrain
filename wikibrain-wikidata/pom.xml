@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.5.1</version>
+        <version>0.5.2</version>
     </parent>
 
     <artifactId>wikibrain-wikidata</artifactId>
@@ -14,22 +14,22 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
-            <version>0.5.1</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-download</artifactId>
-            <version>0.5.1</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-utils</artifactId>
-            <version>0.5.1</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-parser</artifactId>
-            <version>0.5.1</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -45,17 +45,17 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wdtk-dumpfiles</artifactId>
-            <version>0.3.3.shilad</version>
+            <version>0.3.4.shilad</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wdtk-datamodel</artifactId>
-            <version>0.3.3.shilad</version>
+            <version>0.3.4.shilad</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wdtk-storage</artifactId>
-            <version>0.3.3.shilad</version>
+            <version>0.3.4.shilad</version>
         </dependency>
     </dependencies>
 

@@ -73,6 +73,10 @@ public class SphericalDistanceMetric implements SpatialDistanceMetric {
         LOG.info("loaded " + index.size() + " points");
     }
 
+    public int getNumConcepts() {
+        return index.size();
+    }
+
     @Override
     public String getName() {
         return "spherical distance metric";

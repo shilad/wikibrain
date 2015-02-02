@@ -131,6 +131,8 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
                     kms = calc.getOrthodromicDistance();
                 } catch (ArithmeticException e) {
                     kms = r.distance;
+                } catch (IllegalArgumentException e) {
+                    kms = r.distance;
                 }
                 if (kms <= maxDistance) {
                     results.add(new Neighbor(r.id, kms));
@@ -163,24 +165,27 @@ public class GeodeticDistanceMetric implements SpatialDistanceMetric {
     }
 
     private double distance(GeodeticCalculator calc, Geometry g1, Geometry g2) {
-        if (useBorders) {
-            g1 = cleanupGeometry(g1);
-            g2 = cleanupGeometry(g2);
-            Coordinate[] pair = DistanceOp.nearestPoints(g1, g2);
-            calc.setStartingGeographicPoint(pair[0].x, pair[0].y);
-            calc.setDestinationGeographicPoint(pair[1].x, pair[1].y);
-        } else {
-            Point p1 = WikiBrainSpatialUtils.getCenter(g1);
-            Point p2 = WikiBrainSpatialUtils.getCenter(g2);
-            calc.setStartingGeographicPoint(p1.getX(), p1.getY());
-            calc.setDestinationGeographicPoint(p2.getX(), p2.getY());
-        }
         try {
+            if (useBorders) {
+                g1 = cleanupGeometry(g1);
+                g2 = cleanupGeometry(g2);
+                Coordinate[] pair = DistanceOp.nearestPoints(g1, g2);
+                calc.setStartingGeographicPoint(pair[0].x, pair[0].y);
+                calc.setDestinationGeographicPoint(pair[1].x, pair[1].y);
+            } else {
+                Point p1 = WikiBrainSpatialUtils.getCenter(g1);
+                Point p2 = WikiBrainSpatialUtils.getCenter(g2);
+                calc.setStartingGeographicPoint(p1.getX(), p1.getY());
+                calc.setDestinationGeographicPoint(p2.getX(), p2.getY());
+            }
             return calc.getOrthodromicDistance();
         } catch (ArithmeticException e) {
-            // If there's an arithmetic error, fall back on the haversine formula
-            Point2D p1 = calc.getStartingGeographicPoint();
-            Point2D p2 = calc.getDestinationGeographicPoint();
+            Point p1 = WikiBrainSpatialUtils.getCenter(g1);
+            Point p2 = WikiBrainSpatialUtils.getCenter(g2);
+            return WikiBrainSpatialUtils.haversine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+        } catch (IllegalArgumentException e) {
+            Point p1 = WikiBrainSpatialUtils.getCenter(g1);
+            Point p2 = WikiBrainSpatialUtils.getCenter(g2);
             return WikiBrainSpatialUtils.haversine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
         }
     }
