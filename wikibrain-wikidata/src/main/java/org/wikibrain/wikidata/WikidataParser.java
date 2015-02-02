@@ -1,20 +1,18 @@
 package org.wikibrain.wikidata;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.core.model.RawPage;
 import org.wikibrain.parser.WpParseException;
-import org.wikibrain.utils.WpIOUtils;
+import org.wikidata.wdtk.datamodel.helpers.DatamodelConverter;
+import org.wikidata.wdtk.datamodel.helpers.ToString;
 import org.wikidata.wdtk.datamodel.interfaces.*;
-import org.wikidata.wdtk.datamodel.json.ValueJsonConverter;
 import org.wikidata.wdtk.datamodel.json.jackson.*;
 import org.wikidata.wdtk.datamodel.json.jackson.datavalues.JacksonValue;
-import org.wikidata.wdtk.dumpfiles.MwRevision;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -26,22 +24,25 @@ public class WikidataParser {
     private static final Logger LOG = Logger.getLogger(WikidataParser.class.getName());
     private final LanguageSet langs;
     final ObjectMapper mapper = new ObjectMapper();
+    private final DatamodelConverter datamodelConverter;
 
     public WikidataParser() {
         this(LanguageSet.ALL);
     }
 
     public WikidataParser(LanguageSet langs) {
+        this.datamodelConverter = new DatamodelConverter( new JacksonObjectFactory());
+
         this.langs = langs;
     }
 
     private static BufferedWriter writer;
 
     public WikidataEntity parse(String json) throws WpParseException {
-        JacksonTermedDocument mwDoc;
+        JacksonTermedStatementDocument mwDoc;
 
         try {
-            mwDoc = mapper.readValue(json, JacksonTermedDocument.class);
+            mwDoc = mapper.readValue(json, JacksonTermedStatementDocument.class);
         } catch (IOException e) {
             LOG.info("Error parsing: " + json);
             throw new WpParseException(e);
@@ -91,9 +92,24 @@ public class WikidataParser {
     private WikidataStatement parseOneClaim(WikidataEntity item, JacksonStatement js) throws WpParseException {
         String propId =js.getMainsnak().getProperty();  // e.g. "P34"
         WikidataEntity prop = new WikidataEntity(WikidataEntity.Type.PROPERTY, Integer.valueOf(propId.substring(1)));
-        String valTypeStr = js.getMainsnak().getSnaktype();
-        JsonElement jsonVal = null;
 
+        String valTypeStr = js.getMainsnak().accept(new SnakVisitor<String>() {
+            @Override
+            public String visit(ValueSnak snak) {
+                return "value";
+            }
+
+            @Override
+            public String visit(SomeValueSnak snak) {
+                return "somevalue";
+            }
+
+            @Override
+            public String visit(NoValueSnak snak) {
+                return "novalue";
+            }
+        });
+        JsonElement jsonVal = null;
         WikidataValue value;
         if (valTypeStr.equals("value")) { // more specific type available
             JacksonValueSnak snak = (JacksonValueSnak)js.getMainsnak();
@@ -122,7 +138,12 @@ public class WikidataParser {
     }
 
     public WikidataValue snakToValue(final String type, Value snak) {
-        String jsonStr = snak.accept(new ValueJsonConverter()).toString();
+        String jsonStr = null;
+        try {
+            jsonStr = mapper.writeValueAsString(snak);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Unknown snak: " + snak);
+        }
         final JsonElement element = new JsonParser().parse(jsonStr);
         final JsonElement jsonValue = (element.isJsonObject() && element.getAsJsonObject().has("value"))
                 ? element.getAsJsonObject().get("value")
