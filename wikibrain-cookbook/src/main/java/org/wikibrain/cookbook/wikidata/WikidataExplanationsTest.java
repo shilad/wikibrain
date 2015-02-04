@@ -1,4 +1,4 @@
-package org.wikibrain.atlasify;
+package org.wikibrain.cookbook.wikidata;
 
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -11,7 +11,6 @@ import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.wikidata.WikidataDao;
 
-import org.wikibrain.atlasify.WikidataMetric;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;

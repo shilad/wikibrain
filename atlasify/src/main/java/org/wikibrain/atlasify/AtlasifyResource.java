@@ -41,6 +41,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
+import java.io.ByteArrayOutputStream;
+
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -312,17 +314,17 @@ public class AtlasifyResource {
                 i++;
             } */
 
-            /* Page Titles that being/contain search term
+            /* Page Titles that being/contain search term */
             Title title = new Title(query.getKeyword(), language);
             List<LocalPage> similarPages = lpaDao.getBySimilarTitle(title, NameSpace.ARTICLE, llDao);
 
             for (LocalPage p : similarPages) {
                 autocompleteMap.put(i + "", p.getTitle().getCanonicalTitle());
                 i++;
-            } */
+            }
 
             /* Bing */
-            String bingAccountKey = "Y+KqEsFSCzEzNB85dTXJXnWc7U4cSUduZsUJ3pKrQfs";
+            /*String bingAccountKey = "Y+KqEsFSCzEzNB85dTXJXnWc7U4cSUduZsUJ3pKrQfs";
             byte[] bingAccountKeyBytes = Base64.encodeBase64((bingAccountKey + ":" + bingAccountKey).getBytes());
             String bingAccountKeyEncoded = new String(bingAccountKeyBytes);
 
@@ -358,7 +360,7 @@ public class AtlasifyResource {
                     autocompleteMap.put(i + "", page.getTitle().getCanonicalTitle());
                     i++;
                 }
-            }
+            }*/
 
         } catch (Exception e) {
             autocompleteMap = new HashMap<String, String>();
@@ -374,6 +376,9 @@ public class AtlasifyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public Response handleExplanation(@PathParam("keyword") String keyword, @PathParam("feature") String feature) throws  DaoException, MalformedURLException, IOException, Exception{
+        if (lpDao == null) {
+            wikibrainSRinit();
+        }
         System.out.println("Received query for explanation between " + keyword + " and " + feature);
         String keywordTitle;
         String featureTitle;
@@ -419,6 +424,27 @@ public class AtlasifyResource {
 
 
 
+    }
+
+    // A logging method called by the god mode of Atlasify to check the status of the system
+    @POST
+    @Path("/status")
+    @Produces("application/json")
+
+    public Response getLog () throws DaoException{
+        ByteArrayOutputStream output = AtlasifyServer.logger;
+        String s = output.toString();
+
+        /* In order to support multiple god modes running the console
+         * output cannot be cleared. This functionality could change
+         * in the future if there are performance problems.
+         */
+        // output.reset();
+
+        Map<String, String> result = new HashMap<String, String>();
+        result.put("log", s);
+
+        return Response.ok(new JSONObject(result).toString()).build();
     }
 
 }
