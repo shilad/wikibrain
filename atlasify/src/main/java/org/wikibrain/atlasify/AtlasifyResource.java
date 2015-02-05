@@ -93,6 +93,7 @@ public class AtlasifyResource {
     private static Language lang = Language.getByLangCode("en");
     private static LocalPageAutocompleteSqlDao lpaDao = null;
     private static LocalLinkDao llDao = null;
+    private static AtlasifyLogger atlasifyLogger;
 
     private static void wikibrainSRinit(){
 
@@ -103,6 +104,7 @@ public class AtlasifyResource {
             lpDao = conf.get(LocalPageDao.class);
             lpaDao = conf.get(LocalPageAutocompleteSqlDao.class);
 			llDao = conf.get(LocalLinkDao.class);
+            atlasifyLogger = new AtlasifyLogger("./log/AtlasifyLogin", "./log/AtlasifyQuery");
 
             pa = conf.get(PhraseAnalyzer.class, "anchortext");
             System.out.println("FINISHED LOADING WIKIBRAIN");
@@ -113,8 +115,8 @@ public class AtlasifyResource {
             //        "language", "simple");
 
 
-        } catch (ConfigurationException e) {
-            System.out.println("Configuration Exception: "+e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Exception when initializing WikiBrain: "+e.getMessage());
         }
 
     }
@@ -160,6 +162,7 @@ public class AtlasifyResource {
     public Response helloWorld() throws Exception{
 	return Response.ok("hello world").header("Access-Control-Allow-Origin", "*").build();
     }
+
     // The Java method will process HTTP GET requests
     @GET
     // The Java method will produce content identified by the MIME Media
@@ -290,6 +293,22 @@ public class AtlasifyResource {
     }
 
     @POST
+    @Path("logLogin")
+    @Consumes("application/json")
+    public void processLogLogin(AtlasifyLogger.logLogin query) throws Exception{
+
+        atlasifyLogger.LoginLogger(query, "");
+    }
+
+    @POST
+    @Path("logQuery")
+    @Consumes("application/json")
+    public void processLogQuey(AtlasifyLogger.logQuery query) throws Exception{
+
+        atlasifyLogger.QueryLogger(query, "");
+    }
+
+    @POST
     @Path("/autocomplete")
     @Consumes("application/json")
     @Produces("text/plain")
@@ -385,7 +404,8 @@ public class AtlasifyResource {
             System.out.println("Failed to resolve " + keyword + " and " + feature);
             return Response.ok("").header("Access-Control-Allow-Origin", "*").build();
         }
-        String url = "http://downey-n1.cs.northwestern.edu:4321/" + keywordTitle + "/" +featureTitle;
+
+        String url = "http://downey-n1.cs.northwestern.edu:3030/api?concept1=" + keywordTitle + "&concept2=" + featureTitle;
 
         InputStream inputStream = new URL(url).openStream();
 
