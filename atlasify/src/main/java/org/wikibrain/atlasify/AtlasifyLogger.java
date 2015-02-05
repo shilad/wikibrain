@@ -91,8 +91,8 @@ public class AtlasifyLogger {
     CSVWriter logQueryWriter;
 
     AtlasifyLogger(String loginPath, String queryPath)throws IOException{
-        logLoginWriter = new CSVWriter(new FileWriter(new File("./AtlasifyLog/loginLog.csv"), true), ',');
-        logQueryWriter = new CSVWriter(new FileWriter(new File("./AtlasifyLog/queryLog.csv"), true), ',');
+        logLoginWriter = new CSVWriter(new FileWriter(new File(loginPath), true), ',');
+        logQueryWriter = new CSVWriter(new FileWriter(new File(queryPath), true), ',');
     }
 
     public void LoginLogger(logLogin data, String ip) throws IOException{

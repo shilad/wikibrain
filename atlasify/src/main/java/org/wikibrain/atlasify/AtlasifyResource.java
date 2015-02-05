@@ -104,7 +104,7 @@ public class AtlasifyResource {
             lpDao = conf.get(LocalPageDao.class);
             lpaDao = conf.get(LocalPageAutocompleteSqlDao.class);
 			llDao = conf.get(LocalLinkDao.class);
-            atlasifyLogger = new AtlasifyLogger("./log/AtlasifyLogin", "./log/AtlasifyQuery");
+            atlasifyLogger = new AtlasifyLogger("./log/AtlasifyLogin.csv", "./log/AtlasifyQuery.csv");
 
             pa = conf.get(PhraseAnalyzer.class, "anchortext");
             System.out.println("FINISHED LOADING WIKIBRAIN");
@@ -117,6 +117,7 @@ public class AtlasifyResource {
 
         } catch (Exception e) {
             System.out.println("Exception when initializing WikiBrain: "+e.getMessage());
+            
         }
 
     }
