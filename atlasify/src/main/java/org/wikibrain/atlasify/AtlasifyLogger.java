@@ -54,12 +54,13 @@ public class AtlasifyLogger {
         private String centroid;
         private String browser;
         private String language;
+        private String ip;
 
         public logQuery(){
 
         }
 
-        public logQuery(String userId, String type, String keyword, String refSys, String centroid, String browser, String language){
+        public logQuery(String userId, String type, String keyword, String refSys, String centroid, String browser, String language, String ip){
             this.userId = userId;
             this.type = type;
             this.keyword = keyword;
@@ -67,6 +68,7 @@ public class AtlasifyLogger {
             this.centroid = centroid;
             this.browser = browser;
             this.language = language;
+            this.ip = ip;
         }
 
         public String getUserId(){
@@ -127,7 +129,7 @@ public class AtlasifyLogger {
         row[5] = data.type;
         row[6] = data.browser;
         row[7] = data.language;
-        row[8] = ip;
+        row[8] = data.ip;
         row[9] = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         logQueryWriter.writeNext(row);
         logQueryWriter.flush();
