@@ -117,7 +117,7 @@ public class AtlasifyResource {
 
         } catch (Exception e) {
             System.out.println("Exception when initializing WikiBrain: "+e.getMessage());
-            
+
         }
 
     }
@@ -296,17 +296,22 @@ public class AtlasifyResource {
     @POST
     @Path("logLogin")
     @Consumes("application/json")
-    public void processLogLogin(AtlasifyLogger.logLogin query) throws Exception{
+    public Response processLogLogin(AtlasifyLogger.logLogin query) throws Exception{
 
         atlasifyLogger.LoginLogger(query, "");
+        System.out.println("LOGIN LOGGED " + query.toString());
+        return Response.ok("received").build();
+
     }
 
     @POST
     @Path("logQuery")
     @Consumes("application/json")
-    public void processLogQuey(AtlasifyLogger.logQuery query) throws Exception{
+    public Response processLogQuey(AtlasifyLogger.logQuery query) throws Exception{
 
         atlasifyLogger.QueryLogger(query, "");
+        System.out.println("QUERY LOGGED " + query.toString());
+        return Response.ok("received").build();
     }
 
     @POST
@@ -436,7 +441,7 @@ public class AtlasifyResource {
         }
         System.out.println("REQUESTED explanation between " + keywordTitle + " and " + featureTitle + "\n\n" + returnVal);
         */
-        return Response.ok(stringBuilder.toString()).header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok(stringBuilder.toString()).build();
 
 
 
