@@ -307,7 +307,7 @@ public class AtlasifyResource {
     @POST
     @Path("logQuery")
     @Consumes("application/json")
-    public Response processLogQuey(AtlasifyLogger.logQuery query) throws Exception{
+    public Response processLogQuery(AtlasifyLogger.logQuery query) throws Exception{
 
         atlasifyLogger.QueryLogger(query, "");
         System.out.println("QUERY LOGGED " + query.toString());

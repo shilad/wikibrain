@@ -52,17 +52,21 @@ public class AtlasifyLogger {
         private String keyword;
         private String refSys;
         private String centroid;
+        private String browser;
+        private String language;
 
         public logQuery(){
 
         }
 
-        public logQuery(String userId, String type, String keyword, String refSys, String centroid){
+        public logQuery(String userId, String type, String keyword, String refSys, String centroid, String browser, String language){
             this.userId = userId;
             this.type = type;
             this.keyword = keyword;
             this.refSys = refSys;
             this.centroid = centroid;
+            this.browser = browser;
+            this.language = language;
         }
 
         public String getUserId(){
@@ -83,6 +87,14 @@ public class AtlasifyLogger {
 
         public String getCentroid(){
             return centroid;
+        }
+
+        public String getBrowser(){
+            return browser;
+        }
+
+        public String getLanguage(){
+            return language;
         }
 
     }
@@ -107,14 +119,16 @@ public class AtlasifyLogger {
     }
 
     public void QueryLogger(logQuery data, String ip) throws IOException{
-        String[] row = new String[8];
+        String[] row = new String[10];
         row[0] = data.userId;
         row[1] = data.centroid;
         row[2] = data.refSys;
         row[4] = data.keyword;
         row[5] = data.type;
-        row[6] = ip;
-        row[7] = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        row[6] = data.browser;
+        row[7] = data.language;
+        row[8] = ip;
+        row[9] = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         logQueryWriter.writeNext(row);
         logQueryWriter.flush();
     }
