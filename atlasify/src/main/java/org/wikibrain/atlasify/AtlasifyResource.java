@@ -245,7 +245,12 @@ public class AtlasifyResource {
                     }
                     catch (Exception e){
                         //put white for anything not present in the SR map
-                        System.out.println("NO SR Between " + lpDao.getById(queryID).getTitle().getCanonicalTitle() + " and " + lpDao.getById(featureID).getTitle().getCanonicalTitle());
+                        try{
+                            System.out.println("NO SR Between " + lpDao.getById(queryID).getTitle().getCanonicalTitle() + " and " + lpDao.getById(featureID).getTitle().getCanonicalTitle());
+                        }
+                        catch (Exception e1){
+                            System.out.println("Failed to get SR");
+                        }
                         srMap.put(featureNameList[i].toString(), "#ffffff");
                         continue;
                         //do nothing
