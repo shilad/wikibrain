@@ -108,11 +108,16 @@ public class AtlasifyResource {
             Env env = new EnvBuilder().build();
             Configurator conf = env.getConfigurator();
             lpDao = conf.get(LocalPageDao.class);
+            System.out.println("FINISHED LOADING LOCALPAGE DAO");
             lpaDao = conf.get(LocalPageAutocompleteSqlDao.class);
 			llDao = conf.get(LocalLinkDao.class);
+            System.out.println("FINISHED LOADING LOCALLINK DAO");
             sdDao = conf.get(SpatialDataDao.class);
+            System.out.println("FINISHED LOADING SPATIALDATA DAO");
             upDao = conf.get(UniversalPageDao.class);
+            System.out.println("FINISHED LOADING UNIVERSALPAGE DAO");
             geometryMap = sdDao.getAllGeometriesInLayer("wikidata");
+            System.out.println("FINISHED LOADING GEOMETRYMAP");
             atlasifyLogger = new AtlasifyLogger("./log/AtlasifyLogin.csv", "./log/AtlasifyQuery.csv");
 
             pa = conf.get(PhraseAnalyzer.class, "anchortext");
