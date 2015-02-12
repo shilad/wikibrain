@@ -506,15 +506,18 @@ public class AtlasifyResource {
             try {
                 Map<LocalId, Double> srValues = accessNorthwesternAPI(queryID, 100);
                 for(Map.Entry<LocalId, Double> e : srValues.entrySet()){
-                    if(geometryMap.containsKey(e.getKey().getId())){
-                        try {
-                            resultMap.put(upDao.getById(e.getKey().getId()).getBestEnglishTitle(lpDao, true).getCanonicalTitle(), geometryMap.get(e.getKey().getId()));
+                    try{
+                        LocalPage localPage = lpDao.getById(e.getKey());
+                        int univId = upDao.getByLocalPage(localPage).getUnivId();
+                        if(geometryMap.containsKey(univId)){
+                            resultMap.put(localPage.getTitle().getCanonicalTitle(), geometryMap.get(univId));
                         }
-                        catch (Exception e1){
-                            continue;
-                        }
-
                     }
+                    catch (Exception e1){
+                        continue;
+                    }
+
+
 
 
                 }
