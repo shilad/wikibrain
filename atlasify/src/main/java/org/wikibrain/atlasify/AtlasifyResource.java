@@ -188,7 +188,7 @@ public class AtlasifyResource {
     @Path("/helloworld")
     @Produces("text/plain")
     public Response helloWorld() throws Exception{
-	return Response.ok("hello world").header("Access-Control-Allow-Origin", "*").build();
+	return Response.ok("hello world").build();
     }
 
     // The Java method will process HTTP GET requests
@@ -527,7 +527,7 @@ public class AtlasifyResource {
 
             }
 
-        System.out.println("GOT POI " + resultMap.size());
+        System.out.println("GOT POI " + resultMap.toString());
         return Response.ok(new JSONObject(resultMap).toString()).build();
     }
 
