@@ -5,6 +5,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.google.gson.JsonParser;
+import com.vividsolutions.jts.geom.Geometry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wikibrain.conf.ConfigurationException;
@@ -14,6 +15,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.LocalLinkDao;
+import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.NameSpace;
@@ -21,6 +23,7 @@ import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.phrases.PhraseAnalyzer;
+import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import sun.net.www.content.text.plain;
@@ -93,6 +96,9 @@ public class AtlasifyResource {
     private static Language lang = Language.getByLangCode("en");
     private static LocalPageAutocompleteSqlDao lpaDao = null;
     private static LocalLinkDao llDao = null;
+    private static SpatialDataDao sdDao = null;
+    private static UniversalPageDao upDao = null;
+    private static Map<Integer, Geometry> geometryMap = null;
     private static AtlasifyLogger atlasifyLogger;
 
     private static void wikibrainSRinit(){
@@ -104,6 +110,9 @@ public class AtlasifyResource {
             lpDao = conf.get(LocalPageDao.class);
             lpaDao = conf.get(LocalPageAutocompleteSqlDao.class);
 			llDao = conf.get(LocalLinkDao.class);
+            sdDao = conf.get(SpatialDataDao.class);
+            upDao = conf.get(UniversalPageDao.class);
+            geometryMap = sdDao.getAllGeometriesInLayer("wikidata");
             atlasifyLogger = new AtlasifyLogger("./log/AtlasifyLogin.csv", "./log/AtlasifyQuery.csv");
 
             pa = conf.get(PhraseAnalyzer.class, "anchortext");
@@ -131,9 +140,15 @@ public class AtlasifyResource {
         throw new Exception("failed to resolve");
     }
 
-    private static Map<LocalId, Double> accessNorthwesternAPI(LocalId id) throws Exception {
+    private static Map<LocalId, Double> accessNorthwesternAPI(LocalId id, Integer topN) throws Exception {
         Language language = lang;
-        String url = "http://downey-n2.cs.northwestern.edu:8080/wikisr/sr/sID/" + id.getId() + "/langID/" + language.getId();
+        String url = "";
+        if(topN == -1){
+            url = "http://downey-n2.cs.northwestern.edu:8080/wikisr/sr/sID/" + id.getId() + "/langID/" + language.getId();
+        }
+        else{
+            url = "http://downey-n2.cs.northwestern.edu:8080/wikisr/sr/sID/" + id.getId() + "/langID/" + language.getId()+ "/top/" + topN.toString();
+        }
         InputStream inputStream = new URL(url).openStream();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
@@ -224,7 +239,7 @@ public class AtlasifyResource {
             }
             // LocalId queryID = new LocalId(Language.EN, 19908980);
             try {
-                Map<LocalId, Double> srValues = accessNorthwesternAPI(queryID);
+                Map<LocalId, Double> srValues = accessNorthwesternAPI(queryID, -1);
 
                 for (int i = 0; i < featureIdList.length; i++) {
                     LocalId featureID = new LocalId(lang, 0);
@@ -457,6 +472,55 @@ public class AtlasifyResource {
 
 
 
+    }
+//return the list of all spatial objects in the top 100 most realted articles
+    @POST
+    @Path("/getpoi/id={keyword}")
+    @Consumes("text/plain")
+    @Produces("text/plain")
+
+    public Response getPOIs (@PathParam("keyword") String keyword) {
+        if(pa == null){
+            wikibrainSRinit();
+        }
+
+        Map<String, String> srMap = new HashMap<String, String>();
+        if (useNorthWesternAPI) {
+            LocalId queryID = new LocalId(lang, 0);
+            try{
+                queryID = wikibrainPhaseResolution(keyword);
+            }
+            catch (Exception e){
+                System.out.println("Failed to resolve keyword " + keyword);
+                return Response.ok(new JSONObject(srMap).toString()).build();
+            }
+            // LocalId queryID = new LocalId(Language.EN, 19908980);
+            Map<String, Geometry> geometryMap = new HashMap<String, Geometry>();
+            try {
+                Map<LocalId, Double> srValues = accessNorthwesternAPI(queryID, 100);
+                for(Map.Entry<LocalId, Double> e : srValues.entrySet()){
+                    if(geometryMap.containsKey(e.getKey().getId())){
+                        try {
+                            geometryMap.put(upDao.getById(e.getKey().getId()).getBestEnglishTitle(lpDao, true).getCanonicalTitle(), geometryMap.get(e.getKey().getId()));
+                        }
+                        catch (Exception e1){
+                            continue;
+                        }
+
+                    }
+
+
+                }
+
+            }
+            catch (Exception e) {
+                System.out.println("Error when connecting to Northwestern Server ");
+                e.printStackTrace();
+                // do nothing
+
+            }
+        }
+        return Response.ok(new JSONObject(geometryMap).toString()).build();
     }
 
 }
