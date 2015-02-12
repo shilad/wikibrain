@@ -488,6 +488,8 @@ public class AtlasifyResource {
         if(pa == null){
             wikibrainSRinit();
         }
+        System.out.println("REQUESTED POI " + keyword);
+
 
         Map<String, String> srMap = new HashMap<String, String>();
         if (useNorthWesternAPI) {
@@ -525,6 +527,7 @@ public class AtlasifyResource {
 
             }
         }
+        System.out.println("GOT POI " + geometryMap.toString());
         return Response.ok(new JSONObject(geometryMap).toString()).build();
     }
 
