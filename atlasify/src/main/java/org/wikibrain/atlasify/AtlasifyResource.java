@@ -149,10 +149,16 @@ public class AtlasifyResource {
         int length = jsonArray.length();
 
         for (int i = 0; i < length; i++) {
-            JSONObject pageSRPair = jsonArray.getJSONObject(i);
-            LocalId page = new LocalId(language, pageSRPair.getInt("wikiPageId"));
-            Double sr = new Double(pageSRPair.getDouble("srMeasure"));
-            result.put(page, sr);
+            try{
+                JSONObject pageSRPair = jsonArray.getJSONObject(i);
+                LocalId page = new LocalId(language, pageSRPair.getInt("wikiPageId"));
+                Double sr = new Double(pageSRPair.getDouble("srMeasure"));
+                result.put(page, sr);
+            }
+            catch (Exception e){
+                continue;
+            }
+
         }
 
         return result;
@@ -247,7 +253,7 @@ public class AtlasifyResource {
                 }
             }
             catch (Exception e) {
-                System.out.println("Error when connecting to Northwestern Server");
+                System.out.println("Error when connecting to Northwestern Server " + e.getStackTrace());
                 // do nothing
 
             }
