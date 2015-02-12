@@ -479,7 +479,7 @@ public class AtlasifyResource {
 
     }
 //return the list of all spatial objects in the top 100 most realted articles
-    @POST
+    @GET
     @Path("/getpoi/id={keyword}")
     @Consumes("text/plain")
     @Produces("text/plain")
