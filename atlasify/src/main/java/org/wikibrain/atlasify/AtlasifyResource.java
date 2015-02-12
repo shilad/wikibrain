@@ -493,7 +493,6 @@ public class AtlasifyResource {
 
 
         Map<String, String> srMap = new HashMap<String, String>();
-        if (useNorthWesternAPI) {
             LocalId queryID = new LocalId(lang, 0);
             try{
                 queryID = wikibrainPhaseResolution(keyword);
@@ -503,13 +502,13 @@ public class AtlasifyResource {
                 return Response.ok(new JSONObject(srMap).toString()).build();
             }
             // LocalId queryID = new LocalId(Language.EN, 19908980);
-            Map<String, Geometry> geometryMap = new HashMap<String, Geometry>();
+            Map<String, Geometry> resultMap = new HashMap<String, Geometry>();
             try {
                 Map<LocalId, Double> srValues = accessNorthwesternAPI(queryID, 100);
                 for(Map.Entry<LocalId, Double> e : srValues.entrySet()){
                     if(geometryMap.containsKey(e.getKey().getId())){
                         try {
-                            geometryMap.put(upDao.getById(e.getKey().getId()).getBestEnglishTitle(lpDao, true).getCanonicalTitle(), geometryMap.get(e.getKey().getId()));
+                            resultMap.put(upDao.getById(e.getKey().getId()).getBestEnglishTitle(lpDao, true).getCanonicalTitle(), geometryMap.get(e.getKey().getId()));
                         }
                         catch (Exception e1){
                             continue;
@@ -527,9 +526,9 @@ public class AtlasifyResource {
                 // do nothing
 
             }
-        }
-        System.out.println("GOT POI " + geometryMap.size());
-        return Response.ok(new JSONObject(geometryMap).toString()).build();
+
+        System.out.println("GOT POI " + resultMap.size());
+        return Response.ok(new JSONObject(resultMap).toString()).build();
     }
 
 }
