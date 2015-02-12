@@ -154,6 +154,7 @@ public class AtlasifyResource {
         else{
             url = "http://downey-n2.cs.northwestern.edu:8080/wikisr/sr/sID/" + id.getId() + "/langID/" + language.getId()+ "/top/" + topN.toString();
         }
+        System.out.println("NU QUERY " + url);
         InputStream inputStream = new URL(url).openStream();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
@@ -527,7 +528,7 @@ public class AtlasifyResource {
 
             }
         }
-        System.out.println("GOT POI " + geometryMap.toString());
+        System.out.println("GOT POI " + geometryMap.size());
         return Response.ok(new JSONObject(geometryMap).toString()).build();
     }
 
