@@ -253,7 +253,8 @@ public class AtlasifyResource {
                 }
             }
             catch (Exception e) {
-                System.out.println("Error when connecting to Northwestern Server " + e.getStackTrace());
+                System.out.println("Error when connecting to Northwestern Server ");
+                e.printStackTrace();
                 // do nothing
 
             }
