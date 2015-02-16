@@ -1,4 +1,4 @@
-package org.wikibrain.cookbook.wikidata;
+package org.wikibrain.atlasify;
 
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -7,9 +7,11 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.model.Title;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.wikidata.WikidataDao;
+import org.wikibrain.wikidata.WikidataParser;
 
 import org.xml.sax.SAXException;
 
@@ -21,14 +23,19 @@ import java.util.ArrayList;
 
 /**
  * Created by Josh on 2/4/15.
+ * This class is designed to provide explanations using Wikidata
+ * It does provide a simple SR metric which will be 0.0 when there
+ * are no explanations and 1.0 where there are explanations.
  */
 
 public class WikidataExplanationsTest {
+    static private LocalPageDao lpDao;
+    static private WikidataDao wdDao;
     public static void main(String args[]) throws ConfigurationException, DaoException, ParserConfigurationException, SAXException, IOException {
         Env env = new EnvBuilder().build();
         Configurator conf = env.getConfigurator();
-        LocalPageDao lpDao = conf.get(LocalPageDao.class);
-        WikidataDao wdDao = conf.get(WikidataDao.class);
+        lpDao = conf.get(LocalPageDao.class);
+        wdDao = conf.get(WikidataDao.class);
         Language simple = Language.getByLangCode("simple");
         
         HashMap parameters = new HashMap();
@@ -37,13 +44,15 @@ public class WikidataExplanationsTest {
 
         metric = new WikidataMetric("wikidata", Language.SIMPLE, lpDao, dis, wdDao);
 
-        addExplanations("Chocolate", "Food");
-        addExplanations("Minnesota", "United States");
-        addExplanations("Water", "Chemical compound");
-        addExplanations("Water", "Oxygen");
-        addExplanations("Water", "Hydrogen");
-        addExplanations("TV", "United States");
+        addExplanations("Minnesota", "Canada");
         addExplanations("Mexico", "United States");
+        addExplanations("Minnesota", "United States");
+
+        addExplanations("University of Minnesota", "Minnesota");
+
+        addExplanations("Benjamin Franklin", "Massachusetts");
+        addExplanations("Michael Jackson", "California");
+        addExplanations("Michael Jackson", "Indiana");
 
         printExplanations();
     }
@@ -52,7 +61,13 @@ public class WikidataExplanationsTest {
     static private WikidataMetric metric;
 
     private static void addExplanations(String itemOne, String itemTwo) throws DaoException {
-        explanations.addAll(metric.similarity(itemOne, itemTwo, true).getExplanations());
+        try {
+            int page1 = lpDao.getIdByTitle(new Title(itemOne, Language.SIMPLE));
+            int page2 = lpDao.getIdByTitle(new Title(itemTwo, Language.SIMPLE));
+            explanations.addAll(metric.similarity(page1, page2, true).getExplanations());
+        } catch (Exception e) {
+            explanations.addAll(metric.similarity(itemOne, itemTwo, true).getExplanations());
+        }
     }
 
     private static void printExplanations() {

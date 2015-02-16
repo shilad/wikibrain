@@ -1,4 +1,4 @@
-package org.wikibrain.cookbook.wikidata;
+package org.wikibrain.atlasify;
 
 import gnu.trove.set.TIntSet;
 import org.jooq.util.derby.sys.Sys;
@@ -26,6 +26,8 @@ import org.apache.commons.lang.WordUtils;
 import java.io.IOException;
 import java.util.*;
 
+import org.wikibrain.wikidata.WikidataEntity;
+import org.wikibrain.wikidata.WikidataValue;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 import sun.rmi.runtime.Log;
@@ -40,7 +42,9 @@ import org.w3c.dom.*;
 public class WikidataMetric extends BaseSRMetric {
     private WikidataDao wdDao;
     private String defaultExplanation;
+    // These maps keep track of various property ids and their corresponding explanation
     private Map<Integer, String> explanations;
+    private Map<Integer, String> media;
 
     public WikidataMetric(String name, Language language, LocalPageDao pageHelper, Disambiguator disambiguator, WikidataDao wikidataDao) throws ConfigurationException, ParserConfigurationException, SAXException, IOException {
         super(name,language, pageHelper, disambiguator);
@@ -52,18 +56,27 @@ public class WikidataMetric extends BaseSRMetric {
         org.w3c.dom.Element xml = dom.getDocumentElement();
 
         explanations = new HashMap<Integer, String>();
+        media = new HashMap<Integer, String>();
 
         NodeList list = xml.getElementsByTagName("Phrase");
         for (int i = 0; i < list.getLength(); i++) {
             org.w3c.dom.Element phrase = (org.w3c.dom.Element) list.item(i);
 
             String id = phrase.getElementsByTagName("ID").item(0).getFirstChild().getNodeValue();
-            String text = phrase.getElementsByTagName("Text").item(0).getFirstChild().getNodeValue();
-            if (id.equals("default")) {
-                defaultExplanation = text;
-            } else {
+
+            Node mediaList;
+            if ((mediaList = phrase.getElementsByTagName("Media").item(0)) != null) {
+                String mediaType = mediaList.getFirstChild().getNodeValue();
                 Integer intID = Integer.parseInt(id);
-                explanations.put(intID, text);
+                media.put(intID, mediaType);
+            } else {
+                String text = phrase.getElementsByTagName("Text").item(0).getFirstChild().getNodeValue();
+                if (id.equals("default")) {
+                    defaultExplanation = text;
+                } else {
+                    Integer intID = Integer.parseInt(id);
+                    explanations.put(intID, text);
+                }
             }
         }
     }
@@ -93,7 +106,13 @@ public class WikidataMetric extends BaseSRMetric {
         result.setScore(0.0);
 
         for (String property : statements.keySet()) {
-            for (LocalWikidataStatement lws : statements.get(property)) {
+            List<LocalWikidataStatement> localStatements = statements.get(property);
+            for (LocalWikidataStatement lws : localStatements) {
+                // Make sure that the item isn't an image, video, audio, etc
+                if (media.containsKey(lws.getStatement().getProperty().getId())) {
+                    continue;
+                }
+
                 if (lws.getValue().contains(compare.getTitle().getCanonicalTitle())) {
                     result.setScore(1.0);
 
@@ -106,14 +125,64 @@ public class WikidataMetric extends BaseSRMetric {
                         int id = lws.getStatement().getProperty().getId();
                         String format = getExplanationFormat(id);
                         info.add(WordUtils.capitalize(page.getTitle().getCanonicalTitle()));
-                        info.add(WordUtils.capitalize(compare.getTitle().getCanonicalTitle()));
+                        info.add(WordUtils.capitalize(lws.getValue())); //compare.getTitle().getCanonicalTitle()));
                         info.add(WordUtils.capitalize(lws.getProperty()));
 
 
                         explanation.setFormat(format);
                         explanation.setInformation(info);
 
-                        result.addExplanation(explanation);
+                        // Make sure a similar explanation isn't already stored
+                        boolean similarExplanation = false;
+                        for (Explanation storedExplan : result.getExplanations()) {
+                            if (storedExplan.equals(explanation)) {
+                                similarExplanation = true;
+                                break;
+                            }
+                        }
+                        if (!similarExplanation)
+                            result.addExplanation(explanation);
+                    }
+                } else {
+                    try {
+                        // This is a hacky way to search for spatial relationships to states or counties
+                        Language lang = lws.getLang(); // lws.getLang
+                        int cityPageId = lws.getStatement().getValue().getIntValue();
+                        Map<String, List<LocalWikidataStatement>> cityStatements = wdDao.getLocalStatements(lang, WikidataEntity.Type.ITEM, cityPageId);
+
+                        LocalWikidataStatement citylws = cityStatements.get("Commons category").get(0);
+                        if (citylws != null && citylws.getStatement().getValue().getStringValue().contains(compare.getTitle().getCanonicalTitle())) {
+                            // Found the state in the title, we can create an explanation
+                            result.setScore(1.0);
+
+                            if (explanations) {
+                                Explanation explanation = new Explanation("");
+
+                                ArrayList info = new ArrayList();
+
+                                int id = lws.getStatement().getProperty().getId();
+                                String format = getExplanationFormat(id);
+                                info.add(WordUtils.capitalize(page.getTitle().getCanonicalTitle()));
+                                info.add(WordUtils.capitalize(citylws.getValue()));
+                                info.add(WordUtils.capitalize(lws.getProperty()));
+
+                                explanation.setFormat(format);
+                                explanation.setInformation(info);
+
+                                // Make sure a similar explanation isn't already stored
+                                boolean similarExplanation = false;
+                                for (Explanation storedExplan : result.getExplanations()) {
+                                    if (storedExplan.equals(explanation)) {
+                                        similarExplanation = true;
+                                        break;
+                                    }
+                                }
+                                if (!similarExplanation)
+                                    result.addExplanation(explanation);
+                            }
+                        }
+                    } catch (Exception e) {
+                        // It isn't a city
                     }
                 }
             }
