@@ -1,28 +1,37 @@
 package org.wikibrain.sr.phrasesim;
 
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.TLongSet;
 import org.mapdb.HTreeMap;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.StringNormalizer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.wikibrain.sr.SRResult;
+import org.wikibrain.sr.SRResultList;
+import org.wikibrain.sr.utils.Leaderboard;
 
 /**
  * @author Shilad Sen
  */
 public class KnownPhraseSim {
+    private static final Logger LOGGER = Logger.getLogger(KnownPhraseSim.class.getName());
+
     private final StringNormalizer normalizer;
     private final HTreeMap<Object, Object> db;
     private final SimplePhraseCreator creator;
     private ConcurrentHashMap<String, KnownPhrase> byPhrase;
-    private ConcurrentHashMap<Long, KnownPhrase> byId;
+    private ConcurrentHashMap<Integer, KnownPhrase> byId;
     private DB phraseDb;
 
     public KnownPhraseSim(SimplePhraseCreator creator, File dir, StringNormalizer normalizer) {
@@ -40,12 +49,12 @@ public class KnownPhraseSim {
     }
 
     private void readPhrases() {
-        byId = new ConcurrentHashMap<Long, KnownPhrase>();
+        byId = new ConcurrentHashMap<Integer, KnownPhrase>();
         byPhrase = new ConcurrentHashMap<String, KnownPhrase>();
         for (Map.Entry entry : db.entrySet()) {
             String key = (String) entry.getKey();
             KnownPhrase val = (KnownPhrase) entry.getValue();
-            if (entry.getKey().equals(val.getNormalizedPhrase())) {
+            if (!key.equals(val.getNormalizedPhrase())) {
                 throw new IllegalStateException();
             }
             byId.put(val.getId(), val);
@@ -56,7 +65,8 @@ public class KnownPhraseSim {
         }
     }
 
-    public void addPhrase(String phrase, long id) {
+    public void addPhrase(String phrase, int id) {
+        LOGGER.info("adding " + phrase);
         KnownPhrase ifAbsent = new KnownPhrase(id, phrase, normalize(phrase));
         KnownPhrase old = byPhrase.putIfAbsent(ifAbsent.getNormalizedPhrase(), ifAbsent);
         if (old == null) {
@@ -70,14 +80,14 @@ public class KnownPhraseSim {
         }
     }
 
-    public String getPhrase(long id) {
+    public String getPhrase(int id) {
         if (byId.containsKey(id)) {
             return byId.get(id).getCanonicalVersion();
         }
         return null;
     }
 
-    public Long getId(String phrase) {
+    public Integer getId(String phrase) {
         KnownPhrase kp = byPhrase.get(normalize(phrase));
         if (kp == null) {
             return null;
@@ -90,24 +100,78 @@ public class KnownPhraseSim {
         return normalizer.normalize(Language.EN, phrase);
     }
 
-    public LinkedHashMap<String, Double> mostSimilar(String phrase, int maxResults) {
-        Long id = getId(phrase);
+    public SRResultList mostSimilar(String phrase, int maxResults, TIntSet candidateIds) {
+        Integer id = getId(phrase);
         if (id == null) {
             return null;
         } else {
-            return mostSimilar(id, maxResults);
+            return mostSimilar(id, maxResults, candidateIds);
         }
     }
 
-    public LinkedHashMap<String, Double> mostSimilar(long id, int maxResults) {
-        return null;
+    public SRResultList mostSimilar(String phrase, int maxResults) {
+        return mostSimilar(phrase, maxResults, null);
+    }
+
+    public SRResultList mostSimilar(int id, int maxResults, TIntSet candidateIds) {
+        KnownPhrase p = byId.get(id);
+        if (p == null) {
+            return null;
+        }
+        PhraseVector v1 = p.getVector();
+
+        final Leaderboard top = new Leaderboard(maxResults);
+        if (candidateIds != null) {
+            for (int id2 : candidateIds.toArray()) {
+                KnownPhrase p2 = byId.get(id2);
+                if (p2 != null) {
+                    top.tallyScore(id2, v1.cosineSim(p2.getVector()));
+                }
+            }
+        } else {
+            for (KnownPhrase p2 : byId.values()) {
+                top.tallyScore(p2.getId(), v1.cosineSim(p2.getVector()));
+            }
+        }
+        return top.getTop();
+    }
+
+    public SRResultList mostSimilar(int id, int maxResults) {
+        return mostSimilar(id, maxResults, null);
     }
 
     public double[][] phraseCosimilarity(List<String> rows, List<String> columns) {
-        return null;
+        List<Integer> rowIds = new ArrayList<Integer>();
+        for (String s : rows) {
+            rowIds.add(getId(s));
+        }
+        List<Integer> colIds = new ArrayList<Integer>();
+        for (String s : columns) {
+            colIds.add(getId(s));
+        }
+        return cosimilarity(rowIds, colIds);
     }
 
-    public double[][] cosimilarity(List<Long> rows, List<Long> columns) {
-        return null;
+    public double[][] cosimilarity(List<Integer> rows, List<Integer> columns) {
+        double cosims[][] = new double[rows.size()][columns.size()];
+        List<PhraseVector> colVectors = new ArrayList<PhraseVector>(columns.size());
+        for (int i = 0; i < columns.size(); i++) {
+            KnownPhrase kp = byId.get(columns.get(i));
+            colVectors.add(kp == null ? null : kp.getVector());
+        }
+        for (int i = 0; i < rows.size(); i++) {
+            KnownPhrase kp = byId.get(columns.get(i));
+            if (kp == null) {
+                continue;   // leave sims as their default value of 0.0
+            }
+            PhraseVector v1 = kp.getVector();
+            for (int j = 0; j < columns.size(); j++) {
+                PhraseVector v2 = colVectors.get(j);
+                if (v2 != null) {
+                    cosims[i][j] = v1.cosineSim(v2);
+                }
+            }
+        }
+        return cosims;
     }
 }

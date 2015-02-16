@@ -22,7 +22,6 @@ public class PhraseVector implements Serializable {
         }
     }
 
-
     public PhraseVector(TIntFloatMap map) {
         this.ids = new long[map.size()];
         int i = 0;
@@ -45,11 +44,40 @@ public class PhraseVector implements Serializable {
         return Arrays.equals(ids, that.ids) && Arrays.equals(vals, that.vals);
     }
 
-    public static int sign(final float x) {
-        return (x == 0.0f) ? 0 : (x > 0.0f) ? 1 : -1;
-    }
+    public double cosineSim(PhraseVector that) {
+        int n1 = this.ids.length;
+        int n2 = that.ids.length;
 
-    public static int sign(final long x) {
-        return (x == 0L) ? 0 : (x > 0L) ? 1 : -1;
+        double xDotX = 0.0;
+        double xDotY = 0.0;
+        double yDotY = 0.0;
+        int i = 0;
+        int j = 0;
+        while (i < n1 || j < n2) {
+            if (i >= n1) {
+                yDotY += that.vals[j] * that.vals[j];
+                j++;
+            } else if (j >= n2) {
+                xDotX += this.vals[i] * this.vals[i];
+                i++;
+            } else if (this.ids[i] < that.ids[j]) {
+                xDotX += this.vals[i] * this.vals[i];
+                i++;
+            } else if (this.ids[i] > that.ids[j]) {
+                yDotY += that.vals[j] * that.vals[j];
+                j++;
+            } else {
+                xDotX += this.vals[i] * this.vals[i];
+                yDotY += that.vals[j] * that.vals[j];
+                xDotY += this.vals[i] * that.vals[j];
+                i++;
+                j++;
+            }
+        }
+        if (xDotX == 0.0 || yDotY == 0.0) {
+            return 0.0;
+        } else {
+            return xDotY / Math.sqrt(xDotX * yDotY);
+        }
     }
 }

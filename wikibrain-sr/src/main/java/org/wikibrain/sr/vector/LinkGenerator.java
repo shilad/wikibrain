@@ -176,7 +176,6 @@ public class LinkGenerator implements VectorGenerator {
         if (top.numDocs() == 0) {
             return Arrays.asList(new Explanation("? and ? share no links", page1, page2));
         }
-        top.sortDescending();
 
         List<Explanation> explanations = new ArrayList<Explanation>();
         for (int i = 0; i < top.numDocs(); i++) {

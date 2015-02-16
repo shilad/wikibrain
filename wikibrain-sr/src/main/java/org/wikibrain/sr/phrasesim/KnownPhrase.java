@@ -7,12 +7,12 @@ import java.util.*;
  * @author Shilad Sen
  */
 public class KnownPhrase implements Serializable {
-    private final long id;
+    private final int id;
     private final String normalizedPhrase;
     private final Map<String, Integer> versions;
     private PhraseVector vector;
 
-    public KnownPhrase(long id, String phrase, String normalizedPhrase) {
+    public KnownPhrase(int id, String phrase, String normalizedPhrase) {
         this.id = id;
         this.normalizedPhrase = normalizedPhrase;
         this.versions = new HashMap<String, Integer>();
@@ -44,7 +44,7 @@ public class KnownPhrase implements Serializable {
         this.vector = vector;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -86,9 +86,5 @@ public class KnownPhrase implements Serializable {
         if (!versions.equals(that.versions)) return false;
 
         return true;
-    }
-
-    public static int sign(final long x) {
-        return (x == 0L) ? 0 : (x > 0L) ? 1 : -1;
     }
 }
