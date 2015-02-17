@@ -27,11 +27,13 @@ public class KnownPhraseSim {
     private final StringNormalizer normalizer;
     private final HTreeMap<Object, Object> db;
     private final PhraseCreator creator;
+    private final Language language;
     private ConcurrentHashMap<String, KnownPhrase> byPhrase;
     private ConcurrentHashMap<Integer, KnownPhrase> byId;
     private DB phraseDb;
 
-    public KnownPhraseSim(PhraseCreator creator, File dir, StringNormalizer normalizer) {
+    public KnownPhraseSim(Language language, PhraseCreator creator, File dir, StringNormalizer normalizer) {
+        this.language = language;
         this.creator = creator;
         this.normalizer = normalizer;
         this.phraseDb = DBMaker
@@ -97,7 +99,7 @@ public class KnownPhraseSim {
     }
 
     public String normalize(String phrase) {
-        return normalizer.normalize(Language.EN, phrase);
+        return normalizer.normalize(language, phrase);
     }
 
     public SRResultList mostSimilar(String phrase, int maxResults, TIntSet candidateIds) {

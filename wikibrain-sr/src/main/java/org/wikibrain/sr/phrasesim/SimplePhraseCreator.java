@@ -23,19 +23,7 @@ public class SimplePhraseCreator implements PhraseCreator {
 
     @Override
     public TLongFloatMap getVector(String phrase) {
-        // try using phrase generator directly
-        try {
-            return PhraseUtils.intMap2FloatMap(metric.getGenerator().getVector(phrase));
-        } catch (UnsupportedOperationException e) {
-            // try using other methods
-        }
-        try {
-            LocalId best =  metric.getDisambiguator().disambiguateTop(new LocalString(Language.EN, phrase), null);
-            return PhraseUtils.intMap2FloatMap(metric.getPageVector(best.getId()));
-        } catch (DaoException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return PhraseUtils.intMap2FloatMap(
+                PhraseUtils.getPhraseVector(metric, phrase));
     }
 }

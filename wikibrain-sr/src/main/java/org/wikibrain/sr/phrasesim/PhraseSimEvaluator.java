@@ -44,14 +44,20 @@ public class PhraseSimEvaluator {
     public void evaluate(final List<List<String>> bundles) throws ConfigurationException, IOException {
         System.out.println("processing " + bundles.size() + " bundles");
 
-        SRMetric metric = env.getConfigurator().get(SRMetric.class, "word2vec", "language", "simple");
+        VectorBasedSRMetric metrics[] = new VectorBasedSRMetric[4];
+        metrics[0] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "word2vec", "language", "simple");
+        metrics[1] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "ESA", "language", "simple");
+        metrics[2] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "outlink", "language", "simple");
+        metrics[3] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "inlink", "language", "simple");
+        double coefficients[] = new double[] { 0.25, 0.45, 0.12, 0.18 };
+
         StringNormalizer normalizer = env.getConfigurator().get(StringNormalizer.class, "simple");
-        PhraseCreator creator = new SimplePhraseCreator((VectorBasedSRMetric) metric);
+        PhraseCreator creator = new EnsemblePhraseCreator(metrics, coefficients);
         File dir = FileUtils.getFile(env.getBaseDir(), "dat/phrase-sim-test/");
         FileUtils.deleteQuietly(dir);
         dir.mkdirs();
 
-        final KnownPhraseSim sim = new KnownPhraseSim(creator, dir, normalizer);
+        final KnownPhraseSim sim = new KnownPhraseSim(env.getDefaultLanguage(), creator, dir, normalizer);
         final Map<String, Integer> ids = new ConcurrentHashMap<String, Integer>();
         ParallelForEach.loop(bundles, new Procedure<List<String>>() {
             @Override
