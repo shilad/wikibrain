@@ -33,6 +33,7 @@
         <module>./wikibrain-spatial</module>
         <module>./wikibrain-pageview</module>
         <module>./wikibrain</module>
+		<module>./atlasify</module>
     </modules>
 
     <licenses>

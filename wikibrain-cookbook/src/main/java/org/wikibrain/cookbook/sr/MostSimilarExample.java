@@ -22,7 +22,7 @@ public class MostSimilarExample {
         Env env = new EnvBuilder().envFromArgs(args);
         Configurator conf = env.getConfigurator();
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
-        Language simple = Language.getByLangCode("simple");
+        Language simple = Language.getByLangCode("en");
 
         // Retrieve the "ensemble" sr metric for simple english
         SRMetric sr = conf.get(
@@ -30,8 +30,8 @@ public class MostSimilarExample {
                 "language", simple.getLangCode());
 
         //Similarity between strings
-        for (String phrase : Arrays.asList("Barack Obama", "US", "Canada", "vim")) {
-            SRResultList similar = sr.mostSimilar(phrase, 3);
+        for (String phrase : Arrays.asList("Barack Obama", "US", "Canada", "vim", "University of Minnesota", "Dinkytown", "Marcy-Holmes, Minneapolis", "Minneapolis", "Bloomington, Minnesota", "Edina, Minnesota")) {
+            SRResultList similar = sr.mostSimilar(phrase, 10);
             List<String> pages = new ArrayList<String>();
             for (int i = 0; i < similar.numDocs(); i++) {
                 LocalPage page = lpDao.getById(simple, similar.getId(i));

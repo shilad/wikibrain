@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.wikibrainapi</groupId>
+        <artifactId>wikibrain-parent</artifactId>
+        <version>0.4.1</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>atlasify</artifactId>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-mapper</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-sr</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-wikidata</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-loader</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-parser</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-pageview</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-spatial</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.corba</groupId>
+            <artifactId>glassfish-corba-idlj</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.3</version>
+        </dependency>
+		<dependency>
+		    <groupId>javax.ws.rs</groupId>
+		    <artifactId>javax.ws.rs-api</artifactId>
+		    <version>2.0.1</version>
+		    <scope>provided</scope>
+		</dependency>
+		
+		
+		<dependency>
+		    <groupId>org.glassfish.jersey.core</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>2.13</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.glassfish.jersey.containers</groupId>
+		    <artifactId>jersey-container-grizzly2-http</artifactId>
+		    <version>2.13</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.glassfish.jersey.connectors</groupId>
+		    <artifactId>jersey-grizzly-connector</artifactId>
+		    <version>2.13</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+			<version>2.13</version>
+		</dependency>
+ 
+		
+		
+		
+	    <dependency>
+	        <groupId>org.glassfish.grizzly</groupId>
+	        <artifactId>grizzly-framework</artifactId>
+	        <version>2.3.6</version>
+	    </dependency>
+	    <dependency>
+	        <groupId>org.glassfish.grizzly</groupId>
+	        <artifactId>grizzly-http-server</artifactId>
+	        <version>2.3.6</version>
+	    </dependency>
+		<dependency>
+		    <groupId>org.glassfish.grizzly</groupId>
+		    <artifactId>grizzly-http-all</artifactId>
+		    <version>2.3.14</version>
+		</dependency>
+	<dependency>
+	<groupId>commons-codec</groupId>
+	<artifactId>commons-codec</artifactId>
+	<version>1.10</version>
+	</dependency>
+
+
+    </dependencies>
+
+    <repositories>
+
+        <repository>
+            <id>snapshot-repository.java.net</id>
+            <name>Java.net Snapshot Repository for Maven</name>
+            <url>https://maven.java.net/content/repositories/snapshots/</url>
+            <layout>default</layout>
+        </repository>
+
+    </repositories>
+
+
+
+</project>
+
