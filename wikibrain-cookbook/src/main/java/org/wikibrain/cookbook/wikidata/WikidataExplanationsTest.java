@@ -1,4 +1,4 @@
-package org.wikibrain.atlasify;
+package org.wikibrain.cookbook.wikidata;
 
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -10,8 +10,8 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.disambig.Disambiguator;
+import org.wikibrain.sr.wikidata.WikidataMetric;
 import org.wikibrain.wikidata.WikidataDao;
-import org.wikibrain.wikidata.WikidataParser;
 
 import org.xml.sax.SAXException;
 

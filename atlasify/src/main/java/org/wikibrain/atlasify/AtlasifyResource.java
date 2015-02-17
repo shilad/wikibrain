@@ -1,15 +1,11 @@
 package org.wikibrain.atlasify;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.google.gson.JsonParser;
 import com.vividsolutions.jts.geom.Geometry;
-import org.jooq.util.derby.sys.Sys;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
@@ -18,7 +14,6 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.LocalPage;
@@ -27,26 +22,16 @@ import org.wikibrain.phrases.PhraseAnalyzer;
 
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRMetric;
-import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.spatial.dao.SpatialDataDao;
-import org.wikibrain.sr.SRMetric;
-import org.wikibrain.sr.SRResult;
-import sun.net.www.content.text.plain;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
-import org.wikibrain.lucene.LuceneSearcher;
-import org.wikibrain.phrases.LucenePhraseAnalyzer;
 
-import org.wikibrain.atlasify.WikidataMetric;
-import org.wikibrain.wikidata.WikidataDao;
+import org.wikibrain.sr.wikidata.WikidataMetric;
 
-import java.awt.Color;
-import java.io.File;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
 import java.util.*;
 
 import java.net.URL;
@@ -55,17 +40,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
 import java.io.ByteArrayOutputStream;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.wikibrain.atlasify.WikidataMetric;
-
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.commons.codec.binary.Base64;
 
 // The Java class will be hosted at the URI path "/helloworld"
 @Path("/wikibrain")

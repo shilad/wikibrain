@@ -1,4 +1,4 @@
-package org.wikibrain.atlasify;
+package org.wikibrain.sr.wikidata;
 
 import gnu.trove.set.TIntSet;
 import org.jooq.util.derby.sys.Sys;
