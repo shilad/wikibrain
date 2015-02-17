@@ -1,6 +1,7 @@
 package org.wikibrain.sr.phrasesim;
 
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TLongFloatMap;
 import gnu.trove.map.hash.TLongFloatHashMap;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ public class PhraseVector implements Serializable {
     final long ids[];
     final float vals[];
 
-    public PhraseVector(TLongFloatHashMap map) {
+    public PhraseVector(TLongFloatMap map) {
         this.ids = map.keys();
         Arrays.sort(this.ids);
         vals = new float[ids.length];

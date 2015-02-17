@@ -1,6 +1,7 @@
 package org.wikibrain.sr.phrasesim;
 
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TLongFloatMap;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
@@ -13,23 +14,24 @@ import java.util.List;
 /**
  * @author Shilad Sen
  */
-public class SimplePhraseCreator {
+public class SimplePhraseCreator implements PhraseCreator {
     VectorBasedSRMetric metric;
 
     public SimplePhraseCreator(VectorBasedSRMetric metric) {
         this.metric = metric;
     }
 
-    public TIntFloatMap getVector(String phrase) {
+    @Override
+    public TLongFloatMap getVector(String phrase) {
         // try using phrase generator directly
         try {
-            return metric.getGenerator().getVector(phrase);
+            return PhraseUtils.intMap2FloatMap(metric.getGenerator().getVector(phrase));
         } catch (UnsupportedOperationException e) {
             // try using other methods
         }
         try {
             LocalId best =  metric.getDisambiguator().disambiguateTop(new LocalString(Language.EN, phrase), null);
-            return metric.getPageVector(best.getId());
+            return PhraseUtils.intMap2FloatMap(metric.getPageVector(best.getId()));
         } catch (DaoException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

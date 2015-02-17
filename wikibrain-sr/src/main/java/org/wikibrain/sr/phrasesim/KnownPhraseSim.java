@@ -1,25 +1,22 @@
 package org.wikibrain.sr.phrasesim;
 
 import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.TLongFloatMap;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.TLongSet;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.StringNormalizer;
+import org.wikibrain.sr.SRResultList;
+import org.wikibrain.sr.utils.Leaderboard;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.wikibrain.sr.SRResult;
-import org.wikibrain.sr.SRResultList;
-import org.wikibrain.sr.utils.Leaderboard;
 
 /**
  * @author Shilad Sen
@@ -29,12 +26,12 @@ public class KnownPhraseSim {
 
     private final StringNormalizer normalizer;
     private final HTreeMap<Object, Object> db;
-    private final SimplePhraseCreator creator;
+    private final PhraseCreator creator;
     private ConcurrentHashMap<String, KnownPhrase> byPhrase;
     private ConcurrentHashMap<Integer, KnownPhrase> byId;
     private DB phraseDb;
 
-    public KnownPhraseSim(SimplePhraseCreator creator, File dir, StringNormalizer normalizer) {
+    public KnownPhraseSim(PhraseCreator creator, File dir, StringNormalizer normalizer) {
         this.creator = creator;
         this.normalizer = normalizer;
         this.phraseDb = DBMaker
@@ -66,11 +63,14 @@ public class KnownPhraseSim {
     }
 
     public void addPhrase(String phrase, int id) {
-        LOGGER.info("adding " + phrase);
+//        LOGGER.info("adding " + phrase);
         KnownPhrase ifAbsent = new KnownPhrase(id, phrase, normalize(phrase));
         KnownPhrase old = byPhrase.putIfAbsent(ifAbsent.getNormalizedPhrase(), ifAbsent);
         if (old == null) {
-            TIntFloatMap vector = creator.getVector(phrase);
+            TLongFloatMap vector = creator.getVector(phrase);
+            if (vector == null) {
+                return;
+            }
             ifAbsent.setVector(new PhraseVector(vector));
             byId.put(id, ifAbsent);
             db.put(ifAbsent.getNormalizedPhrase(), new KnownPhrase(ifAbsent));
