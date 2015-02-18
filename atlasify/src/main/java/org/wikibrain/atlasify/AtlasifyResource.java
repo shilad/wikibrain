@@ -4,6 +4,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.eclipse.jetty.util.ajax.JSON;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wikibrain.conf.Configurator;
@@ -26,20 +27,17 @@ import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.wikidata.WikidataDao;
 import org.wikibrain.spatial.dao.SpatialDataDao;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 
 import org.wikibrain.sr.wikidata.WikidataMetric;
 
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import java.net.URL;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-
-import java.io.ByteArrayOutputStream;
 
 // The Java class will be hosted at the URI path "/helloworld"
 @Path("/wikibrain")
@@ -470,13 +468,41 @@ public class AtlasifyResource {
             for (int i = 0; i < northwesternJSONArray.length(); i++) {
                 JSONObject northwesternJSON = northwesternJSONArray.getJSONObject(i);
                 JSONArray northwesternExplanations = northwesternJSON.getJSONArray("explanations");
+                double srval = northwesternJSON.getDouble("srval");
+                String title = northwesternJSON.getString("title");
 
                 for (int j = 0; j < northwesternExplanations.length(); j++) {
                     JSONObject northwesternExplanation = (JSONObject) northwesternExplanations.get(j);
 
                     String explanationString = northwesternExplanation.getString("content");
-                    if (explanationString.equals("") || containsExplanation(explanations, explanationString)) {
+                    // Load the complete content if content is unavailable
+                    if (explanationString.equals("")) {
+                        explanationString = northwesternExplanation.getString("completeContent");
+                    }
+                    // Make sure the string is still valid
+                    if (explanationString.equals("") || explanationString.contains("Category:") || containsExplanation(explanations, explanationString)) {
                         continue;
+                    }
+
+                    JSONArray keywordArray = new JSONArray();
+                    JSONArray featureArray = new JSONArray();
+                    try {
+                        keywordArray = northwesternExplanation.getJSONArray(keywordTitle.replace("_", " "));
+                    } catch (Exception e) {
+                        try {
+                            keywordArray = northwesternExplanation.getJSONArray(keywordTitle);
+                        } catch (Exception err) {
+
+                        }
+                    }
+                    try {
+                        featureArray = northwesternExplanation.getJSONArray(featureTitle.replace("_", " "));
+                    } catch (Exception e) {
+                        try {
+                            featureArray = northwesternExplanation.getJSONArray(featureTitle);
+                        } catch (Exception err) {
+
+                        }
                     }
 
                     JSONObject jsonExplanation = new JSONObject();
@@ -485,7 +511,11 @@ public class AtlasifyResource {
                     JSONObject data = new JSONObject();
                     data.put("algorithm", "northwestern");
                     data.put("keyword", keyword);
+                    data.put("keyword-data", keywordArray);
+                    data.put("feature-data", featureArray);
                     data.put("feature", feature);
+                    data.put("srval", srval);
+                    data.put("title", title);
                     jsonExplanation.put("data", data);
 
                     explanations.put(explanations.length(), jsonExplanation);
@@ -579,8 +609,42 @@ public class AtlasifyResource {
     @Path("/explanationsData")
     @Consumes("application/json")
 
-    public void processesExplanations(AtlasifyQuery query) throws DaoException {
+    public void processesExplanations(String json) throws DaoException {
+        JSONObject explanationsData = new JSONObject(json);
+        int id = explanationsData.getInt("id");
 
+        JSONArray data = explanationsData.getJSONArray("data");
+
+        // See if log file exists
+        String file = "explanation-logs/" + id + ".json";
+        File f = new File(file);
+        if (f.isFile()) {
+            // Write to the file
+            try {
+                String fileContents = new String(Files.readAllBytes(Paths.get(file)), Charset.defaultCharset());
+                JSONArray fileArray = new JSONArray(fileContents);
+                fileArray.put(fileArray.length(), data);
+
+                Writer writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(file), "utf-8"));
+                writer.write(fileArray.toString());
+                writer.close();
+            } catch (IOException e) {
+
+            }
+        } else {
+            // Create it
+            try {
+                JSONArray fileArray = new JSONArray();
+                fileArray.put(fileArray.length(), data);
+                Writer writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(file), "utf-8"));
+                writer.write(fileArray.toString());
+                writer.close();
+            } catch (IOException e) {
+
+            }
+        }
     }
 
 
