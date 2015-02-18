@@ -14,9 +14,11 @@ import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.StringNormalizer;
+import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.normalize.IdentityNormalizer;
 import org.wikibrain.sr.normalize.Normalizer;
+import org.wikibrain.sr.normalize.PercentileNormalizer;
 import org.wikibrain.sr.utils.Leaderboard;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -40,8 +43,9 @@ public class KnownPhraseSim {
     private final HTreeMap<Object, Object> db;
     private final PhraseCreator creator;
     private final Language language;
-    private final Normalizer scoreNormalizer = new IdentityNormalizer();
     private final File dir;
+
+    private Normalizer scoreNormalizer = new IdentityNormalizer();
 
     // Regular index
     private ConcurrentHashMap<String, KnownPhrase> byPhrase;
@@ -70,6 +74,11 @@ public class KnownPhraseSim {
         this.dir = dir;
         this.readPhrases();
         this.readCosimilarity();
+
+        File f = new File(dir, "scoreNormalizer.bin");
+        if (f.isFile()) {
+            scoreNormalizer = (Normalizer) WpIOUtils.readObjectFromFile(f);
+        }
     }
 
     private void readCosimilarity() throws IOException {
@@ -156,6 +165,22 @@ public class KnownPhraseSim {
         }
     }
 
+    public void fitScoreNormalizer() throws IOException {
+        List<Integer> ids = new ArrayList<Integer>(byId.keySet());
+        Random random = new Random();
+        Normalizer newNormalizer = new PercentileNormalizer();
+        for (int i = 0; i < 100; i++) {
+            int id = ids.get(random.nextInt(ids.size()));
+            for (SRResult r : mostSimilar(id, ids.size())) {
+                newNormalizer.observe(r.getScore());
+            }
+        }
+        newNormalizer.observationsFinished();
+        File f = new File(dir, "scoreNormalizer.bin");
+        WpIOUtils.writeObjectToFile(f, newNormalizer);
+        this.scoreNormalizer = newNormalizer;
+    }
+
     public String getPhrase(int id) {
         if (byId.containsKey(id)) {
             return byId.get(id).getCanonicalVersion();
@@ -194,16 +219,18 @@ public class KnownPhraseSim {
         if (p == null) {
             return null;
         }
-        if (cosim != null) {
-            return cosim.mostSimilar(id, maxResults, candidateIds);
-        }
-        PhraseVector v1 = p.getVector();
-        if (candidateIds != null && candidateIds.size() < 10) {
-            return mostSimilar(v1, maxResults, candidateIds);
+        SRResultList results;
+        if (cosim == null) {
+            PhraseVector v1 = p.getVector();
+            if (candidateIds != null && candidateIds.size() < 10) {
+                return mostSimilar(v1, maxResults, candidateIds);
+            } else {
+                return indexedMostSimilar(v1, maxResults, candidateIds);
+            }
         } else {
-            return mostSimilar(v1, maxResults, candidateIds);
-//            return indexedMostSimilar(v1, maxResults, candidateIds);
+            results = cosim.mostSimilar(id, maxResults, candidateIds);
         }
+        return scoreNormalizer.normalize(results);
     }
 
     private SRResultList indexedMostSimilar(PhraseVector v1, int maxResults, TIntSet candidateIds) {
@@ -291,10 +318,14 @@ public class KnownPhraseSim {
             for (int j = 0; j < columns.size(); j++) {
                 PhraseVector v2 = colVectors.get(j);
                 if (v2 != null) {
-                    cosims[i][j] = v1.cosineSim(v2);
+                    cosims[i][j] = scoreNormalizer.normalize(v1.cosineSim(v2));
                 }
             }
         }
         return cosims;
+    }
+
+    public Normalizer getScoreNormalizer() {
+        return scoreNormalizer;
     }
 }

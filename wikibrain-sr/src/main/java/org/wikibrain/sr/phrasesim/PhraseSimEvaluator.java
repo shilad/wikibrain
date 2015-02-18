@@ -42,13 +42,14 @@ public class PhraseSimEvaluator {
     }
 
     public void evaluate(final List<List<String>> bundles) throws ConfigurationException, IOException {
+        String lc = env.getDefaultLanguage().getLangCode();
         System.out.println("processing " + bundles.size() + " bundles");
 
         VectorBasedSRMetric metrics[] = new VectorBasedSRMetric[4];
-        metrics[0] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "word2vec", "language", "simple");
-        metrics[1] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "ESA", "language", "simple");
-        metrics[2] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "outlink", "language", "simple");
-        metrics[3] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "inlink", "language", "simple");
+        metrics[0] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "builtword2vec", "language", lc);
+        metrics[1] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "ESA", "language", lc);
+        metrics[2] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "outlink", "language", lc);
+        metrics[3] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "inlink", "language", lc);
         double coefficients[] = new double[] { 0.25, 0.45, 0.12, 0.18 };
 
         StringNormalizer normalizer = env.getConfigurator().get(StringNormalizer.class, "simple");
@@ -72,6 +73,9 @@ public class PhraseSimEvaluator {
                 }
             }
         });
+
+        sim.writeCosimilaritySnapshot();
+        sim.fitScoreNormalizer();
 
         int numSamples = 0;
         int numSampleHits = 0;
