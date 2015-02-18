@@ -80,6 +80,7 @@ public class PhraseSimEvaluator {
         int possible = 0;
         int numErrors = 0;
 
+        long before = System.currentTimeMillis();
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {
             // Select a random bundle
@@ -124,10 +125,12 @@ public class PhraseSimEvaluator {
                 numSampleHits++;
             }
         }
+        long after = System.currentTimeMillis();
 
         System.out.println("for " + bundles.size() + ", top " + k);
         System.out.println("Total samples: " + numSamples);
         System.out.println("Total errors: " + numErrors);
+        System.out.println("Total seconds: " + ((after - before) / 1000.0));
         System.out.println("Total samples with hits: " + numSampleHits);
         System.out.println("Total related items: " + numRecommended);
         System.out.println("Total related items with hits: " + numRecommendedHits);

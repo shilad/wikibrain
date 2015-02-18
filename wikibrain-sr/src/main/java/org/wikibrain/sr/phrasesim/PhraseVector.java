@@ -81,4 +81,12 @@ public class PhraseVector implements Serializable {
             return xDotY / Math.sqrt(xDotX * yDotY);
         }
     }
+
+    public double norm2() {
+        double sum2 = 0.0;
+        for (int i = 0; i < vals.length; i++) {
+            sum2 += vals[i] * vals[i];
+        }
+        return Math.sqrt(sum2);
+    }
 }

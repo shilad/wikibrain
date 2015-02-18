@@ -27,6 +27,9 @@ public class PhraseUtils {
         try {
             Language lang = metric.getLanguage();
             LocalId best =  metric.getDisambiguator().disambiguateTop(new LocalString(lang, phrase), null);
+            if (best == null) {
+                return null;
+            }
             return metric.getPageVector(best.getId());
         } catch (DaoException e) {
             throw new RuntimeException(e);
