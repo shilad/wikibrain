@@ -1,14 +1,12 @@
 package org.wikibrain.atlasify;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.google.gson.JsonParser;
 import com.vividsolutions.jts.geom.Geometry;
+import org.eclipse.jetty.util.ajax.JSON;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
@@ -17,39 +15,29 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.phrases.PhraseAnalyzer;
-import org.wikibrain.spatial.dao.SpatialDataDao;
-import org.wikibrain.sr.SRMetric;
-import org.wikibrain.sr.SRResult;
-import sun.net.www.content.text.plain;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import org.wikibrain.lucene.LuceneSearcher;
-import org.wikibrain.phrases.LucenePhraseAnalyzer;
 
-import java.awt.Color;
-import java.io.File;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
+import org.wikibrain.sr.Explanation;
+import org.wikibrain.sr.SRMetric;
+import org.wikibrain.sr.disambig.Disambiguator;
+import org.wikibrain.wikidata.WikidataDao;
+import org.wikibrain.spatial.dao.SpatialDataDao;
+
+import java.io.*;
+import java.net.MalformedURLException;
+
+import org.wikibrain.sr.wikidata.WikidataMetric;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import java.net.URL;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.commons.codec.binary.Base64;
 
 // The Java class will be hosted at the URI path "/helloworld"
 @Path("/wikibrain")
@@ -93,9 +81,11 @@ public class AtlasifyResource {
     private static SRMetric sr = null;
     private static PhraseAnalyzer pa = null;
     private static LocalPageDao lpDao = null;
-    private static Language lang = Language.getByLangCode("en");
+    private static Language lang = Language.getByLangCode("simple");
     private static LocalPageAutocompleteSqlDao lpaDao = null;
     private static LocalLinkDao llDao = null;
+    private static WikidataMetric wdMetric = null;
+    private static WikidataDao wdDao = null;
     private static SpatialDataDao sdDao = null;
     private static UniversalPageDao upDao = null;
     private static Map<Integer, Geometry> geometryMap = null;
@@ -110,17 +100,31 @@ public class AtlasifyResource {
             lpDao = conf.get(LocalPageDao.class);
             System.out.println("FINISHED LOADING LOCALPAGE DAO");
             lpaDao = conf.get(LocalPageAutocompleteSqlDao.class);
-			llDao = conf.get(LocalLinkDao.class);
+            llDao = conf.get(LocalLinkDao.class);
             System.out.println("FINISHED LOADING LOCALLINK DAO");
+
+            sr = conf.get(SRMetric.class, "ensemble", "language", lang.getLangCode());
+            System.out.println("FINISHED LOADING SR");
+
+            wdDao = conf.get(WikidataDao.class);
+            System.out.println("FINISHED LOADING WIKIDATA DAO");
+            HashMap parameters = new HashMap();
+            parameters.put("language", lang.getLangCode());
+            Disambiguator dis = conf.get(Disambiguator.class, "similarity", parameters);
+            wdMetric = new WikidataMetric("wikidata", lang, lpDao, dis, wdDao);
+            System.out.println("FINISHED LOADING WIKIDATA METRIC");
+
+            atlasifyLogger = new AtlasifyLogger("./log/AtlasifyLogin.csv", "./log/AtlasifyQuery.csv");
+            System.out.println("FINISHED LOADING LOGGER");
+            pa = conf.get(PhraseAnalyzer.class, "anchortext");
+            System.out.println("FINISHED LOADING PHRASE ANALYZER");
+
             sdDao = conf.get(SpatialDataDao.class);
             System.out.println("FINISHED LOADING SPATIALDATA DAO");
             upDao = conf.get(UniversalPageDao.class);
             System.out.println("FINISHED LOADING UNIVERSALPAGE DAO");
             geometryMap = sdDao.getAllGeometriesInLayer("wikidata");
             System.out.println("FINISHED LOADING GEOMETRYMAP");
-            atlasifyLogger = new AtlasifyLogger("./log/AtlasifyLogin.csv", "./log/AtlasifyQuery.csv");
-
-            pa = conf.get(PhraseAnalyzer.class, "anchortext");
             System.out.println("FINISHED LOADING WIKIBRAIN");
 
 
@@ -131,18 +135,20 @@ public class AtlasifyResource {
 
         } catch (Exception e) {
             System.out.println("Exception when initializing WikiBrain: "+e.getMessage());
-
         }
 
     }
 
     private static LocalId wikibrainPhaseResolution(String title) throws Exception {
-        Language language = lang;
+        /*Language language = lang;
         LinkedHashMap<LocalId, Float> resolution = pa.resolve(language, title, 1);
         for (LocalId p : resolution.keySet()) {
             return p;
         }
-        throw new Exception("failed to resolve");
+
+        throw new Exception("failed to resolve"); */
+
+        return new LocalId(lang, lpDao.getByTitle(lang, title).getLocalId());
     }
 
     private static Map<LocalId, Double> accessNorthwesternAPI(LocalId id, Integer topN) throws Exception {
@@ -179,7 +185,6 @@ public class AtlasifyResource {
             catch (Exception e){
                 continue;
             }
-
         }
 
         return result;
@@ -188,7 +193,7 @@ public class AtlasifyResource {
     @Path("/helloworld")
     @Produces("text/plain")
     public Response helloWorld() throws Exception{
-	return Response.ok("hello world").build();
+        return Response.ok("hello world").build();
     }
 
     // The Java method will process HTTP GET requests
@@ -209,16 +214,17 @@ public class AtlasifyResource {
         }
         return Response.ok(new JSONObject(srMap).toString()).header("Access-Control-Allow-Origin", "*").build();
     }
-/*
-    @POST
-    @Path("/send")
-    @Produces("text/plain")
-    public Response nullResponse () {
-        return Response.ok("success").build();
-    }
-*/
+    /*
+        @POST
+        @Path("/send")
+        @Produces("text/plain")
+        public Response nullResponse () {
+            return Response.ok("success").build();
+        }
+    */
 
-    static private boolean useNorthWesternAPI = true;
+    static private boolean useNorthWesternAPI = false;
+
 
     @POST
     @Path("/send")
@@ -362,66 +368,66 @@ public class AtlasifyResource {
         Map<String, String> autocompleteMap = new HashMap<String, String>();
         try {
             int i = 0;
-            /* Phrase Analyzer
-            LinkedHashMap<LocalId, Float> resolution = pa.resolve(language, query.getKeyword(), 100);
-            for (LocalId p : resolution.keySet()) {
-                org.wikibrain.core.model.LocalPage page = lpDao.getById(p);
-                autocompleteMap.put(i + "", page.getTitle().getCanonicalTitle());
-                i++;
-            } */
+                /* Phrase Analyzer
+                LinkedHashMap<LocalId, Float> resolution = pa.resolve(language, query.getKeyword(), 100);
+                for (LocalId p : resolution.keySet()) {
+                    org.wikibrain.core.model.LocalPage page = lpDao.getById(p);
+                    autocompleteMap.put(i + "", page.getTitle().getCanonicalTitle());
+                    i++;
+                } */
 
-            /* Page Titles that being/contain search term
+                /* Page Titles that being/contain search term */
             Title title = new Title(query.getKeyword(), language);
             List<LocalPage> similarPages = lpaDao.getBySimilarTitle(title, NameSpace.ARTICLE, llDao);
 
             for (LocalPage p : similarPages) {
                 autocompleteMap.put(i + "", p.getTitle().getCanonicalTitle());
                 i++;
-            } */
-
-            /* Bing */
-            String bingAccountKey = "Y+KqEsFSCzEzNB85dTXJXnWc7U4cSUduZsUJ3pKrQfs";
-            byte[] bingAccountKeyBytes = Base64.encodeBase64((bingAccountKey + ":" + bingAccountKey).getBytes());
-            String bingAccountKeyEncoded = new String(bingAccountKeyBytes);
-
-            String bingQuery = query.getKeyword();
-            URL bingQueryurl = new URL("https://api.datamarket.azure.com/Bing/SearchWeb/v1/Web?Query=%27"+java.net.URLEncoder.encode(bingQuery, "UTF-8")+"%20site%3Aen.wikipedia.org%27&$top=50&$format=json");
-
-            HttpURLConnection connection = (HttpURLConnection)bingQueryurl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Authorization", "Basic " + bingAccountKeyEncoded);
-            connection.setRequestProperty("Accept", "application/json");
-            BufferedReader br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
-
-            String output;
-            StringBuilder sb = new StringBuilder();
-            while ((output = br.readLine()) != null) {
-                sb.append(output);
             }
 
-            JSONObject bingResponse = new JSONObject(sb.toString());
-            bingResponse = bingResponse.getJSONObject("d");
-            JSONArray bingResponses = bingResponse.getJSONArray("results");
-            JSONObject response;
-            for (int j = 0; j < bingResponses.length() && i < 10; j++) {
-                response = bingResponses.getJSONObject(j);
-                URL url = new URL(response.getString("Url"));
-                String path = url.getPath();
-                String title = path.substring(path.lastIndexOf('/') + 1).replace('_', ' ');
-                LocalPage page = new LocalPage(language, 0, "");
-                for (LocalId p : pa.resolve(language, title, 1).keySet()) {
-                    page = lpDao.getById(p);
+                /* Bing */
+                /* String bingAccountKey = "Y+KqEsFSCzEzNB85dTXJXnWc7U4cSUduZsUJ3pKrQfs";
+                byte[] bingAccountKeyBytes = Base64.encodeBase64((bingAccountKey + ":" + bingAccountKey).getBytes());
+                String bingAccountKeyEncoded = new String(bingAccountKeyBytes);
+
+                String bingQuery = query.getKeyword();
+                URL bingQueryurl = new URL("https://api.datamarket.azure.com/Bing/SearchWeb/v1/Web?Query=%27"+java.net.URLEncoder.encode(bingQuery, "UTF-8")+"%20site%3Aen.wikipedia.org%27&$top=50&$format=json");
+
+                HttpURLConnection connection = (HttpURLConnection)bingQueryurl.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Authorization", "Basic " + bingAccountKeyEncoded);
+                connection.setRequestProperty("Accept", "application/json");
+                BufferedReader br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
+
+                String output;
+                StringBuilder sb = new StringBuilder();
+                while ((output = br.readLine()) != null) {
+                    sb.append(output);
                 }
-                if (page != null && !autocompleteMap.values().contains(page.getTitle().getCanonicalTitle())){
-                    autocompleteMap.put(i + "", page.getTitle().getCanonicalTitle());
-                    i++;
-                }
-            }
+
+                JSONObject bingResponse = new JSONObject(sb.toString());
+                bingResponse = bingResponse.getJSONObject("d");
+                JSONArray bingResponses = bingResponse.getJSONArray("results");
+                JSONObject response;
+                for (int j = 0; j < bingResponses.length() && i < 10; j++) {
+                    response = bingResponses.getJSONObject(j);
+                    URL url = new URL(response.getString("Url"));
+                    String path = url.getPath();
+                    String title = path.substring(path.lastIndexOf('/') + 1).replace('_', ' ');
+                    LocalPage page = new LocalPage(language, 0, "");
+                    for (LocalId p : pa.resolve(language, title, 1).keySet()) {
+                        page = lpDao.getById(p);
+                    }
+                    if (page != null && !autocompleteMap.values().contains(page.getTitle().getCanonicalTitle())){
+                        autocompleteMap.put(i + "", page.getTitle().getCanonicalTitle());
+                        i++;
+                    }
+                }*/
 
         } catch (Exception e) {
             autocompleteMap = new HashMap<String, String>();
         }
-	System.out.println("Get Auto Complete Result" + new JSONObject(autocompleteMap).toString());
+        System.out.println("Get Auto Complete Result" + new JSONObject(autocompleteMap).toString());
         return Response.ok(new JSONObject(autocompleteMap).toString()).build();
     }
 
@@ -432,106 +438,291 @@ public class AtlasifyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public Response handleExplanation(@PathParam("keyword") String keyword, @PathParam("feature") String feature) throws  DaoException, MalformedURLException, IOException, Exception{
+        if (lpDao == null) {
+            wikibrainSRinit();
+        }
+
+        JSONArray explanations = new JSONArray();
+
         System.out.println("Received query for explanation between " + keyword + " and " + feature);
         String keywordTitle;
         String featureTitle;
         try{
             keywordTitle = lpDao.getById(wikibrainPhaseResolution(keyword)).getTitle().getCanonicalTitle().replace(" ", "_");
             featureTitle = lpDao.getById(wikibrainPhaseResolution(feature)).getTitle().getCanonicalTitle().replace(" ", "_");
+
+            String url = "http://downey-n1.cs.northwestern.edu:3030/api?concept1=" + keywordTitle + "&concept2=" + featureTitle;
+
+            InputStream inputStream = new URL(url).openStream();
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
+            StringBuilder stringBuilder = new StringBuilder();
+            int currentChar;
+            while ((currentChar = bufferedReader.read()) != -1) {
+                stringBuilder.append((char) currentChar);
+            }
+            System.out.println("GOT REPLY\n" + stringBuilder.toString());
+
+            // Process the northwestern json
+            JSONArray northwesternJSONArray = new JSONArray(stringBuilder.toString());
+            for (int i = 0; i < northwesternJSONArray.length(); i++) {
+                JSONObject northwesternJSON = northwesternJSONArray.getJSONObject(i);
+                JSONArray northwesternExplanations = northwesternJSON.getJSONArray("explanations");
+                double srval = northwesternJSON.getDouble("srval");
+                String title = northwesternJSON.getString("title");
+
+                for (int j = 0; j < northwesternExplanations.length(); j++) {
+                    JSONObject northwesternExplanation = (JSONObject) northwesternExplanations.get(j);
+
+                    String explanationString = northwesternExplanation.getString("content");
+                    // Load the complete content if content is unavailable
+                    if (explanationString.equals("")) {
+                        explanationString = northwesternExplanation.getString("completeContent");
+                    }
+                    // Make sure the string is still valid
+                    if (explanationString.equals("") || explanationString.contains("Category:") || containsExplanation(explanations, explanationString)) {
+                        continue;
+                    }
+
+                    JSONArray keywordArray = new JSONArray();
+                    JSONArray featureArray = new JSONArray();
+                    try {
+                        keywordArray = northwesternExplanation.getJSONArray(keywordTitle.replace("_", " "));
+                    } catch (Exception e) {
+                        try {
+                            keywordArray = northwesternExplanation.getJSONArray(keywordTitle);
+                        } catch (Exception err) {
+
+                        }
+                    }
+                    try {
+                        featureArray = northwesternExplanation.getJSONArray(featureTitle.replace("_", " "));
+                    } catch (Exception e) {
+                        try {
+                            featureArray = northwesternExplanation.getJSONArray(featureTitle);
+                        } catch (Exception err) {
+
+                        }
+                    }
+
+                    JSONObject jsonExplanation = new JSONObject();
+                    jsonExplanation.put("explanation", explanationString);
+
+                    JSONObject data = new JSONObject();
+                    data.put("algorithm", "northwestern");
+                    data.put("keyword", keyword);
+                    data.put("keyword-data", keywordArray);
+                    data.put("feature-data", featureArray);
+                    data.put("feature", feature);
+                    data.put("srval", srval);
+                    data.put("title", title);
+                    jsonExplanation.put("data", data);
+
+                    explanations.put(explanations.length(), jsonExplanation);
+                }
+            }
         }
         catch (Exception e){
             System.out.println("Failed to resolve " + keyword + " and " + feature);
-            return Response.ok("").header("Access-Control-Allow-Origin", "*").build();
+            // return Response.ok("").header("Access-Control-Allow-Origin", "*").build();
         }
 
-        String url = "http://downey-n1.cs.northwestern.edu:3030/api?concept1=" + keywordTitle + "&concept2=" + featureTitle;
+        // Get Wikidata Explanations using the disambiguator
+        for (Explanation exp : wdMetric.similarity(keyword, feature, true).getExplanations()) {
+            String explanationString = String.format(exp.getFormat(), exp.getInformation().toArray());
+            if (containsExplanation(explanations, explanationString)) {
+                continue;
+            }
 
-        InputStream inputStream = new URL(url).openStream();
+            JSONObject jsonExplanation = new JSONObject();
+            jsonExplanation.put("explanation", explanationString);
 
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
-        StringBuilder stringBuilder = new StringBuilder();
-        int currentChar;
-        while ((currentChar = bufferedReader.read()) != -1) {
-            stringBuilder.append((char) currentChar);
+            JSONObject data = new JSONObject();
+            data.put("algorithm", "wikidata");
+            data.put("page-finder", "disambiguator");
+            data.put("keyword", keyword);
+            data.put("feature", feature);
+            jsonExplanation.put("data", data);
+
+            explanations.put(explanations.length(), jsonExplanation);
         }
-        System.out.println("GOT REPLY\n" + stringBuilder.toString());
-		/*
-        JSONObject jsonObject = new JSONObject(stringBuilder.toString());
-        JSONArray result = jsonObject.getJSONArray("result");
-        System.out.println("GOT RESULT\n" + result.toString());
-        String returnVal = "";
-        for(int i = 0; i < result.length(); i ++){
-            returnVal = returnVal.concat(result.getJSONObject(i).getString("title") + "\n\n");
-            System.out.println("GOT TITLE\n" + result.getJSONObject(i).getString("title") );
-            JSONArray resultForEach = result.getJSONObject(i).getJSONArray("explanations");
-            for(int j = 0; j < resultForEach.length(); j ++){
 
-                returnVal = returnVal.concat(resultForEach.getJSONObject(j).getString("content") + "\n");
-                System.out.println("GOT CONTENT\n" + result.getJSONObject(i).getString("title") );
+        // Get Wikidata Explanations using the LocalPageDao
+        int keywordID = lpDao.getIdByTitle(new Title(keyword, Language.SIMPLE));
+        int featureID = lpDao.getIdByTitle(new Title(feature, Language.SIMPLE));
+        for (Explanation exp : wdMetric.similarity(keywordID, featureID, true).getExplanations()) {
+            String explanationString = String.format(exp.getFormat(), exp.getInformation().toArray());
+            if (containsExplanation(explanations, explanationString)) {
+                continue;
+            }
+
+            JSONObject jsonExplanation = new JSONObject();
+            jsonExplanation.put("explanation", explanationString);
+
+            JSONObject data = new JSONObject();
+            data.put("algorithm", "wikidata");
+            data.put("page-finder", "local-page-dao");
+            data.put("keyword", keyword);
+            data.put("feature", feature);
+            jsonExplanation.put("data", data);
+
+            explanations.put(explanations.length(), jsonExplanation);
+        }
+
+        shuffleJSONArray(explanations);
+        JSONObject result = new JSONObject();
+        result.put("explanations", explanations);
+
+        System.out.println("REQUESTED explanation between " + keyword + " and " + feature + "\n\n" + explanations.toString());
+
+        return Response.ok(result.toString()).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    private Random randomSeedGenerator = new Random();
+    private void shuffleJSONArray(JSONArray array) {
+        int remainingItems = array.length() - 1;
+        Random rand = new Random(randomSeedGenerator.nextInt());
+        while (remainingItems > 0) {
+            int index = rand.nextInt(remainingItems);
+
+            // Swap index and the last item
+            Object object = array.getJSONObject(index);
+            array.put(index, array.get(remainingItems));
+            array.put(remainingItems, object);
+
+            remainingItems--;
+        }
+    }
+
+    private boolean containsExplanation(JSONArray array, String explanation) {
+        for (int i = 0; i < array.length(); i++) {
+            if (array.getJSONObject(i).get("explanation").equals(explanation)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // This method is used to progress the explanations information from Atlasify
+    @POST
+    @Path("/explanationsData")
+    @Consumes("application/json")
+
+    public void processesExplanations(String json) throws DaoException {
+        JSONObject explanationsData = new JSONObject(json);
+        int id = explanationsData.getInt("id");
+
+        JSONArray dataArray = explanationsData.getJSONArray("data");
+        JSONObject data = new JSONObject();
+        data.put("data", dataArray);
+        data.put("time", new Date().getTime());
+        data.put("id", id);
+
+        // See if log file exists
+        String file = "explanation-logs/" + id + ".json";
+        File f = new File(file);
+        if (f.isFile()) {
+            // Write to the file
+            try {
+                String fileContents = new String(Files.readAllBytes(Paths.get(file)), Charset.defaultCharset());
+                JSONArray fileArray = new JSONArray(fileContents);
+                fileArray.put(fileArray.length(), data);
+
+                Writer writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(file), "utf-8"));
+                writer.write(fileArray.toString());
+                writer.close();
+            } catch (IOException e) {
 
             }
-            returnVal = returnVal.concat("\n");
+        } else {
+            // Create it
+            try {
+                JSONArray fileArray = new JSONArray();
+                fileArray.put(fileArray.length(), data);
+                Writer writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(file), "utf-8"));
+                writer.write(fileArray.toString());
+                writer.close();
+            } catch (IOException e) {
+
+            }
         }
-        System.out.println("REQUESTED explanation between " + keywordTitle + " and " + featureTitle + "\n\n" + returnVal);
-        */
-        return Response.ok(stringBuilder.toString()).build();
-
-
-
     }
-//return the list of all spatial objects in the top 100 most realted articles
+
+
+    //return the list of all spatial objects in the top 100 most realted articles
     @GET
     @Path("/getpoi/id={keyword}")
     @Consumes("text/plain")
     @Produces("text/plain")
 
-    public Response getPOIs (@PathParam("keyword") String keyword) {
-        if(pa == null){
+    public Response getPOIs (@PathParam("keyword") String keyword){
+        if(pa==null){
             wikibrainSRinit();
         }
-        System.out.println("REQUESTED POI " + keyword);
+        System.out.println("REQUESTED POI "+keyword);
 
 
-        Map<String, String> srMap = new HashMap<String, String>();
-            LocalId queryID = new LocalId(lang, 0);
-            try{
-                queryID = wikibrainPhaseResolution(keyword);
-            }
-            catch (Exception e){
-                System.out.println("Failed to resolve keyword " + keyword);
-                return Response.ok(new JSONObject(srMap).toString()).build();
-            }
-            // LocalId queryID = new LocalId(Language.EN, 19908980);
-            Map<String, Geometry> resultMap = new HashMap<String, Geometry>();
-            try {
-                Map<LocalId, Double> srValues = accessNorthwesternAPI(queryID, 100);
-                for(Map.Entry<LocalId, Double> e : srValues.entrySet()){
-                    try{
-                        LocalPage localPage = lpDao.getById(e.getKey());
-                        int univId = upDao.getByLocalPage(localPage).getUnivId();
-                        if(geometryMap.containsKey(univId)){
-                            resultMap.put(localPage.getTitle().getCanonicalTitle(), geometryMap.get(univId));
-                        }
+        Map<String, String>srMap=new HashMap<String, String>();
+        LocalId queryID=new LocalId(lang,0);
+        try{
+            queryID=wikibrainPhaseResolution(keyword);
+        }
+        catch(Exception e){
+            System.out.println("Failed to resolve keyword "+keyword);
+            return Response.ok(new JSONObject(srMap).toString()).build();
+        }
+        // LocalId queryID = new LocalId(Language.EN, 19908980);
+        Map<String, Geometry>resultMap=new HashMap<String, Geometry>();
+        try{
+            Map<LocalId, Double>srValues=accessNorthwesternAPI(queryID,100);
+            for(Map.Entry<LocalId, Double>e:srValues.entrySet()){
+                try{
+                    LocalPage localPage=lpDao.getById(e.getKey());
+                    int univId=upDao.getByLocalPage(localPage).getUnivId();
+                    if(geometryMap.containsKey(univId)){
+                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId));
                     }
-                    catch (Exception e1){
-                        continue;
-                    }
-
-
-
-
+                }
+                catch(Exception e1){
+                    continue;
                 }
 
-            }
-            catch (Exception e) {
-                System.out.println("Error when connecting to Northwestern Server ");
-                e.printStackTrace();
-                // do nothing
 
             }
 
-        System.out.println("GOT POI " + resultMap.toString());
+        }
+        catch(Exception e){
+            System.out.println("Error when connecting to Northwestern Server ");
+            e.printStackTrace();
+            // do nothing
+
+        }
+
+        System.out.println("GOT POI "+resultMap.toString());
         return Response.ok(new JSONObject(resultMap).toString()).build();
+    }
+    // A logging method called by the god mode of Atlasify to check the status of the system
+    @POST
+    @Path("/status")
+    @Produces("application/json")
+
+    public Response getLog () throws DaoException{
+        ByteArrayOutputStream output = AtlasifyServer.logger;
+        String s = output.toString();
+
+        /* In order to support multiple god modes running the console
+         * output cannot be cleared. This functionality could change
+         * in the future if there are performance problems.
+         */
+        // output.reset();
+
+        Map<String, String> result = new HashMap<String, String>();
+        result.put("log", s);
+
+        return Response.ok(new JSONObject(result).toString()).build();
     }
 
 }

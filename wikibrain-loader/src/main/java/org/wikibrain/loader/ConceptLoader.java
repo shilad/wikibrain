@@ -98,6 +98,12 @@ public class ConceptLoader {
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("d"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("algorithm")
+                        .withDescription("algorithm")
+                        .create("n"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();

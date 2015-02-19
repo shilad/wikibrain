@@ -25,6 +25,12 @@ import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.ContainerResponse;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.URI;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
@@ -57,8 +63,15 @@ public class AtlasifyServer {
         return server;
     }
 
-
+    public static ByteArrayOutputStream logger = new ByteArrayOutputStream();
+    public static final boolean useLocalLogger = false;
     public static void main(String[] args) throws IOException {
+        if (useLocalLogger == false) {
+            PrintStream stdOut = System.out;
+            System.setOut(new OutputRedirector(logger, stdOut));
+            PrintStream stdErr = System.err;
+            System.setErr(new OutputRedirector(logger, stdErr));
+        }
 
         HttpServer server = startServer();
         System.out.println(String.format("Jersey app started with WADL available at "

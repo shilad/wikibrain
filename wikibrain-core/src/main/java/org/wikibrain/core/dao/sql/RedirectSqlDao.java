@@ -23,7 +23,8 @@ import java.util.Map;
 
 /**
  */
-public class RedirectSqlDao extends AbstractSqlDao<Redirect> implements RedirectDao {
+public class
+        RedirectSqlDao extends AbstractSqlDao<Redirect> implements RedirectDao {
 
     private static final TableField [] INSERT_FIELDS = new TableField[] {
             Tables.REDIRECT.LANG_ID,

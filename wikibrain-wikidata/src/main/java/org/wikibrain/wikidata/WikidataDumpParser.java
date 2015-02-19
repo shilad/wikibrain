@@ -1,13 +1,18 @@
 package org.wikibrain.wikidata;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.parser.DumpSplitter;
 import org.wikibrain.parser.xml.PageXmlParser;
+import org.wikibrain.utils.WpIOUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -21,9 +26,8 @@ public class WikidataDumpParser implements Iterable<WikidataEntity> {
     public static final Logger LOG = Logger.getLogger(DumpSplitter.class.getName());
 
     private final WikidataParser wdParser;
-    private final PageXmlParser xmlParser;
     private final LanguageSet languages;
-    private final DumpSplitter impl;
+    private final File file;
 
     public WikidataDumpParser(File file) {
         this(file, LanguageSet.ALL);
@@ -33,9 +37,8 @@ public class WikidataDumpParser implements Iterable<WikidataEntity> {
      * @param file
      */
     public WikidataDumpParser(File file, LanguageSet languages) {
+        this.file = file;
         this.languages = languages;
-        this.impl = new DumpSplitter(file);
-        this.xmlParser = new PageXmlParser(LanguageInfo.getByLanguage(Language.EN));
         this.wdParser = new WikidataParser();
     }
 
@@ -49,7 +52,11 @@ public class WikidataDumpParser implements Iterable<WikidataEntity> {
         private WikidataEntity buff;
 
         public IteratorImpl() {
-            this.iterImpl = impl.iterator();
+            try {
+                this.iterImpl = new LineIterator(WpIOUtils.openBufferedReader(file));
+            } catch (IOException e) {
+                throw new IllegalArgumentException(e);
+            }
         }
 
         @Override
@@ -66,20 +73,19 @@ public class WikidataDumpParser implements Iterable<WikidataEntity> {
             }
             // try to queue up the next article
             while (buff == null && iterImpl.hasNext()) {
+                String line = iterImpl.next();
+                if (line.trim().equals("[") || line.trim().equals("]")) {
+                    continue;
+                }
                 try {
-                    RawPage rp = xmlParser.parse(iterImpl.next());
-                    if (rp.getModel().equals("wikibase-item") || rp.getModel().equals("wikibase-property")) {
-                        buff = wdParser.parse(rp);
-                        if (!buff.prune(languages)) {
-                            buff = null;
-                        }
-                    } else if (Arrays.asList("wikitext", "css", "javascript").contains(rp.getModel())) {
-                        buff = null;
-                    } else {
-                        LOG.warning("unknown model: " + rp.getModel() + " in page " + rp.getTitle());
+                    if (line.endsWith(",")) {
+                        line = line.substring(0, line.length()-1);
+                    }
+                    if (!line.trim().isEmpty()) {
+                        buff = wdParser.parse(line);
                     }
                 } catch (Exception e) {
-                    LOG.log(Level.WARNING, "parsing of " + impl.getPath() + " failed:", e);
+                    LOG.log(Level.WARNING, "parsing of " + file + " failed for line '" + line  + "':", e);
                 }
             }
         }
