@@ -101,8 +101,9 @@ public class KnownPhraseSim {
         });
     }
 
-    public void writeCosimilaritySnapshot() throws IOException {
+    public void flushCache() throws IOException {
         WpIOUtils.writeObjectToFile(new File(dir, "cosimilarity.bin"), cosim);
+        db.getEngine().commit();
     }
 
     private void readPhrases() {
@@ -168,8 +169,10 @@ public class KnownPhraseSim {
     public void fitScoreNormalizer() throws IOException {
         List<Integer> ids = new ArrayList<Integer>(byId.keySet());
         Random random = new Random();
-        Normalizer newNormalizer = new PercentileNormalizer();
-        for (int i = 0; i < 100; i++) {
+        PercentileNormalizer newNormalizer = new PercentileNormalizer();
+        newNormalizer.setPower(10);
+        newNormalizer.setSampleSize(100000);
+        for (int i = 0; i < 1000; i++) {
             int id = ids.get(random.nextInt(ids.size()));
             for (SRResult r : mostSimilar(id, ids.size())) {
                 newNormalizer.observe(r.getScore());

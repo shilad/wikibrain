@@ -74,7 +74,7 @@ public class PhraseSimEvaluator {
             }
         });
 
-        sim.writeCosimilaritySnapshot();
+        sim.flushCache();
         sim.fitScoreNormalizer();
 
         int numSamples = 0;
@@ -109,7 +109,9 @@ public class PhraseSimEvaluator {
             }
             for (SRResult r : neighbors) {
                 if (r.getId() != targetId) {
-                    if (this.debug) line.append(sim.getPhrase(r.getId())).append(", ");
+                    if (this.debug) line.append(
+                            String.format("%s %.3f, ",
+                                    sim.getPhrase(r.getId()), r.getScore()));
                     if (bundleIds.contains(r.getId())) {
                         hasHit = true;
                         numRecommendedHits++;
