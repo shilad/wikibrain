@@ -613,7 +613,11 @@ public class AtlasifyResource {
         JSONObject explanationsData = new JSONObject(json);
         int id = explanationsData.getInt("id");
 
-        JSONArray data = explanationsData.getJSONArray("data");
+        JSONArray dataArray = explanationsData.getJSONArray("data");
+        JSONObject data = new JSONObject();
+        data.put("data", dataArray);
+        data.put("time", new Date().getTime());
+        data.put("id", id);
 
         // See if log file exists
         String file = "explanation-logs/" + id + ".json";
@@ -709,10 +713,10 @@ public class AtlasifyResource {
         ByteArrayOutputStream output = AtlasifyServer.logger;
         String s = output.toString();
 
-            /* In order to support multiple god modes running the console
-             * output cannot be cleared. This functionality could change
-             * in the future if there are performance problems.
-             */
+        /* In order to support multiple god modes running the console
+         * output cannot be cleared. This functionality could change
+         * in the future if there are performance problems.
+         */
         // output.reset();
 
         Map<String, String> result = new HashMap<String, String>();

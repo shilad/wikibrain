@@ -48,3 +48,6 @@ wb-java.sh
 customized.conf
 
 wb-java.sh.backup
+
+# Explanation Logs
+explanation-logs/
