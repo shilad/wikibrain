@@ -18,7 +18,7 @@ public class TestDatasetDao {
     @Test
     public void testInfos() throws DaoException {
         Collection<DatasetDao.Info> infos = DatasetDao.readInfos();
-        assertEquals(15, infos.size());
+        assertEquals(17, infos.size());
     }
 
     @Test

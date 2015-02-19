@@ -65,7 +65,7 @@ public class RequestedLinkGetter {
         List<Date> availableDate = new ArrayList<Date>();
         URL langWikiPageUrl = new URL(DumpLinkGetter.BASEURL_STRING + "/" + lang.getLangCode().replace("-", "_") + "wiki/");
         Document doc = Jsoup.parse(IOUtils.toString(langWikiPageUrl.openStream()));
-        Elements availableDates = doc.select("tbody").select("td.n").select("a[href]");
+        Elements availableDates = doc.select("body").select("pre").select("a[href]");
         for (Element element : availableDates) {
             Matcher dateMatcher = Pattern.compile("(\\d{8})/").matcher(element.attr("href"));
             while (dateMatcher.find()) {

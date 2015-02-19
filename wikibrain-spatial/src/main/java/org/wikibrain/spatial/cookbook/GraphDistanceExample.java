@@ -13,6 +13,7 @@ import org.wikibrain.spatial.constants.Precision;
 import org.wikibrain.spatial.dao.SpatialDataDao;
 import org.wikibrain.spatial.distance.GeodeticDistanceMetric;
 import org.wikibrain.spatial.distance.GraphDistanceMetric;
+import org.wikibrain.spatial.distance.SphericalDistanceMetric;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ public class GraphDistanceExample {
         LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
         UniversalPageDao conceptDao = env.getConfigurator().get(UniversalPageDao.class);
 
-        GeodeticDistanceMetric metric1 = new GeodeticDistanceMetric(spatialDao);
+        SphericalDistanceMetric metric1 = new SphericalDistanceMetric(spatialDao);
         metric1.enableCache(true);
         GraphDistanceMetric metric2 = new GraphDistanceMetric(spatialDao, metric1);
         metric2.enableCache(true);

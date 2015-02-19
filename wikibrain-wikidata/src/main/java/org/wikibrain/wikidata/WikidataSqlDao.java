@@ -59,6 +59,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     private FastLoader descLoader = null;
     private FastLoader aliasLoader = null;
     private Map<Integer, WikidataEntity> properties;
+    private WikidataParser parser = new WikidataParser();
 
     /**
      * @param dataSource      Data source for jdbc connections
@@ -249,7 +250,11 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                     .withEntityType(type)
                     .withEntityId(id)
                     .build();
-            entity.getStatements().addAll(IteratorUtils.toList(get(filter).iterator()));
+            for (WikidataStatement st : get(filter)) {
+                if (st != null) {
+                    entity.getStatements().add(st);
+                }
+            }
             return entity;
         } finally {
             freeJooq(jooq);
@@ -316,7 +321,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                 item.getItem().getType().code,
                 item.getItem().getId(),
                 item.getProperty().getId(),
-                item.getValue().getType().toString().toLowerCase(),
+                item.getValue().getTypeName().toLowerCase(),
                 encodeValue(item.getValue()),
                 item.getRank().ordinal()
         );
@@ -366,12 +371,12 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     @Override
     public LocalWikidataStatement getLocalStatement(Language language, WikidataStatement statement) throws DaoException {
         language = getRealLang(language );
-        String item = getLocalName(language, statement.getItem().getType(), statement.getItem().getId());
-        String prop = getLocalName(language, statement.getProperty().getType(), statement.getProperty().getId());
+        String item = getLabel(language, statement.getItem().getType(), statement.getItem().getId());
+        String prop = getLabel(language, statement.getProperty().getType(), statement.getProperty().getId());
         String value = null;
         WikidataValue wdv = statement.getValue();
         if (wdv.getType() == WikidataValue.Type.ITEM) {
-            value = getLocalName(language, WikidataEntity.Type.ITEM, wdv.getItemValue());
+            value = getLabel(language, WikidataEntity.Type.ITEM, wdv.getItemValue());
         } else if (wdv.getValue() == null) {
             value = "unknown";
         } else {
@@ -381,7 +386,8 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         return new LocalWikidataStatement(language, statement, full, item, prop, value);
     }
 
-    private String getLocalName(Language language, WikidataEntity.Type type, int id) throws DaoException {
+    @Override
+    public String getLabel(Language language, WikidataEntity.Type type, int id) throws DaoException {
         if (type == WikidataEntity.Type.PROPERTY) {
             WikidataEntity prop = getProperty(id);  // should be cached, fast
             if (prop.getLabels().isEmpty()) {
@@ -510,7 +516,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         }
         DSLContext jooq = getJooq();
         try {
-//            System.out.println("EXECUTING " + jooq.select().from(Tables.WIKIDATA_STATEMENT).where(conditions).getSQL());
+//            System.err.println("EXECUTING " + jooq.select().from(Tables.WIKIDATA_STATEMENT).where(conditions).getSQL());
             Cursor<Record> result = jooq.select().
                     from(Tables.WIKIDATA_STATEMENT).
                     where(conditions).fetchLazy(getFetchSize());
@@ -555,7 +561,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         JsonElement json = new JsonParser().parse(record.getValue(Tables.WIKIDATA_STATEMENT.VAL_STR));
         WikidataValue val;
         try {
-            val = JsonUtils.jsonToValue( record.getValue(Tables.WIKIDATA_STATEMENT.VAL_TYPE), json);
+            val = parser.jsonToValue( record.getValue(Tables.WIKIDATA_STATEMENT.VAL_TYPE), json);
         } catch (WpParseException e) {
             throw new DaoException(e);
         }

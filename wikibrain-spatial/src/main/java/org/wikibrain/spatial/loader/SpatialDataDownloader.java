@@ -79,7 +79,7 @@ public class SpatialDataDownloader {
         return dest;
     }
 
-    public WikiBrainShapeFile download(String refSysName, String layerGroup, String datasetName) throws InterruptedException, IOException {
+    public WikiBrainShapeFile download(String refSysName, String layerGroup, String datasetName, boolean mappingRequired) throws InterruptedException, IOException {
         if (config == null) {
             throw new IllegalArgumentException("To download by name, SpatialDataDownloader must have a configuration");
         }
@@ -92,8 +92,19 @@ public class SpatialDataDownloader {
                 datasetName,
                 c.getString("encoding")
         );
-        downloadMapping(new URL(c.getString("mappingUrl")), shapeFile);
+        if (mappingRequired) {
+            downloadMapping(new URL(c.getString("mappingUrl")), shapeFile);
+        } else {
+            try {
+                downloadMapping(new URL(c.getString("mappingUrl")), shapeFile);
+            } catch (Exception e) {
+            }
+        }
         return shapeFile;
+    }
+
+    public WikiBrainShapeFile download(String refSysName, String layerGroup, String datasetName) throws InterruptedException, IOException {
+        return download(refSysName, layerGroup, datasetName, true);
     }
 
     public void downloadMapping(URL mappingUrl, WikiBrainShapeFile shapeFile) throws IOException, InterruptedException {

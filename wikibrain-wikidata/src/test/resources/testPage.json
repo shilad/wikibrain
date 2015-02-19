@@ -1,1911 +1,3808 @@
-{
-    "label":{
-        "en":"Fran\u00e7ois Hollande",
-        "fr":"Fran\u00e7ois Hollande",
-        "ca":"Fran\u00e7ois Hollande",
-        "de":"Fran\u00e7ois Hollande",
-        "br":"Fran\u00e7ois Hollande",
-        "zh":"\u5f17\u6717\u7d22\u74e6\u00b7\u5965\u6717\u5fb7",
-        "it":"Fran\u00e7ois Hollande",
-        "ru":"\u041e\u043b\u043b\u0430\u043d\u0434, \u0424\u0440\u0430\u043d\u0441\u0443\u0430",
-        "es":"Fran\u00e7ois Hollande",
-        "nb":"Fran\u00e7ois Hollande",
-        "af":"Fran\u00e7ois Hollande",
-        "als":"Fran\u00e7ois Hollande",
-        "an":"Fran\u00e7ois Hollande",
-        "ar":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0623\u0648\u0644\u0627\u0646\u062f",
-        "arz":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
-        "az":"Fransua Olland",
-        "bcl":"Francois Hollande",
-        "be":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u0410\u043b\u0430\u043d\u0434",
-        "bg":"\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
-        "bn":"\u09ab\u09cd\u09b0\u09be\u0981\u09b8\u09cb\u09af\u09bc\u09be \u0993\u09b2\u09be\u0981\u09a6",
-        "bo":"\u0f67\u0fa5\u0f0b\u0f62\u0f53\u0f0b\u0f66\u0f74\u0f60\u0f71\u0f0b\u0f68\u0f7c\u0f0b\u0f63\u0f53\u0f0b\u0f51\u0f7a\u0f0d",
-        "bs":"Fran\u00e7ois Hollande",
-        "ckb":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0626\u06c6\u0644\u0627\u0646\u062f",
-        "co":"Fran\u00e7ois Hollande",
-        "cs":"Fran\u00e7ois Hollande",
-        "cy":"Fran\u00e7ois Hollande",
-        "da":"Fran\u00e7ois Hollande",
-        "de-ch":"Fran\u00e7ois Hollande",
-        "dsb":"Fran\u00e7ois Hollande",
-        "el":"\u03a6\u03c1\u03b1\u03bd\u03c3\u03bf\u03c5\u03ac \u039f\u03bb\u03bb\u03ac\u03bd\u03c4",
-        "en-ca":"Fran\u00e7ois Hollande",
-        "en-gb":"Fran\u00e7ois Hollande",
-        "eo":"Fran\u00e7ois Hollande",
-        "et":"Fran\u00e7ois Hollande",
-        "eu":"Fran\u00e7ois Hollande",
-        "ext":"Fran\u00e7ois Hollande",
-        "fa":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
-        "fi":"Fran\u00e7ois Hollande",
-        "fy":"Fran\u00e7ois Hollande",
-        "gd":"Fran\u00e7ois Hollande",
-        "gl":"Fran\u00e7ois Hollande",
-        "gv":"Fran\u00e7ois Hollande",
-        "he":"\u05e4\u05e8\u05e0\u05e1\u05d5\u05d0\u05d4 \u05d4\u05d5\u05dc\u05e0\u05d3",
-        "hr":"Fran\u00e7ois Hollande",
-        "hsb":"Fran\u00e7ois Hollande",
-        "hu":"Fran\u00e7ois Hollande",
-        "hy":"\u0556\u0580\u0561\u0576\u057d\u0578\u0582\u0561 \u0555\u056c\u0561\u0576\u0564",
-        "ia":"Fran\u00e7ois Hollande",
-        "id":"Fran\u00e7ois Hollande",
-        "ie":"Fran\u00e7ois Hollande",
-        "is":"Fran\u00e7ois Hollande",
-        "ja":"\u30d5\u30e9\u30f3\u30bd\u30ef\u30fb\u30aa\u30e9\u30f3\u30c9",
-        "jv":"Fran\u00e7ois Hollande",
-        "ka":"\u10e4\u10e0\u10d0\u10dc\u10e1\u10e3\u10d0 \u10dd\u10da\u10d0\u10dc\u10d3\u10d8",
-        "kg":"Fran\u00e7ois Hollande",
-        "kk":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
-        "kn":"\u0cab\u0ccd\u0cb0\u0cbe\u0c82\u0c95\u0ccb\u0caf\u0cbf\u0cb8\u0ccd \u0cb9\u0cbe\u0cb2\u0cc6\u0c82\u0ca1\u0ccd",
-        "ko":"\ud504\ub791\uc218\uc544 \uc62c\ub791\ub4dc",
-        "lad":"Fran\u00e7ois Hollande",
-        "la":"Franciscus Hollande",
-        "lb":"Fran\u00e7ois Hollande",
-        "lmo":"Fran\u00e7ois Hollande",
-        "lt":"Fran\u00e7ois Hollande",
-        "lv":"Fransu\u0101 Ollands",
-        "mk":"\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
-        "mr":"\u092b\u094d\u0930\u093e\u0902\u0938\u094d\u0935\u093e \u0911\u0932\u093e\u0902\u0926",
-        "ms":"Fran\u00e7ois Hollande",
-        "mwl":"Fran\u00e7ois Hollande",
-        "my":"\u1016\u101b\u1014\u103a\u1006\u103d\u102c \u101f\u1031\u102c\u103a\u101c\u1014\u103a",
-        "mzn":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
-        "nds":"Fran\u00e7ois Hollande",
-        "nl":"Fran\u00e7ois Hollande",
-        "nn":"Fran\u00e7ois Hollande",
-        "nrm":"Fran\u00e7ois Hollande",
-        "oc":"Fran\u00e7ois Hollande",
-        "pam":"Fran\u00e7ois Hollande",
-        "pl":"Fran\u00e7ois Hollande",
-        "pt":"Fran\u00e7ois Hollande",
-        "pt-br":"Fran\u00e7ois Hollande",
-        "qu":"Fran\u00e7ois Hollande",
-        "ro":"Fran\u00e7ois Hollande",
-        "scn":"Fran\u00e7ois Hollande",
-        "se":"Fran\u00e7ois Hollande",
-        "sh":"Fran\u00e7ois Hollande",
-        "sk":"Fran\u00e7ois Hollande",
-        "so":"Fran\u00e7ois Hollande",
-        "sq":"Fran\u00e7ois Hollande",
-        "sr":"\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
-        "sv":"Fran\u00e7ois Hollande",
-        "ta":"\u0baa\u0bbf\u0bb0\u0bbe\u0ba9\u0bcd\u0b9a\u0bc1\u0bb5\u0bbe \u0b86\u0bb2\u0ba8\u0bcd\u0ba4\u0bc1",
-        "th":"\u0e1f\u0e23\u0e47\u0e2d\u0e07\u0e0b\u0e31\u0e27 \u0e2d\u0e2d\u0e25\u0e47\u0e2d\u0e07\u0e14\u0e4c",
-        "tl":"Fran\u00e7ois Hollande",
-        "tr":"Fran\u00e7ois Hollande",
-        "tt":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
-        "ty":"Fran\u00e7ois Hollande",
-        "uk":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
-        "uz":"Fran\u00e7ois Hollande",
-        "vep":"Olland Fransua",
-        "vi":"Fran\u00e7ois Hollande",
-        "war":"Fran\u00e7ois Hollande",
-        "xmf":"\u10e4\u10e0\u10d0\u10dc\u10e1\u10e3\u10d0 \u10dd\u10da\u10d0\u10dc\u10d3\u10d8",
-        "yi":"\u05e4\u05e8\u05d0\u05e0\u05e6\u05d5\u05d5\u05d0 \u05d4\u05d0\u05dc\u05d0\u05e0\u05d3",
-        "yo":"Fran\u00e7ois Hollande",
-        "ast":"Fran\u00e7ois Hollande",
-        "io":"Fran\u00e7ois Hollande",
-        "ku":"Fran\u00e7ois Hollande",
-        "simple":"Fran\u00e7ois Hollande",
-        "be-x-old":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u0410\u043b\u044f\u043d\u0434",
-        "mt":"Fran\u00e7ois Hollande",
-        "sco":"Fran\u00e7ois Hollande",
-        "vec":"Fran\u00e7ois Hollande",
-        "de-formal":"Fran\u00e7ois Hollande",
-        "ga":"Fran\u00e7ois Hollande",
-        "nds-nl":"Fran\u00e7ois Hollande",
-        "nl-informal":"Fran\u00e7ois Hollande",
-        "pms":"Fran\u00e7ois Hollande",
-        "sl":"Fran\u00e7ois Hollande",
-        "wa":"Fran\u00e7ois Hollande",
-        "pa":"\u0a2b\u0a30\u0a3e\u0a02\u0a38\u0a4b\u0a06 \u0a14\u0a32\u0a3e\u0a02\u0a26"
+{"type": "item", "id": "Q157", "labels": {
+    "en": {
+        "language": "en",
+        "value": "Fran\u00e7ois Hollande"
     },
-    "description":{
-        "en":"24th President of the French Republic",
-        "fr":"pr\u00e9sident de la R\u00e9publique fran\u00e7aise",
-        "ca":"Pol\u00edtic franc\u00e8s i President de la Rep\u00fablica francesa.",
-        "br":"Prezidant ar Republik gall",
-        "zh":"\u6cd5\u5170\u897f\u7b2c\u4e94\u5171\u548c\u56fd\u603b\u7edf",
-        "it":"24\u00ba presidente della Repubblica Francese",
-        "de":"Staatspr\u00e4sident Frankreichs",
-        "es":"presidente de Francia",
-        "nb":"president i Frankrike",
-        "ru":"24-\u0439 \u043f\u0440\u0435\u0437\u0438\u0434\u0435\u043d\u0442 \u0424\u0440\u0430\u043d\u0446\u0438\u0438",
-        "fi":"Ranskan 24. presidentti",
-        "oc":"Actual president de la republica francesa ; \u00f2me politic franc\u00e9s",
-        "pt-br":"24\u00ba presidente da Fran\u00e7a e 67\u00ba copr\u00edncipe de Andorra",
-        "bg":"\u041f\u0440\u0435\u0437\u0438\u0434\u0435\u043d\u0442 \u043d\u0430 \u0424\u0440\u0435\u043d\u0441\u043a\u0430\u0442\u0430 \u0440\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430",
-        "nl":"President van Frankrijk"
+    "fr": {
+        "language": "fr",
+        "value": "Fran\u00e7ois Hollande"
     },
-    "aliases":{
-        "en":[
-            "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande",
-            "Francois Hollande"
-        ],
-        "ca":[
-            "Hollande"
-        ],
-        "br":[
-            "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
-        ],
-        "fi":[
-            "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
-        ],
-        "fr":[
-            "Francois Hollande",
-            "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande",
-            "Fran\u00e7ois Gerard Georges Nicolas Hollande"
-        ],
-        "oc":[
-            "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
-        ],
-        "de":[
-            "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
-        ],
-        "pt-br":[
-            "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
-        ],
-        "ru":[
-            "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
-            "Fran\u00e7ois Hollande"
-        ]
+    "ca": {
+        "language": "ca",
+        "value": "Fran\u00e7ois Hollande"
     },
-    "links":{
-        "frwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "itwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "enwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "plwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "afwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "alswiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "anwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "arwiki":{
-            "name":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0623\u0648\u0644\u0627\u0646\u062f",
-            "badges":[
-
-            ]
-        },
-        "arzwiki":{
-            "name":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
-            "badges":[
-
-            ]
-        },
-        "azwiki":{
-            "name":"Fransua Oland",
-            "badges":[
-
-            ]
-        },
-        "bclwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "bewiki":{
-            "name":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u0410\u043b\u0430\u043d\u0434",
-            "badges":[
-
-            ]
-        },
-        "bgwiki":{
-            "name":"\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
-            "badges":[
-
-            ]
-        },
-        "bnwiki":{
-            "name":"\u09ab\u09cd\u09b0\u09be\u0981\u09b8\u09cb\u09af\u09bc\u09be \u0993\u09b2\u09be\u0981\u09a6",
-            "badges":[
-
-            ]
-        },
-        "bowiki":{
-            "name":"\u0f67\u0fa5\u0f0b\u0f62\u0f53\u0f0b\u0f66\u0f74\u0f60\u0f71\u0f0b\u0f68\u0f7c\u0f0b\u0f63\u0f53\u0f0b\u0f51\u0f7a\u0f0d",
-            "badges":[
-
-            ]
-        },
-        "brwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "bswiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "cawiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "ckbwiki":{
-            "name":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0626\u06c6\u0644\u0627\u0646\u062f",
-            "badges":[
-
-            ]
-        },
-        "cowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "cswiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "cywiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "dawiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "dewiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "dsbwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "elwiki":{
-            "name":"\u03a6\u03c1\u03b1\u03bd\u03c3\u03bf\u03c5\u03ac \u039f\u03bb\u03bb\u03ac\u03bd\u03c4",
-            "badges":[
-
-            ]
-        },
-        "eowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "eswiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "etwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "euwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "extwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "fawiki":{
-            "name":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
-            "badges":[
-
-            ]
-        },
-        "fiwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "fywiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "gdwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "glwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "gvwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "hewiki":{
-            "name":"\u05e4\u05e8\u05e0\u05e1\u05d5\u05d0\u05d4 \u05d4\u05d5\u05dc\u05e0\u05d3",
-            "badges":[
-
-            ]
-        },
-        "hrwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "hsbwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "huwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "hywiki":{
-            "name":"\u0556\u0580\u0561\u0576\u057d\u0578\u0582\u0561 \u0555\u056c\u0561\u0576\u0564",
-            "badges":[
-
-            ]
-        },
-        "iawiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "idwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "iewiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "iswiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "jawiki":{
-            "name":"\u30d5\u30e9\u30f3\u30bd\u30ef\u30fb\u30aa\u30e9\u30f3\u30c9",
-            "badges":[
-
-            ]
-        },
-        "jvwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "kawiki":{
-            "name":"\u10e4\u10e0\u10d0\u10dc\u10e1\u10e3\u10d0 \u10dd\u10da\u10d0\u10dc\u10d3\u10d8",
-            "badges":[
-
-            ]
-        },
-        "kgwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "kkwiki":{
-            "name":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
-            "badges":[
-
-            ]
-        },
-        "knwiki":{
-            "name":"\u0cab\u0ccd\u0cb0\u0cbe\u0c82\u0c95\u0ccb\u0caf\u0cbf\u0cb8\u0ccd \u0cb9\u0cbe\u0cb2\u0cc6\u0c82\u0ca1\u0ccd",
-            "badges":[
-
-            ]
-        },
-        "kowiki":{
-            "name":"\ud504\ub791\uc218\uc544 \uc62c\ub791\ub4dc",
-            "badges":[
-
-            ]
-        },
-        "lawiki":{
-            "name":"Franciscus Hollande",
-            "badges":[
-
-            ]
-        },
-        "ladwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "lbwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "lmowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "ltwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "lvwiki":{
-            "name":"Fransu\u0101 Olands",
-            "badges":[
-
-            ]
-        },
-        "mkwiki":{
-            "name":"\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
-            "badges":[
-
-            ]
-        },
-        "mrwiki":{
-            "name":"\u092b\u094d\u0930\u093e\u0902\u0938\u094d\u0935\u093e \u0911\u0932\u093e\u0902\u0926",
-            "badges":[
-
-            ]
-        },
-        "mswiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "mwlwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "mywiki":{
-            "name":"\u1016\u101b\u1014\u103a\u1006\u103d\u102c \u101f\u1031\u102c\u103a\u101c\u1014\u103a",
-            "badges":[
-
-            ]
-        },
-        "mznwiki":{
-            "name":"\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
-            "badges":[
-
-            ]
-        },
-        "ndswiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "nlwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "nnwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "nowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "nrmwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "ocwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "pamwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "ptwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "quwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "rowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "ruwiki":{
-            "name":"\u041e\u043b\u043b\u0430\u043d\u0434, \u0424\u0440\u0430\u043d\u0441\u0443\u0430",
-            "badges":[
-
-            ]
-        },
-        "scnwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "sewiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "shwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "simplewiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "skwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "sowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "sqwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "srwiki":{
-            "name":"\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
-            "badges":[
-
-            ]
-        },
-        "svwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "tawiki":{
-            "name":"\u0baa\u0bbf\u0bb0\u0bbe\u0ba9\u0bcd\u0b9a\u0bc1\u0bb5\u0bbe \u0b86\u0bb2\u0ba8\u0bcd\u0ba4\u0bc1",
-            "badges":[
-
-            ]
-        },
-        "thwiki":{
-            "name":"\u0e1f\u0e23\u0e47\u0e2d\u0e07\u0e0b\u0e31\u0e27 \u0e2d\u0e2d\u0e25\u0e47\u0e2d\u0e07\u0e14\u0e4c",
-            "badges":[
-
-            ]
-        },
-        "tlwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "trwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "ttwiki":{
-            "name":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
-            "badges":[
-
-            ]
-        },
-        "tywiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "ukwiki":{
-            "name":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
-            "badges":[
-
-            ]
-        },
-        "uzwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "vepwiki":{
-            "name":"Olland Fransua",
-            "badges":[
-
-            ]
-        },
-        "viwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "warwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "xmfwiki":{
-            "name":"\u10e4\u10e0\u10d0\u10dc\u10e1\u10e3\u10d0 \u10dd\u10da\u10d0\u10dc\u10d3\u10d8",
-            "badges":[
-
-            ]
-        },
-        "yiwiki":{
-            "name":"\u05e4\u05e8\u05d0\u05e0\u05e6\u05d5\u05d5\u05d0 \u05d4\u05d0\u05dc\u05d0\u05e0\u05d3",
-            "badges":[
-
-            ]
-        },
-        "yowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "zhwiki":{
-            "name":"\u5f17\u6717\u7d22\u74e6\u00b7\u5965\u6717\u5fb7",
-            "badges":[
-
-            ]
-        },
-        "astwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "iowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "kuwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "be_x_oldwiki":{
-            "name":"\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u0410\u043b\u044f\u043d\u0434",
-            "badges":[
-
-            ]
-        },
-        "mtwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "vecwiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "scowiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "pawiki":{
-            "name":"\u0a2b\u0a30\u0a3e\u0a02\u0a38\u0a4b\u0a06 \u0a14\u0a32\u0a3e\u0a02\u0a26",
-            "badges":[
-
-            ]
-        },
-        "gawiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
-        },
-        "commonswiki":{
-            "name":"Fran\u00e7ois Hollande",
-            "badges":[
-
-            ]
+    "de": {
+        "language": "de",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "br": {
+        "language": "br",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "zh": {
+        "language": "zh",
+        "value": "\u5f17\u6717\u7d22\u74e6\u00b7\u5965\u6717\u5fb7"
+    },
+    "it": {
+        "language": "it",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ru": {
+        "language": "ru",
+        "value": "\u041e\u043b\u043b\u0430\u043d\u0434, \u0424\u0440\u0430\u043d\u0441\u0443\u0430"
+    },
+    "es": {
+        "language": "es",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "nb": {
+        "language": "nb",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "af": {
+        "language": "af",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "an": {
+        "language": "an",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ar": {
+        "language": "ar",
+        "value": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0623\u0648\u0644\u0627\u0646\u062f"
+    },
+    "arz": {
+        "language": "arz",
+        "value": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f"
+    },
+    "az": {
+        "language": "az",
+        "value": "Fransua Olland"
+    },
+    "bcl": {
+        "language": "bcl",
+        "value": "Francois Hollande"
+    },
+    "be": {
+        "language": "be",
+        "value": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u0410\u043b\u0430\u043d\u0434"
+    },
+    "bg": {
+        "language": "bg",
+        "value": "\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434"
+    },
+    "bn": {
+        "language": "bn",
+        "value": "\u09ab\u09cd\u09b0\u09be\u0981\u09b8\u09cb\u09af\u09bc\u09be \u0993\u09b2\u09be\u0981\u09a6"
+    },
+    "bo": {
+        "language": "bo",
+        "value": "\u0f67\u0fa5\u0f0b\u0f62\u0f53\u0f0b\u0f66\u0f74\u0f60\u0f71\u0f0b\u0f68\u0f7c\u0f0b\u0f63\u0f53\u0f0b\u0f51\u0f7a\u0f0d"
+    },
+    "bs": {
+        "language": "bs",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ckb": {
+        "language": "ckb",
+        "value": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0626\u06c6\u0644\u0627\u0646\u062f"
+    },
+    "co": {
+        "language": "co",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "cs": {
+        "language": "cs",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "cy": {
+        "language": "cy",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "da": {
+        "language": "da",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "de-ch": {
+        "language": "de-ch",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "dsb": {
+        "language": "dsb",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "el": {
+        "language": "el",
+        "value": "\u03a6\u03c1\u03b1\u03bd\u03c3\u03bf\u03c5\u03ac \u039f\u03bb\u03bb\u03ac\u03bd\u03c4"
+    },
+    "en-ca": {
+        "language": "en-ca",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "en-gb": {
+        "language": "en-gb",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "eo": {
+        "language": "eo",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "et": {
+        "language": "et",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "eu": {
+        "language": "eu",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ext": {
+        "language": "ext",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "fa": {
+        "language": "fa",
+        "value": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f"
+    },
+    "fi": {
+        "language": "fi",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "fy": {
+        "language": "fy",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "gd": {
+        "language": "gd",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "gl": {
+        "language": "gl",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "gv": {
+        "language": "gv",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "he": {
+        "language": "he",
+        "value": "\u05e4\u05e8\u05e0\u05e1\u05d5\u05d0\u05d4 \u05d4\u05d5\u05dc\u05e0\u05d3"
+    },
+    "hr": {
+        "language": "hr",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "hsb": {
+        "language": "hsb",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "hu": {
+        "language": "hu",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "hy": {
+        "language": "hy",
+        "value": "\u0556\u0580\u0561\u0576\u057d\u0578\u0582\u0561 \u0555\u056c\u0561\u0576\u0564"
+    },
+    "ia": {
+        "language": "ia",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "id": {
+        "language": "id",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ie": {
+        "language": "ie",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "is": {
+        "language": "is",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ja": {
+        "language": "ja",
+        "value": "\u30d5\u30e9\u30f3\u30bd\u30ef\u30fb\u30aa\u30e9\u30f3\u30c9"
+    },
+    "jv": {
+        "language": "jv",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ka": {
+        "language": "ka",
+        "value": "\u10e4\u10e0\u10d0\u10dc\u10e1\u10e3\u10d0 \u10dd\u10da\u10d0\u10dc\u10d3\u10d8"
+    },
+    "kg": {
+        "language": "kg",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "kk": {
+        "language": "kk",
+        "value": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434"
+    },
+    "kn": {
+        "language": "kn",
+        "value": "\u0cab\u0ccd\u0cb0\u0cbe\u0c82\u0c95\u0ccb\u0caf\u0cbf\u0cb8\u0ccd \u0cb9\u0cbe\u0cb2\u0cc6\u0c82\u0ca1\u0ccd"
+    },
+    "ko": {
+        "language": "ko",
+        "value": "\ud504\ub791\uc218\uc544 \uc62c\ub791\ub4dc"
+    },
+    "lad": {
+        "language": "lad",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "la": {
+        "language": "la",
+        "value": "Franciscus Hollande"
+    },
+    "lb": {
+        "language": "lb",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "lmo": {
+        "language": "lmo",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "lt": {
+        "language": "lt",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "lv": {
+        "language": "lv",
+        "value": "Fransu\u0101 Ollands"
+    },
+    "mk": {
+        "language": "mk",
+        "value": "\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434"
+    },
+    "mr": {
+        "language": "mr",
+        "value": "\u092b\u094d\u0930\u093e\u0902\u0938\u094d\u0935\u093e \u0911\u0932\u093e\u0902\u0926"
+    },
+    "ms": {
+        "language": "ms",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "mwl": {
+        "language": "mwl",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "my": {
+        "language": "my",
+        "value": "\u1016\u101b\u1014\u103a\u1006\u103d\u102c \u101f\u1031\u102c\u103a\u101c\u1014\u103a"
+    },
+    "mzn": {
+        "language": "mzn",
+        "value": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f"
+    },
+    "nds": {
+        "language": "nds",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "nl": {
+        "language": "nl",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "nn": {
+        "language": "nn",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "nrm": {
+        "language": "nrm",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "oc": {
+        "language": "oc",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "pam": {
+        "language": "pam",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "pl": {
+        "language": "pl",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "pt": {
+        "language": "pt",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "pt-br": {
+        "language": "pt-br",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "qu": {
+        "language": "qu",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ro": {
+        "language": "ro",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "scn": {
+        "language": "scn",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "se": {
+        "language": "se",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sh": {
+        "language": "sh",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sk": {
+        "language": "sk",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "so": {
+        "language": "so",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sq": {
+        "language": "sq",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sr": {
+        "language": "sr",
+        "value": "\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434"
+    },
+    "sv": {
+        "language": "sv",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ta": {
+        "language": "ta",
+        "value": "\u0baa\u0bbf\u0bb0\u0bbe\u0ba9\u0bcd\u0b9a\u0bc1\u0bb5\u0bbe \u0b86\u0bb2\u0ba8\u0bcd\u0ba4\u0bc1"
+    },
+    "th": {
+        "language": "th",
+        "value": "\u0e1f\u0e23\u0e47\u0e2d\u0e07\u0e0b\u0e31\u0e27 \u0e2d\u0e2d\u0e25\u0e47\u0e2d\u0e07\u0e14\u0e4c"
+    },
+    "tl": {
+        "language": "tl",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "tr": {
+        "language": "tr",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "tt": {
+        "language": "tt",
+        "value": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434"
+    },
+    "ty": {
+        "language": "ty",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "uk": {
+        "language": "uk",
+        "value": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434"
+    },
+    "uz": {
+        "language": "uz",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "vep": {
+        "language": "vep",
+        "value": "Olland Fransua"
+    },
+    "vi": {
+        "language": "vi",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "war": {
+        "language": "war",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "xmf": {
+        "language": "xmf",
+        "value": "\u10e4\u10e0\u10d0\u10dc\u10e1\u10e3\u10d0 \u10dd\u10da\u10d0\u10dc\u10d3\u10d8"
+    },
+    "yi": {
+        "language": "yi",
+        "value": "\u05e4\u05e8\u05d0\u05e0\u05e6\u05d5\u05d5\u05d0 \u05d4\u05d0\u05dc\u05d0\u05e0\u05d3"
+    },
+    "yo": {
+        "language": "yo",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ast": {
+        "language": "ast",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "io": {
+        "language": "io",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ku": {
+        "language": "ku",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "mt": {
+        "language": "mt",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sco": {
+        "language": "sco",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "vec": {
+        "language": "vec",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ga": {
+        "language": "ga",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "nds-nl": {
+        "language": "nds-nl",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "nl-informal": {
+        "language": "nl-informal",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "pms": {
+        "language": "pms",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sl": {
+        "language": "sl",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "wa": {
+        "language": "wa",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "pa": {
+        "language": "pa",
+        "value": "\u0a2b\u0a30\u0a3e\u0a02\u0a38\u0a4b\u0a06 \u0a14\u0a32\u0a3e\u0a02\u0a26"
+    },
+    "gsw": {
+        "language": "gsw",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "be-tarask": {
+        "language": "be-tarask",
+        "value": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u0410\u043b\u044f\u043d\u0434"
+    },
+    "pih": {
+        "language": "pih",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "nov": {
+        "language": "nov",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "ln": {
+        "language": "ln",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "bar": {
+        "language": "bar",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "de-at": {
+        "language": "de-at",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "frp": {
+        "language": "frp",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "fur": {
+        "language": "fur",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "li": {
+        "language": "li",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "lij": {
+        "language": "lij",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "mg": {
+        "language": "mg",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "min": {
+        "language": "min",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "nap": {
+        "language": "nap",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "pcd": {
+        "language": "pcd",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "rm": {
+        "language": "rm",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sc": {
+        "language": "sc",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sr-el": {
+        "language": "sr-el",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "sw": {
+        "language": "sw",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "vls": {
+        "language": "vls",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "vo": {
+        "language": "vo",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "wo": {
+        "language": "wo",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "zu": {
+        "language": "zu",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "zh-hk": {
+        "language": "zh-hk",
+        "value": "\u5f17\u6717\u7d22\u74e6\u00b7\u5967\u6717\u5fb7"
+    },
+    "zh-tw": {
+        "language": "zh-tw",
+        "value": "\u6cd5\u862d\u7d22\u74e6\u00b7\u6b50\u862d\u5fb7"
+    },
+    "zh-hant": {
+        "language": "zh-hant",
+        "value": "\u5f17\u6717\u7d22\u74e6\u00b7\u5967\u6717\u5fb7"
+    },
+    "zh-hans": {
+        "language": "zh-hans",
+        "value": "\u5f17\u6717\u7d22\u74e6\u00b7\u5965\u6717\u5fb7"
+    },
+    "zh-cn": {
+        "language": "zh-cn",
+        "value": "\u5f17\u6717\u7d22\u74e6\u00b7\u5965\u6717\u5fb7"
+    },
+    "hak": {
+        "language": "hak",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "eml": {
+        "language": "eml",
+        "value": "Fran\u00e7ois Hollande"
+    },
+    "yue": {
+        "language": "yue",
+        "value": "\u5967\u6717\u5fb7"
+    }
+}, "descriptions": {
+    "en": {
+        "language": "en",
+        "value": "24th President of the French Republic"
+    },
+    "fr": {
+        "language": "fr",
+        "value": "pr\u00e9sident de la R\u00e9publique fran\u00e7aise"
+    },
+    "ca": {
+        "language": "ca",
+        "value": "Pol\u00edtic franc\u00e8s i President de la Rep\u00fablica francesa."
+    },
+    "br": {
+        "language": "br",
+        "value": "Prezidant ar Republik gall"
+    },
+    "zh": {
+        "language": "zh",
+        "value": "\u6cd5\u56fd\u7b2c24\u4efb\u603b\u7edf"
+    },
+    "it": {
+        "language": "it",
+        "value": "24\u00ba presidente della Repubblica Francese"
+    },
+    "de": {
+        "language": "de",
+        "value": "Staatspr\u00e4sident Frankreichs"
+    },
+    "es": {
+        "language": "es",
+        "value": "presidente de Francia"
+    },
+    "nb": {
+        "language": "nb",
+        "value": "president i Frankrike"
+    },
+    "ru": {
+        "language": "ru",
+        "value": "24-\u0439 \u043f\u0440\u0435\u0437\u0438\u0434\u0435\u043d\u0442 \u0424\u0440\u0430\u043d\u0446\u0438\u0438"
+    },
+    "fi": {
+        "language": "fi",
+        "value": "Ranskan 24. presidentti"
+    },
+    "oc": {
+        "language": "oc",
+        "value": "Actual president de la republica francesa ; \u00f2me politic franc\u00e9s"
+    },
+    "pt-br": {
+        "language": "pt-br",
+        "value": "24\u00ba presidente da Fran\u00e7a e 67\u00ba copr\u00edncipe de Andorra"
+    },
+    "bg": {
+        "language": "bg",
+        "value": "\u041f\u0440\u0435\u0437\u0438\u0434\u0435\u043d\u0442 \u043d\u0430 \u0424\u0440\u0435\u043d\u0441\u043a\u0430\u0442\u0430 \u0440\u0435\u043f\u0443\u0431\u043b\u0438\u043a\u0430"
+    },
+    "nl": {
+        "language": "nl",
+        "value": "President van Frankrijk"
+    },
+    "uk": {
+        "language": "uk",
+        "value": "24-\u0439 \u041f\u0440\u0435\u0437\u0438\u0434\u0435\u043d\u0442 \u0424\u0440\u0430\u043d\u0446\u0443\u0437\u044c\u043a\u043e\u0457 \u0440\u0435\u0441\u043f\u0443\u0431\u043b\u0456\u043a\u0438"
+    },
+    "hu": {
+        "language": "hu",
+        "value": "francia politikus, Franciaorsz\u00e1g 24. eln\u00f6ke"
+    },
+    "zh-hant": {
+        "language": "zh-hant",
+        "value": "\u6cd5\u570b\u7b2c24\u4efb\u7e3d\u7d71"
+    },
+    "zh-hk": {
+        "language": "zh-hk",
+        "value": "\u6cd5\u570b\u7b2c24\u4efb\u7e3d\u7d71"
+    },
+    "zh-cn": {
+        "language": "zh-cn",
+        "value": "\u6cd5\u56fd\u7b2c24\u4efb\u603b\u7edf"
+    },
+    "zh-tw": {
+        "language": "zh-tw",
+        "value": "\u6cd5\u570b\u7b2c24\u4efb\u7e3d\u7d71"
+    },
+    "zh-hans": {
+        "language": "zh-hans",
+        "value": "\u6cd5\u56fd\u7b2c24\u4efb\u603b\u7edf"
+    }
+}, "aliases": {
+    "en": [
+        {
+            "language": "en",
+            "value": "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
+        },
+        {
+            "language": "en",
+            "value": "Francois Hollande"
         }
-    },
-    "entity":[
-        "item",
-        157
     ],
-    "claims":[
+    "ca": [
         {
-            "m":[
-                "value",
-                21,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":6581097
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$02A01A4D-4DAA-4DEB-A0F6-EAEA1EEA4A08",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":54919
-                        }
-                    ]
-                ]
-            ]
+            "language": "ca",
+            "value": "Hollande"
+        }
+    ],
+    "br": [
+        {
+            "language": "br",
+            "value": "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
+        }
+    ],
+    "fi": [
+        {
+            "language": "fi",
+            "value": "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
+        }
+    ],
+    "fr": [
+        {
+            "language": "fr",
+            "value": "Francois Hollande"
         },
         {
-            "m":[
-                "value",
-                18,
-                "string",
-                "Fran\u00e7ois Hollande - Janvier 2012.jpg"
-            ],
-            "q":[
-
-            ],
-            "g":"q157$3CF7EF15-01DC-467E-8EDD-BF46A61D76A5",
-            "rank":1,
-            "refs":[
-
-            ]
+            "language": "fr",
+            "value": "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
         },
         {
-            "m":[
-                "value",
-                373,
-                "string",
-                "Fran\u00e7ois Hollande"
-            ],
-            "q":[
-
-            ],
-            "g":"q157$1CB5B3B2-40F4-41B7-BE49-7530AB1C5F16",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":206855
-                        }
-                    ]
-                ]
-            ]
+            "language": "fr",
+            "value": "Fran\u00e7ois Gerard Georges Nicolas Hollande"
+        }
+    ],
+    "oc": [
+        {
+            "language": "oc",
+            "value": "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
+        }
+    ],
+    "de": [
+        {
+            "language": "de",
+            "value": "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
+        }
+    ],
+    "pt-br": [
+        {
+            "language": "pt-br",
+            "value": "Fran\u00e7ois G\u00e9rard Georges Nicolas Hollande"
+        }
+    ],
+    "ru": [
+        {
+            "language": "ru",
+            "value": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434"
         },
         {
-            "m":[
-                "value",
-                69,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":662976
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$5D0F1935-F9C2-4C3E-A765-D625087C2688",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                69,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":859363
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$A136E4A7-7B17-4B92-BF11-427CC9E3D604",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                69,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":273535
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$AC1403CD-DCBE-43F8-8E02-6A76DEDD539F",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                69,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":273579
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$CC285F91-03E8-4DC1-B495-E117FE7F0BAE",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                166,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":84020
-                }
-            ],
-            "q":[
-                [
-                    "value",
-                    585,
-                    "time",
-                    {
-                        "time":"+00000002012-11-16T00:00:00Z",
-                        "timezone":0,
-                        "before":0,
-                        "after":0,
-                        "precision":11,
-                        "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                    }
-                ]
-            ],
-            "g":"q157$82464792-603F-46F5-B569-7A3CE2A3690B",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                227,
-                "string",
-                "123636205"
-            ],
-            "q":[
-
-            ],
-            "g":"q157$76E228E3-0A3B-495B-AF29-7D5A7C9E0095",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":328
-                        }
-                    ]
-                ],
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":48183
-                        }
-                    ]
-                ],
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":8447
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                244,
-                "string",
-                "n92033817"
-            ],
-            "q":[
-
-            ],
-            "g":"q157$178D37B2-4394-4733-A995-D5E6129FEF6B",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":328
-                        }
-                    ]
-                ],
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":48183
-                        }
-                    ]
-                ],
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":8447
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                214,
-                "string",
-                "64555"
-            ],
-            "q":[
-
-            ],
-            "g":"q157$CF176137-63E5-4083-9927-F2BF2E729C50",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":328
-                        }
-                    ]
-                ],
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":48183
-                        }
-                    ]
-                ],
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":8447
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                27,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":142
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$286D4E67-5A64-4555-A75B-CF6D32F4EDF3",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                109,
-                "string",
-                "Fran\u00e7ois Hollande signature.svg"
-            ],
-            "q":[
-
-            ],
-            "g":"q157$313C72D0-141C-4CF2-AD0C-23196BAB2E07",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                213,
-                "string",
-                "0000 0000 7831 4422"
-            ],
-            "q":[
-
-            ],
-            "g":"q157$2142EB8F-C898-4EE7-9BC1-55E25DE061A0",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":423048
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                166,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":10855226
-                }
-            ],
-            "q":[
-                [
-                    "value",
-                    585,
-                    "time",
-                    {
-                        "time":"+00000002012-05-15T00:00:00Z",
-                        "timezone":0,
-                        "before":0,
-                        "after":0,
-                        "precision":11,
-                        "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                    }
-                ]
-            ],
-            "g":"q157$F13A6A75-2702-405F-9964-5EC0409B09CB",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":8447
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                39,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":191954
-                }
-            ],
-            "q":[
-                [
-                    "value",
-                    155,
-                    "wikibase-entityid",
-                    {
-                        "entity-type":"item",
-                        "numeric-id":329
-                    }
-                ],
-                [
-                    "value",
-                    580,
-                    "time",
-                    {
-                        "time":"+00000002012-05-15T00:00:00Z",
-                        "timezone":0,
-                        "before":0,
-                        "after":0,
-                        "precision":11,
-                        "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                    }
-                ]
-            ],
-            "g":"q157$F445C62C-DE78-4304-BF4F-CA24986959C0",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        248,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":11931253
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                39,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":683337
-                }
-            ],
-            "q":[
-                [
-                    "value",
-                    155,
-                    "wikibase-entityid",
-                    {
-                        "entity-type":"item",
-                        "numeric-id":329
-                    }
-                ],
-                [
-                    "value",
-                    580,
-                    "time",
-                    {
-                        "time":"+00000002012-05-15T00:00:00Z",
-                        "timezone":0,
-                        "before":0,
-                        "after":0,
-                        "precision":11,
-                        "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                    }
-                ]
-            ],
-            "g":"q157$8979C238-EAAD-42F3-8052-3A3115AF958E",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                451,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":230539
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$5061701d-4ad4-e81f-e2a1-433b1036def3",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                451,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":81923
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$25643c46-4868-50a1-1353-706bfded4cc2",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                268,
-                "string",
-                "122353562"
-            ],
-            "q":[
-
-            ],
-            "g":"q157$E6E074B5-8E37-484C-B6CD-9317BB732309",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":8447
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                569,
-                "time",
-                {
-                    "time":"+00000001954-08-12T00:00:00Z",
-                    "timezone":0,
-                    "before":0,
-                    "after":0,
-                    "precision":11,
-                    "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$6aa1830d-4579-4a73-93d3-b8323606ff13",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        268,
-                        "string",
-                        "122353562"
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                19,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":30974
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$4FB12770-E2F9-45EE-8763-118530CE340B",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":206855
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                166,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":13422143
-                }
-            ],
-            "q":[
-                [
-                    "value",
-                    585,
-                    "time",
-                    {
-                        "time":"+00000002012-05-15T00:00:00Z",
-                        "timezone":0,
-                        "before":0,
-                        "after":0,
-                        "precision":11,
-                        "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                    }
-                ]
-            ],
-            "g":"q157$FCF24A46-1D19-4F9C-8DC0-198E9A0CD242",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                31,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":5
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"q157$64ef3af1-47ee-1654-d2cd-0de7b3bd0386",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        143,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":206855
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                102,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":170972
-                }
-            ],
-            "q":[
-                [
-                    "value",
-                    580,
-                    "time",
-                    {
-                        "time":"+00000001979-01-01T00:00:00Z",
-                        "timezone":0,
-                        "before":0,
-                        "after":0,
-                        "precision":9,
-                        "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                    }
-                ]
-            ],
-            "g":"q157$C14CDC9D-C71A-4245-B24B-2CDC25C1B71E",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        854,
-                        "string",
-                        "http:\/\/www.ambafrance-cn.org\/Francois-Hollande-Biographie.html"
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                140,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":288928
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$83743ae9-4ce9-19ee-14f6-26c523f420bb",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        577,
-                        "time",
-                        {
-                            "time":"+00000002012-03-15T00:00:00Z",
-                            "timezone":0,
-                            "before":0,
-                            "after":0,
-                            "precision":11,
-                            "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                        }
-                    ],
-                    [
-                        "value",
-                        248,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":1230298
-                        }
-                    ],
-                    [
-                        "value",
-                        854,
-                        "string",
-                        "http:\/\/www.la-croix.com\/Actualite\/France\/Francois-Hollande-souhaite-apaiser-les-relations-avec-les-cultes-_EP_-2012-03-06-775678"
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                39,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":747123
-                }
-            ],
-            "q":[
-                [
-                    "value",
-                    580,
-                    "time",
-                    {
-                        "time":"+00000001997-11-27T00:00:00Z",
-                        "timezone":0,
-                        "before":0,
-                        "after":0,
-                        "precision":11,
-                        "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                    }
-                ],
-                [
-                    "value",
-                    156,
-                    "wikibase-entityid",
-                    {
-                        "entity-type":"item",
-                        "numeric-id":228977
-                    }
-                ],
-                [
-                    "value",
-                    155,
-                    "wikibase-entityid",
-                    {
-                        "entity-type":"item",
-                        "numeric-id":187099
-                    }
-                ]
-            ],
-            "g":"Q157$185bbc52-422f-5aac-7fb1-4082d41cf7b0",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                106,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":82955
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$72610d47-4d8c-c779-dc00-d3a124fefecd",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                106,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":4594605
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$7b75c477-48d2-6920-9c7c-99db14051822",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                106,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":40348
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$b07d707d-4e25-9c8e-07d8-1e57904f0d8d",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                910,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":8471509
-                }
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$FFBD8803-5004-4F6D-BA5A-D6CBA21F39A7",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                269,
-                "string",
-                "031063357"
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$7FB1076A-F3D0-4753-8373-25E01CD4D237",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                950,
-                "string",
-                "XX5261839"
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$641CD7C4-B295-44FD-9E7F-D4CD33591483",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                1006,
-                "string",
-                "299329356"
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$22DAEE1A-BAEC-4266-9ED3-B3E07C183051",
-            "rank":1,
-            "refs":[
-
-            ]
-        },
-        {
-            "m":[
-                "value",
-                166,
-                "wikibase-entityid",
-                {
-                    "entity-type":"item",
-                    "numeric-id":14539990
-                }
-            ],
-            "q":[
-                [
-                    "value",
-                    585,
-                    "time",
-                    {
-                        "time":"+00000002012-11-15T00:00:00Z",
-                        "timezone":0,
-                        "before":0,
-                        "after":0,
-                        "precision":11,
-                        "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                    }
-                ]
-            ],
-            "g":"q157$0A0B191B-1885-4DAB-9C56-618B718F93C9",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        854,
-                        "string",
-                        "http:\/\/www.quirinale.it\/elementi\/DettaglioOnorificenze.aspx?decorato=324322"
-                    ],
-                    [
-                        "value",
-                        357,
-                        "string",
-                        "Dettaglio decorato"
-                    ],
-                    [
-                        "value",
-                        123,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":15191779
-                        }
-                    ],
-                    [
-                        "value",
-                        364,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":652
-                        }
-                    ],
-                    [
-                        "value",
-                        813,
-                        "time",
-                        {
-                            "time":"+00000002013-11-17T00:00:00Z",
-                            "timezone":0,
-                            "before":0,
-                            "after":0,
-                            "precision":11,
-                            "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                        }
-                    ]
-                ]
-            ]
-        },
-        {
-            "m":[
-                "value",
-                646,
-                "string",
-                "\/m\/02qg4z"
-            ],
-            "q":[
-
-            ],
-            "g":"Q157$BE494DA2-F2FF-4F77-BA1D-319876AB7D55",
-            "rank":1,
-            "refs":[
-                [
-                    [
-                        "value",
-                        248,
-                        "wikibase-entityid",
-                        {
-                            "entity-type":"item",
-                            "numeric-id":15241312
-                        }
-                    ],
-                    [
-                        "value",
-                        577,
-                        "time",
-                        {
-                            "time":"+00000002013-10-28T00:00:00Z",
-                            "timezone":0,
-                            "before":0,
-                            "after":0,
-                            "precision":11,
-                            "calendarmodel":"http:\/\/www.wikidata.org\/entity\/Q1985727"
-                        }
-                    ]
-                ]
-            ]
+            "language": "ru",
+            "value": "Fran\u00e7ois Hollande"
         }
     ]
-}
+}, "claims": {
+    "P40": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P40",
+                "hash": "3fc2030f055ac14b97abfcea61b1c25053e46986",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 16783695
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$9766c120-4375-076f-a97d-e56fe7501548",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P40",
+                "hash": "9158325cf642471ef65de85f2a62d5e5e4067a22",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 16783697
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$9c37858c-4999-0e96-4baa-d57b15b31959",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P40",
+                "hash": "cbe89c0f5416bbd98e682d30a09431003f4ed23d",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 16783700
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$76c74de4-4e08-34f9-5ff2-87776fd7273c",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P40",
+                "hash": "0bad20bf5ba05be82c4722d27d5236ca5775f0b5",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 16783701
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$3e69e856-4f3f-9743-296a-4157ee83c6da",
+            "rank": "normal"
+        }
+    ],
+    "P1284": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P1284",
+                "hash": "661f3469294d58a6b975060c40e4221c739bbc28",
+                "datavalue": {
+                    "value": "00000022421",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$17e5d4bc-422f-8061-2741-d5daa722076c",
+            "rank": "normal"
+        }
+    ],
+    "P7": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P7",
+                "hash": "3ef8c1c935c7e356e0655ccab67a1a19a2d39355",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 16354873
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$0a493d3c-4da9-9b6c-14df-ecd5d58653ce",
+            "rank": "normal"
+        }
+    ],
+    "P22": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P22",
+                "hash": "7b098f79777531234cc76877c81769d0bf15f21d",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 16354870
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$ea102b47-4582-19fb-8db0-86ee49af99ee",
+            "rank": "normal"
+        }
+    ],
+    "P25": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P25",
+                "hash": "b3707d28fdab614d8af96d6ead7fd4eca764d509",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 16354867
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$749df6c5-4442-2ff6-7937-3c36ec42e3cb",
+            "rank": "normal"
+        }
+    ],
+    "P69": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P69",
+                "hash": "c3fb4329f9c1d7cf3ed135c121750e290b4899de",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 662976
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "q157$5D0F1935-F9C2-4C3E-A765-D625087C2688",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P69",
+                "hash": "567a16fa06f04461ccaf8fac6fe8050f8b2253b8",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 859363
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "q157$A136E4A7-7B17-4B92-BF11-427CC9E3D604",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P69",
+                "hash": "7a6053d2f951e37a119683b9fa647fabd7373064",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 273535
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P582": [
+                    {
+                        "snaktype": "value",
+                        "property": "P582",
+                        "hash": "7ddaa1ebda3058683f8a39227f607efb606560fe",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000001975-01-01T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 9,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P582"],
+            "id": "q157$AC1403CD-DCBE-43F8-8E02-6A76DEDD539F",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "27706bf8d66ec5fce76a1fd8b25897410a1e6375",
+                    "snaks": {
+                        "P854": [
+                            {
+                                "snaktype": "value",
+                                "property": "P854",
+                                "hash": "735803cfb87c5dd44ed31440979bb95cb4457d6a",
+                                "datavalue": {
+                                    "value": "http:\/\/www.hec.fr\/Grande-Ecole\/FAQ",
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P854"]
+                }
+            ]
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P69",
+                "hash": "78ce7eb02284e477e5fb5dd8da70b8a369dc884e",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 273579
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P582": [
+                    {
+                        "snaktype": "value",
+                        "property": "P582",
+                        "hash": "327b0944a92bed058f9a5f6b1ba9b73703058c16",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000001980-01-01T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 9,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P582"],
+            "id": "q157$CC285F91-03E8-4DC1-B495-E117FE7F0BAE",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P69",
+                "hash": "0195d9d4db2067670d5aa0cf5f1241ba8fe313a3",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 3374836
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$3517849c-4acc-33fe-726d-f85135ba1409",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "f70116eac7f49194478b3025330bfd8dcffa3c69",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ebfb99141b058cc936093dad3f9ad58be9db5862",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 8447
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P69",
+                "hash": "2ecca80e2f77e1d3eb110e5692a9176fb35cdc9d",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 3268876
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$7aad2b8e-47f9-b01d-a8b1-648e41e58af1",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "f70116eac7f49194478b3025330bfd8dcffa3c69",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ebfb99141b058cc936093dad3f9ad58be9db5862",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 8447
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P735": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P735",
+                "hash": "634498147c5b427cbac996bc16138941ec5573b3",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 1166840
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$a356161f-4eb1-ab37-e32a-5c686c7b4e76",
+            "rank": "normal"
+        }
+    ],
+    "P103": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P103",
+                "hash": "bd75dd7e75770ec78cbaee5d290e2ffaae213da7",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 150
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$de158636-49ad-d021-e1f9-1b22db1315e2",
+            "rank": "normal"
+        }
+    ],
+    "P21": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P21",
+                "hash": "c743cce0bd102def6bc2d4694b7dfc4cf6809968",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 6581097
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "q157$02A01A4D-4DAA-4DEB-A0F6-EAEA1EEA4A08",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "a51d6594fee36c7452eaed2db35a4833613a7078",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "74f998bedaf1a0efbee6fec668f089c6922eaa0d",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 54919
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P18": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P18",
+                "hash": "d905b1ab9584f2554bb3e1127cd6440c40a9035d",
+                "datavalue": {
+                    "value": "Comida con el Presidente de la Rep\u00fablica Francesa, Fran\u00e7ois Hollande, Par\u00eds, Francia, 17 octubre 2012 (8137216578) (2)-crop.jpg",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "q157$3CF7EF15-01DC-467E-8EDD-BF46A61D76A5",
+            "rank": "normal"
+        }
+    ],
+    "P373": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P373",
+                "hash": "0f18f0388ebf6aad0138d2998ea7885975e0ee17",
+                "datavalue": {
+                    "value": "Fran\u00e7ois Hollande",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "q157$1CB5B3B2-40F4-41B7-BE49-7530AB1C5F16",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "d6e3ab4045fb3f3feea77895bc6b27e663fc878a",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "1149b9b11e07f990000c1952c79f58f65d1bf3dd",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 206855
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P166": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P166",
+                "hash": "114f91498b31954e54308c2ed5ac30f10c73e419",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 84020
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P585": [
+                    {
+                        "snaktype": "value",
+                        "property": "P585",
+                        "hash": "b154ce6cc4885d7b484114dbffdc733a5ab818be",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002012-11-16T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P585"],
+            "id": "q157$82464792-603F-46F5-B569-7A3CE2A3690B",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P166",
+                "hash": "2f42c03b0eab766d7eb08f2df3dc0aa72902106d",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 10855226
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P585": [
+                    {
+                        "snaktype": "value",
+                        "property": "P585",
+                        "hash": "6f7addff1626c32b29c9cc627c8990dcc1ba0925",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002012-05-15T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P585"],
+            "id": "q157$F13A6A75-2702-405F-9964-5EC0409B09CB",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "f70116eac7f49194478b3025330bfd8dcffa3c69",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ebfb99141b058cc936093dad3f9ad58be9db5862",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 8447
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P166",
+                "hash": "b0fbe9d6ad170ca5d7b6fce15652b223c66c9706",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 13422143
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P585": [
+                    {
+                        "snaktype": "value",
+                        "property": "P585",
+                        "hash": "6f7addff1626c32b29c9cc627c8990dcc1ba0925",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002012-05-15T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P585"],
+            "id": "q157$FCF24A46-1D19-4F9C-8DC0-198E9A0CD242",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P166",
+                "hash": "ea49620295d728a259b918fcc515a0685aa4cdfe",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 14539990
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P585": [
+                    {
+                        "snaktype": "value",
+                        "property": "P585",
+                        "hash": "86b5e43d1b197b2b5127439fe2756edf8667f6d5",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002012-11-15T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P585"],
+            "id": "q157$0A0B191B-1885-4DAB-9C56-618B718F93C9",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "799e6ad6178c39002c51901674d29691cfedc7c4",
+                    "snaks": {
+                        "P854": [
+                            {
+                                "snaktype": "value",
+                                "property": "P854",
+                                "hash": "8b322fd9fa63af760c056a21fb929dfa24af2448",
+                                "datavalue": {
+                                    "value": "http:\/\/www.quirinale.it\/elementi\/DettaglioOnorificenze.aspx?decorato=324322",
+                                    "type": "string"
+                                }
+                            }
+                        ],
+                        "P357": [
+                            {
+                                "snaktype": "value",
+                                "property": "P357",
+                                "hash": "6f59e8f17873ccc428d9fcb0088bea946e1ea216",
+                                "datavalue": {
+                                    "value": "Dettaglio decorato",
+                                    "type": "string"
+                                }
+                            }
+                        ],
+                        "P123": [
+                            {
+                                "snaktype": "value",
+                                "property": "P123",
+                                "hash": "3044d19c4c56127a8cb33084a72974326da801b2",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 15191779
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ],
+                        "P364": [
+                            {
+                                "snaktype": "value",
+                                "property": "P364",
+                                "hash": "59739638438aafc0c2ce27f95cdd364e9cb657f5",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 652
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ],
+                        "P813": [
+                            {
+                                "snaktype": "value",
+                                "property": "P813",
+                                "hash": "51a55c5f3471dfb6a96e3464a3b42622d9356ceb",
+                                "datavalue": {
+                                    "value": {
+                                        "time": "+00000002013-11-17T00:00:00Z",
+                                        "timezone": 0,
+                                        "before": 0,
+                                        "after": 0,
+                                        "precision": 11,
+                                        "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                                    },
+                                    "type": "time"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P854", "P357", "P123", "P364", "P813"]
+                }
+            ]
+        }
+    ],
+    "P227": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P227",
+                "hash": "5256d8e6b80307242a3218746a7802930a64913a",
+                "datavalue": {
+                    "value": "123636205",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "q157$76E228E3-0A3B-495B-AF29-7D5A7C9E0095",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "7eb64cf9621d34c54fd4bd040ed4b61a88c4a1a0",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "304fa688eced9eefba4e6ed9a84007eacbc9620d",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 328
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                },
+                {
+                    "hash": "004ec6fbee857649acdbdbad4f97b2c8571df97b",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ed26fcd5570c4e73da1b33301244ec0494789f52",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 48183
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                },
+                {
+                    "hash": "f70116eac7f49194478b3025330bfd8dcffa3c69",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ebfb99141b058cc936093dad3f9ad58be9db5862",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 8447
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P244": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P244",
+                "hash": "d18714ee0b2d1189c659901581f6ec4e1969c5b9",
+                "datavalue": {
+                    "value": "n92033817",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "q157$178D37B2-4394-4733-A995-D5E6129FEF6B",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "7eb64cf9621d34c54fd4bd040ed4b61a88c4a1a0",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "304fa688eced9eefba4e6ed9a84007eacbc9620d",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 328
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                },
+                {
+                    "hash": "004ec6fbee857649acdbdbad4f97b2c8571df97b",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ed26fcd5570c4e73da1b33301244ec0494789f52",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 48183
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                },
+                {
+                    "hash": "f70116eac7f49194478b3025330bfd8dcffa3c69",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ebfb99141b058cc936093dad3f9ad58be9db5862",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 8447
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P214": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P214",
+                "hash": "8d77b3f484164e1262b92614d530512c1728b239",
+                "datavalue": {
+                    "value": "64555",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "q157$CF176137-63E5-4083-9927-F2BF2E729C50",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "7eb64cf9621d34c54fd4bd040ed4b61a88c4a1a0",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "304fa688eced9eefba4e6ed9a84007eacbc9620d",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 328
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                },
+                {
+                    "hash": "004ec6fbee857649acdbdbad4f97b2c8571df97b",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ed26fcd5570c4e73da1b33301244ec0494789f52",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 48183
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                },
+                {
+                    "hash": "f70116eac7f49194478b3025330bfd8dcffa3c69",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ebfb99141b058cc936093dad3f9ad58be9db5862",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 8447
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P27": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P27",
+                "hash": "5dd434ae357dabc54331dad23fcf6a81fcaeefe5",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 142
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "q157$286D4E67-5A64-4555-A75B-CF6D32F4EDF3",
+            "rank": "normal"
+        }
+    ],
+    "P109": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P109",
+                "hash": "fbea4495cb1359d0c8755484d7a515c2d42051d4",
+                "datavalue": {
+                    "value": "Fran\u00e7ois Hollande signature.svg",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "q157$313C72D0-141C-4CF2-AD0C-23196BAB2E07",
+            "rank": "normal"
+        }
+    ],
+    "P213": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P213",
+                "hash": "0f032e9fa00736c3f5f67fef7cb93f8dddf02c6e",
+                "datavalue": {
+                    "value": "0000 0000 7831 4422",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "q157$2142EB8F-C898-4EE7-9BC1-55E25DE061A0",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "500bf0768a4645f1e00ad451f904d3a010fa43ae",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ee97523ab78298937407344769ad735a5fe8ca8d",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 423048
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P39": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P39",
+                "hash": "87b2826b8ce2e115ae9562f14019cc2785538161",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 191954
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P155": [
+                    {
+                        "snaktype": "value",
+                        "property": "P155",
+                        "hash": "a87557b96524d26489974dea5d0ecaa4323f7502",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 329
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P580": [
+                    {
+                        "snaktype": "value",
+                        "property": "P580",
+                        "hash": "18a99cf298476d49cdd938713432c423e0abfdec",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002012-05-15T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P155", "P580"],
+            "id": "q157$F445C62C-DE78-4304-BF4F-CA24986959C0",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "b618bcaf2c46c46406cf9b8dcc4c2d0ddecc64b7",
+                    "snaks": {
+                        "P248": [
+                            {
+                                "snaktype": "value",
+                                "property": "P248",
+                                "hash": "c3ea4fd8493f27e2b2a2e505d609eb29ebf5c097",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 11931253
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P248"]
+                }
+            ]
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P39",
+                "hash": "b14e4ab31d78b5d6b80b0e08f12d00219e3b3325",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 683337
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P155": [
+                    {
+                        "snaktype": "value",
+                        "property": "P155",
+                        "hash": "a87557b96524d26489974dea5d0ecaa4323f7502",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 329
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P580": [
+                    {
+                        "snaktype": "value",
+                        "property": "P580",
+                        "hash": "18a99cf298476d49cdd938713432c423e0abfdec",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002012-05-15T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P155", "P580"],
+            "id": "q157$8979C238-EAAD-42F3-8052-3A3115AF958E",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P39",
+                "hash": "b3e805cfa254c6a1d15fc68e5a916fc47d05d033",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 747123
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P580": [
+                    {
+                        "snaktype": "value",
+                        "property": "P580",
+                        "hash": "ff7b574334341f6bacdaaac9f28a8d30921860ec",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000001997-11-27T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ],
+                "P156": [
+                    {
+                        "snaktype": "value",
+                        "property": "P156",
+                        "hash": "a15f328fd889837f705915489ac4916caf09366b",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 228977
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P155": [
+                    {
+                        "snaktype": "value",
+                        "property": "P155",
+                        "hash": "ca39d63e30220b5f53041c358112449a17601b37",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 187099
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P582": [
+                    {
+                        "snaktype": "value",
+                        "property": "P582",
+                        "hash": "337c0f69f97ed2982ec4a671c516de8149e653b1",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002008-11-26T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P580", "P156", "P155", "P582"],
+            "id": "Q157$185bbc52-422f-5aac-7fb1-4082d41cf7b0",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P39",
+                "hash": "1d6703fe8225b315dd8fae5a6b8b0d0c18d8e1a0",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 382617
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P194": [
+                    {
+                        "snaktype": "value",
+                        "property": "P194",
+                        "hash": "e7669126ac26b1f89ed20c4c2b66b50cd2055a72",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 157713
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P580": [
+                    {
+                        "snaktype": "value",
+                        "property": "P580",
+                        "hash": "7d34fefba1f8d4bb71eeb65dcc6823859f3a90e9",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002001-03-17T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ],
+                "P582": [
+                    {
+                        "snaktype": "value",
+                        "property": "P582",
+                        "hash": "aee0e13924370b150e8695ceda850a6d0f47c066",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002008-03-17T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ],
+                "P155": [
+                    {
+                        "snaktype": "value",
+                        "property": "P155",
+                        "hash": "23c132901488413f86293958f91d949b17fffc58",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 3420616
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P156": [
+                    {
+                        "snaktype": "value",
+                        "property": "P156",
+                        "hash": "39005ca443c1534cb67aa4fd7c6ce1d28053209a",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 2897708
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P194", "P580", "P582", "P155", "P156"],
+            "id": "Q157$2860fbae-4388-a199-1801-ffb793d9082f",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P39",
+                "hash": "0167cac1b247f00f21fd47cf528de1e5fcffc7d7",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 3044918
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P156": [
+                    {
+                        "snaktype": "value",
+                        "property": "P156",
+                        "hash": "7aa08c8771bf9c7df6e9ea39bea4e2729486faf0",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 2482453
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P580": [
+                    {
+                        "snaktype": "value",
+                        "property": "P580",
+                        "hash": "5e270d8b917002faea8f78912ced4e361aa9a2f4",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000001997-01-01T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 9,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ],
+                "P582": [
+                    {
+                        "snaktype": "value",
+                        "property": "P582",
+                        "hash": "c218fca6204485c87e6b5bccbeccb53089a67752",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000002012-01-01T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 9,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ],
+                "P155": [
+                    {
+                        "snaktype": "value",
+                        "property": "P155",
+                        "hash": "ffd36b1629425208b1ab3b5a2b0311a15771f7b3",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 3265689
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P768": [
+                    {
+                        "snaktype": "value",
+                        "property": "P768",
+                        "hash": "2ba523670503c220e141d69e7f17b845568f9ec0",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 767203
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P1416": [
+                    {
+                        "snaktype": "value",
+                        "property": "P1416",
+                        "hash": "2f0480bf20df5adf0f5e6d0ae6dd8d779c02fa60",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 2236823
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P156", "P580", "P582", "P155", "P768", "P1416"],
+            "id": "Q157$67402B1D-22A2-41E1-947A-FD06F64EF725",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "4e2c38c2e53c54fa28441e1f7cfa892c85691c19",
+                    "snaks": {
+                        "P248": [
+                            {
+                                "snaktype": "value",
+                                "property": "P248",
+                                "hash": "95bcc72831fa737df2d615da13e2750a336372aa",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 15271528
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ],
+                        "P854": [
+                            {
+                                "snaktype": "value",
+                                "property": "P854",
+                                "hash": "3f51bd794ddf212338b4677d24ce60093ff86dd8",
+                                "datavalue": {
+                                    "value": "http:\/\/www.assemblee-nationale.fr\/13\/tribun\/fiches_id\/1654.asp",
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P248", "P854"]
+                }
+            ]
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P39",
+                "hash": "0167cac1b247f00f21fd47cf528de1e5fcffc7d7",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 3044918
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P155": [
+                    {
+                        "snaktype": "novalue",
+                        "property": "P155",
+                        "hash": "c64c2a33a4770d3e3cb7fa36b467fb2c9b9ad590"
+                    }
+                ],
+                "P156": [
+                    {
+                        "snaktype": "value",
+                        "property": "P156",
+                        "hash": "d86136d76cd8eaa18c8b38364852e3554d515c11",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 3420616
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ],
+                "P580": [
+                    {
+                        "snaktype": "value",
+                        "property": "P580",
+                        "hash": "0cd9b6f354a2da741dcffd77c71a7db1db002380",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000001988-06-13T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ],
+                "P582": [
+                    {
+                        "snaktype": "value",
+                        "property": "P582",
+                        "hash": "0c271c0c8b30e11c95a707489b87b99d0eecc9de",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000001993-04-01T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 11,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ],
+                "P1416": [
+                    {
+                        "snaktype": "value",
+                        "property": "P1416",
+                        "hash": "2f0480bf20df5adf0f5e6d0ae6dd8d779c02fa60",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 2236823
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P155", "P156", "P580", "P582", "P1416"],
+            "id": "Q157$2318355E-3B67-4E80-8332-FF990BAFEE1C",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "4e2c38c2e53c54fa28441e1f7cfa892c85691c19",
+                    "snaks": {
+                        "P248": [
+                            {
+                                "snaktype": "value",
+                                "property": "P248",
+                                "hash": "95bcc72831fa737df2d615da13e2750a336372aa",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 15271528
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ],
+                        "P854": [
+                            {
+                                "snaktype": "value",
+                                "property": "P854",
+                                "hash": "3f51bd794ddf212338b4677d24ce60093ff86dd8",
+                                "datavalue": {
+                                    "value": "http:\/\/www.assemblee-nationale.fr\/13\/tribun\/fiches_id\/1654.asp",
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P248", "P854"]
+                }
+            ]
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P39",
+                "hash": "8eba06cad6a4c25fa812a74f7b243db306b58bc5",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 3780304
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$E43E8D9D-BE29-4597-911B-4EB0E5138A2A",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P39",
+                "hash": "e32092683d4271b2c8d9eabedacd4feec6e0ee13",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 27169
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$F35C1691-AE88-4BCC-86E8-BBA048BFB865",
+            "rank": "normal"
+        }
+    ],
+    "P451": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P451",
+                "hash": "e21b3156d9c867206cb1476bbeb1e59e31a8b40a",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 230539
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "q157$5061701d-4ad4-e81f-e2a1-433b1036def3",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P451",
+                "hash": "df75450c013dcfcf9e45d9cd13bbf9806076ceed",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 81923
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "q157$25643c46-4868-50a1-1353-706bfded4cc2",
+            "rank": "normal"
+        }
+    ],
+    "P268": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P268",
+                "hash": "2173936ce62b9840d20be9306d614e6028f0e525",
+                "datavalue": {
+                    "value": "122353562",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "q157$E6E074B5-8E37-484C-B6CD-9317BB732309",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "f70116eac7f49194478b3025330bfd8dcffa3c69",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ebfb99141b058cc936093dad3f9ad58be9db5862",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 8447
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P569": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P569",
+                "hash": "1f83b3427a828c5808bcccfd83bb744db87e3efc",
+                "datavalue": {
+                    "value": {
+                        "time": "+00000001954-08-12T00:00:00Z",
+                        "timezone": 0,
+                        "before": 0,
+                        "after": 0,
+                        "precision": 11,
+                        "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                    },
+                    "type": "time"
+                }
+            },
+            "type": "statement",
+            "id": "q157$6aa1830d-4579-4a73-93d3-b8323606ff13",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "ed09009a6d56cb3c17e05d552da5d9fff201eb06",
+                    "snaks": {
+                        "P268": [
+                            {
+                                "snaktype": "value",
+                                "property": "P268",
+                                "hash": "2173936ce62b9840d20be9306d614e6028f0e525",
+                                "datavalue": {
+                                    "value": "122353562",
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P268"]
+                },
+                {
+                    "hash": "f991bf419530b161a136a5c4e55c49909074ce49",
+                    "snaks": {
+                        "P248": [
+                            {
+                                "snaktype": "value",
+                                "property": "P248",
+                                "hash": "8c06a4c07a21d94b1ba2914fd8486a10cd565564",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 36578
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ],
+                        "P813": [
+                            {
+                                "snaktype": "value",
+                                "property": "P813",
+                                "hash": "e04d1f79475e1535f2d79d2127e27d46b3961662",
+                                "datavalue": {
+                                    "value": {
+                                        "time": "+00000002014-04-09T00:00:00Z",
+                                        "timezone": 0,
+                                        "before": 0,
+                                        "after": 0,
+                                        "precision": 11,
+                                        "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                                    },
+                                    "type": "time"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P248", "P813"]
+                },
+                {
+                    "hash": "47e5c39012d85adb21c5d29a46cfa3d069ac3b7f",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "1e158580f586192c53b59455c852c7cf9c8ca3af",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 177837
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P19": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P19",
+                "hash": "28d4e36f6341f649545cb43dbcc41c26145eafab",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 30974
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "q157$4FB12770-E2F9-45EE-8763-118530CE340B",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "d6e3ab4045fb3f3feea77895bc6b27e663fc878a",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "1149b9b11e07f990000c1952c79f58f65d1bf3dd",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 206855
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P31": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P31",
+                "hash": "297e517a7b200cad1cc654c9dc6f6e605479c8eb",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 5
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "q157$64ef3af1-47ee-1654-d2cd-0de7b3bd0386",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "d6e3ab4045fb3f3feea77895bc6b27e663fc878a",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "1149b9b11e07f990000c1952c79f58f65d1bf3dd",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 206855
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P102": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P102",
+                "hash": "c6e9ac9c93ea6dd770923898bb346dba8a03c141",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 170972
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P580": [
+                    {
+                        "snaktype": "value",
+                        "property": "P580",
+                        "hash": "62b3a19f43f5b78a1915cc3b80747f2d245a52f4",
+                        "datavalue": {
+                            "value": {
+                                "time": "+00000001979-01-01T00:00:00Z",
+                                "timezone": 0,
+                                "before": 0,
+                                "after": 0,
+                                "precision": 9,
+                                "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                            },
+                            "type": "time"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P580"],
+            "id": "q157$C14CDC9D-C71A-4245-B24B-2CDC25C1B71E",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "6b5e780cf006574d9b99badb5ff649e7759f1ec4",
+                    "snaks": {
+                        "P854": [
+                            {
+                                "snaktype": "value",
+                                "property": "P854",
+                                "hash": "abd6b702799c0c4ab0d86852271e037f32d54a30",
+                                "datavalue": {
+                                    "value": "http:\/\/www.ambafrance-cn.org\/Francois-Hollande-Biographie.html",
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P854"]
+                }
+            ]
+        }
+    ],
+    "P140": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P140",
+                "hash": "3cb0ab4ba1d856f76dffbb124c1407a97a257e84",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 288928
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$83743ae9-4ce9-19ee-14f6-26c523f420bb",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "7fba015f924ec56cfd82f9f206bb2ff4b9f9e6b4",
+                    "snaks": {
+                        "P577": [
+                            {
+                                "snaktype": "value",
+                                "property": "P577",
+                                "hash": "6d42db420eeadd254401581051b66a13d7b3fb19",
+                                "datavalue": {
+                                    "value": {
+                                        "time": "+00000002012-03-15T00:00:00Z",
+                                        "timezone": 0,
+                                        "before": 0,
+                                        "after": 0,
+                                        "precision": 11,
+                                        "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                                    },
+                                    "type": "time"
+                                }
+                            }
+                        ],
+                        "P248": [
+                            {
+                                "snaktype": "value",
+                                "property": "P248",
+                                "hash": "d347b36ae5d37cec92aaab037e7e454b48917da1",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 1230298
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ],
+                        "P854": [
+                            {
+                                "snaktype": "value",
+                                "property": "P854",
+                                "hash": "f105820a0f9c8ac3c5a1bae5b5a7839483d4b43f",
+                                "datavalue": {
+                                    "value": "http:\/\/www.la-croix.com\/Actualite\/France\/Francois-Hollande-souhaite-apaiser-les-relations-avec-les-cultes-_EP_-2012-03-06-775678",
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P577", "P248", "P854"]
+                }
+            ]
+        }
+    ],
+    "P106": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P106",
+                "hash": "ace043c754b4da64d41e680da3594d38a61f163b",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 82955
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$72610d47-4d8c-c779-dc00-d3a124fefecd",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P106",
+                "hash": "619fba9dbd1609cb4393e7fc280dcc0f8898c35e",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 4594605
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$7b75c477-48d2-6920-9c7c-99db14051822",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P106",
+                "hash": "e2999f66e0fed626491c8f623c3671e254f4963a",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 40348
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$b07d707d-4e25-9c8e-07d8-1e57904f0d8d",
+            "rank": "normal"
+        }
+    ],
+    "P910": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P910",
+                "hash": "87372b352288aa96c63a2d04c585dc4b5602b17a",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 8471509
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$FFBD8803-5004-4F6D-BA5A-D6CBA21F39A7",
+            "rank": "normal"
+        }
+    ],
+    "P269": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P269",
+                "hash": "fe27fe6ca8a2f8e9405bb58e5c7e9f47787271d9",
+                "datavalue": {
+                    "value": "031063357",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$7FB1076A-F3D0-4753-8373-25E01CD4D237",
+            "rank": "normal"
+        }
+    ],
+    "P950": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P950",
+                "hash": "54541a7e2ef7098c747cdb03f726e6ef4f884273",
+                "datavalue": {
+                    "value": "XX5261839",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$641CD7C4-B295-44FD-9E7F-D4CD33591483",
+            "rank": "normal"
+        }
+    ],
+    "P1006": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P1006",
+                "hash": "26ecabeb60edd543afadca504e6e0f8a4688782f",
+                "datavalue": {
+                    "value": "299329356",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$22DAEE1A-BAEC-4266-9ED3-B3E07C183051",
+            "rank": "normal"
+        }
+    ],
+    "P646": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P646",
+                "hash": "ec462eae8cbbc1c0e380bc5427ee82772be71a13",
+                "datavalue": {
+                    "value": "\/m\/02qg4z",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$BE494DA2-F2FF-4F77-BA1D-319876AB7D55",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "b923b0d68beb300866b87ead39f61e63ec30d8af",
+                    "snaks": {
+                        "P248": [
+                            {
+                                "snaktype": "value",
+                                "property": "P248",
+                                "hash": "62e345446a0c505d83139055fc6affea7d82887b",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 15241312
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ],
+                        "P577": [
+                            {
+                                "snaktype": "value",
+                                "property": "P577",
+                                "hash": "e835a3f4c5651b4cb3533d61b8b6c518e8e96f0b",
+                                "datavalue": {
+                                    "value": {
+                                        "time": "+00000002013-10-28T00:00:00Z",
+                                        "timezone": 0,
+                                        "before": 0,
+                                        "after": 0,
+                                        "precision": 11,
+                                        "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                                    },
+                                    "type": "time"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P248", "P577"]
+                }
+            ]
+        }
+    ],
+    "P734": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P734",
+                "hash": "23ee3de53ecb3cc21af88370183fae9f10920f33",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 1175467
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$4a20c200-43dc-6c4e-b0b4-5b9667d415fe",
+            "rank": "normal"
+        },
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P734",
+                "hash": "5710ed88d496d58e32540232a20c9a6cce9eb99c",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 2104750
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$553e8f0e-4657-09e2-8167-2061d36e9d84",
+            "rank": "normal"
+        }
+    ],
+    "P1186": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P1186",
+                "hash": "76f6edccc14a8495d151a14f4be6a117ef2c11c7",
+                "datavalue": {
+                    "value": "4285",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$8E559086-D587-4ACA-BECF-110D78BF5799",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "004ec6fbee857649acdbdbad4f97b2c8571df97b",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "ed26fcd5570c4e73da1b33301244ec0494789f52",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 48183
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P1045": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P1045",
+                "hash": "e732e9df8e9ab811d85c249e3052fe2e65a79dd6",
+                "datavalue": {
+                    "value": "3853",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$EB816ECF-8A3D-4BC1-ADED-6240BC637470",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "32ba38c5bdd57048ec3cba29793a0cc484155011",
+                    "snaks": {
+                        "P248": [
+                            {
+                                "snaktype": "value",
+                                "property": "P248",
+                                "hash": "95bcc72831fa737df2d615da13e2750a336372aa",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 15271528
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P248"]
+                }
+            ]
+        }
+    ],
+    "P1273": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P1273",
+                "hash": "ffc61bc5e651f751e2d206309606c7f83f11215d",
+                "datavalue": {
+                    "value": "a11585754",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$ED3AAF5A-1235-46BB-B90B-416B186ECB1B",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "e75c14739f9bfaeff4c6731a6b0c7c3f929ade15",
+                    "snaks": {
+                        "P854": [
+                            {
+                                "snaktype": "value",
+                                "property": "P854",
+                                "hash": "e24288cfc3e02c58105b557a31bd07bfdae4ac92",
+                                "datavalue": {
+                                    "value": "https:\/\/viaf.org\/viaf\/64555\/",
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P854"]
+                }
+            ]
+        }
+    ],
+    "P1296": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P1296",
+                "hash": "f4ed2957f4a67f49fbb36cce15b5ba70cb3bf15b",
+                "datavalue": {
+                    "value": "0522359",
+                    "type": "string"
+                }
+            },
+            "type": "statement",
+            "id": "Q157$B98CC0A1-682D-483C-AEE0-61DD5AD9C006",
+            "rank": "normal",
+            "references": [
+                {
+                    "hash": "d6e6c12387b861a6d1ba4ea22c85225745a63702",
+                    "snaks": {
+                        "P143": [
+                            {
+                                "snaktype": "value",
+                                "property": "P143",
+                                "hash": "c0a7d69d350bd75473e8244df399959b194be5b1",
+                                "datavalue": {
+                                    "value": {
+                                        "entity-type": "item",
+                                        "numeric-id": 199693
+                                    },
+                                    "type": "wikibase-entityid"
+                                }
+                            }
+                        ]
+                    },
+                    "snaks-order": ["P143"]
+                }
+            ]
+        }
+    ],
+    "P1343": [
+        {
+            "mainsnak": {
+                "snaktype": "value",
+                "property": "P1343",
+                "hash": "1b4019e493a67b44f6012489b9cb8214d6415c04",
+                "datavalue": {
+                    "value": {
+                        "entity-type": "item",
+                        "numeric-id": 17290934
+                    },
+                    "type": "wikibase-entityid"
+                }
+            },
+            "type": "statement",
+            "qualifiers": {
+                "P357": [
+                    {
+                        "snaktype": "value",
+                        "property": "P357",
+                        "hash": "edb6d1f32b56ec5573bed60129c5b345dad118eb",
+                        "datavalue": {
+                            "value": "\u041e\u043b\u043b\u0430\u043d\u0434, \u0424\u0440\u0430\u043d\u0441\u0443\u0430",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "P248": [
+                    {
+                        "snaktype": "value",
+                        "property": "P248",
+                        "hash": "a2c734ef9221cde2108eaf8e855c4d253d4de3e5",
+                        "datavalue": {
+                            "value": {
+                                "entity-type": "item",
+                                "numeric-id": 17316984
+                            },
+                            "type": "wikibase-entityid"
+                        }
+                    }
+                ]
+            },
+            "qualifiers-order": ["P357", "P248"],
+            "id": "Q157$335A7D8C-F601-4005-A366-C703DF3D9DC3",
+            "rank": "normal"
+        }
+    ]
+}, "sitelinks": {
+    "frwiki": {
+        "site": "frwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "itwiki": {
+        "site": "itwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "enwiki": {
+        "site": "enwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "plwiki": {
+        "site": "plwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "afwiki": {
+        "site": "afwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "alswiki": {
+        "site": "alswiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "anwiki": {
+        "site": "anwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "arwiki": {
+        "site": "arwiki",
+        "title": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0623\u0648\u0644\u0627\u0646\u062f",
+        "badges": []
+    },
+    "arzwiki": {
+        "site": "arzwiki",
+        "title": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
+        "badges": []
+    },
+    "azwiki": {
+        "site": "azwiki",
+        "title": "Fransua Oland",
+        "badges": []
+    },
+    "bclwiki": {
+        "site": "bclwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "bewiki": {
+        "site": "bewiki",
+        "title": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u0410\u043b\u0430\u043d\u0434",
+        "badges": []
+    },
+    "bgwiki": {
+        "site": "bgwiki",
+        "title": "\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
+        "badges": []
+    },
+    "bnwiki": {
+        "site": "bnwiki",
+        "title": "\u09ab\u09cd\u09b0\u09be\u0981\u09b8\u09cb\u09af\u09bc\u09be \u0993\u09b2\u09be\u0981\u09a6",
+        "badges": []
+    },
+    "bowiki": {
+        "site": "bowiki",
+        "title": "\u0f67\u0fa5\u0f0b\u0f62\u0f53\u0f0b\u0f66\u0f74\u0f60\u0f71\u0f0b\u0f68\u0f7c\u0f0b\u0f63\u0f53\u0f0b\u0f51\u0f7a\u0f0d",
+        "badges": []
+    },
+    "brwiki": {
+        "site": "brwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "bswiki": {
+        "site": "bswiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "cawiki": {
+        "site": "cawiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "ckbwiki": {
+        "site": "ckbwiki",
+        "title": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0626\u06c6\u0644\u0627\u0646\u062f",
+        "badges": []
+    },
+    "cowiki": {
+        "site": "cowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "cswiki": {
+        "site": "cswiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "cywiki": {
+        "site": "cywiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "dawiki": {
+        "site": "dawiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "dewiki": {
+        "site": "dewiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "dsbwiki": {
+        "site": "dsbwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "elwiki": {
+        "site": "elwiki",
+        "title": "\u03a6\u03c1\u03b1\u03bd\u03c3\u03bf\u03c5\u03ac \u039f\u03bb\u03bb\u03ac\u03bd\u03c4",
+        "badges": []
+    },
+    "eowiki": {
+        "site": "eowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "eswiki": {
+        "site": "eswiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "etwiki": {
+        "site": "etwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "euwiki": {
+        "site": "euwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "extwiki": {
+        "site": "extwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "fawiki": {
+        "site": "fawiki",
+        "title": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
+        "badges": []
+    },
+    "fiwiki": {
+        "site": "fiwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "fywiki": {
+        "site": "fywiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "gdwiki": {
+        "site": "gdwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "glwiki": {
+        "site": "glwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "gvwiki": {
+        "site": "gvwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "hewiki": {
+        "site": "hewiki",
+        "title": "\u05e4\u05e8\u05e0\u05e1\u05d5\u05d0\u05d4 \u05d4\u05d5\u05dc\u05e0\u05d3",
+        "badges": []
+    },
+    "hrwiki": {
+        "site": "hrwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "hsbwiki": {
+        "site": "hsbwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "huwiki": {
+        "site": "huwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "hywiki": {
+        "site": "hywiki",
+        "title": "\u0556\u0580\u0561\u0576\u057d\u0578\u0582\u0561 \u0555\u056c\u0561\u0576\u0564",
+        "badges": []
+    },
+    "iawiki": {
+        "site": "iawiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "idwiki": {
+        "site": "idwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "iewiki": {
+        "site": "iewiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "iswiki": {
+        "site": "iswiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "jawiki": {
+        "site": "jawiki",
+        "title": "\u30d5\u30e9\u30f3\u30bd\u30ef\u30fb\u30aa\u30e9\u30f3\u30c9",
+        "badges": []
+    },
+    "jvwiki": {
+        "site": "jvwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "kawiki": {
+        "site": "kawiki",
+        "title": "\u10e4\u10e0\u10d0\u10dc\u10e1\u10e3\u10d0 \u10dd\u10da\u10d0\u10dc\u10d3\u10d8",
+        "badges": []
+    },
+    "kgwiki": {
+        "site": "kgwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "kkwiki": {
+        "site": "kkwiki",
+        "title": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
+        "badges": []
+    },
+    "knwiki": {
+        "site": "knwiki",
+        "title": "\u0cab\u0ccd\u0cb0\u0cbe\u0c82\u0c95\u0ccb\u0caf\u0cbf\u0cb8\u0ccd \u0cb9\u0cbe\u0cb2\u0cc6\u0c82\u0ca1\u0ccd",
+        "badges": []
+    },
+    "kowiki": {
+        "site": "kowiki",
+        "title": "\ud504\ub791\uc218\uc544 \uc62c\ub791\ub4dc",
+        "badges": []
+    },
+    "lawiki": {
+        "site": "lawiki",
+        "title": "Franciscus Hollande",
+        "badges": []
+    },
+    "ladwiki": {
+        "site": "ladwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "lbwiki": {
+        "site": "lbwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "lmowiki": {
+        "site": "lmowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "ltwiki": {
+        "site": "ltwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "lvwiki": {
+        "site": "lvwiki",
+        "title": "Fransu\u0101 Olands",
+        "badges": []
+    },
+    "mkwiki": {
+        "site": "mkwiki",
+        "title": "\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
+        "badges": []
+    },
+    "mrwiki": {
+        "site": "mrwiki",
+        "title": "\u092b\u094d\u0930\u093e\u0902\u0938\u094d\u0935\u093e \u0911\u0932\u093e\u0902\u0926",
+        "badges": []
+    },
+    "mswiki": {
+        "site": "mswiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "mwlwiki": {
+        "site": "mwlwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "mywiki": {
+        "site": "mywiki",
+        "title": "\u1016\u101b\u1014\u103a\u1006\u103d\u102c \u101f\u1031\u102c\u103a\u101c\u1014\u103a",
+        "badges": []
+    },
+    "mznwiki": {
+        "site": "mznwiki",
+        "title": "\u0641\u0631\u0627\u0646\u0633\u0648\u0627 \u0627\u0648\u0644\u0627\u0646\u062f",
+        "badges": []
+    },
+    "ndswiki": {
+        "site": "ndswiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "nlwiki": {
+        "site": "nlwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "nnwiki": {
+        "site": "nnwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "nowiki": {
+        "site": "nowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "nrmwiki": {
+        "site": "nrmwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "ocwiki": {
+        "site": "ocwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "pamwiki": {
+        "site": "pamwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "ptwiki": {
+        "site": "ptwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "quwiki": {
+        "site": "quwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "rowiki": {
+        "site": "rowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "ruwiki": {
+        "site": "ruwiki",
+        "title": "\u041e\u043b\u043b\u0430\u043d\u0434, \u0424\u0440\u0430\u043d\u0441\u0443\u0430",
+        "badges": []
+    },
+    "scnwiki": {
+        "site": "scnwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "sewiki": {
+        "site": "sewiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "shwiki": {
+        "site": "shwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "simplewiki": {
+        "site": "simplewiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "skwiki": {
+        "site": "skwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "sowiki": {
+        "site": "sowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "sqwiki": {
+        "site": "sqwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "srwiki": {
+        "site": "srwiki",
+        "title": "\u0424\u0440\u0430\u043d\u0441\u043e\u0430 \u041e\u043b\u0430\u043d\u0434",
+        "badges": []
+    },
+    "svwiki": {
+        "site": "svwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "tawiki": {
+        "site": "tawiki",
+        "title": "\u0baa\u0bbf\u0bb0\u0bbe\u0ba9\u0bcd\u0b9a\u0bc1\u0bb5\u0bbe \u0b86\u0bb2\u0ba8\u0bcd\u0ba4\u0bc1",
+        "badges": []
+    },
+    "thwiki": {
+        "site": "thwiki",
+        "title": "\u0e1f\u0e23\u0e47\u0e2d\u0e07\u0e0b\u0e31\u0e27 \u0e2d\u0e2d\u0e25\u0e47\u0e2d\u0e07\u0e14\u0e4c",
+        "badges": []
+    },
+    "tlwiki": {
+        "site": "tlwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "trwiki": {
+        "site": "trwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "ttwiki": {
+        "site": "ttwiki",
+        "title": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
+        "badges": []
+    },
+    "tywiki": {
+        "site": "tywiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "ukwiki": {
+        "site": "ukwiki",
+        "title": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
+        "badges": []
+    },
+    "uzwiki": {
+        "site": "uzwiki",
+        "title": "Fransua Olland",
+        "badges": []
+    },
+    "vepwiki": {
+        "site": "vepwiki",
+        "title": "Olland Fransua",
+        "badges": []
+    },
+    "viwiki": {
+        "site": "viwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "warwiki": {
+        "site": "warwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "xmfwiki": {
+        "site": "xmfwiki",
+        "title": "\u10e4\u10e0\u10d0\u10dc\u10e1\u10e3\u10d0 \u10dd\u10da\u10d0\u10dc\u10d3\u10d8",
+        "badges": []
+    },
+    "yiwiki": {
+        "site": "yiwiki",
+        "title": "\u05e4\u05e8\u05d0\u05e0\u05e6\u05d5\u05d5\u05d0 \u05d4\u05d0\u05dc\u05d0\u05e0\u05d3",
+        "badges": []
+    },
+    "yowiki": {
+        "site": "yowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "zhwiki": {
+        "site": "zhwiki",
+        "title": "\u5f17\u6717\u7d22\u74e6\u00b7\u5965\u6717\u5fb7",
+        "badges": []
+    },
+    "astwiki": {
+        "site": "astwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "iowiki": {
+        "site": "iowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "kuwiki": {
+        "site": "kuwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "be_x_oldwiki": {
+        "site": "be_x_oldwiki",
+        "title": "\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u0410\u043b\u044f\u043d\u0434",
+        "badges": []
+    },
+    "mtwiki": {
+        "site": "mtwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "vecwiki": {
+        "site": "vecwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "scowiki": {
+        "site": "scowiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "pawiki": {
+        "site": "pawiki",
+        "title": "\u0a2b\u0a30\u0a3e\u0a02\u0a38\u0a4b\u0a06 \u0a14\u0a32\u0a3e\u0a02\u0a26",
+        "badges": []
+    },
+    "gawiki": {
+        "site": "gawiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "commonswiki": {
+        "site": "commonswiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "enwikisource": {
+        "site": "enwikisource",
+        "title": "Author:Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "frwikisource": {
+        "site": "frwikisource",
+        "title": "Auteur:Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "lnwiki": {
+        "site": "lnwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "elwikiquote": {
+        "site": "elwikiquote",
+        "title": "\u03a6\u03c1\u03b1\u03bd\u03c3\u03bf\u03c5\u03ac \u039f\u03bb\u03bb\u03ac\u03bd\u03c4",
+        "badges": []
+    },
+    "frwikiquote": {
+        "site": "frwikiquote",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "itwikiquote": {
+        "site": "itwikiquote",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "plwikiquote": {
+        "site": "plwikiquote",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "ruwikinews": {
+        "site": "ruwikinews",
+        "title": "\u041a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044f:\u0424\u0440\u0430\u043d\u0441\u0443\u0430 \u041e\u043b\u043b\u0430\u043d\u0434",
+        "badges": []
+    },
+    "hakwiki": {
+        "site": "hakwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "eowikinews": {
+        "site": "eowikinews",
+        "title": "Kategorio:Fran\u00e7ois HOLLANDE",
+        "badges": []
+    },
+    "emlwiki": {
+        "site": "emlwiki",
+        "title": "Fran\u00e7ois Hollande",
+        "badges": []
+    },
+    "zh_yuewiki": {
+        "site": "zh_yuewiki",
+        "title": "\u5967\u6717\u5fb7",
+        "badges": []
+    }
+}}
