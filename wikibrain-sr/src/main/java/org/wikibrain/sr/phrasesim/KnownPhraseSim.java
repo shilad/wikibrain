@@ -302,6 +302,23 @@ public class KnownPhraseSim {
         return cosimilarity(rowIds, colIds);
     }
 
+    public float[] getPhraseVector(String phrase) {
+        Integer id = getId(phrase);
+        if (id == null) {
+            return null;
+        } else {
+            return getPhraseVector(id);
+        }
+    }
+
+    public float[] getPhraseVector(int id) {
+        return cosim.getVector(id);
+    }
+
+    public float similarity(int id1, int id2) {
+        return cosim.similarity(id1, id2);
+    }
+
     public double[][] cosimilarity(TIntList rows, TIntList columns) {
         double cosims[][] = new double[rows.size()][columns.size()];
         if (cosim != null) {

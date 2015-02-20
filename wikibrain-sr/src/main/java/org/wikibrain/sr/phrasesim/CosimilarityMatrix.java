@@ -48,6 +48,14 @@ public class CosimilarityMatrix implements Serializable {
         completed[denseId] = true;
     }
 
+    public float[] getVector(int id) {
+        if (sparse2Dense.containsKey(id)) {
+            return matrix[sparse2Dense.get(id)];
+        } else {
+            return null;
+        }
+    }
+
     public synchronized int size() {
         return sparse2Dense.size();
     }
@@ -139,6 +147,14 @@ public class CosimilarityMatrix implements Serializable {
         completed = newCompleted;
 
         LOGGER.info("finished expanding cosimilarity matrix");
+    }
+
+    public float similarity(int id1, int id2) {
+        if (sparse2Dense.containsKey(id1) && sparse2Dense.containsKey(id2)) {
+            return matrix[sparse2Dense.get(id1)][sparse2Dense.get(id2)];
+        } else {
+            return 0f;
+        }
     }
 
     /**

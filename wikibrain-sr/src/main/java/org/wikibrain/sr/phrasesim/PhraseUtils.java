@@ -38,7 +38,7 @@ public class PhraseUtils {
         }
     }
 
-    public static TLongFloatMap intMap2FloatMap(TIntFloatMap map) {
+    public static TLongFloatMap intMap2LongMap(TIntFloatMap map) {
         if (map == null) {
             return null;
         }

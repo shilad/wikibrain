@@ -52,7 +52,7 @@ public class PhraseSimEvaluator {
         metrics[3] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "inlink", "language", lc);
         double coefficients[] = new double[] { 0.25, 0.45, 0.12, 0.18 };
 
-        StringNormalizer normalizer = env.getConfigurator().get(StringNormalizer.class, "simple");
+        StringNormalizer normalizer = env.getConfigurator().get(StringNormalizer.class, lc);
         PhraseCreator creator = new EnsemblePhraseCreator(metrics, coefficients);
         File dir = FileUtils.getFile(env.getBaseDir(), "dat/phrase-sim-test/");
         FileUtils.deleteQuietly(dir);
