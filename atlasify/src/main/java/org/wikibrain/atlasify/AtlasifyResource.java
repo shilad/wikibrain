@@ -4,7 +4,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import com.vividsolutions.jts.geom.Geometry;
-import org.eclipse.jetty.util.ajax.JSON;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wikibrain.conf.Configurator;
