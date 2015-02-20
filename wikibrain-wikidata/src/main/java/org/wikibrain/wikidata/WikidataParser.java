@@ -39,10 +39,10 @@ public class WikidataParser {
     private static BufferedWriter writer;
 
     public WikidataEntity parse(String json) throws WpParseException {
-        JacksonTermedDocument mwDoc;
+        JacksonTermedStatementDocument mwDoc;
 
         try {
-            mwDoc = mapper.readValue(json, JacksonTermedDocument.class);
+            mwDoc = mapper.readValue(json, JacksonTermedStatementDocument.class);
         } catch (IOException e) {
             LOG.info("Error parsing: " + json);
             throw new WpParseException(e);
