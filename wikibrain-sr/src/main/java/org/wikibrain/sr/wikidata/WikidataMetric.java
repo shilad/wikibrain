@@ -10,29 +10,21 @@ import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.sr.ensemble.Ensemble;
 import org.jooq.tools.StringUtils;
 import org.wikibrain.conf.ConfigurationException;
-import org.wikibrain.conf.Configurator;
-import org.wikibrain.core.cmd.Env;
-import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.LocalPageDao;
-import org.wikibrain.core.lang.Language;
+
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.core.model.Title;
-import org.wikibrain.wikidata.LocalWikidataStatement;
-import org.wikibrain.wikidata.WikidataDao;
 import org.apache.commons.lang.WordUtils;
 
 import java.io.IOException;
 import java.util.*;
 
-import org.wikibrain.wikidata.WikidataEntity;
-import org.wikibrain.wikidata.WikidataValue;
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-import sun.rmi.runtime.Log;
 
-import javax.lang.model.element.Element;
+import org.wikibrain.wikidata.LocalWikidataStatement;
+import org.wikibrain.wikidata.WikidataDao;
+import org.wikibrain.wikidata.WikidataEntity;
+import org.xml.sax.*;
+
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
 

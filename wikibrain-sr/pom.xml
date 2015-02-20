@@ -28,6 +28,11 @@
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
+            <artifactId>wikibrain-wikidata</artifactId>
+            <version>0.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-phrases</artifactId>
             <version>0.5.2</version>
         </dependency>
