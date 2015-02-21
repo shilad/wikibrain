@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Phrases>
+	<Phrase>
+		<ID>default</ID>
+		<Text>%1$s has a %3$s relationship with %2$s</Text>
+	</Phrase>
+    <Phrase>
+        <ID>10</ID>
+        <Media>video</Media>
+    </Phrase>
+    <Phrase>
+        <ID>14</ID>
+        <Media>highway marker</Media>
+    </Phrase>
+    <Phrase>
+        <ID>15</ID>
+        <Media>road map</Media>
+    </Phrase>
+    <Phrase>
+        <ID>17</ID>
+        <Text>%s is in the country of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>18</ID>
+        <Media>image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>19</ID>
+        <Text>%s was born in %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>20</ID>
+        <Text>%s died in %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>21</ID>
+        <Text>%s is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>27</ID>
+        <Text>%s is a citizen of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>30</ID>
+        <Text>%s is on the continent of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>31</ID>
+        <Text>%s is a type of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>35</ID>
+        <Text>%s's head of state is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>36</ID>
+        <Text>%s is the capital of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>37</ID>
+        <Text>%s's offical language is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>39</ID>
+        <Text>%s was a %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>41</ID>
+        <Media>flag image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>47</ID>
+        <Text>%s shares a border with %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>51</ID>
+        <Media>audio</Media>
+    </Phrase>
+    <Phrase>
+        <ID>54</ID>
+        <Text>%s is a member of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>61</ID>
+        <Text>%s was discovered by %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>66</ID>
+        <Text>%s's ancestral home is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>69</ID>
+        <Text>%s was educated at %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>91</ID>
+        <Text>%s is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>94</ID>
+        <Media>coat of arms</Media>
+    </Phrase>
+    <Phrase>
+        <ID>101</ID>
+        <Text>%s's field of work is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>102</ID>
+        <Text>%s was a member of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>103</ID>
+        <Text>%s's native language is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>106</ID>
+        <Text>%s's occupation is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>108</ID>
+        <Text>%s is employed by %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>109</ID>
+        <Media>signature</Media>
+    </Phrase>
+    <Phrase>
+        <ID>117</ID>
+        <Media>chemical structure</Media>
+    </Phrase>
+    <Phrase>
+        <ID>119</ID>
+        <Text>%s is buried in %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>122</ID>
+        <Text>%s's goverment is a %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>127</ID>
+        <Text>%s is owned by %s</Text>
+    </Phrase>
+	<Phrase>
+		<ID>131</ID>
+		<Text>%s is located in %s</Text>
+	</Phrase>
+    <Phrase>
+        <ID>138</ID>
+        <Text>%s is named after %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>140</ID>
+        <Text>%s practices %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>150</ID>
+        <Text>%s contains %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>154</ID>
+        <Media>logo image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>155</ID>
+        <Text>%s follows %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>156</ID>
+        <Text>%s is followed by $s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>158</ID>
+        <Media>seal image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>157</ID>
+        <Text>%s was killed by %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>166</ID>
+        <Text>%s recieved %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>172</ID>
+        <Text>%s is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>181</ID>
+        <Media>range map image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>184</ID>
+        <Text>%2$s was the doctoral advisor of %1$s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>185</ID>
+        <Text>%2$s was the doctoral student of %1$s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>186</ID>
+        <Text>%s is made from %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>190</ID>
+        <Text>%s is a sister city of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>194</ID>
+        <Text>%s's legislative body is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>207</ID>
+        <Media>bathymetry image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>237</ID>
+        <Text>%s's coat of arms in %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>241</ID>
+        <Text>%s was a part of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>242</ID>
+        <Media>locator map image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>263</ID>
+        <Text>%s resides in %s</Text>
+    </Phrase>
+	<Phrase>
+		<ID>279</ID>
+		<Text>%s is a type of %s</Text>
+	</Phrase>
+    <Phrase>
+        <ID>301</ID>
+        <Text>%2$s is the main topic of %1$s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>360</ID>
+        <Text>%s is a list of $s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>361</ID>
+        <Text>%s is a part of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>366</ID>
+        <Text>%s's uses include %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>367</ID>
+        <Media>astronomic symbol image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>368</ID>
+        <Media>Sandbox-CommonsMediaFile</Media>
+    </Phrase>
+    <Phrase>
+        <ID>410</ID>
+        <Text>%s was %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>411</ID>
+        <Text>%s is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>412</ID>
+        <Text>%s is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>413</ID>
+        <Text>%s played %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>416</ID>
+        <Text>%2$s is the symbol for %1$s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>421</ID>
+        <Text>%s is located in time zone %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>423</ID>
+        <Text>%s shoots %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>443</ID>
+        <Media>pronunciation</Media>
+    </Phrase>
+    <Phrase>
+        <ID>450</ID>
+        <Text>%s was a member of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>460</ID>
+        <Text>%s is the same as %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>461</ID>
+        <Text>$s is the opposite of $s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>462</ID>
+        <Text>%s is $s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>463</ID>
+        <Text>%s is a member of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>465</ID>
+        <Text>%s's color in hex is 0x$s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>485</ID>
+        <Text>%s is archived at %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>487</ID>
+        <Text>%s's Unicode character is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>491</ID>
+        <Media>orbit diagram</Media>
+    </Phrase>
+    <Phrase>
+        <ID>509</ID>
+        <Text>%s died because of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>518</ID>
+        <Text>%s applies to %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>527</ID>
+        <Text>%s contains %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>569</ID>
+        <Text>%s was born on %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>570</ID>
+        <Text>%s died on %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>575</ID>
+        <Text>%s was discovered %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>580</ID>
+        <Text>%s began %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>582</ID>
+        <Text>%s ended %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>585</ID>
+        <Text>%s was %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>625</ID>
+        <Text>%s is located at %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>692</ID>
+        <Media>Gene Atlas Image</Media>
+    </Phrase>
+    <Phrase>
+        <ID>790</ID>
+        <Text>%s is approved by %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>800</ID>
+        <Text>%s's notable works include %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>802</ID>
+        <Text>%s's students include %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>910</ID>
+        <Text>%s belongs to the %s catrgory</Text>
+    </Phrase>
+    <Phrase>
+        <ID>948</ID>
+        <Media>Wikivoyage banner</Media>
+    </Phrase>
+    <Phrase>
+        <ID>989</ID>
+        <Media>spoken text audio</Media>
+    </Phrase>
+    <Phrase>
+        <ID>990</ID>
+        <Media>recording of the subject's voice'</Media>
+    </Phrase>
+    <Phrase>
+        <ID>996</ID>
+        <Media>scan file</Media>
+    </Phrase>
+    <Phrase>
+        <ID>1066</ID>
+        <Text>%s was a student of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1196</ID>
+        <Text>%s died of %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1246</ID>
+        <Text>%s's patent number is %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1269</ID>
+        <Text>%2$s is a facet of %1$s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1318</ID>
+        <Text>%s was proved by %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1343</ID>
+        <Text>%s is described in %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1383</ID>
+        <Text>%s contains %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1419</ID>
+        <Text>%s is shaped like a %s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1442</ID>
+        <Media>grave picture</Media>
+    </Phrase>
+    <Phrase>
+        <ID>1464</ID>
+        <Text>%2$s was born in %1$s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1465</ID>
+        <Text>%2$s died in %1$s</Text>
+    </Phrase>
+    <Phrase>
+        <ID>1537</ID>
+        <Text>%s is a contributing factor of %s</Text>
+    </Phrase>
+</Phrases>
+

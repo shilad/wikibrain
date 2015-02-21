@@ -51,3 +51,5 @@ wb-java.sh.backup
 
 # Explanation Logs
 explanation-logs/
+
+atlasify/src/main/java/org/wikibrain/atlasify/AtlasifyResource.java~
