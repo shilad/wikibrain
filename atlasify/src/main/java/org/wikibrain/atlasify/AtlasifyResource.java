@@ -542,6 +542,7 @@ public class AtlasifyResource {
             data.put("keyword", keyword);
             data.put("feature", feature);
             jsonExplanation.put("data", data);
+            System.out.println("GOT WIKIDATA EXPLANATION " + jsonExplanation.toString() + "\n\n");
 
             explanations.put(explanations.length(), jsonExplanation);
         }
