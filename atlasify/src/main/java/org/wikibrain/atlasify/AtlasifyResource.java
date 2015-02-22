@@ -80,7 +80,7 @@ public class AtlasifyResource {
     private static SRMetric sr = null;
     private static PhraseAnalyzer pa = null;
     private static LocalPageDao lpDao = null;
-    private static Language lang = Language.getByLangCode("simple");
+    private static Language lang = Language.getByLangCode("en");
     private static LocalPageAutocompleteSqlDao lpaDao = null;
     private static LocalLinkDao llDao = null;
     private static WikidataMetric wdMetric = null;
