@@ -15,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * TODO: make the individual metrics, and the linear combination of them, trainable.
+ *
  * @author Shilad Sen
  */
 public class EnsemblePhraseCreator implements PhraseCreator {

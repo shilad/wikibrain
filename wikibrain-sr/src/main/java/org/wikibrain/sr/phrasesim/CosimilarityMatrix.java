@@ -93,17 +93,17 @@ public class CosimilarityMatrix implements Serializable {
     }
 
 
-    public double[][] cosimilarity(TIntList rows, TIntList columns) {
-        double cosims[][] = new double[rows.size()][columns.size()];
-        int denseRowIds[] = new int[rows.size()];
-        int denseColIds[] = new int[columns.size()];
+    public double[][] cosimilarity(int rows[], int columns[]) {
+        double cosims[][] = new double[rows.length][columns.length];
+        int denseRowIds[] = new int[rows.length];
+        int denseColIds[] = new int[columns.length];
         synchronized (this) {
-            for (int i = 0; i < rows.size(); i++) {
-                int rowId = rows.get(i);
+            for (int i = 0; i < rows.length; i++) {
+                int rowId = rows[i];
                 denseRowIds[i] = sparse2Dense.containsKey(rowId) ? sparse2Dense.get(rowId) : -1;
             }
-            for (int i = 0; i < columns.size(); i++) {
-                int colId = columns.get(i);
+            for (int i = 0; i < columns.length; i++) {
+                int colId = columns[i];
                 denseColIds[i] = sparse2Dense.containsKey(colId) ? sparse2Dense.get(colId) : -1;
             }
         }

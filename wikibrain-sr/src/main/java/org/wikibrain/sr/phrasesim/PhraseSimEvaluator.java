@@ -43,22 +43,13 @@ public class PhraseSimEvaluator {
 
     public void evaluate(final List<List<String>> bundles) throws ConfigurationException, IOException {
         String lc = env.getDefaultLanguage().getLangCode();
-        System.out.println("processing " + bundles.size() + " bundles");
-
-        VectorBasedSRMetric metrics[] = new VectorBasedSRMetric[4];
-        metrics[0] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "builtword2vec", "language", lc);
-        metrics[1] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "ESA", "language", lc);
-        metrics[2] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "outlink", "language", lc);
-        metrics[3] = (VectorBasedSRMetric) env.getConfigurator().get(SRMetric.class, "inlink", "language", lc);
-        double coefficients[] = new double[] { 0.25, 0.45, 0.12, 0.18 };
-
-        StringNormalizer normalizer = env.getConfigurator().get(StringNormalizer.class, lc);
-        PhraseCreator creator = new EnsemblePhraseCreator(metrics, coefficients);
-        File dir = FileUtils.getFile(env.getBaseDir(), "dat/phrase-sim-test/");
+        File dir = FileUtils.getFile(env.getBaseDir(), "dat/sr/known-phrase/en");
         FileUtils.deleteQuietly(dir);
-        dir.mkdirs();
 
-        final KnownPhraseSim sim = new KnownPhraseSim(env.getDefaultLanguage(), creator, dir, normalizer);
+        final KnownPhraseSim sim = (KnownPhraseSim) env.getConfigurator().get(SRMetric.class, "known-phrase", "language", lc);
+        if (!sim.getDataDir().equals(dir)) {
+            throw new IllegalStateException("expected dir " + dir + ", found " + sim.getDataDir());
+        }
         final Map<String, Integer> ids = new ConcurrentHashMap<String, Integer>();
         ParallelForEach.loop(bundles, new Procedure<List<String>>() {
             @Override
@@ -74,8 +65,8 @@ public class PhraseSimEvaluator {
             }
         });
 
-        sim.flushCache();
-        sim.fitScoreNormalizer();
+        sim.flushCosimilarity();
+        sim.trainNormalizer();
 
         int numSamples = 0;
         int numSampleHits = 0;

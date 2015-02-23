@@ -28,11 +28,13 @@ import org.wikibrain.utils.WpIOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 /**
  * A "script" to build the semantic relatedness models.
@@ -237,6 +239,41 @@ public class SRBuilder {
         Config config = getMetricConfig(name).getConfig("generator");
         File model = Word2VecGenerator.getModelFile(config.getString("modelDir"), language);
         if (skipBuiltMetrics && model.isFile()) {
+            return;
+        }
+
+        if (config.hasPath("prebuilt") && config.getBoolean("prebuilt")) {
+            if (model.isFile()) {
+                return;
+            }
+            File downloadPath = new File(config.getString("binfile"));
+            if (!downloadPath.isFile()) {
+                throw new ConfigurationException(
+                        "word2vec model " + downloadPath.getAbsolutePath() + " cannot be found." +
+                                " You must download it from " + config.getString("url") +
+                                " into to the wikibrain download directory.");
+            }
+            if (!config.getStringList("languages").contains(language.getLangCode())) {
+                throw new ConfigurationException(
+                        "word2vec model " + downloadPath +
+                                " does not support language" + language);
+            }
+            if (downloadPath.toString().toLowerCase().endsWith("gz")) {
+                LOG.info("decompressing " + downloadPath + " to " + model);
+                File tmp = File.createTempFile("word2vec", "bin");
+                try {
+                    FileUtils.deleteQuietly(tmp);
+                    GZIPInputStream gz = new GZIPInputStream(new FileInputStream(downloadPath));
+                    FileUtils.copyInputStreamToFile(gz, tmp);
+                    gz.close();
+                    model.getParentFile().mkdirs();
+                    FileUtils.moveFile(tmp, model);
+                } finally {
+                    FileUtils.deleteQuietly(tmp);
+                }
+            } else {
+                FileUtils.copyFile(downloadPath, model);
+            }
             return;
         }
 
