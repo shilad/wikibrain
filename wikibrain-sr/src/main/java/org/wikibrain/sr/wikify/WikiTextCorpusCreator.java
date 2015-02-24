@@ -127,7 +127,7 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
         LocalPageDao lpd = env.getConfigurator().get(LocalPageDao.class);
         LinkProbabilityDao linkProbabilityDao =env.getConfigurator().get(LinkProbabilityDao.class);
         Language lang = env.getLanguages().getDefaultLanguage();
-        Wikifier wikifier = env.getConfigurator().get(MilneWittenWikifier.class, "default", "language", lang.getLangCode());
+        Wikifier wikifier = env.getConfigurator().get(Wikifier.class, "default", "language", lang.getLangCode());
 
         WikiTextCorpusCreator creator = new WikiTextCorpusCreator(lang, wikifier, rpd, lpd, linkProbabilityDao);
         if (cmd.hasOption("x")) {

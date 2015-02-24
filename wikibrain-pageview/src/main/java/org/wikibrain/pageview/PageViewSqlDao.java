@@ -298,6 +298,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> implements PageView
             }
         });
 
+
         endLoad();
 
         LOG.info(String.format("Found %d pageviews for langs %s and resolved %d of them.",

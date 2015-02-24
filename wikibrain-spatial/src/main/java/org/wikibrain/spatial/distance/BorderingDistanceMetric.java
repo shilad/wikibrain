@@ -1,6 +1,8 @@
 package org.wikibrain.spatial.distance;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.operation.distance.DistanceOp;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -46,6 +48,7 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
     private Map<Integer, TIntList> children = new HashMap<Integer, TIntList>();
     private ContainmentIndex index;
+    private boolean forceContains = false;
 
     public BorderingDistanceMetric(SpatialDataDao dao, String layer) {
         this.dao = dao;
@@ -76,15 +79,15 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
                 }, 50000);
         LOG.info("Found " + adjacencyList.size() + " nodes and " + numEdges.get() + " edges.");
 
-        geometries = dao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH);
-        ParallelForEach.loop(geometries.keySet(), WpThreadUtils.getMaxThreads(),
+        final Map<Integer, Geometry> points = dao.getAllGeometriesInLayer("wikidata", Precision.LatLonPrecision.HIGH);
+        ParallelForEach.loop(points.keySet(), WpThreadUtils.getMaxThreads(),
                 new Procedure<Integer>() {
                     @Override
                     public void call(Integer conceptId) throws Exception {
                         if (concepts != null && !concepts.contains(conceptId)) {
                             return;
                         }
-                        List<ContainmentIndex.Result> results = index.getContainer(geometries.get(conceptId));
+                        List<ContainmentIndex.Result> results = index.getContainer(points.get(conceptId));
                         if (results.size() >= 1) {
                             if (results.size() > 1) LOG.info("concept " + conceptId + " returned " + results.size());
                             int parentId = results.get(0).id;
@@ -253,6 +256,16 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
         this.maxSteps = maxSteps;
     }
 
+    /**
+     * If true, queries for geometries without any container
+     * will fall back on the closest nearby geometry.
+     * @param forceContains
+     */
+    public void setForceContains(boolean forceContains) {
+        this.forceContains = forceContains;
+        index.setForceContains(forceContains);
+    }
+
     private int getContainingGeometry(Geometry g) {
         if (index == null) {
             throw new IllegalStateException();
@@ -268,6 +281,10 @@ public class BorderingDistanceMetric implements SpatialDistanceMetric {
                 return r.id;
             }
         }
-        return -1;
+        if (forceContains && result.size() > 0) {
+            return result.get(0).id;
+        } else {
+            return -1;
+        }
     }
 }

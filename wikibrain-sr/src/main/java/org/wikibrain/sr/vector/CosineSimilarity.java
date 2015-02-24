@@ -108,9 +108,7 @@ public class CosineSimilarity implements VectorSimilarity {
             }
         }
 
-        SRResultList result = leaderboard.getTop();
-        result.sortDescending();
-        return result;
+        return leaderboard.getTop();
     }
 
     private SRResultList mostSimilarWithInvertedIndex(TIntFloatMap query, int maxResults, TIntSet validIds) throws IOException {
@@ -146,9 +144,7 @@ public class CosineSimilarity implements VectorSimilarity {
             leaderboard.tallyScore(id, sim);
         }
 
-        SRResultList result = leaderboard.getTop();
-        result.sortDescending();
-        return result;
+        return leaderboard.getTop();
     }
 
     @Override
