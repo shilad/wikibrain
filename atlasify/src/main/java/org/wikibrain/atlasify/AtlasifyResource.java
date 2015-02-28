@@ -700,9 +700,9 @@ public class AtlasifyResource {
             // do nothing
 
         }
-
-        System.out.println("GOT POI "+new JSONObject(resultMap).toString());
-        return Response.ok(new JSONObject(resultMap).toString()).header("Access-Control-Allow-Origin", "*").build();
+        JSONObject jsonMap = new JSONObject(resultMap);
+        System.out.println("GOT POI "+(jsonMap.toString()));
+        return Response.ok(jsonMap.toString()).header("Access-Control-Allow-Origin", "*").build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
     @POST
