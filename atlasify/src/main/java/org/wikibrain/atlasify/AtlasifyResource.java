@@ -338,7 +338,7 @@ public class AtlasifyResource {
 
         atlasifyLogger.LoginLogger(query, "");
         System.out.println("LOGIN LOGGED " + query.toString());
-        return Response.ok("received").build();
+        return Response.ok("received").header("Access-Control-Allow-Origin", "*").build();
 
     }
 
@@ -349,7 +349,7 @@ public class AtlasifyResource {
 
         atlasifyLogger.QueryLogger(query, "");
         System.out.println("QUERY LOGGED " + query.toString());
-        return Response.ok("received").build();
+        return Response.ok("received").header("Access-Control-Allow-Origin", "*").build();
     }
 
     @POST
@@ -701,8 +701,8 @@ public class AtlasifyResource {
 
         }
 
-        System.out.println("GOT POI "+resultMap.toString());
-        return Response.ok(new JSONObject(resultMap).toString()).build();
+        System.out.println("GOT POI "+new JSONObject(resultMap).toString());
+        return Response.ok(new JSONObject(resultMap).toString()).header("Access-Control-Allow-Origin", "*").build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
     @POST
@@ -722,7 +722,7 @@ public class AtlasifyResource {
         Map<String, String> result = new HashMap<String, String>();
         result.put("log", s);
 
-        return Response.ok(new JSONObject(result).toString()).build();
+        return Response.ok(new JSONObject(result).toString()).header("Access-Control-Allow-Origin", "*").build();
     }
 
 }
