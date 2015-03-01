@@ -683,7 +683,7 @@ public class AtlasifyResource {
                     LocalPage localPage=lpDao.getById(e.getKey());
                     int univId=upDao.getByLocalPage(localPage).getUnivId();
                     if(geometryMap.containsKey(univId)){
-                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).toString());
+                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).toString().substring(5));
                     }
                 }
                 catch(Exception e1){
@@ -702,7 +702,7 @@ public class AtlasifyResource {
         }
 
         JSONObject jsonMap = new JSONObject(resultMap);
-        System.out.println("GOT POI "+(jsonMap.toString()));
+        System.out.println("GOT POI " + resultMap.size() + " spatial points returned");
         return Response.ok(jsonMap.toString()).header("Access-Control-Allow-Origin", "*").build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
