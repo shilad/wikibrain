@@ -473,7 +473,7 @@ public class AtlasifyResource {
             while ((currentChar = bufferedReader.read()) != -1) {
                 stringBuilder.append((char) currentChar);
             }
-            System.out.println("GOT REPLY\n" + stringBuilder.toString());
+            //System.out.println("GOT REPLY\n" + stringBuilder.toString());
 
             // Process the northwestern json
             JSONArray northwesternJSONArray = new JSONArray(stringBuilder.toString());
@@ -539,6 +539,8 @@ public class AtlasifyResource {
             // return Response.ok("").header("Access-Control-Allow-Origin", "*").build();
         }
 
+        /*
+
         // Get Wikidata Explanations using the disambiguator
         for (Explanation exp : wdMetric.similarity(keyword, feature, true).getExplanations()) {
             String explanationString = String.format(exp.getFormat(), exp.getInformation().toArray());
@@ -581,7 +583,7 @@ public class AtlasifyResource {
 
             explanations.put(explanations.length(), jsonExplanation);
         }
-
+        */
         shuffleJSONArray(explanations);
         JSONObject result = new JSONObject();
         result.put("explanations", explanations);
