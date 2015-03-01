@@ -683,7 +683,7 @@ public class AtlasifyResource {
                     LocalPage localPage=lpDao.getById(e.getKey());
                     int univId=upDao.getByLocalPage(localPage).getUnivId();
                     if(geometryMap.containsKey(univId)){
-                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).toString().substring(5));
+                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).toString().substring(6));
                     }
                 }
                 catch(Exception e1){
