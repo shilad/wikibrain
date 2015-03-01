@@ -664,7 +664,7 @@ public class AtlasifyResource {
 
             }
         }
-        return Response.ok("").build();
+        return Response.ok("").header("Access-Control-Allow-Origin", "*").build();
     }
 
 
@@ -731,7 +731,7 @@ public class AtlasifyResource {
 
 
         System.out.println("GOT POI " + resultMap.size() + " spatial points returned");
-        System.out.println("GOT JSON RESULT " + jsonResult);
+        //System.out.println("GOT JSON RESULT " + jsonResult);
         return Response.ok(jsonResult).build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
