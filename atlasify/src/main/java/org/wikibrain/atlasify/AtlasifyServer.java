@@ -64,7 +64,7 @@ public class AtlasifyServer {
     }
 
     public static ByteArrayOutputStream logger = new ByteArrayOutputStream();
-    public static final boolean useLocalLogger = false;
+    public static final boolean useLocalLogger = true;
     public static void main(String[] args) throws IOException {
         if (useLocalLogger == false) {
             PrintStream stdOut = System.out;

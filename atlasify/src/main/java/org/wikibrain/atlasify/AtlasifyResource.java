@@ -722,7 +722,7 @@ public class AtlasifyResource {
         List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
         for(Map.Entry<String, Point> entry: resultMap.entrySet()){
             fb.add(entry.getValue());
-            fb.add(entry.getValue());
+            fb.add(entry.getKey());
             SimpleFeature feature = fb.buildFeature(null);
             featureList.add(feature);
         }
