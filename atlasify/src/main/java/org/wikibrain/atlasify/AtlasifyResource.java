@@ -675,7 +675,7 @@ public class AtlasifyResource {
             return Response.ok(new JSONObject(srMap).toString()).build();
         }
         // LocalId queryID = new LocalId(Language.EN, 19908980);
-        Map<String, Geometry>resultMap=new HashMap<String, Geometry>();
+        Map<String, String>resultMap=new HashMap<String, String>();
         try{
             Map<LocalId, Double>srValues=accessNorthwesternAPI(queryID,100);
             for(Map.Entry<LocalId, Double>e:srValues.entrySet()){
@@ -683,7 +683,7 @@ public class AtlasifyResource {
                     LocalPage localPage=lpDao.getById(e.getKey());
                     int univId=upDao.getByLocalPage(localPage).getUnivId();
                     if(geometryMap.containsKey(univId)){
-                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId));
+                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).toString());
                     }
                 }
                 catch(Exception e1){
@@ -700,9 +700,8 @@ public class AtlasifyResource {
             // do nothing
 
         }
-        System.out.println("GOT POI "+(resultMap.toString()));
+
         JSONObject jsonMap = new JSONObject(resultMap);
-        System.out.println("GOT JSON POI " + jsonMap);
         System.out.println("GOT POI "+(jsonMap.toString()));
         return Response.ok(jsonMap.toString()).header("Access-Control-Allow-Origin", "*").build();
     }
