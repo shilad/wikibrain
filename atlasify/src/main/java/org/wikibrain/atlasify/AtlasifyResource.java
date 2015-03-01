@@ -102,8 +102,8 @@ public class AtlasifyResource {
             llDao = conf.get(LocalLinkDao.class);
             System.out.println("FINISHED LOADING LOCALLINK DAO");
 
-            sr = conf.get(SRMetric.class, "ensemble", "language", lang.getLangCode());
-            System.out.println("FINISHED LOADING SR");
+            //sr = conf.get(SRMetric.class, "ensemble", "language", lang.getLangCode());
+            //System.out.println("FINISHED LOADING SR");
 
             wdDao = conf.get(WikidataDao.class);
             System.out.println("FINISHED LOADING WIKIDATA DAO");
@@ -203,7 +203,7 @@ public class AtlasifyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public Response getClichedMessage(@PathParam("keyword") String keyword, @PathParam("input") String data) throws  DaoException{
-        if(pa == null){
+        if(lpDao == null){
             wikibrainSRinit();
         }
         String[] features = data.split(",");
@@ -231,7 +231,7 @@ public class AtlasifyResource {
     @Produces("text/plain")
 
     public Response consumeJSON (AtlasifyQuery query) {
-        if(pa == null){
+        if(lpDao == null){
             wikibrainSRinit();
         }
         String[] featureIdList = query.getFeatureIdList();
@@ -358,7 +358,7 @@ public class AtlasifyResource {
     @Produces("text/plain")
 
     public Response autocompleteSearch(AtlasifyQuery query) throws Exception {
-        if (pa == null) {
+        if (lpDao == null) {
             wikibrainSRinit();
         }
 
@@ -659,7 +659,7 @@ public class AtlasifyResource {
     @Produces("text/plain")
 
     public Response getPOIs (@PathParam("keyword") String keyword){
-        if(pa==null){
+        if(lpDao==null){
             wikibrainSRinit();
         }
         System.out.println("REQUESTED POI "+keyword);
