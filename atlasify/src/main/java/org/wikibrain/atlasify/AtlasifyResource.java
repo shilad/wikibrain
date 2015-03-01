@@ -1,11 +1,22 @@
 package org.wikibrain.atlasify;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.Response;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import org.geotools.data.DataUtilities;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.SchemaException;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geojson.feature.FeatureJSON;
+import org.geotools.geojson.geom.GeometryJSON;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
@@ -663,7 +674,7 @@ public class AtlasifyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
 
-    public Response getPOIs (@PathParam("keyword") String keyword){
+    public Response getPOIs (@PathParam("keyword") String keyword) throws SchemaException, IOException{
         if(lpDao==null){
             wikibrainSRinit();
         }
@@ -680,7 +691,7 @@ public class AtlasifyResource {
             return Response.ok(new JSONObject(srMap).toString()).build();
         }
         // LocalId queryID = new LocalId(Language.EN, 19908980);
-        Map<String, String>resultMap=new HashMap<String, String>();
+        Map<String, Point>resultMap=new HashMap<String, Point>();
         try{
             Map<LocalId, Double>srValues=accessNorthwesternAPI(queryID,400);
             for(Map.Entry<LocalId, Double>e:srValues.entrySet()){
@@ -688,7 +699,7 @@ public class AtlasifyResource {
                     LocalPage localPage=lpDao.getById(e.getKey());
                     int univId=upDao.getByLocalPage(localPage).getUnivId();
                     if(geometryMap.containsKey(univId)){
-                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).toString().substring(6));
+                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).getCentroid());
                     }
                 }
                 catch(Exception e1){
@@ -705,10 +716,23 @@ public class AtlasifyResource {
             // do nothing
 
         }
+        FeatureJSON featureJSON = new FeatureJSON();
+        SimpleFeatureType featureType= DataUtilities.createType("TYPE", "geometry:Point,name:String");
+        SimpleFeatureBuilder fb = new SimpleFeatureBuilder(featureType);
+        List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
+        for(Map.Entry<String, Point> entry: resultMap.entrySet()){
+            fb.add(entry.getValue());
+            fb.add(entry.getValue());
+            SimpleFeature feature = fb.buildFeature(null);
+            featureList.add(feature);
+        }
+        SimpleFeatureCollection featureCollection = DataUtilities.collection(featureList);
+        String jsonResult = featureJSON.toString(featureCollection);
 
-        JSONObject jsonMap = new JSONObject(resultMap);
+
         System.out.println("GOT POI " + resultMap.size() + " spatial points returned");
-        return Response.ok(jsonMap.toString()).build();
+        System.out.println("GOT JSON RESULT " + jsonResult);
+        return Response.ok(jsonResult).build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
     @POST
