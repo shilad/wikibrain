@@ -609,7 +609,7 @@ public class AtlasifyResource {
     @Path("/explanationsData")
     @Consumes("application/json")
 
-    public void processesExplanations(String json) throws DaoException {
+    public Response processesExplanations(String json) throws DaoException {
         JSONObject explanationsData = new JSONObject(json);
         int id = explanationsData.getInt("id");
 
@@ -649,6 +649,7 @@ public class AtlasifyResource {
 
             }
         }
+        return Response.ok("").header("Access-Control-Allow-Origin", "*").build();
     }
 
 
@@ -677,7 +678,7 @@ public class AtlasifyResource {
         // LocalId queryID = new LocalId(Language.EN, 19908980);
         Map<String, String>resultMap=new HashMap<String, String>();
         try{
-            Map<LocalId, Double>srValues=accessNorthwesternAPI(queryID,100);
+            Map<LocalId, Double>srValues=accessNorthwesternAPI(queryID,400);
             for(Map.Entry<LocalId, Double>e:srValues.entrySet()){
                 try{
                     LocalPage localPage=lpDao.getById(e.getKey());
