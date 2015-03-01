@@ -700,7 +700,9 @@ public class AtlasifyResource {
             // do nothing
 
         }
+        System.out.println("GOT POI "+(resultMap.toString()));
         JSONObject jsonMap = new JSONObject(resultMap);
+        System.out.println("GOT JSON POI " + jsonMap);
         System.out.println("GOT POI "+(jsonMap.toString()));
         return Response.ok(jsonMap.toString()).header("Access-Control-Allow-Origin", "*").build();
     }
