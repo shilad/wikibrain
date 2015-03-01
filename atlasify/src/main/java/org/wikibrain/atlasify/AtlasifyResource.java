@@ -334,22 +334,24 @@ public class AtlasifyResource {
     @POST
     @Path("logLogin")
     @Consumes("application/json")
+    @Produces("text/plain")
     public Response processLogLogin(AtlasifyLogger.logLogin query) throws Exception{
 
         atlasifyLogger.LoginLogger(query, "");
         System.out.println("LOGIN LOGGED " + query.toString());
-        return Response.ok("received").header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok("received").build();
 
     }
 
     @POST
     @Path("logQuery")
     @Consumes("application/json")
+    @Produces("text/plain")
     public Response processLogQuery(AtlasifyLogger.logQuery query) throws Exception{
 
         atlasifyLogger.QueryLogger(query, "");
         System.out.println("QUERY LOGGED " + query.toString());
-        return Response.ok("received").header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok("received").build();
     }
 
     @POST
@@ -575,7 +577,7 @@ public class AtlasifyResource {
 
         System.out.println("REQUESTED explanation between " + keyword + " and " + feature + "\n\n" + explanations.toString());
 
-        return Response.ok(result.toString()).header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok(result.toString()).build();
     }
 
     private Random randomSeedGenerator = new Random();
@@ -608,6 +610,8 @@ public class AtlasifyResource {
     @POST
     @Path("/explanationsData")
     @Consumes("application/json")
+    @Produces("text/plain")
+
 
     public Response processesExplanations(String json) throws DaoException {
         JSONObject explanationsData = new JSONObject(json);
@@ -649,7 +653,7 @@ public class AtlasifyResource {
 
             }
         }
-        return Response.ok("").header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok("").build();
     }
 
 
@@ -704,7 +708,7 @@ public class AtlasifyResource {
 
         JSONObject jsonMap = new JSONObject(resultMap);
         System.out.println("GOT POI " + resultMap.size() + " spatial points returned");
-        return Response.ok(jsonMap.toString()).header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok(jsonMap.toString()).build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
     @POST
