@@ -42,12 +42,13 @@ import java.net.MalformedURLException;
 
 import org.wikibrain.sr.wikidata.WikidataMetric;
 
+
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
 import java.net.URL;
-import java.nio.charset.Charset;
 
 // The Java class will be hosted at the URI path "/helloworld"
 @Path("/wikibrain")
@@ -90,15 +91,14 @@ public class AtlasifyResource {
 
     private static SRMetric sr = null;
     private static PhraseAnalyzer pa = null;
-    private static LocalPageDao lpDao = null;
-    private static Language lang = Language.getByLangCode("en");
+    public static LocalPageDao lpDao = null;
+    public static Language lang = Language.getByLangCode("en");
     private static LocalPageAutocompleteSqlDao lpaDao = null;
-    private static LocalLinkDao llDao = null;
+    public static LocalLinkDao llDao = null;
     private static WikidataMetric wdMetric = null;
     private static WikidataDao wdDao = null;
-    private static SpatialDataDao sdDao = null;
-    private static UniversalPageDao upDao = null;
-    private static Map<Integer, Geometry> geometryMap = null;
+    public static UniversalPageDao upDao = null;
+    private static POIGenerator poiGenerator = null;
     private static AtlasifyLogger atlasifyLogger;
 
     private static void wikibrainSRinit(){
@@ -129,12 +129,11 @@ public class AtlasifyResource {
             pa = conf.get(PhraseAnalyzer.class, "anchortext");
             System.out.println("FINISHED LOADING PHRASE ANALYZER");
 
-            sdDao = conf.get(SpatialDataDao.class);
-            System.out.println("FINISHED LOADING SPATIALDATA DAO");
+
             upDao = conf.get(UniversalPageDao.class);
             System.out.println("FINISHED LOADING UNIVERSALPAGE DAO");
-            geometryMap = sdDao.getAllGeometriesInLayer("wikidata");
-            System.out.println("FINISHED LOADING GEOMETRYMAP");
+            poiGenerator = new POIGenerator(conf);
+            System.out.println("FINISHED LOADING POI GENERATOR");
             System.out.println("FINISHED LOADING WIKIBRAIN");
 
 
@@ -149,7 +148,7 @@ public class AtlasifyResource {
 
     }
 
-    private static LocalId wikibrainPhaseResolution(String title) throws Exception {
+    public static LocalId wikibrainPhaseResolution(String title) throws Exception {
         /*Language language = lang;
         LinkedHashMap<LocalId, Float> resolution = pa.resolve(language, title, 1);
         for (LocalId p : resolution.keySet()) {
@@ -161,7 +160,7 @@ public class AtlasifyResource {
         return new LocalId(lang, lpDao.getByTitle(lang, title).getLocalId());
     }
 
-    private static Map<LocalId, Double> accessNorthwesternAPI(LocalId id, Integer topN) throws Exception {
+    public static Map<LocalId, Double> accessNorthwesternAPI(LocalId id, Integer topN) throws Exception {
         Language language = lang;
         String url = "";
         if(topN == -1){
@@ -681,60 +680,8 @@ public class AtlasifyResource {
             wikibrainSRinit();
         }
         System.out.println("REQUESTED POI "+keyword);
-
-
-        Map<String, String>srMap=new HashMap<String, String>();
-        LocalId queryID=new LocalId(lang,0);
-        try{
-            queryID=wikibrainPhaseResolution(keyword);
-        }
-        catch(Exception e){
-            System.out.println("Failed to resolve keyword "+keyword);
-            return Response.ok(new JSONObject(srMap).toString()).build();
-        }
-        // LocalId queryID = new LocalId(Language.EN, 19908980);
-        Map<String, Point>resultMap=new HashMap<String, Point>();
-        try{
-            Map<LocalId, Double>srValues=accessNorthwesternAPI(queryID,400);
-            for(Map.Entry<LocalId, Double>e:srValues.entrySet()){
-                try{
-                    LocalPage localPage=lpDao.getById(e.getKey());
-                    int univId=upDao.getByLocalPage(localPage).getUnivId();
-                    if(geometryMap.containsKey(univId)){
-                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).getCentroid());
-                    }
-                }
-                catch(Exception e1){
-                    continue;
-                }
-
-
-            }
-
-        }
-        catch(Exception e){
-            System.out.println("Error when connecting to Northwestern Server ");
-            e.printStackTrace();
-            // do nothing
-
-        }
-        FeatureJSON featureJSON = new FeatureJSON();
-        SimpleFeatureType featureType= DataUtilities.createType("TYPE", "geometry:Point,name:String");
-        SimpleFeatureBuilder fb = new SimpleFeatureBuilder(featureType);
-        List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
-        for(Map.Entry<String, Point> entry: resultMap.entrySet()){
-            fb.add(entry.getValue());
-            fb.add(entry.getKey());
-            SimpleFeature feature = fb.buildFeature(null);
-            featureList.add(feature);
-        }
-        SimpleFeatureCollection featureCollection = DataUtilities.collection(featureList);
-        String jsonResult = featureJSON.toString(featureCollection);
-
-
-        System.out.println("GOT POI " + resultMap.size() + " spatial points returned");
         //System.out.println("GOT JSON RESULT " + jsonResult);
-        return Response.ok(jsonResult).build();
+        return Response.ok(poiGenerator.getTopNPOI(keyword, this)).build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
     @POST
