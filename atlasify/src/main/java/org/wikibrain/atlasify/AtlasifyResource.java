@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
@@ -676,14 +677,14 @@ public class AtlasifyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
 
-    public Response getPOIs (@PathParam("keyword") String keyword) throws SchemaException, IOException{
+    public Response getPOIs (@PathParam("keyword") String keyword) throws SchemaException, IOException, WikiBrainException, DaoException{
         if(lpDao==null){
             wikibrainSRinit();
         }
         System.out.println("REQUESTED POI "+keyword);
         //System.out.println("GOT JSON RESULT " + jsonResult);
 
-        return Response.ok(poiGenerator.getTopNPOI(keyword, this)).build();
+        return Response.ok(poiGenerator.getDirectedLinkedPOI(keyword, this)).build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
     @POST

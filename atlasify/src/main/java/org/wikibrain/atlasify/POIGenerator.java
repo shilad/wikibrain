@@ -83,7 +83,7 @@ public class POIGenerator {
                 if(geometryMap.containsKey(univId)){
                     idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
                     idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
-                    idExplanationMap.put(univId, keyword + "is linked from" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                    idExplanationMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle() + " : " + keyword + "is linked from" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
                 }
             }
             catch (Exception e){
@@ -121,7 +121,7 @@ public class POIGenerator {
                     if(geometryMap.containsKey(univId)){
                         idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
                         idTitleMap.put(univId, localPage.getTitle().getCanonicalTitle());
-                        idExplanationMap.put(univId, localPage.getTitle().getCanonicalTitle() + " is a top related article to " + keyword);
+                        idExplanationMap.put(univId, localPage.getTitle().getCanonicalTitle() + " : " + localPage.getTitle().getCanonicalTitle() + " is a top related article to " + keyword);
                     }
                 }
                 catch(Exception e1){
