@@ -138,8 +138,14 @@ public class POIGenerator {
 
         }
         System.out.println("START PACKING JSON FOR POI REQUEST " + keyword + " MAP SIZE " + idGeomMap.size() + " " + idTitleMap.size() + " " + idExplanationMap.size());
-
-        return geoJSONPacking(idGeomMap, idTitleMap, idExplanationMap);
+        String result = "";
+        try{
+            result = geoJSONPacking(idGeomMap, idTitleMap, idExplanationMap);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
 
     }
     private String geoJSONPacking(Map<Integer, Point> idGeomMap, Map<Integer, String> idTitleMap, Map<Integer, String> idExplanationMap) throws IOException, SchemaException{

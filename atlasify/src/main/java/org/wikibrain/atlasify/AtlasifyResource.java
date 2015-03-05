@@ -682,6 +682,7 @@ public class AtlasifyResource {
         }
         System.out.println("REQUESTED POI "+keyword);
         //System.out.println("GOT JSON RESULT " + jsonResult);
+
         return Response.ok(poiGenerator.getTopNPOI(keyword, this)).build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system
