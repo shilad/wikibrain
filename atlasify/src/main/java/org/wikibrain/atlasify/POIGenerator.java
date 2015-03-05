@@ -62,8 +62,9 @@ public class POIGenerator {
             System.out.println("FINISHED GETTING LINKS FOR " + keyword);
 
             //TODO: optimize efficiency in processing links
-            //POSSIBLE: keep
+            int count = 0;
             while(outlinkIter.hasNext()){
+                count ++;
                 LocalLink link = outlinkIter.next();
                 int localId = link.getDestId();
                 try{
@@ -80,9 +81,10 @@ public class POIGenerator {
                     continue;
                 }
             }
-            System.out.println("FINISHED PROCESSING OUTLINKS FOR " + keyword);
-
+            System.out.println("FINISHED PROCESSING OUTLINKS FOR " + String.valueOf(count) + " " + keyword);
+            count = 0;
             while(inlinkIter.hasNext()){
+                count ++;
                 LocalLink link = inlinkIter.next();
                 int localId = link.getSourceId();
                 try{
@@ -99,7 +101,7 @@ public class POIGenerator {
                     continue;
                 }
             }
-            System.out.println("FINISHED PROCESSING INLINKS FOR " + keyword);
+            System.out.println("FINISHED PROCESSING INLINKS FOR " + String.valueOf(count) + " " + keyword);
 
         }
 
