@@ -137,6 +137,7 @@ public class POIGenerator {
             // do nothing
 
         }
+        System.out.println("START PACKING JSON FOR POI REQUEST " + keyword + " MAP SIZE " + idGeomMap.size() + " " + idTitleMap.size() + " " + idExplanationMap.size());
 
         return geoJSONPacking(idGeomMap, idTitleMap, idExplanationMap);
 
@@ -149,6 +150,7 @@ public class POIGenerator {
         typeBuilder.add("name", String.class);
         typeBuilder.add("explanation", String.class);
         SimpleFeatureType featureType= typeBuilder.buildFeatureType();
+        System.out.println("FINISHED BUILDING FEATURETYPE");
         SimpleFeatureBuilder fb = new SimpleFeatureBuilder(featureType);
         List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
         for(Map.Entry<Integer, Point> entry: idGeomMap.entrySet()){
