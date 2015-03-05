@@ -52,45 +52,51 @@ public class POIGenerator {
         Map<Integer, String> idTitleMap = new HashMap<Integer, String>();
         Map<Integer, String> idExplanationMap = new HashMap<Integer, String>();
 
-        Iterable<LocalLink> outlinks = atlasifyResource.llDao.getLinks(atlasifyResource.lang, queryID.getId(), true);
-        Iterable<LocalLink> inlinks = atlasifyResource.llDao.getLinks(atlasifyResource.lang, queryID.getId(), false);
-
-        Iterator<LocalLink> outlinkIter = outlinks.iterator();
-        Iterator<LocalLink> inlinkIter = inlinks.iterator();
-
-        while(outlinkIter.hasNext()){
-            LocalLink link = outlinkIter.next();
-            int localId = link.getDestId();
-            try{
-               int univId = atlasifyResource.upDao.getByLocalPage(atlasifyResource.lpDao.getById(atlasifyResource.lang, localId)).getUnivId();
-               if(geometryMap.containsKey(univId)){
-                   idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
-                   idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
-                   idExplanationMap.put(univId, keyword + "has a link to" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
-               }
-            }
-            catch (Exception e){
-                //do nothing
-                continue;
-            }
-        }
-
-        while(inlinkIter.hasNext()){
-            LocalLink link = outlinkIter.next();
-            int localId = link.getDestId();
-            try{
-                int univId = atlasifyResource.upDao.getByLocalPage(atlasifyResource.lpDao.getById(atlasifyResource.lang, localId)).getUnivId();
-                if(geometryMap.containsKey(univId)){
-                    idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
-                    idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
-                    idExplanationMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle() + " : " + keyword + "is linked from" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+        try {
+            Iterable<LocalLink> outlinks = atlasifyResource.llDao.getLinks(atlasifyResource.lang, queryID.getId(), true);
+            Iterable<LocalLink> inlinks = atlasifyResource.llDao.getLinks(atlasifyResource.lang, queryID.getId(), false);
+            Iterator<LocalLink> outlinkIter = outlinks.iterator();
+            Iterator<LocalLink> inlinkIter = inlinks.iterator();
+            while(outlinkIter.hasNext()){
+                LocalLink link = outlinkIter.next();
+                int localId = link.getDestId();
+                try{
+                    int univId = atlasifyResource.upDao.getByLocalPage(atlasifyResource.lpDao.getById(atlasifyResource.lang, localId)).getUnivId();
+                    if(geometryMap.containsKey(univId)){
+                        idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
+                        idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                        idExplanationMap.put(univId, keyword + "has a link to" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                    }
+                }
+                catch (Exception e){
+                    //do nothing
+                    continue;
                 }
             }
-            catch (Exception e){
-                //do nothing
-                continue;
+
+            while(inlinkIter.hasNext()){
+                LocalLink link = outlinkIter.next();
+                int localId = link.getDestId();
+                try{
+                    int univId = atlasifyResource.upDao.getByLocalPage(atlasifyResource.lpDao.getById(atlasifyResource.lang, localId)).getUnivId();
+                    if(geometryMap.containsKey(univId)){
+                        idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
+                        idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                        idExplanationMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle() + " : " + keyword + "is linked from" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                    }
+                }
+                catch (Exception e){
+                    //do nothing
+                    continue;
+                }
             }
         }
+        catch (Exception e){
+            e.printStackTrace();
+            return "";
+        }
+
+
         return geoJSONPacking(idGeomMap, idTitleMap, idExplanationMap);
 
     }
