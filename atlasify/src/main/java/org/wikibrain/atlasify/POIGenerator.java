@@ -137,7 +137,7 @@ public class POIGenerator {
             // do nothing
 
         }
-        System.out.println("START PACKING JSON FOR POI REQUEST " + keyword + " MAP SIZE " + idGeomMap.size() + " " + idTitleMap.size() + " " + idExplanationMap.size());
+        //System.out.println("START PACKING JSON FOR POI REQUEST " + keyword + " MAP SIZE " + idGeomMap.size() + " " + idTitleMap.size() + " " + idExplanationMap.size());
         String result = "";
         try{
             result = geoJSONPacking(idGeomMap, idTitleMap, idExplanationMap);
@@ -152,11 +152,12 @@ public class POIGenerator {
         FeatureJSON featureJSON = new FeatureJSON();
         SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
         typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
+        typeBuilder.setName("Atlasify_POI");
         typeBuilder.add("geometry", Point.class);
         typeBuilder.add("name", String.class);
         typeBuilder.add("explanation", String.class);
         SimpleFeatureType featureType= typeBuilder.buildFeatureType();
-        System.out.println("FINISHED BUILDING FEATURETYPE");
+        //System.out.println("FINISHED BUILDING FEATURETYPE");
         SimpleFeatureBuilder fb = new SimpleFeatureBuilder(featureType);
         List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
         for(Map.Entry<Integer, Point> entry: idGeomMap.entrySet()){
@@ -164,12 +165,10 @@ public class POIGenerator {
             fb.set("name", idTitleMap.get(entry.getKey()));
             fb.set("explanation", idExplanationMap.get(entry.getKey()));
             SimpleFeature feature = fb.buildFeature(null);
-            System.out.println("BUILT FEATURE" + feature);
             featureList.add(feature);
         }
         SimpleFeatureCollection featureCollection = DataUtilities.collection(featureList);
         String jsonResult = featureJSON.toString(featureCollection);
-        System.out.println("RETURNING GEOJSON \n" + jsonResult);
         return jsonResult;
     }
 
