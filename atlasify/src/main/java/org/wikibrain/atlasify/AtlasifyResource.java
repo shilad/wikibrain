@@ -684,7 +684,7 @@ public class AtlasifyResource {
         System.out.println("REQUESTED POI "+keyword);
         //System.out.println("GOT JSON RESULT " + jsonResult);
         String result = poiGenerator.getDirectedLinkedPOI(keyword, this);
-        System.out.println("FINISHED GETTING POI FOR"+keyword);
+        System.out.println("FINISHED GETTING POI FOR "+keyword);
         return Response.ok(result).build();
     }
     // A logging method called by the god mode of Atlasify to check the status of the system

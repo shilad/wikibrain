@@ -57,6 +57,7 @@ public class POIGenerator {
             Iterable<LocalLink> inlinks = atlasifyResource.llDao.getLinks(atlasifyResource.lang, queryID.getId(), false);
             Iterator<LocalLink> outlinkIter = outlinks.iterator();
             Iterator<LocalLink> inlinkIter = inlinks.iterator();
+            System.out.println("FINISHED GETTING LINKS FOR " + keyword);
             while(outlinkIter.hasNext()){
                 LocalLink link = outlinkIter.next();
                 int localId = link.getDestId();
@@ -73,6 +74,7 @@ public class POIGenerator {
                     continue;
                 }
             }
+            System.out.println("FINISHED PROCESSING OUTLINKS FOR " + keyword);
 
             while(inlinkIter.hasNext()){
                 LocalLink link = inlinkIter.next();
@@ -90,7 +92,11 @@ public class POIGenerator {
                     continue;
                 }
             }
+            System.out.println("FINISHED PROCESSING INLINKS FOR " + keyword);
+
         }
+
+
         catch (Exception e){
             e.printStackTrace();
             return "";
@@ -154,6 +160,8 @@ public class POIGenerator {
         return result;
 
     }
+
+    //Takes in an idGeomMap, an idTitleMap and an idExplanationMap, returns a geoJSON with "geometry, "name" and "explanation"
     private String geoJSONPacking(Map<Integer, Point> idGeomMap, Map<Integer, String> idTitleMap, Map<Integer, String> idExplanationMap) throws IOException, SchemaException{
         FeatureJSON featureJSON = new FeatureJSON();
         SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
