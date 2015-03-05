@@ -75,7 +75,7 @@ public class POIGenerator {
             }
 
             while(inlinkIter.hasNext()){
-                LocalLink link = outlinkIter.next();
+                LocalLink link = inlinkIter.next();
                 int localId = link.getDestId();
                 try{
                     int univId = atlasifyResource.upDao.getByLocalPage(atlasifyResource.lpDao.getById(atlasifyResource.lang, localId)).getUnivId();
