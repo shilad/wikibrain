@@ -2,6 +2,7 @@ package org.wikibrain.sr.ensemble;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.set.TIntSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -42,7 +43,7 @@ public class EvenEnsemble implements Ensemble{
     }
 
     @Override
-    public SRResultList predictMostSimilar(List<SRResultList> scores, int maxResults) {
+    public SRResultList predictMostSimilar(List<SRResultList> scores, int maxResults, TIntSet validIds) {
         int numMetrics = scores.size();
         TIntDoubleHashMap scoreMap = new TIntDoubleHashMap();
         for (SRResultList resultList : scores){

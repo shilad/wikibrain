@@ -158,7 +158,7 @@ public class VectorBasedSRMetric extends BaseSRMetric {
             return super.mostSimilar(phrase, maxResults, validIds);
         } else {
             try {
-                return similarity.mostSimilar(vector, maxResults, validIds);
+                return normalize(similarity.mostSimilar(vector, maxResults, validIds));
             } catch (IOException e) {
                 throw new DaoException(e);
             }
@@ -173,7 +173,7 @@ public class VectorBasedSRMetric extends BaseSRMetric {
         try {
             TIntFloatMap vector = getPageVector(pageId);
             if (vector == null) return null;
-            return similarity.mostSimilar(vector, maxResults, validIds);
+            return normalize(similarity.mostSimilar(vector, maxResults, validIds));
         } catch (IOException e) {
             throw new DaoException(e);
         }

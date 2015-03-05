@@ -6,6 +6,7 @@ import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
@@ -28,7 +29,9 @@ import java.util.logging.Logger;
 public class EnsembleMetric extends BaseSRMetric {
     private static final Logger LOG = Logger.getLogger(EnsembleMetric.class.getName());
 
-    public static final int EXTRA_SEARCH_DEPTH = 2;
+    public static final int MIN_SEARCH_DEPTH = 500;
+    public static final int SEARCH_MULTIPLIER = 3;
+
     private List<SRMetric> metrics;
     private Ensemble ensemble;
     private boolean resolvePhrases = true;
@@ -60,7 +63,7 @@ public class EnsembleMetric extends BaseSRMetric {
         for (SRMetric metric : metrics){
             scores.add(metric.similarity(pageId1,pageId2,explanations));
         }
-        return ensemble.predictSimilarity(scores);
+        return normalize(ensemble.predictSimilarity(scores));
     }
 
     @Override
@@ -72,7 +75,7 @@ public class EnsembleMetric extends BaseSRMetric {
         for (SRMetric metric : metrics){
             scores.add(metric.similarity(phrase1,phrase2,explanations));
         }
-        return ensemble.predictSimilarity(scores);
+        return normalize(ensemble.predictSimilarity(scores));
     }
 
     @Override
@@ -83,9 +86,10 @@ public class EnsembleMetric extends BaseSRMetric {
         }
         List<SRResultList> scores = new ArrayList<SRResultList>();
         for (SRMetric metric : metrics){
-            scores.add(metric.mostSimilar(pageId,maxResults*EXTRA_SEARCH_DEPTH,validIds));
+            scores.add(metric.mostSimilar(pageId,getMaxResults(maxResults),validIds));
         }
-        return ensemble.predictMostSimilar(scores, maxResults);
+        SRResultList result = normalize(ensemble.predictMostSimilar(scores, maxResults, validIds));
+        return result;
     }
 
     @Override
@@ -95,9 +99,9 @@ public class EnsembleMetric extends BaseSRMetric {
         }
         List<SRResultList> scores = new ArrayList<SRResultList>();
         for (SRMetric metric : metrics){
-            scores.add(metric.mostSimilar(phrase,maxResults*EXTRA_SEARCH_DEPTH,validIds));
+            scores.add(metric.mostSimilar(phrase, getMaxResults(maxResults),validIds));
         }
-        return ensemble.predictMostSimilar(scores,maxResults);
+        return normalize(ensemble.predictMostSimilar(scores,maxResults, validIds));
     }
 
     /**
@@ -172,7 +176,7 @@ public class EnsembleMetric extends BaseSRMetric {
                     double score = Double.NaN;
                     int rank = -1;
                     try {
-                        SRResultList dsl = metric.mostSimilar(pageId, numResults * EXTRA_SEARCH_DEPTH, validIds);
+                        SRResultList dsl = metric.mostSimilar(pageId, getMaxResults(numResults), validIds);
                         if (dsl != null && dsl.getIndexForId(ids.get(1).getId()) >= 0) {
                             score = dsl.getScore(dsl.getIndexForId(ids.get(1).getId()));
                             rank = dsl.getIndexForId(ids.get(1).getId());
@@ -189,6 +193,11 @@ public class EnsembleMetric extends BaseSRMetric {
         ensemble.trainMostSimilar(ensembleSims);
         super.trainMostSimilar(dataset, numResults, validIds);
     }
+
+    private int getMaxResults(int numResults) {
+        return Math.max(MIN_SEARCH_DEPTH, numResults * SEARCH_MULTIPLIER);
+    }
+
 
     public void setTrainSubmetrics(boolean trainSubmetrics) {
         this.trainSubmetrics = trainSubmetrics;
@@ -237,17 +246,23 @@ public class EnsembleMetric extends BaseSRMetric {
             for (String metric : config.getStringList("metrics")){
                 metrics.add(getConfigurator().get(SRMetric.class, metric, "language", language.getLangCode()));
             }
+            LocalPageDao pageDao = getConfigurator().get(LocalPageDao.class,config.getString("pageDao"));
+            int numArticles = 0;
+            try {
+                numArticles = pageDao.getCount(DaoFilter.normalPageFilter(language));
+            } catch (DaoException e) {
+                throw new ConfigurationException(e);
+            }
             Ensemble ensemble;
             if (config.getString("ensemble").equals("linear")){
-                ensemble = new LinearEnsemble(metrics.size());
+                ensemble = new CorrelationEnsemble(metrics.size(), numArticles);
             } else if (config.getString("ensemble").equals("even")){
                 ensemble = new EvenEnsemble();
             } else {
                 throw new ConfigurationException("I don't know how to do that ensemble.");
             }
             Disambiguator disambiguator = getConfigurator().get(Disambiguator.class,config.getString("disambiguator"), "language", language.getLangCode());
-            LocalPageDao pagehelper = getConfigurator().get(LocalPageDao.class,config.getString("pageDao"));
-            EnsembleMetric sr = new EnsembleMetric(name, language, metrics,ensemble,disambiguator,pagehelper);
+            EnsembleMetric sr = new EnsembleMetric(name, language, metrics,ensemble,disambiguator,pageDao);
             if (config.hasPath("resolvephrases")) {
                 sr.setResolvePhrases(config.getBoolean("resolvephrases"));
             }

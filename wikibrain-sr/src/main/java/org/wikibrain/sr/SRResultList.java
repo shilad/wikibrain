@@ -206,6 +206,17 @@ public class SRResultList implements  Iterable<SRResult>{
         }
     }
 
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < numDocs(); i++) {
+            if (i > 0) builder.append(" ");
+            builder.append(
+                    String.format("%d. %d=%.3f", (i+1), results[i].getId(), results[i].getScore())
+            );
+        }
+        return builder.toString();
+    }
+
     /**
      * Sorts the SRResults in this list in ascending order.
      */

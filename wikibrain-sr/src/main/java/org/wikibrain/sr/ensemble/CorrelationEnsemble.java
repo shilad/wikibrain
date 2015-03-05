@@ -5,6 +5,8 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
@@ -18,8 +20,8 @@ import java.util.logging.Logger;
 /**
  *@author Matt Lesicko
  */
-public class LinearEnsemble implements Ensemble{
-    private static final Logger LOG = Logger.getLogger(LinearEnsemble.class.getName());
+public class CorrelationEnsemble implements Ensemble{
+    private static final Logger LOG = Logger.getLogger(CorrelationEnsemble.class.getName());
     final int numMetrics;
     private final int numTrainingCandidateArticles;
     TDoubleArrayList simlarityCoefficients;
@@ -27,7 +29,7 @@ public class LinearEnsemble implements Ensemble{
     Interpolator similarityInterpolator;
     Interpolator mostSimilarInterpolator;
 
-    public LinearEnsemble(int numMetrics, int numTrainingCandidateArticles){
+    public CorrelationEnsemble(int numMetrics, int numTrainingCandidateArticles){
         this.numTrainingCandidateArticles = numTrainingCandidateArticles;
         this.numMetrics = numMetrics;
         simlarityCoefficients = new TDoubleArrayList();
@@ -84,29 +86,30 @@ public class LinearEnsemble implements Ensemble{
         List<EnsembleSim> pruned = new ArrayList<EnsembleSim>();
         for (EnsembleSim es : simList) {
             if (es != null && es.getNumMetricsWithScore() > 0) {
-                pruned.add(es);
+                pruned.add(mostSimilarInterpolator.interpolate(es));
             }
         }
 
-        double[][] X = new double[pruned.size()][numMetrics*2];
+        double [][] X = new double[2][pruned.size()];
         double[] Y = new double[pruned.size()];
-        for (int i=0; i<pruned.size(); i++){
-            Y[i]=pruned.get(i).knownSim.similarity;
-            EnsembleSim es = mostSimilarInterpolator.interpolate(pruned.get(i));
-            for (int j=0; j<numMetrics; j++){
-                X[i][2*j]= es.getScores().get(j);
-                X[i][2*j+1]= Math.log(es.getRanks().get(j)+1);
+        mostSimilarCoefficients = new TDoubleArrayList();
+        for (int i = 0; i < numMetrics; i++) {
+            for (int j=0; j<pruned.size(); j++){
+                EnsembleSim es = pruned.get(j);
+                Y[j]=es.knownSim.similarity;
+                X[0][j]= es.getScores().get(i);
+                X[1][j]= Math.log(es.getRanks().get(i)+1);
             }
+            double pearson1 = new PearsonsCorrelation().correlation(X[0], Y);
+            double pearson2 = new PearsonsCorrelation().correlation(X[1], Y);
+            double dev1 = Math.sqrt(StatUtils.variance(X[0]));
+            double dev2 = Math.sqrt(StatUtils.variance(X[1]));
+
+            mostSimilarCoefficients.add(pearson1 / dev1);
+            mostSimilarCoefficients.add(pearson2 / dev2);
         }
 
-
-        OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
-        regression.newSampleData(Y,X);
-
-        mostSimilarCoefficients = new TDoubleArrayList(regression.estimateRegressionParameters());
-        double pearson = Math.sqrt(regression.calculateRSquared());
         LOG.info("coefficients are "+mostSimilarCoefficients.toString());
-        LOG.info("pearson for multiple regression is "+pearson);
     }
 
     @Override
@@ -129,7 +132,7 @@ public class LinearEnsemble implements Ensemble{
     public static boolean debug = false;
     @Override
     public SRResultList predictMostSimilar(List<SRResultList> scores, int maxResults, TIntSet validIds) {
-        if (2*scores.size()+1!= mostSimilarCoefficients.size()){
+        if (2*scores.size() != mostSimilarCoefficients.size()){
             throw new IllegalStateException();
         }
         TIntSet allIds = new TIntHashSet();    // ids returned by at least one metric
@@ -142,22 +145,22 @@ public class LinearEnsemble implements Ensemble{
         }
 
         TIntDoubleHashMap scoreMap = new TIntDoubleHashMap();
-        for (int id : allIds.toArray()) {
-            scoreMap.put(id, mostSimilarCoefficients.get(0));
-        }
-        int i =1;
+        int i = 0;
         for (SRResultList resultList : scores){
             TIntSet unknownIds = new TIntHashSet(allIds);
             double c1 = mostSimilarCoefficients.get(i);     // score coeff
-            double c2 = mostSimilarCoefficients.get(i+1);   // rank coefficient
+            double c2 = mostSimilarCoefficients.get(i + 1);   // rank coefficient
+
+            // expand or contract ranks proportionately to number of articles we see
+            double k = 1.0;
+            if (validIds != null) {
+                k = 1.0 * numTrainingCandidateArticles / validIds.size();
+            }
+            int interpolatedRank = (int) (mostSimilarInterpolator.getInterpolatedRank(i / 2) * k);
+
             if (resultList != null) {
                 for (int j = 0; j < resultList.numDocs(); j++) {
-                    int rank = j + 1;
-                    // expand or contract ranks proportionately
-                    if (validIds != null) {
-                        double k = 1.0 * numTrainingCandidateArticles / validIds.size();
-                        rank = (int) (rank * k);
-                    }
+                    int rank = (int) ((j + 1) * k);
                     SRResult result = resultList.get(j);
                     unknownIds.remove(result.getId());
                     double value = c1 * result.getScore() + c2 * Math.log(rank);
@@ -166,15 +169,16 @@ public class LinearEnsemble implements Ensemble{
                                 "m" + i, j, value, result.getId(),
                                 c1, result.getScore(), c2, rank, Math.log(rank));
                     }
-                    scoreMap.adjustValue(result.getId(), value);
+                    scoreMap.adjustOrPutValue(result.getId(), value, value);
                 }
+                interpolatedRank = (int) Math.max(interpolatedRank, k * resultList.numDocs() * 5 / 4);
             }
 
             // interpolate scores for unknown ids
             double value = c1 * mostSimilarInterpolator.getInterpolatedScore(i/2)
-                         + c2 * Math.log(mostSimilarInterpolator.getInterpolatedRank(i/2));
+                         + c2 * Math.log(interpolatedRank);
             for (int id : unknownIds.toArray()) {
-                scoreMap.adjustValue(id, value);
+                scoreMap.adjustOrPutValue(id, value, value);
             }
             i+=2;
         }
