@@ -132,6 +132,7 @@ public class AtlasifyResource {
 
             upDao = conf.get(UniversalPageDao.class);
             System.out.println("FINISHED LOADING UNIVERSALPAGE DAO");
+            System.out.println("STARTED LOADING POI GENERATOR");
             poiGenerator = new POIGenerator(conf);
             System.out.println("FINISHED LOADING POI GENERATOR");
             System.out.println("FINISHED LOADING WIKIBRAIN");

@@ -6,13 +6,16 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.feature.FeatureJSON;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.json.JSONObject;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalLink;
@@ -21,10 +24,7 @@ import org.wikibrain.spatial.dao.SpatialDataDao;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by toby on 3/4/15.
@@ -38,7 +38,7 @@ public class POIGenerator {
         geometryMap = sdDao.getAllGeometriesInLayer("wikidata");
     }
     //Return POIs that have direct link to the keyword
-    public String getDirectedLinkedPOI(String keyword, AtlasifyResource atlasifyResource) throws DaoException{
+    public String getDirectedLinkedPOI(String keyword, AtlasifyResource atlasifyResource) throws DaoException, WikiBrainException, SchemaException, IOException{
 
         LocalId queryID=new LocalId(atlasifyResource.lang,0);
         try{
@@ -48,14 +48,51 @@ public class POIGenerator {
             System.out.println("Failed to resolve keyword "+keyword);
             return "";
         }
-        Map<String, Point> resultMap = new HashMap<String, Point>();
+        Map<Integer, Point> idGeomMap = new HashMap<Integer, Point>();
+        Map<Integer, String> idTitleMap = new HashMap<Integer, String>();
+        Map<Integer, String> idExplanationMap = new HashMap<Integer, String>();
 
         Iterable<LocalLink> outlinks = atlasifyResource.llDao.getLinks(atlasifyResource.lang, queryID.getId(), true);
         Iterable<LocalLink> inlinks = atlasifyResource.llDao.getLinks(atlasifyResource.lang, queryID.getId(), false);
 
+        Iterator<LocalLink> outlinkIter = outlinks.iterator();
+        Iterator<LocalLink> inlinkIter = inlinks.iterator();
 
+        while(outlinkIter.hasNext()){
+            LocalLink link = outlinkIter.next();
+            int localId = link.getDestId();
+            try{
+               int univId = atlasifyResource.upDao.getByLocalPage(atlasifyResource.lpDao.getById(atlasifyResource.lang, localId)).getUnivId();
+               if(geometryMap.containsKey(univId)){
+                   idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
+                   idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                   idExplanationMap.put(univId, keyword + "has a link to" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+               }
+            }
+            catch (Exception e){
+                //do nothing
+                continue;
+            }
+        }
 
-        return "";
+        while(inlinkIter.hasNext()){
+            LocalLink link = outlinkIter.next();
+            int localId = link.getDestId();
+            try{
+                int univId = atlasifyResource.upDao.getByLocalPage(atlasifyResource.lpDao.getById(atlasifyResource.lang, localId)).getUnivId();
+                if(geometryMap.containsKey(univId)){
+                    idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
+                    idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                    idExplanationMap.put(univId, keyword + "is linked from" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                }
+            }
+            catch (Exception e){
+                //do nothing
+                continue;
+            }
+        }
+        return geoJSONPacking(idGeomMap, idTitleMap, idExplanationMap);
+
     }
 
 
@@ -72,7 +109,9 @@ public class POIGenerator {
             return "";
         }
         // LocalId queryID = new LocalId(Language.EN, 19908980);
-        Map<String, Point>resultMap=new HashMap<String, Point>();
+        Map<Integer, Point> idGeomMap = new HashMap<Integer, Point>();
+        Map<Integer, String> idTitleMap = new HashMap<Integer, String>();
+        Map<Integer, String> idExplanationMap = new HashMap<Integer, String>();
         try{
             Map<LocalId, Double>srValues=atlasifyResource.accessNorthwesternAPI(queryID, 400);
             for(Map.Entry<LocalId, Double>e:srValues.entrySet()){
@@ -80,7 +119,9 @@ public class POIGenerator {
                     LocalPage localPage=atlasifyResource.lpDao.getById(e.getKey());
                     int univId=atlasifyResource.upDao.getByLocalPage(localPage).getUnivId();
                     if(geometryMap.containsKey(univId)){
-                        resultMap.put(localPage.getTitle().getCanonicalTitle(),geometryMap.get(univId).getCentroid());
+                        idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
+                        idTitleMap.put(univId, localPage.getTitle().getCanonicalTitle());
+                        idExplanationMap.put(univId, localPage.getTitle().getCanonicalTitle() + " is a top related article to " + keyword);
                     }
                 }
                 catch(Exception e1){
@@ -97,18 +138,24 @@ public class POIGenerator {
 
         }
 
-        return geoJSONPacking(resultMap);
+        return geoJSONPacking(idGeomMap, idTitleMap, idExplanationMap);
 
     }
-
-    private String geoJSONPacking(Map<String, Point> resultMap) throws IOException, SchemaException{
+    private String geoJSONPacking(Map<Integer, Point> idGeomMap, Map<Integer, String> idTitleMap, Map<Integer, String> idExplanationMap) throws IOException, SchemaException{
         FeatureJSON featureJSON = new FeatureJSON();
-        SimpleFeatureType featureType= DataUtilities.createType("TYPE", "geometry:Point,name:String");
+        SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
+        typeBuilder.add("geometry", Point.class);
+        typeBuilder.add("name", String.class);
+        typeBuilder.add("explanation", String.class);
+        typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
+        SimpleFeatureType featureType= typeBuilder.buildFeatureType();
+
         SimpleFeatureBuilder fb = new SimpleFeatureBuilder(featureType);
         List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
-        for(Map.Entry<String, Point> entry: resultMap.entrySet()){
-            fb.add(entry.getValue());
-            fb.add(entry.getKey());
+        for(Map.Entry<Integer, Point> entry: idGeomMap.entrySet()){
+            fb.set("geometry", entry.getValue());
+            fb.set("name", idTitleMap.get(entry.getKey()));
+            fb.set("explanation", idExplanationMap.get(entry.getKey()));
             SimpleFeature feature = fb.buildFeature(null);
             featureList.add(feature);
         }
