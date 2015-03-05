@@ -65,7 +65,7 @@ public class POIGenerator {
                     if(geometryMap.containsKey(univId)){
                         idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
                         idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
-                        idExplanationMap.put(univId, keyword + "has a link to" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                        idExplanationMap.put(univId, keyword + " has a link to " + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
                     }
                 }
                 catch (Exception e){
@@ -76,13 +76,13 @@ public class POIGenerator {
 
             while(inlinkIter.hasNext()){
                 LocalLink link = inlinkIter.next();
-                int localId = link.getDestId();
+                int localId = link.getSourceId();
                 try{
                     int univId = atlasifyResource.upDao.getByLocalPage(atlasifyResource.lpDao.getById(atlasifyResource.lang, localId)).getUnivId();
                     if(geometryMap.containsKey(univId)){
                         idGeomMap.put(univId, geometryMap.get(univId).getCentroid());
                         idTitleMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
-                        idExplanationMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle() + " : " + keyword + "is linked from" + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
+                        idExplanationMap.put(univId, atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle() + " : " + keyword + " is linked from " + atlasifyResource.upDao.getById(univId).getBestEnglishTitle(atlasifyResource.lpDao, true).getCanonicalTitle());
                     }
                 }
                 catch (Exception e){
