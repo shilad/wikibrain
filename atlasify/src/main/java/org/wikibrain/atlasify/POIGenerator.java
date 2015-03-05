@@ -144,12 +144,11 @@ public class POIGenerator {
     private String geoJSONPacking(Map<Integer, Point> idGeomMap, Map<Integer, String> idTitleMap, Map<Integer, String> idExplanationMap) throws IOException, SchemaException{
         FeatureJSON featureJSON = new FeatureJSON();
         SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
+        typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
         typeBuilder.add("geometry", Point.class);
         typeBuilder.add("name", String.class);
         typeBuilder.add("explanation", String.class);
-        typeBuilder.setCRS(DefaultGeographicCRS.WGS84);
         SimpleFeatureType featureType= typeBuilder.buildFeatureType();
-
         SimpleFeatureBuilder fb = new SimpleFeatureBuilder(featureType);
         List<SimpleFeature> featureList = new ArrayList<SimpleFeature>();
         for(Map.Entry<Integer, Point> entry: idGeomMap.entrySet()){
@@ -157,10 +156,12 @@ public class POIGenerator {
             fb.set("name", idTitleMap.get(entry.getKey()));
             fb.set("explanation", idExplanationMap.get(entry.getKey()));
             SimpleFeature feature = fb.buildFeature(null);
+            System.out.println("BUILT FEATURE" + feature);
             featureList.add(feature);
         }
         SimpleFeatureCollection featureCollection = DataUtilities.collection(featureList);
         String jsonResult = featureJSON.toString(featureCollection);
+        System.out.println("RETURNING GEOJSON \n" + jsonResult);
         return jsonResult;
     }
 
