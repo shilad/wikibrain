@@ -171,8 +171,7 @@ public class MilneWittenMetric extends BaseSRMetric {
         for (int id : scores.keys()) {
             leaderboard.tallyScore(id, scores.get(id));
         }
-
-        return normalize(leaderboard.getTop());
+        return leaderboard.getTop();
     }
 
 

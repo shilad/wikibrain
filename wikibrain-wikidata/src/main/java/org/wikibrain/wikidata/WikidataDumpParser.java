@@ -81,7 +81,9 @@ public class WikidataDumpParser implements Iterable<WikidataEntity> {
                     if (line.endsWith(",")) {
                         line = line.substring(0, line.length()-1);
                     }
-                    buff = wdParser.parse(line);
+                    if (!line.trim().isEmpty()) {
+                        buff = wdParser.parse(line);
+                    }
                 } catch (Exception e) {
                     LOG.log(Level.WARNING, "parsing of " + file + " failed for line '" + line  + "':", e);
                 }

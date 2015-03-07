@@ -55,8 +55,6 @@ public class ClosestPointIndex implements Serializable {
                 maxNeighbors,
                 new SquareEuclideanDistanceFunction());
 
-        GeodeticCalculator calc = new GeodeticCalculator();
-        calc.setStartingGeographicPoint(c.getX(), c.getY());
         List<Result> results = new ArrayList<Result>();
         while (heap.size() > 0) {
             Result r = heap.getMax();

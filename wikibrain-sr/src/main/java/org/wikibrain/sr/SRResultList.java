@@ -90,6 +90,10 @@ public class SRResultList implements  Iterable<SRResult>{
         return results[i].id;
     }
 
+    public void setId(int i, int id) {
+        results[i].id = id;
+    }
+
     /**
      * Returns an array of the IDs in this list.
      * @return

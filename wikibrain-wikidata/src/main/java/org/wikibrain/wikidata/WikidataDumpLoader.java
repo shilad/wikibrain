@@ -4,7 +4,6 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.wikibrain.conf.ConfigurationException;
@@ -13,21 +12,13 @@ import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.cmd.FileMatcher;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.dao.UniversalPageDao;
-import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.core.model.RawPage;
-import org.wikibrain.download.DumpFileDownloader;
 import org.wikibrain.download.FileDownloader;
-import org.wikibrain.download.RequestedLinkGetter;
-import org.wikibrain.parser.DumpSplitter;
 import org.wikibrain.parser.WpParseException;
-import org.wikibrain.parser.xml.PageXmlParser;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
@@ -37,7 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,6 +47,7 @@ public class WikidataDumpLoader {
     private final LanguageSet languages;
     private final WikidataParser wdParser = new WikidataParser();
     private final TIntSet universalIds;
+    private boolean keepAllLabeledEntities = false;
 
     public WikidataDumpLoader(WikidataDao wikidataDao, MetaInfoDao metaDao, UniversalPageDao upDao, LanguageSet langs) throws DaoException {
         this.wikidataDao = wikidataDao;
@@ -110,16 +102,32 @@ public class WikidataDumpLoader {
         if (json.endsWith(",")) {
             json = json.substring(0, json.length()-1);
         }
-        if (counter.incrementAndGet() % 10000 == 0) {
+        if (counter.incrementAndGet() % 100000 == 0) {
             LOG.info("processing wikidata entity " + counter.get());
         }
         WikidataEntity entity = wdParser.parse(json);
         // check if others use prune's boolean?
         entity.prune(languages);
 
-        if (entity.getType() == WikidataEntity.Type.PROPERTY || universalIds.contains(entity.getId())) {
+        if (keepEntity(entity)) {
             wikidataDao.save(entity);
         }
+    }
+
+    private boolean keepEntity(WikidataEntity entity) {
+        if (entity.getType() == WikidataEntity.Type.PROPERTY) {
+            return true;
+        } else if (universalIds.contains(entity.getId())) {
+            return true;
+        } else if (keepAllLabeledEntities && !entity.getLabels().isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void setKeepAllLabeledEntities(boolean keepAllLabeledEntities) {
+        this.keepAllLabeledEntities = keepAllLabeledEntities;
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, DaoException, WikiBrainException, java.text.ParseException, InterruptedException {
@@ -131,6 +139,11 @@ public class WikidataDumpLoader {
                         .withLongOpt("drop-tables")
                         .withDescription("drop and recreate all tables")
                         .create("d"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("keep-labeled")
+                        .withDescription("keep all labeled entities")
+                        .create("k"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -183,6 +196,9 @@ public class WikidataDumpLoader {
         if (cmd.hasOption("d")) {
             wdDao.clear();
             metaDao.clear(WikidataStatement.class);
+        }
+        if (cmd.hasOption("k")) {
+            loader.setKeepAllLabeledEntities(true);
         }
         wdDao.beginLoad();
         metaDao.beginLoad();

@@ -13,6 +13,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.spatial.WikiBrainShapeFile;
 import org.wikibrain.spatial.constants.Precision;
 import org.wikibrain.spatial.dao.SpatialDataDao;
+import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 import org.wikibrain.utils.Scoreboard;
 import org.wikibrain.utils.WpIOUtils;
 
@@ -102,6 +103,28 @@ public class TestBorderingDistanceMetric {
         assertEquals(4, metric.distance(g("Minnesota").getCentroid(), g("Texas").getCentroid()), 0.01);
     }
 
+
+    @Test
+    public void testForceContains() throws DaoException {
+        metric.setForceContains(true);
+
+        // Test polygons
+        assertEquals(0, metric.distance(g("Minnesota"), g("Minnesota")), 0.01);
+        assertEquals(1, metric.distance(g("North Dakota"), g("Minnesota")), 0.01);
+
+        // Test the point variant
+        assertEquals(0, metric.distance(g("Minnesota").getCentroid(), g("Minnesota")), 0.01);
+        assertEquals(1, metric.distance(g("North Dakota").getCentroid(), g("Minnesota")), 0.01);
+
+        // Points nearby states should behave identically to the nearby states.
+        Point aboveMn = WikiBrainSpatialUtils.getPoint(
+                g("Minnesota").getEnvelopeInternal().getMaxY() + 2,
+                g("Minnesota").getCentroid().getX()
+        );
+        assertEquals(0, metric.distance(aboveMn, g("Minnesota")), 0.01);
+        assertEquals(1, metric.distance(aboveMn, g("North Dakota")), 0.01);
+    }
+
     @Test
     public void testKnn() throws DaoException {
         List<SpatialDistanceMetric.Neighbor> neighbors = metric.getNeighbors(g("Minnesota"), 100);
@@ -139,11 +162,5 @@ public class TestBorderingDistanceMetric {
             }
         }
         throw new IllegalArgumentException(name);
-    }
-
-    private Point makePoint() {
-        double lat = 90 - random.nextDouble() * 180;
-        double lon = 180 - random.nextDouble() * 360;
-        return factory.createPoint(new Coordinate(lon, lat));
     }
 }
