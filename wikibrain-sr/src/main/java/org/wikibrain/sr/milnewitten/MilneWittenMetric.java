@@ -65,7 +65,7 @@ public class MilneWittenMetric extends BaseSRMetric {
                 explanationList.addAll(r2.getExplanations());
                 finalResult.setExplanations(explanationList);
             }
-            return finalResult;
+            return normalize(finalResult);
         }
     }
 
@@ -80,7 +80,7 @@ public class MilneWittenMetric extends BaseSRMetric {
                 if (Double.isNaN(s1) || Double.isNaN(s2) || Double.isInfinite(s1) || Double.isInfinite(s2)) {
                     cm1[i][j] = Double.NaN;
                 } else {
-                    cm1[i][j] = s1 * 0.5 + s2 * 0.5;
+                    cm1[i][j] = normalize(s1 * 0.5 + s2 * 0.5);
                 }
             }
         }
@@ -136,7 +136,7 @@ public class MilneWittenMetric extends BaseSRMetric {
             for (int i = 0; i < l1.numDocs(); i++) {
                 double s = l1.getScore(i);
                 if (!Double.isInfinite(s) && !Double.isNaN(s)) {
-                    scores.adjustOrPutValue(l1.getId(i), s, s);
+                    scores.adjustOrPutValue(l1.getId(i), 0.5 * s, 0.5 * s);
                     inList1.add(l1.getId(i));
                 }
             }
@@ -147,7 +147,7 @@ public class MilneWittenMetric extends BaseSRMetric {
             for (int i = 0; i < l2.numDocs(); i++) {
                 double s = l2.getScore(i);
                 if (!Double.isInfinite(s) && !Double.isNaN(s)) {
-                    scores.adjustOrPutValue(l2.getId(i), s, s);
+                    scores.adjustOrPutValue(l2.getId(i), 0.5 * s, 0.5 * s);
                     inList2.add(l2.getId(i));
                 }
             }
@@ -158,12 +158,12 @@ public class MilneWittenMetric extends BaseSRMetric {
 
         for (int p1 : inList1.toArray()) {
             if (!inList2.contains(p1)) {
-                scores.adjustValue(p1, missingScore2);
+                scores.adjustValue(p1, 0.5 * missingScore2);
             }
         }
         for (int p2 : inList2.toArray()) {
             if (!inList1.contains(p2)) {
-                scores.adjustValue(p2, missingScore1);
+                scores.adjustValue(p2, 0.5 * missingScore1);
             }
         }
 
@@ -171,7 +171,7 @@ public class MilneWittenMetric extends BaseSRMetric {
         for (int id : scores.keys()) {
             leaderboard.tallyScore(id, scores.get(id));
         }
-        return leaderboard.getTop();
+        return normalize(leaderboard.getTop());
     }
 
 

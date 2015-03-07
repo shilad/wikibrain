@@ -19,7 +19,7 @@ import java.util.Random;
 public abstract class BaseNormalizer implements Serializable, Normalizer {
     public static final long serialVersionUID = 4305858822325261880L;
 
-    public final static int SAMPLE_SIZE = 5000;
+    public final static int SAMPLE_SIZE = 50000;
 
     public double min = Double.MIN_VALUE;
     protected double max = -Double.MAX_VALUE;

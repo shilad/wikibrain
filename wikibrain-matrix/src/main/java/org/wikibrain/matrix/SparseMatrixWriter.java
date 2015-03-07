@@ -127,4 +127,38 @@ public class SparseMatrixWriter {
     private static byte[] floatToBytes(float f) {
         return ByteBuffer.allocate(4).putFloat(f).array();
     }
+
+    /**
+     * Writes a matrix in sparse matrix format.
+     * If the matrix itself is a sparse matrix formatted matrix, this will be optimized.
+     *
+     * @param matrix
+     * @param output
+     * @throws IOException
+     */
+    public static void write(Matrix<? extends MatrixRow> matrix, File output) throws IOException {
+        ValueConf vconf = null;
+        if (matrix instanceof SparseMatrix) {
+            vconf = ((SparseMatrix)matrix).getValueConf();
+        } else {
+            float min = Float.MAX_VALUE;
+            float max = -Float.MAX_VALUE;
+            for (MatrixRow r : matrix) {
+                for (int i = 0; i < r.getNumCols(); i++) {
+                    min = Math.min(min, r.getColValue(i));
+                    max = Math.max(max, r.getColValue(i));
+                }
+            }
+            vconf = new ValueConf(min, max);
+        }
+        SparseMatrixWriter writer = new SparseMatrixWriter(output, vconf);
+        for (MatrixRow r : matrix) {
+            if (r instanceof SparseMatrixRow) {
+                writer.writeRow((SparseMatrixRow) r);
+            } else {
+                writer.writeRow(new SparseMatrixRow(vconf, r.getRowIndex(), r.asTroveMap()));
+            }
+        }
+        writer.finish();
+    }
 }

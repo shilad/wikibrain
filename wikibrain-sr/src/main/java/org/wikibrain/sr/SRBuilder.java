@@ -220,7 +220,7 @@ public class SRBuilder {
                 LOG.info("metric " + name + " mostSimilar() is already trained... skipping");
             } else {
                 Config config = getMetricConfig(name);
-                int n = maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH;
+                int n = maxResults * EnsembleMetric.SEARCH_MULTIPLIER;
                 TIntSet validIds = validMostSimilarIds;
                 if (config.hasPath("maxResults")) {
                     n = config.getInt("maxResults");
