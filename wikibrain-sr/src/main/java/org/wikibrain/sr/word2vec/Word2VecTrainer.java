@@ -409,6 +409,18 @@ public class Word2VecTrainer {
         }
     }
 
+    public void setMaxWords(int maxWords) {
+        this.maxWords = maxWords;
+    }
+
+    public void setLayer1Size(int layer1Size) {
+        this.layer1Size = layer1Size;
+    }
+
+    public void setWindow(int window) {
+        this.window = window;
+    }
+
     public void setKeepAllArticles(boolean keepAllArticles) {
         this.keepAllArticles = keepAllArticles;
     }

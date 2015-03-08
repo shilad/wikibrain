@@ -299,6 +299,15 @@ public class SRBuilder {
             Word2VecTrainer trainer = new Word2VecTrainer(
                     env.getConfigurator().get(LocalPageDao.class),
                     language);
+            if (config.hasPath("dimensions")) {
+                trainer.setLayer1Size(config.getInt("dimensions"));
+            }
+            if (config.hasPath("maxWords")) {
+                trainer.setMaxWords(config.getInt("maxWords"));
+            }
+            if (config.hasPath("window")) {
+                trainer.setWindow(config.getInt("window"));
+            }
             trainer.setKeepAllArticles(true);
             trainer.train(corpus.getDirectory());
             trainer.save(model);
