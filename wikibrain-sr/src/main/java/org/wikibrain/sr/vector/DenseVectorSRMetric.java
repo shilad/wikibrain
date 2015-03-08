@@ -40,28 +40,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * An SR metric that represents phrases and pages using sparse numeric vectors.
- * SR scores are the result of some similarity metric. MilneWitten, ESA, and
- * Pairwise metrics all use this representation.
+ * An SR metric that represents phrases and pages using dense numeric vectors.
+ * SR scores are the result of cosine similarity between vectors. Word2Vec uses this
+ * representations.
  *
- * <p>
- * The metric requires two subcomponents:
- * <ul>
- *     <li>A VectorGenerator class that generates the sparse vectors.</li>
- *     <li>A VectorSimilarity class that generates SR scores given two vectors.</li>
- * </ul>
- *
- * <p>
- *
- * This class also manages a feature matrix and transpose. The matrix is required
- * for calls to mostSimilar. It is not required for calls to similarity(), but will
- * be used to speed them up if available. The matrix is built when trainMostSimilar()
- * is called, but can also be explicitly built by calling
- * buildFeatureAndTransposeMatrices().
+ * <p>The metric requires a DenseVectorGenerator class that generates the vectors.<p>
  *
  * @author Shilad Sen
- * @see org.wikibrain.sr.vector.SparseVectorGenerator
- * @see VectorSimilarity
+ * @see org.wikibrain.sr.vector.DenseVectorGenerator
  */
 public class DenseVectorSRMetric extends BaseSRMetric {
 

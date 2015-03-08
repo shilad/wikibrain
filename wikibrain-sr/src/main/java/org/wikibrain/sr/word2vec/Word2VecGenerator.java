@@ -149,7 +149,7 @@ public class Word2VecGenerator implements DenseVectorGenerator {
                 } else {
                     word = word.replace('\t', ' ').replace('\n', ' ');
                     DenseMatrixRow row = new DenseMatrixRow(vconf, numPhrases, colIds, vector);
-                    articleWriter.writeRow(row);
+                    phraseWriter.writeRow(row);
                     phraseIdWriter.write(numPhrases + "\t" + word + "\n");
                     numPhrases++;
                 }
@@ -216,6 +216,11 @@ public class Word2VecGenerator implements DenseVectorGenerator {
         return Float.intBitsToFloat(accum);
     }
 
+
+    @Override
+    public DenseMatrix getFeatureMatrix() {
+        return articleMatrix;
+    }
 
     @Override
     public float []  getVector(int pageId) throws DaoException {
