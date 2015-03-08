@@ -496,7 +496,7 @@ public class SparseVectorSRMetric extends BaseSRMetric {
 
         @Override
         public SRMetric get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("vector")) {
+            if (!config.getString("type").equals("sparsevector")) {
                 return null;
             }
 
