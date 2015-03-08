@@ -4,13 +4,8 @@ import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TLongFloatMap;
 import gnu.trove.map.hash.TLongFloatHashMap;
 import gnu.trove.procedure.TIntFloatProcedure;
-import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LocalId;
-import org.wikibrain.core.lang.LocalString;
-import org.wikibrain.sr.vector.VectorBasedSRMetric;
+import org.wikibrain.sr.vector.SparseVectorSRMetric;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,10 +17,10 @@ import java.util.logging.Logger;
 public class EnsemblePhraseCreator implements PhraseCreator {
     private static final Logger LOGGER = Logger.getLogger(EnsemblePhraseCreator.class.getName());
 
-    private final VectorBasedSRMetric[] metrics;
+    private final SparseVectorSRMetric[] metrics;
     private double coefficients[];
 
-    public EnsemblePhraseCreator(VectorBasedSRMetric metrics[], double coefficients[]) {
+    public EnsemblePhraseCreator(SparseVectorSRMetric metrics[], double coefficients[]) {
         if (coefficients.length != metrics.length) {
             throw new IllegalArgumentException();
         }

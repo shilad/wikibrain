@@ -15,15 +15,14 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
-import org.wikibrain.sr.vector.VectorGenerator;
+import org.wikibrain.sr.vector.DenseVectorGenerator;
+import org.wikibrain.sr.vector.SparseVectorGenerator;
 import org.wikibrain.utils.ObjectDb;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -37,7 +36,7 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class Word2VecGenerator implements VectorGenerator {
+public class Word2VecGenerator implements DenseVectorGenerator {
     private static final Logger LOG = Logger.getLogger(Word2VecGenerator.class.getName());
 
     private final Language language;
@@ -54,7 +53,7 @@ public class Word2VecGenerator implements VectorGenerator {
 
     public void read(File path) throws IOException {
         File phraseFile = new File(path.getAbsolutePath() + ".phrases");
-        File articleFile = new File(path.getAbsolutePath() + ".articles");
+        File articleFile = new File(path.getAbsolutePath() + ".articles.mat");
         if (phraseFile.exists()
         &&  articleFile.exists()
         &&  phraseFile.lastModified() >= path.lastModified()
@@ -164,45 +163,29 @@ public class Word2VecGenerator implements VectorGenerator {
 
 
     @Override
-    public TIntFloatMap getVector(int pageId) throws DaoException {
-        float[] vector = articles.get(pageId);
-        if (vector == null) {
-            return null;
-        }
-        TIntFloatMap result = new TIntFloatHashMap(vector.length);
-        for (int i = 0; i < vector.length; i++) {
-            result.put(i, vector[i]);
-        }
-        return result;
+    public float []  getVector(int pageId) throws DaoException {
+        return articles.get(pageId);
     }
 
     @Override
-    public TIntFloatMap getVector(String phrase) {
+    public float []  getVector(String phrase) {
         float[] vector;
         try {
-            vector = phraseDb.get(normalize(phrase));
+            return phraseDb.get(normalize(phrase));
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        if (vector == null) {
-            return null;
-        }
-        TIntFloatMap result = new TIntFloatHashMap(vector.length);
-        for (int i = 0; i < vector.length; i++) {
-            result.put(i, vector[i]);
-        }
-        return result;
     }
 
     @Override
-    public List<Explanation> getExplanations(String phrase1, String phrase2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+    public List<Explanation> getExplanations(String phrase1, String phrase2, float [] vector1, float [] vector2, SRResult result) throws DaoException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<Explanation> getExplanations(int pageID1, int pageID2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+    public List<Explanation> getExplanations(int pageID1, int pageID2, float [] vector1, float [] vector2, SRResult result) throws DaoException {
         return null;
     }
 
@@ -211,23 +194,23 @@ public class Word2VecGenerator implements VectorGenerator {
     }
 
 
-    public static class Provider extends org.wikibrain.conf.Provider<VectorGenerator> {
+    public static class Provider extends org.wikibrain.conf.Provider<DenseVectorGenerator> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
-        public Class<VectorGenerator> getType() {
-            return VectorGenerator.class;
+        public Class<DenseVectorGenerator> getType() {
+            return DenseVectorGenerator.class;
         }
 
         @Override
         public String getPath() {
-            return "sr.metric.generator";
+            return "sr.metric.densegenerator";
         }
 
         @Override
-        public VectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public DenseVectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("word2vec")) {
                 return null;
             }

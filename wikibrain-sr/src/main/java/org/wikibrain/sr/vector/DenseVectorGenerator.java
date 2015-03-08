@@ -3,7 +3,6 @@ package org.wikibrain.sr.vector;
 
 import gnu.trove.map.TIntFloatMap;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
 
@@ -14,14 +13,14 @@ import java.util.List;
  *
  * @author Shilad Sen
  */
-public interface VectorGenerator {
+public interface DenseVectorGenerator {
 
     /**
      * Returns the feature vector associated with Wikipedia id.
      * @param pageId
      * @return a sparse feature vector
      */
-    public TIntFloatMap getVector(int pageId) throws DaoException;
+    public float[] getVector(int pageId) throws DaoException;
 
     /**
      * Returns the feature vector associated with the phrase
@@ -29,7 +28,7 @@ public interface VectorGenerator {
      * @return a sparse feature vector
      * @throws UnsupportedOperationException if it cannot generate a feature vector for a phrase.
      */
-    public TIntFloatMap getVector(String phrase);
+    public float[] getVector(String phrase);
 
     /**
      * Adds the explanation for a particular SRResult if it is supported.
@@ -39,7 +38,7 @@ public interface VectorGenerator {
      * @param vector2 Vector representing second item
      * @param result Original sr object, with explanations (hopefully) added.
      */
-    public List<Explanation> getExplanations(String phrase1, String phrase2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException;
+    public List<Explanation> getExplanations(String phrase1, String phrase2, float [] vector1, float [] vector2, SRResult result) throws DaoException;
 
     /**
      * Adds the explanation for a particular SRResult if it is supported.
@@ -49,5 +48,5 @@ public interface VectorGenerator {
      * @param vector2 Vector representing second item
      * @param result Original sr object, with explanations (hopefully) added.
      */
-    public List<Explanation> getExplanations(int pageID1, int pageID2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException;
+    public List<Explanation> getExplanations(int pageID1, int pageID2, float [] vector1, float [] vector2, SRResult result) throws DaoException;
 }

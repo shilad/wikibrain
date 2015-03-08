@@ -8,11 +8,9 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.lang.StringNormalizer;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
-import org.wikibrain.sr.vector.VectorBasedSRMetric;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 

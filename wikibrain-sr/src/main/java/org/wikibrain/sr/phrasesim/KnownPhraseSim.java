@@ -26,7 +26,7 @@ import org.wikibrain.sr.normalize.IdentityNormalizer;
 import org.wikibrain.sr.normalize.Normalizer;
 import org.wikibrain.sr.normalize.PercentileNormalizer;
 import org.wikibrain.sr.utils.Leaderboard;
-import org.wikibrain.sr.vector.VectorBasedSRMetric;
+import org.wikibrain.sr.vector.SparseVectorSRMetric;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
@@ -518,9 +518,9 @@ public class KnownPhraseSim implements SRMetric {
             Language language = Language.getByLangCode(runtimeParams.get("language"));
 
             List<String> names = config.getStringList("metrics");
-            VectorBasedSRMetric[] metrics = new VectorBasedSRMetric[names.size()];
+            SparseVectorSRMetric[] metrics = new SparseVectorSRMetric[names.size()];
             for (int i = 0; i < names.size(); i++) {
-                metrics[i] = (VectorBasedSRMetric) getConfigurator().get(
+                metrics[i] = (SparseVectorSRMetric) getConfigurator().get(
                         SRMetric.class, names.get(i),
                         "language", language.getLangCode());
             }

@@ -299,6 +299,7 @@ public class SRBuilder {
             Word2VecTrainer trainer = new Word2VecTrainer(
                     env.getConfigurator().get(LocalPageDao.class),
                     language);
+            trainer.setKeepAllArticles(true);
             trainer.train(corpus.getDirectory());
             trainer.save(model);
         }

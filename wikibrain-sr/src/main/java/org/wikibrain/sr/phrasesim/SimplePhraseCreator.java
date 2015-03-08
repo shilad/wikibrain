@@ -1,15 +1,15 @@
 package org.wikibrain.sr.phrasesim;
 
 import gnu.trove.map.TLongFloatMap;
-import org.wikibrain.sr.vector.VectorBasedSRMetric;
+import org.wikibrain.sr.vector.SparseVectorSRMetric;
 
 /**
  * @author Shilad Sen
  */
 public class SimplePhraseCreator implements PhraseCreator {
-    VectorBasedSRMetric metric;
+    SparseVectorSRMetric metric;
 
-    public SimplePhraseCreator(VectorBasedSRMetric metric) {
+    public SimplePhraseCreator(SparseVectorSRMetric metric) {
         this.metric = metric;
     }
 

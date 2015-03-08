@@ -53,13 +53,13 @@ import java.util.logging.Logger;
  * buildFeatureAndTransposeMatrices().
  *
  * @author Shilad Sen
- * @see org.wikibrain.sr.vector.VectorGenerator
+ * @see SparseVectorGenerator
  * @see org.wikibrain.sr.vector.VectorSimilarity
  */
-public class VectorBasedSRMetric extends BaseSRMetric {
+public class SparseVectorSRMetric extends BaseSRMetric {
 
-    private static final Logger LOG = Logger.getLogger(VectorBasedSRMetric.class.getName());
-    protected final VectorGenerator generator;
+    private static final Logger LOG = Logger.getLogger(SparseVectorSRMetric.class.getName());
+    protected final SparseVectorGenerator generator;
     protected final VectorSimilarity similarity;
     protected final SRConfig config;
     private FeatureFilter featureFilter = null;
@@ -68,7 +68,7 @@ public class VectorBasedSRMetric extends BaseSRMetric {
     private SparseMatrix transposeMatrix;
 
 
-    public VectorBasedSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity) {
+    public SparseVectorSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, SparseVectorGenerator generator, VectorSimilarity similarity) {
         super(name, language, dao, disambig);
         this.generator = generator;
         this.similarity = similarity;
@@ -462,7 +462,7 @@ public class VectorBasedSRMetric extends BaseSRMetric {
         return transposeMatrix != null && transposeMatrix.getNumRows() > 0;
     }
 
-    public VectorGenerator getGenerator() {
+    public SparseVectorGenerator getGenerator() {
         return generator;
     }
 
@@ -506,11 +506,11 @@ public class VectorBasedSRMetric extends BaseSRMetric {
             Language language = Language.getByLangCode(runtimeParams.get("language"));
             Map<String, String> params = new HashMap<String, String>();
             params.put("language", language.getLangCode());
-            VectorGenerator generator = getConfigurator().construct(
-                    VectorGenerator.class, null, config.getConfig("generator"), params);
+            SparseVectorGenerator generator = getConfigurator().construct(
+                    SparseVectorGenerator.class, null, config.getConfig("generator"), params);
             VectorSimilarity similarity = getConfigurator().construct(
                     VectorSimilarity.class,  null, config.getConfig("similarity"), params);
-            VectorBasedSRMetric sr = new VectorBasedSRMetric(
+            SparseVectorSRMetric sr = new SparseVectorSRMetric(
                     name,
                     language,
                     getConfigurator().get(LocalPageDao.class,config.getString("pageDao")),

@@ -8,7 +8,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.lang.LocalString;
-import org.wikibrain.sr.vector.VectorBasedSRMetric;
+import org.wikibrain.sr.vector.SparseVectorSRMetric;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author Shilad Sen
  */
 public class PhraseUtils {
-    public static TIntFloatMap getPhraseVector(VectorBasedSRMetric metric, String phrase) {
+    public static TIntFloatMap getPhraseVector(SparseVectorSRMetric metric, String phrase) {
 
         // try using phrase generator directly
         try {
