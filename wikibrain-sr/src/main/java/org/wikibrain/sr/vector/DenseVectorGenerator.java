@@ -3,6 +3,7 @@ package org.wikibrain.sr.vector;
 
 import gnu.trove.map.TIntFloatMap;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.matrix.DenseMatrix;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
 
@@ -14,6 +15,11 @@ import java.util.List;
  * @author Shilad Sen
  */
 public interface DenseVectorGenerator {
+
+    /**
+     * @return The feature matrix (if one exists) or null.
+     */
+    public DenseMatrix getFeatureMatrix();
 
     /**
      * Returns the feature vector associated with Wikipedia id.

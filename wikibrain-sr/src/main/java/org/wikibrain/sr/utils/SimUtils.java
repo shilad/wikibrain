@@ -207,4 +207,20 @@ public class SimUtils {
         return wikibrainScoreDocs;
     }
 
+    public static double cosineSimilarity(float[] X, float[] Y) {
+        if (X == null || Y == null) {
+            return 0.0;
+        } else if (X.length != Y.length) {
+            throw new IllegalArgumentException();
+        }
+        double xDotX = 0.0;
+        double yDotY = 0.0;
+        double xDotY = 0.0;
+        for (int i = 0; i < X.length; i++) {
+            xDotX += X[i] * X[i];
+            yDotY += Y[i] * Y[i];
+            xDotY += X[i] * Y[i];
+        }
+        return xDotX * yDotY != 0 ? xDotY / Math.sqrt(xDotX * yDotY): 0.0;
+    }
 }
