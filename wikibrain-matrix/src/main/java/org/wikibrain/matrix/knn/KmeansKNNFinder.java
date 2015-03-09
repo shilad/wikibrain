@@ -103,7 +103,7 @@ public class KmeansKNNFinder {
             double prevScore = 0.000000001;
             for (int i = 0; i < 5; i++) {
                 double score = reallocateMembers();
-                System.out.println(path + " score at iteration " + i + " is " + score);
+//                System.out.println(path + " score at iteration " + i + " is " + score);
                 if (score / prevScore - 1.0 < 0.001) {
                     break;
                 }
@@ -188,7 +188,7 @@ public class KmeansKNNFinder {
         }
     }
 
-    private static double cosine(DenseMatrixRow X, DenseMatrixRow Y) {
+    static double cosine(DenseMatrixRow X, DenseMatrixRow Y) {
         if (X == null || Y == null) {
             return 0;
         }
@@ -208,7 +208,7 @@ public class KmeansKNNFinder {
         return xDotY / Math.sqrt(xDotX * yDotY);
     }
 
-    private static double cosine(double [] X, DenseMatrixRow Y) {
+    static double cosine(double [] X, DenseMatrixRow Y) {
         if (X == null || Y == null) {
             return 0;
         }
@@ -228,7 +228,7 @@ public class KmeansKNNFinder {
         return xDotY / Math.sqrt(xDotX * yDotY);
     }
 
-    private static double cosine(float [] X, DenseMatrixRow Y) {
+    static double cosine(float [] X, DenseMatrixRow Y) {
         if (X == null || Y == null) {
             return 0;
         }
