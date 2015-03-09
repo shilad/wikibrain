@@ -7,45 +7,72 @@ import org.wikibrain.matrix.DenseMatrix;
 import org.wikibrain.matrix.DenseMatrixRow;
 import org.wikibrain.matrix.DenseMatrixWriter;
 import org.wikibrain.matrix.ValueConf;
-import org.wikibrain.matrix.knn.KmeansKNNFinder;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
+import static junit.framework.Assert.assertEquals;
+
 /**
  * @author Shilad Sen
  */
-public class TestKNNFinder {
+public class TestKMeansNNFinder {
+    DenseMatrix matrix;
+    KNNFinder finder;
+
+    private void makeSmall() throws IOException {
+        matrix = createMatrix(1000, 20);
+        KmeansKNNFinder km = new KmeansKNNFinder(matrix);
+        km.setMaxLeaf(10);
+        km.setSampleSize(200);
+        km.setBranchingFactor(5);
+        km.build();
+        finder = km;
+    }
+
+    private void makeBig() throws IOException {
+        matrix = createMatrix(100000, 20);
+        KmeansKNNFinder km = new KmeansKNNFinder(matrix);
+        km.setMaxLeaf(10);
+        km.setSampleSize(10000);
+        km.setBranchingFactor(5);
+        km.build();
+        finder = km;
+    }
 
     @Test
     public void testBuild() throws IOException {
-        DenseMatrix matrix = createMatrix(10000, 20);
-        KmeansKNNFinder finder = new KmeansKNNFinder(matrix);
-        finder.build();
+        makeSmall();
     }
 
     @Test
     public void testQueryCoverage() throws IOException {
-        DenseMatrix matrix = createMatrix(100000, 1000000);
-        KmeansKNNFinder finder = new KmeansKNNFinder(matrix);
-        finder.build();
+        makeSmall();
+        int hits = 0;
+        int iters = 10;
+        for (int i = 0; i < iters; i++) {
+            System.out.println("doing " + i);
+            float[] v = randomVector(20);
+            Neighborhood estimated = finder.query(v, 10, 1000);
+            Neighborhood actual = actualNeighbors(v, matrix, 10);
+            hits += overlap(estimated, actual);
+        }
+        assertEquals(iters * 10, hits);
     }
 
     @Test
     public void testQuery() throws IOException {
-        DenseMatrix matrix = createMatrix(400000, 100);
-        KmeansKNNFinder finder = new KmeansKNNFinder(matrix);
-        finder.build();
+        makeBig();
         int hits = 0;
         long elapsedTree = 0;
         long elapsedBruteForce = 0;
-        int iters = 100;
+        int iters = 10;
         for (int i = 0; i < iters; i++) {
             System.out.println("doing " + i);
             float[] v = randomVector(20);
             long t1 = System.currentTimeMillis();
-            Neighborhood estimated = finder.query(v, 10, 200);
+            Neighborhood estimated = finder.query(v, 10, 2000);
             long t2 = System.currentTimeMillis();
             Neighborhood actual = actualNeighbors(v, matrix, 10);
             long t3 = System.currentTimeMillis();

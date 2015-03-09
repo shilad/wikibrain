@@ -26,7 +26,7 @@ public class NeighborhoodAccumulator {
      * @param key
      * @param sim Similarity of the neighbor.
      */
-    public void visit(int key, double sim) {
+    public final void visit(int key, double sim) {
         if (size < similarities.length - 1) {
             insert(key, sim);
         } else if (sim > similarities[1]) {

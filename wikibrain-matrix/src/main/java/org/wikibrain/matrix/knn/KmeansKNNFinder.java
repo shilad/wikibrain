@@ -1,5 +1,7 @@
 package org.wikibrain.matrix.knn;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.wikibrain.matrix.DenseMatrix;
 import org.wikibrain.matrix.DenseMatrixRow;
 
@@ -11,7 +13,7 @@ import java.util.*;
  *
  * @author Shilad Sen
  */
-public class KmeansKNNFinder {
+public class KmeansKNNFinder implements KNNFinder {
     private final DenseMatrix matrix;
     private int sampleSize = 50000;
     private int maxLeaf = 20;
@@ -22,10 +24,14 @@ public class KmeansKNNFinder {
         this.matrix = matrix;
     }
 
+    @Override
     public void build() throws IOException {
         root = new Node("R");
         root.members.addAll(getSample());
         root.build();
+        for (DenseMatrixRow row : matrix) {
+            root.place(row);
+        }
     }
 
     private static class Candidate implements Comparable<Candidate> {
@@ -43,14 +49,21 @@ public class KmeansKNNFinder {
         }
     }
 
-    public Neighborhood query(float [] vector, int k, int maxTraversal) {
+    @Override
+    public Neighborhood query(float[] vector, int k, int maxTraversal) {
         NeighborhoodAccumulator accum = new NeighborhoodAccumulator(k);
         TreeSet<Candidate> work = new TreeSet<Candidate>();
         work.add(new Candidate(root, -1.0));
         int traversed = 0;
         while (!work.isEmpty()) {
             Node n = work.pollLast().n;
-            for (DenseMatrixRow row : n.members) {
+            for (int rowId : n.memberIds.toArray()) {
+                DenseMatrixRow row = null;
+                try {
+                    row = matrix.getRow(rowId);
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
                 double sim = cosine(vector, row);
                 accum.visit(row.getRowIndex(), sim);
                 traversed++;
@@ -58,13 +71,25 @@ public class KmeansKNNFinder {
             if (traversed >= maxTraversal) {
                 break;
             }
-            for (Node c : n.children) {
-                if (c != null) {
+            if (n.children != null) {
+                for (Node c : n.children) {
                     work.add(new Candidate(c, cosine(vector, c.delegate)));
                 }
             }
         }
         return accum.get();
+    }
+
+    public void setSampleSize(int sampleSize) {
+        this.sampleSize = sampleSize;
+    }
+
+    public void setMaxLeaf(int maxLeaf) {
+        this.maxLeaf = maxLeaf;
+    }
+
+    public void setBranchingFactor(int branchingFactor) {
+        this.branchingFactor = branchingFactor;
     }
 
     private List<DenseMatrixRow> getSample() throws IOException {
@@ -87,6 +112,7 @@ public class KmeansKNNFinder {
         String path;
         DenseMatrixRow delegate;
         Node[] children = null;
+        TIntList memberIds;
         List<DenseMatrixRow> members = new ArrayList<DenseMatrixRow>();
 
         Node(String path) { this.path = path; }
@@ -94,6 +120,7 @@ public class KmeansKNNFinder {
         void build() {
 //            System.out.println("building node with " + members.size());
             if (members.size() <= maxLeaf) {
+                endBuild();
                 return;
             }
             initializeRandomly();
@@ -112,9 +139,27 @@ public class KmeansKNNFinder {
                 }
                 prevScore = score;
             }
+            endBuild();
             for (Node n : children) {
                 n.build();
             }
+        }
+
+
+        void place(DenseMatrixRow row) {
+            // If we're a leaf
+            if (children == null) {
+                memberIds.add(row.getRowIndex());
+                return;
+            }
+
+            // Otherwise find closest child.
+            findClosestChild(row).place(row);
+        }
+
+        private void endBuild() {
+            members = null;
+            memberIds = new TIntArrayList();
         }
 
         private void initializeRandomly() {
@@ -148,13 +193,10 @@ public class KmeansKNNFinder {
             // Pick the best delegate.
             double compactness = 0.0;
             double mostSimilar = -10;
-//            System.out.println("picking delegate for " + path);
-//            if (delegate != null) System.out.println("\told delegate was " + delegate.getRowIndex());
             for (DenseMatrixRow m : members) {
                 double s = cosine(center, m);
                 compactness += s;
                 if (s > mostSimilar) {
-//                    System.out.println("\tdelegate " + m.getRowIndex() + " has sim " + s);
                     mostSimilar = s;
                     delegate = m;
                 }
@@ -168,23 +210,35 @@ public class KmeansKNNFinder {
             }
             double score = 0.0;
             for (DenseMatrixRow m : members) {
-                double bestSim = -10;
-                Node best = null;
-                for (Node n : children) {
-                    double s = cosine(n.delegate, m);
-                    if (s > bestSim) {
-                        best = n;
-                        bestSim = s;
-                    }
-                }
-                if (best == null) {
-                    throw new IllegalStateException();
-                }
-//                System.out.println(m.getRowIndex() + " went to " + best.delegate.getRowIndex() + " with sim " + bestSim);
+                Node best = findClosestChild(m);
+                score += best.similarity(m);
                 best.members.add(m);
-                score += bestSim;
             }
             return score / members.size();
+        }
+
+        private Node findClosestChild(DenseMatrixRow row) {
+            double bestSim = -10;
+            Node best = null;
+            for (Node n : children) {
+                double s = n.similarity(row);
+                if (s > bestSim) {
+                    best = n;
+                    bestSim = s;
+                }
+            }
+            if (best == null) {
+                throw new IllegalStateException();
+            }
+            return best;
+        }
+
+        private double similarity(DenseMatrixRow row) {
+            return cosine(delegate, row);
+        }
+
+        private double similarity(float [] v) {
+            return cosine(v, delegate);
         }
     }
 
