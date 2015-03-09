@@ -161,7 +161,7 @@ public class SRBuilder {
                 toAdd.addAll(getSubmetrics(child));
                 toAdd.add(child);
             }
-        } else if (type.equals("vector.mostsimilarconcepts")) {
+        } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             toAdd.addAll(getSubmetrics(config.getString("generator.basemetric")));
         } else if (type.equals("milnewitten")){
             toAdd.add(config.getString("inlink"));
@@ -184,7 +184,7 @@ public class SRBuilder {
         if (type.equals("ensemble")) {
             EnsembleMetric ensemble = (EnsembleMetric) getMetric(name);
             ensemble.setTrainSubmetrics(false);         // Do it by hand
-        } else if (type.equals("vector.mostsimilarconcepts")) {
+        } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             if (mode == Mode.SIMILARITY) {
                 LOG.warning("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
                 mode = Mode.BOTH;
@@ -199,7 +199,7 @@ public class SRBuilder {
 
     public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
         LOG.info("building component metric " + name);
-        if (getMetricType(name).equals("vector.word2vec")) {
+        if (getMetricType(name).equals("densevector.word2vec")) {
             initWord2Vec(name);
         }
         Dataset ds = getDataset();
@@ -327,7 +327,7 @@ public class SRBuilder {
         boolean needsConcepts = false;
         for (String name : getSubmetrics(metricName)) {
             String type = getMetricType(name);
-            if (type.equals("vector.esa") || type.equals("vector.mostsimilarconcepts")) {
+            if (type.equals("sparsevector.esa") || type.equals("sparsevector.mostsimilarconcepts")) {
                 needsConcepts = true;
             }
         }
@@ -371,7 +371,7 @@ public class SRBuilder {
     public String getMetricType(String name) throws ConfigurationException {
         Config config = getMetricConfig(name);
         String type = config.getString("type");
-        if (type.equals("vector")) {
+        if (type.equals("densevector") || type.equals("sparsevector")) {
             type += "." + config.getString("generator.type");
         }
         return type;
