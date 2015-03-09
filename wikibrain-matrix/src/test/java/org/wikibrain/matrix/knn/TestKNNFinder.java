@@ -27,7 +27,7 @@ public class TestKNNFinder {
 
     @Test
     public void testQuery() throws IOException {
-        DenseMatrix matrix = createMatrix(4000000, 200);
+        DenseMatrix matrix = createMatrix(400000, 100);
         KmeansKNNFinder finder = new KmeansKNNFinder(matrix);
         finder.build();
         int hits = 0;
