@@ -278,6 +278,7 @@ public class SRBuilder {
         }
 
         LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        lpd.useCache(true);
         if (!lpd.isBuilt()) {
             lpd.build();
         }

@@ -26,6 +26,13 @@ public class TestKNNFinder {
     }
 
     @Test
+    public void testQueryCoverage() throws IOException {
+        DenseMatrix matrix = createMatrix(100000, 1000000);
+        KmeansKNNFinder finder = new KmeansKNNFinder(matrix);
+        finder.build();
+    }
+
+    @Test
     public void testQuery() throws IOException {
         DenseMatrix matrix = createMatrix(400000, 100);
         KmeansKNNFinder finder = new KmeansKNNFinder(matrix);
