@@ -182,7 +182,7 @@ public class RandomProjectionKNNFinder implements KNNFinder {
     public void save(File path) throws IOException {
         path.getParentFile().mkdirs();
         ObjectOutputStream oop = new ObjectOutputStream(new FileOutputStream(path));
-        oop.writeObject(new Object[] { vectors, bits});
+        oop.writeObject(new Object[] { vectors, bits, means, devs});
         oop.close();
     }
 
@@ -200,16 +200,24 @@ public class RandomProjectionKNNFinder implements KNNFinder {
             Object [] obj = (Object[]) in.readObject();
             double [][] newVectors = (double[][]) obj[0];
             long [] newBits = (long[]) obj[1];
-            if (newBits.length != ids.length) {
-                LOG.warning("Not loading knn model. Expected " + ids.length + ", found " + newBits.length);
+            double [] newMeans = (double[]) obj[2];
+            double [] newDevs = (double[]) obj[3];
+            if (newBits.length != ids.length *2) {
+                LOG.warning("Not loading knn model. Expected " + 2*ids.length + " longs, found " + newBits.length);
                 return false;
             }
             if (newVectors.length != NUM_BITS || newVectors[0].length != dimensions) {
                 LOG.warning("Not loading knn model. Invalid vectors dimensions.");
                 return false;
             }
+            if (newMeans.length != dimensions || newDevs.length != dimensions) {
+                LOG.warning("Not loading knn model. Invalid mean or devs dimensions.");
+                return false;
+            }
             this.vectors =newVectors;
             this.bits = newBits;
+            this.means = newMeans;
+            this.devs = newDevs;
             return true;
         } catch (ClassNotFoundException e) {
             throw new IOException(e);

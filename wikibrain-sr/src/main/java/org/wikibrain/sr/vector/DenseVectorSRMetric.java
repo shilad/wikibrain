@@ -22,6 +22,7 @@ import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.matrix.*;
 import org.wikibrain.matrix.knn.KNNFinder;
 import org.wikibrain.matrix.knn.Neighborhood;
+import org.wikibrain.matrix.knn.RandomProjectionKNNFinder;
 import org.wikibrain.sr.BaseSRMetric;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
@@ -194,6 +195,13 @@ public class DenseVectorSRMetric extends BaseSRMetric {
      */
     @Override
     public void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) {
+        try {
+            RandomProjectionKNNFinder knn = new RandomProjectionKNNFinder(articleFeatures);
+            knn.build();
+            accelerator = knn;
+        } catch (IOException e) {
+            throw new IllegalStateException("Unexpected exception: " + e);
+        }
         super.trainMostSimilar(dataset, numResults, validIds);
     }
 
@@ -279,6 +287,16 @@ public class DenseVectorSRMetric extends BaseSRMetric {
     @Override
     public void read() throws IOException {
         super.read();
+        RandomProjectionKNNFinder knn = new RandomProjectionKNNFinder(articleFeatures);
+        if (knn.load(new File(getDataDir(), "knn.bin"))) {
+            accelerator = knn;
+        }
+    }
+
+    @Override
+    public void write() throws IOException {
+        super.write();
+        accelerator.save(new File(getDataDir(), "knn.bin"));
     }
 
     /**
