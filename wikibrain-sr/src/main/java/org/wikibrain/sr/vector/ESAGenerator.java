@@ -6,7 +6,6 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
@@ -19,7 +18,6 @@ import org.wikibrain.lucene.LuceneSearcher;
 import org.wikibrain.lucene.QueryBuilder;
 import org.wikibrain.lucene.WikiBrainScoreDoc;
 import org.wikibrain.lucene.WpIdFilter;
-import org.wikibrain.matrix.SparseMatrix;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
@@ -36,7 +34,7 @@ import java.util.logging.Logger;
 /**
  * @author Shilad Sen
  */
-public class ESAGenerator implements VectorGenerator {
+public class ESAGenerator implements SparseVectorGenerator {
 
     private static final Logger LOG = Logger.getLogger(ESAGenerator.class.getName());
 
@@ -220,23 +218,23 @@ public class ESAGenerator implements VectorGenerator {
         return wikibrainScoreDocs;
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<VectorGenerator> {
+    public static class Provider extends org.wikibrain.conf.Provider<SparseVectorGenerator> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return VectorGenerator.class;
+            return SparseVectorGenerator.class;
         }
 
         @Override
         public String getPath() {
-            return "sr.metric.generator";
+            return "sr.metric.sparsegenerator";
         }
 
         @Override
-        public VectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public SparseVectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("esa")) {
                 return null;
             }

@@ -161,7 +161,7 @@ public class SRBuilder {
                 toAdd.addAll(getSubmetrics(child));
                 toAdd.add(child);
             }
-        } else if (type.equals("vector.mostsimilarconcepts")) {
+        } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             toAdd.addAll(getSubmetrics(config.getString("generator.basemetric")));
         } else if (type.equals("milnewitten")){
             toAdd.add(config.getString("inlink"));
@@ -184,7 +184,7 @@ public class SRBuilder {
         if (type.equals("ensemble")) {
             EnsembleMetric ensemble = (EnsembleMetric) getMetric(name);
             ensemble.setTrainSubmetrics(false);         // Do it by hand
-        } else if (type.equals("vector.mostsimilarconcepts")) {
+        } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             if (mode == Mode.SIMILARITY) {
                 LOG.warning("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
                 mode = Mode.BOTH;
@@ -199,7 +199,7 @@ public class SRBuilder {
 
     public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
         LOG.info("building component metric " + name);
-        if (getMetricType(name).equals("vector.word2vec")) {
+        if (getMetricType(name).equals("densevector.word2vec")) {
             initWord2Vec(name);
         }
         Dataset ds = getDataset();
@@ -278,6 +278,7 @@ public class SRBuilder {
         }
 
         LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        lpd.useCache(true);
         if (!lpd.isBuilt()) {
             lpd.build();
         }
@@ -290,18 +291,33 @@ public class SRBuilder {
                 corpus.create();
             }
         }
-        if (!model.isFile()) {
-            if (corpus == null) {
-                throw new ConfigurationException(
-                        "word2vec metric " + name + " cannot build or find model!" +
-                        "configuration has no corpus, but model not found at " + model + ".");
-            }
-            Word2VecTrainer trainer = new Word2VecTrainer(
-                    env.getConfigurator().get(LocalPageDao.class),
-                    language);
-            trainer.train(corpus.getDirectory());
-            trainer.save(model);
+
+        if (model.isFile() && (corpus == null ||  model.lastModified() > corpus.getCorpusFile().lastModified())) {
+            return;
         }
+        if (corpus == null) {
+            throw new ConfigurationException(
+                    "word2vec metric " + name + " cannot build or find model!" +
+                    "configuration has no corpus, but model not found at " + model + ".");
+        }
+        Word2VecTrainer trainer = new Word2VecTrainer(
+                env.getConfigurator().get(LocalPageDao.class),
+                language);
+        if (config.hasPath("dimensions")) {
+            LOG.info("set number of dimensions to " + config.getInt("dimensions"));
+            trainer.setLayer1Size(config.getInt("dimensions"));
+        }
+        if (config.hasPath("maxWords")) {
+            LOG.info("set maxWords to " + config.getInt("maxWords"));
+            trainer.setMaxWords(config.getInt("maxWords"));
+        }
+        if (config.hasPath("window")) {
+            LOG.info("set window to " + config.getInt("maxWords"));
+            trainer.setWindow(config.getInt("window"));
+        }
+        trainer.setKeepAllArticles(true);
+        trainer.train(corpus.getDirectory());
+        trainer.save(model);
     }
 
     private void setValidMostSimilarIdsFromFile(String file) throws IOException {
@@ -317,7 +333,7 @@ public class SRBuilder {
         boolean needsConcepts = false;
         for (String name : getSubmetrics(metricName)) {
             String type = getMetricType(name);
-            if (type.equals("vector.esa") || type.equals("vector.mostsimilarconcepts")) {
+            if (type.equals("sparsevector.esa") || type.equals("sparsevector.mostsimilarconcepts")) {
                 needsConcepts = true;
             }
         }
@@ -361,7 +377,7 @@ public class SRBuilder {
     public String getMetricType(String name) throws ConfigurationException {
         Config config = getMetricConfig(name);
         String type = config.getString("type");
-        if (type.equals("vector")) {
+        if (type.equals("densevector") || type.equals("sparsevector")) {
             type += "." + config.getString("generator.type");
         }
         return type;

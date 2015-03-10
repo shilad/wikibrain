@@ -16,7 +16,6 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
@@ -33,7 +32,7 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class LinkGenerator implements VectorGenerator {
+public class LinkGenerator implements SparseVectorGenerator {
 
     public static enum LinkType {
         IN,
@@ -200,23 +199,23 @@ public class LinkGenerator implements VectorGenerator {
         this.logTransform = logTransform;
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<VectorGenerator> {
+    public static class Provider extends org.wikibrain.conf.Provider<SparseVectorGenerator> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return VectorGenerator.class;
+            return SparseVectorGenerator.class;
         }
 
         @Override
         public String getPath() {
-            return "sr.metric.generator";
+            return "sr.metric.sparsegenerator";
         }
 
         @Override
-        public VectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public SparseVectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("links")) {
                 return null;
             }

@@ -104,11 +104,11 @@ public abstract class BaseCorpusCreator {
             String finalSentence = joinPhrases(tokens);
             document.append(finalSentence);
             document.append('\n');
+            dictionary.countNormalizedText(finalSentence);
         }
         synchronized (corpus) {
             corpus.write(document.toString() + "\n");
         }
-        countTokens(document.toString());
     }
 
     private String joinPhrases(List<String> words) throws DaoException {
@@ -122,11 +122,6 @@ public abstract class BaseCorpusCreator {
         }
         return buffer.toString();
     }
-
-    private void countTokens(String document) throws IOException {
-        dictionary.countNormalizedText(document);
-    }
-
 
     private List<String> addMentions(Token sentence, List<LocalLink> mentions) throws IOException, DaoException {
         List<Token> words = tokenizer.getWordTokens(language, sentence);

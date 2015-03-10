@@ -16,8 +16,10 @@ import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.nlp.Dictionary;
 import org.wikibrain.sr.wikify.WBCorpusDocReader;
 import org.wikibrain.sr.wikify.WbCorpusLineReader;
@@ -36,6 +38,7 @@ import java.util.regex.Matcher;
  */
 public class Word2VecTrainer {
     private static final Logger LOG = Logger.getLogger(Word2VecTrainer.class.getName());
+    private static final int ARTICLE_COUNT_BONUS = 10;
     private static final int MAX_EXP = 6;
     private static final int EXP_TABLE_SIZE = 1000;
 
@@ -93,6 +96,7 @@ public class Word2VecTrainer {
     private byte[][] wordCodes;
     private int[][] wordParents;
     private String[] words = null;
+    private boolean keepAllArticles = false;
 
 
     public Word2VecTrainer(LocalPageDao pageDao, Language language) {
@@ -169,19 +173,38 @@ public class Word2VecTrainer {
 
         totalWords = dict.getTotalCount();
         List<String> top = dict.getFrequentUnigramsAndMentions(pageDao, maxWords, minWordFrequency, minMentionFrequency);
-        words = top.toArray(new String[top.size()]);
-        for (int i = 0; i < words.length; i++) {
-            long h = hashWord(words[i]);
+        for (int i = 0; i < top.size(); i++) {
+            String w = top.get(i);
+            long h = hashWord(w);
             wordIndexes.put(h, i);
-            if (words[i].startsWith("/w/")) {
-                int wpId = Integer.valueOf(words[i].split("/", 5)[3]);
+            if (w.startsWith("/w/")) {
+                int wpId = Integer.valueOf(w.split("/", 5)[3]);
                 articleIndexes.put(wpId, i);
-                wordCounts.put(h, dict.getMentionCount(wpId));
+                wordCounts.put(h, dict.getMentionCount(wpId) + ARTICLE_COUNT_BONUS);
             } else {
-                wordCounts.put(h, dict.getUnigramCount(words[i]));
+                wordCounts.put(h, dict.getUnigramCount(w));
             }
         }
-        LOG.info("retained " + dict.getNumUnigrams() + " words and " + (words.length - dict.getNumUnigrams()) + " articles");
+        if (keepAllArticles) {
+            for (LocalPage page : pageDao.get(DaoFilter.normalPageFilter(language))) {
+                if (!articleIndexes.containsKey(page.getLocalId())) {
+                    String w = page.getCompactUrl();
+                    long h = hashWord(w);
+                    if (wordIndexes.containsKey(h)) {
+                        LOG.warning("hash collision on " + w + " with hash " + h);
+                    } else {
+                        int i = top.size();
+                        wordIndexes.put(h, i);
+                        top.add(w);
+                        articleIndexes.put(page.getLocalId(), i);
+                        wordCounts.put(h,  ARTICLE_COUNT_BONUS);
+                    }
+                }
+            }
+        }
+        words = top.toArray(new String[top.size()]);
+
+        LOG.info("retained " + dict.getNumUnigrams() + " words and " + articleIndexes.size() + " articles");
     }
 
     private int trainSentence(Integer wpId, String sentence) {
@@ -384,6 +407,22 @@ public class Word2VecTrainer {
         for (String k : keys) {
             System.out.println(sims.get(k) + " " + k);
         }
+    }
+
+    public void setMaxWords(int maxWords) {
+        this.maxWords = maxWords;
+    }
+
+    public void setLayer1Size(int layer1Size) {
+        this.layer1Size = layer1Size;
+    }
+
+    public void setWindow(int window) {
+        this.window = window;
+    }
+
+    public void setKeepAllArticles(boolean keepAllArticles) {
+        this.keepAllArticles = keepAllArticles;
     }
 
     private static byte[] floatToBytes(float value) {
