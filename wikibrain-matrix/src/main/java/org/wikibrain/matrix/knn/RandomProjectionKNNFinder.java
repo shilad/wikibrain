@@ -78,7 +78,7 @@ public class RandomProjectionKNNFinder implements KNNFinder {
         vectors = new double[NUM_BITS][dimensions];
         for (int d = 0; d < dimensions; d++) {
             for (int i = 0; i < vectors.length; i++) {
-                vectors[i][d] = 2 * random.nextDouble() - 1.0;    // in [-1,+1]
+                vectors[i][d] = random.nextGaussian() / 2;
             }
         }
     }

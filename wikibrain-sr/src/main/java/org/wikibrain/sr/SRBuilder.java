@@ -291,31 +291,33 @@ public class SRBuilder {
                 corpus.create();
             }
         }
-        if (!model.isFile()) {
-            if (corpus == null) {
-                throw new ConfigurationException(
-                        "word2vec metric " + name + " cannot build or find model!" +
-                        "configuration has no corpus, but model not found at " + model + ".");
-            }
-            Word2VecTrainer trainer = new Word2VecTrainer(
-                    env.getConfigurator().get(LocalPageDao.class),
-                    language);
-            if (config.hasPath("dimensions")) {
-                LOG.info("set number of dimensions to " + config.getInt("dimensions"));
-                trainer.setLayer1Size(config.getInt("dimensions"));
-            }
-            if (config.hasPath("maxWords")) {
-                LOG.info("set maxWords to " + config.getInt("maxWords"));
-                trainer.setMaxWords(config.getInt("maxWords"));
-            }
-            if (config.hasPath("window")) {
-                LOG.info("set window to " + config.getInt("maxWords"));
-                trainer.setWindow(config.getInt("window"));
-            }
-            trainer.setKeepAllArticles(true);
-            trainer.train(corpus.getDirectory());
-            trainer.save(model);
+
+        if (model.isFile() && (corpus == null ||  model.lastModified() > corpus.getCorpusFile().lastModified())) {
+            return;
         }
+        if (corpus == null) {
+            throw new ConfigurationException(
+                    "word2vec metric " + name + " cannot build or find model!" +
+                    "configuration has no corpus, but model not found at " + model + ".");
+        }
+        Word2VecTrainer trainer = new Word2VecTrainer(
+                env.getConfigurator().get(LocalPageDao.class),
+                language);
+        if (config.hasPath("dimensions")) {
+            LOG.info("set number of dimensions to " + config.getInt("dimensions"));
+            trainer.setLayer1Size(config.getInt("dimensions"));
+        }
+        if (config.hasPath("maxWords")) {
+            LOG.info("set maxWords to " + config.getInt("maxWords"));
+            trainer.setMaxWords(config.getInt("maxWords"));
+        }
+        if (config.hasPath("window")) {
+            LOG.info("set window to " + config.getInt("maxWords"));
+            trainer.setWindow(config.getInt("window"));
+        }
+        trainer.setKeepAllArticles(true);
+        trainer.train(corpus.getDirectory());
+        trainer.save(model);
     }
 
     private void setValidMostSimilarIdsFromFile(String file) throws IOException {

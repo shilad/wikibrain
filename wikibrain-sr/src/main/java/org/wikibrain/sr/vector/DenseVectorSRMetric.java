@@ -20,6 +20,8 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.matrix.*;
+import org.wikibrain.matrix.knn.KNNFinder;
+import org.wikibrain.matrix.knn.Neighborhood;
 import org.wikibrain.sr.BaseSRMetric;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
@@ -56,6 +58,11 @@ public class DenseVectorSRMetric extends BaseSRMetric {
     protected final SRConfig config;
 
     private DenseMatrix articleFeatures;
+    private KNNFinder accelerator;
+
+    // Multiple of requested mostSimilar results that will be considered
+    private double acceleratorMultiplier = 100.0;
+    private int minAcceleratorCandidates = 500;
 
 
     public DenseVectorSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, DenseVectorGenerator generator) {
@@ -135,28 +142,40 @@ public class DenseVectorSRMetric extends BaseSRMetric {
         if (vector == null) {
             return new SRResultList(0);
         }
-        final Leaderboard board = new Leaderboard(maxResults);
-        if (validIds == null) {
-            for (DenseMatrixRow row : articleFeatures) {
-                board.tallyScore(row.getRowIndex(), SimUtils.cosineSimilarity(row.getValues(), vector));
+        SRResultList result;
+        if (accelerator != null) {
+            if (validIds != null) throw new UnsupportedOperationException();// TODO: FIXME!
+            int n = (int) Math.max(minAcceleratorCandidates, maxResults * acceleratorMultiplier);
+            Neighborhood nhood = accelerator.query(vector, maxResults, n);
+            result = new SRResultList(nhood.size());
+            for (int i = 0; i < nhood.size(); i++) {
+                result.set(i, nhood.getId(i), nhood.getScore(i));
             }
         } else {
-            validIds.forEach(new TIntProcedure() {
-                @Override
-                public boolean execute(int id) {
-                    try {
-                        float [] v = getPageVector(id);
-                        if (v != null) {
-                            board.tallyScore(id, SimUtils.cosineSimilarity(v, vector));
-                        }
-                    } catch (Exception e) {
-                        LOG.log(Level.WARNING, "similarity for " + id + " failed: ", e);
-                    }
-                    return true;
+            final Leaderboard board = new Leaderboard(maxResults);
+            if (validIds == null) {
+                for (DenseMatrixRow row : articleFeatures) {
+                    board.tallyScore(row.getRowIndex(), SimUtils.cosineSimilarity(row.getValues(), vector));
                 }
-            });
+            } else {
+                validIds.forEach(new TIntProcedure() {
+                    @Override
+                    public boolean execute(int id) {
+                        try {
+                            float [] v = getPageVector(id);
+                            if (v != null) {
+                                board.tallyScore(id, SimUtils.cosineSimilarity(v, vector));
+                            }
+                        } catch (Exception e) {
+                            LOG.log(Level.WARNING, "similarity for " + id + " failed: ", e);
+                        }
+                        return true;
+                    }
+                });
+            }
+            result = board.getTop();
         }
-        return normalize(board.getTop());
+        return normalize(result);
     }
 
     /**
@@ -282,6 +301,18 @@ public class DenseVectorSRMetric extends BaseSRMetric {
 
     public DenseVectorGenerator getGenerator() {
         return generator;
+    }
+
+    public void setAccelerator(KNNFinder accelerator) {
+        this.accelerator = accelerator;
+    }
+
+    public void setAcceleratorMultiplier(double acceleratorMultiplier) {
+        this.acceleratorMultiplier = acceleratorMultiplier;
+    }
+
+    public void setMinAcceleratorCandidates(int minAcceleratorCandidates) {
+        this.minAcceleratorCandidates = minAcceleratorCandidates;
     }
 
     @Override
