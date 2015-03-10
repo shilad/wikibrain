@@ -301,12 +301,15 @@ public class SRBuilder {
                     env.getConfigurator().get(LocalPageDao.class),
                     language);
             if (config.hasPath("dimensions")) {
+                LOG.info("set number of dimensions to " + config.getInt("dimensions"));
                 trainer.setLayer1Size(config.getInt("dimensions"));
             }
             if (config.hasPath("maxWords")) {
+                LOG.info("set maxWords to " + config.getInt("maxWords"));
                 trainer.setMaxWords(config.getInt("maxWords"));
             }
             if (config.hasPath("window")) {
+                LOG.info("set window to " + config.getInt("maxWords"));
                 trainer.setWindow(config.getInt("window"));
             }
             trainer.setKeepAllArticles(true);
