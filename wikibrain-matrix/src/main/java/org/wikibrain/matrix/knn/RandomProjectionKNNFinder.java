@@ -1,14 +1,25 @@
 package org.wikibrain.matrix.knn;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.matrix.DenseMatrix;
 import org.wikibrain.matrix.DenseMatrixRow;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.logging.Logger;
 
 /**
+ * Approximation cache for nearest neighbors that uses a random-projection scheme.
+ * This implementation keeps two longs (16 bytes) per row in the dense matrix.
+ * It constructs one random vector for each of the 128 bits in the two longs.
+ * Each bit in a particular row's two longs indicates the sign (-1 = 0, +1 = 1) of the
+ * dot product.
+ *
+ * To find neighbors, the algorithm counts how many of the 128 bits agree between
+ * a query and a candidate.
+ *
  * @author Shilad Sen
  */
 public class RandomProjectionKNNFinder implements KNNFinder {
@@ -118,7 +129,13 @@ public class RandomProjectionKNNFinder implements KNNFinder {
     }
 
     @Override
-    public Neighborhood query(float[] vector, int k, int maxTraversal) {
+    public Neighborhood query(float[] vector, int k, int maxTraversal, TIntSet validIds) {
+        // Hack: Speed up query by reducing number of collisions
+        if (validIds != null) {
+            TIntSet tmp = validIds;
+            validIds = new TIntHashSet(tmp.size() * 4);
+            tmp.addAll(validIds);
+        }
         long vbits[] = new  long[2];
         project(vector, vbits);
         long p0 = vbits[0];
@@ -127,6 +144,7 @@ public class RandomProjectionKNNFinder implements KNNFinder {
         // Pass 1: count how many things have each # of bits.
         int[] numHits = new int[NUM_BITS + 1];
         for (int i = 0; i < ids.length; i++) {
+            if (validIds != null && !validIds.contains(ids[i])) continue;
             int nSet = NUM_BITS - Long.bitCount(bits[2*i] ^ p0) - Long.bitCount(bits[2*i+1] ^ p1);
             numHits[nSet]++;
         }
@@ -145,6 +163,7 @@ public class RandomProjectionKNNFinder implements KNNFinder {
 
         NeighborhoodAccumulator accum = new NeighborhoodAccumulator(k);
         for (int i = 0; i < ids.length; i++) {
+            if (validIds != null && !validIds.contains(ids[i])) continue;
             int nSet = NUM_BITS - Long.bitCount(bits[2*i] ^ p0) - Long.bitCount(bits[2*i+1] ^ p1);
             if (nSet >= threshold) {
                 try {
@@ -158,4 +177,44 @@ public class RandomProjectionKNNFinder implements KNNFinder {
         }
         return accum.get();
     }
+
+    @Override
+    public void save(File path) throws IOException {
+        path.getParentFile().mkdirs();
+        ObjectOutputStream oop = new ObjectOutputStream(new FileOutputStream(path));
+        oop.writeObject(new Object[] { vectors, bits});
+        oop.close();
+    }
+
+    @Override
+    public boolean load(File path) throws IOException {
+        if (!path.isFile()) {
+            LOG.warning("Not loading knn model. File doesn't exist: " + path);
+            return false;
+        } else if (path.lastModified() < matrix.getPath().lastModified()) {
+            LOG.warning("Not loading knn model. File " + path + " older than matrix: " + matrix.getPath());
+            return false;
+        }
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(path));
+        try {
+            Object [] obj = (Object[]) in.readObject();
+            double [][] newVectors = (double[][]) obj[0];
+            long [] newBits = (long[]) obj[1];
+            if (newBits.length != ids.length) {
+                LOG.warning("Not loading knn model. Expected " + ids.length + ", found " + newBits.length);
+                return false;
+            }
+            if (newVectors.length != NUM_BITS || newVectors[0].length != dimensions) {
+                LOG.warning("Not loading knn model. Invalid vectors dimensions.");
+                return false;
+            }
+            this.vectors =newVectors;
+            this.bits = newBits;
+            return true;
+        } catch (ClassNotFoundException e) {
+            throw new IOException(e);
+        }
+    }
+
+
 }

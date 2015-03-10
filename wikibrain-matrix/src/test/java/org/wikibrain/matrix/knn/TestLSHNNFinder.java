@@ -48,7 +48,7 @@ public class TestLSHNNFinder {
         for (int i = 0; i < iters; i++) {
             System.out.println("doing " + i);
             float[] v = randomVector(20);
-            Neighborhood estimated = finder.query(v, 10, 1000);
+            Neighborhood estimated = finder.query(v, 10, 1000, null);
             Neighborhood actual = actualNeighbors(v, matrix, 10);
             hits += overlap(estimated, actual);
         }
@@ -66,7 +66,7 @@ public class TestLSHNNFinder {
             System.out.println("doing " + i);
             float[] v = randomVector(100);
             long t1 = System.currentTimeMillis();
-            Neighborhood estimated = finder.query(v, 10, 100);
+            Neighborhood estimated = finder.query(v, 10, 100, null);
             long t2 = System.currentTimeMillis();
             Neighborhood actual = actualNeighbors(v, matrix, 10);
             long t3 = System.currentTimeMillis();

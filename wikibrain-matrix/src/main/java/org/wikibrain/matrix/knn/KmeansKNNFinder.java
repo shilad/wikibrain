@@ -2,9 +2,11 @@ package org.wikibrain.matrix.knn;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
 import org.wikibrain.matrix.DenseMatrix;
 import org.wikibrain.matrix.DenseMatrixRow;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -50,7 +52,10 @@ public class KmeansKNNFinder implements KNNFinder {
     }
 
     @Override
-    public Neighborhood query(float[] vector, int k, int maxTraversal) {
+    public Neighborhood query(float[] vector, int k, int maxTraversal, TIntSet validIds) {
+        if (validIds != null) {
+            throw new UnsupportedOperationException();
+        }
         NeighborhoodAccumulator accum = new NeighborhoodAccumulator(k);
         TreeSet<Candidate> work = new TreeSet<Candidate>();
         work.add(new Candidate(root, -1.0));
@@ -78,6 +83,16 @@ public class KmeansKNNFinder implements KNNFinder {
             }
         }
         return accum.get();
+    }
+
+    @Override
+    public void save(File path) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean load(File path) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     public void setSampleSize(int sampleSize) {
@@ -301,4 +316,6 @@ public class KmeansKNNFinder implements KNNFinder {
         }
         return xDotY / Math.sqrt(xDotX * yDotY);
     }
+
+
 }
