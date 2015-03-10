@@ -88,6 +88,10 @@ public class Env implements Closeable {
         LOG.info("using tmpDir " + tmpDir);
     }
 
+    public File getBaseDir() {
+        return new File(configuration.getString("baseDir"));
+    }
+
     public List<File> getFiles(FileMatcher ... matchers) {
         return getFiles(getLanguages(), matchers);
     }

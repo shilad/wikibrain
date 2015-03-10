@@ -112,7 +112,6 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
     @Override
     public int[] getRowIds() {
         return rowBuffers.getRowIdsInDiskOrder();
-
     }
 
     public int[] getColIds() {

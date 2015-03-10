@@ -29,7 +29,7 @@ public class SimilarityExample {
         //Similarity between strings
         String pairs[][] = new String[][] {
                 { "cat", "kitty" },
-                { "obama", "president" },
+                { "Obama", "president" },
                 { "tires", "car" },
                 { "java", "computer" },
                 { "dog", "computer" },

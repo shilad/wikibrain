@@ -4,6 +4,8 @@ import com.typesafe.config.Config;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.distribution.BetaDistribution;
+import org.apache.commons.math3.util.FastMath;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -20,6 +22,12 @@ import java.util.Map;
  */
 public class PercentileNormalizer extends BaseNormalizer {
     protected transient PolynomialSplineFunction interpolator;
+
+    /**
+     * If the power variable has been set, the percentile is raised to this power.
+     * This has the effect of making things "less related" overall.
+     */
+    protected double power = 0.0;
 
     @Override
     public void reset() {
@@ -38,7 +46,7 @@ public class PercentileNormalizer extends BaseNormalizer {
         TDoubleArrayList Y = new TDoubleArrayList();
 
         for (int i = 0; i < sample.size(); i++) {
-            double fudge = max * 10E-8 * i;    // ensures monotonic increasing
+            double fudge = max * 10E-9 * i;    // ensures monotonic increasing
             X.add(sample.get(i) + fudge);
             Y.add((i + 1.0) / (sample.size() + 1));
         }
@@ -63,13 +71,18 @@ public class PercentileNormalizer extends BaseNormalizer {
         double halfLife = (sMax - sMin) / 4.0;
         double yDelta = 1.0 / (sample.size() + 1);
 
+        double y;
         if (x < sMin) {
-            return WbMathUtils.toAsymptote(sMin - x, halfLife, yDelta, 0.0);
+            y = WbMathUtils.toAsymptote(sMin - x, halfLife, yDelta, 0.0);
         } else if (x > sMax) {
-            return WbMathUtils.toAsymptote(x - sMax, halfLife, 1.0 - yDelta, 1.0);
+            y = WbMathUtils.toAsymptote(x - sMax, halfLife, 1.0 - yDelta, 1.0);
         } else {
-            return interpolator.value(x);
+            y = interpolator.value(x);
         }
+        if (power > 0.0) {
+            y = FastMath.pow(y, power);
+        }
+        return y;
     }
 
     @Override
@@ -84,6 +97,10 @@ public class PercentileNormalizer extends BaseNormalizer {
             buff.append(", ");
         }
         return buff.toString();
+    }
+
+    public void setPower(double power) {
+        this.power = power;
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<PercentileNormalizer> {
@@ -111,10 +128,11 @@ public class PercentileNormalizer extends BaseNormalizer {
             if (!config.getString("type").equals("percentile")) {
                 return null;
             }
-
-            return new PercentileNormalizer(
-            );
+            PercentileNormalizer n = new PercentileNormalizer();
+            if (config.hasPath("power")) {
+                n.setPower(config.getDouble("power"));
+            }
+            return n;
         }
-
     }
 }

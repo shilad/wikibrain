@@ -133,8 +133,7 @@ public class RankAndScoreNormalizer extends BaseNormalizer {
                 return null;
             }
 
-            return new RankAndScoreNormalizer(
-            );
+            return new RankAndScoreNormalizer();
         }
 
     }

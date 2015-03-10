@@ -77,7 +77,6 @@ public class SRConceptSpaceGenerator {
         }
 
         SRResultList sorted = mostLinked.getTop();
-        sorted.sortDescending();
         TIntSet result = new TIntHashSet();
         for (int i = 0; i < sorted.numDocs(); i++) {
             if (i < numStopArticles) {

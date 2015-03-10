@@ -46,9 +46,9 @@ import java.util.*;
 public class PhraseVectorCreator {
     private final LuceneSearcher searcher;
     private Language language;
-    private VectorBasedSRMetric metric;
+    private SparseVectorSRMetric metric;
     private Disambiguator disambig;
-    private VectorGenerator generator;
+    private SparseVectorGenerator generator;
 
     private double dabWeight = 1.0;
     private int numDabCands = 1;
@@ -102,7 +102,7 @@ public class PhraseVectorCreator {
      * Set metric must be called before this component can be used.
      * @param metric
      */
-    public void setMetric(VectorBasedSRMetric metric) {
+    public void setMetric(SparseVectorSRMetric metric) {
         this.metric = metric;
         this.language = metric.getLanguage();
         this.disambig = metric.getDisambiguator();

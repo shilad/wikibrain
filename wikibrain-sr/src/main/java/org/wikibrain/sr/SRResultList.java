@@ -90,6 +90,10 @@ public class SRResultList implements  Iterable<SRResult>{
         return results[i].id;
     }
 
+    public void setId(int i, int id) {
+        results[i].id = id;
+    }
+
     /**
      * Returns an array of the IDs in this list.
      * @return
@@ -200,6 +204,17 @@ public class SRResultList implements  Iterable<SRResult>{
                 results[i].score /= length;
             }
         }
+    }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < numDocs(); i++) {
+            if (i > 0) builder.append(" ");
+            builder.append(
+                    String.format("%d. %d=%.3f", (i+1), results[i].getId(), results[i].getScore())
+            );
+        }
+        return builder.toString();
     }
 
     /**

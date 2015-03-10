@@ -118,6 +118,7 @@ public class CategoryGraphSimilarity extends BaseSRMetric {
         for (int pageId2: bfs.getPageDistances().keys()) {
             results.set(i++, pageId2, distanceToScore(bfs.getPageDistances().get(pageId2)));
         }
+        results.sortDescending();
         return normalize(results);
     }
 

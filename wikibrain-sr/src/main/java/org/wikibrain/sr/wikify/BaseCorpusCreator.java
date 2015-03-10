@@ -68,10 +68,11 @@ public abstract class BaseCorpusCreator {
         dir.mkdirs();
         dictionary = new Dictionary(language, Dictionary.WordStorage.ON_DISK);
         corpus = WpIOUtils.openWriter(new File(dir, "corpus.txt"));
-        corpus.write(String.format("@WikiBrainCorpus %s %s %s\n",
+        corpus.write(String.format("@WikiBrainCorpus\t%s\t%s\t%s\t%s\n",
                 this.language.getLangCode(),
                 this.getClass().getName(),
-                wikifier.getClass().getName()
+                wikifier.getClass().getName(),
+                new Date().toString()
             ));
         ParallelForEach.iterate(getCorpus(), new Procedure<IdAndText>() {
             @Override
@@ -103,11 +104,11 @@ public abstract class BaseCorpusCreator {
             String finalSentence = joinPhrases(tokens);
             document.append(finalSentence);
             document.append('\n');
+            dictionary.countNormalizedText(finalSentence);
         }
         synchronized (corpus) {
             corpus.write(document.toString() + "\n");
         }
-        countTokens(document.toString());
     }
 
     private String joinPhrases(List<String> words) throws DaoException {
@@ -121,11 +122,6 @@ public abstract class BaseCorpusCreator {
         }
         return buffer.toString();
     }
-
-    private void countTokens(String document) throws IOException {
-        dictionary.countNormalizedText(document);
-    }
-
 
     private List<String> addMentions(Token sentence, List<LocalLink> mentions) throws IOException, DaoException {
         List<Token> words = tokenizer.getWordTokens(language, sentence);

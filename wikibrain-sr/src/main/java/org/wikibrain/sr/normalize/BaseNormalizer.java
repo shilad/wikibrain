@@ -19,7 +19,7 @@ import java.util.Random;
 public abstract class BaseNormalizer implements Serializable, Normalizer {
     public static final long serialVersionUID = 4305858822325261880L;
 
-    public final static int SAMPLE_SIZE = 5000;
+    public final static int SAMPLE_SIZE = 50000;
 
     public double min = Double.MIN_VALUE;
     protected double max = -Double.MAX_VALUE;
@@ -37,11 +37,16 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
     private double missingSum = 0.0;
     private int missingCount = 0;
     private boolean trained = false;
+    private int sampleSize = SAMPLE_SIZE;
 
     /**
      * To meet the serializable contract.
      */
     protected BaseNormalizer() {}
+
+    public void setSampleSize(int sampleSize) {
+        this.sampleSize = sampleSize;
+    }
 
     @Override
     public void reset() {
@@ -82,7 +87,7 @@ public abstract class BaseNormalizer implements Serializable, Normalizer {
             if (!Double.isNaN(x) && !Double.isInfinite(x)) {
                 if (x < min) { min = x; }
                 if (x > max) { max = x; }
-                if (sample.size() < SAMPLE_SIZE) {
+                if (sample.size() < sampleSize) {
                     sample.add(x);
                 } else if (random.nextDouble() < 1.0 * sample.size() / (numObservations + 1)) {
                     sample.set(random.nextInt(sample.size()),  x);

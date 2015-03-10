@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class MostSimilarConceptsGenerator implements VectorGenerator {
+public class MostSimilarConceptsGenerator implements SparseVectorGenerator {
 
     private static final Logger LOG = Logger.getLogger(MostSimilarConceptsGenerator.class.getName());
 
@@ -92,7 +92,6 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
         if (top.numDocs() == 0) {
             return Arrays.asList(new Explanation("? and ? share no similar pages", page1, page2));
         }
-        top.sortDescending();
 
         List<Explanation> explanations = new ArrayList<Explanation>();
         for (int i = 0; i < top.numDocs(); i++) {
@@ -104,23 +103,23 @@ public class MostSimilarConceptsGenerator implements VectorGenerator {
         return explanations;
     }
 
-    public static class Provider extends org.wikibrain.conf.Provider<VectorGenerator> {
+    public static class Provider extends org.wikibrain.conf.Provider<SparseVectorGenerator> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
         public Class getType() {
-            return VectorGenerator.class;
+            return SparseVectorGenerator.class;
         }
 
         @Override
         public String getPath() {
-            return "sr.metric.generator";
+            return "sr.metric.sparsegenerator";
         }
 
         @Override
-        public VectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public SparseVectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("mostsimilarconcepts")) {
                 return null;
             }

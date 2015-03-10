@@ -383,7 +383,6 @@ public abstract class BaseSRMetric implements SRMetric {
         if (results.numDocs() < numResults) {
             return null;
         }
-        results.sortDescending();
         return results;
     }
 

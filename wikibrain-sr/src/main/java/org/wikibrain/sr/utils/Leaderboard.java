@@ -30,7 +30,7 @@ public class Leaderboard {
         for (int i = 1; i <= size; i++) {
             scores.set(i - 1, keys[i], values[i]);
         }
-        scores.sortAscending();
+        scores.sortDescending();
         return scores;
     }
 

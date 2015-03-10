@@ -153,9 +153,7 @@ public class GoogleSimilarity implements VectorSimilarity {
                                                    intersections.get(id), numPages);
             leaderboard.tallyScore(id, sim);
         }
-        SRResultList result = leaderboard.getTop();
-        result.sortDescending();
-        return result;
+        return leaderboard.getTop();
     }
 
     @Override

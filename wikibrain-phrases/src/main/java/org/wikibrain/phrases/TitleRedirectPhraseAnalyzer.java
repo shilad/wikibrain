@@ -63,18 +63,10 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
 
         if (maxPages < 1) return result;
 
-        LocalPage lp = lpDao.getByTitle(new Title(phrase, language), NameSpace.ARTICLE);
-        if (lp == null) return result;
-
-        LocalId localId = null;
-        if (lp.isRedirect()){
-            Integer resolvedLocalId = redirectDao.resolveRedirect(language, lp.getLocalId());
-            lp = lpDao.getById(language, resolvedLocalId);
-            localId = new LocalId(language, resolvedLocalId);
-        }else{
-            localId = lp.toLocalId();
+        int pageId = lpDao.getIdByTitle(new Title(phrase, language));
+        if (pageId >= 0) {
+            result.put(new LocalId(language, pageId), 1.0f);
         }
-        result.put(localId, 1.0f);
         return result;
 
     }
@@ -96,7 +88,7 @@ public class TitleRedirectPhraseAnalyzer implements PhraseAnalyzer {
 
         @Override
         public PhraseAnalyzer get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
-            if (!config.getString("type").equals("titleredirect")) {
+            if (!config.getString("type").equals("titleRedirect")) {
                 return null;
             }
             LocalPageDao lpDao = getConfigurator().get(LocalPageDao.class, config.getString("localPageDao"));

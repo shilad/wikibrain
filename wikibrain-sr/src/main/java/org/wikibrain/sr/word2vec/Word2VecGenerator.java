@@ -3,10 +3,8 @@ package org.wikibrain.sr.word2vec;
 import com.typesafe.config.Config;
 import gnu.trove.list.TCharList;
 import gnu.trove.list.array.TCharArrayList;
-import gnu.trove.map.TIntFloatMap;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntFloatHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wikibrain.conf.Configuration;
@@ -15,15 +13,16 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.matrix.DenseMatrix;
+import org.wikibrain.matrix.DenseMatrixRow;
+import org.wikibrain.matrix.DenseMatrixWriter;
+import org.wikibrain.matrix.ValueConf;
 import org.wikibrain.sr.Explanation;
 import org.wikibrain.sr.SRResult;
-import org.wikibrain.sr.vector.VectorGenerator;
-import org.wikibrain.utils.ObjectDb;
+import org.wikibrain.sr.vector.DenseVectorGenerator;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -37,42 +36,67 @@ import java.util.logging.Logger;
  *
  * @author Shilad Sen
  */
-public class Word2VecGenerator implements VectorGenerator {
+public class Word2VecGenerator implements DenseVectorGenerator {
     private static final Logger LOG = Logger.getLogger(Word2VecGenerator.class.getName());
 
     private final Language language;
     private final LocalPageDao localPageDao;
+    private final File path;
 
-    private ObjectDb<float[]> phraseDb;
-    private TIntObjectMap<float[]> articles;
+    private TLongIntMap phraseIds;
+    private DenseMatrix phraseMatrix;
+    private DenseMatrix articleMatrix;
 
     public Word2VecGenerator(Language language, LocalPageDao localPageDao, File path) throws IOException {
         this.language = language;
         this.localPageDao = localPageDao;
-        this.read(path);
+        this.path = path;
+        this.read();
     }
 
-    public void read(File path) throws IOException {
-        File phraseFile = new File(path.getAbsolutePath() + ".phrases");
-        File articleFile = new File(path.getAbsolutePath() + ".articles");
-        if (phraseFile.exists()
-        &&  articleFile.exists()
-        &&  phraseFile.lastModified() >= path.lastModified()
-        &&  articleFile.lastModified() >= path.lastModified()) {
+    public void read() throws IOException {
+        if (getArticleMatrixPath().exists()
+        &&  getPhraseMatrixPath().exists()
+        &&  getPhraseIdPath().exists()
+        &&  getPhraseMatrixPath().lastModified() >= path.lastModified()
+        &&  getArticleMatrixPath().lastModified() >= path.lastModified()) {
             LOG.info("phrase and article caches are up to date, loading them...");
-            phraseDb = new ObjectDb<float[]>(phraseFile);
-            articles = (TIntObjectMap<float[]>) WpIOUtils.readObjectFromFile(articleFile);
+            phraseMatrix = new DenseMatrix(getPhraseMatrixPath());
+            articleMatrix = new DenseMatrix(getArticleMatrixPath());
+            readPhraseIds();
         } else {
-            createWikiBrainModel(path, phraseFile, articleFile);
+            createWikiBrainModel();
         }
     }
 
-    private void createWikiBrainModel(File path, File phraseFile, File articleFile) throws IOException {
-        FileUtils.deleteQuietly(phraseFile);
-        FileUtils.deleteQuietly(articleFile);
+    private void readPhraseIds() throws IOException {
+        BufferedReader reader = WpIOUtils.openBufferedReader(getPhraseIdPath());
+        try {
+            phraseIds = new TLongIntHashMap();
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                String tokens[] = line.split("\t", 2);
+                int wpId = Integer.parseInt(tokens[0]);
+                String phrase = tokens[1].trim();
+                phraseIds.put(hashWord(phrase), wpId);
+            }
+        } finally {
+            IOUtils.closeQuietly(reader);
+        }
+    }
 
-        phraseDb = new ObjectDb<float[]>(phraseFile, true);
-        articles = new TIntObjectHashMap<float[]>();
+    private void createWikiBrainModel() throws IOException {
+        FileUtils.deleteQuietly(getPhraseIdPath());
+        FileUtils.deleteQuietly(getPhraseMatrixPath());
+        FileUtils.deleteQuietly(getArticleMatrixPath());
+
+        ValueConf vconf = new ValueConf();
+        BufferedWriter phraseIdWriter = WpIOUtils.openWriter(getPhraseIdPath());
+        DenseMatrixWriter phraseWriter = new DenseMatrixWriter(getPhraseMatrixPath(), vconf);
+        DenseMatrixWriter articleWriter = new DenseMatrixWriter(getArticleMatrixPath(), vconf);
 
         DataInputStream dis = null;
         InputStream bis = null;
@@ -89,14 +113,18 @@ public class Word2VecGenerator implements VectorGenerator {
 
             String tokens[] = header.split(" ");
 
-            int numWords = Integer.parseInt(tokens[0]);
+            int numEntities = Integer.parseInt(tokens[0]);
             int vlength = Integer.parseInt(tokens[1]);
-            LOG.info("preparing to read " + numWords + " with length " + vlength + " vectors");
+            LOG.info("preparing to read " + numEntities + " with length " + vlength + " vectors");
+            int [] colIds = new int[vlength];
+            for (int i = 0; i < vlength; i++) { colIds[i] = i; }
+            int numPhrases = 0;
 
-            for (int i = 0; i < numWords; i++) {
+
+            for (int i = 0; i < numEntities; i++) {
                 String word = readString(dis);
                 if (i % 50000 == 0) {
-                    LOG.info("Read word vector " + word + " (" + i + " of " + numWords + ")");
+                    LOG.info("Read word vector " + word + " (" + i + " of " + numEntities + ")");
                 }
 
                 float[] vector = new float[vlength];
@@ -114,9 +142,16 @@ public class Word2VecGenerator implements VectorGenerator {
                 if (word.startsWith("/w/")) {
                     String[] pieces = word.split("/", 5);
                     int wpId = Integer.valueOf(pieces[3]);
-                    articles.put(wpId, vector);
+                    if (wpId >= 0) {
+                        DenseMatrixRow row = new DenseMatrixRow(vconf, wpId, colIds, vector);
+                        articleWriter.writeRow(row);
+                    }
                 } else {
-                    phraseDb.put(normalize(word), vector);
+                    word = word.replace('\t', ' ').replace('\n', ' ');
+                    DenseMatrixRow row = new DenseMatrixRow(vconf, numPhrases, colIds, vector);
+                    phraseWriter.writeRow(row);
+                    phraseIdWriter.write(numPhrases + "\t" + word + "\n");
+                    numPhrases++;
                 }
             }
         } finally {
@@ -124,9 +159,28 @@ public class Word2VecGenerator implements VectorGenerator {
             IOUtils.closeQuietly(dis);
         }
 
-        phraseDb.flush();
-        WpIOUtils.writeObjectToFile(articleFile, articles);
+        IOUtils.closeQuietly(phraseIdWriter);
+        phraseWriter.finish();
+        articleWriter.finish();
+
+        phraseMatrix = new DenseMatrix(getPhraseMatrixPath());
+        articleMatrix = new DenseMatrix(getArticleMatrixPath());
+        readPhraseIds();
     }
+
+    private File getPhraseMatrixPath() {
+        return new File(path.getAbsolutePath() + ".phrases.matrix");
+    }
+
+    private File getArticleMatrixPath() {
+        return new File(path.getAbsolutePath() + ".articles.matrix");
+    }
+
+
+    private File getPhraseIdPath() {
+        return new File(path.getAbsolutePath() + ".phrases.txt");
+    }
+
 
 
     private static String readString(DataInputStream dis) throws IOException {
@@ -164,45 +218,47 @@ public class Word2VecGenerator implements VectorGenerator {
 
 
     @Override
-    public TIntFloatMap getVector(int pageId) throws DaoException {
-        float[] vector = articles.get(pageId);
-        if (vector == null) {
-            return null;
-        }
-        TIntFloatMap result = new TIntFloatHashMap(vector.length);
-        for (int i = 0; i < vector.length; i++) {
-            result.put(i, vector[i]);
-        }
-        return result;
+    public DenseMatrix getFeatureMatrix() {
+        return articleMatrix;
     }
 
     @Override
-    public TIntFloatMap getVector(String phrase) {
-        float[] vector;
+    public float []  getVector(int pageId) throws DaoException {
         try {
-            vector = phraseDb.get(normalize(phrase));
+            DenseMatrixRow row = articleMatrix.getRow(pageId);
+            return row == null ? null : row.getValues();
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
+    public float [] getVector(String phrase) {
+        try {
+            long hash = hashWord(phrase);
+            if (phraseIds.containsKey(hash)) {
+                int phraseId = phraseIds.get(hash);
+                DenseMatrixRow row = phraseMatrix.getRow(phraseId);
+                return row == null ? null : row.getValues();
+            } else {
+                return null;
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
-        if (vector == null) {
-            return null;
-        }
-        TIntFloatMap result = new TIntFloatHashMap(vector.length);
-        for (int i = 0; i < vector.length; i++) {
-            result.put(i, vector[i]);
-        }
-        return result;
+    }
+
+    private static long hashWord(String word) {
+        return Word2VecUtils.hashWord(word);
     }
 
     @Override
-    public List<Explanation> getExplanations(String phrase1, String phrase2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+    public List<Explanation> getExplanations(String phrase1, String phrase2, float [] vector1, float [] vector2, SRResult result) throws DaoException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<Explanation> getExplanations(int pageID1, int pageID2, TIntFloatMap vector1, TIntFloatMap vector2, SRResult result) throws DaoException {
+    public List<Explanation> getExplanations(int pageID1, int pageID2, float [] vector1, float [] vector2, SRResult result) throws DaoException {
         return null;
     }
 
@@ -211,23 +267,23 @@ public class Word2VecGenerator implements VectorGenerator {
     }
 
 
-    public static class Provider extends org.wikibrain.conf.Provider<VectorGenerator> {
+    public static class Provider extends org.wikibrain.conf.Provider<DenseVectorGenerator> {
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {
             super(configurator, config);
         }
 
         @Override
-        public Class<VectorGenerator> getType() {
-            return VectorGenerator.class;
+        public Class<DenseVectorGenerator> getType() {
+            return DenseVectorGenerator.class;
         }
 
         @Override
         public String getPath() {
-            return "sr.metric.generator";
+            return "sr.metric.densegenerator";
         }
 
         @Override
-        public VectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
+        public DenseVectorGenerator get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             if (!config.getString("type").equals("word2vec")) {
                 return null;
             }
