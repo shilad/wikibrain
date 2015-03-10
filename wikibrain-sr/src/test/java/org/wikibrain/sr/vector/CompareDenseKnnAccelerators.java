@@ -94,6 +94,6 @@ public class CompareDenseKnnAccelerators {
         Env env = EnvBuilder.envFromArgs(args);
         CompareDenseKnnAccelerators cmp = new CompareDenseKnnAccelerators(env);
         cmp.evaluateRandomProjections();
-        cmp.evaluateKMeansTree();
+//        cmp.evaluateKMeansTree();
     }
 }

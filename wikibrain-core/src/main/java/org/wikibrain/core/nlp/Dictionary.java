@@ -546,7 +546,7 @@ public class Dictionary implements Closeable {
             } else if (tokens[0].equals("m")) {
                 mentionCounts.put(Integer.valueOf(tokens[1]), Integer.valueOf(tokens[2]));
             } else if (tokens[0].equals("t")) {
-                totalWords.set(Integer.valueOf(tokens[1]));
+                totalWords.set(Long.valueOf(tokens[1]));
             } else {
                 throw new IOException("unexpected line: " + line);
             }
