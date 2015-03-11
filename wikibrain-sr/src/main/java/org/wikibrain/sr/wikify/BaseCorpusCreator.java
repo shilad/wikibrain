@@ -22,6 +22,7 @@ import org.wikibrain.phrases.PhraseTokenizer;
 import org.wikibrain.utils.ParallelForEach;
 import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.WpIOUtils;
+import org.wikibrain.utils.WpThreadUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -79,7 +80,7 @@ public abstract class BaseCorpusCreator {
             public void call(IdAndText text) throws Exception {
                 processText(text);
             }
-        });
+        }, 10000);
         corpus.close();
         dictionary.write(new File(dir, "dictionary.txt"));
     }

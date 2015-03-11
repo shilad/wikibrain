@@ -97,6 +97,7 @@ public class Word2VecTrainer {
     private int[][] wordParents;
     private String[] words = null;
     private boolean keepAllArticles = false;
+    private int iterations = 2;
 
 
     public Word2VecTrainer(LocalPageDao pageDao, Language language) {
@@ -121,46 +122,48 @@ public class Word2VecTrainer {
         }
         syn1 = new float[wordIndexes.size()][layer1Size];
 
-        if (wikibrainFormat) {
-            WBCorpusDocReader reader = new WBCorpusDocReader(new File(directory, "corpus.txt"));
-            ParallelForEach.iterate(reader.iterator(),
-                    WpThreadUtils.getMaxThreads(),
-                    1000,
-                    new Procedure<WBCorpusDocReader.Doc>() {
-                        @Override
-                        public void call(WBCorpusDocReader.Doc doc) throws Exception {
-                            int n = 0;
-                            for (String line : doc.getLines()) {
-                                n += trainSentence(doc.getDoc().getId(), line);
+        for (int it = 0; it < iterations; it++) {
+            if (wikibrainFormat) {
+                WBCorpusDocReader reader = new WBCorpusDocReader(new File(directory, "corpus.txt"));
+                ParallelForEach.iterate(reader.iterator(),
+                        WpThreadUtils.getMaxThreads(),
+                        1000,
+                        new Procedure<WBCorpusDocReader.Doc>() {
+                            @Override
+                            public void call(WBCorpusDocReader.Doc doc) throws Exception {
+                                int n = 0;
+                                for (String line : doc.getLines()) {
+                                    n += trainSentence(doc.getDoc().getId(), line);
+                                }
+                                wordsTrainedSoFar.addAndGet(n);
+
+                                // update the learning rate
+                                alpha = Math.max(
+                                        startingAlpha * (1 - wordsTrainedSoFar.get() / (iterations * totalWords + 1.0)),
+                                        startingAlpha * 0.0001);
                             }
-                            wordsTrainedSoFar.addAndGet(n);
+                        },
+                        10000);
+            } else {
+                LineIterator iterator = FileUtils.lineIterator(new File(directory, "corpus.txt"));
+                ParallelForEach.iterate(iterator,
+                        WpThreadUtils.getMaxThreads(),
+                        1000,
+                        new Procedure<String>() {
+                            @Override
+                            public void call(String sentence) throws Exception {
+                                int n = trainSentence(null, sentence);
+                                wordsTrainedSoFar.addAndGet(n);
 
-                            // update the learning rate
-                            alpha = Math.max(
-                                    startingAlpha * (1 - wordsTrainedSoFar.get() / (totalWords + 1.0)),
-                                    startingAlpha * 0.0001);
-                        }
-                    },
-                    10000);
-        } else {
-            LineIterator iterator = FileUtils.lineIterator(new File(directory, "corpus.txt"));
-            ParallelForEach.iterate(iterator,
-                    WpThreadUtils.getMaxThreads(),
-                    1000,
-                    new Procedure<String>() {
-                        @Override
-                        public void call(String sentence) throws Exception {
-                            int n = trainSentence(null, sentence);
-                            wordsTrainedSoFar.addAndGet(n);
-
-                            // update the learning rate
-                            alpha = Math.max(
-                                    startingAlpha * (1 - wordsTrainedSoFar.get() / (totalWords + 1.0)),
-                                    startingAlpha * 0.0001);
-                        }
-                    },
-                    10000);
-            iterator.close();
+                                // update the learning rate
+                                alpha = Math.max(
+                                        startingAlpha * (1 - wordsTrainedSoFar.get() / (iterations * totalWords + 1.0)),
+                                        startingAlpha * 0.0001);
+                            }
+                        },
+                        10000);
+                iterator.close();
+            }
         }
     }
 
@@ -265,7 +268,9 @@ public class Word2VecTrainer {
             for (int j = start; j < end; j++) {
                 int q;
                 if (i == j) {
-                    q = wpIdIndex;  // hack: update the parent document, if it exists
+                    // hack: update the parent document, if it exists.
+                    // Otherwise word2vec skips the word itself.
+                    q = wpIdIndex;
                 } else {
                     q = indexes[j];
                 }

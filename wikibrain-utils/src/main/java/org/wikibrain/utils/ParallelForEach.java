@@ -138,6 +138,10 @@ public class ParallelForEach {
     }
 
 
+    public static <T> void iterate(Iterator<T> iterator, final Procedure<T> fn, int logModulo) {
+        iterate(iterator, WpThreadUtils.getMaxThreads(), 100, fn, logModulo);
+    }
+
     public static <T> void iterate(Iterator<T> iterator, final Procedure<T> fn) {
         iterate(iterator, WpThreadUtils.getMaxThreads(), 100, fn, -1);
     }
