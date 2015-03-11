@@ -26,7 +26,7 @@ public class CompareDenseKnnAccelerators {
 
     public CompareDenseKnnAccelerators(Env env) throws ConfigurationException {
         this.env =  env;
-        this.sr = (DenseVectorSRMetric) env.getConfigurator().get(SRMetric.class, "word2vec", "language", "simple");
+        this.sr = (DenseVectorSRMetric) env.getConfigurator().get(SRMetric.class, "word2vec", "language", env.getDefaultLanguage().getLangCode());
         this.matrix = sr.getGenerator().getFeatureMatrix();
     }
 
