@@ -163,9 +163,11 @@ public class SRBuilder {
             }
         } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             toAdd.addAll(getSubmetrics(config.getString("generator.basemetric")));
-        } else if (type.equals("milnewitten")){
+        } else if (type.equals("milnewitten")) {
             toAdd.add(config.getString("inlink"));
             toAdd.add(config.getString("outlink"));
+        } else if (config.hasPath("reliesOn")) {
+            toAdd.addAll(config.getStringList("reliesOn"));
         }
         toAdd.add(parentName);
         List<String> results = new ArrayList<String>();
