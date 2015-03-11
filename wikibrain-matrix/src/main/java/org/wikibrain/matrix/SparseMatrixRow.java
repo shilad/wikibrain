@@ -22,7 +22,8 @@ import java.util.logging.Logger;
  * Newly created rows are reordered so that the columns appear in sorted order.
  */
 public final class SparseMatrixRow extends BaseMatrixRow implements MatrixRow {
-    Logger LOG = Logger.getLogger(SparseMatrixRow.class.getName());
+    private static final Logger LOG = Logger.getLogger(SparseMatrixRow.class.getName());
+
     public static final Float MIN_SCORE = -1.1f;
     public static final Float MAX_SCORE = 1.1f;
 

@@ -5,12 +5,8 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Test;
 import org.wikibrain.matrix.DenseMatrix;
 import org.wikibrain.matrix.DenseMatrixRow;
-import org.wikibrain.matrix.DenseMatrixWriter;
-import org.wikibrain.matrix.ValueConf;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -22,14 +18,14 @@ public class TestLSHNNFinder {
     KNNFinder finder;
 
     private void makeSmall() throws IOException {
-        matrix = createMatrix(1000, 20);
+        matrix = TestUtils.createMatrix(1000, 20);
         RandomProjectionKNNFinder rp = new RandomProjectionKNNFinder(matrix);
         rp.build();
         finder = rp;
     }
 
     private void makeBig() throws IOException {
-        matrix = createMatrix(40000, 100);
+        matrix = TestUtils.createMatrix(40000, 100);
         RandomProjectionKNNFinder rp = new RandomProjectionKNNFinder(matrix);
         rp.build();
         finder = rp;
@@ -47,7 +43,7 @@ public class TestLSHNNFinder {
         int iters = 10;
         for (int i = 0; i < iters; i++) {
             System.out.println("doing " + i);
-            float[] v = randomVector(20);
+            float[] v = TestUtils.randomVector(20);
             Neighborhood estimated = finder.query(v, 10, 1000, null);
             Neighborhood actual = actualNeighbors(v, matrix, 10);
             hits += overlap(estimated, actual);
@@ -61,10 +57,10 @@ public class TestLSHNNFinder {
         int hits = 0;
         long elapsedTree = 0;
         long elapsedBruteForce = 0;
-        int iters = 10;
+        int iters = 100;
         for (int i = 0; i < iters; i++) {
             System.out.println("doing " + i);
-            float[] v = randomVector(100);
+            float[] v = TestUtils.randomVector(100);
             long t1 = System.currentTimeMillis();
             Neighborhood estimated = finder.query(v, 10, 100, null);
             long t2 = System.currentTimeMillis();
@@ -100,27 +96,4 @@ public class TestLSHNNFinder {
         return accum.get();
     }
 
-    private static DenseMatrix createMatrix(int rows, int cols) throws IOException {
-        File tmp = File.createTempFile("knnfinder", ".matrix");
-        tmp.delete();
-        ValueConf vconf = new ValueConf();
-        int [] colIds = new int[cols];
-        for (int i= 0 ; i < cols; i++) { colIds[i] = i; }
-        DenseMatrixWriter writer = new DenseMatrixWriter(tmp, vconf);
-        for (int i = 0; i < rows; i++) {
-            writer.writeRow(new DenseMatrixRow(vconf, i, colIds, randomVector(cols)));
-        }
-        writer.finish();
-        tmp.deleteOnExit();
-        return new DenseMatrix(tmp);
-    }
-
-    private static float[] randomVector(int cols) {
-        Random rand = new Random();
-        float [] vals = new float[cols];
-        for (int j = 0; j < cols; j++) {
-            vals[j] = rand.nextFloat();
-        }
-        return vals;
-    }
 }

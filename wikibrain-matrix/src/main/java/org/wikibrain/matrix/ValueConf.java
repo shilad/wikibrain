@@ -12,20 +12,36 @@ import java.io.Serializable;
 public class ValueConf implements Serializable {
     public static final Float MIN_SCORE = -1.1f;
     public static final Float MAX_SCORE = 1.1f;
+    public static final int PACKED_RANGE = (Short.MAX_VALUE - Short.MIN_VALUE);
 
     public final float minScore;
     public final float maxScore;
     public final float range;
-    public static final int PACKED_RANGE = (Short.MAX_VALUE - Short.MIN_VALUE);
+    public final float c1;
+    public final float c2;
 
     public ValueConf() {
         this(MIN_SCORE, MAX_SCORE);
     }
 
+
+    /**
+     * Unpacking constants c1 and c2 are calculated as follows:
+     *
+     * float f = (1.0f * (s - Short.MIN_VALUE) / PACKED_RANGE) * range + minScore;
+     * float f = s * range / PACKED_RANGE - Short.MIN_VALUE / PACKAGED_RANGE * range + minScore;
+     * float f = s * c1 + c2;
+     *
+     * @param minScore
+     * @param maxScore
+     */
+
     public ValueConf(float minScore, float maxScore) {
         this.minScore = minScore;
         this.maxScore = maxScore;
-        range = maxScore - minScore;
+        this.range = maxScore - minScore;
+        this.c1 = range / PACKED_RANGE;
+        this.c2 = - Short.MIN_VALUE * range / PACKED_RANGE + minScore;
     }
 
     public final short pack(float s) {

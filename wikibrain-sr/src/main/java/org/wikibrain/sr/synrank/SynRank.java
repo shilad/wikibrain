@@ -19,6 +19,7 @@ import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.disambig.Disambiguator;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -49,10 +50,12 @@ public class SynRank extends BaseSRMetric {
         this.dabs = new TIntHashSet();
 
         // TODO: fix dabs!
-        LocalPage dabCat = pageDao.getByTitle(getLanguage(), NameSpace.CATEGORY, "Category:Disambiguation pages");
-        if (dabCat == null) {
-            throw new IllegalArgumentException();
+        LocalPage dabCat = null;
+        for (String title: Arrays.asList("Category:Disambiguation pages", "Category:Disambiguation")) {
+            dabCat = pageDao.getByTitle(getLanguage(), NameSpace.CATEGORY, title);
+            if (dabCat != null) break;
         }
+        if (dabCat == null) throw new IllegalArgumentException();
         for (int id : catDao.getCategoryMemberIds(dabCat)) {
             dabs.add(id);
         }

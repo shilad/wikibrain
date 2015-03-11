@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  * This means that the object can wrap data from an mmap'd file in the correct format.
  */
 public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
-    Logger LOG = Logger.getLogger(DenseMatrixRow.class.getName());
+    private static final Logger LOG = Logger.getLogger(DenseMatrixRow.class.getName());
 
     public static final Float MIN_SCORE = -1.1f;
     public static final Float MAX_SCORE = 1.1f;
@@ -29,6 +29,8 @@ public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
     public static final int PACKED_RANGE = (Short.MAX_VALUE - Short.MIN_VALUE);
 
     public static final int HEADER = 0xfefefefa;
+    private final float c1;
+    private final float c2;
 
     /**
      * The main "source" buffer.
@@ -64,6 +66,8 @@ public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
             throw new IllegalArgumentException("Columns must be sorted by id");
         }
         this.vconf = vconf;
+        this.c1 = vconf.c1;
+        this.c2 = vconf.c2;
         this.colIds = colIds;
         short packed[] = new short[colVals.length];
         for (int i = 0; i < colVals.length; i++) {
@@ -107,10 +111,21 @@ public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
         this.vconf = vconf;
         this.colIds = colIds;
         this.buffer = buffer;
+        this.c1 = vconf.c1;
+        this.c2 = vconf.c2;
         if (this.buffer.getInt(0) != HEADER) {
             throw new IllegalArgumentException("Invalid header in byte buffer");
         }
         createViewBuffers(buffer.getInt(8));
+    }
+
+    public final double dot(float [] vector) {
+        if (vector.length != colIds.length) throw new IllegalArgumentException();
+        double sum = 0.0;
+        for (int i = 0; i < vector.length; i++) {
+            sum += vector[i] * (c1 * valBuffer.get(i) + c2);
+        }
+        return sum;
     }
 
     @Override
