@@ -128,6 +128,14 @@ public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
         return sum;
     }
 
+    public final double dot(DenseMatrixRow X) {
+        double sum = 0.0;
+        for (int i = 0; i < X.colIds.length; i++) {
+            sum += (c1 * X.valBuffer.get(i) + c2) * (c1 * valBuffer.get(i) + c2);
+        }
+        return sum;
+    }
+
     @Override
     public final int getColIndex(int i) {
         return colIds[i];

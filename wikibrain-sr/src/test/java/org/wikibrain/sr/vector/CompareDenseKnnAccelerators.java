@@ -5,6 +5,7 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.matrix.DenseMatrix;
+import org.wikibrain.matrix.knn.KDTreeKNN;
 import org.wikibrain.matrix.knn.KNNFinder;
 import org.wikibrain.matrix.knn.KmeansKNNFinder;
 import org.wikibrain.matrix.knn.RandomProjectionKNNFinder;
@@ -22,7 +23,7 @@ public class CompareDenseKnnAccelerators {
     private final DenseVectorSRMetric sr;
     private final Env env;
     private final DenseMatrix matrix;
-    private int sampleSize = 100;
+    private int sampleSize = 10;
 
     public CompareDenseKnnAccelerators(Env env) throws ConfigurationException {
         this.env =  env;
@@ -38,6 +39,12 @@ public class CompareDenseKnnAccelerators {
 
     public void evaluateKMeansTree() throws IOException {
         KmeansKNNFinder rp = new KmeansKNNFinder(matrix);
+        rp.build();
+        evaluate(rp);
+    }
+
+    public void evaluateKDTree() throws IOException {
+        KDTreeKNN rp = new KDTreeKNN(matrix);
         rp.build();
         evaluate(rp);
     }
@@ -93,6 +100,7 @@ public class CompareDenseKnnAccelerators {
     public static void main(String args[]) throws ConfigurationException, IOException {
         Env env = EnvBuilder.envFromArgs(args);
         CompareDenseKnnAccelerators cmp = new CompareDenseKnnAccelerators(env);
+        cmp.evaluateKDTree();
         cmp.evaluateRandomProjections();
 //        cmp.evaluateKMeansTree();
     }
