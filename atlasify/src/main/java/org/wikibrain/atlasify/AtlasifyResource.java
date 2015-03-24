@@ -101,10 +101,12 @@ public class AtlasifyResource {
     public static UniversalPageDao upDao = null;
     private static POIGenerator poiGenerator = null;
     private static AtlasifyLogger atlasifyLogger;
+    private static boolean wikibrainLoadingInProcess = false;
 
     private static void wikibrainSRinit(){
 
         try {
+            wikibrainLoadingInProcess = true;
             System.out.println("START LOADING WIKIBRAIN");
             Env env = new EnvBuilder().build();
             Configurator conf = env.getConfigurator();
@@ -137,6 +139,7 @@ public class AtlasifyResource {
             poiGenerator = new POIGenerator(conf);
             System.out.println("FINISHED LOADING POI GENERATOR");
             System.out.println("FINISHED LOADING WIKIBRAIN");
+            wikibrainLoadingInProcess = false;
 
 
             //sr = conf.get(
@@ -146,6 +149,7 @@ public class AtlasifyResource {
 
         } catch (Exception e) {
             System.out.println("Exception when initializing WikiBrain: "+e.getMessage());
+            wikibrainLoadingInProcess = false;
         }
 
     }
@@ -215,7 +219,7 @@ public class AtlasifyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public Response getClichedMessage(@PathParam("keyword") String keyword, @PathParam("input") String data) throws  DaoException{
-        if(lpDao == null){
+        if(lpDao == null && wikibrainLoadingInProcess == false){
             wikibrainSRinit();
         }
         String[] features = data.split(",");
@@ -243,7 +247,7 @@ public class AtlasifyResource {
     @Produces("text/plain")
 
     public Response consumeJSON (AtlasifyQuery query) {
-        if(lpDao == null){
+        if(lpDao == null && wikibrainLoadingInProcess == false){
             wikibrainSRinit();
         }
         String[] featureIdList = query.getFeatureIdList();
@@ -372,7 +376,7 @@ public class AtlasifyResource {
     @Produces("text/plain")
 
     public Response autocompleteSearch(AtlasifyQuery query) throws Exception {
-        if (lpDao == null) {
+        if (lpDao == null && wikibrainLoadingInProcess == false) {
             wikibrainSRinit();
         }
 
@@ -451,7 +455,7 @@ public class AtlasifyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public Response handleExplanation(@PathParam("keyword") String keyword, @PathParam("feature") String feature) throws  DaoException, MalformedURLException, IOException, Exception{
-        if (lpDao == null) {
+        if (lpDao == null && wikibrainLoadingInProcess == false) {
             wikibrainSRinit();
         }
 
