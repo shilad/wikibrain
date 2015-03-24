@@ -221,7 +221,7 @@ public class AtlasifyResource {
     public Response getClichedMessage(@PathParam("keyword") String keyword, @PathParam("input") String data) throws  DaoException{
         if(wikibrainLoadingInProcess == true){
             System.out.println("Waiting for Wikibrain Loading");
-            return;
+            return Response.serverError().entity("Wikibrain not ready").build();
         }
         if(lpDao == null){
             wikibrainSRinit();
@@ -253,7 +253,7 @@ public class AtlasifyResource {
     public Response consumeJSON (AtlasifyQuery query) {
         if(wikibrainLoadingInProcess == true){
             System.out.println("Waiting for Wikibrain Loading");
-            return;
+            return Response.serverError().entity("Wikibrain not ready").build();
         }
         if(lpDao == null ){
             wikibrainSRinit();
@@ -386,7 +386,7 @@ public class AtlasifyResource {
     public Response autocompleteSearch(AtlasifyQuery query) throws Exception {
         if(wikibrainLoadingInProcess == true){
             System.out.println("Waiting for Wikibrain Loading");
-            return;
+            return Response.serverError().entity("Wikibrain not ready").build();
         }
         if (lpDao == null) {
             wikibrainSRinit();
