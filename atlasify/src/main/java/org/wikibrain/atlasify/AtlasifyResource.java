@@ -219,7 +219,11 @@ public class AtlasifyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public Response getClichedMessage(@PathParam("keyword") String keyword, @PathParam("input") String data) throws  DaoException{
-        if(lpDao == null && wikibrainLoadingInProcess == false){
+        if(wikibrainLoadingInProcess == true){
+            System.out.println("Waiting for Wikibrain Loading");
+            return;
+        }
+        if(lpDao == null){
             wikibrainSRinit();
         }
         String[] features = data.split(",");
@@ -247,7 +251,11 @@ public class AtlasifyResource {
     @Produces("text/plain")
 
     public Response consumeJSON (AtlasifyQuery query) {
-        if(lpDao == null && wikibrainLoadingInProcess == false){
+        if(wikibrainLoadingInProcess == true){
+            System.out.println("Waiting for Wikibrain Loading");
+            return;
+        }
+        if(lpDao == null ){
             wikibrainSRinit();
         }
         String[] featureIdList = query.getFeatureIdList();
@@ -376,7 +384,11 @@ public class AtlasifyResource {
     @Produces("text/plain")
 
     public Response autocompleteSearch(AtlasifyQuery query) throws Exception {
-        if (lpDao == null && wikibrainLoadingInProcess == false) {
+        if(wikibrainLoadingInProcess == true){
+            System.out.println("Waiting for Wikibrain Loading");
+            return;
+        }
+        if (lpDao == null) {
             wikibrainSRinit();
         }
 
