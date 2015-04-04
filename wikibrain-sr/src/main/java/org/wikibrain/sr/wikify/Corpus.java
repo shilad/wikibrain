@@ -87,8 +87,9 @@ public class Corpus {
                 throw new IllegalArgumentException("Corpus requires 'language' runtime parameter");
             }
             Language lang = Language.getByLangCode(runtimeParams.get("language"));
+            String wikifierName = config.hasPath("wikifier") ? config.getString("wikifier") : "default";
             Configurator c = getConfigurator();
-            Wikifier wikifier = c.get(Wikifier.class, "default", "language", lang.getLangCode());
+            Wikifier wikifier = c.get(Wikifier.class, wikifierName, "language", lang.getLangCode());
             AnchorTextPhraseAnalyzer phraseAnalyzer = (AnchorTextPhraseAnalyzer)c.get(
                     PhraseAnalyzer.class, config.getString("phraseAnalyzer"));
             PhraseAnalyzerDao paDao = phraseAnalyzer.getDao();

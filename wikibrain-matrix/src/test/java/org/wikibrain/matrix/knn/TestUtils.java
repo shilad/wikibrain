@@ -30,9 +30,15 @@ public class TestUtils {
 
     static float[] randomVector(int cols) {
         Random rand = new Random();
+        double norm = 0.0;
         float [] vals = new float[cols];
         for (int j = 0; j < cols; j++) {
             vals[j] = rand.nextFloat();
+            norm += vals[j] * vals[j];
+        }
+        norm = Math.sqrt(norm) + 0.00001;
+        for (int i = 0; i < cols; i++) {
+            vals[i] /= norm;
         }
         return vals;
     }
