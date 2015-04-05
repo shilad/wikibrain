@@ -115,8 +115,8 @@ public class PageViewLoader {
                 intervals = selectRandomHours(intervals.get(0), Integer.valueOf(cmd.getOptionValue("r")));
             }
         } else if (cmd.hasOption("r")) {
-            // Default to six months date range.
-            DateTime start = DateTime.now().minusMonths(7);
+            // Default to 12 month date range.
+            DateTime start = DateTime.now().minusMonths(13);
             DateTime end = DateTime.now().minusMonths(1);
             intervals = selectRandomHours(new Interval(start, end), Integer.valueOf(cmd.getOptionValue("r")));
         } else {
