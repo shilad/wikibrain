@@ -48,8 +48,8 @@ public class Tester {
 //        LinkProbabilityDao lpd = c.get(LinkProbabilityDao.class);
 //        lpd.build();
 
-        SRMetric sr = c.get(SRMetric.class, "milnewitten", "language", "simple");
-        Wikifier identity = c.get(Wikifier.class, "identity", "language", "simple");
+        SRMetric sr = c.get(SRMetric.class, "word2vec", "language", "simple");
+        Wikifier identity = c.get(Wikifier.class, "word2vec", "language", "simple");
         Wikifier websail = new WebSailWikifier(identity, rpd, linkDao, linkProbabilityDao, phraseAnalyzer.getDao(), sr);
         WikiTextCorpusCreator creator = new WikiTextCorpusCreator(Language.SIMPLE, websail, rpd, pageDao, linkProbabilityDao);
         creator.write(new File("foo"));
