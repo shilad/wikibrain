@@ -160,7 +160,7 @@ public class JvmUtils {
 
     /**
      * Returns the first class in the classpath that has the specified short name.
-     * For example, "LocalLink" -> org.wikibrain.core.LocalLink.class
+     * For example, "LocalLink" -&gt; org.wikibrain.core.LocalLink.class
      *
      * The full mapping between short names and full names is cached because it is costly to build it.
      *
@@ -182,7 +182,7 @@ public class JvmUtils {
 
     /**
      * Returns the first element in the classpath that has the specified short name.
-     * For example, "LocalLink" -> "org.wikibrain.core.LocalLink"
+     * For example, "LocalLink" -&gt; "org.wikibrain.core.LocalLink"
      * The full mapping between short names and full names is cached because it is costly to build it.
      *
      * @param shortName

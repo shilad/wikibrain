@@ -48,7 +48,7 @@ import java.util.Map;
  *    .classpath(new File("c:/myproject/lib/jlibs-xml.jar");
  *
  * // to get configured classpath
- * List<File> classpath = jvm.classpath();
+ * List&lt;File&gt; classpath = jvm.classpath();
  *
  * // to configure additional classpath
  * jvm.endorsedDir("lib/endorsed")

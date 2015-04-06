@@ -14,31 +14,45 @@ import java.util.Map;
 
 /**
  * A generic configuration file.
- * The format of this file is based on the typesafe config project:
- * https://github.com/typesafehub/config
+ *
+ * The class is a lightweight wrapper around the
+ * <a href="https://github.com/typesafehub/config">typesafe config project</a>.
+ *
+ * It includes convenience accessors for configuration data and constructors
+ * that allow series of override files.
+ *
  */
 public class Configuration {
     private final Config config;
 
 
     /**
-     * Creates a configuration based on default settings.
+     * Create a configuration file using default settings.
      */
     public Configuration() {
         this(null);
     }
 
+    /**
+     * Creates a configuration file with the specified settings.
+     * @param file
+     */
     public Configuration(File file) {
         this(null, file);
     }
 
     /**
-     * Creates a configuration using a specific series of overrides.
+     * Creates a configuration using a specific chain of overrridden configurations.
+     *
      * The order of priority from highest to lowest is:
-     * - Parameter map
-     * - System properties
-     * - Files specified to constructor (in order)
-     * - Defaults listed at https://github.com/typesafehub/config (i.e. reference.conf).
+     * <ol>
+     * <li>Passed-in <code>params</code> map.</li>
+     * <li>System properties (see typesafe documentation, below).</li>
+     * <li>Files specified in constructor (in order.)</li>
+     * <li>Defaults listed in typesafe documentation (e.g. <code>reference.conf</code>).</li>
+     * </ol>
+     *
+     * More details can be found at the <a href="https://github.com/typesafehub/config">typesafe documentation</a>.
      *
      * @param params, File files
      */

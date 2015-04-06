@@ -32,8 +32,6 @@ public class WbMathUtils {
 
     /**
      * Returns true if the number is not NaN or infinite.
-     * @param d
-     * @return
      */
     public static boolean isReal(double d) {
         return !Double.isNaN(d) && !Double.isInfinite(d);
@@ -129,7 +127,6 @@ public class WbMathUtils {
      *
      * @param X  Input data.
      * @param epsilon The minimum increase allowed between consecutive points.
-     * @return
      */
     public static void makeMonotonicIncreasing(double [] X, double epsilon) {
         for (int i = 1; i < X.length; i++) {
@@ -146,11 +143,6 @@ public class WbMathUtils {
     /**
      * Given two parallel arrays of doubles representing x,y pairs
      * remove all pairs that are NaN or Infinite, and return the result.
-     *
-     * @param X
-     * @param Y
-     *
-     * @return
      */
     public static double[][] removeNotNumberPoints(double X[], double Y[]) {
         TDoubleArrayList prunedX = new TDoubleArrayList();
@@ -286,11 +278,10 @@ public class WbMathUtils {
     }
 
     /**
-     * v1 <- alpha * v2 + v3
+     * v1 &lt;- alpha * v2 + v3
      * @param v1
      * @param v2
      * @param alpha
-     * @return
      */
     public static void add(double alpha, double[] v1, double[] v2, double v3[]) {
         for (int i = 0; i < v1.length; i++) {
@@ -299,11 +290,10 @@ public class WbMathUtils {
     }
 
     /**
-     * v1 <- alpha * v2 + v3
+     * v1 &lt;- alpha * v2 + v3
      * @param v1
      * @param v2
      * @param alpha
-     * @return
      */
     public static void add(double alpha, double[] v1, double[] v2, float v3[]) {
         for (int i = 0; i < v1.length; i++) {
@@ -311,11 +301,10 @@ public class WbMathUtils {
         }
     }
     /**
-     * v1 <- alpha * v2 + v3
+     * v1 &lt;- alpha * v2 + v3
      * @param v1
      * @param v2
      * @param alpha
-     * @return
      */
     public static void add(double alpha, double[] v1, float[] v2, float v3[]) {
         for (int i = 0; i < v1.length; i++) {
@@ -323,11 +312,10 @@ public class WbMathUtils {
         }
     }
     /**
-     * v1 <- alpha * v2 + v3
+     * v1 &lt;- alpha * v2 + v3
      * @param v1
      * @param v2
      * @param alpha
-     * @return
      */
     public static void add(float alpha, float[] v1, float[] v2, float v3[]) {
         for (int i = 0; i < v1.length; i++) {
