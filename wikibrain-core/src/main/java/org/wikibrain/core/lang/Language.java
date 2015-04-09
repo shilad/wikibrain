@@ -179,6 +179,10 @@ public class Language implements Comparable<Language>, Serializable {
         return langCode + ".wikipedia.org";
     }
 
+    public LanguageInfo getLanguageInfo() {
+        return LanguageInfo.getByLanguage(this);
+    }
+
     @Override
     public int compareTo(Language language) {
         return Short.valueOf(this.id).compareTo(language.id);
