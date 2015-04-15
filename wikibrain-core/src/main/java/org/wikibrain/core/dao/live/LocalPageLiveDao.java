@@ -154,7 +154,7 @@ public class LocalPageLiveDao implements LocalPageDao  {
      */
     public int getIdByTitle(String title, Language language, NameSpace nameSpace) throws DaoException{
         LiveAPIQuery.LiveAPIQueryBuilder builder = new LiveAPIQuery.LiveAPIQueryBuilder("INFO", language)
-                .addTitle(title).setRedirects(followRedirects);
+                .addTitle(title.replace(" ", "_")).setRedirects(followRedirects);
         QueryReply info = builder.build().getValuesFromQueryResult().get(0);
         return info.getId();
     }
