@@ -165,6 +165,7 @@ public class PipelineStage {
             Process p = JvmUtils.launch(klass, actualArgs);
             int retVal = p.waitFor();
             if (retVal != 0) {
+                hasBeenRun = true;
                 succeeded = false;
                 throw new StageFailedException(this, retVal);
             }
