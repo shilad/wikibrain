@@ -5,12 +5,10 @@ package org.wikibrain.loader;
  * Refined by Shilad on 8/3/14.
  */
 
-import com.google.gson.*;
-import com.typesafe.config.Config;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
-import org.wikibrain.conf.Configuration;
 import org.wikibrain.utils.JvmUtils;
 
 import javax.swing.*;
@@ -35,6 +33,7 @@ public class GraphicLoader extends JFrame {
     public static final String DEFAULT_LANG = "simple";
     public static final int MAX_LOG_LINES = 60000;
 
+    private Class loaderClass = org.wikibrain.Loader.class;
     private JPanel mainPanel;
 
     private JPanel paramPanel;
@@ -60,6 +59,10 @@ public class GraphicLoader extends JFrame {
     private JTextField postgresHost = new JTextField(DEFAULT_PG_HOST);
     private JTextField postgresPort = new JTextField(DEFAULT_PG_PORT);
     private JTextField postgresDB = new JTextField(DEFAULT_PG_DB);
+
+    private JPanel cmdPanel = new JPanel();
+    private JCheckBox overrideButton = new JCheckBox("<html>Override<br/>command<br/>line</html>");
+    private JTextArea cmdText = new JTextArea(20, 40);
 
     private JTextField postgresUser = new JTextField();
     private JPasswordField postgresPass = new JPasswordField(20);
@@ -87,6 +90,7 @@ public class GraphicLoader extends JFrame {
         this.initOutputPanel();
         this.initButtonPanel();
         this.initPhaseSelector();
+        this.initCmdPanel();
 
         mainPanel = new JPanel(new GridBagLayout());
         this.getContentPane().add(mainPanel);
@@ -103,7 +107,14 @@ public class GraphicLoader extends JFrame {
         c.gridx = 1;
         mainPanel.add(phasePanel, c);
 
+        c.gridx = 0;
+        c.gridy = 1;
+        c.gridwidth = 2;
+        mainPanel.add(cmdPanel, c);
+
         c.gridx = 2;
+        c.gridwidth = 1;
+        c.gridheight = 2;
         c.gridy = 0;
         c.weightx = 0.8;
         c.weighty = 1.0;
@@ -111,7 +122,7 @@ public class GraphicLoader extends JFrame {
         mainPanel.add(outputPanel, c);
 
         c.gridx = 0;
-        c.gridy = 1;
+        c.gridy = 2;
         c.gridwidth = 3;
         c.weightx = 1.0;
         c.weighty = 0.0;
@@ -301,6 +312,33 @@ public class GraphicLoader extends JFrame {
         paramPanel.add(dbPanel, c);
     }
 
+    private void initCmdPanel() {
+        cmdPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        cmdPanel.add(overrideButton, gbc);
+        gbc.gridheight = 2;
+        gbc.weightx = 0.9;
+        gbc.weighty = 0.9;
+        JScrollPane jsp = new JScrollPane(cmdText);
+        jsp.setPreferredSize(new Dimension(300, 300));
+        jsp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        jsp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+        cmdPanel.add(jsp, gbc);
+        overrideButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (overrideButton.isSelected()) {
+                    cmdText.setEnabled(true);
+                } else {
+                    updateCmdLine();
+                }
+            }
+        });
+        cmdText.setEnabled(false);
+        cmdText.setLineWrap(false);
+    }
+
     private void respondToLanguageUpdate() {
         if (language.getText().contains(",")) {
             conceptsButton.setSelected(true);
@@ -308,6 +346,7 @@ public class GraphicLoader extends JFrame {
         } else {
             conceptsButton.setEnabled(true);
         }
+        updateCmdLine();
     }
 
     public void reset() {
@@ -337,7 +376,7 @@ public class GraphicLoader extends JFrame {
         wikidataButton.setSelected(false);
         univeralButton.setSelected(false);
         spatialButton.setSelected(false);
-        srButton.setSelected(false);
+        srButton.setSelected(true);
 
         basicWikipediaButton.setEnabled(false);
         luceneButton.setEnabled(true);
@@ -347,6 +386,7 @@ public class GraphicLoader extends JFrame {
         univeralButton.setEnabled(true);
         spatialButton.setEnabled(true);
         srButton.setEnabled(true);
+        updateCmdLine();
     }
 
 
@@ -417,6 +457,7 @@ public class GraphicLoader extends JFrame {
             phrasesButton.setText("Phrases (required by SR)");
             luceneButton.setText("Lucene (required by SR)");
         }
+        updateCmdLine();
     }
 
     private static Pattern HOCON_VAR = Pattern.compile("^(.*)(\\$\\{[^}]+\\})(.*)$");
@@ -439,12 +480,10 @@ public class GraphicLoader extends JFrame {
         writer.write('"');
     }
 
-    public void runOrStop() {
-        if (process != null) {
-            process.destroy();
-            appendToLog("\n\nPROCESS CANCELLED!");
-            return;
-        }
+    /**
+     * Writes out the configuration file.
+     */
+    private void writeConf() {
 
         try {
 
@@ -488,65 +527,95 @@ public class GraphicLoader extends JFrame {
             e.printStackTrace();
         }
 
+    }
+
+    private void updateCmdLine() {
+        overrideButton.setSelected(false);
+        cmdText.setEnabled(false);
+        String cmd = "";
+        for (String a : buildArgs()) {
+            if (!cmd.isEmpty()) {
+                cmd += "\n        ";
+            }
+            cmd += a;
+        }
+        cmdText.setText(cmd);
+        writeConf();
+    }
+
+    private String [] buildArgs() {
+        java.util.List<String> argList = new ArrayList<String>();
+        argList.add(loaderClass.getName());
+
+        argList.add("-l");
+        argList.add(language.getText());
+
+        if(basicWikipediaButton.isSelected()){
+            argList.add("-s");
+            argList.add("fetchlinks");
+            argList.add("-s");
+            argList.add("download");
+            argList.add("-s");
+            argList.add("dumploader");
+            argList.add("-s");
+            argList.add("redirects");
+            argList.add("-s");
+            argList.add("wikitext");
+
+        }
+        if(luceneButton.isSelected()){
+            argList.add("-s");
+            argList.add("lucene");
+        }
+        if(phrasesButton.isSelected()){
+            argList.add("-s");
+            argList.add("phrases");
+        }
+        if(conceptsButton.isSelected()){
+            argList.add("-s");
+            argList.add("concepts");
+        }
+        if(univeralButton.isSelected()){
+            argList.add("-s");
+            argList.add("universal");
+        }
+        if(wikidataButton.isSelected()){
+            argList.add("-s");
+            argList.add("wikidata");
+        }
+        if(spatialButton.isSelected()){
+            argList.add("-s");
+            argList.add("spatial");
+        }
+        if(srButton.isSelected()){
+            argList.add("-s");
+            argList.add("sr");
+        }
+        argList.add("-c");
+        argList.add("customized.conf");
+
+        String arg[] = new String[argList.size()];
+        argList.toArray(arg);
+        return arg;
+    }
+
+    public void runOrStop() {
+        if (process != null) {
+            process.destroy();
+            appendToLog("\n\nPROCESS CANCELLED!");
+            return;
+        }
+
+        writeConf();
+        String arg[] = cmdText.getText().split("\n");
+        if (arg[0].contains(" ")) {
+            arg = cmdText.getText().split("\\s+");
+        }
+        for (int i = 0; i < arg.length; i++) {
+            arg[i] = arg[i].trim();
+        }
 
         try {
-            java.util.List<String> argList = new ArrayList<String>();
-
-            argList.add("-l");
-            argList.add(language.getText());
-
-
-            if(basicWikipediaButton.isSelected()){
-                argList.add("-s");
-                argList.add("fetchlinks");
-                argList.add("-s");
-                argList.add("download");
-                argList.add("-s");
-                argList.add("dumploader");
-                argList.add("-s");
-                argList.add("redirects");
-                argList.add("-s");
-                argList.add("wikitext");
-
-            }
-            if(luceneButton.isSelected()){
-                argList.add("-s");
-                argList.add("lucene");
-            }
-            if(phrasesButton.isSelected()){
-                argList.add("-s");
-                argList.add("phrases");
-            }
-            if(conceptsButton.isSelected()){
-                argList.add("-s");
-                argList.add("concepts");
-            }
-            if(univeralButton.isSelected()){
-                argList.add("-s");
-                argList.add("universal");
-            }
-            if(wikidataButton.isSelected()){
-                argList.add("-s");
-                argList.add("wikidata");
-            }
-            if(spatialButton.isSelected()){
-                argList.add("-s");
-                argList.add("spatial");
-            }
-            if(srButton.isSelected()){
-                argList.add("-s");
-                argList.add("sr");
-            }
-            argList.add("-c");
-            argList.add("customized.conf");
-
-            //System.out.println(loader);
-
-            //p = Runtime.getRuntime().exec(loader);
-            String arg[] = new String[argList.size()];
-            arg = argList.toArray(arg);
-
-
             OutputStream out = new PrintStream(new LogOutputStream(System.out), true);
             OutputStream err = new PrintStream(new LogOutputStream(System.err), true);
 
@@ -556,7 +625,12 @@ public class GraphicLoader extends JFrame {
             runButton.setBackground(Color.RED);
             defaultButton.setEnabled(false);
 
-            this.process = JvmUtils.launch(org.wikibrain.Loader.class, arg, out, err, heapSize.getText());
+            Class klass = arg[0].contains(".") ? Class.forName(arg[0]) : JvmUtils.classForShortName(arg[0]);
+            if (klass == null) {
+                throw new ClassNotFoundException("Couldn't find class " + arg[0]);
+            }
+
+            this.process = JvmUtils.launch(klass, ArrayUtils.subarray(arg, 1, arg.length), out, err, heapSize.getText());
             final Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                                @Override
