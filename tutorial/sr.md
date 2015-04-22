@@ -49,10 +49,10 @@ for (String phrase : Arrays.asList("Barack Obama", "US", "Canada", "vim")) {
 This code (on Simple english) displays:
 
 ```
-*Barack Obama* is similar to 1) Barack Obama, 2) Hillary Rodham Clinton, 3) Mitt Romney
-*US* is similar to 1) United States, 2) Federal government of the United States, 3) United States Constitution
-*Canada* is similar to 1) Canada, 2) Quebec, 3) Australia
-*vim* is similar to 1) Vim, 2) Text editor, 3) GNU Emacs
+'Barack Obama' is similar to 1) Barack Obama (simple), 2) Woodrow Wilson (simple), 3) Theodore Roosevelt (simple)
+'US' is similar to 1) United States (simple), 2) United States Virgin Islands (simple), 3) Puerto Rico (simple)
+'Canada' is similar to 1) Canada (simple), 2) British Virgin Islands (simple), 3) Grenada (simple)
+'vim' is similar to 1) Vim (simple), 2) GNU Emacs (simple), 3) Text editor (simple)
 ```
 
 You can also calculate a relatedness score between any two pages or phrases using the same SRMetric:
@@ -76,9 +76,9 @@ for (String pair[] : pairs) {
 This code (on Simple english) displays:
 
 ```
-0.7652857508808703: 'cat', 'kitty'
-0.6816860201660842: 'obama', 'president'
-0.7058954876236786: 'tires', 'car'
-0.5905978329192705: 'java', 'computer'
-0.42989849626985877: 'dog', 'computer'
+0.9816753364801072: 'cat', 'kitty'
+0.6306937386958802: 'Obama', 'president'
+0.6989272555126909: 'tires', 'car'
+0.4818681937945792: 'java', 'computer'
+0.47369101672011227: 'dog', 'computer'
 ```
