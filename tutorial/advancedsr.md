@@ -1,4 +1,3 @@
-
 # Advanced SR Usage
 
 ## Other SR algorithms:
