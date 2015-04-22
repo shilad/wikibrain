@@ -15,15 +15,12 @@ WikiBrain SR metrics support six major functions:
 * `cosimilarity(rowPhrases[], colPhrases[])` computes a cosimilarity matrix for the specified row and column phrases.
 * `cosimilarity(rowPages[], colPages[])` computes a cosimilarity matrix for the specified rows and column pages.
 
-To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
+There are a variety of different SR metrics built into WikiBrain. 
+Each  metric offers tradeoffs in offline build time, online runtime, memory usage, coverage, accuracy etc.
+By default, WikiBrain builds Milne and Witten's [link-based algorithm](http://www.aaai.org/Papers/Workshops/2008/WS-08-15/WS08-15-005.pdf) (2006) a fast, releatively accurate algorithm.
+More details on this and other algorithms appear at the end of this page.
 
-```bash
-./wb-java.sh org.wikibrain.sr.SRBuilder -m inlink
-```
-
-The inlink metric is a fast but relatively inaccurate SR metric. You can also build the "ensemble" metric that provides a linear combination of four other metrics. Beware that training the ensemble is costly. It takes about 10 minutes on Simple English Wikipedia, and a little over a day on the full Wikipedia. Most of the model-building time supports the *mostSimilar()* call, so you can speed up model building if you only need *similarity()*. TODO: explain how to do this.
-
-After you build the model for an SR metric, you can use it in your Java application. For example, to use the `mostSimilar()` method for phrases, do the following:
+After the SR algorithm is trained, you can use it in your Java application. For example, to use the `mostSimilar()` method for phrases, do the following:
 
 ```java    
 // Initialize the WikiBrain environment and get the local page dao
@@ -34,7 +31,7 @@ Language simple = Language.getByLangCode("simple");
 
 // Retrieve the "ensemble" sr metric for simple english 
 SRMetric sr = conf.get(
-        SRMetric.class, "ensemble",
+        SRMetric.class, "milnewitten",
         "language", simple.getLangCode());
 
 //Similarity between strings 
