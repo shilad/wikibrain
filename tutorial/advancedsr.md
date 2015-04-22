@@ -3,7 +3,24 @@
         title: Advanced SR usage.
 ---
 
-# Advanced SR Usage
+# Advanced Semantic Relatedness Usage
+
+WikiBrain provides a robust suite of SR measures and tools.
+By default, when you load some language editions, Wikipedia trains the Milne Witten [2006] SR measure.
+This algorithm strikes an excellent balance between accuracy, speed, and coverage.
+However, you may tap into a variety of other algorithms.
+
+## Modes of operation
+
+As described in the SR overview page, WikiBrain supports a variety of modes of operation.
+The two key dimensions it supports are:
+ * API call:
+   * `mostSimilar(A)` finds the most similar concepts for a particular query `A`.
+   * `similarity(A, B)` estimates the similarity of concepts `A` and `B`.
+   * `cosimilarity(rows, cols)` builds a cosimilarity matrix between the concept in `rows` and `cols.
+ * Query mode:
+   * `phrase`
+   * `article`
 
 ## Other SR algorithms:
 
