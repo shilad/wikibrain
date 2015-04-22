@@ -1,7 +1,6 @@
 package org.wikibrain.sr.vector;
 
 
-import gnu.trove.map.TIntFloatMap;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.matrix.DenseMatrix;
 import org.wikibrain.sr.Explanation;

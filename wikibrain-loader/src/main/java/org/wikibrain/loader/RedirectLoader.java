@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 /**
  *
  * Idea for changing the flow of parsing:
- * - First load all redirect page id -> page id into memory (TIntIntHashMap).
+ * - First load all redirect page id -&gt; page id into memory (TIntIntHashMap).
  * - Fix chaining redirects
  * - Then save.
  * - RedirectSqlDao.update goes away.

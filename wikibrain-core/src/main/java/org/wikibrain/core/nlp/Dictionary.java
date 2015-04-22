@@ -273,7 +273,7 @@ public class Dictionary implements Closeable {
      * Increments the count for a particular unigram.
      *
      * If this.countMentions is true, it scans for, counts,
-     * and removes any article mentions "foo:ID342234" => "foo"
+     * and removes any article mentions "foo:ID342234" -&gt; "foo"
      *
      * If rememberWords is true, and this word hasn't been seen before,
      * it remembers the word.

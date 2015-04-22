@@ -1,25 +1,16 @@
 package org.wikibrain.sr.vector;
 
 import com.typesafe.config.Config;
-import gnu.trove.map.TIntFloatMap;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntFloatHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.core.model.NameSpace;
-import org.wikibrain.matrix.*;
+import org.wikibrain.matrix.DenseMatrix;
+import org.wikibrain.matrix.DenseMatrixRow;
 import org.wikibrain.matrix.knn.KNNFinder;
 import org.wikibrain.matrix.knn.Neighborhood;
 import org.wikibrain.matrix.knn.RandomProjectionKNNFinder;
@@ -31,13 +22,10 @@ import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.disambig.Disambiguator;
 import org.wikibrain.sr.utils.Leaderboard;
 import org.wikibrain.sr.utils.SimUtils;
-import org.wikibrain.utils.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +35,7 @@ import java.util.logging.Logger;
  * SR scores are the result of cosine similarity between vectors. Word2Vec uses this
  * representations.
  *
- * <p>The metric requires a DenseVectorGenerator class that generates the vectors.<p>
+ * <p>The metric requires a DenseVectorGenerator class that generates the vectors.</p>
  *
  * @author Shilad Sen
  * @see org.wikibrain.sr.vector.DenseVectorGenerator

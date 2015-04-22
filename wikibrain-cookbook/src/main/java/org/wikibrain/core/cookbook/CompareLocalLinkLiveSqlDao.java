@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * An Example shows the difference of results between LocalLinkLiveDao & LocalLinkSqlDao
+ * An Example shows the difference of results between LocalLinkLiveDao &amp; LocalLinkSqlDao
  * @author Toby "Jiajun" Li
  */
 

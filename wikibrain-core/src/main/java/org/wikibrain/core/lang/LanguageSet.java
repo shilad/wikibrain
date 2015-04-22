@@ -198,7 +198,6 @@ public class LanguageSet implements Iterable<Language> {
     /**
      * Returns English if English is in the set, else returns Simple. If Simple is not in the
      * set, will return the default language or throws an exception, depending on the value of returnDefaultLangIfEnglishNotAvailable
-     * @param
      * @return
      * @throws WikiBrainException
      */

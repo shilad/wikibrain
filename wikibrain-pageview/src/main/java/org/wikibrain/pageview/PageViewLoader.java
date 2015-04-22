@@ -47,7 +47,7 @@ public class PageViewLoader {
     /**
      * first arg: comma-separated lang codes
      * start date and end date (second and third args) must be in UTC time
-     * dates must be entered as <four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23>
+     * dates must be entered as four_digit_year-numeric_month_1-12-numeric_day_1-31-numeric_hour_0-23
      * can enter as many start date to end date combinations as desired in order to download multiple days
      * @param args
      * @throws ClassNotFoundException

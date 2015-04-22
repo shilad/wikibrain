@@ -44,7 +44,6 @@ public class WikiBrainShapeFile {
     /**
      * Creates a new shapefile wrapper associated with the given file.
      * @param file Must end with ".shp"
-     * @throws IOException
      */
     public WikiBrainShapeFile(File file) {
         this(file, "UTF-8");
@@ -53,7 +52,6 @@ public class WikiBrainShapeFile {
     /**
      * Creates a new shapefile wrapper associated with the given file.
      * @param file Must end with ".shp"
-     * @throws IOException
      */
     public WikiBrainShapeFile(File file, String encoding) {
         ensureHasShpExtension(file);

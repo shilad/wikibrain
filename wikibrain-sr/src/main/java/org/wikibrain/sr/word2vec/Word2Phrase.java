@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * Given a corpus of words and phrases, iteratively concatenates bigrams that are
  * likely to be more meaningful together than apart.
  *
- * ie "speed of light" => "speed_of light" (pass 1) -> "speed_of_light" (pass 2)
+ * ie "speed of light" =&gt; "speed_of light" (pass 1) -&gt; "speed_of_light" (pass 2)
  *
  * @author Shilad Sen
  */

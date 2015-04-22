@@ -91,7 +91,7 @@ public class MostSimilarGuess {
     }
 
     /**
-     * @see https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG
+     * @see <a href="https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG">Wikipedia</a>
      * @return The normalized discounted cummulative gain. Results with no known
      * entry are totally ignored.
      */
@@ -125,7 +125,7 @@ public class MostSimilarGuess {
     }
 
     /**
-     * @see https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG
+     * @see <a href="https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG">Wikipedia</a>
      * @return The normalized discounted cummulative gain, but assumes unobserved
      * KnownSim entries lie somewhere below the observed list.
      */

@@ -46,7 +46,7 @@ public interface RedirectDao extends Dao<Redirect> {
     public TIntSet getRedirects(LocalPage localPage) throws DaoException;
 
     /**
-     * Gets the redirect local id -> dest local id mappings for lang = langId
+     * Gets the redirect local id -&gt; dest local id mappings for lang = langId
      * @param lang
      * @return
      * @throws DaoException

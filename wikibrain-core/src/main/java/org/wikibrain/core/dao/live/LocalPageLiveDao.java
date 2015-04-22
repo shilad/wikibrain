@@ -192,7 +192,7 @@ public class LocalPageLiveDao implements LocalPageDao  {
     }
 
     /**
-     * Gets the local page id -> namespace mappings for lang = langId
+     * Gets the local page id -&gt; namespace mappings for lang = langId
      * @param lang
      * @return
      * @throws DaoException
