@@ -10,7 +10,7 @@
 
     <groupId>org.wikibrainapi</groupId>
     <artifactId>wikibrain-parent</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WikiBrain parent</name>
     <description>The WikiBrain base pom</description>
@@ -87,7 +87,7 @@
                         </executions>
                     </plugin>
 
-                    <!--<plugin>
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <executions>
@@ -98,7 +98,7 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>-->
+                    </plugin>
 
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
@@ -138,7 +138,7 @@
                         </executions>
                     </plugin>
 
-                    <!--<plugin>
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <executions>
@@ -149,7 +149,7 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>-->
+                    </plugin>
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
