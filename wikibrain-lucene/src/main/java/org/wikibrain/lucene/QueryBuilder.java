@@ -61,7 +61,6 @@ public class QueryBuilder {
      *
      * @param searchString
      * @return
-     * @throws ParseException
      */
     public QueryBuilder setPhraseQuery(String searchString) {
         return setPhraseQuery(searcher.getOptions().elements, searchString);

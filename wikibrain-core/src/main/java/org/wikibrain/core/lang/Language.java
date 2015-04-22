@@ -90,6 +90,7 @@ public class Language implements Comparable<Language>, Serializable {
      * @throws IllegalArgumentException if langCode is unknown.
      */
     public static Language getByLangCode(String langCode) {
+        langCode = langCode.replace('_', '-').toLowerCase();
         if (WIKIDATA.getLangCode().equals(langCode)) {
             return WIKIDATA;
         }
@@ -102,6 +103,7 @@ public class Language implements Comparable<Language>, Serializable {
     }
 
     public static Language getByLangCodeLenient(String langCode) {
+        langCode = langCode.replace('_', '-').toLowerCase();
         List<String> flavors = new ArrayList<String>();
         flavors.add(langCode);
         if (langCode.contains("-")) {
@@ -127,6 +129,7 @@ public class Language implements Comparable<Language>, Serializable {
     }
 
     public static boolean hasLangCode(String langCode) {
+        langCode = langCode.replace('_', '-').toLowerCase();
         for (Language lang : LANGUAGES) {
             if (lang.langCode.equalsIgnoreCase(langCode)) {
                 return true;
@@ -174,6 +177,10 @@ public class Language implements Comparable<Language>, Serializable {
 
     public String getDomain() {
         return langCode + ".wikipedia.org";
+    }
+
+    public LanguageInfo getLanguageInfo() {
+        return LanguageInfo.getByLanguage(this);
     }
 
     @Override

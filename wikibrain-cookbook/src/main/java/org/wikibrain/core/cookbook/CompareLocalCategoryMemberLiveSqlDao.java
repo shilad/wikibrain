@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * An Example shows the difference of results between LocalCategoryMemberLiveDao & LocalCategoryMemberSqlDao
+ * An Example shows the difference of results between LocalCategoryMemberLiveDao &amp; LocalCategoryMemberSqlDao
  * @author Toby "Jiajun" Li
  */
 public class CompareLocalCategoryMemberLiveSqlDao {

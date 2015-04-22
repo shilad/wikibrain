@@ -34,16 +34,13 @@ public class Env implements Closeable {
 
     /**
      * Parses standard command line arguments and builds the environment using them.
-     * @throws ConfigurationException
      */
     public Env() throws ConfigurationException {
         this(new HashMap<String, Object>());
     }
 
     /**
-     *
-     * @param pathConfs
-     * @throws ConfigurationException
+     * Creates a new environment, but folds in some external configuration files.
      */
     public Env(File ... pathConfs) throws ConfigurationException {
         this(new HashMap<String, Object>(), pathConfs);
@@ -51,9 +48,6 @@ public class Env implements Closeable {
 
     /**
      * Parses standard command line arguments and builds the environment using them.
-     * @param confParams
-     * @param pathConfs
-     * @throws ConfigurationException
      */
     public Env(Map<String, Object> confParams, File ... pathConfs) throws ConfigurationException {
         // Load basic configuration
@@ -86,6 +80,10 @@ public class Env implements Closeable {
         LOG.info("using languages " + getLanguages());
         LOG.info("using maxThreads " + WpThreadUtils.getMaxThreads());
         LOG.info("using tmpDir " + tmpDir);
+    }
+
+    public File getBaseDir() {
+        return new File(configuration.getString("baseDir"));
     }
 
     public List<File> getFiles(FileMatcher ... matchers) {

@@ -20,7 +20,7 @@ import java.io.Reader;
  *
  * TODO: add language overrides for unsupported languages?
  * In other words, analyze language X as similar language Y
- * ie. Ukrainian -> Russian and Ladino -> Spanish
+ * ie. Ukrainian -&gt; Russian and Ladino -&gt; Spanish
  *
  * @author Ari Weiland
  *

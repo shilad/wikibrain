@@ -147,7 +147,6 @@ public interface SRMetric {
      * @param wpRowIds
      * @param wpColIds
      * @return
-     * @throws java.io.IOException
      */
     public double[][] cosimilarity(int wpRowIds[], int wpColIds[]) throws DaoException;
 
@@ -158,7 +157,6 @@ public interface SRMetric {
      * @param rowPhrases
      * @param colPhrases
      * @return
-     * @throws java.io.IOException
      */
     public double[][] cosimilarity(String rowPhrases[], String colPhrases[]) throws DaoException;
 
@@ -167,7 +165,6 @@ public interface SRMetric {
      *
      * @param ids
      * @return
-     * @throws java.io.IOException
      */
     public double[][] cosimilarity(int ids[]) throws DaoException;
 
@@ -176,7 +173,6 @@ public interface SRMetric {
      *
      * @param phrases
      * @return
-     * @throws java.io.IOException
      */
     public double[][] cosimilarity(String phrases[]) throws DaoException;
 

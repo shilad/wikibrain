@@ -50,6 +50,23 @@ public class WpIOUtils {
     }
 
     /**
+     * Return the most recent tstamp among files in a diretory.
+     * @param dir
+     * @return
+     */
+    public static long getLastModifiedfromDir(File dir){
+        long latest = -1;
+        if (dir.isDirectory()) {
+            for (File f : dir.listFiles()) {
+                if (f.lastModified() > latest) {
+                    latest = f.lastModified();
+                }
+            }
+        }
+        return latest;
+    }
+
+    /**
      * Serialize an object into bytes.
      * @param o Object to be serialized.
      * @return Serialized stream of bytes.
@@ -190,6 +207,7 @@ public class WpIOUtils {
     public static File createTempDirectory(String name) throws IOException {
         return createTempDirectory(name, true);
     }
+
 
     /**
      * Gets the path relative to a specified directory.

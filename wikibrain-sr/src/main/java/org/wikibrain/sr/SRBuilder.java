@@ -28,11 +28,13 @@ import org.wikibrain.utils.WpIOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 /**
  * A "script" to build the semantic relatedness models.
@@ -159,11 +161,13 @@ public class SRBuilder {
                 toAdd.addAll(getSubmetrics(child));
                 toAdd.add(child);
             }
-        } else if (type.equals("vector.mostsimilarconcepts")) {
+        } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             toAdd.addAll(getSubmetrics(config.getString("generator.basemetric")));
-        } else if (type.equals("milnewitten")){
+        } else if (type.equals("milnewitten")) {
             toAdd.add(config.getString("inlink"));
             toAdd.add(config.getString("outlink"));
+        } else if (config.hasPath("reliesOn")) {
+            toAdd.addAll(config.getStringList("reliesOn"));
         }
         toAdd.add(parentName);
         List<String> results = new ArrayList<String>();
@@ -182,7 +186,7 @@ public class SRBuilder {
         if (type.equals("ensemble")) {
             EnsembleMetric ensemble = (EnsembleMetric) getMetric(name);
             ensemble.setTrainSubmetrics(false);         // Do it by hand
-        } else if (type.equals("vector.mostsimilarconcepts")) {
+        } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             if (mode == Mode.SIMILARITY) {
                 LOG.warning("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
                 mode = Mode.BOTH;
@@ -197,7 +201,7 @@ public class SRBuilder {
 
     public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
         LOG.info("building component metric " + name);
-        if (getMetricType(name).equals("vector.word2vec")) {
+        if (getMetricType(name).equals("densevector.word2vec")) {
             initWord2Vec(name);
         }
         Dataset ds = getDataset();
@@ -218,7 +222,7 @@ public class SRBuilder {
                 LOG.info("metric " + name + " mostSimilar() is already trained... skipping");
             } else {
                 Config config = getMetricConfig(name);
-                int n = maxResults * EnsembleMetric.EXTRA_SEARCH_DEPTH;
+                int n = maxResults * EnsembleMetric.SEARCH_MULTIPLIER;
                 TIntSet validIds = validMostSimilarIds;
                 if (config.hasPath("maxResults")) {
                     n = config.getInt("maxResults");
@@ -234,12 +238,53 @@ public class SRBuilder {
     }
 
     private void initWord2Vec(String name) throws ConfigurationException, IOException, DaoException {
+        Config config = getMetricConfig(name).getConfig("generator");
+        File model = Word2VecGenerator.getModelFile(config.getString("modelDir"), language);
+        if (skipBuiltMetrics && model.isFile()) {
+            return;
+        }
+
+        if (config.hasPath("prebuilt") && config.getBoolean("prebuilt")) {
+            if (model.isFile()) {
+                return;
+            }
+            File downloadPath = new File(config.getString("binfile"));
+            if (!downloadPath.isFile()) {
+                throw new ConfigurationException(
+                        "word2vec model " + downloadPath.getAbsolutePath() + " cannot be found." +
+                                " You must download it from " + config.getString("url") +
+                                " into to the wikibrain download directory.");
+            }
+            if (!config.getStringList("languages").contains(language.getLangCode())) {
+                throw new ConfigurationException(
+                        "word2vec model " + downloadPath +
+                                " does not support language" + language);
+            }
+            if (downloadPath.toString().toLowerCase().endsWith("gz")) {
+                LOG.info("decompressing " + downloadPath + " to " + model);
+                File tmp = File.createTempFile("word2vec", "bin");
+                try {
+                    FileUtils.deleteQuietly(tmp);
+                    GZIPInputStream gz = new GZIPInputStream(new FileInputStream(downloadPath));
+                    FileUtils.copyInputStreamToFile(gz, tmp);
+                    gz.close();
+                    model.getParentFile().mkdirs();
+                    FileUtils.moveFile(tmp, model);
+                } finally {
+                    FileUtils.deleteQuietly(tmp);
+                }
+            } else {
+                FileUtils.copyFile(downloadPath, model);
+            }
+            return;
+        }
+
         LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        lpd.useCache(true);
         if (!lpd.isBuilt()) {
             lpd.build();
         }
 
-        Config config = getMetricConfig(name).getConfig("generator");
         String corpusName = config.getString("corpus");
         Corpus corpus = null;
         if (!corpusName.equals("NONE")) {
@@ -248,19 +293,33 @@ public class SRBuilder {
                 corpus.create();
             }
         }
-        File model = Word2VecGenerator.getModelFile(config.getString("modelDir"), language);
-        if (!model.isFile()) {
-            if (corpus == null) {
-                throw new ConfigurationException(
-                        "word2vec metric " + name + " cannot build or find model!" +
-                        "configuration has no corpus, but model not found at " + model + ".");
-            }
-            Word2VecTrainer trainer = new Word2VecTrainer(
-                    env.getConfigurator().get(LocalPageDao.class),
-                    language);
-            trainer.train(corpus.getDirectory());
-            trainer.save(model);
+
+        if (model.isFile() && (corpus == null ||  model.lastModified() > corpus.getCorpusFile().lastModified())) {
+            return;
         }
+        if (corpus == null) {
+            throw new ConfigurationException(
+                    "word2vec metric " + name + " cannot build or find model!" +
+                    "configuration has no corpus, but model not found at " + model + ".");
+        }
+        Word2VecTrainer trainer = new Word2VecTrainer(
+                env.getConfigurator().get(LocalPageDao.class),
+                language);
+        if (config.hasPath("dimensions")) {
+            LOG.info("set number of dimensions to " + config.getInt("dimensions"));
+            trainer.setLayer1Size(config.getInt("dimensions"));
+        }
+        if (config.hasPath("maxWords")) {
+            LOG.info("set maxWords to " + config.getInt("maxWords"));
+            trainer.setMaxWords(config.getInt("maxWords"));
+        }
+        if (config.hasPath("window")) {
+            LOG.info("set window to " + config.getInt("maxWords"));
+            trainer.setWindow(config.getInt("window"));
+        }
+        trainer.setKeepAllArticles(true);
+        trainer.train(corpus.getDirectory());
+        trainer.save(model);
     }
 
     private void setValidMostSimilarIdsFromFile(String file) throws IOException {
@@ -276,7 +335,7 @@ public class SRBuilder {
         boolean needsConcepts = false;
         for (String name : getSubmetrics(metricName)) {
             String type = getMetricType(name);
-            if (type.equals("vector.esa") || type.equals("vector.mostsimilarconcepts")) {
+            if (type.equals("sparsevector.esa") || type.equals("sparsevector.mostsimilarconcepts")) {
                 needsConcepts = true;
             }
         }
@@ -320,7 +379,7 @@ public class SRBuilder {
     public String getMetricType(String name) throws ConfigurationException {
         Config config = getMetricConfig(name);
         String type = config.getString("type");
-        if (type.equals("vector")) {
+        if (type.equals("densevector") || type.equals("sparsevector")) {
             type += "." + config.getString("generator.type");
         }
         return type;

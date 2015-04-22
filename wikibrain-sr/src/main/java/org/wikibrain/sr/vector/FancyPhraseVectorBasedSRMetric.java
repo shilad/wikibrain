@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * @author Shilad Sen
  */
-public class FancyPhraseVectorBasedSRMetric extends VectorBasedSRMetric {
+public class FancyPhraseVectorBasedSRMetric extends SparseVectorSRMetric {
     private static enum PhraseMode {
         GENERATOR,  // try to get phrase vectors from the generator directly
         CREATOR,    // try to get phrase vectors form the phrase vector creator
@@ -36,7 +36,7 @@ public class FancyPhraseVectorBasedSRMetric extends VectorBasedSRMetric {
 
     private PhraseMode phraseMode = PhraseMode.BOTH;
 
-    public FancyPhraseVectorBasedSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, VectorGenerator generator, VectorSimilarity similarity, PhraseVectorCreator creator) {
+    public FancyPhraseVectorBasedSRMetric(String name, Language language, LocalPageDao dao, Disambiguator disambig, SparseVectorGenerator generator, VectorSimilarity similarity, PhraseVectorCreator creator) {
         super(name, language, dao, disambig, generator, similarity);
         this.phraseVectorCreator = creator;
         creator.setMetric(this);
@@ -201,8 +201,8 @@ public class FancyPhraseVectorBasedSRMetric extends VectorBasedSRMetric {
             Language language = Language.getByLangCode(runtimeParams.get("language"));
             Map<String, String> params = new HashMap<String, String>();
             params.put("language", language.getLangCode());
-            VectorGenerator generator = getConfigurator().construct(
-                    VectorGenerator.class, null, config.getConfig("generator"), params);
+            SparseVectorGenerator generator = getConfigurator().construct(
+                    SparseVectorGenerator.class, null, config.getConfig("generator"), params);
             VectorSimilarity similarity = getConfigurator().construct(
                     VectorSimilarity.class,  null, config.getConfig("similarity"), params);
             FancyPhraseVectorBasedSRMetric sr = new FancyPhraseVectorBasedSRMetric(

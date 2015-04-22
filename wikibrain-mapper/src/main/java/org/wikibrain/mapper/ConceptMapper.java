@@ -45,7 +45,6 @@ public abstract class ConceptMapper {
      * @param ls the language set to map
      * @return an Iterator of universal pages
      * @throws DaoException
-     * @throws ConfigurationException
      */
     public abstract Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws WikiBrainException, DaoException;
 

@@ -10,7 +10,7 @@
 
     <groupId>org.wikibrainapi</groupId>
     <artifactId>wikibrain-parent</artifactId>
-    <version>0.5.2</version>
+    <version>0.6.0</version>
     <packaging>pom</packaging>
     <name>WikiBrain parent</name>
     <description>The WikiBrain base pom</description>
@@ -96,6 +96,9 @@
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
+                                    <configuration> <!-- add this to disable checking -->
+                                        <additionalparam>-Xdoclint:none</additionalparam>
+                                    </configuration>
                             </execution>
                         </executions>
                     </plugin>

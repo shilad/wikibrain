@@ -146,8 +146,6 @@ public enum FileMatcher {
     /**
      * Given a set of Strings containing urls, returns the subset of strings
      * that match at least one of the specified regular expressions.
-     * @param links
-     * @return
      */
     public List<String> match(List<String> links) {
         List<String> result = new ArrayList<String>();
@@ -166,8 +164,6 @@ public enum FileMatcher {
 
     /**
      * Return all files whose names match at least one of the specified regexes.
-     * @param paths
-     * @return
      */
     public List<File> matchFiles(List<File> paths) {
         List<File> result = new ArrayList<File>();

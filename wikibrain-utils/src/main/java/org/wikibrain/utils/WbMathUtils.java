@@ -7,6 +7,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 
 import java.util.Arrays;
@@ -31,8 +32,6 @@ public class WbMathUtils {
 
     /**
      * Returns true if the number is not NaN or infinite.
-     * @param d
-     * @return
      */
     public static boolean isReal(double d) {
         return !Double.isNaN(d) && !Double.isInfinite(d);
@@ -52,7 +51,7 @@ public class WbMathUtils {
     public static double toAsymptote(double x, double xHalfLife, double y0, double yInf) {
         assert(x > 0);
         double hl = x / xHalfLife;
-        return y0 + (1.0 - Math.exp(-hl)) * (yInf - y0);
+        return y0 + (1.0 - FastMath.exp(-hl)) * (yInf - y0);
     }
 
     /**
@@ -108,7 +107,7 @@ public class WbMathUtils {
         Arrays.sort(X);
         NormalDistribution dist = new NormalDistribution(
                 X.length / 2,               // heaviest weight at midpoint
-                Math.max(3, X.length / 4)); // 66% of the weight within 3 pts on either side
+                FastMath.max(3, X.length / 4)); // 66% of the weight within 3 pts on either side
         double sum = 0.0;
         double weight = 0.0;
         for (int i = 0; i < X.length; i++) {
@@ -128,11 +127,10 @@ public class WbMathUtils {
      *
      * @param X  Input data.
      * @param epsilon The minimum increase allowed between consecutive points.
-     * @return
      */
     public static void makeMonotonicIncreasing(double [] X, double epsilon) {
         for (int i = 1; i < X.length; i++) {
-            X[i] = Math.max(X[i], X[i-1] + epsilon);
+            X[i] = FastMath.max(X[i], X[i-1] + epsilon);
         }
         MathArrays.checkOrder(X, MathArrays.OrderDirection.INCREASING, true);
     }
@@ -145,11 +143,6 @@ public class WbMathUtils {
     /**
      * Given two parallel arrays of doubles representing x,y pairs
      * remove all pairs that are NaN or Infinite, and return the result.
-     *
-     * @param X
-     * @param Y
-     *
-     * @return
      */
     public static double[][] removeNotNumberPoints(double X[], double Y[]) {
         TDoubleArrayList prunedX = new TDoubleArrayList();
@@ -211,7 +204,7 @@ public class WbMathUtils {
                 double k = X[0][col1] / X[0][col2];
                 for (double row[] : X) {
                     if (row.length != numCols) { throw new IllegalArgumentException(); }
-                    if (Math.abs(row[col1] - k * row[col2]) > epsilon) {
+                    if (FastMath.abs(row[col1] - k * row[col2]) > epsilon) {
                         isColinear = false;
                         break;
                     }
@@ -273,12 +266,22 @@ public class WbMathUtils {
         return dot;
     }
 
+    public static double distance(double[] v1, double[] v2) {
+        if (v1.length != v2.length) {
+            throw new IllegalArgumentException();
+        }
+        double l2 = 0.0;
+        for (int i = 0; i < v1.length; i++) {
+            l2 += (v1[i] - v2[i]) * (v1[i] - v2[i]);
+        }
+        return FastMath.sqrt(l2);
+    }
+
     /**
-     * v1 <- alpha * v2 + v3
+     * v1 &lt;- alpha * v2 + v3
      * @param v1
      * @param v2
      * @param alpha
-     * @return
      */
     public static void add(double alpha, double[] v1, double[] v2, double v3[]) {
         for (int i = 0; i < v1.length; i++) {
@@ -287,11 +290,10 @@ public class WbMathUtils {
     }
 
     /**
-     * v1 <- alpha * v2 + v3
+     * v1 &lt;- alpha * v2 + v3
      * @param v1
      * @param v2
      * @param alpha
-     * @return
      */
     public static void add(double alpha, double[] v1, double[] v2, float v3[]) {
         for (int i = 0; i < v1.length; i++) {
@@ -299,11 +301,10 @@ public class WbMathUtils {
         }
     }
     /**
-     * v1 <- alpha * v2 + v3
+     * v1 &lt;- alpha * v2 + v3
      * @param v1
      * @param v2
      * @param alpha
-     * @return
      */
     public static void add(double alpha, double[] v1, float[] v2, float v3[]) {
         for (int i = 0; i < v1.length; i++) {
@@ -311,11 +312,10 @@ public class WbMathUtils {
         }
     }
     /**
-     * v1 <- alpha * v2 + v3
+     * v1 &lt;- alpha * v2 + v3
      * @param v1
      * @param v2
      * @param alpha
-     * @return
      */
     public static void add(float alpha, float[] v1, float[] v2, float v3[]) {
         for (int i = 0; i < v1.length; i++) {
@@ -358,7 +358,7 @@ public class WbMathUtils {
         if (sum == 0) {
             return;
         }
-        sum = Math.sqrt(sum);
+        sum = FastMath.sqrt(sum);
         for (int i = 0; i < vector.length; i++) {
             vector[i] /= sum;
         }
@@ -382,7 +382,7 @@ public class WbMathUtils {
         if (sum == 0) {
             return;
         }
-        sum = Math.sqrt(sum);
+        sum = FastMath.sqrt(sum);
         for (int i = 0; i < vector.length; i++) {
             vector[i] /= sum;
         }

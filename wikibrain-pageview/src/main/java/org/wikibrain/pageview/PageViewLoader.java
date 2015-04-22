@@ -3,6 +3,7 @@ package org.wikibrain.pageview;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Hours;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -17,10 +18,7 @@ import org.wikibrain.core.lang.LanguageSet;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,7 +47,7 @@ public class PageViewLoader {
     /**
      * first arg: comma-separated lang codes
      * start date and end date (second and third args) must be in UTC time
-     * dates must be entered as <four_digit_year>-<numeric_month_1-12>-<numeric_day_1-31>-<numeric_hour_0-23>
+     * dates must be entered as four_digit_year-numeric_month_1-12-numeric_day_1-31-numeric_hour_0-23
      * can enter as many start date to end date combinations as desired in order to download multiple days
      * @param args
      * @throws ClassNotFoundException
@@ -78,6 +76,12 @@ public class PageViewLoader {
                         .withDescription("date at which to stop loading page view files")
                         .hasArgs()
                         .create("e"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("random-hours")
+                        .withDescription("select a certain number of random hours between the specified start and end date")
+                        .hasArgs()
+                        .create("r"));
         EnvBuilder.addStandardOptions(options);
 
         CommandLineParser parser = new PosixParser();
@@ -87,6 +91,7 @@ public class PageViewLoader {
         } catch (ParseException e) {
             System.err.println( "Invalid option usage: " + e.getMessage());
             new HelpFormatter().printHelp("PageViewLoader", options);
+            System.exit(1);
             return;
         }
 
@@ -101,9 +106,22 @@ public class PageViewLoader {
                         : start.plusMinutes(60 * 2 - 1);
                 intervals.add(new Interval(start, end));
             }
+            if (cmd.hasOption("r")) {
+                if (startStrings.length != 1) {
+                    System.err.println("when using -r, you can only specify one start/end interval");
+                    new HelpFormatter().printHelp("PageViewLoader", options);
+                    System.exit(1);
+                }
+                intervals = selectRandomHours(intervals.get(0), Integer.valueOf(cmd.getOptionValue("r")));
+            }
+        } else if (cmd.hasOption("r")) {
+            // Default to 12 month date range.
+            DateTime start = DateTime.now().minusMonths(13);
+            DateTime end = DateTime.now().minusMonths(1);
+            intervals = selectRandomHours(new Interval(start, end), Integer.valueOf(cmd.getOptionValue("r")));
         } else {
-            // Default to two hours of views a week ago.
-            DateTime start = DateTime.now().minusWeeks(1);
+            // Default to two hours of views two week ago.
+            DateTime start = DateTime.now().minusWeeks(2);
             DateTime end = start.plusMinutes(60 * 2 - 1);
             intervals.add(new Interval(start, end));
         }
@@ -141,6 +159,19 @@ public class PageViewLoader {
         if (result == null) {
             System.err.format("Invalid date format '%s'. Must be one of %s.\n", dateString, StringUtils.join(DATE_FORMATS, ", "));
             System.exit(1);
+        }
+        return result;
+    }
+
+    private static List<Interval> selectRandomHours(Interval interval, int n) {
+        Hours hours = interval.toDuration().toStandardHours();
+        List<Interval> result = new ArrayList<Interval>();
+        Random random = new Random();
+        for (int i = 0; i < n; i++) {
+            int begOffset = random.nextInt(hours.getHours());
+            DateTime start = interval.getStart().plusHours(begOffset);
+            DateTime end = start.plusHours(1);
+            result.add(new Interval(start, end));
         }
         return result;
     }

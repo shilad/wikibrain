@@ -11,9 +11,9 @@ import org.wikibrain.core.dao.sql.AbstractSqlDao;
 /**
  * This program experiments with different settings for fetch size.
  * On my laptop, with a local postgres:
- * - For raw page, there is little improvement with fetch size > 100
- * - For links, there is little improvement with fetch size > 700
- * - For local pages, there is little improvement with fetch size > 100
+ * - For raw page, there is little improvement with fetch size &gt; 100
+ * - For links, there is little improvement with fetch size &gt; 700
+ * - For local pages, there is little improvement with fetch size &gt; 100
  * @author Shilad Sen
  */
 public class TestFetchSize {

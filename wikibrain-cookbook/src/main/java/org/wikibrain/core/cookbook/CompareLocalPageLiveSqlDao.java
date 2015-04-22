@@ -14,7 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * An Example shows the difference of results between LocalPageLiveDao & LocalPageSqlDao
+ * An Example shows the difference of results between LocalPageLiveDao &amp; LocalPageSqlDao
  * @author Toby "Jiajun" Li
  */
 public class CompareLocalPageLiveSqlDao  {

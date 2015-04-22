@@ -66,7 +66,6 @@ public interface PageViewDao extends Dao<PageView> {
      * @return
      * @throws ConfigurationException
      * @throws DaoException
-     * @throws WikiBrainException
      */
     public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, DateTime startTime, DateTime endTime) throws ConfigurationException, DaoException;
 
@@ -78,7 +77,6 @@ public interface PageViewDao extends Dao<PageView> {
      * @return
      * @throws ConfigurationException
      * @throws DaoException
-     * @throws WikiBrainException
      */
     public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates) throws ConfigurationException, DaoException;
 

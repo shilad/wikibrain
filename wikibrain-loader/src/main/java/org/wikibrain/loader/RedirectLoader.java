@@ -12,16 +12,14 @@ import org.wikibrain.core.dao.*;
 import org.wikibrain.core.dao.sql.WpDataSource;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
-import org.wikibrain.core.model.RawPage;
-import org.wikibrain.core.model.Redirect;
-import org.wikibrain.core.model.Title;
+import org.wikibrain.core.model.*;
 
 import java.util.logging.Logger;
 
 /**
  *
  * Idea for changing the flow of parsing:
- * - First load all redirect page id -> page id into memory (TIntIntHashMap).
+ * - First load all redirect page id -&gt; page id into memory (TIntIntHashMap).
  * - Fix chaining redirects
  * - Then save.
  * - RedirectSqlDao.update goes away.
@@ -118,10 +116,11 @@ public class RedirectLoader {
         Configurator conf = env.getConfigurator();
 
         MetaInfoDao metaDao = conf.get(MetaInfoDao.class);
+        LocalPageDao pageDao = conf.get(LocalPageDao.class);
 
         RedirectLoader redirectLoader = new RedirectLoader(
                 conf.get(RawPageDao.class),
-                conf.get(LocalPageDao.class),
+                pageDao,
                 conf.get(RedirectDao.class),
                 metaDao
         );
@@ -144,6 +143,10 @@ public class RedirectLoader {
 
         redirectLoader.getDao().endLoad();
         metaDao.endLoad();
+
+        LOG.info("triggering page title cache creation...");
+        pageDao.setFollowRedirects(true);
+        LocalPage page = pageDao.getByTitle(env.getDefaultLanguage(), NameSpace.ARTICLE, "FooBar");
     }
 
 }
