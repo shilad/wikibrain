@@ -14,6 +14,7 @@ However, you may tap into a variety of other algorithms.
 
 As described in the SR overview page, WikiBrain supports a variety of modes of operation.
 The two key dimensions it supports are:
+
  * Method:
    * `mostSimilar(A)`: finds the most similar concepts for a particular query `A`.
    * `similarity(A, B)`: estimates the similarity of concepts `A` and `B`.
@@ -55,12 +56,14 @@ The inlink metric is a fast but relatively inaccurate SR metric. You can also bu
 
 The table below summarizes the most widely used SR measures and the tradeoffs between them.
 
-Metric | Data used | Accuracy | Training complexity | Runtime complexity | Has feature matrix
-----------------------------------------------------------------------------------------
-ESA | text | med-high | slow | slow | yes
-Ensemble | ensemble | high | slow | slow | no
-MilneWitten | links | med-high | fast | fast | yes
-Category | category | low | fast | fast | no
-word2vec | text | med-high | high | low | yes
+| Metric | Data used | Accuracy | Training complexity | Runtime complexity | Has feature matrix |
+|----|----|---|---|---|---|
+| ESA | text | med-high | slow | slow | yes |
+
+
+| Ensemble | ensemble | high | slow | slow | no|
+| MilneWitten | links | med-high | fast | fast | yes|
+| Category | category | low | fast | fast | no|
+| word2vec | text | med-high | high | low | yes|
 
 ## Normalizers
