@@ -27,7 +27,7 @@ SR researchers have traditionally studied the `similarity` / `phrase` cell in th
 However, WikiBrain suports all six cells.
 In fact, in our experience applications are more likely to need `cosimilarity` and `mostSimilar` than `similarity`.
 
-## Efficiencey
+## Efficiency
 
 There are two dimensions of efficiency an application needs to consider.
 **Training complexity** describes the amount of CPU time needed to create the data needed by an SR measure.
@@ -82,7 +82,8 @@ sr.metric.local.milnewitten.mostsimilarnormalizer : loess
 
 Be aware that you must rebuild your SR metric after changing the normalizer.
 
-# ESA SR Measure
+## SR Algorithms
+#### ESA SR Measure
 
 An optimized implementation of Gabrilovich and Markovitch's Explicit Semantic Analysis SR measure. 
 The ESA measure represents a query concept as a sparse "concept vector" that includes the Wikipedia articles most related to the query. 
@@ -90,7 +91,7 @@ It is reasonably accurate, but relatively slow - particularly for model training
 
 Reference: Gabrilovich, Evgeniy, and Shaul Markovitch. "Computing Semantic Relatedness Using Wikipedia-based Explicit Semantic Analysis." IJCAI. Vol. 7. 2007.
 
-# MilneWitten SR Measure
+#### MilneWitten SR Measure
 
 The Milne / Witten SR measure calculates the overlap between the inlinks and outlinks of the query concept(s).
 It is reasonably fast and accurate.
@@ -98,10 +99,10 @@ It works particularly well for `mostSimilar` queries.
 
 Reference: Witten, I., and David Milne. "An effective, low-cost measure of semantic relatedness obtained from Wikipedia links." Proceeding of AAAI Workshop on Wikipedia and Artificial Intelligence: an Evolving Synergy, AAAI Press, Chicago, USA. 2008.
 
-# Category SR Measure
+#### Category SR Measure
 
 The cateogry SR measure implements 
 
-# Ensemble SR Measure
+#### Ensemble SR Measure
 
-# Word2Vec SR Measure
+#### Word2Vec SR Measure
