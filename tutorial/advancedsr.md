@@ -14,13 +14,29 @@ However, you may tap into a variety of other algorithms.
 
 As described in the SR overview page, WikiBrain supports a variety of modes of operation.
 The two key dimensions it supports are:
- * API call:
-   * `mostSimilar(A)` finds the most similar concepts for a particular query `A`.
-   * `similarity(A, B)` estimates the similarity of concepts `A` and `B`.
-   * `cosimilarity(rows, cols)` builds a cosimilarity matrix between the concept in `rows` and `cols.
+ * Method:
+   * `mostSimilar(A)`: finds the most similar concepts for a particular query `A`.
+   * `similarity(A, B)`: estimates the similarity of concepts `A` and `B`.
+   * `cosimilarity(rows, cols)`: builds a cosimilarity matrix between the concept in `rows` and `cols.
  * Query mode:
-   * `phrase`
-   * `article`
+   * `phrase`: Concepts are represented by free-text queries.
+   * `article`: Concepts are represented by Wikipedia article via their id.
+
+SR researchers have traditionally studied the `similarity` / `phrase` cell in this six cell (two by three) grid.
+However, WikiBrain suports all six cells.
+In fact, in our experience applications are more likely to need `cosimilarity` and `mostSimilar` than `similarity`.
+
+## Efficiencey
+
+There are two dimensions of efficiency an application needs to consider.
+**Training complexity** describes the amount of CPU time needed to create the data needed by an SR measure.
+It is incurred once, offline, before an application is launched.
+**Online complexity** describes the amount of CPU time needed to perform an API. 
+This cost is incurred for every invocation of an SR API call.
+
+There is often a tradeoff between online and training complexity.
+Many algorithms that perform quickly and accurately reuqire longer training time.
+
 
 ## Other SR algorithms:
 
