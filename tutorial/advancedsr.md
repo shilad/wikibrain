@@ -67,3 +67,15 @@ The `-m` argument specifies the name of the metric (from the table above).
 The `-o` argument specifies the mode. It can be `similarity`, `cosimilarity`, or `both`. If `both` is specified, feature matrices will be constructed if the SR measure supports them (see efficiency, above.)
 
 ## Normalizers
+
+Each SR measure produces estiamted SR values on an arbitrary scale. 
+To make the values more interpretable, WikiBrain offers a variety of normalizers that translate estimated values to a consistent scale.
+Most SR measures use the `percentile` normalizer, which converts all values to percentiles on a 0 to 1.0 scale.
+Many more normalizers are available in the [org.wikibrain.sr.normalize](https://github.com/shilad/wikibrain/tree/master/wikibrain-sr/src/main/java/org/wikibrain/sr/normalize) package. You can override a particular metric's normalizer by specifying something like the following in your configuration file:
+
+```
+sr.metric.local.milnewitten.similaritynormalizer : loess
+sr.metric.local.milnewitten.mostsimilarnormalizer : loess
+```
+
+Be aware that you must rebuild your SR metric after changing the normalizer.
