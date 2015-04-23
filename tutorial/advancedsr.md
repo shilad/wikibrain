@@ -33,13 +33,15 @@ There are two dimensions of efficiency an application needs to consider.
 It is incurred once, offline, before an application is launched.
 **Online complexity** describes the amount of CPU time needed to perform an API. 
 This cost is incurred for every invocation of an SR API call.
-
 There is often a tradeoff between online and training complexity.
 Many algorithms that perform quickly and accurately reuqire longer training time.
 
+One important example of the training vs online complexity tradeoff is in precomputing **feature matrices** for articles.
+Many SR measures can precompute feature matrices for all articles in a language.
+In doing so, a user pays a training penalty in exchange for runtime performance.
+For SR measures that support them, feature matrices are built by default when a user runs the SRBuilder in mostSimilar mode (next section).
 
-## Other SR algorithms:
-
+## Running the SR builder
 
 To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
 
@@ -48,3 +50,17 @@ To use these algorithms, you must *build models* that capture the statistical re
 ```
 
 The inlink metric is a fast but relatively inaccurate SR metric. You can also build the "ensemble" metric that provides a linear combination of four other metrics. Beware that training the ensemble is costly. It takes about 10 minutes on Simple English Wikipedia, and a little over a day on the full Wikipedia. Most of the model-building time supports the *mostSimilar()* call, so you can speed up model building if you only need *similarity()*. TODO: explain how to do this.
+
+## Summary of Algorithmic Tradeoffs
+
+The table below summarizes the most widely used SR measures and the tradeoffs between them.
+
+Metric | Data used | Accuracy | Training complexity | Runtime complexity | Has feature matrix
+----------------------------------------------------------------------------------------
+ESA | text | med-high | slow | slow | yes
+Ensemble | ensemble | high | slow | slow | no
+MilneWitten | links | med-high | fast | fast | yes
+Category | category | low | fast | fast | no
+word2vec | text | med-high | high | low | yes
+
+## Normalizers
