@@ -23,7 +23,7 @@ public class SimilarityExample {
 
         // Retrieve the "ensemble" sr metric for simple english
         SRMetric sr = conf.get(
-                SRMetric.class, "ensemble",
+                SRMetric.class, "milnewitten",
                 "language", env.getDefaultLanguage().getLangCode());
 
         //Similarity between strings
@@ -40,7 +40,7 @@ public class SimilarityExample {
                 SRResult s = sr.similarity(pair[0], pair[1], true);
             System.out.println(s.getScore() + ": '" + pair[0] + "', '" + pair[1] + "'");
             for (Explanation e:s.getExplanations()) {
-                System.out.println(formatter.formatExplanation(e));
+//                System.out.println(formatter.formatExplanation(e));
             }
         }
     }
