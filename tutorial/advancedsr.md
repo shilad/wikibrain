@@ -83,26 +83,28 @@ sr.metric.local.milnewitten.mostsimilarnormalizer : loess
 Be aware that you must rebuild your SR metric after changing the normalizer.
 
 ## SR Algorithms
-#### ESA SR Measure
+##### ESA SR Measure
 
 An optimized implementation of Gabrilovich and Markovitch's Explicit Semantic Analysis SR measure. 
 The ESA measure represents a query concept as a sparse "concept vector" that includes the Wikipedia articles most related to the query. 
 It is reasonably accurate, but relatively slow - particularly for model training.
-
 Reference: Gabrilovich, Evgeniy, and Shaul Markovitch. "Computing Semantic Relatedness Using Wikipedia-based Explicit Semantic Analysis." IJCAI. Vol. 7. 2007.
 
-#### MilneWitten SR Measure
+##### MilneWitten SR Measure
 
 The Milne / Witten SR measure calculates the overlap between the inlinks and outlinks of the query concept(s).
 It is reasonably fast and accurate.
 It works particularly well for `mostSimilar` queries.
-
 Reference: Witten, I., and David Milne. "An effective, low-cost measure of semantic relatedness obtained from Wikipedia links." Proceeding of AAAI Workshop on Wikipedia and Artificial Intelligence: an Evolving Synergy, AAAI Press, Chicago, USA. 2008.
 
-#### Category SR Measure
+##### Category SR Measure
 
-The cateogry SR measure implements 
+The category SR measure implements a version of Strube and Ponzetti's WikiRelate SR measure.
+It is relatively inaccurate, but very fast, and useful for it's descriptive power and added value to the ensemble (below).
+This measure examines the category structure of Wikipedia (a directory graph) and finds the distance to the lowest common subsumer category.
+While the original paper 
+Reference: Strube, Michael, and Simone Paolo Ponzetto. "WikiRelate! Computing semantic relatedness using Wikipedia." AAAI. Vol. 6. 2006.
 
-#### Ensemble SR Measure
+##### Ensemble SR Measure
 
-#### Word2Vec SR Measure
+##### Word2Vec SR Measure
