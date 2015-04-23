@@ -42,26 +42,28 @@ Many SR measures can precompute feature matrices for all articles in a language.
 In doing so, a user pays a training penalty in exchange for runtime performance.
 For SR measures that support them, feature matrices are built by default when a user runs the SRBuilder in mostSimilar mode (next section).
 
-## Running the SR builder
-
-To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *inlink* metric):
-
-```bash
-./wb-java.sh org.wikibrain.sr.SRBuilder -m inlink
-```
-
-The inlink metric is a fast but relatively inaccurate SR metric. You can also build the "ensemble" metric that provides a linear combination of four other metrics. Beware that training the ensemble is costly. It takes about 10 minutes on Simple English Wikipedia, and a little over a day on the full Wikipedia. Most of the model-building time supports the *mostSimilar()* call, so you can speed up model building if you only need *similarity()*. TODO: explain how to do this.
-
 ## Summary of Algorithmic Tradeoffs
 
-The table below summarizes the most widely used SR measures and the tradeoffs between them.
+The table below summarizes the most commonly used SR measures in WikiBrain and the tradeoffs between them.
 
 | Metric | Data used | Accuracy | Training complexity | Runtime complexity | Has feature matrix |
 |----|----|---|---|---|---|
 | ESA | text | med-high | slow | slow | yes |
-| Ensemble | ensemble | high | slow | slow | no |
-| MilneWitten | links | med-high | fast | fast | yes |
-| Category | category | low | fast | fast | no |
+| ensemble | ensemble | high | slow | slow | no |
+| milnewitten | links | med-high | fast | fast | yes |
+| category | category | low | fast | fast | no |
 | word2vec | text | med-high | high | low | yes |
+
+## Running the SR builder
+
+To use these algorithms, you must *build models* that capture the statistical relationships an SR metric uses to calculate similarities. To do this, run the SRBuilder java program for a particular SR metric (in this case the *ensemble* metric). You can also use your IDE or the "override command line" feature of the GUILoader to run the builder.
+
+```bash
+./wb-java.sh org.wikibrain.sr.SRBuilder -l simple -m ensemble -o both
+```
+The above example shows the three key arguments for running the SR builder.
+The `-l` argument specifies the langauge of the SR metric you want to build.
+The `-m` argument specifies the name of the metric (from the table above).
+The `-o` argument specifies the mode. It can be `similarity`, `cosimilarity`, or `both`. If `both` is specified, feature matrices will be constructed if the SR measure supports them (see efficiency, above.)
 
 ## Normalizers
