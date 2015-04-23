@@ -59,11 +59,9 @@ The table below summarizes the most widely used SR measures and the tradeoffs be
 | Metric | Data used | Accuracy | Training complexity | Runtime complexity | Has feature matrix |
 |----|----|---|---|---|---|
 | ESA | text | med-high | slow | slow | yes |
-
-
-| Ensemble | ensemble | high | slow | slow | no|
-| MilneWitten | links | med-high | fast | fast | yes|
-| Category | category | low | fast | fast | no|
-| word2vec | text | med-high | high | low | yes|
+| Ensemble | ensemble | high | slow | slow | no |
+| MilneWitten | links | med-high | fast | fast | yes |
+| Category | category | low | fast | fast | no |
+| word2vec | text | med-high | high | low | yes |
 
 ## Normalizers
