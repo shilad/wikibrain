@@ -56,17 +56,10 @@ public class DirectLinkMetric extends BaseSRMetric {
     @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
         int count = 0;
-        for (int i = 0; i < 2; i++) {
-            DaoFilter filter = new DaoFilter().setLanguages(getLanguage());
-            if (i == 0) {
-                filter.setSourceIds(pageId1).setDestIds(pageId2);
-            } else {
-                filter.setSourceIds(pageId2).setDestIds(pageId1);
-            }
-            if (linkDao.getCount(filter) > 1) {
-                count++;
-            }
-        }
+        int links1[] = getLinks(pageId1, true);
+        int links2[] = getLinks(pageId2, true);
+        count += hasLink(links1, pageId2);
+        count += hasLink(links2, pageId1);
         return new SRResult(normalize(1.0 * count / 2.0));
     }
 
