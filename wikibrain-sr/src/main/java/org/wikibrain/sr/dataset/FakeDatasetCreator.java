@@ -42,7 +42,7 @@ public class FakeDatasetCreator {
 
     private int stopWordRank = 1000;
     private int maxTargetRank = 1000;
-    private int maxCandidateRank = 20000;
+    private int maxCandidateRank = 30000;
 
     private final Dictionary dictionary;
     private final File path;
@@ -131,7 +131,7 @@ public class FakeDatasetCreator {
         shuffled.addAll(cocounts.keySet());
         Collections.shuffle(shuffled);
         List<KnownSim> pairs = new ArrayList<KnownSim>();
-        double base = Math.pow(frequent.size(), 1.0 / numPairs);
+        double base = Math.pow(frequent.size() / 3, 1.0 / numPairs);
 
         for (int i = 0; i < shuffled.size(); i++) {
             String target = shuffled.get(i);
