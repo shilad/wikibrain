@@ -46,6 +46,10 @@ public class Corpus {
     }
 
     public void create() throws IOException, DaoException {
+        if (!this.linkProbabilityDao.isBuilt()) {
+            this.linkProbabilityDao.build();
+        }
+        this.linkProbabilityDao.useCache(true);
         FileUtils.deleteQuietly(directory);
         directory.mkdirs();
 
@@ -60,6 +64,8 @@ public class Corpus {
     public File getDictionaryFile() {
         return new File(directory, "dictionary.txt");
     }
+
+    public Language getLanguage() { return this.language; };
 
     public boolean exists() {
         return getCorpusFile().isFile() && getDictionaryFile().isFile();
