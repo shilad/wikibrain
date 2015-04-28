@@ -13,8 +13,10 @@ import org.wikibrain.core.model.*;
 
 import java.io.File;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builds a directed graph among categories and pages using daos.
@@ -22,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class LocalCategoryGraphBuilder {
 
-    private static final Logger LOG = Logger.getLogger(LocalCategoryGraphBuilder.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LocalCategoryGraphBuilder.class);
 
     private final LocalPageDao pageDao;
     private final LocalCategoryMemberDao catDao;
@@ -141,9 +143,9 @@ public class LocalCategoryGraphBuilder {
         }
 
         for (int i = 0; i < 20; i++) {
-            LOG.log(Level.INFO, "performing page ranks iteration {0}.", i);
+            LOG.info("performing page ranks iteration {0}.", i);
             double error = onePageRankIteration(graph);
-            LOG.log(Level.INFO, "Error for iteration is {0}.", error);
+            LOG.info("Error for iteration is {0}.", error);
             if (error == 0) {
                 break;
             }

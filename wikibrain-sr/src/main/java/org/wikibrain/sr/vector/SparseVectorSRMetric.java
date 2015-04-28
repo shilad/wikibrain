@@ -29,8 +29,10 @@ import org.wikibrain.utils.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An SR metric that represents phrases and pages using sparse numeric vectors.
@@ -58,7 +60,7 @@ import java.util.logging.Logger;
  */
 public class SparseVectorSRMetric extends BaseSRMetric {
 
-    private static final Logger LOG = Logger.getLogger(SparseVectorSRMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SparseVectorSRMetric.class);
     protected final SparseVectorGenerator generator;
     protected final VectorSimilarity similarity;
     protected final SRConfig config;
@@ -198,7 +200,7 @@ public class SparseVectorSRMetric extends BaseSRMetric {
             buildFeatureAndTransposeMatrices(validIds);
             super.trainMostSimilar(dataset, numResults, validIds);
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "training failed", e);
+            LOG.error("training failed", e);
             throw new RuntimeException(e);  // somewhat unexpected...
         }
     }

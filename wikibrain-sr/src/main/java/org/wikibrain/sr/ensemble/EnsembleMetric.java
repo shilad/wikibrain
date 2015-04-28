@@ -19,15 +19,17 @@ import org.wikibrain.utils.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Matt Lesicko
  * @author Shilad Sen
  */
 public class EnsembleMetric extends BaseSRMetric {
-    private static final Logger LOG = Logger.getLogger(EnsembleMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(EnsembleMetric.class);
 
     public static final int MIN_SEARCH_DEPTH = 500;
     public static final int SEARCH_MULTIPLIER = 3;
@@ -131,7 +133,7 @@ public class EnsembleMetric extends BaseSRMetric {
                                     score = result.getScore();
                                 }
                             } catch (Exception e){
-                                LOG.log(Level.WARNING, "Local sr metric " + metric.getName() + " failed for " + ks, e);
+                                LOG.warn("Local sr metric " + metric.getName() + " failed for " + ks, e);
                             }
                             es.add(score, 0);
                         }
@@ -182,7 +184,7 @@ public class EnsembleMetric extends BaseSRMetric {
                             rank = dsl.getIndexForId(ids.get(1).getId());
                         }
                     } catch (Exception e) {
-                        LOG.log(Level.WARNING, "Local sr metric " + metric.getName() + " failed for " + pageId, e);
+                        LOG.warn("Local sr metric " + metric.getName() + " failed for " + pageId, e);
                     } finally {
                         es.add(score, rank);
                     }

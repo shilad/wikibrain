@@ -16,15 +16,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @see Evaluator
  * @author Shilad Sen
  */
 public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationLog> {
-    private static final Logger LOG = Logger.getLogger(SimilarityEvaluator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SimilarityEvaluator.class);
 
     public SimilarityEvaluator(File outputDir) {
         super(outputDir, "local-similarity");
@@ -87,7 +89,7 @@ public class SimilarityEvaluator extends Evaluator<SimilarityEvaluationLog> {
                 }
                 splitEval.record(ks, result);
             } catch (Exception e) {
-                LOG.log(Level.WARNING, "Similarity of " + ks + " failed. Logging error to " + err);
+                LOG.warn("Similarity of " + ks + " failed. Logging error to " + err);
                 splitEval.recordFailed(ks);
                 errFile.write("KnownSim failed: " + ks + "\n");
                 errFile.write("\t" + e.getMessage() + "\n");

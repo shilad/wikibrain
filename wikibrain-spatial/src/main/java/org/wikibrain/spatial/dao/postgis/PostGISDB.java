@@ -37,8 +37,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Brent Hecht on 12/30/13.
@@ -46,7 +48,7 @@ import java.util.logging.Logger;
  */
 public class PostGISDB {
 
-    private static final Logger LOG = Logger.getLogger(PostGISDB.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PostGISDB.class);
 
     private static final String SPATIAL_DB_NAME = "geometries";
     private static final String GEOM_FIELD_NAME = "geometry";
@@ -362,7 +364,7 @@ public class PostGISDB {
 
             if (needsToBeInitialized()){ // needs to be initialized
 
-                LOG.log(Level.INFO, "Initializing spatial database tables");
+                LOG.info("Initializing spatial database tables");
 
 
                 try {
@@ -390,7 +392,7 @@ public class PostGISDB {
 
             }else{
 
-                LOG.log(Level.INFO, "Spatial database tables have already been initialized");
+                LOG.info("Spatial database tables have already been initialized");
 
             }
 

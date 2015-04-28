@@ -19,7 +19,7 @@ public class ProviderFilter implements ClassFilter {
             return false;
         }
         // Support two-level hierarchy
-        if (!classInfo.getSuperClassName().equals(Provider.class.getName())) {
+        if (!classInfo.getSuperClassName().equals(Provider.class)) {
             return false;
         }
 

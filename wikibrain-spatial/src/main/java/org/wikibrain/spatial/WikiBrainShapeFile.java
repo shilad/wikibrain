@@ -17,7 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility wrapper around GeoTool's shape file class.
@@ -29,7 +30,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class WikiBrainShapeFile {
-    private static final Logger LOG = Logger.getLogger(WikiBrainShapeFile.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WikiBrainShapeFile.class);
 
     public static final String [] EXTENSIONS = new String[] { ".shp", ".shx", ".dbf" };
 
@@ -130,7 +131,7 @@ public class WikiBrainShapeFile {
             Collections.sort(titleScores);
             mapping.put(titleScores.get(0).key, title);
             if (titleScores.size() > 1) {
-                LOG.warning("duplicate keys for title " + title + ": " + titleScores);
+                LOG.warn("duplicate keys for title " + title + ": " + titleScores);
             }
         }
 

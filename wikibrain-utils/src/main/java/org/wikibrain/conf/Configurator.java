@@ -14,8 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Binds together providers for a collection of components. A component is uniquely
@@ -61,7 +63,7 @@ import java.util.logging.Logger;
  * generated once, it is cached and reused for future requests.
  */
 public class Configurator implements Cloneable {
-    private static final Logger LOG = Logger.getLogger(Configurator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Configurator.class);
 
     public static final int MAX_FILE_SIZE = 8 * 1024 * 1024;   // 8MB
 
@@ -118,10 +120,10 @@ public class Configurator implements Cloneable {
         String classRegEx = System.getProperty("wikibrain.classRegEx", "org\\.wikibrain\\.*");
 
         for (File file : JvmUtils.getClassPathAsList()) {
-            LOG.fine("considering classpath entry " + file);
+            LOG.debug("considering classpath entry " + file);
             String canonical = FilenameUtils.normalize(file.getAbsolutePath());
             if (visited.contains(canonical)) {
-                LOG.fine("skipping looking for providers in duplicate classpath entry " + canonical);
+                LOG.debug("skipping looking for providers in duplicate classpath entry " + canonical);
                 continue;
             }
             visited.add(canonical);
@@ -135,12 +137,12 @@ public class Configurator implements Cloneable {
 
             for (ClassInfo classInfo : foundClasses) {
                 if (registered.containsKey(classInfo.getClassName())) {
-                    LOG.fine("class " + classInfo.getClassName() +
+                    LOG.debug("class " + classInfo.getClassName() +
                             " found in " + file +
                             " but previously found in " + registered.get(classInfo.getClassName()) +
                             ". Skipping!");
                 } else {
-                    LOG.fine("registering component " + classInfo);
+                    LOG.debug("registering component " + classInfo);
                     registerProvider(classInfo.getClassName());
                     registered.put(classInfo.getClassName(), file);
                 }
@@ -151,7 +153,7 @@ public class Configurator implements Cloneable {
         for (Class c : providers.keySet()) {
             ProviderSet pset = providers.get(c);
             total += pset.providers.size();
-            LOG.fine("installed " + pset.providers.size() + " configurators for " + pset.type);
+            LOG.debug("installed " + pset.providers.size() + " configurators for " + pset.type);
         }
         LOG.info("configurator installed " + total + " providers for " +
                 providers.size() + " classes");
@@ -408,7 +410,7 @@ public class Configurator implements Cloneable {
                     try {
                         ((java.io.Closeable) obj).close();
                     } catch (IOException e) {
-                        LOG.log(Level.SEVERE, "closing component " + obj + " failed:", e);
+                        LOG.error("closing component " + obj + " failed:", e);
                     }
                 }
             }

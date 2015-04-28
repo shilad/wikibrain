@@ -21,7 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parses the wiki text associated with articles
@@ -29,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class WikiTextLoader {
 
-    private static final Logger LOG = Logger.getLogger(WikiTextLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WikiTextLoader.class);
 
     public static void main(String args[]) throws ConfigurationException, DaoException, IOException {
         Options options = new Options();

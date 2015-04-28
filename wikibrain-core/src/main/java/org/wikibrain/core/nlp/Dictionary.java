@@ -27,7 +27,8 @@ import org.wikibrain.utils.WpThreadUtils;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,7 +54,7 @@ public class Dictionary implements Closeable {
     public static final int MAX_DICTIONARY_SIZE = 20000000;   // 20M unigrams + bigrams by default.
     public static int PRUNE_INTERVAL = 10000;   // Consider pruning every PRUNE_INTERVAL increments
 
-    public static Logger LOG = Logger.getLogger(Dictionary.class.getName());
+    public static Logger LOG = LoggerFactory.getLogger(Dictionary.class);
 
     /**
      * Matches mentions like:

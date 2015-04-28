@@ -11,13 +11,14 @@ import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.wikidata.*;
 
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class WikidataValueScorer extends AbstractMatchScorer {
-    private static final Logger LOG = Logger.getLogger(WikidataValueScorer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WikidataValueScorer.class);
 
     private WikidataDao wikidataDao;
 
@@ -61,7 +62,7 @@ public class WikidataValueScorer extends AbstractMatchScorer {
             } else if (st.getValue().getType() == WikidataValue.Type.STRING) {
                 candidateVal = st.getValue().getStringValue();
             } else {
-                LOG.warning("Unexpected type for property " + st.getProperty() + ": " + st.getValue());
+                LOG.warn("Unexpected type for property " + st.getProperty() + ": " + st.getValue());
             }
             if (candidateVal != null && candidateVal.equalsIgnoreCase(rowValue)) {
                 return 1.0;

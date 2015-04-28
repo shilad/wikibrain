@@ -25,15 +25,17 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class SimpleToblersLawEvaluator {
 
-    private static final Logger LOG = Logger.getLogger(SimpleToblersLawEvaluator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleToblersLawEvaluator.class);
     private static int NUM_SAMPLES = 1000000;
 
     private Random random = new Random();
@@ -71,7 +73,7 @@ public class SimpleToblersLawEvaluator {
     public void retrieveLocations() throws DaoException {
         // Get all known concept geometries
         Map<Integer, Geometry> geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
-        LOG.log(Level.INFO, String.format("Get %d geometries, now building id-name mapping", geometries.size()));
+        LOG.info(String.format("Get %d geometries, now building id-name mapping", geometries.size()));
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){

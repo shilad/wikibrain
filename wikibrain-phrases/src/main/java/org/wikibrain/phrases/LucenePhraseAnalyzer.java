@@ -15,14 +15,15 @@ import org.wikibrain.lucene.*;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Using Lucene in a phrase analyzer.
  * @author Yulun Li
  */
 public class LucenePhraseAnalyzer implements PhraseAnalyzer {
-    private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PhraseAnalyzer.class);
 
     /**
      * Analyzer retrieves this times as many results as needed and

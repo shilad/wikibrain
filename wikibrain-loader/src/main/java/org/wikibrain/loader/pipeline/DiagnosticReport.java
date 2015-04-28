@@ -19,14 +19,16 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class DiagnosticReport {
-    private static final Logger LOG = Logger.getLogger(DiagnosticReport.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DiagnosticReport.class);
 
     public static double FUDGE_FACTOR = 1.2;    // Better to underpromise than overpromise
 
@@ -276,7 +278,7 @@ public class DiagnosticReport {
         try {
             return FileSystemUtils.freeSpaceKb(10000) / 1024;
         } catch (IOException e) {
-            LOG.log(Level.WARNING, "failed to calculate free space in current dir:", e);
+            LOG.warn("failed to calculate free space in current dir:", e);
             return 0.0;
         }
     }

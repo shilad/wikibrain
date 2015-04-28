@@ -13,13 +13,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *@author Matt Lesicko
  */
 public class LinearEnsemble implements Ensemble{
-    private static final Logger LOG = Logger.getLogger(LinearEnsemble.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LinearEnsemble.class);
     final int numMetrics;
     private final int numTrainingCandidateArticles;
     TDoubleArrayList simlarityCoefficients;

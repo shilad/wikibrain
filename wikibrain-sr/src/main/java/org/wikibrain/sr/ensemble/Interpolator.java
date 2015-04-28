@@ -3,13 +3,14 @@ package org.wikibrain.sr.ensemble;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class Interpolator implements Serializable {
-    private static final Logger LOG = Logger.getLogger(Interpolator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Interpolator.class);
     private final int numMetrics;
     private int[] missingRanks;
     private double[] missingScores;

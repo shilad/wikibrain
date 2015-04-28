@@ -18,7 +18,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Captures common environment components for WikiBrain programs
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class Env implements Closeable {
-    private static final Logger LOG = Logger.getLogger(Env.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Env.class);
 
     private Configuration configuration;
     private Configurator configurator;
@@ -96,7 +97,7 @@ public class Env implements Closeable {
             for (FileMatcher fm : matchers) {
                 List<File> f = getFiles(l, fm);
                 if (f.isEmpty()) {
-                    LOG.warning("no files matching language " + l + ", matcher " + fm.getName());
+                    LOG.warn("no files matching language " + l + ", matcher " + fm.getName());
                 }
                 matches.addAll(f);
             }
@@ -116,7 +117,7 @@ public class Env implements Closeable {
         if (downloadPath == null) {
             throw new IllegalArgumentException("missing configuration for download.path");
         }
-        LOG.fine("scanning download path " + downloadPath + " for files");
+        LOG.debug("scanning download path " + downloadPath + " for files");
         List<File> matchingFiles = new ArrayList<File>();
         File langDir = new File(downloadPath, lang.getLangCode());
         if (!langDir.isDirectory()) {

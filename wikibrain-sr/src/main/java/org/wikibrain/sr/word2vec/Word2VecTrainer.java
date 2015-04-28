@@ -28,7 +28,8 @@ import org.wikibrain.utils.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 
 /**
@@ -37,7 +38,7 @@ import java.util.regex.Matcher;
  * Heavily adapted from https://github.com/piskvorky/gensim/blob/develop/gensim/models/word2vec.py
  */
 public class Word2VecTrainer {
-    private static final Logger LOG = Logger.getLogger(Word2VecTrainer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Word2VecTrainer.class);
     private static final int ARTICLE_COUNT_BONUS = 10;
     private static final int MAX_EXP = 6;
     private static final int EXP_TABLE_SIZE = 1000;
@@ -194,7 +195,7 @@ public class Word2VecTrainer {
                     String w = page.getCompactUrl();
                     long h = hashWord(w);
                     if (wordIndexes.containsKey(h)) {
-                        LOG.warning("hash collision on " + w + " with hash " + h);
+                        LOG.warn("hash collision on " + w + " with hash " + h);
                     } else {
                         int i = top.size();
                         wordIndexes.put(h, i);

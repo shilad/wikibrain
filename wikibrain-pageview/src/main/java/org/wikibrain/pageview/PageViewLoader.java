@@ -19,15 +19,17 @@ import org.wikibrain.core.lang.LanguageSet;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Java "script" to load pageviews.
  * By default it loads two hours worth of pageviews from exactly one week ago.
  */
 public class PageViewLoader {
-    private static final Logger LOG = Logger.getLogger(PageViewLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PageViewLoader.class);
     private final LanguageSet languageSet;
     private final PageViewDao dao;
 
@@ -140,7 +142,7 @@ public class PageViewLoader {
 
         loader.load(intervals);
 
-        LOG.log(Level.INFO, "DONE");
+        LOG.info("DONE");
     }
 
     public static String[] DATE_FORMATS = new String[] {"yyyy-MM-dd", "yyyy-MM-dd:HH"};

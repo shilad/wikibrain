@@ -12,13 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class PostGISVersionChecker extends PostgisNGDataStoreFactory {
-    public static Logger LOG = Logger.getLogger(PostGISVersionChecker.class.getName());
+    public static Logger LOG = LoggerFactory.getLogger(PostGISVersionChecker.class);
 
     public void verifyVersion(Map params) throws DaoException {
         JDBCDataStore dataStore = new JDBCDataStore();

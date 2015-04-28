@@ -277,7 +277,7 @@ public class IntervalHeap<T> implements MinHeap<T>, MaxHeap<T> {
     @Override
     public String toString() {
         java.text.DecimalFormat twoPlaces = new java.text.DecimalFormat("0.00");
-        StringBuffer str = new StringBuffer(IntervalHeap.class.getCanonicalName());
+        StringBuffer str = new StringBuffer(IntervalHeap.class.getName());
         str.append(", size: ").append(size()).append(" capacity: ").append(capacity());
         int i = 0, p = 2;
         while (i < size()) {

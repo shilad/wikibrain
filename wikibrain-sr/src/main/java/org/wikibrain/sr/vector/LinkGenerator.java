@@ -24,7 +24,8 @@ import org.wikibrain.sr.utils.Leaderboard;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates a sparse vector containing a "1" for each inbound or outbound link
@@ -40,7 +41,7 @@ public class LinkGenerator implements SparseVectorGenerator {
         DIRECT
     }
 
-    private static final Logger LOG = Logger.getLogger(LinkGenerator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LinkGenerator.class);
     private boolean outLinks;
     private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;

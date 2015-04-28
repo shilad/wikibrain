@@ -1,7 +1,8 @@
 package org.wikibrain.core.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
@@ -23,7 +24,7 @@ public class Title implements Externalizable {
     private LanguageInfo language;
 
 	private static final long serialVersionUID = 3L;
-	private static final Logger LOG = Logger.getLogger(Title.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Title.class);
 
     public Title(String text, LanguageInfo language) {
         this(text, false, language);

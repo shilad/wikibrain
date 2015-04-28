@@ -12,14 +12,16 @@ import org.wikibrain.spatial.WikiBrainShapeFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class SpatialDataDownloader {
-    private static final Logger LOG = Logger.getLogger(SpatialDataDownloader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SpatialDataDownloader.class);
 
     private final SpatialDataFolder dir;
     private final Configuration config;
@@ -56,7 +58,7 @@ public class SpatialDataDownloader {
             tmpDir = File.createTempFile("wikibrain", ".exploded");
             FileUtils.deleteQuietly(tmpDir);
             FileUtils.forceMkdir(tmpDir);
-            LOG.log(Level.INFO, "Extracting to " + tmpDir);
+            LOG.info("Extracting to " + tmpDir);
             zipFile.extractAll(tmpDir.getAbsolutePath());
             FileUtils.forceDeleteOnExit(tmpDir);
         } catch (ZipException e) {
@@ -126,7 +128,7 @@ public class SpatialDataDownloader {
             tmpDir = File.createTempFile("wikibrain", ".exploded");
             FileUtils.deleteQuietly(tmpDir);
             FileUtils.forceMkdir(tmpDir);
-            LOG.log(Level.INFO, "Extracting " + mappingUrl + " to " + tmpDir);
+            LOG.info("Extracting " + mappingUrl + " to " + tmpDir);
             zipFile.extractAll(tmpDir.getAbsolutePath());
             FileUtils.forceDeleteOnExit(tmpDir);
         } catch (ZipException e) {

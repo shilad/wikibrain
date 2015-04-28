@@ -21,7 +21,8 @@ import org.wikibrain.sr.utils.Leaderboard;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates an
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class MostSimilarConceptsGenerator implements SparseVectorGenerator {
 
-    private static final Logger LOG = Logger.getLogger(MostSimilarConceptsGenerator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MostSimilarConceptsGenerator.class);
 
     private final Language language;
     private final LocalPageDao pageDao;
@@ -69,13 +70,13 @@ public class MostSimilarConceptsGenerator implements SparseVectorGenerator {
     public void setConcepts(File file) throws IOException {
         conceptIds = new TIntHashSet();
         if (!file.isFile()) {
-            LOG.warning("concept path " + file + " not a file; defaulting to all concepts");
+            LOG.warn("concept path " + file + " not a file; defaulting to all concepts");
             return;
         }
         for (String wpId : FileUtils.readLines(file)) {
             conceptIds.add(Integer.valueOf(wpId));
         }
-        LOG.warning("installed " + conceptIds.size() + " concepts for " + language);
+        LOG.warn("installed " + conceptIds.size() + " concepts for " + language);
     }
 
     @Override

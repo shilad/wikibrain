@@ -22,7 +22,8 @@ import org.wikibrain.sr.vector.FeatureFilter;
 import org.wikibrain.utils.Scoreboard;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wikifier based on Doug Downey's approach described in
@@ -31,7 +32,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class WebSailWikifier implements Wikifier {
-    private static final Logger LOG = Logger.getLogger(WebSailWikifier.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WebSailWikifier.class);
 
     /**
      * TODO: Make this configurable

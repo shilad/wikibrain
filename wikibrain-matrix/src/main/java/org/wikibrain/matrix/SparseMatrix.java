@@ -12,8 +12,10 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of a sparse matrix.
@@ -21,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class SparseMatrix implements Matrix<SparseMatrixRow> {
 
-    public static final Logger LOG = Logger.getLogger(SparseMatrix.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(SparseMatrix.class);
 
     // default header page size is 100MB, will be expanded if necessary
     public static final int DEFAULT_HEADER_SIZE = 100 * 1024 * 1024;
@@ -127,7 +129,7 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
             try {
                 return (SparseMatrixRow)getRow(rowIds[i.getAndIncrement()]);
             } catch (IOException e) {
-                LOG.log(Level.SEVERE, "getRow failed", e);
+                LOG.error("getRow failed", e);
                 return null;
             }
         }
@@ -147,10 +149,10 @@ public class SparseMatrix implements Matrix<SparseMatrixRow> {
     }
 
     private void info(String message) {
-        LOG.log(Level.INFO, "sparse matrix " + path + ": " + message);
+        LOG.info("sparse matrix " + path + ": " + message);
     }
 
     private void debug(String message) {
-        LOG.log(Level.FINE, "sparse matrix " + path + ": " + message);
+        LOG.debug("sparse matrix " + path + ": " + message);
     }
 }

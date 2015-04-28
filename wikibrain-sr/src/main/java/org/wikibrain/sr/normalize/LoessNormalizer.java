@@ -15,7 +15,8 @@ import org.wikibrain.utils.WbMathUtils;
 
 import java.text.DecimalFormat;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Normalizes in two steps:
@@ -25,7 +26,7 @@ import java.util.logging.Logger;
 
 public class LoessNormalizer extends BaseNormalizer {
 
-    private static Logger LOG = Logger.getLogger(LoessNormalizer.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(LoessNormalizer.class);
     public static final long serialVersionUID = -34232429;
 
     private TDoubleList X = new TDoubleArrayList();

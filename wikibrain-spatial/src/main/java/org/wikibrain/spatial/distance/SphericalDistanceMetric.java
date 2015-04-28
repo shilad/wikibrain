@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Estimates the number of kilometers between geometries.
@@ -29,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class SphericalDistanceMetric implements SpatialDistanceMetric {
 
-    private static final Logger LOG = Logger.getLogger(SpatialDistanceMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SpatialDistanceMetric.class);
     private ClosestPointIndex index;
     private final SpatialDataDao spatialDao;
     private TIntSet concepts;

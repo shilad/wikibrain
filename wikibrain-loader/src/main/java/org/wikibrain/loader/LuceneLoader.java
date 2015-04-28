@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -41,7 +43,7 @@ import java.util.logging.Logger;
  *
  */
 public class LuceneLoader {
-    private static final Logger LOG = Logger.getLogger(LuceneLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LuceneLoader.class);
 
     private static final RawPage POISON_PILL =
             new RawPage(0, 0, "", null, null, Language.getByLangCode("en"), null);
@@ -85,7 +87,7 @@ public class LuceneLoader {
             for (RawPage rawPage : rawPageDao.get(filter)) {
                 queue.put(rawPage);
                 if (++i % 1000 == 0) {
-                    LOG.log(Level.INFO, "RawPages indexed " + language + ": " + i + " of " + n);
+                    LOG.info("RawPages indexed " + language + ": " + i + " of " + n);
                 }
             }
             queue.put(POISON_PILL);
@@ -124,7 +126,7 @@ public class LuceneLoader {
             try {
                 w.join(Math.max(0, maxMillis - System.currentTimeMillis()));
             } catch (InterruptedException e) {
-                LOG.log(Level.SEVERE, "ignoring interrupted exception on thread join", e);
+                LOG.info("ignoring interrupted exception on thread join", e);
             }
         }
         for (Thread w : workers) {
@@ -152,13 +154,13 @@ public class LuceneLoader {
                         metaDao.incrementRecords(LuceneSearcher.class, lang);
                     }
                 } catch (InterruptedException e) {
-                    LOG.log(Level.WARNING, "LuceneLoader.Worker received interrupt.");
+                    LOG.warn("LuceneLoader.Worker received interrupt.");
                     return;
                 } catch (Exception e) {
                     metaDao.incrementErrorsQuietly(LuceneSearcher.class, lang);
                     String title = "unknown";
                     if (rp != null) title = rp.getTitle().toString();
-                    LOG.log(Level.WARNING, "exception while parsing " + title, e);
+                    LOG.warn("exception while parsing " + title, e);
                 }
             }
         }
@@ -233,7 +235,7 @@ public class LuceneLoader {
 
         final LuceneLoader loader = new LuceneLoader(rawPageDao, metaDao, luceneOptions, namespaces);
 
-        LOG.log(Level.INFO, "Begin indexing");
+        LOG.info("Begin indexing");
 
         for (Language lang : languages) {
             loader.load(lang);
@@ -241,6 +243,7 @@ public class LuceneLoader {
 
         loader.endLoad();
         metaDao.endLoad();
-        LOG.log(Level.INFO, "Done indexing");
+
+        LOG.info("Done indexing");
     }
 }

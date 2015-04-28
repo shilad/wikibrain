@@ -27,8 +27,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An SR metric that represents phrases and pages using dense numeric vectors.
@@ -42,7 +44,7 @@ import java.util.logging.Logger;
  */
 public class DenseVectorSRMetric extends BaseSRMetric {
 
-    private static final Logger LOG = Logger.getLogger(DenseVectorSRMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DenseVectorSRMetric.class);
     protected final DenseVectorGenerator generator;
     protected final SRConfig config;
 
@@ -156,7 +158,7 @@ public class DenseVectorSRMetric extends BaseSRMetric {
                                 board.tallyScore(id, SimUtils.cosineSimilarity(v, vector));
                             }
                         } catch (Exception e) {
-                            LOG.log(Level.WARNING, "similarity for " + id + " failed: ", e);
+                            LOG.warn("similarity for " + id + " failed: ", e);
                         }
                         return true;
                     }

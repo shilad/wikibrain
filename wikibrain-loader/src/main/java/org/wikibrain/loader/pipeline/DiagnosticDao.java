@@ -15,14 +15,16 @@ import org.wikibrain.core.lang.LanguageSet;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class DiagnosticDao {
-    private static final Logger LOG = Logger.getLogger(DiagnosticDao.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DiagnosticDao.class);
     private final String token;
     private final File logFile;
 
@@ -69,7 +71,7 @@ public class DiagnosticDao {
         try {
             save(diagnostic);
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "Save of diagnostics failed: ", e);
+            LOG.warn("Save of diagnostics failed: ", e);
         }
     }
 

@@ -29,7 +29,8 @@ import org.wikibrain.parser.WpParseException;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.wikibrain.core.jooq.tables.WikidataEntityAliases.*;
 import static org.wikibrain.core.jooq.tables.WikidataEntityLabels.*;
@@ -391,7 +392,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
         if (type == WikidataEntity.Type.PROPERTY) {
             WikidataEntity prop = getProperty(id);  // should be cached, fast
             if (prop.getLabels().isEmpty()) {
-                LOG.warning("no labels for property " + id);
+                LOG.warn("no labels for property " + id);
                 return "unknown";
             }
             if (prop.getLabels().containsKey(language)) {
@@ -424,7 +425,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                 if (result.size() >= 1) {
                     return result.get(0).value1();
                 } else {
-                    LOG.warning("no labels for item " + id);
+                    LOG.warn("no labels for item " + id);
                     return "unknown";
                 }
             } finally {
@@ -527,7 +528,7 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
                     try {
                         return buildStatement(r);
                     } catch (DaoException e) {
-                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        LOG.warn(e.getMessage(), e);
                         return null;
                     }
                 }

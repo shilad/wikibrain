@@ -7,11 +7,13 @@ import org.wikibrain.parser.WpParseException;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DumpPageXmlParser implements Iterable<RawPage> {
-    public static final Logger LOG = Logger.getLogger(DumpSplitter.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(DumpSplitter.class);
 
     private final PageXmlParser parser;
     DumpSplitter impl;
@@ -57,7 +59,7 @@ public class DumpPageXmlParser implements Iterable<RawPage> {
                 try {
                     buff = parser.parse(iterImpl.next());
                 } catch (WpParseException e) {
-                    LOG.log(Level.WARNING, "parsing of " + impl.getPath() + " failed:", e);
+                    LOG.warn("parsing of " + impl.getPath() + " failed:", e);
                 }
             }
         }

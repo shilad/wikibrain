@@ -1,9 +1,10 @@
 package org.wikibrain.core.dao.sql;
 
-import org.apache.log4j.Logger;
 import org.jooq.*;
 import org.jooq.impl.DefaultConnectionProvider;
 import org.jooq.impl.TableImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.core.dao.DaoException;
 
 import java.sql.Connection;
@@ -18,7 +19,7 @@ import static org.jooq.SQLDialect.*;
  */
 public class JooqUtils {
 
-    private static final Logger LOG = Logger.getLogger(JooqUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JooqUtils.class);
 
     /**
      * "Guess" the {@link SQLDialect} from a {@link Connection} instance.

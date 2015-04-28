@@ -8,14 +8,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parses a MySQL dump file containing insert statements.
  */
 public class MySqlDumpParser {
-    private static final Logger LOG = Logger.getLogger(MySqlDumpParser.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MySqlDumpParser.class);
 
     private SQLParser sqlParser = new SQLParser();
 
@@ -159,7 +161,7 @@ public class MySqlDumpParser {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 } catch (StandardException e) {
-                    LOG.log(Level.SEVERE, "error parsing line "  + line + " of " + path + ":", e);
+                    LOG.error("error parsing line "  + line + " of " + path + ":", e);
                 }
                 line++;
             }

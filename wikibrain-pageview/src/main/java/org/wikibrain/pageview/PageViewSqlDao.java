@@ -29,7 +29,8 @@ import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Eventually this should implement a PageViewDao interface.
@@ -222,7 +223,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> implements PageView
                     try {
                         return buildPageView(r);
                     } catch (DaoException e) {
-                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        LOG.warn(e.getMessage(), e);
                         return null;
                     }
                 }

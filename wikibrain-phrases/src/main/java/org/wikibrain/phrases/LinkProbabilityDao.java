@@ -30,15 +30,17 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  * Calculates the probability of a link
  */
 public class LinkProbabilityDao {
-    private static final Logger LOG = Logger.getLogger(LinkProbabilityDao.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LinkProbabilityDao.class);
 
     private final File path;
     private final RawPageDao pageDao;
@@ -65,7 +67,7 @@ public class LinkProbabilityDao {
                 throw new DaoException(e);
             }
         } else {
-            LOG.warning("path " + path + " does not exist... LinkProbabilityDao will not work until build() is called.");
+            LOG.warn("path " + path + " does not exist... LinkProbabilityDao will not work until build() is called.");
         }
     }
 
@@ -150,7 +152,7 @@ public class LinkProbabilityDao {
                 subGrams = (TLongSet) WpIOUtils.readObjectFromFile(fsg);
                 return;
             } catch (IOException e) {
-                LOG.log(Level.WARNING, "Using link probability dao cache failed: ", e);
+                LOG.warn("Using link probability dao cache failed: ", e);
             }
         }
         LOG.info("building cache...");

@@ -21,7 +21,8 @@ import org.wikibrain.utils.WpIOUtils;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates or updates a mapping csv file from a shapefile to WikiBrain.
@@ -32,7 +33,7 @@ public class ShapeFileMatcher {
     private static final char STATUS_UNKNOWN = 'U';
     private static final char STATUS_VERIFIED = 'V';
 
-    private static final Logger LOG = Logger.getLogger(ShapeFileMatcher.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ShapeFileMatcher.class);
     private final Env env;
     private final SpatialDataFolder dir;
     private final SpatialDataDownloader downloader;

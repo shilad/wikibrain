@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Pattern;
 
 /**
@@ -21,7 +22,7 @@ import java.util.regex.Pattern;
  * The data is loaded from tsv resources.
  */
 public class LanguageInfo {
-    private static Logger LOG = Logger.getLogger(LanguageInfo.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(LanguageInfo.class);
 
     private static final String INFO_FILENAME = "language_info.tsv";
 

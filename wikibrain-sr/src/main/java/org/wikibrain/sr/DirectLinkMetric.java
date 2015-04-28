@@ -27,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates a sparse vector containing both inbound and outbound links
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
  */
 public class DirectLinkMetric extends BaseSRMetric {
 
-    private static final Logger LOG = Logger.getLogger(DirectLinkMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DirectLinkMetric.class);
     private final LocalLinkDao linkDao;
 
     public DirectLinkMetric(String name, Language language, LocalPageDao dao, LocalLinkDao linkDao, Disambiguator dab) {

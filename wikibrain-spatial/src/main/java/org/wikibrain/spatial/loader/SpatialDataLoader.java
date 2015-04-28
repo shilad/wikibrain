@@ -22,14 +22,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bjhecht, Shilad
  */
 public class SpatialDataLoader {
 
-    private static final Logger LOG = Logger.getLogger(SpatialDataLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SpatialDataLoader.class);
 
     private final Env env;
     private final LanguageSet langs;

@@ -29,7 +29,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wraps a local link dao delegate and builds a fast, sparse, matrix and its
@@ -47,7 +48,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class MatrixLocalLinkDao implements LocalLinkDao {
-    private static final Logger LOG = Logger.getLogger(MatrixLocalLinkDao.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MatrixLocalLinkDao.class);
 
     private final File dir;
     private LocalLinkDao delegate;
@@ -73,9 +74,9 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
     private void load() throws IOException {
         if (!getMatrixFile().isFile()) {
-            LOG.warning("Matrix" + getMatrixFile()+ " missing, disabling fast lookups.");
+            LOG.warn("Matrix" + getMatrixFile()+ " missing, disabling fast lookups.");
         } else if (!getTransposeFile().isFile()) {
-            LOG.warning("Matrix" + getTransposeFile()+ " missing, disabling fast lookups.");
+            LOG.warn("Matrix" + getTransposeFile()+ " missing, disabling fast lookups.");
         } else {
             matrix = new SparseMatrix(getMatrixFile());
             transpose = new SparseMatrix(getTransposeFile());

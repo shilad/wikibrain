@@ -6,8 +6,10 @@ import gnu.trove.map.hash.TLongFloatHashMap;
 import gnu.trove.procedure.TIntFloatProcedure;
 import org.wikibrain.sr.vector.SparseVectorSRMetric;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: make the individual metrics, and the linear combination of them, trainable.
@@ -15,7 +17,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class EnsemblePhraseCreator implements PhraseCreator {
-    private static final Logger LOGGER = Logger.getLogger(EnsemblePhraseCreator.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnsemblePhraseCreator.class);
 
     private final SparseVectorSRMetric[] metrics;
     private double coefficients[];
@@ -45,7 +47,7 @@ public class EnsemblePhraseCreator implements PhraseCreator {
                     }
                 });
             } catch (Exception e) {
-                LOGGER.log(Level.INFO, "SR call for " + phrase + ", metric " + metrics[i].getName() + " failed", e);
+                LOGGER.info("SR call for " + phrase + ", metric " + metrics[i].getName() + " failed", e);
             }
         }
         return vector;

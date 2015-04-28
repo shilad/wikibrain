@@ -34,7 +34,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -44,7 +45,7 @@ import java.util.zip.GZIPInputStream;
  * @author Shilad Sen
  */
 public class SRBuilder {
-    private static final Logger LOG = Logger.getLogger(SRBuilder.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SRBuilder.class);
 
     // The environment and configuration we will use.
     private final Env env;
@@ -193,7 +194,7 @@ public class SRBuilder {
             ensemble.setTrainSubmetrics(false);         // Do it by hand
         } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             if (mode == Mode.SIMILARITY) {
-                LOG.warning("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
+                LOG.warn("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
                 mode = Mode.BOTH;
             }
         } else if (type.equals("milnewitten")){

@@ -11,8 +11,10 @@ import org.wikibrain.core.model.MetaInfo;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,7 +27,7 @@ public class PipelineLoader {
     public static final String DEFAULT_GROUP = "core";
     public static final String MULTILINGUAL_GROUP = "multilingual-core";
 
-    public static Logger LOG = java.util.logging.Logger.getLogger(PipelineLoader.class.getName());
+    public static Logger LOG = LoggerFactory.getLogger(PipelineLoader.class);
 
     private final Map<String, MetaInfo> state;
     private final LanguageSet langs;
@@ -131,7 +133,7 @@ public class PipelineLoader {
                 }
             }
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "Diagnostics save failed (this should be harmless):", e);
+            LOG.warn("Diagnostics save failed (this should be harmless):", e);
         }
     }
 

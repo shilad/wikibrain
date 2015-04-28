@@ -9,15 +9,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  * Utilities to run for each loops in parallel.
  */
 public class ParallelForEach {
-    public static final Logger LOG = Logger.getLogger(ParallelForEach.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(ParallelForEach.class);
 
     /**
      * Construct a parallel loop on [from, to).
@@ -120,8 +122,8 @@ public class ParallelForEach {
                             result.set(finalI, r);
                         } catch (Exception e) {
                             e.printStackTrace();
-                            LOG.log(Level.SEVERE, "error processing list element " + obj, e);
-                            LOG.log(Level.SEVERE, "stacktrace: " + ExceptionUtils.getStackTrace(e).replaceAll("\n", " ").replaceAll("\\s+", " "));
+                            LOG.error("error processing list element " + obj, e);
+                            LOG.error("stacktrace: " + ExceptionUtils.getStackTrace(e).replaceAll("\n", " ").replaceAll("\\s+", " "));
                         } finally {
                             latch.countDown();
                         }
@@ -130,7 +132,7 @@ public class ParallelForEach {
             latch.await();
             return result;
         } catch (InterruptedException e) {
-            LOG.log(Level.SEVERE, "Interrupted parallel for each", e);
+            LOG.error("Interrupted parallel for each", e);
             throw new RuntimeException(e);
         } finally {
             exec.shutdown();
@@ -175,8 +177,8 @@ public class ParallelForEach {
                             fn.call(obj);
                         } catch (Exception e) {
                             e.printStackTrace();
-                            LOG.log(Level.SEVERE, "error processing list element " + obj, e);
-                            LOG.log(Level.SEVERE, "stacktrace: " + ExceptionUtils.getStackTrace(e).replaceAll("\n", " ").replaceAll("\\s+", " "));
+                            LOG.error("error processing list element " + obj, e);
+                            LOG.error("stacktrace: " + ExceptionUtils.getStackTrace(e).replaceAll("\n", " ").replaceAll("\\s+", " "));
                         } finally {
                             if (elemsToGo.decrementAndGet() == 0) {
                                 latch.countDown();
@@ -189,7 +191,7 @@ public class ParallelForEach {
                 latch.await();
             }
         } catch (InterruptedException e) {
-            LOG.log(Level.SEVERE, "Interrupted parallel for each", e);
+            LOG.error("Interrupted parallel for each", e);
             throw new RuntimeException(e);
         } finally {
             exec.shutdown();
@@ -227,8 +229,8 @@ public class ParallelForEach {
                 }
             }
             if (t != null) {
-                LOG.log(Level.SEVERE, "Uncaught Exception: ", t);
-                LOG.log(Level.SEVERE, "stacktrace: " + ExceptionUtils.getStackTrace(t).replaceAll("\n", " ").replaceAll("\\s+", " "));
+                LOG.error("Uncaught Exception: ", t);
+                LOG.error("stacktrace: " + ExceptionUtils.getStackTrace(t).replaceAll("\n", " ").replaceAll("\\s+", " "));
             }
         }
     }

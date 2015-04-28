@@ -26,8 +26,10 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +44,7 @@ import java.util.regex.Pattern;
  */
 public class RequestedLinkGetter {
 
-    private static final Logger LOG = Logger.getLogger(RequestedLinkGetter.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(RequestedLinkGetter.class);
     private static final String DATE_FORMAT = "yyyyMMdd";
 
     private final Language lang;
@@ -136,7 +138,7 @@ public class RequestedLinkGetter {
                 return map;
             }
             if (i == 0) {
-                LOG.log(Level.WARNING, "Some matchers not found: " + unfoundMatchers);
+                LOG.warn("Some matchers not found: " + unfoundMatchers);
             }
         }
         return map;

@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A language associated with a language edition of Wikipedia.
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
 public class Language implements Comparable<Language>, Serializable {
     private static final long serialVersionUID = 6331325313592646604l;
 
-    private static Logger LOG = Logger.getLogger(Language.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(Language.class);
     public static final String LANGUAGE_TSV = "languages.tsv";
 
     /**

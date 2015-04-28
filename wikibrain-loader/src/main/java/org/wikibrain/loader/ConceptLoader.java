@@ -27,8 +27,10 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,7 +40,7 @@ import java.util.logging.Logger;
  *
  */
 public class ConceptLoader {
-    private static final Logger LOG = Logger.getLogger(ConceptLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ConceptLoader.class);
     private final LanguageSet languageSet;
     private final UniversalPageDao dao;
     private final MetaInfoDao metaDao;
@@ -55,16 +57,16 @@ public class ConceptLoader {
 
     public void load(ConceptMapper mapper) throws ConfigurationException, WikiBrainException {
         try {
-            LOG.log(Level.INFO, "Loading Concepts");
+            LOG.info("Loading Concepts");
             Iterator<UniversalPage> pages = mapper.getConceptMap(languageSet);
             int i = 0;
             while (pages.hasNext()) {
                 dao.save(pages.next());
                 i++;
-                if (i%10000 == 0) LOG.log(Level.INFO, "UniversalPages loaded: " + i);
+                if (i%10000 == 0) LOG.info("UniversalPages loaded: " + i);
                 metaDao.incrementRecords(UniversalPage.class);
             }
-            LOG.log(Level.INFO, "All UniversalPages loaded: " + i);
+            LOG.info("All UniversalPages loaded: " + i);
         } catch (DaoException e) {
             metaDao.incrementErrorsQuietly(UniversalPage.class);
             throw new WikiBrainException(e);
@@ -132,17 +134,17 @@ public class ConceptLoader {
         final ConceptLoader loader = new ConceptLoader(env.getLanguages(), dao, metaDao);
 
         if (cmd.hasOption("d")) {
-            LOG.log(Level.INFO, "Clearing data");
+            LOG.info("Clearing data");
             dao.clear();
         }
-        LOG.log(Level.INFO, "Begin Load");
+        LOG.info("Begin Load");
         dao.beginLoad();
 
         loader.load(mapper);
 
-        LOG.log(Level.INFO, "End Load");
+        LOG.info("End Load");
         dao.endLoad();
 
-        LOG.log(Level.INFO, "DONE");
+        LOG.info("DONE");
     }
 }

@@ -9,7 +9,8 @@ import org.wikibrain.matrix.DenseMatrixRow;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Brute force implementations of knn for a dense matrix.
@@ -17,7 +18,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class BruteForceKNNFinder implements KNNFinder {
-    private static final Logger LOG = Logger.getLogger(BruteForceKNNFinder.class.getCanonicalName());
+    private static final Logger LOG = LoggerFactory.getLogger(BruteForceKNNFinder.class);
 
     private final DenseMatrix matrix;
 

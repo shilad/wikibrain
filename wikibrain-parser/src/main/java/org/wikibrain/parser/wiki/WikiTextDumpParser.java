@@ -17,14 +17,16 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class
         WikiTextDumpParser {
-    public static final Logger LOG = Logger.getLogger(WikiTextDumpParser.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(WikiTextDumpParser.class);
 
     // maximum number of raw pages in the parsing buffer
     public static final int MAX_QUEUE = 1000;
@@ -95,7 +97,7 @@ public class
                 parser.parse(rp);
             } catch (Exception e) {
                 String title = "unknown";
-                LOG.log(Level.WARNING, "exception while parsing " + title, e);
+                LOG.warn("exception while parsing " + title, e);
             }
         }
     }

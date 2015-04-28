@@ -22,7 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates a sparse vector containing both inbound and outbound links
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class MilneWittenMetric extends BaseSRMetric {
 
-    private static final Logger LOG = Logger.getLogger(MilneWittenMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MilneWittenMetric.class);
     private final SRMetric inlink;
     private final SRMetric outlink;
     private boolean trainSubmetrics =true;

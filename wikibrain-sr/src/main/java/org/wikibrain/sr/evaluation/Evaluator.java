@@ -13,7 +13,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +43,7 @@ public abstract class Evaluator <T extends BaseEvaluationLog<T>> {
 
     private static final Object LOCK = new Object();
 
-    private static final Logger LOG = Logger.getLogger(Evaluator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Evaluator.class);
     private final File baseDir;
     private final String modeName;
     private final File modeDir;

@@ -11,12 +11,13 @@ import org.wikibrain.core.model.RawPage;
 import org.wikibrain.core.model.Title;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class InterLanguageLinkVisitor extends ParserVisitor {
-    private static final Logger LOG = Logger.getLogger(InterLanguageLinkVisitor.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(InterLanguageLinkVisitor.class);
 
     private final LocalPageDao pageDao;
     private final MetaInfoDao metaDao;

@@ -13,10 +13,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SparseMatrixTransposer {
-    final static Logger LOG = Logger.getLogger(SparseMatrixTransposer.class.getName());
+    final static Logger LOG = LoggerFactory.getLogger(SparseMatrixTransposer.class);
 
     private SparseMatrixWriter writer;
     private SparseMatrix matrix;
@@ -164,7 +165,7 @@ public class SparseMatrixTransposer {
         } else if (args.length == 3) {
             bufferMbs = Integer.valueOf(args[2]);
         } else {
-            System.err.println("usage: java " + SparseMatrixTransposer.class.getName() + " input_path output_path {buffer_in_MBs}");
+            System.err.println("usage: java " + SparseMatrixTransposer.class + " input_path output_path {buffer_in_MBs}");
             System.exit(1);
         }
         SparseMatrix matrix = new SparseMatrix(new File(args[0]));

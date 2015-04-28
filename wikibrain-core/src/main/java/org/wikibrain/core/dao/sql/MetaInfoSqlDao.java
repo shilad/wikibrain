@@ -18,14 +18,16 @@ import org.wikibrain.utils.JvmUtils;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfoDao {
-    private static final Logger LOG = Logger.getLogger(MetaInfoSqlDao.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MetaInfoSqlDao.class);
 
     private static final Object NULL_KEY = new Object();
 
@@ -125,7 +127,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         try {
             return incrementErrors(component);
         } catch (DaoException e) {
-            LOG.log(Level.WARNING, "incrementErrors failed:", e);
+            LOG.warn("incrementErrors failed:", e);
             return 0;
         }
     }
@@ -135,7 +137,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
         try {
             return incrementErrors(component, lang);
         } catch (DaoException e) {
-            LOG.log(Level.WARNING, "incrementErrors failed:", e);
+            LOG.warn("incrementErrors failed:", e);
             return 0;
         }
     }

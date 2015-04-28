@@ -18,7 +18,8 @@ import org.wikibrain.utils.WpIOUtils;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Reads and writes datasets.
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
  * @author Ben Hillmann
  */
 public class DatasetDao {
-    private static final Logger LOG = Logger.getLogger(Dataset.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Dataset.class);
 
     public static final String RESOURCE_DATSET = "/datasets";
     public static final String RESOURCE_DATASET_INFO = "/datasets/info.tsv";

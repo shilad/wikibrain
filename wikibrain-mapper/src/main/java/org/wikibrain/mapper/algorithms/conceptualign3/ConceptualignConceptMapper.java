@@ -22,8 +22,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by bjhecht on 4/24/14.
@@ -50,7 +52,7 @@ public class ConceptualignConceptMapper extends ConceptMapper{
 
     private final boolean print;
 
-    private static Logger LOG = Logger.getLogger(ConceptualignConceptMapper.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(ConceptualignConceptMapper.class);
 
 
     public ConceptualignConceptMapper(File wikidataFilePath, int id,
@@ -93,7 +95,7 @@ public class ConceptualignConceptMapper extends ConceptMapper{
 
         // load Wikidata mappings
         if (uPages == null) {
-            LOG.log(Level.INFO, "Loading Wikidata concept mappings");
+            LOG.info("Loading Wikidata concept mappings");
             Iterator<UniversalPage> uPages = wdMapper.getConceptMap(ls);
         }else{
             if (!ls.equals(uPageLs)){

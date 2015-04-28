@@ -13,8 +13,10 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of a dense matrix.
@@ -23,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class DenseMatrix implements Matrix<DenseMatrixRow> {
 
-    public static final Logger LOG = Logger.getLogger(DenseMatrix.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(DenseMatrix.class);
 
     public static final int FILE_HEADER = 0xabccba;
 
@@ -145,7 +147,7 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
             try {
                 return getRow(rowIds[i.getAndIncrement()]);
             } catch (IOException e) {
-                LOG.log(Level.SEVERE, "getRow failed", e);
+                LOG.error("getRow failed", e);
                 return null;
             }
         }
@@ -166,10 +168,10 @@ public class DenseMatrix implements Matrix<DenseMatrixRow> {
     }
 
     private void info(String message) {
-        LOG.log(Level.WARNING, "dense matrix " + path + ": " + message);
+        LOG.error("dense matrix " + path + ": " + message);
     }
 
     private void debug(String message) {
-        LOG.log(Level.FINEST, "dense matrix " + path + ": " + message);
+        LOG.error("dense matrix " + path + ": " + message);
     }
 }

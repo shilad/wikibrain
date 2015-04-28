@@ -10,14 +10,16 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SparseMatrixWriter {
 
     public static final byte ROW_PADDING = Byte.MIN_VALUE;
 
-    private static final Logger LOG = Logger.getLogger(SparseMatrixWriter.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SparseMatrixWriter.class);
 
     private File path;
     private TIntLongHashMap rowOffsets = new TIntLongHashMap();
@@ -99,7 +101,7 @@ public class SparseMatrixWriter {
     }
 
     private void info(String message) {
-        LOG.log(Level.INFO, "sparse matrix writer " + path + ": " + message);
+        LOG.info("sparse matrix writer " + path + ": " + message);
     }
 
     public static void write(File file, Iterator<SparseMatrixRow> rows) throws IOException {

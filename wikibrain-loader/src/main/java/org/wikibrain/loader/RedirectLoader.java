@@ -14,7 +14,8 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.*;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,7 +26,7 @@ import java.util.logging.Logger;
  * - RedirectSqlDao.update goes away.
  */
 public class RedirectLoader {
-    private static final Logger LOG = Logger.getLogger(RedirectLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(RedirectLoader.class);
     private final MetaInfoDao metaDao;
 
     private TIntIntHashMap redirectIdsToPageIds;

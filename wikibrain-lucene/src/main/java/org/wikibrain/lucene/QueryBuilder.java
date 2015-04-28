@@ -14,8 +14,10 @@ import org.wikibrain.core.lang.Language;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class QueryBuilder {
 
-    private static final Logger LOG = Logger.getLogger(QueryBuilder.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(QueryBuilder.class);
 
     public static final int DEFAULT_MAX_PERCENTAGE = 10;
     public static final int DEFAULT_MAX_QUERY_TERMS = 100;
@@ -148,7 +150,7 @@ public class QueryBuilder {
                 mlt.setFieldNames(new String[]{ fieldName });
                 query = mlt.like(luceneId);
             } catch (IOException e) {
-                LOG.log(Level.WARNING, "Can't more like this query for luceneId: " + luceneId);
+                LOG.warn("Can't more like this query for luceneId: " + luceneId);
             }
         }  else {
             throw new IllegalArgumentException("Illegal Lucene ID: " + luceneId);

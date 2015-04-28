@@ -25,13 +25,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class BorderingDistanceMetric implements SpatialDistanceMetric {
-    private static final Logger LOG = Logger.getLogger(BorderingDistanceMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(BorderingDistanceMetric.class);
 
     /**
      * Default buffer width in degrees. This is about 0.1 kms.

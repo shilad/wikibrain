@@ -13,7 +13,8 @@ import org.wikibrain.core.lang.LocalId;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by bjhecht on 5/20/14.
@@ -26,7 +27,7 @@ public class ConnectedComponentTraversalListener implements TraversalListener<Lo
     private int curComponentId;
     private final List<ClusterResult> clusterResults;
 
-    private static Logger LOG = Logger.getLogger(ConceptualignConceptMapper.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(ConceptualignConceptMapper.class);
 
     public ConnectedComponentTraversalListener(ILLGraph graph, List<ConnectedComponentHandler> ccHandlers) throws WikiBrainException {
 
@@ -64,7 +65,7 @@ public class ConnectedComponentTraversalListener implements TraversalListener<Lo
 
             }
         }catch(WikiBrainException e){
-            LOG.severe(e.getMessage());
+            LOG.error(e.getMessage());
         }
 
     }

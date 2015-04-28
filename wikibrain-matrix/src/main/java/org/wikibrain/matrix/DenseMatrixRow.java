@@ -6,7 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.LinkedHashMap;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A single dense matrix row backed by a byte buffer. The row contains:
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
  * This means that the object can wrap data from an mmap'd file in the correct format.
  */
 public final class DenseMatrixRow extends BaseMatrixRow implements MatrixRow {
-    private static final Logger LOG = Logger.getLogger(DenseMatrixRow.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DenseMatrixRow.class);
 
     public static final Float MIN_SCORE = -1.1f;
     public static final Float MAX_SCORE = 1.1f;

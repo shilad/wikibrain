@@ -17,14 +17,15 @@ import org.wikibrain.utils.WpThreadUtils;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Loads links that are in the SQL dump but not the parsed wiki text.
  */
 public class SqlLinksLoader {
 
-    private static final Logger LOG = Logger.getLogger(SqlLinksLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SqlLinksLoader.class);
 
     private final AtomicInteger counter = new AtomicInteger();
     private final File sqlDump;

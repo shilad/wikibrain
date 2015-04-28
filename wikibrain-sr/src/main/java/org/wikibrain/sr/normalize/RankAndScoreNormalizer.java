@@ -11,10 +11,11 @@ import org.wikibrain.sr.SRResultList;
 
 import java.text.DecimalFormat;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RankAndScoreNormalizer extends BaseNormalizer {
-    private static Logger LOG = Logger.getLogger(RankAndScoreNormalizer.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(RankAndScoreNormalizer.class);
 
     private double intercept;
     private double rankCoeff;

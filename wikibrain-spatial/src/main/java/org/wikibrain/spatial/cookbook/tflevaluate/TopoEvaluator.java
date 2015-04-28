@@ -31,8 +31,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by toby on 5/22/14.
@@ -42,7 +44,7 @@ public class TopoEvaluator {
     private static int WIKIDATA_CONCEPTS = 1;
 
 
-    private static final Logger LOG = Logger.getLogger(TopoEvaluator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TopoEvaluator.class);
 
     private Random random = new Random();
 
@@ -102,7 +104,7 @@ public class TopoEvaluator {
 
         Map<Integer, Geometry> polygons = sdDao.getAllGeometriesInLayer(polygonLayer, "earth");
 
-        LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
+        LOG.info(String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
@@ -160,7 +162,7 @@ public class TopoEvaluator {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
         if(concepts.size() == 0)
-            LOG.warning("No concept has been retrieved");
+            LOG.warn("No concept has been retrieved");
 
         ParallelForEach.range(0, numSamples, new Procedure<Integer>() {
             @Override
@@ -183,7 +185,7 @@ public class TopoEvaluator {
             SRMetric sr = metrics.get(lang);
             results.add(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false));
             if(sr.similarity(c1.getLocalId(lang), c2.getLocalId(lang), false) == null){
-                LOG.warning(String.format("error calculating SR for universal page %d %s and %d %s", c1.getUnivId(), c1.getBestEnglishTitle(lpDao, true), c2.getUnivId(), c2.getBestEnglishTitle(lpDao, true)));            }
+                LOG.warn(String.format("error calculating SR for universal page %d %s and %d %s", c1.getUnivId(), c1.getBestEnglishTitle(lpDao, true), c2.getUnivId(), c2.getBestEnglishTitle(lpDao, true)));            }
         }
 
         writeRow(c1, c2, results);
@@ -293,7 +295,7 @@ public class TopoEvaluator {
             output.flush();
         }
         catch (Exception e){
-            LOG.warning(String.format("error writing row for universal page %d %s and %d %s", c1.getUnivId(), c1.getBestEnglishTitle(lpDao, true), c2.getUnivId(), c2.getBestEnglishTitle(lpDao, true)));
+            LOG.warn(String.format("error writing row for universal page %d %s and %d %s", c1.getUnivId(), c1.getBestEnglishTitle(lpDao, true), c2.getUnivId(), c2.getBestEnglishTitle(lpDao, true)));
             //do nothing
         }
     }

@@ -9,7 +9,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.*;
 import java.util.Iterator;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -17,7 +18,7 @@ import java.util.logging.Logger;
  *
  */
 public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V>> {
-    private static final Logger LOG = Logger.getLogger(ObjectDb.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ObjectDb.class);
     private Environment env;
     private Database db;
 

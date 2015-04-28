@@ -13,8 +13,10 @@ import javax.sql.DataSource;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -26,7 +28,7 @@ import java.util.logging.Logger;
  *
  */
 public abstract class AbstractSqlDao<T> implements Dao<T> {
-    public static final Logger LOG = Logger.getLogger(AbstractSqlDao.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(AbstractSqlDao.class);
 
     public static final int DEFAULT_FETCH_SIZE = 1000;
 
@@ -160,7 +162,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
             try {
                 conn.close();
             } catch (SQLException e) {
-                LOG.log(Level.WARNING, "Failed to close connection: ", e);
+                LOG.warn("Failed to close connection: ", e);
             }
         }
     }
