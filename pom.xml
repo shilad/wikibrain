@@ -16,6 +16,10 @@
     <description>The WikiBrain base pom</description>
     <url>http://github.com/shilad/wikibrain</url>
 
+    <properties>
+        <slf4j.version>1.7.12</slf4j.version>
+    </properties>
+
     <modules>
         <module>./wikibrain-utils</module>
         <module>./wikibrain-matrix</module>
@@ -69,6 +73,20 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <profiles>
         <profile>
