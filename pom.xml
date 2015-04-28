@@ -32,6 +32,7 @@
         <module>./wikibrain-cookbook</module>
         <module>./wikibrain-spatial</module>
         <module>./wikibrain-pageview</module>
+        <module>./wikibrain-webapi</module>
         <module>./wikibrain</module>
     </modules>
 
