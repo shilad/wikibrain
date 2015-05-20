@@ -142,7 +142,7 @@ public class RandomProjectionKNNFinder implements KNNFinder {
         if (validIds != null) {
             TIntSet tmp = validIds;
             validIds = new TIntHashSet(tmp.size() * 4);
-            tmp.addAll(validIds);
+            validIds.addAll(tmp);
         }
         long vbits[] = new  long[2];
         project(vector, vbits);
