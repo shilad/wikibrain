@@ -25,7 +25,8 @@ import org.wikibrain.utils.WpIOUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Google Similarity measure, as described in Milne and Witten:
@@ -36,7 +37,7 @@ import java.util.logging.Logger;
  */
 public class GoogleSimilarity implements VectorSimilarity {
 
-    private static final Logger LOG = Logger.getLogger(CosineSimilarity.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(CosineSimilarity.class);
 
     private TIntIntMap lengths = new TIntIntHashMap();   // lengths of each row
     private TIntSet idsInResults = new TIntHashSet();

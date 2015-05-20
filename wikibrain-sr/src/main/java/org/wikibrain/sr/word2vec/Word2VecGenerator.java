@@ -25,7 +25,8 @@ import org.wikibrain.utils.WpIOUtils;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Reads in a word2vec model in the "standard" file format.
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class Word2VecGenerator implements DenseVectorGenerator {
-    private static final Logger LOG = Logger.getLogger(Word2VecGenerator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Word2VecGenerator.class);
 
     private final Language language;
     private final LocalPageDao localPageDao;

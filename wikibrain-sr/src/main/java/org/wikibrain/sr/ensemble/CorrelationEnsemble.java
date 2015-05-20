@@ -15,13 +15,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *@author Matt Lesicko
  */
 public class CorrelationEnsemble implements Ensemble{
-    private static final Logger LOG = Logger.getLogger(CorrelationEnsemble.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(CorrelationEnsemble.class);
     final int numMetrics;
     private final int numTrainingCandidateArticles;
     TDoubleArrayList simlarityCoefficients;

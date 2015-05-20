@@ -12,8 +12,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class DumpLinkInfo {
 
-    private static final Logger LOG = Logger.getLogger(DumpLinkGetter.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DumpLinkGetter.class);
 
     private Language language;
     private String date;
@@ -154,7 +156,7 @@ public class DumpLinkInfo {
                     );
                     dumpLinks.add(temp);
                 } catch (MalformedURLException e) {
-                    LOG.log(Level.WARNING, "Malformed URL \"" + url + "\" : ", e);
+                    LOG.warn("Malformed URL \"" + url + "\" : ", e);
                 }
             }
             return dumpLinks;

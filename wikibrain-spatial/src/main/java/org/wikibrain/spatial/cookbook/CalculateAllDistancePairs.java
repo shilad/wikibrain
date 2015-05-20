@@ -24,15 +24,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by toby on 4/15/14.
  */
 public class CalculateAllDistancePairs {
 
-    private static final Logger LOG = Logger.getLogger(CalculateAllDistancePairs.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(CalculateAllDistancePairs.class);
 
     public static void main(String[] args) throws Exception {
             File f=new File("./distance_output.csv");
@@ -61,12 +63,12 @@ public class CalculateAllDistancePairs {
 
             Map<Integer, Geometry> idGeomMap = sdDao.getAllGeometriesInLayer("wikidata", "earth");
             TIntObjectMap<String> idNameMap = new TIntObjectHashMap<String>();
-            LOG.log(Level.INFO, String.format("Get %d geometries, now building id-name mapping", idGeomMap.size()));
+            LOG.info(String.format("Get %d geometries, now building id-name mapping", idGeomMap.size()));
             int counter1 = 0;
             for(Integer wdItem : idGeomMap.keySet()){
                 counter1 ++;
                 if(counter1 % 1000 == 0)
-                    LOG.log(Level.INFO, String.format("Finish building name mapping for %d items", counter1));
+                    LOG.info(String.format("Finish building name mapping for %d items", counter1));
                 boolean containAllLanguage = true;
                 for(Language language : langs.getLanguages()){
                     if(! lpDao.getLoadedLanguages().containsLanguage(language)){
@@ -89,7 +91,7 @@ public class CalculateAllDistancePairs {
 
                 idNameMap.put(wdItem, name);
             }
-            LOG.log(Level.INFO, String.format("Finish building id-name mapping for %d entities", idNameMap.size()));
+            LOG.info(String.format("Finish building id-name mapping for %d entities", idNameMap.size()));
 
             GeodeticCalculator calc = new GeodeticCalculator();
 
@@ -120,7 +122,7 @@ public class CalculateAllDistancePairs {
 
             for(counter = 0; counter < 1000; counter ++){
                 if (counter % 100 == 0){
-                    LOG.log(Level.INFO, String.format("Finish calculating %d pairs", counter));
+                    LOG.info(String.format("Finish calculating %d pairs", counter));
                     csvWriter.flush();
                 }
                 int x1 = (int)(Math.random() * (Max + 1));

@@ -13,13 +13,14 @@ import org.wikibrain.core.model.RawPage;
 import org.wikibrain.core.model.Title;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class LocalCategoryVisitor extends ParserVisitor {
 
-    private static final Logger LOG = Logger.getLogger(LocalCategoryVisitor.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LocalCategoryVisitor.class);
 
     private final LocalPageDao pageDao;
     private final LocalCategoryMemberDao catMemDao;

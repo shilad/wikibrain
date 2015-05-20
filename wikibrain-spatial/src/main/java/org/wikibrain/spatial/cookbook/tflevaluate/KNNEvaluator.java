@@ -25,7 +25,8 @@ import org.wikibrain.utils.Procedure;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by toby on 5/17/14.
@@ -36,7 +37,7 @@ public class KNNEvaluator {
     private static int WIKIDATA_CONCEPTS = 1;
 
 
-    private static final Logger LOG = Logger.getLogger(KNNEvaluator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(KNNEvaluator.class);
 
     private Random random = new Random();
 

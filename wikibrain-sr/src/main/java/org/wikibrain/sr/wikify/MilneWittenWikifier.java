@@ -24,13 +24,14 @@ import org.wikibrain.sr.SRMetric;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class MilneWittenWikifier implements Wikifier {
-    private static final Logger LOG = Logger.getLogger(MilneWittenWikifier.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MilneWittenWikifier.class);
 
     private final LocalPageDao lpd;
     private final LocalLinkDao lld;

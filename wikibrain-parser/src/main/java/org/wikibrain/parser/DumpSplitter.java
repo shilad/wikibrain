@@ -6,8 +6,10 @@ import org.wikibrain.utils.WpIOUtils;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Iterates over a file containing an XML dump of wikipedia.
@@ -20,7 +22,7 @@ public class DumpSplitter implements Iterable<String> {
     private static final int MAX_ARTICLE_LENGTH = 10000000;     // Maximum length of article
 
 
-    private static final Logger LOG = Logger.getLogger(DumpSplitter.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DumpSplitter.class);
     private File path;
 
     /**
@@ -41,13 +43,13 @@ public class DumpSplitter implements Iterable<String> {
         try {
             return new ArticleIterator(path);
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "article iterator construction failed", e);
+            LOG.error("article iterator construction failed", e);
             throw new RuntimeException(e);
         } catch (ArchiveException e) {
-            LOG.log(Level.SEVERE, "article iterator construction failed", e);
+            LOG.error("article iterator construction failed", e);
             throw new RuntimeException(e);
         } catch (XMLStreamException e) {
-            LOG.log(Level.SEVERE, "article iterator construction failed", e);
+            LOG.error("article iterator construction failed", e);
             throw new RuntimeException(e);
         }
     }
@@ -125,11 +127,11 @@ public class DumpSplitter implements Iterable<String> {
         }
 
         private void logParseError(String message) {
-            LOG.log(Level.SEVERE, "parsing " + path + "  failed in line " + message);
+            LOG.error("parsing " + path + "  failed in line " + message);
         }
 
         private void logParseError(String message, Exception e) {
-            LOG.log(Level.SEVERE, "parsing " + path + "  failed in line " + message + ":", e);
+            LOG.error("parsing " + path + "  failed in line " + message);
         }
 
         private String readLine() throws IOException {

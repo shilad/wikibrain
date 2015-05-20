@@ -89,6 +89,11 @@ public class EnvBuilder {
         return this;
     }
 
+    public EnvBuilder setReconfigureLogging(boolean reconfigure) {
+        params.put("reconfigureLogging", reconfigure);
+        return this;
+    }
+
     public EnvBuilder setTmpDir(String dir) {
         return setTmpDir(new File(dir));
     }

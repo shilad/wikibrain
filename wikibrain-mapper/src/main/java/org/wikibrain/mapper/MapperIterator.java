@@ -1,8 +1,10 @@
 package org.wikibrain.mapper;
 
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -13,7 +15,7 @@ import java.util.logging.Logger;
  */
 public abstract class MapperIterator<E> implements Iterator<E> {
 
-    public static final Logger LOG = Logger.getLogger(MapperIterator.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(MapperIterator.class);
 
     private final Iterator input;
     private int nullCounter = 0;
@@ -33,7 +35,7 @@ public abstract class MapperIterator<E> implements Iterator<E> {
     public boolean hasNext() {
         boolean temp = input.hasNext();
         if (!temp) {
-            LOG.log(Level.INFO, "Null records: " + nullCounter);
+            LOG.info("Null records: " + nullCounter);
         }
         return temp;
     }

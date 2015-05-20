@@ -38,7 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This metric is intended to support very fast SR for a known (expandable) set of phrases.
@@ -77,7 +78,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class KnownPhraseSim implements SRMetric {
-    private static final Logger LOGGER = Logger.getLogger(KnownPhraseSim.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(KnownPhraseSim.class);
 
     private final StringNormalizer stringNormalizer;
     private final HTreeMap<Object, Object> db;

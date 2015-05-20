@@ -20,17 +20,18 @@ import org.wikibrain.wikidata.WikidataDao;
 
 import java.io.File;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by toby on 4/17/14.
  */
 public class BipartiteEvaluatorTest {
-    private static final Logger LOG = Logger.getLogger(BipartiteEvaluatorTest.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(BipartiteEvaluatorTest.class);
 
     private static Set<Integer> PickSample(Set<Integer> originalSet, Integer size){
         if (size > originalSet.size()){
-            LOG.warning(String.format("Want %d elements, only have %d", size, originalSet.size()));
+            LOG.warn(String.format("Want %d elements, only have %d", size, originalSet.size()));
             return originalSet;
         }
         List<Integer> list = new LinkedList<Integer>(originalSet);

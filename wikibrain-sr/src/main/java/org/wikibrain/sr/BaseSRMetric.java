@@ -37,14 +37,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This abstract class provides many useful building blocks for Monolingual SR Metrics.
  */
 public abstract class BaseSRMetric implements SRMetric {
-    private static Logger LOG = Logger.getLogger(BaseSRMetric.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(BaseSRMetric.class);
 
     private final String name;
     private final Language language;
@@ -176,7 +178,7 @@ public abstract class BaseSRMetric implements SRMetric {
     @Override
     public void read() throws IOException {
         if (!dataDir.isDirectory()) {
-            LOG.warning("directory " + dataDir + " does not exist; cannot read files");
+            LOG.warn("directory " + dataDir + " does not exist; cannot read files");
             return;
         }
         if (shouldReadNormalizers && normalizers.hasReadableNormalizers(dataDir)) {
@@ -207,7 +209,7 @@ public abstract class BaseSRMetric implements SRMetric {
                 writeMostSimilarCache(numResults, mostSimilarCacheRowIds, validIds);
             }
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "writing most similar cache failed:", e);
+            LOG.error("writing most similar cache failed:", e);
         }
     }
 

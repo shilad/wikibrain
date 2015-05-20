@@ -21,8 +21,10 @@ import org.wikibrain.mapper.ConceptMapper;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,7 +34,7 @@ import java.util.logging.Logger;
  *
  */
 public class UniversalLinkLoader {
-    private static final Logger LOG = Logger.getLogger(UniversalLinkLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(UniversalLinkLoader.class);
 
     private final LanguageSet languageSet;
     private final LocalLinkDao localLinkDao;
@@ -52,11 +54,11 @@ public class UniversalLinkLoader {
 
     public void beginLoad(boolean shouldClear) throws DaoException {
         if (shouldClear) {
-            LOG.log(Level.INFO, "Clearing data");
+            LOG.info("Clearing data");
             universalLinkDao.clear();
             universalLinkSkeletalDao.clear();
         }
-        LOG.log(Level.INFO, "Begin Load");
+        LOG.info("Begin Load");
         universalLinkDao.beginLoad();
         universalLinkSkeletalDao.beginLoad();
     }
@@ -68,15 +70,15 @@ public class UniversalLinkLoader {
     public void loadLinkMap(int algorithmId) throws WikiBrainException {
         try {
             Iterable<LocalLink> localLinks = localLinkDao.get(new DaoFilter().setLanguages(languageSet));
-            LOG.log(Level.INFO, "Fetching ID map");
+            LOG.info("Fetching ID map");
             Map<Language, TIntIntMap> map = universalPageDao.getAllLocalToUnivIdsMap(languageSet);
-            LOG.log(Level.INFO, "Loading links");
+            LOG.info("Loading links");
             long start = System.currentTimeMillis();
             int i=0;
             for (LocalLink localLink : localLinks) {
                 i++;
                 if (i%100000 == 0)
-                    LOG.log(Level.INFO, "UniversalLinks loaded: " + i);
+                    LOG.info("UniversalLinks loaded: " + i);
                 int univSourceId, univDestId;
                 if (localLink.getSourceId() < 0) {
                     univSourceId = -1;
@@ -97,21 +99,21 @@ public class UniversalLinkLoader {
             }
             long end = System.currentTimeMillis();
             double seconds = (end - start) / 1000.0;
-            LOG.log(Level.INFO, "Time (s): " + seconds);
-            LOG.log(Level.INFO, "All UniversalLinks loaded: " + i);
+            LOG.info("Time (s): " + seconds);
+            LOG.info("All UniversalLinks loaded: " + i);
         } catch (DaoException e) {
             throw new WikiBrainException(e);
         }
     }
 
     public void endLoad() throws DaoException {
-        LOG.log(Level.INFO, "End Load");
+        LOG.info("End Load");
         long start = System.currentTimeMillis();
         universalLinkDao.endLoad();
         universalLinkSkeletalDao.endLoad();
         long end = System.currentTimeMillis();
         double seconds = (end - start) / 1000.0;
-        LOG.log(Level.INFO, "Time (s): " + seconds);
+        LOG.info("Time (s): " + seconds);
     }
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikiBrainException, DaoException {
@@ -156,6 +158,6 @@ public class UniversalLinkLoader {
         loader.beginLoad(cmd.hasOption("d"));
         loader.loadLinkMap(mapper.getId());
         loader.endLoad();
-        LOG.log(Level.INFO, "DONE");
+        LOG.info("DONE");
     }
 }

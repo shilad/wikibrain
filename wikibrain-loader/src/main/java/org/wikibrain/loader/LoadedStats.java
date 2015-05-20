@@ -11,12 +11,13 @@ import org.wikibrain.core.model.MetaInfo;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class LoadedStats {
-    private static final Logger LOG = Logger.getLogger(LoadedStats.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LoadedStats.class);
     private final MetaInfoDao dao;
     private final Env env;
     private static final int FIELD_WIDTH = 24;

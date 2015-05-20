@@ -5,8 +5,10 @@ import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.apache.commons.math3.util.FastMath;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
 * Created by bjhecht on 5/21/14.
@@ -20,7 +22,7 @@ public class WikiBrainSpatialUtils {
     public static final double EARTH_CIRCUMFERENCE = 2 * Math.PI * EARTH_RADIUS;
     private static final String EARTH_ITEM_ID = "Q2";
 
-    private static final Logger LOG = Logger.getLogger(WikiBrainSpatialUtils.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WikiBrainSpatialUtils.class);
 
 
     public static Geometry jsonToGeometry(JsonObject json){
@@ -35,7 +37,7 @@ public class WikiBrainSpatialUtils {
             }
             return getPoint(latitude, longitude);
         }catch(Exception e){
-            LOG.log(Level.WARNING, "Parse error while reading Wikidata json value: " + json + " (" + e.getMessage() + ")");
+            LOG.warn("Parse error while reading Wikidata json value: " + json + " (" + e.getMessage() + ")");
             return null;
         }
     }

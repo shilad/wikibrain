@@ -5,8 +5,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Multimap;
 import org.apache.commons.cli.*;
@@ -33,7 +35,7 @@ import org.wikibrain.utils.WpIOUtils;
 
 public class DumpFileDownloader {
 
-    private static final Logger LOG = Logger.getLogger(DumpFileDownloader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DumpFileDownloader.class);
     private static final int SLEEP_TIME = 10000;    // getOneFile takes a break from downloading
     private static final int MAX_ATTEMPT = 30;      // number of attempts before getOneFile gives up downloading the dump
     private static final int DISPLAY_INFO = 10000;  // amount of time between displaying download progress
@@ -81,13 +83,13 @@ public class DumpFileDownloader {
         }
         DumpLinkCluster linkCluster = DumpLinkInfo.parseFile(file);
         int numTotalFiles = linkCluster.size();
-        LOG.log(Level.INFO, "Starting to download " + numTotalFiles + " files");
+        LOG.info("Starting to download " + numTotalFiles + " files");
         int success = 0;
 
         for (Language language : linkCluster) {
             success = downloadLanguageFiles(linkCluster, numTotalFiles, success, language);
         }
-        LOG.log(Level.INFO, success + " files downloaded out of " + numTotalFiles + " files.");
+        LOG.info(success + " files downloaded out of " + numTotalFiles + " files.");
         tmpDir.delete();
     }
 
@@ -98,14 +100,14 @@ public class DumpFileDownloader {
                 File download = new File(outputDir, link.getLocalPath()+"/"+link.getFileName());
                 if (download.exists()) {
                     success++;
-                    LOG.log(Level.INFO, "File already downloaded: " + link.getFileName());
+                    LOG.info("File already downloaded: " + link.getFileName());
                 } else {
                     download = getOneFile(link);
                     if (download == null) {
                         throw new WikiBrainException("Download malfunction! Download timed out!");
                     }
                     success++;
-                    LOG.log(Level.INFO, success + "/" + numTotalFiles + " file(s) downloaded");
+                    LOG.info(success + "/" + numTotalFiles + " file(s) downloaded");
                 }
                 FileInputStream fis = FileUtils.openInputStream(download);
                 try {

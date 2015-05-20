@@ -8,8 +8,10 @@ import com.github.axet.wget.info.ex.DownloadIOCodeError;
 import java.io.File;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility class to download files from urls.
@@ -18,7 +20,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class FileDownloader {
-    public static final Logger LOG = Logger.getLogger(FileDownloader.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(FileDownloader.class);
 
     private static final int SLEEP_TIME = 500;     // getOneFile takes a break from downloading
     private static final int MAX_ATTEMPT = 10;      // number of attempts before getOneFile gives up downloading the dump
@@ -46,19 +48,19 @@ public class FileDownloader {
                 file.getParentFile().mkdirs();
                 WGet wget = new WGet(info, file);
                 wget.download(stop, monitor);
-                LOG.log(Level.INFO, "Download complete: " + file.getAbsolutePath());
+                LOG.info("Download complete: " + file.getAbsolutePath());
                 while (!monitor.isFinished()) {
                     Thread.sleep(sleepTime);
                 }
                 return file;
             } catch (DownloadIOCodeError e) {
                 if (i < maxAttempts) {
-                    LOG.log(Level.INFO, "Failed to download " + url +
+                    LOG.info("Failed to download " + url +
                             ". Reconnecting in " + (i * backoffTime / 1000) +
                             " seconds (HTTP " + e.getCode() + "-Error " + url + ")");
                     Thread.sleep(backoffTime * i);
                 } else {
-                    LOG.log(Level.WARNING, "Failed to download " + file +
+                    LOG.warn("Failed to download " + file +
                             " (HTTP " + e.getCode() + "-Error " + url + ")");
                 }
             }
@@ -84,17 +86,16 @@ public class FileDownloader {
                 case EXTRACTING:
                 case EXTRACTING_DONE:
                 case DONE:
-                    LOG.log(Level.INFO, "" + info.getState());
+                    LOG.info("" + info.getState());
                     break;
                 case RETRYING:
-                    LOG.log(Level.INFO, info.getState() + " " + info.getDelay());
+                    LOG.info(info.getState() + " " + info.getDelay());
                     break;
                 case DOWNLOADING:
                     long now = System.currentTimeMillis();
                     if (now > last + displayInfo) {
                         last = now;
-                        LOG.log(Level.INFO,
-                                String.format("%s %.1f of %.1f MB (%.1f%%)",
+                        LOG.info(String.format("%s %.1f of %.1f MB (%.1f%%)",
                                         info.getSource(),
                                         info.getCount() / (1024*1024.0),
                                         info.getLength() / (1024*1024.0),

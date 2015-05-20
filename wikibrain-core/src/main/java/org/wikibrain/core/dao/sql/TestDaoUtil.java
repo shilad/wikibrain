@@ -38,6 +38,8 @@ public class TestDaoUtil {
         Class.forName("org.h2.Driver");
 
         BoneCPDataSource ds = new BoneCPDataSource();
+        ds.setPartitionCount(8);
+        ds.setMaxConnectionsPerPartition(4);
         ds.setJdbcUrl("jdbc:h2:"+file.getAbsolutePath());
         ds.setUsername("sa");
         ds.setPassword("");

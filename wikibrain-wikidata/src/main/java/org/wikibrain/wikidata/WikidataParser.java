@@ -15,13 +15,14 @@ import org.wikidata.wdtk.datamodel.json.jackson.datavalues.JacksonValue;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class WikidataParser {
-    private static final Logger LOG = Logger.getLogger(WikidataParser.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WikidataParser.class);
     private final LanguageSet langs;
     final ObjectMapper mapper = new ObjectMapper();
     private final DatamodelConverter datamodelConverter;

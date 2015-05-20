@@ -9,14 +9,16 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DenseMatrixWriter {
 
     public static final byte ROW_PADDING = Byte.MIN_VALUE;
 
-    private static final Logger LOG = Logger.getLogger(DenseMatrixWriter.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DenseMatrixWriter.class);
 
     private File path;
     private TIntLongHashMap rowOffsets = new TIntLongHashMap();
@@ -115,7 +117,7 @@ public class DenseMatrixWriter {
     }
 
     private void info(String message) {
-        LOG.log(Level.INFO, "dense matrix writer " + path + ": " + message);
+        LOG.info("dense matrix writer " + path + ": " + message);
     }
 
     public static void write(File file, Iterator<DenseMatrixRow> rows) throws IOException {

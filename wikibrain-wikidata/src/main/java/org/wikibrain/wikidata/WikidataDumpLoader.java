@@ -30,14 +30,16 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Load the contents of a dump into the various daos.
  */
 public class WikidataDumpLoader {
-    private static final Logger LOG = Logger.getLogger(WikidataDumpLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WikidataDumpLoader.class);
 
     private final AtomicInteger counter = new AtomicInteger();
 
@@ -81,10 +83,10 @@ public class WikidataDumpLoader {
                             save(file, page);
                             metaDao.incrementRecords(WikidataEntity.class);
                         } catch (WpParseException e) {
-                            LOG.log(Level.WARNING, "parsing of " + file.getPath() + " failed:", e);
+                            LOG.warn("parsing of " + file.getPath() + " failed:", e);
                             metaDao.incrementErrorsQuietly(WikidataEntity.class);
                         } catch (DaoException e) {
-                            LOG.log(Level.WARNING, "parsing of " + file.getPath() + " failed:", e);
+                            LOG.warn("parsing of " + file.getPath() + " failed:", e);
                             metaDao.incrementErrorsQuietly(WikidataEntity.class);
                         }
                     }

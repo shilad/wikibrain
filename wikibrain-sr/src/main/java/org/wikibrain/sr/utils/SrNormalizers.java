@@ -19,8 +19,10 @@ import org.wikibrain.utils.Procedure;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A pair of normalizers (similarity, mostSimilar) persisted to disk.
@@ -28,7 +30,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class SrNormalizers {
-    private static final Logger LOG = Logger.getLogger(SrNormalizers.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SrNormalizers.class);
 
     public static final String SIMILARITY_NORMALIZER = "similarityNormalizer";
     public static final String MOST_SIMILAR_NORMALIZER = "mostSimilarNormalizer";
@@ -95,8 +97,7 @@ public class SrNormalizers {
         try {
             return readNormalizer(dir, name).isTrained();
         } catch (Exception e) {
-            LOG.log(Level.WARNING,
-                    "Failed to load normalizer at " + path.getAbsolutePath() +
+            LOG.warn("Failed to load normalizer at " + path.getAbsolutePath() +
                     ". Setting it to be invalid.");
             return false;
         }

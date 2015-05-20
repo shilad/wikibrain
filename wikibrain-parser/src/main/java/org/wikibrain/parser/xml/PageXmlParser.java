@@ -10,7 +10,8 @@ import org.wikibrain.parser.WpParseException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,7 @@ import java.util.regex.Pattern;
  * Parses the Xml associated with a single Wikipedia page.
  */
 public class PageXmlParser {
-    private static final Logger LOG =Logger.getLogger(PageXmlParser.class.getName());
+    private static final Logger LOG =LoggerFactory.getLogger(PageXmlParser.class);
     private static final Pattern TITLE_PATTERN = Pattern.compile("<title>(.*?)</title>");
     private static final Pattern ID_PATTERN = Pattern.compile("<id>(.*?)</id>");
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("<timestamp>(.*?)</timestamp>");
@@ -80,7 +81,7 @@ public class PageXmlParser {
         try {
             lastEdit = xmlDumpDateFormat.parse(timestampString);
         } catch (ParseException e) {
-            LOG.warning("Could not parse last edited date: " + timestampString);
+            LOG.warn("Could not parse last edited date: " + timestampString);
         }
         title = title.trim();
         String redirectTitle = getRedirect(rawXml);

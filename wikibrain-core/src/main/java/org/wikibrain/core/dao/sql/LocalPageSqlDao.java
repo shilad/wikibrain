@@ -24,7 +24,8 @@ import org.wikibrain.utils.WpThreadUtils;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
@@ -92,7 +93,7 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
                     try {
                         return buildLocalPage(r, daoFilter);
                     } catch (DaoException e) {
-                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        LOG.warn(e.getMessage(), e);
                         return null;
                     }
                 }

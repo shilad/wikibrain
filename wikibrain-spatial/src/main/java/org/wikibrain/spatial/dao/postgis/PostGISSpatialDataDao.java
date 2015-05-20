@@ -29,8 +29,10 @@ import org.wikibrain.wikidata.WikidataDao;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by bjhecht on 4/7/14.
@@ -46,7 +48,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
     private ThreadLocal<SimpleFeatureBuilder> simpleFeatureBuilder;
     private static final Integer BUFFER_SIZE = 200;
 
-    private static final Logger LOG = Logger.getLogger(PostGISDB.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PostGISDB.class);
 
     private PostGISSpatialDataDao(PostGISDB postGisDb, WikidataDao wikidataDao, LocalPageDao localPageDao){
         this.db = postGisDb;
@@ -125,7 +127,7 @@ public class PostGISSpatialDataDao implements SpatialDataDao {
                     rVal.remove(key);
                 }
             }else{
-                LOG.log(Level.WARNING, "Could not find any geometries in layer: " + layerName);
+                LOG.warn("Could not find any geometries in layer: " + layerName);
             }
         }
 

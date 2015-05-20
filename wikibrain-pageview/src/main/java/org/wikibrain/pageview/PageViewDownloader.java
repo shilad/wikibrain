@@ -11,8 +11,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -20,7 +22,7 @@ import java.util.logging.Logger;
  */
 public class PageViewDownloader {
     private static String BASE_URL = "http://dumps.wikimedia.org/other/pagecounts-raw/";
-    private static Logger LOG = Logger.getLogger(PageViewDownloader.class.getSimpleName());
+    private static Logger LOG = LoggerFactory.getLogger(PageViewDownloader.class);
 
     private final File dir;
 
@@ -103,7 +105,7 @@ public class PageViewDownloader {
             FileUtils.moveFile(tmp, dest);
             return dest;
         } catch(IOException e) {
-            LOG.log(Level.WARNING, "downloading of file " + urlStr + " failed: ", e);
+            LOG.warn("downloading of file " + urlStr + " failed: ", e);
             return null;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

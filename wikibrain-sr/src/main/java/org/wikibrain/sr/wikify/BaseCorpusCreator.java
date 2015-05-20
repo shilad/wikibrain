@@ -28,13 +28,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public abstract class BaseCorpusCreator {
-    private static final Logger LOG = Logger.getLogger(BaseCorpusCreator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(BaseCorpusCreator.class);
 
     private final Language language;
     private final StringTokenizer tokenizer = new StringTokenizer();

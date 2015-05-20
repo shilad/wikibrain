@@ -8,13 +8,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class LSHForestKNNFinder implements KNNFinder {
-    private static final Logger LOG = Logger.getLogger(LSHForestKNNFinder.class.getCanonicalName());
+    private static final Logger LOG = LoggerFactory.getLogger(LSHForestKNNFinder.class);
     private static final int NUM_BITS = 16; // Number of bits in each mask (size of short)
 
     private int numTrees = 5;

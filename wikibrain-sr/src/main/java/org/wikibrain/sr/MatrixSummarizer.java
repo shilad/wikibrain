@@ -24,13 +24,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class MatrixSummarizer {
-    private static final Logger LOG = Logger.getLogger(MatrixSummarizer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MatrixSummarizer.class);
 
     private final LocalPageDao pageDao;
 
@@ -165,7 +166,7 @@ public class MatrixSummarizer {
             if (path.isFile()) {
                 summarizer.summarize(language, path);
             } else {
-                LOG.warning("skipping nonexistant matrix file " + path.getAbsolutePath());
+                LOG.warn("skipping nonexistant matrix file " + path.getAbsolutePath());
             }
         }
     }

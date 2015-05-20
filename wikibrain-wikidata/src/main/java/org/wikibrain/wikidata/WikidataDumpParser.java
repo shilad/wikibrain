@@ -15,15 +15,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * @author Shilad Sen
  */
 public class WikidataDumpParser implements Iterable<WikidataEntity> {
-    public static final Logger LOG = Logger.getLogger(DumpSplitter.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(DumpSplitter.class);
 
     private final WikidataParser wdParser;
     private final LanguageSet languages;
@@ -85,7 +87,7 @@ public class WikidataDumpParser implements Iterable<WikidataEntity> {
                         buff = wdParser.parse(line);
                     }
                 } catch (Exception e) {
-                    LOG.log(Level.WARNING, "parsing of " + file + " failed for line '" + line  + "':", e);
+                    LOG.warn("parsing of " + file + " failed for line '" + line  + "':", e);
                 }
             }
         }

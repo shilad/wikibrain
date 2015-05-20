@@ -16,13 +16,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
 * Loads phrase to page mapping using anchor phrase in wiki links.
 */
 public class AnchorTextPhraseAnalyzer extends BasePhraseAnalyzer {
-    private static final Logger LOG = Logger.getLogger(AnchorTextPhraseAnalyzer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(AnchorTextPhraseAnalyzer.class);
 
     private LocalLinkDao linkDao;
 

@@ -19,13 +19,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class PhraseLoader {
-    private static final Logger LOG = Logger.getLogger(PhraseLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PhraseLoader.class);
 
     public static void main(String args[]) throws ClassNotFoundException, SQLException, IOException, ConfigurationException, WikiBrainException, DaoException, InterruptedException {
         Options options = new Options();
@@ -62,9 +64,9 @@ public class PhraseLoader {
         int n = 0;
         for (String name : toLoad) {
             PhraseAnalyzer analyzer = env.getConfigurator().get(PhraseAnalyzer.class, name);
-            LOG.log(Level.INFO, "LOADING PHRASE CORPUS FOR " + name);
+            LOG.info("LOADING PHRASE CORPUS FOR " + name);
             n += analyzer.loadCorpus(env.getLanguages());
-            LOG.log(Level.INFO, "DONE");
+            LOG.info("DONE");
         }
         MetaInfoDao metaDao = env.getConfigurator().get(MetaInfoDao.class);
         for (Language lang : env.getLanguages()) {

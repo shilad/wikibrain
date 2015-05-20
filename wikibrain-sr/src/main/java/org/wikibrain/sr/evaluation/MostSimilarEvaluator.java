@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @see Evaluator
@@ -29,7 +31,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
-    private static final Logger LOG = Logger.getLogger(MostSimilarEvaluator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MostSimilarEvaluator.class);
 
     private boolean buildCosimilarityMatrix = false;
 
@@ -140,7 +142,7 @@ public class MostSimilarEvaluator extends Evaluator<MostSimilarEvaluationLog> {
                     }
                     splitEval.record(kms, result);
                 } catch (Exception e) {
-                    LOG.log(Level.WARNING, "Similarity of " + kms.getPhrase() + ", id=" + kms.getPageId() + " failed. Logging error to " + err);
+                    LOG.warn("Similarity of " + kms.getPhrase() + ", id=" + kms.getPageId() + " failed. Logging error to " + err);
                     splitEval.recordFailed(kms);
                     synchronized (errFile) {
                         errFile.write("KnownSim failed: " + phrase + "\n");

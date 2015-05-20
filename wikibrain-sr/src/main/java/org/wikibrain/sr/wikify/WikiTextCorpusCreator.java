@@ -16,13 +16,14 @@ import org.wikibrain.phrases.LinkProbabilityDao;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class WikiTextCorpusCreator extends BaseCorpusCreator{
-    private static final Logger LOG = Logger.getLogger(WikiTextCorpusCreator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WikiTextCorpusCreator.class);
 
     private final Language language;
     private final RawPageDao dao;
@@ -88,7 +89,7 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
                             buffer = new IdAndText(rp.getLocalId(), text.trim());
                         }
                     } catch (Exception e) {
-                        LOG.warning("Error when extracting text from: " + rp.getTitle());
+                        LOG.warn("Error when extracting text from: " + rp.getTitle());
                     }
                 }
             }

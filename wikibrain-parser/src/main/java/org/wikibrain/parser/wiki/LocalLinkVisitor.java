@@ -10,12 +10,13 @@ import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class LocalLinkVisitor extends ParserVisitor {
-    private static final Logger LOG = Logger.getLogger(LocalLinkVisitor.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LocalLinkVisitor.class);
 
     private final LocalLinkDao linkDao;
     private final LocalPageDao pageDao;

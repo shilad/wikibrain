@@ -19,8 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +35,7 @@ import java.util.regex.Pattern;
  * Note that the pages with anchor phrase are not (usually) Wikipedia pages themselves.
  */
 public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
-    private static final Logger LOG = Logger.getLogger(StanfordPhraseAnalyzer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(StanfordPhraseAnalyzer.class);
     private static final Language LANG_EN = Language.getByLangCode("en");
     private static final Language LANG_SIMPLE = Language.getByLangCode("simple");
 
@@ -54,7 +56,7 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
     protected Iterable<BasePhraseAnalyzer.Entry> getCorpus(LanguageSet langs) throws IOException, DaoException {
         for (Language l : langs) {
             if (l != LANG_EN && l != LANG_SIMPLE) {
-                LOG.warning("Stanford only supports English and Simple English (not " + l + ")");
+                LOG.warn("Stanford only supports English and Simple English (not " + l + ")");
             }
         }
         this.languages = langs;
@@ -110,7 +112,7 @@ public class StanfordPhraseAnalyzer extends BasePhraseAnalyzer {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 } catch (Exception e) {
-                    LOG.log(Level.FINEST, "Error parsing line:", e);
+                    LOG.debug("Error parsing line:", e);
                 }
             }
         }

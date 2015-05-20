@@ -24,9 +24,9 @@ public class MostSimilarExample {
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
         Language simple = Language.getByLangCode("simple");
 
-        // Retrieve the "ensemble" sr metric for simple english
+        // Retrieve the "milnewitten" sr metric for simple english
         SRMetric sr = conf.get(
-                SRMetric.class, "ensemble",
+                SRMetric.class, "milnewitten",
                 "language", simple.getLangCode());
 
         //Similarity between strings

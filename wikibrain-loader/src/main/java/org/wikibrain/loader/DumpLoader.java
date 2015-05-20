@@ -33,14 +33,16 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Load the contents of a dump into the various daos.
  */
 public class DumpLoader {
-    private static final Logger LOG = Logger.getLogger(DumpLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DumpLoader.class);
     public static final List<NameSpace> DEFAULT_NAMESPACES = Arrays.asList(NameSpace.ARTICLE, NameSpace.CATEGORY);
 
     private final AtomicInteger allPages = new AtomicInteger();
@@ -92,7 +94,7 @@ public class DumpLoader {
                         try {
                             processOnePage(file, lang, page);
                         } catch (WpParseException e) {
-                            LOG.log(Level.WARNING, "parsing of " + file.getPath() + " failed:", e);
+                            LOG.warn("parsing of " + file.getPath() + " failed:", e);
                         }
                     }
                 },
@@ -154,7 +156,7 @@ public class DumpLoader {
             rawPageDao.save(rp);
             metaDao.incrementRecords(rp.getClass(), rp.getLanguage());
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
+            LOG.warn("parsing of " + file + " failed:", e);
             metaDao.incrementErrorsQuietly(rp.getClass(), rp.getLanguage());
         }
         try {
@@ -166,7 +168,7 @@ public class DumpLoader {
             localPageDao.save(lp);
             metaDao.incrementRecords(lp.getClass(), lp.getLanguage());
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "parsing of " + file + " failed:", e);
+            LOG.warn("parsing of " + file + " failed:", e);
             metaDao.incrementErrorsQuietly(LocalPage.class, rp.getLanguage());
         }
 

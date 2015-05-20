@@ -24,13 +24,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class MappedShapefileLoader {
-    private static final Logger LOG = Logger.getLogger(MappedShapefileLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(MappedShapefileLoader.class);
 
     private final Env env;
 

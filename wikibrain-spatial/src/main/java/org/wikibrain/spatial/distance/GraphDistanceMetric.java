@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class GraphDistanceMetric implements SpatialDistanceMetric {
-    private static final Logger LOG = Logger.getLogger(GraphDistanceMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(GraphDistanceMetric.class);
 
     private final SpatialDataDao spatialDao;
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
@@ -48,7 +49,7 @@ public class GraphDistanceMetric implements SpatialDistanceMetric {
         this.spatialDao = dao;
         this.index = spherical.getIndex();
         if (spherical.getValidConcepts() != null) {
-            LOG.warning("Warning: ClosestPoint index has been constrained to particular concepts. You probably don't want this. Instead, let GraphDistanceMetric create its own index");
+            LOG.warn("Warning: ClosestPoint index has been constrained to particular concepts. You probably don't want this. Instead, let GraphDistanceMetric create its own index");
         }
     }
 

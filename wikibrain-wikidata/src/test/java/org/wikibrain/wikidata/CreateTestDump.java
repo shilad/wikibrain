@@ -16,7 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates a test wikidata dump that extracts some records from a dump file:
@@ -26,12 +27,12 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class CreateTestDump {
-    private static Logger LOG = Logger.getLogger(CreateTestDump.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(CreateTestDump.class);
 
     public static void main(String args[]) throws IOException {
         if (args.length != 2) {
             System.err.println(
-                    "Usage: java " + CreateTestDump.class.getName() +
+                    "Usage: java " + CreateTestDump.class +
                     " all_wikidata_input.bz2 test_extract_output.bz2\n");
             System.exit(1);
         }

@@ -13,8 +13,10 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -22,7 +24,7 @@ import java.util.logging.Logger;
  * Returns rows at a particular offset in the form of ByteBuffers backed by a memory mapped file.
  */
 public class MemoryMappedMatrix {
-    public static final Logger LOG = Logger.getLogger(MemoryMappedMatrix.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(MemoryMappedMatrix.class);
 
     public static final int PAGE_SIZE = 1024 * 1024 * 1024;     // 1GB
 
@@ -214,10 +216,10 @@ public class MemoryMappedMatrix {
     }
 
     private void info(String message) {
-        LOG.log(Level.INFO, "sparse matrix " + path + ": " + message);
+        LOG.info("sparse matrix " + path + ": " + message);
     }
     private void debug(String message) {
-        LOG.log(Level.FINEST, "sparse matrix " + path + ": " + message);
+        LOG.debug("sparse matrix " + path + ": " + message);
     }
 
 }

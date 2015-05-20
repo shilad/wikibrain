@@ -21,7 +21,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class creates snapshot information useful for integration tests and stores them
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class TestDB {
-    private static final Logger LOG = Logger.getLogger(TestDB.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TestDB.class);
 
     private Env env;
     private WpDataSource ds;

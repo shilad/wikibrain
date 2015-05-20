@@ -25,8 +25,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -37,7 +39,7 @@ public class ToblersLawEvaluator {
     private static int WIKIDATA_CONCEPTS = 1;
 
 
-    private static final Logger LOG = Logger.getLogger(ToblersLawEvaluator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ToblersLawEvaluator.class);
 
     private Random random = new Random();
 
@@ -83,7 +85,7 @@ public class ToblersLawEvaluator {
     public void retrieveAllLocations() throws DaoException {
         // Get all known concept geometries
         Map<Integer, Geometry> geometries = sdDao.getAllGeometriesInLayer("wikidata", "earth");
-        LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
+        LOG.info(String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
@@ -106,7 +108,7 @@ public class ToblersLawEvaluator {
      * @throws DaoException
      */
     public void retrieveLocations(Map<Integer, Geometry> geometries) throws DaoException {
-        LOG.log(Level.INFO, String.format("Found %d total geometries, now loading geometries", geometries.size()));
+        LOG.info(String.format("Found %d total geometries, now loading geometries", geometries.size()));
 
         // Build up list of concepts in all languages
         for (Integer conceptId : geometries.keySet()){
@@ -136,7 +138,7 @@ public class ToblersLawEvaluator {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
         if(concepts.size() == 0)
-            LOG.warning("No concept has been retrieved");
+            LOG.warn("No concept has been retrieved");
 
         ParallelForEach.range(0, numSamples, new Procedure<Integer>() {
             @Override
@@ -174,7 +176,7 @@ public class ToblersLawEvaluator {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
         if(concepts.size() == 0)
-            LOG.warning("No cocept has been retrieved");
+            LOG.warn("No cocept has been retrieved");
         int counter = 0;
         int total_size = concepts.size() * concepts.size();
 
@@ -222,7 +224,7 @@ public class ToblersLawEvaluator {
         this.output = new CSVWriter(new FileWriter(outputPath), ',');
         writeHeader();
         if(concepts1.size() == 0 || concepts2.size() == 0)
-            LOG.warning("No concept has been retrieved");
+            LOG.warn("No concept has been retrieved");
         int counter = 0;
         int total_size = concepts1.size() * concepts2.size();
 
@@ -242,7 +244,7 @@ public class ToblersLawEvaluator {
                     writeRow(c1, c2, results);
                 }
                 catch (Exception e){
-                    LOG.warning(String.format("Error evaluating between %s and %s", c1.getBestEnglishTitle(lpDao, true), c2.getBestEnglishTitle(lpDao, true)));
+                    LOG.warn(String.format("Error evaluating between %s and %s", c1.getBestEnglishTitle(lpDao, true), c2.getBestEnglishTitle(lpDao, true)));
                 }
 
             }

@@ -17,8 +17,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -30,7 +32,7 @@ import java.util.logging.Logger;
 */
 public class LuceneSearcher {
 
-    private static final Logger LOG = Logger.getLogger(LuceneSearcher.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LuceneSearcher.class);
 
     public static final int DEFAULT_HIT_COUNT = 1000;
 
@@ -176,7 +178,7 @@ public class LuceneSearcher {
                 Document document = searchers.get(language).doc(docId);
                 return (Integer) document.getField(LuceneOptions.LOCAL_ID_FIELD_NAME).numericValue();
             } else {
-                LOG.log(Level.WARNING, "This docId does not exist: " + docId);
+                LOG.warn("This docId does not exist: " + docId);
                 return -1;
             }
         }  catch (IOException e) {

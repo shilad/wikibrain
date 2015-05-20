@@ -23,7 +23,7 @@ public class SparseMatrixSorter {
     public static void main(String args[]) throws IOException {
         if (args.length != 2) {
             System.err.println("usage: java " +
-                    SparseMatrixSorter.class.getName() +
+                    SparseMatrixSorter.class +
                     " input_path output_path");
             System.exit(1);
         }

@@ -20,8 +20,10 @@ import org.wikibrain.wikidata.WikidataFilter;
 import org.wikibrain.wikidata.WikidataStatement;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Loads points from wikidata as a layer.
@@ -30,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class WikidataLayerLoader {
 
-    private static final Logger LOG = Logger.getLogger(WikidataLayerLoader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WikidataLayerLoader.class);
 
     private static final int COORDINATE_LOCATION_PROPERTY_ID = 625;
 
@@ -60,11 +62,11 @@ public class WikidataLayerLoader {
                         matches.incrementAndGet();
                     }
                 } catch (Exception e) {
-                    LOG.log(Level.SEVERE, "storage of statement failed: " + statement.toString(), e);
+                    LOG.error("storage of statement failed: " + statement.toString(), e);
                     miDao.incrementErrorsQuietly(Geometry.class);
                 }
                 if (count.incrementAndGet() % 10000 == 0){
-                    LOG.log(Level.INFO, "Matched " + matches + " out of " + count + " statements from " + this.getClass().getName());
+                    LOG.info("Matched " + matches + " out of " + count + " statements from " + this.getClass().getName());
                 }
             }
         }, Integer.MAX_VALUE);

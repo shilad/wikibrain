@@ -15,14 +15,15 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation of a phrase analyzer.
  * Concrete implementations extending this class need only implement a getCorpus() method.
  */
 public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
-    private static final Logger LOG = Logger.getLogger(PhraseAnalyzer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PhraseAnalyzer.class);
 
     /**
      * An entry in the phrase corpus.
@@ -167,7 +168,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             }
             String tokens[] = line.split("\t", 5);
             if (tokens.length != 5) {
-                LOG.warning("invalid line in file " + input + ": " + line);
+                LOG.warn("invalid line in file " + input + ": " + line);
                 continue;
             }
 
@@ -188,7 +189,7 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
             );
             buffer.add(e);
             if (buffer.size() > maxBufferSize * 3 / 2) {
-                LOG.warning("large buffer observed: " + buffer.size() + " for string " + lastKey);
+                LOG.warn("large buffer observed: " + buffer.size() + " for string " + lastKey);
                 maxBufferSize = buffer.size();
             }
             lastKey = tokens[0];
@@ -231,10 +232,10 @@ public abstract class BasePhraseAnalyzer implements PhraseAnalyzer {
         Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
         for (Entry e : pageCounts) {
             if (!normalize(lang, e.phrase).equals(phrase)) {
-                LOG.warning("disagreement between phrases " + phrase + " and " + e.phrase);
+                LOG.warn("disagreement between phrases " + phrase + " and " + e.phrase);
             }
             if (e.language != lang) {
-                LOG.warning("disagreement between languages " + lang+ " and " + e.language);
+                LOG.warn("disagreement between languages " + lang+ " and " + e.language);
             }
             if (counts.containsKey(e.localId)) {
                 counts.put(e.localId, counts.get(e.localId) + e.count);

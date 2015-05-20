@@ -5,6 +5,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -18,7 +22,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Captures common environment components for WikiBrain programs
@@ -27,7 +32,8 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class Env implements Closeable {
-    private static final Logger LOG = Logger.getLogger(Env.class.getName());
+    // Hack: Logger is lazily configured to allow default logging configuration
+    private static Logger LOG = null;
 
     private Configuration configuration;
     private Configurator configurator;
@@ -50,6 +56,15 @@ public class Env implements Closeable {
      * Parses standard command line arguments and builds the environment using them.
      */
     public Env(Map<String, Object> confParams, File ... pathConfs) throws ConfigurationException {
+        if (LOG == null
+        &&  System.getProperty("log4j.configurationFile") == null
+        &&  (!confParams.containsKey("reconfigureLogging") || (Boolean)confParams.get("reconfigureLogging"))) {
+            configureDefaultLogging();
+        }
+
+        // Hack delay until after first chance to configure logging
+        if (LOG == null) LOG = LoggerFactory.getLogger(Env.class);
+
         // Load basic configuration
         configuration = new Configuration(confParams, pathConfs);
         configurator = new Configurator(configuration);
@@ -82,6 +97,15 @@ public class Env implements Closeable {
         LOG.info("using tmpDir " + tmpDir);
     }
 
+    private void configureDefaultLogging() {
+        System.setProperty("org.jooq.no-logo", "true");
+        System.setProperty("log4j.configurationFile", "wikibrain-default-log4j2-config.xml");
+        ((LoggerContext) LogManager.getContext(false)).updateLoggers();
+        LOG = LoggerFactory.getLogger(Env.class);
+        LOG.info("Configured default logging at the Info Level");
+        LOG.info("To customize log4j2 set the 'log4j.configurationFile' system property or set EnvBuilder.setReconfigureLogging to false.");
+    }
+
     public File getBaseDir() {
         return new File(configuration.getString("baseDir"));
     }
@@ -96,7 +120,7 @@ public class Env implements Closeable {
             for (FileMatcher fm : matchers) {
                 List<File> f = getFiles(l, fm);
                 if (f.isEmpty()) {
-                    LOG.warning("no files matching language " + l + ", matcher " + fm.getName());
+                    LOG.warn("no files matching language " + l + ", matcher " + fm.getName());
                 }
                 matches.addAll(f);
             }
@@ -116,7 +140,7 @@ public class Env implements Closeable {
         if (downloadPath == null) {
             throw new IllegalArgumentException("missing configuration for download.path");
         }
-        LOG.fine("scanning download path " + downloadPath + " for files");
+        if (LOG != null) LOG.debug("scanning download path " + downloadPath + " for files");
         List<File> matchingFiles = new ArrayList<File>();
         File langDir = new File(downloadPath, lang.getLangCode());
         if (!langDir.isDirectory()) {

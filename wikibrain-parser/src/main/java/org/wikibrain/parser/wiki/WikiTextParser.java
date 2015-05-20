@@ -14,13 +14,15 @@ import org.wikibrain.core.model.RawPage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WikiTextParser {
-    public static final Logger LOG = Logger.getLogger(WikiTextParser.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(WikiTextParser.class);
 
     private final MediaWikiParser jwpl;
     private final SubarticleParser subarticleParser;
@@ -61,7 +63,7 @@ public class WikiTextParser {
             try {
                 ParsedPage pp = jwpl.parse(xml.getBody());
                 if (pp == null) {
-                    LOG.fine("invalid page: " + xml.getBody());
+                    LOG.debug("invalid page: " + xml.getBody());
                 }
 
                 if (xml.getNamespace() == NameSpace.CATEGORY) {
@@ -92,7 +94,7 @@ public class WikiTextParser {
                     // EASY LINKS
                     for (Link curLink : curContent.getLinks()){
                         if (curLink.getTarget().isEmpty()){
-                            LOG.fine("Found link with empty target: \t" + xml + "\t text=" + curLink.getText());
+                            LOG.debug("Found link with empty target: \t" + xml + "\t text=" + curLink.getText());
                             continue;
                         }
                         Title destTitle = link2Title(curLink);
@@ -109,7 +111,7 @@ public class WikiTextParser {
                             ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, curLink.getSrcSpan().getStart());
                             visitLink(location, destTitle, curLink.getText(), linkSubType);
                         } catch (WikiBrainException e) {
-                            LOG.log(Level.WARNING, String.format("Could not process link\t%s\t%s", xml, curLink.toString()),e);
+                            LOG.warn(String.format("Could not process link\t%s\t%s", xml, curLink.toString()), e);
                         }
                     }
 
@@ -155,7 +157,7 @@ public class WikiTextParser {
                                     }
                                 }
                             }catch(IndexOutOfBoundsException e){
-                                LOG.severe("Parsing error while doing templates -> ParsedPages:\t" + xml + "\t" + templateText);
+                                LOG.error("Parsing error while doing templates -> ParsedPages:\t" + xml + "\t" + templateText);
                             }
 
                         }else{
@@ -167,8 +169,7 @@ public class WikiTextParser {
                                     ParsedLocation location = new ParsedLocation(xml, secNum, paraNum, t.getSrcSpan().getStart());
                                     visitLink(location, destTitle, dest, tempSubType);
                                 } catch (WikiBrainException e) {
-                                    LOG.log(Level.SEVERE,
-                                            String.format("Could not process template-based subarticle link: \t%s\t%s", xml, t.toString()), e);
+                                    LOG.error(String.format("Could not process template-based subarticle link: \t%s\t%s", xml, t.toString()), e);
                                 }
                             }
                         }
@@ -179,7 +180,7 @@ public class WikiTextParser {
                     }
                 }
             } catch(WikiBrainException e){
-                LOG.log(Level.SEVERE, String.format("Could not store whole section in %s", xml), e);
+                LOG.error(String.format("Could not store whole section in %s", xml), e);
             }
             secNum++;
         }
@@ -214,7 +215,7 @@ public class WikiTextParser {
                         String target = m.group(2);
                         Language l = Language.getByLangCode(langCode);
                         if (l == null) {
-                            LOG.warning("unkonwn lang code:\t" + langCode);
+                            LOG.warn("unkonwn lang code:\t" + langCode);
                         } else if (l != lang.getLanguage()) {
                             ParsedIll pill = new ParsedIll();
                             pill.location = new ParsedLocation(xml, -1, -1, ill.getSrcSpan().getStart());
@@ -222,10 +223,10 @@ public class WikiTextParser {
                             visitIll(pill);
                         }
                     }else{
-                        LOG.fine("Invalid ILL:\t" + xml + "\t" + ill.getTarget());
+                        LOG.debug("Invalid ILL:\t" + xml + "\t" + ill.getTarget());
                     }
                 } catch (Exception e) {
-                    LOG.log(Level.WARNING, String.format("Error while parsing/storing ILL\t%s\t%s\t%s",xml,ill.toString().replaceAll("\n", ","), e.getMessage()));
+                    LOG.warn(String.format("Error while parsing/storing ILL\t%s\t%s\t%s", xml, ill.toString().replaceAll("\n", ","), e.getMessage()));
                 }
             }
         }
@@ -256,7 +257,7 @@ public class WikiTextParser {
             try {
                 visitor.beginPage(xml);
             } catch (WikiBrainException e) {
-                LOG.log(Level.WARNING, "beginPage failed:", e);
+                LOG.warn("beginPage failed:", e);
             }
         }
     }
@@ -265,7 +266,7 @@ public class WikiTextParser {
             try {
                 visitor.endPage(xml);
             } catch (WikiBrainException e) {
-                LOG.log(Level.WARNING, "beginPage failed:", e);
+                LOG.warn("beginPage failed:", e);
             }
         }
     }
@@ -274,7 +275,7 @@ public class WikiTextParser {
             try {
                 visitor.redirect(redirect);
             } catch (WikiBrainException e) {
-                LOG.log(Level.WARNING, "beginPage failed:", e);
+                LOG.warn("beginPage failed:", e);
             }
         }
     }
@@ -288,7 +289,7 @@ public class WikiTextParser {
             try {
                 visitor.ill(ill);
             } catch (WikiBrainException e) {
-                LOG.log(Level.WARNING, "beginPage failed:", e);
+                LOG.warn("beginPage failed:", e);
             }
         }
     }
@@ -317,7 +318,7 @@ public class WikiTextParser {
             try {
                 visitor.link(pl);
             } catch (WikiBrainException e) {
-                LOG.log(Level.WARNING, "beginPage failed:", e);
+                LOG.warn("beginPage failed:", e);
             }
         }
     }

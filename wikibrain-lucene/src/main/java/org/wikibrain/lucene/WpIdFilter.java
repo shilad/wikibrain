@@ -12,7 +12,8 @@ import org.apache.lucene.util.DocIdBitSet;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
  * TODO: Perform a search when there are relatively few wpIds.
  */
 public class WpIdFilter extends Filter {
-    private static final Logger LOG = Logger.getLogger(WpIdFilter.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WpIdFilter.class);
     private int[] wpIds;
     private Map<AtomicReader, int[]> allowedLuceneIds = new HashMap<AtomicReader, int[]>();
 
@@ -52,7 +53,7 @@ public class WpIdFilter extends Filter {
         if (allowedLuceneIds.containsKey(reader)) {
             return allowedLuceneIds.get(reader);
         }
-        LOG.fine("building WpId filter for " + wpIds.length + " ids with hash " + Arrays.hashCode(wpIds));
+        LOG.debug("building WpId filter for " + wpIds.length + " ids with hash " + Arrays.hashCode(wpIds));
         TIntSet wpIdSet = new TIntHashSet(wpIds);
         TIntSet luceneIdSet = new TIntHashSet();
         Set<String> fields = new HashSet<String>(Arrays.asList(LuceneOptions.LOCAL_ID_FIELD_NAME));
@@ -64,7 +65,7 @@ public class WpIdFilter extends Filter {
             }
         }
         int luceneIds[] = luceneIdSet.toArray();
-        LOG.fine("WpId filter matched " + luceneIds.length + " ids.");
+        LOG.debug("WpId filter matched " + luceneIds.length + " ids.");
         allowedLuceneIds.put(reader, luceneIds);
         return luceneIds;
     }

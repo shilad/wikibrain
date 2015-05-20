@@ -28,15 +28,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class ESAGenerator implements SparseVectorGenerator {
 
-    private static final Logger LOG = Logger.getLogger(ESAGenerator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ESAGenerator.class);
 
     private final LuceneSearcher searcher;
     private final Language language;
@@ -79,7 +81,7 @@ public class ESAGenerator implements SparseVectorGenerator {
     public TIntFloatMap getVector(int pageId) throws DaoException {
         int luceneId = searcher.getDocIdFromLocalId(pageId, language);
         if (luceneId < 0) {
-            LOG.warning("Unindexed document " + pageId + " in " + language.getEnLangName());
+            LOG.warn("Unindexed document " + pageId + " in " + language.getEnLangName());
             return new TIntFloatHashMap();
         }
         WikiBrainScoreDoc[] wikibrainScoreDocs =  getQueryBuilder()
@@ -98,7 +100,7 @@ public class ESAGenerator implements SparseVectorGenerator {
             scoreDocs = SimUtils.pruneSimilar(scoreDocs);
             return SimUtils.normalizeVector(expandScores(scoreDocs));
         } else {
-            LOG.log(Level.WARNING, "Phrase cannot be parsed to get a query. "+phrase);
+            LOG.warn("Phrase cannot be parsed to get a query. "+phrase);
             return null;
         }
     }
@@ -106,7 +108,7 @@ public class ESAGenerator implements SparseVectorGenerator {
     public void setConcepts(File file) throws IOException {
         conceptFilter = null;
         if (!file.isFile()) {
-            LOG.warning("concept path " + file + " not a file; defaulting to all concepts");
+            LOG.warn("concept path " + file + " not a file; defaulting to all concepts");
             return;
         }
         TIntSet ids = new TIntHashSet();
@@ -117,7 +119,7 @@ public class ESAGenerator implements SparseVectorGenerator {
             }
         }
         conceptFilter = new WpIdFilter(ids.toArray());
-        LOG.warning("installed " + ids.size() + " concepts for " + language);
+        LOG.warn("installed " + ids.size() + " concepts for " + language);
     }
 
     private boolean isBlacklisted(int wpLocalIDNumb) {

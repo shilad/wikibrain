@@ -1,18 +1,8 @@
 package org.wikibrain.core.dao.sql;
 
-import com.google.common.base.FinalizableReferenceQueue;
-import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPDataSource;
-import com.jolbox.bonecp.ConnectionHandle;
-import com.jolbox.bonecp.StatementHandle;
-import com.jolbox.bonecp.hooks.AbstractConnectionHook;
-import com.jolbox.bonecp.hooks.AcquireFailConfig;
-import com.jolbox.bonecp.hooks.ConnectionHook;
-import com.jolbox.bonecp.hooks.ConnectionState;
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.Table;
@@ -27,23 +17,22 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.utils.WpThreadUtils;
 
 import javax.sql.DataSource;
-
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.*;
-import java.util.Enumeration;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
 public class WpDataSource implements Closeable {
-    private static final Logger LOG = Logger.getLogger(WpDataSource.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WpDataSource.class);
 
     private DataSource dataSource;
     private Settings settings;
@@ -92,7 +81,7 @@ public class WpDataSource implements Closeable {
             conn.rollback();
             return true;
         } catch (SQLException e) {
-            LOG.log(Level.SEVERE    , "rollback failed: ", e);
+            LOG.error("rollback failed: ", e);
             return false;
         }
     }
@@ -146,7 +135,7 @@ public class WpDataSource implements Closeable {
                 if (s.replaceAll(";", "").trim().isEmpty()) {
                     continue;
                 }
-                LOG.fine("executing:\n" + s + "\n=========================================\n");
+                LOG.debug("executing:\n" + s + "\n=========================================\n");
 
 
 
@@ -162,7 +151,7 @@ public class WpDataSource implements Closeable {
             conn.commit();
         } catch (SQLException e){
             rollbackQuietly(conn);
-            LOG.log(Level.SEVERE, "error executing: " + script, e);
+            LOG.error("error executing: " + script, e);
             throw new DaoException("SQL Dao Failed. Check if the table exists / if the desired information has been parsed and stored in the database\n" + e.toString());
         } finally {
             closeQuietly(conn);
@@ -189,7 +178,7 @@ public class WpDataSource implements Closeable {
             try {
                 conn.close();
             } catch (SQLException e) {
-                LOG.log(Level.WARNING, "Failed to close connection: ", e);
+                LOG.warn("Failed to close connection: ", e);
             }
         }
     }
@@ -327,7 +316,7 @@ public class WpDataSource implements Closeable {
                     cnxPerPartition++;
                 }
                 if (cnxPerPartition != config.getInt("connectionsPerPartition")) {
-                    LOG.warning("Raised connections per partition to " + cnxPerPartition);
+                    LOG.warn("Raised connections per partition to " + cnxPerPartition);
                 }
                 ds.setMaxConnectionsPerPartition(cnxPerPartition);
 

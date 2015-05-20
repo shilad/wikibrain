@@ -13,7 +13,8 @@ import org.wikibrain.spatial.util.WikiBrainSpatialUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,7 +33,7 @@ public class OrdinalDistanceMetric implements SpatialDistanceMetric {
     private static final int MAX_EXACT_DISTANCE = 10000;
     private static final int SAMPLE_SIZE = 1000;
 
-    private static final Logger LOG = Logger.getLogger(GraphDistanceMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(GraphDistanceMetric.class);
     private final SpatialDataDao spatialDao;
     private final TIntObjectMap<TIntSet> adjacencyList = new TIntObjectHashMap<TIntSet>();
     private final SphericalDistanceMetric spherical;

@@ -10,8 +10,10 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Shilad Sen
@@ -22,7 +24,7 @@ public class PageViewReader implements Iterable<RawPageView> {
 
     private final LanguageSet langs;
 
-    private static final Logger LOG = Logger.getLogger(PageViewReader.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PageViewReader.class);
 
     private final File path;
 
@@ -90,7 +92,7 @@ public class PageViewReader implements Iterable<RawPageView> {
                     }
                     String[] cols = line.split(" ");
                     if (cols.length < 3) {
-                        LOG.log(Level.INFO, "Invalid pageview line: " + line);
+                        LOG.info("Invalid pageview line: " + line);
                         continue;
                     }
 

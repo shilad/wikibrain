@@ -8,7 +8,8 @@ import org.wikibrain.matrix.DenseMatrixRow;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Approximation cache for nearest neighbors that uses a random-projection scheme.
@@ -23,7 +24,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class RandomProjectionKNNFinder implements KNNFinder {
-    private static final Logger LOG = Logger.getLogger(RandomProjectionKNNFinder.class.getCanonicalName());
+    private static final Logger LOG = LoggerFactory.getLogger(RandomProjectionKNNFinder.class);
     public static final int NUM_BITS = 128;
 
     private final DenseMatrix matrix;
@@ -141,7 +142,7 @@ public class RandomProjectionKNNFinder implements KNNFinder {
         if (validIds != null) {
             TIntSet tmp = validIds;
             validIds = new TIntHashSet(tmp.size() * 4);
-            tmp.addAll(validIds);
+            validIds.addAll(tmp);
         }
         long vbits[] = new  long[2];
         project(vector, vbits);
@@ -196,10 +197,10 @@ public class RandomProjectionKNNFinder implements KNNFinder {
     @Override
     public boolean load(File path) throws IOException {
         if (!path.isFile()) {
-            LOG.warning("Not loading knn model. File doesn't exist: " + path);
+            LOG.warn("Not loading knn model. File doesn't exist: " + path);
             return false;
         } else if (path.lastModified() < matrix.getPath().lastModified()) {
-            LOG.warning("Not loading knn model. File " + path + " older than matrix: " + matrix.getPath());
+            LOG.warn("Not loading knn model. File " + path + " older than matrix: " + matrix.getPath());
             return false;
         }
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(path));
@@ -210,15 +211,15 @@ public class RandomProjectionKNNFinder implements KNNFinder {
             double [] newMeans = (double[]) obj[2];
             double [] newDevs = (double[]) obj[3];
             if (newBits.length != ids.length *2) {
-                LOG.warning("Not loading knn model. Expected " + 2*ids.length + " longs, found " + newBits.length);
+                LOG.warn("Not loading knn model. Expected " + 2*ids.length + " longs, found " + newBits.length);
                 return false;
             }
             if (newVectors.length != NUM_BITS || newVectors[0].length != dimensions) {
-                LOG.warning("Not loading knn model. Invalid vectors dimensions.");
+                LOG.warn("Not loading knn model. Invalid vectors dimensions.");
                 return false;
             }
             if (newMeans.length != dimensions || newDevs.length != dimensions) {
-                LOG.warning("Not loading knn model. Invalid mean or devs dimensions.");
+                LOG.warn("Not loading knn model. Invalid mean or devs dimensions.");
                 return false;
             }
             this.vectors =newVectors;

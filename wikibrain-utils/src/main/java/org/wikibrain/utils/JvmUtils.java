@@ -13,7 +13,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Pattern;
 
 /**
@@ -30,7 +31,7 @@ public class JvmUtils {
      */
     private static Pattern WIKIBRAIN_CLASS_BLACKLIST = Pattern.compile("(.*jooq.*|\\$[0-9]+$)");
 
-    private static final Logger LOG = Logger.getLogger(JvmUtils.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(JvmUtils.class);
 
     public static final int MAX_FILE_SIZE = 8 * 1024 * 1024;   // 8MB
 
@@ -52,7 +53,7 @@ public class JvmUtils {
                         try {
                             classPath += separator + new File(url.toURI());
                         } catch (URISyntaxException e) {
-                            LOG.warning("Illegal url: " + url);
+                            LOG.warn("Illegal url: " + url);
                         }
                     }
                 }
@@ -70,10 +71,10 @@ public class JvmUtils {
         CLASS_PATH = new ArrayList<File>();
         String separator = System.getProperty("path.separator");
         for (String entry : getClassPath().split(separator)) {
-            LOG.fine("considering classpath entry " + entry);
+            LOG.debug("considering classpath entry " + entry);
             File file = new File(entry);
             if (!file.exists()) {
-                LOG.warning("skipping nonexistent classpath file " + file);
+                LOG.warn("skipping nonexistent classpath file " + file);
                 continue;
             }
             CLASS_PATH.add(new File(FilenameUtils.normalize(file.getAbsolutePath())));
@@ -195,7 +196,7 @@ public class JvmUtils {
         NAME_TO_CLASS = new HashMap<String, String>();
         for (File file : getClassPathAsList()) {
             if (file.length() > MAX_FILE_SIZE) {
-                LOG.fine("skipping looking for providers in large file " + file);
+                LOG.debug("skipping looking for providers in large file " + file);
                 continue;
             }
             ClassFinder finder = new ClassFinder();

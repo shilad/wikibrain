@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.6.0</version>
+        <version>0.7.0</version>
     </parent>
 
   <artifactId>wikibrain-core</artifactId>
@@ -13,22 +13,22 @@
       <dependency>
           <groupId>org.wikibrainapi</groupId>
           <artifactId>wikibrain-utils</artifactId>
-          <version>0.6.0</version>
+          <version>0.7.0</version>
       </dependency>
       <dependency>
           <groupId>org.wikibrainapi</groupId>
           <artifactId>wikibrain-matrix</artifactId>
-          <version>0.6.0</version>
+          <version>0.7.0</version>
       </dependency>
       <dependency>
           <groupId>org.jooq</groupId>
           <artifactId>jooq</artifactId>
-          <version>3.2.0</version>
+          <version>3.6.0</version>
       </dependency>
       <dependency>
           <groupId>org.jooq</groupId>
           <artifactId>jooq-codegen-maven</artifactId>
-          <version>3.2.0</version>
+          <version>3.6.0</version>
       </dependency>
       <dependency>
           <groupId>com.h2database</groupId>
@@ -38,13 +38,7 @@
       <dependency>
           <groupId>com.jolbox</groupId>
           <artifactId>bonecp</artifactId>
-          <!--<version>0.8.0.RELEASE</version>-->
-          <version>0.7.1.RELEASE</version>
-      </dependency>
-      <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-jdk14</artifactId>
-          <version>1.7.5</version>
+          <version>0.8.0.RELEASE</version>
       </dependency>
       <dependency>
           <groupId>org.postgresql</groupId>
@@ -153,7 +147,7 @@
             <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
-                <version>3.2.0</version>
+                <version>3.6.0</version>
 
                 <dependencies>
                     <dependency>

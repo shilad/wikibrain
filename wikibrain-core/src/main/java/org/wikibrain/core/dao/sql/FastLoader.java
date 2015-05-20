@@ -17,8 +17,10 @@ import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Bulk loads data in batch form to speed up insertions.
@@ -32,7 +34,7 @@ public class FastLoader {
     private static final Object POSION_PILL = new Object();
     private boolean isPostGisLoader = false;
 
-    static final Logger LOG = Logger.getLogger(FastLoader.class.getName());
+    static final Logger LOG = LoggerFactory.getLogger(FastLoader.class);
     static final int BATCH_SIZE = 1000;
 
     private final WpDataSource ds;
@@ -72,15 +74,15 @@ public class FastLoader {
                     try {
                         insertBatches();
                     } catch (DaoException e) {
-                        LOG.log(Level.SEVERE, "inserter failed", e);
+                        LOG.error("inserter failed", e);
                         inserterState = InserterState.FAILED;
                         rowBuffer.clear();  // allow any existing puts to go through
                     } catch (SQLException e) {
-                        LOG.log(Level.SEVERE, "inserter failed", e);
+                        LOG.error("inserter failed", e);
                         inserterState = InserterState.FAILED;
                         rowBuffer.clear();  // allow any existing puts to go through
                     } catch (InterruptedException e) {
-                        LOG.log(Level.SEVERE, "inserter interrupted", e);
+                        LOG.error("inserter interrupted", e);
                         inserterState = InserterState.FAILED;
                         rowBuffer.clear();  // allow any existing puts to go through
                     }
@@ -180,7 +182,7 @@ public class FastLoader {
                 } catch (SQLException e) {
                     cnx.rollback();
                     while (e != null) {
-                        LOG.log(Level.SEVERE, "insert batch failed, attempting to continue:", e);
+                        LOG.error("insert batch failed, attempting to continue:", e);
                         e = e.getNextException();
                     }
                 }

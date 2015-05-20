@@ -23,7 +23,8 @@ import org.wikibrain.parser.sql.MySqlDumpParser;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * User: bjhecht
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class PureWikidataConceptMapper extends ConceptMapper {
 
-    private static Logger LOG = Logger.getLogger(PureWikidataConceptMapper.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(PureWikidataConceptMapper.class);
     private final File wikiDataPath;
 
     public PureWikidataConceptMapper(File wikiDataPath, int id, LocalPageDao localPageDao) {
@@ -106,8 +107,8 @@ public class PureWikidataConceptMapper extends ConceptMapper {
             }
         }
 
-        LOG.warning("encountered unknown languages: " + unknownLangs);
-        LOG.warning("encountered " + unknownPages + " local pages not in the database");
+        LOG.warn("encountered unknown languages: " + unknownLangs);
+        LOG.warn("encountered " + unknownPages + " local pages not in the database");
 
         return new MapperIterator<UniversalPage>(backend.keySet()) {
             @Override

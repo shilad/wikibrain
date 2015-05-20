@@ -11,14 +11,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by bjhecht on 5/21/14.
  */
 public class ILLSplitter {
 
-    private static Logger LOG = Logger.getLogger(ConceptualignConceptMapper.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(ConceptualignConceptMapper.class);
 
     public static Set<Set<LocalId>> split(Map<LocalId, List<LocalId>> ills,
                                                    int minVotes, int maxVotesPerLang, boolean print, LocalPageDao lpDao) throws WikiBrainException {
@@ -65,7 +66,7 @@ public class ILLSplitter {
                         }
                     }
                 }else{
-                    LOG.warning("Found duplicate ILLs to same lang from same article exceeding maxVotes! " +
+                    LOG.warn("Found duplicate ILLs to same lang from same article exceeding maxVotes! " +
                             "Enforcing policy not allowing this!:\t" +curSource + " ---> " + curDest);
                 }
             }
@@ -84,7 +85,7 @@ public class ILLSplitter {
                         sb.append(lpDao.getById(clusterMemb).getTitle().toString());
                         sb.append(",");
                     }catch(DaoException e){
-                        LOG.severe("Error while getting title of LocalId: " + clusterMemb.toString());
+                        LOG.error("Error while getting title of LocalId: " + clusterMemb.toString());
                     }
                 }
                 LOG.info("Cluster:\t" + sb.toString());

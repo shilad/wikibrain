@@ -11,7 +11,8 @@ import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.utils.Leaderboard;
 
 import java.io.Serializable;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A cosimilarity matrix that is dense, but can be expanded.
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
 public class CosimilarityMatrix implements Serializable {
     private static final double EXPANSION_FRACTION = 1.3;
 
-    private static final Logger LOGGER = Logger.getLogger(CosimilarityMatrix.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(CosimilarityMatrix.class);
 
     private float[][] matrix = new float[0][0];
     private TIntIntMap sparse2Dense = new TIntIntHashMap();

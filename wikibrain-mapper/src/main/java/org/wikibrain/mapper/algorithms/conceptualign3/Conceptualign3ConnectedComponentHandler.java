@@ -10,7 +10,8 @@ import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalPage;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by bjhecht on 5/20/14.
@@ -23,7 +24,7 @@ public class Conceptualign3ConnectedComponentHandler implements ConnectedCompone
     private int curUnivId;
     private final LocalPageDao lpDao;
 
-    private static Logger LOG = Logger.getLogger(ConceptualignConceptMapper.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(ConceptualignConceptMapper.class);
 
     public Conceptualign3ConnectedComponentHandler(double minVotesRatio,
                                                    int maxVotesPerLang, boolean print, LocalPageDao lpDao) throws WikiBrainException {

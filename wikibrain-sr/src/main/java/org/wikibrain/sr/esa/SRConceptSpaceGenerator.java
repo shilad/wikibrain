@@ -23,14 +23,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Pattern;
 
 /**
  * @author Shilad Sen
  */
 public class SRConceptSpaceGenerator {
-    private static final Logger LOG = Logger.getLogger(SRConceptSpaceGenerator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SRConceptSpaceGenerator.class);
 
     private final Language lang;
     private final LocalLinkDao linkDao;

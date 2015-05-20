@@ -6,14 +6,15 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 
 import java.util.Date;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Contains a single page's data from Wikipedia's Xml Dump with no processing.
  * You probably don't want to use this class unless you are parsing or need full text.
  */
 public class RawPage {
-    private static final Logger LOG = Logger.getLogger(RawPage.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(RawPage.class);
 
     private final Title title;
     private final String body;

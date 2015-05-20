@@ -10,11 +10,15 @@
 
     <groupId>org.wikibrainapi</groupId>
     <artifactId>wikibrain-parent</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0</version>
     <packaging>pom</packaging>
     <name>WikiBrain parent</name>
     <description>The WikiBrain base pom</description>
     <url>http://github.com/shilad/wikibrain</url>
+
+    <properties>
+        <slf4j.version>1.7.12</slf4j.version>
+    </properties>
 
     <modules>
         <module>./wikibrain-utils</module>
@@ -32,6 +36,7 @@
         <module>./wikibrain-cookbook</module>
         <module>./wikibrain-spatial</module>
         <module>./wikibrain-pageview</module>
+        <module>./wikibrain-webapi</module>
         <module>./wikibrain</module>
     </modules>
 
@@ -68,6 +73,24 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.2</version>
+        </dependency>
+    </dependencies>
 
     <profiles>
         <profile>

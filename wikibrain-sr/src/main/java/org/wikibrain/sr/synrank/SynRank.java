@@ -21,7 +21,8 @@ import org.wikibrain.sr.disambig.Disambiguator;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of the SynRank SR metric as described in
@@ -35,7 +36,7 @@ import java.util.logging.Logger;
  * @author Shilad Sen
  */
 public class SynRank extends BaseSRMetric {
-    private static final Logger LOG = Logger.getLogger(SynRank.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SynRank.class);
 
     private final LocalLinkDao linkDao;
     private final int numArticles;

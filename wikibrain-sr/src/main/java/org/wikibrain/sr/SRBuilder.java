@@ -18,6 +18,7 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
+import org.wikibrain.sr.dataset.FakeDatasetCreator;
 import org.wikibrain.sr.ensemble.EnsembleMetric;
 import org.wikibrain.sr.esa.SRConceptSpaceGenerator;
 import org.wikibrain.sr.milnewitten.MilneWittenMetric;
@@ -33,7 +34,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -43,7 +45,7 @@ import java.util.zip.GZIPInputStream;
  * @author Shilad Sen
  */
 public class SRBuilder {
-    private static final Logger LOG = Logger.getLogger(SRBuilder.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SRBuilder.class);
 
     // The environment and configuration we will use.
     private final Env env;
@@ -72,6 +74,10 @@ public class SRBuilder {
     private boolean skipBuiltMetrics = false;
 
     private TIntSet validMostSimilarIds = null;
+
+    // We may need to create a fake gold standard for languages that don't have one.
+    private boolean createFakeGoldStandard = false;
+    private Dataset fakeGoldStandard = null;
 
     public static enum Mode {
         SIMILARITY,
@@ -188,7 +194,7 @@ public class SRBuilder {
             ensemble.setTrainSubmetrics(false);         // Do it by hand
         } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             if (mode == Mode.SIMILARITY) {
-                LOG.warning("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
+                LOG.warn("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
                 mode = Mode.BOTH;
             }
         } else if (type.equals("milnewitten")){
@@ -363,12 +369,28 @@ public class SRBuilder {
     }
 
     public Dataset getDataset() throws ConfigurationException, DaoException {
-        DatasetDao dao = env.getConfigurator().get(DatasetDao.class);
-        List<Dataset> datasets = new ArrayList<Dataset>();
-        for (String name : datasetNames) {
-            datasets.addAll(dao.getDatasetOrGroup(language, name));  // throws a DaoException if language is incorrect.
+        if (createFakeGoldStandard) {
+            if (fakeGoldStandard == null) {
+                Corpus c = env.getConfigurator().get(
+                        Corpus.class, "plain", "language",
+                        env.getDefaultLanguage().getLangCode());
+                try {
+                    if (!c.exists()) c.create();
+                    FakeDatasetCreator creator = new FakeDatasetCreator(c);
+                    fakeGoldStandard = creator.generate(500);
+                } catch (IOException e) {
+                    throw new DaoException(e);
+                }
+            }
+            return fakeGoldStandard;
+        } else {
+            DatasetDao dao = env.getConfigurator().get(DatasetDao.class);
+            List<Dataset> datasets = new ArrayList<Dataset>();
+            for (String name : datasetNames) {
+                datasets.addAll(dao.getDatasetOrGroup(language, name));  // throws a DaoException if language is incorrect.
+            }
+            return new Dataset(datasets);   // merge all datasets together into one.
         }
-        return new Dataset(datasets);   // merge all datasets together into one.
     }
 
 
@@ -448,6 +470,10 @@ public class SRBuilder {
         return ids;
     }
 
+    public void setCreateFakeGoldStandard(boolean createFakeGoldStandard) {
+        this.createFakeGoldStandard = createFakeGoldStandard;
+    }
+
     public static void main(String args[]) throws ConfigurationException, IOException, WikiBrainException, DaoException {
         Options options = new Options();
 
@@ -525,6 +551,13 @@ public class SRBuilder {
                         .withDescription("Don't rebuild already built bmetrics (implies -d false)")
                         .create("k"));
 
+        // when building pairwise cosine and ensembles, don't rebuild already built sub-metrics.
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("fake")
+                        .withDescription("Create a fake gold standard for the language.")
+                        .create("f"));
+
         EnvBuilder.addStandardOptions(options);
 
 
@@ -573,6 +606,9 @@ public class SRBuilder {
         }
         if (cmd.hasOption("r")) {
             builder.setMaxResults(Integer.valueOf(cmd.getOptionValue("r")));
+        }
+        if (cmd.hasOption("f")) {
+            builder.setCreateFakeGoldStandard(true);
         }
 
         builder.build();

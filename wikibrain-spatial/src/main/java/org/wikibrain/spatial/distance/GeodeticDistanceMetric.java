@@ -16,7 +16,8 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Estimates the number of kilometers between geometries.
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
 public class GeodeticDistanceMetric implements SpatialDistanceMetric {
     private static final double EARTH_RADIUS = 6371.0 * 1000;   // radius of the earth in meters
 
-    private static final Logger LOG = Logger.getLogger(SpatialDistanceMetric.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SpatialDistanceMetric.class);
     private final ClosestPointIndex index;
     private final SpatialDataDao spatialDao;
     private TIntSet concepts;
