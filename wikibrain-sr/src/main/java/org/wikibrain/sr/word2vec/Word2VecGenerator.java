@@ -120,7 +120,7 @@ public class Word2VecGenerator implements DenseVectorGenerator {
             int [] colIds = new int[vlength];
             for (int i = 0; i < vlength; i++) { colIds[i] = i; }
             int numPhrases = 0;
-
+            int numArticles = 0;
 
             for (int i = 0; i < numEntities; i++) {
                 String word = readString(dis);
@@ -146,6 +146,7 @@ public class Word2VecGenerator implements DenseVectorGenerator {
                     if (wpId >= 0) {
                         DenseMatrixRow row = new DenseMatrixRow(vconf, wpId, colIds, vector);
                         articleWriter.writeRow(row);
+                        numArticles++;
                     }
                 } else {
                     word = word.replace('\t', ' ').replace('\n', ' ');
@@ -154,6 +155,12 @@ public class Word2VecGenerator implements DenseVectorGenerator {
                     phraseIdWriter.write(numPhrases + "\t" + word + "\n");
                     numPhrases++;
                 }
+            }
+            if (numPhrases == 0) {
+                phraseWriter.writeRow(new DenseMatrixRow(vconf, 0, colIds, new float[vlength]));
+            }
+            if (numArticles == 0) {
+                articleWriter.writeRow(new DenseMatrixRow(vconf, 0, colIds, new float[vlength]));
             }
         } finally {
             IOUtils.closeQuietly(bis);
