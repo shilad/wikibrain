@@ -286,7 +286,7 @@ public class DenseVectorSRMetric extends BaseSRMetric {
     @Override
     public void write() throws IOException {
         super.write();
-        accelerator.save(new File(getDataDir(), "knn.bin"));
+        if (accelerator != null) accelerator.save(new File(getDataDir(), "knn.bin"));
     }
 
     /**
