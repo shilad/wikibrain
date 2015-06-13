@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.7.1-SNAPSHOT</version>
+        <version>0.7.1</version>
     </parent>
 
     <artifactId>wikibrain-phrases</artifactId>
@@ -15,12 +15,12 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-lucene</artifactId>
-            <version>0.7.1-SNAPSHOT</version>
+            <version>0.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-download</artifactId>
-            <version>0.7.1-SNAPSHOT</version>
+            <version>0.7.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.externalsortinginjava</groupId>
