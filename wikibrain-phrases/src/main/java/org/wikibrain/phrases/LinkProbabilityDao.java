@@ -144,12 +144,28 @@ public class LinkProbabilityDao {
 
         File fp = new File(path + "-phrase-cache.bin");
         File fsg = new File(path + "-subgram-cache.bin");
-        long tstamp = WpIOUtils.getLastModifiedfromDir(path);
+        long tstamp = 0;
+        try {
+            Double doubleTstamp = db.get("tstamp");
+            if (doubleTstamp == null) {
+                tstamp = System.currentTimeMillis();
+                db.put("tstamp", 1.0 * tstamp);
+                db.flush();
+            } else {
+                tstamp = db.get("tstamp").longValue();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.format("comparing %d, %d, and %d\n", tstamp, fp.lastModified(), fsg.lastModified());
         if (fp.isFile() && fp.lastModified() > tstamp
         &&  fsg.isFile() && fsg.lastModified() > tstamp) {
             try {
                 cache = (TLongFloatMap) WpIOUtils.readObjectFromFile(fp);
                 subGrams = (TLongSet) WpIOUtils.readObjectFromFile(fsg);
+                LOG.info("Using up-to-date link probability cache files {} and {}", fp, fsg);
                 return;
             } catch (IOException e) {
                 LOG.warn("Using link probability dao cache failed: ", e);
@@ -161,7 +177,9 @@ public class LinkProbabilityDao {
         TLongSet subgrams = new TLongHashSet();
         while (iter.hasNext()) {
             Pair<String, Double> entry = iter.next();
-            if (entry.getKey().startsWith(":s:")) {
+            if (entry.getKey().equalsIgnoreCase("tstamp")) {
+                // do nothing...
+            } else if (entry.getKey().startsWith(":s:")) {
                 long hash = Long.valueOf(entry.getKey().substring(3));
                 subgrams.add(hash);
             } else {
@@ -284,6 +302,12 @@ public class LinkProbabilityDao {
             } catch (IOException e) {
                 throw new DaoException(e);
             }
+        }
+
+        try {
+            db.put("tstamp", 1.0 * System.currentTimeMillis());
+        } catch (IOException e) {
+            throw new DaoException(e);
         }
 
         if (count != 0) {

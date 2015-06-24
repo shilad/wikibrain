@@ -141,7 +141,7 @@ public class WebSailWikifier implements Wikifier {
         for (LinkInfo li : mentions) {
             PrunedCounts<Integer> prior = phraseDao.getPhraseCounts(language, li.getAnchortext(), 5);
             li.setPrior(prior);
-            if (prior.isEmpty()) continue;
+            if (prior == null || prior.isEmpty()) continue;
             double p = 1.0 * prior.values().iterator().next() / (prior.getTotal() + 1);
             li.setScore(Math.sqrt(li.getLinkProbability()) * p);
         }
@@ -157,7 +157,6 @@ public class WebSailWikifier implements Wikifier {
                 existingIds.add(li.getTopPriorDestination());
             }
         }
-
 
         TIntDoubleMap sr = calculateConceptRelatedness(existingIds, mentions);
 
