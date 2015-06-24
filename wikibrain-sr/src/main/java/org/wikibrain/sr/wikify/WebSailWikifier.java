@@ -74,14 +74,15 @@ public class WebSailWikifier implements Wikifier {
         }
         probs.sort();
         probs.reverse();
-//        for (int i = 0; i < 100; i++) {
-//            System.out.println("i: " + i + " is " + probs.get(probs.size() * i / 100));
-//        }
         minLinkProbability = probs.get((int)(desiredLinkRecall * probs.size()));
         LOG.info("Set minimum link probability to " + minLinkProbability + " to achieve " + desiredLinkRecall + " recall");
     }
 
     private List<LinkInfo> getCandidates(int wpId, String text) throws DaoException {
+        return getCandidates(text); // We should do something smarter with the text.
+    }
+
+    private List<LinkInfo> getCandidates(String text) throws DaoException {
         List<LinkInfo> candidates = new ArrayList<LinkInfo>();
         StringTokenizer tokenizer = new StringTokenizer();
         for (Token sentence : tokenizer.getSentenceTokens(language, text)) {
@@ -100,8 +101,24 @@ public class WebSailWikifier implements Wikifier {
 
     @Override
     public List<LocalLink> wikify(int wpId, String text) throws DaoException {
+
+        // Find all mentions that are linked with some likelihood
         List<LinkInfo> mentions = getCandidates(wpId, text);
-        disambiguate(mentions, wpId);
+
+        // Find disambiguation candidates for each possible mention
+        for (LinkInfo li : mentions) {
+            li.setPrior(phraseDao.getPhraseCounts(language, li.getAnchortext(), 5));
+        }
+
+        // Calculate the relatedness of each mention to known links in the article
+        TIntSet existingIds = getActualLinks(wpId);
+        TIntDoubleMap sr = calculateConceptRelatedness(existingIds, mentions);
+
+        // Score every possible mention
+        for (LinkInfo li : mentions) {
+            scoreInfo(wpId, existingIds, li, sr);
+        }
+
         return link(wpId, text, mentions);
     }
 
@@ -117,19 +134,12 @@ public class WebSailWikifier implements Wikifier {
 
     @Override
     public List<LocalLink> wikify(String text) throws DaoException {
-        return null;
-    }
-
-
-    private void disambiguate(List<LinkInfo> infos, int wpId) throws DaoException {
-        TIntSet existingIds = getActualLinks(wpId);
-        for (LinkInfo li : infos) {
+        List<LinkInfo> mentions = getCandidates(text);
+        for (LinkInfo li : mentions) {
             li.setPrior(phraseDao.getPhraseCounts(language, li.getAnchortext(), 5));
         }
-        TIntDoubleMap sr = calculateConceptRelatedness(wpId, existingIds, infos);
-        for (LinkInfo li : infos) {
-            scoreInfo(wpId, existingIds, li, sr);
-        }
+        // Get very linkely candidates
+        return null;
     }
 
     private void scoreInfo(int wpId, TIntSet existingIds, LinkInfo li, TIntDoubleMap sr) {
@@ -164,7 +174,7 @@ public class WebSailWikifier implements Wikifier {
         return existingIds;
     }
 
-    private TIntDoubleMap calculateConceptRelatedness(int wpId, TIntSet existingIds, List<LinkInfo> infos) throws DaoException {
+    private TIntDoubleMap calculateConceptRelatedness(TIntSet existingIds, List<LinkInfo> infos) throws DaoException {
         TIntSet candidateIds = new TIntHashSet();
         for (LinkInfo li : infos) {
             if (li.getPrior() != null) {

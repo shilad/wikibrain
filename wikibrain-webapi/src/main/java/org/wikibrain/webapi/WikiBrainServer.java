@@ -10,7 +10,6 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.ConfigurationException;
-import org.wikibrain.conf.Configurator;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
@@ -49,6 +48,7 @@ public class WikiBrainServer extends AbstractHandler {
     @Override
     public void handle(String target, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
         WikiBrainWebRequest req = new WikiBrainWebRequest(target, request, httpServletRequest, httpServletResponse);
+        LOG.info("received request for {} {}", target, request.getAttributes());
 
         try {
             // TODO: add logging
@@ -137,7 +137,7 @@ public class WikiBrainServer extends AbstractHandler {
             obj.put("articleId", ll.getDestId());
             jsonConcepts.add(obj);
         }
-        req.writeJsonResponse("text", text, "concepts", jsonConcepts);
+        req.writeJsonResponse("text", text, "references", jsonConcepts);
     }
 
     private void resolvePageIfNecessary(WebEntity e) throws DaoException {
