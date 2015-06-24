@@ -4,6 +4,7 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.sr.wikify.Wikifier;
 
@@ -23,14 +24,15 @@ public class WikifierExample {
 
     public static void main(String args[]) throws ConfigurationException, DaoException {
         Env env = EnvBuilder.envFromArgs(args);
+        LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
 
         // Get the default wikifier in the default language.
         Wikifier wikifier = env.getConfigurator().get(
-                Wikifier.class, "default",
+                Wikifier.class, "websail",
                 "language", env.getDefaultLanguage().getLangCode());
 
         for (LocalLink link : wikifier.wikify(CORPUS)) {
-            System.out.println("link is " + link);
+            System.out.println("link is " + link.getAnchorText() + " is for " + pageDao.getById(link.getLanguage(), link.getDestId()));
         }
     }
 }

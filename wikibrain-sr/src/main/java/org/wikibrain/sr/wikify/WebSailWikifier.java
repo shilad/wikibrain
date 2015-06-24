@@ -18,6 +18,7 @@ import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
 import org.wikibrain.phrases.*;
 import org.wikibrain.sr.SRMetric;
+import org.wikibrain.sr.utils.Leaderboard;
 import org.wikibrain.sr.vector.FeatureFilter;
 import org.wikibrain.utils.Scoreboard;
 
@@ -116,7 +117,7 @@ public class WebSailWikifier implements Wikifier {
 
         // Score every possible mention
         for (LinkInfo li : mentions) {
-            scoreInfo(wpId, existingIds, li, sr);
+            scoreInfo(existingIds, li, sr);
         }
 
         return link(wpId, text, mentions);
@@ -135,14 +136,40 @@ public class WebSailWikifier implements Wikifier {
     @Override
     public List<LocalLink> wikify(String text) throws DaoException {
         List<LinkInfo> mentions = getCandidates(text);
+
+        // Temporarily score eveything based on link probability and prior
         for (LinkInfo li : mentions) {
-            li.setPrior(phraseDao.getPhraseCounts(language, li.getAnchortext(), 5));
+            PrunedCounts<Integer> prior = phraseDao.getPhraseCounts(language, li.getAnchortext(), 5);
+            li.setPrior(prior);
+            if (prior.isEmpty()) continue;
+            double p = 1.0 * prior.values().iterator().next() / (prior.getTotal() + 1);
+            li.setScore(Math.sqrt(li.getLinkProbability()) * p);
         }
-        // Get very linkely candidates
-        return null;
+
+        // Take the top scoring items as existing ids
+        Collections.sort(mentions);
+        TIntSet existingIds = new TIntHashSet();
+        for (int i = 0; i < mentions.size(); i++) {
+            LinkInfo li = mentions.get(i);
+            double p = 1.0 * li.getPrior().values().iterator().next() / (li.getPrior().getTotal() + 1);
+//            String name = phraseDao.getPageCounts(language, li.getTopPriorDestination(), 1).keySet().iterator().next();
+            if ((li.getScore() > 0.01 && i < 3 && p >= 0.5) || (li.getScore() > 0.25 && p >= 0.5)) {
+                existingIds.add(li.getTopPriorDestination());
+            }
+        }
+
+
+        TIntDoubleMap sr = calculateConceptRelatedness(existingIds, mentions);
+
+        // Score every possible mention
+        for (LinkInfo li : mentions) {
+            scoreInfo(existingIds, li, sr);
+        }
+
+        return link(-1, text, mentions);
     }
 
-    private void scoreInfo(int wpId, TIntSet existingIds, LinkInfo li, TIntDoubleMap sr) {
+    private void scoreInfo(TIntSet existingIds, LinkInfo li, TIntDoubleMap sr) {
         if (li.getPrior() == null || li.getPrior().isEmpty()) {
             return;
         }

@@ -142,8 +142,8 @@ public class LinkProbabilityDao {
         }
 
 
-        File fp = new File(path, "phrase-cache.bin");
-        File fsg = new File(path, "subgram-cache.bin");
+        File fp = new File(path + "-phrase-cache.bin");
+        File fsg = new File(path + "-subgram-cache.bin");
         long tstamp = WpIOUtils.getLastModifiedfromDir(path);
         if (fp.isFile() && fp.lastModified() > tstamp
         &&  fsg.isFile() && fsg.lastModified() > tstamp) {
