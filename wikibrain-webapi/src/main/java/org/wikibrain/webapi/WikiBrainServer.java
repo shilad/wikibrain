@@ -17,6 +17,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
+import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.Title;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
@@ -48,7 +49,7 @@ public class WikiBrainServer extends AbstractHandler {
     @Override
     public void handle(String target, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
         WikiBrainWebRequest req = new WikiBrainWebRequest(target, request, httpServletRequest, httpServletResponse);
-        LOG.info("received request for {} {}", target, request.getAttributes());
+        LOG.info("received request for {}?{}", request.getRequestURL(), request.getQueryString());
 
         try {
             // TODO: add logging
@@ -115,10 +116,12 @@ public class WikiBrainServer extends AbstractHandler {
         }
         List jsonResults = new ArrayList();
         for (SRResult r : results) {
+            LocalPage page = pageDao.getById(lang, r.getId());
             Map obj = new HashMap();
             obj.put("articleId", r.getId());
             obj.put("score", r.getScore());
             obj.put("lang", lang.getLangCode());
+            obj.put("title", page == null ? "Unknown" : page.getTitle().getCanonicalTitle());
             jsonResults.add(obj);
         }
         req.writeJsonResponse("results", jsonResults);
@@ -126,15 +129,17 @@ public class WikiBrainServer extends AbstractHandler {
 
     private void doWikify(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
         Language lang = req.getLanguage();
-        Wikifier wf = env.getConfigurator().get(Wikifier.class, "default", "language", lang.getLangCode());
+        Wikifier wf = env.getConfigurator().get(Wikifier.class, "websail", "language", lang.getLangCode());
         String text = req.getParamOrDie("text");
         List jsonConcepts = new ArrayList();
         for (LocalLink ll : wf.wikify(text)) {
+            LocalPage page = pageDao.getById(lang, ll.getDestId());
             Map obj = new HashMap();
             obj.put("index", ll.getLocation());
             obj.put("text", ll.getAnchorText());
             obj.put("lang", lang.getLangCode());
             obj.put("articleId", ll.getDestId());
+            obj.put("title", page == null ? "Unknown" : page.getTitle().getCanonicalTitle());
             jsonConcepts.add(obj);
         }
         req.writeJsonResponse("text", text, "references", jsonConcepts);

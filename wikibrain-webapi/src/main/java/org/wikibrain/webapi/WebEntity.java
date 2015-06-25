@@ -21,7 +21,9 @@ public class WebEntity {
 
         @Override
         public String toString() {
-            return WordUtils.capitalizeFully(toString(), new char[]{'_'}).replaceAll("_", "");
+            return WordUtils.uncapitalize(
+                    WordUtils.capitalizeFully(name(), new char[]{'_'})
+                            .replaceAll("_", ""));
         }
     };
 

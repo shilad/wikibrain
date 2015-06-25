@@ -66,7 +66,7 @@ public class WikiBrainWebRequest {
      * @param keysAndValues key1, value1, key2, value2, ...
      */
     public void writeJsonResponse(Object ...keysAndValues) {
-        if (keysAndValues.length % 2 == 0) {
+        if (keysAndValues.length % 2 != 0) {
             throw new IllegalArgumentException();
         }
         Map obj = new HashMap();
@@ -93,6 +93,7 @@ public class WikiBrainWebRequest {
         } catch (IOException e) {
             throw new WikiBrainWebException(e);
         }
+        request.setHandled(true);
     }
 
     public void writeError(Exception e) {
