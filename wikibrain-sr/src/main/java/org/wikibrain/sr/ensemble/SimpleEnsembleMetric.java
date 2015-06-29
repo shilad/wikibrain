@@ -47,7 +47,6 @@ public class SimpleEnsembleMetric implements SRMetric{
     private SubMetric metrics[];
     private boolean trainSubmetrics = true;
     private double numCandidateMultiplier = 2.0;
-    private File dataDir;
 
 
     public SimpleEnsembleMetric(String name, Language language, List<SRMetric> metrics, List<Double> coefficients){
@@ -56,6 +55,7 @@ public class SimpleEnsembleMetric implements SRMetric{
         }
         this.metrics=new SubMetric[metrics.size()];
         for (int i =0 ; i < metrics.size(); i++) {
+            this.metrics[i] = new SubMetric();
             this.metrics[i].metric = metrics.get(i);
             this.metrics[i].coefficient = coefficients.get(i);
         }
