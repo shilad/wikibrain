@@ -158,7 +158,7 @@ public class SRBuilder {
         String type = getMetricType(parentName);
         Config config = getMetricConfig(parentName);
         List<String> toAdd = new ArrayList<String>();
-        if (type.equals("ensemble")) {
+        if (type.equals("ensemble") || type.equals("simple-ensemble")) {
             for (String child : config.getStringList("metrics")) {
                 toAdd.addAll(getSubmetrics(child));
                 toAdd.add(child);
