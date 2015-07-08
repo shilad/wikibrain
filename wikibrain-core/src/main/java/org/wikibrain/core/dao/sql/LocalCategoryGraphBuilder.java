@@ -131,6 +131,10 @@ public class LocalCategoryGraphBuilder {
     }
 
     public void computePageRanks(CategoryGraph graph) {
+        if (graph.catIds.length == 0) {
+            LOG.info("No categories found. Skipping page rank calculation.");
+            return;
+        }
         LOG.info("computing category page ranks...");
 
         // initialize page rank
