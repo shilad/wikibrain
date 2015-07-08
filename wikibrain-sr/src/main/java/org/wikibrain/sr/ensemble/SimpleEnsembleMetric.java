@@ -53,6 +53,9 @@ public class SimpleEnsembleMetric implements SRMetric{
         if (metrics.size() != coefficients.size()) {
             throw new IllegalArgumentException();
         }
+        if (metrics.isEmpty()) {
+            throw new IllegalArgumentException("Must supply at least one metric to the simple ensemble.");
+        }
         this.metrics=new SubMetric[metrics.size()];
         for (int i =0 ; i < metrics.size(); i++) {
             this.metrics[i] = new SubMetric();
@@ -300,12 +303,24 @@ public class SimpleEnsembleMetric implements SRMetric{
             if (!config.hasPath("metrics")){
                 throw new ConfigurationException("Ensemble metric has no base metrics to use.");
             }
+            List<String> metricNames = config.getStringList("metrics");
+            List<Double> allCoefficients = config.getDoubleList("coefficients");
+
             List<SRMetric> metrics = new ArrayList<SRMetric>();
-            for (String metric : config.getStringList("metrics")){
-                metrics.add(getConfigurator().get(SRMetric.class, metric, "language", language.getLangCode()));
+            List<Double> activeCoefficients = new ArrayList<Double>();
+
+            for (int i = 0; i < metricNames.size(); i++) {
+                try {
+                    metrics.add(getConfigurator().get(SRMetric.class, metricNames.get(i),
+
+                            "language", language.getLangCode()));
+                    activeCoefficients.add(allCoefficients.get(i));
+                } catch (Exception e) {
+                    LOG.error("Loading of metric " + metricNames.get(i) + " failed. Skipping it! Error:", e);
+                }
             }
-            List<Double> coefficients = config.getDoubleList("coefficients");
-            return new SimpleEnsembleMetric(name, language, metrics, coefficients);
+
+            return new SimpleEnsembleMetric(name, language, metrics, activeCoefficients);
         }
     }
 }
