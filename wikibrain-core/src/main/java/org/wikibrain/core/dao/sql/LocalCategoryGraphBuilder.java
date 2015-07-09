@@ -171,7 +171,7 @@ public class LocalCategoryGraphBuilder {
         });
 
         StringBuilder b = new StringBuilder();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 20 && i < sortedIndexes.length; i++) {
             int j = sortedIndexes[i];
             b.append("" + i + ". " + graph.cats[j] + "=" + graph.catCosts[j]);
             b.append(", ");
