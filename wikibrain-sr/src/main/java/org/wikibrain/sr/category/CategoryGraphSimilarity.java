@@ -2,6 +2,8 @@ package org.wikibrain.sr.category;
 
 import com.typesafe.config.Config;
 import gnu.trove.set.TIntSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -34,6 +36,8 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class CategoryGraphSimilarity extends BaseSRMetric {
+    private static final Logger LOG = LoggerFactory.getLogger(CategoryGraphSimilarity.class);
+
     private final CategoryGraph graph;
     LocalCategoryMemberDao catHelper;
 
@@ -71,8 +75,10 @@ public class CategoryGraphSimilarity extends BaseSRMetric {
      */
     @Override
     public synchronized void trainSimilarity(Dataset dataset) throws DaoException {
-        if (graph.catIds.length != 0) {
+        try {
             super.trainSimilarity(dataset);
+        } catch (Exception e) {
+            LOG.warn("Training of sr metric similarity " + getName() + " failed, disabling it.", e);
         }
     }
 
@@ -81,14 +87,16 @@ public class CategoryGraphSimilarity extends BaseSRMetric {
      */
     @Override
     public synchronized void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) {
-        if (graph.catIds.length != 0) {
+        try {
             super.trainMostSimilar(dataset, numResults, validIds);
+        } catch (Exception e) {
+            LOG.warn("Training of sr metric mostSimilar " + getName() + " failed, disabling it.", e);
         }
     }
 
     @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
-        if (graph.catIds.length != 0) {
+        if (similarityIsTrained()) {
             return new SRResult(0.0);
         }
         CategoryBfs bfs1 = new CategoryBfs(graph,pageId1,getLanguage(), Integer.MAX_VALUE, null, catHelper);
@@ -140,7 +148,7 @@ public class CategoryGraphSimilarity extends BaseSRMetric {
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
-        if (graph.catIds.length != 0) {
+        if (!mostSimilarIsTrained()) {
             return new SRResultList(0);
         }
 
