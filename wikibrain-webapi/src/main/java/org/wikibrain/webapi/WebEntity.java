@@ -3,7 +3,9 @@ package org.wikibrain.webapi;
 import org.apache.commons.lang3.text.WordUtils;
 import org.wikibrain.core.lang.Language;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -25,6 +27,9 @@ public class WebEntity {
                     WordUtils.capitalizeFully(name(), new char[]{'_'})
                             .replaceAll("_", ""));
         }
+        public String toPluralString() {
+            return toString() + "s";
+        }
     };
 
     private Type type;
@@ -34,32 +39,39 @@ public class WebEntity {
     private int articleId = -1;
     private int conceptId = -1;
 
-    public WebEntity(Language lang, WikiBrainWebRequest req) {
-        this(lang, "", req);
+    public static WebEntity titleEntity(Language lang, String title) {
+        WebEntity w = new WebEntity();
+        w.type = Type.TITLE;
+        w.lang = lang;
+        w.title = title;
+        return w;
     }
 
-    public WebEntity(Language lang, String suffix, WikiBrainWebRequest req) {
-        String errorMessage = "Must specify exactly one of the following params:";
-        for (Type t : Type.values()) {
-            errorMessage += " " + t + suffix;
-        }
-        String value = null;
-        for (Type t : Type.values()) {
-            if (req.hasParam(t + suffix)) {
-                if (value != null) throw new WikiBrainWebException(errorMessage);
-                type = t;
-                value = req.getParam(t + suffix);
-            }
-        }
-        if (value == null) throw new WikiBrainWebException(errorMessage);
-        this.lang = lang;
-        switch (type) {
-            case TITLE: this.title = value; break;
-            case PHRASE: this.phrase = value; break;
-            case ARTICLE_ID: this.articleId = Integer.valueOf(value); break;
-            case CONCEPT_ID: this.conceptId = Integer.valueOf(value); break;
-        }
+    public static WebEntity phraseEntity(Language lang, String phrase) {
+        WebEntity w = new WebEntity();
+        w.type = Type.PHRASE;
+        w.lang = lang;
+        w.phrase = phrase;
+        return w;
     }
+
+    public static WebEntity articleEntity(Language lang, int articleId) {
+        WebEntity w = new WebEntity();
+        w.type = Type.ARTICLE_ID;
+        w.lang = lang;
+        w.articleId = articleId;
+        return w;
+    }
+
+    public static WebEntity conceptEntity(Language lang, int conceptId) {
+        WebEntity w = new WebEntity();
+        w.type = Type.CONCEPT_ID;
+        w.lang = lang;
+        w.conceptId = conceptId;
+        return w;
+    }
+
+    private WebEntity() {}
 
     public Type getType() {
         return type;

@@ -40,9 +40,11 @@ public class WikiBrainServer extends AbstractHandler {
     private static final Logger LOG = LoggerFactory.getLogger(WikiBrainServer.class);
     private final Env env;
     private final LocalPageDao pageDao;
+    private WebEntityParser entityParser;
 
     public WikiBrainServer(Env env) throws ConfigurationException {
         this.env = env;
+        this.entityParser = new WebEntityParser(env);
         this.pageDao = env.getConfigurator().get(LocalPageDao.class);
     }
 
@@ -61,6 +63,8 @@ public class WikiBrainServer extends AbstractHandler {
                 doMostSimilar(req);
             } else if (target.equals("/wikify")) {
                 doWikify(req);
+            } else if (target.equals("/pageRank")) {
+                doPageRank(req);
             }
         } catch (WikiBrainWebException e) {
             req.writeError(e);
@@ -74,13 +78,12 @@ public class WikiBrainServer extends AbstractHandler {
     private void doSimilarity(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
         // TODO: support explanations
         Language lang = req.getLanguage();
-        WebEntity entity1 = new WebEntity(lang, "1", req);
-        WebEntity entity2 = new WebEntity(lang, "2", req);
-        if (entity1.getType() != entity2.getType()) {
-            throw new WikiBrainWebException("Types of entities do not match (" + entity1 + " vs. " + entity2 + ")");
+        List<WebEntity> entities = entityParser.extractEntityList(req);
+        if (entities.size() != 2) {
+            throw new WikiBrainWebException("Similarity requires exactly two entities");
         }
-        resolvePageIfNecessary(entity1);
-        resolvePageIfNecessary(entity2);
+        WebEntity entity1 = entities.get(0);
+        WebEntity entity2 = entities.get(1);
         SRMetric sr = env.getConfigurator().get(SRMetric.class, "milnewitten", "language", lang.getLangCode());
         SRResult r = null;
         switch (entity1.getType()) {
@@ -99,8 +102,7 @@ public class WikiBrainServer extends AbstractHandler {
 
     private void doMostSimilar(WikiBrainWebRequest req) throws DaoException, ConfigurationException {
         Language lang = req.getLanguage();
-        WebEntity entity = new WebEntity(lang, "", req);
-        resolvePageIfNecessary(entity);
+        WebEntity entity = entityParser.extractEntity(req);
         int n = Integer.valueOf(req.getParam("n", "10"));
         SRMetric sr = env.getConfigurator().get(SRMetric.class, "milnewitten", "language", lang.getLangCode());
         SRResultList results;
@@ -127,6 +129,10 @@ public class WikiBrainServer extends AbstractHandler {
         req.writeJsonResponse("results", jsonResults);
     }
 
+    private void doPageRank(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
+
+    }
+
     private void doWikify(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
         Language lang = req.getLanguage();
         Wikifier wf = env.getConfigurator().get(Wikifier.class, "websail", "language", lang.getLangCode());
@@ -143,17 +149,6 @@ public class WikiBrainServer extends AbstractHandler {
             jsonConcepts.add(obj);
         }
         req.writeJsonResponse("text", text, "references", jsonConcepts);
-    }
-
-    private void resolvePageIfNecessary(WebEntity e) throws DaoException {
-        if (e.getType() == WebEntity.Type.TITLE) {
-            Title title = new Title(e.getTitle(), e.getLang());
-            int id = pageDao.getIdByTitle(title);
-            if (id < 0) {
-                throw new WikiBrainWebException("No page found for title " + title);
-            }
-            e.setArticleId(id);
-        }
     }
 
     public static void main(String args[]) throws Exception {
