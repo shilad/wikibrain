@@ -100,6 +100,7 @@ public class Env implements Closeable {
     private void configureDefaultLogging() {
         System.setProperty("org.jooq.no-logo", "true");
         System.setProperty("log4j.configurationFile", "wikibrain-default-log4j2-config.xml");
+        ((org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false)).reconfigure();
         ((LoggerContext) LogManager.getContext(false)).updateLoggers();
         LOG = LoggerFactory.getLogger(Env.class);
         LOG.info("Configured default logging at the Info Level");

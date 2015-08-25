@@ -55,18 +55,24 @@ public class EnvBuilder {
             setConfigFile(new File(cmd.getOptionValue("c").trim()));
         }
         if (cmd.hasOption("l")) {
+            System.err.println("here a");
             String val = cmd.getOptionValue("l");
             if (val.equals("loaded")) {
+                System.err.println("here b");
                 setUseLoadedLanguages();
             } else if (val.equals("downloaded")) {
+                System.err.println("here c");
                 setUseDownloadedLanguages();
             } else {  // TODO: handle world economies, etc.
+                System.err.println("here d");
                 setLanguages(new LanguageSet(cmd.getOptionValue("l")));
+                System.err.println("here e");
             }
         }
         if (cmd.hasOption("tmp-dir")) {
             setTmpDir(new File(cmd.getOptionValue("tmp-dir")));
         }
+        System.err.println("here f");
     }
 
 
