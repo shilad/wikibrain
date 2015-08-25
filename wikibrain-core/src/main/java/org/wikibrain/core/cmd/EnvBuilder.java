@@ -61,7 +61,6 @@ public class EnvBuilder {
             } else if (val.equals("downloaded")) {
                 setUseDownloadedLanguages();
             } else {  // TODO: handle world economies, etc.
-                System.err.println("here d");
                 setLanguages(new LanguageSet(cmd.getOptionValue("l")));
             }
         }
