@@ -29,7 +29,7 @@ Common request query parameters include:
   * `articleId`: The id of the article, e.g. `articleId=18618509`
   * `conceptId`: The id of the associated Wikidata concept, e.g. `conceptId=180`
   * `phrase`: A textual phrase, e.g. `phrase=The%20Wikimedia%20Foundation`
-* Requests about multiple entities contain plural versions of the above query parameters (an `s` is added), with individual entities delimited by an or-bar (`|`), e.g. `articleId=18618509|5043734`
+* Requests about multiple entities contain plural versions of the above query parameters (an `s` is added), with individual entities delimited by an or-bar (`|`), e.g. `articleIds=18618509|5043734`
 
 # Structure of API responses:
 
