@@ -173,6 +173,7 @@ public class LocalPageSqlDao extends AbstractSqlDao<LocalPage> implements LocalP
                     from(Tables.LOCAL_PAGE).
                     where(Tables.LOCAL_PAGE.PAGE_ID.eq(pageId)).
                     and(Tables.LOCAL_PAGE.LANG_ID.eq(language.getId())).
+                    limit(1).
                     fetchOne();
             return buildLocalPage(record);
         } finally {

@@ -2,6 +2,8 @@ package org.wikibrain.sr.category;
 
 import com.typesafe.config.Config;
 import gnu.trove.set.TIntSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -14,15 +16,28 @@ import org.wikibrain.core.model.CategoryGraph;
 import org.wikibrain.sr.*;
 import org.wikibrain.sr.BaseSRMetric;
 import org.wikibrain.sr.SRMetric;
+import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.disambig.Disambiguator;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
+ * <p>This metric is an enhanced variant of Stube and Ponzetto's WikiRelate.</p>
+ *
+ * <p>This class makes two enhancements to the original SR metric that improve
+ * the accuracy and efficiency of the algorithm calculations. First, this class
+ * uses page-rank weighted edge weights for the category graph to distinguish
+ * between categories with different levels of specificity. Second, this class
+ * uses bidirectional search (instead of vanilla breadth-first search) for the
+ * similarity() method.</p>
+ *
  * @author Matt Lesicko
  * @author Shilad Sen
  */
 public class CategoryGraphSimilarity extends BaseSRMetric {
+    private static final Logger LOG = LoggerFactory.getLogger(CategoryGraphSimilarity.class);
+
     private final CategoryGraph graph;
     LocalCategoryMemberDao catHelper;
 
@@ -53,8 +68,37 @@ public class CategoryGraphSimilarity extends BaseSRMetric {
         return config;
     }
 
+    /**
+     * Some languages do not have categories. Don't choke on them!
+     * @param dataset
+     * @throws DaoException
+     */
+    @Override
+    public synchronized void trainSimilarity(Dataset dataset) throws DaoException {
+        try {
+            super.trainSimilarity(dataset);
+        } catch (Exception e) {
+            LOG.warn("Training of sr metric similarity " + getName() + " failed, disabling it.", e);
+        }
+    }
+
+    /**
+     * Some languages do not have categories. Don't choke on them!
+     */
+    @Override
+    public synchronized void trainMostSimilar(Dataset dataset, int numResults, TIntSet validIds) {
+        try {
+            super.trainMostSimilar(dataset, numResults, validIds);
+        } catch (Exception e) {
+            LOG.warn("Training of sr metric mostSimilar " + getName() + " failed, disabling it.", e);
+        }
+    }
+
     @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
+        if (similarityIsTrained()) {
+            return new SRResult(0.0);
+        }
         CategoryBfs bfs1 = new CategoryBfs(graph,pageId1,getLanguage(), Integer.MAX_VALUE, null, catHelper);
         CategoryBfs bfs2 = new CategoryBfs(graph,pageId2,getLanguage(), Integer.MAX_VALUE, null, catHelper);
         bfs1.setAddPages(false);
@@ -104,6 +148,9 @@ public class CategoryGraphSimilarity extends BaseSRMetric {
 
     @Override
     public SRResultList mostSimilar(int pageId, int maxResults, TIntSet validIds) throws DaoException {
+        if (!mostSimilarIsTrained()) {
+            return new SRResultList(0);
+        }
 
         SRResultList results = getCachedMostSimilar(pageId, maxResults, validIds);
         if (results != null) {

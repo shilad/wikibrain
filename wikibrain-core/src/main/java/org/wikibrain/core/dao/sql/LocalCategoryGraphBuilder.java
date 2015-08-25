@@ -131,6 +131,10 @@ public class LocalCategoryGraphBuilder {
     }
 
     public void computePageRanks(CategoryGraph graph) {
+        if (graph.catIds.length == 0) {
+            LOG.info("No categories found. Skipping page rank calculation.");
+            return;
+        }
         LOG.info("computing category page ranks...");
 
         // initialize page rank
@@ -167,7 +171,7 @@ public class LocalCategoryGraphBuilder {
         });
 
         StringBuilder b = new StringBuilder();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 20 && i < sortedIndexes.length; i++) {
             int j = sortedIndexes[i];
             b.append("" + i + ". " + graph.cats[j] + "=" + graph.catCosts[j]);
             b.append(", ");

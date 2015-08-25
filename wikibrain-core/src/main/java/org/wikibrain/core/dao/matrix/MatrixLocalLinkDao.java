@@ -2,8 +2,12 @@ package org.wikibrain.core.dao.matrix;
 
 import com.google.code.externalsorting.ExternalSort;
 import com.typesafe.config.Config;
+import gnu.trove.function.TDoubleFunction;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.procedure.TIntProcedure;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -22,10 +26,7 @@ import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.matrix.*;
 import org.wikibrain.utils.*;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,17 +34,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Wraps a local link dao delegate and builds a fast, sparse, matrix and its
- * transpose to speed up graph lookups.
+ * <p>This class wraps a local link dao delegate and builds a fast, sparse, matrix
+ * and its transpose to speed up graph lookups.</p>
  *
+ * <p>
  * Three API calls are partially supported:
  * 1. The three-argument version of getLinks()
  * 2. get() if a) a language and b) either a src or dest is specified.
  * 3. count() for the same requirements as 2.
+ * 4. PageRank values (beware that PageRank estimates are lazily calculated
+ * the first time a pagerank value is requested.)
+ * </p>
  *
+ * <p>
  * All other calls are delegated to the passed-in delegate.
- *
  * Note that this dao also loads the links into the delegate.
+ * </p>
  *
  * @author Shilad Sen
  */
@@ -54,6 +60,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     private LocalLinkDao delegate;
     private SparseMatrix matrix = null;
     private SparseMatrix transpose = null;
+    private Map<Language, TIntDoubleMap> pageRanks = null;
 
     private Set<File> allWriterFiles = Collections.newSetFromMap(new ConcurrentHashMap<File, Boolean>());
     private Set<BufferedWriter> allWriters = Collections.newSetFromMap(
@@ -81,6 +88,9 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             matrix = new SparseMatrix(getMatrixFile());
             transpose = new SparseMatrix(getTransposeFile());
         }
+        if (getPageRanksFile().isFile() && getPageRanksFile().lastModified() > getMatrixFile().lastModified()) {
+            pageRanks = (Map<Language, TIntDoubleMap>) WpIOUtils.readObjectFromFile(getPageRanksFile());
+        }
     }
 
     @Override
@@ -106,6 +116,54 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         }
     }
 
+    /**
+     * Calculates the PageRank associated with a particular page.
+     * Currently only implemented by the MatrixLocalLinkDao.
+     * PageRank estimation is performed lazily, so the first time this method is called
+     * will be very expensive, and future invocations will be cached.
+     *
+     * @param language
+     * @param pageId
+     * @return An estimate of the pageRank. The sum of PageRank values for all pages will
+     * approximately sum to 1.0.
+     */
+    @Override
+    public double getPageRank(Language language, int pageId) {
+        if (pageRanks == null) {
+            synchronized (this) {
+                if (pageRanks == null) {
+                    pageRanks = computePageRanks();
+                    try {
+                        WpIOUtils.writeObjectToFile(getPageRanksFile(), pageRanks);
+                    } catch (IOException e) {
+                        throw new IllegalStateException("Unexpected exception:", e);
+                    }
+                }
+            }
+        }
+        TIntDoubleMap langRanks = pageRanks.get(language);
+        if (langRanks != null && langRanks.containsKey(pageId)) {
+            return langRanks.get(pageId);
+        } else {
+            return 0.0;
+        }
+    }
+
+    /**
+     * Calculates the PageRank associated with a particular page.
+     * Currently only implemented by the MatrixLocalLinkDao.
+     * PageRank estimation is performed lazily, so the first time this method is called
+     * will be very expensive, and future invocations will be cached.
+     *
+     * @param localId
+     * @return An estimate of the pageRank. The sum of PageRank values for all pages will
+     * approximately sum to 1.0.
+     */
+    @Override
+    public double getPageRank(LocalId localId) {
+        return getPageRank(localId.getLanguage(), localId.getId());
+    }
+
     private BufferedWriter getSortingWriter() throws IOException {
         if (writers.get() == null) {
             File file = File.createTempFile("links-sorter", ".txt");
@@ -116,6 +174,83 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
             allWriterFiles.add(file);
         }
         return writers.get();
+    }
+
+
+    private static final double DAMPING_FACTOR = 0.85;
+
+
+    private static class LangRanks {
+        TIntDoubleMap pageSums = new TIntDoubleHashMap();
+        TIntDoubleMap nextSums = new TIntDoubleHashMap();
+    }
+    private Map<Language, TIntDoubleMap> computePageRanks() {
+        Map<Language, LangRanks> ranks = new HashMap<Language, LangRanks>();
+
+        // Set initial weights
+        for (SparseMatrixRow row : matrix) {
+            LocalId src = LocalId.fromInt(row.getRowIndex());
+            LangRanks lr = ranks.get(src.getLanguage());
+            if (lr == null) {
+                lr = new LangRanks();
+                ranks.put(src.getLanguage(), lr);
+            }
+            lr.pageSums.put(src.getId(), 1.0);
+        }
+
+        // normalize (divide by num pages)
+        for (final LangRanks lr : ranks.values()) {
+            final int n = lr.pageSums.size();
+            lr.pageSums.transformValues(new TDoubleFunction() {
+                @Override
+                public double execute(double v) {
+                    return 1.0 / n;
+                }
+            });
+        }
+
+        // perform iterations
+        for (int i = 0;i < 10; i++) {
+            for (SparseMatrixRow row : matrix) {
+                int ncols = row.getNumCols();
+                if (ncols == 0) continue;
+                LocalId src = LocalId.fromInt(row.getRowIndex());
+                LangRanks lr = ranks.get(src.getLanguage());
+                double w = lr.pageSums.get(src.getId()) / ncols;
+                for (int j = 0; j < ncols; j++) {
+                    LocalId dest = LocalId.fromInt(row.getColIndex(j));
+                    if (dest.getLanguage() == src.getLanguage()) {
+                        lr.nextSums.adjustOrPutValue(dest.getId(), w, w);
+                    }
+                }
+            }
+
+            // update values, measure change
+            final double[] delta = {0.0};
+            for (final LangRanks lr : ranks.values()) {
+                final int n = lr.nextSums.size();
+                lr.nextSums.forEachKey(new TIntProcedure() {
+                    @Override
+                    public boolean execute(int id) {
+                        double ps = lr.pageSums.get(id);
+                        double ns = lr.nextSums.get(id);
+                        delta[0] += Math.abs(ps - ns);
+                        lr.nextSums.put(id, 0);
+                        lr.pageSums.put(id, (1.0 - DAMPING_FACTOR) / n + DAMPING_FACTOR * ns);
+                        return true;
+
+                    }
+                });
+            }
+            LOG.info("change in pageranks at iteration {} is {}.", i, delta);
+        }
+
+
+        Map<Language, TIntDoubleMap> result = new HashMap<Language, TIntDoubleMap>();
+        for (Language lang : ranks.keySet()) {
+            result.put(lang, ranks.get(lang).pageSums);
+        }
+        return result;
     }
 
     @Override
@@ -140,6 +275,10 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
     public File getMatrixFile() {
         return new File(dir, "links.matrix");
+    }
+
+    public File getPageRanksFile() {
+        return new File(dir, "pageRanks.bin");
     }
 
     public File getTransposeFile() {

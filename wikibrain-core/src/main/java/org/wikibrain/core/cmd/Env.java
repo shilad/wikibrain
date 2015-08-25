@@ -1,18 +1,13 @@
 package org.wikibrain.core.cmd;
 
-import com.typesafe.config.Config;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
-import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.utils.WpThreadUtils;
@@ -22,8 +17,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Captures common environment components for WikiBrain programs
@@ -99,9 +92,9 @@ public class Env implements Closeable {
 
     private void configureDefaultLogging() {
         System.setProperty("org.jooq.no-logo", "true");
-        System.setProperty("log4j.configurationFile", "wikibrain-default-log4j2-config.xml");
+        System.setProperty("log4j.configurationFile", "wikibrain-log4j2.yaml");
         ((org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false)).reconfigure();
-        ((LoggerContext) LogManager.getContext(false)).updateLoggers();
+//        ((LoggerContext) LogManager.getContext(false)).updateLoggers();
         LOG = LoggerFactory.getLogger(Env.class);
         LOG.info("Configured default logging at the Info Level");
         LOG.info("To customize log4j2 set the 'log4j.configurationFile' system property or set EnvBuilder.setReconfigureLogging to false.");

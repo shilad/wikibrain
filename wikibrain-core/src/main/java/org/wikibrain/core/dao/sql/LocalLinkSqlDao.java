@@ -10,6 +10,7 @@ import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.jooq.Tables;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalLink;
 
 import java.util.ArrayList;
@@ -136,6 +137,16 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
             freeJooq(context);
             throw e;
         }
+    }
+
+    @Override
+    public double getPageRank(Language language, int pageId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public double getPageRank(LocalId localId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

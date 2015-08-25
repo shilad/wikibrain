@@ -87,6 +87,8 @@ public class WikiTextLoader {
         metaDao.beginLoad();
 
         for (Language lang : env.getLanguages().getLanguages()) {
+            LOG.info("loading links for " + lang);
+
             final LocalLinkSet linkSet = new LocalLinkSet();
 
             linkVisitor.setLinkListener(

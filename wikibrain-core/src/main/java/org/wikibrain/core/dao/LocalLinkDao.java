@@ -2,6 +2,7 @@ package org.wikibrain.core.dao;
 
 
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalLink;
 
 public interface LocalLinkDao extends Dao<LocalLink> {
@@ -19,6 +20,31 @@ public interface LocalLinkDao extends Dao<LocalLink> {
      */
 
     public LocalLink getLink(Language language, int sourceId, int destId) throws DaoException;
+
+    /**
+     * Calculates the PageRank associated with a particular page.
+     * Currently only implemented by the MatrixLocalLinkDao.
+     * PageRank estimation is performed lazily, so the first time this method is called
+     * will be very expensive, and future invocations will be cached.
+     *
+     * @param language
+     * @param pageId
+     * @return An estimate of the pageRank. The sum of PageRank values for all pages will
+     * approximately sum to 1.0.
+     */
+    double getPageRank(Language language, int pageId);
+
+    /**
+     * Calculates the PageRank associated with a particular page.
+     * Currently only implemented by the MatrixLocalLinkDao.
+     * PageRank estimation is performed lazily, so the first time this method is called
+     * will be very expensive, and future invocations will be cached.
+     *
+     * @param localId
+     * @return An estimate of the pageRank. The sum of PageRank values for all pages will
+     * approximately sum to 1.0.
+     */
+    double getPageRank(LocalId localId);
 
     /**
      * get all the links on a page matching criteria
