@@ -45,12 +45,9 @@ public class Loader {
     private String[] loaderArgs;
 
     public Loader(String args[]) throws ConfigurationException, DaoException, InterruptedException, ClassNotFoundException, ParseException {
-        System.err.println("here 1");
         CommandLineParser parser = new PosixParser();
-        System.err.println("here 2");
         cmd = parser.parse(options, args);
 
-        System.err.println("here 3");
         List<String> keeperArgs = new ArrayList<String>();
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-d") || args[i].equals("-drop")) {
@@ -61,14 +58,11 @@ public class Loader {
                 keeperArgs.add(args[i]);
             }
         }
-        System.err.println("here 4");
 
         // Don't trigger logging before we initialize it.
 //        PipelineLoader.LOG.info("pipeline keeping args: " + keeperArgs);
 
-        System.err.println("here 5");
         env = new EnvBuilder(cmd).build();
-        System.err.println("here 6");
         List<StageArgs> stageArgs = null;
         if (cmd.hasOption("s")) {
             stageArgs = new ArrayList<StageArgs>();
