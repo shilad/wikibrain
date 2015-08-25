@@ -12,6 +12,7 @@ As of September 2015, this API is in active development supported by the WikiMed
 **No public endpoints are yet available for this endpoint.**
 
 **Within Wikimedia Labs**, an endpoint is available  at:
+
 * http://wikibrain0.eqiad.wmflabs for languages: en, de, pt, es, fr, it, ja, no
 * Email shilad for other languages: ssen@macalester.edu
 
@@ -21,6 +22,7 @@ All *requests* use simple URLs with query parameters:
     `http://endpoint/method?param1=val1&param2=val2...`.
 
 Common request query parameters include:
+
 * Language: for example, `lang=en`.
 * Requests about single "entities", which must contain exactly one of the following parameters:
   * `title`: The title of a Wikipedia article, e.g. `title=Wikimedia%20Foundation`
