@@ -16,7 +16,7 @@ As of September 2015, this API is in active development supported by the WikiMed
 * http://wikibrain0.eqiad.wmflabs for languages: en, de, pt, es, fr, it, ja, no
 * Email shilad for other languages: ssen@macalester.edu
 
-# Common elements of API requests:
+# Structure of API requests:
 
 All *requests* use simple URLs with query parameters:
     `http://endpoint/method?param1=val1&param2=val2...`.
@@ -30,6 +30,8 @@ Common request query parameters include:
   * `conceptId`: The id of the associated Wikidata concept, e.g. `conceptId=180`
   * `phrase`: A textual phrase, e.g. `phrase=The%20Wikimedia%20Foundation`
 * Requests about multiple entities contain plural versions of the above query parameters (an `s` is added), with individual entities delimited by an or-bar (`|`), e.g. `articleId=18618509|5043734`
+
+# Structure of API responses:
 
 API responses are formatted in JSON.
 
