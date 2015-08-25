@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.8-SNAPSHOT</version>
+        <version>0.7.3</version>
     </parent>
 
     <artifactId>wikibrain-sr</artifactId>
@@ -14,22 +14,22 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-utils</artifactId>
-            <version>0.8-SNAPSHOT</version>
+            <version>0.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
-            <version>0.8-SNAPSHOT</version>
+            <version>0.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-lucene</artifactId>
-            <version>0.8-SNAPSHOT</version>
+            <version>0.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-phrases</artifactId>
-            <version>0.8-SNAPSHOT</version>
+            <version>0.7.3</version>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
