@@ -104,5 +104,4 @@ public class WebEntityParser {
         }
         return we;
     }
-
 }
