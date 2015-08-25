@@ -257,7 +257,7 @@ public class Word2VecGenerator implements DenseVectorGenerator {
     }
 
     private static long hashWord(String word) {
-        return Word2VecUtils.hashWord(word);
+        return Word2VecUtils.hashWord(normalize(word));
     }
 
     @Override
