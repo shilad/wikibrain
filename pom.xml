@@ -10,7 +10,7 @@
 
     <groupId>org.wikibrainapi</groupId>
     <artifactId>wikibrain-parent</artifactId>
-    <version>0.7.3-SNAPSHOT</version>
+    <version>0.7.3</version>
     <packaging>pom</packaging>
     <name>WikiBrain parent</name>
     <description>The WikiBrain base pom</description>
