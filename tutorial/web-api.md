@@ -42,7 +42,7 @@ API responses are formatted in JSON and encoded using UTF-8. Every JSON response
 
 **mostSimilar**: Shows the most similar articles for a particular article or phrase.
 
-http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
+[http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3]
 
 ```json
 {
@@ -57,7 +57,7 @@ http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
 ```
 **wikify**: Identify Wikipedia articles mentioned in a passage of free text
 
-http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation.
+[http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation]
 
 ```json
 {
@@ -74,3 +74,4 @@ http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free
     ],
 }
 ```
+**pageRank**: 
