@@ -38,4 +38,5 @@ API responses are formatted in JSON and encoded using UTF-8. Every JSON response
  * `success`: A boolean of true or false indicating whether the API call succeeded.
  * `message`: If the call does not succeed (`success` if `false`), message will contain an error message. Otherwise, it will contain contain the empty string.
 
+# API Calls
 
