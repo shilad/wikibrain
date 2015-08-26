@@ -40,3 +40,18 @@ API responses are formatted in JSON and encoded using UTF-8. Every JSON response
 
 # API Calls
 
+**mostSimilar**: Shows the most similar articles for a particular article or phrase.
+
+http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
+
+```json
+{
+    "success":true,
+    "message":"",
+    "results":[
+        {"title":"Spider","score":0.9392013984939758,"lang":"simple","articleId":19903},
+        {"title":"Arachnid","score":0.46658547513090154,"lang":"simple","articleId":22923},
+        {"title":"Scorpion","score":0.4409242802398655,"lang":"simple","articleId":22045}
+    ]
+}
+```
