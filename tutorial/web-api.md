@@ -55,3 +55,22 @@ http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
     ]
 }
 ```
+**wikify**: Identify Wikipedia articles mentioned in a passage of free text
+
+http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation.
+
+```json
+{
+    "success":true,
+    "message":"",
+    "text":"Wikipedia is a free-access, free-content Internet encyclopedia, supported and hosted by the non-profit Wikimedia Foundation.",
+    "references": [
+        {"title":"Wikipedia","text":"Wikipedia","index":0,"lang":"simple","articleId":27263},
+        {"title":"Free content","text":"free-content","index":28,"lang":"simple","articleId":129718},
+        {"title":"Internet","text":"Internet","index":41,"lang":"simple","articleId":362},
+        {"title":"Encyclopedia","text":"encyclopedia","index":50,"lang":"simple","articleId":217},
+        {"title":"Non-profit organization","text":"non-profit","index":92,"lang":"simple","articleId":83609},
+        {"title":"Wikimedia Foundation","text":"Wikimedia Foundation","index":103,"lang":"simple","articleId":224356}
+    ],
+}
+```
