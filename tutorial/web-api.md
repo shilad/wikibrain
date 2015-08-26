@@ -14,7 +14,7 @@ As of September 2015, this API is in active development supported by the WikiMed
 **Within Wikimedia Labs**, an endpoint is available  at:
 
 * http://wikibrain0.eqiad.wmflabs:8080 for languages: en, de, pt, es, fr, it, ja, no
-* Email shilad for other languages: ssen@macalester.edu
+* Interested in other languages? Email Shilad at ssen@macalester.edu
 
 # Structure of API requests:
 
@@ -33,7 +33,9 @@ Common request query parameters include:
 
 # Structure of API responses:
 
-API responses are formatted in JSON. Every 
+API responses are formatted in JSON and encoded using UTF-8. Every JSON response includes two keys:
 
+ * `success`: A boolean of true or false indicating whether the API call succeeded.
+ * `message`: If the call does not succeed (`success` if `false`), message will contain an error message. Otherwise, it will contain contain the empty string.
 
 
