@@ -36,6 +36,12 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao {
     public void endLoad()throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
+
+    @Override
+    public Set<LocalPage> guessTopLevelCategories(Language language) {
+        return null;
+    }
+
     public void save(LocalPage a, LocalPage b)throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }

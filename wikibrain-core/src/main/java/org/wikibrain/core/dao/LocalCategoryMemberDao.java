@@ -14,10 +14,12 @@ import java.util.Set;
  *
  * An interface that describes a Dao to determine local category membership.
  *
+ * @author Shilad Sen
  * @author Ari Weiland
  *
  */
 public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
+    public Set<LocalPage> guessTopLevelCategories(Language language) throws DaoException;
 
     /**
      * Supplemental method that saves a membership relationship based on

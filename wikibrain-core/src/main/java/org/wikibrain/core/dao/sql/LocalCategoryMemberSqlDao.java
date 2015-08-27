@@ -1,6 +1,7 @@
 package org.wikibrain.core.dao.sql;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
 import org.jooq.*;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * A SQL database implementation of the LocalCategoryMemberDao.
  *
+ * @author Shilad Sen
  * @author Ari Weiland
  *
  */
@@ -32,9 +34,26 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
     private final LocalPageDao localPageDao;
     private Map<Language, CategoryGraph> graphs = new HashMap<Language, CategoryGraph>();
 
+    /**
+     * Only used to identify top-level categories.
+     */
+    private final UniversalPageDao univDao;
+
+    // See https://www.wikidata.org/wiki/Q4587687
+    public static final int TOP_LEVEL_CONCEPT = 4587687;
+
+    // Language-specific top-level concept overrides (language -> title)
+    private Map<Language, Title> topLevelLangOverrides = new HashMap<Language, Title>();
+
     public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalPageDao localArticleDao) throws DaoException {
+        this(dataSource, localArticleDao, null);
+    }
+
+
+    public LocalCategoryMemberSqlDao(WpDataSource dataSource, LocalPageDao localArticleDao, UniversalPageDao univDao) throws DaoException {
         super(dataSource, INSERT_FIELDS, "/db/category-members");
         this.localPageDao = localArticleDao;
+        this.univDao = univDao;
     }
 
     @Override
@@ -44,6 +63,40 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                 member.getCategoryId(),
                 member.getArticleId()
         );
+    }
+
+    public void addTopLevelOverride(Language language, String topLevelTitle) {
+        this.topLevelLangOverrides.put(language, new Title(topLevelTitle, language));
+    }
+
+    @Override
+    public Set<LocalPage> guessTopLevelCategories(Language language) throws DaoException {
+        int topLevelId = -1;
+        Title override = topLevelLangOverrides.get(language);
+        if (override != null) {
+            topLevelId = localPageDao.getIdByTitle(override);
+            if (topLevelId < 0) {
+                LOG.warn("top level category {} for language {} not found.", override, language);
+            }
+        }
+        if (topLevelId < 0) {
+            if (univDao == null) {
+                throw new DaoException("Universal dao required for top level categories.");
+            }
+            topLevelId = univDao.getLocalId(language, TOP_LEVEL_CONCEPT);
+        }
+        Set<LocalPage> result = new HashSet<LocalPage>();
+        if (topLevelId < 0) {
+            return result;
+        }
+        for (int id : getCategoryMemberIds(language, topLevelId)) {
+            LocalPage page = localPageDao.getById(language, id);
+            if (page.getNameSpace() == NameSpace.CATEGORY) {
+                result.add(page);
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -256,12 +309,21 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
                 return null;
             }
             try {
+                UniversalPageDao univDao = null;
+                MetaInfoDao metaDao = getConfigurator().get(MetaInfoDao.class);
+                if (metaDao.isLoaded(UniversalPage.class)) {
+                    univDao = getConfigurator().get(UniversalPageDao.class);
+                }
                 LocalCategoryMemberSqlDao dao = new LocalCategoryMemberSqlDao(
                         getConfigurator().get(
                                 WpDataSource.class,
                                 config.getString("dataSource")),
-                        getConfigurator().get(LocalPageDao.class)
-                );
+                        getConfigurator().get(LocalPageDao.class),
+                        univDao);
+                Config c = config.getConfig("topLevelCats");
+                for (Map.Entry<String, ConfigValue> e : c.entrySet()) {
+                    dao.addTopLevelOverride(Language.getByLangCode(e.getKey()), (String) e.getValue().unwrapped());
+                }
                 String cachePath = getConfig().get().getString("dao.sqlCachePath");
                 File cacheDir = new File(cachePath);
                 if (!cacheDir.isDirectory()) {

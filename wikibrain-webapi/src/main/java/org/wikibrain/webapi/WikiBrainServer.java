@@ -51,7 +51,7 @@ public class WikiBrainServer extends AbstractHandler {
     @Override
     public void handle(String target, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
         WikiBrainWebRequest req = new WikiBrainWebRequest(target, request, httpServletRequest, httpServletResponse);
-        LOG.info("received request for {}?{}", request.getRequestURL(), request.getQueryString());
+        LOG.info("received request for {}, URL {}?{}", target, request.getRequestURL(), request.getQueryString());
 
         try {
             // TODO: add logging
