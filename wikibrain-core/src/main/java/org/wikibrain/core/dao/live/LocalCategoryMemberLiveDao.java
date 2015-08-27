@@ -63,6 +63,11 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao {
         throw new DaoException("Can't use this method for remote wiki server!");
     }
 
+    @Override
+    public TIntDoubleMap getCategoryDistances(Set<LocalPage> candidateCategories, int pageId, boolean weighted) throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+
     public void save(LocalCategoryMember member) throws DaoException {
         throw new DaoException("Can't use this method for remote wiki server!");
     }

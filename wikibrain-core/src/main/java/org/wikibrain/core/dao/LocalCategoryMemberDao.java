@@ -74,6 +74,21 @@ public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
      */
     Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> topLevelCats) throws DaoException;
 
+
+    /**
+     * Returns distances to specified categories for requested page.
+     * Distance is measured using shortest path in the category graph.
+     *
+     * @param candidateCategories   The categories to consider as candidates (e.g. those considered "top-level").
+     * @param pageId                The article id we want to find.
+     * @param weighted              If true, use page-rank weighted edges so paths that traverse more
+     *                              general categories are penalized more highly.
+     * @return                      Map with article ids as keys and distances to each category id as values.
+     * @throws DaoException
+     *
+     */
+    TIntDoubleMap getCategoryDistances(Set<LocalPage> candidateCategories, int pageId, boolean weighted) throws DaoException;
+
     /**
      * Gets a collection of page IDs of articles that are members of the category
      * specified by the language and category ID

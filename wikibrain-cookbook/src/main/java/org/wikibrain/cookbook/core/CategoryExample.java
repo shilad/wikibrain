@@ -1,6 +1,8 @@
 package org.wikibrain.cookbook.core;
 
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
@@ -8,6 +10,7 @@ import org.wikibrain.core.dao.LocalCategoryMemberDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalPage;
+import org.wikibrain.utils.WpCollectionUtils;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -49,5 +52,14 @@ public class CategoryExample {
             }
         }
 
+        // Find closest categories for an article
+        LocalPage p = pageDao.getByTitle(lang, "Jesus");
+        TIntDoubleMap distances = catDao.getCategoryDistances(topLevelCats, p.getLocalId(), true);
+        System.out.println("distances to top-level categories for " + p);
+        for (int catId : WpCollectionUtils.sortMapKeys(distances, false)) {
+            LocalPage c = pageDao.getById(lang, catId);
+            if (c != null) System.out.format("\t%.3f %s\n", distances.get(catId), c.toString());
+
+        }
     }
 }

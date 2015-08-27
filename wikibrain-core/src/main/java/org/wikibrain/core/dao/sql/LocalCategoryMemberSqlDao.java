@@ -201,6 +201,8 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         TIntSet visited = new TIntHashSet(numPages*3);   // both articles and categories
         while (!frontier.isEmpty()) {
             CatCost cc = frontier.poll();
+            if (visited.contains(cc.catId)) continue;
+            visited.add(cc.catId);
 
             // Handle pages of categories
             for (int pageId : graph.catPages[cc.catIndex]) {
@@ -215,7 +217,6 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
             for (int childIndex : graph.catChildren[cc.catIndex]) {
                 int childId = graph.catIndexToId(childIndex);
                 if (!visited.contains(childId)) {
-                    visited.add(childId);
                     double childCost = cc.cost + (weighted ? graph.catCosts[childIndex] : 1.0);
                     frontier.add(new CatCost(cc.topLevelCat, childId, childIndex, childCost));
                 }
@@ -223,6 +224,63 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         }
 
         return results;
+    }
+
+    /**
+     * Returns distance to specified categories for requested pages.
+     * Distance is measured using shortest path in the category graph.
+     *
+     * @param candidateCategories   The categories to consider as candidates (e.g. those considered "top-level").
+     * @param pageId                The article id we want to find.
+     * @param weighted              If true, use page-rank weighted edges so paths that traverse more
+     *                              general categories are penalized more highly.
+     * @return                      Map with article ids as keys and distances to each category id as values.
+     * @throws DaoException
+     *
+     */
+    @Override
+    public TIntDoubleMap getCategoryDistances(Set<LocalPage> candidateCategories, int pageId, boolean weighted) throws DaoException {
+
+        Language language = candidateCategories.iterator().next().getLanguage();
+        CategoryGraph graph = getGraph(language);
+
+        Map<Integer, TIntDoubleMap> results = new HashMap<Integer, TIntDoubleMap>();
+
+        // Indexes for goal categories
+        TIntSet goalIndexes = new TIntHashSet();
+        for (LocalPage p : candidateCategories) {
+            int i = graph.catIdToIndex(p.getLocalId());
+            if (i >= 0) goalIndexes.add(i);
+        }
+
+        // Search upwards from each page
+        TIntSet visited = new TIntHashSet();
+
+        // all we care about in CatCost for this search is the category index and cost
+        PriorityQueue<CatCost> frontier = new PriorityQueue<CatCost>();
+        TIntDoubleMap distances = new TIntDoubleHashMap();
+        for (int catId : getCategoryIds(language, pageId)) {
+            int i = graph.catIdToIndex(catId);
+            if (i >= 0)  frontier.add(new CatCost(null, -1, i, graph.catCosts[i]));
+        }
+        while (!frontier.isEmpty() && distances.size() != candidateCategories.size()) {
+            CatCost cc = frontier.poll();
+            if (visited.contains(cc.catIndex)) continue;
+            visited.add(cc.catIndex);
+            if (goalIndexes.contains(cc.catIndex)) {
+                distances.put(graph.catIndexToId(cc.catIndex), cc.cost);
+            } else {
+
+                // Ascend to unexplored parent categories.
+                for (int parentIndex : graph.catParents[cc.catIndex]) {
+                    if (!visited.contains(parentIndex)) {
+                        double parentCost = cc.cost + (weighted ? graph.catCosts[parentIndex] : 1.0);
+                        frontier.add(new CatCost(null, -1, parentIndex, parentCost));
+                    }
+                }
+            }
+        }
+        return distances;
     }
 
     /**
