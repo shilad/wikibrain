@@ -1,20 +1,13 @@
 package org.wikibrain.core.dao.sql;
 
-import com.typesafe.config.Config;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.wikibrain.conf.Configuration;
-import org.wikibrain.conf.ConfigurationException;
-import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.*;
 
-import java.io.File;
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +87,8 @@ public class LocalCategoryGraphBuilder {
 
         DaoFilter filter = new DaoFilter().setLanguages(graph.language);
         for (LocalCategoryMember lcm : catDao.get(filter)) {
-            int catIndex1 = graph.getCategoryIndex(lcm.getArticleId());     // cat index for page (probably -1)
-            int catIndex2 = graph.getCategoryIndex(lcm.getCategoryId());    // cat index for cat
+            int catIndex1 = graph.catIdToIndex(lcm.getArticleId());     // cat index for page (probably -1)
+            int catIndex2 = graph.catIdToIndex(lcm.getCategoryId());    // cat index for cat
             if (catIndex1 >= 0 && catIndex2 >= 0) {
                 numCatChildren[catIndex2]++;
                 numCatParents[catIndex1]++;
@@ -114,8 +107,8 @@ public class LocalCategoryGraphBuilder {
 
         // fill it
         for (LocalCategoryMember lcm : catDao.get(filter)) {
-            int catIndex1 = graph.getCategoryIndex(lcm.getArticleId());     // cat index for page (probably -1)
-            int catIndex2 = graph.getCategoryIndex(lcm.getCategoryId());    // cat index for cat
+            int catIndex1 = graph.catIdToIndex(lcm.getArticleId());     // cat index for page (probably -1)
+            int catIndex2 = graph.catIdToIndex(lcm.getCategoryId());    // cat index for cat
             if (catIndex1 >= 0 && catIndex2 >= 0) {
                 graph.catChildren[catIndex2][--numCatChildren[catIndex2]] = catIndex1;
                 graph.catParents[catIndex1][--numCatParents[catIndex1]] = catIndex2;

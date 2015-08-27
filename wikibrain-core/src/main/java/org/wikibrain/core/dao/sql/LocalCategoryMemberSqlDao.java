@@ -2,6 +2,10 @@ package org.wikibrain.core.dao.sql;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.jooq.*;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
@@ -10,11 +14,11 @@ import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.jooq.Tables;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.*;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -74,6 +78,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         int topLevelId = -1;
         Title override = topLevelLangOverrides.get(language);
         if (override != null) {
+            System.out.println("title is " + override);
             topLevelId = localPageDao.getIdByTitle(override);
             if (topLevelId < 0) {
                 LOG.warn("top level category {} for language {} not found.", override, language);
@@ -115,7 +120,7 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         bfs.setExploreChildren(false);
         Map<Integer, LocalPage> indexToCandidates = new HashMap<Integer, LocalPage>();
         for (LocalPage c : candidates) {
-            indexToCandidates.put(graph.getCategoryIndex(c.getLocalId()), c);
+            indexToCandidates.put(graph.catIdToIndex(c.getLocalId()), c);
         }
 
         List<LocalPage> matches = new ArrayList<LocalPage>();
@@ -132,6 +137,92 @@ public class LocalCategoryMemberSqlDao extends AbstractSqlDao<LocalCategoryMembe
         } else {
             return matches.get(new Random().nextInt(matches.size()));
         }
+    }
+
+    static class CatCost implements Comparable<CatCost> {
+        LocalPage topLevelCat;
+        int catId;
+        int catIndex;   // dense internal id from category graph, not an article id.
+        double cost;
+
+        public CatCost(LocalPage topLevelCat, int catId, int catIndex, double cost) {
+            this.topLevelCat = topLevelCat;
+            this.catId = catId;
+            this.catIndex = catIndex;
+            this.cost = cost;
+        }
+
+        @Override
+        public int compareTo(CatCost o) {
+            return Double.compare(cost, o.cost);
+        }
+    }
+
+
+
+    @Override
+    public Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> topLevelCats) throws DaoException {
+        return getClosestCategories(topLevelCats, null, true);
+    }
+
+    /**
+     * For each article, identifies the closest category among the specified candidate set.
+     * Distance is measured using shortest path in the category graph.
+     *
+     * @param candidateCategories   The categories to consider as candidates (e.g. those considered "top-level").
+     * @param pageIds               If not null, only considers articles in the provided pageIds.
+     * @param weighted              If true, use page-rank weighted edges so paths that traverse more
+     *                              general categories are penalized more highly.
+     * @return                      Map with candidates as keys and the articles that have them as closest category
+     *                              as values. The values are a map of article ids to distances.
+     * @throws DaoException
+     */
+    @Override
+    public Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> candidateCategories, TIntSet pageIds, boolean weighted) throws DaoException {
+        Map<LocalPage, TIntDoubleMap> results = new HashMap<LocalPage, TIntDoubleMap>();
+        if (candidateCategories.isEmpty()) {
+            return results;
+        }
+
+        Language language = candidateCategories.iterator().next().getLanguage();
+        CategoryGraph graph = getGraph(language);
+        int numPages = (pageIds == null) ? LanguageInfo.getByLanguage(language).getNumArticles() : pageIds.size();
+
+        PriorityQueue<CatCost> frontier = new PriorityQueue<CatCost>();
+        for (LocalPage p : candidateCategories) {
+            if (p.getLanguage() != language) throw new IllegalStateException("Category languages must be identitical");
+            CatCost cc = new CatCost(p, p.getLocalId(), graph.catIdToIndex(p.getLocalId()), 0.0);
+            if (cc.catIndex >= 0) {
+                frontier.add(cc);
+            }
+            results.put(p, new TIntDoubleHashMap(numPages));
+        }
+
+        TIntSet visited = new TIntHashSet(numPages*3);   // both articles and categories
+        while (!frontier.isEmpty()) {
+            CatCost cc = frontier.poll();
+
+            // Handle pages of categories
+            for (int pageId : graph.catPages[cc.catIndex]) {
+                if (!visited.contains(pageId)
+                &&  (pageIds == null || pageIds.contains(pageId))) {
+                    visited.add(pageId);
+                    results.get(cc.topLevelCat).put(pageId, cc.cost);
+                }
+            }
+
+            // Descend to unexplored child categories.
+            for (int childIndex : graph.catChildren[cc.catIndex]) {
+                int childId = graph.catIndexToId(childIndex);
+                if (!visited.contains(childId)) {
+                    visited.add(childId);
+                    double childCost = cc.cost + (weighted ? graph.catCosts[childIndex] : 1.0);
+                    frontier.add(new CatCost(cc.topLevelCat, childId, childIndex, childCost));
+                }
+            }
+        }
+
+        return results;
     }
 
     /**

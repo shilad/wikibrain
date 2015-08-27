@@ -2,6 +2,8 @@ package org.wikibrain.core.dao.live;
 
 import com.typesafe.config.Config;
 
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.set.TIntSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -47,8 +49,18 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao {
     }
 
     @Override
-    public LocalPage getClosestCategory(LocalPage page, Set<LocalPage> candidates, boolean weightedDistance) {
-        throw new UnsupportedOperationException();
+    public LocalPage getClosestCategory(LocalPage page, Set<LocalPage> candidates, boolean weightedDistance) throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+
+    @Override
+    public Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> candidateCategories, TIntSet pageIds, boolean weighted) throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+
+    @Override
+    public Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> topLevelCats) throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
     }
 
     public void save(LocalCategoryMember member) throws DaoException {
