@@ -96,7 +96,7 @@ public class CategoryGraphSimilarity extends BaseSRMetric {
 
     @Override
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
-        if (similarityIsTrained()) {
+        if (!similarityIsTrained()) {
             return new SRResult(0.0);
         }
         CategoryBfs bfs1 = new CategoryBfs(graph,pageId1,getLanguage(), Integer.MAX_VALUE, null, catHelper);
