@@ -1,7 +1,6 @@
 package org.wikibrain.core.dao.live;
 
 import com.typesafe.config.Config;
-
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.set.TIntSet;
 import org.wikibrain.conf.Configuration;
@@ -10,10 +9,11 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalCategoryMemberDao;
-
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.core.model.*;
+import org.wikibrain.core.model.CategoryGraph;
+import org.wikibrain.core.model.LocalCategoryMember;
+import org.wikibrain.core.model.LocalPage;
 
 import java.util.*;
 

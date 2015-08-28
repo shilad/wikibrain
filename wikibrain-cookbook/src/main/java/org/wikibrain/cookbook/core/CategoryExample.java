@@ -1,8 +1,6 @@
 package org.wikibrain.cookbook.core;
 
 import gnu.trove.map.TIntDoubleMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;

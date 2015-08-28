@@ -210,7 +210,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         }
 
         // perform iterations
-        for (int i = 0;i < 10; i++) {
+        for (int i = 0;i < 20; i++) {
             for (SparseMatrixRow row : matrix) {
                 int ncols = row.getNumCols();
                 if (ncols == 0) continue;
@@ -233,10 +233,10 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
                     @Override
                     public boolean execute(int id) {
                         double ps = lr.pageSums.get(id);
-                        double ns = lr.nextSums.get(id);
+                        double ns = (1.0 - DAMPING_FACTOR) / n + DAMPING_FACTOR * lr.nextSums.get(id);
                         delta[0] += Math.abs(ps - ns);
                         lr.nextSums.put(id, 0);
-                        lr.pageSums.put(id, (1.0 - DAMPING_FACTOR) / n + DAMPING_FACTOR * ns);
+                        lr.pageSums.put(id, ns);
                         return true;
 
                     }

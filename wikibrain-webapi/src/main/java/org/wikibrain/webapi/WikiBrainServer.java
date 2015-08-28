@@ -1,5 +1,8 @@
 package org.wikibrain.webapi;
 
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
@@ -7,6 +10,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.ConfigurationException;
@@ -14,24 +18,24 @@ import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalCategoryMemberDao;
+import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.LocalPage;
-import org.wikibrain.core.model.Title;
+import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
 import org.wikibrain.sr.wikify.Wikifier;
+import org.wikibrain.utils.WpCollectionUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Shilad Sen
@@ -40,12 +44,16 @@ public class WikiBrainServer extends AbstractHandler {
     private static final Logger LOG = LoggerFactory.getLogger(WikiBrainServer.class);
     private final Env env;
     private final LocalPageDao pageDao;
+    private final LocalLinkDao linkDao;
+    private final LocalCategoryMemberDao catDao;
     private WebEntityParser entityParser;
 
     public WikiBrainServer(Env env) throws ConfigurationException {
         this.env = env;
         this.entityParser = new WebEntityParser(env);
         this.pageDao = env.getConfigurator().get(LocalPageDao.class);
+        this.linkDao = env.getConfigurator().get(LocalLinkDao.class);
+        this.catDao = env.getConfigurator().get(LocalCategoryMemberDao.class);
     }
 
     @Override
@@ -65,6 +73,10 @@ public class WikiBrainServer extends AbstractHandler {
                 doWikify(req);
             } else if (target.equals("/pageRank")) {
                 doPageRank(req);
+            } else if (target.equals("/categoryToPages")) {
+                doCategoryToPages(req);
+            } else if (target.equals("/pageToCategories")) {
+                doPageToCategories(req);
             }
         } catch (WikiBrainWebException e) {
             req.writeError(e);
@@ -130,7 +142,128 @@ public class WikiBrainServer extends AbstractHandler {
     }
 
     private void doPageRank(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
+        Language lang = req.getLanguage();
+        WebEntity entity = entityParser.extractEntity(req);
+        if (entity.getArticleId() < 0) {
+            throw new WikiBrainWebException("articleId or title parameter required.");
+        }
+        int id = entity.getArticleId();
+        double pageRank = linkDao.getPageRank(lang, id);
+        req.writeJsonResponse(
+                "article", pageJson(lang, id),
+                "pageRank", pageRank
+            );
+    }
 
+    private void doPageToCategories(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
+        Language lang = req.getLanguage();
+        WebEntity entity = entityParser.extractEntity(req);
+        if (entity.getArticleId() < 0) {
+            throw new WikiBrainWebException("articleId or title parameter required.");
+        }
+        Set<LocalPage> candidates = extractCategories(req, lang);
+        boolean weighted = Boolean.valueOf(req.getParam("weighted", "true"));
+        TIntDoubleMap distances = catDao.getCategoryDistances(candidates, entity.getArticleId(), weighted);
+        List distanceJson = new ArrayList();
+        for (int catId : WpCollectionUtils.sortMapKeys(distances, false)) {
+            Map articleJson = pageJson(lang, catId);
+            articleJson.put("distance", distances.get(catId));
+            distanceJson.add(articleJson);
+        }
+        req.writeJsonResponse(
+                "article", entity.toJson(),
+                "distances", distanceJson
+        );
+    }
+
+    private Set<LocalPage> extractCategories(WikiBrainWebRequest req, Language lang) throws DaoException {
+        Set<LocalPage> candidates = new HashSet<LocalPage>();
+        if (req.hasParam("categoryIds")) {
+            String ids[] = req.getParam("categoryIds").split("\\|");
+            for (String sid : ids) {
+                LocalPage p = pageDao.getById(lang, Integer.valueOf(sid));
+                if (p == null) throw new WikiBrainWebException("No " + lang + " article loaded with id " + sid);
+                candidates.add(p);
+            }
+        } else if (req.hasParam("categoryTitles")) {
+            String titles[] = req.getParam("categoryTitles").split("\\|");
+            for (String t : titles) {
+                LocalPage p = pageDao.getByTitle(lang, t);
+                if (p == null) throw new WikiBrainWebException("No " + lang + " article loaded with title " + t);
+                candidates.add(p);
+            }
+        } else {
+            candidates = catDao.guessTopLevelCategories(lang);
+            if (candidates == null || candidates.isEmpty()) {
+                throw new WikiBrainWebException("No candidates specified and no top-level categories found.");
+            }
+        }
+        return candidates;
+    }
+
+    private void doCategoryToPages(WikiBrainWebRequest req) throws DaoException {
+        Language lang = req.getLanguage();
+        TIntSet pageIds = null;
+
+        LocalPage target = null;
+        if (req.hasParam("targetCategoryId")) {
+            target = pageDao.getById(lang, Integer.valueOf(req.getParam("targetCategoryId")));
+        } else if (req.hasParam("targetCategoryTitle")) {
+            target = pageDao.getByTitle(lang, NameSpace.CATEGORY, req.getParam("targetCategoryTitle"));
+        } else {
+            throw new WikiBrainWebException("Either targetCategoryId or targetCategoryTitle must be specified");
+        }
+
+        if (req.hasParam("titles")) {
+            pageIds = new TIntHashSet();
+            for (String t : req.getParam("titles").split("\\|")) {
+                int id = pageDao.getIdByTitle(t, lang, NameSpace.ARTICLE);
+                if (id < 0) {
+                    throw new WikiBrainWebException("No " + lang + " article loaded with title " + t);
+                }
+                pageIds.add(id);
+            }
+        } else if (req.hasParam("articleIds")) {
+            for (String id : req.getParam("articleIds").split("\\|")) {
+                pageIds.add(Integer.valueOf(id));
+            }
+        }
+        Set<LocalPage> candidates = extractCategories(req, lang);
+        if (!candidates.contains(target)) {
+            throw new WikiBrainWebException("target category " + target + " not contained in [" + StringUtils.join(candidates) + "]");
+        }
+
+        boolean weighted = Boolean.valueOf(req.getParam("weighted", "true"));
+        Map<LocalPage, TIntDoubleMap> distances = catDao.getClosestCategories(candidates, pageIds, weighted);
+        final List distanceJson = new ArrayList();
+
+        if (distances.containsKey(target)) {
+            for (int pageId : WpCollectionUtils.sortMapKeys(distances.get(target), false)) {
+                Map json = pageJson(lang, pageId);
+                json.put("distance", distances.get(target).get(pageId));
+                distanceJson.add(json);
+            }
+        }
+
+        req.writeJsonResponse(
+                "category", pageJson(target),
+                "distances", distanceJson
+        );
+    }
+
+    private Map pageJson(LocalPage p) {
+        if (p == null) {
+            return null;
+        }
+        Map json = new HashMap();
+        json.put("articleId", p.getLocalId());
+        json.put("title", p.getTitle().getCanonicalTitle());
+        json.put("lang", p.getLanguage().getLangCode());
+        return json;
+    }
+
+    private Map pageJson(Language lang, int pageId) throws DaoException {
+        return pageJson(pageDao.getById(lang, pageId));
     }
 
     private void doWikify(WikiBrainWebRequest req) throws ConfigurationException, DaoException {

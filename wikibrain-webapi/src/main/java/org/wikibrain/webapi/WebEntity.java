@@ -15,6 +15,7 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class WebEntity {
+
     public enum Type {
         TITLE,
         PHRASE,
@@ -95,6 +96,10 @@ public class WebEntity {
 
     public void setArticleId(int articleId) {
         this.articleId = articleId;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public int getConceptId() {

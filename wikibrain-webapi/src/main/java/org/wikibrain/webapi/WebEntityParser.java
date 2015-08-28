@@ -6,6 +6,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.Title;
 
 import java.util.ArrayList;
@@ -95,7 +96,13 @@ public class WebEntityParser {
                 we  = WebEntity.phraseEntity(lang, value);
                 break;
             case ARTICLE_ID:
-                we = WebEntity.articleEntity(lang, Integer.valueOf(value));
+                int pageId = Integer.valueOf(value);
+                we = WebEntity.articleEntity(lang, pageId);
+                LocalPage page = pageDao.getById(lang, pageId);
+                if (page == null) {
+                    throw new WikiBrainWebException("No " + lang.getLangCode() + " article with id " +  pageId);
+                }
+                we.setTitle(page.getTitle().getCanonicalTitle());
                 break;
             case CONCEPT_ID:
                 we = WebEntity.conceptEntity(lang, Integer.valueOf(value));
