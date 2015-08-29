@@ -171,7 +171,14 @@ http://localhost:8000/pageRank?title=United_States&lang=simple
 }
 ```
 
-**articlesInCategory**: Given a category "c" and a set of candidate categories "S", returns all pages that are closer to c than S. If S is not specified, the language edition's top-level categories are used. S must contain c.
+##articlesInCategory:
+
+Given a target category and a set of candidate categories, returns all pages that are closer to the target than other candidates. Closer is defined as distance upwards in the category graph. **Note:** This is computationally intensive. Please use it with care and cache results.
+
+**Input parameters**:
+
+
+If candidates are not specified, the language edition's top-level categories are used. S must contain c.
 
 http://localhost:8000/articlesInCategory?targetCategoryTitle=Category:Science&lang=simple
 
