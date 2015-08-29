@@ -51,6 +51,30 @@ JSON representation of articles share a common format containing "articleId", "l
 
 # API Calls
 
+##languages:
+
+Returns the languages editions available through the endpoint.
+
+**Input parameters:** 
+
+* None
+
+**Output parameters:**
+
+* `languages`: A list of language codes that correspond to the languages available through the endpoint.
+
+**Example:**
+
+```json
+{
+    "success":true,
+    "message":""
+    "diagnostics":{"cpuTime":3.9E-4,"userTime":3.55E-4},
+    "languages":["de","en","simple"],
+}
+```
+
+
 ##mostSimilar: 
 
 Returns the most related articles for a particular article or phrase. 
