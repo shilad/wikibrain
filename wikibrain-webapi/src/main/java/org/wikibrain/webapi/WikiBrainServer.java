@@ -73,10 +73,10 @@ public class WikiBrainServer extends AbstractHandler {
                 doWikify(req);
             } else if (target.equals("/pageRank")) {
                 doPageRank(req);
-            } else if (target.equals("/categoryToPages")) {
-                doCategoryToPages(req);
-            } else if (target.equals("/pageToCategories")) {
-                doPageToCategories(req);
+            } else if (target.equals("/articlesInCategory")) {
+                doArticlesInCategory(req);
+            } else if (target.equals("/categoriesForArticle")) {
+                doCategoriesForArticle(req);
             }
         } catch (WikiBrainWebException e) {
             req.writeError(e);
@@ -155,7 +155,7 @@ public class WikiBrainServer extends AbstractHandler {
             );
     }
 
-    private void doPageToCategories(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
+    private void doCategoriesForArticle(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
         Language lang = req.getLanguage();
         WebEntity entity = entityParser.extractEntity(req);
         if (entity.getArticleId() < 0) {
@@ -201,7 +201,7 @@ public class WikiBrainServer extends AbstractHandler {
         return candidates;
     }
 
-    private void doCategoryToPages(WikiBrainWebRequest req) throws DaoException {
+    private void doArticlesInCategory(WikiBrainWebRequest req) throws DaoException {
         Language lang = req.getLanguage();
         TIntSet pageIds = null;
 

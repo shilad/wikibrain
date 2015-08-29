@@ -67,11 +67,14 @@ public class WebSailWikifier implements Wikifier {
     private void learnMinLinkProbability() throws DaoException {
         LOG.info("Learning minimum link probability");
         TDoubleList probs = new TDoubleArrayList();
+        DaoFilter filter = new DaoFilter()
+                .setLanguages(language)
+                .setHasDest(true)
+                .setLimit(numTrainingLinks);
         for (LocalLink ll : linkDao.get(new DaoFilter().setLanguages(language).setLimit(numTrainingLinks))) {
-            if (ll.getDestId() >= 0) {
-                double p = linkProbDao.getLinkProbability(language, ll.getAnchorText());
-                probs.add(p);
-            }
+            if (ll.getDestId() < 0) throw new IllegalStateException();
+            double p = linkProbDao.getLinkProbability(language, ll.getAnchorText());
+            probs.add(p);
         }
         probs.sort();
         probs.reverse();
