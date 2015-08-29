@@ -65,15 +65,12 @@ http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
     ]
 }
 ```
-----------------------
 
 **similarity**: TODO
 
-----------------------
 
 **cosimilarity**: TODO
 
-----------------------
 
 **wikify**: Identify Wikipedia articles mentioned in a passage of free text
 
@@ -95,7 +92,6 @@ http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free
 }
 ```
 
-----------------------
 
 **pageRank**: Returns the pageRank of a particular article. The pageRank represents the "importance" in the link graph for a particular page. The sum of page ranks for all articles in a particular language equals 1.0. For example, the following call shows that the "United States" article in the Simple Wikipedia represents about 2.0% of the total page rank in the language.
 
@@ -110,5 +106,21 @@ http://localhost:8000/pageRank?title=United_States&lang=simple
 }
 ```
 
-----------------------
+**articlesInCategory**: Given a category "c" and a set of candidate categories "S", returns all pages that are closer to c than S. If S is not specified, the language edition's top-level categories are used. S must contain c.
 
+http://localhost:8000/articlesInCategory?targetCategoryTitle=Category:Science&lang=simple
+
+```json
+{
+    "success":true,
+    "message":"",
+    "category":{"title":"Category:Science","lang":"simple","articleId":5833},"success":true,
+    "distances":[
+        {"distance":0.0,"title":"Process","lang":"simple","articleId":202920},
+        {"distance":0.0,"title":"Applied science","lang":"simple","articleId":402104},
+        {"distance":0.0,"title":"Scientific law","lang":"simple","articleId":171228},
+        {"distance":0.0,"title":"Instrumentation","lang":"simple","articleId":144685},
+        ...
+    ],
+}
+```
