@@ -46,7 +46,7 @@ JSON representation of articles share a common format containing "articleId", "l
 
 # API Calls
 
-###mostSimilar: 
+##mostSimilar: 
 
 Returns the most related articles for a particular article or phrase. 
 Relatedness is defined using a semantic relatedness algorithm that is based on [Hecht et al's AtlasifySR+E](http://www.brenthecht.com/papers/bhecht_sigir2012_ExpSpatialization_SRplusE.pdf).
@@ -77,7 +77,7 @@ http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
 }
 ```
 
-###similarity: 
+##similarity: 
 
 Returns the relatedness score between two articles or phrases.
 Relatedness is defined using a semantic relatedness algorithm that is based on [Hecht et al's AtlasifySR+E](http://www.brenthecht.com/papers/bhecht_sigir2012_ExpSpatialization_SRplusE.pdf).
@@ -106,11 +106,11 @@ http://localhost:8000/similarity?lang=simple&phrases=coltrane|blues
 }
 ```
 
-###Cosimilarity
+##Cosimilarity
 
 TODO
 
-###Wikify
+##Wikify
 
 Identifies Wikipedia articles mentioned in a passage of free text.
 Algorithm is based on Noraset et al.'s [WebSail Wikfier](http://web-ngram.research.microsoft.com/erd2014/Docs/submissions/erd14_submission_24.pdf)
@@ -145,8 +145,20 @@ http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free
 }
 ```
 
+##pageRank
 
-**pageRank**: Returns the pageRank of a particular article. The pageRank represents the "importance" in the link graph for a particular page. The sum of page ranks for all articles in a particular language equals 1.0. For example, the following call shows that the "United States" article in the Simple Wikipedia represents about 2.0% of the total page rank in the language.
+Returns the pageRank of a particular article. The pageRank represents the "importance" in the link graph for a particular page. The sum of page ranks for all articles in a particular language equals 1.0. 
+
+**Input parameters:**
+
+* A single input article (specified as an entity, described above).
+
+**Output parameters:**
+
+* `article`: The specified input article.
+* `pageRank`: The fraction of total language edition pageRank the page accounts for. For example, the call shown below indicates that the "United States" article in the Simple Wikipedia represents about 2.0% of the total page rank in the language.
+
+**Example:**
 
 http://localhost:8000/pageRank?title=United_States&lang=simple
 
