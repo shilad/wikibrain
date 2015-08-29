@@ -7,13 +7,17 @@
 WikiBrain includes a Web API that exposes simplified, developer-friendly versions of WikiBrain functions. 
 As of September 2015, this API is in active development supported by the WikiMedia Foundation under the [WikiBrainTools IEG](https://meta.wikimedia.org/wiki/Grants:IEG/WikiBrainTools).
 
-# Public endpoints
+# Endpoints
 
-**No public endpoints are yet available for this endpoint.**
+**Public endpoint**: http://como.macalester.edu/wikibrain
+
+* For languages: en, de, pt, es, fr, it, ja, no.
+
 
 **Within Wikimedia Labs**, an endpoint is available  at:
 
-* http://wikibrain0.eqiad.wmflabs:8080 for languages: en, de, pt, es, fr, it, ja, no
+* http://wikibrain0.eqiad.wmflabs:8080 for languages: en, de, pt, es, fr, it, ja, no.
+* At the moment, this endpoint is down as Shilad figures out how to partition languages.
 * Interested in other languages? Email Shilad at ssen@macalester.edu
 
 # Structure of API requests:
@@ -63,7 +67,7 @@ Relatedness is defined using a semantic relatedness algorithm that is based on [
 
 **Example:** 
 
-http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
+http://como.macalester.edu/wikibrain/mostSimilar?lang=simple&phrase=spider?n=3
 
 ```json
 {
@@ -95,7 +99,7 @@ Relatedness is defined using a semantic relatedness algorithm that is based on [
 
 **Example:** 
 
-http://localhost:8000/similarity?lang=simple&phrases=coltrane|blues
+http://como.macalester.edu/wikibrain/similarity?lang=simple&phrases=coltrane|blues
 ```json
 {
     "success":true,
@@ -127,7 +131,7 @@ Algorithm is based on Noraset et al.'s [WebSail Wikfier](http://web-ngram.resear
 
 **Example:**
 
-http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation
+http://como.macalester.edu/wikibrain/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation
 
 ```json
 {
@@ -160,7 +164,7 @@ Returns the pageRank of a particular article. The pageRank represents the "impor
 
 **Example:**
 
-http://localhost:8000/pageRank?title=United_States&lang=simple
+http://como.macalester.edu/wikibrain/pageRank?title=United_States&lang=simple
 
 ```json
 {
@@ -190,7 +194,7 @@ Given a target category and a set of candidate categories, returns all pages tha
 
 **Example:**
 
-http://localhost:8000/articlesInCategory?targetCategoryTitle=Category:Science&lang=simple
+http://como.macalester.edu/wikibrain/articlesInCategory?targetCategoryTitle=Category:Science&lang=simple
 
 ```json
 {
@@ -224,7 +228,7 @@ Given an article, returns the distance to each of a set of categories in in the 
 
 **Example:**
 
-http://localhost:8000/categoriesForArticle?title=Jesus&lang=simple
+http://como.macalester.edu/wikibrain/categoriesForArticle?title=Jesus&lang=simple
 
 ```json
 {
