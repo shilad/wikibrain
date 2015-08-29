@@ -25,10 +25,10 @@ Common request query parameters include:
 
 * **Language**: For example, `lang=en`.
 * **Single entities**: Requests related to single entities must contain exactly one of the following parameters:
-  * `title`: The title of a Wikipedia article, e.g. `title=Wikimedia%20Foundation`.
-  * `articleId`: The id of the article, e.g. `articleId=18618509`.
-  * `conceptId`: The id of the associated Wikidata concept, e.g. `conceptId=180`.
-  * `phrase`: A textual phrase, e.g. `phrase=The%20Wikimedia%20Foundation`.
+  * `title`: The URL-encoded title of a Wikipedia article. For example, `title=Wikimedia%20Foundation`.
+  * `articleId`: The id of the article. For example, `articleId=18618509`.
+  * `conceptId`: The id of the associated Wikidata concept. For example, `conceptId=180` represents the [Wikimedia Foundation](https://www.wikidata.org/wiki/Q180).
+  * `phrase`: The URL encoded textual phrase. For example, `phrase=The%20Wikimedia%20Foundation`. Note that this parameter cannot be used when the entity must be an article.
 * **Multiple entities**: Requests about multiple entities contain plural versions of the above query parameters with an `s` added to the parameter name. Entities are separted by an or-bar (`|`). For example, `articleIds=18618509|5043734`.
 
 # Structure of API responses:
@@ -38,19 +38,30 @@ API responses are formatted in JSON and encoded using UTF-8. Every JSON response
  * `success`: A boolean of true or false indicating whether the API call succeeded.
  * `message`: If the call does not succeed (`success` if `false`), message will contain an error message. Otherwise, it will contain contain the empty string.
 
-All JSON representing articles has a common format containing "articleId", "lang", and "title" keys (as well as additional keys relevant to the particular API call). For example:
+JSON representation of articles share a common format containing "articleId", "lang", and "title" keys (as well as additional keys relevant to the particular API call). For example:
 
 ```json
-{
-    "lang":"simple",
-    "articleId":19903,
-    "title":"Spider"
-}
+{ "lang":"simple", "articleId":19903, "title":"Spider" }
 ```
 
 # API Calls
 
-**mostSimilar**: Shows the most similar articles for a particular article or phrase.
+####mostSimilar: 
+
+Returns the most related articles for a particular article or phrase. 
+Relatedness is defined using a semantic relatedness algorithm that is based on [Hecht et al's AtlasifySR+E](http://www.brenthecht.com/papers/bhecht_sigir2012_ExpSpatialization_SRplusE.pdf).
+
+
+**Input parameters:** 
+
+* A single entity (see definition above)
+* `n=`: An optional number of returned results.
+
+**Output format:** 
+
+* `results`: a list of articles ordered most to least related. Each article's JSON object includes a `score` attribute that indicates the relatedness score, between 0.0 and 1.0.
+
+**Example:** 
 
 http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
 
