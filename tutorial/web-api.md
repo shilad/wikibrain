@@ -14,9 +14,9 @@ As of September 2015, this API is in active development supported by the WikiMed
 * For languages: en, de, pt, es, fr, it, ja, no.
 
 
-**Within Wikimedia Labs**, an endpoint is available  at:
+**Within Wikimedia Labs**: http://wikibrain0.eqiad.wmflabs:8080 
 
-* http://wikibrain0.eqiad.wmflabs:8080 for languages: en, de, pt, es, fr, it, ja, no.
+* For languages: en, de, pt, es, fr, it, ja, no.
 * At the moment, this endpoint is down as Shilad figures out how to partition languages.
 * Interested in other languages? Email Shilad at ssen@macalester.edu
 
