@@ -71,7 +71,7 @@ public class WebSailWikifier implements Wikifier {
                 .setLanguages(language)
                 .setHasDest(true)
                 .setLimit(numTrainingLinks);
-        for (LocalLink ll : linkDao.get(new DaoFilter().setLanguages(language).setLimit(numTrainingLinks))) {
+        for (LocalLink ll : linkDao.get(filter)) {
             if (ll.getDestId() < 0) throw new IllegalStateException();
             double p = linkProbDao.getLinkProbability(language, ll.getAnchorText());
             probs.add(p);
