@@ -41,6 +41,7 @@ API responses are formatted in JSON and encoded using UTF-8. Every JSON response
 
  * `success`: A boolean of true or false indicating whether the API call succeeded.
  * `message`: If the call does not succeed (`success` if `false`), message will contain an error message. Otherwise, it will contain contain the empty string.
+ * `diagnostics`: Shows the cpuTime and userTime required to complete the call. In the future this may be used to rate limit clients.
 
 JSON representation of articles share a common format containing "articleId", "lang", and "title" keys (as well as additional keys relevant to the particular API call). For example:
 
@@ -73,6 +74,7 @@ http://como.macalester.edu/wikibrain/mostSimilar?lang=simple&phrase=spider?n=3
 {
     "success":true,
     "message":"",
+    "diagnostics":{"cpuTime":0.069754,"userTime":0.065966},
     "results":[
         {"title":"Spider","score":0.9392013984939758,"lang":"simple","articleId":19903},
         {"title":"Arachnid","score":0.46658547513090154,"lang":"simple","articleId":22923},
@@ -104,6 +106,7 @@ http://como.macalester.edu/wikibrain/similarity?lang=simple&phrases=coltrane|blu
 {
     "success":true,
     "message":"",
+    "diagnostics":{"cpuTime":0.009481,"userTime":0.007077},
     "entity1":{"phrase":"coltrane","type":"phrase"},
     "entity2":{"phrase":"blues","type":"phrase"},
     "score":0.6527105891471714
@@ -138,6 +141,7 @@ http://como.macalester.edu/wikibrain/wikify?lang=simple&text=Wikipedia+is+a+free
     "success":true,
     "message":"",
     "text":"Wikipedia is a free-access, free-content Internet encyclopedia, supported and hosted by the non-profit Wikimedia Foundation.",
+    "diagnostics":{"cpuTime":0.009892,"userTime":0.009152},
     "references": [
         {"title":"Wikipedia","text":"Wikipedia","index":0,"lang":"simple","articleId":27263},
         {"title":"Free content","text":"free-content","index":28,"lang":"simple","articleId":129718},
@@ -170,6 +174,7 @@ http://como.macalester.edu/wikibrain/pageRank?title=United_States&lang=simple
 {
     "success":true,
     "message":"",
+    "diagnostics":{"cpuTime":0.001937,"userTime":0.001781},
     "pageRank":0.019948040315214213,
     "article":{"title":"United States","lang":"simple","articleId":219587}
 }
@@ -200,6 +205,7 @@ http://como.macalester.edu/wikibrain/articlesInCategory?targetCategoryTitle=Cate
 {
     "success":true,
     "message":"",
+    "diagnostics":{"cpuTime":2.937681,"userTime":1.964611},
     "category":{"title":"Category:Science","lang":"simple","articleId":5833},"success":true,
     "distances":[
         {"distance":0.0,"title":"Process","lang":"simple","articleId":202920},
@@ -234,6 +240,7 @@ http://como.macalester.edu/wikibrain/categoriesForArticle?title=Jesus&lang=simpl
 {
     "success":true,
     "message":"",
+    "diagnostics":{"cpuTime":0.005009,"userTime":0.003763},
     "article":{"title":"Jesus","type":"title","articleId":219585},
     "distances":[
         {"distance":0.33521585396335846,"title":"Category:Religion","lang":"simple","articleId":6106},
