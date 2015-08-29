@@ -46,7 +46,7 @@ JSON representation of articles share a common format containing "articleId", "l
 
 # API Calls
 
-####mostSimilar: 
+###mostSimilar: 
 
 Returns the most related articles for a particular article or phrase. 
 Relatedness is defined using a semantic relatedness algorithm that is based on [Hecht et al's AtlasifySR+E](http://www.brenthecht.com/papers/bhecht_sigir2012_ExpSpatialization_SRplusE.pdf).
@@ -55,7 +55,7 @@ Relatedness is defined using a semantic relatedness algorithm that is based on [
 **Input parameters:** 
 
 * A single entity (see definition above)
-* `n=`: An optional number of returned results.
+* `n`: An optional parameter specifying the number of results that should be returned.
 
 **Output format:** 
 
@@ -77,13 +77,43 @@ http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
 }
 ```
 
-**similarity**: TODO
+###similarity: 
+
+Returns the relatedness score between two articles or phrases.
+Relatedness is defined using a semantic relatedness algorithm that is based on [Hecht et al's AtlasifySR+E](http://www.brenthecht.com/papers/bhecht_sigir2012_ExpSpatialization_SRplusE.pdf).
 
 
-**cosimilarity**: TODO
+**Input parameters:** 
 
+* Two entities (see definition above)
 
-**wikify**: Identify Wikipedia articles mentioned in a passage of free text
+**Output format:** 
+
+* `entity1`: The first requested entity.
+* `entity2`: The second requested entity.
+* `score`: A relatedness score between 0.0 and 1.0.
+
+**Example:** 
+
+http://localhost:8000/similarity?lang=simple&phrases=coltrane|blues
+```json
+{
+    "success":true,
+    "message":"",
+    "entity1":{"phrase":"coltrane","type":"phrase"},
+    "entity2":{"phrase":"blues","type":"phrase"},
+    "score":0.6527105891471714
+}
+```
+
+###Cosimilarity
+
+TODO
+
+###Wikify
+
+Identifies Wikipedia articles mentioned in a passage of free text.
+Algorithm is based on 
 
 http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation
 
