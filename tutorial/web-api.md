@@ -124,3 +124,21 @@ http://localhost:8000/articlesInCategory?targetCategoryTitle=Category:Science&la
     ],
 }
 ```
+
+**categoriesForArticle**: Given an article, returns the distance to each of a set of categories in in the category graph. If no categories are specified, top-level categories are used.
+
+```json
+{
+    "success":true,
+    "message":"",
+    "article":{"title":"Jesus","type":"title","articleId":219585},
+    "distances":[
+        {"distance":0.33521585396335846,"title":"Category:Religion","lang":"simple","articleId":6106},
+        {"distance":0.37135337094738713,"title":"Category:People","lang":"simple","articleId":5904},
+        {"distance":0.7239022222538307,"title":"Category:Knowledge","lang":"simple","articleId":65947},
+        {"distance":0.9894527716878347,"title":"Category:Science","lang":"simple","articleId":5833},
+        {"distance":1.0924154851425356,"title":"Category:Geography","lang":"simple","articleId":5834},
+        {"distance":1.095675386326904,"title":"Category:Everyday life","lang":"simple","articleId":5865}
+    ]
+}
+```
