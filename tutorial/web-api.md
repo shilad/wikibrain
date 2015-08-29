@@ -65,6 +65,11 @@ http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
     ]
 }
 ```
+
+**similarity**: TODO
+
+**cosimilarity**: TODO
+
 **wikify**: Identify Wikipedia articles mentioned in a passage of free text
 
 http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation
@@ -84,4 +89,15 @@ http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free
     ],
 }
 ```
-**pageRank**: 
+**pageRank**: Returns the pageRank of a particular article. The pageRank represents the "importance" in the link graph for a particular page. The sum of page ranks for all articles in a particular language equals 1.0. For example, the following call shows that the "United States" article in the Simple Wikipedia represents about 2.0% of the total page rank in the language.
+
+http://localhost:8000/pageRank?title=United_States&lang=simple
+
+```json
+{
+    "success":true,
+    "message":"",
+    "pageRank":0.019948040315214213,
+    "article":{"title":"United States","lang":"simple","articleId":219587}
+}
+```
