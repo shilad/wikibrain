@@ -177,8 +177,16 @@ Given a target category and a set of candidate categories, returns all pages tha
 
 **Input parameters**:
 
+* `lang`: Language of categories
+* `targetCategoryTitle` OR `targetCategoryId`: The "target" category we want to find closest pages for.
+* `categoryTitles` OR `categoryIds`: The "top-level" candidates to consider as alternates to the target category. Pages closer to the target than these candidates are returned. The target most be contained in these candidate. If not specified, "top-level" categories for the language are used.
 
-If candidates are not specified, the language edition's top-level categories are used. S must contain c.
+**Output parameters:**
+
+* `category`: The specified target category.
+* `distances`: A list of articles closer to the target category than other candidates, sorted by distance to the target. Each article's JSON entry includes a `distance` field.
+
+**Example:**
 
 http://localhost:8000/articlesInCategory?targetCategoryTitle=Category:Science&lang=simple
 
