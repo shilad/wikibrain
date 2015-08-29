@@ -113,7 +113,19 @@ TODO
 ###Wikify
 
 Identifies Wikipedia articles mentioned in a passage of free text.
-Algorithm is based on 
+Algorithm is based on Noraset et al.'s [WebSail Wikfier](http://web-ngram.research.microsoft.com/erd2014/Docs/submissions/erd14_submission_24.pdf)
+
+**Input parameters:**
+
+* `lang`: Language code of input text and output articles.
+* `text`: URL-encoded free text that should be mined for article mentions.
+
+**Output parameters:**
+
+* `text`: The input text, unchanged.
+* `references`: A list of articles mentioned in the text. Each mention is an article JSON that also includes "index", which specifies the offset in characters for the mention, and "text" which is the substring in the text corresponding to the mention.
+
+** Example:**
 
 http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation
 
