@@ -38,11 +38,21 @@ API responses are formatted in JSON and encoded using UTF-8. Every JSON response
  * `success`: A boolean of true or false indicating whether the API call succeeded.
  * `message`: If the call does not succeed (`success` if `false`), message will contain an error message. Otherwise, it will contain contain the empty string.
 
+All JSON representing articles has a common format containing "articleId", "lang", and "title" keys (as well as additional keys relevant to the particular API call). For example:
+
+```json
+{
+    "lang":"simple",
+    "articleId":19903,
+    "title":"Spider"
+}
+```
+
 # API Calls
 
 **mostSimilar**: Shows the most similar articles for a particular article or phrase.
 
-[http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3]
+http://localhost:8000/mostSimilar?lang=simple&phrase=spider?n=3
 
 ```json
 {
@@ -57,7 +67,7 @@ API responses are formatted in JSON and encoded using UTF-8. Every JSON response
 ```
 **wikify**: Identify Wikipedia articles mentioned in a passage of free text
 
-[http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation]
+http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation
 
 ```json
 {
