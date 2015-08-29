@@ -125,7 +125,7 @@ Algorithm is based on Noraset et al.'s [WebSail Wikfier](http://web-ngram.resear
 * `text`: The input text, unchanged.
 * `references`: A list of articles mentioned in the text. Each mention is an article JSON that also includes "index", which specifies the offset in characters for the mention, and "text" which is the substring in the text corresponding to the mention.
 
-** Example:**
+**Example:**
 
 http://localhost:8000/wikify?lang=simple&text=Wikipedia+is+a+free-access%2C+free-content+Internet+encyclopedia%2C+supported+and+hosted+by+the+non-profit+Wikimedia+Foundation
 
@@ -179,7 +179,9 @@ Given a target category and a set of candidate categories, returns all pages tha
 
 * `lang`: Language of categories
 * `targetCategoryTitle` OR `targetCategoryId`: The "target" category we want to find closest pages for.
-* `categoryTitles` OR `categoryIds`: The "top-level" candidates to consider as alternates to the target category. Pages closer to the target than these candidates are returned. The target most be contained in these candidate. If not specified, "top-level" categories for the language are used.
+* `categoryTitles` OR `categoryIds`: (Optional) The "top-level" candidates to consider as alternates to the target category. Pages closer to the target than these candidates are returned. The target most be contained in these candidate. If not specified, "top-level" categories for the language are used.
+* A list of entities (in the multiple-entity format specified above): (Optional) If specified, only these articles are considered. Defaults to all articles in the langauge edition.
+* `weighted:` (Optional) Whether distance in the category graph should weight edges by the page rank of a category. If true, weight by pageRank to penalize broad categories more heavily. If false, each edge has weight 1.0. Defaults to true.
 
 **Output parameters:**
 
@@ -205,7 +207,24 @@ http://localhost:8000/articlesInCategory?targetCategoryTitle=Category:Science&la
 }
 ```
 
-**categoriesForArticle**: Given an article, returns the distance to each of a set of categories in in the category graph. If no categories are specified, top-level categories are used.
+##categoriesForArticle
+
+Given an article, returns the distance to each of a set of categories in in the category graph. Distance is measured as the shortest upwards path in the category graph from the page to each top-level category.
+
+**Input parameters**:
+
+* An article in the single-entity format specified above: The article for which distances should be measured.
+* `categoryTitles` OR `categoryIds`: (Optional) The "top-level" candidates to consider as alternates to the target category. Pages closer to the target than these candidates are returned. The target most be contained in these candidate. If not specified, "top-level" categories for the language are used.
+* `weighted:` (Optional) Whether distance in the category graph should weight edges by the page rank of a category. If true, weight by pageRank to penalize broad categories more heavily. If false, each edge has weight 1.0. Defaults to true.
+
+**Output parameters:**
+
+* `category`: The specified target category.
+* `distances`: A list of articles closer to the target category than other candidates, sorted by distance to the target. Each article's JSON entry includes a `distance` field.
+
+**Example:**
+
+http://localhost:8000/categoriesForArticle?title=Jesus&lang=simple
 
 ```json
 {
