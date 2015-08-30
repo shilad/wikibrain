@@ -242,6 +242,7 @@ public class LinkProbabilityDao {
 
         DaoFilter filter = new DaoFilter()
                 .setRedirect(false)
+                .setLanguages(lang)
                 .setDisambig(false)
                 .setNameSpaces(NameSpace.ARTICLE);
 
