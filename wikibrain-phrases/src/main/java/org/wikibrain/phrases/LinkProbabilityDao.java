@@ -72,7 +72,7 @@ public class LinkProbabilityDao {
     }
 
     public boolean isBuilt() {
-        return db != null;
+        return (db != null && !db.isEmpty());
     }
 
     public boolean isSubgram(Language lang, String phrase, boolean normalize) {
@@ -159,7 +159,6 @@ public class LinkProbabilityDao {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        System.out.format("comparing %d, %d, and %d\n", tstamp, fp.lastModified(), fsg.lastModified());
         if (fp.isFile() && fp.lastModified() > tstamp
         &&  fsg.isFile() && fsg.lastModified() > tstamp) {
             try {
@@ -200,7 +199,7 @@ public class LinkProbabilityDao {
         }
     }
 
-    public void build() throws DaoException {
+    public synchronized void build() throws DaoException {
         if (db != null) {
             db.close();
         }
@@ -315,6 +314,7 @@ public class LinkProbabilityDao {
                     "Inserted link probabilities for %d anchors with mean probability %.4f and %d mises",
                     count, sum/count, misses));
         }
+        db.flush();
     }
 
     private TLongIntMap getPhraseLinkCounts(Language lang) {

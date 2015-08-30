@@ -65,6 +65,9 @@ public class WebSailWikifier implements Wikifier {
     }
 
     private void learnMinLinkProbability() throws DaoException {
+        if (!linkProbDao.isBuilt()) {
+            linkProbDao.build();
+        }
         LOG.info("Learning minimum link probability");
         TDoubleList probs = new TDoubleArrayList();
         DaoFilter filter = new DaoFilter()

@@ -17,10 +17,7 @@ import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
-import org.wikibrain.core.dao.DaoException;
-import org.wikibrain.core.dao.LocalCategoryMemberDao;
-import org.wikibrain.core.dao.LocalLinkDao;
-import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.LocalPage;
@@ -48,12 +45,23 @@ public class WikiBrainServer extends AbstractHandler {
     private final LocalCategoryMemberDao catDao;
     private WebEntityParser entityParser;
 
-    public WikiBrainServer(Env env) throws ConfigurationException {
+    public WikiBrainServer(Env env) throws ConfigurationException, DaoException {
         this.env = env;
         this.entityParser = new WebEntityParser(env);
         this.pageDao = env.getConfigurator().get(LocalPageDao.class);
         this.linkDao = env.getConfigurator().get(LocalLinkDao.class);
         this.catDao = env.getConfigurator().get(LocalCategoryMemberDao.class);
+
+        // Warm up necessary components
+        for (Language l : env.getLanguages()) {
+            LOG.info("warming up components for language: " + l);
+            getSr(l);
+            env.getConfigurator().get(Wikifier.class, "websail", "language", l.getLangCode());
+        }
+
+        LOG.info("warming up pagerank");
+        LocalPage p = pageDao.get(new DaoFilter().setLimit(1)).iterator().next();
+        linkDao.getPageRank(p.toLocalId());
     }
 
     @Override
@@ -98,6 +106,10 @@ public class WikiBrainServer extends AbstractHandler {
         req.writeJsonResponse("languages", langs);
     }
 
+    private SRMetric getSr(Language lang) throws ConfigurationException {
+        return env.getConfigurator().get(SRMetric.class, "simple-ensemble", "language", lang.getLangCode());
+    }
+
     private void doSimilarity(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
         // TODO: support explanations
         Language lang = req.getLanguage();
@@ -107,7 +119,7 @@ public class WikiBrainServer extends AbstractHandler {
         }
         WebEntity entity1 = entities.get(0);
         WebEntity entity2 = entities.get(1);
-        SRMetric sr = env.getConfigurator().get(SRMetric.class, "milnewitten", "language", lang.getLangCode());
+        SRMetric sr = getSr(lang);
         SRResult r = null;
         switch (entity1.getType()) {
             case ARTICLE_ID: case TITLE:
@@ -127,7 +139,7 @@ public class WikiBrainServer extends AbstractHandler {
         Language lang = req.getLanguage();
         WebEntity entity = entityParser.extractEntity(req);
         int n = Integer.valueOf(req.getParam("n", "10"));
-        SRMetric sr = env.getConfigurator().get(SRMetric.class, "milnewitten", "language", lang.getLangCode());
+        SRMetric sr = getSr(lang);
         SRResultList results;
         switch (entity.getType()) {
             case ARTICLE_ID: case TITLE:
