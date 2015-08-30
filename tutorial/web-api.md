@@ -126,6 +126,7 @@ Relatedness is defined using a semantic relatedness algorithm that is based on [
 **Example:** 
 
 http://como.macalester.edu/wikibrain/similarity?lang=simple&phrases=coltrane|blues
+
 ```json
 {
     "success":true,
