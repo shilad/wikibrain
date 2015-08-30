@@ -63,7 +63,9 @@ public class WikiBrainServer extends AbstractHandler {
 
         try {
             // TODO: add logging
-            if (target.equals("/similarity")) {
+            if (target.equals("/languages")) {
+                doLanguages(req);
+            } else if (target.equals("/similarity")) {
                 doSimilarity(req);
             } else if (target.equals("/cosimilarity")) {
                 throw new UnsupportedOperationException();
@@ -85,6 +87,15 @@ public class WikiBrainServer extends AbstractHandler {
         } catch (DaoException e) {
             req.writeError(e);
         }
+    }
+
+    private void doLanguages(WikiBrainWebRequest req) {
+        List<String> langs = new ArrayList<String>();
+        for (Language l : env.getLanguages()) {
+            langs.add(l.getLangCode());
+        }
+        Collections.sort(langs);
+        req.writeJsonResponse("languages", langs);
     }
 
     private void doSimilarity(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
@@ -205,7 +216,7 @@ public class WikiBrainServer extends AbstractHandler {
         Language lang = req.getLanguage();
         TIntSet pageIds = null;
 
-        LocalPage target = null;
+        LocalPage target;
         if (req.hasParam("targetCategoryId")) {
             target = pageDao.getById(lang, Integer.valueOf(req.getParam("targetCategoryId")));
         } else if (req.hasParam("targetCategoryTitle")) {

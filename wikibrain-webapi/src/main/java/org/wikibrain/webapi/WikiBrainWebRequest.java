@@ -8,6 +8,8 @@ import org.wikibrain.core.lang.Language;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,16 +17,35 @@ import java.util.Map;
  * @author Shilad Sen
  */
 public class WikiBrainWebRequest {
+
+    // For timings
+    private ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    private long startCpuTime;
+    private long startUserTime;
+    private long elapsedUserTime;
+    private long elapsedCpuTime;
+
     private final String target;
     private final Request request;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
 
     public WikiBrainWebRequest(String target, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        startCpuTime = getCpuTime();
+        startUserTime = getUserTime();
+
         this.target = target;
         this.request = request;
         this.httpServletRequest = httpServletRequest;
         this.httpServletResponse = httpServletResponse;
+    }
+
+    private long getUserTime() {
+        return bean.isCurrentThreadCpuTimeSupported( ) ? bean.getCurrentThreadUserTime() : 0L;
+    }
+
+    private long getCpuTime() {
+        return bean.isCurrentThreadCpuTimeSupported( ) ? bean.getCurrentThreadCpuTime( ) : 0L;
     }
 
     public String getParam(String key) {
@@ -86,6 +107,14 @@ public class WikiBrainWebRequest {
         if (!object.containsKey("message")) {
             object.put("message", "");
         }
+
+        this.elapsedCpuTime = getCpuTime() - startCpuTime;
+        this.elapsedUserTime = getUserTime() - startUserTime;
+        Map<String, Double> resources = new HashMap<String, Double>();
+        resources.put("cpuTime", elapsedCpuTime / 1.0E9);
+        resources.put("userTime", elapsedUserTime / 1.0E9);
+        object.put("diagnostics", resources);
+
         httpServletResponse.setContentType("application/json;charset=utf-8");
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);
         try {
