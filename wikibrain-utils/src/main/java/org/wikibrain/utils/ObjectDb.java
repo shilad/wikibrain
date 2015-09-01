@@ -44,6 +44,7 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
         EnvironmentConfig envConfig = new EnvironmentConfig();
         envConfig.setTransactional(false);
         envConfig.setAllowCreate(true);
+        envConfig.setCachePercent(15);
         this.env = new Environment(path, envConfig);
 
         DatabaseConfig dbConfig = new DatabaseConfig();

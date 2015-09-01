@@ -334,10 +334,11 @@ public class LinkProbabilityDao {
     private void processPage(TLongIntMap counts, RawPage page) {
         Language lang = page.getLanguage();
         StringTokenizer tokenizer = new StringTokenizer();
+        StringBuilder buffer = new StringBuilder();
         for (Token sentence : tokenizer.getSentenceTokens(lang, page.getPlainText())) {
             List<Token> words = tokenizer.getWordTokens(lang, sentence);
             for (int i = 0; i < words.size(); i++) {
-                StringBuilder buffer = new StringBuilder();
+                buffer.setLength(0);
                 for (int j = i; j < words.size(); j++) {
                     if (j > i) {
                         buffer.append(' ');
