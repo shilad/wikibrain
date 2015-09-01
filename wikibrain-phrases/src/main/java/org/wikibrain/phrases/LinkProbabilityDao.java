@@ -364,7 +364,7 @@ public class LinkProbabilityDao {
     }
 
     private long hashCode(Language lang, String string) {
-        return WpStringUtils.longHashCode(lang.getLangCode() + ":" + string);
+        return WpStringUtils.longHashCode2(lang.getLangCode() + ":" + string);
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<LinkProbabilityDao> {
