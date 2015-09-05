@@ -62,6 +62,8 @@ public class CategoryBfs {
      */
     private TIntSet validWpIds;
 
+    int numSteps = 0;
+
     public CategoryBfs(CategoryGraph graph, int startCatId, Language language, int maxResults, TIntSet validWpIds, LocalCategoryMemberDao categoryMemberDao) throws DaoException {
         this(graph, startCatId, NameSpace.ARTICLE, language, maxResults, validWpIds, categoryMemberDao, (byte)+1);
     }
@@ -112,6 +114,8 @@ public class CategoryBfs {
      * @return A BfsVisited object that captures all pages and categories visited in the step.
      */
     public BfsVisited step() {
+        numSteps++;
+
         visited.clear();
         if (!hasMoreResults()) {
             return visited;

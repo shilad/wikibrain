@@ -77,6 +77,40 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         } catch (IOException e) {
             throw new DaoException(e);
         }
+
+        if (matrix == null && transpose == null) {
+            if (delegate.get(new DaoFilter().setLimit(1)).iterator().hasNext()) {
+                LOG.warn("MatrixLocalLinkDao empty, but delegate is not. Attempting to rebuild...");
+                rebuild();
+            }
+        }
+    }
+
+    /**
+     * Rebuild the dao from the delegate.
+     * @throws DaoException
+     */
+    public void rebuild() throws DaoException {
+        LocalLinkDao tmp = delegate;
+        this.delegate = null;
+
+        IOUtils.closeQuietly(matrix);
+        IOUtils.closeQuietly(transpose);
+        matrix = null;
+        transpose = null;
+        FileUtils.deleteQuietly(getMatrixFile());
+        FileUtils.deleteQuietly(getTransposeFile());
+
+        beginLoad();
+        ParallelForEach.iterate(tmp.get(new DaoFilter()).iterator(), new Procedure<LocalLink>() {
+            @Override
+            public void call(LocalLink ll) throws Exception {
+                save(ll);
+            }
+        });
+        endLoad();
+
+        this.delegate = tmp;
     }
 
     private void load() throws IOException {
@@ -101,7 +135,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
     @Override
     public void beginLoad() throws DaoException {
         allWriters.clear();
-        delegate.beginLoad();
+        if (delegate != null) delegate.beginLoad();
         // Initialize object database with existing links
         if (matrix != null) {
             ParallelForEach.iterate(matrix.iterator(), new Procedure<SparseMatrixRow>() {
@@ -255,7 +289,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
     @Override
     public void save(LocalLink item) throws DaoException {
-        delegate.save(item);
+        if (delegate != null) delegate.save(item);
         // skip red links
         if (item.getDestId() < 0 || item.getSourceId() < 0) {
             return;
@@ -346,7 +380,7 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
 
     @Override
     public void endLoad() throws DaoException {
-        delegate.endLoad();
+        if (delegate != null) delegate.endLoad();
 
         try {
             // close the old matrix and transpose

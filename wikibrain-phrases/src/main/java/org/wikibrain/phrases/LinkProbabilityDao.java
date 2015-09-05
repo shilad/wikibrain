@@ -221,6 +221,9 @@ public class LinkProbabilityDao {
     private void build(Language lang) throws DaoException {
         subGrams = new TLongHashSet();
 
+
+        LOG.info("building link probabilities for language " + lang);
+
         final TLongIntMap counts = new TLongIntHashMap();
         Iterator<String> iter = phraseDao.getAllPhrases(lang);
         StringTokenizer tokenizer = new StringTokenizer();
@@ -246,7 +249,6 @@ public class LinkProbabilityDao {
                 .setDisambig(false)
                 .setNameSpaces(NameSpace.ARTICLE);
 
-        LOG.info("building link probabilities for language " + lang);
         ParallelForEach.iterate(
                 pageDao.get(filter).iterator(),
                 WpThreadUtils.getMaxThreads(),

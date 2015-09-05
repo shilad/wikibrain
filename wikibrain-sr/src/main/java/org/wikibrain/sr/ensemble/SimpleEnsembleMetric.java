@@ -2,8 +2,10 @@ package org.wikibrain.sr.ensemble;
 
 import com.typesafe.config.Config;
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.procedure.TIntDoubleProcedure;
+import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.slf4j.Logger;
@@ -145,14 +147,25 @@ public class SimpleEnsembleMetric implements SRMetric{
         }
         // Hack: because there's no way to compare a phrase query and articles,
         // we need to re-ask mostSimilar with the specified candidate list.
-        int candidates[] = candidateSet.toArray();
         TIntDoubleMap scores = new TIntDoubleHashMap();
         for (SubMetric m : metrics) {
-            SRResultList rl = m.metric.mostSimilar(phrase, candidates.length, candidateSet);
-            if (rl != null) {
-                for (SRResult r : rl) {
-                    double s = m.coefficient * r.getScore();
-                    if (r.isValid()) scores.adjustOrPutValue(r.getId(), s, s);
+            // Hack: The bottom 20% all get the same (lowest) score.
+            SRResultList rl = m.metric.mostSimilar(phrase,
+                    (int) Math.ceil(candidateSet.size() * 0.8),
+                    candidateSet);
+            if (rl != null && rl.numDocs() > 0) {
+                TIntFloatMap subscores = rl.asTroveMap();
+                double minScore = rl.getScore(rl.numDocs() - 1) * 0.99;
+                for (int id : subscores.keys()) {
+                    double s = minScore;
+                    if (subscores.containsKey(id)) {
+                        s = subscores.get(id);
+                        if (Double.isFinite(s)) {
+                            s = minScore;
+                        }
+                    }
+                    s *= m.coefficient;
+                    scores.adjustOrPutValue(id, s, s);
                 }
             }
         }
