@@ -160,7 +160,7 @@ public class SimpleEnsembleMetric implements SRMetric{
                     double s = minScore;
                     if (subscores.containsKey(id)) {
                         s = subscores.get(id);
-                        if (Double.isFinite(s)) {
+                        if (Double.isInfinite(s) || Double.isNaN(s)) {
                             s = minScore;
                         }
                     }
