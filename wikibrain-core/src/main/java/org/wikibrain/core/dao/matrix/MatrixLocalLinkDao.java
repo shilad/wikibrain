@@ -79,7 +79,14 @@ public class MatrixLocalLinkDao implements LocalLinkDao {
         }
 
         if (matrix == null && transpose == null) {
-            if (delegate.get(new DaoFilter().setLimit(1)).iterator().hasNext()) {
+            boolean delegateHasData = false;
+            try {
+                delegateHasData = delegate.get(new DaoFilter().setLimit(1)).iterator().hasNext();
+            } catch (Exception e) {
+                LOG.warn("Error occurred while trying to fetch links from " + delegate +
+                        ". Assuming it is empty and continuing.");
+            }
+            if (delegateHasData) {
                 LOG.warn("MatrixLocalLinkDao empty, but delegate is not. Attempting to rebuild...");
                 rebuild();
             }
