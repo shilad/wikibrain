@@ -199,13 +199,19 @@ public enum FileMatcher {
     }
 
     public Language getLanguage(String link) {
-        for (Pattern p : patterns) {
-            Matcher m = p.matcher(link);
-            if (m.matches()) {
-                return Language.getByLangCode(m.group(1));
-            }
+        int end = link.lastIndexOf("wiki");
+        if (end < 1) {
+            throw new IllegalStateException("No language detected for " + link);
         }
-        throw new IllegalStateException("No language detected for " + link);
+        int beg;
+        for (beg = end-1; beg >=0 && isLangChar(link.charAt(beg)); beg--) {
+            // All work is done in loop condition.
+        }
+        return Language.getByLangCode(link.substring(beg + 1, end));
+    }
+
+    private boolean isLangChar(char c) {
+        return Character.isLetter(c) || Character.isDigit(c) || c == '_' || c == '-';
     }
 
     public String getName() {

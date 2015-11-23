@@ -37,7 +37,7 @@ import java.util.Map;
  *
  * @author Shilad Sen
  */
-public class SimpleEnsembleMetric implements SRMetric{
+public class SimpleEnsembleMetric implements SRMetric {
     private class SubMetric {
         SRMetric metric;
         double coefficient;
@@ -83,25 +83,29 @@ public class SimpleEnsembleMetric implements SRMetric{
     public SRResult similarity(int pageId1, int pageId2, boolean explanations) throws DaoException {
         // TODO: Handle explanations
         double sum = 0.0;
+        double divisor = 0.0;
         for (SubMetric m : metrics) {
             SRResult r = m.metric.similarity(pageId1, pageId2, false);
-            if (r.isValid()) {
+            if (r != null && r.isValid()) {
                 sum += m.coefficient * r.getScore();
+                divisor += m.coefficient;
             }
         }
-        return new SRResult(sum);
+        return new SRResult((divisor > 0) ? (sum / divisor) : Double.NaN);
     }
 
     @Override
     public SRResult similarity(String phrase1, String phrase2, boolean explanations) throws DaoException {
         double sum = 0.0;
+        double divisor = 0.0;
         for (SubMetric m : metrics) {
             SRResult r = m.metric.similarity(phrase1, phrase2, false);
-            if (r.isValid()) {
+            if (r != null && r.isValid()) {
                 sum += m.coefficient * r.getScore();
+                divisor += m.coefficient;
             }
         }
-        return new SRResult(sum);
+        return new SRResult((divisor > 0) ? (sum / divisor) : Double.NaN);
     }
 
     @Override
