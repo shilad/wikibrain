@@ -58,38 +58,28 @@ public class RequestedLinkGetter {
     }
 
     /**
-     * Return all dates on the dump index page of a particular language.
-     * @return list of Date objects.
-     * @throws IOException
-     * @throws ParseException
+     * Return a sorted list of dump dates before the date requested.
+     * @return list of dates as String.
      */
-    protected List<Date> getAllDates() throws IOException, ParseException {
-        List<Date> availableDate = new ArrayList<Date>();
+    protected List<String> getAllDates() throws IOException, ParseException, WikiBrainException {
         URL langWikiPageUrl = new URL(DumpLinkGetter.BASEURL_STRING + "/" + lang.getLangCode().replace("-", "_") + "wiki/");
         Document doc = Jsoup.parse(IOUtils.toString(langWikiPageUrl.openStream()));
         Elements availableDates = doc.select("body").select("pre").select("a[href]");
+        List<Date> dates = new ArrayList<Date>();
         for (Element element : availableDates) {
             Matcher dateMatcher = Pattern.compile("(\\d{8})/").matcher(element.attr("href"));
             while (dateMatcher.find()) {
-                availableDate.add(stringToDate(dateMatcher.group(1)));
+                dates.add(stringToDate(dateMatcher.group(1)));
             }
         }
-        return availableDate;
-    }
 
-    /**
-     * Return a sorted list of dump dates before the date requested.
-     * @param dateList list of Date object
-     * @return list of dates as String.
-     */
-    protected List<String> availableDumpDatesSorted(List<Date> dateList) throws WikiBrainException {
-        List<String> dateListSorted = new ArrayList<String>();
-        Collections.sort(dateList, new Comparator<Date>() {
+        Collections.sort(dates, new Comparator<Date>() {
             public int compare(Date date1, Date date2) {
                 return date1.compareTo(date2);
             }
         });
-        for (Date date : dateList) {
+        List<String> dateListSorted = new ArrayList<String>();
+        for (Date date : dates) {
             if (!date.after(requestDate)) {
                 dateListSorted.add(new SimpleDateFormat(DATE_FORMAT).format(date));
             }
@@ -120,7 +110,7 @@ public class RequestedLinkGetter {
      * @throws WikiBrainException
      */
     protected Map<String, Multimap<FileMatcher, DumpLinkInfo>> getDumps() throws ParseException, IOException, WikiBrainException {
-        List<String> availableDates = availableDumpDatesSorted(getAllDates());
+        List<String> availableDates = getAllDates();
         Map<String, Multimap<FileMatcher, DumpLinkInfo>> map = new HashMap<String, Multimap<FileMatcher, DumpLinkInfo>>();
         List<FileMatcher> unfoundMatchers = new ArrayList<FileMatcher>(matchers);
         for (int i = availableDates.size() - 1; i > -1; i--) {

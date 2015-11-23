@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 public class Language implements Comparable<Language>, Serializable {
     private static final long serialVersionUID = 6331325313592646604l;
 
-    private static Logger LOG = LoggerFactory.getLogger(Language.class);
     public static final String LANGUAGE_TSV = "languages.tsv";
 
     /**
@@ -170,7 +169,6 @@ public class Language implements Comparable<Language>, Serializable {
                 }
                 LANGUAGES[i] = new Language(id, cols[1], cols[2], cols[3]);
             }
-            LOG.info("loaded " + LANGUAGES.length + " languages");
         } else {
             throw new IOException("invalid header in languages.tsv: " + header);
         }

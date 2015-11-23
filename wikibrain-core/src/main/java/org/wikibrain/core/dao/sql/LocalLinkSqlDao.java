@@ -10,6 +10,7 @@ import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.jooq.Tables;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalLink;
 
 import java.util.ArrayList;
@@ -67,6 +68,9 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
             if (daoFilter.isParseable() != null) {
                 conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(daoFilter.isParseable()));
             }
+            if (daoFilter.getHasDest() != null) {
+                conditions.add(Tables.LOCAL_LINK.DEST_ID.ne(-1));
+            }
             Cursor<Record> result = context.select().
                     from(Tables.LOCAL_LINK).
                     where(conditions).
@@ -104,6 +108,9 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
             if (daoFilter.isParseable() != null) {
                 conditions.add(Tables.LOCAL_LINK.IS_PARSEABLE.in(daoFilter.isParseable()));
             }
+            if (daoFilter.getHasDest() != null) {
+                conditions.add(Tables.LOCAL_LINK.DEST_ID.ne(-1));
+            }
             return context.selectDistinct(Tables.LOCAL_LINK.SOURCE_ID,Tables.LOCAL_LINK.DEST_ID).
                     from(Tables.LOCAL_LINK).
                     where(conditions).
@@ -136,6 +143,16 @@ public class LocalLinkSqlDao extends AbstractSqlDao<LocalLink> implements LocalL
             freeJooq(context);
             throw e;
         }
+    }
+
+    @Override
+    public double getPageRank(Language language, int pageId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public double getPageRank(LocalId localId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

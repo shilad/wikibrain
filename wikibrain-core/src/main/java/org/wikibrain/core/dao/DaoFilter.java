@@ -47,6 +47,7 @@ public class DaoFilter {
     private Collection<Short> nsIds;
     private Boolean isRedirect;
     private Boolean isDisambig;
+    private Boolean hasDest;
     private Collection<Short> locTypeIds;
     private Collection<Integer> sourceIds;
     private Collection<Integer> destIds;
@@ -63,6 +64,7 @@ public class DaoFilter {
         destIds = null;
         locTypeIds = null;
         isParseable = null;
+        hasDest = null;
     }
 
     public Collection<Short> getLangIds() {
@@ -187,6 +189,20 @@ public class DaoFilter {
     public DaoFilter setDisambig(Boolean disambig) {
         this.isDisambig = disambig;
         return this;
+    }
+
+    /**
+     * Whether or not links, etc. are required to have destinations.
+     * @param hasDest
+     */
+    public DaoFilter setHasDest(Boolean hasDest) {
+        this.hasDest = hasDest;
+        return this;
+    }
+
+
+    public Boolean getHasDest() {
+        return hasDest;
     }
 
     /**

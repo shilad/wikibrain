@@ -72,7 +72,7 @@ public class LinkProbabilityDao {
     }
 
     public boolean isBuilt() {
-        return db != null;
+        return (db != null && !db.isEmpty());
     }
 
     public boolean isSubgram(Language lang, String phrase, boolean normalize) {
@@ -142,14 +142,29 @@ public class LinkProbabilityDao {
         }
 
 
-        File fp = new File(path, "phrase-cache.bin");
-        File fsg = new File(path, "subgram-cache.bin");
-        long tstamp = WpIOUtils.getLastModifiedfromDir(path);
+        File fp = new File(path + "-phrase-cache.bin");
+        File fsg = new File(path + "-subgram-cache.bin");
+        long tstamp = 0;
+        try {
+            Double doubleTstamp = db.get("tstamp");
+            if (doubleTstamp == null) {
+                tstamp = System.currentTimeMillis();
+                db.put("tstamp", 1.0 * tstamp);
+                db.flush();
+            } else {
+                tstamp = db.get("tstamp").longValue();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (fp.isFile() && fp.lastModified() > tstamp
         &&  fsg.isFile() && fsg.lastModified() > tstamp) {
             try {
                 cache = (TLongFloatMap) WpIOUtils.readObjectFromFile(fp);
                 subGrams = (TLongSet) WpIOUtils.readObjectFromFile(fsg);
+                LOG.info("Using up-to-date link probability cache files {} and {}", fp, fsg);
                 return;
             } catch (IOException e) {
                 LOG.warn("Using link probability dao cache failed: ", e);
@@ -161,7 +176,9 @@ public class LinkProbabilityDao {
         TLongSet subgrams = new TLongHashSet();
         while (iter.hasNext()) {
             Pair<String, Double> entry = iter.next();
-            if (entry.getKey().startsWith(":s:")) {
+            if (entry.getKey().equalsIgnoreCase("tstamp")) {
+                // do nothing...
+            } else if (entry.getKey().startsWith(":s:")) {
                 long hash = Long.valueOf(entry.getKey().substring(3));
                 subgrams.add(hash);
             } else {
@@ -182,7 +199,7 @@ public class LinkProbabilityDao {
         }
     }
 
-    public void build() throws DaoException {
+    public synchronized void build() throws DaoException {
         if (db != null) {
             db.close();
         }
@@ -203,6 +220,9 @@ public class LinkProbabilityDao {
 
     private void build(Language lang) throws DaoException {
         subGrams = new TLongHashSet();
+
+
+        LOG.info("building link probabilities for language " + lang);
 
         final TLongIntMap counts = new TLongIntHashMap();
         Iterator<String> iter = phraseDao.getAllPhrases(lang);
@@ -225,10 +245,10 @@ public class LinkProbabilityDao {
 
         DaoFilter filter = new DaoFilter()
                 .setRedirect(false)
+                .setLanguages(lang)
                 .setDisambig(false)
                 .setNameSpaces(NameSpace.ARTICLE);
 
-        LOG.info("building link probabilities for language " + lang);
         ParallelForEach.iterate(
                 pageDao.get(filter).iterator(),
                 WpThreadUtils.getMaxThreads(),
@@ -286,11 +306,18 @@ public class LinkProbabilityDao {
             }
         }
 
+        try {
+            db.put("tstamp", 1.0 * System.currentTimeMillis());
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+
         if (count != 0) {
             LOG.info(String.format(
                     "Inserted link probabilities for %d anchors with mean probability %.4f and %d mises",
                     count, sum/count, misses));
         }
+        db.flush();
     }
 
     private TLongIntMap getPhraseLinkCounts(Language lang) {
@@ -309,10 +336,11 @@ public class LinkProbabilityDao {
     private void processPage(TLongIntMap counts, RawPage page) {
         Language lang = page.getLanguage();
         StringTokenizer tokenizer = new StringTokenizer();
+        StringBuilder buffer = new StringBuilder();
         for (Token sentence : tokenizer.getSentenceTokens(lang, page.getPlainText())) {
             List<Token> words = tokenizer.getWordTokens(lang, sentence);
             for (int i = 0; i < words.size(); i++) {
-                StringBuilder buffer = new StringBuilder();
+                buffer.setLength(0);
                 for (int j = i; j < words.size(); j++) {
                     if (j > i) {
                         buffer.append(' ');
@@ -339,7 +367,7 @@ public class LinkProbabilityDao {
     }
 
     private long hashCode(Language lang, String string) {
-        return WpStringUtils.longHashCode(lang.getLangCode() + ":" + string);
+        return WpStringUtils.longHashCode2(lang.getLangCode() + ":" + string);
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<LinkProbabilityDao> {

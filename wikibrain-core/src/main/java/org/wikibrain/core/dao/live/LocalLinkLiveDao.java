@@ -14,6 +14,7 @@ import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.Title;
 
@@ -123,6 +124,16 @@ public class LocalLinkLiveDao implements LocalLinkDao {
             }
         }
         throw new DaoException("No link with given sourceId and destId found");
+    }
+
+    @Override
+    public double getPageRank(Language language, int pageId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public double getPageRank(LocalId localId) {
+        throw new UnsupportedOperationException();
     }
 
     //Notice: A DaoException will be thrown if you call this method!
