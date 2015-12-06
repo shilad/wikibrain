@@ -35,7 +35,7 @@ public class TestFileDownloader {
 
     @Test
     public void testDownloaderMove() throws IOException, InterruptedException {
-        URL url = new URL("http://dumps.wikimedia.org/iewiki/20150123/iewiki-20150123-redirect.sql.gz");
+        URL url = new URL("http://dumps.wikimedia.org/iewiki/latest/iewiki-latest-redirect.sql.gz");
         File tmp1 = File.createTempFile("downloader-test", ".txt");
         File tmp3 = File.createTempFile("downloader-test", ".txt");
         tmp1.delete();
