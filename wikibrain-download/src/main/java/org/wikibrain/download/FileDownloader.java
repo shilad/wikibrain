@@ -5,6 +5,7 @@ import com.github.axet.wget.info.DownloadInfo;
 import com.github.axet.wget.info.DownloadInfo.Part;
 import com.github.axet.wget.info.DownloadInfo.Part.States;
 import com.github.axet.wget.info.URLInfo;
+import com.github.axet.wget.info.ex.DownloadMultipartError;
 import com.github.axet.wget.info.ex.DownloadIOCodeError;
 
 import java.io.File;
@@ -47,7 +48,8 @@ public class FileDownloader {
                 DownloadInfo info = new DownloadInfo(url);
                 DownloadMonitor monitor = new DownloadMonitor(info);
                 info.extract(stop, monitor);
-                info.enableMultipart();
+		if (info.multipart())
+		    info.enableMultipart();
                 file.getParentFile().mkdirs();
                 WGet wget = new WGet(info, file);
                 wget.download(stop, monitor);
@@ -56,6 +58,12 @@ public class FileDownloader {
                     Thread.sleep(sleepTime);
                 }
                 return file;
+	    } catch (DownloadMultipartError e) {
+		for (Part p : e.getInfo().getParts()) {
+                    Throwable ee = p.getException();
+                    if (ee != null)
+                        ee.printStackTrace();
+                }
             } catch (DownloadIOCodeError e) {
                 if (i < maxAttempts) {
                     LOG.info("Failed to download " + url +
