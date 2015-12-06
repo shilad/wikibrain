@@ -60,6 +60,8 @@ public class EnvBuilder {
                 setUseLoadedLanguages();
             } else if (val.equals("downloaded")) {
                 setUseDownloadedLanguages();
+            } else if (val.equals("all")) {
+                setLanguages(LanguageSet.ALL);
             } else {  // TODO: handle world economies, etc.
                 setLanguages(new LanguageSet(cmd.getOptionValue("l")));
             }

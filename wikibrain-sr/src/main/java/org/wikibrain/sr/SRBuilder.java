@@ -126,10 +126,6 @@ public class SRBuilder {
         buildConceptsIfNecessary();
         LOG.info("building metric " + metricName);
         for (String name : getSubmetrics(metricName)) {
-            initMetric(name);
-        }
-
-        for (String name : getSubmetrics(metricName)) {
             buildMetric(name);
         }
     }
@@ -162,7 +158,7 @@ public class SRBuilder {
         String type = getMetricType(parentName);
         Config config = getMetricConfig(parentName);
         List<String> toAdd = new ArrayList<String>();
-        if (type.equals("ensemble")) {
+        if (type.equals("ensemble") || type.equals("simple-ensemble")) {
             for (String child : config.getStringList("metrics")) {
                 toAdd.addAll(getSubmetrics(child));
                 toAdd.add(child);
@@ -187,34 +183,32 @@ public class SRBuilder {
         return results;
     }
 
-    public void initMetric(String name) throws ConfigurationException {
-       String type = getMetricType(name);
+    public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
+
+        LOG.info("building component metric " + name);
+        String type = getMetricType(name);
+        if (type.equals("densevector.word2vec")) {
+            initWord2Vec(name);
+        }
+
+        SRMetric metric = getMetric(name);
         if (type.equals("ensemble")) {
-            EnsembleMetric ensemble = (EnsembleMetric) getMetric(name);
-            ensemble.setTrainSubmetrics(false);         // Do it by hand
+            ((EnsembleMetric)metric).setTrainSubmetrics(false);         // Do it by hand
         } else if (type.equals("sparsevector.mostsimilarconcepts")) {
             if (mode == Mode.SIMILARITY) {
                 LOG.warn("metric " + name + " of type " + type + " requires mostSimilar... training BOTH");
                 mode = Mode.BOTH;
             }
+            throw new UnsupportedOperationException("This block needs to occur earlier.");
         } else if (type.equals("milnewitten")){
-            MilneWittenMetric mw = (MilneWittenMetric) getMetric(name);
-            mw.setTrainSubmetrics(false);
-        } else {
-            // simple; nothing needed!
+            ((MilneWittenMetric)metric).setTrainSubmetrics(false);
         }
-    }
 
-    public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
-        LOG.info("building component metric " + name);
-        if (getMetricType(name).equals("densevector.word2vec")) {
-            initWord2Vec(name);
-        }
-        Dataset ds = getDataset();
-        SRMetric metric = getMetric(name);
         if (metric instanceof BaseSRMetric) {
             ((BaseSRMetric)metric).setBuildMostSimilarCache(buildCosimilarity);
         }
+
+        Dataset ds = getDataset();
         if (mode == Mode.SIMILARITY || mode == Mode.BOTH) {
             if (skipBuiltMetrics && metric.similarityIsTrained()) {
                 LOG.info("metric " + name + " similarity() is already trained... skipping");

@@ -135,7 +135,6 @@ public class DenseVectorSRMetric extends BaseSRMetric {
         }
         SRResultList result;
         if (accelerator != null) {
-            if (validIds != null) throw new UnsupportedOperationException();// TODO: FIXME!
             int n = (int) Math.max(minAcceleratorCandidates, maxResults * acceleratorMultiplier);
             Neighborhood nhood = accelerator.query(vector, maxResults, n, validIds);
             result = new SRResultList(nhood.size());

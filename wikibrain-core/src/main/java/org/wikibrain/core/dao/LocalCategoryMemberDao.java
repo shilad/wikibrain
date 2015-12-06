@@ -1,5 +1,7 @@
 package org.wikibrain.core.dao;
 
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.set.TIntSet;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.CategoryGraph;
@@ -14,10 +16,29 @@ import java.util.Set;
  *
  * An interface that describes a Dao to determine local category membership.
  *
+ * @author Shilad Sen
  * @author Ari Weiland
  *
  */
 public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
+
+    /**
+     * Returns the best guess at the top level categories associated with a language.
+     *
+     * <p>
+     * This first looks for a language-specific "override" specified in the reference.conf.
+     * If that fails, it looks for a language-specific mapping for the
+     * <a href="https://www.wikidata.org/wiki/Q4587687">Category:Main topic classifications
+     * (Q4587687)</a>Wikidata concept and uses child categories in the language.
+     * </p>
+     *
+     * <p>Be warned: This may fail for some languages.</p>
+     *
+     * @param language
+     * @return
+     * @throws DaoException
+     */
+    public Set<LocalPage> guessTopLevelCategories(Language language) throws DaoException;
 
     /**
      * Supplemental method that saves a membership relationship based on
@@ -30,6 +51,43 @@ public interface LocalCategoryMemberDao extends Dao<LocalCategoryMember> {
     public void save(LocalPage category, LocalPage article) throws DaoException, WikiBrainException;
 
     public LocalPage getClosestCategory(LocalPage page, Set<LocalPage> candidates, boolean weightedDistance) throws DaoException;
+
+    /**
+     * For each article, identifies the closest category among the specified candidate set.
+     * Distance is measured using shortest path in the category graph.
+     *
+     * @param candidateCategories   The categories to consider as candidates (e.g. those considered "top-level").
+     * @param pageIds               If not null, only considers articles in the provided pageIds.
+     * @param weighted              If true, use page-rank weighted edges so paths that traverse more
+     *                              general categories are penalized more highly.
+     * @return                      Map with candidates as keys and the articles that have them as closest category
+     *                              as values. The values are a map of article ids to distances.
+     * @throws DaoException
+     */
+    Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> candidateCategories, TIntSet pageIds, boolean weighted) throws DaoException;
+
+
+    /**
+     * See #getClosestCategories with pageIds = null and weighted = true.
+     * @param topLevelCats
+     * @return
+     */
+    Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> topLevelCats) throws DaoException;
+
+
+    /**
+     * Returns distances to specified categories for requested page.
+     * Distance is measured using shortest path in the category graph.
+     *
+     * @param candidateCategories   The categories to consider as candidates (e.g. those considered "top-level").
+     * @param pageId                The article id we want to find.
+     * @param weighted              If true, use page-rank weighted edges so paths that traverse more
+     *                              general categories are penalized more highly.
+     * @return                      Map with article ids as keys and distances to each category id as values.
+     * @throws DaoException
+     *
+     */
+    TIntDoubleMap getCategoryDistances(Set<LocalPage> candidateCategories, int pageId, boolean weighted) throws DaoException;
 
     /**
      * Gets a collection of page IDs of articles that are members of the category

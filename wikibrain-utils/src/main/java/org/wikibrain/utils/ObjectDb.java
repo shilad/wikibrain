@@ -8,7 +8,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.*;
-import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +44,7 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
         EnvironmentConfig envConfig = new EnvironmentConfig();
         envConfig.setTransactional(false);
         envConfig.setAllowCreate(true);
+        envConfig.setCachePercent(15);
         this.env = new Environment(path, envConfig);
 
         DatabaseConfig dbConfig = new DatabaseConfig();
@@ -102,6 +102,14 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
         this.db.delete(null, new DatabaseEntry(key.getBytes("UTF-8")));
     }
 
+    public boolean isEmpty() {
+        KeyIterator ki = new KeyIterator();
+        boolean hasKeys = ki.hasNext();
+        ki.close();
+        return !hasKeys;
+    }
+
+
     /**
      * Gets the underlying database.
      * @return
@@ -118,72 +126,77 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
         return env;
     }
 
+    public java.util.Iterator<String> keyIterator() {
+        return new KeyIterator();
+    }
+
     /**
      * Iterate over keys
      * The cursor is closed when all the pairs have been read or when there is an error.
      * Otherwise the cursor is not closed... this is bad!
      * @return an iterator over keys.
      */
-    public Iterator<String> keyIterator() {
+    public class KeyIterator implements java.util.Iterator<String> {
         final DatabaseEntry key = new DatabaseEntry();
         final DatabaseEntry val = new DatabaseEntry();
-        val.setPartial(0, 0, true);
         final Cursor cursor;
-        try {
-            cursor = this.db.openCursor(null, CursorConfig.READ_UNCOMMITTED);
-        } catch (DatabaseException e) {
-            throw new RuntimeException(e);  // what else to do?
+        boolean finished = false;
+        boolean hasValue = false;
+
+        public KeyIterator() {
+            val.setPartial(0, 0, true);
+            try {
+                cursor = db.openCursor(null, CursorConfig.READ_UNCOMMITTED);
+            } catch (DatabaseException e) {
+                throw new RuntimeException(e);  // what else to do?
+            }
         }
-        return new Iterator<String>() {
-            boolean finished = false;
-            boolean hasValue = false;
 
-            @Override
-            public boolean hasNext() {
-                advance();
-                return !finished;
+        @Override
+        public boolean hasNext() {
+            advance();
+            return !finished;
+        }
+
+        @Override
+        public String next() {
+            advance();
+            if (finished) return null;
+            hasValue = false;
+            try {
+                return new String(key.getData(), "UTF-8");
+            } catch (IOException e) {
+                close();
+                throw new RuntimeException(e);
             }
+        }
 
-            @Override
-            public String next() {
-                advance();
-                if (finished) return null;
-                hasValue = false;
-                try {
-                    return new String(key.getData(), "UTF-8");
-                } catch (IOException e) {
+        @Override
+        public void remove() {
+            try {
+                cursor.delete();
+            } catch (DatabaseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void advance() {
+            if (finished || hasValue) return;
+            try {
+                if (cursor.getNext(key, val, LockMode.READ_UNCOMMITTED) != OperationStatus.SUCCESS) {
                     close();
-                    throw new RuntimeException(e);
+                    finished = true;
                 }
+            } catch (DatabaseException e) {
+                close();
+                throw new RuntimeException(e);
             }
+            hasValue = true;
+        }
 
-            @Override
-            public void remove() {
-                try {
-                    cursor.delete();
-                } catch (DatabaseException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            private void advance() {
-                if (finished || hasValue) return;
-                try {
-                    if (cursor.getNext(key, val, LockMode.READ_UNCOMMITTED) != OperationStatus.SUCCESS) {
-                        close();
-                        finished = true;
-                    }
-                } catch (DatabaseException e) {
-                    close();
-                    throw new RuntimeException(e);
-                }
-                hasValue = true;
-            }
-
-            private void close() {
-                try { cursor.close(); } catch (DatabaseException e) {}
-            }
-        };
+        public void close() {
+            try { cursor.close(); } catch (DatabaseException e) {}
+        }
     }
 
     /**
@@ -193,7 +206,7 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
      * @return an iterator over key / value pairs.
      */
     @Override
-    public Iterator<Pair<String, V>> iterator() {
+    public java.util.Iterator<Pair<String, V>> iterator() {
         final DatabaseEntry key = new DatabaseEntry();
         final DatabaseEntry val = new DatabaseEntry();
         final Cursor cursor;
@@ -202,7 +215,7 @@ public class ObjectDb<V extends Serializable> implements Iterable<Pair<String, V
         } catch (DatabaseException e) {
             throw new RuntimeException(e);  // what else to do?
         }
-        return new Iterator<Pair<String, V>>() {
+        return new java.util.Iterator<Pair<String, V>>() {
             boolean finished = false;
             boolean hasValue = false;
 

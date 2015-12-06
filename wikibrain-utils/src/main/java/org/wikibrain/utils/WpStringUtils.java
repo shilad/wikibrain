@@ -35,4 +35,13 @@ public class WpStringUtils {
         }
         return h;
     }
+
+    /**
+     * This is much faster... TODO: look for and replace longHashCode calls.
+     * @param s
+     * @return
+     */
+    public static long longHashCode2(String s) {
+        return MurmurHash.hash64(s);
+    }
 }

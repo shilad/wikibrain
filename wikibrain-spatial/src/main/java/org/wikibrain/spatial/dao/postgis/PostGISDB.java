@@ -271,12 +271,12 @@ public class PostGISDB {
             iterator.close();
             return null;
         }
-        Feature feature = iterator.next();
+        Feature feature;
 
         Map<Integer, Geometry> geometries = new HashMap<Integer, Geometry>();
         while (iterator.hasNext()){
-            geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
             feature = iterator.next();
+            geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
         }
         iterator.close();
         return geometries;
@@ -333,12 +333,12 @@ public class PostGISDB {
                 return null;
             }
 
-            Feature feature = iterator.next();
+            Feature feature;
 
             Map<Integer, Geometry> geometries = new HashMap<Integer, Geometry>();
             while (iterator.hasNext()){
-                geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
                 feature = iterator.next();
+                geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
             }
             iterator.close();
             return geometries;

@@ -1,6 +1,7 @@
 package org.wikibrain;
 
 import org.apache.commons.cli.*;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
@@ -29,6 +30,9 @@ public class Loader {
                         .withDescription("turn stage on or off, format is stagename:on or stagename:off")
                         .create("s"));
 
+        //Skip diagnostics
+        options.addOption("skipDiagnostics", false, "Skip diagnostic tests");
+
         //Specify the Datasets
         options.addOption(
                 new DefaultOptionBuilder()
@@ -43,23 +47,28 @@ public class Loader {
     private Env env;
     private CommandLine cmd;
     private String[] loaderArgs;
+    private boolean doDiagnostics = true;
 
     public Loader(String args[]) throws ConfigurationException, DaoException, InterruptedException, ClassNotFoundException, ParseException {
         CommandLineParser parser = new PosixParser();
         cmd = parser.parse(options, args);
+        doDiagnostics = !cmd.hasOption("skipDiagnostics");
 
         List<String> keeperArgs = new ArrayList<String>();
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-d") || args[i].equals("-drop")) {
                 // do not keep
+            } else if (args[i].endsWith("skipDiagnostics")) {
+                    // do not keep
             } else if (args[i].equals("-s") || args[i].equals("-stage")) {
                 i++;    // do not keep and skip the next arg
             } else {
                 keeperArgs.add(args[i]);
             }
         }
-        PipelineLoader.LOG.info("pipeline keeping args: " + keeperArgs);
 
+        // Don't trigger logging before we initialize it.
+//        PipelineLoader.LOG.info("pipeline keeping args: " + keeperArgs);
 
         env = new EnvBuilder(cmd).build();
         List<StageArgs> stageArgs = null;
@@ -90,7 +99,12 @@ public class Loader {
     }
 
     public synchronized boolean runDiagnostics() throws IOException, InterruptedException {
-        return loader.runDiagnostics(env, loaderArgs, System.err);
+        if (doDiagnostics) {
+            return loader.runDiagnostics(env, loaderArgs, System.err);
+        } else {
+            LoggerFactory.getLogger(Loader.class).warn("Skipping diagnostics due to command line argument");
+            return true;
+        }
     }
 
     public static void usage(String message, Exception e) {
@@ -105,18 +119,20 @@ public class Loader {
     public static void main(String args[]) throws ConfigurationException, ClassNotFoundException, IOException, InterruptedException, SQLException, DaoException {
         try {
             Loader loader = new Loader(args);
-            if (!loader.runDiagnostics()) {
-                System.err.println("Diagnostics failed. Aborting execution.");
-                System.exit(1);
+            if (loader.doDiagnostics) {
+                if (!loader.runDiagnostics()) {
+                    System.err.println("Diagnostics failed. Aborting execution.");
+                    System.exit(1);
+                }
+                System.err.println("Beginning import process in 20 seconds...");
+                Thread.sleep(5000);
+                System.err.println("Beginning import process in 15 seconds...");
+                Thread.sleep(5000);
+                System.err.println("Beginning import process in 10 seconds...");
+                Thread.sleep(5000);
+                System.err.println("Beginning import process in 5 seconds...");
+                Thread.sleep(5000);
             }
-            System.err.println("Beginning import process in 20 seconds...");
-            Thread.sleep(5000);
-            System.err.println("Beginning import process in 15 seconds...");
-            Thread.sleep(5000);
-            System.err.println("Beginning import process in 10 seconds...");
-            Thread.sleep(5000);
-            System.err.println("Beginning import process in 5 seconds...");
-            Thread.sleep(5000);
             loader.run();
         } catch (ParseException e) {
             usage("Invalid arguments: ", e);

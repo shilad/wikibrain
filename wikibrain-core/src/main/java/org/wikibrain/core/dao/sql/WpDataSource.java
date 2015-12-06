@@ -260,17 +260,6 @@ public class WpDataSource implements Closeable {
                 closeQuietly(cnx);
             }
         }
-        if (dataSource instanceof BoneCPDataSource) {
-            ((BoneCPDataSource)dataSource).close();
-
-            // Awful hack that should go away when we upgrade to BoneCP 0.8.0
-            // For now, though many unit tests hang under 0.8.0
-            for (Thread thread : Thread.getAllStackTraces().keySet()) {
-                if (thread.toString().contains("com.google.common.base.internal.Finalizer,")) {
-                    thread.stop();
-                }
-            }
-        }
     }
 
     public static class WpDsProvider extends Provider<WpDataSource> {
@@ -301,6 +290,8 @@ public class WpDataSource implements Closeable {
             try {
                 Class.forName(config.getString("driver"));
                 BoneCPDataSource ds = new BoneCPDataSource();
+//                ds.setCloseConnectionWatch(true);
+                ds.setDisableConnectionTracking(true);
                 ds.setJdbcUrl(config.getString("url"));
                 ds.setUsername(config.getString("username"));
                 ds.setPassword(config.getString("password"));

@@ -139,7 +139,7 @@ public class Title implements Externalizable {
 	}
 
     public long longHashCode() {
-        return longHashCode(language.getLanguage(), getTitleStringWithoutNamespace(), getNamespace());
+        return longHashCode(language.getLanguage(), getCanonicalTitle(), getNamespace());
     }
 
     public static long longHashCode(Language l, String title, NameSpace ns) {

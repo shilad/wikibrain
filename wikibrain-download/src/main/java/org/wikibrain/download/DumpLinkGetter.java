@@ -54,7 +54,11 @@ public class DumpLinkGetter {
     public List<String> getFileLinks() throws IOException {
         List<String> links = new ArrayList<String>();
         URL dumpPageUrl = new URL(getLanguageWikiUrl() + dumpDate + "/");
-        Document doc = Jsoup.parse(IOUtils.toString(dumpPageUrl.openStream()));
+        String html = IOUtils.toString(dumpPageUrl.openStream());
+        if (!html.contains("Dump complete")) {
+            return links;
+        }
+        Document doc = Jsoup.parse(html);
         Elements linkElements = doc.select("ul").select("li.done").select("li.file").select("a[href]");
         linkElements.addAll(doc.select("p.checksum").select("a[href]"));
         for (Element linkElement : linkElements) {
@@ -92,10 +96,13 @@ public class DumpLinkGetter {
      * @throws IOException
      */
     protected Map<String, String> getMd5Sums(List<String> links) throws IOException {
+        HashMap<String, String> md5s = new HashMap<String, String>();
+        if (links.isEmpty()) {
+            return md5s;
+        }
         FileMatcher md5Matcher = FileMatcher.MD5;
         URL md5Url = new URL(BASEURL_STRING + md5Matcher.match(links).get(0));
         List<String> lines = IOUtils.readLines(md5Url.openStream(), "UTF-8");
-        HashMap<String, String> md5s = new HashMap<String, String>();
         for (String line : lines) {
             String[] parsedInfo = line.split("\\W{2}");
             String md5 = parsedInfo[0];

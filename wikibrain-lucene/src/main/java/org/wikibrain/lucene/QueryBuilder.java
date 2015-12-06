@@ -31,10 +31,10 @@ public class QueryBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(QueryBuilder.class);
 
-    public static final int DEFAULT_MAX_PERCENTAGE = 10;
-    public static final int DEFAULT_MAX_QUERY_TERMS = 100;
+    public static final int DEFAULT_MAX_PERCENTAGE = 5;
+    public static final int DEFAULT_MAX_QUERY_TERMS = 20;
     public static final int DEFAULT_MIN_TERM_FREQ = 2;
-    public static final int DEFAULT_MIN_DOC_FREQ = 2;
+    public static final int DEFAULT_MIN_DOC_FREQ = 5;
     public static final int DEFAULT_HIT_COUNT = 1000;
 
     private final Language language;

@@ -6,11 +6,9 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalCategoryMemberDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.CategoryGraph;
-import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.model.NameSpace;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
@@ -64,6 +62,8 @@ public class CategoryBfs {
      */
     private TIntSet validWpIds;
 
+    int numSteps = 0;
+
     public CategoryBfs(CategoryGraph graph, int startCatId, Language language, int maxResults, TIntSet validWpIds, LocalCategoryMemberDao categoryMemberDao) throws DaoException {
         this(graph, startCatId, NameSpace.ARTICLE, language, maxResults, validWpIds, categoryMemberDao, (byte)+1);
     }
@@ -80,14 +80,14 @@ public class CategoryBfs {
             Collection<Integer> cats = categoryMemberDao.getCategoryIds(language, startId);
             if (cats!=null){
                 for (int catId : cats) {
-                    int ci = graph.getCategoryIndex(catId);
+                    int ci = graph.catIdToIndex(catId);
                     if (ci >= 0) {
                         openCats.add(new CategoryDistance(ci, graph.cats[ci], graph.catCosts[ci], (byte)direction));
                     }
                 }
             }
         } else if (startNamespace == NameSpace.CATEGORY) {
-            int ci = graph.getCategoryIndex(startId);
+            int ci = graph.catIdToIndex(startId);
             if (ci >= 0) {
                 openCats.add(new CategoryDistance(ci, graph.cats[ci], 0.000000001, (byte)direction));
             }
@@ -114,6 +114,8 @@ public class CategoryBfs {
      * @return A BfsVisited object that captures all pages and categories visited in the step.
      */
     public BfsVisited step() {
+        numSteps++;
+
         visited.clear();
         if (!hasMoreResults()) {
             return visited;
@@ -179,10 +181,10 @@ public class CategoryBfs {
         return catDistances.containsKey(categoryId);
     }
     public boolean hasCategoryDistance(int pageId) {
-        return catDistances.containsKey(graph.getCategoryIndex(pageId));
+        return catDistances.containsKey(graph.catIdToIndex(pageId));
     }
     public double getCategoryDistance(int categoryId) {
-        return catDistances.get(graph.getCategoryIndex(categoryId));
+        return catDistances.get(graph.catIdToIndex(categoryId));
     }
     public double getCategoryDistanceForIndex(int catIndex) {
         return catDistances.get(catIndex);

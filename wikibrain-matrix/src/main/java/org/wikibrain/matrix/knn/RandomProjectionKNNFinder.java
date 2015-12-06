@@ -82,7 +82,7 @@ public class RandomProjectionKNNFinder implements KNNFinder {
         }
         for (int d= 0; d < dimensions; d++) {
             devs[d] = Math.sqrt(devs[d] / n);
-            LOG.info("dimension " + d + " has mean " + means[d] + " and std-dev " + devs[d]);
+            LOG.debug("dimension " + d + " has mean " + means[d] + " and std-dev " + devs[d]);
         }
 
 

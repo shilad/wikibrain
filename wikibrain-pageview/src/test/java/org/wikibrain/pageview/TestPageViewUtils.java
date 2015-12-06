@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 public class TestPageViewUtils {
     @Test
     public void testTstampsInRange() {
+
         long now = System.currentTimeMillis();
         Random random = new Random();
         for (int i = 0; i < 1000; i++) {

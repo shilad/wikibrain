@@ -1,13 +1,9 @@
 package org.wikibrain.core.model;
 
 import gnu.trove.map.TIntIntMap;
-import gnu.trove.set.TIntSet;
 import org.wikibrain.core.lang.Language;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A compact graph representation of the category structure.
@@ -37,9 +33,10 @@ public class CategoryGraph implements Serializable{
         this.language = language;
     }
 
-    public int getCategoryIndex(int catId) {
+    public int catIdToIndex(int catId) {
         return catIndexes.containsKey(catId) ?  catIndexes.get(catId) : -1;
     }
+    public int catIndexToId(int catIndex) { return (catIndex < 0) ? -1 : catIds[catIndex]; }
 
     /**
      * Return the wikipedia page ids for child of the specified category
@@ -47,7 +44,7 @@ public class CategoryGraph implements Serializable{
      * @return
      */
     public int[] getChildCategories(int wpId) {
-        int parentIndex = getCategoryIndex(wpId);
+        int parentIndex = catIdToIndex(wpId);
         if (parentIndex < 0) {
             return new int[0];
         }
@@ -60,7 +57,7 @@ public class CategoryGraph implements Serializable{
     }
 
     public int[] getCategoryPages(int wpId) {
-        int parentIndex = getCategoryIndex(wpId);
+        int parentIndex = catIdToIndex(wpId);
         if (parentIndex < 0) {
             return new int[0];
         }

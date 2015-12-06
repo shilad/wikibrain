@@ -507,7 +507,7 @@ public class GraphicLoader extends JFrame {
             output.write("\ndao.dataSource.psql.username : ");
             writeHOCONString(output, postgresUser.getText());
             output.write("\ndao.dataSource.psql.password : ");
-            writeHOCONString(output, postgresPass.getPassword());
+            writeHOCONString(output, new String(postgresPass.getPassword()));
 
             output.write("\n\ndao.dataSource.postgis.host : ");
             writeHOCONString(output, postgresHost.getText());
@@ -518,7 +518,7 @@ public class GraphicLoader extends JFrame {
             output.write("\ndao.dataSource.postgis.user : ");
             writeHOCONString(output, postgresUser.getText());
             output.write("\ndao.dataSource.postgis.passwd : ");
-            writeHOCONString(output, postgresPass.getPassword());
+            writeHOCONString(output, new String(postgresPass.getPassword()));
             output.write("\n\n");
             output.close();
 

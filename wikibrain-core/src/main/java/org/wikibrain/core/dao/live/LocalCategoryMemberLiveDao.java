@@ -1,17 +1,19 @@
 package org.wikibrain.core.dao.live;
 
 import com.typesafe.config.Config;
-
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.set.TIntSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.DaoFilter;
 import org.wikibrain.core.dao.LocalCategoryMemberDao;
-
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
-import org.wikibrain.core.model.*;
+import org.wikibrain.core.model.CategoryGraph;
+import org.wikibrain.core.model.LocalCategoryMember;
+import org.wikibrain.core.model.LocalPage;
 
 import java.util.*;
 
@@ -36,13 +38,34 @@ public class LocalCategoryMemberLiveDao implements LocalCategoryMemberDao {
     public void endLoad()throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
+
+    @Override
+    public Set<LocalPage> guessTopLevelCategories(Language language) {
+        return null;
+    }
+
     public void save(LocalPage a, LocalPage b)throws DaoException{
         throw new DaoException("Can't use this method for remote wiki server!");
     }
 
     @Override
-    public LocalPage getClosestCategory(LocalPage page, Set<LocalPage> candidates, boolean weightedDistance) {
-        throw new UnsupportedOperationException();
+    public LocalPage getClosestCategory(LocalPage page, Set<LocalPage> candidates, boolean weightedDistance) throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+
+    @Override
+    public Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> candidateCategories, TIntSet pageIds, boolean weighted) throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+
+    @Override
+    public Map<LocalPage, TIntDoubleMap> getClosestCategories(Set<LocalPage> topLevelCats) throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
+    }
+
+    @Override
+    public TIntDoubleMap getCategoryDistances(Set<LocalPage> candidateCategories, int pageId, boolean weighted) throws DaoException {
+        throw new DaoException("Can't use this method for remote wiki server!");
     }
 
     public void save(LocalCategoryMember member) throws DaoException {

@@ -26,7 +26,7 @@ public class MostSimilarExample {
 
         // Retrieve the "milnewitten" sr metric for simple english
         SRMetric sr = conf.get(
-                SRMetric.class, "milnewitten",
+                SRMetric.class, "simple-ensemble",
                 "language", simple.getLangCode());
 
         //Similarity between strings

@@ -113,7 +113,7 @@ public class CosineSimilarity implements VectorSimilarity {
     }
 
     private SRResultList mostSimilarWithInvertedIndex(TIntFloatMap query, int maxResults, TIntSet validIds) throws IOException {
-        TIntDoubleHashMap dots = new TIntDoubleHashMap(maxResults * 5);
+        TIntDoubleHashMap dots = new TIntDoubleHashMap(Math.max(100000, maxResults * 5));
 
         // Eschew a for-each loop here for performance reasons.
         int keys[] = query.keys();
