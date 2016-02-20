@@ -116,6 +116,7 @@ kernel.shmall = 15675290
     synchronous_commit = off    
     checkpoint_segments = 256
     checkpoint_completion_target = 0.9
+    autovacuum = off
 
 
 ```
