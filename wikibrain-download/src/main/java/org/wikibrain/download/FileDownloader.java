@@ -47,7 +47,7 @@ public class FileDownloader {
                 DownloadInfo info = new DownloadInfo(url);
                 DownloadMonitor monitor = new DownloadMonitor(info);
                 info.extract(stop, monitor);
-                info.enableMultipart();
+//                info.enableMultipart();
                 file.getParentFile().mkdirs();
                 WGet wget = new WGet(info, file);
                 wget.download(stop, monitor);
@@ -98,7 +98,7 @@ public class FileDownloader {
                     long now = System.currentTimeMillis();
                     if (now > last + displayInfo) {
                         last = now;
-                        if (info.multipart()) {
+                        /*if (info.multipart()) {
                             String parts = "";
 
                             for (Part p : info.getParts()) {
@@ -110,14 +110,14 @@ public class FileDownloader {
 
                             System.out.println(String.format("%.2f %s", info.getCount() / (float) info.getLength(),
                                     parts));
-                        } else {
+                        } else {*/
                             LOG.info(String.format("%s %.1f of %.1f MB (%.1f%%)",
                                             info.getSource(),
                                             info.getCount() / (1024*1024.0),
                                             info.getLength() / (1024*1024.0),
                                             info.getCount() * 100.0 / info.getLength())
                             );
-                        }
+//                        }
                     }
                     break;
                 default:
