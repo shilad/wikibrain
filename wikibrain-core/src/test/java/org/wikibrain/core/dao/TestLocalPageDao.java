@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.wikibrain.core.dao.sql.LocalPageSqlDao;
 import org.wikibrain.core.dao.sql.TestDaoUtil;
 import org.wikibrain.core.dao.sql.WpDataSource;
+import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.model.*;
 
@@ -13,6 +14,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class TestLocalPageDao {
     @Test
@@ -58,5 +61,19 @@ public class TestLocalPageDao {
 
         int savedId = dao.getIdByTitle("Test", lang.getLanguage(), NameSpace.ARTICLE);
         assert (savedId==7);
+    }
+
+    @Test
+    public void testURL() {
+        LocalPage lp = new LocalPage(Language.EN, 3, "Barack Obama");
+        String url = lp.getCompactUrl();
+
+        assertEquals("/w/en/3/Barack_Obama", url);
+        assertFalse(LocalPage.isCompactUrl("s" + url));
+        assertTrue(LocalPage.isCompactUrl(url));
+
+        LocalPage lp2 = LocalPage.fromCompactUrl(url);
+        assertNotNull(lp2);
+        assertEquals(lp, lp2);
     }
 }

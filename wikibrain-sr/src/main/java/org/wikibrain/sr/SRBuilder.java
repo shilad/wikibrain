@@ -87,10 +87,9 @@ public class SRBuilder {
 
     private Mode mode = Mode.BOTH;
 
-
-    public SRBuilder(Env env, String metricName) throws ConfigurationException {
+    public SRBuilder(Env env, String metricName, Language language) throws ConfigurationException {
         this.env = env;
-        this.language = env.getLanguages().getDefaultLanguage();
+        this.language = language;
         this.config = env.getConfiguration();
         this.srDir = new File(config.get().getString("sr.metric.path"));
         datasetNames = config.get().getStringList("sr.dataset.defaultsets");
@@ -100,6 +99,11 @@ public class SRBuilder {
         if (!srDir.isDirectory()) {
             srDir.mkdirs();
         }
+    }
+
+
+    public SRBuilder(Env env, String metricName) throws ConfigurationException {
+        this(env, metricName, env.getDefaultLanguage());
     }
 
 
@@ -367,7 +371,7 @@ public class SRBuilder {
             if (fakeGoldStandard == null) {
                 Corpus c = env.getConfigurator().get(
                         Corpus.class, "plain", "language",
-                        env.getDefaultLanguage().getLangCode());
+                        language.getLangCode());
                 try {
                     if (!c.exists()) c.create();
                     FakeDatasetCreator creator = new FakeDatasetCreator(c);
