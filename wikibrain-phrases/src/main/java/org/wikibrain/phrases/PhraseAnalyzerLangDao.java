@@ -129,5 +129,4 @@ public class PhraseAnalyzerLangDao {
         this.describeDb.close();
         this.resolveDb.close();
     }
-
 }

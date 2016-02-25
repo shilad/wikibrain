@@ -64,6 +64,15 @@ public class WebSailWikifier implements Wikifier {
         learnMinLinkProbability();
     }
 
+    public void setDesiredLinkRecall(double recall) throws DaoException {
+        this.desiredLinkRecall = recall;
+        this.learnMinLinkProbability();
+    }
+
+    public void setMinLinkProbability(double minProb) {
+        this.minLinkProbability = minProb;
+    }
+
     private void learnMinLinkProbability() throws DaoException {
         if (!linkProbDao.isBuilt()) {
             linkProbDao.build();
@@ -157,6 +166,7 @@ public class WebSailWikifier implements Wikifier {
         TIntSet existingIds = new TIntHashSet();
         for (int i = 0; i < mentions.size(); i++) {
             LinkInfo li = mentions.get(i);
+            if (li.getPrior() == null || li.getPrior().isEmpty()) continue;
             double p = 1.0 * li.getPrior().values().iterator().next() / (li.getPrior().getTotal() + 1);
 //            String name = phraseDao.getPageCounts(language, li.getTopPriorDestination(), 1).keySet().iterator().next();
             if ((li.getScore() > 0.01 && i < 3 && p >= 0.5) || (li.getScore() > 0.25 && p >= 0.5)) {

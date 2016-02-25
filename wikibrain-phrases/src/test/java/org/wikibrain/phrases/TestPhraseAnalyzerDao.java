@@ -77,10 +77,10 @@ public class TestPhraseAnalyzerDao {
     public void testDao() throws IOException, DaoException {
         File tmp = File.createTempFile("testdb", ".db", null);
         tmp.delete();
-        FileUtils.forceDeleteOnExit(tmp);
 
         StringNormalizer normalizer = new LuceneStringNormalizer(new TokenizerOptions(true, false, false), Version.LUCENE_43);
         PhraseAnalyzerDao dao = new PhraseAnalyzerObjectDbDao(normalizer, tmp, true);
+        FileUtils.forceDeleteOnExit(tmp);
         Language en = Language.getByLangCode("en");
 
         PrunedCounts<Integer> c1 = new PrunedCounts<Integer>(12);
@@ -136,5 +136,21 @@ public class TestPhraseAnalyzerDao {
         assertEquals("foo", phraseCounts.get(0).getKey());
         assertEquals(2, phraseCounts.get(0).getValue().size());
         assertEquals((Integer)7, (Integer)phraseCounts.get(0).getValue().get(349));
+
+        dao.close();
+
+        dao = new PhraseAnalyzerObjectDbDao(normalizer, tmp, false);
+        phrases = IteratorUtils.toList(dao.getAllPhrases(en));
+        System.out.println("phrases are " + phrases);
+        assertEquals(phrases, Arrays.asList("foo"));
+
+        phraseCounts = IteratorUtils.toList(dao.getAllPhraseCounts(en));
+        assertEquals(1, phraseCounts.size());
+        assertEquals("foo", phraseCounts.get(0).getKey());
+        assertEquals(2, phraseCounts.get(0).getValue().size());
+        assertEquals((Integer)7, (Integer)phraseCounts.get(0).getValue().get(349));
+
+        dao.close();
+
     }
 }

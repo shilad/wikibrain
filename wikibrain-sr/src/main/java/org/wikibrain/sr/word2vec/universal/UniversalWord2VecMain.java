@@ -3,29 +3,31 @@ package org.wikibrain.sr.word2vec.universal;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.plexus.util.FileUtils;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.WikiBrainException;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
+import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.nlp.Dictionary;
+import org.wikibrain.download.FileDownloader;
+import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.sr.SRBuilder;
-import org.wikibrain.sr.wikify.Corpus;
-import org.wikibrain.sr.wikify.WbCorpusLineReader;
+import org.wikibrain.sr.wikify.*;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +44,25 @@ public class UniversalWord2VecMain {
     private final Env env;
     private final TIntIntMap concepts;
 
-    UniversalWord2VecMain(Env env, Language lang) throws ConfigurationException, DaoException {
+    private static final String[][] CORPORA = {
+            { "simple", "http://shilad.com/news.2007.en.shuffled.gz"},
+            { "cs", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.cs.shuffled.gz"},
+            { "de", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.de.shuffled.gz"},
+            { "en", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.en.shuffled.gz"},
+            { "es", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.es.shuffled.gz"},
+            { "fr", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.fr.shuffled.gz"},
+            { "hi", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.hi.shuffled.gz"},
+            { "ru", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.ru.shuffled.gz"},
+            { "cs", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.cs.shuffled.gz"},
+            { "de", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.de.shuffled.gz"},
+            { "en", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.en.shuffled.gz"},
+            { "es", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.es.shuffled.gz"},
+            { "fr", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.fr.shuffled.gz"},
+            { "hi", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.hi.shuffled.gz"},
+            { "ru", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.ru.shuffled.gz"},
+    };
+
+    public UniversalWord2VecMain(Env env, Language lang) throws ConfigurationException, DaoException {
         this.env = env;
         this.lang = lang;
         UniversalPageDao univDao = env.getConfigurator().get(UniversalPageDao.class);
@@ -50,13 +70,13 @@ public class UniversalWord2VecMain {
         this.concepts = allConcepts.containsKey(lang) ? allConcepts.get(lang) : new TIntIntHashMap();
     }
 
-    void create(String path) throws ConfigurationException, DaoException, WikiBrainException, IOException {
+    public void create(String path) throws ConfigurationException, DaoException, WikiBrainException, IOException, InterruptedException {
         SRBuilder builder = new SRBuilder(env, "word2vec", lang);
         builder.setSkipBuiltMetrics(true);
         builder.setCreateFakeGoldStandard(true);
         builder.build();
 
-        FileUtils.forceDelete(path);
+        FileUtils.forceDelete(new File(path));
         FileUtils.forceMkdir(new File(path));
         Corpus c = env.getConfigurator().get(Corpus.class, "wikified", "language", lang.getLangCode());
         if (c == null) throw new IllegalStateException("Couldn't find wikified corpus for language " + lang);
@@ -64,40 +84,75 @@ public class UniversalWord2VecMain {
             c.create();
         }
 
-
         RotatingWriter writer = new RotatingWriter(
                 path + "/corpus." + lang.getLangCode() + ".",
                 ".txt",
                 OPTIMAL_FILE_SIZE);
+
+        LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
+        Wikifier wikifier = env.getConfigurator().get(Wikifier.class, "websail-final", "language", lang.getLangCode());
+        LinkProbabilityDao linkDao = env.getConfigurator().get(LinkProbabilityDao.class);
+
+        // We set super high recall settings to try to pickup lots of important words.
+        ((WebSailWikifier)wikifier).setMinLinkProbability(0.000001);
+        ((WebSailWikifier)wikifier).setDesiredLinkRecall(0.999);
+
+        // Process the wikipedia corpus
         WbCorpusLineReader cr = new WbCorpusLineReader(c.getCorpusFile());
         for (WbCorpusLineReader.Line line : cr) {
-            List<String> words = new ArrayList<String>();
-            for (String word : line.getLine().split(" +")) {
-                int mentionStart = word.indexOf(":/w/");
-                if (mentionStart >= 0) {
-                    Matcher m = Dictionary.PATTERN_MENTION.matcher(word.substring(mentionStart));
-                    if (m.matches()) {
-                        List<String> parts = new ArrayList<String>();
-                        parts.add(makeWordToken(word.substring(0, mentionStart)));
-                        int wpId2 = Integer.valueOf(m.group(3));
-                        if (wpId2 >= 0) {
-                            parts.add(word.substring(mentionStart + 1));
-                            if (concepts.containsKey(wpId2)) {
-                                parts.add("/c/" + concepts.get(wpId2));
-                            }
-                            Collections.shuffle(parts);
+            processLine(writer, line.getLine());
+        }
+
+        File tmp = WpIOUtils.createTempDirectory(lang.getLangCode() + "corpora");
+
+        // Process the online corpora
+        for (String [] info : CORPORA) {
+            if (info[0].equals(lang.getLangCode())) {
+                URL url = new URL(info[1]);
+                String name = new File(url.getFile()).getName();
+                FileDownloader downloader = new FileDownloader();
+                File in = downloader.download(url, new File(tmp, name));
+                in.deleteOnExit();
+                File out = new File(in.toString().replace(".gz", "") + ".wikified");
+                PlainTextCorpusCreator ptc = new PlainTextCorpusCreator(lang, wikifier, pageDao, linkDao, in);
+                ptc.write(out);
+
+                WbCorpusLineReader r = new WbCorpusLineReader(new File(out, "corpus.txt"));
+                for (WbCorpusLineReader.Line line : r) {
+                    processLine(writer, line.getLine());
+                }
+            }
+        }
+
+        writer.close();
+    }
+
+    private void processLine(RotatingWriter writer, String line) throws IOException {
+        List<String> words = new ArrayList<String>();
+        for (String word : line.split(" +")) {
+            int mentionStart = word.indexOf(":/w/");
+            if (mentionStart >= 0) {
+                Matcher m = Dictionary.PATTERN_MENTION.matcher(word.substring(mentionStart));
+                if (m.matches()) {
+                    List<String> parts = new ArrayList<String>();
+                    parts.add(makeWordToken(word.substring(0, mentionStart)));
+                    int wpId2 = Integer.valueOf(m.group(3));
+                    if (wpId2 >= 0) {
+                        parts.add(word.substring(mentionStart + 1));
+                        if (concepts.containsKey(wpId2)) {
+                            parts.add("/c/" + concepts.get(wpId2));
                         }
-                        words.addAll(parts);
-                    } else {
-                        words.add(makeWordToken(word));
+                        Collections.shuffle(parts);
                     }
+                    words.addAll(parts);
                 } else {
                     words.add(makeWordToken(word));
                 }
+            } else {
+                words.add(makeWordToken(word));
             }
-            writer.write(StringUtils.join(words, " ") + "\n");
         }
-        writer.close();
+        writer.write(StringUtils.join(words, " ") + "\n");
     }
 
     private String makeWordToken(String word) {
@@ -144,7 +199,7 @@ public class UniversalWord2VecMain {
         }
     }
 
-    public static void main(String args[]) throws ConfigurationException, DaoException, IOException, WikiBrainException {
+    public static void main(String args[]) throws ConfigurationException, DaoException, IOException, WikiBrainException, InterruptedException {
         Options options = new Options();
         options.addOption(
                 new DefaultOptionBuilder()
