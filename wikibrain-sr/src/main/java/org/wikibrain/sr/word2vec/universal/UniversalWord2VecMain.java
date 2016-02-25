@@ -45,7 +45,7 @@ public class UniversalWord2VecMain {
     private final TIntIntMap concepts;
 
     private static final String[][] CORPORA = {
-            { "simple", "http://shilad.com/news.2007.en.shuffled.gz"},
+//            { "simple", "http://shilad.com/news.2007.en.shuffled.gz"},    // A Smallish file for testing.
             { "cs", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.cs.shuffled.gz"},
             { "de", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.de.shuffled.gz"},
             { "en", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.en.shuffled.gz"},
