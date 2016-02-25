@@ -9,6 +9,8 @@ import org.apache.commons.collections.iterators.FilterIterator;
 import org.apache.commons.collections.iterators.TransformIterator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -21,6 +23,7 @@ import org.wikibrain.utils.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -28,10 +31,12 @@ import java.util.Map;
  * Persists information about phrases to page relationships using an object database.
  */
 public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
+    private static final Logger LOG = LoggerFactory.getLogger(PhraseAnalyzerObjectDbDao.class);
+
+    private final Map<Language, PhraseAnalyzerLangDao> langDaos = new HashMap<Language, PhraseAnalyzerLangDao>();
+    private final File dir;
+    private final boolean isNew;
     private final StringNormalizer normalizer;
-    private File dir;
-    private ObjectDb<PrunedCounts<String>> describeDb;
-    private ObjectDb<PrunedCounts<Integer>> resolveDb;
 
     /**
      * Creates a new dao using the given directory.
@@ -41,78 +46,53 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      */
     public PhraseAnalyzerObjectDbDao(StringNormalizer normalizer, File path, boolean isNew) throws DaoException {
         this.dir = path;
+        this.isNew = isNew;
         this.normalizer = normalizer;
+
         if (isNew) {
             if (path.exists()) FileUtils.deleteQuietly(path);
             path.mkdirs();
         }
-        try {
-            describeDb = new ObjectDb<PrunedCounts<String>>(new File(path, "describe"), isNew);
-            resolveDb = new ObjectDb<PrunedCounts<Integer>>(new File(path, "resolve"), isNew);
-        } catch (IOException e) {
-            throw new DaoException(e);
+    }
+
+    synchronized PhraseAnalyzerLangDao getDao(Language lang) throws DaoException {
+        File subDir = new File(dir, lang.getLangCode());
+        if (langDaos.containsKey(lang)) {
+            return langDaos.get(lang);
+        } else if (subDir.isDirectory() || isNew) {
+            langDaos.put(lang, new PhraseAnalyzerLangDao(normalizer, lang, subDir, isNew));
+            return langDaos.get(lang);
+        } else {
+            throw new DaoException("No phrase dao available for " + lang);
         }
     }
+
     @Override
     public void savePageCounts(Language lang, int wpId, PrunedCounts<String> counts) throws DaoException {
-        try {
-            describeDb.put(lang.getLangCode() + ":" + wpId, counts);
-        } catch (IOException e) {
-            throw new DaoException(e);
-        }
+        getDao(lang).savePageCounts(wpId, counts);
     }
 
     @Override
     public void savePhraseCounts(Language lang, String phrase, PrunedCounts<Integer> counts) throws DaoException {
-        phrase = normalizer.normalize(lang, phrase);
-        try {
-            resolveDb.put(lang.getLangCode() + ":" + phrase, counts);
-        } catch (IOException e) {
-            throw new DaoException(e);
-        }
+        getDao(lang).savePhraseCounts(phrase, counts);
     }
 
     @Override
     public Iterator<String> getAllPhrases(final Language lang) {
-        Predicate langFilter = new Predicate() {
-                @Override
-                public boolean evaluate(Object o) {
-                    String langCode = ((String)o).split(":")[0];
-                    return lang.getLangCode().equals(langCode);
-                }
-            };
-        Transformer stripLang = new Transformer() {
-            @Override
-            public Object transform(Object input) {
-                return ((String)input).split(":", 2)[1];
-            }
-        };
-        return new TransformIterator(
-                    new FilterIterator(resolveDb.keyIterator(), langFilter),
-                    stripLang);
+        try {
+            return getDao(lang).getAllPhrases();
+        } catch (DaoException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public Iterator<Pair<String, PrunedCounts<Integer>>> getAllPhraseCounts(final Language lang) {
-        Predicate langFilter = new Predicate() {
-            @Override
-            public boolean evaluate(Object o) {
-                Pair<String, PrunedCounts<Integer>> pair = (Pair<String, PrunedCounts<Integer>>) o;
-                String langCode = pair.getLeft().split(":")[0];
-                return lang.getLangCode().equals(langCode);
-            }
-        };
-        Transformer stripLang = new Transformer() {
-            @Override
-            public Object transform(Object o) {
-                Pair<String, PrunedCounts<Integer>> pair = (Pair<String, PrunedCounts<Integer>>) o;
-                String phrase = pair.getLeft().split(":", 2)[1];
-                return Pair.of(phrase, pair.getRight());
-            }
-        };
-        return new TransformIterator(
-                new FilterIterator(resolveDb.iterator(), langFilter),
-                stripLang);
+        try {
+            return getDao(lang).getAllPhraseCounts();
+        } catch (DaoException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -132,25 +112,7 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      */
     @Override
     public PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase, int maxPages) throws DaoException {
-        phrase = normalizer.normalize(lang, phrase);
-        try {
-            PrunedCounts<Integer> counts = resolveDb.get(lang.getLangCode() + ":" + phrase);
-            if (counts == null || counts.size() <= maxPages) {
-                return counts;
-            }
-            PrunedCounts<Integer> result = new PrunedCounts<Integer>(counts.getTotal());
-            for (int id : counts.keySet()) {
-                if (result.size() >= maxPages) {
-                    break;
-                }
-                result.put(id, counts.get(id));
-            }
-            return result;
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (ClassNotFoundException e) {
-            throw new DaoException(e);
-        }
+        return getDao(lang).getPhraseCounts(phrase, maxPages);
     }
 
     /**
@@ -164,36 +126,21 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      */
     @Override
     public PrunedCounts<String> getPageCounts(Language lang, int wpId, int maxPhrases) throws DaoException {
-        try {
-            PrunedCounts<String> counts = describeDb.get(lang.getLangCode() + ":" + wpId);
-            if (counts == null || counts.size() <= maxPhrases) {
-                return counts;
-            }
-            PrunedCounts<String> result = new PrunedCounts<String>(counts.getTotal());
-            for (String phrase : counts.keySet()) {
-                if (result.size() >= maxPhrases) {
-                    break;
-                }
-                result.put(phrase, counts.get(phrase));
-            }
-            return result;
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (ClassNotFoundException e) {
-            throw new DaoException(e);
-        }
+        return getDao(lang).getPageCounts(wpId, maxPhrases);
     }
 
     @Override
     public void flush() {
-        this.describeDb.flush();
-        this.resolveDb.flush();
+        for (PhraseAnalyzerLangDao dao : langDaos.values()) {
+            dao.flush();
+        }
     }
 
     @Override
     public void close() {
-        this.describeDb.close();
-        this.resolveDb.close();
+        for (PhraseAnalyzerLangDao dao : langDaos.values()) {
+            dao.close();
+        }
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<PhraseAnalyzerDao> {
