@@ -49,7 +49,7 @@ public class WebSailWikifier implements Wikifier {
     private final PhraseAnalyzerDao phraseDao;
     private final RawPageDao rawPageDao;
 
-    private double desiredLinkRecall = 0.98;
+    private double desiredLinkRecall = 0.99;
     private double minLinkProbability = 0.01;
 
     public WebSailWikifier(Wikifier identityWikifier, RawPageDao rawPageDao, LocalLinkDao linkDao, LinkProbabilityDao linkProbDao, PhraseAnalyzerDao phraseDao, SRMetric metric) throws DaoException {
@@ -90,7 +90,8 @@ public class WebSailWikifier implements Wikifier {
         }
         probs.sort();
         probs.reverse();
-        minLinkProbability = probs.get((int)(desiredLinkRecall * probs.size()));
+        int index = (int)(desiredLinkRecall * probs.size());
+        minLinkProbability = (index >= probs.size()) ? 0.0 : probs.get(index);
         LOG.info("Set minimum link probability to " + minLinkProbability + " to achieve " + desiredLinkRecall + " recall");
     }
 

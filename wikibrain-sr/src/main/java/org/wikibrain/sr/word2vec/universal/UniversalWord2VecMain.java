@@ -45,7 +45,7 @@ public class UniversalWord2VecMain {
     private final TIntIntMap concepts;
 
     private static final String[][] CORPORA = {
-//            { "simple", "http://shilad.com/news.2007.en.shuffled.gz"},    // A Smallish file for testing.
+            { "simple", "http://shilad.com/news.2007.en.shuffled.gz"},    // A Smallish file for testing.
             { "cs", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.cs.shuffled.gz"},
             { "de", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.de.shuffled.gz"},
             { "en", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.en.shuffled.gz"},
@@ -76,7 +76,7 @@ public class UniversalWord2VecMain {
         builder.setCreateFakeGoldStandard(true);
         builder.build();
 
-        FileUtils.forceDelete(new File(path));
+        FileUtils.deleteQuietly(new File(path));
         FileUtils.forceMkdir(new File(path));
         Corpus c = env.getConfigurator().get(Corpus.class, "wikified", "language", lang.getLangCode());
         if (c == null) throw new IllegalStateException("Couldn't find wikified corpus for language " + lang);
@@ -93,19 +93,14 @@ public class UniversalWord2VecMain {
         Wikifier wikifier = env.getConfigurator().get(Wikifier.class, "websail-final", "language", lang.getLangCode());
         LinkProbabilityDao linkDao = env.getConfigurator().get(LinkProbabilityDao.class);
 
-        // We set super high recall settings to try to pickup lots of important words.
-        ((WebSailWikifier)wikifier).setMinLinkProbability(0.000001);
-        ((WebSailWikifier)wikifier).setDesiredLinkRecall(0.999);
-
         // Process the wikipedia corpus
         WbCorpusLineReader cr = new WbCorpusLineReader(c.getCorpusFile());
         for (WbCorpusLineReader.Line line : cr) {
             processLine(writer, line.getLine());
         }
 
-        File tmp = WpIOUtils.createTempDirectory(lang.getLangCode() + "corpora");
-
         // Process the online corpora
+        File tmp = WpIOUtils.createTempDirectory(lang.getLangCode() + "corpora");
         for (String [] info : CORPORA) {
             if (info[0].equals(lang.getLangCode())) {
                 URL url = new URL(info[1]);
@@ -123,6 +118,7 @@ public class UniversalWord2VecMain {
                 }
             }
         }
+        FileUtils.deleteQuietly(tmp);
 
         writer.close();
     }
