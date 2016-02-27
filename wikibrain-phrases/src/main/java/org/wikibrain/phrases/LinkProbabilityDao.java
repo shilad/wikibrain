@@ -64,6 +64,12 @@ public class LinkProbabilityDao {
         return true;
     }
 
+    public void buildIfNecessary() throws DaoException {
+        for (LangLinkProbabilityDao dao : langDaos.values()) {
+            if (!dao.isBuilt()) dao.build();
+        }
+    }
+
     public boolean isSubgram(Language lang, String phrase, boolean normalize) {
         if (!langDaos.containsKey(lang)) {
             throw new IllegalArgumentException("No link probability dao for language: " + lang);
