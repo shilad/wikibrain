@@ -284,8 +284,8 @@ public class SRBuilder {
         }
 
         LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
-        lpd.useCache(true);
         lpd.buildIfNecessary();
+        lpd.useCache(true);
 
         String corpusName = config.getString("corpus");
         Corpus corpus = null;
