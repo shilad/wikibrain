@@ -23,9 +23,7 @@ import org.wikibrain.utils.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Persists information about phrases to page relationships using an object database.
@@ -63,7 +61,8 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
             langDaos.put(lang, new PhraseAnalyzerLangDao(normalizer, lang, subDir, isNew));
             return langDaos.get(lang);
         } else {
-            throw new DaoException("No phrase dao available for " + lang);
+//            throw new DaoException("No phrase dao available for " + lang);
+            return null;
         }
     }
 
@@ -80,7 +79,10 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
     @Override
     public Iterator<String> getAllPhrases(final Language lang) {
         try {
-            return getDao(lang).getAllPhrases();
+            PhraseAnalyzerLangDao dao = getDao(lang);
+            return (dao == null)
+                    ? new ArrayList<String>().iterator()
+                    : dao.getAllPhrases();
         } catch (DaoException e) {
             throw new RuntimeException(e);
         }
@@ -89,7 +91,10 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
     @Override
     public Iterator<Pair<String, PrunedCounts<Integer>>> getAllPhraseCounts(final Language lang) {
         try {
-            return getDao(lang).getAllPhraseCounts();
+            PhraseAnalyzerLangDao dao = getDao(lang);
+            return (dao == null)
+                    ? new ArrayList<Pair<String, PrunedCounts<Integer>>>().iterator()
+                    : dao.getAllPhraseCounts();
         } catch (DaoException e) {
             throw new RuntimeException(e);
         }
@@ -112,7 +117,8 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      */
     @Override
     public PrunedCounts<Integer> getPhraseCounts(Language lang, String phrase, int maxPages) throws DaoException {
-        return getDao(lang).getPhraseCounts(phrase, maxPages);
+        PhraseAnalyzerLangDao dao = getDao(lang);
+        return (dao == null) ? null : dao.getPhraseCounts(phrase, maxPages);
     }
 
     /**
@@ -126,7 +132,8 @@ public class PhraseAnalyzerObjectDbDao implements PhraseAnalyzerDao {
      */
     @Override
     public PrunedCounts<String> getPageCounts(Language lang, int wpId, int maxPhrases) throws DaoException {
-        return getDao(lang).getPageCounts(wpId, maxPhrases);
+        PhraseAnalyzerLangDao dao = getDao(lang);
+        return (dao == null) ? null : dao.getPageCounts(wpId, maxPhrases);
     }
 
     @Override
