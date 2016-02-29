@@ -1,11 +1,15 @@
 package org.wikibrain.sr.word2vec.universal;
 
 import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.WikiBrainException;
@@ -16,6 +20,7 @@ import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
+import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.nlp.Dictionary;
 import org.wikibrain.download.FileDownloader;
 import org.wikibrain.phrases.LinkProbabilityDao;
@@ -38,11 +43,15 @@ import java.util.regex.Matcher;
  * @author Shilad Sen
  */
 public class UniversalWord2VecMain {
+    private static final Logger LOG = LoggerFactory.getLogger(UniversalWord2VecMain.class);
+
     private static final int OPTIMAL_FILE_SIZE = 50 * 1024 * 1024;
 
     private final Language lang;
     private final Env env;
     private final TIntIntMap concepts;
+    private final LocalPageDao pageDao;
+    private final TIntObjectMap<String> shortUrls = new TIntObjectHashMap<String>();
 
     private static final String[][] CORPORA = {
             { "simple", "http://shilad.com/news.2007.en.shuffled.gz"},    // A Smallish file for testing.
@@ -66,6 +75,7 @@ public class UniversalWord2VecMain {
         this.env = env;
         this.lang = lang;
         UniversalPageDao univDao = env.getConfigurator().get(UniversalPageDao.class);
+        this.pageDao = env.getComponent(LocalPageDao.class);
         Map<Language, TIntIntMap> allConcepts = univDao.getAllLocalToUnivIdsMap(new LanguageSet(lang));
         this.concepts = allConcepts.containsKey(lang) ? allConcepts.get(lang) : new TIntIntHashMap();
     }
@@ -96,7 +106,7 @@ public class UniversalWord2VecMain {
         // Process the wikipedia corpus
         WbCorpusLineReader cr = new WbCorpusLineReader(c.getCorpusFile());
         for (WbCorpusLineReader.Line line : cr) {
-            processLine(writer, line.getLine());
+            processLine(writer, line.getLine(), line.getDocId());
         }
 
         // Process the online corpora
@@ -114,7 +124,7 @@ public class UniversalWord2VecMain {
 
                 WbCorpusLineReader r = new WbCorpusLineReader(new File(out, "corpus.txt"));
                 for (WbCorpusLineReader.Line line : r) {
-                    processLine(writer, line.getLine());
+                    processLine(writer, line.getLine(), -1);
                 }
             }
         }
@@ -123,7 +133,33 @@ public class UniversalWord2VecMain {
         writer.close();
     }
 
-    private void processLine(RotatingWriter writer, String line) throws IOException {
+    protected String getShortUrl(int wpId) throws IOException {
+        if (wpId < 0) return null;
+        synchronized (shortUrls) {
+            if (shortUrls.containsKey(wpId)) {
+                String url = shortUrls.get(wpId);
+                return url.isEmpty() ? null: url;
+            }
+        }
+        LocalPage page = null;
+        try {
+            page = pageDao.getById(lang, wpId);
+        } catch (DaoException e) {
+            throw new IOException(e);
+        }
+        synchronized (shortUrls) {
+            if (page == null) {
+                shortUrls.put(wpId, "");
+                return null;
+            } else {
+                String url = page.getCompactUrl();
+                shortUrls.put(wpId, url);
+                return url;
+            }
+        }
+    }
+
+    private void processLine(RotatingWriter writer, String line, int pageId) throws IOException {
         List<String> words = new ArrayList<String>();
         for (String word : line.split(" +")) {
             int mentionStart = word.indexOf(":/w/");
@@ -148,6 +184,11 @@ public class UniversalWord2VecMain {
                 words.add(makeWordToken(word));
             }
         }
+        List<String> labels = new ArrayList<String>();
+        String url = getShortUrl(pageId);
+        if (url != null) labels.add(url);
+        if (concepts.containsKey(pageId)) labels.add("/c/" + concepts.get(pageId));
+        writer.write(StringUtils.join(labels, " ") + "\t");
         writer.write(StringUtils.join(words, " ") + "\n");
     }
 
@@ -218,6 +259,7 @@ public class UniversalWord2VecMain {
         }
         Env env = new EnvBuilder(cmd).build();
         for (Language l : env.getLanguages()) {
+            LOG.info("Generating corpus for language " + l);
             UniversalWord2VecMain creator = new UniversalWord2VecMain(env, l);
             creator.create(cmd.getOptionValue("o") + "/" + l.getLangCode());
         }

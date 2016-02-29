@@ -113,7 +113,7 @@ public class SRBuilder {
     }
 
     public synchronized SRMetric getMetric(String name) throws ConfigurationException {
-            return env.getConfigurator().get(SRMetric.class, name, "language", language.getLangCode());
+            return env.getComponent(SRMetric.class, name, language);
     }
 
     /**
@@ -284,8 +284,8 @@ public class SRBuilder {
         }
 
         LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
-        lpd.buildIfNecessary();
         lpd.useCache(true);
+        lpd.buildIfNecessary();
 
         String corpusName = config.getString("corpus");
         Corpus corpus = null;
