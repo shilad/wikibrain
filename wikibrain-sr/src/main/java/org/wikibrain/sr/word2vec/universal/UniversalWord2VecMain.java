@@ -114,7 +114,7 @@ public class UniversalWord2VecMain {
         wtc.write(in);
         FileUtils.forceDeleteOnExit(in);
 
-        WbCorpusLineReader cr = new WbCorpusLineReader(in);
+        WbCorpusLineReader cr = new WbCorpusLineReader(new File(in, "corpus.txt"));
         for (WbCorpusLineReader.Line line : cr) {
             processLine(writer, line.getLine(), line.getDocId());
         }
