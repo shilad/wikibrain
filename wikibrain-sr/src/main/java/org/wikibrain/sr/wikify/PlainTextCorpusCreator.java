@@ -123,9 +123,9 @@ public class PlainTextCorpusCreator extends BaseCorpusCreator{
         Env env = new EnvBuilder(cmd).build();
         RawPageDao rpd = env.getConfigurator().get(RawPageDao.class);
         LocalPageDao lpd = env.getConfigurator().get(LocalPageDao.class);
-        LinkProbabilityDao linkProbabilityDao =env.getConfigurator().get(LinkProbabilityDao.class);
         Language lang = env.getLanguages().getDefaultLanguage();
-        Wikifier wikifier = env.getConfigurator().get(Wikifier.class, "default", "language", lang.getLangCode());
+        Wikifier wikifier = env.getComponent(Wikifier.class, lang);
+        LinkProbabilityDao linkProbabilityDao = env.getComponent(LinkProbabilityDao.class, lang);
 
         PlainTextCorpusCreator creator = new PlainTextCorpusCreator(
                 lang, wikifier, lpd, linkProbabilityDao, new File(cmd.getOptionValue("i")));

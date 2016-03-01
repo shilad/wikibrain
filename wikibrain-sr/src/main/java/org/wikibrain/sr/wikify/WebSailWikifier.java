@@ -10,6 +10,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
@@ -85,7 +86,7 @@ public class WebSailWikifier implements Wikifier {
                 .setLimit(numTrainingLinks);
         for (LocalLink ll : linkDao.get(filter)) {
             if (ll.getDestId() < 0) throw new IllegalStateException();
-            double p = linkProbDao.getLinkProbability(language, ll.getAnchorText());
+            double p = linkProbDao.getLinkProbability(ll.getAnchorText());
             probs.add(p);
         }
         probs.sort();
@@ -104,7 +105,7 @@ public class WebSailWikifier implements Wikifier {
         StringTokenizer tokenizer = new StringTokenizer();
         for (Token sentence : tokenizer.getSentenceTokens(language, text)) {
             for (Token phrase : phraseTokenizer.makePhraseTokens(language, sentence)) {
-                double p = linkProbDao.getLinkProbability(language, phrase.getToken());
+                double p = linkProbDao.getLinkProbability(phrase.getToken());
                 if (p > minLinkProbability) {
                     LinkInfo li = new LinkInfo(phrase);
                     li.setLinkProbability(p);
@@ -302,7 +303,7 @@ public class WebSailWikifier implements Wikifier {
             String phraseName = config.getString("phraseAnalyzer");
             String identityName = config.getString("identityWikifier");
             String linkName = config.getString("localLinkDao");
-            LinkProbabilityDao lpd = c.get(LinkProbabilityDao.class);
+            LinkProbabilityDao lpd = Env.getComponent(c, LinkProbabilityDao.class, language);
             if (config.getBoolean("useLinkProbabilityCache")) {
                 lpd.useCache(true);
             }

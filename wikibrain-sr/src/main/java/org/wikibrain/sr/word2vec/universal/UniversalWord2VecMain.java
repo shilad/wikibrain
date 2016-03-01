@@ -100,8 +100,8 @@ public class UniversalWord2VecMain {
                 OPTIMAL_FILE_SIZE);
 
         LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
-        Wikifier wikifier = env.getConfigurator().get(Wikifier.class, "websail-final", "language", lang.getLangCode());
-        LinkProbabilityDao linkDao = env.getConfigurator().get(LinkProbabilityDao.class);
+        Wikifier wikifier = env.getComponent(Wikifier.class, "websail-final", lang);
+        LinkProbabilityDao linkDao = env.getComponent(LinkProbabilityDao.class, lang);
 
         // Process the wikipedia corpus
         WbCorpusLineReader cr = new WbCorpusLineReader(c.getCorpusFile());
