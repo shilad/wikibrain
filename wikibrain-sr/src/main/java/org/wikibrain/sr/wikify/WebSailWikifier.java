@@ -52,6 +52,7 @@ public class WebSailWikifier implements Wikifier {
 
     private double desiredLinkRecall = 0.99;
     private double minLinkProbability = 0.01;
+    private double minFinalScore = 0.001;
 
     public WebSailWikifier(Wikifier identityWikifier, RawPageDao rawPageDao, LocalLinkDao linkDao, LinkProbabilityDao linkProbDao, PhraseAnalyzerDao phraseDao, SRMetric metric) throws DaoException {
         this.identityWikifier = identityWikifier;
@@ -249,6 +250,10 @@ public class WebSailWikifier implements Wikifier {
         return results;
     }
 
+    public void setMinFinalScore(double minFinalScore) {
+        this.minFinalScore = minFinalScore;
+    }
+
     private List<LocalLink> link(int wpId, String text, List<LinkInfo> infos) throws DaoException {
         BitSet used = new BitSet(text.length());
         List<LocalLink> results = identityWikifier.wikify(wpId, text);
@@ -258,7 +263,7 @@ public class WebSailWikifier implements Wikifier {
 
         Collections.sort(infos);
         for (LinkInfo li : infos) {
-            if (li.getDest() != null && li.getScore() > 0.001 && used.get(li.getStartChar(), li.getEndChar()).isEmpty()) {
+            if (li.getDest() != null && li.getScore() > minFinalScore && used.get(li.getStartChar(), li.getEndChar()).isEmpty()) {
                 results.add(li.toLocalLink(language, wpId));
                 used.set(li.getStartChar(), li.getEndChar());
             }
