@@ -101,6 +101,7 @@ public class UniversalWord2VecMain {
 
         LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
         Wikifier wikifier = env.getComponent(Wikifier.class, "websail-final", lang);
+        ((WebSailWikifier)wikifier).setDesiredLinkRecall(0.999);
         LinkProbabilityDao linkDao = env.getComponent(LinkProbabilityDao.class, lang);
 
         // Process the wikipedia corpus

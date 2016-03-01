@@ -39,7 +39,7 @@ public class WebSailWikifier implements Wikifier {
     /**
      * TODO: Make this configurable
      */
-    private int numTrainingLinks = 10000;
+    private int numTrainingLinks = 50000;
 
     private final Wikifier identityWikifier;
     private final SRMetric metric;
