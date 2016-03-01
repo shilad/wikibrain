@@ -17,6 +17,7 @@ import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
+import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
@@ -99,6 +100,7 @@ public class UniversalWord2VecMain {
                 ".txt",
                 OPTIMAL_FILE_SIZE);
 
+        RawPageDao rawDao = env.getConfigurator().get(RawPageDao.class);
         LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
         Wikifier wikifier = env.getComponent(Wikifier.class, "websail-final", lang);
         ((WebSailWikifier)wikifier).setMinFinalScore(0.00001);
@@ -106,19 +108,24 @@ public class UniversalWord2VecMain {
         LinkProbabilityDao linkDao = env.getComponent(LinkProbabilityDao.class, lang);
 
         // Process the wikipedia corpus
-        WbCorpusLineReader cr = new WbCorpusLineReader(c.getCorpusFile());
+        File tmp = WpIOUtils.createTempDirectory(lang.getLangCode() + "corpora");
+        File in = new File(tmp, "wikipedia.txt");
+        WikiTextCorpusCreator wtc = new WikiTextCorpusCreator(lang, wikifier, rawDao, pageDao, linkDao);
+        wtc.write(in);
+        FileUtils.forceDeleteOnExit(in);
+
+        WbCorpusLineReader cr = new WbCorpusLineReader(in);
         for (WbCorpusLineReader.Line line : cr) {
             processLine(writer, line.getLine(), line.getDocId());
         }
 
         // Process the online corpora
-        File tmp = WpIOUtils.createTempDirectory(lang.getLangCode() + "corpora");
         for (String [] info : CORPORA) {
             if (info[0].equals(lang.getLangCode())) {
                 URL url = new URL(info[1]);
                 String name = new File(url.getFile()).getName();
                 FileDownloader downloader = new FileDownloader();
-                File in = downloader.download(url, new File(tmp, name));
+                in = downloader.download(url, new File(tmp, name));
                 in.deleteOnExit();
                 File out = new File(in.toString().replace(".gz", "") + ".wikified");
                 PlainTextCorpusCreator ptc = new PlainTextCorpusCreator(lang, wikifier, pageDao, linkDao, in);
