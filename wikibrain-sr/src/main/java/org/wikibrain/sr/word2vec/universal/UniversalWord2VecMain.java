@@ -109,7 +109,7 @@ public class UniversalWord2VecMain {
 
         // Process the wikipedia corpus
         File tmp = WpIOUtils.createTempDirectory(lang.getLangCode() + "corpora");
-        File in = new File(tmp, "wikipedia.txt");
+        File in = new File(tmp, "wikipedia");
         WikiTextCorpusCreator wtc = new WikiTextCorpusCreator(lang, wikifier, rawDao, pageDao, linkDao);
         wtc.write(in);
         FileUtils.forceDeleteOnExit(in);
@@ -118,6 +118,7 @@ public class UniversalWord2VecMain {
         for (WbCorpusLineReader.Line line : cr) {
             processLine(writer, line.getLine(), line.getDocId());
         }
+        FileUtils.deleteQuietly(in);
 
         // Process the online corpora
         for (String [] info : CORPORA) {
