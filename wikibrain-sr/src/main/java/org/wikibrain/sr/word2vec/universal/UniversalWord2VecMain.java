@@ -269,9 +269,17 @@ public class UniversalWord2VecMain {
         }
         Env env = new EnvBuilder(cmd).build();
         for (Language l : env.getLanguages()) {
-            LOG.info("Generating corpus for language " + l);
-            UniversalWord2VecMain creator = new UniversalWord2VecMain(env, l);
-            creator.create(cmd.getOptionValue("o") + "/" + l.getLangCode());
+            try {
+                LOG.info("Generating corpus for language " + l);
+                UniversalWord2VecMain creator = new UniversalWord2VecMain(env, l);
+                String path = cmd.getOptionValue("o") + "/" + l.getLangCode();
+                File file = new File(path);
+                if (!file.isDirectory() || file.list().length == 0) {
+                    creator.create(path);
+                }
+            } catch (Exception e) {
+                LOG.warn("Generation of corpus for language " + l + " failed", e);
+            }
         }
     }
 }
