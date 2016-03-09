@@ -168,7 +168,7 @@ public class MetaInfoSqlDao extends AbstractSqlDao<MetaInfo> implements MetaInfo
 
     @Override
     public void sync() throws DaoException {
-        for (Class klass : counters.keySet()) {
+        for (Class klass : ((Map<Class, Map<Language, MetaInfo>>)counters).keySet()) {
             for (MetaInfo mi : counters.get(klass).values()) {
                 flush(mi);
             }
