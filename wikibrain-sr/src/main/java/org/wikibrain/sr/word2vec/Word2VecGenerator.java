@@ -1,7 +1,9 @@
 package org.wikibrain.sr.word2vec;
 
 import com.typesafe.config.Config;
+import gnu.trove.list.TByteList;
 import gnu.trove.list.TCharList;
+import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TCharArrayList;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TLongIntHashMap;
@@ -124,7 +126,7 @@ public class Word2VecGenerator implements DenseVectorGenerator {
 
             for (int i = 0; i < numEntities; i++) {
                 String word = readString(dis);
-                if (i % 50000 == 0) {
+                if (i % 5000 == 0) {
                     LOG.info("Read word vector " + word + " (" + i + " of " + numEntities + ")");
                 }
 
@@ -192,21 +194,24 @@ public class Word2VecGenerator implements DenseVectorGenerator {
 
 
     private static String readString(DataInputStream dis) throws IOException {
-        TCharList bytes = new TCharArrayList();
+        TByteList bytes = new TByteArrayList();
         while (true) {
             int i = dis.read();
-            if (i < 0) {
+            if (i == -1) {
                 break;
+            }
+            if (i < 0 || i > 255) {
+                throw new IllegalStateException();
             }
             char c = (char)i;
             if (c == ' ') {
                 break;
             }
             if (c != '\n') {
-                bytes.add(c);
+                bytes.add((byte)i);
             }
         }
-        return new String(bytes.toArray());
+        return new String(bytes.toArray(), "UTF-8");
     }
 
     private static float readFloat(InputStream is) throws IOException {
@@ -321,5 +326,10 @@ public class Word2VecGenerator implements DenseVectorGenerator {
 
     public static File getModelFile(File dir, Language lang) {
         return new File(dir, lang.getLangCode() + ".bin");
+    }
+
+    public static void main(String args[]) throws IOException {
+        Word2VecGenerator gen = new Word2VecGenerator(null, null,
+                new File("/Users/a558989/Projects/wikibrain/base-bh/dat/word2vecRaw/bh.bin"));
     }
 }
