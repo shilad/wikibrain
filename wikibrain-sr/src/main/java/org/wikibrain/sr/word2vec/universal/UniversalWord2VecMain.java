@@ -104,7 +104,7 @@ public class UniversalWord2VecMain {
         LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
         Wikifier wikifier = env.getComponent(Wikifier.class, "websail-final", lang);
         ((WebSailWikifier)wikifier).setMinFinalScore(0.00001);
-        ((WebSailWikifier)wikifier).setDesiredLinkRecall(0.999);
+        ((WebSailWikifier)wikifier).setDesiredLinkRecall(0.995);
         LinkProbabilityDao linkDao = env.getComponent(LinkProbabilityDao.class, lang);
 
         // Process the wikipedia corpus
@@ -116,7 +116,7 @@ public class UniversalWord2VecMain {
 
         WbCorpusLineReader cr = new WbCorpusLineReader(new File(in, "corpus.txt"));
         for (WbCorpusLineReader.Line line : cr) {
-            processLine(writer, line.getLine(), line.getDocId());
+            processLine(writer, line.getLine(), line.getDocId(), line.getLineNumber(), line.getCharNumber());
         }
         FileUtils.deleteQuietly(in);
 
@@ -134,7 +134,7 @@ public class UniversalWord2VecMain {
 
                 WbCorpusLineReader r = new WbCorpusLineReader(new File(out, "corpus.txt"));
                 for (WbCorpusLineReader.Line line : r) {
-                    processLine(writer, line.getLine(), -1);
+                    processLine(writer, line.getLine(), -1, -1, -1);
                 }
             }
         }
@@ -169,7 +169,7 @@ public class UniversalWord2VecMain {
         }
     }
 
-    private void processLine(RotatingWriter writer, String line, int pageId) throws IOException {
+    private void processLine(RotatingWriter writer, String line, int pageId, int lineNum, int charNum) throws IOException {
         List<String> words = new ArrayList<String>();
         for (String word : line.split(" +")) {
             int mentionStart = word.indexOf(":/w/");
@@ -198,6 +198,7 @@ public class UniversalWord2VecMain {
         String url = getShortUrl(pageId);
         if (url != null) labels.add(url);
         if (concepts.containsKey(pageId)) labels.add("/c/" + concepts.get(pageId));
+        writer.write(lineNum + "\t" + charNum + "\t");
         writer.write(StringUtils.join(labels, " ") + "\t");
         writer.write(StringUtils.join(words, " ") + "\n");
     }
