@@ -82,7 +82,7 @@ public class MilneWittenWikifier implements Wikifier {
     }
 
     private double getLinkProbability(String phrase) throws DaoException {
-        return linkProbDao.getLinkProbability(language, phrase);
+        return linkProbDao.getLinkProbability(phrase);
     }
 
 
@@ -329,7 +329,7 @@ public class MilneWittenWikifier implements Wikifier {
             String srName = config.getString("sr");
             String phraseName = config.getString("phraseAnalyzer");
             String linkName = config.getString("localLinkDao");
-            LinkProbabilityDao lpd = c.get(LinkProbabilityDao.class);
+            LinkProbabilityDao lpd = Env.getComponent(c, LinkProbabilityDao.class, language);
             if (config.getBoolean("useLinkProbabilityCache")) {
                 lpd.useCache(true);
             }

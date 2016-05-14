@@ -108,12 +108,12 @@ public class PhraseTokenizer {
                     buffer.append(' ');
                 }
                 buffer.append(words.get(j).getToken());
-                double prob = dao.getLinkProbability(language, buffer.toString());
+                double prob = dao.getLinkProbability(buffer.toString());
                 if (prob > minLinkProbabilityForPhrases) {
                     Mention m = new Mention(i, j, prob);
                     possibles.add(m);
                 }
-                if (!dao.isSubgram(language, buffer.toString(), true)) {
+                if (!dao.isSubgram(buffer.toString(), true)) {
                     break;
                 }
             }

@@ -57,7 +57,7 @@ public class Dictionary implements Closeable {
      * foo:/w/en/1000
      * foo:/w/en/1000/Hercule_Poirot
      */
-    public static final Pattern PATTERN_MENTION = Pattern.compile("(.*?):/w/([^/]+)/(\\d+)(/[^ ]*($| ))?");
+    public static final Pattern PATTERN_MENTION = Pattern.compile("(.*?):/w/([^/]+)/(-?\\d+)(/[^ ]*($| ))?");
 
     /**
      * How should words be stored? IN_MEMORY requires much more memory.

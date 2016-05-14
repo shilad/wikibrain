@@ -2,6 +2,7 @@ package org.wikibrain.core.model;
 
 import com.google.common.collect.Sets;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LanguageInfo;
 import org.wikibrain.core.lang.LocalId;
 
 import java.util.Set;
@@ -134,5 +135,38 @@ public class LocalPage {
             rVal.add(localPage.toLocalId());
         }
         return rVal;
+    }
+
+    /**
+     * Converts a compact url representation of a page to a LocalPage.
+     * @param s
+     * @return The local page, or null if the string was not a url.
+     */
+    public static LocalPage fromCompactUrl(String s) {
+        String parts[] = s.split("/", 5);
+        if (s.startsWith("/w/") && parts.length == 5 && Language.hasLangCode(parts[2])) {
+            return new LocalPage(
+                        Language.getByLangCode(parts[2]),
+                        Integer.valueOf(parts[3]),
+                        parts[4]
+                    );
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Determines whether a Url is a compact representation of a title.
+     * For example, "/w/en/1000/Hercule_Poirot"
+     * @param s
+     * @return
+     */
+    public static boolean isCompactUrl(String s) {
+        if (!s.startsWith("/w/")) {
+            return false;
+        } else {
+            String parts[] = s.split("/");
+            return parts.length >= 5 && Language.hasLangCode(parts[2]);
+        }
     }
 }

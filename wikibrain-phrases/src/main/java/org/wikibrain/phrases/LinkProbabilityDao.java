@@ -10,6 +10,8 @@ import gnu.trove.set.hash.TLongHashSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -30,22 +32,20 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
- * Calculates the probability of a link
+ *
+ * Calculates the probability that a section of text is hyperlinked. Useful for
+ * detecting entities.
  */
 public class LinkProbabilityDao {
     private static final Logger LOG = LoggerFactory.getLogger(LinkProbabilityDao.class);
 
     private final File path;
+    private final Language lang;
     private final RawPageDao pageDao;
     private final PhraseAnalyzerDao phraseDao;
-    private final LanguageSet langs;
     private final StringNormalizer normalizer;
 
     private ObjectDb<Double> db;
@@ -53,9 +53,9 @@ public class LinkProbabilityDao {
     private TLongSet subGrams = null;
 
 
-    public LinkProbabilityDao(File path, LanguageSet langs, RawPageDao pageDao, PhraseAnalyzerDao phraseDao) throws DaoException {
+    public LinkProbabilityDao(File path, Language lang, RawPageDao pageDao, PhraseAnalyzerDao phraseDao) throws DaoException {
         this.path = path;
-        this.langs = langs;
+        this.lang = lang;
         this.pageDao = pageDao;
         this.phraseDao = phraseDao;
         this.normalizer = phraseDao.getStringNormalizer();
@@ -71,68 +71,12 @@ public class LinkProbabilityDao {
         }
     }
 
-    public boolean isBuilt() {
-        return (db != null && !db.isEmpty());
-    }
-
-    public boolean isSubgram(Language lang, String phrase, boolean normalize) {
-        if (cache == null || subGrams == null) {
-            throw new IllegalArgumentException("Subgrams require a cache!");
-        }
-        String cleaned = cleanString(lang, phrase, normalize);
-        long h = hashCode(lang, cleaned);
-        return cache.containsKey(h) || subGrams.contains(h);
-    }
-
-    private String cleanString(Language lang, String s) {
-        return cleanString(lang, s, false);
-    }
-
-    private String cleanString(Language lang, String s, boolean normalize) {
-        if (normalize) s = normalizer.normalize(lang, s);
-        StringTokenizer t = new StringTokenizer();
-        return StringUtils.join(t.getWords(lang, s), " ");
-    }
-
-    public double getLinkProbability(Language language, String mention) throws DaoException {
-        return getLinkProbability(language, mention, true);
-    }
-
     /**
-     * Fixme: Check the cache here...
-     * @param language
-     * @param mention
-     * @return
-     * @throws DaoException
+     * If true, create a memory cache that stores a 64-bit hashcode for each word.
+     * If the cache doesn't exist, it will be built.
+     * @param useCache
      */
-    public double getLinkProbability(Language language, String mention, boolean normalize) throws DaoException {
-        if (db == null) {
-            throw new IllegalStateException("Dao has not yet been built. Call build()");
-        }
-        String normalizedMention = cleanString(language, mention, normalize);
-        if (cache != null && cache.size() > 0) {
-            long hash = hashCode(language, normalizedMention);
-            return cache.containsKey(hash) ? cache.get(hash) : 0.0;
-        }
-
-        String key = language.getLangCode() + ":" + normalizedMention;
-
-        Double d = null;
-        try {
-            d = db.get(key);
-        } catch (IOException e) {
-            throw new DaoException(e);
-        } catch (ClassNotFoundException e) {
-            throw new DaoException(e);
-        }
-        if (d == null) {
-            return 0.0;
-        } else {
-            return d;
-        }
-    }
-
-    public synchronized void useCache(boolean useCache) {
+    public void useCache(boolean useCache) {
         if (!useCache) {
             this.cache = null;
             return;
@@ -140,7 +84,6 @@ public class LinkProbabilityDao {
             this.cache = new TLongFloatHashMap();   // build cache later
             return;
         }
-
 
         File fp = new File(path + "-phrase-cache.bin");
         File fsg = new File(path + "-subgram-cache.bin");
@@ -160,7 +103,7 @@ public class LinkProbabilityDao {
             throw new RuntimeException(e);
         }
         if (fp.isFile() && fp.lastModified() > tstamp
-        &&  fsg.isFile() && fsg.lastModified() > tstamp) {
+                && fsg.isFile() && fsg.lastModified() > tstamp) {
             try {
                 cache = (TLongFloatMap) WpIOUtils.readObjectFromFile(fp);
                 subGrams = (TLongSet) WpIOUtils.readObjectFromFile(fsg);
@@ -184,7 +127,7 @@ public class LinkProbabilityDao {
             } else {
                 String tokens[] = entry.getKey().split(":", 2);
                 Language lang = Language.getByLangCode(tokens[0]);
-                long hash = hashCode(lang, tokens[1]);
+                long hash = hashCode(tokens[1]);
                 cache.put(hash, entry.getRight().floatValue());
             }
         }
@@ -199,6 +142,70 @@ public class LinkProbabilityDao {
         }
     }
 
+    /**
+     * Build the cache if it is not already built.
+     * @throws DaoException
+     */
+    public void buildIfNecessary() throws DaoException {
+        if (!isBuilt()) build();
+    }
+
+    /**
+     * @return The language associated with this dao.
+     */
+    public Language getLang() {
+        return lang;
+    }
+
+
+    /**
+     * Retrieves the probability a link is linked in Wikipedia.
+     * If normalize is true, text normalization is first performed.
+     * @param mention
+     * @return
+     * @throws DaoException
+     */
+    public double getLinkProbability(String mention) throws DaoException {
+        return getLinkProbability(mention, true);
+    }
+
+    /**
+     * Retrieves the probability a link is linked in Wikipedia.
+     * If normalize is true, text normalization is first performed.
+     * @param mention
+     * @param normalize If true, the text is normalized.
+     * @return
+     * @throws DaoException
+     */
+    public double getLinkProbability(String mention, boolean normalize) throws DaoException {
+        if (db == null) {
+            throw new IllegalStateException("Dao has not yet been built. Call build()");
+        }
+        String normalizedMention = cleanString(mention, normalize);
+        if (cache != null && cache.size() > 0) {
+            long hash = hashCode(normalizedMention);
+            return cache.containsKey(hash) ? cache.get(hash) : 0.0;
+        }
+        String key = lang.getLangCode() + ":" + normalizedMention;
+        Double d = null;
+        try {
+            d = db.get(key);
+        } catch (IOException e) {
+            throw new DaoException(e);
+        } catch (ClassNotFoundException e) {
+            throw new DaoException(e);
+        }
+        if (d == null) {
+            return 0.0;
+        } else {
+            return d;
+        }
+    }
+
+    /**
+     * Rebuilds the link probability dao. Deletes the dao if it currently exists.
+     * @throws DaoException
+     */
     public synchronized void build() throws DaoException {
         if (db != null) {
             db.close();
@@ -213,12 +220,7 @@ public class LinkProbabilityDao {
         } catch (IOException e) {
             throw new DaoException(e);
         }
-        for (Language lang : langs) {
-            this.build(lang);
-        }
-    }
 
-    private void build(Language lang) throws DaoException {
         subGrams = new TLongHashSet();
 
 
@@ -236,7 +238,7 @@ public class LinkProbabilityDao {
             for (int i = 0; i < words.size(); i++) {
                 if (i > 0) buffer.append(' ');
                 buffer.append(words.get(i));
-                hash = hashCode(lang, buffer.toString());
+                hash = hashCode(buffer.toString());
                 subGrams.add(hash);
             }
             counts.put(hash, 0);
@@ -266,14 +268,14 @@ public class LinkProbabilityDao {
         double sum = 0.0;
 
         TLongSet completed = new TLongHashSet();
-        TLongIntMap linkCounts = getPhraseLinkCounts(lang);
+        TLongIntMap linkCounts = getPhraseLinkCounts();
 
         Iterator<Pair<String, PrunedCounts<Integer>>> phraseIter = phraseDao.getAllPhraseCounts(lang);
 
         while (phraseIter.hasNext()) {
             Pair<String, PrunedCounts<Integer>> pair = phraseIter.next();
-            String phrase = cleanString(lang, pair.getLeft());
-            long hash = hashCode(lang, phrase);
+            String phrase = cleanString(pair.getLeft());
+            long hash = hashCode(phrase);
             if (completed.contains(hash)) {
                 continue;
             }
@@ -288,8 +290,7 @@ public class LinkProbabilityDao {
                 double p = 1.0 * numLinks / (numText + 3.0);  // 3.0 for smoothing
                 sum += p;
 //                System.out.println(String.format("inserting values into db: %s, %f", pair.getLeft, p));
-                String key = lang.getLangCode() + ":" + phrase;
-                db.put(key, p);
+                db.put(lang.getLangCode() + ":" + phrase, p);
                 if (cache != null) {
                     cache.put(hash, (float) p);
                 }
@@ -315,23 +316,11 @@ public class LinkProbabilityDao {
         if (count != 0) {
             LOG.info(String.format(
                     "Inserted link probabilities for %d anchors with mean probability %.4f and %d mises",
-                    count, sum/count, misses));
+                    count, sum / count, misses));
         }
         db.flush();
     }
 
-    private TLongIntMap getPhraseLinkCounts(Language lang) {
-        Iterator<Pair<String, PrunedCounts<Integer>>> phraseIter = phraseDao.getAllPhraseCounts(lang);
-        TLongIntMap counts = new TLongIntHashMap();
-        while (phraseIter.hasNext()) {
-            Pair<String, PrunedCounts<Integer>> pair = phraseIter.next();
-            String phrase = cleanString(lang, pair.getLeft());
-            long hash = hashCode(lang, phrase);
-            int n = pair.getRight().getTotal();
-            counts.adjustOrPutValue(hash, n, n);
-        }
-        return counts;
-    }
 
     private void processPage(TLongIntMap counts, RawPage page) {
         Language lang = page.getLanguage();
@@ -346,8 +335,8 @@ public class LinkProbabilityDao {
                         buffer.append(' ');
                     }
                     buffer.append(words.get(j).getToken());
-                    String phrase = cleanString(lang, buffer.toString(), true);
-                    long hash = hashCode(lang, phrase);
+                    String phrase = cleanString(buffer.toString(), true);
+                    long hash = hashCode(phrase);
                     if (subGrams.contains(hash)) {
                         synchronized (counts) {
                             if (counts.containsKey(hash)) {
@@ -366,8 +355,45 @@ public class LinkProbabilityDao {
         }
     }
 
-    private long hashCode(Language lang, String string) {
-        return WpStringUtils.longHashCode2(lang.getLangCode() + ":" + string);
+
+    private TLongIntMap getPhraseLinkCounts() {
+        Iterator<Pair<String, PrunedCounts<Integer>>> phraseIter = phraseDao.getAllPhraseCounts(lang);
+        TLongIntMap counts = new TLongIntHashMap();
+        while (phraseIter.hasNext()) {
+            Pair<String, PrunedCounts<Integer>> pair = phraseIter.next();
+            String phrase = cleanString(pair.getLeft());
+            long hash = hashCode(phrase);
+            int n = pair.getRight().getTotal();
+            counts.adjustOrPutValue(hash, n, n);
+        }
+        return counts;
+    }
+
+    public boolean isBuilt() {
+        return (db != null && !db.isEmpty());
+    }
+
+    public boolean isSubgram(String phrase, boolean normalize) {
+        if (cache == null || subGrams == null) {
+            throw new IllegalArgumentException("Subgrams require a cache!");
+        }
+        String cleaned = cleanString(phrase, normalize);
+        long h = hashCode(cleaned);
+        return cache.containsKey(h) || subGrams.contains(h);
+    }
+
+    private String cleanString(String s) {
+        return cleanString(s, false);
+    }
+
+    private String cleanString(String s, boolean normalize) {
+        if (normalize) s = normalizer.normalize(lang, s);
+        StringTokenizer t = new StringTokenizer();
+        return StringUtils.join(t.getWords(lang, s), " ");
+    }
+
+    static long hashCode(String string) {
+        return WpStringUtils.longHashCode2(string);
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<LinkProbabilityDao> {
@@ -388,7 +414,11 @@ public class LinkProbabilityDao {
         @Override
         public LinkProbabilityDao get(String name, Config config, Map<String, String> runtimeParams) throws ConfigurationException {
             LanguageSet ls = getConfigurator().get(LanguageSet.class);
-            File path = new File(config.getString("path"));
+            if (runtimeParams == null || !runtimeParams.containsKey("language")){
+                throw new IllegalArgumentException("LinkProbabilityDao requires 'language' runtime parameter.");
+            }
+            Language language = Language.getByLangCode(runtimeParams.get("language"));
+            File path = new File(config.getString("path"), language.getLangCode());
             String pageName = config.hasPath("rawPageDao") ? config.getString("rawPageDao") : null;
             String phraseName = config.hasPath("phraseAnalyzer") ? config.getString("phraseAnalyzer") : null;
             RawPageDao rpd = getConfigurator().get(RawPageDao.class, pageName);
@@ -398,10 +428,11 @@ public class LinkProbabilityDao {
             }
             PhraseAnalyzerDao pad = ((AnchorTextPhraseAnalyzer)pa).getDao();
             try {
-                return new LinkProbabilityDao(path, ls, rpd, pad);
+                return new LinkProbabilityDao(path, language, rpd, pad);
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }
         }
     }
+
 }

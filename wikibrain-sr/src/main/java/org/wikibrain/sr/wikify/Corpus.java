@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RawPageDao;
@@ -95,11 +96,11 @@ public class Corpus {
             Language lang = Language.getByLangCode(runtimeParams.get("language"));
             String wikifierName = config.hasPath("wikifier") ? config.getString("wikifier") : "default";
             Configurator c = getConfigurator();
-            Wikifier wikifier = c.get(Wikifier.class, wikifierName, "language", lang.getLangCode());
+            Wikifier wikifier = Env.getComponent(c, Wikifier.class, wikifierName, lang);
             AnchorTextPhraseAnalyzer phraseAnalyzer = (AnchorTextPhraseAnalyzer)c.get(
                     PhraseAnalyzer.class, config.getString("phraseAnalyzer"));
             PhraseAnalyzerDao paDao = phraseAnalyzer.getDao();
-            LinkProbabilityDao linkProbabilityDao = c.get(LinkProbabilityDao.class);
+            LinkProbabilityDao linkProbabilityDao = Env.getComponent(c, LinkProbabilityDao.class, lang);
 
             return new Corpus(
                     lang,

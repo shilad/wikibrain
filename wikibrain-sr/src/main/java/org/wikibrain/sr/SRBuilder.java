@@ -87,10 +87,9 @@ public class SRBuilder {
 
     private Mode mode = Mode.BOTH;
 
-
-    public SRBuilder(Env env, String metricName) throws ConfigurationException {
+    public SRBuilder(Env env, String metricName, Language language) throws ConfigurationException {
         this.env = env;
-        this.language = env.getLanguages().getDefaultLanguage();
+        this.language = language;
         this.config = env.getConfiguration();
         this.srDir = new File(config.get().getString("sr.metric.path"));
         datasetNames = config.get().getStringList("sr.dataset.defaultsets");
@@ -103,13 +102,18 @@ public class SRBuilder {
     }
 
 
+    public SRBuilder(Env env, String metricName) throws ConfigurationException {
+        this(env, metricName, env.getDefaultLanguage());
+    }
+
+
 
     public synchronized SRMetric getMetric() throws ConfigurationException {
         return getMetric(metricName);
     }
 
     public synchronized SRMetric getMetric(String name) throws ConfigurationException {
-            return env.getConfigurator().get(SRMetric.class, name, "language", language.getLangCode());
+            return env.getComponent(SRMetric.class, name, language);
     }
 
     /**
@@ -279,11 +283,9 @@ public class SRBuilder {
             return;
         }
 
-        LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        LinkProbabilityDao lpd = env.getComponent(LinkProbabilityDao.class, language);
         lpd.useCache(true);
-        if (!lpd.isBuilt()) {
-            lpd.build();
-        }
+        lpd.buildIfNecessary();
 
         String corpusName = config.getString("corpus");
         Corpus corpus = null;
@@ -367,7 +369,7 @@ public class SRBuilder {
             if (fakeGoldStandard == null) {
                 Corpus c = env.getConfigurator().get(
                         Corpus.class, "plain", "language",
-                        env.getDefaultLanguage().getLangCode());
+                        language.getLangCode());
                 try {
                     if (!c.exists()) c.create();
                     FakeDatasetCreator creator = new FakeDatasetCreator(c);

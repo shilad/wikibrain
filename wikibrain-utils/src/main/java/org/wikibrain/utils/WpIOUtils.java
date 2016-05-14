@@ -221,7 +221,7 @@ public class WpIOUtils {
         return new File(cleanedBase).toURI().relativize(new File(cleanedPath).toURI()).getPath();
     }
 
-    public static Writer openWriter(String path) throws IOException {
+    public static BufferedWriter openWriter(String path) throws IOException {
         return openWriter(new File(path));
     }
 }

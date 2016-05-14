@@ -1,6 +1,11 @@
 package org.wikibrain.sr.wikify;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.DefaultOptionBuilder;
 import org.wikibrain.core.cmd.Env;
@@ -12,27 +17,27 @@ import org.wikibrain.core.dao.RawPageDao;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.phrases.LinkProbabilityDao;
+import org.wikibrain.utils.WpIOUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Shilad Sen
  */
-public class WikiTextCorpusCreator extends BaseCorpusCreator{
-    private static final Logger LOG = LoggerFactory.getLogger(WikiTextCorpusCreator.class);
+public class PlainTextCorpusCreator extends BaseCorpusCreator{
+    private static final Logger LOG = LoggerFactory.getLogger(PlainTextCorpusCreator.class);
 
-    private final Language language;
-    private final RawPageDao dao;
+    private final File file;
     private int maxPages = Integer.MAX_VALUE;
 
-    public WikiTextCorpusCreator(Language language, Wikifier wikifier, RawPageDao dao, LocalPageDao lpd, LinkProbabilityDao probabilityDao) {
+    public PlainTextCorpusCreator(Language language, Wikifier wikifier, LocalPageDao lpd, LinkProbabilityDao probabilityDao, File inputFile) {
         super(language, lpd, wikifier, probabilityDao);
-        this.language = language;
-        this.dao = dao;
+        this.file = inputFile;
+        if (!file.isFile()) {
+            throw new IllegalArgumentException("Plaintext corpus " + file + " does not exist");
+        }
     }
 
     public void setMaxPages(int maxPages) {
@@ -41,63 +46,55 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
 
     @Override
     public Iterator<IdAndText> getCorpus() throws DaoException {
-        DaoFilter filter = new DaoFilter()
-                .setRedirect(false)
-                .setDisambig(false)
-                .setLanguages(language)
-                .setLimit(maxPages);
-        Iterator<RawPage> iter = dao.get(filter).iterator();
-        return new RawPageTextIterator(iter);
+        try {
+            return new ClosingLineIterator(
+                    IOUtils.lineIterator(
+                            WpIOUtils.openReader(file)));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
     }
 
-    public static class RawPageTextIterator implements Iterator<IdAndText> {
-        private final Iterator<RawPage> iter;
-        private static IdAndText buffer = null;
+    public static class ClosingLineIterator implements Iterator<IdAndText> {
+        private LineIterator iter;
 
-        public RawPageTextIterator(Iterator<RawPage> iter) {
+        public ClosingLineIterator(LineIterator iter) {
             this.iter = iter;
-            this.fillBuffer();
         }
 
         @Override
         public boolean hasNext() {
-            return (buffer != null);
+            LineIterator i = iter;
+            if (i == null) {
+                return false;
+            } else if (i.hasNext()) {
+                return true;
+            } else {
+                i.close();
+                iter = null;
+                return false;
+            }
         }
 
         @Override
         public IdAndText next() {
-            IdAndText result = buffer;
-            if (buffer != null) {
-                buffer = null;
-                fillBuffer();
-            }
-            return result;
+            return new IdAndText(-1, iter.next());
         }
 
         @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
-
-        private void fillBuffer() {
-            while (buffer == null && iter.hasNext()) {
-                RawPage rp = iter.next();
-                if (rp != null) {
-                    try {
-                        String text = rp.getPlainText(false);
-                        if (text != null && text.trim().length() > 0) {
-                            buffer = new IdAndText(rp.getLocalId(), text.trim());
-                        }
-                    } catch (Exception e) {
-                        LOG.warn("Error when extracting text from: " + rp.getTitle());
-                    }
-                }
-            }
-        }
     }
-
     public static void main(String args[]) throws ConfigurationException, IOException, DaoException {
         Options options = new Options();
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .isRequired()
+                        .withLongOpt("input")
+                        .withDescription("input output file (existing data will be lost)")
+                        .create("i"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
@@ -127,10 +124,11 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
         RawPageDao rpd = env.getConfigurator().get(RawPageDao.class);
         LocalPageDao lpd = env.getConfigurator().get(LocalPageDao.class);
         Language lang = env.getLanguages().getDefaultLanguage();
-        LinkProbabilityDao linkProbabilityDao =env.getComponent(LinkProbabilityDao.class, lang);
         Wikifier wikifier = env.getComponent(Wikifier.class, lang);
+        LinkProbabilityDao linkProbabilityDao = env.getComponent(LinkProbabilityDao.class, lang);
 
-        WikiTextCorpusCreator creator = new WikiTextCorpusCreator(lang, wikifier, rpd, lpd, linkProbabilityDao);
+        PlainTextCorpusCreator creator = new PlainTextCorpusCreator(
+                lang, wikifier, lpd, linkProbabilityDao, new File(cmd.getOptionValue("i")));
         if (cmd.hasOption("x")) {
             creator.setMaxPages(Integer.valueOf(cmd.getOptionValue("x")));
         }
