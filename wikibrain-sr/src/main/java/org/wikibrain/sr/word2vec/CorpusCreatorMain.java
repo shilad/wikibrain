@@ -195,7 +195,7 @@ public class CorpusCreatorMain {
     }
 
     private String makeWordToken(String word) {
-        return lang.getLangCode() + ":" + word;
+        return word;
     }
 
     static class RotatingWriter implements Closeable {
