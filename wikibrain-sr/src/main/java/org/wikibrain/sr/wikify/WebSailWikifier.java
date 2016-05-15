@@ -50,7 +50,7 @@ public class WebSailWikifier implements Wikifier {
     private final PhraseAnalyzerDao phraseDao;
     private final RawPageDao rawPageDao;
 
-    private double desiredLinkRecall = 0.99;
+    private double desiredLinkRecall = 0.98;
     private double minLinkProbability = 0.01;
     private double minFinalScore = 0.001;
 
