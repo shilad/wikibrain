@@ -99,8 +99,8 @@ public class CorpusCreatorMain {
         RawPageDao rawDao = env.getConfigurator().get(RawPageDao.class);
         LocalPageDao pageDao = env.getConfigurator().get(LocalPageDao.class);
         Wikifier wikifier = env.getComponent(Wikifier.class, "websail-final", lang);
-//        ((WebSailWikifier)wikifier).setMinFinalScore(0.00001);
-        ((WebSailWikifier)wikifier).setDesiredLinkRecall(0.98);
+        ((WebSailWikifier)wikifier).setMinFinalScore(0.00001);
+        ((WebSailWikifier)wikifier).setDesiredLinkRecall(0.99);
         LinkProbabilityDao linkDao = env.getComponent(LinkProbabilityDao.class, lang);
 
         // Process the wikipedia corpus
