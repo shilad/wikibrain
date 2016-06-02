@@ -69,14 +69,16 @@ public class FastTSne implements TSne {
 	public static double[][] readBinaryDoubleMatrix(int rows, int columns, String fn) throws FileNotFoundException, IOException {
 		File matrixFile = new File(fn);
 		double [][] matrix = new double[rows][columns];
-		try (DataInputStream dis =
-				new DataInputStream(new BufferedInputStream(new FileInputStream(matrixFile.getAbsolutePath())))) {
+		try {DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(matrixFile.getAbsolutePath())));
 			for (int i = 0; i < matrix.length; i++) {
 				for (int j = 0; j < matrix[0].length; j++) {
 					matrix[i][j] = dis.readDouble();
 				}
 			}
+		} catch (IOException e){
+
 		}
+
 		return matrix;
 	}
 	
@@ -239,7 +241,7 @@ public class FastTSne implements TSne {
 		double [][] sum_X   = sum(square(X), 1);
 		double [][] times   = scalarMult(times(X, mo.transpose(X)), -2);
 		double [][] prodSum = addColumnVector(mo.transpose(times), sum_X);
-		double [][] D       = com.jujutsu.utils.MatrixOps.addRowVector(prodSum, mo.transpose(sum_X));
+		double [][] D       = MatrixOps.addRowVector(prodSum, mo.transpose(sum_X));
 		// D seems correct at this point compared to Python version
 		double [][] P       = fillMatrix(n,n,0.0);
 		double [] beta      = fillMatrix(n,n,1.0)[0];

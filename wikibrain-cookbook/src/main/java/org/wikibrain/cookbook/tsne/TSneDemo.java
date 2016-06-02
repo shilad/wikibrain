@@ -12,7 +12,6 @@ import javax.swing.JFrame;
 import org.math.plot.FrameView;
 import org.math.plot.Plot2DPanel;
 import org.math.plot.PlotPanel;
-import org.math.plot.plots.ColoredScatterPlot;
 import org.math.plot.plots.ScatterPlot;
 
 public class TSneDemo {
@@ -25,10 +24,12 @@ public class TSneDemo {
 	}
 	
 	public static void saveFile(File file, String text, boolean append) {
-        try (FileWriter fw = new FileWriter(file, append);
-            BufferedWriter bw = new BufferedWriter(fw)) {
+        try {
+            FileWriter fw = new FileWriter(file, append);
+            BufferedWriter bw = new BufferedWriter(fw);
             bw.write(text);
             bw.close();
+
         } catch (IOException e) {
             throw new IllegalArgumentException(e);
         }
@@ -36,7 +37,7 @@ public class TSneDemo {
 
 
 
-	public static void pca_mnist(int nistSize) {
+	/*public static void pca_mnist(int nistSize) {
 		double [][] X = MatrixUtils.simpleRead2DMatrix(new File("src/main/resources/datasets/mnist" + nistSize + "_X.txt"));
     	String [] labels = MatrixUtils.simpleReadLines(new File("src/main/resources/datasets/mnist2500_labels.txt"));
     	for (int i = 0; i < labels.length; i++) {
@@ -55,7 +56,7 @@ public class TSneDemo {
         plotframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         plotframe.setVisible(true);
     }
-
+*/
 	
     public static void tsne_iris() {
     	double [][] X = MatrixUtils.simpleRead2DMatrix(new File("src/main/resources/datasets/iris_X.txt"), ",");
@@ -147,7 +148,7 @@ public class TSneDemo {
         saveFile(new File("Java-tsne-result.txt"), MatrixOps.doubleArrayToString(Y));
         Plot2DPanel plot = new Plot2DPanel();
         
-        ColoredScatterPlot setosaPlot = new ColoredScatterPlot("setosa", Y, labels);
+        /*ColoredScatterPlot setosaPlot = new ColoredScatterPlot("setosa", Y, labels);
         plot.plotCanvas.setNotable(true);
         plot.plotCanvas.setNoteCoords(true);
         plot.plotCanvas.addPlot(setosaPlot);
@@ -155,6 +156,7 @@ public class TSneDemo {
         FrameView plotframe = new FrameView(plot);
         plotframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         plotframe.setVisible(true);
+        */
     }
     
     public static void fast_tsne_no_labels(String filename) {
@@ -224,7 +226,7 @@ public class TSneDemo {
         saveFile(new File("Java-tsne-result.txt"), MatrixOps.doubleArrayToString(Y));
         Plot2DPanel plot = new Plot2DPanel();
         
-        ColoredScatterPlot setosaPlot = new ColoredScatterPlot("setosa", Y, labels);
+        /*ColoredScatterPlot setosaPlot = new ColoredScatterPlot("setosa", Y, labels);
         plot.plotCanvas.setNotable(true);
         plot.plotCanvas.setNoteCoords(true);
         plot.plotCanvas.addPlot(setosaPlot);
@@ -232,6 +234,7 @@ public class TSneDemo {
         FrameView plotframe = new FrameView(plot);
         plotframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         plotframe.setVisible(true);
+        */
     }
     
     public static void tsne_mnist_icons(int nistSize) {
@@ -247,7 +250,7 @@ public class TSneDemo {
         System.out.println(MatrixOps.doubleArrayToPrintString(Y));
         Plot2DPanel plot = new Plot2DPanel();
         
-        IconScatterPlot setosaPlot = new IconScatterPlot("setosa", Y, imgfiles);
+        /*IconScatterPlot setosaPlot = new IconScatterPlot("setosa", Y, imgfiles);
         plot.plotCanvas.setNotable(true);
         plot.plotCanvas.setNoteCoords(true);
         plot.plotCanvas.addPlot(setosaPlot);
@@ -255,6 +258,7 @@ public class TSneDemo {
         FrameView plotframe = new FrameView(plot);
         plotframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         plotframe.setVisible(true);
+        */
     }
     
     public static void main(String [] args) {
