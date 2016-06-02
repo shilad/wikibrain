@@ -20,13 +20,13 @@ public class TsneDemoWBData {
     public static void main(String [] args) {
         int initial_dims = 50;
         double perplexity = 20.0;
-        double [][] X = MatrixUtils.simpleRead2DMatrix(new File("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/tsne/data/.txt"), ", ");
+        double [][] X = MatrixUtils.simpleRead2DMatrix(new File("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/tsne/data/vecs1.txt"), ",");
         System.out.println(MatrixOps.doubleArrayToPrintString(X, ", ", 50,10));
         TSne tsne = new FastTSne();
         double [][] Y = tsne.tsne(X, 2, initial_dims, perplexity);
 
         // Plot Y or save Y to file and plot with some other tool such as for instance R
-        saveFile(new File("Java-tsne-testing-vecsreal-results.txt"), MatrixOps.doubleArrayToString(Y));
+        saveFile(new File("Java-tsne-testing-vecs1-results.txt"), MatrixOps.doubleArrayToString(Y));
 
             /* String [] labels = MatrixUtils.simpleReadLines(new File("tsne-demos/src/main/resources/datasets/iris_X_labels.txt"));
             for (int i = 0; i < labels.length; i++) {
