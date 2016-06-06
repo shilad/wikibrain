@@ -25,6 +25,9 @@ public class titleFilter {
             if(i % 20 == 0){
                 writer.append(line + "\n");
             }
+            else{
+                writer.append(" \n");
+            }
 
         }
 
