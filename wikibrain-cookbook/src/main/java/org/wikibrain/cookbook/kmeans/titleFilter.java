@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class titleFilter {
     public static void main(String[] args) throws IOException {
-        FileReader titleRdr = new FileReader("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/sr/names.txt");
+        FileReader titleRdr = new FileReader("/Users/research/wikibrain/wikibrain-cookbook/results/kmeans-results/ordered_article_titles.txt");
         BufferedReader bufferedReader = new BufferedReader(titleRdr);
 
         BufferedWriter writer = new BufferedWriter( new FileWriter(new File("wikibrain-cookbook/results/kmeans-results/filtered_labels.txt")));

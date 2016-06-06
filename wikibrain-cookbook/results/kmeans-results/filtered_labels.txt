@@ -1,4 +1,4 @@
-April
+Addition
  
  
  
@@ -18,7 +18,7 @@ April
  
  
  
-Apple
+Harbor
  
  
  
@@ -38,7 +38,7 @@ Apple
  
  
  
-Bankruptcy
+Proof
  
  
  
@@ -58,7 +58,7 @@ Bankruptcy
  
  
  
-Computer
+IP address
  
  
  
@@ -78,7 +78,7 @@ Computer
  
  
  
-Time Cube
+Mississippi River
  
  
  
@@ -98,7 +98,7 @@ Time Cube
  
  
  
-Dublin
+Sundial
  
  
  
@@ -118,7 +118,7 @@ Dublin
  
  
  
-Et cetera
+List of volcanos
  
  
  
@@ -138,7 +138,7 @@ Et cetera
  
  
  
-FAQ
+White dwarf
  
  
  
@@ -158,7 +158,7 @@ FAQ
  
  
  
-God
+Pakistan
  
  
  
@@ -178,7 +178,7 @@ God
  
  
  
-History of Australia
+Julius Caesar
  
  
  
@@ -198,7 +198,7 @@ History of Australia
  
  
  
-Italian
+Groningen (province)
  
  
  
@@ -218,7 +218,7 @@ Italian
  
  
  
-Live
+Ralph Steadman
  
  
  
@@ -238,7 +238,7 @@ Live
  
  
  
-Litre
+Charon
  
  
  
@@ -258,7 +258,7 @@ Litre
  
  
  
-Mile
+Raffles Institution
  
  
  
@@ -278,7 +278,7 @@ Mile
  
  
  
-National anthem
+A Tale of Two Cities
  
  
  
@@ -298,7 +298,7 @@ National anthem
  
  
  
-O Canada
+Eric Clapton
  
  
  
@@ -318,7 +318,7 @@ O Canada
  
  
  
-Program
+Pyrgos
  
  
  
@@ -338,7 +338,7 @@ Program
  
  
  
-Reading
+Evritania
  
  
  
@@ -358,7 +358,7 @@ Reading
  
  
  
-Suggestion
+Tandjilé
  
  
  
@@ -378,7 +378,7 @@ Suggestion
  
  
  
-Sail
+Ulysses S. Grant
  
  
  
@@ -398,7 +398,7 @@ Sail
  
  
  
-Synagogue
+1790
  
  
  
@@ -418,7 +418,7 @@ Synagogue
  
  
  
-Uranus
+Hearing
  
  
  
@@ -438,7 +438,7 @@ Uranus
  
  
  
-Microsoft Windows
+Windows Vista
  
  
  
@@ -458,7 +458,7 @@ Microsoft Windows
  
  
  
-Prison
+Kathmandu
  
  
  
@@ -478,7 +478,7 @@ Prison
  
  
  
-Software
+Marxist economics
  
  
  
@@ -498,7 +498,7 @@ Software
  
  
  
-Catalan language
+1561
  
  
  
@@ -518,7 +518,7 @@ Catalan language
  
  
  
-Argon
+Palmyra Atoll
  
  
  
@@ -538,7 +538,7 @@ Argon
  
  
  
-Shape of the universe
+Jilin
  
  
  
@@ -558,7 +558,7 @@ Shape of the universe
  
  
  
-Solidarity
+1706
  
  
  
@@ -578,7 +578,7 @@ Solidarity
  
  
  
-1930s
+United States House of Representatives
  
  
  
@@ -598,7 +598,7 @@ Solidarity
  
  
  
-St. Gallen (canton)
+Fuzzy logic
  
  
  
@@ -618,7 +618,7 @@ St. Gallen (canton)
  
  
  
-1982
+Rambla de las Ovejas
  
  
  
@@ -638,7 +638,7 @@ St. Gallen (canton)
  
  
  
-Poland
+Republic of Mahabad
  
  
  
@@ -658,7 +658,7 @@ Poland
  
  
  
-Chelsea F.C.
+Mariska Hargitay
  
  
  
@@ -678,7 +678,7 @@ Chelsea F.C.
  
  
  
-Sheffield F.C.
+List of towns in Greenland
  
  
  
@@ -698,7 +698,7 @@ Sheffield F.C.
  
  
  
-Orange
+Tamil language
  
  
  
@@ -718,7 +718,7 @@ Orange
  
  
  
-London Borough of Southwark
+Punjab (India)
  
  
  
@@ -738,7 +738,7 @@ London Borough of Southwark
  
  
  
-Nation
+Surat
  
  
  
@@ -758,7 +758,7 @@ Nation
  
  
  
-BBC
+Bottrop
  
  
  
@@ -778,7 +778,7 @@ BBC
  
  
  
-Boss
+Yangon
  
  
  
@@ -798,7 +798,7 @@ Boss
  
  
  
-Denarius
+Dachshund
  
  
  
@@ -818,7 +818,7 @@ Denarius
  
  
  
-Black hole
+Medical emergency
  
  
  
@@ -838,7 +838,7 @@ Black hole
  
  
  
-Mahatma Gandhi
+1989
  
  
  
@@ -858,7 +858,7 @@ Mahatma Gandhi
  
  
  
-Travel
+1
  
  
  
@@ -878,7 +878,7 @@ Travel
  
  
  
-Vector
+William I of England
  
  
  
@@ -898,7 +898,7 @@ Vector
  
  
  
-Freedom of speech
+American Civil War
  
  
  
@@ -918,7 +918,7 @@ Freedom of speech
  
  
  
-Cricket
+Vladimir Putin
  
  
  
@@ -938,7 +938,7 @@ Cricket
  
  
  
-Van
+1191
  
  
  
@@ -958,7 +958,7 @@ Van
  
  
  
-Safety curtain
+Dionne Quintuplets
  
  
  
@@ -978,7 +978,7 @@ Safety curtain
  
  
  
-Vitamin C
+Lady Eleanor Brandon
  
  
  
@@ -998,7 +998,7 @@ Vitamin C
  
  
  
-Pin cushion
+Truro
  
  
  
@@ -1018,7 +1018,7 @@ Pin cushion
  
  
  
-Flavor
+Aaron Copland
  
  
  
@@ -1038,7 +1038,7 @@ Flavor
  
  
  
-2005
+OpenBSD
  
  
  
@@ -1058,7 +1058,7 @@ Flavor
  
  
  
-Electron
+Point of view
  
  
  
@@ -1078,7 +1078,7 @@ Electron
  
  
  
-Population
+1852
  
  
  
@@ -1098,7 +1098,7 @@ Population
  
  
  
-Communism
+1090s
  
  
  
@@ -1118,7 +1118,7 @@ Communism
  
  
  
-George W. Bush
+1518
  
  
  
@@ -1138,7 +1138,7 @@ George W. Bush
  
  
  
-Middle East
+1690
  
  
  
@@ -1158,7 +1158,7 @@ Middle East
  
  
  
-List of disasters
+Bali tiger
  
  
  
@@ -1178,7 +1178,7 @@ List of disasters
  
  
  
-List of wave topics
+1167
  
  
  
@@ -1198,7 +1198,7 @@ List of wave topics
  
  
  
-Alcohol
+1791
  
  
  
@@ -1218,7 +1218,7 @@ Alcohol
  
  
  
-Aristotle
+1031
  
  
  
@@ -1238,7 +1238,7 @@ Aristotle
  
  
  
-1850
+1496
  
  
  
@@ -1258,7 +1258,7 @@ Aristotle
  
  
  
-Murasaki Shikibu
+1636
  
  
  
@@ -1278,7 +1278,7 @@ Murasaki Shikibu
  
  
  
-Anders Celsius
+1600s
  
  
  
@@ -1298,7 +1298,7 @@ Anders Celsius
  
  
  
-Craft
+886
  
  
  
@@ -1318,7 +1318,7 @@ Craft
  
  
  
-Coffee
+Louis Armstrong
  
  
  
@@ -1338,7 +1338,7 @@ Coffee
  
  
  
-Tuberculosis
+48
  
  
  
@@ -1358,7 +1358,7 @@ Tuberculosis
  
  
  
-List of countries by continents
+1028
  
  
  
@@ -1378,7 +1378,7 @@ List of countries by continents
  
  
  
-Head of state
+World Youth Day
  
  
  
@@ -1398,7 +1398,7 @@ Head of state
  
  
  
-Stonehenge
+1569
  
  
  
@@ -1418,7 +1418,7 @@ Stonehenge
  
  
  
-Spree
+Lech Kaczyński
  
  
  
@@ -1438,7 +1438,7 @@ Spree
  
  
  
-Niccolò Machiavelli
+525
  
  
  
@@ -1458,7 +1458,7 @@ Niccolò Machiavelli
  
  
  
-Fort Ouiatenon
+Charles I of England
  
  
  
@@ -1478,7 +1478,7 @@ Fort Ouiatenon
  
  
  
-Emily Brontë
+41
  
  
  
@@ -1498,7 +1498,7 @@ Emily Brontë
  
  
  
-Lady Jane Grey
+Black
  
  
  
@@ -1518,7 +1518,7 @@ Lady Jane Grey
  
  
  
-Cornwall
+Periodic table
  
  
  
@@ -1538,7 +1538,7 @@ Cornwall
  
  
  
-Jupiter (mythology)
+Citizenship
  
  
  
@@ -1558,7 +1558,7 @@ Jupiter (mythology)
  
  
  
-Prussia
+Das Lied der Deutschen
  
  
  
@@ -1578,7 +1578,7 @@ Prussia
  
  
  
-Yield
+Tapeworm
  
  
  
@@ -1598,547 +1598,7 @@ Yield
  
  
  
-8
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Microsoft Word
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Saint George
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Crewkerne
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Scone
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Charles Kay Ogden
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-R
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Tuesday
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Marshall Islands
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-List of elements by symbol
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Pedipalp
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Father
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Vehicle
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Telephone
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Comparative
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-FC Bayern Munich
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Actor
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Esteban Huertas
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Berkeley Software Distribution
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Burgundy
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Junta
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Gainesville, Florida
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Kingdom of Holland
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-MacGyver
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Soil
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1948
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Super Mario 64 DS
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Lothian
+Wind
  
  
  
@@ -2178,867 +1638,7 @@ Saint Denis
  
  
  
-The White Stripes
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Jalisco
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Golden Rule
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Michael Palin
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-January 1
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Jimmy Swaggart
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-October 24
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Nintendo
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Birth
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Composer
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Note (disambiguation)
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Mike Farrell
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-October 14
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1913
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-October 12
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-John Candy
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Traverse City, Michigan
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Bea Arthur
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Meteor
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Andreas Baader
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1740
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Lewis Carroll
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-October 31
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Steering wheel
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Drunkenness
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Translator
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Arabic
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-The Lost World: Jurassic Park
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Prague
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-March 8
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1980
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-May 19
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Jerry Reed
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-La Liga Filipina
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Drug
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Andrew Sachs
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Tiny Tim
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1923
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1964
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Arizona
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Silversword
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Pipeline
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Buffy the Vampire Slayer
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Boroughs of Berlin
+Don Quixote
  
  
  
@@ -3078,7 +1678,7 @@ Hospital
  
  
  
-Huddersfield
+1524
  
  
  
@@ -3098,7 +1698,7 @@ Huddersfield
  
  
  
-Hitchhiking
+Thumb
  
  
  
@@ -3118,7 +1718,7 @@ Hitchhiking
  
  
  
-January 19
+Ancient Greece
  
  
  
@@ -3138,7 +1738,7 @@ January 19
  
  
  
-January 28
+Edgar Winter
  
  
  
@@ -3158,7 +1758,7 @@ January 28
  
  
  
-February 15
+Universal Declaration of Human Rights
  
  
  
@@ -3178,7 +1778,7 @@ February 15
  
  
  
-March 25
+Edip Yuksel
  
  
  
@@ -3198,7 +1798,7 @@ March 25
  
  
  
-April 30
+Roma
  
  
  
@@ -3218,7 +1818,7 @@ April 30
  
  
  
-May 21
+Custard
  
  
  
@@ -3238,7 +1838,7 @@ May 21
  
  
  
-November 2
+Wlazł kotek na płotek
  
  
  
@@ -3258,7 +1858,7 @@ November 2
  
  
  
-September 4
+Charles de Gaulle
  
  
  
@@ -3278,7 +1878,7 @@ September 4
  
  
  
-August 27
+Sedative
  
  
  
@@ -3298,7 +1898,907 @@ August 27
  
  
  
-1898
+Pancreas
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1772
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Konstanz
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Bhavani River
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Slobodan Milošević
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Food pyramid
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Novalis
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Marklohe
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Topology
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Hindi
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Homer
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Thanksgiving
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Full House
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1804
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Steam
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1943
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Fresno, California
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1473
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Accent
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Sen no Rikyu
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Caribert of Laon
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1170
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1864
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Spring
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Internet Protocol
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+European Revolutions of 1848
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1097
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1746
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Emperor of Ethiopia
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Demo
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1081
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+List of kings of Carthage
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Virginia Woolf
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+December 22
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1975
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1947
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1907
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+La Liga Filipina
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+January 5
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Pope John Paul I
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+March 1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+April 27
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+May 31
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+June 9
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+October 7
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+August 30
  
  
  
@@ -3418,7 +2918,7 @@ December 21
  
  
  
-Hoboken election of 2005
+Blood
  
  
  
@@ -3438,7 +2938,7 @@ Hoboken election of 2005
  
  
  
-Koblenz
+Café
  
  
  
@@ -3458,7 +2958,7 @@ Koblenz
  
  
  
-Malleability
+Hilary Swank
  
  
  
@@ -3478,7 +2978,7 @@ Malleability
  
  
  
-Ben Stein
+Osaka
  
  
  
@@ -3498,7 +2998,7 @@ Ben Stein
  
  
  
-Crayola
+Bob Dylan
  
  
  
@@ -3518,7 +3018,7 @@ Crayola
  
  
  
-Goldstar beer
+Michael Palin
  
  
  
@@ -3538,7 +3038,7 @@ Goldstar beer
  
  
  
-1854
+Ankst
  
  
  
@@ -3558,7 +3058,7 @@ Goldstar beer
  
  
  
-Andhra Pradesh
+1983
  
  
  
@@ -3578,7 +3078,7 @@ Andhra Pradesh
  
  
  
-Constant
+Queen (band)
  
  
  
@@ -3598,7 +3098,7 @@ Constant
  
  
  
-Madonna (entertainer)
+Karel Appel
  
  
  
@@ -3618,7 +3118,7 @@ Madonna (entertainer)
  
  
  
-Colorado
+Jyväskylä
  
  
  
@@ -3638,7 +3138,7 @@ Colorado
  
  
  
-Lady Frances Brandon
+Tim Rice
  
  
  
@@ -3658,7 +3158,7 @@ Lady Frances Brandon
  
  
  
-Kölsch
+July 5
  
  
  
@@ -3678,7 +3178,7 @@ Kölsch
  
  
  
-The Hobbit
+Music video
  
  
  
@@ -3698,7 +3198,7 @@ The Hobbit
  
  
  
-1873
+Shropshire
  
  
  
@@ -3718,7 +3218,7 @@ The Hobbit
  
  
  
-Mineralogy
+Calvin and Hobbes
  
  
  
@@ -3738,7 +3238,7 @@ Mineralogy
  
  
  
-Horse
+Arkansas
  
  
  
@@ -3758,7 +3258,7 @@ Horse
  
  
  
-Ilia
+Ron Howard
  
  
  
@@ -3778,7 +3278,7 @@ Ilia
  
  
  
-Serres
+Linda Blair
  
  
  
@@ -3798,207 +3298,7 @@ Serres
  
  
  
-Mongo
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Bisexuality
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Robert Peel
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Montgomery, Alabama
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Black Death
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Adam Clayton
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Al-Qaeda
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Chancellor
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Horst Köhler
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Terminus
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Dian Fossey
+James Brown
  
  
  
@@ -4038,7 +3338,7 @@ Dinah Shore
  
  
  
-Mel Blanc
+Voice of America
  
  
  
@@ -4058,7 +3358,7 @@ Mel Blanc
  
  
  
-Jeb Bush
+INXS
  
  
  
@@ -4078,7 +3378,7 @@ Jeb Bush
  
  
  
-Sean Connery
+British Sea Power
  
  
  
@@ -4098,7 +3398,7 @@ Sean Connery
  
  
  
-Wheelbarrow
+Toad the Wet Sprocket
  
  
  
@@ -4118,347 +3418,7 @@ Wheelbarrow
  
  
  
-Reed (instrument)
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Rational number
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Baz Luhrmann
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Donovan
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Megabyte
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Consciousness
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Cholesterol
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Heart (band)
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Democratic Party (United States)
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Ancient Greece
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Multiplayer video game
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Ministry (band)
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1766
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Swabian Alb
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Paco de Lucía
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Bruce Springsteen
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Medical ethics
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Multiprocessing
+1776
  
  
  
@@ -4498,7 +3458,7 @@ Cunt
  
  
  
-The Simpsons
+Phil Collins
  
  
  
@@ -4518,7 +3478,7 @@ The Simpsons
  
  
  
-Jethro Tull (band)
+Harry Potter and the Philosopher's Stone
  
  
  
@@ -4538,7 +3498,7 @@ Jethro Tull (band)
  
  
  
-Sonic the Hedgehog
+Battle of Trafalgar
  
  
  
@@ -4558,7 +3518,7 @@ Sonic the Hedgehog
  
  
  
-Staind
+Jack the Ripper
  
  
  
@@ -4578,7 +3538,7 @@ Staind
  
  
  
-Bob Denver
+Peter Davison
  
  
  
@@ -4598,7 +3558,7 @@ Bob Denver
  
  
  
-Franco Cerri
+Barry Sadler
  
  
  
@@ -4618,7 +3578,7 @@ Franco Cerri
  
  
  
-Region
+Eugene McCarthy
  
  
  
@@ -4638,7 +3598,7 @@ Region
  
  
  
-1615
+Mammary gland
  
  
  
@@ -4658,7 +3618,7 @@ Region
  
  
  
-Lesotho
+Light bulb
  
  
  
@@ -4678,7 +3638,7 @@ Lesotho
  
  
  
-Inflation
+Tampa, Florida
  
  
  
@@ -4698,7 +3658,7 @@ Inflation
  
  
  
-List of national anthems
+On the Waterfront
  
  
  
@@ -4718,7 +3678,7 @@ List of national anthems
  
  
  
-North Carolina
+Estuary
  
  
  
@@ -4738,7 +3698,7 @@ North Carolina
  
  
  
-Agnosticism
+Balearic Islands
  
  
  
@@ -4758,7 +3718,7 @@ Agnosticism
  
  
  
-Hawaiian language
+Solomonid dynasty
  
  
  
@@ -4778,7 +3738,7 @@ Hawaiian language
  
  
  
-Sea level
+Sylvester McCoy
  
  
  
@@ -4798,7 +3758,7 @@ Sea level
  
  
  
-1537
+Protist
  
  
  
@@ -4818,7 +3778,7 @@ Sea level
  
  
  
-Writer
+Belaying
  
  
  
@@ -4838,7 +3798,7 @@ Writer
  
  
  
-Christopher Walken
+1654
  
  
  
@@ -4858,7 +3818,7 @@ Christopher Walken
  
  
  
-1582
+Sex organ
  
  
  
@@ -4878,7 +3838,7 @@ Christopher Walken
  
  
  
-1681
+Bollywood
  
  
  
@@ -4898,7 +3858,7 @@ Christopher Walken
  
  
  
-Underwear
+Selgovae
  
  
  
@@ -4918,7 +3878,7 @@ Underwear
  
  
  
-Etymology
+Breakfast sausage
  
  
  
@@ -4938,7 +3898,7 @@ Etymology
  
  
  
-Sicily
+Dictionary
  
  
  
@@ -4958,7 +3918,7 @@ Sicily
  
  
  
-Navassa Island
+History of Spain
  
  
  
@@ -4978,7 +3938,7 @@ Navassa Island
  
  
  
-Plum
+Multiverse
  
  
  
@@ -4998,7 +3958,7 @@ Plum
  
  
  
-Stage name
+Oahu
  
  
  
@@ -5018,7 +3978,7 @@ Stage name
  
  
  
-1880
+Subtraction
  
  
  
@@ -5038,7 +3998,7 @@ Stage name
  
  
  
-Lucifer
+United States customary units
  
  
  
@@ -5058,7 +4018,7 @@ Lucifer
  
  
  
-Hertford
+Pop music
  
  
  
@@ -5078,7 +4038,7 @@ Hertford
  
  
  
-Rhubarb
+Saturn (disambiguation)
  
  
  
@@ -5098,7 +4058,7 @@ Rhubarb
  
  
  
-Colin Baker
+Paper
  
  
  
@@ -5118,7 +4078,7 @@ Colin Baker
  
  
  
-1814
+Ice
  
  
  
@@ -5138,7 +4098,7 @@ Colin Baker
  
  
  
-Leaf
+Tongue-twister
  
  
  
@@ -5158,7 +4118,7 @@ Leaf
  
  
  
-1463
+Common year
  
  
  
@@ -5178,7 +4138,7 @@ Leaf
  
  
  
-1076
+List of diseases
  
  
  
@@ -5198,7 +4158,7 @@ Leaf
  
  
  
-Convair B-36 Peacemaker
+Triangle (disambiguation)
  
  
  
@@ -5218,7 +4178,7 @@ Convair B-36 Peacemaker
  
  
  
-Chino Hills, California
+Mandrake
  
  
  
@@ -5238,7 +4198,7 @@ Chino Hills, California
  
  
  
-Saanich
+Virus
  
  
  
@@ -5258,7 +4218,7 @@ Saanich
  
  
  
-Al Gore
+Chopsticks
  
  
  
@@ -5278,7 +4238,7 @@ Al Gore
  
  
  
-IPod nano
+College
  
  
  
@@ -5298,7 +4258,7 @@ IPod nano
  
  
  
-Oasis (band)
+Machine
  
  
  
@@ -5318,7 +4278,7 @@ Oasis (band)
  
  
  
-Modem
+December 30
  
  
  
@@ -5338,7 +4298,7 @@ Modem
  
  
  
-1613
+Cruise ship
  
  
  
@@ -5358,7 +4318,7 @@ Modem
  
  
  
-Pearson Air Museum
+Colony
  
  
  
@@ -5378,7 +4338,7 @@ Pearson Air Museum
  
  
  
-Georg Agricola
+Tiny Tim
  
  
  
@@ -5398,7 +4358,7 @@ Georg Agricola
  
  
  
-890
+Noon
  
  
  
@@ -5418,7 +4378,7 @@ Georg Agricola
  
  
  
-Sarah McLachlan
+Tortilla
  
  
  
@@ -5438,7 +4398,7 @@ Sarah McLachlan
  
  
  
-1189
+Tel Aviv
  
  
  
@@ -5458,7 +4418,7 @@ Sarah McLachlan
  
  
  
-Oder-Neisse line
+Carpenter
  
  
  
@@ -5478,7 +4438,7 @@ Oder-Neisse line
  
  
  
-1753
+Button
  
  
  
@@ -5498,7 +4458,7 @@ Oder-Neisse line
  
  
  
-Akron, Ohio
+United Nations Security Council
  
  
  
@@ -5518,7 +4478,7 @@ Akron, Ohio
  
  
  
-Brunei
+Celsius
  
  
  
@@ -5538,7 +4498,7 @@ Brunei
  
  
  
-Armenian Genocide
+Anonymity
  
  
  
@@ -5558,7 +4518,7 @@ Armenian Genocide
  
  
  
-192
+Harry Potter and the Chamber of Secrets
  
  
  
@@ -5578,7 +4538,7 @@ Armenian Genocide
  
  
  
-Church of the SubGenius
+Holy Spirit
  
  
  
@@ -5598,7 +4558,7 @@ Church of the SubGenius
  
  
  
-Kurt Browning
+1800s
  
  
  
@@ -5618,7 +4578,7 @@ Kurt Browning
  
  
  
-Goth subculture
+Cream
  
  
  
@@ -5638,7 +4598,7 @@ Goth subculture
  
  
  
-Sumatran tiger
+Yttrium
  
  
  
@@ -5658,7 +4618,7 @@ Sumatran tiger
  
  
  
-Frequency
+Baku
  
  
  
@@ -5678,7 +4638,7 @@ Frequency
  
  
  
-Saginaw, Michigan
+1768
  
  
  
@@ -5698,1227 +4658,7 @@ Saginaw, Michigan
  
  
  
-Sensory system
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Rudolf Hess
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Dharma
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Helena, Montana
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-The Phantom of the Opera
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-AFI's 100 Years... 100 Movies
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Time dilation
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Sigmund Freud
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Epilepsy
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1799
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Faroese language
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Debt
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Disney Channel
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Queensrÿche
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Djibouti
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Lawyer
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Adultery
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Cleveland, England
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Alberto Fujimori
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Sendero Luminoso
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-John G. Roberts
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1098
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-James Bond
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-871
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Rn
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Super Smash Bros. Melee
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Spaghetti
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1005
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1778
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Gleiwitz incident
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1588
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-655
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Zaragoza
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-844
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Mighty Morphin Power Rangers
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Bosnia and Herzegovina
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1793
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Gunpowder Plot
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Gosport
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1609
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Lamp
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Puebla, Puebla
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Emperor of Ethiopia
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Dr. Hook & The Medicine Show
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Euclid
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Bun
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Pleasure
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Land
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Shrub
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1721
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Courage
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Lilo & Stitch
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Tropic of Cancer
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Continental shelf
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-City gate
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Blues (disambiguation)
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Tamil language
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Odisha
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Copperbelt
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Instant messaging
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Root
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Skill
+Price
  
  
  
@@ -6958,7 +4698,7 @@ Constipation
  
  
  
-Enclave
+Sponge
  
  
  
@@ -6978,7 +4718,7 @@ Enclave
  
  
  
-Unicellular organism
+Research
  
  
  
@@ -6998,7 +4738,7 @@ Unicellular organism
  
  
  
-Nocturnal animals
+Titan (moon)
  
  
  
@@ -7018,7 +4758,7 @@ Nocturnal animals
  
  
  
-Nutmeg
+Radar
  
  
  
@@ -7038,7 +4778,7 @@ Nutmeg
  
  
  
-Sultan
+Mother 1 + 2
  
  
  
@@ -7058,7 +4798,7 @@ Sultan
  
  
  
-Conduction
+Cheese
  
  
  
@@ -7078,7 +4818,7 @@ Conduction
  
  
  
-Riding helmet
+Slang
  
  
  
@@ -7098,7 +4838,7 @@ Riding helmet
  
  
  
-Bic Runga
+List of U.S. states
  
  
  
@@ -7118,7 +4858,7 @@ Bic Runga
  
  
  
-Chandigarh
+CNN
  
  
  
@@ -7138,7 +4878,7 @@ Chandigarh
  
  
  
-Hard disk
+Malta
  
  
  
@@ -7158,7 +4898,7 @@ Hard disk
  
  
  
-Gymnasium (school)
+Greenhouse effect
  
  
  
@@ -7178,7 +4918,7 @@ Gymnasium (school)
  
  
  
-Zimbabwean dollar
+The Matrix
  
  
  
@@ -7198,7 +4938,7 @@ Zimbabwean dollar
  
  
  
-Number theory
+Oradea
  
  
  
@@ -7218,7 +4958,7 @@ Number theory
  
  
  
-Buttercup
+Salt
  
  
  
@@ -7238,7 +4978,7 @@ Buttercup
  
  
  
-Ian Fleming
+Messiah
  
  
  
@@ -7258,7 +4998,7 @@ Ian Fleming
  
  
  
-Valencia (autonomous community)
+Pluto (mythology)
  
  
  
@@ -7278,7 +5018,7 @@ Valencia (autonomous community)
  
  
  
-J. M. W. Turner
+Inverness
  
  
  
@@ -7298,7 +5038,7 @@ J. M. W. Turner
  
  
  
-Pasture
+Molière
  
  
  
@@ -7318,7 +5058,7 @@ Pasture
  
  
  
-Bank of China Tower
+Thailand
  
  
  
@@ -7338,7 +5078,7 @@ Bank of China Tower
  
  
  
-John le Carré
+Depression
  
  
  
@@ -7358,7 +5098,7 @@ John le Carré
  
  
  
-Motion
+Dinner
  
  
  
@@ -7378,7 +5118,7 @@ Motion
  
  
  
-Ford (disambiguation)
+Prejudice
  
  
  
@@ -7398,7 +5138,7 @@ Ford (disambiguation)
  
  
  
-Seaweed
+Wizardry
  
  
  
@@ -7418,7 +5158,1047 @@ Seaweed
  
  
  
-Belarusian language
+Leaf
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+South Shropshire
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Kryptos
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Equatorial Guinea
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+David Souter
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Manhattan Project
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Autocracy
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Skill
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+AFI's 100 Years... 100 Thrills
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Hectare
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Gas giant
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Chen Dynasty
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Health
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Greece
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Moscow
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+List of Italian football teams
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Ipswich Town F.C.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+London Borough of Merton
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Swahili language
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Swamp cooler
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+List of wars
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Manga
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Cornwall
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Yeovil, Somerset
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+South Cadbury
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Psychology
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Michael Schumacher
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+County town
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Aerosmith
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Cramlington
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Tourism
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Virtues of Harmony
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Fifth Avenue
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Ethiopia
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Gary Busey
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Cannabis
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Camellia
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Victor Hugo
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Teresa Heinz
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Trent Reznor
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Nobel Peace Prize
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Record producer
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Virology
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Shrewsbury
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+National Football League
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Soldier
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Helena, Montana
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Harrisburg, Pennsylvania
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Pisa
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Edinburgh Airport
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Albany
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Panhandle
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Calabria
  
  
  
@@ -7458,7 +6238,7 @@ Ben Bradshaw
  
  
  
-Dirt
+Ejaculation
  
  
  
@@ -7478,7 +6258,7 @@ Dirt
  
  
  
-The Karate Kid
+Calgary Flames
  
  
  
@@ -7498,7 +6278,7 @@ The Karate Kid
  
  
  
-Food pyramid
+Charlotte Eagles
  
  
  
@@ -7518,7 +6298,7 @@ Food pyramid
  
  
  
-Carthage
+English
  
  
  
@@ -7538,7 +6318,7 @@ Carthage
  
  
  
-Tao Te Ching
+October
  
  
  
@@ -7558,7 +6338,7 @@ Tao Te Ching
  
  
  
-Oval
+Webpage
  
  
  
@@ -7578,7 +6358,7 @@ Oval
  
  
  
-Alexa
+Christmas
  
  
  
@@ -7598,7 +6378,7 @@ Alexa
  
  
  
-1668
+Video game
  
  
  
@@ -7618,7 +6398,7 @@ Alexa
  
  
  
-Aesop
+B
  
  
  
@@ -7638,7 +6418,7 @@ Aesop
  
  
  
-Hugh Cook
+V
  
  
  
@@ -7658,7 +6438,7 @@ Hugh Cook
  
  
  
-Fyodor Tyutchev
+Panama
  
  
  
@@ -7678,7 +6458,1507 @@ Fyodor Tyutchev
  
  
  
-Freedom of religion
+Autism
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Koblenz
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Hades
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Titanium
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Copenhagen
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Lagos
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Engelbert Dollfuss
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Bhopal
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Guqin
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Spanish Civil War
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Dance
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Substance
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Army
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Plato
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+List of shipwrecks
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Luke McCormick
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+January 25
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Adware
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Jan Peter Balkenende
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Queen Victoria
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+American Samoa
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Swim
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Parody
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Angela Merkel
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Mary Magdalene
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Mount Meager
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+LGBT
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Hebrew language
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Methamphetamine
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+SS Richard Montgomery
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Pascal's Triangle
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Nile
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Nagasaki
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Deity
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Wrench
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Danish
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Ash Ketchum
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1163
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Erythropoietin
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+David Hilbert
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Beijing
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+GNU Free Documentation License
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Sport utility vehicle
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Semiotics
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Headrest
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Airport
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Para rubber tree
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Seam ripper
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Coal
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Pepsin
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Libertarianism
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Scissors
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Newt
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Nyngan, New South Wales
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+House music
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1836
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+September 3
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Robber baron
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Carl Lewis
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1703
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Hypercholesterolemia
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Sweet
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Laurent Clerc
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Fishing hook
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Mark Hoppus
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Lima
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Bucket
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Schindler's List
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Headstone
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Polonium
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Turkmenistan
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Mount Price
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Ziggy
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Alcoholic proof
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Spear
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Anaheim, California
  
  
  
@@ -7699,286 +7979,6 @@ Freedom of religion
  
  
 1159
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Baptism
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Municipalities of Republika Srpska
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-525
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Mackenzie Bowell
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-997
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Ritual
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1522
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Vein
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Dog Day Afternoon
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1124
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Cerebellum
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Lee Hsien Loong
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Roseau
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Stuart, Florida
  
  
  
