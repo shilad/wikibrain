@@ -18,7 +18,12 @@ Addition
  
  
  
-Harbor
+ 
+ 
+ 
+ 
+ 
+Knowledge
  
  
  
@@ -38,7 +43,12 @@ Harbor
  
  
  
-Proof
+ 
+ 
+ 
+ 
+ 
+Mainland China
  
  
  
@@ -58,27 +68,17 @@ Proof
  
  
  
-IP address
  
  
  
  
  
+St. Gallen (canton)
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Mississippi River
  
  
  
@@ -118,7 +118,12 @@ Sundial
  
  
  
-List of volcanos
+ 
+ 
+ 
+ 
+ 
+Comoving distance
  
  
  
@@ -138,7 +143,12 @@ List of volcanos
  
  
  
-White dwarf
+ 
+ 
+ 
+ 
+ 
+Anarchism
  
  
  
@@ -158,27 +168,17 @@ White dwarf
  
  
  
-Pakistan
  
  
  
  
  
+Shogun
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Julius Caesar
  
  
  
@@ -218,7 +218,12 @@ Groningen (province)
  
  
  
-Ralph Steadman
+ 
+ 
+ 
+ 
+ 
+Submarine
  
  
  
@@ -238,7 +243,12 @@ Ralph Steadman
  
  
  
-Charon
+ 
+ 
+ 
+ 
+ 
+Sonic boom
  
  
  
@@ -258,27 +268,17 @@ Charon
  
  
  
-Raffles Institution
  
  
  
  
  
+May Day
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-A Tale of Two Cities
  
  
  
@@ -318,7 +318,12 @@ Eric Clapton
  
  
  
-Pyrgos
+ 
+ 
+ 
+ 
+ 
+Laconia
  
  
  
@@ -338,7 +343,12 @@ Pyrgos
  
  
  
-Evritania
+ 
+ 
+ 
+ 
+ 
+Chari-Baguirmi
  
  
  
@@ -358,27 +368,17 @@ Evritania
  
  
  
-Tandjilé
  
  
  
  
  
+Robert Mugabe
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Ulysses S. Grant
  
  
  
@@ -418,7 +418,12 @@ Ulysses S. Grant
  
  
  
-Hearing
+ 
+ 
+ 
+ 
+ 
+Screw
  
  
  
@@ -438,7 +443,12 @@ Hearing
  
  
  
-Windows Vista
+ 
+ 
+ 
+ 
+ 
+Caribbean
  
  
  
@@ -458,27 +468,17 @@ Windows Vista
  
  
  
-Kathmandu
  
  
  
  
  
+Arnold Schoenberg
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Marxist economics
  
  
  
@@ -518,7 +518,12 @@ Marxist economics
  
  
  
-Palmyra Atoll
+ 
+ 
+ 
+ 
+ 
+Howland Island
  
  
  
@@ -538,7 +543,12 @@ Palmyra Atoll
  
  
  
-Jilin
+ 
+ 
+ 
+ 
+ 
+Priest
  
  
  
@@ -558,27 +568,17 @@ Jilin
  
  
  
-1706
  
  
  
  
  
+Square mile
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-United States House of Representatives
  
  
  
@@ -618,7 +618,12 @@ Fuzzy logic
  
  
  
-Rambla de las Ovejas
+ 
+ 
+ 
+ 
+ 
+Castile-La Mancha
  
  
  
@@ -638,7 +643,12 @@ Rambla de las Ovejas
  
  
  
-Republic of Mahabad
+ 
+ 
+ 
+ 
+ 
+Saint (disambiguation)
  
  
  
@@ -658,27 +668,17 @@ Republic of Mahabad
  
  
  
-Mariska Hargitay
  
  
  
  
  
+List of Atlantic hurricane seasons
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-List of towns in Greenland
  
  
  
@@ -718,7 +718,12 @@ Tamil language
  
  
  
-Punjab (India)
+ 
+ 
+ 
+ 
+ 
+Sikhism
  
  
  
@@ -738,7 +743,12 @@ Punjab (India)
  
  
  
-Surat
+ 
+ 
+ 
+ 
+ 
+Gilbert and Ellice Islands
  
  
  
@@ -758,27 +768,17 @@ Surat
  
  
  
-Bottrop
  
  
  
  
  
+Gymnasium (school)
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Yangon
  
  
  
@@ -818,7 +818,12 @@ Dachshund
  
  
  
-Medical emergency
+ 
+ 
+ 
+ 
+ 
+Sand
  
  
  
@@ -838,7 +843,12 @@ Medical emergency
  
  
  
-1989
+ 
+ 
+ 
+ 
+ 
+Bangalore
  
  
  
@@ -858,27 +868,17 @@ Medical emergency
  
  
  
-1
  
  
  
  
  
+Malcolm IV of Scotland
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-William I of England
  
  
  
@@ -918,7 +918,12 @@ American Civil War
  
  
  
-Vladimir Putin
+ 
+ 
+ 
+ 
+ 
+Cambodia
  
  
  
@@ -938,7 +943,12 @@ Vladimir Putin
  
  
  
-1191
+ 
+ 
+ 
+ 
+ 
+Mecklenburg-Vorpommern
  
  
  
@@ -958,27 +968,17 @@ Vladimir Putin
  
  
  
-Dionne Quintuplets
  
  
  
  
  
+Anne of Cleves
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Lady Eleanor Brandon
  
  
  
@@ -1018,7 +1018,12 @@ Truro
  
  
  
-Aaron Copland
+ 
+ 
+ 
+ 
+ 
+New Mexico
  
  
  
@@ -1038,7 +1043,12 @@ Aaron Copland
  
  
  
-OpenBSD
+ 
+ 
+ 
+ 
+ 
+Smush Parker
  
  
  
@@ -1058,27 +1068,17 @@ OpenBSD
  
  
  
-Point of view
  
  
  
  
  
+Crusades
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1852
  
  
  
@@ -1118,7 +1118,12 @@ Point of view
  
  
  
-1518
+ 
+ 
+ 
+ 
+ 
+Accordion
  
  
  
@@ -1138,7 +1143,12 @@ Point of view
  
  
  
-1690
+ 
+ 
+ 
+ 
+ 
+1433
  
  
  
@@ -1158,27 +1168,17 @@ Point of view
  
  
  
-Bali tiger
  
  
  
  
  
+1162
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1167
  
  
  
@@ -1218,7 +1218,12 @@ Bali tiger
  
  
  
-1031
+ 
+ 
+ 
+ 
+ 
+1802
  
  
  
@@ -1238,7 +1243,12 @@ Bali tiger
  
  
  
-1496
+ 
+ 
+ 
+ 
+ 
+477
  
  
  
@@ -1258,27 +1268,17 @@ Bali tiger
  
  
  
-1636
  
  
  
  
  
+1590s
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1600s
  
  
  
@@ -1318,7 +1318,12 @@ Bali tiger
  
  
  
-Louis Armstrong
+ 
+ 
+ 
+ 
+ 
+West Bank
  
  
  
@@ -1338,7 +1343,12 @@ Louis Armstrong
  
  
  
-48
+ 
+ 
+ 
+ 
+ 
+Hierarchy
  
  
  
@@ -1358,27 +1368,17 @@ Louis Armstrong
  
  
  
-1028
  
  
  
  
  
+1602
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-World Youth Day
  
  
  
@@ -1418,7 +1418,12 @@ World Youth Day
  
  
  
-Lech Kaczyński
+ 
+ 
+ 
+ 
+ 
+Janet Reno
  
  
  
@@ -1438,7 +1443,12 @@ Lech Kaczyński
  
  
  
-525
+ 
+ 
+ 
+ 
+ 
+1765
  
  
  
@@ -1458,27 +1468,17 @@ Lech Kaczyński
  
  
  
-Charles I of England
  
  
  
  
  
+Alix of France
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-41
  
  
  
@@ -1518,7 +1518,12 @@ Black
  
  
  
-Periodic table
+ 
+ 
+ 
+ 
+ 
+Zinc
  
  
  
@@ -1538,7 +1543,12 @@ Periodic table
  
  
  
-Citizenship
+ 
+ 
+ 
+ 
+ 
+2004
  
  
  
@@ -1558,27 +1568,17 @@ Citizenship
  
  
  
-Das Lied der Deutschen
  
  
  
  
  
+Atmosphere of Earth
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Tapeworm
  
  
  
@@ -1618,7 +1618,12 @@ Wind
  
  
  
-Saint Denis
+ 
+ 
+ 
+ 
+ 
+Pollution
  
  
  
@@ -1638,7 +1643,12 @@ Saint Denis
  
  
  
-Don Quixote
+ 
+ 
+ 
+ 
+ 
+Iliad
  
  
  
@@ -1658,27 +1668,17 @@ Don Quixote
  
  
  
-Hospital
  
  
  
  
  
+The Lord of the Rings
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1524
  
  
  
@@ -1718,7 +1718,12 @@ Thumb
  
  
  
-Ancient Greece
+ 
+ 
+ 
+ 
+ 
+1471
  
  
  
@@ -1738,7 +1743,12 @@ Ancient Greece
  
  
  
-Edgar Winter
+ 
+ 
+ 
+ 
+ 
+Cracker
  
  
  
@@ -1758,27 +1768,17 @@ Edgar Winter
  
  
  
-Universal Declaration of Human Rights
  
  
  
  
  
+Agent
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Edip Yuksel
  
  
  
@@ -1818,7 +1818,12 @@ Roma
  
  
  
-Custard
+ 
+ 
+ 
+ 
+ 
+Kiwifruit
  
  
  
@@ -1838,7 +1843,12 @@ Custard
  
  
  
-Wlazł kotek na płotek
+ 
+ 
+ 
+ 
+ 
+Johnston Atoll
  
  
  
@@ -1858,27 +1868,17 @@ Wlazł kotek na płotek
  
  
  
-Charles de Gaulle
  
  
  
  
  
+Supreme Court of the United States
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Sedative
  
  
  
@@ -1918,7 +1918,12 @@ Pancreas
  
  
  
-1772
+ 
+ 
+ 
+ 
+ 
+Goldfinger
  
  
  
@@ -1938,7 +1943,12 @@ Pancreas
  
  
  
-Konstanz
+ 
+ 
+ 
+ 
+ 
+Pond
  
  
  
@@ -1958,27 +1968,17 @@ Konstanz
  
  
  
-Bhavani River
  
  
  
  
  
+Mollusc
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Slobodan Milošević
  
  
  
@@ -2018,7 +2018,12 @@ Food pyramid
  
  
  
-Novalis
+ 
+ 
+ 
+ 
+ 
+Fyodor Tyutchev
  
  
  
@@ -2038,7 +2043,12 @@ Novalis
  
  
  
-Marklohe
+ 
+ 
+ 
+ 
+ 
+Plural
  
  
  
@@ -2058,27 +2068,17 @@ Marklohe
  
  
  
-Topology
  
  
  
  
  
+1824
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Hindi
  
  
  
@@ -2118,7 +2118,12 @@ Homer
  
  
  
-Thanksgiving
+ 
+ 
+ 
+ 
+ 
+Banana Republic
  
  
  
@@ -2138,7 +2143,12 @@ Thanksgiving
  
  
  
-Full House
+ 
+ 
+ 
+ 
+ 
+April 20
  
  
  
@@ -2158,27 +2168,17 @@ Full House
  
  
  
-1804
  
  
  
  
  
+Equation
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Steam
  
  
  
@@ -2218,7 +2218,12 @@ Steam
  
  
  
-Fresno, California
+ 
+ 
+ 
+ 
+ 
+January 10
  
  
  
@@ -2238,7 +2243,12 @@ Fresno, California
  
  
  
-1473
+ 
+ 
+ 
+ 
+ 
+Motown
  
  
  
@@ -2258,27 +2268,17 @@ Fresno, California
  
  
  
-Accent
  
  
  
  
  
+Huntz Hall
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Sen no Rikyu
  
  
  
@@ -2318,7 +2318,12 @@ Caribert of Laon
  
  
  
-1170
+ 
+ 
+ 
+ 
+ 
+Writer
  
  
  
@@ -2338,7 +2343,12 @@ Caribert of Laon
  
  
  
-1864
+ 
+ 
+ 
+ 
+ 
+1890s
  
  
  
@@ -2358,27 +2368,17 @@ Caribert of Laon
  
  
  
-Spring
  
  
  
  
  
+Taipei
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Internet Protocol
  
  
  
@@ -2418,7 +2418,12 @@ European Revolutions of 1848
  
  
  
-1097
+ 
+ 
+ 
+ 
+ 
+Emission
  
  
  
@@ -2438,7 +2443,12 @@ European Revolutions of 1848
  
  
  
-1746
+ 
+ 
+ 
+ 
+ 
+John Knox
  
  
  
@@ -2458,27 +2468,17 @@ European Revolutions of 1848
  
  
  
-Emperor of Ethiopia
  
  
  
  
  
+1504
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Demo
  
  
  
@@ -2518,7 +2518,12 @@ Demo
  
  
  
-List of kings of Carthage
+ 
+ 
+ 
+ 
+ 
+Cost of living
  
  
  
@@ -2538,7 +2543,12 @@ List of kings of Carthage
  
  
  
-Virginia Woolf
+ 
+ 
+ 
+ 
+ 
+February 13
  
  
  
@@ -2558,27 +2568,17 @@ Virginia Woolf
  
  
  
-December 22
  
  
  
  
  
+1351
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1975
  
  
  
@@ -2618,7 +2618,12 @@ December 22
  
  
  
-1907
+ 
+ 
+ 
+ 
+ 
+July 30
  
  
  
@@ -2638,7 +2643,12 @@ December 22
  
  
  
-La Liga Filipina
+ 
+ 
+ 
+ 
+ 
+The Tonight Show
  
  
  
@@ -2658,27 +2668,17 @@ La Liga Filipina
  
  
  
-January 5
  
  
  
  
  
+August 5
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Pope John Paul I
  
  
  
@@ -2718,7 +2718,12 @@ March 1
  
  
  
-April 27
+ 
+ 
+ 
+ 
+ 
+April 29
  
  
  
@@ -2738,7 +2743,12 @@ April 27
  
  
  
-May 31
+ 
+ 
+ 
+ 
+ 
+May 17
  
  
  
@@ -2758,27 +2768,17 @@ May 31
  
  
  
-June 9
  
  
  
  
  
+December 9
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-October 7
  
  
  
@@ -2818,7 +2818,12 @@ August 30
  
  
  
-June 14
+ 
+ 
+ 
+ 
+ 
+June 19
  
  
  
@@ -2838,7 +2843,12 @@ June 14
  
  
  
-July 14
+ 
+ 
+ 
+ 
+ 
+September 27
  
  
  
@@ -2858,27 +2868,17 @@ July 14
  
  
  
-September 16
  
  
  
  
  
+November 11
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-November 24
  
  
  
@@ -2918,7 +2918,12 @@ December 21
  
  
  
-Blood
+ 
+ 
+ 
+ 
+ 
+1974
  
  
  
@@ -2938,7 +2943,12 @@ Blood
  
  
  
-Café
+ 
+ 
+ 
+ 
+ 
+Gwyneth Paltrow
  
  
  
@@ -2958,27 +2968,17 @@ Café
  
  
  
-Hilary Swank
  
  
  
  
  
+Jennifer Love Hewitt
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Osaka
  
  
  
@@ -3018,7 +3018,12 @@ Bob Dylan
  
  
  
-Michael Palin
+ 
+ 
+ 
+ 
+ 
+Tasmania
  
  
  
@@ -3038,7 +3043,12 @@ Michael Palin
  
  
  
-Ankst
+ 
+ 
+ 
+ 
+ 
+Garfield
  
  
  
@@ -3058,27 +3068,17 @@ Ankst
  
  
  
-1983
  
  
  
  
  
+David Ogden Stiers
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Queen (band)
  
  
  
@@ -3118,7 +3118,12 @@ Karel Appel
  
  
  
-Jyväskylä
+ 
+ 
+ 
+ 
+ 
+1715
  
  
  
@@ -3138,7 +3143,12 @@ Jyväskylä
  
  
  
-Tim Rice
+ 
+ 
+ 
+ 
+ 
+Jerry Reed
  
  
  
@@ -3158,27 +3168,17 @@ Tim Rice
  
  
  
-July 5
  
  
  
  
  
+ABBA
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Music video
  
  
  
@@ -3218,7 +3218,12 @@ Shropshire
  
  
  
-Calvin and Hobbes
+ 
+ 
+ 
+ 
+ 
+1685
  
  
  
@@ -3238,7 +3243,12 @@ Calvin and Hobbes
  
  
  
-Arkansas
+ 
+ 
+ 
+ 
+ 
+Kentucky
  
  
  
@@ -3258,27 +3268,17 @@ Arkansas
  
  
  
-Ron Howard
  
  
  
  
  
+Toledo, Spain
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Linda Blair
  
  
  
@@ -3318,7 +3318,12 @@ James Brown
  
  
  
-Dinah Shore
+ 
+ 
+ 
+ 
+ 
+SpongeBob SquarePants
  
  
  
@@ -3338,7 +3343,12 @@ Dinah Shore
  
  
  
-Voice of America
+ 
+ 
+ 
+ 
+ 
+Bahrain
  
  
  
@@ -3358,27 +3368,17 @@ Voice of America
  
  
  
-INXS
  
  
  
  
  
+Fifth Dimension
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-British Sea Power
  
  
  
@@ -3418,7 +3418,12 @@ Toad the Wet Sprocket
  
  
  
-1776
+ 
+ 
+ 
+ 
+ 
+Fleetwood Mac
  
  
  
@@ -3438,7 +3443,12 @@ Toad the Wet Sprocket
  
  
  
-Cunt
+ 
+ 
+ 
+ 
+ 
+Turtle
  
  
  
@@ -3458,27 +3468,17 @@ Cunt
  
  
  
-Phil Collins
  
  
  
  
  
+1615
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Harry Potter and the Philosopher's Stone
  
  
  
@@ -3518,7 +3518,12 @@ Battle of Trafalgar
  
  
  
-Jack the Ripper
+ 
+ 
+ 
+ 
+ 
+Ribosome
  
  
  
@@ -3538,7 +3543,12 @@ Jack the Ripper
  
  
  
-Peter Davison
+ 
+ 
+ 
+ 
+ 
+Yes (band)
  
  
  
@@ -3558,27 +3568,17 @@ Peter Davison
  
  
  
-Barry Sadler
  
  
  
  
  
+Red Hot Chili Peppers
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Eugene McCarthy
  
  
  
@@ -3618,7 +3618,12 @@ Mammary gland
  
  
  
-Light bulb
+ 
+ 
+ 
+ 
+ 
+Wichita, Kansas
  
  
  
@@ -3638,7 +3643,12 @@ Light bulb
  
  
  
-Tampa, Florida
+ 
+ 
+ 
+ 
+ 
+Uranium
  
  
  
@@ -3658,27 +3668,17 @@ Tampa, Florida
  
  
  
-On the Waterfront
  
  
  
  
  
+Annie Hall
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Estuary
  
  
  
@@ -3718,7 +3718,12 @@ Balearic Islands
  
  
  
-Solomonid dynasty
+ 
+ 
+ 
+ 
+ 
+The Broadway Melody
  
  
  
@@ -3738,7 +3743,12 @@ Solomonid dynasty
  
  
  
-Sylvester McCoy
+ 
+ 
+ 
+ 
+ 
+Tootsie
  
  
  
@@ -3758,27 +3768,17 @@ Sylvester McCoy
  
  
  
-Protist
  
  
  
  
  
+Comic book
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Belaying
  
  
  
@@ -3818,7 +3818,12 @@ Belaying
  
  
  
-Sex organ
+ 
+ 
+ 
+ 
+ 
+Dionne Warwick
  
  
  
@@ -3838,7 +3843,12 @@ Sex organ
  
  
  
-Bollywood
+ 
+ 
+ 
+ 
+ 
+Emma (novel)
  
  
  
@@ -3858,27 +3868,17 @@ Bollywood
  
  
  
-Selgovae
  
  
  
  
  
+Astronomy
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Breakfast sausage
  
  
  
@@ -3918,7 +3918,12 @@ Dictionary
  
  
  
-History of Spain
+ 
+ 
+ 
+ 
+ 
+Italian
  
  
  
@@ -3938,7 +3943,12 @@ History of Spain
  
  
  
-Multiverse
+ 
+ 
+ 
+ 
+ 
+Apple Macintosh
  
  
  
@@ -3958,27 +3968,17 @@ Multiverse
  
  
  
-Oahu
  
  
  
  
  
+River
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Subtraction
  
  
  
@@ -4018,7 +4018,12 @@ United States customary units
  
  
  
-Pop music
+ 
+ 
+ 
+ 
+ 
+Radio telescope
  
  
  
@@ -4038,7 +4043,12 @@ Pop music
  
  
  
-Saturn (disambiguation)
+ 
+ 
+ 
+ 
+ 
+Democracy
  
  
  
@@ -4058,27 +4068,17 @@ Saturn (disambiguation)
  
  
  
-Paper
  
  
  
  
  
+Sphere
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Ice
  
  
  
@@ -4118,7 +4118,12 @@ Tongue-twister
  
  
  
-Common year
+ 
+ 
+ 
+ 
+ 
+Market
  
  
  
@@ -4138,7 +4143,12 @@ Common year
  
  
  
-List of diseases
+ 
+ 
+ 
+ 
+ 
+List of waterways
  
  
  
@@ -4158,27 +4168,17 @@ List of diseases
  
  
  
-Triangle (disambiguation)
  
  
  
  
  
+October 21
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Mandrake
  
  
  
@@ -4218,7 +4218,12 @@ Virus
  
  
  
-Chopsticks
+ 
+ 
+ 
+ 
+ 
+Usenet
  
  
  
@@ -4238,7 +4243,12 @@ Chopsticks
  
  
  
-College
+ 
+ 
+ 
+ 
+ 
+Hamilton, Ontario
  
  
  
@@ -4258,27 +4268,17 @@ College
  
  
  
-Machine
  
  
  
  
  
+Integer
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-December 30
  
  
  
@@ -4318,7 +4318,12 @@ Cruise ship
  
  
  
-Colony
+ 
+ 
+ 
+ 
+ 
+Vandalism
  
  
  
@@ -4338,7 +4343,12 @@ Colony
  
  
  
-Tiny Tim
+ 
+ 
+ 
+ 
+ 
+Supply
  
  
  
@@ -4358,27 +4368,17 @@ Tiny Tim
  
  
  
-Noon
  
  
  
  
  
+Nintendo GameCube
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Tortilla
  
  
  
@@ -4418,7 +4418,12 @@ Tel Aviv
  
  
  
-Carpenter
+ 
+ 
+ 
+ 
+ 
+Pink triangle
  
  
  
@@ -4438,7 +4443,12 @@ Carpenter
  
  
  
-Button
+ 
+ 
+ 
+ 
+ 
+Camera
  
  
  
@@ -4458,27 +4468,17 @@ Button
  
  
  
-United Nations Security Council
  
  
  
  
  
+Wendy Carlos
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Celsius
  
  
  
@@ -4518,7 +4518,12 @@ Anonymity
  
  
  
-Harry Potter and the Chamber of Secrets
+ 
+ 
+ 
+ 
+ 
+Catalan
  
  
  
@@ -4538,7 +4543,12 @@ Harry Potter and the Chamber of Secrets
  
  
  
-Holy Spirit
+ 
+ 
+ 
+ 
+ 
+Mongolia
  
  
  
@@ -4558,27 +4568,17 @@ Holy Spirit
  
  
  
-1800s
  
  
  
  
  
+Idea
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Cream
  
  
  
@@ -4618,7 +4618,12 @@ Yttrium
  
  
  
-Baku
+ 
+ 
+ 
+ 
+ 
+Factorization
  
  
  
@@ -4638,7 +4643,12 @@ Baku
  
  
  
-1768
+ 
+ 
+ 
+ 
+ 
+Mariana Islands
  
  
  
@@ -4658,27 +4668,17 @@ Baku
  
  
  
-Price
  
  
  
  
  
+Spacecraft
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Constipation
  
  
  
@@ -4718,7 +4718,12 @@ Sponge
  
  
  
-Research
+ 
+ 
+ 
+ 
+ 
+Poverty
  
  
  
@@ -4738,7 +4743,12 @@ Research
  
  
  
-Titan (moon)
+ 
+ 
+ 
+ 
+ 
+Paul Revere & the Raiders
  
  
  
@@ -4758,27 +4768,17 @@ Titan (moon)
  
  
  
-Radar
  
  
  
  
  
+Cursor
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Mother 1 + 2
  
  
  
@@ -4818,7 +4818,12 @@ Cheese
  
  
  
-Slang
+ 
+ 
+ 
+ 
+ 
+Simple English
  
  
  
@@ -4838,7 +4843,12 @@ Slang
  
  
  
-List of U.S. states
+ 
+ 
+ 
+ 
+ 
+Power network
  
  
  
@@ -4858,27 +4868,17 @@ List of U.S. states
  
  
  
-CNN
  
  
  
  
  
+Logic
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Malta
  
  
  
@@ -4918,7 +4918,12 @@ Greenhouse effect
  
  
  
-The Matrix
+ 
+ 
+ 
+ 
+ 
+John Adams
  
  
  
@@ -4938,7 +4943,12 @@ The Matrix
  
  
  
-Oradea
+ 
+ 
+ 
+ 
+ 
+Atum
  
  
  
@@ -4958,27 +4968,17 @@ Oradea
  
  
  
-Salt
  
  
  
  
  
+Banana republic
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Messiah
  
  
  
@@ -5018,7 +5018,12 @@ Pluto (mythology)
  
  
  
-Inverness
+ 
+ 
+ 
+ 
+ 
+Socialist teachers
  
  
  
@@ -5038,7 +5043,12 @@ Inverness
  
  
  
-Molière
+ 
+ 
+ 
+ 
+ 
+President of Russia
  
  
  
@@ -5058,27 +5068,17 @@ Molière
  
  
  
-Thailand
  
  
  
  
  
+Gospel
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Depression
  
  
  
@@ -5118,7 +5118,12 @@ Dinner
  
  
  
-Prejudice
+ 
+ 
+ 
+ 
+ 
+Windows 95
  
  
  
@@ -5138,7 +5143,12 @@ Prejudice
  
  
  
-Wizardry
+ 
+ 
+ 
+ 
+ 
+Fermat's Last Theorem
  
  
  
@@ -5158,27 +5168,17 @@ Wizardry
  
  
  
-Leaf
  
  
  
  
  
+Gizmondo
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-South Shropshire
  
  
  
@@ -5218,7 +5218,12 @@ Kryptos
  
  
  
-Equatorial Guinea
+ 
+ 
+ 
+ 
+ 
+Adultery
  
  
  
@@ -5238,7 +5243,12 @@ Equatorial Guinea
  
  
  
-David Souter
+ 
+ 
+ 
+ 
+ 
+Nursing
  
  
  
@@ -5258,27 +5268,17 @@ David Souter
  
  
  
-Manhattan Project
  
  
  
  
  
+Francis Hutcheson
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Autocracy
  
  
  
@@ -5318,7 +5318,12 @@ Skill
  
  
  
-AFI's 100 Years... 100 Thrills
+ 
+ 
+ 
+ 
+ 
+Hat
  
  
  
@@ -5338,7 +5343,12 @@ AFI's 100 Years... 100 Thrills
  
  
  
-Hectare
+ 
+ 
+ 
+ 
+ 
+Fast food
  
  
  
@@ -5358,27 +5368,17 @@ Hectare
  
  
  
-Gas giant
  
  
  
  
  
+Computer engineering
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Chen Dynasty
  
  
  
@@ -5418,7 +5418,12 @@ Health
  
  
  
-Greece
+ 
+ 
+ 
+ 
+ 
+Thomm
  
  
  
@@ -5438,7 +5443,12 @@ Greece
  
  
  
-Moscow
+ 
+ 
+ 
+ 
+ 
+Plymouth Argyle F.C.
  
  
  
@@ -5458,27 +5468,17 @@ Moscow
  
  
  
-List of Italian football teams
  
  
  
  
  
+Middlesbrough F.C.
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Ipswich Town F.C.
  
  
  
@@ -5518,7 +5518,12 @@ London Borough of Merton
  
  
  
-Swahili language
+ 
+ 
+ 
+ 
+ 
+Black hole
  
  
  
@@ -5538,7 +5543,12 @@ Swahili language
  
  
  
-Swamp cooler
+ 
+ 
+ 
+ 
+ 
+2006
  
  
  
@@ -5558,27 +5568,17 @@ Swamp cooler
  
  
  
-List of wars
  
  
  
  
  
+Constellation
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Manga
  
  
  
@@ -5618,7 +5618,12 @@ Cornwall
  
  
  
-Yeovil, Somerset
+ 
+ 
+ 
+ 
+ 
+Bath, Somerset
  
  
  
@@ -5638,7 +5643,12 @@ Yeovil, Somerset
  
  
  
-South Cadbury
+ 
+ 
+ 
+ 
+ 
+Alphabet
  
  
  
@@ -5658,27 +5668,17 @@ South Cadbury
  
  
  
-Psychology
  
  
  
  
  
+Hedonism
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Michael Schumacher
  
  
  
@@ -5718,7 +5718,12 @@ County town
  
  
  
-Aerosmith
+ 
+ 
+ 
+ 
+ 
+Tonbridge
  
  
  
@@ -5738,7 +5743,12 @@ Aerosmith
  
  
  
-Cramlington
+ 
+ 
+ 
+ 
+ 
+Adlai Stevenson I
  
  
  
@@ -5758,27 +5768,17 @@ Cramlington
  
  
  
-Tourism
  
  
  
  
  
+Bremen (state)
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Virtues of Harmony
  
  
  
@@ -5818,7 +5818,12 @@ Fifth Avenue
  
  
  
-Ethiopia
+ 
+ 
+ 
+ 
+ 
+Fangame
  
  
  
@@ -5838,7 +5843,12 @@ Ethiopia
  
  
  
-Gary Busey
+ 
+ 
+ 
+ 
+ 
+Illinois
  
  
  
@@ -5858,27 +5868,17 @@ Gary Busey
  
  
  
-Cannabis
  
  
  
  
  
+Accrington
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Camellia
  
  
  
@@ -5918,7 +5918,12 @@ Victor Hugo
  
  
  
-Teresa Heinz
+ 
+ 
+ 
+ 
+ 
+Masashi Tashiro
  
  
  
@@ -5938,7 +5943,12 @@ Teresa Heinz
  
  
  
-Trent Reznor
+ 
+ 
+ 
+ 
+ 
+Function (mathematics)
  
  
  
@@ -5958,27 +5968,17 @@ Trent Reznor
  
  
  
-Nobel Peace Prize
  
  
  
  
  
+Milk shake
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Record producer
  
  
  
@@ -6018,7 +6018,12 @@ Virology
  
  
  
-Shrewsbury
+ 
+ 
+ 
+ 
+ 
+Artist
  
  
  
@@ -6038,7 +6043,12 @@ Shrewsbury
  
  
  
-National Football League
+ 
+ 
+ 
+ 
+ 
+Newport
  
  
  
@@ -6058,27 +6068,17 @@ National Football League
  
  
  
-Soldier
  
  
  
  
  
+Baton Rouge, Louisiana
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Helena, Montana
  
  
  
@@ -6118,7 +6118,12 @@ Harrisburg, Pennsylvania
  
  
  
-Pisa
+ 
+ 
+ 
+ 
+ 
+Yale University
  
  
  
@@ -6138,7 +6143,12 @@ Pisa
  
  
  
-Edinburgh Airport
+ 
+ 
+ 
+ 
+ 
+1811
  
  
  
@@ -6158,27 +6168,17 @@ Edinburgh Airport
  
  
  
-Albany
  
  
  
  
  
+Jan Hus
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Panhandle
  
  
  
@@ -6218,7 +6218,12 @@ Calabria
  
  
  
-Ben Bradshaw
+ 
+ 
+ 
+ 
+ 
+Wasilla, Alaska
  
  
  
@@ -6238,7 +6243,12 @@ Ben Bradshaw
  
  
  
-Ejaculation
+ 
+ 
+ 
+ 
+ 
+Adrenal gland
  
  
  
@@ -6258,27 +6268,17 @@ Ejaculation
  
  
  
-Calgary Flames
  
  
  
  
  
+Level
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Charlotte Eagles
  
  
  
@@ -6318,7 +6318,12 @@ English
  
  
  
-October
+ 
+ 
+ 
+ 
+ 
+Value (personal and cultural)
  
  
  
@@ -6338,7 +6343,12 @@ October
  
  
  
-Webpage
+ 
+ 
+ 
+ 
+ 
+Korea
  
  
  
@@ -6358,27 +6368,17 @@ Webpage
  
  
  
-Christmas
  
  
  
  
  
+Alliteration
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Video game
  
  
  
@@ -6418,7 +6418,12 @@ B
  
  
  
-V
+ 
+ 
+ 
+ 
+ 
+Laos
  
  
  
@@ -6438,7 +6443,12 @@ V
  
  
  
-Panama
+ 
+ 
+ 
+ 
+ 
+North Yorkshire
  
  
  
@@ -6458,27 +6468,17 @@ Panama
  
  
  
-Autism
  
  
  
  
  
+Second language
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Koblenz
  
  
  
@@ -6518,7 +6518,12 @@ Hades
  
  
  
-Titanium
+ 
+ 
+ 
+ 
+ 
+Microsoft Office
  
  
  
@@ -6538,7 +6543,12 @@ Titanium
  
  
  
-Copenhagen
+ 
+ 
+ 
+ 
+ 
+QWERTY
  
  
  
@@ -6558,27 +6568,17 @@ Copenhagen
  
  
  
-Lagos
  
  
  
  
  
+Graffiti
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Engelbert Dollfuss
  
  
  
@@ -6618,7 +6618,12 @@ Bhopal
  
  
  
-Guqin
+ 
+ 
+ 
+ 
+ 
+40 (number)
  
  
  
@@ -6638,7 +6643,12 @@ Guqin
  
  
  
-Spanish Civil War
+ 
+ 
+ 
+ 
+ 
+Abbreviation
  
  
  
@@ -6658,27 +6668,17 @@ Spanish Civil War
  
  
  
-Dance
  
  
  
  
  
+Noun
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Substance
  
  
  
@@ -6718,7 +6718,12 @@ Army
  
  
  
-Plato
+ 
+ 
+ 
+ 
+ 
+Adverb
  
  
  
@@ -6738,7 +6743,12 @@ Plato
  
  
  
-List of shipwrecks
+ 
+ 
+ 
+ 
+ 
+Aristotle
  
  
  
@@ -6758,27 +6768,17 @@ List of shipwrecks
  
  
  
-Luke McCormick
  
  
  
  
  
+Charles Darwin
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-January 25
  
  
  
@@ -6818,7 +6818,12 @@ Adware
  
  
  
-Jan Peter Balkenende
+ 
+ 
+ 
+ 
+ 
+Flag
  
  
  
@@ -6838,7 +6843,12 @@ Jan Peter Balkenende
  
  
  
-Queen Victoria
+ 
+ 
+ 
+ 
+ 
+Court
  
  
  
@@ -6858,27 +6868,17 @@ Queen Victoria
  
  
  
-American Samoa
  
  
  
  
  
+Spelling bee
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Swim
  
  
  
@@ -6918,7 +6918,12 @@ Parody
  
  
  
-Angela Merkel
+ 
+ 
+ 
+ 
+ 
+Lyndon B. Johnson
  
  
  
@@ -6938,7 +6943,12 @@ Angela Merkel
  
  
  
-Mary Magdalene
+ 
+ 
+ 
+ 
+ 
+Southern hemisphere
  
  
  
@@ -6958,27 +6968,17 @@ Mary Magdalene
  
  
  
-Mount Meager
  
  
  
  
  
+Iowa
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-LGBT
  
  
  
@@ -7018,7 +7018,12 @@ Hebrew language
  
  
  
-Methamphetamine
+ 
+ 
+ 
+ 
+ 
+1681
  
  
  
@@ -7038,7 +7043,12 @@ Methamphetamine
  
  
  
-SS Richard Montgomery
+ 
+ 
+ 
+ 
+ 
+Anne Murray
  
  
  
@@ -7058,27 +7068,17 @@ SS Richard Montgomery
  
  
  
-Pascal's Triangle
  
  
  
  
  
+Zombie
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Nile
  
  
  
@@ -7118,7 +7118,12 @@ Nagasaki
  
  
  
-Deity
+ 
+ 
+ 
+ 
+ 
+Dinosaur Comics
  
  
  
@@ -7138,7 +7143,12 @@ Deity
  
  
  
-Wrench
+ 
+ 
+ 
+ 
+ 
+Premature ejaculation
  
  
  
@@ -7158,27 +7168,17 @@ Wrench
  
  
  
-Danish
  
  
  
  
  
+Switch
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Ash Ketchum
  
  
  
@@ -7218,7 +7218,12 @@ Ash Ketchum
  
  
  
-Erythropoietin
+ 
+ 
+ 
+ 
+ 
+Pepin the Short
  
  
  
@@ -7238,7 +7243,12 @@ Erythropoietin
  
  
  
-David Hilbert
+ 
+ 
+ 
+ 
+ 
+Plaice
  
  
  
@@ -7258,27 +7268,17 @@ David Hilbert
  
  
  
-Beijing
  
  
  
  
  
+Fecund universes
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-GNU Free Documentation License
  
  
  
@@ -7318,7 +7318,12 @@ Sport utility vehicle
  
  
  
-Semiotics
+ 
+ 
+ 
+ 
+ 
+Kami
  
  
  
@@ -7338,7 +7343,12 @@ Semiotics
  
  
  
-Headrest
+ 
+ 
+ 
+ 
+ 
+Kimono
  
  
  
@@ -7358,27 +7368,17 @@ Headrest
  
  
  
-Airport
  
  
  
  
  
+Glow-worm
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Para rubber tree
  
  
  
@@ -7418,7 +7418,12 @@ Seam ripper
  
  
  
-Coal
+ 
+ 
+ 
+ 
+ 
+Body
  
  
  
@@ -7438,7 +7443,12 @@ Coal
  
  
  
-Pepsin
+ 
+ 
+ 
+ 
+ 
+Clothing
  
  
  
@@ -7458,27 +7468,17 @@ Pepsin
  
  
  
-Libertarianism
  
  
  
  
  
+Apocrypha
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Scissors
  
  
  
@@ -7518,7 +7518,12 @@ Newt
  
  
  
-Nyngan, New South Wales
+ 
+ 
+ 
+ 
+ 
+United Nations General Assembly
  
  
  
@@ -7538,7 +7543,12 @@ Nyngan, New South Wales
  
  
  
-House music
+ 
+ 
+ 
+ 
+ 
+Birth
  
  
  
@@ -7558,27 +7568,17 @@ House music
  
  
  
-1836
  
  
  
  
  
+Belarus
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-September 3
  
  
  
@@ -7618,7 +7618,12 @@ Robber baron
  
  
  
-Carl Lewis
+ 
+ 
+ 
+ 
+ 
+Fred Gwynne
  
  
  
@@ -7638,7 +7643,12 @@ Carl Lewis
  
  
  
-1703
+ 
+ 
+ 
+ 
+ 
+Nuuk
  
  
  
@@ -7658,27 +7668,17 @@ Carl Lewis
  
  
  
-Hypercholesterolemia
  
  
  
  
  
+Pain
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Sweet
  
  
  
@@ -7718,7 +7718,12 @@ Laurent Clerc
  
  
  
-Fishing hook
+ 
+ 
+ 
+ 
+ 
+Tomato
  
  
  
@@ -7738,7 +7743,12 @@ Fishing hook
  
  
  
-Mark Hoppus
+ 
+ 
+ 
+ 
+ 
+War on Terrorism
  
  
  
@@ -7758,27 +7768,17 @@ Mark Hoppus
  
  
  
-Lima
  
  
  
  
  
+Rat
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Bucket
  
  
  
@@ -7818,7 +7818,12 @@ Schindler's List
  
  
  
-Headstone
+ 
+ 
+ 
+ 
+ 
+Fat
  
  
  
@@ -7838,7 +7843,12 @@ Headstone
  
  
  
-Polonium
+ 
+ 
+ 
+ 
+ 
+Glucose
  
  
  
@@ -7858,27 +7868,17 @@ Polonium
  
  
  
-Turkmenistan
  
  
  
  
  
+A Portuguesa
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-Mount Price
  
  
  
@@ -7918,7 +7918,12 @@ Ziggy
  
  
  
-Alcoholic proof
+ 
+ 
+ 
+ 
+ 
+Muteness
  
  
  
@@ -7938,7 +7943,12 @@ Alcoholic proof
  
  
  
-Spear
+ 
+ 
+ 
+ 
+ 
+Olive oil
  
  
  
@@ -7958,27 +7968,17 @@ Spear
  
  
  
-Anaheim, California
  
  
  
  
  
+Teaspoon
  
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
-1159
  
  
  

@@ -22,7 +22,7 @@ public class titleFilter {
 
         for(int i = 0; i < 8000; i++){
             String line = bufferedReader.readLine();
-            if(i % 20 == 0){
+            if(i % 25 == 0){
                 writer.append(line + "\n");
             }
             else{
