@@ -29,7 +29,7 @@ import static org.wikibrain.cookbook.tsne.TSneDemo.saveFile;
 
 
 /**
- * Created by research on 6/3/16.
+ * Created by Anja Beth Swoap on 6/3/16.
  */
 public class KmeansWBSimple8000 {
     public static final int numClusters = 12;
@@ -66,8 +66,7 @@ public class KmeansWBSimple8000 {
             BufferedWriter clusterfw = new BufferedWriter (new FileWriter(new File ("wikibrain-cookbook/results/kmeans-results/ordered_cluster_labels.txt")));
             BufferedWriter articlefw = new BufferedWriter(new FileWriter(new File("wikibrain-cookbook/results/kmeans-results/ordered_article_titles.txt")));
 
-            clusterfw.append("this is a file");
-            articlefw.append("this is a file");
+            clusterfw.append("x, y");
 
             //establish 2D array to hold vectors in the correct order
             double[][] orderedVecs = new double[vectors.length][50];
