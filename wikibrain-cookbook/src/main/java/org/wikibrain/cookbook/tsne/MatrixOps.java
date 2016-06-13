@@ -359,7 +359,7 @@ public class MatrixOps {
 	// Unit Tested
 	/**
 	 * Returns a new matrix with values exponentiated
-	 * @param matrix
+
 	 * @return new matrix with values exponentiated
 	 */
 	public static double [][] exp(double [][] m1) {
@@ -375,7 +375,7 @@ public class MatrixOps {
 	// Unit Tested
 	/**
 	 * Returns new vetcor with vals sqrt'ed
-	 * @param vector
+
 	 * @return new vector with values sqrt'ed
 	 */
 	public static double [] sqrt(double [] v1) {
@@ -402,7 +402,7 @@ public class MatrixOps {
 	// Unit Tested
 	/**
 	 * Returns a new matrix with values that are the log of the input matrix
-	 * @param matrix
+
 	 * @return  same matrix with values log'ed
 	 */
 	public static double [][] log(double [][] m1) {
@@ -417,7 +417,7 @@ public class MatrixOps {
 
 	/**
 	 * Returns a new matrix with values that are taken to the power of the input matrix
-	 * @param matrix
+
 	 * @param power
 	 * @return  same matrix with values pow'ed
 	 */
@@ -433,7 +433,7 @@ public class MatrixOps {
 
 	/**
 	 * Returns a new matrix with values that are taken to the power of the input matrix
-	 * @param matrix
+
 	 * @param power
 	 * @return  same matrix with values pow'ed
 	 */
@@ -447,7 +447,7 @@ public class MatrixOps {
 
 	/**
 	 * Returns a new matrix with values that are the log of the input matrix
-	 * @param matrix
+
 	 * @param infAsZero treat +- Infinity as zero, i.e replaces Infinity with 0.0
 	 * if set to true
 	 * @return  same matrix with values log'ed
@@ -466,7 +466,7 @@ public class MatrixOps {
 
 	// Unit Tested
 	/**
-	 * @param matrix
+
 	 * @return scalar inverse of matrix
 	 */
 	public static double [][] scalarInverse(double [][] m1) {
@@ -481,7 +481,7 @@ public class MatrixOps {
 
 	// Unit Tested
 	/**
-	 * @param vector
+
 	 * @return scalar inverse of vector
 	 */
 	public static double [] scalarInverse(double [] v1) {
@@ -644,7 +644,7 @@ public class MatrixOps {
 	}
 
 	/**
-	 * @param absolutes
+
 	 * @return
 	 */
 	public static double [] abs(double [] vals) {
@@ -1523,7 +1523,7 @@ public class MatrixOps {
 	}
 
 	public static Integer [] indicesOf(int classIdx, int [] ys) {
-		List<Integer> indices = new ArrayList<>();
+		List<Integer> indices = new ArrayList<Integer>();
 		for (int row = 0; row < ys.length; row++) {
 			if(ys[row]==classIdx) {
 				indices.add(row);
