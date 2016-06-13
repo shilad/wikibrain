@@ -1,3 +1,4 @@
+/* NOT USING THIS ANYMORE, IT'S BEING DONE IN PYTHON
 package org.wikibrain.cookbook.kmeans;
 
 
@@ -31,8 +32,10 @@ import static org.wikibrain.cookbook.tsne.TSneDemo.saveFile;
 /**
  * Created by Anja Beth Swoap on 6/3/16.
  */
+
+/*
 public class KmeansWBSimple8000 {
-    public static final int numClusters = 12;
+    public static final int numClusters = 20;
     public static final int numIters = 100;
 
 
@@ -66,7 +69,7 @@ public class KmeansWBSimple8000 {
             BufferedWriter clusterfw = new BufferedWriter (new FileWriter(new File ("wikibrain-cookbook/results/kmeans-results/ordered_cluster_labels.txt")));
             BufferedWriter articlefw = new BufferedWriter(new FileWriter(new File("wikibrain-cookbook/results/kmeans-results/ordered_article_titles.txt")));
 
-            clusterfw.append("x, y");
+            clusterfw.append("clusters\n");
 
             //establish 2D array to hold vectors in the correct order
             double[][] orderedVecs = new double[vectors.length][50];
@@ -74,6 +77,7 @@ public class KmeansWBSimple8000 {
 
             //establish InstanceTools to be able to write vectors properly
             InstanceTools itool = new InstanceTools();
+
 
             for(int i = 0; i < clustered.length; i++){
                 //iterate through current Dataset and write each instance to the orderedVecs array, in order
@@ -88,6 +92,7 @@ public class KmeansWBSimple8000 {
 
                     //grab class (article title) from currInst and write to file
                     articlefw.append(currInst.classValue().toString()+ "\n");
+
 
                     //write vector array to orderedVecs
                     double[] vec = InstanceTools.array(currInst);
@@ -110,3 +115,5 @@ public class KmeansWBSimple8000 {
         }
 
 }
+
+*/

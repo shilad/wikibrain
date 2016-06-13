@@ -131,7 +131,17 @@
             <artifactId>javaml</artifactId>
             <version>0.1.7</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>3.7</version>
+        </dependency>
+        <!-- http://mvnrepository.com/artifact/net.sf.trove4j/trove4j -->
+        <dependency>
+            <groupId>net.sf.trove4j</groupId>
+            <artifactId>trove4j</artifactId>
+            <version>3.0.3</version>
+        </dependency>
 
 
     </dependencies>

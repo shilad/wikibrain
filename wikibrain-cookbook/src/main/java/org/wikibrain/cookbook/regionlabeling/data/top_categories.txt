@@ -1,0 +1,10 @@
+0, Music
+1, War
+2, Movie industry
+3, Football (soccer)
+4, Communes
+5, Terrestrial planets
+6, Biology
+7, Subdivision of the United Kingdom
+8, North American people
+9, Midwestern United States
