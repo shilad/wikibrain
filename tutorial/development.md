@@ -14,3 +14,5 @@ These guidelines are for IntelliJ Version 15.
 3. You may need to turn on some tool windows: View -> Tool Windows -> Project and Maven Projects.
 4. In the "Maven Projects" window, run the maven "Test" target under -> wikibrain-core -> Lifecycle -> test
 5. In the project window, find wikibrain-core -> src/generated/jooq-h2. Right click and select Mark directory -> Generated sources root.
+6. Check out the "dev" branch.
+7. Run the GUI loader.
