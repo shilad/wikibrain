@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class DumpLinkGetter {
 
-    protected static final String BASEURL_STRING = "http://dumps.wikimedia.org";
+    protected static final String BASEURL_STRING = "https://dumps.wikimedia.org";
 
     private Language lang;
     private List<FileMatcher> matchers;

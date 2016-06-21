@@ -15,6 +15,7 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalLinkDao;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.download.FileDownloader;
 import org.wikibrain.phrases.LinkProbabilityDao;
 import org.wikibrain.sr.dataset.Dataset;
 import org.wikibrain.sr.dataset.DatasetDao;
@@ -31,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -87,10 +89,9 @@ public class SRBuilder {
 
     private Mode mode = Mode.BOTH;
 
-
-    public SRBuilder(Env env, String metricName) throws ConfigurationException {
+    public SRBuilder(Env env, String metricName, Language language) throws ConfigurationException {
         this.env = env;
-        this.language = env.getLanguages().getDefaultLanguage();
+        this.language = language;
         this.config = env.getConfiguration();
         this.srDir = new File(config.get().getString("sr.metric.path"));
         datasetNames = config.get().getStringList("sr.dataset.defaultsets");
@@ -103,13 +104,18 @@ public class SRBuilder {
     }
 
 
+    public SRBuilder(Env env, String metricName) throws ConfigurationException {
+        this(env, metricName, env.getDefaultLanguage());
+    }
+
+
 
     public synchronized SRMetric getMetric() throws ConfigurationException {
         return getMetric(metricName);
     }
 
     public synchronized SRMetric getMetric(String name) throws ConfigurationException {
-            return env.getConfigurator().get(SRMetric.class, name, "language", language.getLangCode());
+            return env.getComponent(SRMetric.class, name, language);
     }
 
     /**
@@ -119,7 +125,7 @@ public class SRBuilder {
      * @throws IOException
      * @throws WikiBrainException
      */
-    public void build() throws ConfigurationException, DaoException, IOException, WikiBrainException {
+    public void build() throws ConfigurationException, DaoException, IOException, WikiBrainException, InterruptedException {
         if (deleteExistingData) {
             deleteDataDirectories();
         }
@@ -183,7 +189,7 @@ public class SRBuilder {
         return results;
     }
 
-    public void buildMetric(String name) throws ConfigurationException, DaoException, IOException {
+    public void buildMetric(String name) throws ConfigurationException, DaoException, IOException, InterruptedException {
 
         LOG.info("building component metric " + name);
         String type = getMetricType(name);
@@ -237,7 +243,10 @@ public class SRBuilder {
         metric.write();
     }
 
-    private void initWord2Vec(String name) throws ConfigurationException, IOException, DaoException {
+    private String localize(String str) {
+        return str.replace("LANG", language.getLangCode());
+    }
+    private void initWord2Vec(String name) throws ConfigurationException, IOException, DaoException, InterruptedException {
         Config config = getMetricConfig(name).getConfig("generator");
         File model = Word2VecGenerator.getModelFile(config.getString("modelDir"), language);
         if (skipBuiltMetrics && model.isFile()) {
@@ -248,14 +257,12 @@ public class SRBuilder {
             if (model.isFile()) {
                 return;
             }
-            File downloadPath = new File(config.getString("binfile"));
+            File downloadPath = new File(localize(config.getString("binfile")));
             if (!downloadPath.isFile()) {
-                throw new ConfigurationException(
-                        "word2vec model " + downloadPath.getAbsolutePath() + " cannot be found." +
-                                " You must download it from " + config.getString("url") +
-                                " into to the wikibrain download directory.");
+                FileDownloader downloader = new FileDownloader();
+                downloader.download(new URL(localize(config.getString("url"))), downloadPath);
             }
-            if (!config.getStringList("languages").contains(language.getLangCode())) {
+            if (config.hasPath("languages") && !config.getStringList("languages").contains(language.getLangCode())) {
                 throw new ConfigurationException(
                         "word2vec model " + downloadPath +
                                 " does not support language" + language);
@@ -279,11 +286,9 @@ public class SRBuilder {
             return;
         }
 
-        LinkProbabilityDao lpd = env.getConfigurator().get(LinkProbabilityDao.class);
+        LinkProbabilityDao lpd = env.getComponent(LinkProbabilityDao.class, language);
         lpd.useCache(true);
-        if (!lpd.isBuilt()) {
-            lpd.build();
-        }
+        lpd.buildIfNecessary();
 
         String corpusName = config.getString("corpus");
         Corpus corpus = null;
@@ -367,7 +372,7 @@ public class SRBuilder {
             if (fakeGoldStandard == null) {
                 Corpus c = env.getConfigurator().get(
                         Corpus.class, "plain", "language",
-                        env.getDefaultLanguage().getLangCode());
+                        language.getLangCode());
                 try {
                     if (!c.exists()) c.create();
                     FakeDatasetCreator creator = new FakeDatasetCreator(c);
@@ -468,7 +473,7 @@ public class SRBuilder {
         this.createFakeGoldStandard = createFakeGoldStandard;
     }
 
-    public static void main(String args[]) throws ConfigurationException, IOException, WikiBrainException, DaoException {
+    public static void main(String args[]) throws ConfigurationException, IOException, WikiBrainException, DaoException, InterruptedException {
         Options options = new Options();
 
         //Number of Max Results(otherwise take from config)

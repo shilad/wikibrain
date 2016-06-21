@@ -100,6 +100,30 @@ public class Env implements Closeable {
         LOG.info("To customize log4j2 set the 'log4j.configurationFile' system property or set EnvBuilder.setReconfigureLogging to false.");
     }
 
+    public <T> T getComponent(Class<T> klass, String name) throws ConfigurationException {
+        return getConfigurator().get(klass, name);
+    }
+
+    public <T> T getComponent(Class<T> klass) throws ConfigurationException {
+        return getConfigurator().get(klass, "default");
+    }
+
+    public <T> T getComponent(Class<T> klass, String name, Language lang) throws ConfigurationException {
+        return getConfigurator().get(klass, name, "language", lang.getLangCode());
+    }
+
+    public <T> T getComponent(Class<T> klass, Language lang) throws ConfigurationException {
+        return getConfigurator().get(klass, "default", "language", lang.getLangCode());
+    }
+
+    public static <T> T getComponent(Configurator conf, Class<T> klass, Language lang) throws ConfigurationException {
+        return conf.get(klass, "default", "language", lang.getLangCode());
+    }
+
+    public static <T> T getComponent(Configurator conf, Class<T> klass, String name, Language lang) throws ConfigurationException {
+        return conf.get(klass, name, "language", lang.getLangCode());
+    }
+
     public File getBaseDir() {
         return new File(configuration.getString("baseDir"));
     }

@@ -34,7 +34,7 @@ public class Tester {
         LocalLinkDao linkDao = c.get(LocalLinkDao.class);
         LocalPageDao pageDao = c.get(LocalPageDao.class);
         AnchorTextPhraseAnalyzer phraseAnalyzer = (AnchorTextPhraseAnalyzer) c.get(PhraseAnalyzer.class, "anchortext");
-        LinkProbabilityDao linkProbabilityDao = c.get(LinkProbabilityDao.class);
+        LinkProbabilityDao linkProbabilityDao = env.getComponent(LinkProbabilityDao.class, Language.SIMPLE);
         if (!linkProbabilityDao.isBuilt()) {
             linkProbabilityDao.build();
         }

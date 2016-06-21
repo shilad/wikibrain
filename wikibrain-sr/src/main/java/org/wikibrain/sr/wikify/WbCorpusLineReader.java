@@ -68,6 +68,8 @@ public class WbCorpusLineReader implements Iterable<WbCorpusLineReader.Line> {
     public static class DocInfo {
         private final int id;
         private final String title;
+        int lineCounter = 0;
+        int charCounter = 0;
 
         public DocInfo(String line) {
             if (!line.startsWith("@WikiBrainDoc")) {
@@ -109,11 +111,15 @@ public class WbCorpusLineReader implements Iterable<WbCorpusLineReader.Line> {
         private final CorpusInfo corpus;
         private final DocInfo doc;
         private final String line;
+        private final int lineNumber;
+        private final int charNumber;
 
-        public Line(CorpusInfo corpus, DocInfo doc, String line) {
+        public Line(CorpusInfo corpus, DocInfo doc, String line, int lineNumber, int charNumber) {
             this.corpus = corpus;
             this.doc = doc;
             this.line = line;
+            this.lineNumber = lineNumber;
+            this.charNumber = charNumber;
         }
 
         public CorpusInfo getCorpus() {
@@ -134,6 +140,14 @@ public class WbCorpusLineReader implements Iterable<WbCorpusLineReader.Line> {
 
         public String getLine() {
             return line;
+        }
+
+        public int getLineNumber() {
+            return lineNumber;
+        }
+
+        public int getCharNumber() {
+            return charNumber;
         }
     }
 
@@ -176,7 +190,10 @@ public class WbCorpusLineReader implements Iterable<WbCorpusLineReader.Line> {
                 if (line == null) {
                     return null;
                 } else {
-                    Line res = new Line(corpus, doc, line);
+                    int lineNum = doc.lineCounter++;
+                    int charNum = doc.charCounter;
+                    doc.charCounter += line.length();
+                    Line res = new Line(corpus, doc, line, lineNum, charNum);
                     line = null;    // consume buffer
                     return res;
                 }

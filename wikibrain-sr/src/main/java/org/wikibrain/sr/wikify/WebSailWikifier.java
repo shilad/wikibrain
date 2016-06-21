@@ -10,6 +10,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
+import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
@@ -38,7 +39,7 @@ public class WebSailWikifier implements Wikifier {
     /**
      * TODO: Make this configurable
      */
-    private int numTrainingLinks = 10000;
+    private int numTrainingLinks = 50000;
 
     private final Wikifier identityWikifier;
     private final SRMetric metric;
@@ -51,6 +52,7 @@ public class WebSailWikifier implements Wikifier {
 
     private double desiredLinkRecall = 0.98;
     private double minLinkProbability = 0.01;
+    private double minFinalScore = 0.001;
 
     public WebSailWikifier(Wikifier identityWikifier, RawPageDao rawPageDao, LocalLinkDao linkDao, LinkProbabilityDao linkProbDao, PhraseAnalyzerDao phraseDao, SRMetric metric) throws DaoException {
         this.identityWikifier = identityWikifier;
@@ -62,6 +64,15 @@ public class WebSailWikifier implements Wikifier {
         this.phraseDao = phraseDao;
         this.phraseTokenizer = new PhraseTokenizer(linkProbDao);
         learnMinLinkProbability();
+    }
+
+    public void setDesiredLinkRecall(double recall) throws DaoException {
+        this.desiredLinkRecall = recall;
+        this.learnMinLinkProbability();
+    }
+
+    public void setMinLinkProbability(double minProb) {
+        this.minLinkProbability = minProb;
     }
 
     private void learnMinLinkProbability() throws DaoException {
@@ -76,12 +87,13 @@ public class WebSailWikifier implements Wikifier {
                 .setLimit(numTrainingLinks);
         for (LocalLink ll : linkDao.get(filter)) {
             if (ll.getDestId() < 0) throw new IllegalStateException();
-            double p = linkProbDao.getLinkProbability(language, ll.getAnchorText());
+            double p = linkProbDao.getLinkProbability(ll.getAnchorText());
             probs.add(p);
         }
         probs.sort();
         probs.reverse();
-        minLinkProbability = probs.get((int)(desiredLinkRecall * probs.size()));
+        int index = (int)(desiredLinkRecall * probs.size());
+        minLinkProbability = (index >= probs.size()) ? 0.0 : probs.get(index);
         LOG.info("Set minimum link probability to " + minLinkProbability + " to achieve " + desiredLinkRecall + " recall");
     }
 
@@ -94,7 +106,7 @@ public class WebSailWikifier implements Wikifier {
         StringTokenizer tokenizer = new StringTokenizer();
         for (Token sentence : tokenizer.getSentenceTokens(language, text)) {
             for (Token phrase : phraseTokenizer.makePhraseTokens(language, sentence)) {
-                double p = linkProbDao.getLinkProbability(language, phrase.getToken());
+                double p = linkProbDao.getLinkProbability(phrase.getToken());
                 if (p > minLinkProbability) {
                     LinkInfo li = new LinkInfo(phrase);
                     li.setLinkProbability(p);
@@ -157,6 +169,7 @@ public class WebSailWikifier implements Wikifier {
         TIntSet existingIds = new TIntHashSet();
         for (int i = 0; i < mentions.size(); i++) {
             LinkInfo li = mentions.get(i);
+            if (li.getPrior() == null || li.getPrior().isEmpty()) continue;
             double p = 1.0 * li.getPrior().values().iterator().next() / (li.getPrior().getTotal() + 1);
 //            String name = phraseDao.getPageCounts(language, li.getTopPriorDestination(), 1).keySet().iterator().next();
             if ((li.getScore() > 0.01 && i < 3 && p >= 0.5) || (li.getScore() > 0.25 && p >= 0.5)) {
@@ -237,6 +250,10 @@ public class WebSailWikifier implements Wikifier {
         return results;
     }
 
+    public void setMinFinalScore(double minFinalScore) {
+        this.minFinalScore = minFinalScore;
+    }
+
     private List<LocalLink> link(int wpId, String text, List<LinkInfo> infos) throws DaoException {
         BitSet used = new BitSet(text.length());
         List<LocalLink> results = identityWikifier.wikify(wpId, text);
@@ -246,7 +263,7 @@ public class WebSailWikifier implements Wikifier {
 
         Collections.sort(infos);
         for (LinkInfo li : infos) {
-            if (li.getDest() != null && li.getScore() > 0.001 && used.get(li.getStartChar(), li.getEndChar()).isEmpty()) {
+            if (li.getDest() != null && li.getScore() > minFinalScore && used.get(li.getStartChar(), li.getEndChar()).isEmpty()) {
                 results.add(li.toLocalLink(language, wpId));
                 used.set(li.getStartChar(), li.getEndChar());
             }
@@ -291,7 +308,7 @@ public class WebSailWikifier implements Wikifier {
             String phraseName = config.getString("phraseAnalyzer");
             String identityName = config.getString("identityWikifier");
             String linkName = config.getString("localLinkDao");
-            LinkProbabilityDao lpd = c.get(LinkProbabilityDao.class);
+            LinkProbabilityDao lpd = Env.getComponent(c, LinkProbabilityDao.class, language);
             if (config.getBoolean("useLinkProbabilityCache")) {
                 lpd.useCache(true);
             }
