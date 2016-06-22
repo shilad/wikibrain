@@ -1,7 +1,7 @@
-/* NOT USING THIS ANYMORE, IT'S BEING DONE IN PYTHON
+
 package org.wikibrain.cookbook.kmeans;
 
-
+/* unneeded
 import net.sf.javaml.core.Dataset;
 import net.sf.javaml.core.DefaultDataset;
 import net.sf.javaml.core.DenseInstance;
@@ -13,6 +13,7 @@ import net.sf.javaml.tools.data.FileHandler;
 import org.math.plot.plots.ScatterPlot;
 import org.wikibrain.cookbook.tsne.MatrixOps;
 import org.wikibrain.cookbook.tsne.MatrixUtils;
+*/
 
 import java.util.Iterator;
 
@@ -33,8 +34,10 @@ import static org.wikibrain.cookbook.tsne.TSneDemo.saveFile;
  * Created by Anja Beth Swoap on 6/3/16.
  */
 
-/*
+
 public class KmeansWBSimple8000 {
+
+/* NOT USING THIS ANYMORE, IT'S BEING DONE IN PYTHON
     public static final int numClusters = 20;
     public static final int numIters = 100;
 
@@ -113,7 +116,7 @@ public class KmeansWBSimple8000 {
             articlefw.close();
 
         }
+*/
 
 }
 
-*/

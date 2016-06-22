@@ -1,0 +1,100 @@
+Music	 cluster 0
+Musical genre	 cluster 0
+Album	 cluster 0
+Record label	 cluster 0
+List of countries	 cluster 0
+Song	 cluster 0
+Singer	 cluster 0
+Compact Disc	 cluster 0
+Musician	 cluster 0
+Pop music	 cluster 0
+United States	 cluster 1
+United Kingdom	 cluster 1
+Country	 cluster 1
+Wiktionary	 cluster 1
+Europe	 cluster 1
+Canada	 cluster 1
+Japan	 cluster 1
+Australia	 cluster 1
+Wikipedia	 cluster 1
+Germany	 cluster 1
+Movie	 cluster 2
+Animation	 cluster 2
+Television	 cluster 2
+Internet Movie Database	 cluster 2
+Actor	 cluster 2
+Comedy	 cluster 2
+Television programme	 cluster 2
+Video game	 cluster 2
+Horror movie	 cluster 2
+Play (theatre)	 cluster 2
+Association football	 cluster 3
+Brazil	 cluster 3
+2007	 cluster 3
+2006	 cluster 3
+2005	 cluster 3
+2004	 cluster 3
+2000	 cluster 3
+1998	 cluster 3
+Midfielder	 cluster 3
+Striker	 cluster 3
+Departments of France	 cluster 4
+Communes of France	 cluster 4
+Pas-de-Calais	 cluster 4
+Pyrénées-Atlantiques	 cluster 4
+Aisne	 cluster 4
+Nord-Pas-de-Calais	 cluster 4
+Gironde	 cluster 4
+Picardy	 cluster 4
+Vendée	 cluster 4
+Aquitaine	 cluster 4
+Multimedia	 cluster 5
+Definition	 cluster 5
+IP address	 cluster 5
+International Standard Book Number	 cluster 5
+Information	 cluster 5
+Sound	 cluster 5
+Picture	 cluster 5
+Human	 cluster 5
+Mathematics	 cluster 5
+Computer	 cluster 5
+Animal	 cluster 6
+Biological classification	 cluster 6
+Plant	 cluster 6
+Africa	 cluster 6
+North America	 cluster 6
+Species	 cluster 6
+Mammal	 cluster 6
+Food	 cluster 6
+Organism	 cluster 6
+Evolution	 cluster 6
+English language	 cluster 7
+France	 cluster 7
+England	 cluster 7
+Latin	 cluster 7
+Spain	 cluster 7
+French language	 cluster 7
+Religion	 cluster 7
+Greek language	 cluster 7
+Book	 cluster 7
+ISO 639-2	 cluster 7
+Americans	 cluster 8
+Politician	 cluster 8
+Gini coefficient	 cluster 8
+English people	 cluster 8
+Nobel Prize	 cluster 8
+Ohio	 cluster 8
+Journalist	 cluster 8
+January 1	 cluster 8
+British people	 cluster 8
+Myocardial infarction	 cluster 8
+City	 cluster 9
+Capital city	 cluster 9
+List of U.S. states	 cluster 9
+Romania	 cluster 9
+Area	 cluster 9
+Province	 cluster 9
+Town	 cluster 9
+Texas	 cluster 9
+Illinois	 cluster 9
+Florida	 cluster 9

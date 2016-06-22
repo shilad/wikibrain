@@ -17,6 +17,7 @@ import java.io.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +45,7 @@ public class RunRegionLabeler {
         //set up CSV reader to ge data
         CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/regionlabeling/data/data3.csv"), "UTF-8"), ',');
         FileWriter fw = new FileWriter("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/regionlabeling/data/top_categories.txt");
+        FileWriter articlewr = new FileWriter("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/regionlabeling/data/top_100_articles.txt");
 
 
         //get datapoints and put them into arrayLists, one for each cluster
@@ -69,6 +71,30 @@ public class RunRegionLabeler {
             //calculate outlinks for those top articles
             System.out.println("Getting outlinks...");
             c.calculateOutlinks();
+
+
+            List<PageiDRank> top10 = c.getTopArticlesinCluster().subList(0, 10);
+            for(int j = 0; j < 10; j++){
+                PageiDRank p = top10.get(j);
+                LocalId l = p.getId();
+                LocalPage pg = lpDao.getById(l);
+                String title = pg.getTitle().getCanonicalTitle();
+                int index = title.indexOf("(simple)");
+                String shortTitle;
+                if(index != -1){
+                    shortTitle = title.substring(0, index);
+                }
+                else{
+                    shortTitle = title;
+                }
+
+                articlewr.append(shortTitle + "\t" + " cluster " + i + "\n");
+
+            }
+
+
+            //c.printTopOutlinks();
+            /* Currently commented out for tf idf testing
             System.out.println("Sorting outlinks..." + "\n");
             c.sortOutLinks();
             //calculate categories from top outlinks
@@ -77,11 +103,29 @@ public class RunRegionLabeler {
             c.goUpOneCatLevel();
             //optional - evaluate top categories by taking top 150 cluster articles, finding the category out of topCats they're most related to, and counting that one
             c.evaluateTopCats();
-            fw.append("" + i +", " + c.getTopCat() + "\n");
+            fw.append("" + i +"\t" + c.getTopCat() + "\n");
             System.out.println("Finished processing cluster " + (i+1) + "\n\n\n");
 
-
+            */
         }
+
+        articlewr.close();
+        System.out.println("Finished writing article titles");
+
+        labeler.doAllTfIdf();
+
+
+        for(int i = 0; i < 10; i++){
+            System.out.println("Processing cluster " + (i +1) + "\n");
+            ClusterList c = labeler.getCluster(i + 1);
+            c.convertTfidfs();
+            //c.calculateTopCats();
+            //c.evaluateTopCats();
+            //c.printTopCats();
+            c.printTopOutlinks();
+            System.out.println("\n\n\n");
+        }
+
 
         fw.close();
     }
