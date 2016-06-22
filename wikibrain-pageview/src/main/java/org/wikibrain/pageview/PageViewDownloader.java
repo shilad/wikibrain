@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author Shilad Sen
  */
 public class PageViewDownloader {
-    private static String BASE_URL = "http://dumps.wikimedia.org/other/pagecounts-raw/";
+    private static String BASE_URL = "https://dumps.wikimedia.org/other/pagecounts-raw/";
     private static Logger LOG = LoggerFactory.getLogger(PageViewDownloader.class);
 
     private final File dir;
