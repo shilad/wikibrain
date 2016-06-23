@@ -30,12 +30,11 @@ public class Macademia {
         Env env = EnvBuilder.envFromArgs(args);
         Configurator conf = env.getConfigurator();
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
-        LocalCategoryMemberDao catDao = env.getConfigurator().get(LocalCategoryMemberDao.class);
-        Language simple = Language.getByLangCode("simple");
+        Language simple = env.getDefaultLanguage();
         PhraseAnalyzer phrases = conf.get(PhraseAnalyzer.class);
 
         DenseVectorSRMetric sr = (DenseVectorSRMetric)conf.get(
-                SRMetric.class, "word2smallvec",
+                SRMetric.class, "prebuiltword2vec",
                 "language", simple.getLangCode());
         DenseVectorGenerator gen = sr.getGenerator();
 
@@ -51,10 +50,10 @@ public class Macademia {
         //Set<String> interest = new HashSet<String>();
         Map<String, LocalId> interest = new HashMap<String, LocalId>();
 
-        BufferedReader titles = new BufferedReader(new FileReader("/Users/research/Desktop/macademia_info/interest.txt")); //TODO: change path
+        BufferedReader titles = new BufferedReader(new FileReader("/Users/research/Desktop/interest.txt")); //TODO: change path
         for (String line = titles.readLine(); line != null; line = titles.readLine()){
             //interest.add(line.toLowerCase());
-            LinkedHashMap<LocalId, Float> results = phrases.resolve(Language.SIMPLE, line.toLowerCase(), 1);
+            LinkedHashMap<LocalId, Float> results = phrases.resolve(Language.EN, line.toLowerCase(), 1);
             if (! results.isEmpty()){
                 LocalId id = results.entrySet().iterator().next().getKey();
                 interest.put(line, id);
@@ -65,14 +64,18 @@ public class Macademia {
 
         for (Map.Entry<String, LocalId> ins: interest.entrySet()){
             LocalPage page = lpDao.getById(ins.getValue());
-            out3.write((ins.getKey() + "\n").getBytes());
-            String WikiTitle = page.getTitle().getCanonicalTitle();
-            out2.write((WikiTitle + "\n").getBytes());
             float[] vec = gen.getVector(ins.getValue().getId());
-            for (int i = 0; i < vec.length-1; i++) {
-                out1.write((Float.toString(vec[i]) + "\t").getBytes());
+            if (vec == null) {
+                System.err.println("Could not find vector for page: " + page);
+            } else {
+                out3.write((ins.getKey() + "\n").getBytes());
+                String WikiTitle = page.getTitle().getCanonicalTitle();
+                out2.write((WikiTitle + "\n").getBytes());
+                for (int i = 0; i < vec.length - 1; i++) {
+                    out1.write((Float.toString(vec[i]) + "\t").getBytes());
+                }
+                out1.write((Float.toString(vec[vec.length-1]) + "\n").getBytes());
             }
-            out1.write((Float.toString(vec[vec.length-1]) + "\n").getBytes());
         }
 
         out1.flush();

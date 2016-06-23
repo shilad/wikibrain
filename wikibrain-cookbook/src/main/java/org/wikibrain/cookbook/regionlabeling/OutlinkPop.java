@@ -6,19 +6,21 @@ import org.wikibrain.core.model.LocalLink;
  */
 public class OutlinkPop implements Comparable<OutlinkPop>{
     public LocalLink link;
-    public int popularity;
+    public double popularity;
 
     public OutlinkPop(LocalLink l){
         link = l;
         popularity = 1;
     }
 
-    public OutlinkPop(LocalLink l, int p){
+
+    public OutlinkPop(LocalLink l, double p){
         link = l;
         popularity = p;
+
     }
 
-    public int getPopularity(){
+    public double getPopularity(){
         return popularity;
     }
 
@@ -31,7 +33,7 @@ public class OutlinkPop implements Comparable<OutlinkPop>{
     }
 
     public int compareTo(OutlinkPop o){
-       return Integer.compare(popularity, o.getPopularity());
+       return Double.compare(popularity, o.getPopularity());
     }
 
     public String toString(){

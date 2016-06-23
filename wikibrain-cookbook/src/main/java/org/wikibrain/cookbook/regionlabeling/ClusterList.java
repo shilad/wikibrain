@@ -1,5 +1,6 @@
 package org.wikibrain.cookbook.regionlabeling;
 
+import java.io.FileWriter;
 import java.util.*;
 
 import gnu.trove.decorator.TIntSetDecorator;
@@ -23,6 +24,7 @@ import org.wikibrain.core.dao.LocalCategoryMemberDao;
 public class ClusterList {
     private ArrayList<RegionDataPoint> clusterList;
     private ArrayList<OutlinkPop> outlinks;
+    private ArrayList<OutlinkTFIDF> tfidfs;
     private List<PageiDRank> topArticlesinCluster;
     private List<PageiDRank> top150Articles;
     private ArrayList<CategoryCount> topCats;
@@ -32,17 +34,26 @@ public class ClusterList {
     private LocalCategoryMemberDao lcmDao;
     private Language lang;
     private NameSpace ns;
+    private int clusterIdNum;
     private static final int numArticlesToReturn = 500;
-    private static final int numTopLinksConsidered = 6;
+    private static final int numTopLinksConsidered = 10;
 
+    /**
+     * Initializes a simple English ClusterList
+     * @param l
+     * @param lld
+     * @param cmDao
+     */
 
-    public ClusterList(LocalPageDao l, LocalLinkDao lld, LocalCategoryMemberDao cmDao){
+    public ClusterList(LocalPageDao l, LocalLinkDao lld, LocalCategoryMemberDao cmDao, int id){
         clusterList = new ArrayList<RegionDataPoint>();
         outlinks = new ArrayList<OutlinkPop>();
+        tfidfs = new ArrayList<OutlinkTFIDF>();
         topArticlesinCluster = new ArrayList<PageiDRank>();
         top150Articles = new ArrayList<PageiDRank>();
         blacklistedIds = new ArrayList<Integer>();
         topCats = new ArrayList<CategoryCount>();
+        clusterIdNum = id;
         lpDao = l;
         llDao = lld;
         lcmDao = cmDao;
@@ -50,32 +61,60 @@ public class ClusterList {
         ns = NameSpace.ARTICLE;
     }
 
-    public ClusterList(LocalPageDao l, LocalLinkDao lld, Language lan, NameSpace n){
+    /**
+     * ClusterList constructor for languages other than simple english
+     * @param l
+     * @param lld
+     * @param lan
+     * @param n
+     */
+    public ClusterList(LocalPageDao l, LocalLinkDao lld, Language lan, NameSpace n, int id){
         clusterList = new ArrayList<RegionDataPoint>();
         outlinks = new ArrayList<OutlinkPop>();
+        tfidfs = new ArrayList<OutlinkTFIDF>();
         topArticlesinCluster = new ArrayList<PageiDRank>();
         top150Articles = new ArrayList<PageiDRank>();
         blacklistedIds = new ArrayList<Integer>();
         topCats = new ArrayList<CategoryCount>();
+        clusterIdNum = id;
         lpDao = l;
         llDao = lld;
         lang = lan;
         ns = n;
     }
 
+    /**
+     * adds a RegionDataPoint to clusterList list of points
+     * @param p
+     */
     public void add(RegionDataPoint p){
         clusterList.add(p);
     }
+
+    /**
+     * Returns size of clusters (in # of articles)
+     * @return
+     */
 
     public int size(){
         return clusterList.size();
     }
 
+    /**
+     * Gets the point at an index out of clusterList (ArrayList wrapper function)
+     * @param index
+     * @return
+     */
+
     public RegionDataPoint getPoint(int index){
         return clusterList.get(index);
     }
 
-    //NOTE: this method written with hard-coded ids based on most-linked wikipedia articles to try to remove irrelevant results. works for english and simple english
+    /**
+     * Blacklists certain outlinks from consideration in order to prevent irrelevant results. Kind of a hack-around, ideally tf-idf will supplant this
+     *     //NOTE: this method written with hard-coded ids based on most-linked wikipedia articles to try to remove irrelevant results. works for english and simple english
+     */
+
     public void initializeBlacklist(){
         blacklistedIds.add(92288);
         blacklistedIds.add(219587);
@@ -91,6 +130,10 @@ public class ClusterList {
         blacklistedIds.add(42899);
     }
 
+    /**
+     * Ranks pages in cluster by pagerank and puts a sublist of the top ones (# = numArticlesToReturn) into topArticlesInCluster
+     * @throws Exception
+     */
     public void getTopArticles() throws Exception{
         initializeBlacklist();
         ArrayList<PageiDRank> topArticles = new ArrayList<PageiDRank>();
@@ -111,13 +154,33 @@ public class ClusterList {
         //sort the arraylist
         Collections.sort(topArticles);
 
+
         //NOTE: this line assumes that each cluster has at least 500 entries - TODO: add edge case checking in case there aren't
         topArticlesinCluster = topArticles.subList(0, numArticlesToReturn);
     }
 
+
+
+    /**
+     * Getter for clusterIdNum
+     */
+
+    public int getClusterIdNum(){
+        return clusterIdNum;
+    }
+
+    /**
+     * Getter for topArticlesinCluster
+     * @return
+     */
     public List getTopArticlesinCluster(){
         return topArticlesinCluster;
     }
+
+    /**
+     * Adds a page to outlinks or increments its count if it already exists (for internal use by calculateOutlinks)
+     * @param l
+     */
     public void addToOutlinks(LocalLink l){
         //create new OutlinkPop
         OutlinkPop op = new OutlinkPop(l);
@@ -126,7 +189,7 @@ public class ClusterList {
         //if yes, update value
         if(index != -1){
             //get old popularity and increment it
-            int newpop = outlinks.get(index).getPopularity() + 1;
+            double newpop = outlinks.get(index).getPopularity() + 1;
             //remove old entry and add new entry
             OutlinkPop newop = new OutlinkPop(l, newpop);
             outlinks.set(index, newop);
@@ -138,15 +201,26 @@ public class ClusterList {
 
     }
 
+    /**
+     * Sorts outlinks arraylist by # of occurrences
+     */
     public void sortOutLinks(){
         Collections.sort(outlinks);
         Collections.reverse(outlinks);
     }
 
-    public ArrayList<OutlinkPop> getOutLinks(){
+    /**
+     * Getter for outlinks
+     * @return
+     */
+    public ArrayList<OutlinkPop> getOutlinks(){
         return outlinks;
     }
 
+    /**
+     * Calculates outlinks from topArticlesInCluster and ranks them according to the number of times they occur
+     * @throws Exception
+     */
     public void calculateOutlinks() throws Exception{
         for(int i = 0; i < topArticlesinCluster.size(); i++){
             PageiDRank current = topArticlesinCluster.get(i);
@@ -165,6 +239,10 @@ public class ClusterList {
         }
     }
 
+    /**
+     * Prints specified number of top outlinks (for debugging)
+     * @throws Exception
+     */
     public void printTopOutlinks() throws Exception{
         for(int i = 0; i < numTopLinksConsidered; i++){
             OutlinkPop o = outlinks.get(i);
@@ -175,7 +253,12 @@ public class ClusterList {
         }
     }
 
-    //NOTE: this must be called AFTER sortOutLinks. numTopLinksConsidered is the number of links whose categories will be found
+    /**
+     * Finds categories for a specified number of the top outlinks. Ranks them based on # of outlinks that have that page as their top category
+     * //NOTE: this must be called AFTER sortOutLinks. numTopLinksConsidered is the number of links whose categories will be found
+     * @throws Exception
+     */
+
     public void calculateTopCats() throws Exception{
         for(int i = 0; i < numTopLinksConsidered; i++){
             //get current outlink destination id and convert it into page form
@@ -214,7 +297,12 @@ public class ClusterList {
 
     }
 
-//NOTE: this method must be run AFTER calculateTopCats and will overwrite its curretn contents to be one category up the hierarchy
+    /**
+     * Abstracts one category level up - takes each category in topCats and finds its closest category (for making labels more general - can theoretically be executed more than once if desired)
+     * //NOTE: this method must be run AFTER calculateTopCats and will overwrite its current contents to be one category up the hierarchy
+     * @throws Exception
+     */
+
     public void goUpOneCatLevel() throws Exception{
         ArrayList<CategoryCount> newTopCats = new ArrayList<CategoryCount>();
         for(int i = 0; i < topCats.size() ; i++){
@@ -249,6 +337,11 @@ public class ClusterList {
 
     }
 
+    /**
+     * Takes list of top categories and compares it against top 125 articles (by page rank) in the cluster.
+     * Each article "votes" for the category it's closest to, and categories are re-ranked by # of "votes" received
+     * @throws Exception
+     */
     //must be called after topCats has been calculated and has gone up as many levels as desired - this MODIFIES topCats to contain page-evaluated categories with new counts
     public void evaluateTopCats() throws Exception {
         /* OLD METHOD CODE WITH NULL ISSUE - SAVED IN CASE NEW METHOD DOESN'T WORK
@@ -341,14 +434,94 @@ public class ClusterList {
 
     }
 
+    /**
+     * Returns string version of top category title (for use post-calculation for writing suggested label to file)
+     * @return
+     */
     public String getTopCat(){
         return topCats.get(0).getPage().getTitle().getCanonicalTitle().substring(9);
     }
 
+    /**
+     * Prints all of topCats (for debugging purposes)
+     */
     public void printTopCats(){
         for(int i = 0; i < topCats.size(); i++){
             System.out.println(topCats.get(i));
         }
     }
 
+    /**
+     * Getter for outlinks variable
+     * @return
+     */
+    public ArrayList<OutlinkPop> getAllOutlinks(){
+        return outlinks;
+    }
+
+    /**
+     * Setter for outlinks variable (for use by RegionLabeler when calculating tf-idf)
+     */
+
+    public void setOutlinks(ArrayList<OutlinkPop> newOutlinks){
+        outlinks = newOutlinks;
+    }
+    /**
+     * Counts all outlinks (used to calculate tf and used by RegionLabeler to calculate idf)
+     */
+    public int countOutlinks(){
+        int total = 0;
+        for(int i = 0; i < outlinks.size(); i++){
+            total += outlinks.get(i).getPopularity();
+        }
+        return total;
+    }
+
+    /**
+     * Searches outlinks for a particular page and returns the count for that page, if it exists. Returns 0 if not.
+     */
+    public double searchOutlinks(OutlinkPop op){
+        if(outlinks.contains(op)){
+            return outlinks.get(outlinks.indexOf(op)).getPopularity();
+        }
+        else{
+            return 0;
+        }
+    }
+
+    /**
+     * Returns tf for a given OutlinkPop
+     * @param op
+     * @return
+     */
+    public double calculateTF(OutlinkPop op){
+        double freq = searchOutlinks(op);
+        double all = countOutlinks();
+
+        return freq/all;
+    }
+
+    /**
+     * Setter for tfidfs
+     */
+    public void setTfidfs(ArrayList<OutlinkTFIDF> oltf){
+        tfidfs = oltf;
+    }
+
+    /**
+     * Convert tfidfs to outlinkpops (for use after calculating all tfidfs)
+     */
+    public void convertTfidfs(){
+        ArrayList<OutlinkPop> temp = new ArrayList<OutlinkPop>();
+        for(int i = 0; i < tfidfs.size(); i++){
+            OutlinkTFIDF current = tfidfs.get(i);
+            OutlinkPop olp = new OutlinkPop(current.getLink(), current.getTfidf());
+            temp.add(olp);
+        }
+
+        Collections.sort(temp);
+        Collections.reverse(temp);
+        outlinks = temp;
+    }
 }
+
