@@ -156,7 +156,7 @@ public class ClusterList {
 
 
         //NOTE: this line assumes that each cluster has at least 500 entries - TODO: add edge case checking in case there aren't
-        topArticlesinCluster = topArticles.subList(0, numArticlesToReturn);
+        topArticlesinCluster = topArticles; //NOTE: have chanfed this to NOT sublist in order to give it to Brooke - need to change it back in order to actually run the labeling algo
     }
 
 

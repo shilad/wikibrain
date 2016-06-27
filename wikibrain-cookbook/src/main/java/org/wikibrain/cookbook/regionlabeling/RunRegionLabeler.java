@@ -45,7 +45,7 @@ public class RunRegionLabeler {
         //set up CSV reader to ge data
         CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/regionlabeling/data/data3.csv"), "UTF-8"), ',');
         FileWriter fw = new FileWriter("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/regionlabeling/data/top_categories.txt");
-        FileWriter articlewr = new FileWriter("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/regionlabeling/data/top_100_articles.txt");
+        FileWriter allarticles = new FileWriter("/Users/research/wikibrain/wikibrain-cookbook/src/main/java/org/wikibrain/cookbook/regionlabeling/data/articles_and_pop.txt");
 
 
         //get datapoints and put them into arrayLists, one for each cluster
@@ -72,25 +72,25 @@ public class RunRegionLabeler {
             System.out.println("Getting outlinks...");
             c.calculateOutlinks();
 
+            List<PageiDRank> clusterArts = c.getTopArticlesinCluster();
+            for(int j = 0; j < clusterArts.size(); j++){
+                PageiDRank p = clusterArts.get(j);
 
-            List<PageiDRank> top10 = c.getTopArticlesinCluster().subList(0, 10);
-            for(int j = 0; j < 10; j++){
-                PageiDRank p = top10.get(j);
-                LocalId l = p.getId();
-                LocalPage pg = lpDao.getById(l);
+                LocalId id = p.getId();
+                double pop = llDao.getPageRank(id) * 1000000;
+                LocalPage pg = lpDao.getById(id);
                 String title = pg.getTitle().getCanonicalTitle();
-                int index = title.indexOf("(simple)");
-                String shortTitle;
+                int index = title.indexOf(" (simple)");
                 if(index != -1){
-                    shortTitle = title.substring(0, index);
+                    title = title.substring(0, index);
                 }
-                else{
-                    shortTitle = title;
-                }
-
-                articlewr.append(shortTitle + "\t" + " cluster " + i + "\n");
+                allarticles.append(title + "\t" + pop + "\n");
 
             }
+
+
+
+
 
 
             //c.printTopOutlinks();
@@ -109,7 +109,8 @@ public class RunRegionLabeler {
             */
         }
 
-        articlewr.close();
+
+        allarticles.close();
         System.out.println("Finished writing article titles");
 
         labeler.doAllTfIdf();
