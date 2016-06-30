@@ -31,6 +31,15 @@ public class WebEntity {
         public String toPluralString() {
             return toString() + "s";
         }
+
+
+        public String toCapitalizedString() {
+            return WordUtils.capitalizeFully(name(), new char[]{'_'})
+                            .replaceAll("_", "");
+        }
+        public String toCapitalizedPluralString() {
+            return toCapitalizedString() + "s";
+        }
     };
 
     private Type type;
