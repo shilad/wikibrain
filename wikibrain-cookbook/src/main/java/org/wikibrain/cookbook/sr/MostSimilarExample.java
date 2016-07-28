@@ -31,7 +31,7 @@ public class MostSimilarExample {
 
         //Similarity between strings
         for (String phrase : Arrays.asList("Barack Obama", "US", "Canada", "vim")) {
-            SRResultList similar = sr.mostSimilar(phrase, 3);
+            SRResultList similar = sr.mostSimilar(phrase, 1);
             List<String> pages = new ArrayList<String>();
             for (int i = 0; i < similar.numDocs(); i++) {
                 LocalPage page = lpDao.getById(simple, similar.getId(i));
