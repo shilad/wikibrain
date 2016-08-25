@@ -346,6 +346,7 @@ public class PageViewSqlDao extends AbstractSqlDao<PageView> implements PageView
         }
     }
 
+    @Override
     public synchronized  Map<Language, SortedSet<DateTime>> getLoadedHours() throws DaoException {
         DSLContext context = getJooq();
         try {
