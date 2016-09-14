@@ -124,6 +124,9 @@ public enum FileMatcher {
     WIKIDATA_ITEMS (
             "wikidata_items",
             Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-wb_items_per_site.sql.gz")),
+    WIKIDATA_JSON(
+            "wikidata",
+            Pattern.compile(".*?wikidata-.+-all.json.bz")),
     MD5               (
             "md5_checksums",
             Pattern.compile(".*?([a-zA-Z_-]+)wiki.+-md5sums.txt"));
