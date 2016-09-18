@@ -6,6 +6,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
+import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
 import org.wikibrain.conf.DefaultOptionBuilder;
@@ -40,6 +41,8 @@ import org.slf4j.LoggerFactory;
  */
 public class WikidataDumpLoader {
     private static final Logger LOG = LoggerFactory.getLogger(WikidataDumpLoader.class);
+    public static final String WIKIDATA_JSON_URL = "https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2";
+
 
     private final AtomicInteger counter = new AtomicInteger();
 
@@ -160,32 +163,13 @@ public class WikidataDumpLoader {
 
         Env env =  new EnvBuilder(cmd).build();
         Configurator conf = env.getConfigurator();
-        File path;
-        if (cmd.getArgList().isEmpty()) {
-            WikidataDumpHelper helper = new WikidataDumpHelper();
-
-            // Fetch the file (if necessary) to the standard path
-            String downloadDir = conf.getConf().get().getString("download.path");
-            File dest = FileUtils.getFile(downloadDir, helper.getMostRecentFile());
-            if (!dest.isFile()) {
-                dest.getParentFile().mkdirs();
-                File tmp = File.createTempFile("wikibrain-wikidata", "json");
-                FileUtils.deleteQuietly(tmp);
-                URL url = new URL(helper.getMostRecentUrl());
-                FileDownloader downloader = new FileDownloader();
-                downloader.download(url, tmp);
-                if (dest.isFile()) {
-                    throw new IllegalStateException();
-                }
-                FileUtils.moveFile(tmp, dest);
-            }
-            path = dest;
-        } else if (cmd.getArgList().size() == 1) {
-            path = new File(cmd.getArgList().get(0).toString());
-        } else {
-            System.err.println("Invalid option usage:");
-            new HelpFormatter().printHelp("WikidataDumpLoader", options);
-            return;
+        File path = new File(conf.getConf().getFile("download.path"), "wikidata.json.bz2");
+        if (!path.isFile()) {
+            File tf = File.createTempFile("wikidata.json", null);
+            tf.delete();
+            FileDownloader dl = new FileDownloader();
+            dl.download(new URL(WIKIDATA_JSON_URL), tf);
+            tf.renameTo(path);
         }
 
         WikidataDao wdDao = conf.get(WikidataDao.class);
