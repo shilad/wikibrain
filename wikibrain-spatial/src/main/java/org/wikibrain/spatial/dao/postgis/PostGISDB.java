@@ -340,6 +340,7 @@ public class PostGISDB {
                 feature = iterator.next();
                 geometries.put((Integer)((SimpleFeatureImpl)feature).getAttribute("item_id"), (Geometry) feature.getDefaultGeometryProperty().getValue());
             }
+
             iterator.close();
             return geometries;
 
