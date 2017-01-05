@@ -18,15 +18,28 @@ public class CategoryGraph implements Serializable{
     static final long serialVersionUID = -3429823331722647576l;
     public Language language;
 
-    // Mapping from local page id to internal dense index.
+    // Mapping from external local page id to internal dense index.
     public TIntIntMap catIndexes;
 
-    public int[] catIds;    // dense category ids to sparse local page ids
-    public double[] catCosts;  // the cost of travelling through each category
+    // Dense internal category ids to sparse external local page ids
+    public int[] catIds;
+
+    // the cost of travelling through each category based on page rank
+    public double[] catCosts;
+
+    // The category graph. Category to list of parents
     public int[][] catParents;
+
+    // Category to list of local page ids (articles, not categories)
     public int[][] catPages;
+
+    // Category to list of children dense internal category ids
     public int[][] catChildren;
+
+    // Names of categories indexed by internal dense index
     public String[] cats;
+
+    // ??
     public double minCost = -1;
 
     public CategoryGraph(Language language){
@@ -49,6 +62,8 @@ public class CategoryGraph implements Serializable{
             return new int[0];
         }
         int [] denseIds = catChildren[parentIndex];
+
+        // Translate dense ids back out to external category ids
         int childIds[] = new int[denseIds.length];
         for (int i = 0; i < denseIds.length; i++) {
             childIds[i] = catIds[denseIds[i]];
