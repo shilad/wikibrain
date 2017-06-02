@@ -33,7 +33,7 @@ public class PipelineLoader {
     private final LanguageSet langs;
     private final LinkedHashMap<String, PipelineStage> stages = new LinkedHashMap<String, PipelineStage>();
     private final Map<String, List<String>> groups = new HashMap<String, List<String>>();
-    private final DiagnosticDao diagnosticDao;
+//    private final DiagnosticDao diagnosticDao;
     private boolean forceRerun = false;
 
     public PipelineLoader(Env env) throws ConfigurationException, DaoException, ClassNotFoundException, InterruptedException {
@@ -44,7 +44,7 @@ public class PipelineLoader {
         MetaInfoDao metaDao = env.getConfigurator().get(MetaInfoDao.class);
         this.langs = env.getLanguages();
         this.state = metaDao.getAllCummulativeInfo();
-        this.diagnosticDao = env.getConfigurator().get(DiagnosticDao.class);
+//        this.diagnosticDao = env.getConfigurator().get(DiagnosticDao.class);
 
         initConfig(env.getConfiguration());
         if (args == null) {
@@ -129,7 +129,7 @@ public class PipelineLoader {
                             -1.0
                     );
                     sd.setSucceeded(stage.getSucceeded());
-                    diagnosticDao.saveQuietly(sd);
+//                    diagnosticDao.saveQuietly(sd);
                 }
             }
         } catch (Exception e) {
