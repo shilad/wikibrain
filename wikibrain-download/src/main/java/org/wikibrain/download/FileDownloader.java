@@ -22,10 +22,6 @@ import org.slf4j.LoggerFactory;
  * @author Shilad Sen
  */
 public class FileDownloader {
-    static {
-        RequestedLinkGetter.FIX_CERTS();
-    }
-
     public static final Logger LOG = LoggerFactory.getLogger(FileDownloader.class);
 
     private static final int SLEEP_TIME = 500;     // getOneFile takes a break from downloading
@@ -41,6 +37,7 @@ public class FileDownloader {
 
 
     public FileDownloader() {
+        RequestedLinkGetter.FIX_CERTS();
     }
 
     public File download(URL url, File file) throws InterruptedException {

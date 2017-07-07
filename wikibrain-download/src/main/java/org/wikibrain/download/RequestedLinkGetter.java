@@ -92,15 +92,12 @@ public class RequestedLinkGetter {
         FIXED = true;
     }
 
-    static {
-        FIX_CERTS();
-    }
-
     private final Language lang;
     private final List<FileMatcher> matchers;
     private final Date requestDate;    // This is the date requested by the user.
 
     public RequestedLinkGetter(Language lang, List<FileMatcher> matchers, Date requestDate) {
+        FIX_CERTS();
         this.lang = lang;
         this.matchers = matchers;
         this.requestDate = requestDate;
