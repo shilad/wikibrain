@@ -23,6 +23,9 @@ import org.wikibrain.core.lang.LanguageSet;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,6 +51,50 @@ public class RequestedLinkGetter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestedLinkGetter.class);
     private static final String DATE_FORMAT = "yyyyMMdd";
+
+
+    private static boolean FIXED = false;
+
+    /*
+     * Fix for self-certs
+     */
+    public static synchronized void FIX_CERTS() {
+        if (FIXED) {
+            return;
+        }
+                /* Start of Fix */
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+            public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+            public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+
+        } };
+
+        SSLContext sc = null;
+        try {
+            sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("SSL initialization failed, algorithm not found!", e);
+        } catch (KeyManagementException e) {
+            LOG.error("SSL initialization failed, key not found!", e);
+        }
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+        // Create all-trusting host name verifier
+        HostnameVerifier allHostsValid = new HostnameVerifier() {
+            public boolean verify(String hostname, SSLSession session) { return true; }
+        };
+        // Install the all-trusting host verifier
+        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        /* End of the fix*/
+
+        FIXED = true;
+    }
+
+    static {
+        FIX_CERTS();
+    }
 
     private final Language lang;
     private final List<FileMatcher> matchers;

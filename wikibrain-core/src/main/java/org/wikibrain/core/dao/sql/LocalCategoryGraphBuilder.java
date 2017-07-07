@@ -140,9 +140,9 @@ public class LocalCategoryGraphBuilder {
         }
 
         for (int i = 0; i < 20; i++) {
-            LOG.info("performing page ranks iteration {0}.", i);
+            LOG.info("performing page ranks iteration {}.", i);
             double error = onePageRankIteration(graph);
-            LOG.info("Error for iteration is {0}.", error);
+            LOG.info("Error for iteration is {}.", error);
             if (error == 0) {
                 break;
             }
