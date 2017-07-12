@@ -23,12 +23,12 @@ public class DescribeExample {
 
         Env env = new EnvBuilder().build();
         Configurator c = env.getConfigurator();
-        Language lang = Language.getByLangCode("simple");   // simple english
-        PhraseAnalyzer pa = c.get(PhraseAnalyzer.class, "stanford");
+        Language lang = env.getDefaultLanguage();   // simple english
+        PhraseAnalyzer pa = c.get(PhraseAnalyzer.class, "anchortext");
         LocalPageDao pageDao = c.get(LocalPageDao.class);
         LocalPage page = pageDao.getByTitle(new Title("Obama", lang), NameSpace.ARTICLE);
         System.out.println("description of " + page + ":"); // should resolve redirect to Barack Obama
-        LinkedHashMap<String, Float> description = pa.describe(lang, page, 20);
+        LinkedHashMap<String, Float> description = pa.describe(lang, page, 100);
         if (description == null) {
             System.out.println("\tno description!");
         } else {
