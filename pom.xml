@@ -222,11 +222,13 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.amashchenko.maven.plugin</groupId>
-                <artifactId>gitflow-maven-plugin</artifactId>
-                <version>1.8.0</version>
+                <groupId>external.atlassian.jgitflow</groupId>
+                <artifactId>jgitflow-maven-plugin</artifactId>
+                <version>1.0-m4.3</version>
                 <configuration>
-                    <!-- optional configuration -->
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <allowUntracked>true</allowUntracked>
+                    <pushReleases>true</pushReleases>
                 </configuration>
             </plugin>
         </plugins>
