@@ -71,6 +71,10 @@ public class LinkInfo implements Comparable<LinkInfo> {
         }
     }
 
+    public boolean hasScore() {
+        return getScore() != null && !Double.isNaN(score);
+    }
+
     public boolean intersects(TIntSet used) {
         for (int i = getStartChar(); i < getEndChar(); i++) {
             if (used.contains(i)) {

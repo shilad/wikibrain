@@ -1,12 +1,13 @@
 package org.wikibrain.sr.wikify;
 
 import com.typesafe.config.Config;
-import gnu.trove.list.TDoubleList;
-import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.collections.IteratorUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -19,13 +20,11 @@ import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
 import org.wikibrain.phrases.*;
 import org.wikibrain.sr.SRMetric;
-import org.wikibrain.sr.utils.Leaderboard;
-import org.wikibrain.sr.vector.FeatureFilter;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
 import org.wikibrain.utils.Scoreboard;
 
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Wikifier based on Doug Downey's approach described in
@@ -39,7 +38,7 @@ public class WebSailWikifier implements Wikifier {
     /**
      * TODO: Make this configurable
      */
-    private int numTrainingLinks = 50000;
+    private int numTrainingPages = 500;
 
     private final Wikifier identityWikifier;
     private final SRMetric metric;
@@ -50,7 +49,7 @@ public class WebSailWikifier implements Wikifier {
     private final PhraseAnalyzerDao phraseDao;
     private final RawPageDao rawPageDao;
 
-    private double desiredLinkRecall = 0.98;
+    private double desiredWikifiedFraction = 0.25;
     private double minLinkProbability = 0.01;
     private double minFinalScore = 0.001;
 
@@ -66,13 +65,9 @@ public class WebSailWikifier implements Wikifier {
         learnMinLinkProbability();
     }
 
-    public void setDesiredLinkRecall(double recall) throws DaoException {
-        this.desiredLinkRecall = recall;
-        this.learnMinLinkProbability();
-    }
-
-    public void setMinLinkProbability(double minProb) {
-        this.minLinkProbability = minProb;
+    public void setDesiredWikifiedFraction(double frac) throws DaoException {
+        desiredWikifiedFraction = frac;
+        learnMinLinkProbability();
     }
 
     private void learnMinLinkProbability() throws DaoException {
@@ -80,21 +75,72 @@ public class WebSailWikifier implements Wikifier {
             linkProbDao.build();
         }
         LOG.info("Learning minimum link probability");
-        TDoubleList probs = new TDoubleArrayList();
-        DaoFilter filter = new DaoFilter()
-                .setLanguages(language)
-                .setHasDest(true)
-                .setLimit(numTrainingLinks);
-        for (LocalLink ll : linkDao.get(filter)) {
-            if (ll.getDestId() < 0) throw new IllegalStateException();
-            double p = linkProbDao.getLinkProbability(ll.getAnchorText());
-            probs.add(p);
+
+        // Choose a sample of numTrainingPages * 4 and train on the longest quarter of them.
+        DaoFilter filter = DaoFilter.normalPageFilter(language).setLimit(numTrainingPages * 4);
+        List<RawPage> pages = IteratorUtils.toList(rawPageDao.get(filter).iterator());
+        Collections.sort(pages, new Comparator<RawPage>() {
+            @Override
+            public int compare(RawPage p1, RawPage p2) {
+                return p2.getBody().length() - p1.getBody().length();
+            }
+        });
+        if (pages.size() > numTrainingPages) {
+            pages = pages.subList(0, numTrainingPages);
         }
-        probs.sort();
-        probs.reverse();
-        int index = (int)(desiredLinkRecall * probs.size());
-        minLinkProbability = (index >= probs.size()) ? 0.0 : probs.get(index);
-        LOG.info("Set minimum link probability to " + minLinkProbability + " to achieve " + desiredLinkRecall + " recall");
+
+        minLinkProbability = 0.001;  // set the link probability ridiculously low
+        minFinalScore = 0;
+
+        final List<List<LinkInfo>> results = new ArrayList<List<LinkInfo>>();
+        ParallelForEach.loop(pages, new Procedure<RawPage>() {
+            @Override
+            public void call(RawPage page) throws Exception {
+                String text = page.getPlainText(false);
+                List<LinkInfo> candidates = scoreMentions(page.getLocalId(), text);
+                Collections.sort(candidates);
+                List<String> words = new StringTokenizer().getWords(language, text);
+                int target = (int) (words.size() * desiredWikifiedFraction);
+                if (candidates.size() > target) candidates = candidates.subList(0, target);
+                synchronized (results) { results.add(candidates); }
+            }
+        });
+
+        List<Double> minScores = new ArrayList<Double>();
+        List<Double> minProbabilities = new ArrayList<Double>();
+        for (List<LinkInfo> pageResults: results) {
+            if (!pageResults.isEmpty()) {
+                double s = 100000000000000f;    // min score
+                double p = 10000000000000f;     // min probability
+                for (LinkInfo li : pageResults) {
+                    if (li.hasScore()) {
+                        p = Math.min(p, li.getLinkProbability());
+                        s = Math.min(s, li.getScore());
+                    }
+                }
+                minScores.add(s);
+                minProbabilities.add(p);
+            }
+        }
+
+        // For link probabilities, throw out the bottom 5% of outliers
+        if (minProbabilities.isEmpty()) {
+            minLinkProbability = 0.0001;
+        } else {
+            Collections.sort(minProbabilities);
+            minLinkProbability = minProbabilities.get((int) (minProbabilities.size() * 0.05));
+        }
+
+        // For score, take the median of mins
+        if (minScores.isEmpty()) {
+            minFinalScore = 0.0001;
+        } else {
+            Collections.sort(minScores);
+            minFinalScore = minProbabilities.get((int) (minProbabilities.size() * 0.50));
+        }
+
+        LOG.info("Set minimum link probability to " + minLinkProbability + " to achieve " + desiredWikifiedFraction + "% wikification");
+        LOG.info("Set minimum final score to " + minFinalScore + " to achieve " + desiredWikifiedFraction + "% wikification");
     }
 
     private List<LinkInfo> getCandidates(int wpId, String text) throws DaoException {
@@ -117,10 +163,7 @@ public class WebSailWikifier implements Wikifier {
         return candidates;
     }
 
-
-    @Override
-    public List<LocalLink> wikify(int wpId, String text) throws DaoException {
-
+    private List<LinkInfo> scoreMentions(int wpId, String text) throws DaoException {
         // Find all mentions that are linked with some likelihood
         List<LinkInfo> mentions = getCandidates(wpId, text);
 
@@ -138,7 +181,12 @@ public class WebSailWikifier implements Wikifier {
             scoreInfo(existingIds, li, sr);
         }
 
-        return link(wpId, text, mentions);
+        return mentions;
+    }
+
+    @Override
+    public List<LocalLink> wikify(int wpId, String text) throws DaoException {
+        return link(wpId, text, scoreMentions(wpId, text));
     }
 
     @Override
@@ -314,7 +362,7 @@ public class WebSailWikifier implements Wikifier {
             }
 
             try {
-                return new WebSailWikifier(
+                WebSailWikifier wikifier = new WebSailWikifier(
                             c.get(Wikifier.class, identityName, "language", language.getLangCode()),
                             c.get(RawPageDao.class),
                             c.get(LocalLinkDao.class, linkName),
@@ -322,6 +370,11 @@ public class WebSailWikifier implements Wikifier {
                             ((AnchorTextPhraseAnalyzer)c.get(PhraseAnalyzer.class, phraseName)).getDao(),
                             c.get(SRMetric.class, srName, "language", language.getLangCode())
                         );
+
+                if (config.hasPath("desiredWikifiedFraction")) {
+                    wikifier.setDesiredWikifiedFraction(config.getDouble("desiredWikifiedFraction"));
+                }
+                return wikifier;
             } catch (DaoException e) {
                 throw new ConfigurationException(e);
             }
